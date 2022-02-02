@@ -1,0 +1,8 @@
+{
+  "account": "Account",
+  "connectWallet": "Connect wallet",
+  "notify": {
+    "proposalCreated": "Proposal created",
+    "voteSuccessful": "Your vote is in!"
+  }
+}

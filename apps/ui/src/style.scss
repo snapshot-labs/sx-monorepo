@@ -1,0 +1,116 @@
+@import './assets/fonts/iconfont.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[data-color-scheme='dark'] {
+  color-scheme: dark;
+  --primary-color: #384aff;
+  --bg-color: #121212;
+  --text-color: #8b949e;
+  --link-color: #ffffff;
+  --heading-color: #ffffff;
+  --border-color: #424242;
+  --header-bg: #121212;
+}
+
+[data-color-scheme='light'] {
+  color-scheme: light;
+  --primary-color: #384aff;
+  --bg-color: white;
+  --text-color: #57606a;
+  --link-color: #111111;
+  --heading-color: #111111;
+  --border-color: #d0d7de;
+  --header-bg: white;
+  --block-bg: transparent;
+}
+
+@font-face {
+  font-family: 'Calibre';
+  src: url('./assets/fonts/Calibre-Medium-Custom.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Calibre';
+  src: url('./assets/fonts/Calibre-Semibold-Custom.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+h1 {
+  @apply text-2xl;
+}
+h2 {
+  @apply text-xl;
+}
+h3 {
+  @apply text-lg my-2;
+}
+h4 {
+  @apply text-md;
+}
+
+* {
+  outline: none !important;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--heading-color);
+  font-weight: 600;
+}
+
+a,
+.a {
+  color: var(--link-color);
+
+  &:hover {
+    cursor: pointer;
+    text-decoration: none !important;
+  }
+}
+
+::placeholder {
+  color: var(--text-color) !important;
+  opacity: 0.6 !important;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 16px;
+}
+
+.notification {
+  color: white !important;
+}
+
+.border,
+.border-md,
+.border-lg,
+.border-b,
+.border-t,
+.border-r,
+.border-l {
+  border-color: var(--border-color);
+}
+
+// Shot UI kit
+
+.s-input {
+  @apply text-skin-heading border border-skin-border focus-within:border-skin-link block rounded-full py-2 px-3 w-full bg-transparent;
+}
+
+.s-label {
+  @apply block mb-1;
+}
+
+.lazy-loading {
+  @apply bg-skin-text animate-pulse-fast;
+}
