@@ -1,3 +1,4 @@
+import fetch from 'cross-fetch';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import {
@@ -9,10 +10,10 @@ import {
 } from '@/helpers/x/types';
 
 export default class Client {
-  // readonly address: string;
+  readonly address: string;
 
-  constructor() {
-    // this.address = address;
+  constructor(address) {
+    this.address = address;
   }
 
   async sign(web3: Web3Provider | Wallet, address: string, message, types) {
@@ -25,6 +26,25 @@ export default class Client {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  async send(envelop) {
+    const init = {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'send',
+        params: { envelop },
+        id: null
+      })
+    };
+    const res = await fetch(this.address, init);
+    const json = await res.json();
+    return json.result;
   }
 
   async proposal(

@@ -5,12 +5,14 @@ import { useWeb3 } from '@/composables/useWeb3';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import proposalSchema from '@/helpers/x/schemas/proposal.json';
 import voteSchema from '@/helpers/x/schemas/vote.json';
+import { useTxStatus } from '@/composables/useTxStatus';
 
 const proposalDef = proposalSchema.definitions.Proposal;
 const voteDef = voteSchema.definitions.Vote;
 
 const { web3 } = useWeb3();
 const auth = getInstance();
+const { pendingCount } = useTxStatus();
 
 const inputProposal = ref({
   executionHash:
@@ -26,20 +28,26 @@ const inputVote = ref({
 });
 
 async function proposal() {
-  const receipt = await client.proposal(
+  const envelop = await client.proposal(
     auth.web3,
     web3.value.account,
     inputProposal.value
   );
+  pendingCount.value++;
+  const receipt = await client.send(envelop);
+  pendingCount.value--;
   console.log('Receipt', receipt);
 }
 
 async function vote() {
-  const receipt = await client.vote(
+  const envelop = await client.vote(
     auth.web3,
     web3.value.account,
     inputVote.value
   );
+  pendingCount.value++;
+  const receipt = await client.send(envelop);
+  pendingCount.value--;
   console.log('Receipt', receipt);
 }
 </script>

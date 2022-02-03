@@ -1,8 +1,9 @@
 {
-  "name": "snapshot-x",
+  "name": "sx-ui",
   "version": "0.1.0",
+  "license": "MIT",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port=8080",
     "build": "vite build",
     "lint": "eslint \"./src/*/**/*.{ts,vue,json}\" --fix"
   },
@@ -50,7 +51,5 @@
   "resolutions": {
     "ansi-regex": "^5.0.1",
     "axios": "^0.21.1"
-  },
-  "license": "MIT",
-  "repository": "snapshot-labs/sx-ui"
+  }
 }
