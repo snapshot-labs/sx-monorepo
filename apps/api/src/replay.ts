@@ -14,7 +14,7 @@ async function next(blockHash?: string) {
     console.log(block.block_number, block.block_hash, block.parent_block_hash, block.status);
     next(block.parent_block_hash);
   } catch (e) {
-    console.log('Get block failed', blockHash, e);
+    console.log('Get block failed', blockHash, JSON.stringify(e).slice(0, 256));
     next(blockHash);
   }
 }
