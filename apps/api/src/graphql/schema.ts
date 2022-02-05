@@ -1,6 +1,6 @@
 export default `
 type Query {
-  votes(where: Where): [Vote]
+  votes: [Vote]
 }
 
 type Vote {
