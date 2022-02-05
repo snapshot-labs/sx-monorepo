@@ -1,7 +1,7 @@
 import { defaultProvider as provider } from 'starknet';
 import mysql from './mysql';
 
-async function next(blockHash?) {
+async function next(blockHash?: string) {
   const block: any = await provider.getBlock(blockHash);
   const params = [
     {
