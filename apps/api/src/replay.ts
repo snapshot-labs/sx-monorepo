@@ -2,16 +2,21 @@ import { defaultProvider as provider } from 'starknet';
 import mysql from './mysql';
 
 async function next(blockHash?: string) {
-  const block: any = await provider.getBlock(blockHash);
-  const params = [
-    {
-      number: block.block_number,
-      hash: block.block_hash
-    }
-  ];
-  await mysql.queryAsync('INSERT IGNORE INTO blocks SET ?', params);
-  console.log(block.block_number, block.block_hash, block.parent_block_hash, block.status);
-  next(block.parent_block_hash);
+  try {
+    const block: any = await provider.getBlock(blockHash);
+    const params = [
+      {
+        number: block.block_number,
+        hash: block.block_hash
+      }
+    ];
+    await mysql.queryAsync('INSERT IGNORE INTO blocks SET ?', params);
+    console.log(block.block_number, block.block_hash, block.parent_block_hash, block.status);
+    next(block.parent_block_hash);
+  } catch (e) {
+    console.log('Get block failed', blockHash, e);
+    next(blockHash);
+  }
 }
 
 async function start() {
