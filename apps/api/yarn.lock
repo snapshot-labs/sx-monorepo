@@ -2013,10 +2013,10 @@ sqlstring@2.3.1:
   resolved "https://registry.yarnpkg.com/sqlstring/-/sqlstring-2.3.1.tgz#475393ff9e91479aea62dcaf0ca3d14983a7fb40"
   integrity sha1-R1OT/56RR5rqYtyvDKPRSYOn+0A=
 
-starknet@^2.7.2:
-  version "2.7.2"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-2.7.2.tgz#927d7aaa226bd213420584e4397911f56f75e664"
-  integrity sha512-TLFrpQEOYx7o9wgF6fPOQwplxFu+CSaxy5Yidn7TW5B9PkMHaQRPmQdx508oxadeaJnye6wJTQ1zfYBrMrxnrg==
+starknet@^2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-2.9.0.tgz#a263e603a45441785991f2c18fcecd8722d6368b"
+  integrity sha512-i/wYJMR1DtkjagCNkPOwUsZLyyCYZtT533nJLdhL5CYw2K7ChuLQphhC8tSDKvrzMm0/PkthDVSI+xjYOPVdTw==
   dependencies:
     axios "^0.23.0"
     bn.js "^5.2.0"

@@ -2,7 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import graphql from './graphql';
-import './replay';
+import Checkpoint from './checkpoint';
+import config from './config.json';
+import action from './action';
+
+const checkpoint = new Checkpoint(config, action);
+checkpoint.start();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

@@ -1,11 +1,13 @@
 import { graphqlHTTP } from 'express-graphql';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import proposals from './proposals';
 import votes from './votes';
 import defaultQuery from './examples';
 import typeDefs from './schema';
 
 const rootValue = {
   Query: {
+    proposals,
     votes
   }
 };
