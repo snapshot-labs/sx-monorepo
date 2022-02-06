@@ -1,5 +1,7 @@
 export default `
 type Query {
+  checkpoint(where: Where): [Checkpoint]
+
   proposals(where: Where): [Proposal]
 
   votes(where: Where): [Vote]
@@ -7,6 +9,10 @@ type Query {
 
 input Where {
   created: Int
+}
+
+type Checkpoint {
+  number: Int!
 }
 
 type Proposal {
