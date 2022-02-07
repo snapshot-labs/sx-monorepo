@@ -24,3 +24,5 @@ CREATE TABLE votes (
   INDEX choice (choice),
   INDEX created (created)
 );
+
+INSERT checkpoint SET number = -1;
