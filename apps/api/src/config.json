@@ -2,8 +2,8 @@
   "network": "goerli-alpha",
   "sources": [
     {
-      "contract": "0x414130848ed5100d0c3bb0dafc3cf2a6de63b4ea49862ee5c38ccec2145cbda",
-      "start": 54565
+      "contract": "0x05a880858035c9f5234f4bb97e903b0e1b5cd4c5ae0e59d0b7087168b319c503",
+      "start": 60014
     }
   ]
 }
