@@ -1,15 +1,16 @@
 import { Provider } from 'starknet';
+import { starknetKeccak } from 'starknet/utils/hash';
 import Promise from 'bluebird';
 import mysql from './mysql';
 
 export default class Checkpoint {
   public config;
-  public action;
+  public writer;
   public provider: Provider;
 
-  constructor(config, action) {
+  constructor(config, writer) {
     this.config = config;
-    this.action = action;
+    this.writer = writer;
     this.provider = new Provider({ network: this.config.network });
   }
 
@@ -57,5 +58,16 @@ export default class Checkpoint {
       if (source.contract === tx.contract_address) await this.action(source, block, tx, receipt);
     }
     // console.log('Handle tx done', tx.transaction_index);
+  }
+
+  async action(source, block, tx, receipt) {
+    console.log('Action for', source.contract, tx.type);
+    console.log('Events', receipt.events.length);
+    for (const sourceEvent of source.events) {
+      for (const event of receipt.events) {
+        if (starknetKeccak(sourceEvent.name).toString() === event.keys[0])
+          await this.writer[sourceEvent.fn]({ source, block, tx, receipt });
+      }
+    }
   }
 }

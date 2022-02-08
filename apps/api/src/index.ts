@@ -6,9 +6,9 @@ import cors from 'cors';
 import graphql from './graphql';
 import Checkpoint from './checkpoint';
 import config from './config.json';
-import action from './action';
+import * as writer from './writer';
 
-const checkpoint = new Checkpoint(config, action);
+const checkpoint = new Checkpoint(config, writer);
 checkpoint.start();
 
 const app = express();

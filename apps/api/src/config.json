@@ -2,8 +2,14 @@
   "network": "goerli-alpha",
   "sources": [
     {
-      "contract": "0x05a880858035c9f5234f4bb97e903b0e1b5cd4c5ae0e59d0b7087168b319c503",
-      "start": 60014
+      "contract": "0x5460ddee442f8b0f019bfadb501628779f8201eb18d5f03c451a60d25a2814b",
+      "start": 62103,
+      "events": [
+        {
+          "name": "vote_received",
+          "fn": "handleVoteReceived"
+        }
+      ]
     }
   ]
 }
