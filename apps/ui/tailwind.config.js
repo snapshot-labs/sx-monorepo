@@ -47,13 +47,13 @@ module.exports = {
       bold: 600
     },
     fontSize: {
-      '2xl': ['36px', '50px'],
-      xl: ['28px', '44px'],
-      lg: ['24px', '32px'],
-      md: ['20px', '28px'],
-      base: ['18px', '24px'],
+      '2xl': ['36px'],
+      xl: ['28px'],
+      lg: ['22px'],
+      md: ['20px'],
+      base: ['18px'],
       sm: ['16px'],
-      xs: ['14px']
+      xs: ['13px']
     }
   }
 };

@@ -16,6 +16,7 @@ defineProps({
 <template>
   <button
     :type="type || 'button'"
+    class="rounded-full"
     :class="[
       'button px-[24px] focus-within:border-skin-link',
       { 'button--primary': primary }
@@ -32,7 +33,6 @@ defineProps({
   border: 1px solid var(--border-color);
   background-color: transparent;
   color: var(--link-color);
-  border-radius: 23px;
   outline: none;
   height: 46px;
   font-size: 18px;

@@ -25,7 +25,7 @@ async function handleLogin(connector) {
 <template>
   <Sticky>
     <nav id="topnav" class="border-b w-full bg-[color:var(--bg-color)]">
-      <Container>
+      <div class="mx-4">
         <div class="flex items-center" style="height: 78px">
           <div class="flex-auto flex items-center">
             <router-link
@@ -44,11 +44,8 @@ async function handleLogin(connector) {
                 class="flex items-center float-left"
               >
                 <UiAvatar
-                  :imgsrc="
-                    web3.profile?.image ? getIpfsUrl(web3.profile.image) : ''
-                  "
                   :address="web3.account"
-                  size="18"
+                  :size="18"
                   class="-mr-1 sm:mr-2 md:mr-2 lg:mr-2 xl:mr-2 -ml-1"
                 />
                 <span
@@ -76,12 +73,12 @@ async function handleLogin(connector) {
                 class="sm:hidden -ml-2 -mr-2 block align-text-bottom"
               />
             </UiButton>
-            <UiButton @click="toggleSkin" class="float-right !px-3 ml-2">
+            <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
               <Icon size="20" class="link-color" :name="getSkinIcon()" />
             </UiButton>
           </div>
         </div>
-      </Container>
+      </div>
     </nav>
     <div class="bg-blue text-white text-center py-2" v-if="pendingCount > 0">
       <UiLoading :fill-white="true" class="mr-2" />

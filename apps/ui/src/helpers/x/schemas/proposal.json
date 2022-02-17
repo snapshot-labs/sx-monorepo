@@ -6,6 +6,14 @@
       "title": "Proposal",
       "type": "object",
       "properties": {
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "body": {
+          "type": "string",
+          "title": "Body"
+        },
         "executionHash": {
           "type": "string",
           "title": "Execution hash"

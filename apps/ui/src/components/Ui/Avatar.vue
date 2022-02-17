@@ -1,41 +1,20 @@
 <script setup>
-import { ref } from 'vue';
-
 defineProps({
   address: String,
-  size: String,
-  imgsrc: String,
-  space: Object
+  size: {
+    type: Number,
+    default: 22
+  }
 });
-
-const error = ref(false);
 </script>
 
 <template>
-  <span class="flex flex-shrink-0 items-center justify-center">
-    <img
-      v-if="imgsrc && !error"
-      :src="imgsrc"
-      :style="{
-        width: `${parseInt(size) || 22}px`,
-        height: `${parseInt(size) || 22}px`
-      }"
-      @error="error = true"
-      :class="[
-        space?.skin ? `${space?.skin} bg-[color:var(--bg-color)]` : 'bg-white'
-      ]"
-      :alt="space?.name"
-      class="rounded-full"
-    />
-    <UiBlockie
-      v-else-if="!!address"
-      :seed="address"
-      class="rounded-full"
-      :style="{
-        width: `${parseInt(size) || 22}px`,
-        height: `${parseInt(size) || 22}px`
-      }"
-      :alt="space?.name"
-    />
-  </span>
+  <img
+    :src="`https://stamp.fyi/avatar/eth:${address}?s=${size * 2}`"
+    class="rounded-full inline-block bg-[color:var(--border-color)]"
+    :style="{
+      width: `${size}px`,
+      height: `${size}px`
+    }"
+  />
 </template>

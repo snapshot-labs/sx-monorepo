@@ -1,0 +1,45 @@
+<script setup>
+defineProps({
+  proposal: Object
+});
+</script>
+<template>
+  <router-link
+    :to="{ name: 'proposal', params: { id: proposal.id } }"
+    class="block rounded-lg border mb-3"
+  >
+    <div class="p-4">
+      <div class="overflow-hidden mb-3">
+        <Icon name="threedots" size="20" class="float-right" />
+        <UiAvatar
+          address="0xeF8305E140ac520225DAf050e2f71d5fBcC543e7"
+          :size="24"
+          class="float-left mr-2"
+        />
+        <span>4:56 AM · Feb 8, 2022</span>
+      </div>
+      <h2 class="mb-3">{{ proposal.title }}</h2>
+      <div class="space-x-2 mb-3">
+        <UiButton
+          @click="vote(1)"
+          class="w-full !text-green !border-green w-[46px] !px-0"
+        >
+          <Icon name="check3" size="20" />
+        </UiButton>
+        <UiButton
+          @click="vote(2)"
+          class="w-full !text-red !border-red w-[46px] !px-0"
+        >
+          <Icon name="close2" size="20" />
+        </UiButton>
+        <UiButton
+          @click="vote(3)"
+          class="w-full !text-gray-500 !border-gray-500 w-[46px] !px-0"
+        >
+          <Icon name="skip" size="20" />
+        </UiButton>
+      </div>
+      <div class="text-skin-text">123 votes · 1h left</div>
+    </div>
+  </router-link>
+</template>

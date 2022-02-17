@@ -1,0 +1,12 @@
+{
+  "0x8f974b76d4f50ea26a1f44843dcda2e0f6a4736883968b29996d272b86b447a9": {
+    "id": "0x8f974b76d4f50ea26a1f44843dcda2e0f6a4736883968b29996d272b86b447a9",
+    "title": "Set the temporary premium start price to $100,000",
+    "body": "When a name expires, it goes through a 90 day grace period, after which it becomes available. To prevent it becoming a race to register, a ‘temporary premium’ is attached."
+  },
+  "0x42605fa85d059459f7072aeaeea4cd14ada78e15d9aa1998fe99634a75f9f5a6": {
+    "id": "0x42605fa85d059459f7072aeaeea4cd14ada78e15d9aa1998fe99634a75f9f5a6",
+    "title": "Amend airdrop proposal to include accidentally returned funds",
+    "body": "A number of users have accidentally sent $ENS tokens back to the token contract. As of December 6, this amounted to some 6,246 tokens in 49 separate transactions."
+  }
+}

@@ -1,6 +1,7 @@
 {
   "account": "Account",
   "connectWallet": "Connect wallet",
+  "logout": "Log out",
   "pendingTransaction": "No pending transaction | 1 pending transaction | {count} pending transactions",
   "notify": {
     "proposalCreated": "Proposal created",

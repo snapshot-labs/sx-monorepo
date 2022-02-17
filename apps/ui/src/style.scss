@@ -7,11 +7,11 @@
 [data-color-scheme='dark'] {
   color-scheme: dark;
   --primary-color: #384aff;
-  --bg-color: #121212;
-  --text-color: #8b949e;
-  --link-color: #ffffff;
-  --heading-color: #ffffff;
-  --border-color: #424242;
+  --bg-color: #1c1b20;
+  --text-color: #a09fa5;
+  --link-color: #faf9fc;
+  --heading-color: #faf9fc;
+  --border-color: #ffffff1a;
   --header-bg: #121212;
 }
 
@@ -22,7 +22,7 @@
   --text-color: #57606a;
   --link-color: #111111;
   --heading-color: #111111;
-  --border-color: #d0d7de;
+  --border-color: #0404051a;
   --header-bg: white;
   --block-bg: transparent;
 }
@@ -43,15 +43,21 @@
 
 h1 {
   @apply text-2xl;
+  line-height: 1.3em;
 }
 h2 {
   @apply text-xl;
+  line-height: 1.2em;
 }
 h3 {
-  @apply text-lg my-2;
+  @apply text-lg;
 }
 h4 {
   @apply text-md;
+}
+
+p {
+  @apply text-lg pb-2;
 }
 
 * {

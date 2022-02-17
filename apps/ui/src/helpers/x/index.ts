@@ -24,7 +24,7 @@ export default class Client {
       const sig = await signer._signTypedData(domain, data.types, message);
       return { address, sig, data };
     } catch (e) {
-      console.log(e);
+      return Promise.reject(e);
     }
   }
 

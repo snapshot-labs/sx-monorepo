@@ -35,7 +35,7 @@ watch(modalOpen, val => {
 <template>
   <div
     :class="skin"
-    class="overflow-hidden pb-6 font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
+    class="overflow-hidden font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else>

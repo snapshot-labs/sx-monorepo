@@ -1,11 +1,5 @@
-<script setup>
-defineProps({
-  slim: Boolean
-});
-</script>
-
 <template>
-  <div :class="slim ? 'px-0 md:px-4' : 'px-4'" class="mx-auto">
+  <div class="px-0 max-w-xl mx-auto">
     <slot />
   </div>
 </template>
