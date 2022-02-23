@@ -5,14 +5,14 @@ defineProps({
 </script>
 <template>
   <router-link
-    :to="{ name: 'proposal', params: { id: proposal.id } }"
-    class="block rounded-lg border mb-3"
+    :to="{ name: 'proposal', params: { id: proposal.id, space: 'bolo' } }"
+    class="block bg-skin-block-bg rounded-lg border mb-3"
   >
     <div class="p-4">
       <div class="overflow-hidden mb-3">
         <Icon name="threedots" size="20" class="float-right" />
-        <UiAvatar
-          address="0xeF8305E140ac520225DAf050e2f71d5fBcC543e7"
+        <Stamp
+          id="0xeF8305E140ac520225DAf050e2f71d5fBcC543e7"
           :size="24"
           class="float-left mr-2"
         />

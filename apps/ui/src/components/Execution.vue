@@ -22,7 +22,8 @@ function decodeTxs(tx) {
   <div>
     <div v-for="(tx, i) in txs" :key="i" class="border-t px-4 py-3">
       <h4>
-        <Icon name="receipt-outlined" class="mr-2" /> {{ shorten(tx.to) }}
+        <Icon name="receipt-outlined" class="mr-1" />
+        {{ shorten(tx.to) }}
       </h4>
       <span class="s-label !inline-block">{{ tx.name }} ( </span>
       <span class="space-x-2 inline-block">

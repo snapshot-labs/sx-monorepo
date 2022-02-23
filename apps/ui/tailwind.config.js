@@ -2,8 +2,10 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,vue}'],
   theme: {
     extend: {
+      borderColor: {
+        DEFAULT: 'var(--border-color)'
+      },
       colors: {
-        snapshot: '#f3b04e',
         primary: 'var(--primary-color)',
         'skin-border': 'var(--border-color)',
         'skin-text': 'var(--text-color)',
@@ -12,7 +14,6 @@ module.exports = {
         'skin-block-bg': 'var(--block-bg)',
         'skin-header-bg': 'var(--header-bg)',
         'skin-heading': 'var(--heading-color)',
-
         blue: '#384aff',
         green: '#21b66f',
         red: '#ff3856'
@@ -28,23 +29,12 @@ module.exports = {
       3: '16px',
       4: '24px',
       5: '32px',
-      6: '40px'
-    },
-    screens: {
-      xs: '420px',
-      sm: '544px',
-      md: '768px',
-      lg: '1012px',
-      xl: '1280px'
+      6: '44px'
     },
     fontFamily: {
       serif: [
         'Calibre, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji'
       ]
-    },
-    fontWeight: {
-      'font-normal': 500,
-      bold: 600
     },
     fontSize: {
       '2xl': ['36px'],

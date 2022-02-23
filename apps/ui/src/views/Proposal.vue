@@ -31,8 +31,8 @@ async function vote(choice) {
     <h1 class="mb-3">{{ proposals[id].title }}</h1>
     <div class="flex mb-3 items-center">
       <div class="flex-auto">
-        <UiAvatar
-          address="0xeF8305E140ac520225DAf050e2f71d5fBcC543e7"
+        <Stamp
+          id="0xeF8305E140ac520225DAf050e2f71d5fBcC543e7"
           :size="24"
           class="float-left mr-2"
         />
@@ -47,11 +47,11 @@ async function vote(choice) {
         {{ proposals[id].body }}
       </p>
     </div>
-    <div class="border rounded-lg mb-5">
+    <div class="border rounded-lg mb-5 bg-skin-block-bg">
       <Execution />
     </div>
 
-    <div class="border rounded-lg mb-5">
+    <div class="border rounded-lg mb-5 bg-skin-block-bg">
       <h4 class="px-4 py-3">
         <Icon name="receipt-outlined" class="mr-2" /> Discussion
         <span class="float-right"><Icon name="external-link" /></span>

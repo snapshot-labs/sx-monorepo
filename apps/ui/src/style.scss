@@ -1,7 +1,7 @@
 @import './assets/fonts/iconfont.css';
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 [data-color-scheme='dark'] {
@@ -13,6 +13,7 @@
   --heading-color: #faf9fc;
   --border-color: #ffffff1a;
   --header-bg: #121212;
+  --block-bg: #1c1b20;
 }
 
 [data-color-scheme='light'] {
@@ -24,7 +25,7 @@
   --heading-color: #111111;
   --border-color: #0404051a;
   --header-bg: white;
-  --block-bg: transparent;
+  --block-bg: white;
 }
 
 @font-face {
@@ -41,17 +42,28 @@
   font-style: normal;
 }
 
+.mono {
+  font-size: 44px;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: -1px;
+  font-weight: 700;
+  line-height: 1.1em;
+}
+
 h1 {
   @apply text-2xl;
   line-height: 1.3em;
 }
+
 h2 {
   @apply text-xl;
   line-height: 1.2em;
 }
+
 h3 {
   @apply text-lg;
 }
+
 h4 {
   @apply text-md;
 }
@@ -78,7 +90,6 @@ a,
 
   &:hover {
     cursor: pointer;
-    text-decoration: none !important;
   }
 }
 
@@ -97,20 +108,10 @@ a,
   color: white !important;
 }
 
-.border,
-.border-md,
-.border-lg,
-.border-b,
-.border-t,
-.border-r,
-.border-l {
-  border-color: var(--border-color);
-}
-
 // Shot UI kit
 
 .s-input {
-  @apply text-skin-heading border border-skin-border focus-within:border-skin-link block rounded-full py-2 px-3 w-full bg-transparent;
+  @apply text-skin-heading border border-skin-border focus-within:border-skin-link block rounded-[24px] py-2 px-3 w-full bg-transparent;
 }
 
 .s-label {

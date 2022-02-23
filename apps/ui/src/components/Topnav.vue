@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { shorten, getIpfsUrl } from '@/helpers/utils';
+import { shorten } from '@/helpers/utils';
 import { useModal } from '@/composables/useModal';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useTxStatus } from '@/composables/useTxStatus';
@@ -24,7 +24,7 @@ async function handleLogin(connector) {
 
 <template>
   <Sticky>
-    <nav id="topnav" class="border-b w-full bg-[color:var(--bg-color)]">
+    <nav id="topnav" class="border-b w-full bg-skin-block-bg">
       <div class="mx-4">
         <div class="flex items-center" style="height: 78px">
           <div class="flex-auto flex items-center">
@@ -43,8 +43,8 @@ async function handleLogin(connector) {
                 :loading="web3.authLoading"
                 class="flex items-center float-left"
               >
-                <UiAvatar
-                  :address="web3.account"
+                <Stamp
+                  :id="web3.account"
                   :size="18"
                   class="-mr-1 sm:mr-2 md:mr-2 lg:mr-2 xl:mr-2 -ml-1"
                 />
@@ -69,12 +69,11 @@ async function handleLogin(connector) {
               <span class="hidden sm:block" v-text="$t('connectWallet')" />
               <Icon
                 name="login"
-                size="20"
                 class="sm:hidden -ml-2 -mr-2 block align-text-bottom"
               />
             </UiButton>
             <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
-              <Icon size="20" class="link-color" :name="getSkinIcon()" />
+              <Icon class="link-color" :name="getSkinIcon()" />
             </UiButton>
           </div>
         </div>

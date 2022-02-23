@@ -94,7 +94,7 @@ li:hover {
   right: 0;
   top: var(--top);
   width: auto;
-  background-color: var(--header-bg);
+  background-color: var(--block-bg);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 0 20px -6px var(--border-color);
@@ -112,7 +112,7 @@ li:hover {
   right: var(--right);
   height: 0.75rem;
   width: 0.75rem;
-  background-color: var(--header-bg);
+  background-color: var(--block-bg);
   border-top: 1px solid var(--border-color);
   border-left: 1px solid var(--border-color);
   transform: rotate(45deg);

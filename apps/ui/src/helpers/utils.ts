@@ -28,6 +28,11 @@ export function getIpfsUrl(url) {
   return getUrl(url, gateway);
 }
 
+export function _n(value) {
+  const formatter = new Intl.NumberFormat('en', { notation: 'standard' });
+  return formatter.format(value);
+}
+
 export function jsonParse(input, fallback?) {
   if (typeof input !== 'string') {
     return fallback || {};

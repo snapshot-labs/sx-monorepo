@@ -15,7 +15,7 @@ defineProps({
 
 <style scoped lang="scss">
 .iconfont {
-  font-size: 16px;
-  line-height: 16px;
+  font-size: 18px;
+  line-height: 18px;
 }
 </style>

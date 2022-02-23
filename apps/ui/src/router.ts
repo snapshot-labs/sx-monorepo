@@ -1,19 +1,25 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import Home from '@/views/Home.vue';
-import Org from '@/views/Org.vue';
 import Space from '@/views/Space.vue';
 import Proposal from '@/views/Proposal.vue';
+import Proposals from '@/views/Proposals.vue';
 import Settings from '@/views/Settings.vue';
 import Create from '@/views/Create.vue';
+import Execution from '@/views/Execution.vue';
+import Treasury from '@/views/Treasury.vue';
 import Playground from '@/views/Playground.vue';
 
 const routes: any[] = [
   { path: '/', name: 'home', component: Home },
-  { path: '/org/:id', name: 'org', component: Org },
-  { path: '/space/:id', name: 'space', component: Space },
-  { path: '/proposal/:id?', name: 'proposal', component: Proposal },
-  { path: '/settings/:id?', name: 'settings', component: Settings },
+  { path: '/:id', name: 'space', component: Space, children: [
+      { path: '', name: 'proposals', component: Proposals },
+      { path: 'settings', name: 'settings', component: Settings },
+      { path: 'treasury', name: 'treasury', component: Treasury }
+    ]
+  },
+  { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
   { path: '/:id/create', name: 'create', component: Create },
+  { path: '/:id/execution', name: 'execution', component: Execution },
   { path: '/playground', name: 'playground', component: Playground }
 ];
 

@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1444287",
+      "name": "coins",
+      "font_class": "coins",
+      "unicode": "e6c6",
+      "unicode_decimal": 59078
+    },
+    {
+      "icon_id": "11270464",
+      "name": "world",
+      "font_class": "world",
+      "unicode": "e8b3",
+      "unicode_decimal": 59571
+    },
+    {
       "icon_id": "11398722",
       "name": "check",
       "font_class": "check3",
@@ -39,13 +53,6 @@
       "font_class": "draggable",
       "unicode": "e617",
       "unicode_decimal": 58903
-    },
-    {
-      "icon_id": "702320",
-      "name": "earth",
-      "font_class": "earth",
-      "unicode": "e7dc",
-      "unicode_decimal": 59356
     },
     {
       "icon_id": "20997029",

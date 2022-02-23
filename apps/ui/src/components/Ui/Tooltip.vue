@@ -27,7 +27,7 @@ const debounce = useDebounce();
 .tooltip {
   pointer-events: none;
   background-color: var(--text-color);
-  color: var(--header-bg);
+  color: var(--block-bg);
   max-width: 350px;
   word-wrap: break-word;
   width: max-content;

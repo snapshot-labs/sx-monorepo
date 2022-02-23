@@ -1,6 +1,10 @@
 <script setup>
 defineProps({
-  address: String,
+  type: {
+    type: String,
+    default: 'avatar'
+  },
+  id: String,
   size: {
     type: Number,
     default: 22
@@ -10,7 +14,7 @@ defineProps({
 
 <template>
   <img
-    :src="`https://stamp.fyi/avatar/eth:${address}?s=${size * 2}`"
+    :src="`https://stamp.fyi/${type}/${id}?s=${size * 2}`"
     class="rounded-full inline-block bg-[color:var(--border-color)]"
     :style="{
       width: `${size}px`,

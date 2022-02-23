@@ -6,10 +6,8 @@ const DARK_MODE = 'dark-mode';
 const LIGHT_MODE = 'light-mode';
 
 const currenSkin = lsGet('skin', NOT_SET);
-const osSkin =
-  window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? DARK_MODE
-    : LIGHT_MODE;
+// const osSkin = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? LIGHT_MODE : DARK_MODE;
+const osSkin = DARK_MODE;
 
 const userSkin = ref(currenSkin === NOT_SET ? osSkin : currenSkin);
 const getSkinIcon = () => (userSkin.value === LIGHT_MODE ? 'moon' : 'sun');
