@@ -6,6 +6,10 @@ const route = useRoute();
 const menu = ref(false);
 
 const items = {
+  overview: {
+    name: 'Overview',
+    icon: 'world'
+  },
   proposals: {
     name: 'Proposals',
     icon: 'receipt-outlined'

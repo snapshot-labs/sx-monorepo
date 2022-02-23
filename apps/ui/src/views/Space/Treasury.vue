@@ -76,7 +76,7 @@ onMounted(async () => {
 
 <template>
   <Container class="pb-6">
-    <div class="border rounded-lg mb-5 bg-skin-block-bg">
+    <div class="border rounded-lg mb-3 bg-skin-block-bg">
       <div class="border-b flex px-4 py-2">
         <h4>Wallet(s)</h4>
       </div>

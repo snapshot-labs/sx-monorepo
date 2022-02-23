@@ -1,6 +1,5 @@
 <script setup>
 import spaces from '@/helpers/spaces.json';
-import proposals from '@/helpers/proposals.json';
 
 defineProps({ space: Object });
 </script>
@@ -9,7 +8,7 @@ defineProps({ space: Object });
   <Container class="pb-6">
     <div v-if="space.parent" class="border rounded-lg mb-3">
       <router-link
-        :to="{ name: 'proposals', params: { id: space.parent } }"
+        :to="{ name: 'overview', params: { id: space.parent } }"
         class="px-4 py-3 border-b last:border-0 block"
       >
         <h4>
@@ -18,12 +17,11 @@ defineProps({ space: Object });
         </h4>
       </router-link>
     </div>
-
     <div v-if="space.spaces" class="border rounded-lg mb-3">
       <router-link
         v-for="s in space.spaces"
         :key="s"
-        :to="{ name: 'proposals', params: { id: s } }"
+        :to="{ name: 'overview', params: { id: s } }"
         class="px-4 py-3 border-b last:border-0 block"
       >
         <h4>
@@ -32,12 +30,5 @@ defineProps({ space: Object });
         </h4>
       </router-link>
     </div>
-
-    <Proposal
-      v-for="(proposal, i) in proposals"
-      :key="i"
-      :proposal="proposal"
-      class="block rounded-lg border mb-3"
-    />
   </Container>
 </template>
