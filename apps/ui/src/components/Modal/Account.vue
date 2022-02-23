@@ -1,7 +1,7 @@
 <script setup>
 import { toRefs, ref, watch, computed } from 'vue';
 import { getInjected } from '@snapshot-labs/lock/src/utils';
-import { shorten, explorerUrl, getIpfsUrl } from '@/helpers/utils';
+import { shorten, explorerUrl, getUrl } from '@/helpers/utils';
 import connectors from '@/helpers/connectors.json';
 import { useWeb3 } from '@/composables/useWeb3';
 
@@ -20,9 +20,6 @@ async function handleLogout() {
   await logout();
   emit('close');
 }
-
-const path =
-  'https://raw.githubusercontent.com/snapshot-labs/lock/master/connectors/assets';
 
 watch(open, () => (step.value = null));
 </script>
@@ -49,7 +46,7 @@ watch(open, () => (step.value = null));
             class="button-outline w-full flex justify-center items-center"
           >
             <img
-              :src="`${path}/${injected.id}.png`"
+              :src="getUrl(injected.icon)"
               height="28"
               width="28"
               class="mr-2 -mt-1"
@@ -61,13 +58,8 @@ watch(open, () => (step.value = null));
             v-else-if="id !== 'gnosis'"
             class="button-outline w-full flex justify-center items-center gap-2"
           >
-            <img
-              :src="`${path}/${connector.id}.png`"
-              height="25"
-              width="25"
-              :alt="connector.name"
-            />
-            <span>{{ connector.name }}</span>
+            <img :src="getUrl(connector.icon)" height="25" width="25" />
+            {{ connector.name }}
           </UiButton>
         </a>
       </div>
@@ -82,12 +74,7 @@ watch(open, () => (step.value = null));
           <UiButton
             class="button-outline w-full flex justify-center items-center"
           >
-            <UiAvatar
-              :imgsrc="getIpfsUrl(web3.profile?.image)"
-              :address="web3.account"
-              :size="18"
-              class="mr-2 -ml-1"
-            />
+            <Stamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
             <span v-if="web3.profile.name" v-text="web3.profile.name" />
             <span v-else-if="web3.profile.ens" v-text="web3.profile.ens" />
             <span v-else v-text="shorten(web3.account)" />

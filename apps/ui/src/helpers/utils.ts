@@ -1,5 +1,5 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { getUrl } from '@snapshot-labs/snapshot.js/src/utils';
+export { getUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
 
 export function shortenAddress(str = '') {
@@ -20,12 +20,6 @@ export function shorten(str: string, key?: any): string {
 
 export function explorerUrl(network, str: string, type = 'address'): string {
   return `${networks[network].explorer}/${type}/${str}`;
-}
-
-export function getIpfsUrl(url) {
-  const gateway: any =
-    import.meta.env.VITE_IPFS_GATEWAY || 'cloudflare-ipfs.com';
-  return getUrl(url, gateway);
 }
 
 export function _n(value) {

@@ -12,7 +12,7 @@ const items = {
   },
   treasury: {
     name: 'Treasury',
-    icon: 'wallet'
+    icon: 'coins'
   },
   settings: {
     name: 'Settings',
@@ -34,7 +34,10 @@ function toggleMenu() {
   <div class="border rounded-lg mb-3">
     <a @click="toggleMenu" class="px-4 py-3 border-b last:border-0 block">
       <h4>
-        <Icon name="arrow-down" class="float-right mt-1" />
+        <Icon
+          :name="menu ? 'arrow-up' : 'arrow-down'"
+          class="float-right mt-1"
+        />
         <Icon :name="items[$route.name].icon" class="mr-2" />
         {{ items[$route.name].name }}
       </h4>

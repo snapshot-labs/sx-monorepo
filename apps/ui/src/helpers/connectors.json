@@ -1,12 +1,14 @@
 {
   "injected": {
     "id": "injected",
-    "name": "MetaMask"
+    "name": "MetaMask",
+    "icon": "ipfs://QmTE7VPXMhriKAobMWEiC5S3oG22p4G6AXGyGdNWQTQ3Fv"
   },
   "walletconnect": {
     "id": "walletconnect",
     "name": "WalletConnect",
     "network": "1",
+    "icon": "ipfs://QmZRVqHpgRemw13aoovP2EaQdVtjzXRaQGQZsCLXWaNn9x",
     "options": {
       "rpc": {
         "1": "https://cloudflare-eth.com",
@@ -17,12 +19,14 @@
   },
   "torus": {
     "id": "torus",
-    "name": "Torus"
+    "name": "Torus",
+    "icon": "ipfs://QmTsZvSJrj5xbreGzccwPCdkV7ZKYEzPqRrTe5xduXgVmu"
   },
   "walletlink": {
     "id": "walletlink",
     "name": "Coinbase",
     "network": "1",
+    "icon": "ipfs://QmbJKEaeMz6qR3DmJSTxtYtrZeQPptVfnnYK72QBsvAw5q",
     "options": {
       "appName": "Snapshot",
       "darkMode": false,
@@ -34,6 +38,7 @@
     "id": "portis",
     "name": "Portis",
     "network": "1",
+    "icon": "ipfs://QmNuLXa47xSrDNKRfpPNhoFTuoztvtWCcwGnPpT5MXJWMb",
     "options": {
       "dappId": "3eb93706-c71d-456b-b4eb-322ea27f7d48",
       "network": "mainnet"
@@ -41,6 +46,7 @@
   },
   "gnosis": {
     "id": "gnosis",
-    "name": "Gnosis Safe"
+    "name": "Gnosis Safe",
+    "icon": "ipfs://QmfJUHZLtRvadM7fvEJUWWxhS869KXXCMxPCr7TUqkwvUc"
   }
 }
