@@ -1,5 +1,6 @@
 <script setup>
 import spaces from '@/helpers/spaces.json';
+import proposals from '@/helpers/proposals.json';
 
 defineProps({ space: Object });
 </script>
@@ -30,5 +31,11 @@ defineProps({ space: Object });
         </h4>
       </router-link>
     </div>
+    <Proposal
+      v-for="(proposal, i) in proposals"
+      :key="i"
+      :proposal="proposal"
+      class="block rounded-lg border mb-3"
+    />
   </Container>
 </template>
