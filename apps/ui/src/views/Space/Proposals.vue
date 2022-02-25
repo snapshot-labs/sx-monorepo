@@ -8,7 +8,7 @@ import proposals from '@/helpers/proposals.json';
       v-for="(proposal, i) in proposals"
       :key="i"
       :proposal="proposal"
-      class="block rounded-lg border mb-3"
+      class="x-block mb-3"
     />
   </Container>
 </template>

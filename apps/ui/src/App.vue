@@ -38,7 +38,7 @@ watch(modalOpen, val => {
     class="overflow-hidden font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else>
+    <div v-else class="pb-6">
       <Topnav />
       <router-view :key="$route.path" class="flex-auto" />
     </div>

@@ -47,11 +47,11 @@ async function vote(choice) {
         {{ proposals[id].body }}
       </p>
     </div>
-    <div class="border rounded-lg mb-5 bg-skin-block-bg">
+    <div class="x-block mb-5">
       <Execution />
     </div>
 
-    <div class="border rounded-lg mb-5 bg-skin-block-bg">
+    <div class="x-block mb-5">
       <h4 class="px-4 py-3">
         <Icon name="receipt-outlined" class="mr-2" /> Discussion
         <span class="float-right"><Icon name="external-link" /></span>

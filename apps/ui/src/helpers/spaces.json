@@ -10,8 +10,8 @@
       "votingDelay": 1,
       "votingPeriod": 2,
       "proposalThreshold": 5,
-      "auths": ["Ethereum signature", "Ethereum transaction"],
-      "strategies": ["ERC20", "ERC721"],
+      "auths": ["sig", "tx"],
+      "strategies": ["Single slot proof", "Single slot proof"],
       "executions": ["Gnosis Zodiac"]
     }
   },
@@ -26,7 +26,7 @@
       "votingDelay": 1,
       "votingPeriod": 2,
       "proposalThreshold": 5,
-      "auths": ["Ethereum signature", "Ethereum transaction"],
+      "auths": ["sig", "tx"],
       "strategies": ["ERC20", "ERC721"],
       "executions": ["Gnosis Zodiac"]
     }
@@ -42,7 +42,7 @@
       "votingDelay": 1,
       "votingPeriod": 2,
       "proposalThreshold": 5,
-      "auths": ["Ethereum signature", "Ethereum transaction"],
+      "auths": ["sig", "tx"],
       "strategies": ["ERC20", "ERC721"],
       "executions": ["Gnosis Zodiac"]
     }

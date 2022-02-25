@@ -1,0 +1,10 @@
+{
+  "sig": {
+    "name": "Ethereum signature",
+    "about": "Allow Ethereum wallet signature as authenticator"
+  },
+  "tx": {
+    "name": "Ethereum transaction",
+    "about": "Allow Ethereum transaction as authenticator"
+  }
+}

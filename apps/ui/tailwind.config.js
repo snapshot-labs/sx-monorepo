@@ -22,6 +22,13 @@ module.exports = {
         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
       }
     },
+    screens: {
+      xs: '420px',
+      sm: '544px',
+      md: '768px',
+      lg: '1012px',
+      xl: '1280px'
+    },
     spacing: {
       0: '0px',
       1: '4px',

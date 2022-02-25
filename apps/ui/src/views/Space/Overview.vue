@@ -6,8 +6,8 @@ defineProps({ space: Object });
 </script>
 
 <template>
-  <Container class="pb-6">
-    <div v-if="space.parent" class="border rounded-lg mb-3">
+  <Container class="space-y-3">
+    <div v-if="space.parent" class="x-block">
       <router-link
         :to="{ name: 'overview', params: { id: space.parent } }"
         class="px-4 py-3 border-b last:border-0 block"
@@ -18,7 +18,7 @@ defineProps({ space: Object });
         </h4>
       </router-link>
     </div>
-    <div v-if="space.spaces" class="border rounded-lg mb-3">
+    <div v-if="space.spaces" class="x-block">
       <router-link
         v-for="s in space.spaces"
         :key="s"
@@ -35,7 +35,7 @@ defineProps({ space: Object });
       v-for="(proposal, i) in proposals"
       :key="i"
       :proposal="proposal"
-      class="block rounded-lg border mb-3"
+      class="mb-3"
     />
   </Container>
 </template>

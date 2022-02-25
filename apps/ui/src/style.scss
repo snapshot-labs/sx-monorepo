@@ -108,6 +108,10 @@ a,
   color: white !important;
 }
 
+.x-block {
+  @apply block border-y border-x-0 sm:border-x sm:rounded-lg;
+}
+
 // Shot UI kit
 
 .s-input {

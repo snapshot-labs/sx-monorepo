@@ -6,7 +6,7 @@ defineProps({
 <template>
   <router-link
     :to="{ name: 'proposal', params: { id: proposal.id, space: 'bolo' } }"
-    class="block bg-skin-block-bg rounded-lg border mb-3"
+    class="x-block"
   >
     <div class="p-4">
       <div class="overflow-hidden mb-3">

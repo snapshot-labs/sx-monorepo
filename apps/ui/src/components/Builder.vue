@@ -4,7 +4,7 @@ import { ref } from 'vue';
 const step = ref(0);
 </script>
 <template>
-  <div class="border bg-skin-block-bg rounded-lg mb-4">
+  <div class="x-block rounded-lg mb-4">
     <a @click="step = 1" class="px-4 py-3 block border-b">
       <h4>
         <Icon name="go" class="float-right mt-1" />

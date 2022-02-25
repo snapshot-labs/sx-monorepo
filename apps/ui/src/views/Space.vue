@@ -29,7 +29,7 @@ const space = spaces[id];
         <b class="text-skin-link">{{ space.proposals }}</b> proposals
       </div>
     </div>
-    <Nav />
+    <Nav class="mb-3" />
   </Container>
   <router-view :space="space" />
 </template>
