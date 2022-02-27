@@ -12,7 +12,6 @@ module.exports = {
         'skin-link': 'var(--link-color)',
         'skin-bg': 'var(--bg-color)',
         'skin-block-bg': 'var(--block-bg)',
-        'skin-header-bg': 'var(--header-bg)',
         'skin-heading': 'var(--heading-color)',
         blue: '#384aff',
         green: '#21b66f',
@@ -36,7 +35,9 @@ module.exports = {
       3: '16px',
       4: '24px',
       5: '32px',
-      6: '44px'
+      6: '40px',
+      7: '48px',
+      8: '64px'
     },
     fontFamily: {
       serif: [

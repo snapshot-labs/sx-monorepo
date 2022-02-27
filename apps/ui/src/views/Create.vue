@@ -1,0 +1,27 @@
+<template>
+  <router-view class="mb-8 pb-4" />
+  <div class="fixed bottom-0 w-full border-t px-4 py-3 bg-skin-block-bg flex">
+    <div class="flex-auto space-x-2">
+      <h5 class="flex-auto mt-2 inline-block">Step 1 on 3</h5>
+      <div class="h-2 w-[128px] rounded bg-skin-border inline-block">
+        <div
+          class="h-2 rounded bg-gray-600"
+          :style="{ width: $route.name === 'editor' ? '33%' : '66%' }"
+        />
+      </div>
+    </div>
+    <div class="space-x-2">
+      <router-link :to="{ name: 'editor' }">
+        <UiButton v-if="$route.name !== 'editor'" class="leading-3 !px-0 w-7">
+          <Icon name="back" class="align-middle" />
+        </UiButton>
+      </router-link>
+      <router-link :to="{ name: 'execution' }">
+        <UiButton class="leading-3">
+          {{ $route.name !== 'editor' ? 'Preview' : 'Next' }}
+          <Icon name="go" class="align-middle" />
+        </UiButton>
+      </router-link>
+    </div>
+  </div>
+</template>

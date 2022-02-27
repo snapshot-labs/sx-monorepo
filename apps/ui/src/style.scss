@@ -12,7 +12,6 @@
   --link-color: #faf9fc;
   --heading-color: #faf9fc;
   --border-color: #ffffff1a;
-  --header-bg: #121212;
   --block-bg: #1c1b20;
 }
 
@@ -24,7 +23,6 @@
   --link-color: #111111;
   --heading-color: #111111;
   --border-color: #0404051a;
-  --header-bg: white;
   --block-bg: white;
 }
 
@@ -68,6 +66,10 @@ h4 {
   @apply text-md;
 }
 
+h5 {
+  @apply text-sm
+}
+
 p {
   @apply text-lg pb-2;
 }
@@ -91,6 +93,10 @@ a,
   &:hover {
     cursor: pointer;
   }
+}
+
+#app {
+  height: 100%;
 }
 
 ::placeholder {

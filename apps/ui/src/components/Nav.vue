@@ -35,7 +35,7 @@ function toggleMenu() {
 }
 </script>
 <template>
-  <div class="x-block">
+  <div v-if="items[$route.name]" class="x-block">
     <a @click="toggleMenu" class="px-4 py-3 border-b last:border-0 block">
       <h4>
         <Icon

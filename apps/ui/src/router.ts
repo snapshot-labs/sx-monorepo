@@ -4,24 +4,31 @@ import Space from '@/views/Space.vue';
 import Overview from '@/views/Space/Overview.vue';
 import Proposals from '@/views/Space/Proposals.vue';
 import Settings from '@/views/Space/Settings.vue';
-import Create from '@/views/Space/Create.vue';
-import Execution from '@/views/Space/Execution.vue';
+import Create from '@/views/Create.vue';
+import Editor from '@/views/Create/Editor.vue';
+import Execution from '@/views/Create/Execution.vue';
 import Treasury from '@/views/Space/Treasury.vue';
+import Profile from '@/views/Space/Profile.vue';
 import Proposal from '@/views/Proposal.vue';
 import Playground from '@/views/Playground.vue';
 
 const routes: any[] = [
   { path: '/', name: 'home', component: Home },
-  { path: '/:id', name: 'space', component: Space, children: [
+  { path: '/:id', component: Space, children: [
       { path: '', name: 'overview', component: Overview },
       { path: 'proposals', name: 'proposals', component: Proposals },
       { path: 'settings', name: 'settings', component: Settings },
-      { path: 'treasury', name: 'treasury', component: Treasury }
+      { path: 'treasury', name: 'treasury', component: Treasury },
+      { path: 'profile', name: 'profile', component: Profile },
+    ]
+  },
+  { path: '/:id/create', component: Create, children: [
+      { path: '', name: 'editor', component: Editor },
+      { path: 'execution', name: 'execution', component: Execution },
     ]
   },
   { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
   { path: '/:id/create', name: 'create', component: Create },
-  { path: '/:id/execution', name: 'execution', component: Execution },
   { path: '/playground', name: 'playground', component: Playground }
 ];
 
