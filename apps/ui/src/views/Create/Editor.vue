@@ -1,22 +1,29 @@
 <script setup>
-import { ref } from 'vue';
+import { useEditor } from '@/composables/useEditor';
+import { useRoute } from 'vue-router';
 
-const input = ref({});
+const route = useRoute();
+const { proposals } = useEditor();
+
+const id = route.params.id;
+const draft = route.params.key;
+const key = `${id}:${draft}`;
+if (!proposals[key]) proposals[key] = {};
 </script>
 <template>
   <Layout>
     <h1 class="mb-4">New proposal</h1>
     <SIString
-      v-model="input.title"
+      v-model="proposals[key].title"
       :definition="{
         type: 'string',
         title: 'Title'
       }"
     />
     <div class="s-label">Description</div>
-    <textarea class="s-input mb-3 h-[120px]" />
+    <textarea v-model="proposals[key].body" class="s-input mb-3 h-[120px]" />
     <SIString
-      v-model="input.discussion"
+      v-model="proposals[key].discussion"
       :definition="{
         type: 'string',
         title: 'Discussion',

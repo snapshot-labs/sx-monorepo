@@ -17,6 +17,7 @@
     "@snapshot-labs/lock": "^0.1.6",
     "@snapshot-labs/snapshot.js": "^0.3.50",
     "@vueuse/core": "^7.6.2",
+    "randombytes": "^2.1.0",
     "scrollmonitor": "^1.2.9",
     "vue": "^3.2.29",
     "vue-i18n": "^9.2.0-beta.30",

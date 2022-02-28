@@ -1,5 +1,25 @@
+<script setup>
+import { onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const route = useRoute();
+const router = useRouter();
+
+const id = route.params.id;
+const key = route.params.key;
+
+onMounted(() => {
+  if (!key) {
+    const str = (Math.random() + 1).toString(36).substring(7);
+    router.push({
+      name: route.name,
+      params: { id, key: str }
+    });
+  }
+});
+</script>
 <template>
-  <router-view class="mb-8 pb-4" />
+  <router-view v-if="key" class="mb-8 pb-4" />
   <div class="fixed bottom-0 w-full border-t px-4 py-3 bg-skin-block-bg flex">
     <div class="flex-auto space-x-2">
       <h5 class="flex-auto mt-2 inline-block">Step 1 on 3</h5>
@@ -11,12 +31,12 @@
       </div>
     </div>
     <div class="space-x-2">
-      <router-link :to="{ name: 'editor' }">
+      <router-link :to="{ name: 'editor', params: { id, key } }">
         <UiButton v-if="$route.name !== 'editor'" class="leading-3 !px-0 w-7">
           <Icon name="back" class="align-middle" />
         </UiButton>
       </router-link>
-      <router-link :to="{ name: 'execution' }">
+      <router-link :to="{ name: 'execution', params: { id, key } }">
         <UiButton class="leading-3">
           {{ $route.name !== 'editor' ? 'Preview' : 'Next' }}
           <Icon name="go" class="align-middle" />

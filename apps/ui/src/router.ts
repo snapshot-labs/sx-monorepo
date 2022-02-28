@@ -22,7 +22,7 @@ const routes: any[] = [
       { path: 'profile', name: 'profile', component: Profile },
     ]
   },
-  { path: '/:id/create', component: Create, children: [
+  { path: '/:id/create/:key?', component: Create, children: [
       { path: '', name: 'editor', component: Editor },
       { path: 'execution', name: 'execution', component: Execution },
     ]
