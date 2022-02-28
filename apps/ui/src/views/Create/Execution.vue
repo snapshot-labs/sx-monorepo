@@ -1,5 +1,5 @@
 <template>
-  <Layout>
+  <Container class="pt-5">
     <h1 class="mb-4">Add execution</h1>
     <SIString
       :definition="{
@@ -15,5 +15,5 @@
         title: 'Use custom data (hex encoded)'
       }"
     />
-  </Layout>
+  </Container>
 </template>

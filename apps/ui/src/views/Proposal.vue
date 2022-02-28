@@ -27,7 +27,7 @@ async function vote(choice) {
 </script>
 
 <template>
-  <Layout>
+  <Container class="pt-5">
     <h1 class="mb-3">{{ proposals[id].title }}</h1>
     <div class="flex mb-3 items-center">
       <div class="flex-auto">
@@ -47,17 +47,20 @@ async function vote(choice) {
         {{ proposals[id].body }}
       </p>
     </div>
+  </Container>
+  <Container slim>
     <div class="x-block mb-5">
       <Execution />
     </div>
-
     <div class="x-block mb-5">
       <h4 class="px-4 py-3">
         <Icon name="receipt-outlined" class="mr-2" /> Discussion
         <span class="float-right"><Icon name="external-link" /></span>
       </h4>
     </div>
+  </Container>
 
+  <Container>
     <div class="mb-4">
       <div class="grid grid-cols-3 gap-2 mb-3">
         <UiButton
@@ -81,5 +84,5 @@ async function vote(choice) {
       </div>
       <div class="mb-4">123 votes · 1h left</div>
     </div>
-  </Layout>
+  </Container>
 </template>

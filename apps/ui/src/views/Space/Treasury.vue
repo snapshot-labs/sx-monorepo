@@ -75,7 +75,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Container class="space-y-3">
+  <Container slim class="space-y-3">
     <div class="x-block">
       <div class="border-b flex px-4 py-2">
         <h4>Wallet(s)</h4>

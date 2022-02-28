@@ -6,7 +6,7 @@ defineProps({ space: Object });
 </script>
 
 <template>
-  <Container class="space-y-3">
+  <Container slim class="space-y-3">
     <div v-if="space.parent" class="x-block">
       <router-link
         :to="{ name: 'overview', params: { id: space.parent } }"

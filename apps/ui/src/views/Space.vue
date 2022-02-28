@@ -17,7 +17,7 @@ const space = spaces[id];
       </router-link>
     </div>
   </div>
-  <Container>
+  <Container slim>
     <div class="text-center mb-4 relative">
       <router-link :to="{ name: 'overview' }">
         <Stamp

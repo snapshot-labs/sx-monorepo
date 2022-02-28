@@ -3,12 +3,12 @@ import proposals from '@/helpers/proposals.json';
 </script>
 
 <template>
-  <Container class="pb-6">
+  <Container slim class="space-y-3">
     <Proposal
       v-for="(proposal, i) in proposals"
       :key="i"
       :proposal="proposal"
-      class="x-block mb-3"
+      class="x-block"
     />
   </Container>
 </template>

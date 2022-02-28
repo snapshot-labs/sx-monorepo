@@ -55,17 +55,17 @@ async function vote() {
 </script>
 
 <template>
-  <Layout>
+  <Container class="pt-5">
     <h1 class="mb-3">Playground</h1>
-    <div class="mb-5 max-w-lg">
+    <div class="mb-5">
       <h3>Create proposal</h3>
       <SIObject v-model="inputProposal" :definition="proposalDef" />
-      <UiButton @click="proposal" class="mr-2">Submit</UiButton>
+      <UiButton @click="proposal" class="w-full">Submit</UiButton>
     </div>
-    <div class="mb-5 max-w-lg">
+    <div class="mb-5">
       <h3>Cast vote</h3>
       <SIObject v-model="inputVote" :definition="voteDef" />
       <UiButton @click="vote" class="w-full">Vote</UiButton>
     </div>
-  </Layout>
+  </Container>
 </template>

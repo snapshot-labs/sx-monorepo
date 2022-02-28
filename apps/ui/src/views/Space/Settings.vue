@@ -3,7 +3,7 @@ defineProps({ space: Object });
 </script>
 
 <template>
-  <Container>
+  <Container slim>
     <div class="x-block mb-3">
       <router-link
         :to="{ name: 'profile' }"

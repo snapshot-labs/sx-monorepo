@@ -11,7 +11,7 @@ const key = `${id}:${draft}`;
 if (!proposals[key]) proposals[key] = {};
 </script>
 <template>
-  <Layout>
+  <Container class="pt-5">
     <h1 class="mb-4">New proposal</h1>
     <SIString
       v-model="proposals[key].title"
@@ -30,5 +30,5 @@ if (!proposals[key]) proposals[key] = {};
         examples: ['e.g. https://forum.balancer.fi/t/proposal...']
       }"
     />
-  </Layout>
+  </Container>
 </template>
