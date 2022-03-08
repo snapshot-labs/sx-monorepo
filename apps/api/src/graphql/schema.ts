@@ -4,6 +4,8 @@ type Query {
 
   proposals(where: Where): [Proposal]
 
+  proposal(id: String): Proposal
+
   votes(where: Where): [Vote]
 }
 
