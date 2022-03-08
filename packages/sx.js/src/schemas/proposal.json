@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/Proposal",
+  "definitions": {
+    "Proposal": {
+      "title": "Proposal",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "body": {
+          "type": "string",
+          "title": "Body"
+        },
+        "executionHash": {
+          "type": "string",
+          "title": "Execution hash"
+        },
+        "metadataHash": {
+          "type": "string",
+          "title": "Metadata hash"
+        }
+      },
+      "required": ["executionHash", "metadataHash"],
+      "additionalProperties": false
+    }
+  }
+}

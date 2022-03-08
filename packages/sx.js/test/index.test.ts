@@ -1,5 +1,5 @@
 import { propose, vote } from '../src';
-import constants from '../src/constants.json';
+import constants from '../src/starknet/constants.json';
 
 const space = constants.space;
 
