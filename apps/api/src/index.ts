@@ -9,6 +9,7 @@ import config from './config.json';
 import * as writer from './writer';
 
 const checkpoint = new Checkpoint(config, writer);
+checkpoint.reset();
 checkpoint.start();
 
 const app = express();

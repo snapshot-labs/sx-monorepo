@@ -2,6 +2,7 @@ import { Provider } from 'starknet';
 import { starknetKeccak } from 'starknet/utils/hash';
 import Promise from 'bluebird';
 import mysql from './mysql';
+import schema from './schema';
 
 export default class Checkpoint {
   public config;
@@ -55,7 +56,9 @@ export default class Checkpoint {
   async handleTx(block, tx, receipt) {
     // console.log('Handle tx', tx.transaction_index);
     for (const source of this.config.sources) {
-      if (source.contract === tx.contract_address) await this.action(source, block, tx, receipt);
+      let contract = source.contract;
+      contract = contract.length === 66 ? `0x${contract.slice(3)}` : contract;
+      if (contract === tx.contract_address) await this.action(source, block, tx, receipt);
     }
     // console.log('Handle tx done', tx.transaction_index);
   }
@@ -69,5 +72,10 @@ export default class Checkpoint {
           await this.writer[sourceEvent.fn]({ source, block, tx, receipt });
       }
     }
+  }
+
+  async reset() {
+    console.log('Reset');
+    await mysql.queryAsync(schema);
   }
 }

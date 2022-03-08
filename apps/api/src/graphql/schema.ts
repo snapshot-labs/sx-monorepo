@@ -16,9 +16,16 @@ type Checkpoint {
 }
 
 type Proposal {
-  id: String!
-  author: String
-  created: Int
+  id: Int!
+  space: String!
+  author: String!
+  title: String
+  body: String
+  start: Int!
+  end: Int!
+  snapshot: Int
+  created: Int!
+  tx: String!
 }
 
 type Vote {
