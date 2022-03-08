@@ -1,13 +1,16 @@
 import { propose, vote } from '../src';
+import constants from '../src/constants.json';
+
+const space = constants.space;
 
 describe('', () => {
   it('propose()', async () => {
-    const response = await propose();
-    expect(response).not.toThrow();
-  }, 24e3);
+    const receipt = await propose(space);
+    expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+  }, 360e3);
 
   it('vote()', async () => {
-    const response = await vote();
-    expect(response).not.toThrow();
-  }, 24e3);
+    const receipt = await vote(space);
+    expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+  }, 360e3);
 });

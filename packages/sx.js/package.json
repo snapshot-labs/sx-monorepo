@@ -2,8 +2,13 @@
   "name": "sx",
   "version": "0.1.0",
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "lint": "tslint -p tsconfig.json --fix",
+    "prepare": "yarn build",
+    "prepublishOnly": "yarn test && yarn run lint",
     "test": "jest"
   },
   "dependencies": {
@@ -19,5 +24,9 @@
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.6.2"
-  }
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ]
 }
