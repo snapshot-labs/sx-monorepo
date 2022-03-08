@@ -1,0 +1,268 @@
+[
+  {
+    "members": [
+      {
+        "name": "value",
+        "offset": 0,
+        "type": "felt"
+      }
+    ],
+    "name": "EthAddress",
+    "size": 1,
+    "type": "struct"
+  },
+  {
+    "members": [
+      {
+        "name": "execution_hash",
+        "offset": 0,
+        "type": "felt"
+      },
+      {
+        "name": "metadata_uri",
+        "offset": 1,
+        "type": "felt"
+      },
+      {
+        "name": "start_timestamp",
+        "offset": 2,
+        "type": "felt"
+      },
+      {
+        "name": "end_timestamp",
+        "offset": 3,
+        "type": "felt"
+      },
+      {
+        "name": "ethereum_block_number",
+        "offset": 4,
+        "type": "felt"
+      }
+    ],
+    "name": "Proposal",
+    "size": 5,
+    "type": "struct"
+  },
+  {
+    "members": [
+      {
+        "name": "choice",
+        "offset": 0,
+        "type": "felt"
+      },
+      {
+        "name": "voting_power",
+        "offset": 1,
+        "type": "Uint256"
+      }
+    ],
+    "name": "Vote",
+    "size": 3,
+    "type": "struct"
+  },
+  {
+    "members": [
+      {
+        "name": "low",
+        "offset": 0,
+        "type": "felt"
+      },
+      {
+        "name": "high",
+        "offset": 1,
+        "type": "felt"
+      }
+    ],
+    "name": "Uint256",
+    "size": 2,
+    "type": "struct"
+  },
+  {
+    "members": [
+      {
+        "name": "proposal",
+        "offset": 0,
+        "type": "Proposal"
+      },
+      {
+        "name": "power_for",
+        "offset": 5,
+        "type": "Uint256"
+      },
+      {
+        "name": "power_against",
+        "offset": 7,
+        "type": "Uint256"
+      },
+      {
+        "name": "power_abstain",
+        "offset": 9,
+        "type": "Uint256"
+      }
+    ],
+    "name": "ProposalInfo",
+    "size": 11,
+    "type": "struct"
+  },
+  {
+    "data": [
+      {
+        "name": "proposal_id",
+        "type": "felt"
+      },
+      {
+        "name": "proposer_address",
+        "type": "EthAddress"
+      },
+      {
+        "name": "proposal",
+        "type": "Proposal"
+      }
+    ],
+    "keys": [],
+    "name": "proposal_created",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "proposal_id",
+        "type": "felt"
+      },
+      {
+        "name": "voter_address",
+        "type": "EthAddress"
+      },
+      {
+        "name": "vote",
+        "type": "Vote"
+      }
+    ],
+    "keys": [],
+    "name": "vote_created",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "name": "_voting_delay",
+        "type": "felt"
+      },
+      {
+        "name": "_voting_period",
+        "type": "felt"
+      },
+      {
+        "name": "_proposal_threshold",
+        "type": "Uint256"
+      },
+      {
+        "name": "_voting_strategy",
+        "type": "felt"
+      },
+      {
+        "name": "_authenticator",
+        "type": "felt"
+      }
+    ],
+    "name": "constructor",
+    "outputs": [],
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "name": "voter_address",
+        "type": "EthAddress"
+      },
+      {
+        "name": "proposal_id",
+        "type": "felt"
+      },
+      {
+        "name": "choice",
+        "type": "felt"
+      },
+      {
+        "name": "params_len",
+        "type": "felt"
+      },
+      {
+        "name": "params",
+        "type": "felt*"
+      }
+    ],
+    "name": "vote",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "proposer_address",
+        "type": "EthAddress"
+      },
+      {
+        "name": "execution_hash",
+        "type": "felt"
+      },
+      {
+        "name": "metadata_uri",
+        "type": "felt"
+      },
+      {
+        "name": "ethereum_block_number",
+        "type": "felt"
+      },
+      {
+        "name": "params_len",
+        "type": "felt"
+      },
+      {
+        "name": "params",
+        "type": "felt*"
+      }
+    ],
+    "name": "propose",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "voter_address",
+        "type": "EthAddress"
+      },
+      {
+        "name": "proposal_id",
+        "type": "felt"
+      }
+    ],
+    "name": "get_vote_info",
+    "outputs": [
+      {
+        "name": "vote",
+        "type": "Vote"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "proposal_id",
+        "type": "felt"
+      }
+    ],
+    "name": "get_proposal_info",
+    "outputs": [
+      {
+        "name": "proposal_info",
+        "type": "ProposalInfo"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
