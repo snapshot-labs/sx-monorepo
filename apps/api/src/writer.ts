@@ -1,3 +1,5 @@
+import { BigNumber } from '@ethersproject/bignumber';
+import { getAddress } from '@ethersproject/address';
 import mysql from './mysql';
 
 export function feltToString(events) {
@@ -9,12 +11,20 @@ export function feltToString(events) {
   return `0x${str}`;
 }
 
+function toAddress(bn) {
+  try {
+    return getAddress(BigNumber.from(bn).toHexString());
+  } catch (e) {
+    return bn;
+  }
+}
+
 export async function handleProposalCreated({ block, tx, receipt }) {
   console.log('handleProposalCreated', receipt.events);
   const vote = {
     id: receipt.events[0].data[0],
     space: receipt.events[0].from_address,
-    author: receipt.events[0].data[1],
+    author: toAddress(receipt.events[0].data[1]),
     execution: receipt.events[0].data[2],
     metadata: receipt.events[0].data[3],
     start: receipt.events[0].data[4],

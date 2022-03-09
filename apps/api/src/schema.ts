@@ -12,9 +12,9 @@ CREATE TABLE checkpoint (
 CREATE TABLE proposals (
   id INT(24) NOT NULL,
   space VARCHAR(65) NOT NULL,
-  author VARCHAR(42) NOT NULL,
-  execution VARCHAR(64) NOT NULL,
-  metadata VARCHAR(64) NOT NULL,
+  author VARCHAR(65) NOT NULL,
+  execution VARCHAR(65) NOT NULL,
+  metadata VARCHAR(65) NOT NULL,
   title TEXT NOT NULL,
   body TEXT NOT NULL,
   start INT(11) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE proposals (
 
 CREATE TABLE votes (
   space VARCHAR(65) NOT NULL,
-  voter VARCHAR(42) NOT NULL,
+  voter VARCHAR(65) NOT NULL,
   proposal INT(24) NOT NULL,
   choice INT NOT NULL,
   created INT(11) NOT NULL,
