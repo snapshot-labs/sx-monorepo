@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { getAddress } from '@ethersproject/address';
-import mysql from './mysql';
+import mysql from './checkpoint/mysql';
 
 export function feltToString(events) {
   if (!events || events.length < 1 || !events[0].data || events[0].data.length < 8) return '';
@@ -21,7 +21,7 @@ function toAddress(bn) {
 
 export async function handleProposalCreated({ block, tx, receipt }) {
   console.log('handleProposalCreated', receipt.events);
-  const vote = {
+  const item = {
     id: receipt.events[0].data[0],
     space: receipt.events[0].from_address,
     author: toAddress(receipt.events[0].data[1]),
@@ -34,12 +34,12 @@ export async function handleProposalCreated({ block, tx, receipt }) {
     tx: tx.transaction_hash
   };
   const query = 'INSERT IGNORE INTO proposals SET ?';
-  await mysql.queryAsync(query, [vote]);
+  await mysql.queryAsync(query, [item]);
 }
 
 export async function handleVoteCreated({ block, tx, receipt }) {
   console.log('handleVoteCreated', receipt.events);
-  const vote = {
+  const item = {
     id: tx.transaction_hash,
     voter: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
     proposal: '0x8f974b76d4f50ea26a1f44843dcda2e0f6a4736883968b29996d272b86b447a9',
@@ -47,5 +47,5 @@ export async function handleVoteCreated({ block, tx, receipt }) {
     created: block.timestamp
   };
   const query = 'INSERT IGNORE INTO votes SET ?';
-  await mysql.queryAsync(query, [vote]);
+  await mysql.queryAsync(query, [item]);
 }

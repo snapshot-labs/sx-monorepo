@@ -2,16 +2,21 @@ import { Provider } from 'starknet';
 import { starknetKeccak } from 'starknet/utils/hash';
 import Promise from 'bluebird';
 import mysql from './mysql';
-import schema from './schema';
+import { toSql } from './graphql/utils';
+import getGraphQL from './graphql';
 
 export default class Checkpoint {
   public config;
   public writer;
+  public schema;
+  public graphql;
   public provider: Provider;
 
-  constructor(config, writer) {
+  constructor(config, writer, schema) {
     this.config = config;
     this.writer = writer;
+    this.schema = schema;
+    this.graphql = getGraphQL(schema);
     this.provider = new Provider({ network: this.config.network });
   }
 
@@ -76,6 +81,6 @@ export default class Checkpoint {
 
   async reset() {
     console.log('Reset');
-    await mysql.queryAsync(schema);
+    await mysql.queryAsync(toSql(this.schema));
   }
 }
