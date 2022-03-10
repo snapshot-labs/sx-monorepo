@@ -14,7 +14,7 @@ async function querySingle(parent, args, context, info) {
 
 export function toSql(typeDefs) {
   const schema = makeExecutableSchema({
-    typeDefs: `scalar Text\ntype Query { x: String }\n${typeDefs}`
+    typeDefs: `type Query { x: String }\n${typeDefs}`
   });
   let sql = 'DROP TABLE IF EXISTS checkpoint;';
   sql += '\nCREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));';
@@ -46,11 +46,10 @@ export function toSql(typeDefs) {
 }
 
 export function toGql(typeDefs) {
-  let gql = 'scalar Text';
   let where = '';
-  gql += '\n\ntype Query {';
+  let gql = 'type Query {';
   const schema = makeExecutableSchema({
-    typeDefs: `scalar Text\ntype Query { x: String }\n${typeDefs}`
+    typeDefs: `type Query { x: String }\n${typeDefs}`
   });
   introspectionFromSchema(schema).__schema.types.forEach(type => {
     const clone = JSON.parse(JSON.stringify(type));
@@ -69,7 +68,7 @@ export function toGql(typeDefs) {
       gql += `\n    where: Where${clone.name}`;
       gql += `\n  ): [${clone.name}]`;
       gql += `\n  ${clone.name.toLowerCase()}(id: String): ${clone.name}`;
-      clone.fields.forEach((field) => {
+      clone.fields.forEach(field => {
         const fieldType = field.type.name;
         if (fieldType !== 'Text') {
           where += `\n  ${field.name}: ${fieldType}`;
@@ -92,7 +91,7 @@ export function toGql(typeDefs) {
 export function toQuery(typeDefs) {
   const query = {};
   const schema = makeExecutableSchema({
-    typeDefs: `scalar Text\ntype Query { x: String }\n${typeDefs}`
+    typeDefs: `type Query { x: String }\n${typeDefs}`
   });
   introspectionFromSchema(schema).__schema.types.forEach(type => {
     const clone = JSON.parse(JSON.stringify(type));

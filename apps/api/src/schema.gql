@@ -1,4 +1,5 @@
-export default `
+scalar Text
+
 type Proposal {
   id: Int
   space: String
@@ -21,4 +22,3 @@ type Vote {
   choice: Int
   created: Int
 }
-`;

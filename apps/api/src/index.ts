@@ -3,10 +3,14 @@ dotenv.config();
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import Checkpoint from './checkpoint';
 import config from './config.json';
-import schema from './schema';
 import * as writer from './writer';
+
+const schemaFile = path.join(__dirname, './schema.gql');
+const schema = fs.readFileSync(schemaFile, 'utf8');
 
 const checkpoint = new Checkpoint(config, writer, schema);
 checkpoint.reset();
