@@ -18,17 +18,6 @@
             "abi": [
               "function transfer(address _to, uint256 _value) returns (bool)"
             ]
-          },
-          {
-            "to": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-            "data": "0xa9059cbb000000000000000000000000849d52316331967b6ff1198e5e32a0eb168d039d000000000000000000000000000000000000000000000213b9ab63cf587c0000",
-            "nonce": 1,
-            "operation": "0",
-            "type": "contractInteraction",
-            "value": "0",
-            "abi": [
-              "function transfer(address dst, uint256 wad) returns (bool)"
-            ]
           }
         ]
       }

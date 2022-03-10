@@ -1,0 +1,3 @@
+[submodule "sx.js"]
+	path = sx.js
+	url = https://github.com/snapshot-labs/sx.js.git

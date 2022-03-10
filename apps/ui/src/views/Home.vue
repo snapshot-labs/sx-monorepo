@@ -10,9 +10,18 @@
       <router-link :to="{ name: 'overview', params: { id: 'pasta' } }">
         <h3 class="mb-2">Space</h3>
       </router-link>
+      <router-link :to="{ name: 'editor', params: { id: 'pasta' } }">
+        <h3 class="mb-2">Editor</h3>
+      </router-link>
       <router-link :to="{ name: 'playground' }">
         <h3 class="mb-2">Playground</h3>
       </router-link>
+      <a
+        href="https://github.com/snapshot-labs?q=sx&type=all&language=&sort="
+        target="_blank"
+      >
+        <h3 class="mb-2">GitHub <Icon name="external-link" /></h3>
+      </a>
     </Container>
   </div>
 </template>

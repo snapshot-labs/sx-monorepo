@@ -1,6 +1,30 @@
+import * as dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import updateLocale from 'dayjs/plugin/updateLocale';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 export { getUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
+
+dayjs.extend(relativeTime);
+dayjs.extend(updateLocale);
+
+dayjs.updateLocale('en', {
+  relativeTime: {
+    future: '%s ago',
+    past: '%s left',
+    s: 'now',
+    m: '1m',
+    mm: '%dm',
+    h: '1h',
+    hh: '%dh',
+    d: '1d',
+    dd: '%dd',
+    M: '1m',
+    MM: '%dm',
+    y: '1y',
+    yy: '%dy'
+  }
+});
 
 export function shortenAddress(str = '') {
   return `${str.slice(0, 6)}...${str.slice(str.length - 4)}`;
@@ -49,4 +73,9 @@ export function lsGet(key: string, fallback?: any) {
 
 export function lsRemove(key: string) {
   return localStorage.removeItem(`${pkg.name}.${key}`);
+}
+
+export function _rt(number) {
+  // @ts-ignore
+  return dayjs(number * 1e3).toNow(false);
 }

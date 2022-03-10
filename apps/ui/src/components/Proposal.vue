@@ -1,4 +1,6 @@
 <script setup>
+import { _rt, _n, shortenAddress } from '@/helpers/utils';
+
 defineProps({
   proposal: Object
 });
@@ -16,9 +18,14 @@ defineProps({
           :size="24"
           class="float-left mr-2"
         />
-        <span>4:56 AM · Feb 8, 2022</span>
+        <span>
+          {{ shortenAddress(proposal.author) }}
+          <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
+        </span>
       </div>
-      <h2 class="mb-3">{{ proposal.title }}</h2>
+      <h2 class="mb-3">
+        {{ proposal.title || `Proposal #${proposal.id.slice(0, 7)}` }}
+      </h2>
       <div class="space-x-2 mb-3">
         <UiButton
           @click="vote(1)"
@@ -39,7 +46,9 @@ defineProps({
           <Icon name="skip" size="20" />
         </UiButton>
       </div>
-      <div class="text-skin-text">123 votes · 1h left</div>
+      <div class="text-skin-text">
+        {{ _n(proposal.vote_count) }} votes · {{ _rt(proposal.end) }}
+      </div>
     </div>
   </router-link>
 </template>

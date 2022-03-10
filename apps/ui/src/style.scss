@@ -40,6 +40,10 @@
   font-style: normal;
 }
 
+body {
+  background-color: var(--bg-color);
+}
+
 .mono {
   font-size: 44px;
   font-family: 'Space Mono', monospace;
