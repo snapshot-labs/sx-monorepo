@@ -3,11 +3,13 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import mysql from '../mysql';
 
 async function queryMulti(parent, args, context, info) {
-  return await mysql.queryAsync(`SELECT * FROM ${info.fieldName}`);
+  const first = args?.first || 1000;
+  const skip = args?.skip || 0;
+  return await mysql.queryAsync(`SELECT * FROM ${info.fieldName} LIMIT ?, ?`, [skip, first]);
 }
 
 async function querySingle(parent, args, context, info) {
-  const query = `SELECT * FROM ${info.fieldName}s LIMIT 1`;
+  const query = `SELECT * FROM ${info.fieldName}s WHERE id = ? LIMIT 1`;
   const [item] = await mysql.queryAsync(query, [args.id]);
   return item;
 }

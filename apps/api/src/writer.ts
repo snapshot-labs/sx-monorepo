@@ -3,9 +3,11 @@ import { toAddress } from './utils';
 
 export async function handleProposalCreated({ block, tx, receipt }) {
   console.log('handleProposalCreated', receipt.events);
+  const space = receipt.events[0].from_address;
+  const proposal = receipt.events[0].data[0];
   const item = {
-    id: receipt.events[0].data[0],
-    space: receipt.events[0].from_address,
+    id: `${space}/${proposal}`,
+    space,
     author: toAddress(receipt.events[0].data[1]),
     execution: receipt.events[0].data[2],
     metadata: receipt.events[0].data[3],
@@ -21,13 +23,21 @@ export async function handleProposalCreated({ block, tx, receipt }) {
 
 export async function handleVoteCreated({ block, tx, receipt }) {
   console.log('handleVoteCreated', receipt.events);
+  const space = receipt.events[0].from_address;
+  const proposal = receipt.events[0].data[0];
+  const voter = receipt.events[0].data[1];
   const item = {
-    id: tx.transaction_hash,
-    voter: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
-    proposal: '0x8f974b76d4f50ea26a1f44843dcda2e0f6a4736883968b29996d272b86b447a9',
-    choice: Math.ceil(Math.random() * 3),
+    id: `${space}/${proposal}/${voter}`,
+    space: receipt.events[0].from_address,
+    proposal: receipt.events[0].data[0],
+    voter,
+    choice: receipt.events[0].data[2],
+    vp: receipt.events[0].data[3],
     created: block.timestamp
   };
-  const query = 'INSERT IGNORE INTO votes SET ?';
-  await mysql.queryAsync(query, [item]);
+  const query = `
+    INSERT IGNORE INTO votes SET ?;
+    UPDATE proposals SET vote_count = vote_count + 1 WHERE id = ? LIMIT 1;
+  `;
+  await mysql.queryAsync(query, [item, `${item.space}/${item.proposal}`]);
 }

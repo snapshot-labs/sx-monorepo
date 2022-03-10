@@ -1,7 +1,16 @@
+scalar Id
 scalar Text
 
+type Space {
+  id: String
+  voting_delay: Int
+  voting_period: Int
+  proposal_threshold: Int
+  created: Int
+}
+
 type Proposal {
-  id: Int
+  id: String
   space: String
   author: String
   execution: String
@@ -13,12 +22,15 @@ type Proposal {
   snapshot: Int
   created: Int
   tx: String
+  vote_count: Int
 }
 
 type Vote {
   id: String
   voter: String
-  proposal: String
+  space: String
+  proposal: Int
   choice: Int
+  vp: Int
   created: Int
 }
