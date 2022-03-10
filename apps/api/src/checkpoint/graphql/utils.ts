@@ -47,7 +47,7 @@ export function toSql(typeDefs) {
 
 export function toGql(typeDefs) {
   let gql = 'scalar Text';
-  gql += '\n\ninput Where { created: Int }';
+  let where = '';
   gql += '\n\ntype Query {';
   const schema = makeExecutableSchema({
     typeDefs: `scalar Text\ntype Query { x: String }\n${typeDefs}`
@@ -60,14 +60,32 @@ export function toGql(typeDefs) {
       !clone.name.startsWith('__') &&
       clone.name !== 'Query'
     ) {
-      gql += `\n  ${clone.name.toLowerCase()}s(where: Where): [${clone.name}]`;
-      gql += `\n  ${clone.name.toLowerCase()}(where: Where): ${clone.name}`;
-      clone.fields.forEach(() => {
-        // const fieldType = field.type.name;
+      where += `\n\ninput Where${clone.name} {`;
+      gql += `\n  ${clone.name.toLowerCase()}s(`;
+      gql += `\n    first: Int`;
+      gql += `\n    skip: Int`;
+      gql += `\n    orderBy: String`;
+      gql += `\n    orderDirection: String`;
+      gql += `\n    where: Where${clone.name}`;
+      gql += `\n  ): [${clone.name}]`;
+      gql += `\n  ${clone.name.toLowerCase()}(id: String): ${clone.name}`;
+      clone.fields.forEach((field) => {
+        const fieldType = field.type.name;
+        if (fieldType !== 'Text') {
+          where += `\n  ${field.name}: ${fieldType}`;
+          where += `\n  ${field.name}_in: [${fieldType}]`;
+          if (fieldType === 'Int') {
+            where += `\n  ${field.name}_gt: ${fieldType}`;
+            where += `\n  ${field.name}_gte: ${fieldType}`;
+            where += `\n  ${field.name}_lt: ${fieldType}`;
+            where += `\n  ${field.name}_lte: ${fieldType}`;
+          }
+        }
       });
+      where += `\n}`;
     }
   });
-  gql += `\n}\n${typeDefs}`;
+  gql += `\n}\n${where}\n\n${typeDefs}`;
   return gql;
 }
 
