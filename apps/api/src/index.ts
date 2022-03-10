@@ -9,12 +9,12 @@ import Checkpoint from './checkpoint';
 import config from './config.json';
 import * as writer from './writer';
 
-const file = __dirname.endsWith('build/src') ? '../../src/schema.gql' : '../src/schema.gql';
+const file = __dirname.endsWith('dist/src') ? '../../src/schema.gql' : '../src/schema.gql';
 const schemaFile = path.join(__dirname, file);
 const schema = fs.readFileSync(schemaFile, 'utf8');
 
 const checkpoint = new Checkpoint(config, writer, schema);
-// checkpoint.reset();
+checkpoint.reset();
 checkpoint.start();
 
 const app = express();
