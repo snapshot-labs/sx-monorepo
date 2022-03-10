@@ -6,9 +6,9 @@ const { getSelectorFromName } = hash;
 
 export async function propose(space: string): Promise<AddTransactionResponse> {
   const executionHash: any = '1';
-  const metadataUri: any = '3';
+  const metadataUri: any = '2';
   const proposer: any = constants.user;
-  const blockNum: any = '1337';
+  const blockNum: any = '1234567';
   const params: any = [];
 
   // @ts-ignore
@@ -27,7 +27,7 @@ export async function propose(space: string): Promise<AddTransactionResponse> {
 export async function vote(space: string): Promise<AddTransactionResponse> {
   const voter: any = constants.user;
   const proposal = '1';
-  const choice = '1';
+  const choice = '2';
   const params: any = [];
 
   // @ts-ignore
