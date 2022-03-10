@@ -14,7 +14,7 @@ const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
 const schema = fs.readFileSync(schemaFile, 'utf8');
 
 const checkpoint = new Checkpoint(config, writer, schema);
-// checkpoint.reset();
+checkpoint.reset();
 checkpoint.start();
 
 const app = express();
