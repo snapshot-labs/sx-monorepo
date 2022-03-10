@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "git submodule update --init && git submodule foreach git pull origin master",
+    "preinstall": "git submodule update --init",
     "dev": "vite --port=8080",
     "build": "vite build",
     "lint": "eslint \"./src/*/**/*.{ts,vue,json}\" --fix"
