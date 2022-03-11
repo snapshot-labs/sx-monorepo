@@ -3,8 +3,8 @@ import { ref } from 'vue';
 import client from '@/helpers/client';
 import { useWeb3 } from '@/composables/useWeb3';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import proposalSchema from '@/../../sx.js/src/schemas/proposal.json';
-import voteSchema from '@/../../sx.js/src/schemas/vote.json';
+import proposalSchema from '@snapshot-labs/sx/src/schemas/proposal.json';
+import voteSchema from '@snapshot-labs/sx/src/schemas/vote.json';
 import { useTxStatus } from '@/composables/useTxStatus';
 
 const proposalDef = proposalSchema.definitions.Proposal;
