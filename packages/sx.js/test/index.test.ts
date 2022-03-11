@@ -1,4 +1,5 @@
 import { propose, vote } from '../src';
+// @ts-ignore
 import constants from '../src/starknet/constants.json';
 
 const space = constants.space;

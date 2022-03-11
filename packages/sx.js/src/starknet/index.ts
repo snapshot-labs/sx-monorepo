@@ -1,4 +1,4 @@
-import { AddTransactionResponse, Contract, defaultProvider as provider, hash} from 'starknet';
+import { AddTransactionResponse, Contract, defaultProvider as provider, hash } from 'starknet';
 import abi from './abi/auth.json';
 import constants from './constants.json';
 import { strToShortStringArr } from './strings';
@@ -9,14 +9,14 @@ export async function propose(
   space: string,
   executionHash: string,
   metadataUri: string
-): Promise<AddTransactionResponse>{
+): Promise<AddTransactionResponse> {
   const proposer: any = constants.user;
   const blockNum: any = '1234567';
   const params: any = [];
 
   // @ts-ignore
   const auth = new Contract(abi, constants.auth, provider);
-  const metadataUriFelt = strToShortStringArr('Snapshot X');
+  const metadataUriFelt = strToShortStringArr(metadataUri);
   const calldata = [proposer, executionHash, metadataUriFelt.length.toString()];
   metadataUriFelt.forEach(m => calldata.push(m.toString()));
   calldata.push(blockNum);

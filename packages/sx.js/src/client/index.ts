@@ -1,13 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'cross-fetch';
-import {
-  domain,
-  IProposal,
-  IVote,
-  proposalTypes,
-  voteTypes
-} from './types';
+import { domain, Proposal, Vote, proposalTypes, voteTypes } from './types';
 
 export class Client {
   public readonly address: string;
@@ -47,15 +41,11 @@ export class Client {
     return json.result;
   }
 
-  public async proposal(
-    web3: Web3Provider | Wallet,
-    address: string,
-    message: IProposal
-  ) {
+  public async proposal(web3: Web3Provider | Wallet, address: string, message: Proposal) {
     return await this.sign(web3, address, message, proposalTypes);
   }
 
-  public async vote(web3: Web3Provider | Wallet, address: string, message: IVote) {
+  public async vote(web3: Web3Provider | Wallet, address: string, message: Vote) {
     return await this.sign(web3, address, message, voteTypes);
   }
 }

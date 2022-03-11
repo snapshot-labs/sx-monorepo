@@ -1,12 +1,12 @@
 {
-  "name": "sx",
-  "version": "0.1.0",
+  "name": "@snapshot-labs/sx",
+  "version": "0.1.0-beta.0",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "tslint -p tsconfig.json --fix",
+    "lint": "eslint ./src --ext .ts --fix",
     "prepare": "yarn build",
     "prepublishOnly": "yarn test && yarn run lint",
     "test": "jest"
@@ -21,11 +21,13 @@
     "@types/bn.js": "^5.1.0",
     "@types/elliptic": "^6.4.14",
     "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.1.3",
     "jest": "^27.5.1",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "ts-jest": "^27.1.3",
-    "tslint": "^5.18.0",
-    "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.6.2"
   },
   "files": [

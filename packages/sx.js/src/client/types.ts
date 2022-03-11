@@ -28,12 +28,12 @@ export const voteTypes = {
   ]
 };
 
-export interface IProposal {
+export interface Proposal {
   executionHash: string;
   metadataHash: string;
 }
 
-export interface IVote {
+export interface Vote {
   proposal: string;
   choice: number;
 }
