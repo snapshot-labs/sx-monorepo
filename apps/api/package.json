@@ -12,6 +12,7 @@
     "@ethersproject/address": "^5.5.0",
     "@ethersproject/bignumber": "^5.5.0",
     "@graphql-tools/schema": "^8.3.1",
+    "@snapshot-labs/sx": "^0.1.0-beta.0",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "connection-string": "^1.0.1",

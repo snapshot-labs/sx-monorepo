@@ -1,16 +1,22 @@
+import { shortStringArrToStr } from '@snapshot-labs/sx';
 import mysql from './checkpoint/mysql';
 import { toAddress } from './utils';
 
-export async function handleProposalCreated({ block, tx, receipt }) {
-  console.log('handleProposalCreated', receipt.events);
+export async function handlePropose({ block, tx, receipt }) {
+  console.log('Handle propose', receipt.events);
   const space = receipt.events[0].from_address;
   const proposal = receipt.events[0].data[0];
+
+  const metadataUriLen = receipt.events[0].data[6];
+  const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
+  const metadataUri = shortStringArrToStr(metadataUriArr.map(m => BigInt(m)));
+
   const item = {
     id: `${space}/${proposal}`,
     space,
     author: toAddress(receipt.events[0].data[1]),
-    execution: receipt.events[0].data[2],
-    metadata: receipt.events[0].data[3],
+    execution_hash: receipt.events[0].data[2],
+    metadata_uri: metadataUri,
     start: receipt.events[0].data[4],
     end: receipt.events[0].data[5],
     snapshot: receipt.events[0].data[6],
@@ -21,11 +27,11 @@ export async function handleProposalCreated({ block, tx, receipt }) {
   await mysql.queryAsync(query, [item]);
 }
 
-export async function handleVoteCreated({ block, tx, receipt }) {
-  console.log('handleVoteCreated', receipt.events);
+export async function handleVote({ block, receipt }) {
+  console.log('Handle vote', receipt.events);
   const space = receipt.events[0].from_address;
   const proposal = receipt.events[0].data[0];
-  const voter = receipt.events[0].data[1];
+  const voter = toAddress(receipt.events[0].data[1]);
   const item = {
     id: `${space}/${proposal}/${voter}`,
     space: receipt.events[0].from_address,

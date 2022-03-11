@@ -13,8 +13,8 @@ type Proposal {
   id: String
   space: String
   author: String
-  execution: String
-  metadata: String
+  execution_hash: String
+  metadata_uri: String
   title: Text
   body: Text
   start: Int

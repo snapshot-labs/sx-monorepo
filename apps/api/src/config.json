@@ -2,16 +2,16 @@
   "network": "goerli-alpha",
   "sources": [
     {
-      "contract": "0x05bf1d6b1bc77a33a28c5fb372e4c084733508bec60a1122b8724696068e14f8",
-      "start": 111372,
+      "contract": "0x063d3c1c93411131b65491f216301263e6071ef0df02ab800cdd7748ddedcecf",
+      "start": 112319,
       "events": [
         {
           "name": "proposal_created",
-          "fn": "handleProposalCreated"
+          "fn": "handlePropose"
         },
         {
           "name": "vote_created",
-          "fn": "handleVoteCreated"
+          "fn": "handleVote"
         }
       ]
     }
