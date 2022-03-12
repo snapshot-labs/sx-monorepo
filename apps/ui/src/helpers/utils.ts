@@ -76,6 +76,11 @@ export function lsRemove(key: string) {
 }
 
 export function _rt(number) {
-  // @ts-ignore
-  return dayjs(number * 1e3).toNow(false);
+  try {
+    // @ts-ignore
+    return dayjs(number * 1e3).toNow(false);
+  } catch (e) {
+    console.log(e);
+    return '';
+  }
 }
