@@ -7,9 +7,14 @@ export async function handlePropose({ block, tx, receipt }) {
   const space = receipt.events[0].from_address;
   const proposal = receipt.events[0].data[0];
 
-  const metadataUriLen = receipt.events[0].data[6];
-  const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
-  const metadataUri = shortStringArrToStr(metadataUriArr.map(m => BigInt(m)));
+  let metadataUri = '';
+  try {
+    const metadataUriLen = receipt.events[0].data[6];
+    const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
+    metadataUri = shortStringArrToStr(metadataUriArr.map(m => BigInt(m)));
+  } catch (e) {
+    console.log(e);
+  }
 
   const item = {
     id: `${space}/${proposal}`,
