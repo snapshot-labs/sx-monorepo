@@ -47,7 +47,7 @@ export async function handlePropose({ block, tx, receipt }) {
     tx: tx.transaction_hash
   };
   const query = `
-    INSERT IGNORE INTO proposals SET ?
+    INSERT IGNORE INTO proposals SET ?;
     UPDATE spaces SET proposal_count = proposal_count + 1 WHERE id = ? LIMIT 1;
   `;
   await mysql.queryAsync(query, [item, item.space]);
