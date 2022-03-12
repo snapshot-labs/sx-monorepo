@@ -21,12 +21,10 @@
     "dayjs": "^1.10.8",
     "graphql": "^16.3.0",
     "graphql-tag": "^2.12.6",
-    "randombytes": "^2.1.0",
     "scrollmonitor": "^1.2.9",
-    "timeago.js": "^4.0.2",
-    "vue": "^3.2.29",
-    "vue-i18n": "^9.2.0-beta.30",
-    "vue-router": "^4.0.12",
+    "vue": "^3.2.31",
+    "vue-i18n": "^9.2.0-beta.32",
+    "vue-router": "^4.0.13",
     "vue-tippy": "^6.0.0-alpha.52"
   },
   "devDependencies": {
