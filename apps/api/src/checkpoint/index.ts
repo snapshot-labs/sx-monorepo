@@ -71,6 +71,8 @@ export default class Checkpoint {
   async action(source, block, tx, receipt) {
     console.log('Action for', source.contract, tx.type);
     console.log('Events', receipt.events.length);
+    if (tx.type === 'DEPLOY' && source.deploy_fn)
+      await this.writer[source.deploy_fn]({ source, block, tx, receipt });
     for (const sourceEvent of source.events) {
       for (const event of receipt.events) {
         if (starknetKeccak(sourceEvent.name).toString() === event.keys[0])

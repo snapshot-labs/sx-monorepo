@@ -3,14 +3,19 @@ scalar Text
 
 type Space {
   id: String
+  name: String
   voting_delay: Int
   voting_period: Int
   proposal_threshold: Int
+  proposal_count: Int
+  vote_count: Int
   created: Int
+  tx: String
 }
 
 type Proposal {
   id: String
+  proposal_id: Int
   space: String
   author: String
   execution_hash: String

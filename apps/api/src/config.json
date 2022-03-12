@@ -4,6 +4,7 @@
     {
       "contract": "0x063d3c1c93411131b65491f216301263e6071ef0df02ab800cdd7748ddedcecf",
       "start": 112319,
+      "deploy_fn": "handleDeploy",
       "events": [
         {
           "name": "proposal_created",
