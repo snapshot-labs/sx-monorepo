@@ -4,6 +4,7 @@ export const PROPOSAL_QUERY = gql`
   query Proposal($id: String!) {
     proposal(id: $id) {
       id
+      proposal_id
       space
       author
       title
@@ -22,6 +23,7 @@ export const PROPOSALS_QUERY = gql`
   query Proposals {
     proposals {
       id
+      proposal_id
       space
       author
       title

@@ -48,7 +48,7 @@ onMounted(async () => {
   <div v-else>
     <Container class="pt-5">
       <h1 class="mb-3">
-        {{ proposal.title || `Proposal #${id.slice(0, 7)}` }}
+        {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>
       <div class="flex mb-4 items-center">
         <div class="flex-auto">

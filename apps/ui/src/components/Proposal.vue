@@ -24,7 +24,7 @@ defineProps({
         </span>
       </div>
       <h2 class="mb-3">
-        {{ proposal.title || `Proposal #${proposal.id.slice(0, 7)}` }}
+	      {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h2>
       <div class="space-x-2 mb-3">
         <UiButton

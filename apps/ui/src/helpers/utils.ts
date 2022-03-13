@@ -1,4 +1,4 @@
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
@@ -77,7 +77,6 @@ export function lsRemove(key: string) {
 
 export function _rt(number) {
   try {
-    // @ts-ignore
     return dayjs(number * 1e3).toNow(false);
   } catch (e) {
     console.log(e);
