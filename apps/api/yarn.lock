@@ -902,10 +902,10 @@ configstore@^5.0.1:
     write-file-atomic "^3.0.0"
     xdg-basedir "^4.0.0"
 
-connection-string@^1.0.1:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/connection-string/-/connection-string-1.1.0.tgz#3d37d8933210548f7bee752426e948cdd88663a0"
-  integrity sha512-uWTk8bs+jczX5D0ptKk7hldRMtp4eqty8SyTS1lKZs24VOQRsGGwLAUUvj1+egd+LxYfDfkiPSm4bFp9LTgrbQ==
+connection-string@^4.3.5:
+  version "4.3.5"
+  resolved "https://registry.yarnpkg.com/connection-string/-/connection-string-4.3.5.tgz#02f725bc3f67a1f764c5fe5d8b986959ca3d9de5"
+  integrity sha512-ayXcReF4FoYTUCKxN8Z4bXDKek6O2w5/udkXH42Sv17k9saPW9XkMUJc4nE2CgQRRvBTqkmVsQstXYb9f99j4w==
 
 content-disposition@0.5.3:
   version "0.5.3"
