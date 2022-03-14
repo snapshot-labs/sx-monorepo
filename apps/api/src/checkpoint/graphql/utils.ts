@@ -5,7 +5,14 @@ import mysql from '../mysql';
 async function queryMulti(parent, args, context, info) {
   const first = args?.first || 1000;
   const skip = args?.skip || 0;
-  return await mysql.queryAsync(`SELECT * FROM ${info.fieldName} LIMIT ?, ?`, [skip, first]);
+  const orderBy = 'created';
+  const orderDirection = 'DESC';
+  return await mysql.queryAsync(`SELECT * FROM ${info.fieldName} ORDER BY ? ? LIMIT ?, ?`, [
+    orderBy,
+    orderDirection,
+    skip,
+    first
+  ]);
 }
 
 async function querySingle(parent, args, context, info) {

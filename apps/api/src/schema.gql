@@ -4,6 +4,7 @@ scalar Text
 type Space {
   id: String
   name: String
+  about: String
   voting_delay: Int
   voting_period: Int
   proposal_threshold: Int
@@ -22,6 +23,7 @@ type Proposal {
   metadata_uri: String
   title: Text
   body: Text
+  discussion: Text
   start: Int
   end: Int
   snapshot: Int
