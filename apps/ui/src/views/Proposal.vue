@@ -14,7 +14,8 @@ const auth = getInstance();
 const { pendingCount } = useTxStatus();
 const route = useRoute();
 
-const id = route.params.id || 0;
+const id = route.params.id;
+const space = route.params.space;
 
 const proposal = ref({});
 const loaded = ref(false);
@@ -34,7 +35,7 @@ async function vote(choice) {
 onMounted(async () => {
   const { data } = await apollo.query({
     query: PROPOSAL_QUERY,
-    variables: { id }
+    variables: { id: `${space}/${id}` }
   });
   proposal.value = data.proposal;
   loaded.value = true;

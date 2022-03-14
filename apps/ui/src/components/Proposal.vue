@@ -7,7 +7,10 @@ defineProps({
 </script>
 <template>
   <router-link
-    :to="{ name: 'proposal', params: { id: proposal.id, space: 'bolo' } }"
+    :to="{
+      name: 'proposal',
+      params: { id: proposal.proposal_id, space: proposal.space }
+    }"
     class="x-block"
   >
     <div class="p-4">
@@ -24,7 +27,7 @@ defineProps({
         </span>
       </div>
       <h2 class="mb-3">
-	      {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
+        {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h2>
       <div class="space-x-2 mb-3">
         <UiButton

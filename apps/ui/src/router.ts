@@ -9,6 +9,7 @@ import Editor from '@/views/Create/Editor.vue';
 import Execution from '@/views/Create/Execution.vue';
 import Treasury from '@/views/Space/Treasury.vue';
 import Profile from '@/views/Space/Profile.vue';
+import Voting from '@/views/Space/Voting.vue';
 import Proposal from '@/views/Proposal.vue';
 import Playground from '@/views/Playground.vue';
 
@@ -20,6 +21,7 @@ const routes: any[] = [
       { path: 'settings', name: 'settings', component: Settings },
       { path: 'treasury', name: 'treasury', component: Treasury },
       { path: 'profile', name: 'profile', component: Profile },
+      { path: 'voting', name: 'voting', component: Voting },
     ]
   },
   { path: '/:id/create/:key?', component: Create, children: [

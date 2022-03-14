@@ -4,11 +4,10 @@ import { formatUnits } from '@ethersproject/units';
 import { getAddress } from '@ethersproject/address';
 import snapshot from '@snapshot-labs/snapshot.js';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import spaces from '@/helpers/spaces.json';
 import { _n, shorten } from '@/helpers/utils';
 
-const props = defineProps({
-  space: Object
-});
+defineProps({ space: Object });
 
 const balances = ref({});
 const loading = ref(false);
@@ -41,7 +40,7 @@ const tokens = [
 ];
 
 onMounted(async () => {
-  const treasury = props.space.wallets[0];
+  const treasury = spaces.pasta.wallets[0];
   loading.value = true;
   const prices = await getUsdValue(tokens);
   const multi = new Multicaller(network, provider, abi);
@@ -82,8 +81,13 @@ onMounted(async () => {
       </div>
       <a class="px-4 py-3 block">
         <h4>
-          <Stamp type="avatar" :id="space.wallets[0]" :size="44" class="mr-2" />
-          {{ shorten(space.wallets[0]) }}
+          <Stamp
+            type="avatar"
+            :id="spaces.pasta.wallets[0]"
+            :size="44"
+            class="mr-2"
+          />
+          {{ shorten(spaces.pasta.wallets[0]) }}
           <Icon name="external-link" class="float-right mt-2" />
         </h4>
       </a>
