@@ -15,10 +15,10 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "cross-fetch": "^3.1.5",
-    "dotenv": "^9.0.1",
+    "dotenv": "^16.0.0",
     "eslint": "^6.7.2",
     "express": "^4.17.1",
-    "nodemon": "^2.0.7",
+    "nodemon": "^2.0.15",
     "starknet": "^3.2.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
