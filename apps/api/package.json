@@ -11,22 +11,22 @@
   "dependencies": {
     "@ethersproject/address": "^5.5.0",
     "@ethersproject/bignumber": "^5.5.0",
-    "@graphql-tools/schema": "^8.3.1",
+    "@graphql-tools/schema": "^8.3.2",
     "@snapshot-labs/sx": "^0.1.0-beta.0",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "connection-string": "^1.0.1",
     "cors": "^2.8.5",
-    "dotenv": "^9.0.1",
+    "dotenv": "^16.0.0",
     "eslint": "^6.7.2",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "graphql": "^16.3.0",
     "graphql-fields": "^2.0.3",
     "mysql": "^2.18.1",
-    "nodemon": "^2.0.7",
+    "nodemon": "^2.0.15",
     "starknet": "^2.9.0",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.7.0",
     "typescript": "^4.1.3"
   },
   "devDependencies": {
@@ -36,6 +36,6 @@
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "eslint-plugin-prettier": "^3.1.3",
-    "prettier": "^1.19.1"
+    "prettier": "^2.5.1"
   }
 }
