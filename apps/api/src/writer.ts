@@ -28,7 +28,7 @@ export async function handlePropose({ block, tx, receipt }) {
   try {
     const metadataUriLen = receipt.events[0].data[6];
     const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
-    metadataUri = shortStringArrToStr(metadataUriArr.map(m => BigInt(m)));
+    metadataUri = shortStringArrToStr(metadataUriArr.map((m) => BigInt(m)));
   } catch (e) {
     console.log(e);
   }

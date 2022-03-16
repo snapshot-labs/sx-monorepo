@@ -24,7 +24,7 @@ export default class Checkpoint {
     let start = 0;
     const lastBlock = await mysql.queryAsync('SELECT * FROM checkpoint LIMIT 1');
     const nextBlock = lastBlock[0].number + 1;
-    this.config.sources.forEach(source => {
+    this.config.sources.forEach((source) => {
       start = start === 0 || start > source.start ? source.start : start;
     });
     return nextBlock > start ? nextBlock : start;
@@ -75,7 +75,7 @@ export default class Checkpoint {
       await this.writer[source.deploy_fn]({ source, block, tx, receipt });
     for (const sourceEvent of source.events) {
       for (const event of receipt.events) {
-        if (starknetKeccak(sourceEvent.name).toString() === event.keys[0])
+        if (`0x${starknetKeccak(sourceEvent.name).toString('hex')}` === event.keys[0])
           await this.writer[sourceEvent.fn]({ source, block, tx, receipt });
       }
     }

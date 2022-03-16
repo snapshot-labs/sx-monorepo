@@ -28,7 +28,7 @@ export function toSql(typeDefs) {
   let sql = 'DROP TABLE IF EXISTS checkpoint;';
   sql += '\nCREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));';
   sql += '\nINSERT checkpoint SET number = 0;';
-  introspectionFromSchema(schema).__schema.types.forEach(type => {
+  introspectionFromSchema(schema).__schema.types.forEach((type) => {
     const clone = JSON.parse(JSON.stringify(type));
     if (
       clone.kind === 'OBJECT' &&
@@ -39,7 +39,7 @@ export function toSql(typeDefs) {
       sql += `\n\nDROP TABLE IF EXISTS ${clone.name.toLowerCase()}s;`;
       sql += `\nCREATE TABLE ${clone.name.toLowerCase()}s (`;
       let sqlIndexes = ``;
-      clone.fields.forEach(field => {
+      clone.fields.forEach((field) => {
         const fieldType = field.type.name;
         let sqlType = 'VARCHAR(128)';
         if (fieldType === 'Int') sqlType = 'INT(128)';
@@ -60,7 +60,7 @@ export function toGql(typeDefs) {
   const schema = makeExecutableSchema({
     typeDefs: `type Query { x: String }\n${typeDefs}`
   });
-  introspectionFromSchema(schema).__schema.types.forEach(type => {
+  introspectionFromSchema(schema).__schema.types.forEach((type) => {
     const clone = JSON.parse(JSON.stringify(type));
     if (
       clone.kind === 'OBJECT' &&
@@ -77,7 +77,7 @@ export function toGql(typeDefs) {
       gql += `\n    where: Where${clone.name}`;
       gql += `\n  ): [${clone.name}]`;
       gql += `\n  ${clone.name.toLowerCase()}(id: String): ${clone.name}`;
-      clone.fields.forEach(field => {
+      clone.fields.forEach((field) => {
         const fieldType = field.type.name;
         if (fieldType !== 'Text') {
           where += `\n  ${field.name}: ${fieldType}`;
@@ -102,7 +102,7 @@ export function toQuery(typeDefs) {
   const schema = makeExecutableSchema({
     typeDefs: `type Query { x: String }\n${typeDefs}`
   });
-  introspectionFromSchema(schema).__schema.types.forEach(type => {
+  introspectionFromSchema(schema).__schema.types.forEach((type) => {
     const clone = JSON.parse(JSON.stringify(type));
     if (
       clone.kind === 'OBJECT' &&
