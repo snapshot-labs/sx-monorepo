@@ -6,18 +6,17 @@ import { strToShortStringArr } from './strings';
 const { getSelectorFromName } = hash;
 
 export async function propose(
+  author: string,
   space: string,
   executionHash: string,
   metadataUri: string
 ): Promise<AddTransactionResponse> {
-  const proposer: any = constants.user;
   const blockNum: any = '1234567';
   const params: any = [];
-
   // @ts-ignore
   const auth = new Contract(abi, constants.auth, provider);
   const metadataUriFelt = strToShortStringArr(metadataUri);
-  const calldata = [proposer, executionHash, metadataUriFelt.length.toString()];
+  const calldata = [author, executionHash, metadataUriFelt.length.toString()];
   metadataUriFelt.forEach((m) => calldata.push(m.toString()));
   calldata.push(blockNum);
   calldata.push(params.length.toString());
@@ -32,16 +31,14 @@ export async function propose(
 }
 
 export async function vote(
+  voter: string,
   space: string,
   proposal: string,
   choice: string
 ): Promise<AddTransactionResponse> {
-  const voter: any = constants.user;
   const params: any = [];
-
   // @ts-ignore
   const auth = new Contract(abi, constants.auth, provider);
-
   const receipt = await auth.invoke('execute', {
     to: space,
     function_selector: getSelectorFromName('vote'),
