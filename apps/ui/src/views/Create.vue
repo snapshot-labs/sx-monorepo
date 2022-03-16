@@ -1,12 +1,15 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useActions } from '@/composables/useActions';
 
 const route = useRoute();
 const router = useRouter();
-
+const { propose } = useActions();
 const id = route.params.id;
 const key = route.params.key;
+const executionHash = '1';
+const metadataUri = 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca';
 
 onMounted(() => {
   if (!key) {
@@ -36,12 +39,22 @@ onMounted(() => {
           <Icon name="back" class="align-middle" />
         </UiButton>
       </router-link>
-      <router-link :to="{ name: 'execution', params: { id, key } }">
-        <UiButton class="leading-3">
-          {{ $route.name !== 'editor' ? 'Preview' : 'Next' }}
-          <Icon name="go" class="align-middle" />
+      <span v-if="$route.name !== 'editor'">
+        <UiButton
+          @click="propose(id, executionHash, metadataUri)"
+          class="leading-3"
+        >
+          Publish
         </UiButton>
-      </router-link>
+      </span>
+      <span v-else>
+        <router-link :to="{ name: 'execution', params: { id, key } }">
+          <UiButton class="leading-3">
+            Next
+            <Icon name="go" class="align-middle" />
+          </UiButton>
+        </router-link>
+      </span>
     </div>
   </div>
 </template>

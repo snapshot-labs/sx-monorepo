@@ -1,36 +1,17 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import client from '@/helpers/client';
-import { useWeb3 } from '@/composables/useWeb3';
-import { useTxStatus } from '@/composables/useTxStatus';
 import { _rt, _n, shortenAddress } from '@/helpers/utils';
 import apollo from '@/helpers/apollo';
 import { PROPOSAL_QUERY } from '@/helpers/queries';
+import { useActions } from '@/composables/useActions';
 
-const { web3 } = useWeb3();
-const auth = getInstance();
-const { pendingCount } = useTxStatus();
 const route = useRoute();
-
-const id = route.params.id;
+const { vote } = useActions();
+const id = parseInt(route.params.id || 0);
 const space = route.params.space;
-
 const proposal = ref({});
 const loaded = ref(false);
-
-async function vote(choice) {
-  const envelop = await client.vote(auth.web3, web3.value.account, {
-    proposal: id,
-    choice
-  });
-  console.log('Envelop', envelop);
-  pendingCount.value++;
-  const receipt = await client.send(envelop);
-  pendingCount.value--;
-  console.log('Receipt', receipt);
-}
 
 onMounted(async () => {
   const { data } = await apollo.query({
@@ -86,19 +67,19 @@ onMounted(async () => {
       <div class="mb-4">
         <div class="grid grid-cols-3 gap-2 mb-3">
           <UiButton
-            @click="vote(1)"
+            @click="vote(space, proposal.proposal_id, 1)"
             class="w-full !text-white !bg-green !border-green"
           >
             <Icon name="check3" size="20" />
           </UiButton>
           <UiButton
-            @click="vote(2)"
+            @click="vote(space, proposal.proposal_id, 2)"
             class="w-full !text-white !bg-red !border-red"
           >
             <Icon name="close2" size="20" />
           </UiButton>
           <UiButton
-            @click="vote(3)"
+            @click="vote(space, proposal.proposal_id, 3)"
             class="w-full !text-white !bg-gray-500 !border-gray-500"
           >
             <Icon name="skip" size="20" />

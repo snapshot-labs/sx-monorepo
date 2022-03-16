@@ -16,7 +16,7 @@
     "@popperjs/core": "^2.11.2",
     "@snapshot-labs/lock": "^0.1.6",
     "@snapshot-labs/snapshot.js": "^0.3.50",
-    "@snapshot-labs/sx": "^0.1.0-beta.0",
+    "@snapshot-labs/sx": "^0.1.0-beta.1",
     "@vueuse/core": "^7.6.2",
     "dayjs": "^1.10.8",
     "graphql": "^16.3.0",
