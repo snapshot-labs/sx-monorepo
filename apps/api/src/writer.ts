@@ -1,11 +1,11 @@
 import { shortStringArrToStr } from '@snapshot-labs/sx';
 import mysql from './checkpoint/mysql';
-import { toAddress } from './utils';
+import { getSNAddress, toAddress } from './utils';
 
 export async function handleDeploy({ block, tx }) {
   console.log('Handle deploy');
   const item = {
-    id: '0x625dc1290b6e936be5f1a3e963cf629326b1f4dfd5a56738dea98e1ad31b7f3',
+    id: '0x0625dc1290b6e936be5f1a3e963cf629326b1f4dfd5a56738dea98e1ad31b7f3',
     name: 'Pistachio DAO',
     voting_delay: 3600,
     voting_period: 86400,
@@ -21,7 +21,7 @@ export async function handleDeploy({ block, tx }) {
 
 export async function handlePropose({ block, tx, receipt }) {
   console.log('Handle propose', receipt.events);
-  const space = receipt.events[0].from_address;
+  const space = getSNAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
 
   let metadataUri = '';
