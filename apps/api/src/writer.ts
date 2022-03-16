@@ -22,11 +22,11 @@ export async function handleDeploy({ block, tx }) {
 export async function handlePropose({ block, tx, receipt }) {
   console.log('Handle propose', receipt.events);
   const space = receipt.events[0].from_address;
-  const proposal = receipt.events[0].data[0];
+  const proposal = BigInt(receipt.events[0].data[0]).toString();
 
   let metadataUri = '';
   try {
-    const metadataUriLen = receipt.events[0].data[6];
+    const metadataUriLen = BigInt(receipt.events[0].data[6]).toString();
     const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
     metadataUri = shortStringArrToStr(metadataUriArr.map((m) => BigInt(m)));
   } catch (e) {
@@ -40,9 +40,9 @@ export async function handlePropose({ block, tx, receipt }) {
     author: toAddress(receipt.events[0].data[1]),
     execution_hash: receipt.events[0].data[2],
     metadata_uri: metadataUri,
-    start: receipt.events[0].data[4],
-    end: receipt.events[0].data[5],
-    snapshot: receipt.events[0].data[6],
+    start: BigInt(receipt.events[0].data[4]).toString(),
+    end: BigInt(receipt.events[0].data[5]).toString(),
+    snapshot: BigInt(receipt.events[0].data[6]).toString(),
     created: block.timestamp,
     tx: tx.transaction_hash
   };
@@ -56,15 +56,15 @@ export async function handlePropose({ block, tx, receipt }) {
 export async function handleVote({ block, receipt }) {
   console.log('Handle vote', receipt.events);
   const space = receipt.events[0].from_address;
-  const proposal = receipt.events[0].data[0];
+  const proposal = BigInt(receipt.events[0].data[0]).toString();
   const voter = toAddress(receipt.events[0].data[1]);
   const item = {
     id: `${space}/${proposal}/${voter}`,
     space: receipt.events[0].from_address,
-    proposal: receipt.events[0].data[0],
+    proposal,
     voter,
-    choice: receipt.events[0].data[2],
-    vp: receipt.events[0].data[3],
+    choice: BigInt(receipt.events[0].data[2]).toString(),
+    vp: BigInt(receipt.events[0].data[3]).toString(),
     created: block.timestamp
   };
   const query = `
