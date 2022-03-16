@@ -40,9 +40,9 @@ export async function handlePropose({ block, tx, receipt }) {
     author: toAddress(receipt.events[0].data[1]),
     execution_hash: receipt.events[0].data[2],
     metadata_uri: metadataUri,
-    start: BigInt(receipt.events[0].data[4]).toString(),
-    end: BigInt(receipt.events[0].data[5]).toString(),
-    snapshot: BigInt(receipt.events[0].data[6]).toString(),
+    start: BigInt(receipt.events[0].data[3]).toString(),
+    end: BigInt(receipt.events[0].data[4]).toString(),
+    snapshot: BigInt(receipt.events[0].data[5]).toString(),
     created: block.timestamp,
     tx: tx.transaction_hash
   };
