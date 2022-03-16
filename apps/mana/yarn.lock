@@ -182,7 +182,7 @@
   dependencies:
     "@ethersproject/logger" "^5.6.0"
 
-"@ethersproject/providers@^5.6.0":
+"@ethersproject/providers@^5.5.3", "@ethersproject/providers@^5.6.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.6.0.tgz#08ec8e2666771e3a347e66c8f664a2af97366534"
   integrity sha512-6+5PKXTWAttJWFWF8+xCDTCa2/dtq9BNrdKQHGl0IyIOwj99vM6OeThmIRcsIAzIOb8m0XS6w+1KFZwrf3j9nw==
@@ -268,7 +268,7 @@
     "@ethersproject/rlp" "^5.6.0"
     "@ethersproject/signing-key" "^5.6.0"
 
-"@ethersproject/wallet@^5.6.0":
+"@ethersproject/wallet@^5.5.0", "@ethersproject/wallet@^5.6.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/wallet/-/wallet-5.6.0.tgz#33d11a806d783864208f348709a5a3badac8e22a"
   integrity sha512-qMlSdOSTyp0MBeE+r7SUhr1jjDlC1zAXB8VD84hCnpijPQiSNbxr6GdiLXxpUs8UKzkDiNYYC5DRI3MZr+n+tg==
@@ -325,6 +325,16 @@
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
+
+"@snapshot-labs/sx@^0.1.0-beta.0":
+  version "0.1.0-beta.0"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.0.tgz#8dc6de2eaeaebd5457441820680f7873175b9c0a"
+  integrity sha512-TNiOtjpH4r395frV8FQ/Tn3jsiOBNa01xDWiWS0Sfhj/Xd3Ckuo+ded9exu/UuKQjEpiLUxH7DEpIOaYLVUtAA==
+  dependencies:
+    "@ethersproject/providers" "^5.5.3"
+    "@ethersproject/wallet" "^5.5.0"
+    cross-fetch "^3.1.5"
+    starknet "^3.2.0"
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"

@@ -1,27 +1,23 @@
 import express from 'express';
+import { propose, vote } from '@snapshot-labs/sx';
 import { rpcError, rpcSuccess } from './utils';
-import { propose, vote } from '../sx.js/src';
 
 const router = express.Router();
 
-router.all('/', async (req, res) => {
+router.post('/', async (req, res) => {
   const { id } = req.body;
   try {
-    const { types } = req.body.params.envelop;
+    const { types, message } = req.body.params.envelop.data;
     let receipt;
     console.time('Send');
-    if (types.Proposal) {
-      const space = '0x06d6de57282e6798ab5a1fa56686b65fc0282b1c4b95b86df85f4a44ee5dc8ae';
-      receipt = await propose(space);
-    }
-    if (types.Vote) {
-      const space = '0x06d6de57282e6798ab5a1fa56686b65fc0282b1c4b95b86df85f4a44ee5dc8ae';
-      receipt = await vote(space);
-    }
+    if (types.Propose)
+      receipt = await propose(message.space, message.executionHash, message.metadataURI);
+    if (types.Vote) receipt = await vote(message.space, message.proposal, message.choice);
     console.timeEnd('Send');
     console.log('Receipt', receipt);
     return rpcSuccess(res, receipt, id);
   } catch (e) {
+    console.log('Failed', e);
     return rpcError(res, 500, e, id);
   }
 });
