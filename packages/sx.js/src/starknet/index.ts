@@ -18,7 +18,7 @@ export async function propose(
   const auth = new Contract(abi, constants.auth, provider);
   const metadataUriFelt = strToShortStringArr(metadataUri);
   const calldata = [proposer, executionHash, metadataUriFelt.length.toString()];
-  metadataUriFelt.forEach(m => calldata.push(m.toString()));
+  metadataUriFelt.forEach((m) => calldata.push(m.toString()));
   calldata.push(blockNum);
   calldata.push(params.length.toString());
   const receipt = await auth.invoke('execute', {
