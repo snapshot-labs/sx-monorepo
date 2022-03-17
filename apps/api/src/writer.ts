@@ -60,7 +60,7 @@ export async function handleVote({ block, receipt }) {
   const voter = toAddress(receipt.events[0].data[1]);
   const item = {
     id: `${space}/${proposal}/${voter}`,
-    space: receipt.events[0].from_address,
+    space,
     proposal,
     voter,
     choice: BigInt(receipt.events[0].data[2]).toString(),
