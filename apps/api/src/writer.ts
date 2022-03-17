@@ -55,7 +55,7 @@ export async function handlePropose({ block, tx, receipt }) {
 
 export async function handleVote({ block, receipt }) {
   console.log('Handle vote', receipt.events);
-  const space = receipt.events[0].from_address;
+  const space = getSNAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
   const voter = toAddress(receipt.events[0].data[1]);
   const item = {
