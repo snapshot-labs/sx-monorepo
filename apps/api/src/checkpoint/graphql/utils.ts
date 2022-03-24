@@ -6,7 +6,7 @@ async function queryMulti(parent, args, context, info) {
   const first = args?.first || 1000;
   const skip = args?.skip || 0;
   const orderBy = 'created';
-  const orderDirection = 'DESC';
+  const orderDirection = 'ASC';
   return await mysql.queryAsync(`SELECT * FROM ${info.fieldName} ORDER BY ? ? LIMIT ?, ?`, [
     orderBy,
     orderDirection,
