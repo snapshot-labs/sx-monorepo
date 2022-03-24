@@ -19,7 +19,7 @@ defineProps({
       <div class="overflow-hidden mb-3 px-4">
         <Icon name="threedots" size="20" class="float-right" />
         <Stamp
-          id="0xeF8305E140ac520225DAf050e2f71d5fBcC543e7"
+          :id="proposal.author"
           :size="24"
           class="float-left mr-2"
         />

@@ -6,12 +6,10 @@ import connectors from '@/helpers/connectors.json';
 import { useWeb3 } from '@/composables/useWeb3';
 
 const props = defineProps(['open']);
-
 const emit = defineEmits(['login', 'close']);
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
-
 const step = ref(null);
 
 const injected = computed(() => getInjected());

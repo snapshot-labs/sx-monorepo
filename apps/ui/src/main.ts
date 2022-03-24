@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 (window as any).global = window;
 (window as any).Buffer = Buffer;
-import { createApp, h, provide } from 'vue';
+import { createApp, h } from 'vue';
 import { LockPlugin } from '@snapshot-labs/lock/plugins/vue3';
 import options from '@/helpers/auth';
 import App from '@/App.vue';

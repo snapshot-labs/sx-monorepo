@@ -35,7 +35,7 @@ onMounted(async () => {
       <div class="flex mb-4 items-center">
         <div class="flex-auto">
           <Stamp
-            id="0xeF8305E140ac520225DAf050e2f71d5fBcC543e7"
+	          :id="proposal.author"
             :size="24"
             class="float-left mr-2"
           />
