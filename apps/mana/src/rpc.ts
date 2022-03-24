@@ -10,12 +10,25 @@ router.post('/', async (req, res) => {
     const { address } = req.body.params.envelop;
     const { types, message } = req.body.params.envelop.data;
     let receipt;
+
     console.time('Send');
-    if (types.Propose)
+    console.log('Types', types);
+    console.log('Address', address);
+    console.log('Message', message);
+
+    if (types.Propose) {
+      console.log('Propose');
       receipt = await propose(address, message.space, message.executionHash, message.metadataURI);
-    if (types.Vote) receipt = await vote(address, message.space, message.proposal, message.choice);
+    }
+
+    if (types.Vote) {
+      console.log('Vote');
+      receipt = await vote(address, message.space, message.proposal, message.choice);
+    }
+
     console.timeEnd('Send');
     console.log('Receipt', receipt);
+
     return rpcSuccess(res, receipt, id);
   } catch (e) {
     console.log('Failed', e);
