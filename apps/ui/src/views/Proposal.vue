@@ -12,6 +12,7 @@ const id = parseInt(route.params.id || 0);
 const space = route.params.space;
 const proposal = ref({});
 const loaded = ref(false);
+const modalOpen = ref(false);
 
 onMounted(async () => {
   const { data } = await apollo.query({
@@ -24,67 +25,79 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Container v-if="!loaded" class="pt-5">
-    <UiLoading />
-  </Container>
-  <div v-else>
-    <Container class="pt-5">
-      <h1 class="mb-3">
-        {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
-      </h1>
-      <div class="flex mb-4 items-center">
-        <div class="flex-auto">
-          <Stamp :id="proposal.author" :size="24" class="float-left mr-2" />
-          <span>
-            {{ shortenAddress(proposal.author) }}
-            <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
-          </span>
-        </div>
-        <UiButton class="!w-[46px] !h-[46px] !p-0">
-          <Icon name="threedots" size="20" />
-        </UiButton>
-      </div>
-      <div v-if="proposal.body" class="mb-4">
-        <p v-text="proposal.body" />
-      </div>
+  <div>
+    <Container v-if="!loaded" class="pt-5">
+      <UiLoading />
     </Container>
-    <Container slim>
-      <div class="x-block mb-5">
-        <Execution />
-      </div>
-      <div class="x-block mb-5">
-        <h4 class="px-4 py-3">
-          <Icon name="receipt-outlined" class="mr-2" /> Discussion
-          <span class="float-right"><Icon name="external-link" /></span>
-        </h4>
-      </div>
-    </Container>
-    <Container>
-      <div class="mb-4">
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <UiButton
-            @click="vote(space, proposal.proposal_id, 1)"
-            class="w-full !text-white !bg-green !border-green"
-          >
-            <Icon name="check3" size="20" />
-          </UiButton>
-          <UiButton
-            @click="vote(space, proposal.proposal_id, 2)"
-            class="w-full !text-white !bg-red !border-red"
-          >
-            <Icon name="close2" size="20" />
-          </UiButton>
-          <UiButton
-            @click="vote(space, proposal.proposal_id, 3)"
-            class="w-full !text-white !bg-gray-500 !border-gray-500"
-          >
-            <Icon name="skip" size="20" />
+    <div v-else>
+      <Container class="pt-5">
+        <h1 class="mb-3">
+          {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
+        </h1>
+        <div class="flex mb-4 items-center">
+          <div class="flex-auto">
+            <Stamp :id="proposal.author" :size="24" class="float-left mr-2" />
+            <span>
+              {{ shortenAddress(proposal.author) }}
+              <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
+            </span>
+          </div>
+          <UiButton class="!w-[46px] !h-[46px] !p-0">
+            <Icon name="threedots" size="20" />
           </UiButton>
         </div>
+        <div v-if="proposal.body" class="mb-4">
+          <p v-text="proposal.body" />
+        </div>
+      </Container>
+      <Container slim>
+        <div class="x-block mb-5">
+          <Execution />
+        </div>
+        <div class="x-block mb-5">
+          <h4 class="px-4 py-3">
+            <Icon name="receipt-outlined" class="mr-2" /> Discussion
+            <span class="float-right"><Icon name="external-link" /></span>
+          </h4>
+        </div>
+      </Container>
+      <Container>
         <div class="mb-4">
-          {{ _n(proposal.vote_count) }} votes · {{ _rt(proposal.end) }}
+          <div class="grid grid-cols-3 gap-2 mb-3">
+            <UiButton
+              @click="vote(space, proposal.proposal_id, 1)"
+              class="w-full !text-white !bg-green !border-green"
+            >
+              <Icon name="check3" size="20" />
+            </UiButton>
+            <UiButton
+              @click="vote(space, proposal.proposal_id, 2)"
+              class="w-full !text-white !bg-red !border-red"
+            >
+              <Icon name="close2" size="20" />
+            </UiButton>
+            <UiButton
+              @click="vote(space, proposal.proposal_id, 3)"
+              class="w-full !text-white !bg-gray-500 !border-gray-500"
+            >
+              <Icon name="skip" size="20" />
+            </UiButton>
+          </div>
+          <div class="mb-4">
+            <a @click="modalOpen = true" class="text-skin-text">
+              {{ _n(proposal.vote_count) }} votes
+            </a>
+            · {{ _rt(proposal.end) }}
+          </div>
         </div>
-      </div>
-    </Container>
+      </Container>
+    </div>
+    <teleport to="#modal">
+      <ModalVotes
+        :open="modalOpen"
+        :proposal="proposal"
+        @close="modalOpen = false"
+      />
+    </teleport>
   </div>
 </template>
