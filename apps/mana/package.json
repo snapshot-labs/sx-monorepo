@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "git submodule update --init",
     "lint": "eslint . --ext .ts --fix",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
