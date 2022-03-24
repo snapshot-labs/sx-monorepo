@@ -3,16 +3,23 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import mysql from '../mysql';
 
 async function queryMulti(parent, args, context, info) {
+  const params: any = [];
+  let whereSql = '';
+  if (args.where) {
+    Object.entries(args.where).map((w) => {
+      whereSql += !whereSql ? `WHERE ${w[0]} = ? ` : ` AND ${w[0]} = ?`;
+      params.push(w[1]);
+    });
+  }
   const first = args?.first || 1000;
   const skip = args?.skip || 0;
   const orderBy = 'created';
-  const orderDirection = 'ASC';
-  return await mysql.queryAsync(`SELECT * FROM ${info.fieldName} ORDER BY ? ? LIMIT ?, ?`, [
-    orderBy,
-    orderDirection,
-    skip,
-    first
-  ]);
+  const orderDirection = 'DESC';
+  params.push(orderBy, orderDirection, skip, first);
+  return await mysql.queryAsync(
+    `SELECT * FROM ${info.fieldName} ${whereSql} ORDER BY ? ? LIMIT ?, ?`,
+    params
+  );
 }
 
 async function querySingle(parent, args, context, info) {
