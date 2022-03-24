@@ -38,6 +38,20 @@ export const PROPOSALS_QUERY = gql`
   }
 `;
 
+export const VOTES_QUERY = gql`
+  query ($proposal: Int!) {
+    votes(where: { proposal: $proposal }) {
+      id
+      voter
+      space
+      proposal
+      choice
+      vp
+      created
+    }
+  }
+`;
+
 export const SPACE_QUERY = gql`
   query ($id: String!) {
     space(id: $id) {

@@ -34,11 +34,7 @@ onMounted(async () => {
       </h1>
       <div class="flex mb-4 items-center">
         <div class="flex-auto">
-          <Stamp
-	          :id="proposal.author"
-            :size="24"
-            class="float-left mr-2"
-          />
+          <Stamp :id="proposal.author" :size="24" class="float-left mr-2" />
           <span>
             {{ shortenAddress(proposal.author) }}
             <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
