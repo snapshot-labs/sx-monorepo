@@ -73,19 +73,27 @@ export async function handleVote({ block, receipt }) {
   const space = getSNAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
   const voter = toAddress(receipt.events[0].data[1]);
+  const choice = BigInt(receipt.events[0].data[2]).toString();
+  const vp = BigInt(receipt.events[0].data[3]).toString();
   const item = {
     id: `${space}/${proposal}/${voter}`,
     space,
     proposal,
     voter,
-    choice: BigInt(receipt.events[0].data[2]).toString(),
-    vp: BigInt(receipt.events[0].data[3]).toString(),
+    choice,
+    vp,
     created: block.timestamp
   };
   const query = `
     INSERT IGNORE INTO votes SET ?;
     UPDATE spaces SET vote_count = vote_count + 1 WHERE id = ? LIMIT 1;
-    UPDATE proposals SET vote_count = vote_count + 1 WHERE id = ? LIMIT 1;
+    UPDATE proposals SET vote_count = vote_count + 1, scores_total = scores_total + ?, scores_${item.choice} = scores_${item.choice} + ? WHERE id = ? LIMIT 1;
   `;
-  await mysql.queryAsync(query, [item, item.space, `${item.space}/${item.proposal}`]);
+  await mysql.queryAsync(query, [
+    item,
+    item.space,
+    item.vp,
+    item.vp,
+    `${item.space}/${item.proposal}`
+  ]);
 }

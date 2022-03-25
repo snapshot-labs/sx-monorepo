@@ -27,6 +27,10 @@ type Proposal {
   start: Int
   end: Int
   snapshot: Int
+  scores_1: Int
+  scores_2: Int
+  scores_3: Int
+  scores_total: Text
   created: Int
   tx: String
   vote_count: Int
