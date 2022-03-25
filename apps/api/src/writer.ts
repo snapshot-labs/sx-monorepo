@@ -42,7 +42,7 @@ export async function handlePropose({ block, tx, receipt }) {
     if (metadata.body) body = metadata.body;
     if (metadata.discussion) discussion = metadata.discussion;
   } catch (e) {
-    console.log(e);
+    console.log(JSON.stringify(e).slice(0, 256));
   }
 
   const item = {

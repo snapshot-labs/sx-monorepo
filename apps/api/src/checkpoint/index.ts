@@ -4,6 +4,7 @@ import Promise from 'bluebird';
 import mysql from './mysql';
 import { toSql } from './graphql/utils';
 import getGraphQL from './graphql';
+import cps from '../cps.json';
 
 export default class Checkpoint {
   public config;
@@ -11,8 +12,6 @@ export default class Checkpoint {
   public schema;
   public graphql;
   public provider: Provider;
-  public cache = {};
-  public checkpoint;
 
   constructor(config, writer, schema) {
     this.config = config;
@@ -35,52 +34,24 @@ export default class Checkpoint {
   async start() {
     console.log('Start');
     const blockNum = await this.getStartBlockNum();
-    this.loadNextBlocks(blockNum);
     return await this.next(blockNum);
   }
 
-  async loadNextBlocks(blockNum) {
-    if (this.checkpoint && this.checkpoint > blockNum) blockNum = this.checkpoint;
-    if (Object.keys(this.cache).length > 128) {
-      await Promise.delay(12e3);
-      await this.loadNextBlocks(blockNum);
-    }
-    const limit = 12;
-    const p = Array(limit)
-      .fill(0)
-      .map((v, i) => this.provider.getBlock(blockNum + i));
-    try {
-      const blocks = await Promise.all(p);
-      blocks.forEach((block) => (this.cache[block.block_number] = block));
-      console.log('Cache', Object.keys(this.cache), Object.keys(this.cache).length);
-      await this.loadNextBlocks(blockNum + limit);
-    } catch (e) {
-      console.log('Get blocks failed from', blockNum, JSON.stringify(e).slice(0, 256));
-      await Promise.delay(12e3);
-      await this.loadNextBlocks(blockNum);
-    }
-  }
-
   async next(blockNum: number) {
+    const cpsArr = cps.filter((cp) => cp >= blockNum);
+    if (cpsArr.length > 0) blockNum = cpsArr[0];
     let block: any;
-    if (this.cache[blockNum]) {
-      block = this.cache[blockNum];
-    } else {
-      try {
-        block = await this.provider.getBlock(blockNum);
-      } catch (e) {
-        console.log('Get block failed', blockNum, JSON.stringify(e).slice(0, 256));
-        await Promise.delay(12e3);
-        return this.next(blockNum);
-      }
+    console.log('Next', blockNum);
+    try {
+      block = await this.provider.getBlock(blockNum);
+    } catch (e) {
+      console.log('Get block failed', blockNum, JSON.stringify(e).slice(0, 256));
+      await Promise.delay(12e3);
+      return this.next(blockNum);
     }
     await this.handleBlock(block);
     const query = 'UPDATE checkpoint SET number = ?';
     await mysql.queryAsync(query, [block.block_number]);
-    this.cache = Object.fromEntries(
-      Object.entries(this.cache).filter((cache) => parseInt(cache[0]) > blockNum)
-    );
-    this.checkpoint = blockNum;
     return this.next(blockNum + 1);
   }
 
