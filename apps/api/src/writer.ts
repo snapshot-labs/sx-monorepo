@@ -36,12 +36,11 @@ export async function handlePropose({ block, tx, receipt }) {
   }
 
   try {
-    const uri = 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca';
-    const metadata: any = await getJSON(uri);
+    const metadata: any = await getJSON(metadataUri);
     console.log('Metadata', metadata);
-    title = metadata.title;
-    body = metadata.body;
-    discussion = metadata.discussion;
+    if (metadata.title) title = metadata.title;
+    if (metadata.body) body = metadata.body;
+    if (metadata.discussion) discussion = metadata.discussion;
   } catch (e) {
     console.log(e);
   }
