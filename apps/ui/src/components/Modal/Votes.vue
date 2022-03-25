@@ -45,7 +45,10 @@ watch(open, async () => {
           class="py-3 px-4 border-b last:border-b-0 relative"
         >
           <div
-            class="absolute w-[20%] choice-bg bottom-0 h-[3px] left-0"
+            class="absolute choice-bg top-0 bottom-0 right-0 opacity-10"
+            :style="{
+              width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
+            }"
             :class="`_${vote.choice}`"
           />
           <Stamp :id="vote.voter" :size="24" class="mr-2" />
@@ -55,8 +58,10 @@ watch(open, async () => {
           >
             {{ shortenAddress(vote.voter) }}
           </router-link>
-          {{ vote.vp }}
-          <div v-text="choices[vote.choice]" class="float-right" />
+          <div
+            v-text="choices[vote.choice]"
+            class="absolute right-4 top-3 text-skin-link"
+          />
         </div>
       </div>
       <div class="p-4 text-center" v-else>There isn't any votes yet!</div>

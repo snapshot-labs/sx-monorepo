@@ -14,6 +14,10 @@ export const PROPOSAL_QUERY = gql`
       start
       end
       snapshot
+      scores_1
+      scores_2
+      scores_3
+      scores_total
       created
       tx
       vote_count
@@ -22,8 +26,8 @@ export const PROPOSAL_QUERY = gql`
 `;
 
 export const PROPOSALS_QUERY = gql`
-  query {
-    proposals {
+  query ($first: Int!) {
+    proposals(first: $first) {
       id
       proposal_id
       space
@@ -35,6 +39,10 @@ export const PROPOSALS_QUERY = gql`
       start
       end
       snapshot
+      scores_1
+      scores_2
+      scores_3
+      scores_total
       created
       tx
       vote_count

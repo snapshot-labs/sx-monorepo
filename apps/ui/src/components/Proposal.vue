@@ -35,7 +35,7 @@ const modalOpen = ref(false);
           {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
         </h2>
       </router-link>
-      <div class="space-x-2 mb-3 px-4">
+      <div v-if="proposal.vote_count === 0" class="space-x-2 mb-3 px-4">
         <UiButton
           @click="vote(proposal.space, proposal.proposal_id, 1)"
           class="w-full !text-green !border-green w-[46px] !px-0"
@@ -54,6 +54,22 @@ const modalOpen = ref(false);
         >
           <Icon name="skip" size="20" />
         </UiButton>
+      </div>
+      <div v-else class="px-4 mb-3">
+        <div class="rounded-full h-[6px] overflow-hidden">
+          <div
+            v-for="(score, i) in Array(3)"
+            :key="i"
+            class="choice-bg float-left h-full"
+            :style="{
+              width: `${(
+                (100 / proposal.scores_total) *
+                proposal[`scores_${i + 1}`]
+              ).toFixed(0)}%`
+            }"
+            :class="`_${i + 1}`"
+          />
+        </div>
       </div>
       <div class="text-skin-text px-4">
         <a @click="modalOpen = true" class="text-skin-text">
