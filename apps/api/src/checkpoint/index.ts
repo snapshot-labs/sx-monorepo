@@ -12,6 +12,7 @@ export default class Checkpoint {
   public graphql;
   public provider: Provider;
   public cache = {};
+  public checkpoint;
 
   constructor(config, writer, schema) {
     this.config = config;
@@ -39,11 +40,12 @@ export default class Checkpoint {
   }
 
   async loadNextBlocks(blockNum) {
+    if (this.checkpoint && this.checkpoint > blockNum) blockNum = this.checkpoint;
     if (Object.keys(this.cache).length > 128) {
       await Promise.delay(12e3);
       await this.loadNextBlocks(blockNum);
     }
-    const limit = 6;
+    const limit = 12;
     const p = Array(limit)
       .fill(0)
       .map((v, i) => this.provider.getBlock(blockNum + i));
@@ -78,6 +80,7 @@ export default class Checkpoint {
     this.cache = Object.fromEntries(
       Object.entries(this.cache).filter((cache) => parseInt(cache[0]) > blockNum)
     );
+    this.checkpoint = blockNum;
     return this.next(blockNum + 1);
   }
 
