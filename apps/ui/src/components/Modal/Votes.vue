@@ -41,8 +41,12 @@ watch(open, async () => {
       <div
         v-for="(vote, i) in votes"
         :key="i"
-        class="py-3 px-4 border-b last:border-b-0"
+        class="py-3 px-4 border-b last:border-b-0 relative"
       >
+        <div
+          class="absolute w-[20%] choice-bg bottom-0 h-[4px] left-0"
+          :class="`_${vote.choice}`"
+        />
         <Stamp :id="vote.voter" :size="24" class="mr-2" />
         {{ shortenAddress(vote.voter) }}
         {{ vote.vp }}

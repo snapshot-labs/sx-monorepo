@@ -99,6 +99,12 @@ a,
   }
 }
 
+.choice-bg {
+  &._1 { @apply bg-green; }
+  &._2 { @apply bg-red; }
+  &._3 { @apply bg-gray-500; }
+}
+
 #app {
   height: 100%;
 }
