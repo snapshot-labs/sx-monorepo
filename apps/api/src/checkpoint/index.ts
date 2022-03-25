@@ -43,7 +43,7 @@ export default class Checkpoint {
       await Promise.delay(12e3);
       await this.loadNextBlocks(blockNum);
     }
-    const limit = 16;
+    const limit = 6;
     const p = Array(limit)
       .fill(0)
       .map((v, i) => this.provider.getBlock(blockNum + i));
@@ -75,7 +75,9 @@ export default class Checkpoint {
     await this.handleBlock(block);
     const query = 'UPDATE checkpoint SET number = ?';
     await mysql.queryAsync(query, [block.block_number]);
-    delete this.cache[blockNum];
+    this.cache = Object.fromEntries(
+      Object.entries(this.cache).filter((cache) => parseInt(cache[0]) > blockNum)
+    );
     return this.next(blockNum + 1);
   }
 
