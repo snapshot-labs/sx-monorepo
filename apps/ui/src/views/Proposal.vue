@@ -59,12 +59,17 @@ onMounted(async () => {
         <div class="x-block mb-5">
           <Execution />
         </div>
-        <div class="x-block mb-5">
+        <a
+          v-if="proposal.discussion"
+          :href="proposal.discussion"
+          target="_blank"
+          class="x-block block mb-5"
+        >
           <h4 class="px-4 py-3">
             <Icon name="receipt-outlined" class="mr-2" /> Discussion
             <span class="float-right"><Icon name="external-link" /></span>
           </h4>
-        </div>
+        </a>
       </Container>
       <Container>
         <div class="mb-4">

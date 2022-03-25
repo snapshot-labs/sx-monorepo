@@ -10,6 +10,7 @@ export const PROPOSAL_QUERY = gql`
       metadata_uri
       title
       body
+      discussion
       start
       end
       snapshot
@@ -30,6 +31,7 @@ export const PROPOSALS_QUERY = gql`
       metadata_uri
       title
       body
+      discussion
       start
       end
       snapshot

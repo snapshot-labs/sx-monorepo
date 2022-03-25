@@ -2,6 +2,8 @@
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useActions } from '@/composables/useActions';
+import { useEditor } from '@/composables/useEditor';
+const { proposals } = useEditor();
 
 const route = useRoute();
 const router = useRouter();
@@ -9,7 +11,6 @@ const { propose } = useActions();
 const id = route.params.id;
 const key = route.params.key;
 const executionHash = '1';
-const metadataUri = 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca';
 
 onMounted(() => {
   if (!key) {
@@ -41,7 +42,15 @@ onMounted(() => {
       </router-link>
       <span v-if="$route.name !== 'editor'">
         <UiButton
-          @click="propose(id, executionHash, metadataUri)"
+          @click="
+            propose(
+              id,
+              executionHash,
+              proposals[`${id}:${key}`].title,
+              proposals[`${id}:${key}`].body,
+              proposals[`${id}:${key}`].discussion
+            )
+          "
           class="leading-3"
         >
           Publish
