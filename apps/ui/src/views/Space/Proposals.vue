@@ -21,7 +21,6 @@ onMounted(async () => {
       v-for="(proposal, i) in proposals"
       :key="i"
       :proposal="proposal"
-      class="x-block"
     />
   </Container>
 </template>

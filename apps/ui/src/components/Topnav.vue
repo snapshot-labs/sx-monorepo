@@ -61,7 +61,7 @@ async function handleLogin(connector) {
               @click="modalAccountOpen = true"
               :loading="loading || web3.authLoading"
             >
-              <span class="hidden sm:block" v-text="$t('connectWallet')" />
+              <span class="hidden sm:block" v-text="'Connect wallet'" />
               <Icon
                 name="login"
                 class="sm:hidden -ml-2 -mr-2 block align-text-bottom"

@@ -35,12 +35,17 @@ onMounted(async () => {
           {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
         </h1>
         <div class="flex mb-4 items-center">
-          <div class="flex-auto">
-            <Stamp :id="proposal.author" :size="24" class="float-left mr-2" />
-            <span>
+          <div class="flex-auto space-x-2">
+            <router-link
+              :to="{
+                name: 'user',
+                params: { id: proposal.author }
+              }"
+            >
+              <Stamp :id="proposal.author" :size="24" class="mr-1" />
               {{ shortenAddress(proposal.author) }}
-              <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
-            </span>
+            </router-link>
+            <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
           </div>
           <UiButton class="!w-[46px] !h-[46px] !p-0">
             <Icon name="threedots" size="20" />

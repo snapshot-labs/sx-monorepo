@@ -11,21 +11,27 @@ const modalOpen = ref(false);
 <template>
   <div>
     <div class="x-block py-4">
+      <div class="overflow-hidden px-4 space-x-1">
+        <Icon name="threedots" size="20" class="float-right" />
+        <router-link
+          :to="{
+            name: 'user',
+            params: { id: proposal.author }
+          }"
+        >
+          <Stamp :id="proposal.author" :size="24" class="mr-1" />
+          {{ shortenAddress(proposal.author) }}
+        </router-link>
+        <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
+      </div>
       <router-link
         :to="{
           name: 'proposal',
           params: { id: proposal.proposal_id, space: proposal.space }
         }"
+        class="py-3 px-4 block"
       >
-        <div class="overflow-hidden mb-3 px-4">
-          <Icon name="threedots" size="20" class="float-right" />
-          <Stamp :id="proposal.author" :size="24" class="float-left mr-2" />
-          <span>
-            {{ shortenAddress(proposal.author) }}
-            <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
-          </span>
-        </div>
-        <h2 class="mb-3 px-4">
+        <h2>
           {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
         </h2>
       </router-link>

@@ -7,6 +7,7 @@ export const PROPOSAL_QUERY = gql`
       proposal_id
       space
       author
+      metadata_uri
       title
       body
       start
@@ -26,6 +27,7 @@ export const PROPOSALS_QUERY = gql`
       proposal_id
       space
       author
+      metadata_uri
       title
       body
       start

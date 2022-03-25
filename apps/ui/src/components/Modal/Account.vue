@@ -25,10 +25,11 @@ watch(open, () => (step.value = null));
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template v-slot:header>
-      <h3 v-if="!web3.account || step === 'connect'">
-        {{ $t('connectWallet') }}
-      </h3>
-      <h3 v-else>{{ $t('account') }}</h3>
+      <h3
+        v-if="!web3.account || step === 'connect'"
+        v-text="'Connect wallet'"
+      />
+      <h3 v-text="'Account'" v-else />
     </template>
     <div v-if="!web3.account || step === 'connect'">
       <div class="m-4 space-y-2">
@@ -80,10 +81,10 @@ watch(open, () => (step.value = null));
           </UiButton>
         </a>
         <UiButton @click="step = 'connect'" class="button-outline w-full">
-          {{ $t('connectWallet') }}
+          Connect wallet
         </UiButton>
         <UiButton @click="handleLogout" class="button-outline w-full !text-red">
-          {{ $t('logout') }}
+          Log out
         </UiButton>
       </div>
     </div>

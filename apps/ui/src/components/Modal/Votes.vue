@@ -38,20 +38,28 @@ watch(open, async () => {
     </template>
     <UiLoading v-if="!loaded" class="p-4 block text-center" />
     <div v-else>
-      <div
-        v-for="(vote, i) in votes"
-        :key="i"
-        class="py-3 px-4 border-b last:border-b-0 relative"
-      >
+      <div v-if="votes.length > 0">
         <div
-          class="absolute w-[20%] choice-bg bottom-0 h-[4px] left-0"
-          :class="`_${vote.choice}`"
-        />
-        <Stamp :id="vote.voter" :size="24" class="mr-2" />
-        {{ shortenAddress(vote.voter) }}
-        {{ vote.vp }}
-        <div v-text="choices[vote.choice]" class="float-right" />
+          v-for="(vote, i) in votes"
+          :key="i"
+          class="py-3 px-4 border-b last:border-b-0 relative"
+        >
+          <div
+            class="absolute w-[20%] choice-bg bottom-0 h-[3px] left-0"
+            :class="`_${vote.choice}`"
+          />
+          <Stamp :id="vote.voter" :size="24" class="mr-2" />
+          <router-link
+            @click="$emit('close')"
+            :to="{ name: 'user', params: { id: vote.voter } }"
+          >
+            {{ shortenAddress(vote.voter) }}
+          </router-link>
+          {{ vote.vp }}
+          <div v-text="choices[vote.choice]" class="float-right" />
+        </div>
       </div>
+      <div class="p-4 text-center" v-else>There isn't any votes yet!</div>
     </div>
   </UiModal>
 </template>
