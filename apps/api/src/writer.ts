@@ -1,6 +1,6 @@
 import { shortStringArrToStr } from '@snapshot-labs/sx';
 import mysql from './checkpoint/mysql';
-import { getSNAddress, toAddress } from './utils';
+import { getJSON, getSNAddress, toAddress } from './utils';
 
 export async function handleDeploy({ block, tx }) {
   console.log('Handle deploy');
@@ -23,12 +23,25 @@ export async function handlePropose({ block, tx, receipt }) {
   console.log('Handle propose', receipt.events);
   const space = getSNAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
-
+  let title = '';
+  let body = '';
+  let discussion = '';
   let metadataUri = '';
   try {
     const metadataUriLen = BigInt(receipt.events[0].data[6]).toString();
     const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
     metadataUri = shortStringArrToStr(metadataUriArr.map((m) => BigInt(m)));
+  } catch (e) {
+    console.log(e);
+  }
+
+  try {
+    const uri = 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca';
+    const metadata: any = await getJSON(uri);
+    console.log('Metadata', metadata);
+    title = metadata.title;
+    body = metadata.body;
+    discussion = metadata.discussion;
   } catch (e) {
     console.log(e);
   }
@@ -40,6 +53,9 @@ export async function handlePropose({ block, tx, receipt }) {
     author: toAddress(receipt.events[0].data[1]),
     execution_hash: receipt.events[0].data[2],
     metadata_uri: metadataUri,
+    title,
+    body,
+    discussion,
     start: BigInt(receipt.events[0].data[3]).toString(),
     end: BigInt(receipt.events[0].data[4]).toString(),
     snapshot: BigInt(receipt.events[0].data[5]).toString(),
