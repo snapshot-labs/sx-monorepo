@@ -3,6 +3,7 @@ import { ref, toRefs, watch } from 'vue';
 import apollo from '@/helpers/apollo';
 import { VOTES_QUERY } from '@/helpers/queries';
 import { shortenAddress } from '@/helpers/utils';
+import choices from '@/helpers/choices.json';
 
 const props = defineProps({
   open: Boolean,
@@ -21,6 +22,7 @@ watch(open, async () => {
   const { data } = await apollo.query({
     query: VOTES_QUERY,
     variables: {
+      space: props.proposal.space,
       proposal: props.proposal.proposal_id
     }
   });
@@ -43,9 +45,8 @@ watch(open, async () => {
       >
         <Stamp :id="vote.voter" :size="24" class="mr-2" />
         {{ shortenAddress(vote.voter) }}
-        <div class="float-right">
-          {{ vote.vp }}
-        </div>
+        {{ vote.vp }}
+        <div v-text="choices[vote.choice]" class="float-right" />
       </div>
     </div>
   </UiModal>
