@@ -1,14 +1,14 @@
 import express from 'express';
 import { propose, vote } from '@snapshot-labs/sx';
 import { rpcError, rpcSuccess } from './utils';
+import { set } from './pinata';
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-  const { id } = req.body;
+async function send(id, params, res) {
   try {
-    const { address } = req.body.params.envelop;
-    const { types, message } = req.body.params.envelop.data;
+    const { address } = params.envelop;
+    const { types, message } = params.envelop.data;
     let receipt;
 
     console.time('Send');
@@ -34,6 +34,18 @@ router.post('/', async (req, res) => {
     console.log('Failed', e);
     return rpcError(res, 500, e, id);
   }
+}
+
+async function pin(id, params, res) {
+  const result = await set(params);
+  return rpcSuccess(res, result, id);
+}
+
+const fn = { send, pin };
+
+router.post('/', async (req, res) => {
+  const { id, method, params } = req.body;
+  return await fn[method](id, params, res);
 });
 
 export default router;
