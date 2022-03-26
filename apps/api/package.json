@@ -27,7 +27,7 @@
     "nodemon": "^2.0.15",
     "starknet": "^2.9.0",
     "ts-node": "^10.7.0",
-    "typescript": "^4.1.3"
+    "typescript": "^4.6.3"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
