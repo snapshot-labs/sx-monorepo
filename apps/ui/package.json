@@ -11,7 +11,7 @@
     "@apollo/client": "^3.5.10",
     "@ensdomains/eth-ens-namehash": "^2.0.15",
     "@ethersproject/address": "^5.4.0",
-    "@ethersproject/providers": "^5.6.0",
+    "@ethersproject/providers": "^5.6.2",
     "@ethersproject/units": "^5.6.0",
     "@popperjs/core": "^2.11.4",
     "@snapshot-labs/lock": "^0.1.6",
