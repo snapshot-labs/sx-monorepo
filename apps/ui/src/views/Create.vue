@@ -1,16 +1,17 @@
 <script setup>
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useActions } from '@/composables/useActions';
 import { useEditor } from '@/composables/useEditor';
-const { proposals } = useEditor();
 
+const { proposals } = useEditor();
 const route = useRoute();
 const router = useRouter();
 const { propose } = useActions();
 const id = route.params.id;
 const key = route.params.key;
 const executionHash = '1';
+const modalOpen = ref(false);
 
 onMounted(() => {
   if (!key) {
@@ -56,7 +57,10 @@ onMounted(() => {
           Publish
         </UiButton>
       </span>
-      <span v-else>
+      <span class="space-x-2" v-else>
+        <UiButton @click="modalOpen = true" class="leading-3 !px-0 w-7">
+          <Icon name="receipt-outlined" class="align-middle px-1" />
+        </UiButton>
         <router-link :to="{ name: 'execution', params: { id, key } }">
           <UiButton class="leading-3">
             Next
@@ -65,5 +69,8 @@ onMounted(() => {
         </router-link>
       </span>
     </div>
+    <teleport to="#modal">
+      <ModalDrafts :open="modalOpen" :space="id" @close="modalOpen = false" />
+    </teleport>
   </div>
 </template>
