@@ -12,7 +12,7 @@ if (!proposals[key]) proposals[key] = {};
 </script>
 <template>
   <Container class="pt-5 s-compact">
-    <h1 class="mb-4">New proposal</h1>
+    <h1 v-text="'New proposal'" class="mb-4" />
     <SIString
       v-model="proposals[key].title"
       :definition="{
@@ -21,7 +21,7 @@ if (!proposals[key]) proposals[key] = {};
       }"
     />
     <div class="s-base">
-      <div class="s-label">Description</div>
+      <div v-text="'Description'" class="s-label" />
       <textarea v-model="proposals[key].body" class="s-input mb-3 h-[140px]" />
       <SIString
         v-model="proposals[key].discussion"

@@ -7,6 +7,7 @@ export function useScrollMonitor(fn) {
   const endElement = ref(null);
 
   onMounted(() => {
+    // @ts-ignore
     elementWatcher = scrollMonitor.create(endElement.value);
     elementWatcher.enterViewport(() => {
       fn();

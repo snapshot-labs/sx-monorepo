@@ -16,7 +16,7 @@ defineProps({
 <template>
   <button
     :type="type || 'button'"
-    class="rounded-full border button px-[24px] text-skin-link focus-within:border-skin-link bg-skin-block-bg"
+    class="rounded-full border button px-[20px] h-[46px] outline-0 text-skin-link focus-within:border-skin-link bg-skin-block-bg"
     :disabled="disabled || loading"
   >
     <UiLoading v-if="loading" :fill-white="primary" />
@@ -26,10 +26,6 @@ defineProps({
 
 <style scoped lang="scss">
 .button {
-  outline: none;
-  height: 46px;
-  font-size: 18px;
-
   &:disabled {
     color: var(--border-color) !important;
     cursor: not-allowed;
