@@ -1,11 +1,12 @@
 import { shortStringArrToStr } from '@snapshot-labs/sx';
+import { validateAndParseAddress } from 'starknet/utils/address';
 import mysql from './checkpoint/mysql';
-import { getJSON, getSNAddress, toAddress } from './utils';
+import { getJSON, toAddress } from './utils';
 
-export async function handleDeploy({ block, tx }) {
+export async function handleDeploy({ source, block, tx }) {
   console.log('Handle deploy');
   const item = {
-    id: '0x0625dc1290b6e936be5f1a3e963cf629326b1f4dfd5a56738dea98e1ad31b7f3',
+    id: validateAndParseAddress(source.contract),
     name: 'Pistachio DAO',
     voting_delay: 3600,
     voting_period: 86400,
@@ -21,7 +22,7 @@ export async function handleDeploy({ block, tx }) {
 
 export async function handlePropose({ block, tx, receipt }) {
   console.log('Handle propose', receipt.events);
-  const space = getSNAddress(receipt.events[0].from_address);
+  const space = validateAndParseAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
   const author = toAddress(receipt.events[0].data[1]);
   let title = '';
@@ -80,7 +81,7 @@ export async function handlePropose({ block, tx, receipt }) {
 
 export async function handleVote({ block, receipt }) {
   console.log('Handle vote', receipt.events);
-  const space = getSNAddress(receipt.events[0].from_address);
+  const space = validateAndParseAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
   const voter = toAddress(receipt.events[0].data[1]);
   const choice = BigInt(receipt.events[0].data[2]).toString();

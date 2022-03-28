@@ -10,11 +10,6 @@ export function toAddress(bn) {
   }
 }
 
-export function getSNAddress(address: string) {
-  if (address.length === 65) return `0x0${address.slice(2)}`;
-  return address;
-}
-
 export function getUrl(uri, gateway = 'cloudflare-ipfs.com') {
   const ipfsGateway = `https://${gateway}`;
   if (!uri) return null;

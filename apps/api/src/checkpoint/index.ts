@@ -1,10 +1,10 @@
 import { Provider } from 'starknet';
 import { starknetKeccak } from 'starknet/utils/hash';
+import { validateAndParseAddress } from 'starknet/utils/address';
 import Promise from 'bluebird';
 import mysql from './mysql';
 import { toSql } from './graphql/utils';
 import getGraphQL from './graphql';
-import cps from '../cps.json';
 
 export default class Checkpoint {
   public config;
@@ -12,13 +12,15 @@ export default class Checkpoint {
   public schema;
   public graphql;
   public provider: Provider;
+  public checkpoints: number[];
 
-  constructor(config, writer, schema) {
+  constructor(config, writer, schema, checkpoints) {
     this.config = config;
     this.writer = writer;
     this.schema = schema;
     this.graphql = getGraphQL(schema);
     this.provider = new Provider({ network: this.config.network });
+    this.checkpoints = checkpoints;
   }
 
   async getStartBlockNum() {
@@ -38,8 +40,8 @@ export default class Checkpoint {
   }
 
   async next(blockNum: number) {
-    const cpsArr = cps.filter(cp => cp >= blockNum);
-    if (cpsArr.length > 0) blockNum = cpsArr[0];
+    const cps = this.checkpoints.filter(cp => cp >= blockNum);
+    if (cps.length > 0) blockNum = cps[0];
     let block: any;
     console.log('Next', blockNum);
     try {
@@ -65,24 +67,27 @@ export default class Checkpoint {
   async handleTx(block, tx, receipt) {
     // console.log('Handle tx', tx.transaction_index);
     for (const source of this.config.sources) {
-      let contract = source.contract;
-      contract = contract.length === 66 ? `0x${contract.slice(3)}` : contract;
-      if (contract === tx.contract_address) await this.action(source, block, tx, receipt);
-    }
-    // console.log('Handle tx done', tx.transaction_index);
-  }
+      const contract = validateAndParseAddress(source.contract);
 
-  async action(source, block, tx, receipt) {
-    console.log('Action for', source.contract, tx.type);
-    console.log('Events', receipt.events.length);
-    if (tx.type === 'DEPLOY' && source.deploy_fn)
-      await this.writer[source.deploy_fn]({ source, block, tx, receipt });
-    for (const sourceEvent of source.events) {
+      if (contract === validateAndParseAddress(tx.contract_address)) {
+        if (tx.type === 'DEPLOY' && source.deploy_fn) {
+          console.log('Deploy for', source.contract, tx.type);
+          await this.writer[source.deploy_fn]({ source, block, tx, receipt });
+        }
+      }
+
       for (const event of receipt.events) {
-        if (`0x${starknetKeccak(sourceEvent.name).toString('hex')}` === event.keys[0])
-          await this.writer[sourceEvent.fn]({ source, block, tx, receipt });
+        if (contract === validateAndParseAddress(event.from_address)) {
+          for (const sourceEvent of source.events) {
+            if (`0x${starknetKeccak(sourceEvent.name).toString('hex')}` === event.keys[0]) {
+              console.log('Event', sourceEvent.name, 'for', contract);
+              await this.writer[sourceEvent.fn]({ source, block, tx, receipt });
+            }
+          }
+        }
       }
     }
+    // console.log('Handle tx done', tx.transaction_index);
   }
 
   async reset() {
