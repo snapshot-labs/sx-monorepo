@@ -18,6 +18,7 @@ async function handleLogin(connector) {
   modalAccountOpen.value = false;
   loading.value = true;
   await login(connector);
+  // Load user votes
   loading.value = false;
 }
 </script>

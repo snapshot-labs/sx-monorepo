@@ -8,17 +8,12 @@ import App from '@/App.vue';
 import router from '@/router';
 import '@/helpers/auth';
 import '@/style.scss';
-import VueTippy from 'vue-tippy';
 
 const app = createApp({
   render: () => h(App)
 })
   .use(router)
-  .use(LockPlugin, options)
-  .use(VueTippy, {
-    defaultProps: { delay: [400, null] },
-    directive: 'tippy' // => v-tippy
-  });
+  .use(LockPlugin, options);
 
 app.mount('#app');
 

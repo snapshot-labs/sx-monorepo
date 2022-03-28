@@ -75,6 +75,15 @@ export function lsRemove(key: string) {
   return localStorage.removeItem(`${pkg.name}.${key}`);
 }
 
+export function _t(number) {
+  try {
+    return dayjs(number * 1e3).format('MMM d, YYYY · h:mm A');
+  } catch (e) {
+    console.log(e);
+    return '';
+  }
+}
+
 export function _rt(number) {
   try {
     return dayjs(number * 1e3).toNow(false);

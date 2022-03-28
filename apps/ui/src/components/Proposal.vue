@@ -6,12 +6,13 @@ import { useActions } from '../composables/useActions';
 defineProps({ proposal: Object });
 
 const { vote } = useActions();
-const modalOpen = ref(false);
+const modalOpenVotes = ref(false);
+const modalOpenTimeline = ref(false);
 </script>
 <template>
   <div>
     <div class="x-block py-4">
-      <div class="overflow-hidden px-4 space-x-1">
+      <div class="overflow-hidden px-4">
         <Icon name="threedots" size="20" class="float-right" />
         <router-link
           :to="{
@@ -22,7 +23,12 @@ const modalOpen = ref(false);
           <Stamp :id="proposal.author" :size="24" class="mr-1" />
           {{ shortenAddress(proposal.author) }}
         </router-link>
-        <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
+        <span>
+          ·
+          <a @click="modalOpenTimeline = true" class="text-skin-text">
+            {{ _rt(proposal.created) }}
+          </a>
+        </span>
       </div>
       <router-link
         :to="{
@@ -72,18 +78,25 @@ const modalOpen = ref(false);
         </div>
       </div>
       <div class="text-skin-text px-4">
-        <a @click="modalOpen = true" class="text-skin-text">
+        <a @click="modalOpenVotes = true" class="text-skin-text">
           {{ _n(proposal.vote_count) }} votes
         </a>
         ·
-        {{ _rt(proposal.end) }}
+        <a @click="modalOpenTimeline = true" class="text-skin-text">
+          {{ _rt(proposal.end) }}
+        </a>
       </div>
     </div>
     <teleport to="#modal">
       <ModalVotes
-        :open="modalOpen"
+        :open="modalOpenVotes"
         :proposal="proposal"
-        @close="modalOpen = false"
+        @close="modalOpenVotes = false"
+      />
+      <ModalTimeline
+        :open="modalOpenTimeline"
+        :proposal="proposal"
+        @close="modalOpenTimeline = false"
       />
     </teleport>
   </div>

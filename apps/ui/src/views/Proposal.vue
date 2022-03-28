@@ -12,7 +12,8 @@ const id = parseInt(route.params.id || 0);
 const space = route.params.space;
 const proposal = ref({});
 const loaded = ref(false);
-const modalOpen = ref(false);
+const modalOpenVotes = ref(false);
+const modalOpenTimeline = ref(false);
 
 onMounted(async () => {
   const { data } = await apollo.query({
@@ -45,7 +46,12 @@ onMounted(async () => {
               <Stamp :id="proposal.author" :size="24" class="mr-1" />
               {{ shortenAddress(proposal.author) }}
             </router-link>
-            <span class="text-skin-text">· {{ _rt(proposal.created) }}</span>
+            <span
+              >·
+              <a @click="modalOpenTimeline = true" class="text-skin-text">
+                {{ _rt(proposal.created) }}
+              </a>
+            </span>
           </div>
           <UiButton class="!w-[46px] !h-[46px] !p-0">
             <Icon name="threedots" size="20" />
@@ -94,19 +100,27 @@ onMounted(async () => {
             </UiButton>
           </div>
           <div class="mb-4">
-            <a @click="modalOpen = true" class="text-skin-text">
+            <a @click="modalOpenVotes = true" class="text-skin-text">
               {{ _n(proposal.vote_count) }} votes
             </a>
-            · {{ _rt(proposal.end) }}
+            ·
+            <a @click="modalOpenTimeline = true" class="text-skin-text">
+              {{ _rt(proposal.end) }}
+            </a>
           </div>
         </div>
       </Container>
     </div>
     <teleport to="#modal">
       <ModalVotes
-        :open="modalOpen"
+        :open="modalOpenVotes"
         :proposal="proposal"
-        @close="modalOpen = false"
+        @close="modalOpenVotes = false"
+      />
+      <ModalTimeline
+        :open="modalOpenTimeline"
+        :proposal="proposal"
+        @close="modalOpenTimeline = false"
       />
     </teleport>
   </div>
