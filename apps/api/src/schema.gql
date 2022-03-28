@@ -45,3 +45,10 @@ type Vote {
   vp: Int
   created: Int
 }
+
+type User {
+  id: String
+  proposal_count: Int
+  vote_count: Int
+  created: Int
+}

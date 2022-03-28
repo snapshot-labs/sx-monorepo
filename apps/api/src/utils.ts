@@ -33,5 +33,5 @@ export function getUrl(uri, gateway = 'cloudflare-ipfs.com') {
 
 export async function getJSON(uri) {
   const url = getUrl(uri);
-  return fetch(url).then((res) => res.json());
+  return fetch(url).then(res => res.json());
 }

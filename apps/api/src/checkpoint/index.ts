@@ -25,7 +25,7 @@ export default class Checkpoint {
     let start = 0;
     const lastBlock = await mysql.queryAsync('SELECT * FROM checkpoint LIMIT 1');
     const nextBlock = lastBlock[0].number + 1;
-    this.config.sources.forEach((source) => {
+    this.config.sources.forEach(source => {
       start = start === 0 || start > source.start ? source.start : start;
     });
     return nextBlock > start ? nextBlock : start;
@@ -38,7 +38,7 @@ export default class Checkpoint {
   }
 
   async next(blockNum: number) {
-    const cpsArr = cps.filter((cp) => cp >= blockNum);
+    const cpsArr = cps.filter(cp => cp >= blockNum);
     if (cpsArr.length > 0) blockNum = cpsArr[0];
     let block: any;
     console.log('Next', blockNum);

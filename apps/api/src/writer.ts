@@ -23,14 +23,16 @@ export async function handlePropose({ block, tx, receipt }) {
   console.log('Handle propose', receipt.events);
   const space = getSNAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
+  const author = toAddress(receipt.events[0].data[1]);
   let title = '';
   let body = '';
   let discussion = '';
+
   let metadataUri = '';
   try {
     const metadataUriLen = BigInt(receipt.events[0].data[6]).toString();
     const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
-    metadataUri = shortStringArrToStr(metadataUriArr.map((m) => BigInt(m)));
+    metadataUri = shortStringArrToStr(metadataUriArr.map(m => BigInt(m)));
   } catch (e) {
     console.log(e);
   }
@@ -49,7 +51,7 @@ export async function handlePropose({ block, tx, receipt }) {
     id: `${space}/${proposal}`,
     proposal_id: proposal,
     space,
-    author: toAddress(receipt.events[0].data[1]),
+    author,
     execution_hash: receipt.events[0].data[2],
     metadata_uri: metadataUri,
     title,
@@ -61,11 +63,19 @@ export async function handlePropose({ block, tx, receipt }) {
     created: block.timestamp,
     tx: tx.transaction_hash
   };
+
+  const user = {
+    id: author,
+    created: block.timestamp
+  };
+
   const query = `
     INSERT IGNORE INTO proposals SET ?;
     UPDATE spaces SET proposal_count = proposal_count + 1 WHERE id = ? LIMIT 1;
+    INSERT IGNORE INTO users SET ?;
+    UPDATE users SET proposal_count = proposal_count + 1 WHERE id = ? LIMIT 1;
   `;
-  await mysql.queryAsync(query, [item, item.space]);
+  await mysql.queryAsync(query, [item, item.space, user, author]);
 }
 
 export async function handleVote({ block, receipt }) {
@@ -75,6 +85,7 @@ export async function handleVote({ block, receipt }) {
   const voter = toAddress(receipt.events[0].data[1]);
   const choice = BigInt(receipt.events[0].data[2]).toString();
   const vp = BigInt(receipt.events[0].data[3]).toString();
+
   const item = {
     id: `${space}/${proposal}/${voter}`,
     space,
@@ -84,16 +95,26 @@ export async function handleVote({ block, receipt }) {
     vp,
     created: block.timestamp
   };
+
+  const user = {
+    id: voter,
+    created: block.timestamp
+  };
+
   const query = `
     INSERT IGNORE INTO votes SET ?;
     UPDATE spaces SET vote_count = vote_count + 1 WHERE id = ? LIMIT 1;
     UPDATE proposals SET vote_count = vote_count + 1, scores_total = scores_total + ?, scores_${item.choice} = scores_${item.choice} + ? WHERE id = ? LIMIT 1;
+    INSERT IGNORE INTO users SET ?;
+    UPDATE users SET vote_count = vote_count + 1 WHERE id = ? LIMIT 1;
   `;
   await mysql.queryAsync(query, [
     item,
     item.space,
     item.vp,
     item.vp,
-    `${item.space}/${item.proposal}`
+    `${item.space}/${item.proposal}`,
+    user,
+    voter
   ]);
 }
