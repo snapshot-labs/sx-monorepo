@@ -88,3 +88,14 @@ export const SPACES_QUERY = gql`
     }
   }
 `;
+
+export const USER_QUERY = gql`
+  query ($id: String!) {
+    user(id: $id) {
+      id
+      proposal_count
+      vote_count
+      created
+    }
+  }
+`;

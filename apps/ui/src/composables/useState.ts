@@ -1,5 +1,6 @@
 let state = {
-  spaces: {}
+  spaces: {},
+  users: {}
 };
 
 export function useState() {
