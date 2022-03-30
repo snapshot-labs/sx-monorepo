@@ -18,7 +18,7 @@ onMounted(async () => {
 
 <template>
   <Container slim class="space-y-3">
-    <UiLoading v-if="!loaded" />
+    <UiLoading v-if="!loaded" class="block px-4 sm:px-0" />
     <Proposal
       v-else
       v-for="(proposal, i) in proposals"
