@@ -4,11 +4,13 @@ import { useModal } from '@/composables/useModal';
 import { useUserSkin } from '@/composables/useUserSkin';
 import { useApp } from '@/composables/useApp';
 import { useWeb3 } from '@/composables/useWeb3';
+import { useAccount } from '@/composables/useAccount';
 
 const { modalOpen } = useModal();
 const { userSkin } = useUserSkin();
 const { init, app } = useApp();
-const { web3 } = useWeb3();
+const { web3, web3Account } = useWeb3();
+const { loadVotes } = useAccount();
 
 provide('web3', web3);
 
@@ -21,6 +23,10 @@ onMounted(async () => await init());
 watch(modalOpen, val => {
   const el = document.body;
   el.classList[val ? 'add' : 'remove']('overflow-hidden');
+});
+
+watch(web3Account, async () => {
+	if (web3Account.value) await loadVotes();
 });
 </script>
 
@@ -35,6 +41,5 @@ watch(modalOpen, val => {
       <router-view :key="$route.path" class="flex-auto" />
     </div>
     <div id="modal" />
-    <Notifications />
   </div>
 </template>
