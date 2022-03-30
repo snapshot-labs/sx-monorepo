@@ -1,10 +1,12 @@
 <script setup>
 import { ref } from 'vue';
 import { _rt, _n, shortenAddress } from '@/helpers/utils';
-import { useActions } from '../composables/useActions';
+import { useActions } from '@/composables/useActions';
+import { useAccount } from '@/composables/useAccount';
 
 defineProps({ proposal: Object });
 
+const { voted } = useAccount();
 const { vote } = useActions();
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -37,11 +39,9 @@ const modalOpenTimeline = ref(false);
         }"
         class="py-3 px-4 block"
       >
-        <h2>
-          {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
-        </h2>
+        <h2 v-text="proposal.title || `Proposal #${proposal.proposal_id}`" />
       </router-link>
-      <div v-if="proposal.vote_count === 0" class="space-x-2 mb-3 px-4">
+      <div v-if="!voted.includes(proposal.id)" class="space-x-2 mb-3 px-4">
         <UiButton
           @click="vote(proposal.space, proposal.proposal_id, 1)"
           class="w-full !text-green !border-green w-[46px] !px-0"

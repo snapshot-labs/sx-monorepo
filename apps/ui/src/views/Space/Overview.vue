@@ -45,7 +45,7 @@ defineProps({ space: Object });
         </h4>
       </router-link>
     </div>
-    <UiLoading v-if="!loaded" class="block" />
+    <UiLoading v-if="!loaded" class="block px-4 sm:px-0" />
     <Proposal
       v-else
       v-for="(proposal, i) in proposals"

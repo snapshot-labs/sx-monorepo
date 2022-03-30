@@ -1,13 +1,15 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { useWeb3 } from '@/composables/useWeb3';
 import client from '@/helpers/client';
-import { useTxStatus } from '@/composables/useTxStatus';
 import { set } from '@/helpers/ipfs';
+import { useWeb3 } from '@/composables/useWeb3';
+import { useTxStatus } from '@/composables/useTxStatus';
+import { useAccount } from '@/composables/useAccount';
 
 export function useActions() {
   const { web3 } = useWeb3();
   const auth = getInstance();
   const { pendingCount } = useTxStatus();
+  const { loadVotes } = useAccount();
 
   async function vote(space: string, proposal: number, choice: number) {
     const envelop = await client.vote(auth.web3, web3.value.account, {
@@ -20,6 +22,7 @@ export function useActions() {
     const receipt = await client.send(envelop);
     pendingCount.value--;
     console.log('Receipt', receipt);
+    await loadVotes();
   }
 
   async function propose(
