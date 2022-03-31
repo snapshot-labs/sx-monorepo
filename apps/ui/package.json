@@ -14,7 +14,7 @@
     "@ethersproject/providers": "^5.6.2",
     "@ethersproject/units": "^5.6.0",
     "@snapshot-labs/lock": "^0.1.7",
-    "@snapshot-labs/snapshot.js": "^0.3.58",
+    "@snapshot-labs/snapshot.js": "^0.3.59",
     "@snapshot-labs/sx": "^0.1.0-beta.2",
     "@vueuse/core": "^8.2.3",
     "@walletconnect/client": "^1.7.1",
