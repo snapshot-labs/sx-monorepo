@@ -14,9 +14,7 @@ const { loadVotes } = useAccount();
 
 provide('web3', web3);
 
-const skin = computed(() => {
-  return userSkin.value;
-});
+const skin = computed(() => userSkin.value);
 
 onMounted(async () => await init());
 

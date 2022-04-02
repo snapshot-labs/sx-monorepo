@@ -24,11 +24,11 @@ const items = {
   }
 };
 
-const inactiveItems = computed(() => {
-  return Object.fromEntries(
+const inactiveItems = computed(() =>
+  Object.fromEntries(
     Object.entries(items).filter(item => item[0] !== route.name)
-  );
-});
+  )
+);
 
 function toggleMenu() {
   menu.value = !menu.value;
