@@ -28,7 +28,38 @@ async function querySingle(parent, args, context, info) {
   return item;
 }
 
-export function toSql(typeDefs) {
+/**
+ * toSql generates SQL statements to create tables based on the types defined
+ * in the GraphQL typeDefs.
+ *
+ * The generated SQL statment also creates a `checkpoint` table to track block
+ * checkpoints.
+ *
+ * For example, given an input like:
+ * ```graphql
+ * type Vote {
+ *  id: Int!
+ *  name: String
+ * }
+ * ```
+ *
+ * will return the following SQL:
+ * ```sql
+ * DROP TABLE IF EXISTS checkpoint;
+ * CREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));
+ * INSERT checkpoint SET number = 0;·
+ * DROP TABLE IF EXISTS votes;
+ * CREATE TABLE votes (
+ *   id VARCHAR(128) NOT NULL,
+ *   name VARCHAR(128) NOT NULL,
+ *   PRIMARY KEY (id) ,
+ *   INDEX id (id),
+ *   INDEX name (name)
+ * );
+ * ```
+ *
+ */
+export function toSql(typeDefs: string): string {
   const schema = makeExecutableSchema({
     typeDefs: `type Query { x: String }\n${typeDefs}`
   });
@@ -61,7 +92,43 @@ export function toSql(typeDefs) {
   return sql;
 }
 
-export function toGql(typeDefs) {
+/**
+ * toGql returns a graphql schema string with generated queries for fetching
+ * the already defined types in the input schema. For each type, a single and
+ * multi (pluralized name) query is generated.
+ *
+ * For example, given the input schema:
+ * ```
+ * type Vote {
+ *  id: Int!
+ *  name: String
+ * }
+ * ```
+ *
+ * The generated queries will be like:
+ * ```
+ * type Query {
+ *  votes(
+ *     first: Int
+ *     skip: Int
+ *     orderBy: String
+ *     orderDirection: String
+ *     where: WhereVote
+ *   ): [Vote]
+ *   vote(id: String): Vote
+ * }
+ *
+ *  input WhereVote {
+ *    id: null
+ *    id_in: [null]
+ *    name: String
+ *    name_in: [String]
+ *  }
+ *
+ * ```
+ *
+ */
+export function toGql(typeDefs: string): string {
   let where = '';
   let gql = 'type Query {';
   const schema = makeExecutableSchema({
@@ -104,7 +171,29 @@ export function toGql(typeDefs) {
   return gql;
 }
 
-export function toQuery(typeDefs) {
+/**
+ * toQuery creates an object of resolvers  based on types defined within graphql
+ * schema.
+ *
+ * For example, given the input:
+ * ```graphql
+ * type Vote {
+ *  id: Int!
+ *  name: String
+ * }
+ * ```
+ *
+ * will return an object of the form:
+ * ```
+ * Object {
+ *  vote: GQLResolver,
+ *  votes: GQLResolver,
+ * }
+ * ```
+ *
+ * Note that a plural resolver is also created for each field
+ */
+export function toQuery(typeDefs: string): Record<string, any> {
   const query = {};
   const schema = makeExecutableSchema({
     typeDefs: `type Query { x: String }\n${typeDefs}`

@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`toGql should work 1`] = `
+"type Query {
+  votes(
+    first: Int
+    skip: Int
+    orderBy: String
+    orderDirection: String
+    where: WhereVote
+  ): [Vote]
+  vote(id: String): Vote
+}
+
+
+input WhereVote {
+  id: null
+  id_in: [null]
+  name: String
+  name_in: [String]
+}
+
+
+type Vote {
+  id: Int!
+  name: String
+}
+    "
+`;
+
+exports[`toQuery should work 1`] = `
+Object {
+  "vote": [Function],
+  "votes": [Function],
+}
+`;
+
+exports[`toSql should work 1`] = `
+"DROP TABLE IF EXISTS checkpoint;
+CREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));
+INSERT checkpoint SET number = 0;
+
+DROP TABLE IF EXISTS votes;
+CREATE TABLE votes (
+  id VARCHAR(128) NOT NULL,
+  name VARCHAR(128) NOT NULL,
+  PRIMARY KEY (id) ,
+  INDEX id (id),
+  INDEX name (name)
+);"
+`;
