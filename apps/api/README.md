@@ -9,7 +9,7 @@ For more about how checkpoint works, refer to its documentation.
 This API depends on a couple of services:
 
 - Node.js (>= v16.0.0)
-- MySQL (v 5.7)
+- MySQL (v8.0)
 - Starknet Provider (optional).
 
 To get start, first install all dependencies with:
