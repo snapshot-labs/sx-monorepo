@@ -37,3 +37,15 @@ yarn dev
 ```
 
 This should start the service to be listening on port 3000.
+
+### Running Tests
+
+Before running tests, ensure you have MySQL server running (see getting started guide for some pointer to do this).
+
+Next, run:
+
+```
+yarn test
+```
+
+This will run all tests.

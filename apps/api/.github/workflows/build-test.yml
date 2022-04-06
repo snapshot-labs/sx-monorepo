@@ -1,0 +1,25 @@
+name: Build and Run Tests
+on: [push]
+services:
+  mysql:
+    image: mysql:5.7
+    env:
+      MYSQL_DATABASE: checkpoint
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - 3306
+    options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn build
+      - run: yarn test
+        env:
+          DATABASE_URL: 'mysql://root:rootpassword@l27.0.0.1:${{ job.services.mysql.ports[3306] }}/checkpoint'
