@@ -1,6 +1,6 @@
 # SX-API
 
-This API uses checkpoint to index Snapshot X spaces information on Starknet.
+This API uses Checkpoint to index Snapshot X spaces information on StarkNet.
 
 For more about how checkpoint works, refer to its documentation.
 
