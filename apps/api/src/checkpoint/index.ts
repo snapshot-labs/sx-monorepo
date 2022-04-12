@@ -3,22 +3,25 @@ import { starknetKeccak } from 'starknet/utils/hash';
 import { validateAndParseAddress } from 'starknet/utils/address';
 import Promise from 'bluebird';
 import mysql from './mysql';
-import { toSql } from './graphql/utils';
 import getGraphQL from './graphql';
+import { GqlEntityController } from './graphql/controller';
 
 export default class Checkpoint {
   public config;
   public writer;
-  public schema;
+  public schema: string;
   public graphql;
   public provider: Provider;
   public checkpoints: number[];
 
-  constructor(config, writer, schema, checkpoints) {
+  private readonly entityController: GqlEntityController;
+
+  constructor(config, writer, schema: string, checkpoints) {
     this.config = config;
     this.writer = writer;
     this.schema = schema;
-    this.graphql = getGraphQL(schema);
+    this.entityController = new GqlEntityController(schema);
+    this.graphql = getGraphQL(this.entityController.createEntityQuerySchema());
     this.provider = new Provider({ network: this.config.network });
     this.checkpoints = checkpoints;
   }
@@ -92,6 +95,6 @@ export default class Checkpoint {
 
   async reset() {
     console.log('Reset');
-    await mysql.queryAsync(toSql(this.schema));
+    await this.entityController.createEntityStores(mysql);
   }
 }

@@ -1,10 +1,12 @@
+import { RequestParamHandler } from 'express';
 import { graphqlHTTP } from 'express-graphql';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { toGql, toQuery } from './utils';
+import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 
-export default function get(types) {
-  const rootValue = { Query: toQuery(types) };
-  const typeDefs = toGql(types);
-  const schema = makeExecutableSchema({ typeDefs, resolvers: rootValue });
-  return graphqlHTTP({ schema, rootValue, graphiql: {} });
+/**
+ * Creates an graphql http handler for the query passed a parameters.
+ * Returned middleware can be used with express.
+ */
+export default function get(query: GraphQLObjectType): RequestParamHandler {
+  const schema = new GraphQLSchema({ query });
+  return graphqlHTTP({ schema, graphiql: {} });
 }

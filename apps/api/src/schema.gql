@@ -2,7 +2,7 @@ scalar Id
 scalar Text
 
 type Space {
-  id: String
+  id: String!
   name: String
   about: String
   voting_delay: Int
@@ -15,7 +15,7 @@ type Space {
 }
 
 type Proposal {
-  id: String
+  id: String!
   proposal_id: Int
   space: String
   author: String
@@ -37,7 +37,7 @@ type Proposal {
 }
 
 type Vote {
-  id: String
+  id: String!
   voter: String
   space: String
   proposal: Int
@@ -47,7 +47,7 @@ type Vote {
 }
 
 type User {
-  id: String
+  id: String!
   proposal_count: Int
   vote_count: Int
   created: Int
