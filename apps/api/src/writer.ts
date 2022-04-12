@@ -62,7 +62,8 @@ export async function handlePropose({ block, tx, receipt }) {
     end: BigInt(receipt.events[0].data[4]).toString(),
     snapshot: BigInt(receipt.events[0].data[5]).toString(),
     created: block.timestamp,
-    tx: tx.transaction_hash
+    tx: tx.transaction_hash,
+    vote_count: 0
   };
 
   const user = {
