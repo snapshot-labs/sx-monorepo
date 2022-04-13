@@ -16,7 +16,7 @@ const schema = fs.readFileSync(schemaFile, 'utf8');
 
 const checkpoint = new Checkpoint(config, writer, schema, checkpoints, {
   logLevel: LogLevel.Info,
-  prettifyLogs: true
+  prettifyLogs: process.env.NODE_ENV !== 'production'
 });
 checkpoint.reset();
 checkpoint.start();
