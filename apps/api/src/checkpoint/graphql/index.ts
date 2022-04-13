@@ -1,12 +1,12 @@
-import { RequestParamHandler } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
+import { ResolverContext } from './resolvers';
 
 /**
  * Creates an graphql http handler for the query passed a parameters.
  * Returned middleware can be used with express.
  */
-export default function get(query: GraphQLObjectType): RequestParamHandler {
+export default function get(query: GraphQLObjectType, context: ResolverContext) {
   const schema = new GraphQLSchema({ query });
-  return graphqlHTTP({ schema, graphiql: {} });
+  return graphqlHTTP({ schema, context, graphiql: {} });
 }

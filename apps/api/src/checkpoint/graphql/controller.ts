@@ -19,12 +19,12 @@ import {
   Source
 } from 'graphql';
 
-import { querySingle, queryMulti } from './resolvers';
+import { querySingle, queryMulti, ResolverContext } from './resolvers';
 
 /**
  * Type for single and multiple query resolvers
  */
-interface EntityQueryResolvers<Context = unknown> {
+interface EntityQueryResolvers<Context = ResolverContext> {
   singleEntityResolver: GraphQLFieldResolver<unknown, Context>;
   multipleEntityResolver: GraphQLFieldResolver<unknown, Context>;
 }

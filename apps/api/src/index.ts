@@ -8,12 +8,16 @@ import Checkpoint from './checkpoint';
 import config from './config.json';
 import * as writer from './writer';
 import checkpoints from './checkpoints.json';
+import { LogLevel } from './checkpoint/utils/logger';
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
 const schema = fs.readFileSync(schemaFile, 'utf8');
 
-const checkpoint = new Checkpoint(config, writer, schema, checkpoints);
+const checkpoint = new Checkpoint(config, writer, schema, checkpoints, {
+  logLevel: LogLevel.Info,
+  prettifyLogs: true
+});
 checkpoint.reset();
 checkpoint.start();
 
