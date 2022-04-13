@@ -1,5 +1,7 @@
 import { GraphQLSchema, printSchema } from 'graphql';
+import { mock } from 'jest-mock-extended';
 import { GqlEntityController } from '../../../../src/checkpoint/graphql/controller';
+import { AsyncMySqlPool } from '../../../../src/checkpoint/mysql';
 
 describe('GqlEntityController', () => {
   describe('createEntityQuerySchema', () => {
@@ -38,9 +40,7 @@ type Vote {
 
   describe('createEntityStores', () => {
     it('should work', async () => {
-      const mockMysql = {
-        queryAsync: jest.fn()
-      };
+      const mockMysql = mock<AsyncMySqlPool>();
       const controller = new GqlEntityController(`
 type Vote {
   id: Int!

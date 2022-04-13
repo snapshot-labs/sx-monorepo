@@ -2,10 +2,10 @@ import { Provider } from 'starknet';
 import { starknetKeccak } from 'starknet/utils/hash';
 import { validateAndParseAddress } from 'starknet/utils/address';
 import Promise from 'bluebird';
-import mysql from './mysql';
 import getGraphQL from './graphql';
 import { GqlEntityController } from './graphql/controller';
 import { createLogger, Logger, LogLevel } from './utils/logger';
+import { AsyncMySqlPool, createMySqlPool } from './mysql';
 
 export interface CheckpointOptions {
   // Set the log output levels for checkpoint. Defaults to Error.
@@ -14,6 +14,10 @@ export interface CheckpointOptions {
   // optionally format logs to pretty output.
   // will require installing pino-pretty. Not recommended for production.
   prettifyLogs?: boolean;
+  // Optional database connection screen. For now only accepts mysql database
+  // connection string. If no provided will default to looking up a value in
+  // the DATABASE_URL environment.
+  dbConnection?: string;
 }
 
 export default class Checkpoint {
@@ -25,6 +29,9 @@ export default class Checkpoint {
 
   private readonly entityController: GqlEntityController;
   private readonly log: Logger;
+
+  private mysqlPool?: AsyncMySqlPool;
+  private mysqlConnection?: string;
 
   constructor(config, writer, schema: string, checkpoints: number[], opts?: CheckpointOptions) {
     this.config = config;
@@ -45,6 +52,8 @@ export default class Checkpoint {
           }
         : {})
     });
+
+    this.mysqlConnection = opts?.dbConnection;
   }
 
   /**
@@ -54,13 +63,25 @@ export default class Checkpoint {
    */
   public get graphql() {
     return getGraphQL(this.entityController.createEntityQuerySchema(), {
-      log: this.log.child({ component: 'resolver' })
+      log: this.log.child({ component: 'resolver' }),
+      mysql: this.mysql
     });
   }
 
-  async getStartBlockNum() {
+  public async start() {
+    this.log.debug('starting');
+    const blockNum = await this.getStartBlockNum();
+    return await this.next(blockNum);
+  }
+
+  public async reset() {
+    this.log.debug('reset');
+    await this.entityController.createEntityStores(this.mysql);
+  }
+
+  private async getStartBlockNum() {
     let start = 0;
-    const lastBlock = await mysql.queryAsync('SELECT * FROM checkpoint LIMIT 1');
+    const lastBlock = await this.mysql.queryAsync('SELECT * FROM checkpoint LIMIT 1');
     const nextBlock = lastBlock[0].number + 1;
     this.config.sources.forEach(source => {
       start = start === 0 || start > source.start ? source.start : start;
@@ -68,13 +89,7 @@ export default class Checkpoint {
     return nextBlock > start ? nextBlock : start;
   }
 
-  async start() {
-    this.log.debug('starting');
-    const blockNum = await this.getStartBlockNum();
-    return await this.next(blockNum);
-  }
-
-  async next(blockNum: number) {
+  private async next(blockNum: number) {
     const cps = this.checkpoints.filter(cp => cp >= blockNum);
     if (cps.length > 0) blockNum = cps[0];
     let block: any;
@@ -91,11 +106,11 @@ export default class Checkpoint {
     }
     await this.handleBlock(block);
     const query = 'UPDATE checkpoint SET number = ?';
-    await mysql.queryAsync(query, [block.block_number]);
+    await this.mysql.queryAsync(query, [block.block_number]);
     return this.next(blockNum + 1);
   }
 
-  async handleBlock(block) {
+  private async handleBlock(block) {
     this.log.info({ blockNumber: block.block_number }, 'handling block');
 
     for (const receipt of block.transaction_receipts) {
@@ -105,7 +120,7 @@ export default class Checkpoint {
     this.log.debug({ blockNumber: block.block_number }, 'handling block done');
   }
 
-  async handleTx(block, tx, receipt) {
+  private async handleTx(block, tx, receipt) {
     this.log.debug({ txIndex: tx.transaction_index }, 'handling transaction');
 
     for (const source of this.config.sources) {
@@ -118,7 +133,7 @@ export default class Checkpoint {
             'found deployment transaction'
           );
 
-          await this.writer[source.deploy_fn]({ source, block, tx, receipt });
+          await this.writer[source.deploy_fn]({ source, block, tx, receipt, mysql: this.mysql });
         }
       }
 
@@ -131,7 +146,7 @@ export default class Checkpoint {
                 'found contract event'
               );
 
-              await this.writer[sourceEvent.fn]({ source, block, tx, receipt });
+              await this.writer[sourceEvent.fn]({ source, block, tx, receipt, mysql: this.mysql });
             }
           }
         }
@@ -141,8 +156,12 @@ export default class Checkpoint {
     this.log.debug({ txIndex: tx.transaction_index }, 'handling transaction done');
   }
 
-  async reset() {
-    this.log.debug('reset');
-    await this.entityController.createEntityStores(mysql);
+  private get mysql(): AsyncMySqlPool {
+    if (this.mysqlPool) {
+      return this.mysqlPool;
+    }
+
+    // lazy initialization of mysql connection
+    return (this.mysqlPool = createMySqlPool(this.mysqlConnection));
   }
 }

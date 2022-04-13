@@ -18,6 +18,7 @@ import {
   GraphQLString,
   Source
 } from 'graphql';
+import { AsyncMySqlPool } from '../mysql';
 
 import { querySingle, queryMulti, ResolverContext } from './resolvers';
 
@@ -136,7 +137,7 @@ export class GqlEntityController {
    * ```
    *
    */
-  public async createEntityStores(mysql): Promise<void> {
+  public async createEntityStores(mysql: AsyncMySqlPool): Promise<void> {
     let sql = 'DROP TABLE IF EXISTS checkpoint;';
     sql += '\nCREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));';
     sql += '\nINSERT checkpoint SET number = 0;';

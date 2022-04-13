@@ -1,9 +1,8 @@
 import { shortStringArrToStr } from '@snapshot-labs/sx';
 import { validateAndParseAddress } from 'starknet/utils/address';
-import mysql from './checkpoint/mysql';
 import { getJSON, toAddress } from './utils';
 
-export async function handleDeploy({ source, block, tx }) {
+export async function handleDeploy({ source, block, tx, mysql }) {
   console.log('Handle deploy');
   const item = {
     id: validateAndParseAddress(source.contract),
@@ -20,7 +19,7 @@ export async function handleDeploy({ source, block, tx }) {
   await mysql.queryAsync(query, [item]);
 }
 
-export async function handlePropose({ block, tx, receipt }) {
+export async function handlePropose({ block, tx, receipt, mysql }) {
   console.log('Handle propose', receipt.events);
   const space = validateAndParseAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
@@ -80,7 +79,7 @@ export async function handlePropose({ block, tx, receipt }) {
   await mysql.queryAsync(query, [item, item.space, user, author]);
 }
 
-export async function handleVote({ block, receipt }) {
+export async function handleVote({ block, receipt, mysql }) {
   console.log('Handle vote', receipt.events);
   const space = validateAndParseAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();

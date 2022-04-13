@@ -1,4 +1,4 @@
-import mysql from '../mysql';
+import { AsyncMySqlPool } from '../mysql';
 import { Logger } from '../utils/logger';
 
 /**
@@ -6,9 +6,12 @@ import { Logger } from '../utils/logger';
  */
 export interface ResolverContext {
   log: Logger;
+  mysql: AsyncMySqlPool;
 }
 
 export async function queryMulti(parent, args, context: ResolverContext, info) {
+  const { log, mysql } = context;
+
   const params: any = [];
   let whereSql = '';
   if (args.where) {
@@ -24,14 +27,16 @@ export async function queryMulti(parent, args, context: ResolverContext, info) {
   params.push(skip, first);
 
   const query = `SELECT * FROM ${info.fieldName} ${whereSql} ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?`;
-  context.log.debug({ sql: query, args }, 'executing multi query');
+  log.debug({ sql: query, args }, 'executing multi query');
 
   return await mysql.queryAsync(query, params);
 }
 
 export async function querySingle(parent, args, context: ResolverContext, info) {
+  const { log, mysql } = context;
+
   const query = `SELECT * FROM ${info.fieldName}s WHERE id = ? LIMIT 1`;
-  context.log.debug({ sql: query, args }, 'executing single query');
+  log.debug({ sql: query, args }, 'executing single query');
 
   const [item] = await mysql.queryAsync(query, [args.id]);
   return item;
