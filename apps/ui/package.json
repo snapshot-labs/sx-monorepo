@@ -22,13 +22,13 @@
     "graphql": "^16.3.0",
     "graphql-tag": "^2.12.6",
     "scrollmonitor": "^1.2.9",
-    "vue": "^3.2.32",
+    "vue": "^3.2.33",
     "vue-router": "^4.0.14"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
-    "@typescript-eslint/parser": "^5.18.0",
+    "@typescript-eslint/parser": "^5.19.0",
     "@vitejs/plugin-vue": "^2.3.1",
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/eslint-config-typescript": "^10.0.0",
