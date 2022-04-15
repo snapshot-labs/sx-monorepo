@@ -4,11 +4,10 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
-import Checkpoint from './checkpoint';
+import Checkpoint, { LogLevel } from './checkpoint';
 import config from './config.json';
 import * as writer from './writer';
 import checkpoints from './checkpoints.json';
-import { LogLevel } from './checkpoint/utils/logger';
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
