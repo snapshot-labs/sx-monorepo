@@ -60,6 +60,9 @@ export async function handlePropose({ block, tx, receipt, mysql }) {
     start: BigInt(receipt.events[0].data[3]).toString(),
     end: BigInt(receipt.events[0].data[4]).toString(),
     snapshot: BigInt(receipt.events[0].data[5]).toString(),
+    scores_1: 0,
+    scores_2: 0,
+    scores_3: 0,
     created: block.timestamp,
     tx: tx.transaction_hash,
     vote_count: 0
@@ -67,6 +70,8 @@ export async function handlePropose({ block, tx, receipt, mysql }) {
 
   const user = {
     id: author,
+    vote_count: 0,
+    proposal_count: 0,
     created: block.timestamp
   };
 
@@ -99,6 +104,8 @@ export async function handleVote({ block, receipt, mysql }) {
 
   const user = {
     id: voter,
+    vote_count: 0,
+    proposal_count: 0,
     created: block.timestamp
   };
 
