@@ -15,7 +15,7 @@ const modalOpenTimeline = ref(false);
   <div>
     <div class="x-block py-4">
       <div class="overflow-hidden px-4">
-        <Icon name="threedots" size="20" class="float-right" />
+	      <IH-dots-horizontal class="float-right"/>
         <router-link
           :to="{
             name: 'user',
@@ -46,19 +46,19 @@ const modalOpenTimeline = ref(false);
           @click="vote(proposal.space, proposal.proposal_id, 1)"
           class="w-full !text-green !border-green w-[46px] !px-0"
         >
-          <Icon name="check3" size="20" />
+	        <IH-check class="inline-block" />
         </UiButton>
         <UiButton
           @click="vote(proposal.space, proposal.proposal_id, 2)"
           class="w-full !text-red !border-red w-[46px] !px-0"
         >
-          <Icon name="close2" size="20" />
+	        <IH-x class="inline-block" />
         </UiButton>
         <UiButton
           @click="vote(proposal.space, proposal.proposal_id, 3)"
           class="w-full !text-gray-500 !border-gray-500 w-[46px] !px-0"
         >
-          <Icon name="skip" size="20" />
+	        <IH-arrow-sm-right class="inline-block" />
         </UiButton>
       </div>
       <div v-else class="px-4 mb-3">
@@ -71,7 +71,7 @@ const modalOpenTimeline = ref(false);
               width: `${(
                 (100 / proposal.scores_total) *
                 proposal[`scores_${i + 1}`]
-              ).toFixed(0)}%`
+              ).toFixed(3)}%`
             }"
             :class="`_${i + 1}`"
           />

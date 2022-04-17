@@ -23,67 +23,64 @@ async function handleLogin(connector) {
 </script>
 
 <template>
-  <Sticky>
-    <nav id="topnav" class="border-b w-full bg-skin-block-bg">
-      <div class="mx-4">
-        <div class="flex items-center" style="height: 78px">
-          <div class="flex-auto flex items-center">
-            <router-link
-              :to="{ path: '/' }"
-              class="flex items-center"
-              style="font-size: 24px"
-            >
-              snapshot x
-            </router-link>
-          </div>
-          <div :key="web3.account">
-            <template v-if="$auth.isAuthenticated.value">
-              <UiButton
-                @click="modalAccountOpen = true"
-                :loading="web3.authLoading"
-                class="flex items-center float-left space-x-2"
-              >
-                <Stamp :id="web3.account" :size="18" />
-                <span
-                  v-if="web3.profile?.name || web3.profile?.ens"
-                  v-text="web3.profile.name || web3.profile.ens"
-                  class="hidden sm:block"
-                />
-                <span
-                  v-else
-                  v-text="shorten(web3.account)"
-                  class="hidden sm:block"
-                />
-              </UiButton>
-            </template>
+  <nav id="topnav" class="border-b w-full fixed top-0 z-10 bg-skin-block-bg">
+    <div class="mx-4">
+      <div class="flex items-center" style="height: 78px">
+        <div class="flex-auto flex items-center">
+          <router-link
+            :to="{ path: '/' }"
+            class="flex items-center"
+            style="font-size: 24px"
+          >
+            snapshot x
+          </router-link>
+        </div>
+        <div :key="web3.account">
+          <template v-if="$auth.isAuthenticated.value">
             <UiButton
-              v-if="!$auth.isAuthenticated.value"
               @click="modalAccountOpen = true"
-              :loading="loading || web3.authLoading"
+              :loading="web3.authLoading"
+              class="flex items-center float-left space-x-2"
             >
-              <span class="hidden sm:block" v-text="'Connect wallet'" />
-              <Icon
-                name="login"
-                class="sm:hidden -ml-2 -mr-2 block align-text-bottom"
+              <Stamp :id="web3.account" :size="18" />
+              <span
+                v-if="web3.profile?.name || web3.profile?.ens"
+                v-text="web3.profile.name || web3.profile.ens"
+                class="hidden sm:block"
+              />
+              <span
+                v-else
+                v-text="shorten(web3.account)"
+                class="hidden sm:block"
               />
             </UiButton>
-            <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
-              <Icon class="link-color" :name="getSkinIcon()" />
-            </UiButton>
-          </div>
+          </template>
+          <UiButton
+            v-if="!$auth.isAuthenticated.value"
+            @click="modalAccountOpen = true"
+            :loading="loading || web3.authLoading"
+            class="w-[46px] sm:w-auto"
+          >
+            <span class="hidden sm:block" v-text="'Connect wallet'" />
+	          <IH-login class="sm:hidden -ml-2 -mr-2 inline-block" />
+          </UiButton>
+          <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
+	          <IH-light-bulb v-if="getSkinIcon() === 'sun'" class="inline-block" />
+	          <IH-moon v-else class="inline-block" />
+          </UiButton>
         </div>
       </div>
-    </nav>
-    <div class="bg-blue text-white text-center py-2" v-if="pendingCount > 0">
-      <UiLoading :fill-white="true" class="mr-2" />
-      {{ pendingCount }} pending transaction
     </div>
-    <teleport to="#modal">
-      <ModalAccount
-        :open="modalAccountOpen"
-        @close="modalAccountOpen = false"
-        @login="handleLogin"
-      />
-    </teleport>
-  </Sticky>
+  </nav>
+  <div class="bg-blue text-white text-center py-2" v-if="pendingCount > 0">
+    <UiLoading :fill-white="true" class="mr-2" />
+    {{ pendingCount }} pending transaction
+  </div>
+  <teleport to="#modal">
+    <ModalAccount
+      :open="modalAccountOpen"
+      @close="modalAccountOpen = false"
+      @login="handleLogin"
+    />
+  </teleport>
 </template>
