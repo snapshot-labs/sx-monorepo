@@ -10,7 +10,7 @@ const loaded = ref(false);
 onMounted(async () => {
   const { data } = await apollo.query({
     query: PROPOSALS_QUERY,
-    variables: { first: 24 }
+    variables: { first: 6 }
   });
   proposals.value = data.proposals;
   loaded.value = true;

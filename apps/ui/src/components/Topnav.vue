@@ -71,11 +71,15 @@ async function handleLogin(connector) {
         </div>
       </div>
     </div>
+    <div
+      class="bg-blue text-white text-center py-2 fixed top-[79px] w-full"
+      v-if="pendingCount > 0"
+    >
+      <UiLoading :fill-white="true" class="mr-2" />
+      {{ pendingCount }} pending transaction
+    </div>
   </nav>
-  <div class="bg-blue text-white text-center py-2" v-if="pendingCount > 0">
-    <UiLoading :fill-white="true" class="mr-2" />
-    {{ pendingCount }} pending transaction
-  </div>
+  <div v-if="pendingCount > 0" class="pt-[43px]"></div>
   <teleport to="#modal">
     <ModalAccount
       :open="modalAccountOpen"

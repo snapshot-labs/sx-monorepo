@@ -103,8 +103,9 @@ export function abiToDefinition(abi) {
   abi.inputs.forEach(input => {
     definition.properties[input.name] = {};
     let type = 'string';
-    if (input.type === 'uint256') type = 'number';
     if (input.type === 'bool') type = 'boolean';
+    if (input.type === 'uint256')
+      definition.properties[input.name].format = 'uint256';
     if (input.type === 'address')
       definition.properties[input.name].format = 'address';
     definition.properties[input.name].type = type;

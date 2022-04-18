@@ -1,12 +1,10 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
 import { isAddress } from '@ethersproject/address';
+import { Interface } from '@ethersproject/abi';
 import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
 import { getABI } from '@/helpers/etherscan';
 import { abiToDefinition, clone } from '@/helpers/utils';
-import { Builder } from '@/helpers/builder';
-
-const builder = reactive(new Builder('1'));
 
 const showAbiInput = ref(false);
 const abiStr = ref('');
@@ -15,19 +13,26 @@ const methods = ref([]);
 const definition = ref({});
 const loading = ref(false);
 
+const emit = defineEmits(['add', 'close']);
+
 const form = reactive({
-  to: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
   value: '',
   method: '',
   args: {},
-  abi: []
+  abi: [],
+  data: ''
 });
 
-function handleAddTx() {
+function handleSubmit() {
   const tx = clone(form);
   tx.args = Object.values(tx.args);
-  console.log('Tx', tx);
-  builder.addTx(tx);
+  const iface = new Interface(tx.abi);
+  tx.data = iface.encodeFunctionData(tx.method, tx.args);
+  const decodedTx = JSON.parse(JSON.stringify(iface.parseTransaction(tx)));
+  decodedTx.to = tx.to;
+  emit('add', decodedTx);
+  emit('close');
 }
 
 watch(
@@ -114,7 +119,7 @@ watch(
       </div>
     </div>
     <template v-slot:footer>
-      <UiButton type="submit" class="w-full" disabled> Confirm </UiButton>
+      <UiButton @click="handleSubmit" class="w-full"> Confirm </UiButton>
     </template>
   </UiModal>
 </template>

@@ -68,12 +68,9 @@ onMounted(() => {
         <span class="space-x-2">
           <UiButton
             @click="modalOpen = true"
-            class="float-left leading-3 !px-3 rounded-r-none border-r-0"
+            class="float-left leading-3 !px-3 rounded-r-none"
           >
             <IH-collection class="inline-block" />
-          </UiButton>
-          <UiButton class="float-left leading-3 !px-0 w-7 rounded-none !m-0">
-            <IH-document-search class="inline-block" />
           </UiButton>
           <UiButton
             @click="

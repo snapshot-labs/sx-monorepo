@@ -1,10 +1,6 @@
 <script setup>
 import { useEditor } from '@/composables/useEditor';
 import { useRoute } from 'vue-router';
-import { reactive } from 'vue';
-import { Builder } from '@/helpers/builder';
-
-const builder = reactive(new Builder('1'));
 
 const route = useRoute();
 const { proposals } = useEditor();
@@ -37,6 +33,8 @@ if (!proposals[key]) proposals[key] = {};
       />
     </div>
     <h4 class="eyebrow mb-3">Execution</h4>
-    <BlockExecutionEditable :txs="builder.txs" class="mb-4" />
+  </Container>
+  <Container slim>
+    <BlockExecutionEditable class="mb-4" />
   </Container>
 </template>

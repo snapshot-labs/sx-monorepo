@@ -24,13 +24,15 @@ defineEmits(['close']);
           <div
             class="absolute w-[15px] h-[15px] inline-block rounded-full -left-[7px] border-[4px] border-skin-bg"
             :class="
-              ['created', 'start'].includes(state) ? 'bg-blue' : 'bg-gray-600'
+              ['created', 'start'].includes(state)
+                ? 'bg-skin-heading'
+                : 'bg-gray-600'
             "
           />
           <div
             v-if="state !== 'end'"
             class="border-l pr-4 mt-3"
-            :class="['created'].includes(state) && 'border-blue'"
+            :class="['created'].includes(state) && 'border-skin-heading'"
           />
         </div>
       </div>
