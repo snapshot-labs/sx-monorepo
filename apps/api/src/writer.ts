@@ -63,6 +63,7 @@ export async function handlePropose({ block, tx, receipt, mysql }) {
     scores_1: 0,
     scores_2: 0,
     scores_3: 0,
+    scores_total: 0,
     created: block.timestamp,
     tx: tx.transaction_hash,
     vote_count: 0
