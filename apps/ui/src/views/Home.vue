@@ -17,12 +17,12 @@ onMounted(async () => {
   <div>
     <div class="border-b py-7 mb-6">
       <Container class="max-w-screen-md">
-        <div class="eyebrow mb-3">Snapshot X</div>
+        <div v-text="'Snapshot X'" class="eyebrow mb-3" />
         <h1 class="mb-5 mono">Where decisions<br />get made.</h1>
       </Container>
     </div>
     <Container class="max-w-screen-md">
-      <h3 class="mb-2">Spaces</h3>
+      <h3 v-text="'Spaces'" class="mb-2" />
       <UiLoading v-if="!loaded" class="block mb-2" />
       <router-link
         v-else
@@ -30,18 +30,21 @@ onMounted(async () => {
         :key="space.id"
         :to="{ name: 'overview', params: { id: space.id } }"
       >
-        <div class="mb-2">{{ space.name }}</div>
+        <div v-text="space.name" class="mb-2" />
       </router-link>
       <router-link
         :to="{ name: 'editor', params: { id: spaces[0]?.id || '0' } }"
       >
-        <h3 class="mb-2">Editor</h3>
+        <h3 v-text="'Editor'" class="mb-2" />
       </router-link>
       <a
         href="https://github.com/snapshot-labs?q=sx&type=all&language=&sort="
         target="_blank"
       >
-        <h3 class="mb-2">GitHub <Icon name="external-link" /></h3>
+        <h3 class="mb-2">
+          GitHub
+          <IH-external-link class="inline-block" />
+        </h3>
       </a>
     </Container>
   </div>

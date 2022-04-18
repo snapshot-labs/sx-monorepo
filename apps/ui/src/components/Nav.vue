@@ -7,20 +7,16 @@ const menu = ref(false);
 
 const items = {
   overview: {
-    name: 'Overview',
-    icon: 'world'
+    name: 'Overview'
   },
   proposals: {
-    name: 'Proposals',
-    icon: 'receipt-outlined'
+    name: 'Proposals'
   },
   treasury: {
-    name: 'Treasury',
-    icon: 'coins'
+    name: 'Treasury'
   },
   settings: {
-    name: 'Settings',
-    icon: 'gear'
+    name: 'Settings'
   }
 };
 
@@ -38,11 +34,18 @@ function toggleMenu() {
   <div v-if="items[$route.name]" class="x-block">
     <a @click="toggleMenu" class="px-4 py-3 border-b last:border-0 block">
       <h4>
-        <Icon
-          :name="menu ? 'arrow-up' : 'arrow-down'"
-          class="float-right mt-1"
+        <IH-arrow-sm-up v-if="menu" class="float-right mt-1" />
+        <IH-arrow-sm-down v-else class="float-right mt-1" />
+        <IH-globe-alt
+          v-if="$route.name === 'overview'"
+          class="inline-block mr-2"
         />
-        <Icon :name="items[$route.name].icon" class="mr-2" />
+        <IH-newspaper
+          v-if="$route.name === 'proposals'"
+          class="inline-block mr-2"
+        />
+        <IH-cash v-if="$route.name === 'treasury'" class="inline-block mr-2" />
+        <IH-cog v-if="$route.name === 'settings'" class="inline-block mr-2" />
         {{ items[$route.name].name }}
       </h4>
     </a>
@@ -54,7 +57,10 @@ function toggleMenu() {
         class="px-4 py-3 border-b last:border-0 block"
       >
         <h4>
-          <Icon :name="item.icon" class="mr-2" />
+          <IH-globe-alt v-if="i === 'overview'" class="inline-block mr-2" />
+          <IH-newspaper v-if="i === 'proposals'" class="inline-block mr-2" />
+          <IH-cash v-if="i === 'treasury'" class="inline-block mr-2" />
+          <IH-cog v-if="i === 'settings'" class="inline-block mr-2" />
           {{ item.name }}
         </h4>
       </router-link>

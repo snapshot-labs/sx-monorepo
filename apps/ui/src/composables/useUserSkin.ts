@@ -1,16 +1,16 @@
 import { ref, watch } from 'vue';
 import { lsGet, lsSet } from '@/helpers/utils';
 
-const NOT_SET = 'not-set';
-const DARK_MODE = 'dark-mode';
-const LIGHT_MODE = 'light-mode';
+const NOT_SET = 'none';
+const DARK_MODE = 'dark';
+const LIGHT_MODE = 'light';
 
 const currenSkin = lsGet('skin', NOT_SET);
 // const osSkin = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? LIGHT_MODE : DARK_MODE;
 const osSkin = DARK_MODE;
 
 const userSkin = ref(currenSkin === NOT_SET ? osSkin : currenSkin);
-const getSkinIcon = () => (userSkin.value === LIGHT_MODE ? 'moon' : 'sun');
+const getMode = () => (userSkin.value === LIGHT_MODE ? LIGHT_MODE : DARK_MODE);
 const _toggleSkin = skin => {
   if (skin === LIGHT_MODE) {
     lsSet('skin', DARK_MODE);
@@ -44,7 +44,7 @@ export function useUserSkin() {
 
   return {
     userSkin,
-    getSkinIcon,
+    getMode,
     toggleSkin
   };
 }

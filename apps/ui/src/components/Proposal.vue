@@ -15,7 +15,7 @@ const modalOpenTimeline = ref(false);
   <div>
     <div class="x-block py-4">
       <div class="overflow-hidden px-4">
-	      <IH-dots-horizontal class="float-right"/>
+        <IH-dots-horizontal class="float-right" />
         <router-link
           :to="{
             name: 'user',
@@ -46,19 +46,19 @@ const modalOpenTimeline = ref(false);
           @click="vote(proposal.space, proposal.proposal_id, 1)"
           class="w-full !text-green !border-green w-[46px] !px-0"
         >
-	        <IH-check class="inline-block" />
+          <IH-check class="inline-block" />
         </UiButton>
         <UiButton
           @click="vote(proposal.space, proposal.proposal_id, 2)"
           class="w-full !text-red !border-red w-[46px] !px-0"
         >
-	        <IH-x class="inline-block" />
+          <IH-x class="inline-block" />
         </UiButton>
         <UiButton
           @click="vote(proposal.space, proposal.proposal_id, 3)"
           class="w-full !text-gray-500 !border-gray-500 w-[46px] !px-0"
         >
-	        <IH-arrow-sm-right class="inline-block" />
+          <IH-arrow-sm-right class="inline-block" />
         </UiButton>
       </div>
       <div v-else class="px-4 mb-3">

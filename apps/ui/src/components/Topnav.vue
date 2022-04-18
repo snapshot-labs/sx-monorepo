@@ -10,7 +10,7 @@ const { pendingCount } = useTxStatus();
 const { modalAccountOpen } = useModal();
 
 const { login, web3 } = useWeb3();
-const { toggleSkin, getSkinIcon } = useUserSkin();
+const { toggleSkin, getMode } = useUserSkin();
 
 const loading = ref(false);
 
@@ -62,11 +62,11 @@ async function handleLogin(connector) {
             class="w-[46px] sm:w-auto"
           >
             <span class="hidden sm:block" v-text="'Connect wallet'" />
-	          <IH-login class="sm:hidden -ml-2 -mr-2 inline-block" />
+            <IH-login class="sm:hidden -ml-2 -mr-2 inline-block" />
           </UiButton>
           <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
-	          <IH-light-bulb v-if="getSkinIcon() === 'sun'" class="inline-block" />
-	          <IH-moon v-else class="inline-block" />
+            <IH-light-bulb v-if="getMode() === 'dark'" class="inline-block" />
+            <IH-moon v-else class="inline-block" />
           </UiButton>
         </div>
       </div>
