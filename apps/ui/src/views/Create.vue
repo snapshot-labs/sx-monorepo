@@ -68,7 +68,7 @@ onMounted(() => {
         <span class="space-x-2">
           <UiButton
             @click="modalOpen = true"
-            class="float-left leading-3 !px-1 w-7 rounded-r-none border-r-0"
+            class="float-left leading-3 !px-3 rounded-r-none border-r-0"
           >
             <IH-collection class="inline-block" />
           </UiButton>
@@ -85,16 +85,16 @@ onMounted(() => {
                 proposals[`${id}:${key}`].discussion
               )
             "
-            class="rounded-l-none border-l-0 float-left !m-0"
+            class="rounded-l-none border-l-0 float-left !m-0 !px-3"
           >
-            Publish
-            <IH-paper-airplane class="inline-block rotate-90 ml-1" />
+            <span v-text="'Publish'" class="hidden mr-2 md:inline-block" />
+            <IH-paper-airplane class="inline-block rotate-90" />
           </UiButton>
         </span>
       </div>
-      <teleport to="#modal">
-        <ModalDrafts :open="modalOpen" :space="id" @close="modalOpen = false" />
-      </teleport>
     </div>
+    <teleport to="#modal">
+      <ModalDrafts :open="modalOpen" :space="id" @close="modalOpen = false" />
+    </teleport>
   </div>
 </template>
