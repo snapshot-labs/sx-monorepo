@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { sanitizeUrl } from '@braintree/sanitize-url';
 import { _rt, _n, shortenAddress } from '@/helpers/utils';
 import apollo from '@/helpers/apollo';
 import { PROPOSAL_QUERY } from '@/helpers/queries';
@@ -12,6 +13,7 @@ const { vote } = useActions();
 const id = parseInt(route.params.id || 0);
 const space = route.params.space;
 const proposal = ref({});
+const discussion = ref('');
 const loaded = ref(false);
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -22,6 +24,11 @@ onMounted(async () => {
     variables: { id: `${space}/${id}` }
   });
   proposal.value = data.proposal;
+  if (
+    data.proposal.discussion &&
+    sanitizeUrl(data.proposal.discussion) !== 'about:blank'
+  )
+    discussion.value = sanitizeUrl(data.proposal.discussion);
   loaded.value = true;
 });
 </script>
@@ -65,8 +72,8 @@ onMounted(async () => {
       <Container class="space-y-4 mb-4" slim>
         <BlockExecution :txs="txs" />
         <a
-          v-if="proposal.discussion"
-          :href="proposal.discussion"
+          v-if="discussion"
+          :href="discussion"
           target="_blank"
           class="x-block block mb-5"
         >
