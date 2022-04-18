@@ -14,35 +14,34 @@ defineEmits(['close']);
     <template v-slot:header>
       <h3 v-text="'Timeline'" />
     </template>
-    <div class="p-4 pl-5">
-      <div class="flex relative">
+    <div class="p-4 flex flex-column">
+      <div class="mt-1 ml-2">
         <div
-          class="absolute w-[15px] h-[15px] inline-block rounded-full bg-gray-600 -left-[7px] top-[5px] border-[4px] border-skin-bg"
-        />
-        <div class="border-l pr-4 mt-3" />
-        <div class="leading-6 mb-3">
-          <h4>Created</h4>
-          {{ _t(proposal.created) }}
+          v-for="state in ['created', 'start', 'end']"
+          :key="state"
+          class="flex relative h-[60px]"
+        >
+          <div
+            class="absolute w-[15px] h-[15px] inline-block rounded-full -left-[7px] border-[4px] border-skin-bg"
+            :class="
+              ['created', 'start'].includes(state) ? 'bg-blue' : 'bg-gray-600'
+            "
+          />
+          <div
+            v-if="state !== 'end'"
+            class="border-l pr-4 mt-3"
+            :class="['created'].includes(state) && 'border-blue'"
+          />
         </div>
       </div>
-      <div class="flex relative">
+      <div class="flex-auto leading-6">
         <div
-          class="absolute w-[15px] h-[15px] inline-block rounded-full bg-green -left-[7px] top-[5px] border-[4px] border-skin-bg"
-        />
-        <div class="border-l pr-4" />
-        <div class="leading-6 mb-3">
-          <h4>Start</h4>
-          {{ _t(proposal.start) }}
-        </div>
-      </div>
-      <div class="flex relative">
-        <div
-          class="absolute w-[15px] h-[15px] inline-block rounded-full bg-red -left-[7px] top-[5px] border-[4px] border-skin-bg"
-        />
-        <div class="border-l pr-4 mb-6" />
-        <div class="leading-6">
-          <h4>End</h4>
-          {{ _t(proposal.end) }}
+          v-for="state in ['created', 'start', 'end']"
+          :key="state"
+          class="mb-3 last:mb-0 h-[44px]"
+        >
+          <h4 v-text="state" class="capitalize" />
+          {{ _t(proposal[state]) }}
         </div>
       </div>
     </div>

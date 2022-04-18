@@ -92,3 +92,27 @@ export function _rt(number) {
     return '';
   }
 }
+
+export function abiToDefinition(abi) {
+  const definition = {
+    title: abi.name,
+    type: 'object',
+    properties: {},
+    additionalProperties: false
+  };
+  abi.inputs.forEach(input => {
+    definition.properties[input.name] = {};
+    let type = 'string';
+    if (input.type === 'uint256') type = 'number';
+    if (input.type === 'bool') type = 'boolean';
+    if (input.type === 'address')
+      definition.properties[input.name].format = 'address';
+    definition.properties[input.name].type = type;
+    definition.properties[input.name].title = input.name;
+  });
+  return definition;
+}
+
+export function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}

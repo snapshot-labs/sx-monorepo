@@ -88,7 +88,7 @@ onMounted(async () => {
             class="mr-2"
           />
           {{ shorten(spaces.pasta.wallets[0]) }}
-          <Icon name="external-link" class="float-right mt-2" />
+          <IH-external-link class="float-right mt-2" />
         </h4>
       </a>
     </div>
@@ -111,7 +111,7 @@ onMounted(async () => {
             <div v-if="b.value">${{ _n(b.value) }}</div>
           </div>
         </div>
-        <Icon name="go" class="mt-3" />
+        <IH-arrow-sm-right class="mt-2" />
       </div>
     </div>
   </Container>

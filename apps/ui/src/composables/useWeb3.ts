@@ -38,11 +38,6 @@ export function useWeb3() {
 
   async function loadProvider() {
     try {
-      if (
-        auth.provider.value.removeAllListeners &&
-        !auth.provider.value.isTorus
-      )
-        auth.provider.value.removeAllListeners();
       if (auth.provider.value.on) {
         auth.provider.value.on('chainChanged', async chainId => {
           handleChainChanged(parseInt(formatUnits(chainId, 0)));

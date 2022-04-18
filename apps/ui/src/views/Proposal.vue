@@ -5,6 +5,7 @@ import { _rt, _n, shortenAddress } from '@/helpers/utils';
 import apollo from '@/helpers/apollo';
 import { PROPOSAL_QUERY } from '@/helpers/queries';
 import { useActions } from '@/composables/useActions';
+import txs from '@/helpers/execution.json';
 
 const route = useRoute();
 const { vote } = useActions();
@@ -53,18 +54,16 @@ onMounted(async () => {
               </a>
             </span>
           </div>
-          <UiButton class="!w-[46px] !h-[46px] !p-0">
-            <Icon name="threedots" size="20" />
+          <UiButton class="!w-[46px] !h-[46px] !px-[12px]">
+            <IH-dots-horizontal />
           </UiButton>
         </div>
         <div v-if="proposal.body" class="mb-4">
           <p v-text="proposal.body" />
         </div>
       </Container>
-      <Container slim>
-        <div class="x-block mb-5">
-          <Execution />
-        </div>
+      <Container class="space-y-4 mb-4" slim>
+        <BlockExecution :txs="txs" />
         <a
           v-if="proposal.discussion"
           :href="proposal.discussion"
@@ -72,42 +71,40 @@ onMounted(async () => {
           class="x-block block mb-5"
         >
           <h4 class="px-4 py-3">
-            <Icon name="receipt-outlined" class="mr-2" /> Discussion
-            <span class="float-right"><Icon name="external-link" /></span>
+            <IH-chat-alt class="inline-block mr-2" /> Discussion
+            <IH-external-link class="float-right mt-1" />
           </h4>
         </a>
       </Container>
       <Container>
-        <div class="mb-4">
-          <div class="grid grid-cols-3 gap-2 mb-3">
-            <UiButton
-              @click="vote(space, proposal.proposal_id, 1)"
-              class="w-full !text-white !bg-green !border-green"
-            >
-              <Icon name="check3" size="20" />
-            </UiButton>
-            <UiButton
-              @click="vote(space, proposal.proposal_id, 2)"
-              class="w-full !text-white !bg-red !border-red"
-            >
-              <Icon name="close2" size="20" />
-            </UiButton>
-            <UiButton
-              @click="vote(space, proposal.proposal_id, 3)"
-              class="w-full !text-white !bg-gray-500 !border-gray-500"
-            >
-              <Icon name="skip" size="20" />
-            </UiButton>
-          </div>
-          <div class="mb-4">
-            <a @click="modalOpenVotes = true" class="text-skin-text">
-              {{ _n(proposal.vote_count) }} votes
-            </a>
-            ·
-            <a @click="modalOpenTimeline = true" class="text-skin-text">
-              {{ _rt(proposal.end) }}
-            </a>
-          </div>
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <UiButton
+            @click="vote(space, proposal.proposal_id, 1)"
+            class="w-full !text-white !bg-green !border-green"
+          >
+            <IH-check class="inline-block" />
+          </UiButton>
+          <UiButton
+            @click="vote(space, proposal.proposal_id, 2)"
+            class="w-full !text-white !bg-red !border-red"
+          >
+            <IH-x class="inline-block" />
+          </UiButton>
+          <UiButton
+            @click="vote(space, proposal.proposal_id, 3)"
+            class="w-full !text-white !bg-gray-500 !border-gray-500"
+          >
+            <IH-arrow-right class="inline-block" />
+          </UiButton>
+        </div>
+        <div>
+          <a @click="modalOpenVotes = true" class="text-skin-text">
+            {{ _n(proposal.vote_count) }} votes
+          </a>
+          ·
+          <a @click="modalOpenTimeline = true" class="text-skin-text">
+            {{ _rt(proposal.end) }}
+          </a>
         </div>
       </Container>
     </div>

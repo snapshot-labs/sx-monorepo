@@ -24,53 +24,77 @@ onMounted(() => {
 });
 </script>
 <template>
-  <router-view v-if="key" class="mb-8 pb-4" />
-  <div class="fixed bottom-0 w-full border-t px-4 py-3 bg-skin-block-bg flex">
-    <div class="flex-auto space-x-2">
-      <h5 class="flex-auto mt-2 hidden sm:inline-block">Step 1 on 3</h5>
-      <div class="h-2 w-[128px] rounded bg-skin-border hidden sm:inline-block">
-        <div
-          class="h-2 rounded bg-gray-600"
-          :style="{ width: $route.name === 'editor' ? '33%' : '66%' }"
-        />
-      </div>
-    </div>
-    <div class="space-x-2">
-      <router-link :to="{ name: 'editor', params: { id, key } }">
-        <UiButton v-if="$route.name !== 'editor'" class="leading-3 !px-0 w-7">
-          <Icon name="back" class="align-middle" />
-        </UiButton>
-      </router-link>
-      <span v-if="$route.name !== 'editor'">
-        <UiButton
-          @click="
-            propose(
-              id,
-              executionHash,
-              proposals[`${id}:${key}`].title,
-              proposals[`${id}:${key}`].body,
-              proposals[`${id}:${key}`].discussion
-            )
-          "
-          class="leading-3"
-        >
-          Publish
-        </UiButton>
-      </span>
-      <span class="space-x-2" v-else>
-        <UiButton @click="modalOpen = true" class="leading-3 !px-0 w-7">
-          <Icon name="receipt-outlined" class="align-middle px-1" />
-        </UiButton>
-        <router-link :to="{ name: 'execution', params: { id, key } }">
-          <UiButton class="leading-3">
-            Next
-            <Icon name="go" class="align-middle" />
+  <div>
+    <router-view v-if="key" />
+    <div
+      class="fixed top-0 border-b w-full px-4 py-3 bg-skin-block-bg flex h-[79px] z-20"
+    >
+      <div class="flex-auto space-x-2">
+        <router-link :to="{ name: 'overview', params: { id } }" class="mr-2">
+          <UiButton class="leading-3 !px-1 w-7">
+            <IH-arrow-narrow-left class="inline-block" />
           </UiButton>
         </router-link>
-      </span>
+        <h4 class="py-2 inline-block">New proposal</h4>
+        <div class="h-2 w-[88px] rounded bg-skin-border hidden">
+          <div
+            class="h-2 rounded bg-gray-600"
+            :style="{ width: $route.name === 'editor' ? '33%' : '66%' }"
+          />
+        </div>
+      </div>
+      <div class="space-x-2">
+        <router-link :to="{ name: 'editor', params: { id, key } }">
+          <UiButton v-if="$route.name !== 'editor'" class="leading-3 !px-0 w-7">
+            <IH-arrow-narrow-left class="inline-block" />
+          </UiButton>
+        </router-link>
+        <span v-if="$route.name !== 'editor'">
+          <UiButton
+            @click="
+              propose(
+                id,
+                executionHash,
+                proposals[`${id}:${key}`].title,
+                proposals[`${id}:${key}`].body,
+                proposals[`${id}:${key}`].discussion
+              )
+            "
+            class="leading-3"
+          >
+            Publish
+          </UiButton>
+        </span>
+        <span class="space-x-2">
+          <UiButton
+            @click="modalOpen = true"
+            class="float-left leading-3 !px-1 w-7 rounded-r-none border-r-0"
+          >
+            <IH-collection class="inline-block" />
+          </UiButton>
+          <UiButton class="float-left leading-3 !px-0 w-7 rounded-none !m-0">
+            <IH-document-search class="inline-block" />
+          </UiButton>
+          <UiButton
+            @click="
+              propose(
+                id,
+                executionHash,
+                proposals[`${id}:${key}`].title,
+                proposals[`${id}:${key}`].body,
+                proposals[`${id}:${key}`].discussion
+              )
+            "
+            class="rounded-l-none border-l-0 float-left !m-0"
+          >
+            Publish
+            <IH-paper-airplane class="inline-block rotate-90 ml-1" />
+          </UiButton>
+        </span>
+      </div>
+      <teleport to="#modal">
+        <ModalDrafts :open="modalOpen" :space="id" @close="modalOpen = false" />
+      </teleport>
     </div>
-    <teleport to="#modal">
-      <ModalDrafts :open="modalOpen" :space="id" @close="modalOpen = false" />
-    </teleport>
   </div>
 </template>

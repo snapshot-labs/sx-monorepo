@@ -27,7 +27,7 @@ defineProps({ space: Object });
         class="px-4 py-3 border-b last:border-0 block"
       >
         <h4>
-          <Icon name="back" class="mr-1" />
+          <IH-arrow-narrow-left class="inline-block mr-1" />
           {{ spaces[space.parent].name }}
         </h4>
       </router-link>

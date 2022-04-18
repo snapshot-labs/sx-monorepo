@@ -1,6 +1,10 @@
 <script setup>
 import { useEditor } from '@/composables/useEditor';
 import { useRoute } from 'vue-router';
+import { reactive } from 'vue';
+import { Builder } from '@/helpers/builder';
+
+const builder = reactive(new Builder('1'));
 
 const route = useRoute();
 const { proposals } = useEditor();
@@ -12,7 +16,7 @@ if (!proposals[key]) proposals[key] = {};
 </script>
 <template>
   <Container class="pt-5 s-compact">
-    <h1 v-text="'New proposal'" class="mb-4" />
+    <h4 class="eyebrow mb-3">Context</h4>
     <SIString
       v-model="proposals[key].title"
       :definition="{
@@ -20,7 +24,7 @@ if (!proposals[key]) proposals[key] = {};
         title: 'Title'
       }"
     />
-    <div class="s-base">
+    <div class="s-base mb-5">
       <div v-text="'Description'" class="s-label" />
       <textarea v-model="proposals[key].body" class="s-input mb-3 h-[140px]" />
       <SIString
@@ -32,5 +36,7 @@ if (!proposals[key]) proposals[key] = {};
         }"
       />
     </div>
+    <h4 class="eyebrow mb-3">Execution</h4>
+    <BlockExecutionEditable :txs="builder.txs" class="mb-4" />
   </Container>
 </template>
