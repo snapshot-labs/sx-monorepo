@@ -18,7 +18,7 @@
     "@snapshot-labs/sx": "^0.1.0-beta.2",
     "@vueuse/core": "^8.2.3",
     "@walletconnect/client": "^1.7.1",
-    "dayjs": "^1.11.0",
+    "dayjs": "^1.11.1",
     "graphql": "^16.3.0",
     "graphql-tag": "^2.12.6",
     "scrollmonitor": "^1.2.9",
