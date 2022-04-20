@@ -59,7 +59,6 @@ async function handleLogin(connector) {
             v-if="!$auth.isAuthenticated.value"
             @click="modalAccountOpen = true"
             :loading="loading || web3.authLoading"
-            class="w-[46px] sm:w-auto"
           >
             <span class="hidden sm:block" v-text="'Connect wallet'" />
             <IH-login class="sm:hidden -ml-2 -mr-2 inline-block" />

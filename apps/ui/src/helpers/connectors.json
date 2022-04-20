@@ -43,5 +43,10 @@
     "id": "gnosis",
     "name": "Gnosis Safe",
     "icon": "ipfs://QmfJUHZLtRvadM7fvEJUWWxhS869KXXCMxPCr7TUqkwvUc"
+  },
+  "argentx": {
+    "id": "argentx",
+    "name": "Argent X",
+    "icon": "ipfs://QmYfjt7VZzb4LfudhFH5YDdKSaJQ1xMGRriDHPwceKQs2U"
   }
 }

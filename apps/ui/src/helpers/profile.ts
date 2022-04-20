@@ -1,6 +1,7 @@
 import namehash from '@ensdomains/eth-ens-namehash';
 import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
 import { call } from '@snapshot-labs/snapshot.js/src/utils';
+import { isAddress } from '@ethersproject/address';
 
 function ensReverseRecordRequest(addresses) {
   const network = '1';
@@ -25,6 +26,7 @@ function ensReverseRecordRequest(addresses) {
 }
 
 function lookupAddresses(addresses) {
+  addresses = addresses.filter(address => isAddress(address.length));
   return new Promise((resolove, reject) => {
     ensReverseRecordRequest(addresses)
       .then(reverseRecords => {
@@ -59,10 +61,7 @@ export async function getProfiles(addresses) {
     Object.entries(profiles).map(([address, profile]) => {
       profile = {};
       profile.ens = ensNames[address.toLowerCase()] || '';
-      if (profile.ens) {
-        profile.name = profile.ens;
-        profile.image = `https://metadata.ens.domains/mainnet/avatar/${profile.ens}`;
-      }
+      profile.name = profile.ens;
       return [address, profile];
     })
   );

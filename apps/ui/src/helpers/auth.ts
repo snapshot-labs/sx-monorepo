@@ -4,6 +4,7 @@ import portis from '@snapshot-labs/lock/connectors/portis';
 import connectors from '@/helpers/connectors.json';
 import walletlink from '@snapshot-labs/lock/connectors/walletlink';
 import gnosis from '@snapshot-labs/lock/connectors/gnosis';
+import argentx from '@/helpers/argentx';
 
 const options: any = { connectors: [] };
 const lockConnectors = {
@@ -11,7 +12,8 @@ const lockConnectors = {
   walletconnect,
   walletlink,
   portis,
-  gnosis
+  gnosis,
+  argentx
 };
 
 Object.entries(connectors).forEach((connector: any) => {

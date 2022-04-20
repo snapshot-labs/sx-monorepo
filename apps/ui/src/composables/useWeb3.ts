@@ -37,8 +37,9 @@ export function useWeb3() {
   }
 
   async function loadProvider() {
+    const connector = auth.provider.value?.connectorName;
     try {
-      if (auth.provider.value.on) {
+      if (auth.provider.value.on && connector !== 'argentx') {
         auth.provider.value.on('chainChanged', async chainId => {
           handleChainChanged(parseInt(formatUnits(chainId, 0)));
         });
@@ -53,11 +54,13 @@ export function useWeb3() {
       console.log('Provider', auth.provider.value);
       let network, accounts;
       try {
-        const connector = auth.provider.value?.connectorName;
         if (connector === 'gnosis') {
           const { chainId: safeChainId, safeAddress } = auth.web3.provider.safe;
           network = { chainId: safeChainId };
           accounts = [safeAddress];
+        } else if (connector === 'argentx') {
+          network = { chainId: 'starknet' };
+          accounts = [auth.provider.value.selectedAddress];
         } else {
           [network, accounts] = await Promise.all([
             auth.web3.getNetwork(),
@@ -99,8 +102,6 @@ export function useWeb3() {
   return {
     login,
     logout,
-    loadProvider,
-    handleChainChanged,
     web3: computed(() => state),
     web3Account: computed(() => state.account)
   };
