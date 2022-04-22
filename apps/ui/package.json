@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.5.10",
-    "@argent/get-starknet": "^3.1.1",
+    "@argent/get-starknet": "^3.2.0",
     "@braintree/sanitize-url": "^6.0.0",
     "@ensdomains/eth-ens-namehash": "^2.0.15",
     "@ethersproject/address": "^5.4.0",
@@ -18,7 +18,7 @@
     "@snapshot-labs/lock": "^0.1.7",
     "@snapshot-labs/snapshot.js": "^0.3.71",
     "@snapshot-labs/sx": "^0.1.0-beta.2",
-    "@vueuse/core": "^8.2.3",
+    "@vueuse/core": "^8.3.1",
     "@walletconnect/client": "^1.7.1",
     "dayjs": "^1.11.1",
     "graphql": "^16.3.0",
