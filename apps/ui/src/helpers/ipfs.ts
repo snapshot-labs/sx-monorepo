@@ -1,6 +1,6 @@
 import fetch from 'cross-fetch';
 
-const url: any = import.meta.env.VITE_RELAYER_URL || 'http://localhost:3000';
+const url: any = import.meta.env.VITE_PINEAPPLE_URL || 'http://localhost:3000';
 
 export async function set(json) {
   const init = {

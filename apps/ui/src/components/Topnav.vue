@@ -40,7 +40,7 @@ async function handleLogin(connector) {
             <UiButton
               @click="modalAccountOpen = true"
               :loading="web3.authLoading"
-              class="flex items-center float-left space-x-2"
+              class="sm:flex items-center float-left space-x-2 !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
             >
               <Stamp :id="web3.account" :size="18" />
               <span
