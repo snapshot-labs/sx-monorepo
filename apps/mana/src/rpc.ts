@@ -1,7 +1,6 @@
 import express from 'express';
 import { propose, vote } from '@snapshot-labs/sx';
 import { rpcError, rpcSuccess } from './utils';
-import { set } from './pinata';
 
 const router = express.Router();
 
@@ -36,12 +35,7 @@ async function send(id, params, res) {
   }
 }
 
-async function pin(id, params, res) {
-  const result = await set(params);
-  return rpcSuccess(res, result, id);
-}
-
-const fn = { send, pin };
+const fn = { send };
 
 router.post('/', async (req, res) => {
   const { id, method, params } = req.body;
