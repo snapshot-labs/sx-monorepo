@@ -2,8 +2,11 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-export { getUrl } from '@snapshot-labs/snapshot.js/src/utils';
+import { getUrl as snapshotGetUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
+
+const IPFS_GATEWAY: string =
+  import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -25,6 +28,10 @@ dayjs.updateLocale('en', {
     yy: '%dy'
   }
 });
+
+export function getUrl(str: string) {
+  return snapshotGetUrl(str, IPFS_GATEWAY);
+}
 
 export function shortenAddress(str = '') {
   return `${str.slice(0, 6)}...${str.slice(str.length - 4)}`;

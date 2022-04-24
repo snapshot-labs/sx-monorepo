@@ -36,26 +36,27 @@ async function handleLogin(connector) {
           </router-link>
         </div>
         <div :key="web3.account">
-          <template v-if="$auth.isAuthenticated.value">
-            <UiButton
-              @click="modalAccountOpen = true"
-              :loading="web3.authLoading"
-              class="sm:flex items-center float-left space-x-2 !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
-            >
+          <UiButton
+            v-if="loading || web3.authLoading"
+            loading
+            class="!px-0 w-[46px]"
+          ></UiButton>
+          <UiButton
+            v-else
+            @click="modalAccountOpen = true"
+            class="sm:flex items-center float-left space-x-2 !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+          >
+            <template v-if="$auth.isAuthenticated.value">
               <Stamp :id="web3.account" :size="18" />
               <span
                 v-text="web3.name || shorten(web3.account)"
                 class="hidden sm:block"
               />
-            </UiButton>
-          </template>
-          <UiButton
-            v-if="!$auth.isAuthenticated.value"
-            @click="modalAccountOpen = true"
-            :loading="loading || web3.authLoading"
-          >
-            <span class="hidden sm:block" v-text="'Connect wallet'" />
-            <IH-login class="sm:hidden -ml-2 -mr-2 inline-block" />
+            </template>
+            <template v-else>
+              <span class="hidden sm:block" v-text="'Connect wallet'" />
+              <IH-login class="sm:hidden -ml-2 -mr-2 inline-block" />
+            </template>
           </UiButton>
           <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
             <IH-light-bulb v-if="getMode() === 'dark'" class="inline-block" />
