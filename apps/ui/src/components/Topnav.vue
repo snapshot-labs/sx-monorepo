@@ -40,22 +40,25 @@ async function handleLogin(connector) {
             v-if="loading || web3.authLoading"
             loading
             class="!px-0 w-[46px]"
-          ></UiButton>
+          />
           <UiButton
             v-else
             @click="modalAccountOpen = true"
-            class="sm:flex items-center float-left space-x-2 !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+            class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
           >
-            <template v-if="$auth.isAuthenticated.value">
+            <span
+              v-if="$auth.isAuthenticated.value"
+              class="sm:flex items-center space-x-2"
+            >
               <Stamp :id="web3.account" :size="18" />
               <span
                 v-text="web3.name || shorten(web3.account)"
                 class="hidden sm:block"
               />
-            </template>
+            </span>
             <template v-else>
               <span class="hidden sm:block" v-text="'Connect wallet'" />
-              <IH-login class="sm:hidden -ml-2 -mr-2 inline-block" />
+              <IH-login class="sm:hidden inline-block" />
             </template>
           </UiButton>
           <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
