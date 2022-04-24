@@ -2,6 +2,8 @@
   "injected": {
     "id": "injected",
     "name": "MetaMask",
+    "type": "injected",
+    "root": "ethereum",
     "icon": "ipfs://QmTE7VPXMhriKAobMWEiC5S3oG22p4G6AXGyGdNWQTQ3Fv"
   },
   "walletconnect": {
@@ -41,12 +43,15 @@
   },
   "gnosis": {
     "id": "gnosis",
+    "type": "gnosis",
     "name": "Gnosis Safe",
     "icon": "ipfs://QmfJUHZLtRvadM7fvEJUWWxhS869KXXCMxPCr7TUqkwvUc"
   },
   "argentx": {
     "id": "argentx",
     "name": "Argent X",
+    "type": "injected",
+    "root": "starknet",
     "icon": "ipfs://QmYfjt7VZzb4LfudhFH5YDdKSaJQ1xMGRriDHPwceKQs2U"
   }
 }

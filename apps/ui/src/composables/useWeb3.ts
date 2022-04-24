@@ -3,7 +3,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { formatUnits } from '@ethersproject/units';
-import { getProfiles } from '@/helpers/profile';
+import { getNames } from '@/helpers/ens';
 
 let auth;
 const defaultNetwork: any =
@@ -11,9 +11,9 @@ const defaultNetwork: any =
 
 const state = reactive({
   account: '',
+  name: '',
   network: networks[defaultNetwork],
   authLoading: false,
-  profile: null,
   walletConnectType: null
 });
 
@@ -33,7 +33,7 @@ export function useWeb3() {
     auth = getInstance();
     auth.logout();
     state.account = '';
-    state.profile = null;
+    state.name = '';
   }
 
   async function loadProvider() {
@@ -74,14 +74,13 @@ export function useWeb3() {
       console.log('Accounts', accounts);
       handleChainChanged(network.chainId);
       const acc = accounts.length > 0 ? accounts[0] : null;
-      const profiles = await getProfiles([acc]);
-
+      const names = await getNames([acc]);
       state.account = acc;
       state.walletConnectType = auth.provider.value?.wc?.peerMeta?.name || null;
-      state.profile = profiles[acc];
+      state.name = names[acc];
     } catch (e) {
       state.account = '';
-      state.profile = null;
+      state.name = '';
       return Promise.reject(e);
     }
   }

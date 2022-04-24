@@ -1,18 +1,25 @@
 <script setup>
-import { toRefs, ref, watch, computed } from 'vue';
+import { toRefs, ref, watch } from 'vue';
 import { getInjected } from '@snapshot-labs/lock/src/utils';
 import { shorten, explorerUrl, getUrl } from '@/helpers/utils';
 import connectors from '@/helpers/connectors.json';
 import { useWeb3 } from '@/composables/useWeb3';
 
+const injected = getInjected();
+if (injected)
+  connectors['injected'] = {
+    ...connectors['injected'],
+    ...injected,
+    ...{ id: 'injected' }
+  };
+
 const props = defineProps(['open']);
 const emit = defineEmits(['login', 'close']);
+const win = window;
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
 const step = ref(null);
-
-const injected = computed(() => getInjected());
 
 async function handleLogout() {
   await logout();
@@ -41,23 +48,19 @@ watch(open, () => (step.value = null));
           class="block"
         >
           <UiButton
-            v-if="id === 'injected' && injected"
+            v-if="
+              (connector.type === 'injected' && win[connector.root]) ||
+              !connector.type
+            "
             class="button-outline w-full flex justify-center items-center"
           >
             <img
-              :src="getUrl(injected.icon)"
+              :src="getUrl(connector.icon)"
               height="28"
               width="28"
               class="mr-2 -mt-1"
-              :alt="injected.name"
+              :alt="connector.name"
             />
-            {{ injected.name }}
-          </UiButton>
-          <UiButton
-            v-else-if="id !== 'gnosis'"
-            class="button-outline w-full flex justify-center items-center gap-2"
-          >
-            <img :src="getUrl(connector.icon)" height="25" width="25" />
             {{ connector.name }}
           </UiButton>
         </a>
@@ -74,9 +77,7 @@ watch(open, () => (step.value = null));
             class="button-outline w-full flex justify-center items-center"
           >
             <Stamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
-            <span v-if="web3.profile.name" v-text="web3.profile.name" />
-            <span v-else-if="web3.profile.ens" v-text="web3.profile.ens" />
-            <span v-else v-text="shorten(web3.account)" />
+            <span v-text="web3.name || shorten(web3.account)" />
             <IH-external-link class="inline-block ml-1" />
           </UiButton>
         </a>

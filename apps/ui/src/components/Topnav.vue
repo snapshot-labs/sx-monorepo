@@ -44,13 +44,7 @@ async function handleLogin(connector) {
             >
               <Stamp :id="web3.account" :size="18" />
               <span
-                v-if="web3.profile?.name || web3.profile?.ens"
-                v-text="web3.profile.name || web3.profile.ens"
-                class="hidden sm:block"
-              />
-              <span
-                v-else
-                v-text="shorten(web3.account)"
+                v-text="web3.name || shorten(web3.account)"
                 class="hidden sm:block"
               />
             </UiButton>
