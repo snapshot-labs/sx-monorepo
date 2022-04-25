@@ -33,10 +33,10 @@
     tslib "^2.3.0"
     zen-observable-ts "^1.2.0"
 
-"@argent/get-starknet@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@argent/get-starknet/-/get-starknet-3.2.0.tgz#902be150ef37b0b2350b4c7c7daea9e96dcf807a"
-  integrity sha512-MWy/duqkpqCW517pIIJTTML1CURJM/FtqsHHNVJ8LEU9dOUWnG9Cp+tqrUeHJxygnWAuN+EdSD+gO6VOov5o2Q==
+"@argent/get-starknet@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@argent/get-starknet/-/get-starknet-3.2.1.tgz#c0e2472bd34c5932086a772cbf2902a1f4b6b113"
+  integrity sha512-4gZYZAr0d8lWJWMOAP2NZPuuUwB9vKMGxzX3gxz8Oc6WrJoMN24/TbkQpwBULxy4qCl4x1L+t9yAoGF5ODkYaA==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.16.7":
   version "7.16.7"
