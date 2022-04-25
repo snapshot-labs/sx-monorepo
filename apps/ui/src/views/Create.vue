@@ -31,7 +31,7 @@ onMounted(() => {
     >
       <div class="flex-auto space-x-2">
         <router-link :to="{ name: 'overview', params: { id } }" class="mr-2">
-          <UiButton class="leading-3 !px-1 w-7">
+          <UiButton class="leading-3 w-[46px] !px-0">
             <IH-arrow-narrow-left class="inline-block" />
           </UiButton>
         </router-link>
