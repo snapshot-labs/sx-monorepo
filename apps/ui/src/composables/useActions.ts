@@ -32,12 +32,13 @@ export function useActions() {
     body: string,
     discussion: string
   ) {
-    const ipfsHash = await pin({ title, body, discussion });
-    console.log('IPFS hash', ipfsHash);
+    const pinned = await pin({ title, body, discussion });
+    if (!pinned || !pinned.cid) return;
+    console.log('IPFS', pinned);
     const envelop = await client.propose(auth.web3, web3.value.account, {
       space,
       executionHash,
-      metadataURI: `ipfs://${ipfsHash}`
+      metadataURI: `ipfs://${pinned.cid}`
     });
     console.log('Envelop', envelop);
     pendingCount.value++;
