@@ -1,6 +1,6 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import client from '@/helpers/client';
-import { set } from '@/helpers/ipfs';
+import { pin } from '@snapshot-labs/pineapple';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useTxStatus } from '@/composables/useTxStatus';
 import { useAccount } from '@/composables/useAccount';
@@ -32,7 +32,7 @@ export function useActions() {
     body: string,
     discussion: string
   ) {
-    const ipfsHash = await set({ title, body, discussion });
+    const ipfsHash = await pin({ title, body, discussion });
     console.log('IPFS hash', ipfsHash);
     const envelop = await client.propose(auth.web3, web3.value.account, {
       space,

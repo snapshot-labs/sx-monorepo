@@ -43,7 +43,7 @@ onMounted(() => {
           />
         </div>
       </div>
-      <div class="space-x-2">
+      <div>
         <router-link :to="{ name: 'editor', params: { id, key } }">
           <UiButton v-if="$route.name !== 'editor'" class="leading-3 !px-0 w-7">
             <IH-arrow-narrow-left class="inline-block" />
