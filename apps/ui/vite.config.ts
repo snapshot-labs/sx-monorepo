@@ -6,8 +6,10 @@ import Icons from 'unplugin-icons/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import visualizer from 'rollup-plugin-visualizer';
 
+const ELECTRON = process.env.ELECTRON || false;
+
 export default defineConfig({
-  base: path.resolve(__dirname, './dist'),
+  base: ELECTRON ? path.resolve(__dirname, './dist') : undefined,
   define: {
     'process.env': process.env
   },
