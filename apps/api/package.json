@@ -22,7 +22,7 @@
     "eslint": "^6.7.2",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
-    "graphql": "^16.3.0",
+    "graphql": "^16.4.0",
     "graphql-fields": "^2.0.3",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.15",
