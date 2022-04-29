@@ -33,9 +33,7 @@ exports[`GqlEntityController createEntityStores should work 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
-      "DROP TABLE IF EXISTS checkpoint;
-CREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));
-INSERT checkpoint SET number = 0;
+      "
 
 DROP TABLE IF EXISTS votes;
 CREATE TABLE votes (

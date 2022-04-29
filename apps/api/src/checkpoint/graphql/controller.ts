@@ -123,9 +123,6 @@ export class GqlEntityController {
    *
    * will execute the following SQL:
    * ```sql
-   * DROP TABLE IF EXISTS checkpoint;
-   * CREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));
-   * INSERT checkpoint SET number = 0;·
    * DROP TABLE IF EXISTS votes;
    * CREATE TABLE votes (
    *   id VARCHAR(128) NOT NULL,
@@ -138,11 +135,13 @@ export class GqlEntityController {
    *
    */
   public async createEntityStores(mysql: AsyncMySqlPool): Promise<void> {
-    let sql = 'DROP TABLE IF EXISTS checkpoint;';
-    sql += '\nCREATE TABLE checkpoint (number BIGINT NOT NULL, PRIMARY KEY (number));';
-    sql += '\nINSERT checkpoint SET number = 0;';
+    const schemaObjects = this.schemaObjects;
+    if (schemaObjects.length === 0) {
+      return;
+    }
 
-    this.schemaObjects.forEach(type => {
+    let sql = '';
+    schemaObjects.forEach(type => {
       sql += `\n\nDROP TABLE IF EXISTS ${type.name.toLowerCase()}s;`;
       sql += `\nCREATE TABLE ${type.name.toLowerCase()}s (`;
       let sqlIndexes = ``;
@@ -161,11 +160,11 @@ export class GqlEntityController {
           sqlIndexes += `,\n  INDEX ${field.name} (${field.name})`;
         }
       });
-      sql += `\n  PRIMARY KEY (id) ${sqlIndexes}\n);`;
+      sql += `\n  PRIMARY KEY (id) ${sqlIndexes}\n);\n`;
     });
 
     // TODO(perfectmak): wrap this in a transaction
-    return mysql.queryAsync(sql);
+    return mysql.queryAsync(sql.trimEnd());
   }
 
   /**

@@ -10,7 +10,7 @@ export default {
   coverageProvider: 'v8',
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/dist/'],
+  coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/dist/', '<rootDir>/test/fixtures/'],
 
   preset: 'ts-jest',
   testEnvironment: 'node',
