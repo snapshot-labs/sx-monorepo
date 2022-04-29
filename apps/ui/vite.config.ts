@@ -7,6 +7,7 @@ import IconsResolver from 'unplugin-icons/resolver';
 import visualizer from 'rollup-plugin-visualizer';
 
 export default defineConfig({
+  base: path.resolve(__dirname, './dist'),
   define: {
     'process.env': process.env
   },

@@ -14,8 +14,8 @@ onMounted(async () => {
   const treasury = spaces.pasta.wallets[0];
   loading.value = true;
   const key = 'ckey_2d082caf47f04a46947f4f212a8';
-	const url = `https://api.covalenthq.com/v1/1/address/${treasury}/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=true&key=${key}`;
-	const results = await snapshot.utils.getJSON(url);
+  const url = `https://api.covalenthq.com/v1/1/address/${treasury}/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=true&key=${key}`;
+  const results = await snapshot.utils.getJSON(url);
   const ether = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
   const etherItem = results.data.items.find(
     item => item.contract_address === ether
@@ -74,7 +74,11 @@ onMounted(async () => {
         <div class="flex-auto">
           <div class="leading-[24px]">
             <div class="text-md text-skin-link">
-              {{ _n(formatUnits(asset.balance || 0, asset.contract_decimals || 0)) }}
+              {{
+                _n(
+                  formatUnits(asset.balance || 0, asset.contract_decimals || 0)
+                )
+              }}
               {{ asset.contract_ticker_symbol }}
             </div>
             <div>${{ _n(asset.quote) }}</div>

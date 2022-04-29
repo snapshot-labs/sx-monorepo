@@ -2,10 +2,12 @@
   "name": "sx-ui",
   "version": "0.1.0",
   "license": "MIT",
+  "main": "main.js",
   "scripts": {
     "dev": "vite --port=8080",
     "build": "vite build",
-    "lint": "eslint \"./src/*/**/*.{ts,vue,json}\" --fix"
+    "lint": "eslint \"./src/*/**/*.{ts,vue,json}\" --fix",
+    "electron:start": "electron ."
   },
   "dependencies": {
     "@apollo/client": "^3.5.10",
@@ -22,6 +24,7 @@
     "@vueuse/core": "^8.3.1",
     "@walletconnect/client": "^1.7.7",
     "dayjs": "^1.11.1",
+    "electron": "^18.2.0",
     "graphql": "^16.4.0",
     "graphql-tag": "^2.12.6",
     "scrollmonitor": "^1.2.9",
