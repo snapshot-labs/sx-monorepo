@@ -3,7 +3,7 @@ import { Wallet } from '@ethersproject/wallet';
 import fetch from 'cross-fetch';
 import { domain, Propose, Vote, proposeTypes, voteTypes } from './types';
 
-export class Client {
+export class EthereumSig {
   public readonly address: string;
 
   constructor(address: string) {
