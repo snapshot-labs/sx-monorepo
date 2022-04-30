@@ -22,7 +22,11 @@ if (!proposals[key]) proposals[key] = {};
     />
     <div class="s-base mb-5">
       <div v-text="'Description'" class="s-label" />
-      <textarea v-model="proposals[key].body" class="s-input mb-3 h-[140px]" />
+      <textarea
+        v-model="proposals[key].body"
+        maxlength="280"
+        class="s-input mb-3 h-[140px]"
+      />
       <SIString
         v-model="proposals[key].discussion"
         :definition="{

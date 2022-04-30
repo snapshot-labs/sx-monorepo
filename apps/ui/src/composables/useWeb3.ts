@@ -12,9 +12,10 @@ const defaultNetwork: any =
 const state = reactive({
   account: '',
   name: '',
+  type: '',
+  walletconnect: '',
   network: networks[defaultNetwork],
-  authLoading: false,
-  walletConnectType: null
+  authLoading: false
 });
 
 export function useWeb3() {
@@ -34,6 +35,8 @@ export function useWeb3() {
     auth.logout();
     state.account = '';
     state.name = '';
+    state.type = '';
+    state.walletconnect = '';
   }
 
   async function loadProvider() {
@@ -76,11 +79,13 @@ export function useWeb3() {
       const acc = accounts.length > 0 ? accounts[0] : null;
       const names = await getNames([acc]);
       state.account = acc;
-      state.walletConnectType = auth.provider.value?.wc?.peerMeta?.name || null;
       state.name = names[acc];
+      state.type = connector;
+      state.walletconnect = auth.provider.value?.wc?.peerMeta?.name || '';
     } catch (e) {
       state.account = '';
       state.name = '';
+      state.type = '';
       return Promise.reject(e);
     }
   }

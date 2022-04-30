@@ -1291,10 +1291,10 @@
     json-to-graphql-query "^2.0.0"
     lodash.set "^4.3.2"
 
-"@snapshot-labs/sx@^0.1.0-beta.2":
-  version "0.1.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.2.tgz#2a333345bff4823244d0a0cfb56949679839d27f"
-  integrity sha512-TvPgTEyPXtA1jN+yhSmEd75gQ1gI9StCpVbhr4DhVskeF4ccw3o5BIAsPeM4WdiMxbB7OPOIstaPuaYRjsnQ3g==
+"@snapshot-labs/sx@^0.1.0-beta.4":
+  version "0.1.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.4.tgz#13fc26cac44fbf0d1f080c889bc32b9d2f270835"
+  integrity sha512-3S7PS3bCOlFFq2f7a2fjIpixMwjcOxrvQ9/Qj6VAokrg3OeW7jtgkPY/Wfz9g6KeBHvuhFfCAA7FdCJfWx0vkQ==
   dependencies:
     "@ethersproject/providers" "^5.5.3"
     "@ethersproject/wallet" "^5.6.0"

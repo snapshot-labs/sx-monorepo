@@ -20,7 +20,7 @@
     "@snapshot-labs/lock": "^0.1.7",
     "@snapshot-labs/pineapple": "^0.1.0-beta.0",
     "@snapshot-labs/snapshot.js": "^0.3.71",
-    "@snapshot-labs/sx": "^0.1.0-beta.2",
+    "@snapshot-labs/sx": "^0.1.0-beta.4",
     "@vueuse/core": "^8.3.1",
     "@walletconnect/client": "^1.7.7",
     "dayjs": "^1.11.1",
