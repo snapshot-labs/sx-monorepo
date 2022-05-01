@@ -4,14 +4,21 @@ import { pin } from '@snapshot-labs/pineapple';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useTxStatus } from '@/composables/useTxStatus';
 import { useAccount } from '@/composables/useAccount';
+import { useModal } from '@/composables/useModal';
 
 export function useActions() {
   const { web3 } = useWeb3();
+  const { modalAccountOpen } = useModal();
   const auth = getInstance();
   const { pendingCount } = useTxStatus();
   const { loadVotes } = useAccount();
 
+  async function forceLogin() {
+    modalAccountOpen.value = true;
+  }
+
   async function vote(space: string, proposal: number, choice: number) {
+    if (!web3.value.account) return await forceLogin();
     const isStarkNet = web3.value.type === 'argentx';
     const account = isStarkNet ? auth.provider.value.account : auth.web3;
     const type = isStarkNet ? 'StarkNetSig' : 'EthereumSig';
@@ -35,6 +42,7 @@ export function useActions() {
     body: string,
     discussion: string
   ) {
+    if (!web3.value.account) return await forceLogin();
     const pinned = await pin({ title, body, discussion });
     if (!pinned || !pinned.cid) return;
     console.log('IPFS', pinned);

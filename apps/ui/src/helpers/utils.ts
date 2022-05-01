@@ -50,6 +50,7 @@ export function shorten(str: string, key?: any): string {
 }
 
 export function explorerUrl(network, str: string, type = 'address'): string {
+  if (network === 'starknet') type = 'contract';
   return `${networks[network].explorer}/${type}/${str}`;
 }
 

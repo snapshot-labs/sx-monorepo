@@ -5,6 +5,12 @@ import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { formatUnits } from '@ethersproject/units';
 import { getNames } from '@/helpers/ens';
 
+networks['starknet'] = {
+  key: 'starknet',
+  name: 'StarkNet',
+  explorer: 'https://goerli.voyager.online'
+};
+
 let auth;
 const defaultNetwork: any =
   import.meta.env.VITE_DEFAULT_NETWORK || Object.keys(networks)[0];
@@ -62,7 +68,7 @@ export function useWeb3() {
           network = { chainId: safeChainId };
           accounts = [safeAddress];
         } else if (connector === 'argentx') {
-          network = { chainId: 'starknet' };
+          network = { key: 'starknet', chainId: 'starknet' };
           accounts = [auth.provider.value.selectedAddress];
         } else {
           [network, accounts] = await Promise.all([
