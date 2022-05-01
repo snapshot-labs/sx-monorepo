@@ -25,7 +25,7 @@ watch(modalOpen, val => {
 
 watch(web3Account, async () => {
   if (web3Account.value) return await loadVotes();
-	voted.value = [];
+  voted.value = [];
 });
 </script>
 
