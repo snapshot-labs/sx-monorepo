@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
@@ -24,8 +23,8 @@ checkpoint.seedCheckpoints(checkpoints).then(() => checkpoint.start());
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(bodyParser.json({ limit: '4mb' }));
-app.use(bodyParser.urlencoded({ limit: '4mb', extended: false }));
+app.use(express.json({ limit: '4mb' }));
+app.use(express.urlencoded({ limit: '4mb', extended: false }));
 app.use(cors({ maxAge: 86400 }));
 app.use('/', checkpoint.graphql);
 
