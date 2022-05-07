@@ -1,13 +1,15 @@
+import * as crypto from 'crypto';
 import { AsyncMySqlPool } from '../mysql';
 import { Logger } from '../utils/logger';
 
 const Table = {
   Checkpoints: '_checkpoints',
-  Metadata: '_metadata'
+  Metadata: '_metadatas' // using plural names to confirm with standards entities
 };
 
 const Fields = {
   Checkpoints: {
+    Id: 'id',
     BlockNumber: 'block_number',
     ContractAddress: 'contract_address'
   },
@@ -25,6 +27,26 @@ export interface CheckpointRecord {
   blockNumber: number;
   contractAddress: string;
 }
+
+/**
+ * Metadata Ids stored in the CheckpointStore.
+ *
+ */
+export enum MetadataId {
+  LastIndexedBlock = 'last_indexed_block'
+}
+
+const CheckpointIdSize = 10;
+
+/**
+ * Generates a unique hex based on the contract address and block number.
+ * Used when as id for storing checkpoints records.
+ *
+ */
+export const getCheckpointId = (contract: string, block: number): string => {
+  const data = `${contract}${block}`;
+  return crypto.createHash('sha256').update(data).digest('hex').slice(-CheckpointIdSize);
+};
 
 /**
  * Checkpoints store is a data store class for managing
@@ -48,9 +70,10 @@ export class CheckpointsStore {
     this.log.debug('creating checkpoints tables...');
 
     let sql = `CREATE TABLE IF NOT EXISTS ${Table.Checkpoints} (
+      ${Fields.Checkpoints.Id} VARCHAR(${CheckpointIdSize}) NOT NULL,
       ${Fields.Checkpoints.BlockNumber} BIGINT NOT NULL,
       ${Fields.Checkpoints.ContractAddress} VARCHAR(66) NOT NULL,
-      PRIMARY KEY (${Fields.Checkpoints.BlockNumber}, ${Fields.Checkpoints.ContractAddress})
+      PRIMARY KEY (${Fields.Checkpoints.Id})
     );`;
 
     sql += `\nCREATE TABLE IF NOT EXISTS ${Table.Metadata} (
@@ -98,7 +121,8 @@ export class CheckpointsStore {
     }
     await this.mysql.queryAsync(`INSERT IGNORE INTO ${Table.Checkpoints} VALUES ?`, [
       checkpoints.map(checkpoint => {
-        return [checkpoint.blockNumber, checkpoint.contractAddress];
+        const id = getCheckpointId(checkpoint.contractAddress, checkpoint.blockNumber);
+        return [id, checkpoint.blockNumber, checkpoint.contractAddress];
       })
     ]);
   }

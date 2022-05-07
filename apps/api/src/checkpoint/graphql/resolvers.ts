@@ -22,11 +22,15 @@ export async function queryMulti(parent, args, context: ResolverContext, info) {
   }
   const first = args?.first || 1000;
   const skip = args?.skip || 0;
-  const orderBy = 'created';
-  const orderDirection = 'DESC';
+
+  let orderBySql = '';
+  if (args.orderBy) {
+    orderBySql = `ORDER BY ${args.orderBy} ${args.orderDirection || 'DESC'}`;
+  }
+
   params.push(skip, first);
 
-  const query = `SELECT * FROM ${info.fieldName} ${whereSql} ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?`;
+  const query = `SELECT * FROM ${info.fieldName} ${whereSql} ${orderBySql} LIMIT ?, ?`;
   log.debug({ sql: query, args }, 'executing multi query');
 
   return await mysql.queryAsync(query, params);

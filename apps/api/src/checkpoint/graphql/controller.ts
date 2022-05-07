@@ -1,5 +1,6 @@
 import {
   buildSchema,
+  GraphQLEnumType,
   GraphQLField,
   GraphQLFieldConfig,
   GraphQLFieldConfigMap,
@@ -29,6 +30,14 @@ interface EntityQueryResolvers<Context = ResolverContext> {
   singleEntityResolver: GraphQLFieldResolver<unknown, Context>;
   multipleEntityResolver: GraphQLFieldResolver<unknown, Context>;
 }
+
+const GraphQLOrderDirection = new GraphQLEnumType({
+  name: 'OrderDirection',
+  values: {
+    asc: { value: 'ASC' },
+    desc: { value: 'DESC' }
+  }
+});
 
 /**
  * Controller for performing actions based on the graphql schema provided to its
@@ -83,15 +92,18 @@ export class GqlEntityController {
    * ```
    *
    */
-  public createEntityQuerySchema(
+  public generateQueryFields(
+    schemaObjects?: GraphQLObjectType[],
     resolvers: EntityQueryResolvers = {
       singleEntityResolver: querySingle,
       multipleEntityResolver: queryMulti
     }
-  ): GraphQLObjectType {
+  ): GraphQLFieldConfigMap<any, any> {
+    schemaObjects = schemaObjects || this.schemaObjects;
+
     const queryFields: GraphQLFieldConfigMap<any, any> = {};
 
-    this.schemaObjects.forEach(type => {
+    schemaObjects.forEach(type => {
       queryFields[type.name.toLowerCase()] = this.getSingleEntityQueryConfig(
         type,
         resolvers.singleEntityResolver
@@ -102,10 +114,7 @@ export class GqlEntityController {
       );
     });
 
-    return new GraphQLObjectType({
-      name: 'Query',
-      fields: queryFields
-    });
+    return queryFields;
   }
 
   /**
@@ -166,6 +175,8 @@ export class GqlEntityController {
     // TODO(perfectmak): wrap this in a transaction
     return mysql.queryAsync(sql.trimEnd());
   }
+
+  public static generateQueryFields() {}
 
   /**
    * Returns a list of objects defined within the graphql typedefs.
@@ -249,7 +260,7 @@ export class GqlEntityController {
           type: GraphQLString
         },
         orderDirection: {
-          type: GraphQLString
+          type: GraphQLOrderDirection
         },
         where: { type: new GraphQLInputObjectType(whereInputConfig) }
       },
