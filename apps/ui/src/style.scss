@@ -151,3 +151,16 @@ a,
   @apply bg-skin-text animate-pulse-fast;
 }
 
+
+.hero {
+  background-repeat: repeat;
+  background-position: top center;
+}
+
+.dark .hero {
+  background-image: url('@/assets/grid-dark.svg');
+}
+
+.light .hero {
+  background-image: url('@/assets/grid-light.svg');
+}

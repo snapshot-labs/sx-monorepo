@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="34px" height="34px" viewBox="0 0 34 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-10.000000, -10.000000)" fill="#FFFFFF">
+            <g id="Group" transform="translate(10.000000, 10.000000)">
+                <path d="M34,11.2 C34,5.0144108 28.8960461,0 22.6,0 C16.3039539,0 11.2,5.0144108 11.2,11.2 L34,11.2 Z" id="Oval"></path>
+                <path d="M39.2,28 C39.2,21.8144108 34.0960461,16.8 27.8,16.8 C21.5039539,16.8 16.4,21.8144108 16.4,28 L39.2,28 Z" id="Oval" transform="translate(27.800000, 22.400000) rotate(-270.000000) translate(-27.800000, -22.400000) "></path>
+                <path d="M22.8,34 C22.8,27.8144108 17.6960461,22.8 11.4,22.8 C5.10395385,22.8 0,27.8144108 0,34 L22.8,34 Z" id="Oval" transform="translate(11.400000, 28.400000) rotate(-180.000000) translate(-11.400000, -28.400000) "></path>
+                <path d="M17.2,17.2 C17.2,11.0144108 12.0960461,6 5.8,6 C-0.496046148,6 -5.6,11.0144108 -5.6,17.2 L17.2,17.2 Z" id="Oval" transform="translate(5.800000, 11.600000) rotate(-90.000000) translate(-5.800000, -11.600000) "></path>
+            </g>
+        </g>
+    </g>
+</svg>
