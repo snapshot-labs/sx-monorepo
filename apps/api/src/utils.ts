@@ -10,7 +10,7 @@ export function toAddress(bn) {
   }
 }
 
-export function getUrl(uri, gateway = 'cloudflare-ipfs.com') {
+export function getUrl(uri, gateway = 'pineapple.fyi') {
   const ipfsGateway = `https://${gateway}`;
   if (!uri) return null;
   if (
