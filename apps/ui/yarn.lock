@@ -403,6 +403,26 @@
     human-id "^1.0.2"
     prettier "^1.19.1"
 
+"@coinbase/wallet-sdk@^3.0.11":
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/@coinbase/wallet-sdk/-/wallet-sdk-3.0.11.tgz#3277a2f5252d736b27541e5602a4fd5111e63738"
+  integrity sha512-53FA6wFuFyNeDr68hUcu42ufOgkdMxK3Nhn1CNsVvvA84se1dofD03t+ZfvDydlwviFoajgriQIFIWKbxRvojA==
+  dependencies:
+    "@metamask/safe-event-emitter" "2.0.0"
+    bind-decorator "^1.0.11"
+    bn.js "^5.1.1"
+    clsx "^1.1.0"
+    eth-block-tracker "4.4.3"
+    eth-json-rpc-filters "4.2.2"
+    eth-rpc-errors "4.0.2"
+    js-sha256 "0.9.0"
+    json-rpc-engine "6.1.0"
+    keccak "^3.0.1"
+    preact "^10.5.9"
+    qs "^6.10.3"
+    rxjs "^6.6.3"
+    stream-browserify "^3.0.0"
+
 "@electron/get@^1.13.0":
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.14.1.tgz#16ba75f02dffb74c23965e72d617adc721d27f40"
@@ -1254,18 +1274,18 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@snapshot-labs/lock@^0.1.7":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.1.7.tgz#ec7127f46af7506c4029632760f9bab51c6b8d70"
-  integrity sha512-bxOeWjCkwyN+2NfcvMd3Q0jbGPYKx7vgrf4mgWkeVkB3x8cZtjxSPmo+NBdrDEenEXajztvbsGSmksl06xLAmw==
+"@snapshot-labs/lock@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.1.8.tgz#36a26513701185af0d293e5436e09b2919c68d84"
+  integrity sha512-YpnGB2t+IMIjQfg+gYHonKUTCU7lo/oXkJENgW9wC4wOZ4XMI/uLZEO2fHKN4r8iP7gerxUMSTT5VGKMV4T0+w==
   dependencies:
+    "@coinbase/wallet-sdk" "^3.0.11"
     "@gnosis.pm/safe-apps-provider" "^0.8.0"
     "@gnosis.pm/safe-apps-sdk" "^6.1.1"
     "@portis/web3" "^4.0.6"
     "@toruslabs/torus-embed" "^1.12.1"
     "@walletconnect/web3-provider" "1.4.1"
     fortmatic "^2.2.1"
-    walletlink "^2.4.0"
 
 "@snapshot-labs/pineapple@^0.1.0-beta.0":
   version "0.1.0-beta.0"
@@ -4147,10 +4167,10 @@ graphql-tag@^2.12.6:
   dependencies:
     tslib "^2.1.0"
 
-graphql@^16.4.0:
-  version "16.4.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.4.0.tgz#bb10b1b4683045dedcb67000eb4ad134a36c59e6"
-  integrity sha512-tYDNcRvKCcfHREZYje3v33NSrSD/ZpbWWdPtBtUUuXx9NCo/2QDxYzNqCnMvfsrnbwRpEHMovVrPu/ERoLrIRg==
+graphql@^16.5.0:
+  version "16.5.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.5.0.tgz#41b5c1182eaac7f3d47164fb247f61e4dfb69c85"
+  integrity sha512-qbHgh8Ix+j/qY+a/ZcJnFQ+j8ezakqPiHwPiZhV/3PgGlgf96QMBB5/f2rkiC9sgLoy/xvT6TSiaf2nTHJh5iA==
 
 har-schema@^2.0.0:
   version "2.0.0"
@@ -5727,6 +5747,13 @@ qrcode@1.4.4:
     pngjs "^3.3.0"
     yargs "^13.2.4"
 
+qs@^6.10.3:
+  version "6.10.3"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.10.3.tgz#d6cde1b2ffca87b5aa57889816c5f81535e22e8e"
+  integrity sha512-wr7M2E0OFRfIfJZjKGieI8lBKb7fRCH4Fv5KNPEs7gJ8jadvotdsS08PzOKR7opXhZ/Xkjtt3WF9g38drmyRqQ==
+  dependencies:
+    side-channel "^1.0.4"
+
 qs@~6.5.2:
   version "6.5.3"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.3.tgz#3aeeffc91967ef6e35c0e488ef46fb296ab76aad"
@@ -6655,10 +6682,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.6.3:
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
-  integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
+typescript@^4.6.4:
+  version "4.6.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.4.tgz#caa78bbc3a59e6a5c510d35703f6a09877ce45e9"
+  integrity sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==
 
 unbox-primitive@^1.0.1:
   version "1.0.1"
@@ -6845,25 +6872,6 @@ vue@^3.2.33:
     "@vue/runtime-dom" "3.2.33"
     "@vue/server-renderer" "3.2.33"
     "@vue/shared" "3.2.33"
-
-walletlink@^2.4.0:
-  version "2.4.6"
-  resolved "https://registry.yarnpkg.com/walletlink/-/walletlink-2.4.6.tgz#efaa950c16447bf34e186495b55755b3d7157725"
-  integrity sha512-CtfyRa3Tc9yTRFIoE0P0rhiq57WB6/XnJ0Fyc3tmSR4yntFP29sqp+SCDOI0R9Ot20gAKaYb2w/nnmLRrhfiJQ==
-  dependencies:
-    "@metamask/safe-event-emitter" "2.0.0"
-    bind-decorator "^1.0.11"
-    bn.js "^5.1.1"
-    clsx "^1.1.0"
-    eth-block-tracker "4.4.3"
-    eth-json-rpc-filters "4.2.2"
-    eth-rpc-errors "4.0.2"
-    js-sha256 "0.9.0"
-    json-rpc-engine "6.1.0"
-    keccak "^3.0.1"
-    preact "^10.5.9"
-    rxjs "^6.6.3"
-    stream-browserify "^3.0.0"
 
 wcwidth@^1.0.1:
   version "1.0.1"
