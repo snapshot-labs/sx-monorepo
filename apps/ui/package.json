@@ -29,7 +29,7 @@
     "graphql-tag": "^2.12.6",
     "scrollmonitor": "^1.2.9",
     "vue": "^3.2.33",
-    "vue-router": "^4.0.14"
+    "vue-router": "^4.0.15"
   },
   "devDependencies": {
     "@iconify-json/heroicons-outline": "^1.1.1",
