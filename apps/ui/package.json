@@ -22,7 +22,7 @@
     "@snapshot-labs/snapshot.js": "^0.3.71",
     "@snapshot-labs/sx": "^0.1.0-beta.4",
     "@vueuse/core": "^8.3.1",
-    "@walletconnect/client": "^1.7.7",
+    "@walletconnect/client": "^1.7.8",
     "dayjs": "^1.11.1",
     "electron": "^18.2.0",
     "graphql": "^16.4.0",
