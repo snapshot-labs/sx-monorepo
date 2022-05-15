@@ -127,30 +127,10 @@ a,
   @apply block border-y border-x-0 sm:border-x sm:rounded-lg;
 }
 
-// Shot UI kit
-
-.s-input {
-  @apply text-skin-heading border border-skin-border focus-within:border-skin-link block rounded-[24px] py-2 px-3 w-full bg-transparent mb-3;
-}
-
-.s-label {
-  @apply block mb-1;
-}
-
-.s-compact {
-  .s-base {
-    @apply relative pt-[8px]
-  }
-
-  .s-label {
-    @apply absolute left-2 bg-skin-bg -top-[6px] px-2;
-  }
-}
 
 .lazy-loading {
   @apply bg-skin-text animate-pulse-fast;
 }
-
 
 .hero {
   background-repeat: repeat;
@@ -163,4 +143,51 @@ a,
 
 .light .hero {
   background-image: url('@/assets/grid-light.svg');
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+// Shot UI kit
+
+.s-input {
+  @apply text-skin-heading border border-skin-border focus-within:border-skin-link block rounded-[24px] py-2 px-3 w-full bg-transparent mb-3;
+}
+
+.s-label {
+  @apply block mb-1;
+}
+
+.s-box {
+  .s-base {
+    @apply relative
+  }
+
+  .s-label {
+    @apply absolute left-2 top-[4px] px-2 text-[17px];
+  }
+
+  .s-input {
+    @apply border-0 bg-skin-border rounded-lg pt-[26px] mb-[14px];
+  }
+
+  select {
+    @apply h-[64px];
+  }
+}
+
+.s-compact {
+  .s-base {
+    @apply relative pt-[8px]
+  }
+
+  .s-label {
+    @apply absolute left-2 bg-skin-bg -top-[6px] px-2;
+  }
 }

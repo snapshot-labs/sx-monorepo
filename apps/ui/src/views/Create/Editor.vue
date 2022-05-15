@@ -11,7 +11,7 @@ const key = `${id}:${draft}`;
 if (!proposals[key]) proposals[key] = {};
 </script>
 <template>
-  <Container class="pt-5 s-compact">
+  <Container class="pt-5 s-box">
     <h4 class="eyebrow mb-3">Context</h4>
     <SIString
       v-model="proposals[key].title"
@@ -25,20 +25,18 @@ if (!proposals[key]) proposals[key] = {};
       <textarea
         v-model="proposals[key].body"
         maxlength="280"
-        class="s-input mb-3 h-[140px]"
+        class="s-input mb-3 h-[120px]"
       />
       <SIString
         v-model="proposals[key].discussion"
         :definition="{
           type: 'string',
           title: 'Discussion',
-          examples: ['e.g. https://forum.balancer.fi/t/proposal...']
+          examples: ['e.g. https://forum.balancer.fi/t/proposal…']
         }"
       />
     </div>
     <h4 class="eyebrow mb-3">Execution</h4>
-  </Container>
-  <Container slim>
     <BlockExecutionEditable class="mb-4" />
   </Container>
 </template>

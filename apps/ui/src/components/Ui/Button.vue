@@ -16,7 +16,7 @@ defineProps({
 <template>
   <button
     :type="type || 'button'"
-    class="rounded-full leading-[100%] border button px-[20px] h-[46px] outline-0 text-skin-link focus-within:border-skin-link bg-skin-block-bg"
+    class="rounded-full leading-[100%] border button px-[20px] h-[46px] outline-0 text-skin-link focus-within:border-skin-link bg-skin-bg"
     :disabled="disabled || loading"
   >
     <UiLoading v-if="loading" :fill-white="primary" />

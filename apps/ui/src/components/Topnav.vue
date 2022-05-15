@@ -23,7 +23,7 @@ async function handleLogin(connector) {
 </script>
 
 <template>
-  <nav id="topnav" class="border-b w-full fixed top-0 z-10 bg-skin-block-bg">
+  <nav id="topnav" class="border-b w-full fixed top-0 z-10 bg-skin-bg">
     <div class="mx-4">
       <div class="flex items-center" style="height: 78px">
         <div class="flex-auto flex items-center">

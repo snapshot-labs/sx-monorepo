@@ -27,7 +27,7 @@ onMounted(() => {
   <div>
     <router-view v-if="key" />
     <div
-      class="fixed top-0 border-b w-full px-4 py-3 bg-skin-block-bg flex h-[79px] z-20"
+      class="fixed top-0 border-b w-full px-4 py-3 bg-skin-bg flex h-[79px] z-20"
     >
       <div class="flex-auto space-x-2">
         <router-link :to="{ name: 'overview', params: { id } }" class="mr-2">

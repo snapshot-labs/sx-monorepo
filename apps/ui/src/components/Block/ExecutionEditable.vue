@@ -14,11 +14,36 @@ function removeTx(index) {
 }
 </script>
 <template>
-  <div class="x-block">
-    <div v-if="txs.length > 0">
-      <div v-for="(tx, i) in txs" :key="i" class="border-b px-4 py-3 space-x-2">
+  <div>
+    <div class="overflow-hidden w-auto">
+      <div
+        class="mb-3 flex flex-no-wrap overflow-x-scroll no-scrollbar scrolling-touch items-start space-x-3"
+      >
+        <a class="px-4 py-3 border-b border rounded-lg block min-w-[165px]">
+          <IH-stop />
+          Send funds
+        </a>
+        <a class="px-4 py-3 border-b border rounded-lg block min-w-[165px]">
+          <IH-photograph />
+          Send NFT
+        </a>
+        <a
+          @click="modalOpen = true"
+          class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
+        >
+          <IH-chip />
+          Contract call
+        </a>
+      </div>
+    </div>
+    <div v-if="txs.length > 0" class="x-block">
+      <div
+        v-for="(tx, i) in txs"
+        :key="i"
+        class="border-b last:border-b-0 px-4 py-3 space-x-2"
+      >
         <h4 class="inline-block">
-          <IH-document-text class="inline-block mr-1" />
+          <IH-chip class="inline-block mr-1" />
           {{ shorten(tx.to) }}
         </h4>
         <span class="s-label !inline-block">{{ tx.name }}</span>
@@ -29,11 +54,6 @@ function removeTx(index) {
         </span>
       </div>
     </div>
-    <a @click="modalOpen = true" class="w-full">
-      <h4 class="px-4 py-3">
-        <IH-plus-sm class="inline-block" /> Add transaction
-      </h4>
-    </a>
     <teleport to="#modal">
       <ModalTransaction
         :open="modalOpen"

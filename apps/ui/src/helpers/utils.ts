@@ -112,12 +112,16 @@ export function abiToDefinition(abi) {
     definition.properties[input.name] = {};
     let type = 'string';
     if (input.type === 'bool') type = 'boolean';
-    if (input.type === 'uint256')
+    if (input.type === 'uint256') {
       definition.properties[input.name].format = 'uint256';
-    if (input.type === 'address')
+      definition.properties[input.name].examples = ['0'];
+    }
+    if (input.type === 'address') {
       definition.properties[input.name].format = 'address';
+      definition.properties[input.name].examples = ['0x0000…'];
+    }
     definition.properties[input.name].type = type;
-    definition.properties[input.name].title = input.name;
+    definition.properties[input.name].title = `${input.name} (${input.type})`;
   });
   return definition;
 }

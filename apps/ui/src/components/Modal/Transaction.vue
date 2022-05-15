@@ -86,7 +86,7 @@ watch(
     <template v-slot:header>
       <h3 v-text="'Add transaction'" />
     </template>
-    <div class="s-compact p-4">
+    <div class="s-box p-4">
       <div class="relative">
         <UiLoading v-if="loading" class="absolute top-[14px] right-3" />
         <SIString
