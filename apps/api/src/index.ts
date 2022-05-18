@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
-import Checkpoint, { LogLevel } from './checkpoint';
+import Checkpoint, { LogLevel } from '@snapshot-labs/checkpoint';
 import config from './config.json';
 import * as writer from './writer';
 import checkpoints from './checkpoints.json';
