@@ -21,7 +21,7 @@
     "@snapshot-labs/pineapple": "^0.1.0-beta.0",
     "@snapshot-labs/snapshot.js": "^0.3.71",
     "@snapshot-labs/sx": "^0.1.0-beta.4",
-    "@vueuse/core": "^8.4.2",
+    "@vueuse/core": "^8.5.0",
     "@walletconnect/client": "^1.7.8",
     "dayjs": "^1.11.1",
     "electron": "^18.2.3",
