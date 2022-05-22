@@ -35,6 +35,7 @@ if (!proposals[key]) proposals[key] = {};
           examples: ['e.g. https://forum.balancer.fi/t/proposal…']
         }"
       />
+      <Preview :url="proposals[key].discussion" />
     </div>
     <h4 class="eyebrow mb-3">Execution</h4>
     <BlockExecutionEditable class="mb-4" />

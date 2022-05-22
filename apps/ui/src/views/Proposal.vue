@@ -81,6 +81,10 @@ onMounted(async () => {
             <IH-chat-alt class="inline-block mr-2" /> Discussion
             <IH-external-link class="float-right mt-1" />
           </h4>
+          <Preview
+            :url="discussion"
+            class="!border-0 !border-t !rounded-none"
+          />
         </a>
       </Container>
       <Container>
