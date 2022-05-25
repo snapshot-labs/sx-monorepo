@@ -14,7 +14,7 @@
     "@argent/get-starknet": "^3.4.3",
     "@braintree/sanitize-url": "^6.0.0",
     "@ensdomains/eth-ens-namehash": "^2.0.15",
-    "@ethersproject/address": "^5.4.0",
+    "@ethersproject/address": "^5.6.1",
     "@ethersproject/providers": "^5.6.4",
     "@ethersproject/units": "^5.6.0",
     "@snapshot-labs/lock": "^0.1.8",
