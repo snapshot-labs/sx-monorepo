@@ -16,7 +16,7 @@
     "@ensdomains/eth-ens-namehash": "^2.0.15",
     "@ethersproject/address": "^5.4.0",
     "@ethersproject/providers": "^5.6.4",
-    "@ethersproject/units": "^5.6.0",
+    "@ethersproject/units": "^5.6.1",
     "@snapshot-labs/lock": "^0.1.8",
     "@snapshot-labs/pineapple": "^0.1.0-beta.0",
     "@snapshot-labs/snapshot.js": "^0.3.71",
