@@ -138,11 +138,11 @@ a,
 }
 
 .dark .hero {
-  background-image: url('@/assets/grid-dark.svg');
+  background-image: radial-gradient(400px circle at bottom, transparent, var(--bg-color)), url('@/assets/grid-dark.svg');
 }
 
 .light .hero {
-  background-image: url('@/assets/grid-light.svg');
+  background-image: radial-gradient(400px circle at bottom, transparent, var(--bg-color)), url('@/assets/grid-light.svg');
 }
 
 .no-scrollbar::-webkit-scrollbar {

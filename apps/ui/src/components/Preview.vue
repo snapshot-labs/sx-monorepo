@@ -4,16 +4,14 @@ import { debouncedWatch } from '@vueuse/core';
 
 const props = defineProps(['url']);
 const preview = ref(false);
+const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
-onMounted(async () => {
-  await update(props.url);
-});
+onMounted(async () => await update(props.url));
 
 async function update(val) {
   try {
     preview.value = false;
     new URL(val);
-    const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
     const url = `https://cdn.iframe.ly/api/iframely?url=${encodeURI(
       val
     )}&api_key=${IFRAMELY_API_KEY}`;
@@ -44,13 +42,12 @@ debouncedWatch(
       </div>
     </div>
     <div class="px-4 py-3 overflow-hidden">
-      <div class="text-skin-link truncate">{{ preview.meta.title }}</div>
+      <div v-text="preview.meta.title" class="text-skin-link truncate" />
       <div
         v-if="preview.meta.description"
+        v-text="preview.meta.description"
         class="text-sm text-skin-text truncate"
-      >
-        {{ preview.meta.description }}
-      </div>
+      />
     </div>
   </div>
 </template>

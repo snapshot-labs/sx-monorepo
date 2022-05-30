@@ -15,7 +15,7 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div class="py-7 mb-6 border-b">
+    <div class="py-8 mb-6 border-b hero">
       <Container class="max-w-screen-md">
         <div v-text="'Snapshot X'" class="eyebrow mb-3" />
         <h1 class="mb-5 mono">Where decisions<br />get made.</h1>

@@ -50,7 +50,7 @@ onMounted(async () => {
             class="mb-2 border-[3px] border-skin-bg !bg-skin-bg"
           />
         </router-link>
-        <h1>{{ space.name }}</h1>
+        <h1 v-text="space.name" />
         <div>
           <b class="text-skin-link">{{ space.proposal_count }}</b> proposals ·
           <b class="text-skin-link">{{ space.vote_count }}</b> votes
