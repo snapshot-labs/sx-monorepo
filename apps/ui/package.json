@@ -24,7 +24,7 @@
     "@vueuse/core": "^8.5.0",
     "@walletconnect/client": "^1.7.8",
     "dayjs": "^1.11.2",
-    "electron": "^19.0.0",
+    "electron": "^19.0.3",
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
     "scrollmonitor": "^1.2.9",
