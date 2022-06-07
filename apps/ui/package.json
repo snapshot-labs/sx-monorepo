@@ -28,7 +28,7 @@
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
     "scrollmonitor": "^1.2.9",
-    "vue": "^3.2.36",
+    "vue": "^3.2.37",
     "vue-router": "^4.0.15"
   },
   "devDependencies": {
