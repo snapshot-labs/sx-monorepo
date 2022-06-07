@@ -35,7 +35,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.5.1",
     "jest-mock-extended": "^2.0.6",
-    "pino-pretty": "^7.6.1",
     "prettier": "^2.6.1",
     "ts-jest": "^27.1.4"
   }
