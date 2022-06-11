@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { shorten } from '@/helpers/utils';
 
 const txs = ref([]);
-const modalOpen = ref(false);
+const modalOpen = ref({});
 
 function addTx(tx) {
   txs.value.push(tx);
@@ -19,16 +19,22 @@ function removeTx(index) {
       <div
         class="mb-3 flex flex-no-wrap overflow-x-scroll no-scrollbar scrolling-touch items-start space-x-3"
       >
-        <a class="px-4 py-3 border-b border rounded-lg block min-w-[165px]">
+        <a
+          @click="modalOpen.sendToken = true"
+          class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
+        >
           <IH-stop />
-          Send funds
+          Send token
         </a>
-        <a class="px-4 py-3 border-b border rounded-lg block min-w-[165px]">
+        <a
+          @click="modalOpen.sendNft = true"
+          class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
+        >
           <IH-photograph />
           Send NFT
         </a>
         <a
-          @click="modalOpen = true"
+          @click="modalOpen.contractCall = true"
           class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
         >
           <IH-chip />
@@ -55,9 +61,17 @@ function removeTx(index) {
       </div>
     </div>
     <teleport to="#modal">
+      <ModalSendToken
+        :open="modalOpen.sendToken"
+        @close="modalOpen.sendToken = false"
+      />
+      <ModalSendNft
+        :open="modalOpen.sendNft"
+        @close="modalOpen.sendNft = false"
+      />
       <ModalTransaction
-        :open="modalOpen"
-        @close="modalOpen = false"
+        :open="modalOpen.contractCall"
+        @close="modalOpen.contractCall = false"
         @add="addTx"
       />
     </teleport>
