@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { formatUnits } from '@ethersproject/units';
 import spaces from '@/helpers/spaces.json';
@@ -9,6 +9,12 @@ defineProps({ space: Object });
 
 const assets = ref([]);
 const loading = ref(false);
+
+const totalQuote = computed(() =>
+  assets.value.reduce((acc, asset) => {
+    return acc + asset.quote;
+  }, 0)
+);
 
 onMounted(async () => {
   const treasury = spaces.pasta.wallets[0];
@@ -41,18 +47,21 @@ onMounted(async () => {
       <a
         :href="explorerUrl('1', spaces.pasta.wallets[0])"
         target="_blank"
-        class="px-4 py-3 block"
+        class="flex justify-between items-center px-4 py-3 block"
       >
-        <h4>
-          <Stamp
-            type="avatar"
-            :id="spaces.pasta.wallets[0]"
-            :size="44"
-            class="mr-2"
-          />
-          {{ shorten(spaces.pasta.wallets[0]) }}
-          <IH-external-link class="float-right mt-2" />
-        </h4>
+        <Stamp
+          type="avatar"
+          :id="spaces.pasta.wallets[0]"
+          :size="44"
+          class="mr-2"
+        />
+        <div class="flex-1">
+          <h4>
+            {{ shorten(spaces.pasta.wallets[0]) }}
+          </h4>
+          <div class="text-skin-text">${{ _n(totalQuote) }}</div>
+        </div>
+        <IH-external-link class="float-right mt-2" />
       </a>
     </div>
     <div class="x-block">
