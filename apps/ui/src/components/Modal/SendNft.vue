@@ -1,6 +1,10 @@
 <script setup>
 import { reactive } from 'vue';
 
+defineProps({
+  open: Boolean
+});
+
 const emit = defineEmits(['close']);
 
 const form = reactive({
