@@ -9,7 +9,7 @@ const props = defineProps({
 
 defineEmits(['close']);
 
-const { proposals } = useEditor();
+const { proposals, removeDraft } = useEditor();
 const { open } = toRefs(props);
 </script>
 
@@ -20,16 +20,25 @@ const { open } = toRefs(props);
     </template>
     <div>
       <div v-if="Object.keys(proposals).length > 0">
-        <router-link
-          @click="$emit('close')"
+        <div
           v-for="(proposal, i) in proposals"
           :key="i"
-          :to="{ name: 'editor', params: { id: space, key: i.split(':')[1] } }"
-          class="py-3 px-4 border-b block last:border-b-0"
+          class="py-3 px-4 border-b last:border-b-0 flex justify-between items-center"
         >
-          {{ proposal.title || 'Untitled' }}
-          <span class="float-right">#{{ i.split(':')[1] }}</span>
-        </router-link>
+          <router-link
+            @click="$emit('close')"
+            :to="{
+              name: 'editor',
+              params: { id: space, key: i.split(':')[1] }
+            }"
+          >
+            {{ proposal.title || 'Untitled' }}
+            <span class="text-skin-text">#{{ i.split(':')[1] }}</span>
+          </router-link>
+          <a @click="removeDraft(i)">
+            <IH-trash class="mr-2" />
+          </a>
+        </div>
       </div>
       <div v-else class="p-4 text-center">There isn't any drafts yet!</div>
     </div>
