@@ -1289,10 +1289,10 @@
     "@walletconnect/web3-provider" "1.4.1"
     fortmatic "^2.2.1"
 
-"@snapshot-labs/pineapple@^0.1.0-beta.0":
-  version "0.1.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/pineapple/-/pineapple-0.1.0-beta.0.tgz#5bf27ab1124bbde882828391cde1636c20c5d549"
-  integrity sha512-zsg1ZRsO/X/hW7oB1i8+yykPeIjSj6lFwL115EDXXYzRPjLO/EDfHM7LTFZZbWSB+4GeXw21FkH/jTfVLuefjg==
+"@snapshot-labs/pineapple@^0.1.0-beta.1":
+  version "0.1.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/pineapple/-/pineapple-0.1.0-beta.1.tgz#4b136b778bff741c85df474ebfa202e8b1c9969a"
+  integrity sha512-oWqABbp/AM7rP/DmbAwx+eoOU77xa6JaQBXnLLuTB0/Vka9a7w0ti1IlVM6qbILMvjfttCHKPXVYvre6jNB7lw==
   dependencies:
     cross-fetch "^3.1.5"
 
