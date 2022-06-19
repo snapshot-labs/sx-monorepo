@@ -34,10 +34,10 @@
     use-sync-external-store "^1.0.0"
     zen-observable-ts "^1.2.0"
 
-"@argent/get-starknet@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@argent/get-starknet/-/get-starknet-4.0.2.tgz#de0a0366bdc3db1ebf2037919c43b2d599e21e1c"
-  integrity sha512-a/DZrmOJ//6HkIgO2EszQYyWjiX5U3aCwa57ftkPcVdVnSo3TnDg7zEDyyw2OBocSNn4wUcOxrP/Irdu97p32Q==
+"@argent/get-starknet@^4.1.3":
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/@argent/get-starknet/-/get-starknet-4.1.3.tgz#e6604aa39f7c812d0c79ef24cc080a55795d7e8f"
+  integrity sha512-G3xFXTM8hNyr2V3bp82P75/tWvhE424ShhpXqTmxzH+3O+fbPEYRhw4btp6VxTO8VTxSdz9M+OMVIdP7xEBEFQ==
   dependencies:
     get-starknet "^1.0.0"
 
