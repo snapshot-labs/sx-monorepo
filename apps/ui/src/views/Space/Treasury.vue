@@ -1,14 +1,13 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue';
-import snapshot from '@snapshot-labs/snapshot.js';
+import { onMounted, computed } from 'vue';
 import { formatUnits } from '@ethersproject/units';
+import { useBalances } from '@/composables/useBalances';
 import spaces from '@/helpers/spaces.json';
 import { _n, shorten, explorerUrl } from '@/helpers/utils';
 
 defineProps({ space: Object });
 
-const assets = ref([]);
-const loading = ref(false);
+const { loading, assets, loadBalances } = useBalances();
 
 const totalQuote = computed(() =>
   assets.value.reduce((acc, asset) => {
@@ -16,25 +15,8 @@ const totalQuote = computed(() =>
   }, 0)
 );
 
-onMounted(async () => {
-  const treasury = spaces.pasta.wallets[0];
-  loading.value = true;
-  const key = 'ckey_2d082caf47f04a46947f4f212a8';
-  const url = `https://api.covalenthq.com/v1/1/address/${treasury}/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=true&key=${key}`;
-  const results = await snapshot.utils.getJSON(url);
-  const ether = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-  const etherItem = results.data.items.find(
-    item => item.contract_address === ether
-  );
-  assets.value = [
-    etherItem,
-    ...results.data.items.filter(
-      item =>
-        formatUnits(item.balance || 0, item.contract_decimals || 0) > 0.001 &&
-        item.contract_address !== ether
-    )
-  ];
-  loading.value = false;
+onMounted(() => {
+  loadBalances(spaces.pasta.wallets[0]);
 });
 </script>
 

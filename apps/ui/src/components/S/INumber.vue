@@ -1,23 +1,36 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
-  modelValue: Number,
+  value: [Number, String],
   definition: Object
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['input']);
 
-const input = ref(props.modelValue || props.definition.default || undefined);
+const dirty = ref(false);
 
-watch(input, () => emit('update:modelValue', parseFloat(input.value)));
+const inputValue = computed({
+  get() {
+    if (!props.value && !dirty.value && props.definition.default) {
+      return props.definition.default;
+    }
+
+    return props.value;
+  },
+  set(newValue) {
+    dirty.value = true;
+
+    emit('input', newValue);
+  }
+});
 </script>
 
 <template>
   <SBase :definition="definition">
     <input
       type="number"
-      v-model="input"
+      v-model="inputValue"
       class="s-input"
       :placeholder="definition.examples && definition.examples[0]"
     />
