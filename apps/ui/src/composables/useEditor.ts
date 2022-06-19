@@ -6,5 +6,9 @@ const proposals = reactive(lsGet('proposals', {}));
 export function useEditor() {
   watch(proposals, () => lsSet('proposals', proposals));
 
-  return { proposals };
+  function removeDraft(key) {
+    delete proposals[key];
+  }
+
+  return { proposals, removeDraft };
 }

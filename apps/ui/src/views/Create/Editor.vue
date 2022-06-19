@@ -1,7 +1,9 @@
 <script setup>
+import { watch } from 'vue';
 import { useEditor } from '@/composables/useEditor';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
+const router = useRouter();
 const route = useRoute();
 const { proposals } = useEditor();
 
@@ -9,9 +11,15 @@ const id = route.params.id;
 const draft = route.params.key;
 const key = `${id}:${draft}`;
 if (!proposals[key]) proposals[key] = {};
+
+watch(proposals, () => {
+  if (!proposals[key]) {
+    router.push({ name: 'editor' });
+  }
+});
 </script>
 <template>
-  <Container class="pt-5 s-box">
+  <Container class="pt-5 s-box" v-if="proposals[key]">
     <h4 class="eyebrow mb-3">Context</h4>
     <SIString
       v-model="proposals[key].title"
