@@ -6,6 +6,10 @@ import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
 import { getABI } from '@/helpers/etherscan';
 import { abiToDefinition, clone } from '@/helpers/utils';
 
+defineProps({
+  open: Boolean
+});
+
 const showAbiInput = ref(false);
 const abiStr = ref('');
 const method = ref({});

@@ -3,7 +3,11 @@ import { ref } from 'vue';
 import { shorten } from '@/helpers/utils';
 
 const txs = ref([]);
-const modalOpen = ref({});
+const modalOpen = ref({
+  sendToken: false,
+  sendNft: false,
+  contractCall: false
+});
 
 function addTx(tx) {
   txs.value.push(tx);
