@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref, computed, watch, nextTick, Ref } from 'vue';
+import { reactive, ref, computed, watch, onMounted, nextTick, Ref } from 'vue';
 import { formatUnits } from '@ethersproject/units';
 import { useBalances } from '@/composables/useBalances';
 import { createSendTokenTransaction } from '@/helpers/transactions';
+import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 
 const props = defineProps({
@@ -23,25 +24,38 @@ const form: {
   value: string | number;
 } = reactive({
   to: '',
-  token: '',
+  token: ETH_CONTRACT,
   amount: '',
   value: ''
 });
 
 const showPicker = ref(false);
 const searchValue = ref('');
-const { loading, loaded, assets, assetsMap, loadBalances } = useBalances();
+const { loading, assets, assetsMap, loadBalances } = useBalances();
 
-const currentToken = computed(() => assetsMap.value?.get(form.token));
+const currentToken = computed(() => {
+  const token = assetsMap.value?.get(form.token);
+
+  if (!token) {
+    return {
+      contract_decimals: 18,
+      contract_name: 'Ether',
+      contract_ticker_symbol: 'ETH',
+      contract_address: ETH_CONTRACT
+    };
+  }
+
+  return token;
+});
 const formValid = computed(
   () => currentToken.value && form.to && form.amount !== ''
 );
 
-function handlePickerClick() {
-  if (!loaded.value) {
-    loadBalances(props.address);
-  }
+onMounted(() => {
+  loadBalances(props.address);
+});
 
+function handlePickerClick() {
   showPicker.value = true;
 
   nextTick(() => {

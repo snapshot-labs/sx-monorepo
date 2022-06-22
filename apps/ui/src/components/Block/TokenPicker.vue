@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { formatUnits } from '@ethersproject/units';
+import { ETH_CONTRACT } from '@/helpers/constants';
 import { _n } from '@/helpers/utils';
 
 const props = defineProps({
@@ -12,16 +13,23 @@ const props = defineProps({
 const emit = defineEmits(['pick']);
 
 const filteredAssets = computed(() =>
-  props.assets.filter(asset => {
-    return (
-      asset.contract_ticker_symbol
-        .toLocaleLowerCase()
-        .includes(props.searchValue.toLocaleLowerCase()) ||
-      asset.contract_name
-        .toLocaleLowerCase()
-        .includes(props.searchValue.toLocaleLowerCase())
-    );
-  })
+  props.assets
+    .filter(asset => {
+      return (
+        asset.contract_ticker_symbol
+          .toLocaleLowerCase()
+          .includes(props.searchValue.toLocaleLowerCase()) ||
+        asset.contract_name
+          .toLocaleLowerCase()
+          .includes(props.searchValue.toLocaleLowerCase())
+      );
+    })
+    .sort((a, b) => {
+      const isEth = asset => asset.contract_address === ETH_CONTRACT;
+      if (isEth(a)) return -1;
+      if (isEth(b)) return 1;
+      return 0;
+    })
 );
 </script>
 
