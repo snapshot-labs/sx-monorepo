@@ -1,18 +1,27 @@
-<script setup>
-import { reactive, ref, computed, watch } from 'vue';
+<script setup lang="ts">
+import { reactive, ref, computed, watch, nextTick, Ref } from 'vue';
 import { formatUnits } from '@ethersproject/units';
 import { useBalances } from '@/composables/useBalances';
-import spaces from '@/helpers/spaces.json';
-import { nextTick } from 'process';
+import { createSendTokenTransaction } from '@/helpers/transactions';
+import { clone } from '@/helpers/utils';
 
 const props = defineProps({
-  open: Boolean
+  open: Boolean,
+  address: {
+    type: String,
+    required: true
+  }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['add', 'close']);
 
-const searchInput = ref(null);
-const form = reactive({
+const searchInput: Ref<HTMLElement | null> = ref(null);
+const form: {
+  to: string;
+  token: string;
+  amount: string | number;
+  value: string | number;
+} = reactive({
   to: '',
   token: '',
   amount: '',
@@ -24,10 +33,13 @@ const searchValue = ref('');
 const { loading, loaded, assets, assetsMap, loadBalances } = useBalances();
 
 const currentToken = computed(() => assetsMap.value?.get(form.token));
+const formValid = computed(
+  () => currentToken.value && form.to && form.amount !== ''
+);
 
 function handlePickerClick() {
   if (!loaded.value) {
-    loadBalances(spaces.pasta.wallets[0]);
+    loadBalances(props.address);
   }
 
   showPicker.value = true;
@@ -70,6 +82,16 @@ function handleMaxClick() {
   }
 }
 
+function handleSubmit() {
+  const tx = createSendTokenTransaction({
+    token: currentToken.value,
+    form: clone(form)
+  });
+
+  emit('add', tx);
+  emit('close');
+}
+
 watch(
   () => props.open,
   () => {
@@ -78,7 +100,7 @@ watch(
 );
 
 watch(currentToken, token => {
-  if (!token || form.amount === '') return;
+  if (!token || typeof form.amount === 'string') return;
 
   form.value = parseFloat((form.amount * token.quote_rate).toFixed(2));
 });
@@ -144,8 +166,8 @@ watch(currentToken, token => {
       <div class="grid grid-cols-2 gap-[12px]">
         <div class="relative">
           <SINumber
-            :value="form.amount"
-            @input="handleAmountUpdate"
+            :modelValue="form.amount"
+            @update:modelValue="handleAmountUpdate"
             :definition="{
               type: 'number',
               title: 'Amount',
@@ -157,14 +179,16 @@ watch(currentToken, token => {
           >
         </div>
         <SINumber
-          :value="form.value"
-          @input="handleValueUpdate"
+          :modelValue="form.value"
+          @update:modelValue="handleValueUpdate"
           :definition="{ type: 'number', title: 'USD', examples: ['0'] }"
         />
       </div>
     </div>
     <template v-slot:footer v-if="!showPicker">
-      <UiButton class="w-full">Confirm</UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+        Confirm
+      </UiButton>
     </template>
   </UiModal>
 </template>

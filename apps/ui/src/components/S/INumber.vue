@@ -2,11 +2,11 @@
 import { ref, computed } from 'vue';
 
 const props = defineProps({
-  value: [Number, String],
+  modelValue: [Number, String],
   definition: Object
 });
 
-const emit = defineEmits(['input']);
+const emit = defineEmits(['update:modelValue']);
 
 const dirty = ref(false);
 
@@ -16,12 +16,12 @@ const inputValue = computed({
       return props.definition.default;
     }
 
-    return props.value;
+    return props.modelValue;
   },
   set(newValue) {
     dirty.value = true;
 
-    emit('input', newValue);
+    emit('update:modelValue', newValue);
   }
 });
 </script>

@@ -1,19 +1,24 @@
-<script setup>
-import { reactive, ref, computed, watch, nextTick } from 'vue';
+<script setup lang="ts">
+import { reactive, ref, computed, watch, nextTick, Ref } from 'vue';
 import { useNfts } from '@/composables/useNfts';
-import spaces from '@/helpers/spaces.json';
+import { createSendNftTransaction } from '@/helpers/transactions';
+import { clone } from '@/helpers/utils';
 
 const props = defineProps({
-  open: Boolean
+  open: Boolean,
+  address: {
+    type: String,
+    required: true
+  }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['add', 'close']);
 
-const searchInput = ref(null);
+const searchInput: Ref<HTMLElement | null> = ref(null);
 const showPicker = ref(false);
 const searchValue = ref('');
 
-const form = reactive({
+const form: { to: string; nft: string; amount: string | number } = reactive({
   to: '',
   nft: '',
   amount: ''
@@ -22,10 +27,16 @@ const form = reactive({
 const { loading, loaded, nfts, nftsMap, loadNfts } = useNfts();
 
 const currentNft = computed(() => nftsMap.value?.get(form.nft));
+const formValid = computed(
+  () =>
+    currentNft.value &&
+    form.to &&
+    (currentNft.value.type !== 'erc1155' || form.amount !== '')
+);
 
 function handlePickerClick() {
   if (!loaded.value) {
-    loadNfts(spaces.pasta.wallets[0]);
+    loadNfts(props.address);
   }
 
   showPicker.value = true;
@@ -35,6 +46,17 @@ function handlePickerClick() {
       searchInput.value.focus();
     }
   });
+}
+
+function handleSubmit() {
+  const tx = createSendNftTransaction({
+    nft: currentNft.value,
+    address: props.address,
+    form: clone(form)
+  });
+
+  emit('add', tx);
+  emit('close');
 }
 
 watch(
@@ -103,6 +125,8 @@ watch(
         </button>
       </div>
       <SINumber
+        v-if="currentNft?.type === 'erc1155'"
+        v-model="form.amount"
         :definition="{
           type: 'number',
           title: 'Amount',
@@ -111,7 +135,9 @@ watch(
       />
     </div>
     <template v-slot:footer v-if="!showPicker">
-      <UiButton class="w-full">Confirm</UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+        Confirm
+      </UiButton>
     </template>
   </UiModal>
 </template>

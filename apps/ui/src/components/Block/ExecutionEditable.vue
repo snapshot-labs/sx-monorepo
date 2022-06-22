@@ -1,15 +1,39 @@
-<script setup>
-import { ref } from 'vue';
-import { shorten } from '@/helpers/utils';
+<script setup lang="ts">
+import { ref, computed, Ref } from 'vue';
+import { formatUnits } from '@ethersproject/units';
+import { _n, shorten } from '@/helpers/utils';
+import spaces from '@/helpers/spaces.json';
+import { Transaction } from '@/types';
 
-const txs = ref([]);
+const address = spaces.pasta.wallets[0];
+
+const txs: Ref<Transaction[]> = ref([]);
 const modalOpen = ref({
   sendToken: false,
   sendNft: false,
   contractCall: false
 });
 
-function addTx(tx) {
+const formattedTxs = computed(() =>
+  txs.value.map(tx => {
+    let title = '';
+    if (tx._type === 'sendToken') {
+      title = `Send ${_n(
+        formatUnits(tx._form.amount, tx._form.token.decimals)
+      )} ${tx._form.token.symbol} to ${shorten(tx._form.recipient)}`;
+    } else if (tx._type === 'sendNft') {
+      title = `Send ${_n(formatUnits(tx._form.amount, 0))} NFT to ${shorten(
+        tx._form.recipient
+      )}`;
+    } else if (tx._type === 'contractCall') {
+      title = `Contract call to ${shorten(tx.to)}`;
+    }
+
+    return { ...tx, title };
+  })
+);
+
+function addTx(tx: Transaction) {
   txs.value.push(tx);
 }
 
@@ -48,18 +72,21 @@ function removeTx(index) {
     </div>
     <div v-if="txs.length > 0" class="x-block">
       <div
-        v-for="(tx, i) in txs"
+        v-for="(tx, i) in formattedTxs"
         :key="i"
-        class="border-b last:border-b-0 px-4 py-3 space-x-2"
+        class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
       >
-        <h4 class="inline-block">
-          <IH-chip class="inline-block mr-1" />
-          {{ shorten(tx.to) }}
-        </h4>
-        <span class="s-label !inline-block">{{ tx.name }}</span>
-        <span class="float-right">
+        <div class="flex items-center">
+          <IH-stop v-if="tx._type === 'sendToken'" />
+          <IH-photograph v-else-if="tx._type === 'sendNft'" />
+          <IH-chip v-else />
+          <h4 class="ml-2 inline-block">
+            {{ tx.title }}
+          </h4>
+        </div>
+        <span>
           <a @click="removeTx(i)">
-            <IH-trash class="inline-block" />
+            <IH-trash />
           </a>
         </span>
       </div>
@@ -67,11 +94,15 @@ function removeTx(index) {
     <teleport to="#modal">
       <ModalSendToken
         :open="modalOpen.sendToken"
+        :address="address"
         @close="modalOpen.sendToken = false"
+        @add="addTx"
       />
       <ModalSendNft
         :open="modalOpen.sendNft"
+        :address="address"
         @close="modalOpen.sendNft = false"
+        @add="addTx"
       />
       <ModalTransaction
         :open="modalOpen.contractCall"
