@@ -82,8 +82,6 @@ export function createSendNftTransaction({
       form.to,
       nft.tokenId
     ]);
-  } else {
-    throw new Error('Unknown NFT type');
   }
 
   return {
