@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 
 import IObject from './IObject.vue';
 import IArray from './IArray.vue';
@@ -14,7 +14,22 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const input = ref(props.modelValue || props.definition.default || {});
+const dirty = ref(false);
+
+const inputValue = computed({
+  get() {
+    if (!props.value && !dirty.value && props.definition.default) {
+      return props.definition.default;
+    }
+
+    return props.modelValue;
+  },
+  set(newValue) {
+    dirty.value = true;
+
+    emit('update:modelValue', newValue);
+  }
+});
 
 const getComponent = name => {
   switch (name) {
@@ -32,8 +47,6 @@ const getComponent = name => {
       return null;
   }
 };
-
-watch(input, () => emit('update:modelValue', input.value));
 </script>
 
 <template>
@@ -42,6 +55,6 @@ watch(input, () => emit('update:modelValue', input.value));
     :key="i"
     :is="getComponent(property.type)"
     :definition="property"
-    v-model="input[i]"
+    v-model="inputValue[i]"
   />
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
   modelValue: String,
@@ -8,16 +8,29 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const input = ref(props.modelValue || props.definition.default || undefined);
+const dirty = ref(false);
 
-watch(input, () => emit('update:modelValue', input.value));
+const inputValue = computed({
+  get() {
+    if (!props.value && !dirty.value && props.definition.default) {
+      return props.definition.default;
+    }
+
+    return props.modelValue;
+  },
+  set(newValue) {
+    dirty.value = true;
+
+    emit('update:modelValue', newValue);
+  }
+});
 </script>
 
 <template>
   <SBase :definition="definition">
     <input
       type="text"
-      v-model="input"
+      v-model="inputValue"
       class="s-input"
       :placeholder="definition.examples && definition.examples[0]"
     />

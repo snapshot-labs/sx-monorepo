@@ -116,8 +116,10 @@ export function createContractCallTransaction({
     data,
     value: '0x',
     _form: {
+      abi: form.abi,
+      recipient: form.to,
       method: form.method,
-      args
+      args: form.args
     }
   };
 }

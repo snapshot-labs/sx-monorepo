@@ -35,8 +35,10 @@ export type SendNftTransaction = BaseTransaction & {
 export type ContractCallTransaction = BaseTransaction & {
   _type: 'contractCall';
   _form: {
+    abi: any[];
+    recipient: string;
     method: string;
-    args: any[];
+    args: any;
   };
 };
 

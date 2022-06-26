@@ -8,6 +8,8 @@ import { Transaction } from '@/types';
 const address = spaces.pasta.wallets[0];
 
 const txs: Ref<Transaction[]> = ref([]);
+const editedTx: Ref<number | null> = ref(null);
+const modalState: Ref<object> = ref({});
 const modalOpen = ref({
   sendToken: false,
   sendNft: false,
@@ -34,11 +36,29 @@ const formattedTxs = computed(() =>
 );
 
 function addTx(tx: Transaction) {
-  txs.value.push(tx);
+  if (editedTx.value !== null) {
+    txs.value[editedTx.value] = tx;
+  } else {
+    txs.value.push(tx);
+  }
 }
 
 function removeTx(index) {
   txs.value = txs.value.filter((tx, i) => i !== index);
+}
+
+function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
+  editedTx.value = null;
+  modalState.value[type] = null;
+  modalOpen.value[type] = true;
+}
+
+function editTx(index) {
+  const tx = txs.value[index];
+
+  editedTx.value = index;
+  modalState.value[tx._type] = tx._form;
+  modalOpen.value[tx._type] = true;
 }
 </script>
 <template>
@@ -48,21 +68,21 @@ function removeTx(index) {
         class="mb-3 flex flex-no-wrap overflow-x-scroll no-scrollbar scrolling-touch items-start space-x-3"
       >
         <a
-          @click="modalOpen.sendToken = true"
+          @click="openModal('sendToken')"
           class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
         >
           <IH-stop />
           Send token
         </a>
         <a
-          @click="modalOpen.sendNft = true"
+          @click="openModal('sendNft')"
           class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
         >
           <IH-photograph />
           Send NFT
         </a>
         <a
-          @click="modalOpen.contractCall = true"
+          @click="openModal('contractCall')"
           class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
         >
           <IH-chip />
@@ -84,28 +104,34 @@ function removeTx(index) {
             {{ tx.title }}
           </h4>
         </div>
-        <span>
+        <div class="flex gap-3">
+          <a @click="editTx(i)">
+            <IH-pencil />
+          </a>
           <a @click="removeTx(i)">
             <IH-trash />
           </a>
-        </span>
+        </div>
       </div>
     </div>
     <teleport to="#modal">
       <ModalSendToken
         :open="modalOpen.sendToken"
         :address="address"
+        :initialState="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
       />
       <ModalSendNft
         :open="modalOpen.sendNft"
         :address="address"
+        :initialState="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"
       />
       <ModalTransaction
         :open="modalOpen.contractCall"
+        :initialState="modalState.contractCall"
         @close="modalOpen.contractCall = false"
         @add="addTx"
       />

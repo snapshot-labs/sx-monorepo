@@ -4,12 +4,19 @@ import { useNfts } from '@/composables/useNfts';
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 
+const DEFAULT_FORM_STATE = {
+  to: '',
+  nft: '',
+  amount: ''
+};
+
 const props = defineProps({
   open: Boolean,
   address: {
     type: String,
     required: true
-  }
+  },
+  initialState: Object
 });
 
 const emit = defineEmits(['add', 'close']);
@@ -18,11 +25,9 @@ const searchInput: Ref<HTMLElement | null> = ref(null);
 const showPicker = ref(false);
 const searchValue = ref('');
 
-const form: { to: string; nft: string; amount: string | number } = reactive({
-  to: '',
-  nft: '',
-  amount: ''
-});
+const form: { to: string; nft: string; amount: string | number } = reactive(
+  clone(DEFAULT_FORM_STATE)
+);
 
 const { loading, loaded, nfts, nftsMap, loadNfts } = useNfts();
 
@@ -63,6 +68,16 @@ watch(
   () => props.open,
   () => {
     showPicker.value = false;
+
+    if (props.initialState) {
+      form.to = props.initialState.recipient;
+      form.nft = `${props.initialState.nft.address}:${props.initialState.nft.id}`;
+      form.amount = props.initialState.amount;
+    } else {
+      form.to = DEFAULT_FORM_STATE.to;
+      form.nft = DEFAULT_FORM_STATE.nft;
+      form.amount = DEFAULT_FORM_STATE.amount;
+    }
   }
 );
 </script>

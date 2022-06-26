@@ -3,10 +3,14 @@
 exports[`transactions > createContractCallTransaction > should create contract call transaction 1`] = `
 {
   "_form": {
-    "args": [
-      "0x000000000000000000000000000000000000dead",
+    "abi": [
+      "function deny(address guy)",
     ],
+    "args": {
+      "guy": "0x000000000000000000000000000000000000dead",
+    },
     "method": "deny",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
   },
   "_type": "contractCall",
   "data": "0x9c52a7f1000000000000000000000000000000000000000000000000000000000000dead",

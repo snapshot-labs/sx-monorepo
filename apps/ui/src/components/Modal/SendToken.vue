@@ -6,12 +6,20 @@ import { createSendTokenTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 
+const DEFAULT_FORM_STATE = {
+  to: '',
+  token: ETH_CONTRACT,
+  amount: '',
+  value: ''
+};
+
 const props = defineProps({
   open: Boolean,
   address: {
     type: String,
     required: true
-  }
+  },
+  initialState: Object
 });
 
 const emit = defineEmits(['add', 'close']);
@@ -22,12 +30,7 @@ const form: {
   token: string;
   amount: string | number;
   value: string | number;
-} = reactive({
-  to: '',
-  token: ETH_CONTRACT,
-  amount: '',
-  value: ''
-});
+} = reactive(clone(DEFAULT_FORM_STATE));
 
 const showPicker = ref(false);
 const searchValue = ref('');
@@ -110,6 +113,21 @@ watch(
   () => props.open,
   () => {
     showPicker.value = false;
+
+    if (props.initialState) {
+      form.to = props.initialState.recipient;
+      form.token = props.initialState.token.address;
+      handleAmountUpdate(
+        formatUnits(
+          props.initialState.amount,
+          props.initialState.token.decimals
+        )
+      );
+    } else {
+      form.to = DEFAULT_FORM_STATE.to;
+      form.token = DEFAULT_FORM_STATE.token;
+      handleAmountUpdate(DEFAULT_FORM_STATE.amount);
+    }
   }
 );
 
