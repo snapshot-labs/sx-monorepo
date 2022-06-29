@@ -1,5 +1,5 @@
-import { IntsSequence } from '../utils/ints-sequence';
-import { hexToBytes } from '../utils/bytes';
+import { IntsSequence } from '../ints-sequence';
+import { hexToBytes } from '../bytes';
 
 /**
  * Single slot proof voting strategy parameter array encoding (Inclusive -> Exclusive):

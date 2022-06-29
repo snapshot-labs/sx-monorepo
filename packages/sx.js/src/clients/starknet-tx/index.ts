@@ -22,6 +22,7 @@ export class StarkNetTx {
     calldata.push(blockNum);
     calldata.push(params.length.toString());
     const receipt = await auth.invoke('execute', {
+      // @ts-ignore
       to: space,
       function_selector: getSelectorFromName('propose'),
       calldata
@@ -41,6 +42,7 @@ export class StarkNetTx {
     // @ts-ignore
     const auth = new Contract(abi, constants.auth, provider);
     const receipt = await auth.invoke('execute', {
+      // @ts-ignore
       to: space,
       function_selector: getSelectorFromName('vote'),
       calldata: [voter, proposal, choice, params.length.toString()]

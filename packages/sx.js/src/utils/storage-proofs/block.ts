@@ -1,7 +1,7 @@
 import Common, { Chain, Hardfork } from '@ethereumjs/common';
 import blockFromRpc from '@ethereumjs/block/dist/from-rpc';
-import { IntsSequence } from '../utils/ints-sequence';
-import { hexToBytes } from '../utils/bytes';
+import { IntsSequence } from '../ints-sequence';
+import { hexToBytes } from '../bytes';
 
 export interface ProcessBlockInputs {
   blockNumber: number;

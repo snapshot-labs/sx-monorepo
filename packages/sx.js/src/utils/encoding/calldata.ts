@@ -1,5 +1,5 @@
-import { SplitUint256 } from '../utils/split-uint256';
-import { Choice } from '../utils/choice';
+import { SplitUint256 } from '../split-uint256';
+import { Choice } from '../choice';
 
 /**
  * Currently there is no way to pass struct types with pointers in calldata, so we must pass the 2d array as a flat array and then reconstruct the type.
