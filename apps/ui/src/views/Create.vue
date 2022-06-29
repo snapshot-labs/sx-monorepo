@@ -57,7 +57,8 @@ onMounted(() => {
                 executionHash,
                 proposals[`${id}:${key}`].title,
                 proposals[`${id}:${key}`].body,
-                proposals[`${id}:${key}`].discussion
+                proposals[`${id}:${key}`].discussion,
+                proposals[`${id}:${key}`].execution
               )
             "
             class="leading-3"
@@ -79,7 +80,8 @@ onMounted(() => {
                 executionHash,
                 proposals[`${id}:${key}`].title,
                 proposals[`${id}:${key}`].body,
-                proposals[`${id}:${key}`].discussion
+                proposals[`${id}:${key}`].discussion,
+                proposals[`${id}:${key}`].execution
               )
             "
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"

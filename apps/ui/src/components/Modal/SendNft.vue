@@ -73,6 +73,10 @@ watch(
       form.to = props.initialState.recipient;
       form.nft = `${props.initialState.nft.address}:${props.initialState.nft.id}`;
       form.amount = props.initialState.amount;
+
+      if (!loaded.value) {
+        loadNfts(props.address);
+      }
     } else {
       form.to = DEFAULT_FORM_STATE.to;
       form.nft = DEFAULT_FORM_STATE.nft;

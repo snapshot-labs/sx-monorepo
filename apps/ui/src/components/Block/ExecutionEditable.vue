@@ -7,7 +7,14 @@ import { Transaction } from '@/types';
 
 const address = spaces.pasta.wallets[0];
 
-const txs: Ref<Transaction[]> = ref([]);
+const props = defineProps<{
+  modelValue: Transaction[];
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: Transaction[]): void;
+}>();
+
 const editedTx: Ref<number | null> = ref(null);
 const modalState: Ref<object> = ref({});
 const modalOpen = ref({
@@ -17,7 +24,7 @@ const modalOpen = ref({
 });
 
 const formattedTxs = computed(() =>
-  txs.value.map(tx => {
+  props.modelValue.map(tx => {
     let title = '';
     if (tx._type === 'sendToken') {
       title = `Send ${_n(
@@ -36,15 +43,22 @@ const formattedTxs = computed(() =>
 );
 
 function addTx(tx: Transaction) {
+  const newValue = [...props.modelValue];
+
   if (editedTx.value !== null) {
-    txs.value[editedTx.value] = tx;
+    newValue[editedTx.value] = tx;
   } else {
-    txs.value.push(tx);
+    newValue.push(tx);
   }
+
+  emit('update:modelValue', newValue);
 }
 
 function removeTx(index) {
-  txs.value = txs.value.filter((tx, i) => i !== index);
+  emit(
+    'update:modelValue',
+    props.modelValue.filter((tx, i) => i !== index)
+  );
 }
 
 function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
@@ -54,7 +68,7 @@ function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
 }
 
 function editTx(index) {
-  const tx = txs.value[index];
+  const tx = props.modelValue[index];
 
   editedTx.value = index;
   modalState.value[tx._type] = tx._form;
@@ -90,7 +104,7 @@ function editTx(index) {
         </a>
       </div>
     </div>
-    <div v-if="txs.length > 0" class="x-block">
+    <div v-if="formattedTxs.length > 0" class="x-block">
       <div
         v-for="(tx, i) in formattedTxs"
         :key="i"
