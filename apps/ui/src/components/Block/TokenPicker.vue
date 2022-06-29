@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { formatUnits } from '@ethersproject/units';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { _n } from '@/helpers/utils';
+import { _n, shorten } from '@/helpers/utils';
 
 const props = defineProps({
   searchValue: String,
@@ -38,32 +38,36 @@ const filteredAssets = computed(() =>
     <UiLoading />
   </div>
   <template v-else>
-    <div v-if="filteredAssets.length === 0" class="text-center py-2">
-      No results
-    </div>
+    <div
+      v-if="filteredAssets.length === 0"
+      v-text="'No results'"
+      class="text-center py-3"
+    />
     <div
       v-for="(asset, i) in filteredAssets"
       :key="i"
       role="button"
-      class="px-3 py-1 border-b last:border-0 flex justify-between"
+      class="px-3 py-[12px] border-b last:border-0 flex justify-between"
       @click="emit('pick', asset.contract_address)"
     >
       <div class="flex items-center">
         <Stamp type="token" :id="asset.contract_address" :size="32" />
-        <div class="flex flex-col ml-3 leading-[20px] text-skin-link text-sm">
-          <span>
-            {{ asset.contract_ticker_symbol }}
-          </span>
-          <span>{{ asset.contract_name }}</span>
+        <div class="flex flex-col ml-3 leading-[20px]">
+          <div
+            v-text="shorten(asset.contract_ticker_symbol, 12)"
+            class="text-skin-link"
+          />
+          <div v-text="shorten(asset.contract_name, 24)" class="text-sm" />
         </div>
       </div>
-      <div class="flex flex-col items-end text-sm">
-        <span class="text-skin-link">
-          {{
+      <div class="flex flex-col items-end leading-[20px]">
+        <div
+          v-text="
             _n(formatUnits(asset.balance || 0, asset.contract_decimals || 0))
-          }}
-        </span>
-        <span>${{ _n(asset.quote) }}</span>
+          "
+          class="text-skin-link"
+        />
+        <div v-text="`$${_n(asset.quote)}`" class="text-sm" />
       </div>
     </div>
   </template>

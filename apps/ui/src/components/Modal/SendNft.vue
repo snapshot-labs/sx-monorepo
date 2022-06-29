@@ -93,8 +93,8 @@ watch(
         >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
-        <div class="flex items-center border-t px-2 py-2 mt-3 -mb-3">
-          <IH-search class="mr-2" />
+        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+          <IH-search class="mx-2" />
           <input
             v-model="searchValue"
             ref="searchInput"
@@ -131,11 +131,10 @@ watch(
             <NftPreview
               v-if="currentNft"
               :item="currentNft"
-              class="mr-1"
+              class="mr-2"
               :size="20"
             />
-
-            {{ currentNft?.displayTitle || 'Select token' }}
+            {{ currentNft?.displayTitle || 'Select NFT' }}
           </div>
         </button>
       </div>

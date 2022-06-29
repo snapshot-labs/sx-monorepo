@@ -23,9 +23,11 @@ const filteredNfts = computed(() =>
     <UiLoading />
   </div>
   <template v-else>
-    <div v-if="filteredNfts.length === 0" class="text-center py-2">
-      No results
-    </div>
+    <div
+      v-if="filteredNfts.length === 0"
+      v-text="'No results'"
+      class="text-center py-3"
+    />
     <div v-else class="grid gap-2 grid-cols-3 py-3 px-2">
       <a
         v-for="(nft, i) in filteredNfts"

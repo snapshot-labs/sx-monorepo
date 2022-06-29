@@ -149,8 +149,8 @@ watch(currentToken, token => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
-        <div class="flex items-center border-t px-2 py-2 mt-3 -mb-3">
-          <IH-search class="mr-2" />
+        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+          <IH-search class="mx-2" />
           <input
             v-model="searchValue"
             ref="searchInput"
@@ -187,11 +187,11 @@ watch(currentToken, token => {
             <Stamp
               v-if="currentToken"
               type="token"
-              class="mr-1"
+              class="mr-2"
               :id="currentToken.contract_address"
               :size="20"
             />
-            {{ currentToken?.contract_name || 'Select token' }}
+            {{ currentToken?.contract_ticker_symbol || 'Select token' }}
           </div>
         </button>
       </div>
@@ -206,9 +206,11 @@ watch(currentToken, token => {
               examples: ['0']
             }"
           />
-          <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick"
-            >Max</a
-          >
+          <a
+            v-text="'max'"
+            @click="handleMaxClick"
+            class="absolute right-[16px] top-[4px]"
+          />
         </div>
         <SINumber
           :modelValue="form.value"
