@@ -38,7 +38,7 @@ onMounted(async () => {
         <Stamp
           :id="id"
           :size="90"
-          class="mb-2 border-[3px] border-skin-bg !bg-skin-bg"
+          class="mb-2 border-[4px] border-skin-bg !bg-skin-bg"
         />
         <h1>{{ shortenAddress(id) }}</h1>
         <div>

@@ -37,7 +37,7 @@ onMounted(async () => {
             <Stamp
               :id="space.id"
               :size="24"
-              class="inline-block border-skin-bg !bg-skin-bg"
+              class="inline-block border-skin-bg !bg-skin-bg rounded-sm"
             />
             <h4 v-text="space.name" class="inline-block" />
           </div>

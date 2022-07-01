@@ -27,15 +27,15 @@ const formattedTxs = computed(() =>
   props.modelValue.map(tx => {
     let title = '';
     if (tx._type === 'sendToken') {
-      title = `Send ${_n(
+      title = `Send <b>${_n(
         formatUnits(tx._form.amount, tx._form.token.decimals)
-      )} ${tx._form.token.symbol} to ${shorten(tx._form.recipient)}`;
+      )}</b> ${tx._form.token.symbol} to <b>${shorten(tx._form.recipient)}</b>`;
     } else if (tx._type === 'sendNft') {
-      title = `Send ${_n(formatUnits(tx._form.amount, 0))} NFT to ${shorten(
-        tx._form.recipient
-      )}`;
+      title = `Send <b>${_n(
+        formatUnits(tx._form.amount, 0)
+      )}</b> NFT to <b>${shorten(tx._form.recipient)}</b>`;
     } else if (tx._type === 'contractCall') {
-      title = `Contract call to ${shorten(tx.to)}`;
+      title = `Contract call to <b>${shorten(tx.to)}</b>`;
     }
 
     return { ...tx, title };
@@ -104,19 +104,17 @@ function editTx(index) {
         </a>
       </div>
     </div>
-    <div v-if="formattedTxs.length > 0" class="x-block">
+    <div v-if="formattedTxs.length > 0" class="x-block !border-x rounded-lg">
       <div
         v-for="(tx, i) in formattedTxs"
         :key="i"
         class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
       >
-        <div class="flex items-center">
+        <div class="flex items-center max-w-[70%]">
           <IH-stop v-if="tx._type === 'sendToken'" />
           <IH-photograph v-else-if="tx._type === 'sendNft'" />
           <IH-chip v-else />
-          <h4 class="ml-2 inline-block">
-            {{ tx.title }}
-          </h4>
+          <div v-html="tx.title" class="ml-2 truncate text-skin-link" />
         </div>
         <div class="flex gap-3">
           <a @click="editTx(i)">

@@ -47,7 +47,7 @@ onMounted(async () => {
           <Stamp
             :id="space.id"
             :size="90"
-            class="mb-2 border-[3px] border-skin-bg !bg-skin-bg"
+            class="mb-2 border-[4px] border-skin-bg !bg-skin-bg rounded-lg"
           />
         </router-link>
         <h1 v-text="space.name" />

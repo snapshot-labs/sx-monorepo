@@ -137,7 +137,8 @@ watch(
           v-model="form.to"
           :definition="{
             type: 'string',
-            title: 'Contract address'
+            title: 'Contract address',
+            examples: ['Address or ENS']
           }"
         />
       </div>
