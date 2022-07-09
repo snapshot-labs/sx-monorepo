@@ -43,53 +43,29 @@ onMounted(() => {
           />
         </div>
       </div>
-      <div>
-        <router-link :to="{ name: 'editor', params: { id, key } }">
-          <UiButton v-if="$route.name !== 'editor'" class="leading-3 !px-0 w-7">
-            <IH-arrow-narrow-left class="inline-block" />
-          </UiButton>
-        </router-link>
-        <span v-if="$route.name !== 'editor'">
-          <UiButton
-            @click="
-              propose(
-                id,
-                executionHash,
-                proposals[`${id}:${key}`].title,
-                proposals[`${id}:${key}`].body,
-                proposals[`${id}:${key}`].discussion,
-                proposals[`${id}:${key}`].execution
-              )
-            "
-            class="leading-3"
-          >
-            Publish
-          </UiButton>
-        </span>
-        <span class="space-x-2">
-          <UiButton
-            @click="modalOpen = true"
-            class="float-left leading-3 !px-3 rounded-r-none"
-          >
-            <IH-collection class="inline-block" />
-          </UiButton>
-          <UiButton
-            @click="
-              propose(
-                id,
-                executionHash,
-                proposals[`${id}:${key}`].title,
-                proposals[`${id}:${key}`].body,
-                proposals[`${id}:${key}`].discussion,
-                proposals[`${id}:${key}`].execution
-              )
-            "
-            class="rounded-l-none border-l-0 float-left !m-0 !px-3"
-          >
-            <span v-text="'Publish'" class="hidden mr-2 md:inline-block" />
-            <IH-paper-airplane class="inline-block rotate-90" />
-          </UiButton>
-        </span>
+      <div class="space-x-2">
+        <UiButton
+          @click="modalOpen = true"
+          class="float-left leading-3 !px-3 rounded-r-none"
+        >
+          <IH-collection class="inline-block" />
+        </UiButton>
+        <UiButton
+          @click="
+            propose(
+              id,
+              executionHash,
+              proposals[`${id}:${key}`].title,
+              proposals[`${id}:${key}`].body,
+              proposals[`${id}:${key}`].discussion,
+              proposals[`${id}:${key}`].execution
+            )
+          "
+          class="rounded-l-none border-l-0 float-left !m-0 !px-3"
+        >
+          <span v-text="'Publish'" class="hidden mr-2 md:inline-block" />
+          <IH-paper-airplane class="inline-block rotate-90" />
+        </UiButton>
       </div>
     </div>
     <teleport to="#modal">
