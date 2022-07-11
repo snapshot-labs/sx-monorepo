@@ -74,7 +74,7 @@ export function getProofInputs(blockNumber: number, proofs: any): ProofInputs {
   const ethAddress = IntsSequence.fromBytes(hexToBytes(proofs.address));
   const ethAddressFelt = BigInt(proofs.address);
 
-  const storageProofs: bigint[][] = [[]];
+  const storageProofs: bigint[][] = [];
   for (let i = 0; i < proofs.storageProof.length; i++) {
     const slot = IntsSequence.fromBytes(hexToBytes(proofs.storageProof[i].key));
     const storageProofArray = proofs.storageProof[i].proof.map((node: string) =>
