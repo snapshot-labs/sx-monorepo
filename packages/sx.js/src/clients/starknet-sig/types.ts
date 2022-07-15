@@ -4,7 +4,7 @@ export const domain = {
   chainId: 1
 };
 
-const domainTypes = {
+export const domainTypes = {
   StarkNetDomain: [
     {
       name: 'name',

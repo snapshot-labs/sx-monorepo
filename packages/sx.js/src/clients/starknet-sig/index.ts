@@ -11,12 +11,8 @@ export class StarkNetSig {
 
   public async sign(signer: AccountInterface, address: string, message, types, primaryType) {
     const data: any = { domain, types, primaryType, message };
-    try {
-      const sig = await signer.signMessage(data);
-      return { address, sig, data };
-    } catch (e) {
-      return Promise.reject(e);
-    }
+    const sig = await signer.signMessage(data);
+    return { address, sig, data };
   }
 
   public async send(envelop) {

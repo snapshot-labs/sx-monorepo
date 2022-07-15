@@ -14,12 +14,8 @@ export class EthereumSig {
     // @ts-ignore
     const signer = web3?.getSigner ? web3.getSigner() : web3;
     const data: any = { domain, types, message };
-    try {
-      const sig = await signer._signTypedData(domain, data.types, message);
-      return { address, sig, data };
-    } catch (e) {
-      return Promise.reject(e);
-    }
+    const sig = await signer._signTypedData(domain, data.types, message);
+    return { address, sig, data };
   }
 
   public async send(envelop) {
