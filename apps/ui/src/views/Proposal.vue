@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { sanitizeUrl } from '@braintree/sanitize-url';
-import { _rt, _n, shortenAddress } from '@/helpers/utils';
+import { _rt, _n, shortenAddress, getUrl } from '@/helpers/utils';
 import apollo from '@/helpers/apollo';
 import { PROPOSAL_QUERY } from '@/helpers/queries';
 import { useActions } from '@/composables/useActions';
@@ -61,9 +61,11 @@ onMounted(async () => {
               </a>
             </span>
           </div>
-          <UiButton class="!w-[46px] !h-[46px] !px-[12px]">
-            <IH-dots-horizontal />
-          </UiButton>
+          <a :href="sanitizeUrl(getUrl(proposal.metadata_uri))" target="_blank">
+            <UiButton class="!w-[46px] !h-[46px] !px-[12px]">
+              <IH-dots-horizontal />
+            </UiButton>
+          </a>
         </div>
         <div v-if="proposal.body" class="mb-4">
           <p v-text="proposal.body" />
