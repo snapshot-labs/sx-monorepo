@@ -1,4 +1,4 @@
-import { shortStringArrToStr } from '@snapshot-labs/sx';
+import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet/utils/address';
 import { getJSON, toAddress } from './utils';
 
