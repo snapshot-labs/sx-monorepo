@@ -1,3 +1,5 @@
+import fetch from 'cross-fetch';
+global.fetch = fetch;
 import express from 'express';
 import { Account, defaultProvider, ec } from 'starknet';
 import { StarkNetTx } from '@snapshot-labs/sx/dist/clients';
