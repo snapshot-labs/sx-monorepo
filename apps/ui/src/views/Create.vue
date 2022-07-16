@@ -25,49 +25,43 @@ onMounted(() => {
 </script>
 <template>
   <div>
-    <router-view v-if="key" />
-    <div
-      class="fixed top-0 border-b w-full px-4 py-3 bg-skin-bg flex h-[79px] z-20"
-    >
-      <div class="flex-auto space-x-2">
-        <router-link :to="{ name: 'overview', params: { id } }" class="mr-2">
-          <UiButton class="leading-3 w-[46px] !px-0">
-            <IH-arrow-narrow-left class="inline-block" />
+    <nav class="border-b w-full fixed top-0 z-10 bg-skin-bg">
+      <div class="flex items-center h-[71px] mx-4">
+        <div class="flex-auto space-x-2">
+          <router-link :to="{ name: 'overview', params: { id } }" class="mr-2">
+            <UiButton class="leading-3 w-[46px] !px-0">
+              <IH-arrow-narrow-left class="inline-block" />
+            </UiButton>
+          </router-link>
+          <h4 class="py-2 inline-block">New proposal</h4>
+        </div>
+        <div class="space-x-2">
+          <UiButton
+            @click="modalOpen = true"
+            class="float-left leading-3 !px-3 rounded-r-none"
+          >
+            <IH-collection class="inline-block" />
           </UiButton>
-        </router-link>
-        <h4 class="py-2 inline-block">New proposal</h4>
-        <div class="h-2 w-[88px] rounded bg-skin-border hidden">
-          <div
-            class="h-2 rounded bg-gray-600"
-            :style="{ width: $route.name === 'editor' ? '33%' : '66%' }"
-          />
+          <UiButton
+            @click="
+              propose(
+                id,
+                executionHash,
+                proposals[`${id}:${key}`].title,
+                proposals[`${id}:${key}`].body,
+                proposals[`${id}:${key}`].discussion,
+                proposals[`${id}:${key}`].execution
+              )
+            "
+            class="rounded-l-none border-l-0 float-left !m-0 !px-3"
+          >
+            <span v-text="'Publish'" class="hidden mr-2 md:inline-block" />
+            <IH-paper-airplane class="inline-block rotate-90" />
+          </UiButton>
         </div>
       </div>
-      <div class="space-x-2">
-        <UiButton
-          @click="modalOpen = true"
-          class="float-left leading-3 !px-3 rounded-r-none"
-        >
-          <IH-collection class="inline-block" />
-        </UiButton>
-        <UiButton
-          @click="
-            propose(
-              id,
-              executionHash,
-              proposals[`${id}:${key}`].title,
-              proposals[`${id}:${key}`].body,
-              proposals[`${id}:${key}`].discussion,
-              proposals[`${id}:${key}`].execution
-            )
-          "
-          class="rounded-l-none border-l-0 float-left !m-0 !px-3"
-        >
-          <span v-text="'Publish'" class="hidden mr-2 md:inline-block" />
-          <IH-paper-airplane class="inline-block rotate-90" />
-        </UiButton>
-      </div>
-    </div>
+    </nav>
+    <router-view v-if="key" />
     <teleport to="#modal">
       <ModalDrafts :open="modalOpen" :space="id" @close="modalOpen = false" />
     </teleport>
