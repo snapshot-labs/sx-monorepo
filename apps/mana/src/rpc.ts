@@ -1,6 +1,6 @@
 import express from 'express';
 import { Account, defaultProvider, ec } from 'starknet';
-import { StarkNetTx } from '@snapshot-labs/sx/src/clients';
+import { StarkNetTx } from '@snapshot-labs/sx/dist/clients';
 import { rpcError, rpcSuccess } from './utils';
 
 const relayerPrivKey = process.env.RELAYER_PRIVKEY || '';
