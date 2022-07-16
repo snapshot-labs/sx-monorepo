@@ -1,6 +1,13 @@
 import express from 'express';
-import { propose, vote } from '@snapshot-labs/sx';
+import { Account, defaultProvider, ec } from 'starknet';
+import { StarkNetTx } from '@snapshot-labs/sx/src/clients';
 import { rpcError, rpcSuccess } from './utils';
+
+const relayerPrivKey = process.env.RELAYER_PRIVKEY || '';
+const relayerAddress = process.env.RELAYER_ADDRESS || '';
+const client = new StarkNetTx();
+const starkKeyPair = ec.getKeyPair(relayerPrivKey);
+const account = new Account(defaultProvider, relayerAddress, starkKeyPair);
 
 const router = express.Router();
 
@@ -17,12 +24,24 @@ async function send(id, params, res) {
 
     if (types.Propose) {
       console.log('Propose');
-      receipt = await propose(address, message.space, message.executionHash, message.metadataURI);
+      receipt = await client.propose(
+        account,
+        address,
+        message.space,
+        message.executionHash,
+        message.metadataURI
+      );
     }
 
     if (types.Vote) {
       console.log('Vote');
-      receipt = await vote(address, message.space, message.proposal, message.choice);
+      receipt = await client.vote(
+        account,
+        address,
+        message.space,
+        message.proposal,
+        message.choice
+      );
     }
 
     console.timeEnd('Send');
