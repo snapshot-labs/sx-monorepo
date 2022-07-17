@@ -5,6 +5,7 @@ import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { abiToDefinition, clone } from '@/helpers/utils';
+import { validateForm } from '@/helpers/validation';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -76,6 +77,23 @@ watch(currentMethod, () => {
   }
 });
 
+const errors = computed(() =>
+  validateForm(
+    {
+      type: 'object',
+      properties: {
+        to: {
+          type: 'string',
+          format: 'address'
+        }
+      },
+      additionalProperties: true
+    },
+    { to: form.to }
+  )
+);
+const argsErrors = computed(() => validateForm(definition.value, form.args));
+
 watch(
   () => form.to,
   async v => {
@@ -135,6 +153,7 @@ watch(
         <UiLoading v-if="loading" class="absolute top-[14px] right-3" />
         <SIString
           v-model="form.to"
+          :error="errors.to"
           :definition="{
             type: 'string',
             title: 'Contract address',
@@ -160,7 +179,11 @@ watch(
         }"
       />
       <div v-if="definition">
-        <SIObject v-model="form.args" :definition="definition" />
+        <SIObject
+          v-model="form.args"
+          :error="argsErrors"
+          :definition="definition"
+        />
       </div>
     </div>
     <template v-slot:footer>

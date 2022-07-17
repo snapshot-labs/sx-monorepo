@@ -1,24 +1,27 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 
-const props = defineProps({
-  modelValue: [Number, String],
-  definition: Object
-});
+const props = defineProps<{
+  modelValue?: string | number;
+  error?: string;
+  definition: any;
+}>();
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string);
+}>();
 
 const dirty = ref(false);
 
 const inputValue = computed({
   get() {
-    if (!props.value && !dirty.value && props.definition.default) {
+    if (!props.modelValue && !dirty.value && props.definition.default) {
       return props.definition.default;
     }
 
     return props.modelValue;
   },
-  set(newValue) {
+  set(newValue: string) {
     dirty.value = true;
 
     emit('update:modelValue', newValue);
@@ -27,7 +30,7 @@ const inputValue = computed({
 </script>
 
 <template>
-  <SBase :definition="definition">
+  <SBase :definition="definition" :error="error" :dirty="dirty">
     <input
       type="number"
       v-model="inputValue"

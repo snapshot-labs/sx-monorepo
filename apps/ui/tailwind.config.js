@@ -3,7 +3,8 @@ module.exports = {
   theme: {
     extend: {
       borderColor: {
-        DEFAULT: 'var(--border-color)'
+        DEFAULT: 'var(--border-color)',
+        red: '#ff3856'
       },
       colors: {
         primary: 'var(--primary-color)',

@@ -116,6 +116,10 @@ export function abiToDefinition(abi) {
       definition.properties[input.name].format = 'uint256';
       definition.properties[input.name].examples = ['0'];
     }
+    if (input.type === 'int256') {
+      definition.properties[input.name].format = 'int256';
+      definition.properties[input.name].examples = ['0'];
+    }
     if (input.type === 'address') {
       definition.properties[input.name].format = 'address';
       definition.properties[input.name].examples = ['0x0000…'];

@@ -9,6 +9,7 @@ import IBoolean from './IBoolean.vue';
 
 const props = defineProps({
   modelValue: Object,
+  error: undefined,
   definition: Object
 });
 
@@ -18,7 +19,7 @@ const dirty = ref(false);
 
 const inputValue = computed({
   get() {
-    if (!props.value && !dirty.value && props.definition.default) {
+    if (!props.modelValue && !dirty.value && props.definition.default) {
       return props.definition.default;
     }
 
@@ -55,6 +56,7 @@ const getComponent = name => {
     :key="i"
     :is="getComponent(property.type)"
     :definition="property"
+    :error="error?.[i]"
     v-model="inputValue[i]"
   />
 </template>

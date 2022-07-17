@@ -1,20 +1,40 @@
-<script setup>
-import { ref, watch } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 
-const props = defineProps({
-  modelValue: Boolean,
-  definition: Object
+const props = defineProps<{
+  modelValue?: boolean;
+  error?: string;
+  definition: any;
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean);
+}>();
+
+const dirty = ref(false);
+
+const inputValue = computed({
+  get() {
+    if (
+      props.modelValue === undefined &&
+      !dirty.value &&
+      props.definition.default !== undefined
+    ) {
+      return props.definition.default;
+    }
+
+    return props.modelValue;
+  },
+  set(newValue: boolean) {
+    dirty.value = true;
+
+    emit('update:modelValue', newValue);
+  }
 });
-
-const emit = defineEmits(['update:modelValue']);
-
-const input = ref(props.modelValue || props.definition.default || undefined);
-
-watch(input, () => emit('update:modelValue', input.value));
 </script>
 
 <template>
-  <SBase :definition="definition">
-    <input type="checkbox" v-model="input" />
+  <SBase :definition="definition" :error="error" :dirty="dirty">
+    <input type="checkbox" v-model="inputValue" />
   </SBase>
 </template>
