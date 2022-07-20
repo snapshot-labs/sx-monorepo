@@ -32,7 +32,7 @@ function toggleMenu() {
 </script>
 <template>
   <div v-if="items[$route.name]" class="x-block">
-    <a @click="toggleMenu" class="px-4 py-3 border-b last:border-0 block">
+    <a class="px-4 py-3 border-b last:border-0 block" @click="toggleMenu">
       <h4>
         <IH-arrow-sm-up v-if="menu" class="float-right mt-1" />
         <IH-arrow-sm-down v-else class="float-right mt-1" />

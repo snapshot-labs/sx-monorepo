@@ -20,7 +20,7 @@ watch(proposals, () => {
 });
 </script>
 <template>
-  <Container class="pt-5 s-box" v-if="proposals[key]">
+  <Container v-if="proposals[key]" class="pt-5 s-box">
     <h4 class="eyebrow mb-3">Context</h4>
     <SIString
       v-model="proposals[key].title"
@@ -30,7 +30,7 @@ watch(proposals, () => {
       }"
     />
     <div class="s-base mb-5">
-      <div v-text="'Description'" class="s-label" />
+      <div class="s-label" v-text="'Description'" />
       <textarea
         v-model="proposals[key].body"
         maxlength="280"

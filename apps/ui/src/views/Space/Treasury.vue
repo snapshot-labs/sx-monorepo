@@ -32,8 +32,8 @@ onMounted(() => {
         class="flex justify-between items-center px-4 py-3 block"
       >
         <Stamp
-          type="avatar"
           :id="spaces.pasta.wallets[0]"
+          type="avatar"
           :size="44"
           class="mr-2"
         />
@@ -57,8 +57,8 @@ onMounted(() => {
         class="px-4 py-3 border-b last:border-0 flex"
       >
         <Stamp
-          type="token"
           :id="asset.contract_address"
+          type="token"
           :size="32"
           class="mr-3 mt-2"
         />

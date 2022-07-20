@@ -88,7 +88,7 @@ watch(
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <template v-slot:header>
+    <template #header>
       <h3 v-text="'Send NFT'" />
       <template v-if="showPicker">
         <a
@@ -100,8 +100,8 @@ watch(
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
           <IH-search class="mx-2" />
           <input
-            v-model="searchValue"
             ref="searchInput"
+            v-model="searchValue"
             type="text"
             placeholder="Search"
             class="flex-auto bg-transparent text-skin-link"
@@ -113,13 +113,13 @@ watch(
       v-if="showPicker"
       :nfts="nfts"
       :loading="loading"
-      :searchValue="searchValue"
+      :search-value="searchValue"
       @pick="
         form.nft = $event;
         showPicker = false;
       "
     />
-    <div class="s-box p-4" v-if="!showPicker">
+    <div v-if="!showPicker" class="s-box p-4">
       <SIString
         v-model="form.to"
         :definition="{
@@ -129,7 +129,7 @@ watch(
         }"
       />
       <div class="s-base">
-        <div v-text="'NFT'" class="s-label" />
+        <div class="s-label" v-text="'NFT'" />
         <button class="s-input text-left h-[61px]" @click="handlePickerClick">
           <div class="flex items-center">
             <NftPreview
@@ -152,7 +152,7 @@ watch(
         }"
       />
     </div>
-    <template v-slot:footer v-if="!showPicker">
+    <template v-if="!showPicker" #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
         Confirm
       </UiButton>

@@ -12,16 +12,16 @@ const discussions = ref(props.space.discussions || '');
 <template>
   <Container>
     <h2 class="mb-3">Profile</h2>
-    <form @submit.prevent class="s-box">
+    <form class="s-box" @submit.prevent>
       <SIString
+        v-model="name"
         :definition="{
           type: 'string',
           title: 'Name'
         }"
-        v-model="name"
       />
       <div class="s-base">
-        <div v-text="'Description'" class="s-label" />
+        <div class="s-label" v-text="'Description'" />
         <textarea
           v-model="about"
           maxlength="280"
@@ -29,12 +29,12 @@ const discussions = ref(props.space.discussions || '');
         />
       </div>
       <SIString
+        v-model="discussions"
         :definition="{
           type: 'string',
           title: 'Discussions',
           examples: ['e.g. https://forum.balancer.fi']
         }"
-        v-model="discussions"
       />
     </form>
   </Container>

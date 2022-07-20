@@ -140,7 +140,7 @@ watch(currentToken, token => {
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <template v-slot:header>
+    <template #header>
       <h3 v-text="'Send token'" />
       <template v-if="showPicker">
         <a
@@ -152,8 +152,8 @@ watch(currentToken, token => {
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
           <IH-search class="mx-2" />
           <input
-            v-model="searchValue"
             ref="searchInput"
+            v-model="searchValue"
             type="text"
             placeholder="Search"
             class="flex-auto bg-transparent text-skin-link"
@@ -165,13 +165,13 @@ watch(currentToken, token => {
       v-if="showPicker"
       :assets="assets"
       :loading="loading"
-      :searchValue="searchValue"
+      :search-value="searchValue"
       @pick="
         form.token = $event;
         showPicker = false;
       "
     />
-    <div class="s-box p-4" v-if="!showPicker">
+    <div v-if="!showPicker" class="s-box p-4">
       <SIString
         v-model="form.to"
         :definition="{
@@ -181,14 +181,14 @@ watch(currentToken, token => {
         }"
       />
       <div class="s-base">
-        <div v-text="'Token'" class="s-label" />
+        <div class="s-label" v-text="'Token'" />
         <button class="s-input text-left h-[61px]" @click="handlePickerClick">
           <div class="flex items-center">
             <Stamp
               v-if="currentToken"
+              :id="currentToken.contract_address"
               type="token"
               class="mr-2"
-              :id="currentToken.contract_address"
               :size="20"
             />
             {{ currentToken?.contract_ticker_symbol || 'Select token' }}
@@ -198,28 +198,28 @@ watch(currentToken, token => {
       <div class="grid grid-cols-2 gap-[12px]">
         <div class="relative">
           <SINumber
-            :modelValue="form.amount"
-            @update:modelValue="handleAmountUpdate"
+            :model-value="form.amount"
             :definition="{
               type: 'number',
               title: 'Amount',
               examples: ['0']
             }"
+            @update:model-value="handleAmountUpdate"
           />
           <a
-            v-text="'max'"
-            @click="handleMaxClick"
             class="absolute right-[16px] top-[4px]"
+            @click="handleMaxClick"
+            v-text="'max'"
           />
         </div>
         <SINumber
-          :modelValue="form.value"
-          @update:modelValue="handleValueUpdate"
+          :model-value="form.value"
           :definition="{ type: 'number', title: 'USD', examples: ['0'] }"
+          @update:model-value="handleValueUpdate"
         />
       </div>
     </div>
-    <template v-slot:footer v-if="!showPicker">
+    <template v-if="!showPicker" #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
         Confirm
       </UiButton>

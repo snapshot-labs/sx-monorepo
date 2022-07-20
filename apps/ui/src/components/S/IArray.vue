@@ -22,7 +22,7 @@ function addItem() {
 <template>
   <SBase :definition="definition">
     <div v-for="(item, i) in input" :key="i">
-      <SString :definition="{ title: '' }" v-model="input[i]" />
+      <SString v-model="input[i]" :definition="{ title: '' }" />
     </div>
     <a @click="addItem">Add</a>
   </SBase>

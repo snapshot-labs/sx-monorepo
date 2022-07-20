@@ -25,8 +25,8 @@ const filteredNfts = computed(() =>
   <template v-else>
     <div
       v-if="filteredNfts.length === 0"
-      v-text="'No results'"
       class="text-center py-3"
+      v-text="'No results'"
     />
     <div v-else class="grid gap-2 grid-cols-3 py-3 px-2">
       <a

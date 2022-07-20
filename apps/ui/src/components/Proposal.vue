@@ -27,9 +27,11 @@ const modalOpenTimeline = ref(false);
         </router-link>
         <span>
           ·
-          <a @click="modalOpenTimeline = true" class="text-skin-text">
-            {{ _rt(proposal.created) }}
-          </a>
+          <a
+            class="text-skin-text"
+            @click="modalOpenTimeline = true"
+            v-text="_rt(proposal.created)"
+          />
         </span>
       </div>
       <router-link
@@ -43,20 +45,20 @@ const modalOpenTimeline = ref(false);
       </router-link>
       <div v-if="!voted.includes(proposal.id)" class="space-x-2 mb-3 px-4">
         <UiButton
-          @click="vote(proposal.space, proposal.proposal_id, 1)"
           class="w-full !text-green !border-green w-[46px] !px-0"
+          @click="vote(proposal.space, proposal.proposal_id, 1)"
         >
           <IH-check class="inline-block" />
         </UiButton>
         <UiButton
-          @click="vote(proposal.space, proposal.proposal_id, 2)"
           class="w-full !text-red !border-red w-[46px] !px-0"
+          @click="vote(proposal.space, proposal.proposal_id, 2)"
         >
           <IH-x class="inline-block" />
         </UiButton>
         <UiButton
-          @click="vote(proposal.space, proposal.proposal_id, 3)"
           class="w-full !text-gray-500 !border-gray-500 w-[46px] !px-0"
+          @click="vote(proposal.space, proposal.proposal_id, 3)"
         >
           <IH-arrow-sm-right class="inline-block" />
         </UiButton>
@@ -78,13 +80,15 @@ const modalOpenTimeline = ref(false);
         </div>
       </div>
       <div class="text-skin-text px-4">
-        <a @click="modalOpenVotes = true" class="text-skin-text">
+        <a class="text-skin-text" @click="modalOpenVotes = true">
           {{ _n(proposal.vote_count) }} votes
         </a>
         ·
-        <a @click="modalOpenTimeline = true" class="text-skin-text">
-          {{ _rt(proposal.end) }}
-        </a>
+        <a
+          class="text-skin-text"
+          @click="modalOpenTimeline = true"
+          v-text="_rt(proposal.end)"
+        />
       </div>
     </div>
     <teleport to="#modal">

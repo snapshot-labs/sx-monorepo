@@ -17,12 +17,12 @@ onMounted(async () => {
   <div>
     <div class="py-8 mb-6 border-b hero">
       <Container class="max-w-screen-md">
-        <div v-text="'Snapshot X'" class="eyebrow mb-3" />
+        <div class="eyebrow mb-3" v-text="'Snapshot X'" />
         <h1 class="mb-5 mono">Where decisions<br />get made.</h1>
       </Container>
     </div>
     <Container class="max-w-screen-md">
-      <h3 v-text="'Spaces'" class="mb-2" />
+      <h3 class="mb-2" v-text="'Spaces'" />
       <UiLoading v-if="!loaded" class="block mb-2" />
     </Container>
     <Container v-if="loaded" class="max-w-screen-md" slim>
@@ -39,11 +39,11 @@ onMounted(async () => {
               :size="24"
               class="inline-block border-skin-bg !bg-skin-bg rounded-sm"
             />
-            <h4 v-text="space.name" class="inline-block" />
+            <h4 class="inline-block" v-text="space.name" />
           </div>
           <div>
-            <b class="text-skin-link">{{ space.proposal_count }}</b> proposals ·
-            <b class="text-skin-link">{{ space.vote_count }}</b> votes
+            <b class="text-skin-link" v-text="space.proposal_count" /> proposals
+            · <b class="text-skin-link" v-text="space.vote_count" /> votes
           </div>
         </router-link>
       </div>

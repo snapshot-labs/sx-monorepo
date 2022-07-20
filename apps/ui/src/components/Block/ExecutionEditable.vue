@@ -82,22 +82,22 @@ function editTx(index) {
         class="mb-3 flex flex-no-wrap overflow-x-scroll no-scrollbar scrolling-touch items-start space-x-3"
       >
         <a
-          @click="openModal('sendToken')"
           class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
+          @click="openModal('sendToken')"
         >
           <IH-stop />
           Send token
         </a>
         <a
-          @click="openModal('sendNft')"
           class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
+          @click="openModal('sendNft')"
         >
           <IH-photograph />
           Send NFT
         </a>
         <a
-          @click="openModal('contractCall')"
           class="px-4 py-3 border-b border rounded-lg block min-w-[165px]"
+          @click="openModal('contractCall')"
         >
           <IH-chip />
           Contract call
@@ -114,7 +114,7 @@ function editTx(index) {
           <IH-stop v-if="tx._type === 'sendToken'" />
           <IH-photograph v-else-if="tx._type === 'sendNft'" />
           <IH-chip v-else />
-          <div v-html="tx.title" class="ml-2 truncate text-skin-link" />
+          <div class="ml-2 truncate text-skin-link" v-html="tx.title" />
         </div>
         <div class="flex gap-3">
           <a @click="editTx(i)">
@@ -130,20 +130,20 @@ function editTx(index) {
       <ModalSendToken
         :open="modalOpen.sendToken"
         :address="address"
-        :initialState="modalState.sendToken"
+        :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
       />
       <ModalSendNft
         :open="modalOpen.sendNft"
         :address="address"
-        :initialState="modalState.sendNft"
+        :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"
       />
       <ModalTransaction
         :open="modalOpen.contractCall"
-        :initialState="modalState.contractCall"
+        :initial-state="modalState.contractCall"
         @close="modalOpen.contractCall = false"
         @add="addTx"
       />

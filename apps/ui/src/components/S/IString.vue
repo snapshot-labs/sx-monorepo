@@ -32,8 +32,8 @@ const inputValue = computed({
 <template>
   <SBase :definition="definition" :error="error" :dirty="dirty">
     <input
-      type="text"
       v-model="inputValue"
+      type="text"
       class="s-input"
       :placeholder="definition.examples && definition.examples[0]"
     />

@@ -145,7 +145,7 @@ watch(
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <template v-slot:header>
+    <template #header>
       <h3 v-text="'Add transaction'" />
     </template>
     <div class="s-box p-4">
@@ -162,11 +162,11 @@ watch(
         />
       </div>
       <div v-if="showAbiInput" class="s-base">
-        <div v-text="'ABI'" class="s-label" />
+        <div class="s-label" v-text="'ABI'" />
         <textarea v-model="abiStr" class="s-input mb-3 h-[140px]" />
       </div>
       <div v-if="methods.length > 0" class="s-base">
-        <div v-text="'Method'" class="s-label" />
+        <div class="s-label" v-text="'Method'" />
         <select v-model="form.method" class="s-input h-[45px]">
           <option v-for="(method, i) in methods" :key="i" v-text="method" />
         </select>
@@ -186,8 +186,8 @@ watch(
         />
       </div>
     </div>
-    <template v-slot:footer>
-      <UiButton @click="handleSubmit" class="w-full">Confirm</UiButton>
+    <template #footer>
+      <UiButton class="w-full" @click="handleSubmit">Confirm</UiButton>
     </template>
   </UiModal>
 </template>

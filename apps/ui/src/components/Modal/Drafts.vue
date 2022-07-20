@@ -15,7 +15,7 @@ const { open } = toRefs(props);
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <template v-slot:header>
+    <template #header>
       <h3 v-text="'Drafts'" />
     </template>
     <div>
@@ -26,11 +26,11 @@ const { open } = toRefs(props);
           class="py-3 px-4 border-b last:border-b-0 flex justify-between items-center"
         >
           <router-link
-            @click="$emit('close')"
             :to="{
               name: 'editor',
               params: { id: space, key: i.split(':')[1] }
             }"
+            @click="$emit('close')"
           >
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ i.split(':')[1] }}</span>

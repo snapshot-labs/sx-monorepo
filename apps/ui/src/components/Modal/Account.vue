@@ -13,7 +13,7 @@ if (injected)
     ...{ id: 'injected' }
   };
 
-const props = defineProps(['open']);
+const props = defineProps({ open: Boolean });
 const emit = defineEmits(['login', 'close']);
 const win = window;
 
@@ -31,21 +31,21 @@ watch(open, () => (step.value = null));
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <template v-slot:header>
+    <template #header>
       <h3
         v-if="!web3.account || step === 'connect'"
         v-text="'Connect wallet'"
       />
-      <h3 v-text="'Account'" v-else />
+      <h3 v-else v-text="'Account'" />
     </template>
     <div v-if="!web3.account || step === 'connect'">
       <div class="m-4 space-y-2">
         <a
           v-for="(connector, id, i) in connectors"
           :key="i"
-          @click="$emit('login', connector.id)"
           target="_blank"
           class="block"
+          @click="$emit('login', connector.id)"
         >
           <UiButton
             v-if="
@@ -81,10 +81,10 @@ watch(open, () => (step.value = null));
             <IH-external-link class="inline-block ml-1" />
           </UiButton>
         </a>
-        <UiButton @click="step = 'connect'" class="button-outline w-full">
+        <UiButton class="button-outline w-full" @click="step = 'connect'">
           Connect wallet
         </UiButton>
-        <UiButton @click="handleLogout" class="button-outline w-full !text-red">
+        <UiButton class="button-outline w-full !text-red" @click="handleLogout">
           Log out
         </UiButton>
       </div>

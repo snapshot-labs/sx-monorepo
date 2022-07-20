@@ -11,7 +11,7 @@ defineEmits(['close']);
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <template v-slot:header>
+    <template #header>
       <h3 v-text="'Timeline'" />
     </template>
     <div class="p-4 flex flex-column">
@@ -42,7 +42,7 @@ defineEmits(['close']);
           :key="state"
           class="mb-3 last:mb-0 h-[44px]"
         >
-          <h4 v-text="state" class="capitalize" />
+          <h4 class="capitalize" v-text="state" />
           {{ _t(proposal[state]) }}
         </div>
       </div>

@@ -42,8 +42,8 @@ async function handleLogin(connector) {
         />
         <UiButton
           v-else
-          @click="modalAccountOpen = true"
           class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+          @click="modalAccountOpen = true"
         >
           <span
             v-if="$auth.isAuthenticated.value"
@@ -51,8 +51,8 @@ async function handleLogin(connector) {
           >
             <Stamp :id="web3.account" :size="18" />
             <span
-              v-text="web3.name || shorten(web3.account)"
               class="hidden sm:block"
+              v-text="web3.name || shorten(web3.account)"
             />
           </span>
           <template v-else>
@@ -60,15 +60,15 @@ async function handleLogin(connector) {
             <IH-login class="sm:hidden inline-block" />
           </template>
         </UiButton>
-        <UiButton @click="toggleSkin" class="!px-0 w-[46px] ml-2">
+        <UiButton class="!px-0 w-[46px] ml-2" @click="toggleSkin">
           <IH-light-bulb v-if="getMode() === 'dark'" class="inline-block" />
           <IH-moon v-else class="inline-block" />
         </UiButton>
       </div>
     </div>
     <div
-      class="bg-blue text-white text-center py-2 fixed top-[72px] w-full"
       v-if="pendingCount > 0"
+      class="bg-blue text-white text-center py-2 fixed top-[72px] w-full"
     >
       <UiLoading :fill-white="true" class="mr-2" />
       {{ pendingCount }} pending transaction

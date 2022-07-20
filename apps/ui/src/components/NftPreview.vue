@@ -14,7 +14,6 @@ function handleError(e) {
 <template>
   <img
     :src="item.image"
-    @error="handleError"
     class="aspect-square rounded"
     :style="
       size
@@ -24,5 +23,6 @@ function handleError(e) {
           }
         : {}
     "
+    @error="handleError"
   />
 </template>

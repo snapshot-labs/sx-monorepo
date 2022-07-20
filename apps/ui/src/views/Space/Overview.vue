@@ -47,8 +47,8 @@ defineProps({ space: Object });
     </div>
     <UiLoading v-if="!loaded" class="block px-4 sm:px-0" />
     <Proposal
-      v-else
       v-for="(proposal, i) in proposals"
+      v-else
       :key="i"
       :proposal="proposal"
       class="mb-3"

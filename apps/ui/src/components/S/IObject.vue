@@ -52,11 +52,11 @@ const getComponent = name => {
 
 <template>
   <component
+    :is="getComponent(property.type)"
     v-for="(property, i) in definition.properties"
     :key="i"
-    :is="getComponent(property.type)"
+    v-model="inputValue[i]"
     :definition="property"
     :error="error?.[i]"
-    v-model="inputValue[i]"
   />
 </template>

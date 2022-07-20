@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { debouncedWatch } from '@vueuse/core';
 
-const props = defineProps(['url']);
+const props = defineProps({ url: String });
 const preview = ref(false);
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
@@ -42,11 +42,11 @@ debouncedWatch(
       </div>
     </div>
     <div class="px-4 py-3 overflow-hidden">
-      <div v-text="preview.meta.title" class="text-skin-link truncate" />
+      <div class="text-skin-link truncate" v-text="preview.meta.title" />
       <div
         v-if="preview.meta.description"
-        v-text="preview.meta.description"
         class="text-sm text-skin-text truncate"
+        v-text="preview.meta.description"
       />
     </div>
   </div>

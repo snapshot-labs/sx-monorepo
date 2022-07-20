@@ -37,12 +37,13 @@ onMounted(() => {
         </div>
         <div class="space-x-2">
           <UiButton
-            @click="modalOpen = true"
             class="float-left leading-3 !px-3 rounded-r-none"
+            @click="modalOpen = true"
           >
             <IH-collection class="inline-block" />
           </UiButton>
           <UiButton
+            class="rounded-l-none border-l-0 float-left !m-0 !px-3"
             @click="
               propose(
                 id,
@@ -53,9 +54,8 @@ onMounted(() => {
                 proposals[`${id}:${key}`].execution
               )
             "
-            class="rounded-l-none border-l-0 float-left !m-0 !px-3"
           >
-            <span v-text="'Publish'" class="hidden mr-2 md:inline-block" />
+            <span class="hidden mr-2 md:inline-block" v-text="'Publish'" />
             <IH-paper-airplane class="inline-block rotate-90" />
           </UiButton>
         </div>

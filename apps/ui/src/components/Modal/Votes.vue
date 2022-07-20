@@ -33,7 +33,7 @@ watch(open, async () => {
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
-    <template v-slot:header>
+    <template #header>
       <h3 v-text="'Votes'" />
     </template>
     <UiLoading v-if="!loaded" class="p-4 block text-center" />
@@ -53,18 +53,18 @@ watch(open, async () => {
           />
           <Stamp :id="vote.voter" :size="24" class="mr-2" />
           <router-link
-            @click="$emit('close')"
             :to="{ name: 'user', params: { id: vote.voter } }"
+            @click="$emit('close')"
           >
             {{ shortenAddress(vote.voter) }}
           </router-link>
           <div
-            v-text="choices[vote.choice]"
             class="absolute right-4 top-3 text-skin-link"
+            v-text="choices[vote.choice]"
           />
         </div>
       </div>
-      <div class="p-4 text-center" v-else>There isn't any votes yet!</div>
+      <div v-else class="p-4 text-center">There isn't any votes yet!</div>
     </div>
   </UiModal>
 </template>

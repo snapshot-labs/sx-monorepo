@@ -12,7 +12,7 @@ const showError = computed(() => props.error && props.dirty);
 
 <template>
   <div class="s-base" :class="showError ? 's-error' : ''">
-    <label v-if="definition.title" v-text="definition.title" class="s-label" />
+    <label v-if="definition.title" class="s-label" v-text="definition.title" />
     <slot />
     <span v-if="showError" class="s-input-error-message">{{ error }}</span>
     <legend v-if="definition.description" v-text="definition.description" />

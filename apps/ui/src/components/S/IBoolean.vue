@@ -35,6 +35,6 @@ const inputValue = computed({
 
 <template>
   <SBase :definition="definition" :error="error" :dirty="dirty">
-    <input type="checkbox" v-model="inputValue" />
+    <input v-model="inputValue" type="checkbox" />
   </SBase>
 </template>

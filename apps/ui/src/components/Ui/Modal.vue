@@ -2,6 +2,8 @@
 import { watch, toRefs } from 'vue';
 import { useModal } from '@/composables/useModal';
 
+defineEmits(['close']);
+
 const props = defineProps({
   open: {
     type: Boolean,
@@ -32,8 +34,8 @@ watch(open, (val, prev) => {
           <slot name="footer" />
         </div>
         <a
-          @click="$emit('close')"
           class="absolute right-0 -top-1 p-4 text-color"
+          @click="$emit('close')"
         >
           <IH-x />
         </a>

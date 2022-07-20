@@ -40,8 +40,8 @@ const filteredAssets = computed(() =>
   <template v-else>
     <div
       v-if="filteredAssets.length === 0"
-      v-text="'No results'"
       class="text-center py-3"
+      v-text="'No results'"
     />
     <div
       v-for="(asset, i) in filteredAssets"
@@ -51,23 +51,23 @@ const filteredAssets = computed(() =>
       @click="emit('pick', asset.contract_address)"
     >
       <div class="flex items-center">
-        <Stamp type="token" :id="asset.contract_address" :size="32" />
+        <Stamp :id="asset.contract_address" type="token" :size="32" />
         <div class="flex flex-col ml-3 leading-[20px]">
           <div
-            v-text="shorten(asset.contract_ticker_symbol, 12)"
             class="text-skin-link"
+            v-text="shorten(asset.contract_ticker_symbol, 12)"
           />
-          <div v-text="shorten(asset.contract_name, 24)" class="text-sm" />
+          <div class="text-sm" v-text="shorten(asset.contract_name, 24)" />
         </div>
       </div>
       <div class="flex flex-col items-end leading-[20px]">
         <div
+          class="text-skin-link"
           v-text="
             _n(formatUnits(asset.balance || 0, asset.contract_decimals || 0))
           "
-          class="text-skin-link"
         />
-        <div v-text="`$${_n(asset.quote)}`" class="text-sm" />
+        <div class="text-sm" v-text="`$${_n(asset.quote)}`" />
       </div>
     </div>
   </template>
