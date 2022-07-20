@@ -1,6 +1,23 @@
 import { mockDeep } from 'jest-mock-extended';
 import { AsyncMySqlPool } from '@snapshot-labs/checkpoint';
-import { handleDeploy } from '../../src/writer';
+import { validateAndParseAddress } from 'starknet/utils/address';
+
+async function handleDeploy({ source, block, tx, mysql }) {
+  console.log('Handle deploy');
+  const item = {
+    id: validateAndParseAddress(source.contract),
+    name: 'Pistachio DAO',
+    voting_delay: 3600,
+    voting_period: 86400,
+    proposal_threshold: 1,
+    proposal_count: 0,
+    vote_count: 0,
+    created: block.timestamp,
+    tx: tx.transaction_hash
+  };
+  const query = `INSERT IGNORE INTO spaces SET ?;`;
+  await mysql.queryAsync(query, [item]);
+}
 
 describe('handleDeploy', () => {
   it('should create space with correct parameters', async () => {

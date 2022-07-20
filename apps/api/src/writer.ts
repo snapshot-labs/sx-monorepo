@@ -1,15 +1,21 @@
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet/utils/address';
-import { getJSON, toAddress } from './utils';
+import { getJSON, toAddress, getEvent } from './utils';
 
-export async function handleDeploy({ source, block, tx, mysql }) {
-  console.log('Handle deploy');
+export async function handleSpaceCreated({ source, block, tx, receipt, mysql }) {
+  console.log('Handle space created');
+  const format =
+    'voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), voting_strategies_len, voting_strategies(felt*), authenticators_len, authenticators(felt*), executors_len, executor';
+  const event: any = getEvent(receipt.events[0].data, format);
   const item = {
     id: validateAndParseAddress(source.contract),
     name: 'Pistachio DAO',
-    voting_delay: 3600,
-    voting_period: 86400,
-    proposal_threshold: 1,
+    controller: validateAndParseAddress(event.controller),
+    voting_delay: BigInt(event.voting_delay).toString(),
+    min_voting_period: BigInt(event.min_voting_period).toString(),
+    max_voting_period: BigInt(event.max_voting_period).toString(),
+    proposal_threshold: event.proposal_threshold,
+    quorum: event.quorum,
     proposal_count: 0,
     vote_count: 0,
     created: block.timestamp,
@@ -20,7 +26,7 @@ export async function handleDeploy({ source, block, tx, mysql }) {
 }
 
 export async function handlePropose({ block, tx, receipt, mysql }) {
-  console.log('Handle propose', receipt.events);
+  console.log('Handle propose');
   const space = validateAndParseAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
   const author = toAddress(receipt.events[0].data[1]);
@@ -86,7 +92,7 @@ export async function handlePropose({ block, tx, receipt, mysql }) {
 }
 
 export async function handleVote({ block, receipt, mysql }) {
-  console.log('Handle vote', receipt.events);
+  console.log('Handle vote');
   const space = validateAndParseAddress(receipt.events[0].from_address);
   const proposal = BigInt(receipt.events[0].data[0]).toString();
   const voter = toAddress(receipt.events[0].data[1]);
