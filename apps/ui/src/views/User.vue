@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { shortenAddress } from '@/helpers/utils';
 import apollo from '@/helpers/apollo';
@@ -9,23 +9,23 @@ import { useState } from '@/composables/useState';
 const route = useRoute();
 const { get, set } = useState();
 const id = route.params.id;
-const user = ref({});
-const loaded = ref(false);
+let user = $ref({});
+let loaded = $ref(false);
 
 onMounted(async () => {
   const state = get();
   if (state?.users[id]) {
-    user.value = state.users[id];
+    user = state.users[id];
   } else {
     const { data } = await apollo.query({
       query: USER_QUERY,
       variables: { id }
     });
     state.users[id] = data.user;
-    user.value = data.user;
+    user = data.user;
     set(state);
   }
-  loaded.value = true;
+  loaded = true;
 });
 </script>
 

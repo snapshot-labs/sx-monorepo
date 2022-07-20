@@ -1,5 +1,5 @@
 <script setup>
-import { toRefs, ref, watch } from 'vue';
+import { toRefs, watch } from 'vue';
 import { getInjected } from '@snapshot-labs/lock/src/utils';
 import { shorten, explorerUrl, getUrl } from '@/helpers/utils';
 import connectors from '@/helpers/connectors.json';
@@ -19,14 +19,14 @@ const win = window;
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
-const step = ref(null);
+let step = $ref(null);
 
 async function handleLogout() {
   await logout();
   emit('close');
 }
 
-watch(open, () => (step.value = null));
+watch(open, () => (step = null));
 </script>
 
 <template>

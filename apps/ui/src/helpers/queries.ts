@@ -7,6 +7,7 @@ export const PROPOSAL_QUERY = gql`
       proposal_id
       space
       author
+      execution_hash
       metadata_uri
       title
       body
@@ -32,6 +33,7 @@ export const PROPOSALS_QUERY = gql`
       proposal_id
       space
       author
+      execution_hash
       metadata_uri
       title
       body
@@ -69,11 +71,16 @@ export const SPACE_QUERY = gql`
     space(id: $id) {
       id
       name
+      about
+      controller
       voting_delay
-      voting_period
+      min_voting_period
+      max_voting_period
       proposal_threshold
+      quorum
       proposal_count
       vote_count
+      created
     }
   }
 `;
@@ -83,8 +90,16 @@ export const SPACES_QUERY = gql`
     spaces {
       id
       name
+      about
+      controller
+      voting_delay
+      min_voting_period
+      max_voting_period
+      proposal_threshold
+      quorum
       proposal_count
       vote_count
+      created
     }
   }
 `;

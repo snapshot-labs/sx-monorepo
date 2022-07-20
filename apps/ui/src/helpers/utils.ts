@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
+import duration from 'dayjs/plugin/duration';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl as snapshotGetUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
@@ -10,6 +11,7 @@ const IPFS_GATEWAY: string =
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
+dayjs.extend(duration);
 
 dayjs.updateLocale('en', {
   relativeTime: {
@@ -81,6 +83,14 @@ export function lsGet(key: string, fallback?: any) {
 
 export function lsRemove(key: string) {
   return localStorage.removeItem(`${pkg.name}.${key}`);
+}
+
+export function _d(s: number) {
+  return dayjs
+    .duration(s, 'seconds')
+    .format('H[h] m[m] s[s]')
+    .replace(/\b0+[a-z]+\s*/gi, '')
+    .trim();
 }
 
 export function _t(number) {

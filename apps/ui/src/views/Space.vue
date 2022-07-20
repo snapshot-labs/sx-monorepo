@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import apollo from '@/helpers/apollo';
 import { SPACE_QUERY } from '@/helpers/queries';
@@ -9,23 +9,23 @@ const route = useRoute();
 const { get, set } = useState();
 const id = route.params.id;
 
-const space = ref({});
-const loaded = ref(false);
+let space = $ref({});
+let loaded = $ref(false);
 
 onMounted(async () => {
   const state = get();
   if (state?.spaces[id]) {
-    space.value = state.spaces[id];
+    space = state.spaces[id];
   } else {
     const { data } = await apollo.query({
       query: SPACE_QUERY,
       variables: { id }
     });
     state.spaces[id] = data.space;
-    space.value = data.space;
+    space = data.space;
     set(state);
   }
-  loaded.value = true;
+  loaded = true;
 });
 </script>
 
