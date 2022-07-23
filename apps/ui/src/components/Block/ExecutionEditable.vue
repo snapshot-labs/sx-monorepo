@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, Ref } from 'vue';
+import draggable from 'vuedraggable';
 import { formatUnits } from '@ethersproject/units';
 import { _n, shorten } from '@/helpers/utils';
 import spaces from '@/helpers/spaces.json';
@@ -16,31 +17,41 @@ const emit = defineEmits<{
 }>();
 
 const editedTx: Ref<number | null> = ref(null);
-const modalState: Ref<object> = ref({});
+const modalState: Ref<{
+  sendToken?: any;
+  sendNft?: any;
+  contractCall?: any;
+}> = ref({});
 const modalOpen = ref({
   sendToken: false,
   sendNft: false,
   contractCall: false
 });
 
-const formattedTxs = computed(() =>
-  props.modelValue.map(tx => {
-    let title = '';
-    if (tx._type === 'sendToken') {
-      title = `Send <b>${_n(
-        formatUnits(tx._form.amount, tx._form.token.decimals)
-      )}</b> ${tx._form.token.symbol} to <b>${shorten(tx._form.recipient)}</b>`;
-    } else if (tx._type === 'sendNft') {
-      title = `Send <b>${_n(
-        formatUnits(tx._form.amount, 0)
-      )}</b> NFT to <b>${shorten(tx._form.recipient)}</b>`;
-    } else if (tx._type === 'contractCall') {
-      title = `Contract call to <b>${shorten(tx.to)}</b>`;
-    }
+function getTitle(tx: Transaction) {
+  if (tx._type === 'sendToken') {
+    return `Send <b>${_n(
+      formatUnits(tx._form.amount, tx._form.token.decimals)
+    )}</b> ${tx._form.token.symbol} to <b>${shorten(tx._form.recipient)}</b>`;
+  }
 
-    return { ...tx, title };
-  })
-);
+  if (tx._type === 'sendNft') {
+    return `Send <b>${_n(
+      formatUnits(tx._form.amount, 0)
+    )}</b> NFT to <b>${shorten(tx._form.recipient)}</b>`;
+  }
+
+  if (tx._type === 'contractCall') {
+    return `Contract call to <b>${shorten(tx.to)}</b>`;
+  }
+}
+
+const txs = computed({
+  get: () => props.modelValue,
+  set: newValue => {
+    emit('update:modelValue', newValue);
+  }
+});
 
 function addTx(tx: Transaction) {
   const newValue = [...props.modelValue];
@@ -54,11 +65,11 @@ function addTx(tx: Transaction) {
   emit('update:modelValue', newValue);
 }
 
-function removeTx(index) {
-  emit(
-    'update:modelValue',
-    props.modelValue.filter((tx, i) => i !== index)
-  );
+function removeTx(index: number) {
+  emit('update:modelValue', [
+    ...props.modelValue.slice(0, index),
+    ...props.modelValue.slice(index + 1)
+  ]);
 }
 
 function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
@@ -67,7 +78,7 @@ function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
   modalOpen.value[type] = true;
 }
 
-function editTx(index) {
+function editTx(index: number) {
   const tx = props.modelValue[index];
 
   editedTx.value = index;
@@ -104,27 +115,35 @@ function editTx(index) {
         </a>
       </div>
     </div>
-    <div v-if="formattedTxs.length > 0" class="x-block !border-x rounded-lg">
-      <div
-        v-for="(tx, i) in formattedTxs"
-        :key="i"
-        class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
-      >
-        <div class="flex items-center max-w-[70%]">
-          <IH-stop v-if="tx._type === 'sendToken'" />
-          <IH-photograph v-else-if="tx._type === 'sendNft'" />
-          <IH-chip v-else />
-          <div class="ml-2 truncate text-skin-link" v-html="tx.title" />
-        </div>
-        <div class="flex gap-3">
-          <a @click="editTx(i)">
-            <IH-pencil />
-          </a>
-          <a @click="removeTx(i)">
-            <IH-trash />
-          </a>
-        </div>
-      </div>
+    <div v-if="txs.length > 0" class="x-block !border-x rounded-lg">
+      <draggable v-model="txs" handle=".handle">
+        <template #item="{ element: tx, index: i }">
+          <div
+            class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
+          >
+            <div class="flex items-center max-w-[70%]">
+              <div
+                v-if="txs.length > 1"
+                class="handle mr-2 text-white cursor-pointer opacity-50 hover:opacity-100"
+              >
+                <IH-switch-vertical />
+              </div>
+              <IH-stop v-if="tx._type === 'sendToken'" />
+              <IH-photograph v-else-if="tx._type === 'sendNft'" />
+              <IH-chip v-else />
+              <div class="ml-2 truncate text-skin-link" v-html="getTitle(tx)" />
+            </div>
+            <div class="flex gap-3">
+              <a @click="editTx(i)">
+                <IH-pencil />
+              </a>
+              <a @click="removeTx(i)">
+                <IH-trash />
+              </a>
+            </div>
+          </div>
+        </template>
+      </draggable>
     </div>
     <teleport to="#modal">
       <ModalSendToken
