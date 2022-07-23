@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { shorten } from '@/helpers/utils';
 import { formatUnits } from '@ethersproject/units';
 import { Interface } from '@ethersproject/abi';
 
-defineProps({ txs: Array });
+defineProps<{ txs: any[] }>();
 
 function decodeTx(tx) {
   const iface = new Interface(tx.abi);

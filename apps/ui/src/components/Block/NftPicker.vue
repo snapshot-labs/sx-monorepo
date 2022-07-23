@@ -1,13 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 
-const props = defineProps({
-  searchValue: String,
-  loading: Boolean,
-  nfts: Array
-});
+const props = defineProps<{
+  searchValue: string;
+  loading: boolean;
+  nfts: any[];
+}>();
 
-const emit = defineEmits(['pick']);
+const emit = defineEmits<{
+  (e: 'pick', value: string);
+}>();
 
 const filteredNfts = computed(() =>
   props.nfts.filter(nft => {

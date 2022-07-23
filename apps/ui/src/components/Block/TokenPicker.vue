@@ -1,16 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { formatUnits } from '@ethersproject/units';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _n, shorten } from '@/helpers/utils';
 
-const props = defineProps({
-  searchValue: String,
-  loading: Boolean,
-  assets: Array
-});
+const props = defineProps<{
+  searchValue: string;
+  loading: boolean;
+  assets: any[];
+}>();
 
-const emit = defineEmits(['pick']);
+const emit = defineEmits<{
+  (e: 'pick', value: string);
+}>();
 
 const filteredAssets = computed(() =>
   props.assets
