@@ -114,12 +114,15 @@ export function createContractCallTransaction({
     _type: 'contractCall',
     to: form.to,
     data,
-    value: '0x',
+    value: iface.getFunction(form.method).payable
+      ? parseUnits(form.amount.toString(), 18).toString()
+      : '0',
     _form: {
       abi: form.abi,
       recipient: form.to,
       method: form.method,
-      args: form.args
+      args: form.args,
+      amount: form.amount
     }
   };
 }

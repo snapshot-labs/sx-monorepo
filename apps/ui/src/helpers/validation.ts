@@ -1,5 +1,6 @@
 import Ajv from 'ajv';
 import { isAddress } from '@ethersproject/address';
+import { parseUnits } from '@ethersproject/units';
 import {
   Zero,
   MinInt256,
@@ -22,6 +23,19 @@ export function validateForm(schema, form) {
       try {
         const number = BigNumber.from(value);
         return number.gte(Zero) && number.lte(MaxUint256);
+      } catch {
+        return false;
+      }
+    }
+  });
+
+  ajv.addFormat('ethValue', {
+    validate: value => {
+      if (!value.match(/^([0-9]|[1-9][0-9]+)(\.[0-9]+)?$/)) return false;
+
+      try {
+        parseUnits(value, 18);
+        return true;
       } catch {
         return false;
       }

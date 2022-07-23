@@ -91,20 +91,30 @@ describe('transactions', () => {
   });
 
   describe('createContractCallTransaction', () => {
-    const form = {
-      to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
-      value: '',
-      method: 'deny',
-      args: {
-        guy: '0x000000000000000000000000000000000000dead'
-      },
-      abi: ['function deny(address guy)'],
-      data: ''
-    };
-
     it('should create contract call transaction', () => {
       const tx = createContractCallTransaction({
-        form
+        form: {
+          to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
+          abi: ['function deny(address guy)'],
+          method: 'deny',
+          args: {
+            guy: '0x000000000000000000000000000000000000dead'
+          }
+        }
+      });
+
+      expect(tx).toMatchSnapshot();
+    });
+
+    it('should create contract call transaction with payable', () => {
+      const tx = createContractCallTransaction({
+        form: {
+          to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
+          abi: ['function deposit() payable'],
+          method: 'deposit',
+          args: {},
+          amount: '20'
+        }
       });
 
       expect(tx).toMatchSnapshot();

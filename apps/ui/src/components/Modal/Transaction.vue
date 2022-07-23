@@ -11,7 +11,8 @@ const DEFAULT_FORM_STATE = {
   to: '',
   abi: [],
   method: '',
-  args: {}
+  args: {},
+  amount: ''
 };
 
 const props = defineProps({
@@ -74,6 +75,7 @@ watch(currentMethod, () => {
     ignoreFormUpdates.value = false;
   } else {
     form.args = {};
+    form.amount = DEFAULT_FORM_STATE.amount;
   }
 });
 
@@ -85,11 +87,19 @@ const errors = computed(() =>
         to: {
           type: 'string',
           format: 'address'
-        }
+        },
+        ...(currentMethod.value.payable
+          ? {
+              amount: {
+                type: 'string',
+                format: 'ethValue'
+              }
+            }
+          : {})
       },
       additionalProperties: true
     },
-    { to: form.to }
+    { to: form.to, amount: form.amount }
   )
 );
 const argsErrors = computed(() => validateForm(definition.value, form.args));
@@ -129,6 +139,7 @@ watch(
       form.abi = props.initialState.abi;
       form.method = props.initialState.method;
       form.args = props.initialState.args;
+      form.amount = props.initialState.amount;
 
       ignoreFormUpdates.value = true;
     } else {
@@ -136,6 +147,7 @@ watch(
       form.abi = DEFAULT_FORM_STATE.abi;
       form.method = DEFAULT_FORM_STATE.method;
       form.args = DEFAULT_FORM_STATE.args;
+      form.amount = DEFAULT_FORM_STATE.amount;
 
       ignoreFormUpdates.value = false;
     }
@@ -150,7 +162,7 @@ watch(
     </template>
     <div class="s-box p-4">
       <div class="relative">
-        <UiLoading v-if="loading" class="absolute top-[14px] right-3" />
+        <UiLoading v-if="loading" class="absolute top-[14px] right-3 z-10" />
         <SIString
           v-model="form.to"
           :error="errors.to"
@@ -171,11 +183,14 @@ watch(
           <option v-for="(method, i) in methods" :key="i" v-text="method" />
         </select>
       </div>
-      <SINumber
+      <SIString
         v-if="currentMethod.payable"
+        v-model="form.amount"
+        :error="errors.amount"
         :definition="{
-          type: 'number',
-          title: 'ETH value'
+          format: 'ethValue',
+          title: 'ETH amount',
+          examples: ['Payable amount']
         }"
       />
       <div v-if="definition">

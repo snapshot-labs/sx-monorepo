@@ -6,6 +6,7 @@ exports[`transactions > createContractCallTransaction > should create contract c
     "abi": [
       "function deny(address guy)",
     ],
+    "amount": undefined,
     "args": {
       "guy": "0x000000000000000000000000000000000000dead",
     },
@@ -15,7 +16,25 @@ exports[`transactions > createContractCallTransaction > should create contract c
   "_type": "contractCall",
   "data": "0x9c52a7f1000000000000000000000000000000000000000000000000000000000000dead",
   "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
-  "value": "0x",
+  "value": "0",
+}
+`;
+
+exports[`transactions > createContractCallTransaction > should create contract call transaction with payable 1`] = `
+{
+  "_form": {
+    "abi": [
+      "function deposit() payable",
+    ],
+    "amount": "20",
+    "args": {},
+    "method": "deposit",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  },
+  "_type": "contractCall",
+  "data": "0xd0e30db0",
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "value": "20000000000000000000",
 }
 `;
 
