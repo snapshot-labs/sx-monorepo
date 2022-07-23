@@ -116,7 +116,7 @@ function editTx(index: number) {
       </div>
     </div>
     <div v-if="txs.length > 0" class="x-block !border-x rounded-lg">
-      <draggable v-model="txs" handle=".handle">
+      <draggable v-model="txs" handle=".handle" :item-key="() => undefined">
         <template #item="{ element: tx, index: i }">
           <div
             class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"

@@ -5,7 +5,7 @@ import { useWeb3 } from '@/composables/useWeb3';
 import { useTxStatus } from '@/composables/useTxStatus';
 import { useAccount } from '@/composables/useAccount';
 import { useModal } from '@/composables/useModal';
-import type { Transaction } from '@/types';
+import type { Transaction, TransactionData } from '@/types';
 
 export function useActions() {
   const { web3 } = useWeb3();
@@ -45,7 +45,21 @@ export function useActions() {
     execution: Transaction[]
   ) {
     if (!web3.value.account) return await forceLogin();
-    const pinned = await pin({ title, body, discussion, execution });
+
+    const executionData = execution.map(
+      (tx: Transaction, i: number): TransactionData => ({
+        ...tx,
+        nonce: i,
+        operation: '0'
+      })
+    );
+
+    const pinned = await pin({
+      title,
+      body,
+      discussion,
+      execution: executionData
+    });
     if (!pinned || !pinned.cid) return;
     console.log('IPFS', pinned);
     const isStarkNet = web3.value.type === 'argentx';
