@@ -9,7 +9,7 @@ const props = defineProps({
 
 defineEmits(['close']);
 
-const { proposals, removeDraft } = useEditor();
+const { drafts, removeDraft } = useEditor();
 const { open } = toRefs(props);
 </script>
 
@@ -19,9 +19,9 @@ const { open } = toRefs(props);
       <h3 v-text="'Drafts'" />
     </template>
     <div>
-      <div v-if="Object.keys(proposals).length > 0">
+      <div v-if="Object.keys(drafts).length > 0">
         <div
-          v-for="(proposal, i) in proposals"
+          v-for="(proposal, i) in drafts"
           :key="i"
           class="py-3 px-4 border-b last:border-b-0 flex justify-between items-center"
         >
