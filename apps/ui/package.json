@@ -38,7 +38,7 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@iconify-json/heroicons-outline": "^1.1.1",
+    "@iconify-json/heroicons-outline": "^1.1.2",
     "@types/node": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
     "@typescript-eslint/parser": "^5.30.5",
