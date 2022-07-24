@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, ref, computed, watch } from 'vue';
+import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
 import { getABI } from '@/helpers/etherscan';
@@ -104,6 +105,17 @@ const errors = computed(() =>
 );
 const argsErrors = computed(() => validateForm(definition.value, form.args));
 
+watch(abiStr, value => {
+  try {
+    const abi = JSON.parse(value);
+    new Interface(abi);
+    form.abi = abi;
+    showAbiInput.value = false;
+  } catch (err) {
+    console.log('invalid abi', value);
+  }
+});
+
 watch(
   () => form.to,
   async v => {
@@ -120,7 +132,6 @@ watch(
         console.log('Address is valid');
         try {
           form.abi = await getABI(v);
-          abiStr.value = JSON.stringify(form.abi, null, 2);
         } catch (e) {
           showAbiInput.value = true;
           console.log(e);
