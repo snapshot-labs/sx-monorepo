@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.6.2",
-    "@argent/get-starknet": "^4.3.1",
+    "@argent/get-starknet": "^4.5.1",
     "@braintree/sanitize-url": "^6.0.0",
     "@ensdomains/eth-ens-namehash": "^2.0.15",
     "@ethersproject/address": "^5.6.1",
