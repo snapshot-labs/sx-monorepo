@@ -1,7 +1,8 @@
-<script setup>
-import { watch } from 'vue';
-import { useEditor } from '@/composables/useEditor';
+<script setup lang="ts">
+import { watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useEditor } from '@/composables/useEditor';
+import { omit } from '@/helpers/utils';
 
 const router = useRouter();
 const route = useRoute();
@@ -10,13 +11,29 @@ const { proposals } = useEditor();
 const id = route.params.id;
 const draft = route.params.key;
 const key = `${id}:${draft}`;
-if (!proposals[key]) proposals[key] = {};
+if (!proposals[key]) {
+  proposals[key] = {
+    title: '',
+    body: '',
+    discussion: '',
+    execution: [],
+    updatedAt: Date.now()
+  };
+}
 if (!proposals[key].execution) proposals[key].execution = [];
 
 watch(proposals, () => {
   if (!proposals[key]) {
     router.push({ name: 'editor' });
   }
+});
+
+const proposalData = computed(() =>
+  JSON.stringify(omit(proposals[key], ['updatedAt']))
+);
+
+watch(proposalData, () => {
+  proposals[key].updatedAt = Date.now();
 });
 </script>
 <template>

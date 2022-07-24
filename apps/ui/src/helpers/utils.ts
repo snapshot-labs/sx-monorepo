@@ -140,6 +140,15 @@ export function abiToDefinition(abi) {
   return definition;
 }
 
-export function clone(obj) {
+export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const entries = Object.entries(obj) as [K, any];
+
+  return Object.fromEntries(entries.filter(([k]) => !keys.includes(k))) as Omit<
+    T,
+    K
+  >;
+}
+
+export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
