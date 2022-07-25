@@ -1,18 +1,29 @@
-<script setup>
-import { watch, toRefs } from 'vue';
+<script setup lang="ts">
+import { watch, toRefs, onMounted, onBeforeUnmount } from 'vue';
 import { useModal } from '@/composables/useModal';
 
-defineEmits(['close']);
+const emit = defineEmits<{
+  (e: 'close');
+}>();
 
-const props = defineProps({
-  open: {
-    type: Boolean,
-    required: true
-  }
-});
+const props = defineProps<{
+  open: boolean;
+}>();
 
 const { open } = toRefs(props);
 const { modalOpen } = useModal();
+
+function handleKeyboardEvent(ev: KeyboardEvent) {
+  if (ev.code === 'Escape') emit('close');
+}
+
+onMounted(() => {
+  document.addEventListener('keyup', handleKeyboardEvent);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keyup', handleKeyboardEvent);
+});
 
 watch(open, (val, prev) => {
   if (val !== prev) modalOpen.value = !modalOpen.value;
