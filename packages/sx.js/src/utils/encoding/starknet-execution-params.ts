@@ -1,30 +1,30 @@
-export interface StarknetMetaTransaction {
+export interface Call {
   to: bigint;
   functionSelector: bigint;
   calldata: bigint[];
 }
 
-export function createStarknetExecutionParams(txArray: StarknetMetaTransaction[]): bigint[] {
-  if (!txArray || txArray.length == 0) {
+export function createStarknetExecutionParams(callArray: Call[]): bigint[] {
+  if (!callArray || callArray.length == 0) {
     return [];
   }
 
-  const dataOffset = BigInt(1 + txArray.length * 4);
+  const dataOffset = BigInt(1 + callArray.length * 4);
   const executionParams = [dataOffset];
   let calldataIndex = 0;
 
-  txArray.forEach((tx) => {
+  callArray.forEach((tx) => {
     const subArr: bigint[] = [
       tx.to,
       tx.functionSelector,
+      BigInt(calldataIndex),
       BigInt(tx.calldata.length),
-      BigInt(calldataIndex)
     ];
     calldataIndex += tx.calldata.length;
     executionParams.push(...subArr);
   });
 
-  txArray.forEach((tx) => {
+  callArray.forEach((tx) => {
     executionParams.push(...tx.calldata);
   });
   return executionParams;
