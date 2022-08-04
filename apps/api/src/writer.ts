@@ -1,14 +1,15 @@
+import { formatUnits } from '@ethersproject/units';
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet/utils/address';
 import { getJSON, toAddress, getEvent } from './utils';
 
-export async function handleSpaceCreated({ source, block, tx, receipt, mysql }) {
+export async function handleSpaceCreated({ block, tx, event, mysql }) {
   console.log('Handle space created');
   const format =
-    'voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), voting_strategies_len, voting_strategies(felt*), authenticators_len, authenticators(felt*), executors_len, executor';
-  const event: any = getEvent(receipt.events[0].data, format);
+    'deployer_address, space_address, voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), voting_strategies_len, voting_strategies(felt*), authenticators_len, authenticators(felt*), executors_len, executors(felt*)';
+  event = getEvent(event.data, format);
   const item = {
-    id: validateAndParseAddress(source.contract),
+    id: validateAndParseAddress(event.space_address),
     name: 'Pistachio DAO',
     controller: validateAndParseAddress(event.controller),
     voting_delay: BigInt(event.voting_delay).toString(),
@@ -25,19 +26,19 @@ export async function handleSpaceCreated({ source, block, tx, receipt, mysql }) 
   await mysql.queryAsync(query, [item]);
 }
 
-export async function handlePropose({ block, tx, receipt, mysql }) {
+export async function handlePropose({ block, tx, event, mysql }) {
   console.log('Handle propose');
-  const space = validateAndParseAddress(receipt.events[0].from_address);
-  const proposal = BigInt(receipt.events[0].data[0]).toString();
-  const author = toAddress(receipt.events[0].data[1]);
+  const space = validateAndParseAddress(event.from_address);
+  const proposal = BigInt(event.data[0]).toString();
+  const author = toAddress(event.data[1]);
   let title = '';
   let body = '';
   let discussion = '';
 
   let metadataUri = '';
   try {
-    const metadataUriLen = BigInt(receipt.events[0].data[6]).toString();
-    const metadataUriArr = receipt.events[0].data.slice(7, 7 + metadataUriLen);
+    const metadataUriLen = BigInt(event.data[6]).toString();
+    const metadataUriArr = event.data.slice(7, 7 + metadataUriLen);
     metadataUri = shortStringArrToStr(metadataUriArr.map(m => BigInt(m)));
   } catch (e) {
     console.log(e);
@@ -58,14 +59,14 @@ export async function handlePropose({ block, tx, receipt, mysql }) {
     proposal_id: proposal,
     space,
     author,
-    execution_hash: receipt.events[0].data[2],
+    execution_hash: event.data[2],
     metadata_uri: metadataUri,
     title,
     body,
     discussion,
-    start: BigInt(receipt.events[0].data[3]).toString(),
-    end: BigInt(receipt.events[0].data[4]).toString(),
-    snapshot: BigInt(receipt.events[0].data[5]).toString(),
+    start: BigInt(event.data[3]).toString(),
+    end: BigInt(event.data[4]).toString(),
+    snapshot: BigInt(event.data[5]).toString(),
     scores_1: 0,
     scores_2: 0,
     scores_3: 0,
@@ -91,13 +92,13 @@ export async function handlePropose({ block, tx, receipt, mysql }) {
   await mysql.queryAsync(query, [item, item.space, user, author]);
 }
 
-export async function handleVote({ block, receipt, mysql }) {
+export async function handleVote({ block, event, mysql }) {
   console.log('Handle vote');
-  const space = validateAndParseAddress(receipt.events[0].from_address);
-  const proposal = BigInt(receipt.events[0].data[0]).toString();
-  const voter = toAddress(receipt.events[0].data[1]);
-  const choice = BigInt(receipt.events[0].data[2]).toString();
-  const vp = BigInt(receipt.events[0].data[3]).toString();
+  const space = validateAndParseAddress(event.from_address);
+  const proposal = BigInt(event.data[0]).toString();
+  const voter = toAddress(event.data[1]);
+  const choice = BigInt(event.data[2]).toString();
+  const vp = parseFloat(formatUnits(BigInt(event.data[3]).toString(), 18));
 
   const item = {
     id: `${space}/${proposal}/${voter}`,

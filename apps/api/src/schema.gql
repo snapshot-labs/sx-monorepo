@@ -10,7 +10,7 @@ type Space {
   min_voting_period: Int
   max_voting_period: Int
   proposal_threshold: Int
-  quorum: Int
+  quorum: Float
   proposal_count: Int
   vote_count: Int
   created: Int
@@ -30,10 +30,10 @@ type Proposal {
   start: Int
   end: Int
   snapshot: Int
-  scores_1: Int
-  scores_2: Int
-  scores_3: Int
-  scores_total: Int
+  scores_1: Float
+  scores_2: Float
+  scores_3: Float
+  scores_total: Float
   created: Int
   tx: String
   vote_count: Int
@@ -45,7 +45,7 @@ type Vote {
   space: String
   proposal: Int
   choice: Int
-  vp: Int
+  vp: Float
   created: Int
 }
 

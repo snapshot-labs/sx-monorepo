@@ -1,16 +1,21 @@
 {
   "network": "goerli-alpha",
-  "networkBaseUrl": "https://starknet-proxy-ikaz7.ondigitalocean.app",
+  "network_base_url": "https://starknet-proxy-ikaz7.ondigitalocean.app",
   "sources": [
     {
-      "contract": "0x03a4cb1c6e4439e2ce2c43b565e6347f2f334cd3a387e86fb14f7655c9b6704a",
-      "start": 276452,
-      "deploy_fn": "",
+      "contract": "0x053fa692b13da0641ef768c8c7fbe85a7034e72b1f43188315664c107a5f1c47",
+      "start": 286079,
       "events": [
         {
-          "name": "space_created",
+          "name": "space_deployed",
           "fn": "handleSpaceCreated"
-        },
+        }
+      ]
+    },
+    {
+      "contract": "0x06e9ac13ee6328edc1f37da546432a3942f6153ccd4e9f0b253e0ba7687c96ce",
+      "start": 286079,
+      "events": [
         {
           "name": "proposal_created",
           "fn": "handlePropose"

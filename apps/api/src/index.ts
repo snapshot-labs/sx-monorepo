@@ -11,6 +11,7 @@ const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
 const schema = fs.readFileSync(schemaFile, 'utf8');
 
+// @ts-ignore
 const checkpoint = new Checkpoint(config, writer, schema, {
   logLevel: LogLevel.Info,
   prettifyLogs: process.env.NODE_ENV !== 'production'
