@@ -26,6 +26,16 @@ export class IntsSequence {
     return SplitUint256.fromUint(uint);
   }
 
+  static LEFromString(str: string): IntsSequence {
+    const ints_array: bigint[] = [];
+    for (let i = 0; i < str.length; i += 8) {
+      let bytes = Buffer.from(str.slice(i, i + 8));
+      let leBytes = bytes.reverse();
+      ints_array.push(BigInt(bytesToHex(leBytes)));
+    }
+    return new IntsSequence(ints_array, str.length);
+  }
+
   static fromBytes(bytes: number[]): IntsSequence {
     const ints_array: bigint[] = [];
     for (let i = 0; i < bytes.length; i += 8) {
