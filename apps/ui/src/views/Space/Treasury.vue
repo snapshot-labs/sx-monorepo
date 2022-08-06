@@ -2,7 +2,7 @@
 import { onMounted, computed } from 'vue';
 import { formatUnits } from '@ethersproject/units';
 import { useBalances } from '@/composables/useBalances';
-import spaces from '@/helpers/spaces.json';
+import space from '@/helpers/space.json';
 import { _n, shorten, explorerUrl } from '@/helpers/utils';
 
 defineProps({ space: Object });
@@ -15,9 +15,7 @@ const totalQuote = computed(() =>
   }, 0)
 );
 
-onMounted(() => {
-  loadBalances(spaces.pasta.wallets[0]);
-});
+onMounted(() => loadBalances(space.wallet));
 </script>
 
 <template>
@@ -27,19 +25,14 @@ onMounted(() => {
         <h4>Wallet(s)</h4>
       </div>
       <a
-        :href="explorerUrl('1', spaces.pasta.wallets[0])"
+        :href="explorerUrl('1', space.wallet)"
         target="_blank"
         class="flex justify-between items-center px-4 py-3 block"
       >
-        <Stamp
-          :id="spaces.pasta.wallets[0]"
-          type="avatar"
-          :size="44"
-          class="mr-2"
-        />
+        <Stamp :id="space.wallet" type="avatar" :size="44" class="mr-2" />
         <div class="flex-1">
           <h4>
-            {{ shorten(spaces.pasta.wallets[0]) }}
+            {{ shorten(space.wallet) }}
           </h4>
           <div class="text-skin-text">${{ _n(totalQuote) }}</div>
         </div>

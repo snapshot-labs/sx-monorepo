@@ -3,14 +3,10 @@ import { ref, computed, Ref } from 'vue';
 import draggable from 'vuedraggable';
 import { formatUnits } from '@ethersproject/units';
 import { _n, shorten } from '@/helpers/utils';
-import spaces from '@/helpers/spaces.json';
+import space from '@/helpers/space.json';
 import { Transaction } from '@/types';
 
-const address = spaces.pasta.wallets[0];
-
-const props = defineProps<{
-  modelValue: Transaction[];
-}>();
+const props = defineProps<{ modelValue: Transaction[] }>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Transaction[]): void;
@@ -148,14 +144,14 @@ function editTx(index: number) {
     <teleport to="#modal">
       <ModalSendToken
         :open="modalOpen.sendToken"
-        :address="address"
+        :address="space.wallet"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
       />
       <ModalSendNft
         :open="modalOpen.sendNft"
-        :address="address"
+        :address="space.wallet"
         :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"

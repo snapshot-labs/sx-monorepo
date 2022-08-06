@@ -11,6 +11,7 @@ const { proposals } = useEditor();
 const id = route.params.id;
 const draft = route.params.key;
 const key = `${id}:${draft}`;
+
 if (!proposals[key]) {
   proposals[key] = {
     title: '',
@@ -20,6 +21,7 @@ if (!proposals[key]) {
     updatedAt: Date.now()
   };
 }
+
 if (!proposals[key].execution) proposals[key].execution = [];
 
 watch(proposals, () => {
