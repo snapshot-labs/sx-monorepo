@@ -29,8 +29,8 @@ export class IntsSequence {
   static LEFromString(str: string): IntsSequence {
     const ints_array: bigint[] = [];
     for (let i = 0; i < str.length; i += 8) {
-      let bytes = Buffer.from(str.slice(i, i + 8));
-      let leBytes = bytes.reverse();
+      const bytes = Buffer.from(str.slice(i, i + 8));
+      const leBytes = bytes.reverse();
       ints_array.push(BigInt(bytesToHex(leBytes)));
     }
     return new IntsSequence(ints_array, str.length);

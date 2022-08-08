@@ -18,7 +18,7 @@ export function createStarknetExecutionParams(callArray: Call[]): bigint[] {
       tx.to,
       tx.functionSelector,
       BigInt(calldataIndex),
-      BigInt(tx.calldata.length),
+      BigInt(tx.calldata.length)
     ];
     calldataIndex += tx.calldata.length;
     executionParams.push(...subArr);
