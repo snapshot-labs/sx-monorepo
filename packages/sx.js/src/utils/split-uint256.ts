@@ -1,20 +1,20 @@
 export class SplitUint256 {
-  low: bigint;
-  high: bigint;
+  low: string;
+  high: string;
 
-  constructor(low: bigint, high: bigint) {
+  constructor(low: string, high: string) {
     this.low = low;
     this.high = high;
   }
 
   toUint(): bigint {
-    const uint = this.low + (this.high << BigInt(128));
+    const uint = BigInt(this.low) + (BigInt(this.high) << BigInt(128));
     return uint;
   }
 
   static fromUint(uint: bigint): SplitUint256 {
-    const low = uint & ((BigInt(1) << BigInt(128)) - BigInt(1));
-    const high = uint >> BigInt(128);
+    const low = `0x${(uint & ((BigInt(1) << BigInt(128)) - BigInt(1))).toString(16)}`;
+    const high = `0x${(uint >> BigInt(128)).toString(16)}`;
     return new SplitUint256(low, high);
   }
 
@@ -26,7 +26,7 @@ export class SplitUint256 {
     return `0x${this.toUint().toString(16)}`;
   }
 
-  static fromObj(s: { low: bigint; high: bigint }): SplitUint256 {
+  static fromObj(s: { low: string; high: string }): SplitUint256 {
     return new SplitUint256(s.low, s.high);
   }
 }

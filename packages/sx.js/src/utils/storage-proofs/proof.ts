@@ -18,12 +18,12 @@ import { hexToBytes } from '../bytes';
  * @returns Encoded array
  */
 export function encodeParams(
-  slot: bigint[],
-  proofSizesBytes: bigint[],
-  proofSizesWords: bigint[],
-  proofsConcat: bigint[]
-): bigint[] {
-  const numNodes = BigInt(proofSizesBytes.length);
+  slot: string[],
+  proofSizesBytes: string[],
+  proofSizesWords: string[],
+  proofsConcat: string[]
+): string[] {
+  const numNodes = `0x${proofSizesBytes.length.toString(16)}`;
   return slot.concat([numNodes], proofSizesBytes, proofSizesWords, proofsConcat);
 }
 
@@ -32,8 +32,8 @@ export function encodeParams(
  * @param params Encoded parameter array
  * @returns Decoded parameters
  */
-export function decodeParams(params: bigint[]): bigint[][] {
-  const slot: bigint[] = [params[0], params[1], params[2], params[3]];
+export function decodeParams(params: string[]): string[][] {
+  const slot: string[] = [params[0], params[1], params[2], params[3]];
   const numNodes = Number(params[4]);
   const proofSizesBytes = params.slice(5, 5 + numNodes);
   const proofSizesWords = params.slice(5 + numNodes, 5 + 2 * numNodes);
@@ -45,48 +45,54 @@ export interface ProofInputs {
   blockNumber: number;
   accountOptions: number;
   ethAddress: IntsSequence;
-  ethAddressFelt: bigint; // Fossil treats eth addresses two different ways for some reason, it will be changed soon but now this works
-  accountProofSizesBytes: bigint[];
-  accountProofSizesWords: bigint[];
-  accountProof: bigint[];
-  storageProofs: bigint[][]; // Multiple storage proofs
+  ethAddressFelt: string; // Fossil treats eth addresses two different ways for some reason, it will be changed soon but now this works
+  accountProofSizesBytes: string[];
+  accountProofSizesWords: string[];
+  accountProof: string[];
+  storageProofs: string[][]; // Multiple storage proofs
 }
 
 /**
  * Produces the input data for the account and storage proof verification methods in Fossil
  * @param blockNumber Block Number that the proof targets
  * @param proofs Proofs object from RPC call
- * @param encodeParams The encoding function that should be used on the storage proof data
+ * @param accountOptions Config for Fossil to encode which of the values proved by the account proof get stored. Default 15 is all of them.
  * @returns ProofInputs object
  */
-export function getProofInputs(blockNumber: number, proofs: any): ProofInputs {
+export function getProofInputs(blockNumber: number, proofs: any, accountOptions = 15): ProofInputs {
   const accountProofArray = proofs.accountProof.map((node: string) =>
     IntsSequence.fromBytes(hexToBytes(node))
   );
-  let accountProof: bigint[] = [];
-  let accountProofSizesBytes: bigint[] = [];
-  let accountProofSizesWords: bigint[] = [];
+  let accountProof: string[] = [];
+  let accountProofSizesBytes: string[] = [];
+  let accountProofSizesWords: string[] = [];
   for (const node of accountProofArray) {
     accountProof = accountProof.concat(node.values);
-    accountProofSizesBytes = accountProofSizesBytes.concat([BigInt(node.bytesLength)]);
-    accountProofSizesWords = accountProofSizesWords.concat([BigInt(node.values.length)]);
+    accountProofSizesBytes = accountProofSizesBytes.concat([`0x${node.bytesLength.toString(16)}`]);
+    accountProofSizesWords = accountProofSizesWords.concat([
+      `0x${node.values.length.toString(16)}`
+    ]);
   }
   const ethAddress = IntsSequence.fromBytes(hexToBytes(proofs.address));
-  const ethAddressFelt = BigInt(proofs.address);
+  const ethAddressFelt = proofs.address;
 
-  const storageProofs: bigint[][] = [];
+  const storageProofs: string[][] = [];
   for (let i = 0; i < proofs.storageProof.length; i++) {
     const slot = IntsSequence.fromBytes(hexToBytes(proofs.storageProof[i].key));
     const storageProofArray = proofs.storageProof[i].proof.map((node: string) =>
       IntsSequence.fromBytes(hexToBytes(node))
     );
-    let storageProof: bigint[] = [];
-    let storageProofSizesBytes: bigint[] = [];
-    let storageProofSizesWords: bigint[] = [];
+    let storageProof: string[] = [];
+    let storageProofSizesBytes: string[] = [];
+    let storageProofSizesWords: string[] = [];
     for (const node of storageProofArray) {
       storageProof = storageProof.concat(node.values);
-      storageProofSizesBytes = storageProofSizesBytes.concat([BigInt(node.bytesLength)]);
-      storageProofSizesWords = storageProofSizesWords.concat([BigInt(node.values.length)]);
+      storageProofSizesBytes = storageProofSizesBytes.concat([
+        `0x${node.bytesLength.toString(16)}`
+      ]);
+      storageProofSizesWords = storageProofSizesWords.concat([
+        `0x${node.values.length.toString(16)}`
+      ]);
     }
     const storageProofEncoded = encodeParams(
       slot.values,
@@ -98,13 +104,13 @@ export function getProofInputs(blockNumber: number, proofs: any): ProofInputs {
   }
 
   return {
-    blockNumber: blockNumber as number,
-    accountOptions: 15 as number,
-    ethAddress: ethAddress as IntsSequence,
-    ethAddressFelt: ethAddressFelt as bigint,
-    accountProofSizesBytes: accountProofSizesBytes as bigint[],
-    accountProofSizesWords: accountProofSizesWords as bigint[],
-    accountProof: accountProof as bigint[],
-    storageProofs: storageProofs as bigint[][]
+    blockNumber,
+    accountOptions,
+    ethAddress,
+    ethAddressFelt,
+    accountProofSizesBytes,
+    accountProofSizesWords,
+    accountProof,
+    storageProofs
   };
 }

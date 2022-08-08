@@ -8,8 +8,8 @@ import { keccak256 } from '@ethersproject/keccak256';
  * @param slotIndex The index of the mapping in the contract, can be found from solidity compiler artifacts
  * @returns The slot key of the mapping value, a 32 byte hex string
  */
-export function getSlotKey(mappingKey: bigint, slotIndex: bigint): string {
-  const paddedSlot = slotIndex.toString(16).padStart(64, '0');
-  const paddedAddress = mappingKey.toString(16).padStart(64, '0');
+export function getSlotKey(mappingKey: string, slotIndex: string): string {
+  const paddedSlot = slotIndex.slice(2).padStart(64, '0');
+  const paddedAddress = mappingKey.slice(2).padStart(64, '0');
   return keccak256(`0x${paddedAddress}${paddedSlot}`);
 }

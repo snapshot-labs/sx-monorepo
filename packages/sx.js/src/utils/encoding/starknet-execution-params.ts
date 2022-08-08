@@ -1,24 +1,24 @@
 export interface Call {
-  to: bigint;
-  functionSelector: bigint;
-  calldata: bigint[];
+  to: string;
+  functionSelector: string;
+  calldata: string[];
 }
 
-export function createStarknetExecutionParams(callArray: Call[]): bigint[] {
+export function createStarknetExecutionParams(callArray: Call[]): string[] {
   if (!callArray || callArray.length == 0) {
     return [];
   }
 
-  const dataOffset = BigInt(1 + callArray.length * 4);
+  const dataOffset = `0x${(1 + callArray.length * 4).toString(16)}`;
   const executionParams = [dataOffset];
   let calldataIndex = 0;
 
   callArray.forEach((tx) => {
-    const subArr: bigint[] = [
+    const subArr: string[] = [
       tx.to,
       tx.functionSelector,
-      BigInt(calldataIndex),
-      BigInt(tx.calldata.length)
+      `0x${calldataIndex.toString(16)}`,
+      `0x${tx.calldata.length.toString(16)}`
     ];
     calldataIndex += tx.calldata.length;
     executionParams.push(...subArr);

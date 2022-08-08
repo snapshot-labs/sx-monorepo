@@ -10,15 +10,15 @@ import { IntsSequence } from '../ints-sequence';
  * @param array2D The 2d array to flatten
  * @returns The flattened array
  */
-export function flatten2DArray(array2D: bigint[][]): bigint[] {
-  const flatArray: bigint[] = [];
-  const num_arrays = BigInt(array2D.length);
-  flatArray.push(num_arrays);
-  let offset = BigInt(0);
-  flatArray.push(offset);
-  for (let i = 0; i < num_arrays - BigInt(1); i++) {
-    offset += BigInt(array2D[i].length);
-    flatArray.push(offset);
+export function flatten2DArray(array2D: string[][]): string[] {
+  const flatArray: string[] = [];
+  const numArrays = `0x${array2D.length.toString(16)}`;
+  flatArray.push(numArrays);
+  let offset = 0;
+  flatArray.push('0x0'); // offset of first array
+  for (let i = 0; i < array2D.length - 1; i++) {
+    offset += array2D[i].length;
+    flatArray.push(`0x${offset.toString(16)}`);
   }
   const elements = array2D.reduce((accumulator, value) => accumulator.concat(value), []);
   return flatArray.concat(elements);
@@ -38,23 +38,23 @@ export function flatten2DArray(array2D: bigint[][]): bigint[] {
 export function getProposeCalldata(
   proposerAddress: string,
   metadataUri: IntsSequence,
-  executorAddress: bigint,
-  usedVotingStrategies: bigint[],
-  usedVotingStrategyParams: bigint[][],
-  executionParams: bigint[]
-): bigint[] {
+  executorAddress: string,
+  usedVotingStrategies: string[],
+  usedVotingStrategyParams: string[][],
+  executionParams: string[]
+): string[] {
   const usedVotingStrategyParamsFlat = flatten2DArray(usedVotingStrategyParams);
   return [
-    BigInt(proposerAddress),
-    BigInt(metadataUri.bytesLength),
-    BigInt(metadataUri.values.length),
+    proposerAddress,
+    `0x${metadataUri.bytesLength.toString(16)}`,
+    `0x${metadataUri.values.length.toString(16)}`,
     ...metadataUri.values,
     executorAddress,
-    BigInt(usedVotingStrategies.length),
+    `0x${usedVotingStrategies.length.toString(16)}`,
     ...usedVotingStrategies,
-    BigInt(usedVotingStrategyParamsFlat.length),
+    `0x${usedVotingStrategyParamsFlat.length.toString(16)}`,
     ...usedVotingStrategyParamsFlat,
-    BigInt(executionParams.length),
+    `0x${executionParams.length.toString(16)}`,
     ...executionParams
   ];
 }
@@ -70,19 +70,19 @@ export function getProposeCalldata(
  */
 export function getVoteCalldata(
   voterAddress: string,
-  proposalID: bigint,
+  proposalID: string,
   choice: Choice,
-  usedVotingStrategies: bigint[],
-  usedVotingStrategyParams: bigint[][]
-): bigint[] {
+  usedVotingStrategies: string[],
+  usedVotingStrategyParams: string[][]
+): string[] {
   const usedVotingStrategyParamsFlat = flatten2DArray(usedVotingStrategyParams);
   return [
-    BigInt(voterAddress),
+    voterAddress,
     proposalID,
-    BigInt(choice),
-    BigInt(usedVotingStrategies.length),
+    `0x${choice.toString(16)}`,
+    `0x${usedVotingStrategies.length.toString(16)}`,
     ...usedVotingStrategies,
-    BigInt(usedVotingStrategyParamsFlat.length),
+    `0x${usedVotingStrategyParamsFlat.length.toString(16)}`,
     ...usedVotingStrategyParamsFlat
   ];
 }
