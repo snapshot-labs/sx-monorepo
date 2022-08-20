@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-
 @tailwind base;
 @tailwind utilities;
 
@@ -37,6 +35,20 @@
   src: url('./assets/fonts/Calibre-Semibold-Custom.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/SpaceMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./assets/fonts/SpaceMono-Bold.woff2') format('woff2');
 }
 
 body {
