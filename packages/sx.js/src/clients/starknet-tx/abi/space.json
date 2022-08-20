@@ -7,57 +7,50 @@
         "type": "felt"
       }
     ],
-    "name": "EthAddress",
+    "name": "Address",
     "size": 1,
     "type": "struct"
   },
   {
     "members": [
       {
-        "name": "execution_hash",
+        "name": "quorum",
         "offset": 0,
-        "type": "felt"
+        "type": "Uint256"
       },
       {
-        "name": "metadata_uri",
-        "offset": 1,
-        "type": "felt"
-      },
-      {
-        "name": "start_timestamp",
+        "name": "snapshot_timestamp",
         "offset": 2,
         "type": "felt"
       },
       {
-        "name": "end_timestamp",
+        "name": "start_timestamp",
         "offset": 3,
         "type": "felt"
       },
       {
-        "name": "ethereum_block_number",
+        "name": "min_end_timestamp",
         "offset": 4,
+        "type": "felt"
+      },
+      {
+        "name": "max_end_timestamp",
+        "offset": 5,
+        "type": "felt"
+      },
+      {
+        "name": "executor",
+        "offset": 6,
+        "type": "felt"
+      },
+      {
+        "name": "execution_hash",
+        "offset": 7,
         "type": "felt"
       }
     ],
     "name": "Proposal",
-    "size": 5,
-    "type": "struct"
-  },
-  {
-    "members": [
-      {
-        "name": "choice",
-        "offset": 0,
-        "type": "felt"
-      },
-      {
-        "name": "voting_power",
-        "offset": 1,
-        "type": "Uint256"
-      }
-    ],
-    "name": "Vote",
-    "size": 3,
+    "size": 8,
     "type": "struct"
   },
   {
@@ -80,29 +73,88 @@
   {
     "members": [
       {
+        "name": "choice",
+        "offset": 0,
+        "type": "felt"
+      },
+      {
+        "name": "voting_power",
+        "offset": 1,
+        "type": "Uint256"
+      }
+    ],
+    "name": "Vote",
+    "size": 3,
+    "type": "struct"
+  },
+  {
+    "members": [
+      {
         "name": "proposal",
         "offset": 0,
         "type": "Proposal"
       },
       {
         "name": "power_for",
-        "offset": 5,
+        "offset": 8,
         "type": "Uint256"
       },
       {
         "name": "power_against",
-        "offset": 7,
+        "offset": 10,
         "type": "Uint256"
       },
       {
         "name": "power_abstain",
-        "offset": 9,
+        "offset": 12,
         "type": "Uint256"
       }
     ],
     "name": "ProposalInfo",
-    "size": 11,
+    "size": 14,
     "type": "struct"
+  },
+  {
+    "members": [
+      {
+        "name": "to",
+        "offset": 0,
+        "type": "felt"
+      },
+      {
+        "name": "selector",
+        "offset": 1,
+        "type": "felt"
+      },
+      {
+        "name": "data_offset",
+        "offset": 2,
+        "type": "felt"
+      },
+      {
+        "name": "data_len",
+        "offset": 3,
+        "type": "felt"
+      }
+    ],
+    "name": "AccountCallArray",
+    "size": 4,
+    "type": "struct"
+  },
+  {
+    "data": [
+      {
+        "name": "previousOwner",
+        "type": "felt"
+      },
+      {
+        "name": "newOwner",
+        "type": "felt"
+      }
+    ],
+    "keys": [],
+    "name": "OwnershipTransferred",
+    "type": "event"
   },
   {
     "data": [
@@ -112,11 +164,27 @@
       },
       {
         "name": "proposer_address",
-        "type": "EthAddress"
+        "type": "Address"
       },
       {
         "name": "proposal",
         "type": "Proposal"
+      },
+      {
+        "name": "metadata_uri_len",
+        "type": "felt"
+      },
+      {
+        "name": "metadata_uri",
+        "type": "felt*"
+      },
+      {
+        "name": "execution_params_len",
+        "type": "felt"
+      },
+      {
+        "name": "execution_params",
+        "type": "felt*"
       }
     ],
     "keys": [],
@@ -131,7 +199,7 @@
       },
       {
         "name": "voter_address",
-        "type": "EthAddress"
+        "type": "Address"
       },
       {
         "name": "vote",
@@ -143,37 +211,354 @@
     "type": "event"
   },
   {
-    "inputs": [
+    "data": [
       {
-        "name": "_voting_delay",
+        "name": "previous",
         "type": "felt"
       },
       {
-        "name": "_voting_period",
-        "type": "felt"
-      },
-      {
-        "name": "_proposal_threshold",
-        "type": "Uint256"
-      },
-      {
-        "name": "_voting_strategy",
-        "type": "felt"
-      },
-      {
-        "name": "_authenticator",
+        "name": "new_controller",
         "type": "felt"
       }
     ],
-    "name": "constructor",
+    "keys": [],
+    "name": "controller_updated",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "previous",
+        "type": "Uint256"
+      },
+      {
+        "name": "new_quorum",
+        "type": "Uint256"
+      }
+    ],
+    "keys": [],
+    "name": "quorum_updated",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "previous",
+        "type": "felt"
+      },
+      {
+        "name": "new_voting_delay",
+        "type": "felt"
+      }
+    ],
+    "keys": [],
+    "name": "voting_delay_updated",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "previous",
+        "type": "felt"
+      },
+      {
+        "name": "new_voting_duration",
+        "type": "felt"
+      }
+    ],
+    "keys": [],
+    "name": "min_voting_duration_updated",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "previous",
+        "type": "felt"
+      },
+      {
+        "name": "new_voting_duration",
+        "type": "felt"
+      }
+    ],
+    "keys": [],
+    "name": "max_voting_duration_updated",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "previous",
+        "type": "Uint256"
+      },
+      {
+        "name": "new_proposal_threshold",
+        "type": "Uint256"
+      }
+    ],
+    "keys": [],
+    "name": "proposal_threshold_updated",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "added_len",
+        "type": "felt"
+      },
+      {
+        "name": "added",
+        "type": "felt*"
+      }
+    ],
+    "keys": [],
+    "name": "authenticators_added",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "removed_len",
+        "type": "felt"
+      },
+      {
+        "name": "removed",
+        "type": "felt*"
+      }
+    ],
+    "keys": [],
+    "name": "authenticators_removed",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "added_len",
+        "type": "felt"
+      },
+      {
+        "name": "added",
+        "type": "felt*"
+      }
+    ],
+    "keys": [],
+    "name": "executors_added",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "removed_len",
+        "type": "felt"
+      },
+      {
+        "name": "removed",
+        "type": "felt*"
+      }
+    ],
+    "keys": [],
+    "name": "executors_removed",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "added_len",
+        "type": "felt"
+      },
+      {
+        "name": "added",
+        "type": "felt*"
+      }
+    ],
+    "keys": [],
+    "name": "voting_strategies_added",
+    "type": "event"
+  },
+  {
+    "data": [
+      {
+        "name": "removed_len",
+        "type": "felt"
+      },
+      {
+        "name": "removed",
+        "type": "felt*"
+      }
+    ],
+    "keys": [],
+    "name": "voting_strategies_removed",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "name": "new_controller",
+        "type": "felt"
+      }
+    ],
+    "name": "update_controller",
     "outputs": [],
-    "type": "constructor"
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "new_quorum",
+        "type": "Uint256"
+      }
+    ],
+    "name": "update_quorum",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "new_delay",
+        "type": "felt"
+      }
+    ],
+    "name": "update_voting_delay",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "new_min_duration",
+        "type": "felt"
+      }
+    ],
+    "name": "update_min_voting_duration",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "new_max_duration",
+        "type": "felt"
+      }
+    ],
+    "name": "update_max_voting_duration",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "new_threshold",
+        "type": "Uint256"
+      }
+    ],
+    "name": "update_proposal_threshold",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "to_add_len",
+        "type": "felt"
+      },
+      {
+        "name": "to_add",
+        "type": "felt*"
+      }
+    ],
+    "name": "add_executors",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "to_remove_len",
+        "type": "felt"
+      },
+      {
+        "name": "to_remove",
+        "type": "felt*"
+      }
+    ],
+    "name": "remove_executors",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "to_add_len",
+        "type": "felt"
+      },
+      {
+        "name": "to_add",
+        "type": "felt*"
+      },
+      {
+        "name": "params_flat_len",
+        "type": "felt"
+      },
+      {
+        "name": "params_flat",
+        "type": "felt*"
+      }
+    ],
+    "name": "add_voting_strategies",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "to_remove_len",
+        "type": "felt"
+      },
+      {
+        "name": "to_remove",
+        "type": "felt*"
+      }
+    ],
+    "name": "remove_voting_strategies",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "to_add_len",
+        "type": "felt"
+      },
+      {
+        "name": "to_add",
+        "type": "felt*"
+      }
+    ],
+    "name": "add_authenticators",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "to_remove_len",
+        "type": "felt"
+      },
+      {
+        "name": "to_remove",
+        "type": "felt*"
+      }
+    ],
+    "name": "remove_authenticators",
+    "outputs": [],
+    "type": "function"
   },
   {
     "inputs": [
       {
         "name": "voter_address",
-        "type": "EthAddress"
+        "type": "Address"
       },
       {
         "name": "proposal_id",
@@ -184,11 +569,19 @@
         "type": "felt"
       },
       {
-        "name": "params_len",
+        "name": "used_voting_strategies_len",
         "type": "felt"
       },
       {
-        "name": "params",
+        "name": "used_voting_strategies",
+        "type": "felt*"
+      },
+      {
+        "name": "user_voting_strategy_params_flat_len",
+        "type": "felt"
+      },
+      {
+        "name": "user_voting_strategy_params_flat",
         "type": "felt*"
       }
     ],
@@ -200,26 +593,46 @@
     "inputs": [
       {
         "name": "proposer_address",
-        "type": "EthAddress"
+        "type": "Address"
       },
       {
-        "name": "execution_hash",
+        "name": "metadata_uri_string_len",
+        "type": "felt"
+      },
+      {
+        "name": "metadata_uri_len",
         "type": "felt"
       },
       {
         "name": "metadata_uri",
+        "type": "felt*"
+      },
+      {
+        "name": "executor",
         "type": "felt"
       },
       {
-        "name": "ethereum_block_number",
+        "name": "used_voting_strategies_len",
         "type": "felt"
       },
       {
-        "name": "params_len",
+        "name": "used_voting_strategies",
+        "type": "felt*"
+      },
+      {
+        "name": "user_voting_strategy_params_flat_len",
         "type": "felt"
       },
       {
-        "name": "params",
+        "name": "user_voting_strategy_params_flat",
+        "type": "felt*"
+      },
+      {
+        "name": "execution_params_len",
+        "type": "felt"
+      },
+      {
+        "name": "execution_params",
         "type": "felt*"
       }
     ],
@@ -230,8 +643,46 @@
   {
     "inputs": [
       {
+        "name": "proposal_id",
+        "type": "felt"
+      },
+      {
+        "name": "execution_params_len",
+        "type": "felt"
+      },
+      {
+        "name": "execution_params",
+        "type": "felt*"
+      }
+    ],
+    "name": "finalize_proposal",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "proposal_id",
+        "type": "felt"
+      },
+      {
+        "name": "execution_params_len",
+        "type": "felt"
+      },
+      {
+        "name": "execution_params",
+        "type": "felt*"
+      }
+    ],
+    "name": "cancel_proposal",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "name": "voter_address",
-        "type": "EthAddress"
+        "type": "Address"
       },
       {
         "name": "proposal_id",
@@ -263,6 +714,186 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "public_key",
+        "type": "felt"
+      },
+      {
+        "name": "voting_delay",
+        "type": "felt"
+      },
+      {
+        "name": "min_voting_duration",
+        "type": "felt"
+      },
+      {
+        "name": "max_voting_duration",
+        "type": "felt"
+      },
+      {
+        "name": "proposal_threshold",
+        "type": "Uint256"
+      },
+      {
+        "name": "controller",
+        "type": "felt"
+      },
+      {
+        "name": "quorum",
+        "type": "Uint256"
+      },
+      {
+        "name": "voting_strategy_params_flat_len",
+        "type": "felt"
+      },
+      {
+        "name": "voting_strategy_params_flat",
+        "type": "felt*"
+      },
+      {
+        "name": "voting_strategies_len",
+        "type": "felt"
+      },
+      {
+        "name": "voting_strategies",
+        "type": "felt*"
+      },
+      {
+        "name": "authenticators_len",
+        "type": "felt"
+      },
+      {
+        "name": "authenticators",
+        "type": "felt*"
+      },
+      {
+        "name": "executors_len",
+        "type": "felt"
+      },
+      {
+        "name": "executors",
+        "type": "felt*"
+      }
+    ],
+    "name": "constructor",
+    "outputs": [],
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "get_public_key",
+    "outputs": [
+      {
+        "name": "res",
+        "type": "felt"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "get_nonce",
+    "outputs": [
+      {
+        "name": "res",
+        "type": "felt"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "interfaceId",
+        "type": "felt"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "name": "success",
+        "type": "felt"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "new_public_key",
+        "type": "felt"
+      }
+    ],
+    "name": "set_public_key",
+    "outputs": [],
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "hash",
+        "type": "felt"
+      },
+      {
+        "name": "signature_len",
+        "type": "felt"
+      },
+      {
+        "name": "signature",
+        "type": "felt*"
+      }
+    ],
+    "name": "is_valid_signature",
+    "outputs": [
+      {
+        "name": "is_valid",
+        "type": "felt"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "call_array_len",
+        "type": "felt"
+      },
+      {
+        "name": "call_array",
+        "type": "AccountCallArray*"
+      },
+      {
+        "name": "calldata_len",
+        "type": "felt"
+      },
+      {
+        "name": "calldata",
+        "type": "felt*"
+      },
+      {
+        "name": "nonce",
+        "type": "felt"
+      }
+    ],
+    "name": "__execute__",
+    "outputs": [
+      {
+        "name": "response_len",
+        "type": "felt"
+      },
+      {
+        "name": "response",
+        "type": "felt*"
+      }
+    ],
     "type": "function"
   }
 ]

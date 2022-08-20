@@ -8,7 +8,7 @@ import {
 } from 'starknet';
 import abi from './abi/auth.json';
 import constants from './constants.json';
-import { strToShortStringArr } from '../../utils/strings';
+import * as utils from '../../utils';
 
 const { getSelectorFromName } = hash;
 
@@ -17,24 +17,28 @@ export class StarkNetTx {
     account: Account,
     author: string,
     space: string,
-    executionHash: string,
     metadataUri: string
   ): Promise<AddTransactionResponse> {
-    const blockNum: any = '1234567';
-    const params: any = [];
-
     const auth = new Contract(abi as Abi, constants.auth, provider);
     auth.connect(account);
 
-    const metadataUriFelt = strToShortStringArr(metadataUri);
-    const calldata = [author, executionHash, metadataUriFelt.length.toString()];
-    metadataUriFelt.forEach((m) => calldata.push(m.toString()));
-    calldata.push(blockNum);
-    calldata.push(params.length.toString());
+    const metadataUriInts = utils.intsSequence.IntsSequence.LEFromString(metadataUri);
+    const calldata = utils.encoding.getProposeCalldata(
+      author,
+      metadataUriInts,
+      constants.executor,
+      [constants.strategy],
+      [[]],
+      []
+    );
 
-    const fee = await auth.estimateFee.execute(space, getSelectorFromName('propose'), calldata);
+    const fee = await auth.estimateFee.authenticate(
+      space,
+      getSelectorFromName('propose'),
+      calldata
+    );
 
-    return await auth.invoke('execute', [space, getSelectorFromName('propose'), calldata], {
+    return await auth.invoke('authenticate', [space, getSelectorFromName('propose'), calldata], {
       maxFee: fee.suggestedMaxFee
     });
   }
@@ -46,14 +50,20 @@ export class StarkNetTx {
     proposal: string,
     choice: string
   ): Promise<AddTransactionResponse> {
-    const calldata: any[] = [voter, proposal, choice, '0'];
-
     const auth = new Contract(abi as Abi, constants.auth, provider);
     auth.connect(account);
 
-    const fee = await auth.estimateFee.execute(space, getSelectorFromName('vote'), calldata);
+    const calldata = utils.encoding.getVoteCalldata(
+      voter,
+      proposal,
+      Number(choice),
+      [constants.strategy],
+      [[]]
+    );
 
-    return await auth.invoke('execute', [space, getSelectorFromName('vote'), calldata], {
+    const fee = await auth.estimateFee.authenticate(space, getSelectorFromName('vote'), calldata);
+
+    return await auth.invoke('authenticate', [space, getSelectorFromName('vote'), calldata], {
       maxFee: fee.suggestedMaxFee
     });
   }

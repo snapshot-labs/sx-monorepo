@@ -5,7 +5,7 @@ import { Wallet } from '@ethersproject/wallet';
 describe('', () => {
   const wallet = Wallet.createRandom();
   const walletAddress = wallet.address;
-  const space = '0x0625dc1290b6e936be5f1a3e963cf629326b1f4dfd5a56738dea98e1ad31b7f3';
+  const space = '0x5ad4bd1ca422953ac845ac7915ddfa93fe3fecec0ed8c86db5e294b0e18c9bd';
   const client = new StarkNetTx();
   const address = '0x00c26a3cdcc570da83f3dd6afd0db9d038ee096e2c56707d6348db3b06223427';
   const privKey = '0x78a61bf2d838b1094705168bbd5b462e665a5ce094d8b1c2e5438c66eeb9f59';
@@ -14,10 +14,9 @@ describe('', () => {
 
   it('StarkNetTx.propose()', async () => {
     const author = walletAddress;
-    const executionHash = '0';
     const metadataUri = 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca';
 
-    const receipt = await client.propose(account, author, space, executionHash, metadataUri);
+    const receipt = await client.propose(account, author, space, metadataUri);
     console.log('Receipt', receipt);
 
     // await defaultProvider.waitForTransaction(receipt.transaction_hash);
