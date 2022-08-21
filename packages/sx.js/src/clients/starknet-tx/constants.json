@@ -1,6 +1,11 @@
 {
-  "auth": "0x1574bf879d7f62ce07d40eee018ed471613637ba1c7c9231363fa2b75cd386f",
-  "executor": "0x56aabaa21efea14289fdc1df7d76d3b5df179d94dc8e9f937b9a9dd75eb101a",
-  "strategy": "0x184f7df02cfeef5307c93a602206ff8708560cb20b185226be93089f2740f36",
-  "space": "0x0625dc1290b6e936be5f1a3e963cf629326b1f4dfd5a56738dea98e1ad31b7f3"
+  "authenticators": {
+    "vanilla": "0x6ad07205a4d725c5c2b10c4f5fbdfaaa351c742fce7a5a22b2b56fd8d5afd62",
+    "ethSig": "0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643"
+  },
+  "strategies": {
+    "vanilla": "0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865",
+    "singleSlotProof": "0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6"
+  },
+  "executor": "0x7402b474327a0d7a2d5c3e01489386113d9654eaff8591344577458074bb1b7"
 }

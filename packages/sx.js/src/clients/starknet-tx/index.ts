@@ -19,7 +19,7 @@ export class StarkNetTx {
     space: string,
     metadataUri: string
   ): Promise<AddTransactionResponse> {
-    const auth = new Contract(abi as Abi, constants.auth, provider);
+    const auth = new Contract(abi as Abi, constants.authenticators.vanilla, provider);
     auth.connect(account);
 
     const metadataUriInts = utils.intsSequence.IntsSequence.LEFromString(metadataUri);
@@ -27,7 +27,7 @@ export class StarkNetTx {
       author,
       metadataUriInts,
       constants.executor,
-      [constants.strategy],
+      [constants.strategies.vanilla],
       [[]],
       []
     );
@@ -50,14 +50,14 @@ export class StarkNetTx {
     proposal: string,
     choice: string
   ): Promise<AddTransactionResponse> {
-    const auth = new Contract(abi as Abi, constants.auth, provider);
+    const auth = new Contract(abi as Abi, constants.authenticators.vanilla, provider);
     auth.connect(account);
 
     const calldata = utils.encoding.getVoteCalldata(
       voter,
       proposal,
       Number(choice),
-      [constants.strategy],
+      [constants.strategies.vanilla],
       [[]]
     );
 
