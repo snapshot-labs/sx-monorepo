@@ -1,10 +1,9 @@
 {
   "network": "goerli-alpha",
-  "network_base_url": "https://starknet-proxy-ikaz7.ondigitalocean.app",
   "sources": [
     {
-      "contract": "0x053fa692b13da0641ef768c8c7fbe85a7034e72b1f43188315664c107a5f1c47",
-      "start": 286079,
+      "contract": "0x3e5165026e6586cd2d5cdf1fdced8af866f900e430bf1dc7b839c84604c506e",
+      "start": 304821,
       "events": [
         {
           "name": "space_deployed",
@@ -13,8 +12,36 @@
       ]
     },
     {
-      "contract": "0x06e9ac13ee6328edc1f37da546432a3942f6153ccd4e9f0b253e0ba7687c96ce",
-      "start": 286079,
+      "contract": "0x03ddbcdfec756eb9e9e0fbce7a90721570a09fc97d31a15b8e40769b93ecb957",
+      "start": 305377,
+      "events": [
+        {
+          "name": "proposal_created",
+          "fn": "handlePropose"
+        },
+        {
+          "name": "vote_created",
+          "fn": "handleVote"
+        }
+      ]
+    },
+    {
+      "contract": "0x03a48d8a7e80b7b295ef15efc4e1604e78b1f4460266cd460b6eb8826846bba0",
+      "start": 305384,
+      "events": [
+        {
+          "name": "proposal_created",
+          "fn": "handlePropose"
+        },
+        {
+          "name": "vote_created",
+          "fn": "handleVote"
+        }
+      ]
+    },
+    {
+      "contract": "0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8",
+      "start": 305389,
       "events": [
         {
           "name": "proposal_created",

@@ -1,16 +1,26 @@
 import { formatUnits } from '@ethersproject/units';
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet/utils/address';
+import { getSelectorFromName } from 'starknet/utils/hash';
+import { faker } from '@faker-js/faker';
 import { getJSON, toAddress, getEvent } from './utils';
+
+function getSpaceName(address) {
+  const seed = parseInt(getSelectorFromName(address).toString().slice(0, 12));
+  faker.seed(seed);
+  const noun = faker.word.noun(6);
+  return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
+}
 
 export async function handleSpaceCreated({ block, tx, event, mysql }) {
   console.log('Handle space created');
   const format =
     'deployer_address, space_address, voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), strategies_len, strategies(felt*), authenticators_len, authenticators(felt*), executors_len, executors(felt*)';
   event = getEvent(event.data, format);
+
   const item = {
     id: validateAndParseAddress(event.space_address),
-    name: 'Pistachio DAO',
+    name: getSpaceName(event.space_address),
     controller: validateAndParseAddress(event.controller),
     voting_delay: BigInt(event.voting_delay).toString(),
     min_voting_period: BigInt(event.min_voting_period).toString(),
