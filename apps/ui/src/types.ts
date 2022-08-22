@@ -1,3 +1,18 @@
+export type Space = {
+  id: string;
+  name: string;
+  about?: string;
+  controller: string;
+  voting_delay: number;
+  min_voting_period: number;
+  max_voting_period: number;
+  proposal_threshold: number;
+  quorum: number;
+  proposal_count: number;
+  vote_count: number;
+  created: number;
+};
+
 export type Proposal = {
   title: string;
   body: string;
