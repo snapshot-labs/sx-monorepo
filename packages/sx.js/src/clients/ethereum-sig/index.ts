@@ -1,7 +1,11 @@
+import { hash } from 'starknet';
+import randomBytes from 'randombytes';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'cross-fetch';
-import { domain, Propose, Vote, proposeTypes, voteTypes } from './types';
+import { domain, proposeTypes, voteTypes } from './types';
+import * as utils from '../../utils';
+import { Propose, Vote, EthSigProposeMessage, EthSigVoteMessage, Envelope } from '../../types';
 
 export class EthereumSig {
   public readonly address: string;
@@ -10,12 +14,22 @@ export class EthereumSig {
     this.address = address;
   }
 
-  public async sign(web3: Web3Provider | Wallet, address: string, message, types) {
-    // @ts-ignore
-    const signer = web3?.getSigner ? web3.getSigner() : web3;
-    const data: any = { domain, types, message };
+  generateSalt() {
+    return Number(
+      utils.splitUint256.SplitUint256.fromHex(utils.bytes.bytesToHex(randomBytes(4))).toHex()
+    );
+  }
+
+  public async sign<T extends EthSigProposeMessage | EthSigVoteMessage>(
+    web3: Web3Provider | Wallet,
+    address: string,
+    message: T,
+    types
+  ): Promise<Envelope<T>> {
+    const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+    const data = { domain, types, message };
     const sig = await signer._signTypedData(domain, data.types, message);
-    return { address, sig, data };
+    return { address, sig, data } as any;
   }
 
   public async send(envelop) {
@@ -37,11 +51,22 @@ export class EthereumSig {
     return json.result;
   }
 
-  public async propose(web3: Web3Provider | Wallet, address: string, message: Propose) {
-    return await this.sign(web3, address, message, proposeTypes);
+  public async propose(web3: Web3Provider | Wallet, address: string, data: Propose) {
+    const message = {
+      ...data,
+      executionHash: utils.encoding.hexPadRight(hash.computeHashOnElements(data.executionParams)),
+      salt: this.generateSalt()
+    };
+
+    return this.sign(web3, address, message, proposeTypes);
   }
 
-  public async vote(web3: Web3Provider | Wallet, address: string, message: Vote) {
-    return await this.sign(web3, address, message, voteTypes);
+  public async vote(web3: Web3Provider | Wallet, address: string, data: Vote) {
+    const message = {
+      ...data,
+      salt: this.generateSalt()
+    };
+
+    return this.sign(web3, address, message, voteTypes);
   }
 }

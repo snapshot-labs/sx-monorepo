@@ -5,28 +5,18 @@ export const domain = {
 
 export const proposeTypes = {
   Propose: [
-    { name: 'space', type: 'string' },
-    { name: 'executionHash', type: 'string' },
-    { name: 'metadataURI', type: 'string' }
+    { name: 'space', type: 'bytes32' },
+    { name: 'executionHash', type: 'bytes32' },
+    { name: 'metadataURI', type: 'string' },
+    { name: 'salt', type: 'uint256' }
   ]
 };
 
 export const voteTypes = {
   Vote: [
-    { name: 'space', type: 'string' },
-    { name: 'proposal', type: 'uint32' },
-    { name: 'choice', type: 'uint32' }
+    { name: 'space', type: 'bytes32' },
+    { name: 'proposal', type: 'uint256' },
+    { name: 'choice', type: 'uint256' },
+    { name: 'salt', type: 'uint256' }
   ]
 };
-
-export interface Propose {
-  space: string;
-  executionHash: string;
-  metadataURI: string;
-}
-
-export interface Vote {
-  space: string;
-  proposal: number;
-  choice: number;
-}

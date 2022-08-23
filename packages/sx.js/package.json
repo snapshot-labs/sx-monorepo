@@ -20,6 +20,7 @@
     "@ethersproject/providers": "^5.6.4",
     "@ethersproject/wallet": "^5.6.2",
     "cross-fetch": "^3.1.5",
+    "randombytes": "^2.1.0",
     "starknet": "^3.18.2"
   },
   "devDependencies": {
