@@ -24,7 +24,7 @@
     "starknet": "^3.18.2"
   },
   "devDependencies": {
-    "@types/bn.js": "^5.1.0",
+    "@types/bn.js": "^5.1.1",
     "@types/elliptic": "^6.4.14",
     "@types/jest": "^27.5.0",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
