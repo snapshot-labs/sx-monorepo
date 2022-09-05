@@ -26,6 +26,26 @@ export class IntsSequence {
     return SplitUint256.fromUint(uint);
   }
 
+  asStrings(): string[] {
+    return this.values.map(s => {
+      let str = '';
+      for (let n = 2; n < s.length; n += 2) {
+        str += String.fromCharCode(parseInt(s.substring(n, n + 2), 16));
+      }
+      return str
+    })
+  }
+
+  static fromString(str: string): IntsSequence {
+    const intsArray: string[] = [];
+    for (let i = 0; i < str.length; i += 8) {
+      const bytes = Buffer.from(str.slice(i, i + 8));
+      intsArray.push(bytesToHex(bytes));
+    }
+    return new IntsSequence(intsArray, str.length);
+  }
+
+
   static LEFromString(str: string): IntsSequence {
     const intsArray: string[] = [];
     for (let i = 0; i < str.length; i += 8) {
