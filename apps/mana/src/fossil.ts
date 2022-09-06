@@ -6,9 +6,10 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 const router = express.Router();
 
 const ethPrivkey = process.env.ETH_PRIVKEY || '';
-const fossilAddress = process.env.FOSSIL_ADDRESS || '0x738bfb83246156b759165d244077865b994f9d33';
+const fossilAddress = process.env.FOSSIL_ADDRESS || '';
+const ethRpcUrl = process.env.ETH_RPC_URL || '';
 
-const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
+const provider = new JsonRpcProvider(ethRpcUrl);
 let wallet = new Wallet(ethPrivkey);
 wallet = wallet.connect(provider);
 const abi = ['function sendExactParentHashToL2(uint256)', 'function sendLatestParentHashToL2()'];
