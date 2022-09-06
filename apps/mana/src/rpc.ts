@@ -5,11 +5,11 @@ import { Account, defaultProvider, ec } from 'starknet';
 import { StarkNetTx } from '@snapshot-labs/sx/dist/clients';
 import { rpcError, rpcSuccess } from './utils';
 
-const relayerPrivKey = process.env.RELAYER_PRIVKEY || '';
-const relayerAddress = process.env.RELAYER_ADDRESS || '';
+const starknetPrivkey = process.env.STARKNET_PRIVKEY || '';
+const starknetAddress = process.env.STARKNET_ADDRESS || '';
 const client = new StarkNetTx();
-const starkKeyPair = ec.getKeyPair(relayerPrivKey);
-const account = new Account(defaultProvider, relayerAddress, starkKeyPair);
+const starkKeyPair = ec.getKeyPair(starknetPrivkey);
+const account = new Account(defaultProvider, starknetAddress, starkKeyPair);
 
 const router = express.Router();
 
