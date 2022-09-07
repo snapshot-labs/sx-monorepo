@@ -47,7 +47,7 @@ describe('StarkNetTx', () => {
 
       // await defaultProvider.waitForTransaction(receipt.transaction_hash);
 
-      expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+      expect(receipt.transaction_hash).toBeDefined();
     }, 60e3);
 
     it('StarkNetTx.vote()', async () => {
@@ -70,7 +70,7 @@ describe('StarkNetTx', () => {
 
       // await defaultProvider.waitForTransaction(receipt.transaction_hash);
 
-      expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+      expect(receipt.transaction_hash).toBeDefined();
     }, 60e3);
   });
 
@@ -95,7 +95,7 @@ describe('StarkNetTx', () => {
 
       // await defaultProvider.waitForTransaction(receipt.transaction_hash);
 
-      expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+      expect(receipt.transaction_hash).toBeDefined();
     }, 60e3);
 
     it('StarkNetTx.vote()', async () => {
@@ -112,7 +112,7 @@ describe('StarkNetTx', () => {
 
       // await defaultProvider.waitForTransaction(receipt.transaction_hash);
 
-      expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+      expect(receipt.transaction_hash).toBeDefined();
     }, 60e3);
   });
 
@@ -160,7 +160,7 @@ describe('StarkNetTx', () => {
 
       // await defaultProvider.waitForTransaction(receipt.transaction_hash);
 
-      expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+      expect(receipt.transaction_hash).toBeDefined();
     }, 60e3);
 
     it('StarkNetTx.vote()', async () => {
@@ -177,7 +177,7 @@ describe('StarkNetTx', () => {
 
       // await defaultProvider.waitForTransaction(receipt.transaction_hash);
 
-      expect(receipt.code).toBe('TRANSACTION_RECEIVED');
+      expect(receipt.transaction_hash).toBeDefined();
     }, 60e3);
   });
 });

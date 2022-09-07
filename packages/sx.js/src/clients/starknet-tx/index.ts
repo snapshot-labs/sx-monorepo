@@ -1,7 +1,7 @@
 import {
   Abi,
   Account,
-  AddTransactionResponse,
+  InvokeFunctionResponse,
   Contract,
   defaultProvider as provider,
   hash
@@ -156,7 +156,7 @@ export class StarkNetTx {
     account: Account,
     envelope: Envelope<VanillaProposeMessage>,
     metadata: Metadata
-  ): Promise<AddTransactionResponse> {
+  ): Promise<InvokeFunctionResponse> {
     const { space, authenticator } = envelope.data.message;
     const calldata = await this.getProposeCalldata(envelope, metadata);
     const proveCalls = await this.getProveAccountCalls(envelope, metadata);
@@ -181,7 +181,7 @@ export class StarkNetTx {
     account: Account,
     envelope: Envelope<EthSigProposeMessage>,
     metadata: Metadata
-  ): Promise<AddTransactionResponse> {
+  ): Promise<InvokeFunctionResponse> {
     const { sig, data } = envelope;
     const { space, authenticator, salt } = data.message;
     const { r, s, v } = utils.encoding.getRSVFromSig(sig);
@@ -221,7 +221,7 @@ export class StarkNetTx {
     account: Account,
     envelope: Envelope<VanillaVoteMessage>,
     metadata: Metadata
-  ): Promise<AddTransactionResponse> {
+  ): Promise<InvokeFunctionResponse> {
     const { space, authenticator } = envelope.data.message;
     const calldata = await this.getVoteCalldata(envelope, metadata);
 
@@ -239,7 +239,7 @@ export class StarkNetTx {
     account: Account,
     envelope: Envelope<EthSigVoteMessage>,
     metadata: Metadata
-  ): Promise<AddTransactionResponse> {
+  ): Promise<InvokeFunctionResponse> {
     const { sig, data } = envelope;
     const { space, authenticator, salt } = data.message;
     const { r, s, v } = utils.encoding.getRSVFromSig(sig);
