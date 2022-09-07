@@ -3,6 +3,8 @@ on: [push]
 jobs:
   build-test:
     runs-on: ubuntu-20.04
+    env:
+      GOERLI_NODE_URL: ${{ secrets.GOERLI_NODE_URL }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -11,6 +13,7 @@ jobs:
           cache: 'yarn'
       - run: yarn install
       - run: yarn lint
+      - run: yarn test
       - run: yarn build
       - id: publish
         name: Release to NPM
