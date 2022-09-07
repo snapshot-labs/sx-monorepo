@@ -1,4 +1,4 @@
-import { StarkNetTx, EthereumSig } from '../src/clients';
+import { StarkNetTx, EthereumSig } from '../../src/clients';
 import { Account, defaultProvider, ec } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
 
@@ -128,23 +128,6 @@ describe('StarkNetTx', () => {
     const space = '0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8';
     const authenticator = '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643';
     const strategy = '0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6';
-
-    it('StarkNetTx.getAccountProveCalls()', async () => {
-      const envelope = await ethSigClient.propose(wallet, walletAddress, {
-        space,
-        authenticator,
-        strategies: [strategy],
-        metadataURI: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-        executionParams: []
-      });
-
-      const calls = await client.getProveAccountCalls(envelope, {
-        strategyParams: ['0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', '0x3'],
-        block: 7529615
-      });
-
-      expect(calls).toMatchSnapshot();
-    });
 
     it('StarkNetTx.propose()', async () => {
       const envelope = await ethSigClient.propose(wallet, walletAddress, {

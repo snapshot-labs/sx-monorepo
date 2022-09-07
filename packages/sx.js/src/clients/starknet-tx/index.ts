@@ -130,7 +130,7 @@ export class StarkNetTx {
     const singleSlotProofs = await this.getSingleSlotProofs(envelope, metadata);
 
     return singleSlotProofs.map((proof) => {
-      const proofInputs = utils.storageProofs.getProofInputs(TEMP_CONSTANTS.block, proof);
+      const proofInputs = utils.storageProofs.getProofInputs(metadata.block, proof);
 
       return {
         contractAddress: constants.fossilFactRegistryAddress,

@@ -1,9 +1,9 @@
 import { Account, ec, defaultProvider } from 'starknet';
 import { getStarkKey } from 'starknet/utils/ellipticCurve';
-import { verify } from '../src/utils/starkkey';
-import { domain, voteTypes } from '../src/clients/starknet-sig/types';
+import { verify } from '../../../src/utils/starkkey';
+import { domain, voteTypes } from '../../../src/clients/starknet-sig/types';
 
-describe('', () => {
+describe('starkkey', () => {
   let starkKeyPair = ec.genKeyPair();
   const privKey = starkKeyPair.getPrivate('hex');
   starkKeyPair = ec.getKeyPair(`0x${privKey}`);

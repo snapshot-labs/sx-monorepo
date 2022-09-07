@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StarkNetTx ethSig authenticator + single slot proof StarkNetTx.getAccountProveCalls() 1`] = `
+exports[`StarkNetTx getAccountProveCalls should return single slot proof prove calls 1`] = `
 Array [
   Object {
     "calldata": Array [
