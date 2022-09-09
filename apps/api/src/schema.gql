@@ -32,6 +32,8 @@ type Proposal {
   discussion: Text
   start: Int
   end: Int
+  min_end: Int
+  max_end: Int
   snapshot: Int
   strategies: Text
   scores_1: Float

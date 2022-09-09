@@ -1,35 +1,26 @@
 import { formatUnits } from '@ethersproject/units';
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet/utils/address';
-import { getSelectorFromName } from 'starknet/utils/hash';
-import { faker } from '@faker-js/faker';
-import { getJSON, toAddress, getEvent } from './utils';
-
-function getSpaceName(address) {
-  const seed = parseInt(getSelectorFromName(address).toString().slice(0, 12));
-  faker.seed(seed);
-  const noun = faker.word.noun(6);
-  return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
-}
+import { getJSON, toAddress, getEvent, getSpaceName } from './utils';
 
 export async function handleSpaceCreated({ block, tx, event, mysql }) {
   console.log('Handle space created');
   const format =
     'deployer_address, space_address, voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), strategies_len, strategies(felt*), authenticators_len, authenticators(felt*), executors_len, executors(felt*)';
-  event = getEvent(event.data, format);
+  const data: any = getEvent(event.data, format);
 
   const item = {
-    id: validateAndParseAddress(event.space_address),
-    name: getSpaceName(event.space_address),
-    controller: validateAndParseAddress(event.controller),
-    voting_delay: BigInt(event.voting_delay).toString(),
-    min_voting_period: BigInt(event.min_voting_period).toString(),
-    max_voting_period: BigInt(event.max_voting_period).toString(),
-    proposal_threshold: event.proposal_threshold,
-    quorum: event.quorum,
-    strategies: event.strategies.join(','),
-    authenticators: event.authenticators.join(','),
-    executors: event.executors.join(','),
+    id: validateAndParseAddress(data.space_address),
+    name: getSpaceName(data.space_address),
+    controller: validateAndParseAddress(data.controller),
+    voting_delay: BigInt(data.voting_delay).toString(),
+    min_voting_period: BigInt(data.min_voting_period).toString(),
+    max_voting_period: BigInt(data.max_voting_period).toString(),
+    proposal_threshold: data.proposal_threshold,
+    quorum: data.quorum,
+    strategies: data.strategies.join(','),
+    authenticators: data.authenticators.join(','),
+    executors: data.executors.join(','),
     proposal_count: 0,
     vote_count: 0,
     created: block.timestamp,
@@ -41,27 +32,24 @@ export async function handleSpaceCreated({ block, tx, event, mysql }) {
 
 export async function handlePropose({ block, tx, event, mysql }) {
   console.log('Handle propose');
+  const format =
+    'proposal, author, quorum(uint256), snapshot, start, min_end, max_end, executor, execution_hash, metadata_uri_len, metadata_uri(felt*)';
+  const data: any = getEvent(event.data, format);
+
   const space = validateAndParseAddress(event.from_address);
   const [{ strategies }] = await mysql.queryAsync(
     'SELECT strategies FROM spaces WHERE id = ? LIMIT 1',
     [space]
   );
-  const proposal = BigInt(event.data[0]).toString();
-  const author = toAddress(event.data[1]);
+  const proposal = parseInt(BigInt(data.proposal).toString());
+  const author = toAddress(data.author);
   let title = '';
   let body = '';
   let discussion = '';
-
   let metadataUri = '';
-  try {
-    const metadataUriLen = BigInt(event.data[6]).toString();
-    const metadataUriArr = event.data.slice(7, 7 + metadataUriLen);
-    metadataUri = shortStringArrToStr(metadataUriArr.map(m => BigInt(m)));
-  } catch (e) {
-    console.log(e);
-  }
 
   try {
+    metadataUri = shortStringArrToStr(data.metadata_uri);
     const metadata: any = await getJSON(metadataUri);
     console.log('Metadata', metadata);
     if (metadata.title) title = metadata.title;
@@ -76,14 +64,16 @@ export async function handlePropose({ block, tx, event, mysql }) {
     proposal_id: proposal,
     space,
     author,
-    execution_hash: event.data[2],
+    execution_hash: data.execution_hash,
     metadata_uri: metadataUri,
     title,
     body,
     discussion,
-    start: BigInt(event.data[3]).toString(),
-    end: BigInt(event.data[4]).toString(),
-    snapshot: BigInt(event.data[5]).toString(),
+    start: parseInt(BigInt(data.start).toString()),
+    end: parseInt(BigInt(data.max_end).toString()),
+    min_end: parseInt(BigInt(data.min_end).toString()),
+    max_end: parseInt(BigInt(data.max_end).toString()),
+    snapshot: parseInt(BigInt(data.snapshot).toString()),
     scores_1: 0,
     scores_2: 0,
     scores_3: 0,
@@ -93,6 +83,7 @@ export async function handlePropose({ block, tx, event, mysql }) {
     tx: tx.transaction_hash,
     vote_count: 0
   };
+  console.log('Proposal', item);
 
   const user = {
     id: author,
@@ -112,11 +103,14 @@ export async function handlePropose({ block, tx, event, mysql }) {
 
 export async function handleVote({ block, event, mysql }) {
   console.log('Handle vote');
+  const format = 'proposal, voter, choice, vp';
+  const data: any = getEvent(event.data, format);
+
   const space = validateAndParseAddress(event.from_address);
-  const proposal = BigInt(event.data[0]).toString();
-  const voter = toAddress(event.data[1]);
-  const choice = BigInt(event.data[2]).toString();
-  const vp = parseFloat(formatUnits(BigInt(event.data[3]).toString(), 18));
+  const proposal = parseInt(BigInt(data.proposal).toString());
+  const voter = toAddress(data.voter);
+  const choice = parseInt(BigInt(data.choice).toString());
+  const vp = parseFloat(formatUnits(BigInt(data.vp).toString(), 18));
 
   const item = {
     id: `${space}/${proposal}/${voter}`,
@@ -127,6 +121,7 @@ export async function handleVote({ block, event, mysql }) {
     vp,
     created: block.timestamp
   };
+  console.log('Vote', item);
 
   const user = {
     id: voter,

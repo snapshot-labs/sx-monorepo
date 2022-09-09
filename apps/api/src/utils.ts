@@ -1,4 +1,6 @@
 import fetch from 'node-fetch';
+import { getSelectorFromName } from 'starknet/utils/hash';
+import { faker } from '@faker-js/faker';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { SplitUint256 } from '@snapshot-labs/sx/dist/utils/split-uint256';
@@ -56,4 +58,11 @@ export function getEvent(data: string[], format: string) {
     if (param.endsWith('_len')) len = parseInt(BigInt(data[next]).toString());
   });
   return event;
+}
+
+export function getSpaceName(address) {
+  const seed = parseInt(getSelectorFromName(address).toString().slice(0, 12));
+  faker.seed(seed);
+  const noun = faker.word.noun(6);
+  return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
 }
