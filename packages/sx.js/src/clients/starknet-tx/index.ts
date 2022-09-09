@@ -1,16 +1,8 @@
-import {
-  Abi,
-  Account,
-  InvokeFunctionResponse,
-  Contract,
-  defaultProvider as provider,
-  hash
-} from 'starknet';
-import vanillaAbi from './abi/auth-vanilla.json';
-import ethSigAbi from './abi/auth-eth-sig.json';
+import { Account, Call, hash } from 'starknet';
 import constants from './constants';
 import * as utils from '../../utils';
-import { getAuthenticatorType, getStrategyType } from './contracts';
+import { getAuthenticator } from '../../authenticators';
+import { getStrategyType } from './contracts';
 import {
   EthSigProposeMessage,
   EthSigVoteMessage,
@@ -126,7 +118,7 @@ export class StarkNetTx {
   async getProveAccountCalls(
     envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>,
     metadata: Metadata
-  ) {
+  ): Promise<Call[]> {
     const singleSlotProofs = await this.getSingleSlotProofs(envelope, metadata);
 
     return singleSlotProofs.map((proof) => {
@@ -152,152 +144,46 @@ export class StarkNetTx {
     });
   }
 
-  async proposeVanilla(
-    account: Account,
-    envelope: Envelope<VanillaProposeMessage>,
-    metadata: Metadata
-  ): Promise<InvokeFunctionResponse> {
-    const { space, authenticator } = envelope.data.message;
-    const calldata = await this.getProposeCalldata(envelope, metadata);
-    const proveCalls = await this.getProveAccountCalls(envelope, metadata);
-
-    const calls = [
-      ...proveCalls,
-      {
-        contractAddress: authenticator,
-        entrypoint: 'authenticate',
-        calldata: [space, getSelectorFromName('propose'), calldata.length, ...calldata]
-      }
-    ];
-
-    const fee = await account.estimateFee(calls);
-
-    return account.execute(calls, undefined, {
-      maxFee: fee.suggestedMaxFee
-    });
-  }
-
-  async proposeEthSig(
-    account: Account,
-    envelope: Envelope<EthSigProposeMessage>,
-    metadata: Metadata
-  ): Promise<InvokeFunctionResponse> {
-    const { sig, data } = envelope;
-    const { space, authenticator, salt } = data.message;
-    const { r, s, v } = utils.encoding.getRSVFromSig(sig);
-    const rawSalt = utils.splitUint256.SplitUint256.fromHex(`0x${salt.toString(16)}`);
-    const calldata = await this.getProposeCalldata(envelope, metadata);
-    const proveCalls = await this.getProveAccountCalls(envelope, metadata);
-
-    const calls = [
-      ...proveCalls,
-      {
-        contractAddress: authenticator,
-        entrypoint: 'authenticate',
-        calldata: [
-          r.low,
-          r.high,
-          s.low,
-          s.high,
-          v,
-          rawSalt.low,
-          rawSalt.high,
-          space,
-          getSelectorFromName('propose'),
-          calldata.length,
-          ...calldata
-        ]
-      }
-    ];
-
-    const fee = await account.estimateFee(calls);
-
-    return account.execute(calls, undefined, {
-      maxFee: fee.suggestedMaxFee
-    });
-  }
-
-  async voteVanilla(
-    account: Account,
-    envelope: Envelope<VanillaVoteMessage>,
-    metadata: Metadata
-  ): Promise<InvokeFunctionResponse> {
-    const { space, authenticator } = envelope.data.message;
-    const calldata = await this.getVoteCalldata(envelope, metadata);
-
-    const auth = new Contract(vanillaAbi as Abi, authenticator, provider);
-    auth.connect(account);
-
-    const fee = await auth.estimateFee.authenticate(space, getSelectorFromName('vote'), calldata);
-
-    return await auth.invoke('authenticate', [space, getSelectorFromName('vote'), calldata], {
-      maxFee: fee.suggestedMaxFee
-    });
-  }
-
-  async voteEthSig(
-    account: Account,
-    envelope: Envelope<EthSigVoteMessage>,
-    metadata: Metadata
-  ): Promise<InvokeFunctionResponse> {
-    const { sig, data } = envelope;
-    const { space, authenticator, salt } = data.message;
-    const { r, s, v } = utils.encoding.getRSVFromSig(sig);
-    const rawSalt = utils.splitUint256.SplitUint256.fromHex(`0x${salt.toString(16)}`);
-    const calldata = await this.getVoteCalldata(envelope, metadata);
-
-    const auth = new Contract(ethSigAbi as Abi, authenticator, provider);
-    auth.connect(account);
-
-    const fee = await auth.estimateFee.authenticate(
-      r,
-      s,
-      v,
-      rawSalt,
-      space,
-      getSelectorFromName('vote'),
-      calldata
-    );
-
-    return await auth.invoke(
-      'authenticate',
-      [r, s, v, rawSalt, space, getSelectorFromName('vote'), calldata],
-      {
-        maxFee: fee.suggestedMaxFee
-      }
-    );
-  }
-
   async propose(
     account: Account,
     envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>
   ) {
-    const authenticatorType = getAuthenticatorType(envelope.data.message.authenticator);
-
     // TODO: fetch from network once possible
     const metadata = TEMP_CONSTANTS;
 
-    if (authenticatorType === 'ethSig') {
-      return this.proposeEthSig(account, envelope as Envelope<EthSigProposeMessage>, metadata);
-    } else if (authenticatorType === 'vanilla') {
-      return this.proposeVanilla(account, envelope as Envelope<VanillaProposeMessage>, metadata);
-    } else {
+    const authenticator = getAuthenticator(envelope.data.message.authenticator);
+    if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
+
+    const calldata = await this.getProposeCalldata(envelope, metadata);
+    const call = authenticator.createCall(envelope, getSelectorFromName('propose'), calldata);
+
+    const proveCalls = await this.getProveAccountCalls(envelope, metadata);
+
+    const calls = [...proveCalls, call];
+
+    const fee = await account.estimateFee(calls);
+    return account.execute(calls, undefined, {
+      maxFee: fee.suggestedMaxFee
+    });
   }
 
   async vote(account: Account, envelope: Envelope<VanillaVoteMessage | EthSigVoteMessage>) {
-    const authenticatorType = getAuthenticatorType(envelope.data.message.authenticator);
-
     // TODO: fetch from network once possible
     const metadata = TEMP_CONSTANTS;
 
-    if (authenticatorType === 'ethSig') {
-      return this.voteEthSig(account, envelope as Envelope<EthSigVoteMessage>, metadata);
-    } else if (authenticatorType === 'vanilla') {
-      return this.voteVanilla(account, envelope as Envelope<VanillaVoteMessage>, metadata);
-    } else {
+    const authenticator = getAuthenticator(envelope.data.message.authenticator);
+    if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
+
+    const calldata = await this.getVoteCalldata(envelope, metadata);
+    const call = authenticator.createCall(envelope, getSelectorFromName('vote'), calldata);
+
+    const fee = await account.estimateFee(call);
+    return account.execute(call, undefined, {
+      maxFee: fee.suggestedMaxFee
+    });
   }
 }

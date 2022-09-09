@@ -1,3 +1,10 @@
+import type { Call } from 'starknet';
+
+export interface Authenticator {
+  type: string;
+  createCall(envelope: Envelope<Message>, selector: string, calldata: string[]): Call;
+}
+
 export interface Propose {
   space: string;
   authenticator: string;
