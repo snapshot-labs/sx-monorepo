@@ -54,6 +54,7 @@ export async function handlePropose({ block, tx, event, mysql }) {
   let title = '';
   let body = '';
   let discussion = '';
+  let execution = '';
   let metadataUri = '';
 
   try {
@@ -63,6 +64,7 @@ export async function handlePropose({ block, tx, event, mysql }) {
     if (metadata.title) title = metadata.title;
     if (metadata.body) body = metadata.body;
     if (metadata.discussion) discussion = metadata.discussion;
+    if (metadata.execution) execution = JSON.stringify(metadata.execution);
   } catch (e) {
     console.log(JSON.stringify(e).slice(0, 256));
   }
@@ -77,6 +79,7 @@ export async function handlePropose({ block, tx, event, mysql }) {
     title,
     body,
     discussion,
+    execution,
     start: parseInt(BigInt(data.start).toString()),
     end: parseInt(BigInt(data.max_end).toString()),
     min_end: parseInt(BigInt(data.min_end).toString()),

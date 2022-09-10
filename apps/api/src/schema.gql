@@ -30,6 +30,7 @@ type Proposal {
   title: Text
   body: Text
   discussion: Text
+  execution: Text
   start: Int
   end: Int
   min_end: Int
