@@ -22,3 +22,8 @@ export const envelope = {
     }
   }
 };
+
+export const metadata = {
+  strategyParams: ['0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', '0x3'],
+  block: 7541970
+};

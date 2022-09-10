@@ -1,6 +1,6 @@
 import { hash } from 'starknet';
 import vanillaAuthenticator from '../../../src/authenticators/vanilla';
-import { envelope } from './fixtures';
+import { envelope } from '../fixtures';
 
 describe('vanillaAuthenticator', () => {
   it('should return type', () => {

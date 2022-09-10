@@ -5,6 +5,23 @@ export interface Authenticator {
   createCall(envelope: Envelope<Message>, selector: string, calldata: string[]): Call;
 }
 
+export interface Strategy {
+  type: string;
+  getParams(
+    envelope: Envelope<Message>,
+    metadata: Metadata,
+    clientConfig: ClientConfig
+  ): Promise<string[]>;
+  getExtraProposeCalls(
+    envelope: Envelope<Message>,
+    metadata: Metadata,
+    clientConfig: ClientConfig
+  ): Promise<Call[]>;
+}
+
+export type ClientConfig = {
+  ethUrl: string;
+};
 export interface Propose {
   space: string;
   authenticator: string;

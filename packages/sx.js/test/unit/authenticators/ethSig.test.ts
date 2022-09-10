@@ -1,6 +1,6 @@
 import { hash } from 'starknet';
 import ethSigAuthenticator from '../../../src/authenticators/ethSig';
-import { envelope } from './fixtures';
+import { envelope } from '../fixtures';
 
 describe('ethSigAuthenticator', () => {
   it('should return type', () => {

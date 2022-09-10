@@ -1,8 +1,8 @@
-import { Account, Call, hash } from 'starknet';
+import { Account, hash } from 'starknet';
 import constants from './constants';
 import * as utils from '../../utils';
 import { getAuthenticator } from '../../authenticators';
-import { getStrategyType } from './contracts';
+import { getStrategy } from '../../strategies';
 import {
   EthSigProposeMessage,
   EthSigVoteMessage,
@@ -10,7 +10,8 @@ import {
   VanillaProposeMessage,
   Message,
   Envelope,
-  Metadata
+  Metadata,
+  ClientConfig
 } from '../../types';
 
 const { getSelectorFromName } = hash;
@@ -21,61 +22,40 @@ const TEMP_CONSTANTS = {
 };
 
 export class StarkNetTx {
-  ethUrl: string;
+  config: ClientConfig;
 
   constructor(options: { ethUrl: string }) {
-    this.ethUrl = options.ethUrl;
-  }
-
-  async getSingleSlotProofs(envelope: Envelope<Message>, metadata: Metadata) {
-    const singleSlotProofStrategies = envelope.data.message.strategies.filter(
-      (strategy) => getStrategyType(strategy) === 'singleSlotProof'
-    );
-
-    if (singleSlotProofStrategies.length === 0) return [];
-
-    const response = await fetch(this.ethUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(
-        singleSlotProofStrategies.map((strategy, i) => ({
-          jsonrpc: '2.0',
-          method: 'eth_getProof',
-          params: [
-            metadata.strategyParams[0],
-            [utils.encoding.getSlotKey(envelope.address, metadata.strategyParams[1])],
-            `0x${metadata.block.toString(16)}`
-          ],
-          id: i
-        }))
-      )
-    });
-
-    const data = await response.json();
-
-    return data.map((entry) => entry.result);
+    this.config = {
+      ethUrl: options.ethUrl
+    };
   }
 
   async getStrategiesParams(envelope: Envelope<Message>, metadata: Metadata) {
-    const proofs = await this.getSingleSlotProofs(envelope, metadata);
+    const { strategies } = envelope.data.message;
 
-    let proofsCounter = 0;
-    return envelope.data.message.strategies.map((strategy) => {
-      const type = getStrategyType(strategy);
+    return Promise.all(
+      strategies.map((address) => {
+        const strategy = getStrategy(address);
+        if (!strategy) throw new Error('Invalid strategy');
 
-      if (!type) throw new Error('Invalid strategy');
+        return strategy.getParams(envelope, metadata, this.config);
+      })
+    );
+  }
 
-      if (type === 'singleSlotProof') {
-        const proofInputs = utils.storageProofs.getProofInputs(
-          metadata.block,
-          proofs[proofsCounter++]
-        );
+  async getExtraProposeCalls(envelope: Envelope<Message>, metadata: Metadata) {
+    const { strategies } = envelope.data.message;
 
-        return proofInputs.storageProofs[0];
-      }
+    const extraCalls = await Promise.all(
+      strategies.map((address) => {
+        const strategy = getStrategy(address);
+        if (!strategy) throw new Error('Invalid strategy');
 
-      return [];
-    });
+        return strategy.getExtraProposeCalls(envelope, metadata, this.config);
+      })
+    );
+
+    return extraCalls.flat();
   }
 
   async getProposeCalldata(
@@ -115,35 +95,6 @@ export class StarkNetTx {
     );
   }
 
-  async getProveAccountCalls(
-    envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>,
-    metadata: Metadata
-  ): Promise<Call[]> {
-    const singleSlotProofs = await this.getSingleSlotProofs(envelope, metadata);
-
-    return singleSlotProofs.map((proof) => {
-      const proofInputs = utils.storageProofs.getProofInputs(metadata.block, proof);
-
-      return {
-        contractAddress: constants.fossilFactRegistryAddress,
-        entrypoint: 'prove_account',
-        calldata: [
-          proofInputs.accountOptions,
-          proofInputs.blockNumber,
-          proofInputs.ethAddress.values[0],
-          proofInputs.ethAddress.values[1],
-          proofInputs.ethAddress.values[2],
-          proofInputs.accountProofSizesBytes.length,
-          ...proofInputs.accountProofSizesBytes,
-          proofInputs.accountProofSizesWords.length,
-          ...proofInputs.accountProofSizesWords,
-          proofInputs.accountProof.length,
-          ...proofInputs.accountProof
-        ]
-      };
-    });
-  }
-
   async propose(
     account: Account,
     envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>
@@ -158,10 +109,9 @@ export class StarkNetTx {
 
     const calldata = await this.getProposeCalldata(envelope, metadata);
     const call = authenticator.createCall(envelope, getSelectorFromName('propose'), calldata);
+    const extraCalls = await this.getExtraProposeCalls(envelope, metadata);
 
-    const proveCalls = await this.getProveAccountCalls(envelope, metadata);
-
-    const calls = [...proveCalls, call];
+    const calls = [...extraCalls, call];
 
     const fee = await account.estimateFee(calls);
     return account.execute(calls, undefined, {
