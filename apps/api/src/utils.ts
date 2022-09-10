@@ -49,7 +49,7 @@ export function getEvent(data: string[], format: string) {
     } else {
       if (param.endsWith('(uint256)')) {
         const uint256 = data.slice(next, next + 2);
-        event[name] = new SplitUint256(BigInt(uint256[0]), BigInt(uint256[1])).toUint().toString();
+        event[name] = new SplitUint256(uint256[0], uint256[1]).toUint().toString();
         skip += 1;
       } else {
         event[name] = data[next];

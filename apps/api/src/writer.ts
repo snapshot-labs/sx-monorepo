@@ -3,6 +3,14 @@ import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet/utils/address';
 import { getJSON, toAddress, getEvent, getSpaceName } from './utils';
 
+function intSequenceToString(intSequence) {
+  const sequenceStr = shortStringArrToStr(intSequence);
+  return (sequenceStr.split(/(.{9})/) || [])
+    .filter(str => str !== '')
+    .map(str => str.replace('\x00', '').split('').reverse().join(''))
+    .join('');
+}
+
 export async function handleSpaceCreated({ block, tx, event, mysql }) {
   console.log('Handle space created');
   const format =
@@ -49,7 +57,7 @@ export async function handlePropose({ block, tx, event, mysql }) {
   let metadataUri = '';
 
   try {
-    metadataUri = shortStringArrToStr(data.metadata_uri);
+    metadataUri = intSequenceToString(data.metadata_uri);
     const metadata: any = await getJSON(metadataUri);
     console.log('Metadata', metadata);
     if (metadata.title) title = metadata.title;
