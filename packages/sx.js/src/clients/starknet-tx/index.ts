@@ -17,7 +17,6 @@ import {
 const { getSelectorFromName } = hash;
 
 const TEMP_CONSTANTS = {
-  strategyParams: ['0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', '0x3'],
   block: 7541970
 };
 
@@ -38,7 +37,7 @@ export class StarkNetTx {
         const strategy = getStrategy(address);
         if (!strategy) throw new Error('Invalid strategy');
 
-        return strategy.getParams(envelope, metadata, this.config);
+        return strategy.getParams(address, envelope, metadata, this.config);
       })
     );
   }
@@ -51,7 +50,7 @@ export class StarkNetTx {
         const strategy = getStrategy(address);
         if (!strategy) throw new Error('Invalid strategy');
 
-        return strategy.getExtraProposeCalls(envelope, metadata, this.config);
+        return strategy.getExtraProposeCalls(address, envelope, metadata, this.config);
       })
     );
 

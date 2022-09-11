@@ -9,13 +9,23 @@ describe('vanillaStrategy', () => {
   });
 
   it('should return params', async () => {
-    const params = await vanillaStrategy.getParams(envelope, metadata, { ethUrl });
+    const params = await vanillaStrategy.getParams(
+      '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
+      envelope,
+      metadata,
+      { ethUrl }
+    );
 
     expect(params).toEqual([]);
   });
 
   it('should return extra propose calls', async () => {
-    const params = await vanillaStrategy.getExtraProposeCalls(envelope, metadata, { ethUrl });
+    const params = await vanillaStrategy.getExtraProposeCalls(
+      '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
+      envelope,
+      metadata,
+      { ethUrl }
+    );
 
     expect(params).toEqual([]);
   });

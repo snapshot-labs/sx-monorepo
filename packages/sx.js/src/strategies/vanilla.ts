@@ -13,6 +13,7 @@ import type {
 const vanillaStrategy: Strategy = {
   type: 'vanilla',
   async getParams(
+    address: string,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
     metadata: Metadata,
     clientConfig: ClientConfig
@@ -20,6 +21,7 @@ const vanillaStrategy: Strategy = {
     return [];
   },
   async getExtraProposeCalls(
+    address: string,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
     metadata: Metadata,
     clientConfig: ClientConfig
