@@ -1,6 +1,6 @@
 import { hash } from 'starknet';
 import ethSigAuthenticator from '../../../src/authenticators/ethSig';
-import { envelope } from '../fixtures';
+import { proposeEnvelope } from '../fixtures';
 
 describe('ethSigAuthenticator', () => {
   it('should return type', () => {
@@ -8,9 +8,11 @@ describe('ethSigAuthenticator', () => {
   });
 
   it('should create call', () => {
-    const call = ethSigAuthenticator.createCall(envelope, hash.getSelectorFromName('propose'), [
-      '0x15'
-    ]);
+    const call = ethSigAuthenticator.createCall(
+      proposeEnvelope,
+      hash.getSelectorFromName('propose'),
+      ['0x15']
+    );
 
     expect(call).toEqual({
       calldata: [

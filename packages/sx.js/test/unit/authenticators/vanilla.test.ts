@@ -1,6 +1,6 @@
 import { hash } from 'starknet';
 import vanillaAuthenticator from '../../../src/authenticators/vanilla';
-import { envelope } from '../fixtures';
+import { proposeEnvelope } from '../fixtures';
 
 describe('vanillaAuthenticator', () => {
   it('should return type', () => {
@@ -8,9 +8,11 @@ describe('vanillaAuthenticator', () => {
   });
 
   it('should create call', () => {
-    const call = vanillaAuthenticator.createCall(envelope, hash.getSelectorFromName('propose'), [
-      '0x15'
-    ]);
+    const call = vanillaAuthenticator.createCall(
+      proposeEnvelope,
+      hash.getSelectorFromName('propose'),
+      ['0x15']
+    );
 
     expect(call).toEqual({
       calldata: [

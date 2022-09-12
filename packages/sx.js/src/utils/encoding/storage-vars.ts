@@ -21,3 +21,7 @@ export function getStorageVarAddress(varName: string, ...args: string[]) {
 
   return res.mod(ADDR_BOUND).toString();
 }
+
+export function offsetStorageVar(address: string, offset: number) {
+  return new BN(address, 'be').add(new BN(offset)).toString();
+}

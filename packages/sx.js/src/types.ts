@@ -8,15 +8,14 @@ export interface Authenticator {
 export interface Strategy {
   type: string;
   getParams(
+    call: 'propose' | 'vote',
     address: string,
     envelope: Envelope<Message>,
-    metadata: Metadata,
     clientConfig: ClientConfig
   ): Promise<string[]>;
   getExtraProposeCalls(
     address: string,
     envelope: Envelope<Message>,
-    metadata: Metadata,
     clientConfig: ClientConfig
   ): Promise<Call[]>;
 }
@@ -62,8 +61,4 @@ export type Envelope<T extends Message> = {
   data: {
     message: T;
   };
-};
-
-export type Metadata = {
-  block: number;
 };

@@ -4,7 +4,6 @@ import type { Call } from 'starknet';
 import type {
   ClientConfig,
   Envelope,
-  Metadata,
   Strategy,
   VanillaProposeMessage,
   VanillaVoteMessage
@@ -13,9 +12,9 @@ import type {
 const vanillaStrategy: Strategy = {
   type: 'vanilla',
   async getParams(
+    call: 'propose' | 'vote',
     address: string,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
-    metadata: Metadata,
     clientConfig: ClientConfig
   ): Promise<string[]> {
     return [];
@@ -23,7 +22,6 @@ const vanillaStrategy: Strategy = {
   async getExtraProposeCalls(
     address: string,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
-    metadata: Metadata,
     clientConfig: ClientConfig
   ): Promise<Call[]> {
     return [];

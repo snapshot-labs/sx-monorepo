@@ -27,13 +27,13 @@ export class IntsSequence {
   }
 
   asStrings(): string[] {
-    return this.values.map(s => {
+    return this.values.map((s) => {
       let str = '';
       for (let n = 2; n < s.length; n += 2) {
         str += String.fromCharCode(parseInt(s.substring(n, n + 2), 16));
       }
-      return str
-    })
+      return str;
+    });
   }
 
   static fromString(str: string): IntsSequence {
@@ -44,7 +44,6 @@ export class IntsSequence {
     }
     return new IntsSequence(intsArray, str.length);
   }
-
 
   static LEFromString(str: string): IntsSequence {
     const intsArray: string[] = [];
