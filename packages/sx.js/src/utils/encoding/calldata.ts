@@ -70,7 +70,7 @@ export function getProposeCalldata(
  */
 export function getVoteCalldata(
   voterAddress: string,
-  proposalID: string,
+  proposalID: number,
   choice: Choice,
   usedVotingStrategies: string[],
   usedVotingStrategyParams: string[][]
@@ -78,7 +78,7 @@ export function getVoteCalldata(
   const usedVotingStrategyParamsFlat = flatten2DArray(usedVotingStrategyParams);
   return [
     voterAddress,
-    proposalID,
+    `0x${proposalID.toString(16)}`,
     `0x${choice.toString(16)}`,
     `0x${usedVotingStrategies.length.toString(16)}`,
     ...usedVotingStrategies,

@@ -85,13 +85,7 @@ export class StarkNetTx {
 
     const strategiesParams = await this.getStrategiesParams(envelope, metadata);
 
-    return utils.encoding.getVoteCalldata(
-      address,
-      proposal.toString(16),
-      Number(choice),
-      strategies,
-      strategiesParams
-    );
+    return utils.encoding.getVoteCalldata(address, proposal, choice, strategies, strategiesParams);
   }
 
   async propose(
