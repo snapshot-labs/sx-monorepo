@@ -14,7 +14,7 @@ function intSequenceToString(intSequence) {
 export async function handleSpaceCreated({ block, tx, event, mysql }) {
   console.log('Handle space created');
   const format =
-    'deployer_address, space_address, voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), strategies_len, strategies(felt*), authenticators_len, authenticators(felt*), executors_len, executors(felt*)';
+    'deployer_address, space_address, voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), strategies_len, strategies(felt*), strategies_params_len, strategies_params(felt*), authenticators_len, authenticators(felt*), executors_len, executors(felt*)';
   const data: any = getEvent(event.data, format);
 
   const item = {
@@ -27,6 +27,7 @@ export async function handleSpaceCreated({ block, tx, event, mysql }) {
     proposal_threshold: data.proposal_threshold,
     quorum: data.quorum,
     strategies: data.strategies.join(','),
+    strategies_params: JSON.stringify(data.strategies_params),
     authenticators: data.authenticators.join(','),
     executors: data.executors.join(','),
     proposal_count: 0,
@@ -45,8 +46,8 @@ export async function handlePropose({ block, tx, event, mysql }) {
   const data: any = getEvent(event.data, format);
 
   const space = validateAndParseAddress(event.from_address);
-  const [{ strategies }] = await mysql.queryAsync(
-    'SELECT strategies FROM spaces WHERE id = ? LIMIT 1',
+  const [{ strategies, strategies_params }] = await mysql.queryAsync(
+    'SELECT strategies, strategies_params FROM spaces WHERE id = ? LIMIT 1',
     [space]
   );
   const proposal = parseInt(BigInt(data.proposal).toString());
@@ -90,6 +91,7 @@ export async function handlePropose({ block, tx, event, mysql }) {
     scores_3: 0,
     scores_total: 0,
     strategies,
+    strategies_params,
     created: block.timestamp,
     tx: tx.transaction_hash,
     vote_count: 0

@@ -12,6 +12,7 @@ type Space {
   proposal_threshold: Int
   quorum: Float
   strategies: Text
+  strategies_params: Text
   authenticators: Text
   executors: Text
   proposal_count: Int
@@ -37,6 +38,7 @@ type Proposal {
   max_end: Int
   snapshot: Int
   strategies: Text
+  strategies_params: Text
   scores_1: Float
   scores_2: Float
   scores_3: Float

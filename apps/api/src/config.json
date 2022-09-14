@@ -2,8 +2,8 @@
   "network": "goerli-alpha",
   "sources": [
     {
-      "contract": "0x3e5165026e6586cd2d5cdf1fdced8af866f900e430bf1dc7b839c84604c506e",
-      "start": 304821,
+      "contract": "0xbecc696f9790b511bbdbdf30bab7e2aa4e54c7a23d777b0fbe8e581821cf0c",
+      "start": 332509,
       "events": [
         {
           "name": "space_deployed",
@@ -12,8 +12,8 @@
       ]
     },
     {
-      "contract": "0x03ddbcdfec756eb9e9e0fbce7a90721570a09fc97d31a15b8e40769b93ecb957",
-      "start": 305377,
+      "contract": "0xe4524f240f31334d0970d8516f1e8135308c7f4aa6867cae2bb4a53fa656e1",
+      "start": 333979,
       "events": [
         {
           "name": "proposal_created",
@@ -26,8 +26,8 @@
       ]
     },
     {
-      "contract": "0x03a48d8a7e80b7b295ef15efc4e1604e78b1f4460266cd460b6eb8826846bba0",
-      "start": 305384,
+      "contract": "0x0072064a0d2d717fcb4bb6af182a652e7deb1d0eef8dc126e3062bf6dda0156b",
+      "start": 333979,
       "events": [
         {
           "name": "proposal_created",
@@ -40,8 +40,8 @@
       ]
     },
     {
-      "contract": "0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8",
-      "start": 305389,
+      "contract": "0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383",
+      "start": 333979,
       "events": [
         {
           "name": "proposal_created",
