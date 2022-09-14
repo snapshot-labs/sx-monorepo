@@ -12,10 +12,11 @@ export const proposeEnvelope = {
       ]
     },
     message: {
-      space: '0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8',
-      authenticator: '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643',
-      strategies: ['0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6'],
-      metadataURI: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+      space: '0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383',
+      authenticator: '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38',
+      strategies: [0],
+      executor: '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb',
+      metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
       executionParams: [],
       executionHash: '0x049ee3eba8c1600700ee1b87eb599f16716b0b1022947733551fde4050ca6804',
       salt: 2817056238
@@ -37,10 +38,11 @@ export const voteEnvelope = {
       ]
     },
     message: {
-      space: '0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8',
-      authenticator: '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643',
-      strategies: ['0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6'],
-      proposal: 9,
+      space: '0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383',
+      authenticator: '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38',
+      executor: '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb',
+      strategies: [0],
+      proposal: 1,
       choice: 1
     }
   }

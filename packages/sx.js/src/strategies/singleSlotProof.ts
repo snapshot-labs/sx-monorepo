@@ -17,16 +17,16 @@ const fossilFactRegistryAddress =
 
 const proposalRegistryStore = 'Voting_proposal_registry_store';
 const strategyParamsStore = 'Voting_voting_strategy_params_store';
-const timestampToEthBlockNumberStore = 'timestamp_to_eth_block_number';
+const timestampToEthBlockNumberStore = 'Timestamp_timestamp_to_eth_block_number';
 const latestL1BlockStore = '_latest_l1_block';
 
 const snapshotTimestampOffset = 3;
 
 async function fetchStrategyParams(
-  address: string,
+  index: number,
   envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>
 ): Promise<string[]> {
-  const lengthAddress = getStorageVarAddress(strategyParamsStore, address, '0x0');
+  const lengthAddress = getStorageVarAddress(strategyParamsStore, index.toString(16), '0x0');
   const length = parseInt(
     (await defaultProvider.getStorageAt(envelope.data.message.space, lengthAddress)) as string,
     16
@@ -36,7 +36,7 @@ async function fetchStrategyParams(
     [...Array(length)].map(async (_, i) => {
       const lengthAddress = getStorageVarAddress(
         strategyParamsStore,
-        address,
+        index.toString(16),
         (i + 1).toString(16)
       );
 
@@ -86,12 +86,13 @@ async function fetchBlock(
 async function fetchProofInputs(
   call: 'propose' | 'vote',
   address: string,
+  index: number,
   envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
   clientConfig: ClientConfig
 ) {
   const [block, strategyParams] = await Promise.all([
     fetchBlock(call, address, envelope),
-    fetchStrategyParams(address, envelope)
+    fetchStrategyParams(index, envelope)
   ]);
 
   const response = await fetch(clientConfig.ethUrl, {
@@ -120,19 +121,21 @@ const singleSlotProofStrategy: Strategy = {
   async getParams(
     call: 'propose' | 'vote',
     address: string,
+    index: number,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
     clientConfig: ClientConfig
   ): Promise<string[]> {
-    const proofInputs = await fetchProofInputs(call, address, envelope, clientConfig);
+    const proofInputs = await fetchProofInputs(call, address, index, envelope, clientConfig);
 
     return proofInputs.storageProofs[0];
   },
   async getExtraProposeCalls(
     address: string,
+    index: number,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
     clientConfig: ClientConfig
   ): Promise<Call[]> {
-    const proofInputs = await fetchProofInputs('propose', address, envelope, clientConfig);
+    const proofInputs = await fetchProofInputs('propose', address, index, envelope, clientConfig);
 
     return [
       {

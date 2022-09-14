@@ -23,12 +23,12 @@ describe('ethSigAuthenticator', () => {
         '0x1c',
         '0xa7e8ddee',
         '0x0',
-        '0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8',
+        '0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383',
         '0x1bfd596ae442867ef71ca523061610682af8b00fc2738329422f4ad8d220b81',
         1,
         '0x15'
       ],
-      contractAddress: '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643',
+      contractAddress: '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38',
       entrypoint: 'authenticate'
     });
   });

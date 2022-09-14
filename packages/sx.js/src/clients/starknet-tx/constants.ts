@@ -1,3 +1,0 @@
-export default {
-  executor: '0x7402b474327a0d7a2d5c3e01489386113d9654eaff8591344577458074bb1b7'
-};

@@ -12,6 +12,7 @@ describe('vanillaStrategy', () => {
     const params = await vanillaStrategy.getParams(
       'vote',
       '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
+      0,
       proposeEnvelope,
       { ethUrl }
     );
@@ -22,6 +23,7 @@ describe('vanillaStrategy', () => {
   it('should return extra propose calls', async () => {
     const params = await vanillaStrategy.getExtraProposeCalls(
       '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
+      0,
       proposeEnvelope,
       { ethUrl }
     );

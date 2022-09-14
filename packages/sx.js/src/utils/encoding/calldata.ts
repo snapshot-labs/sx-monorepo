@@ -39,7 +39,7 @@ export function getProposeCalldata(
   proposerAddress: string,
   metadataUri: IntsSequence,
   executorAddress: string,
-  usedVotingStrategies: string[],
+  usedVotingStrategies: number[],
   usedVotingStrategyParams: string[][],
   executionParams: string[]
 ): string[] {
@@ -51,7 +51,7 @@ export function getProposeCalldata(
     ...metadataUri.values,
     executorAddress,
     `0x${usedVotingStrategies.length.toString(16)}`,
-    ...usedVotingStrategies,
+    ...usedVotingStrategies.map((strategy) => `0x${strategy.toString(16)}`),
     `0x${usedVotingStrategyParamsFlat.length.toString(16)}`,
     ...usedVotingStrategyParamsFlat,
     `0x${executionParams.length.toString(16)}`,
@@ -72,7 +72,7 @@ export function getVoteCalldata(
   voterAddress: string,
   proposalID: number,
   choice: Choice,
-  usedVotingStrategies: string[],
+  usedVotingStrategies: number[],
   usedVotingStrategyParams: string[][]
 ): string[] {
   const usedVotingStrategyParamsFlat = flatten2DArray(usedVotingStrategyParams);
@@ -81,7 +81,7 @@ export function getVoteCalldata(
     `0x${proposalID.toString(16)}`,
     `0x${choice.toString(16)}`,
     `0x${usedVotingStrategies.length.toString(16)}`,
-    ...usedVotingStrategies,
+    ...usedVotingStrategies.map((strategy) => `0x${strategy.toString(16)}`),
     `0x${usedVotingStrategyParamsFlat.length.toString(16)}`,
     ...usedVotingStrategyParamsFlat
   ];

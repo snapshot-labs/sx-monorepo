@@ -1,14 +1,15 @@
 import vanillaAuthenticator from './vanilla';
 import ethSigAuthenticator from './ethSig';
+import * as utils from '../utils';
 import type { Authenticator } from '../types';
 
 const authenticators = {
-  '0x6ad07205a4d725c5c2b10c4f5fbdfaaa351c742fce7a5a22b2b56fd8d5afd62': vanillaAuthenticator,
-  '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643': ethSigAuthenticator
+  '0x036f53ac6efe16403267873d307db90b5cc10c97fd3353af3107609bb63f9f83': vanillaAuthenticator,
+  '0x04bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38': ethSigAuthenticator
 };
 
 export function getAuthenticator(address: string): Authenticator | null {
-  const authenticator = authenticators[address];
+  const authenticator = authenticators[utils.encoding.hexPadRight(address)];
   if (!authenticator) return null;
 
   return authenticator;

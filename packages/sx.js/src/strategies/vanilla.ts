@@ -14,6 +14,7 @@ const vanillaStrategy: Strategy = {
   async getParams(
     call: 'propose' | 'vote',
     address: string,
+    index: number,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
     clientConfig: ClientConfig
   ): Promise<string[]> {
@@ -21,6 +22,7 @@ const vanillaStrategy: Strategy = {
   },
   async getExtraProposeCalls(
     address: string,
+    index: number,
     envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
     clientConfig: ClientConfig
   ): Promise<Call[]> {

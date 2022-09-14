@@ -1,9 +1,8 @@
-import { Account, hash } from 'starknet';
-import constants from './constants';
+import { Account, defaultProvider, hash } from 'starknet';
 import * as utils from '../../utils';
 import { getAuthenticator } from '../../authenticators';
 import { getStrategy } from '../../strategies';
-import {
+import type {
   EthSigProposeMessage,
   EthSigVoteMessage,
   VanillaVoteMessage,
@@ -18,61 +17,81 @@ const { getSelectorFromName } = hash;
 export class StarkNetTx {
   config: ClientConfig;
 
-  constructor(options: { ethUrl: string }) {
-    this.config = {
-      ethUrl: options.ethUrl
-    };
+  constructor(config: ClientConfig) {
+    this.config = config;
   }
 
-  async getStrategiesParams(call: 'propose' | 'vote', envelope: Envelope<Message>) {
-    const { strategies } = envelope.data.message;
-
+  async getStrategiesAddresses(envelope: Envelope<Message>) {
     return Promise.all(
-      strategies.map((address) => {
+      envelope.data.message.strategies.map(
+        (id) =>
+          defaultProvider.getStorageAt(
+            envelope.data.message.space,
+            utils.encoding.getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))
+          ) as Promise<string>
+      )
+    );
+  }
+
+  async getStrategiesParams(
+    call: 'propose' | 'vote',
+    strategiesAddresses: string[],
+    envelope: Envelope<Message>
+  ) {
+    return Promise.all(
+      strategiesAddresses.map((address, index) => {
         const strategy = getStrategy(address);
         if (!strategy) throw new Error('Invalid strategy');
 
-        return strategy.getParams(call, address, envelope, this.config);
+        return strategy.getParams(call, address, index, envelope, this.config);
       })
     );
   }
 
-  async getExtraProposeCalls(envelope: Envelope<Message>) {
-    const { strategies } = envelope.data.message;
-
+  async getExtraProposeCalls(strategiesAddresses: string[], envelope: Envelope<Message>) {
     const extraCalls = await Promise.all(
-      strategies.map((address) => {
+      strategiesAddresses.map((address, index) => {
         const strategy = getStrategy(address);
         if (!strategy) throw new Error('Invalid strategy');
 
-        return strategy.getExtraProposeCalls(address, envelope, this.config);
+        return strategy.getExtraProposeCalls(address, index, envelope, this.config);
       })
     );
 
     return extraCalls.flat();
   }
 
-  async getProposeCalldata(envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>) {
+  async getProposeCalldata(
+    strategiesAddresses: string[],
+    envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>
+  ) {
     const { address, data } = envelope;
-    const { strategies, metadataURI, executionParams } = data.message;
+    const { strategies, executor, metadataUri, executionParams } = data.message;
 
-    const strategiesParams = await this.getStrategiesParams('propose', envelope);
+    const strategiesParams = await this.getStrategiesParams(
+      'propose',
+      strategiesAddresses,
+      envelope
+    );
 
     return utils.encoding.getProposeCalldata(
       address,
-      utils.intsSequence.IntsSequence.LEFromString(metadataURI),
-      constants.executor,
+      utils.intsSequence.IntsSequence.LEFromString(metadataUri),
+      executor,
       strategies,
       strategiesParams,
       executionParams
     );
   }
 
-  async getVoteCalldata(envelope: Envelope<VanillaVoteMessage | EthSigVoteMessage>) {
+  async getVoteCalldata(
+    strategiesAddresses: string[],
+    envelope: Envelope<VanillaVoteMessage | EthSigVoteMessage>
+  ) {
     const { address, data } = envelope;
     const { strategies, proposal, choice } = data.message;
 
-    const strategiesParams = await this.getStrategiesParams('vote', envelope);
+    const strategiesParams = await this.getStrategiesParams('vote', strategiesAddresses, envelope);
 
     return utils.encoding.getVoteCalldata(address, proposal, choice, strategies, strategiesParams);
   }
@@ -86,9 +105,10 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const calldata = await this.getProposeCalldata(envelope);
+    const strategiesAddresses = await this.getStrategiesAddresses(envelope);
+    const calldata = await this.getProposeCalldata(strategiesAddresses, envelope);
     const call = authenticator.createCall(envelope, getSelectorFromName('propose'), calldata);
-    const extraCalls = await this.getExtraProposeCalls(envelope);
+    const extraCalls = await this.getExtraProposeCalls(strategiesAddresses, envelope);
 
     const calls = [...extraCalls, call];
 
@@ -104,7 +124,8 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const calldata = await this.getVoteCalldata(envelope);
+    const strategiesAddresses = await this.getStrategiesAddresses(envelope);
+    const calldata = await this.getVoteCalldata(strategiesAddresses, envelope);
     const call = authenticator.createCall(envelope, getSelectorFromName('vote'), calldata);
 
     const fee = await account.estimateFee(call);

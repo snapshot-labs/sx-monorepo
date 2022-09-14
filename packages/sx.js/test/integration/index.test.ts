@@ -1,18 +1,11 @@
 import { StarkNetTx, EthereumSig } from '../../src/clients';
 import { Account, defaultProvider, ec } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
-
-// Factory: 0x3e5165026e6586cd2d5cdf1fdced8af866f900e430bf1dc7b839c84604c506e
-// Spaces
-// [vanilla auth, vanilla voting strategy]
-// 0x03ddbcdfec756eb9e9e0fbce7a90721570a09fc97d31a15b8e40769b93ecb957
-// [ethSig auth, vanilla voting strategy]
-// 0x03a48d8a7e80b7b295ef15efc4e1604e78b1f4460266cd460b6eb8826846bba0
-// [ethSig auth, single slot proof (WETH goerli)]
-// 0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8
+import { Choice } from '../../src/utils/choice';
 
 describe('StarkNetTx', () => {
   const ethUrl = process.env.GOERLI_NODE_URL as string;
+  const manaUrl = '';
 
   const wallet = Wallet.createRandom();
   const walletAddress = wallet.address;
@@ -23,9 +16,10 @@ describe('StarkNetTx', () => {
 
   describe('vanilla authenticator', () => {
     const client = new StarkNetTx({ ethUrl });
-    const space = '0x03ddbcdfec756eb9e9e0fbce7a90721570a09fc97d31a15b8e40769b93ecb957';
-    const authenticator = '0x6ad07205a4d725c5c2b10c4f5fbdfaaa351c742fce7a5a22b2b56fd8d5afd62';
-    const strategy = '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865';
+    const space = '0xe4524f240f31334d0970d8516f1e8135308c7f4aa6867cae2bb4a53fa656e1';
+    const authenticator = '0x36f53ac6efe16403267873d307db90b5cc10c97fd3353af3107609bb63f9f83';
+    const strategy = 0;
+    const executor = '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb';
 
     it('StarkNetTx.propose()', async () => {
       const envelope = {
@@ -36,7 +30,8 @@ describe('StarkNetTx', () => {
             space,
             authenticator,
             strategies: [strategy],
-            metadataURI: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+            executor,
+            metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
             executionParams: []
           }
         }
@@ -59,8 +54,9 @@ describe('StarkNetTx', () => {
             space,
             authenticator,
             strategies: [strategy],
+            executor,
             proposal: 1,
-            choice: 1
+            choice: Choice.FOR
           }
         }
       };
@@ -76,17 +72,19 @@ describe('StarkNetTx', () => {
 
   describe('ethSig authenticator', () => {
     const client = new StarkNetTx({ ethUrl });
-    const ethSigClient = new EthereumSig(walletAddress);
-    const space = '0x03a48d8a7e80b7b295ef15efc4e1604e78b1f4460266cd460b6eb8826846bba0';
-    const authenticator = '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643';
-    const strategy = '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865';
+    const ethSigClient = new EthereumSig({ ethUrl, manaUrl });
+    const space = '0x0072064a0d2d717fcb4bb6af182a652e7deb1d0eef8dc126e3062bf6dda0156b';
+    const authenticator = '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38';
+    const strategy = 0;
+    const executor = '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb';
 
     it('StarkNetTx.propose()', async () => {
       const envelope = await ethSigClient.propose(wallet, walletAddress, {
         space,
         authenticator,
         strategies: [strategy],
-        metadataURI: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+        executor,
+        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
         executionParams: []
       });
 
@@ -103,8 +101,9 @@ describe('StarkNetTx', () => {
         space,
         authenticator,
         strategies: [strategy],
+        executor,
         proposal: 1,
-        choice: 1
+        choice: Choice.FOR
       });
 
       const receipt = await client.vote(account, envelope);
@@ -124,17 +123,19 @@ describe('StarkNetTx', () => {
     const walletAddress = wallet.address;
 
     const client = new StarkNetTx({ ethUrl });
-    const ethSigClient = new EthereumSig(walletAddress);
-    const space = '0x069555971fbf76b3d0471297818ed93986fdd7afe3816d53ea8d8e72034260d8';
-    const authenticator = '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643';
-    const strategy = '0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6';
+    const ethSigClient = new EthereumSig({ ethUrl, manaUrl });
+    const space = '0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383';
+    const authenticator = '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38';
+    const strategy = 0;
+    const executor = '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb';
 
     it('StarkNetTx.propose()', async () => {
       const envelope = await ethSigClient.propose(wallet, walletAddress, {
         space,
         authenticator,
         strategies: [strategy],
-        metadataURI: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+        executor,
+        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
         executionParams: []
       });
 
@@ -151,8 +152,9 @@ describe('StarkNetTx', () => {
         space,
         authenticator,
         strategies: [strategy],
-        proposal: 5,
-        choice: 1
+        executor,
+        proposal: 2,
+        choice: Choice.FOR
       });
 
       const receipt = await client.vote(account, envelope);

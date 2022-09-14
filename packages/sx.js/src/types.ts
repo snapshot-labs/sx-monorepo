@@ -1,4 +1,5 @@
 import type { Call } from 'starknet';
+import type { Choice } from './utils/choice';
 
 export interface Authenticator {
   type: string;
@@ -10,11 +11,13 @@ export interface Strategy {
   getParams(
     call: 'propose' | 'vote',
     address: string,
+    index: number,
     envelope: Envelope<Message>,
     clientConfig: ClientConfig
   ): Promise<string[]>;
   getExtraProposeCalls(
     address: string,
+    index: number,
     envelope: Envelope<Message>,
     clientConfig: ClientConfig
   ): Promise<Call[]>;
@@ -23,29 +26,42 @@ export interface Strategy {
 export type ClientConfig = {
   ethUrl: string;
 };
+
+export type EthereumSigClientConfig = ClientConfig & {
+  manaUrl: string;
+};
+
 export interface Propose {
   space: string;
   authenticator: string;
-  strategies: string[];
+  strategies: number[];
+  executor: string;
   executionParams: string[];
-  metadataURI: string;
+  metadataUri: string;
 }
 
 export interface Vote {
   space: string;
   authenticator: string;
-  strategies: string[];
+  strategies: number[];
+  executor: string;
   proposal: number;
-  choice: number;
+  choice: Choice;
 }
 
 export type VanillaProposeMessage = Propose;
 export type VanillaVoteMessage = Vote;
 export type EthSigProposeMessage = Propose & {
-  executionHash: string;
+  proposerAddress: string;
+  executionParamsHash: string;
+  usedVotingStrategiesHash: string;
+  userVotingStrategyParamsFlatHash: string;
   salt: number;
 };
 export type EthSigVoteMessage = Vote & {
+  voterAddress: string;
+  usedVotingStrategiesHash: string;
+  userVotingStrategyParamsFlatHash: string;
   salt: number;
 };
 

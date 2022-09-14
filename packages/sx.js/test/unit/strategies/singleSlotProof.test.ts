@@ -37,7 +37,8 @@ describe('singleSlotProofStrategy', () => {
   it('should return params for vote', async () => {
     const params = await singleSlotProofStrategy.getParams(
       'vote',
-      '0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6',
+      '0x68da98d7798439f16b63b61644e7b27c932d5c051a455a978aa95488d5dcc9b',
+      0,
       voteEnvelope,
       { ethUrl }
     );
@@ -48,7 +49,8 @@ describe('singleSlotProofStrategy', () => {
   it('should return params for propose', async () => {
     const params = await singleSlotProofStrategy.getParams(
       'propose',
-      '0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6',
+      '0x68da98d7798439f16b63b61644e7b27c932d5c051a455a978aa95488d5dcc9b',
+      0,
       proposeEnvelope,
       { ethUrl }
     );
@@ -58,7 +60,8 @@ describe('singleSlotProofStrategy', () => {
 
   it('should return extra propose calls', async () => {
     const params = await singleSlotProofStrategy.getExtraProposeCalls(
-      '0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6',
+      '0x68da98d7798439f16b63b61644e7b27c932d5c051a455a978aa95488d5dcc9b',
+      0,
       proposeEnvelope,
       {
         ethUrl
