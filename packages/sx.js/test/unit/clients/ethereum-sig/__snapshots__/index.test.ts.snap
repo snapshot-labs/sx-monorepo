@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EthereumSig should create propose envelope 1`] = `
+Object {
+  "address": "0x0538D033B879aC94C709c1E408CC081345427379",
+  "data": Object {
+    "domain": Object {
+      "chainId": "0x534e5f474f45524c49",
+      "name": "snapshot-x",
+      "version": "1",
+    },
+    "message": Object {
+      "authenticator": "0x04bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38",
+      "executionParams": Array [],
+      "executionParamsHash": "0x049ee3eba8c1600700ee1b87eb599f16716b0b1022947733551fde4050ca6804",
+      "executor": "0x06b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb",
+      "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+      "proposerAddress": "0x0538D033B879aC94C709c1E408CC081345427379000000000000000000000000",
+      "salt": 0,
+      "space": "0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383",
+      "strategies": Array [
+        0,
+      ],
+      "usedVotingStrategiesHash": "0x137c95c76862129847d0f5e3618c7a4c3822ee344f4aa80bcb897cb97d3e1600",
+      "userVotingStrategyParamsFlatHash": "0x015f0739a3e1756fbc36b409a639e2d6d7690aba78a15c9669269717491ca1b4",
+    },
+    "types": Object {
+      "Propose": Array [
+        Object {
+          "name": "authenticator",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "space",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "proposerAddress",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "metadataUri",
+          "type": "string",
+        },
+        Object {
+          "name": "executor",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "executionParamsHash",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "usedVotingStrategiesHash",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "userVotingStrategyParamsFlatHash",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "salt",
+          "type": "uint256",
+        },
+      ],
+    },
+  },
+  "sig": "0xe3b4ebc53b9904a8444bf47c7305996248ce43b3f7f40355fa316025e7ea29f04a7ed9bf344afacaab3de7c933f4e3199c288a6674ab849a3d58d6adf9c6c3851c",
+}
+`;
+
+exports[`EthereumSig should create vote envelope 1`] = `
+Object {
+  "address": "0x0538D033B879aC94C709c1E408CC081345427379",
+  "data": Object {
+    "domain": Object {
+      "chainId": "0x534e5f474f45524c49",
+      "name": "snapshot-x",
+      "version": "1",
+    },
+    "message": Object {
+      "authenticator": "0x04bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38",
+      "choice": 1,
+      "executor": "0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb",
+      "proposal": 2,
+      "salt": 0,
+      "space": "0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383",
+      "strategies": Array [
+        0,
+      ],
+      "usedVotingStrategiesHash": "0x137c95c76862129847d0f5e3618c7a4c3822ee344f4aa80bcb897cb97d3e1600",
+      "userVotingStrategyParamsFlatHash": "0x015f0739a3e1756fbc36b409a639e2d6d7690aba78a15c9669269717491ca1b4",
+      "voterAddress": "0x0538D033B879aC94C709c1E408CC081345427379000000000000000000000000",
+    },
+    "types": Object {
+      "Vote": Array [
+        Object {
+          "name": "authenticator",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "space",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "voterAddress",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "proposal",
+          "type": "uint256",
+        },
+        Object {
+          "name": "choice",
+          "type": "uint256",
+        },
+        Object {
+          "name": "usedVotingStrategiesHash",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "userVotingStrategyParamsFlatHash",
+          "type": "bytes32",
+        },
+        Object {
+          "name": "salt",
+          "type": "uint256",
+        },
+      ],
+    },
+  },
+  "sig": "0x7cb69a134e02f7557601e7ba4c404c785f699667cba8075d863538ccb20eae2535731cbcfb343847406deebf16687537a79ff6a6e2f4301676ec7224a2c743da1c",
+}
+`;
