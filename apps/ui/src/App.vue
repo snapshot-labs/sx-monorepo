@@ -35,9 +35,12 @@ watch(web3Account, async () => {
     class="overflow-hidden font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else class="pb-6">
-      <Topnav />
-      <router-view :key="$route.path" class="flex-auto mt-[72px]" />
+    <div v-else class="pb-6 flex">
+	    <Sidebar class="invisible md:visible"/>
+	    <div class="flex-auto">
+		    <Topnav />
+		    <router-view :key="$route.path" class="flex-auto mt-[72px] ml-0 md:ml-[72px]" />
+	    </div>
     </div>
     <div id="modal" />
   </div>

@@ -95,7 +95,7 @@ export function _d(s: number) {
 
 export function _t(number) {
   try {
-    return dayjs(number * 1e3).format('MMM d, YYYY · h:mm A');
+    return dayjs(number * 1e3).format('MMM D, YYYY · h:mm A');
   } catch (e) {
     console.log(e);
     return '';

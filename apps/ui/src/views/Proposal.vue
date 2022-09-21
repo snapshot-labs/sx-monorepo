@@ -120,7 +120,7 @@ onMounted(async () => {
           <a
             class="text-skin-text"
             @click="modalOpenTimeline = true"
-            v-text="_rt(proposal.end)"
+            v-text="_rt(proposal.max_end)"
           />
         </div>
       </Container>

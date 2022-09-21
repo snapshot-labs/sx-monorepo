@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { _rt, _n, shortenAddress } from '@/helpers/utils';
+import { _rt, shortenAddress } from '@/helpers/utils';
 import { useActions } from '@/composables/useActions';
 import { useAccount } from '@/composables/useAccount';
 
@@ -13,9 +13,17 @@ const modalOpenTimeline = ref(false);
 </script>
 <template>
   <div>
-    <div class="x-block py-4">
-      <div class="overflow-hidden px-4">
-        <IH-dots-horizontal class="float-right" />
+    <div class="border-b mx-4 py-3 flex">
+      <div class="flex-auto">
+        <router-link
+          :to="{
+            name: 'proposal',
+            params: { id: proposal.proposal_id, space: proposal.space }
+          }"
+          class="block"
+        >
+          <h3 v-text="proposal.title || `Proposal #${proposal.proposal_id}`" />
+        </router-link>
         <router-link
           :to="{
             name: 'user',
@@ -34,37 +42,28 @@ const modalOpenTimeline = ref(false);
           />
         </span>
       </div>
-      <router-link
-        :to="{
-          name: 'proposal',
-          params: { id: proposal.proposal_id, space: proposal.space }
-        }"
-        class="py-3 px-4 block"
-      >
-        <h2 v-text="proposal.title || `Proposal #${proposal.proposal_id}`" />
-      </router-link>
-      <div v-if="!voted.includes(proposal.id)" class="space-x-2 mb-3 px-4">
-        <UiButton
-          class="w-full !text-green !border-green w-[46px] !px-0"
-          @click="vote(proposal.space, proposal.proposal_id, 1)"
-        >
-          <IH-check class="inline-block" />
-        </UiButton>
-        <UiButton
-          class="w-full !text-red !border-red w-[46px] !px-0"
-          @click="vote(proposal.space, proposal.proposal_id, 2)"
-        >
-          <IH-x class="inline-block" />
-        </UiButton>
-        <UiButton
-          class="w-full !text-gray-500 !border-gray-500 w-[46px] !px-0"
-          @click="vote(proposal.space, proposal.proposal_id, 3)"
-        >
-          <IH-arrow-sm-right class="inline-block" />
-        </UiButton>
-      </div>
-      <div v-else class="px-4 mb-3">
-        <div class="rounded-full h-[6px] overflow-hidden">
+      <div class="hidden md:block">
+        <div v-if="!voted.includes(proposal.id)" class="space-x-2 py-2">
+          <UiButton
+            class="w-full !text-green !border-green !w-[40px] !h-[40px] !px-0"
+            @click="vote(proposal.space, proposal.proposal_id, 1)"
+          >
+            <IH-check class="inline-block" />
+          </UiButton>
+          <UiButton
+            class="w-full !text-red !border-red !w-[40px] !h-[40px] !px-0"
+            @click="vote(proposal.space, proposal.proposal_id, 2)"
+          >
+            <IH-x class="inline-block" />
+          </UiButton>
+          <UiButton
+            class="w-full !text-gray-500 !border-gray-500 !w-[40px] !h-[40px] !px-0"
+            @click="vote(proposal.space, proposal.proposal_id, 3)"
+          >
+            <IH-arrow-sm-right class="inline-block" />
+          </UiButton>
+        </div>
+        <div v-else class="rounded-full h-[6px] overflow-hidden">
           <div
             v-for="(score, i) in Array(3)"
             :key="i"
@@ -78,17 +77,6 @@ const modalOpenTimeline = ref(false);
             :class="`_${i + 1}`"
           />
         </div>
-      </div>
-      <div class="text-skin-text px-4">
-        <a class="text-skin-text" @click="modalOpenVotes = true">
-          {{ _n(proposal.vote_count) }} votes
-        </a>
-        ·
-        <a
-          class="text-skin-text"
-          @click="modalOpenTimeline = true"
-          v-text="_rt(proposal.end)"
-        />
       </div>
     </div>
     <teleport to="#modal">

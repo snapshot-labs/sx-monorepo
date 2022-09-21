@@ -30,34 +30,21 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UiLoading v-if="!loaded" class="block text-center p-4" />
-  <div v-else>
-    <div class="relative bg-skin-border h-[140px] -mb-[70px]">
-      <div class="absolute right-4 top-4 space-x-2">
-        <router-link :to="{ name: 'editor' }">
-          <UiButton class="!px-0 w-[46px]">
-            <IH-plus-sm class="inline-block" />
-          </UiButton>
-        </router-link>
-      </div>
+  <div>
+    <div
+      class="invisible lg:visible fixed w-[240px] border-r top-0 bottom-0 z-10 bg-skin-bg"
+    >
+      <div class="h-[72px] border-b" />
+      <Nav />
     </div>
-    <Container slim>
-      <div class="text-center mb-4 relative">
-        <router-link :to="{ name: 'overview' }">
-          <Stamp
-            :id="space.id"
-            :size="90"
-            class="mb-2 border-[4px] border-skin-bg !bg-skin-bg rounded-lg"
-          />
-        </router-link>
-        <h1 v-text="space.name" />
-        <div>
-          <b class="text-skin-link">{{ space.proposal_count }}</b> proposals ·
-          <b class="text-skin-link">{{ space.vote_count }}</b> votes
-        </div>
+    <div>
+      <div class="ml-0 lg:ml-[240px] mr-0 xl:mr-[240px]">
+        <UiLoading v-if="!loaded" class="block p-4" />
+        <router-view v-else :space="space" />
       </div>
-      <Nav class="mb-3" />
-    </Container>
-    <router-view :space="space" />
+      <div
+        class="invisible xl:visible fixed w-[240px] border-l bottom-0 top-[72px] right-0"
+      />
+    </div>
   </div>
 </template>

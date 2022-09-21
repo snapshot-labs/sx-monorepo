@@ -53,7 +53,7 @@ watch(proposalData, () => {
       <textarea
         v-model="proposals[key].body"
         maxlength="280"
-        class="s-input mb-3 h-[120px]"
+        class="s-input mb-3 h-[160px]"
       />
       <SIString
         v-model="proposals[key].discussion"

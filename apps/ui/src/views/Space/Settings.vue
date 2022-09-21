@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten } from '@/helpers/utils';
+import { shorten, _d } from '@/helpers/utils';
 import { AUTHS, STRATEGIES, EXECUTORS } from '@/helpers/constants';
 import { Space } from '@/types';
 
@@ -7,34 +7,69 @@ defineProps<{ space: Space }>();
 </script>
 
 <template>
-  <Container slim>
-    <div class="x-block mb-3">
-      <router-link
-        :to="{ name: 'profile' }"
-        class="px-4 py-3 border-b last:border-0 block"
-      >
-        <h4>
-          <IH-user class="inline-block mr-2" />
-          Profile
-        </h4>
-      </router-link>
-      <router-link
-        :to="{ name: 'voting' }"
-        class="px-4 py-3 border-b last:border-0 block"
-      >
-        <h4>
-          <IH-adjustments class="inline-block mr-2" />
-          Voting
-        </h4>
-      </router-link>
+  <div class="space-y-3">
+    <div>
+      <Label :label="'Profile'" />
+      <div class="mx-4 pt-3">
+        <div class="mb-3">
+          <div class="s-label !mb-0">Name</div>
+          <div class="text-skin-link text-md" v-text="space.name" />
+        </div>
+        <div class="mb-3">
+          <div class="s-label !mb-0">About</div>
+          <div class="text-skin-link text-md" v-text="space.about || '...'" />
+        </div>
+        <div class="mb-3">
+          <div class="s-label !mb-0">Discussions</div>
+          <div
+            class="text-skin-link text-md"
+            v-text="space.discussions || '...'"
+          />
+        </div>
+      </div>
     </div>
 
-    <div class="x-block mb-3">
-      <h4 class="px-4 py-3 border-b last:border-0 block">
-        <IH-key class="inline-block mr-2" />
-        Controller
-      </h4>
-      <div class="py-3 px-4">
+    <div>
+      <Label :label="'Voting'" />
+      <div class="mx-4 pt-3">
+        <div class="mb-3">
+          <div class="s-label !mb-0">Voting delay</div>
+          <div
+            class="text-skin-link text-md"
+            v-text="_d(space.voting_delay) || 'No delay'"
+          />
+        </div>
+        <div class="mb-3">
+          <div class="s-label !mb-0">Min. voting period</div>
+          <div
+            class="text-skin-link text-md"
+            v-text="_d(space.min_voting_period) || 'No min.'"
+          />
+        </div>
+        <div class="mb-3">
+          <div class="s-label !mb-0">Max. voting period</div>
+          <div
+            class="text-skin-link text-md"
+            v-text="_d(space.max_voting_period)"
+          />
+        </div>
+        <div class="mb-3">
+          <div class="s-label !mb-0" v-text="'Proposal threshold'" />
+          <div
+            class="text-skin-link text-md"
+            v-text="space.proposal_threshold"
+          />
+        </div>
+        <div class="mb-3">
+          <div class="s-label !mb-0" v-text="'Quorum'" />
+          <div class="text-skin-link text-md" v-text="space.quorum" />
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <Label :label="'Controller'" />
+      <div class="py-3 mx-4">
         <a
           :href="`https://goerli.voyager.online/contract/${space.controller}`"
           target="_blank"
@@ -51,22 +86,20 @@ defineProps<{ space: Space }>();
       </div>
     </div>
 
-    <div class="x-block mb-3">
-      <h4 class="px-4 py-3 border-b last:border-0 block">
-        <IH-check-circle class="inline-block mr-2" />
-        Auth(s)
-      </h4>
-      <div class="py-3">
-        <div
-          v-for="(auth, i) in space.authenticators.split(',')"
-          :key="i"
-          class="px-4"
+    <div>
+      <Label :label="'Auth(s)'" />
+      <div
+        v-for="(auth, i) in space.authenticators.split(',')"
+        :key="i"
+        class="mx-4 py-3 border-b"
+      >
+        <a
+          :href="`https://goerli.voyager.online/contract/${auth}`"
+          target="_blank"
+          class="flex"
         >
-          <a
-            :href="`https://goerli.voyager.online/contract/${auth}`"
-            target="_blank"
-          >
-            <h4 v-text="AUTHS[auth]" />
+          <h4 class="flex-auto" v-text="AUTHS[auth]" />
+          <div>
             <Stamp
               :id="auth"
               type="avatar"
@@ -74,27 +107,25 @@ defineProps<{ space: Space }>();
               class="mr-2 rounded-sm"
             />
             {{ shorten(auth) }} <IH-external-link class="inline-block" />
-          </a>
-        </div>
+          </div>
+        </a>
       </div>
     </div>
 
-    <div class="x-block mb-3">
-      <h4 class="px-4 py-3 border-b last:border-0 block">
-        <IH-puzzle class="inline-block mr-2" />
-        Strategie(s)
-      </h4>
-      <div class="py-3">
-        <div
-          v-for="(strategy, i) in space.strategies.split(',')"
-          :key="i"
-          class="px-4"
+    <div>
+      <Label :label="'Strategie(s)'" />
+      <div
+        v-for="(strategy, i) in space.strategies.split(',')"
+        :key="i"
+        class="mx-4 py-3 border-b"
+      >
+        <a
+          :href="`https://goerli.voyager.online/contract/${strategy}`"
+          target="_blank"
+          class="flex"
         >
-          <a
-            :href="`https://goerli.voyager.online/contract/${strategy}`"
-            target="_blank"
-          >
-            <h4 v-text="STRATEGIES[strategy]" />
+          <h4 class="flex-auto" v-text="STRATEGIES[strategy]" />
+          <div>
             <Stamp
               :id="strategy"
               type="avatar"
@@ -102,27 +133,28 @@ defineProps<{ space: Space }>();
               class="mr-2 rounded-sm"
             />
             {{ shorten(strategy) }} <IH-external-link class="inline-block" />
-          </a>
-        </div>
+          </div>
+        </a>
       </div>
     </div>
 
-    <div class="x-block mb-3">
-      <h4 class="px-4 py-3 border-b last:border-0 block">
-        <IH-code class="inline-block mr-2" />
-        Execution(s)
-      </h4>
-      <div class="py-3">
-        <div
-          v-for="(executor, i) in space.executors.split(',')"
-          :key="i"
-          class="px-4"
+    <div>
+      <Label :label="'Execution(s)'" />
+      <div
+        v-for="(executor, i) in space.executors.split(',')"
+        :key="i"
+        class="mx-4 py-3 border-b"
+      >
+        <a
+          :href="`https://goerli.voyager.online/contract/${executor}`"
+          target="_blank"
+          class="flex"
         >
-          <a
-            :href="`https://goerli.voyager.online/contract/${executor}`"
-            target="_blank"
-          >
-            <h4 v-text="EXECUTORS[executor]" />
+          <h4
+            class="inline-block mr-3 flex-auto"
+            v-text="EXECUTORS[executor]"
+          />
+          <div>
             <Stamp
               :id="executor"
               type="avatar"
@@ -130,9 +162,9 @@ defineProps<{ space: Space }>();
               class="mr-2 rounded-sm"
             />
             {{ shorten(executor) }} <IH-external-link class="inline-block" />
-          </a>
-        </div>
+          </div>
+        </a>
       </div>
     </div>
-  </Container>
+  </div>
 </template>

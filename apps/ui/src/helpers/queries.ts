@@ -12,8 +12,10 @@ export const PROPOSAL_QUERY = gql`
       title
       body
       discussion
+      execution
       start
-      end
+      min_end
+      max_end
       snapshot
       scores_1
       scores_2
@@ -43,8 +45,10 @@ export const PROPOSALS_QUERY = gql`
       title
       body
       discussion
+      execution
       start
-      end
+      min_end
+      max_end
       snapshot
       scores_1
       scores_2

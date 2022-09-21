@@ -7,10 +7,7 @@ import Settings from '@/views/Space/Settings.vue';
 import Create from '@/views/Create.vue';
 import Editor from '@/views/Create/Editor.vue';
 import Treasury from '@/views/Space/Treasury.vue';
-import Profile from '@/views/Space/Profile.vue';
-import Voting from '@/views/Space/Voting.vue';
 import Proposal from '@/views/Proposal.vue';
-import Playground from '@/views/Playground.vue';
 import User from '@/views/User.vue';
 
 const routes: any[] = [
@@ -19,9 +16,7 @@ const routes: any[] = [
       { path: '', name: 'overview', component: Overview },
       { path: 'proposals', name: 'proposals', component: Proposals },
       { path: 'settings', name: 'settings', component: Settings },
-      { path: 'treasury', name: 'treasury', component: Treasury },
-      { path: 'profile', name: 'profile', component: Profile },
-      { path: 'voting', name: 'voting', component: Voting },
+      { path: 'treasury', name: 'treasury', component: Treasury }
     ]
   },
   { path: '/:id/create/:key?', component: Create, children: [
@@ -30,8 +25,7 @@ const routes: any[] = [
   },
   { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
   { path: '/:id/create', name: 'create', component: Create },
-  { path: '/profile/:id', name: 'user', component: User },
-  { path: '/playground', name: 'playground', component: Playground }
+  { path: '/profile/:id', name: 'user', component: User }
 ];
 
 const router = createRouter({

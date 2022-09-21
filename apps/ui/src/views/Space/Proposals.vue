@@ -23,13 +23,34 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Container slim class="space-y-3">
-    <UiLoading v-if="!loaded" class="block px-4 sm:px-0" />
-    <Proposal
-      v-for="(proposal, i) in proposals"
-      v-else
-      :key="i"
-      :proposal="proposal"
-    />
-  </Container>
+  <div>
+    <div class="flex">
+      <div class="flex-auto" />
+      <div class="p-4 space-x-2">
+        <a>
+          <UiButton class="!px-0 w-[46px]">
+            <IH-lightning-bolt class="inline-block" />
+          </UiButton>
+        </a>
+        <router-link :to="{ name: 'editor' }">
+          <UiButton class="!px-0 w-[46px]">
+            <IH-plus-sm class="inline-block" />
+          </UiButton>
+        </router-link>
+      </div>
+    </div>
+    <Label :label="'Proposals'" />
+    <UiLoading v-if="!loaded" class="block px-4 py-3" />
+    <div v-else>
+      <div v-if="!proposals.length" class="px-4 py-3 text-skin-link">
+        <IH-exclamation-circle class="inline-block mr-2" />
+        <span v-text="'There are no proposals here.'" />
+      </div>
+      <Proposal
+        v-for="(proposal, i) in proposals"
+        :key="i"
+        :proposal="proposal"
+      />
+    </div>
+  </div>
 </template>

@@ -23,7 +23,9 @@ async function handleLogin(connector) {
 </script>
 
 <template>
-  <nav class="border-b w-full fixed top-0 z-10 bg-skin-bg">
+  <nav
+    class="border-b fixed top-0 right-0 z-10 bg-skin-bg left-0 md:left-[72px]"
+  >
     <div class="flex items-center h-[71px] mx-4">
       <div class="flex-auto">
         <router-link
