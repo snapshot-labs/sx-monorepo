@@ -1,18 +1,21 @@
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const AUTHS = {
-  '0x6ad07205a4d725c5c2b10c4f5fbdfaaa351c742fce7a5a22b2b56fd8d5afd62':
+  '0x36f53ac6efe16403267873d307db90b5cc10c97fd3353af3107609bb63f9f83':
     'Vanilla',
-  '0x594a81b66c3aa2c64577916f727e1307b60c9d6afa80b6f5ca3e3049c40f643':
+  '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38':
     'Ethereum signature'
 };
 
 export const STRATEGIES = {
-  '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865': 'Vanilla',
-  '0x4bbd8081b1e9ef84ee2a767ef2cdcdea0dd8298b8e2858afa06bed1898533e6':
+  '0x7cccf8ea8e940a4728182a4c05423c0148a805aeba3e6c43bed9743acd6d09b':
+    'Vanilla',
+  '0x68da98d7798439f16b63b61644e7b27c932d5c051a455a978aa95488d5dcc9b':
     'Single slot proof'
 };
 
 export const EXECUTORS = {
-  '0x7402b474327a0d7a2d5c3e01489386113d9654eaff8591344577458074bb1b7': 'Vanilla'
+  '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb':
+    'Vanilla',
+  '0x125eeaeac3e2439b28a1becf50d5bba74a60cf17936f29b1a4347184369bef6': 'Zodiac'
 };
