@@ -54,7 +54,6 @@ describe('StarkNetTx', () => {
             space,
             authenticator,
             strategies: [strategy],
-            executor,
             proposal: 1,
             choice: Choice.FOR
           }
@@ -101,7 +100,6 @@ describe('StarkNetTx', () => {
         space,
         authenticator,
         strategies: [strategy],
-        executor,
         proposal: 1,
         choice: Choice.FOR
       });
@@ -152,7 +150,6 @@ describe('StarkNetTx', () => {
         space,
         authenticator,
         strategies: [strategy],
-        executor,
         proposal: 2,
         choice: Choice.FOR
       });

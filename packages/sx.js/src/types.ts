@@ -44,7 +44,6 @@ export interface Vote {
   space: string;
   authenticator: string;
   strategies: number[];
-  executor: string;
   proposal: number;
   choice: Choice;
 }

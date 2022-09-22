@@ -42,7 +42,6 @@ describe('EthereumSig', () => {
       space,
       authenticator,
       strategies: [strategy],
-      executor,
       proposal: 2,
       choice: Choice.FOR
     });

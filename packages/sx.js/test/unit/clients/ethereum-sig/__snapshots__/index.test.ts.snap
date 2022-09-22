@@ -81,7 +81,6 @@ Object {
     "message": Object {
       "authenticator": "0x04bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38",
       "choice": 1,
-      "executor": "0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb",
       "proposal": 2,
       "salt": 0,
       "space": "0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383",
