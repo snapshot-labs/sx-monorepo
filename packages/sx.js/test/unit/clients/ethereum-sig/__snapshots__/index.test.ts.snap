@@ -5,19 +5,19 @@ Object {
   "address": "0x0538D033B879aC94C709c1E408CC081345427379",
   "data": Object {
     "domain": Object {
-      "chainId": "0x534e5f474f45524c49",
+      "chainId": 5,
       "name": "snapshot-x",
       "version": "1",
     },
     "message": Object {
-      "authenticator": "0x04bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38",
+      "authenticator": "0x06aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369",
       "executionParams": Array [],
       "executionParamsHash": "0x049ee3eba8c1600700ee1b87eb599f16716b0b1022947733551fde4050ca6804",
-      "executor": "0x06b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb",
+      "executor": "0x070d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7",
       "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
       "proposerAddress": "0x0538D033B879aC94C709c1E408CC081345427379000000000000000000000000",
       "salt": 0,
-      "space": "0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383",
+      "space": "0x04b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d",
       "strategies": Array [
         0,
       ],
@@ -65,7 +65,7 @@ Object {
       ],
     },
   },
-  "sig": "0xe3b4ebc53b9904a8444bf47c7305996248ce43b3f7f40355fa316025e7ea29f04a7ed9bf344afacaab3de7c933f4e3199c288a6674ab849a3d58d6adf9c6c3851c",
+  "sig": "0x6af0cb3ea1a813de510cda2de695281e204a03507005b10240d7b0d4ffabab342b71f61ef3d1bcc04671fa942edb0f1efd34adbc5853d1c1135bff7fec023bdd1b",
 }
 `;
 
@@ -74,16 +74,16 @@ Object {
   "address": "0x0538D033B879aC94C709c1E408CC081345427379",
   "data": Object {
     "domain": Object {
-      "chainId": "0x534e5f474f45524c49",
+      "chainId": 5,
       "name": "snapshot-x",
       "version": "1",
     },
     "message": Object {
-      "authenticator": "0x04bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38",
+      "authenticator": "0x06aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369",
       "choice": 1,
-      "proposal": 2,
+      "proposal": 1,
       "salt": 0,
-      "space": "0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383",
+      "space": "0x04b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d",
       "strategies": Array [
         0,
       ],
@@ -128,6 +128,6 @@ Object {
       ],
     },
   },
-  "sig": "0x7cb69a134e02f7557601e7ba4c404c785f699667cba8075d863538ccb20eae2535731cbcfb343847406deebf16687537a79ff6a6e2f4301676ec7224a2c743da1c",
+  "sig": "0x85cf25b428dc2084e0e6527084fe1c757cf76aa655604847b26c196291cafb61228d08ebc0e4bf6035c3cbbaf52c73281771319c4b93760dec8b9484b3db5ef61b",
 }
 `;

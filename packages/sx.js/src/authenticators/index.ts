@@ -4,8 +4,8 @@ import * as utils from '../utils';
 import type { Authenticator } from '../types';
 
 const authenticators = {
-  '0x036f53ac6efe16403267873d307db90b5cc10c97fd3353af3107609bb63f9f83': vanillaAuthenticator,
-  '0x04bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38': ethSigAuthenticator
+  '0xb32364e042cb948be62a09355595a4b80dfff4eb11a485c1950ace70b0e83500': vanillaAuthenticator,
+  '0x06aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369': ethSigAuthenticator
 };
 
 export function getAuthenticator(address: string): Authenticator | null {

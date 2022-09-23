@@ -12,10 +12,10 @@ export const proposeEnvelope = {
       ]
     },
     message: {
-      space: '0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383',
-      authenticator: '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38',
+      space: '0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d',
+      authenticator: '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369',
       strategies: [0],
-      executor: '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb',
+      executor: '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7',
       metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
       executionParams: [],
       executionHash: '0x049ee3eba8c1600700ee1b87eb599f16716b0b1022947733551fde4050ca6804',
@@ -38,9 +38,9 @@ export const voteEnvelope = {
       ]
     },
     message: {
-      space: '0x0375bc9b4d236f961cbc5410213cdbf2de6dfe30f21b2c58bb4de3713d868383',
-      authenticator: '0x4bbd4959806784f2ad7541e36eda88d9b3dff1baef60b39862abc171f3eed38',
-      executor: '0x6b429254760eea72cedb8e6485ebf090ced630a366012994296ceb253b42aeb',
+      space: '0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d',
+      authenticator: '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369',
+      executor: '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7',
       strategies: [0],
       proposal: 1,
       choice: 1
