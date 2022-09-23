@@ -7,6 +7,17 @@ import { useAccount } from '@/composables/useAccount';
 import { useModal } from '@/composables/useModal';
 import type { Transaction, TransactionData } from '@/types';
 
+// those are currently hardcoded
+// 1. API doesn't return arrays properly (encodes them as string)
+// 2. those are part of space, but we need to access it in Proposal page,
+//    it's hard to do it without centralized store as we would need to refetch it
+//    all the time in multiple screens
+const ethSigAuthenticator =
+  '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369';
+const singleSlotProofStrategy = 0;
+const vanillaExecutor =
+  '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7';
+
 export function useActions() {
   const { web3 } = useWeb3();
   const { modalAccountOpen } = useModal();
@@ -22,9 +33,13 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
     const isStarkNet = web3.value.type === 'argentx';
     const account = isStarkNet ? auth.provider.value.account : auth.web3;
-    const type = isStarkNet ? 'StarkNetSig' : 'EthereumSig';
+    // TODO: StarknetSig is not updated
+    const type = 'EthereumSig'; // isStarkNet ? 'StarkNetSig' : 'EthereumSig';
+
     const envelop = await clients[type].vote(account, web3.value.account, {
       space,
+      authenticator: ethSigAuthenticator,
+      strategies: [singleSlotProofStrategy],
       proposal,
       choice
     });
@@ -64,11 +79,16 @@ export function useActions() {
     console.log('IPFS', pinned);
     const isStarkNet = web3.value.type === 'argentx';
     const account = isStarkNet ? auth.provider.value.account : auth.web3;
-    const type = isStarkNet ? 'StarkNetSig' : 'EthereumSig';
+    // TODO: StarknetSig is not updated
+    const type = 'EthereumSig'; // isStarkNet ? 'StarkNetSig' : 'EthereumSig';
+
     const envelop = await clients[type].propose(account, web3.value.account, {
       space,
-      executionHash,
-      metadataURI: `ipfs://${pinned.cid}`
+      authenticator: ethSigAuthenticator,
+      strategies: [singleSlotProofStrategy],
+      executor: vanillaExecutor,
+      metadataUri: `ipfs://${pinned.cid}`,
+      executionParams: []
     });
     console.log('Envelop', envelop);
     pendingCount.value++;
