@@ -7,7 +7,9 @@ import { rpcError, rpcSuccess } from './utils';
 
 const starknetPrivkey = process.env.STARKNET_PRIVKEY || '';
 const starknetAddress = process.env.STARKNET_ADDRESS || '';
-const client = new StarkNetTx();
+const client = new StarkNetTx({
+  ethUrl: process.env.ETH_RPC_URL as string
+});
 const starkKeyPair = ec.getKeyPair(starknetPrivkey);
 const account = new Account(defaultProvider, starknetAddress, starkKeyPair);
 
@@ -26,24 +28,12 @@ async function send(id, params, res) {
 
     if (types.Propose) {
       console.log('Propose');
-      receipt = await client.propose(
-        account,
-        address,
-        message.space,
-        message.executionHash,
-        message.metadataURI
-      );
+      receipt = await client.propose(account, params.envelop);
     }
 
     if (types.Vote) {
       console.log('Vote');
-      receipt = await client.vote(
-        account,
-        address,
-        message.space,
-        message.proposal,
-        message.choice
-      );
+      receipt = await client.vote(account, params.envelop);
     }
 
     console.timeEnd('Send');
