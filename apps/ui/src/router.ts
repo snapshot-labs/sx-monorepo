@@ -12,16 +12,20 @@ import User from '@/views/User.vue';
 
 const routes: any[] = [
   { path: '/', name: 'home', component: Home },
-  { path: '/:id', component: Space, children: [
+  {
+    path: '/:id',
+    component: Space,
+    children: [
       { path: '', name: 'overview', component: Overview },
       { path: 'proposals', name: 'proposals', component: Proposals },
       { path: 'settings', name: 'settings', component: Settings },
       { path: 'treasury', name: 'treasury', component: Treasury }
     ]
   },
-  { path: '/:id/create/:key?', component: Create, children: [
-      { path: '', name: 'editor', component: Editor }
-    ]
+  {
+    path: '/:id/create/:key?',
+    component: Create,
+    children: [{ path: '', name: 'editor', component: Editor }]
   },
   { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
   { path: '/:id/create', name: 'create', component: Create },
