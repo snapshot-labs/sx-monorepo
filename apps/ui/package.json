@@ -33,6 +33,7 @@
     "electron": "^19.0.3",
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
+    "pinia": "^2.0.22",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "scrollmonitor": "^1.2.9",
     "vue": "^3.2.37",

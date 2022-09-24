@@ -1,15 +1,11 @@
-<script setup>
-import { onMounted, ref } from 'vue';
-import apollo from '@/helpers/apollo';
-import { SPACES_QUERY } from '@/helpers/queries';
+<script setup lang="ts">
+import { useSpacesStore } from '@/stores/spaces';
+import { onMounted } from 'vue';
 
-const spaces = ref([]);
-const loaded = ref(false);
+const spacesStore = useSpacesStore();
 
-onMounted(async () => {
-  const { data } = await apollo.query({ query: SPACES_QUERY });
-  spaces.value = data.spaces;
-  loaded.value = true;
+onMounted(() => {
+  spacesStore.fetchAll();
 });
 </script>
 
@@ -18,10 +14,10 @@ onMounted(async () => {
     <router-link :to="{ name: 'home' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
-    <UiLoading v-if="!loaded" class="block py-2" />
+    <UiLoading v-if="!spacesStore.loaded" class="block py-2" />
     <div v-else class="space-y-3 p-2">
       <router-link
-        v-for="(space, i) in spaces"
+        v-for="(space, i) in spacesStore.spaces"
         :key="i"
         :to="{ name: 'overview', params: { id: space.id } }"
         class="block"

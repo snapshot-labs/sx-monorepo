@@ -1,10 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { _rt, shortenAddress } from '@/helpers/utils';
 import { useActions } from '@/composables/useActions';
 import { useAccount } from '@/composables/useAccount';
+import type { Proposal as ProposalType } from '@/types';
 
-defineProps({ proposal: Object });
+defineProps<{ proposal: ProposalType }>();
 
 const { voted } = useAccount();
 const { vote } = useActions();

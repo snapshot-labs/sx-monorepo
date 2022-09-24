@@ -1,15 +1,11 @@
-<script setup>
-import { onMounted, ref } from 'vue';
-import apollo from '@/helpers/apollo';
-import { SPACES_QUERY } from '@/helpers/queries';
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useSpacesStore } from '@/stores/spaces';
 
-const spaces = ref([]);
-const loaded = ref(false);
+const spacesStore = useSpacesStore();
 
-onMounted(async () => {
-  const { data } = await apollo.query({ query: SPACES_QUERY });
-  spaces.value = data.spaces;
-  loaded.value = true;
+onMounted(() => {
+  spacesStore.fetchAll();
 });
 </script>
 
@@ -23,12 +19,12 @@ onMounted(async () => {
     </div>
     <Container class="max-w-screen-md">
       <h3 class="mb-2" v-text="'Spaces'" />
-      <UiLoading v-if="!loaded" class="block mb-2" />
+      <UiLoading v-if="!spacesStore.loaded" class="block mb-2" />
     </Container>
-    <Container v-if="loaded" class="max-w-screen-md" slim>
+    <Container v-if="spacesStore.loaded" class="max-w-screen-md" slim>
       <div class="x-block mb-3">
         <router-link
-          v-for="space in spaces"
+          v-for="space in spacesStore.spaces"
           :key="space.id"
           :to="{ name: 'overview', params: { id: space.id } }"
           class="p-4 text-skin-text border-b last:border-b-0 block"
@@ -50,7 +46,10 @@ onMounted(async () => {
     </Container>
     <Container class="max-w-screen-md">
       <router-link
-        :to="{ name: 'editor', params: { id: spaces[0]?.id || '0' } }"
+        :to="{
+          name: 'editor',
+          params: { id: spacesStore.spaces[0]?.id || '0' }
+        }"
         class="mb-2 block"
       >
         <h3 v-text="'Editor'" />

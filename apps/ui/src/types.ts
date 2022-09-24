@@ -17,6 +17,30 @@ export type Space = {
 };
 
 export type Proposal = {
+  id: string;
+  proposal_id: number;
+  space: string;
+  author: string;
+  execution_hash: string;
+  metadata_uri: string;
+  title: string;
+  body: string;
+  discussion: string;
+  execution: string;
+  start: number;
+  min_end: number;
+  max_end: number;
+  snapshot: number;
+  scores_1: number;
+  scores_2: number;
+  scores_3: number;
+  scores_total: number;
+  created: number;
+  tx: string;
+  vote_count: number;
+};
+
+export type Draft = {
   title: string;
   body: string;
   discussion: string;
@@ -24,7 +48,7 @@ export type Proposal = {
   updatedAt: number;
 };
 
-export type Proposals = Record<string, Proposal>;
+export type Drafts = Record<string, Draft>;
 
 export type BaseTransaction = {
   to: string;

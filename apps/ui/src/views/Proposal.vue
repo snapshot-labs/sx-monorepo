@@ -1,41 +1,39 @@
-<script setup>
-import { onMounted, ref } from 'vue';
+<script setup lang="ts">
+import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import { useProposalsStore } from '@/stores/proposals';
 import { _rt, _n, shortenAddress, getUrl } from '@/helpers/utils';
-import apollo from '@/helpers/apollo';
-import { PROPOSAL_QUERY } from '@/helpers/queries';
 import { useActions } from '@/composables/useActions';
 import txs from '@/helpers/execution.json';
 
 const route = useRoute();
+const proposalsStore = useProposalsStore();
 const { vote } = useActions();
-const id = parseInt(route.params.id || 0);
-const space = route.params.space;
-const proposal = ref({});
-const discussion = ref('');
-const loaded = ref(false);
+const id = parseInt((route.params.id as string) || '0');
+const space = route.params.space as string;
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 
-onMounted(async () => {
-  const { data } = await apollo.query({
-    query: PROPOSAL_QUERY,
-    variables: { id: `${space}/${id}` }
-  });
-  proposal.value = data.proposal;
-  if (
-    data.proposal.discussion &&
-    sanitizeUrl(data.proposal.discussion) !== 'about:blank'
-  )
-    discussion.value = sanitizeUrl(data.proposal.discussion);
-  loaded.value = true;
+const proposal = computed(() => proposalsStore.getProposal(space, id));
+
+const discussion = computed(() => {
+  if (!proposal.value?.discussion) return null;
+
+  const output = sanitizeUrl(proposal.value.discussion);
+  if (output === 'about:blank') return null;
+
+  return output;
+});
+
+onMounted(() => {
+  proposalsStore.fetchProposal(space, id);
 });
 </script>
 
 <template>
   <div>
-    <Container v-if="!loaded" class="pt-5">
+    <Container v-if="!proposal" class="pt-5">
       <UiLoading />
     </Container>
     <div v-else>

@@ -1,10 +1,10 @@
 import { reactive, watch, computed } from 'vue';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
-import type { Proposals } from '@/types';
+import type { Drafts } from '@/types';
 
-const proposals = reactive<Proposals>(lsGet('proposals', {}));
+const proposals = reactive<Drafts>(lsGet('proposals', {}));
 
-function removeEmpty(proposals: Proposals): Proposals {
+function removeEmpty(proposals: Drafts): Drafts {
   return Object.entries(proposals).reduce((acc, [id, proposal]) => {
     const { execution, ...rest } = omit(proposal, ['updatedAt']);
     const hasFormValues = Object.values(rest).some(val => !!val);

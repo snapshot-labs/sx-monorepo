@@ -1,9 +1,9 @@
-import { ref } from 'vue';
+import { ref, Ref } from 'vue';
 import apollo from '@/helpers/apollo';
 import { VOTES_QUERY } from '@/helpers/queries';
 import { useWeb3 } from '@/composables/useWeb3';
 
-const voted = ref([]);
+const voted: Ref<string[]> = ref([]);
 
 export function useAccount() {
   const { web3 } = useWeb3();

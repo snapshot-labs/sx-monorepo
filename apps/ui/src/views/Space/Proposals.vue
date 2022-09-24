@@ -1,25 +1,19 @@
 <script setup lang="ts">
-import { onMounted, ref, Ref } from 'vue';
-import apollo from '@/helpers/apollo';
-import { PROPOSALS_QUERY } from '@/helpers/queries';
-import { Space, Proposal as ProposalType } from '@/types';
+import { onMounted, computed } from 'vue';
+import { useProposalsStore } from '@/stores/proposals';
+import type { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const proposals: Ref<ProposalType[]> = ref([]);
-const loaded: Ref<boolean> = ref(false);
+const proposalsStore = useProposalsStore();
 
-onMounted(async () => {
-  const { data } = await apollo.query({
-    query: PROPOSALS_QUERY,
-    variables: {
-      first: 24,
-      space: props.space.id
-    }
-  });
-  proposals.value = data.proposals;
-  loaded.value = true;
+onMounted(() => {
+  proposalsStore.fetchAll(props.space.id);
 });
+
+const proposalsRecord = computed(
+  () => proposalsStore.proposals[props.space.id]
+);
 </script>
 
 <template>
@@ -40,14 +34,17 @@ onMounted(async () => {
       </div>
     </div>
     <Label :label="'Proposals'" />
-    <UiLoading v-if="!loaded" class="block px-4 py-3" />
+    <UiLoading v-if="!proposalsRecord?.loaded" class="block px-4 py-3" />
     <div v-else>
-      <div v-if="!proposals.length" class="px-4 py-3 text-skin-link">
+      <div
+        v-if="!proposalsRecord?.proposals.length"
+        class="px-4 py-3 text-skin-link"
+      >
         <IH-exclamation-circle class="inline-block mr-2" />
         <span v-text="'There are no proposals here.'" />
       </div>
       <Proposal
-        v-for="(proposal, i) in proposals"
+        v-for="(proposal, i) in proposalsRecord?.proposals"
         :key="i"
         :proposal="proposal"
       />
