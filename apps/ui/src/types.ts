@@ -8,9 +8,9 @@ export type Space = {
   max_voting_period: number;
   proposal_threshold: number;
   quorum: number;
-  strategies: string;
-  authenticators: string;
-  executors: string;
+  strategies: string[];
+  authenticators: string[];
+  executors: string[];
   proposal_count: number;
   vote_count: number;
   created: number;

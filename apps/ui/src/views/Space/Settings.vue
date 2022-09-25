@@ -89,7 +89,7 @@ defineProps<{ space: Space }>();
     <div>
       <Label :label="'Auth(s)'" />
       <div
-        v-for="(auth, i) in space.authenticators.split(',')"
+        v-for="(auth, i) in space.authenticators"
         :key="i"
         class="mx-4 py-3 border-b"
       >
@@ -115,7 +115,7 @@ defineProps<{ space: Space }>();
     <div>
       <Label :label="'Strategie(s)'" />
       <div
-        v-for="(strategy, i) in space.strategies.split(',')"
+        v-for="(strategy, i) in space.strategies"
         :key="i"
         class="mx-4 py-3 border-b"
       >
@@ -141,7 +141,7 @@ defineProps<{ space: Space }>();
     <div>
       <Label :label="'Execution(s)'" />
       <div
-        v-for="(executor, i) in space.executors.split(',')"
+        v-for="(executor, i) in space.executors"
         :key="i"
         class="mx-4 py-3 border-b"
       >
