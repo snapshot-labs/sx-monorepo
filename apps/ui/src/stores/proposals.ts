@@ -16,7 +16,7 @@ export const useProposalsStore = defineStore('proposals', {
   }),
   getters: {
     getProposal: state => {
-      return (spaceId: string, proposalId) => {
+      return (spaceId: string, proposalId: number) => {
         const proposals = state.proposals[spaceId]?.proposals ?? [];
 
         return proposals.find(proposal => proposal.proposal_id === proposalId);
