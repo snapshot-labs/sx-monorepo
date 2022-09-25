@@ -11,10 +11,10 @@ type Space {
   max_voting_period: Int
   proposal_threshold: Int
   quorum: Float
-  strategies: Text
-  strategies_params: Text
-  authenticators: Text
-  executors: Text
+  strategies: [String]
+  strategies_params: [String]
+  authenticators: [String]
+  executors: [String]
   proposal_count: Int
   vote_count: Int
   created: Int
@@ -37,8 +37,8 @@ type Proposal {
   min_end: Int
   max_end: Int
   snapshot: Int
-  strategies: Text
-  strategies_params: Text
+  strategies: [String]
+  strategies_params: [String]
   scores_1: Float
   scores_2: Float
   scores_3: Float
