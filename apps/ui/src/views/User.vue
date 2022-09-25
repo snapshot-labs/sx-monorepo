@@ -1,37 +1,26 @@
-<script setup>
-import { onMounted } from 'vue';
+<script setup lang="ts">
+import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useUsersStore } from '@/stores/users';
 import { shortenAddress } from '@/helpers/utils';
-import apollo from '@/helpers/apollo';
-import { USER_QUERY } from '@/helpers/queries';
-import { useState } from '@/composables/useState';
 
 const route = useRoute();
-const { get, set } = useState();
-const id = route.params.id;
-let user = $ref({});
-let loaded = $ref(false);
+const usersStore = useUsersStore();
+const id = route.params.id as string;
 
-onMounted(async () => {
-  const state = get();
-  if (state?.users[id]) {
-    user = state.users[id];
-  } else {
-    const { data } = await apollo.query({
-      query: USER_QUERY,
-      variables: { id }
-    });
-    state.users[id] = data.user;
-    user = data.user;
-    set(state);
-  }
-  loaded = true;
+onMounted(() => {
+  usersStore.fetchUser(id);
 });
+
+const user = computed(() => usersStore.getUser(id));
 </script>
 
 <template>
-  <UiLoading v-if="!loaded" class="block text-center p-4" />
-  <div v-else>
+  <UiLoading
+    v-if="!usersStore.users[id]?.loaded"
+    class="block text-center p-4"
+  />
+  <div v-else-if="user">
     <div class="relative bg-skin-border h-[140px] -mb-[70px]" />
     <Container slim>
       <div class="text-center mb-4 relative">

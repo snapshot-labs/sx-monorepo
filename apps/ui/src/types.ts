@@ -40,6 +40,13 @@ export type Proposal = {
   vote_count: number;
 };
 
+export type User = {
+  id: string;
+  proposal_count: number;
+  vote_count: number;
+  created: number;
+};
+
 export type Draft = {
   title: string;
   body: string;
