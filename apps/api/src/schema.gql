@@ -24,8 +24,8 @@ type Space {
 type Proposal {
   id: String!
   proposal_id: Int
-  space: String
-  author: String
+  space: Space
+  author: User
   execution_hash: String
   metadata_uri: String
   title: Text
@@ -50,8 +50,8 @@ type Proposal {
 
 type Vote {
   id: String!
-  voter: String
-  space: String
+  voter: User
+  space: Space
   proposal: Int
   choice: Int
   vp: Float
