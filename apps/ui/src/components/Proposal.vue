@@ -19,7 +19,7 @@ const modalOpenTimeline = ref(false);
         <router-link
           :to="{
             name: 'proposal',
-            params: { id: proposal.proposal_id, space: proposal.space }
+            params: { id: proposal.proposal_id, space: proposal.space.id }
           }"
           class="block"
         >
@@ -28,11 +28,11 @@ const modalOpenTimeline = ref(false);
         <router-link
           :to="{
             name: 'user',
-            params: { id: proposal.author }
+            params: { id: proposal.author.id }
           }"
         >
-          <Stamp :id="proposal.author" :size="24" class="mr-1" />
-          {{ shortenAddress(proposal.author) }}
+          <Stamp :id="proposal.author.id" :size="24" class="mr-1" />
+          {{ shortenAddress(proposal.author.id) }}
         </router-link>
         <span>
           ·
@@ -47,19 +47,19 @@ const modalOpenTimeline = ref(false);
         <div v-if="!voted.includes(proposal.id)" class="space-x-2 py-2">
           <UiButton
             class="w-full !text-green !border-green !w-[40px] !h-[40px] !px-0"
-            @click="vote(proposal.space, proposal.proposal_id, 1)"
+            @click="vote(proposal.space.id, proposal.proposal_id, 1)"
           >
             <IH-check class="inline-block" />
           </UiButton>
           <UiButton
             class="w-full !text-red !border-red !w-[40px] !h-[40px] !px-0"
-            @click="vote(proposal.space, proposal.proposal_id, 2)"
+            @click="vote(proposal.space.id, proposal.proposal_id, 2)"
           >
             <IH-x class="inline-block" />
           </UiButton>
           <UiButton
             class="w-full !text-gray-500 !border-gray-500 !w-[40px] !h-[40px] !px-0"
-            @click="vote(proposal.space, proposal.proposal_id, 3)"
+            @click="vote(proposal.space.id, proposal.proposal_id, 3)"
           >
             <IH-arrow-sm-right class="inline-block" />
           </UiButton>

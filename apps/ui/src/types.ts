@@ -19,8 +19,12 @@ export type Space = {
 export type Proposal = {
   id: string;
   proposal_id: number;
-  space: string;
-  author: string;
+  space: {
+    id: string;
+  };
+  author: {
+    id: string;
+  };
   execution_hash: string;
   metadata_uri: string;
   title: string;
@@ -44,6 +48,20 @@ export type User = {
   id: string;
   proposal_count: number;
   vote_count: number;
+  created: number;
+};
+
+export type Vote = {
+  id: string;
+  voter: {
+    id: string;
+  };
+  space: {
+    id: string;
+  };
+  proposal: number;
+  choice: number;
+  vp: number;
   created: number;
 };
 

@@ -1,18 +1,21 @@
-<script setup>
-import { ref, toRefs, watch } from 'vue';
+<script setup lang="ts">
+import { Ref, ref, toRefs, watch } from 'vue';
 import apollo from '@/helpers/apollo';
 import { VOTES_QUERY } from '@/helpers/queries';
 import { shortenAddress } from '@/helpers/utils';
 import choices from '@/helpers/choices.json';
+import type { Proposal as ProposalType, Vote } from '@/types';
 
-const props = defineProps({
-  open: Boolean,
-  proposal: Object
-});
+const props = defineProps<{
+  open: boolean;
+  proposal: ProposalType;
+}>();
 
-defineEmits(['close']);
+defineEmits<{
+  (e: 'close');
+}>();
 
-const votes = ref([]);
+const votes: Ref<Vote[]> = ref([]);
 const loaded = ref(false);
 const { open } = toRefs(props);
 
@@ -22,7 +25,7 @@ watch(open, async () => {
   const { data } = await apollo.query({
     query: VOTES_QUERY,
     variables: {
-      space: props.proposal.space,
+      space: props.proposal.space.id,
       proposal: props.proposal.proposal_id
     }
   });
@@ -51,12 +54,12 @@ watch(open, async () => {
             }"
             :class="`_${vote.choice}`"
           />
-          <Stamp :id="vote.voter" :size="24" class="mr-2" />
+          <Stamp :id="vote.voter.id" :size="24" class="mr-2" />
           <router-link
-            :to="{ name: 'user', params: { id: vote.voter } }"
+            :to="{ name: 'user', params: { id: vote.voter.id } }"
             @click="$emit('close')"
           >
-            {{ shortenAddress(vote.voter) }}
+            {{ shortenAddress(vote.voter.id) }}
           </router-link>
           <div
             class="absolute right-4 top-3 text-skin-link"

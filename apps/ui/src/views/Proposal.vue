@@ -46,11 +46,11 @@ onMounted(() => {
             <router-link
               :to="{
                 name: 'user',
-                params: { id: proposal.author }
+                params: { id: proposal.author.id }
               }"
             >
-              <Stamp :id="proposal.author" :size="24" class="mr-1" />
-              {{ shortenAddress(proposal.author) }}
+              <Stamp :id="proposal.author.id" :size="24" class="mr-1" />
+              {{ shortenAddress(proposal.author.id) }}
             </router-link>
             <span
               >·

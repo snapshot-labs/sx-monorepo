@@ -5,8 +5,12 @@ export const PROPOSAL_QUERY = gql`
     proposal(id: $id) {
       id
       proposal_id
-      space
-      author
+      space {
+        id
+      }
+      author {
+        id
+      }
       execution_hash
       metadata_uri
       title
@@ -38,8 +42,12 @@ export const PROPOSALS_QUERY = gql`
     ) {
       id
       proposal_id
-      space
-      author
+      space {
+        id
+      }
+      author {
+        id
+      }
       execution_hash
       metadata_uri
       title
@@ -65,8 +73,12 @@ export const VOTES_QUERY = gql`
   query ($space: String, $proposal: Int, $voter: String) {
     votes(where: { space: $space, proposal: $proposal, voter: $voter }) {
       id
-      voter
-      space
+      voter {
+        id
+      }
+      space {
+        id
+      }
       proposal
       choice
       vp
