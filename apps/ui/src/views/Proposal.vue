@@ -102,19 +102,19 @@ onMounted(() => {
           <div class="grid grid-cols-3 gap-2">
             <UiButton
               class="w-full !text-white !bg-green !border-green"
-              @click="vote(space, proposal.proposal_id, 1)"
+              @click="vote(proposal, 1)"
             >
               <IH-check class="inline-block" />
             </UiButton>
             <UiButton
               class="w-full !text-white !bg-red !border-red"
-              @click="vote(space, proposal.proposal_id, 2)"
+              @click="vote(proposal, 2)"
             >
               <IH-x class="inline-block" />
             </UiButton>
             <UiButton
               class="w-full !text-white !bg-gray-500 !border-gray-500"
-              @click="vote(space, proposal.proposal_id, 3)"
+              @click="vote(proposal, 3)"
             >
               <IH-arrow-right class="inline-block" />
             </UiButton>

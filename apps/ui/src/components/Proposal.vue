@@ -53,19 +53,19 @@ const modalOpenTimeline = ref(false);
           <div class="space-x-2 py-2">
             <UiButton
               class="w-full !text-green !border-green !w-[40px] !h-[40px] !px-0"
-              @click="vote(proposal.space.id, proposal.proposal_id, 1)"
+              @click="vote(proposal, 1)"
             >
               <IH-check class="inline-block" />
             </UiButton>
             <UiButton
               class="w-full !text-red !border-red !w-[40px] !h-[40px] !px-0"
-              @click="vote(proposal.space.id, proposal.proposal_id, 2)"
+              @click="vote(proposal, 2)"
             >
               <IH-x class="inline-block" />
             </UiButton>
             <UiButton
               class="w-full !text-gray-500 !border-gray-500 !w-[40px] !h-[40px] !px-0"
-              @click="vote(proposal.space.id, proposal.proposal_id, 3)"
+              @click="vote(proposal, 3)"
             >
               <IH-arrow-sm-right class="inline-block" />
             </UiButton>

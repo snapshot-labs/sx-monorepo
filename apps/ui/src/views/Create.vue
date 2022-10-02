@@ -1,6 +1,7 @@
-<script setup>
-import { ref, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useSpacesStore } from '@/stores/spaces';
 import { useActions } from '@/composables/useActions';
 import { useEditor } from '@/composables/useEditor';
 
@@ -8,13 +9,16 @@ const { proposals } = useEditor();
 const route = useRoute();
 const router = useRouter();
 const { propose } = useActions();
-const id = route.params.id;
+const spacesStore = useSpacesStore();
+const id = route.params.id as string;
 const key = route.params.key;
 const executionHash = '1';
 const modalOpen = ref(false);
 
 onMounted(() => {
-  if (!key) {
+  spacesStore.fetchSpace(id);
+
+  if (!key && route.name) {
     const str = (Math.random() + 1).toString(36).substring(7);
     router.push({
       name: route.name,
@@ -22,6 +26,8 @@ onMounted(() => {
     });
   }
 });
+
+const space = computed(() => spacesStore.spacesMap.get(id));
 </script>
 <template>
   <div>
@@ -37,7 +43,8 @@ onMounted(() => {
           </router-link>
           <h4 class="py-2 inline-block">New proposal</h4>
         </div>
-        <div class="space-x-2">
+        <UiLoading v-if="!space" class="block p-4" />
+        <div v-else class="space-x-2">
           <UiButton
             class="float-left leading-3 !px-3 rounded-r-none"
             @click="modalOpen = true"
@@ -48,7 +55,7 @@ onMounted(() => {
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
             @click="
               propose(
-                id,
+                space,
                 executionHash,
                 proposals[`${id}:${key}`].title,
                 proposals[`${id}:${key}`].body,
