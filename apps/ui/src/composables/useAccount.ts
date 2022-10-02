@@ -2,6 +2,7 @@ import { ref, Ref } from 'vue';
 import apollo from '@/helpers/apollo';
 import { VOTES_QUERY } from '@/helpers/queries';
 import { useWeb3 } from '@/composables/useWeb3';
+import type { Vote } from '@/types';
 
 const voted: Ref<string[]> = ref([]);
 
@@ -17,7 +18,9 @@ export function useAccount() {
         voter: account
       }
     });
-    voted.value = data.votes.map(vote => `${vote.space}/${vote.proposal}`);
+    voted.value = (data.votes as Vote[]).map(
+      vote => `${vote.space.id}/${vote.proposal}`
+    );
   }
 
   return { loadVotes, voted };

@@ -21,6 +21,7 @@ export type Proposal = {
   proposal_id: number;
   space: {
     id: string;
+    authenticators: string[];
   };
   author: {
     id: string;
@@ -39,6 +40,7 @@ export type Proposal = {
   scores_2: number;
   scores_3: number;
   scores_total: number;
+  strategies: string[];
   created: number;
   tx: string;
   vote_count: number;

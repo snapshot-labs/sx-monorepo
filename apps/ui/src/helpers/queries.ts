@@ -7,6 +7,7 @@ export const PROPOSAL_QUERY = gql`
       proposal_id
       space {
         id
+        authenticators
       }
       author {
         id
@@ -25,6 +26,7 @@ export const PROPOSAL_QUERY = gql`
       scores_2
       scores_3
       scores_total
+      strategies
       created
       tx
       vote_count
@@ -44,6 +46,7 @@ export const PROPOSALS_QUERY = gql`
       proposal_id
       space {
         id
+        authenticators
       }
       author {
         id
@@ -62,6 +65,7 @@ export const PROPOSALS_QUERY = gql`
       scores_2
       scores_3
       scores_total
+      strategies
       created
       tx
       vote_count

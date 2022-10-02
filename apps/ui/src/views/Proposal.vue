@@ -90,27 +90,37 @@ onMounted(() => {
         </a>
       </Container>
       <Container>
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <UiButton
-            class="w-full !text-white !bg-green !border-green"
-            @click="vote(space, proposal.proposal_id, 1)"
-          >
-            <IH-check class="inline-block" />
-          </UiButton>
-          <UiButton
-            class="w-full !text-white !bg-red !border-red"
-            @click="vote(space, proposal.proposal_id, 2)"
-          >
-            <IH-x class="inline-block" />
-          </UiButton>
-          <UiButton
-            class="w-full !text-white !bg-gray-500 !border-gray-500"
-            @click="vote(space, proposal.proposal_id, 3)"
-          >
-            <IH-arrow-right class="inline-block" />
-          </UiButton>
-        </div>
-        <div>
+        <Vote :proposal="proposal">
+          <template #voted>
+            <h4 class="mb-2">Results</h4>
+            <Results :proposal="proposal" width="full" />
+          </template>
+          <template #ended>
+            <h4 class="mb-2">Results</h4>
+            <Results :proposal="proposal" width="full" />
+          </template>
+          <div class="grid grid-cols-3 gap-2">
+            <UiButton
+              class="w-full !text-white !bg-green !border-green"
+              @click="vote(space, proposal.proposal_id, 1)"
+            >
+              <IH-check class="inline-block" />
+            </UiButton>
+            <UiButton
+              class="w-full !text-white !bg-red !border-red"
+              @click="vote(space, proposal.proposal_id, 2)"
+            >
+              <IH-x class="inline-block" />
+            </UiButton>
+            <UiButton
+              class="w-full !text-white !bg-gray-500 !border-gray-500"
+              @click="vote(space, proposal.proposal_id, 3)"
+            >
+              <IH-arrow-right class="inline-block" />
+            </UiButton>
+          </div>
+        </Vote>
+        <div class="mt-3">
           <a class="text-skin-text" @click="modalOpenVotes = true">
             {{ _n(proposal.vote_count) }} votes
           </a>
