@@ -90,6 +90,7 @@ export async function handlePropose({ block, tx, event, mysql }) {
     scores_2: 0,
     scores_3: 0,
     scores_total: 0,
+    quorum: data.quorum,
     strategies,
     strategies_params,
     created: block.timestamp,
