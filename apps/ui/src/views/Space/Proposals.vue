@@ -33,21 +33,11 @@ const proposalsRecord = computed(
         </router-link>
       </div>
     </div>
-    <Label :label="'Proposals'" />
-    <UiLoading v-if="!proposalsRecord?.loaded" class="block px-4 py-3" />
-    <div v-else>
-      <div
-        v-if="!proposalsRecord?.proposals.length"
-        class="px-4 py-3 text-skin-link"
-      >
-        <IH-exclamation-circle class="inline-block mr-2" />
-        <span v-text="'There are no proposals here.'" />
-      </div>
-      <Proposal
-        v-for="(proposal, i) in proposalsRecord?.proposals"
-        :key="i"
-        :proposal="proposal"
-      />
-    </div>
+    <ProposalsList
+      title="Proposals"
+      limit="off"
+      :loading="!proposalsRecord?.loaded"
+      :proposals="proposalsRecord?.proposals || []"
+    />
   </div>
 </template>

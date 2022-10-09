@@ -45,6 +45,7 @@ export type Proposal = {
   created: number;
   tx: string;
   vote_count: number;
+  has_ended: boolean;
 };
 
 export type User = {

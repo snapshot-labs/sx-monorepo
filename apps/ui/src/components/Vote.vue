@@ -28,7 +28,7 @@ const isSupported = computed(() => {
     You have already voted for this proposal
   </slot>
 
-  <slot v-else-if="proposal.max_end * 1000 <= Date.now()" name="ended">
+  <slot v-else-if="proposal.has_ended" name="ended">
     Proposal voting window has ended
   </slot>
 
