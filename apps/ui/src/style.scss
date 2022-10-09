@@ -120,6 +120,9 @@ a,
   &._3 {
     @apply bg-gray-500;
   }
+  &._quorum {
+    @apply bg-gray-700;
+  }
 }
 
 #app {

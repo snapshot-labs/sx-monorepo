@@ -21,6 +21,7 @@ export type Proposal = {
   proposal_id: number;
   space: {
     id: string;
+    quorum: number;
     authenticators: string[];
   };
   author: {

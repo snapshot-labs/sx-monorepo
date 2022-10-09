@@ -7,6 +7,7 @@ export const PROPOSAL_QUERY = gql`
       proposal_id
       space {
         id
+        quorum
         authenticators
       }
       author {
@@ -46,6 +47,7 @@ export const PROPOSALS_QUERY = gql`
       proposal_id
       space {
         id
+        quorum
         authenticators
       }
       author {

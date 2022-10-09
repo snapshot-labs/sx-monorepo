@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Proposal as ProposalType } from '@/types';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     proposal: ProposalType;
     width?: number | 'full';
@@ -16,6 +17,10 @@ const labels = {
   1: 'Against',
   2: 'Abstain'
 };
+
+const progress = computed(() =>
+  Math.min(props.proposal.scores_total / props.proposal.space.quorum, 1)
+);
 </script>
 
 <template>
@@ -27,11 +32,6 @@ const labels = {
       }"
     >
       <div
-        v-if="proposal.scores_total === 0"
-        title="No votes"
-        class="choice-bg _3 float-left w-full h-full"
-      />
-      <div
         v-for="(score, i) in Array(3)"
         :key="i"
         :title="labels[i]"
@@ -39,10 +39,18 @@ const labels = {
         :style="{
           width: `${(
             (100 / proposal.scores_total) *
-            proposal[`scores_${i + 1}`]
+            proposal[`scores_${i + 1}`] *
+            progress
           ).toFixed(3)}%`
         }"
         :class="`_${i + 1}`"
+      />
+      <div
+        title="Quorum left"
+        class="choice-bg _quorum float-left h-full"
+        :style="{
+          width: `${(100 * (1 - progress)).toFixed(3)}%`
+        }"
       />
     </div>
   </div>
