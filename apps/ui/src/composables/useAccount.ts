@@ -4,7 +4,7 @@ import { VOTES_QUERY } from '@/helpers/queries';
 import { useWeb3 } from '@/composables/useWeb3';
 import type { Vote } from '@/types';
 
-const voted: Ref<string[]> = ref([]);
+const votes: Ref<Record<string, Vote>> = ref({});
 
 export function useAccount() {
   const { web3 } = useWeb3();
@@ -18,10 +18,14 @@ export function useAccount() {
         voter: account
       }
     });
-    voted.value = (data.votes as Vote[]).map(
-      vote => `${vote.space.id}/${vote.proposal}`
+
+    votes.value = Object.fromEntries(
+      (data.votes as Vote[]).map(vote => [
+        `${vote.space.id}/${vote.proposal}`,
+        vote
+      ])
     );
   }
 
-  return { loadVotes, voted };
+  return { loadVotes, votes };
 }

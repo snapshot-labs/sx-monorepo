@@ -91,9 +91,21 @@ onMounted(() => {
       </Container>
       <Container>
         <Vote :proposal="proposal">
-          <template #voted>
+          <template #voted="{ vote: userVote }">
             <h4 class="mb-2">Results</h4>
             <Results :proposal="proposal" width="full" />
+            <div class="mt-2">
+              <div v-if="userVote.choice === 1">
+                You already voted <strong>for</strong> this proposal
+              </div>
+              <div v-else-if="userVote.choice === 2">
+                You already voted <strong>against</strong> this proposal
+              </div>
+              <div v-else-if="userVote.choice === 3">
+                You already <strong>abstained</strong> from voting on this
+                proposal
+              </div>
+            </div>
           </template>
           <template #ended>
             <h4 class="mb-2">Results</h4>

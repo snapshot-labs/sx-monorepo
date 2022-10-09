@@ -9,7 +9,7 @@ import type { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
-const { voted } = useAccount();
+const { votes } = useAccount();
 
 const isSupported = computed(() => {
   const hasSupportedAuthenticator = props.proposal.space.authenticators.find(
@@ -24,7 +24,7 @@ const isSupported = computed(() => {
 </script>
 
 <template>
-  <slot v-if="voted.includes(proposal.id)" name="voted">
+  <slot v-if="votes[proposal.id]" name="voted" :vote="votes[proposal.id]">
     You have already voted for this proposal
   </slot>
 

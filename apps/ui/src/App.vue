@@ -10,7 +10,7 @@ const { modalOpen } = useModal();
 const { userSkin } = useUserSkin();
 const { init, app } = useApp();
 const { web3, web3Account } = useWeb3();
-const { loadVotes, voted } = useAccount();
+const { loadVotes, votes } = useAccount();
 
 provide('web3', web3);
 
@@ -25,7 +25,7 @@ watch(modalOpen, val => {
 
 watch(web3Account, async () => {
   if (web3Account.value) return await loadVotes();
-  voted.value = [];
+  votes.value = {};
 });
 </script>
 
