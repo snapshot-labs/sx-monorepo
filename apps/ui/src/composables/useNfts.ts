@@ -1,7 +1,7 @@
 import { ref, computed, Ref } from 'vue';
 import snapshot from '@snapshot-labs/snapshot.js';
 
-const SUPPORTED_ABIS = ['erc721', 'erc1155'];
+const SUPPORTED_ABIS = ['ERC721', 'ERC1155'];
 
 const nfts: Ref<any[]> = ref([]);
 const loading = ref(true);
@@ -10,42 +10,32 @@ const loaded = ref(false);
 export function useNfts() {
   async function loadNfts(address) {
     loading.value = true;
-    const key = 'ckey_2d082caf47f04a46947f4f212a8';
-    const url = `https://api.covalenthq.com/v1/1/address/${address}/balances_v2/?quote-currency=USD&format=JSON&nft=true&key=${key}`;
-    const results = await snapshot.utils.getJSON(url);
-    nfts.value = results.data.items
-      .filter(
-        item =>
-          item.type === 'nft' &&
-          item.nft_data &&
-          item.supports_erc?.some(itemErc => SUPPORTED_ABIS.includes(itemErc))
+
+    const url =
+      'https://testnets-api.opensea.io/api/v1/assets?owner=0x0000000000000000000000000000000000000000&order_direction=desc&offset=0&limit=20&include_orders=false';
+    const { assets } = await snapshot.utils.getJSON(url);
+
+    nfts.value = assets
+      .filter(asset =>
+        SUPPORTED_ABIS.includes(asset.asset_contract?.schema_name)
       )
-      .map(item => {
-        const type = item.supports_erc?.find(itemErc =>
-          SUPPORTED_ABIS.includes(itemErc)
-        );
-        const tokenId = item.nft_data[0]?.token_id;
-        const title =
-          item.nft_data[0]?.external_data?.name ??
-          item.contract_name ??
-          'Untitled';
+      .map(asset => {
+        const tokenId = asset.token_id;
+        const title = asset.name ?? 'Untitled';
         const displayTitle =
           title.match(/(#[0-9]+)$/) || !tokenId
             ? title
             : `${title} #${tokenId}`;
 
-        const image =
-          item?.nft_data[0]?.external_data.image ??
-          `https://cdn.stamp.fyi/token/${item.contract_address}?s=256`;
-
         return {
-          ...item,
-          id: `${item.contract_address}:${tokenId || 0}`,
-          type,
+          ...asset,
+          type: asset.asset_contract.schema_name.toLowerCase(),
           tokenId,
           title,
           displayTitle,
-          image
+          image: asset.image_url,
+          collectionName: asset.collection.name,
+          contractAddress: asset.asset_contract.address
         };
       });
     loading.value = false;

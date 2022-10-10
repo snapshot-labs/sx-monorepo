@@ -44,19 +44,16 @@ describe('transactions', () => {
 
   describe('createSendNftTransaction', () => {
     const erc721Nft = {
-      contract_decimals: 0,
-      contract_name: 'BekoNekoz VX',
-      contract_address: '0x9ed9dc8af51d74e638528ececd510dca5fe2a539',
+      collectionName: 'BekoNekoz VX',
+      contractAddress: '0x9ed9dc8af51d74e638528ececd510dca5fe2a539',
       type: 'erc721',
       id: '0x9ed9dc8af51d74e638528ececd510dca5fe2a539:162',
       tokenId: '162'
     };
 
     const erc1155Nft = {
-      contract_decimals: 0,
-      contract_name: 'OpenSea Shared Storefront',
-      contract_ticker_symbol: 'OPENSTORE',
-      contract_address: '0x495f947276749ce646f68ac8c248420045cb7b5e',
+      collectionName: 'OpenSea Shared Storefront',
+      contractAddress: '0x495f947276749ce646f68ac8c248420045cb7b5e',
       type: 'erc1155',
       id: '0x495f947276749ce646f68ac8c248420045cb7b5e:90408759670418442924295527194769699607350667425091321551161727238095924887553',
       tokenId:

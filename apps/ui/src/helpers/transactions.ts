@@ -59,10 +59,7 @@ export function createSendNftTransaction({
 }): SendNftTransaction {
   let data = '';
 
-  const baseAmount = parseUnits(
-    form.amount.toString() || '1',
-    nft.contract_decimals
-  );
+  const baseAmount = parseUnits(form.amount.toString() || '1', 0);
 
   if (nft.type === 'erc1155') {
     const iface = new Interface(abis.erc1155);
@@ -90,13 +87,13 @@ export function createSendNftTransaction({
       recipient: form.to,
       amount: baseAmount.toString(),
       nft: {
-        address: nft.contract_address,
+        address: nft.contractAddress,
         id: nft.tokenId,
         name: nft.title,
-        collection: nft.contract_name
+        collection: nft.collectionName
       }
     },
-    to: nft.contract_address,
+    to: nft.contractAddress,
     data,
     value: '0'
   };

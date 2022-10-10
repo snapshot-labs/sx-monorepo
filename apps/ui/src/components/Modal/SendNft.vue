@@ -138,7 +138,9 @@ watch(
               class="mr-2"
               :size="20"
             />
-            {{ currentNft?.displayTitle || 'Select NFT' }}
+            <div class="truncate">
+              {{ currentNft?.displayTitle || 'Select NFT' }}
+            </div>
           </div>
         </button>
       </div>
