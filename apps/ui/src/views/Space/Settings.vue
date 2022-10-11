@@ -13,15 +13,15 @@ defineProps<{ space: Space }>();
       <div class="mx-4 pt-3">
         <div class="mb-3">
           <div class="s-label !mb-0">Name</div>
-          <div class="text-skin-link text-md" v-text="space.name" />
+          <h4 class="text-skin-link text-md" v-text="space.name" />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">About</div>
-          <div class="text-skin-link text-md" v-text="space.about || '...'" />
+          <h4 class="text-skin-link text-md" v-text="space.about || '...'" />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Discussions</div>
-          <div
+          <h4
             class="text-skin-link text-md"
             v-text="space.discussions || '...'"
           />
@@ -34,35 +34,35 @@ defineProps<{ space: Space }>();
       <div class="mx-4 pt-3">
         <div class="mb-3">
           <div class="s-label !mb-0">Voting delay</div>
-          <div
+          <h4
             class="text-skin-link text-md"
             v-text="_d(space.voting_delay) || 'No delay'"
           />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Min. voting period</div>
-          <div
+          <h4
             class="text-skin-link text-md"
             v-text="_d(space.min_voting_period) || 'No min.'"
           />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Max. voting period</div>
-          <div
+          <h4
             class="text-skin-link text-md"
             v-text="_d(space.max_voting_period)"
           />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0" v-text="'Proposal threshold'" />
-          <div
+          <h4
             class="text-skin-link text-md"
             v-text="space.proposal_threshold"
           />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0" v-text="'Quorum'" />
-          <div class="text-skin-link text-md" v-text="space.quorum" />
+          <h4 class="text-skin-link text-md" v-text="space.quorum" />
         </div>
       </div>
     </div>

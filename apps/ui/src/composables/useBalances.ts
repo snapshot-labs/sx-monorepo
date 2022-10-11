@@ -24,7 +24,15 @@ export function useBalances() {
             formatUnits(item.balance || 0, item.contract_decimals || 0)
           ) > 0.001 && item.contract_address !== ETH_CONTRACT
       )
-    ].sort((a, b) => b.quote - a.quote);
+    ]
+      .sort((a, b) => b.quote - a.quote)
+      .map(asset => {
+        if (asset.quote_rate && asset.quote_rate_24h)
+          asset.percent =
+            (100 / asset.quote_rate) *
+            (asset.quote_rate - asset.quote_rate_24h);
+        return asset;
+      });
     loading.value = false;
     loaded.value = true;
   }

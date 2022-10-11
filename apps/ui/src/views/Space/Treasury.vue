@@ -36,11 +36,11 @@ onMounted(() => loadBalances(space.wallet));
         <IH-duplicate class="inline-block" />
       </UiButton>
     </a>
-    <a>
+    <router-link :to="{ name: 'editor' }">
       <UiButton class="!px-0 w-[46px]">
         <IH-arrow-sm-right class="inline-block -rotate-45" />
       </UiButton>
-    </a>
+    </router-link>
   </div>
   <div class="space-y-3">
     <div>
@@ -51,12 +51,11 @@ onMounted(() => loadBalances(space.wallet));
         class="flex justify-between items-center mx-4 py-3 block border-b"
       >
         <Stamp :id="space.wallet" type="avatar" :size="32" class="mr-3" />
-        <div class="flex-1 leading-[20px]">
-          <div class="text-skin-link" v-text="shorten(space.wallet)" />
-          <div class="text-skin-text text-sm">
-            ${{ _n(totalQuote.toFixed()) }}
-          </div>
+        <div class="flex-1 leading-[22px]">
+          <h4 class="text-skin-link" v-text="shorten(space.wallet)" />
+          <div class="text-skin-text text-sm" v-text="shorten(space.wallet)" />
         </div>
+        <h3 v-text="`$${_n(totalQuote.toFixed())}`" />
       </a>
     </div>
     <div>
@@ -69,22 +68,46 @@ onMounted(() => loadBalances(space.wallet));
       >
         <div class="flex-auto flex items-center">
           <Stamp :id="asset.contract_address" type="token" :size="32" />
-          <div class="flex flex-col ml-3 leading-[20px]">
-            <div
+          <div class="flex flex-col ml-3 leading-[22px]">
+            <h4
               class="text-skin-link"
               v-text="shorten(asset.contract_ticker_symbol, 12)"
             />
             <div class="text-sm" v-text="shorten(asset.contract_name, 24)" />
           </div>
         </div>
-        <div class="flex-col items-end text-right leading-[20px]">
-          <div
+        <div
+          v-if="asset.quote_rate"
+          class="flex-col items-end text-right leading-[22px] w-[180px] invisible md:visible"
+        >
+          <h4 class="text-skin-link" v-text="`$${_n(asset.quote_rate)}`" />
+          <div v-if="asset.percent" class="text-sm">
+            <div
+              v-if="asset.percent > 0"
+              class="text-green"
+              v-text="`+${_n(asset.percent)}%`"
+            />
+            <div
+              v-if="asset.percent < 0"
+              class="text-red"
+              v-text="`${_n(asset.percent)}%`"
+            />
+          </div>
+        </div>
+        <div
+          class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px]"
+        >
+          <h4
             class="text-skin-link"
             v-text="
               _n(formatUnits(asset.balance || 0, asset.contract_decimals || 0))
             "
           />
-          <div class="text-sm" v-text="`$${_n(asset.quote)}`" />
+          <div
+            v-if="asset.quote"
+            class="text-sm"
+            v-text="`$${_n(asset.quote)}`"
+          />
         </div>
       </div>
     </div>
