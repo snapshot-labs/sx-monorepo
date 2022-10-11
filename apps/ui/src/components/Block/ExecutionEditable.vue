@@ -145,6 +145,7 @@ function editTx(index: number) {
       <ModalSendToken
         :open="modalOpen.sendToken"
         :address="space.wallet"
+        :network="space.network"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"

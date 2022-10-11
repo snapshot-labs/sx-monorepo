@@ -11,8 +11,7 @@ export function useNfts() {
   async function loadNfts(address) {
     loading.value = true;
 
-    const url =
-      'https://testnets-api.opensea.io/api/v1/assets?owner=0x0000000000000000000000000000000000000000&order_direction=desc&offset=0&limit=20&include_orders=false';
+    const url = `https://testnets-api.opensea.io/api/v1/assets?owner=${address}&order_direction=desc&offset=0&limit=20&include_orders=false`;
     const { assets } = await snapshot.utils.getJSON(url);
 
     nfts.value = assets

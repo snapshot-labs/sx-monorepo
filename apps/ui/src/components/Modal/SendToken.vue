@@ -19,6 +19,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  network: {
+    type: String,
+    required: true
+  },
   initialState: Object
 });
 
@@ -55,7 +59,7 @@ const formValid = computed(
 );
 
 onMounted(() => {
-  loadBalances(props.address);
+  loadBalances(props.address, props.network);
 });
 
 function handlePickerClick() {

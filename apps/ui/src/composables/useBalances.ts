@@ -8,10 +8,10 @@ const loading = ref(true);
 const loaded = ref(false);
 
 export function useBalances() {
-  async function loadBalances(address) {
+  async function loadBalances(address, network) {
     loading.value = true;
     const key = 'ckey_2d082caf47f04a46947f4f212a8';
-    const url = `https://api.covalenthq.com/v1/1/address/${address}/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=true&key=${key}`;
+    const url = `https://api.covalenthq.com/v1/${network}/address/${address}/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=true&key=${key}`;
     const results = await snapshot.utils.getJSON(url);
     const etherItem = results.data.items.find(
       item => item.contract_address === ETH_CONTRACT

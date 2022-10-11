@@ -31,7 +31,7 @@ const sortedAssets = computed(() =>
 );
 
 onMounted(() => {
-  loadBalances(space.wallet);
+  loadBalances(space.wallet, space.network);
   loadNfts(space.wallet);
 });
 </script>
@@ -88,16 +88,9 @@ onMounted(() => {
             <div class="flex flex-col ml-3 leading-[22px]">
               <h4
                 class="text-skin-link"
-                v-text="
-                  _n(
-                    formatUnits(
-                      asset.balance || 0,
-                      asset.contract_decimals || 0
-                    )
-                  )
-                "
+                v-text="asset.contract_ticker_symbol"
               />
-              <div class="text-sm" v-text="`$${_n(asset.quote)}`" />
+              <div class="text-sm" v-text="asset.contract_name" />
             </div>
           </div>
           <div
