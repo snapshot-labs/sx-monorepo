@@ -77,6 +77,13 @@ export type Draft = {
   updatedAt: number;
 };
 
+export type Metadata = {
+  title: string;
+  body: string;
+  discussion: string;
+  execution: Transaction[];
+};
+
 export type Drafts = Record<string, Draft>;
 
 export type BaseTransaction = {

@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, Ref } from 'vue';
 import draggable from 'vuedraggable';
-import { formatUnits } from '@ethersproject/units';
-import { _n, shorten } from '@/helpers/utils';
 import space from '@/helpers/space.json';
-import { Transaction } from '@/types';
+import { Transaction as TransactionType } from '@/types';
 
-const props = defineProps<{ modelValue: Transaction[] }>();
+const props = defineProps<{ modelValue: TransactionType[] }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Transaction[]): void;
+  (e: 'update:modelValue', value: TransactionType[]): void;
 }>();
 
 const editedTx: Ref<number | null> = ref(null);
@@ -24,24 +22,6 @@ const modalOpen = ref({
   contractCall: false
 });
 
-function getTitle(tx: Transaction) {
-  if (tx._type === 'sendToken') {
-    return `Send <b>${_n(
-      formatUnits(tx._form.amount, tx._form.token.decimals)
-    )}</b> ${tx._form.token.symbol} to <b>${shorten(tx._form.recipient)}</b>`;
-  }
-
-  if (tx._type === 'sendNft') {
-    return `Send <b>${_n(
-      formatUnits(tx._form.amount, 0)
-    )}</b> NFT to <b>${shorten(tx._form.recipient)}</b>`;
-  }
-
-  if (tx._type === 'contractCall') {
-    return `Contract call to <b>${shorten(tx.to)}</b>`;
-  }
-}
-
 const txs = computed({
   get: () => props.modelValue,
   set: newValue => {
@@ -49,7 +29,7 @@ const txs = computed({
   }
 });
 
-function addTx(tx: Transaction) {
+function addTx(tx: TransactionType) {
   const newValue = [...props.modelValue];
 
   if (editedTx.value !== null) {
@@ -114,30 +94,26 @@ function editTx(index: number) {
     <div v-if="txs.length > 0" class="x-block !border-x rounded-lg">
       <draggable v-model="txs" handle=".handle" :item-key="() => undefined">
         <template #item="{ element: tx, index: i }">
-          <div
-            class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
-          >
-            <div class="flex items-center max-w-[70%]">
+          <Transaction :tx="tx">
+            <template #left>
               <div
                 v-if="txs.length > 1"
                 class="handle mr-2 text-white cursor-pointer opacity-50 hover:opacity-100"
               >
                 <IH-switch-vertical />
               </div>
-              <IH-stop v-if="tx._type === 'sendToken'" />
-              <IH-photograph v-else-if="tx._type === 'sendNft'" />
-              <IH-chip v-else />
-              <div class="ml-2 truncate text-skin-link" v-html="getTitle(tx)" />
-            </div>
-            <div class="flex gap-3">
-              <a @click="editTx(i)">
-                <IH-pencil />
-              </a>
-              <a @click="removeTx(i)">
-                <IH-trash />
-              </a>
-            </div>
-          </div>
+            </template>
+            <template #right>
+              <div class="flex gap-3">
+                <a @click="editTx(i)">
+                  <IH-pencil />
+                </a>
+                <a @click="removeTx(i)">
+                  <IH-trash />
+                </a>
+              </div>
+            </template>
+          </Transaction>
         </template>
       </draggable>
     </div>
