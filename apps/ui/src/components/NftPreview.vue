@@ -22,7 +22,7 @@ function handleError(e) {
 <template>
   <img
     :src="url"
-    class="aspect-square rounded"
+    class="aspect-square rounded bg-[color:var(--border-color)]"
     :style="
       size
         ? {

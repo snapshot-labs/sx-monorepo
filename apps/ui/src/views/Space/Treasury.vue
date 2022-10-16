@@ -136,7 +136,7 @@ onMounted(() => {
           class="grid gap-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-6 py-3 px-2"
         >
           <div v-for="(nft, i) in nfts" :key="i" class="block px-3 py-1 mb-3">
-            <NftPreview :item="nft" class="aspect-square rounded w-full" />
+            <NftPreview :item="nft" class="w-full" />
             <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
           </div>
         </div>

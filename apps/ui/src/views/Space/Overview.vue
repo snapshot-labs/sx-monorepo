@@ -51,7 +51,7 @@ const grouped = computed(() => {
           <Stamp
             :id="space.id"
             :size="90"
-            class="mb-2 border-[4px] border-skin-bg !bg-skin-bg rounded-lg"
+            class="mb-2 border-[4px] border-skin-bg !bg-skin-bg !rounded-lg"
           />
         </router-link>
         <h1 v-text="space.name" />
@@ -59,9 +59,23 @@ const grouped = computed(() => {
           <b class="text-skin-link">{{ space.proposal_count }}</b> proposals ·
           <b class="text-skin-link">{{ space.vote_count }}</b> votes
         </div>
-        <div class="max-w-[540px] text-skin-link text-md leading-[26px]">
+        <div class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </div>
+        <div class="space-x-2">
+          <img
+            src="~@/assets/twitter.svg"
+            class="w-[28px] h-[28px] inline-block"
+          />
+          <img
+            src="~@/assets/discord.svg"
+            class="w-[28px] h-[28px] inline-block"
+          />
+          <img
+            src="~@/assets/github.svg"
+            class="w-[28px] h-[28px] inline-block"
+          />
         </div>
       </div>
     </div>

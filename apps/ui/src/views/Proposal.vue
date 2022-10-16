@@ -100,7 +100,10 @@ onMounted(() => {
           </a>
         </div>
         <div v-if="execution && execution.length > 0">
-          <h4 class="mb-3 eyebrow">Execution</h4>
+          <h4 class="mb-3 eyebrow flex items-center">
+            <IH-play class="inline-block mr-2" />
+            <span>Execution</span>
+          </h4>
           <div class="mb-4">
             <BlockExecution :txs="execution" />
           </div>
