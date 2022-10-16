@@ -37,7 +37,7 @@ watch(web3Account, async () => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
       <Sidebar class="invisible md:visible" />
-      <div class="flex-auto">
+      <div class="flex-auto w-full">
         <Topnav />
         <router-view
           :key="$route.path"
