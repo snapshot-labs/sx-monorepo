@@ -54,14 +54,17 @@ const filteredAssets = computed(() =>
       class="px-3 py-[12px] border-b last:border-0 flex justify-between"
       @click="emit('pick', asset.contract_address)"
     >
-      <div class="flex items-center">
+      <div class="flex items-center min-w-0 pr-2">
         <Stamp :id="asset.contract_address" type="token" :size="32" />
-        <div class="flex flex-col ml-3 leading-[20px]">
+        <div class="flex flex-col ml-3 leading-[20px] min-w-0">
           <div
             class="text-skin-link"
             v-text="shorten(asset.contract_ticker_symbol, 12)"
           />
-          <div class="text-sm" v-text="shorten(asset.contract_name, 24)" />
+          <div
+            class="text-sm truncate"
+            v-text="shorten(asset.contract_name, 24)"
+          />
         </div>
       </div>
       <div class="flex flex-col items-end leading-[20px]">

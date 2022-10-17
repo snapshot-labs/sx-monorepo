@@ -83,19 +83,19 @@ onMounted(() => {
           :key="i"
           class="mx-4 py-3 border-b flex"
         >
-          <div class="flex-auto flex items-center">
+          <div class="flex-auto flex items-center min-w-0">
             <Stamp :id="asset.contract_address" type="token" :size="32" />
-            <div class="flex flex-col ml-3 leading-[22px]">
+            <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
               <h4
                 class="text-skin-link"
                 v-text="asset.contract_ticker_symbol"
               />
-              <div class="text-sm" v-text="asset.contract_name" />
+              <div class="text-sm truncate" v-text="asset.contract_name" />
             </div>
           </div>
           <div
             v-if="asset.quote_rate"
-            class="flex-col items-end text-right leading-[22px] w-[180px] invisible md:visible"
+            class="flex-col items-end text-right leading-[22px] w-[180px] hidden md:block"
           >
             <h4 class="text-skin-link" v-text="`$${_n(asset.quote_rate)}`" />
             <div v-if="asset.percent" class="text-sm">

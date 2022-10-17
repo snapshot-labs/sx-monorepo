@@ -195,7 +195,9 @@ watch(currentToken, token => {
               class="mr-2"
               :size="20"
             />
-            {{ currentToken?.contract_ticker_symbol || 'Select token' }}
+            <div class="truncate">
+              {{ currentToken?.contract_ticker_symbol || 'Select token' }}
+            </div>
           </div>
         </button>
       </div>
