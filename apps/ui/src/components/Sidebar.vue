@@ -4,9 +4,7 @@ import { onMounted } from 'vue';
 
 const spacesStore = useSpacesStore();
 
-onMounted(() => {
-  spacesStore.fetchAll();
-});
+onMounted(() => spacesStore.fetchAll());
 </script>
 
 <template>

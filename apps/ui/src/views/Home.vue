@@ -4,9 +4,7 @@ import { useSpacesStore } from '@/stores/spaces';
 
 const spacesStore = useSpacesStore();
 
-onMounted(() => {
-  spacesStore.fetchAll();
-});
+onMounted(() => spacesStore.fetchAll());
 </script>
 
 <template>
