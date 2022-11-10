@@ -1,4 +1,4 @@
-import { Account, defaultProvider, hash } from 'starknet';
+import { Account, hash } from 'starknet';
 import * as utils from '../../utils';
 import { getAuthenticator } from '../../authenticators';
 import { getStrategy } from '../../strategies';
@@ -25,7 +25,7 @@ export class StarkNetTx {
     return Promise.all(
       envelope.data.message.strategies.map(
         (id) =>
-          defaultProvider.getStorageAt(
+          this.config.starkProvider.getStorageAt(
             envelope.data.message.space,
             utils.encoding.getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))
           ) as Promise<string>

@@ -1,3 +1,4 @@
+import { defaultProvider } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../../src/clients';
 import { Choice } from '../../../../src/utils/choice';
@@ -7,8 +8,9 @@ describe('EthereumSig', () => {
 
   const ethUrl = process.env.GOERLI_NODE_URL as string;
   const manaUrl = '';
+  const starkProvider = defaultProvider;
 
-  const ethSigClient = new EthereumSig({ ethUrl, manaUrl });
+  const ethSigClient = new EthereumSig({ ethUrl, starkProvider, manaUrl });
   const wallet = new Wallet('be2b70290c687fadeaac651bfc4578948ef25c932f6b0ae6e7f2047ce61bcbaa');
   const walletAddress = wallet.address;
   const space = '0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d';

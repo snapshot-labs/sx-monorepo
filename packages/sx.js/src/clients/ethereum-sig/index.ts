@@ -1,4 +1,4 @@
-import { hash, defaultProvider } from 'starknet';
+import { hash } from 'starknet';
 import randomBytes from 'randombytes';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
@@ -32,7 +32,7 @@ export class EthereumSig {
     return Promise.all(
       data.strategies.map(
         (id) =>
-          defaultProvider.getStorageAt(
+          this.config.starkProvider.getStorageAt(
             data.space,
             utils.encoding.getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))
           ) as Promise<string>
