@@ -9,7 +9,7 @@ const defaultStrategies = {
 };
 
 export function getStrategy(address: string, strategies: any = defaultStrategies): Strategy | null {
-  const strategy = strategies[utils.encoding.hexPadRight(address)];
+  const strategy = strategies[utils.encoding.hexPadLeft(address)];
   if (!strategy) return null;
 
   return strategy;
