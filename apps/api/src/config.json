@@ -1,5 +1,5 @@
 {
-  "network": "goerli-alpha",
+  "network_node_url": "https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
   "sources": [
     {
       "contract": "0x2121c175922cef8870b6b6b956d01a7ac75af034dfbb9135698f88644b17ea3",
@@ -10,38 +10,10 @@
           "fn": "handleSpaceCreated"
         }
       ]
-    },
-    {
-      "contract": "0x847ae39833c61fe964bfac857ad8c5fa261ec4c716c61b8f28c4ae61fe376b",
-      "start": 345862,
-      "events": [
-        {
-          "name": "proposal_created",
-          "fn": "handlePropose"
-        },
-        {
-          "name": "vote_created",
-          "fn": "handleVote"
-        }
-      ]
-    },
-    {
-      "contract": "0xb60f2a154b9aaec8e4bec8e04f86d6cd92a9c993871e904bd815962603492d",
-      "start": 345862,
-      "events": [
-        {
-          "name": "proposal_created",
-          "fn": "handlePropose"
-        },
-        {
-          "name": "vote_created",
-          "fn": "handleVote"
-        }
-      ]
-    },
-    {
-      "contract": "0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d",
-      "start": 345862,
+    }
+  ],
+  "templates": {
+    "Space": {
       "events": [
         {
           "name": "proposal_created",
@@ -53,5 +25,5 @@
         }
       ]
     }
-  ]
+  }
 }

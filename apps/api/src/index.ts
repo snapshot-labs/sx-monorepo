@@ -11,11 +11,15 @@ const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
 const schema = fs.readFileSync(schemaFile, 'utf8');
 
-// @ts-ignore
+if (process.env.NETWORK_NODE_URL) {
+  config.network_node_url = process.env.NETWORK_NODE_URL;
+}
+
 const checkpoint = new Checkpoint(config, writer, schema, {
   logLevel: LogLevel.Info,
   prettifyLogs: process.env.NODE_ENV !== 'production'
 });
+
 checkpoint.reset().then(() => checkpoint.start());
 
 const app = express();

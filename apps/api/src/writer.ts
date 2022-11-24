@@ -1,7 +1,8 @@
 import { formatUnits } from '@ethersproject/units';
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
-import { validateAndParseAddress } from 'starknet/utils/address';
+import { validateAndParseAddress } from 'starknet';
 import { getJSON, toAddress, getEvent, getSpaceName } from './utils';
+import type { CheckpointWriter } from '@snapshot-labs/checkpoint';
 
 function intSequenceToString(intSequence) {
   const sequenceStr = shortStringArrToStr(intSequence);
@@ -11,7 +12,15 @@ function intSequenceToString(intSequence) {
     .join('');
 }
 
-export async function handleSpaceCreated({ block, tx, event, mysql }) {
+export const handleSpaceCreated: CheckpointWriter = async ({
+  block,
+  tx,
+  event,
+  mysql,
+  instance
+}) => {
+  if (!event) return;
+
   console.log('Handle space created');
   const format =
     'deployer_address, space_address, voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), strategies_len, strategies(felt*), strategies_params_len, strategies_params(felt*), authenticators_len, authenticators(felt*), executors_len, executors(felt*)';
@@ -35,11 +44,19 @@ export async function handleSpaceCreated({ block, tx, event, mysql }) {
     created: block.timestamp,
     tx: tx.transaction_hash
   };
+
+  instance.executeTemplate('Space', {
+    contract: item.id,
+    start: block.block_number
+  });
+
   const query = `INSERT IGNORE INTO spaces SET ?;`;
   await mysql.queryAsync(query, [item]);
-}
+};
 
-export async function handlePropose({ block, tx, event, mysql }) {
+export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql }) => {
+  if (!event) return;
+
   console.log('Handle propose');
   const format =
     'proposal, author, quorum(uint256), snapshot, start, min_end, max_end, executor, execution_hash, metadata_uri_len, metadata_uri(felt*)';
@@ -113,9 +130,11 @@ export async function handlePropose({ block, tx, event, mysql }) {
     UPDATE users SET proposal_count = proposal_count + 1 WHERE id = ? LIMIT 1;
   `;
   await mysql.queryAsync(query, [item, item.space, user, author]);
-}
+};
 
-export async function handleVote({ block, event, mysql }) {
+export const handleVote: CheckpointWriter = async ({ block, event, mysql }) => {
+  if (!event) return;
+
   console.log('Handle vote');
   const format = 'proposal, voter, choice, vp';
   const data: any = getEvent(event.data, format);
@@ -160,4 +179,4 @@ export async function handleVote({ block, event, mysql }) {
     user,
     voter
   ]);
-}
+};

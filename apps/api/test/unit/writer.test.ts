@@ -1,6 +1,6 @@
 import { mockDeep } from 'jest-mock-extended';
 import { AsyncMySqlPool } from '@snapshot-labs/checkpoint';
-import { validateAndParseAddress } from 'starknet/utils/address';
+import { validateAndParseAddress } from 'starknet';
 
 async function handleDeploy({ source, block, tx, mysql }) {
   console.log('Handle deploy');
