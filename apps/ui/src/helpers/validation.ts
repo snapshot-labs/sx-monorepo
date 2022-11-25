@@ -9,7 +9,7 @@ import {
 } from '@ethersproject/constants';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export function validateForm(schema, form) {
+export function validateForm(schema, form): Record<string, string> {
   const ajv = new Ajv({ allErrors: true });
 
   ajv.addFormat('address', {

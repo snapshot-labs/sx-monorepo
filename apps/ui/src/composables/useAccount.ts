@@ -27,5 +27,5 @@ export function useAccount() {
     );
   }
 
-  return { loadVotes, votes };
+  return { account: web3.value.account, loadVotes, votes };
 }

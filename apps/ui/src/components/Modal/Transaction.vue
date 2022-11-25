@@ -1,6 +1,6 @@
-<script setup>
-import { reactive, ref, computed, watch } from 'vue';
-import { Interface } from '@ethersproject/abi';
+<script setup lang="ts">
+import { reactive, ref, computed, watch, Ref } from 'vue';
+import { Interface, Fragment, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
 import { getABI } from '@/helpers/etherscan';
@@ -10,7 +10,7 @@ import { validateForm } from '@/helpers/validation';
 
 const DEFAULT_FORM_STATE = {
   to: '',
-  abi: [],
+  abi: [] as (Fragment & JsonFragment)[],
   method: '',
   args: {},
   amount: ''
@@ -24,6 +24,9 @@ const props = defineProps({
 const emit = defineEmits(['add', 'close']);
 
 const loading = ref(false);
+const showPicker = ref(false);
+const pickerField: Ref<string | null> = ref(null);
+const searchValue = ref('');
 const ignoreFormUpdates = ref(true);
 const showAbiInput = ref(false);
 const abiStr = ref('');
@@ -39,9 +42,12 @@ const methods = computed(() => {
 });
 
 const currentMethod = computed(() => {
-  if (!form.method) return {};
+  if (!form.method) return null;
 
-  return form.abi.find(item => item.name === form.method) || {};
+  const method = form.abi.find(item => item.name === form.method);
+  if (!method) return null;
+
+  return method as Fragment & JsonFragment;
 });
 
 const definition = computed(() => {
@@ -55,6 +61,21 @@ const definition = computed(() => {
 
   return {};
 });
+
+function handlePickerClick(field: string) {
+  showPicker.value = true;
+  pickerField.value = field;
+}
+
+function handlePickerSelect(value: string) {
+  showPicker.value = false;
+
+  if (!pickerField.value) return;
+
+  const isTopLevel = pickerField.value === 'to';
+  if (isTopLevel) form[pickerField.value] = value;
+  else form.args[pickerField.value] = value;
+}
 
 function handleSubmit() {
   const tx = createContractCallTransaction({ form: clone(form) });
@@ -89,7 +110,7 @@ const errors = computed(() =>
           type: 'string',
           format: 'address'
         },
-        ...(currentMethod.value.payable
+        ...(currentMethod.value?.payable
           ? {
               amount: {
                 type: 'string',
@@ -145,6 +166,8 @@ watch(
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.to = props.initialState.recipient;
       form.abi = props.initialState.abi;
@@ -170,18 +193,45 @@ watch(
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
       <h3 v-text="'Add transaction'" />
+      <template v-if="showPicker">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
+          <IH-arrow-narrow-left class="mr-2" />
+        </a>
+        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+          <IH-search class="mx-2" />
+          <input
+            ref="searchInput"
+            v-model="searchValue"
+            type="text"
+            placeholder="Search"
+            class="flex-auto bg-transparent text-skin-link"
+          />
+        </div>
+      </template>
     </template>
-    <div class="s-box p-4">
+    <template v-if="showPicker">
+      <BlockContactPicker
+        :loading="false"
+        :search-value="searchValue"
+        @pick="handlePickerSelect"
+      />
+    </template>
+    <div v-else class="s-box p-4">
       <div class="relative">
         <UiLoading v-if="loading" class="absolute top-[14px] right-3 z-10" />
-        <SIString
+        <SIAddress
           v-model="form.to"
           :error="errors.to"
+          :show-picker="!loading"
           :definition="{
             type: 'string',
             title: 'Contract address',
             examples: ['Address or ENS']
           }"
+          @pick="handlePickerClick('to')"
         />
       </div>
       <div v-if="showAbiInput" class="s-base">
@@ -195,7 +245,7 @@ watch(
         </select>
       </div>
       <SIString
-        v-if="currentMethod.payable"
+        v-if="currentMethod?.payable"
         v-model="form.amount"
         :error="errors.amount"
         :definition="{
@@ -209,6 +259,7 @@ watch(
           v-model="form.args"
           :error="argsErrors"
           :definition="definition"
+          @pick="handlePickerClick"
         />
       </div>
     </div>

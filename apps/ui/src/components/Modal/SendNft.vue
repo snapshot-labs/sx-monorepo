@@ -23,6 +23,7 @@ const emit = defineEmits(['add', 'close']);
 
 const searchInput: Ref<HTMLElement | null> = ref(null);
 const showPicker = ref(false);
+const pickerType: Ref<'nft' | 'contact' | null> = ref(null);
 const searchValue = ref('');
 
 const form: { to: string; nft: string; amount: string | number } = reactive(
@@ -39,12 +40,13 @@ const formValid = computed(
     (currentNft.value.type !== 'erc1155' || form.amount !== '')
 );
 
-function handlePickerClick() {
-  if (!loaded.value) {
+function handlePickerClick(type: 'nft' | 'contact') {
+  if (type === 'nft' && !loaded.value) {
     loadNfts(props.address);
   }
 
   showPicker.value = true;
+  pickerType.value = type;
 
   nextTick(() => {
     if (searchInput.value) {
@@ -109,28 +111,43 @@ watch(
         </div>
       </template>
     </template>
-    <BlockNftPicker
-      v-if="showPicker"
-      :nfts="nfts"
-      :loading="loading"
-      :search-value="searchValue"
-      @pick="
-        form.nft = $event;
-        showPicker = false;
-      "
-    />
+    <template v-if="showPicker">
+      <BlockNftPicker
+        v-if="pickerType === 'nft'"
+        :nfts="nfts"
+        :loading="loading"
+        :search-value="searchValue"
+        @pick="
+          form.nft = $event;
+          showPicker = false;
+        "
+      />
+      <BlockContactPicker
+        v-else-if="pickerType === 'contact'"
+        :loading="false"
+        :search-value="searchValue"
+        @pick="
+          form.to = $event;
+          showPicker = false;
+        "
+      />
+    </template>
     <div v-if="!showPicker" class="s-box p-4">
-      <SIString
+      <SIAddress
         v-model="form.to"
         :definition="{
           type: 'string',
           title: 'Recipient',
           examples: ['Address or ENS']
         }"
+        @pick="handlePickerClick('contact')"
       />
       <div class="s-base">
         <div class="s-label" v-text="'NFT'" />
-        <button class="s-input text-left h-[61px]" @click="handlePickerClick">
+        <button
+          class="s-input text-left h-[61px]"
+          @click="handlePickerClick('nft')"
+        >
           <div class="flex items-center">
             <NftPreview
               v-if="currentNft"

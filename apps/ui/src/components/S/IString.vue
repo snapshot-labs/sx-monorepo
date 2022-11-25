@@ -1,3 +1,9 @@
+<script lang="ts">
+export default {
+  inheritAttrs: false
+};
+</script>
+
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 
@@ -35,6 +41,7 @@ const inputValue = computed({
       v-model="inputValue"
       type="text"
       class="s-input"
+      v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
     />
   </SBase>
