@@ -1,7 +1,10 @@
 import { defaultProvider } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../../src/clients';
+import { getStorageVarAddress } from '../../../../src/utils/encoding';
 import { Choice } from '../../../../src/utils/choice';
+
+const latestL1Block = 7583800;
 
 describe('EthereumSig', () => {
   expect(process.env.GOERLI_NODE_URL).toBeDefined();
@@ -19,6 +22,18 @@ describe('EthereumSig', () => {
   const executor = '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7';
 
   beforeAll(() => {
+    const getStorageAt = defaultProvider.getStorageAt;
+    jest.spyOn(defaultProvider, 'getStorageAt').mockImplementation((contractAddress, key) => {
+      if (
+        contractAddress === '0x6ca3d25e901ce1fff2a7dd4079a24ff63ca6bbf8ba956efc71c1467975ab78f' &&
+        key === getStorageVarAddress('_latest_l1_block')
+      ) {
+        return Promise.resolve(latestL1Block.toString(16));
+      }
+
+      return getStorageAt.call(defaultProvider, contractAddress, key);
+    });
+
     jest.spyOn(ethSigClient, 'generateSalt').mockImplementation(() => 0);
   });
 
