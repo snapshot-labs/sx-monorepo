@@ -24,7 +24,7 @@ export class StarkNetTx {
   async getStrategiesAddresses(envelope: Envelope<Message>) {
     return Promise.all(
       envelope.data.message.strategies.map(
-        (id) =>
+        id =>
           this.config.starkProvider.getStorageAt(
             envelope.data.message.space,
             utils.encoding.getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))

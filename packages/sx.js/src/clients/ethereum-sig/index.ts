@@ -31,7 +31,7 @@ export class EthereumSig {
   async getStrategiesAddresses(data: Propose | Vote) {
     return Promise.all(
       data.strategies.map(
-        (id) =>
+        id =>
           this.config.starkProvider.getStorageAt(
             data.space,
             utils.encoding.getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))
@@ -109,7 +109,7 @@ export class EthereumSig {
         hash.computeHashOnElements(data.executionParams)
       ),
       usedVotingStrategiesHash: utils.encoding.hexPadRight(
-        hash.computeHashOnElements(data.strategies.map((strategy) => `0x${strategy.toString(16)}`))
+        hash.computeHashOnElements(data.strategies.map(strategy => `0x${strategy.toString(16)}`))
       ),
       userVotingStrategyParamsFlatHash: utils.encoding.hexPadRight(
         hash.computeHashOnElements(utils.encoding.flatten2DArray(strategiesParams))
@@ -129,7 +129,7 @@ export class EthereumSig {
       authenticator: utils.encoding.hexPadRight(data.authenticator),
       voterAddress: utils.encoding.hexPadRight(address),
       usedVotingStrategiesHash: utils.encoding.hexPadRight(
-        hash.computeHashOnElements(data.strategies.map((strategy) => `0x${strategy.toString(16)}`))
+        hash.computeHashOnElements(data.strategies.map(strategy => `0x${strategy.toString(16)}`))
       ),
       userVotingStrategyParamsFlatHash: utils.encoding.hexPadRight(
         hash.computeHashOnElements(utils.encoding.flatten2DArray(strategiesParams))

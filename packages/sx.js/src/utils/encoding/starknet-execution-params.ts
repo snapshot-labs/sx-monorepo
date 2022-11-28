@@ -13,7 +13,7 @@ export function createStarknetExecutionParams(callArray: Call[]): string[] {
   const executionParams = [dataOffset];
   let calldataIndex = 0;
 
-  callArray.forEach((tx) => {
+  callArray.forEach(tx => {
     const subArr: string[] = [
       tx.to,
       tx.functionSelector,
@@ -24,7 +24,7 @@ export function createStarknetExecutionParams(callArray: Call[]): string[] {
     executionParams.push(...subArr);
   });
 
-  callArray.forEach((tx) => {
+  callArray.forEach(tx => {
     executionParams.push(...tx.calldata);
   });
   return executionParams;

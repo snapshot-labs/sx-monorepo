@@ -51,7 +51,7 @@ export function getProposeCalldata(
     ...metadataUri.values,
     executorAddress,
     `0x${usedVotingStrategies.length.toString(16)}`,
-    ...usedVotingStrategies.map((strategy) => `0x${strategy.toString(16)}`),
+    ...usedVotingStrategies.map(strategy => `0x${strategy.toString(16)}`),
     `0x${usedVotingStrategyParamsFlat.length.toString(16)}`,
     ...usedVotingStrategyParamsFlat,
     `0x${executionParams.length.toString(16)}`,
@@ -81,7 +81,7 @@ export function getVoteCalldata(
     `0x${proposalID.toString(16)}`,
     `0x${choice.toString(16)}`,
     `0x${usedVotingStrategies.length.toString(16)}`,
-    ...usedVotingStrategies.map((strategy) => `0x${strategy.toString(16)}`),
+    ...usedVotingStrategies.map(strategy => `0x${strategy.toString(16)}`),
     `0x${usedVotingStrategyParamsFlat.length.toString(16)}`,
     ...usedVotingStrategyParamsFlat
   ];

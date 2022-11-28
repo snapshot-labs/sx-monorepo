@@ -27,7 +27,7 @@ export class IntsSequence {
   }
 
   asStrings(): string[] {
-    return this.values.map((s) => {
+    return this.values.map(s => {
       let str = '';
       for (let n = 2; n < s.length; n += 2) {
         str += String.fromCharCode(parseInt(s.substring(n, n + 2), 16));

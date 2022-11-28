@@ -7,7 +7,7 @@ export function shortStrToFelt(str: string): bigint {
   for (let i = 0; i < str.length; i++) {
     let toAdd = str.charCodeAt(i).toString(16);
     // If value is < 10, prefix with a 0
-    if (toAdd.length % 2 !== 0) toAdd = '0' + toAdd;
+    if (toAdd.length % 2 !== 0) toAdd = `0${toAdd}`;
     res += toAdd;
   }
   return BigInt(res);

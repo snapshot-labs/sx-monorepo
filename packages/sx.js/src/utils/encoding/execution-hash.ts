@@ -53,7 +53,7 @@ export function createExecutionHash(
     chainId: chainId,
     verifyingContract: verifyingContract
   };
-  const txHashes = txs.map((tx) => _TypedDataEncoder.hash(domain, EIP712_TYPES, tx));
+  const txHashes = txs.map(tx => _TypedDataEncoder.hash(domain, EIP712_TYPES, tx));
   const abiCoder = new AbiCoder();
   const executionHash = keccak256(abiCoder.encode(['bytes32[]'], [txHashes]));
   return {
