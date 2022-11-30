@@ -1,6 +1,7 @@
 import type { Provider } from 'starknet';
 import type { Call } from 'starknet';
 import type { Choice } from './utils/choice';
+import type { MetaTransaction } from './utils/encoding/execution-hash';
 
 export interface Authenticator {
   type: string;
@@ -78,4 +79,9 @@ export type Envelope<T extends Message> = {
   data: {
     message: T;
   };
+};
+
+export type ExecutionInput = {
+  calls?: Call[];
+  transactions?: MetaTransaction[];
 };

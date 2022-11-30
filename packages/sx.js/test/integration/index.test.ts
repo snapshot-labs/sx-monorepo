@@ -1,4 +1,5 @@
 import { StarkNetTx, EthereumSig } from '../../src/clients';
+import { getExecutionData } from '../../src/executors';
 import { Account, defaultProvider, ec } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
 import { Choice } from '../../src/utils/choice';
@@ -155,6 +156,49 @@ describe('StarkNetTx', () => {
       });
 
       const receipt = await client.vote(account, envelope);
+      console.log('Receipt', receipt);
+
+      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60e3);
+  });
+
+  describe('zodiac execution', () => {
+    const client = new StarkNetTx({ starkProvider: defaultProvider, ethUrl });
+    const space = '0x847ae39833c61fe964bfac857ad8c5fa261ec4c716c61b8f28c4ae61fe376b';
+    const authenticator = '0xb32364e042cb948be62a09355595a4b80dfff4eb11a485c1950ace70b0e835';
+    const strategy = 0;
+
+    const executorAddress = '0x790a2f60ac5a1743ebfad2a00b06d1c40866dc92eead76a7ede6c805bc29a4b';
+    const transactions = [
+      {
+        to: '0x2842c82E20ab600F443646e1BC8550B44a513D82',
+        value: '0x0',
+        data: '0x',
+        operation: 0,
+        nonce: 0
+      }
+    ];
+
+    it('StarkNetTx.propose()', async () => {
+      const executionData = getExecutionData(executorAddress, { transactions });
+
+      const envelope = {
+        address: walletAddress,
+        sig: null,
+        data: {
+          message: {
+            space,
+            authenticator,
+            strategies: [strategy],
+            metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+            ...executionData
+          }
+        }
+      };
+
+      const receipt = await client.propose(account, envelope);
       console.log('Receipt', receipt);
 
       // await defaultProvider.waitForTransaction(receipt.transaction_hash);
