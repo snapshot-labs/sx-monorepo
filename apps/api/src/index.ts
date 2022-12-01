@@ -28,6 +28,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '4mb' }));
 app.use(express.urlencoded({ limit: '4mb', extended: false }));
 app.use(cors({ maxAge: 86400 }));
+app.get('/ping', (req, res) => res.send({ status: 'ok' }));
 app.use('/', checkpoint.graphql);
 
 app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
