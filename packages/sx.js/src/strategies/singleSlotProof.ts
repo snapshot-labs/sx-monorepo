@@ -10,16 +10,16 @@ import type {
 import { getStorageVarAddress, offsetStorageVar } from '../utils/encoding';
 
 const fossilL1HeadersStoreAddress =
-  '0x6ca3d25e901ce1fff2a7dd4079a24ff63ca6bbf8ba956efc71c1467975ab78f';
+  '0x69606dd1655fdbbf8189e88566c54890be8f7e4a3650398ac17f6586a4a336d';
 const fossilFactRegistryAddress =
-  '0x363108ac1521a47b4f7d82f8ba868199bc1535216bbedfc1b071ae93cc406fd';
+  '0x2e39818908f0da118fde6b88b52e4dbdf13d2e171e488507f40deb6811bde3f';
 
 const proposalRegistryStore = 'Voting_proposal_registry_store';
 const strategyParamsStore = 'Voting_voting_strategy_params_store';
-const timestampToEthBlockNumberStore = 'Timestamp_timestamp_to_eth_block_number';
+const timestampToEthBlockNumberStore = 'Timestamp_timestamp_to_eth_block_number_store';
 const latestL1BlockStore = '_latest_l1_block';
 
-const snapshotTimestampOffset = 3;
+const snapshotTimestampsOffset = 2;
 
 async function fetchStrategyParams(
   index: number,
@@ -27,6 +27,7 @@ async function fetchStrategyParams(
   clientConfig: ClientConfig
 ): Promise<string[]> {
   const lengthAddress = getStorageVarAddress(strategyParamsStore, index.toString(16), '0x0');
+
   const length = parseInt(
     (await clientConfig.starkProvider.getStorageAt(
       envelope.data.message.space,
@@ -63,12 +64,14 @@ async function getBlockStorage(
       (envelope as Envelope<VanillaVoteMessage>).data.message.proposal.toString(16)
     );
 
-    const timestamp = (await clientConfig.starkProvider.getStorageAt(
+    const timestamps = (await clientConfig.starkProvider.getStorageAt(
       envelope.data.message.space,
-      offsetStorageVar(proposalAddress, snapshotTimestampOffset)
+      offsetStorageVar(proposalAddress, snapshotTimestampsOffset)
     )) as string;
 
-    return [address, getStorageVarAddress(timestampToEthBlockNumberStore, timestamp)];
+    const snapshotTimestamp = timestamps.replace('0x', '').slice(0, 8);
+
+    return [address, getStorageVarAddress(timestampToEthBlockNumberStore, snapshotTimestamp)];
   }
 
   return [fossilL1HeadersStoreAddress, getStorageVarAddress(latestL1BlockStore)];

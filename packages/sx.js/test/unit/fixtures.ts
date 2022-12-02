@@ -1,49 +1,64 @@
 export const proposeEnvelope = {
-  address: '0x0BF8dE8Fc51002c9fE7cb29352dcaCb757d0364b',
-  sig: '0x9477b6bae1534ea017fc44d8df019dcd74c87146c9ec0e37400019d3b5e7330010f89f8c80474f42f7d9a125156e8dc26a24d54eb1b496f88f04c467a9574f211c',
+  address: '0x0538D033B879aC94C709c1E408CC081345427379',
+  sig: '0x33bbb847e30b943aadc6101e20fbd32da3804d2b217767882cacfb85bd5e8d5a1a81dfa00b5ceec8945545276f56dd2a1190ac129b3f39bad5789a4397d8e3621b',
   data: {
-    domain: { name: 'snapshot-x', version: '1' },
+    domain: { name: 'snapshot-x', version: '1', chainId: 5 },
     types: {
       Propose: [
+        { name: 'authenticator', type: 'bytes32' },
         { name: 'space', type: 'bytes32' },
-        { name: 'executionHash', type: 'bytes32' },
-        { name: 'metadataURI', type: 'string' },
+        { name: 'author', type: 'address' },
+        { name: 'metadata_uri', type: 'string' },
+        { name: 'executor', type: 'bytes32' },
+        { name: 'execution_hash', type: 'bytes32' },
+        { name: 'strategies_hash', type: 'bytes32' },
+        { name: 'strategies_params_hash', type: 'bytes32' },
         { name: 'salt', type: 'uint256' }
       ]
     },
     message: {
-      space: '0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d',
-      authenticator: '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369',
-      strategies: [0],
-      executor: '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7',
+      space: '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',
+      authenticator: '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
+      strategies: [1],
+      executor: '0x04ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d',
       metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
       executionParams: [],
+      author: '0x0538D033B879aC94C709c1E408CC081345427379',
       executionHash: '0x049ee3eba8c1600700ee1b87eb599f16716b0b1022947733551fde4050ca6804',
-      salt: 2817056238
+      strategiesHash: '0x078d74f61aeaa8286418fd34b3a12a610445eba11d00ecc82ecac2542d55f7a4',
+      strategiesParamsHash: '0x04c643e1ba37b388f483a9dce226443876069bc87ff7ed6763c1f12048ff5cf9',
+      salt: 0
     }
   }
 };
 
 export const voteEnvelope = {
-  address: '0x0BF8dE8Fc51002c9fE7cb29352dcaCb757d0364b',
-  sig: '0x9477b6bae1534ea017fc44d8df019dcd74c87146c9ec0e37400019d3b5e7330010f89f8c80474f42f7d9a125156e8dc26a24d54eb1b496f88f04c467a9574f211c',
+  address: '0x0538D033B879aC94C709c1E408CC081345427379',
+  sig: '0x529b909b496194a9d4b4fed0f30264943cc25d430352fcf0e5dc0baa7dbeb6f60de20dd6edf8db193bdf39c1c0cfcdf3895927cae31e88c4c28b9eacf736c2401c',
   data: {
-    domain: { name: 'snapshot-x', version: '1' },
+    domain: { name: 'snapshot-x', version: '1', chainId: 5 },
     types: {
-      Propose: [
+      Vote: [
+        { name: 'authenticator', type: 'bytes32' },
         { name: 'space', type: 'bytes32' },
-        { name: 'executionHash', type: 'bytes32' },
-        { name: 'metadataURI', type: 'string' },
+        { name: 'voter', type: 'address' },
+        { name: 'proposal', type: 'uint256' },
+        { name: 'choice', type: 'uint256' },
+        { name: 'strategies_hash', type: 'bytes32' },
+        { name: 'strategies_params_hash', type: 'bytes32' },
         { name: 'salt', type: 'uint256' }
       ]
     },
     message: {
-      space: '0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d',
-      authenticator: '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369',
-      executor: '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7',
-      strategies: [0],
-      proposal: 1,
-      choice: 1
+      space: '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',
+      authenticator: '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
+      strategies: [1],
+      proposal: 3,
+      choice: 1,
+      voter: '0x0538D033B879aC94C709c1E408CC081345427379',
+      strategiesHash: '0x078d74f61aeaa8286418fd34b3a12a610445eba11d00ecc82ecac2542d55f7a4',
+      strategiesParamsHash: '0x04c643e1ba37b388f483a9dce226443876069bc87ff7ed6763c1f12048ff5cf9',
+      salt: 0
     }
   }
 };

@@ -29,7 +29,8 @@
     "@snapshot-labs/prettier-config": "^0.1.0-beta.7",
     "cross-fetch": "^3.1.5",
     "randombytes": "^2.1.0",
-    "starknet": "^4.4.2"
+    "snake-case": "^3.0.4",
+    "starknet": "^4.14.0"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.1",

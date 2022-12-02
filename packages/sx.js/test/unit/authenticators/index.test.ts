@@ -6,11 +6,11 @@ describe('authenticators', () => {
   describe('getAuthenticator', () => {
     it('should return correct authenticator from predefined default addresses', () => {
       expect(
-        getAuthenticator('0xb32364e042cb948be62a09355595a4b80dfff4eb11a485c1950ace70b0e835')?.type
+        getAuthenticator('0x05e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62')?.type
       ).toBe('vanilla');
 
       expect(
-        getAuthenticator('0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369')?.type
+        getAuthenticator('0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14')?.type
       ).toBe('ethSig');
     });
 

@@ -2,7 +2,7 @@ import { getExecutionData } from '../../../src/executors';
 
 describe('getExecutionData', () => {
   it('should create vanilla execution data', () => {
-    const address = '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7';
+    const address = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
 
     const data = getExecutionData(address);
 
@@ -37,7 +37,7 @@ describe('getExecutionData', () => {
   });
 
   it('should create ethRelayer execution data', () => {
-    const address = '0x790a2f60ac5a1743ebfad2a00b06d1c40866dc92eead76a7ede6c805bc29a4b';
+    const address = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
     const transactions = [
       {
         to: '0x2842c82E20ab600F443646e1BC8550B44a513D82',
@@ -69,10 +69,10 @@ describe('getExecutionData', () => {
   });
 
   it('should throw if inputs are missing', () => {
-    const address = '0x790a2f60ac5a1743ebfad2a00b06d1c40866dc92eead76a7ede6c805bc29a4b';
+    const address = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
 
     expect(() => getExecutionData(address)).toThrowError(
-      'Not enough data to create execution for executor 0x790a2f60ac5a1743ebfad2a00b06d1c40866dc92eead76a7ede6c805bc29a4b'
+      'Not enough data to create execution for executor 0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81'
     );
   });
 });

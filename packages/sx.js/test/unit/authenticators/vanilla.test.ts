@@ -16,12 +16,12 @@ describe('vanillaAuthenticator', () => {
 
     expect(call).toEqual({
       calldata: [
-        '0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d',
+        '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',
         '0x1bfd596ae442867ef71ca523061610682af8b00fc2738329422f4ad8d220b81',
         1,
         '0x15'
       ],
-      contractAddress: '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369',
+      contractAddress: '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
       entrypoint: 'authenticate'
     });
   });

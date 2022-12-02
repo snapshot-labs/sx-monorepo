@@ -54,16 +54,16 @@ export interface Vote {
 export type VanillaProposeMessage = Propose;
 export type VanillaVoteMessage = Vote;
 export type EthSigProposeMessage = Propose & {
-  proposerAddress: string;
-  executionParamsHash: string;
-  usedVotingStrategiesHash: string;
-  userVotingStrategyParamsFlatHash: string;
+  author: string;
+  executionHash: string;
+  strategiesHash: string;
+  strategiesParamsHash: string;
   salt: number;
 };
 export type EthSigVoteMessage = Vote & {
-  voterAddress: string;
-  usedVotingStrategiesHash: string;
-  userVotingStrategyParamsFlatHash: string;
+  voter: string;
+  strategiesHash: string;
+  strategiesParamsHash: string;
   salt: number;
 };
 
@@ -80,6 +80,8 @@ export type Envelope<T extends Message> = {
     message: T;
   };
 };
+
+export type StrategiesAddresses = { index: number; address: string }[];
 
 export type ExecutionInput = {
   calls?: Call[];

@@ -16,8 +16,8 @@ type Executor = {
 
 const executors: { [key: string]: Executor } = {
   '1': starknetExecutor,
-  '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7': vanillaExecutor,
-  '0x790a2f60ac5a1743ebfad2a00b06d1c40866dc92eead76a7ede6c805bc29a4b': ethRelayerExecutor
+  '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d': vanillaExecutor,
+  '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81': ethRelayerExecutor
 };
 
 export function getExecutionData(executorAddress: string, input?: ExecutionInput) {

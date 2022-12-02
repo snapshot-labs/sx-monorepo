@@ -2,7 +2,7 @@ import { createExecutionHash, MetaTransaction } from '../utils/encoding/executio
 import { SplitUint256 } from '../utils/split-uint256';
 
 const CONSTANTS = {
-  '0x790a2f60ac5a1743ebfad2a00b06d1c40866dc92eead76a7ede6c805bc29a4b': {
+  '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81': {
     destination: '0xa88f72e92cc519d617b684F8A78d3532E7bb61ca',
     chainId: 5
   }

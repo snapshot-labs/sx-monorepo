@@ -1,15 +1,14 @@
 import { Account, hash } from 'starknet';
 import * as utils from '../../utils';
 import { getAuthenticator } from '../../authenticators';
-import { getStrategy } from '../../strategies';
 import type {
   EthSigProposeMessage,
   EthSigVoteMessage,
   VanillaVoteMessage,
   VanillaProposeMessage,
-  Message,
   Envelope,
-  ClientConfig
+  ClientConfig,
+  StrategiesAddresses
 } from '../../types';
 
 const { getSelectorFromName } = hash;
@@ -21,57 +20,19 @@ export class StarkNetTx {
     this.config = config;
   }
 
-  async getStrategiesAddresses(envelope: Envelope<Message>) {
-    return Promise.all(
-      envelope.data.message.strategies.map(
-        id =>
-          this.config.starkProvider.getStorageAt(
-            envelope.data.message.space,
-            utils.encoding.getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))
-          ) as Promise<string>
-      )
-    );
-  }
-
-  async getStrategiesParams(
-    call: 'propose' | 'vote',
-    strategiesAddresses: string[],
-    envelope: Envelope<Message>
-  ) {
-    return Promise.all(
-      strategiesAddresses.map((address, index) => {
-        const strategy = getStrategy(address);
-        if (!strategy) throw new Error('Invalid strategy');
-
-        return strategy.getParams(call, address, index, envelope, this.config);
-      })
-    );
-  }
-
-  async getExtraProposeCalls(strategiesAddresses: string[], envelope: Envelope<Message>) {
-    const extraCalls = await Promise.all(
-      strategiesAddresses.map((address, index) => {
-        const strategy = getStrategy(address);
-        if (!strategy) throw new Error('Invalid strategy');
-
-        return strategy.getExtraProposeCalls(address, index, envelope, this.config);
-      })
-    );
-
-    return extraCalls.flat();
-  }
-
   async getProposeCalldata(
-    strategiesAddresses: string[],
+    strategiesAddresses: StrategiesAddresses,
     envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>
   ) {
     const { address, data } = envelope;
     const { strategies, executor, metadataUri, executionParams } = data.message;
 
-    const strategiesParams = await this.getStrategiesParams(
+    const strategiesParams = await utils.strategies.getStrategiesParams(
       'propose',
       strategiesAddresses,
-      envelope
+      envelope.address,
+      envelope.data.message,
+      this.config
     );
 
     return utils.encoding.getProposeCalldata(
@@ -85,13 +46,19 @@ export class StarkNetTx {
   }
 
   async getVoteCalldata(
-    strategiesAddresses: string[],
+    strategiesAddresses: StrategiesAddresses,
     envelope: Envelope<VanillaVoteMessage | EthSigVoteMessage>
   ) {
     const { address, data } = envelope;
     const { strategies, proposal, choice } = data.message;
 
-    const strategiesParams = await this.getStrategiesParams('vote', strategiesAddresses, envelope);
+    const strategiesParams = await utils.strategies.getStrategiesParams(
+      'vote',
+      strategiesAddresses,
+      envelope.address,
+      envelope.data.message,
+      this.config
+    );
 
     return utils.encoding.getVoteCalldata(address, proposal, choice, strategies, strategiesParams);
   }
@@ -105,10 +72,19 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const strategiesAddresses = await this.getStrategiesAddresses(envelope);
+    const strategiesAddresses = await utils.strategies.getStrategies(
+      envelope.data.message,
+      this.config
+    );
+
     const calldata = await this.getProposeCalldata(strategiesAddresses, envelope);
     const call = authenticator.createCall(envelope, getSelectorFromName('propose'), calldata);
-    const extraCalls = await this.getExtraProposeCalls(strategiesAddresses, envelope);
+    const extraCalls = await utils.strategies.getExtraProposeCalls(
+      strategiesAddresses,
+      envelope.address,
+      envelope.data.message,
+      this.config
+    );
 
     const calls = [...extraCalls, call];
 
@@ -124,7 +100,10 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const strategiesAddresses = await this.getStrategiesAddresses(envelope);
+    const strategiesAddresses = await utils.strategies.getStrategies(
+      envelope.data.message,
+      this.config
+    );
     const calldata = await this.getVoteCalldata(strategiesAddresses, envelope);
     const call = authenticator.createCall(envelope, getSelectorFromName('vote'), calldata);
 

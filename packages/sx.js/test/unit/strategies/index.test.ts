@@ -6,11 +6,11 @@ describe('voting strategies', () => {
   describe('getStrategy', () => {
     it('should return correct strategy from predefined default addresses', () => {
       expect(
-        getStrategy('0x515fbfa25bcf1e9419cdb8886cb8878d2705cdd2be8cf434675e19314b89d71')?.type
+        getStrategy('0x058623786b93d9b6ed1f83cec5c6fa6bea5f399d2795ee56a6123bdd83f5aa48')?.type
       ).toBe('vanilla');
 
       expect(
-        getStrategy('0x68da98d7798439f16b63b61644e7b27c932d5c051a455a978aa95488d5dcc9b')?.type
+        getStrategy('0x00d1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b')?.type
       ).toBe('singleSlotProof');
     });
 

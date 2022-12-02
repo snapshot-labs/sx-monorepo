@@ -16,19 +16,19 @@ describe('ethSigAuthenticator', () => {
 
     expect(call).toEqual({
       calldata: [
-        '0x74c87146c9ec0e37400019d3b5e73300',
-        '0x9477b6bae1534ea017fc44d8df019dcd',
-        '0x6a24d54eb1b496f88f04c467a9574f21',
-        '0x10f89f8c80474f42f7d9a125156e8dc2',
-        '0x1c',
-        '0xa7e8ddee',
+        '0xa3804d2b217767882cacfb85bd5e8d5a',
+        '0x33bbb847e30b943aadc6101e20fbd32d',
+        '0x1190ac129b3f39bad5789a4397d8e362',
+        '0x1a81dfa00b5ceec8945545276f56dd2a',
+        '0x1b',
         '0x0',
-        '0x4b7cff71219e275676e0ca23579f41b99dd1d1bd01adc7d7f1bc917d448e57d',
+        '0x0',
+        '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',
         '0x1bfd596ae442867ef71ca523061610682af8b00fc2738329422f4ad8d220b81',
         1,
         '0x15'
       ],
-      contractAddress: '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369',
+      contractAddress: '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
       entrypoint: 'authenticate'
     });
   });

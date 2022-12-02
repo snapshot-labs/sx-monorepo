@@ -1,5 +1,4 @@
 import { Account, ec, defaultProvider } from 'starknet';
-import { getStarkKey } from 'starknet/utils/ellipticCurve';
 import { verify } from '../../../src/utils/starkkey';
 import { domain, voteTypes } from '../../../src/clients/starknet-sig/types';
 
@@ -8,7 +7,7 @@ describe('starkkey', () => {
   const privKey = starkKeyPair.getPrivate('hex');
   starkKeyPair = ec.getKeyPair(`0x${privKey}`);
   const pubKey = starkKeyPair.getPublic('hex');
-  const address = getStarkKey(starkKeyPair);
+  const address = ec.getStarkKey(starkKeyPair);
   const account = new Account(defaultProvider, address, starkKeyPair);
   // console.log('Privkey', privKey);
   // console.log('Pubkey', pubKey);
