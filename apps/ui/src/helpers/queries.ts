@@ -37,12 +37,7 @@ export const PROPOSAL_QUERY = gql`
 
 export const PROPOSALS_QUERY = gql`
   query ($first: Int!, $space: String!) {
-    proposals(
-      first: $first
-      where: { space: $space }
-      orderBy: created
-      orderDirection: desc
-    ) {
+    proposals(first: $first, where: { space: $space }, orderBy: created, orderDirection: desc) {
       id
       proposal_id
       space {

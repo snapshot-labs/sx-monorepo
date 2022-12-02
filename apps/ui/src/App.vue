@@ -39,10 +39,7 @@ watch(web3Account, async () => {
       <Sidebar class="invisible md:visible" />
       <div class="flex-auto w-full">
         <Topnav />
-        <router-view
-          :key="$route.path"
-          class="flex-auto mt-[72px] ml-0 md:ml-[72px]"
-        />
+        <router-view :key="$route.path" class="flex-auto mt-[72px] ml-0 md:ml-[72px]" />
       </div>
     </div>
     <div id="modal" />

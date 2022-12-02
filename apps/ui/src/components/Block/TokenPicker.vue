@@ -21,11 +21,8 @@ const filteredAssets = computed(() =>
         asset.contract_ticker_symbol
           .toLocaleLowerCase()
           .includes(props.searchValue.toLocaleLowerCase()) ||
-        asset.contract_name
-          .toLocaleLowerCase()
-          .includes(props.searchValue.toLocaleLowerCase()) ||
-        asset.contract_address.toLocaleLowerCase() ===
-          props.searchValue.toLocaleLowerCase()
+        asset.contract_name.toLocaleLowerCase().includes(props.searchValue.toLocaleLowerCase()) ||
+        asset.contract_address.toLocaleLowerCase() === props.searchValue.toLocaleLowerCase()
       );
     })
     .sort((a, b) => {
@@ -42,11 +39,7 @@ const filteredAssets = computed(() =>
     <UiLoading />
   </div>
   <template v-else>
-    <div
-      v-if="filteredAssets.length === 0"
-      class="text-center py-3"
-      v-text="'No results'"
-    />
+    <div v-if="filteredAssets.length === 0" class="text-center py-3" v-text="'No results'" />
     <div
       v-for="(asset, i) in filteredAssets"
       :key="i"
@@ -57,22 +50,14 @@ const filteredAssets = computed(() =>
       <div class="flex items-center min-w-0 pr-2">
         <Stamp :id="asset.contract_address" type="token" :size="32" />
         <div class="flex flex-col ml-3 leading-[20px] min-w-0">
-          <div
-            class="text-skin-link"
-            v-text="shorten(asset.contract_ticker_symbol, 12)"
-          />
-          <div
-            class="text-sm truncate"
-            v-text="shorten(asset.contract_name, 24)"
-          />
+          <div class="text-skin-link" v-text="shorten(asset.contract_ticker_symbol, 12)" />
+          <div class="text-sm truncate" v-text="shorten(asset.contract_name, 24)" />
         </div>
       </div>
       <div class="flex flex-col items-end leading-[20px]">
         <div
           class="text-skin-link"
-          v-text="
-            _n(formatUnits(asset.balance || 0, asset.contract_decimals || 0))
-          "
+          v-text="_n(formatUnits(asset.balance || 0, asset.contract_decimals || 0))"
         />
         <div class="text-sm" v-text="`$${_n(asset.quote)}`" />
       </div>

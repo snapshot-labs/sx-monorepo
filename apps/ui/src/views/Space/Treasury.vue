@@ -68,28 +68,16 @@ onMounted(() => {
     </div>
     <div>
       <div class="flex pl-4 border-b">
-        <Link
-          :is-active="page === 'tokens'"
-          text="Tokens"
-          class="pr-3"
-          @click="page = 'tokens'"
-        />
+        <Link :is-active="page === 'tokens'" text="Tokens" class="pr-3" @click="page = 'tokens'" />
         <Link :is-active="page === 'nfts'" text="NFTs" @click="page = 'nfts'" />
       </div>
       <div v-if="page === 'tokens'">
         <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
-        <div
-          v-for="(asset, i) in sortedAssets"
-          :key="i"
-          class="mx-4 py-3 border-b flex"
-        >
+        <div v-for="(asset, i) in sortedAssets" :key="i" class="mx-4 py-3 border-b flex">
           <div class="flex-auto flex items-center min-w-0">
             <Stamp :id="asset.contract_address" type="token" :size="32" />
             <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
-              <h4
-                class="text-skin-link"
-                v-text="asset.contract_ticker_symbol"
-              />
+              <h4 class="text-skin-link" v-text="asset.contract_ticker_symbol" />
               <div class="text-sm truncate" v-text="asset.contract_name" />
             </div>
           </div>
@@ -99,42 +87,22 @@ onMounted(() => {
           >
             <h4 class="text-skin-link" v-text="`$${_n(asset.quote_rate)}`" />
             <div v-if="asset.percent" class="text-sm">
-              <div
-                v-if="asset.percent > 0"
-                class="text-green"
-                v-text="`+${_n(asset.percent)}%`"
-              />
-              <div
-                v-if="asset.percent < 0"
-                class="text-red"
-                v-text="`${_n(asset.percent)}%`"
-              />
+              <div v-if="asset.percent > 0" class="text-green" v-text="`+${_n(asset.percent)}%`" />
+              <div v-if="asset.percent < 0" class="text-red" v-text="`${_n(asset.percent)}%`" />
             </div>
           </div>
-          <div
-            class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px]"
-          >
+          <div class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px]">
             <h4
               class="text-skin-link"
-              v-text="
-                _n(
-                  formatUnits(asset.balance || 0, asset.contract_decimals || 0)
-                )
-              "
+              v-text="_n(formatUnits(asset.balance || 0, asset.contract_decimals || 0))"
             />
-            <div
-              v-if="asset.quote"
-              class="text-sm"
-              v-text="`$${_n(asset.quote)}`"
-            />
+            <div v-if="asset.quote" class="text-sm" v-text="`$${_n(asset.quote)}`" />
           </div>
         </div>
       </div>
       <div v-else>
         <UiLoading v-if="nftsLoading && !nftsLoaded" class="px-4 py-3 block" />
-        <div
-          class="grid gap-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-6 py-3 px-2"
-        >
+        <div class="grid gap-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-6 py-3 px-2">
           <div v-for="(nft, i) in nfts" :key="i" class="block px-3 py-1 mb-3">
             <NftPreview :item="nft" class="w-full" />
             <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>

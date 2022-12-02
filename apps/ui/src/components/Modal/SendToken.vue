@@ -55,9 +55,7 @@ const currentToken = computed(() => {
 
   return token;
 });
-const formValid = computed(
-  () => currentToken.value && form.to && form.amount !== ''
-);
+const formValid = computed(() => currentToken.value && form.to && form.amount !== '');
 
 onMounted(() => {
   loadBalances(props.address, props.network);
@@ -97,10 +95,7 @@ function handleValueUpdate(value) {
 function handleMaxClick() {
   if (currentToken.value) {
     handleAmountUpdate(
-      formatUnits(
-        currentToken.value.balance,
-        currentToken.value.contract_decimals
-      )
+      formatUnits(currentToken.value.balance, currentToken.value.contract_decimals)
     );
   }
 }
@@ -123,12 +118,7 @@ watch(
     if (props.initialState) {
       form.to = props.initialState.recipient;
       form.token = props.initialState.token.address;
-      handleAmountUpdate(
-        formatUnits(
-          props.initialState.amount,
-          props.initialState.token.decimals
-        )
-      );
+      handleAmountUpdate(formatUnits(props.initialState.amount, props.initialState.token.decimals));
     } else {
       form.to = DEFAULT_FORM_STATE.to;
       form.token = DEFAULT_FORM_STATE.token;
@@ -149,10 +139,7 @@ watch(currentToken, token => {
     <template #header>
       <h3 v-text="'Send token'" />
       <template v-if="showPicker">
-        <a
-          class="absolute left-0 -top-1 p-4 text-color"
-          @click="showPicker = false"
-        >
+        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
@@ -200,10 +187,7 @@ watch(currentToken, token => {
       />
       <div class="s-base">
         <div class="s-label" v-text="'Token'" />
-        <button
-          class="s-input text-left h-[61px]"
-          @click="handlePickerClick('token')"
-        >
+        <button class="s-input text-left h-[61px]" @click="handlePickerClick('token')">
           <div class="flex items-center">
             <Stamp
               v-if="currentToken"
@@ -229,11 +213,7 @@ watch(currentToken, token => {
             }"
             @update:model-value="handleAmountUpdate"
           />
-          <a
-            class="absolute right-[16px] top-[4px]"
-            @click="handleMaxClick"
-            v-text="'max'"
-          />
+          <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick" v-text="'max'" />
         </div>
         <SINumber
           :model-value="form.value"
@@ -243,9 +223,7 @@ watch(currentToken, token => {
       </div>
     </div>
     <template v-if="!showPicker" #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
-        Confirm
-      </UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"> Confirm </UiButton>
     </template>
   </UiModal>
 </template>

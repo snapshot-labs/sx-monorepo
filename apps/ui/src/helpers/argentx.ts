@@ -1,5 +1,4 @@
-const get = () =>
-  import(/* webpackChunkName: "argentx" */ '@argent/get-starknet');
+const get = () => import(/* webpackChunkName: "argentx" */ '@argent/get-starknet');
 import LockConnector from '@snapshot-labs/lock/src/connector';
 
 export default class Connector extends LockConnector {

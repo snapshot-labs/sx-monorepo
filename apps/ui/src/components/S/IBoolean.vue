@@ -15,11 +15,7 @@ const dirty = ref(false);
 
 const inputValue = computed({
   get() {
-    if (
-      props.modelValue === undefined &&
-      !dirty.value &&
-      props.definition.default !== undefined
-    ) {
+    if (props.modelValue === undefined && !dirty.value && props.definition.default !== undefined) {
       return props.definition.default;
     }
 

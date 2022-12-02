@@ -9,9 +9,7 @@ export async function getNames(addresses) {
   const provider = getProvider(network);
   const abi = [
     {
-      inputs: [
-        { internalType: 'address[]', name: 'addresses', type: 'address[]' }
-      ],
+      inputs: [{ internalType: 'address[]', name: 'addresses', type: 'address[]' }],
       name: 'getNames',
       outputs: [{ internalType: 'string[]', name: 'r', type: 'string[]' }],
       stateMutability: 'view',

@@ -5,14 +5,10 @@ import { useWeb3 } from '@/composables/useWeb3';
 import { useTxStatus } from '@/composables/useTxStatus';
 import { useAccount } from '@/composables/useAccount';
 import { useModal } from '@/composables/useModal';
-import {
-  SUPPORTED_AUTHENTICATORS,
-  SUPPORTED_STRATEGIES
-} from '@/helpers/constants';
+import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from '@/helpers/constants';
 import type { Transaction, TransactionData, Proposal, Space } from '@/types';
 
-const vanillaExecutor =
-  '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7';
+const vanillaExecutor = '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7';
 
 export function useActions() {
   const { web3 } = useWeb3();
@@ -25,10 +21,7 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
-  function pickAuthenticatorAndStrategies(
-    entity: Proposal | Space,
-    authenticators: string[]
-  ) {
+  function pickAuthenticatorAndStrategies(entity: Proposal | Space, authenticators: string[]) {
     const authenticator = authenticators.find(
       authenticator => SUPPORTED_AUTHENTICATORS[authenticator]
     );

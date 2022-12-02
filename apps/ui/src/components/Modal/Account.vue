@@ -32,10 +32,7 @@ watch(open, () => (step = null));
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3
-        v-if="!web3.account || step === 'connect'"
-        v-text="'Connect wallet'"
-      />
+      <h3 v-if="!web3.account || step === 'connect'" v-text="'Connect wallet'" />
       <h3 v-else v-text="'Account'" />
     </template>
     <div v-if="!web3.account || step === 'connect'">
@@ -48,10 +45,7 @@ watch(open, () => (step = null));
           @click="$emit('login', connector.id)"
         >
           <UiButton
-            v-if="
-              (connector.type === 'injected' && win[connector.root]) ||
-              !connector.type
-            "
+            v-if="(connector.type === 'injected' && win[connector.root]) || !connector.type"
             class="button-outline w-full flex justify-center items-center"
           >
             <img
@@ -68,14 +62,8 @@ watch(open, () => (step = null));
     </div>
     <div v-else>
       <div v-if="$auth.isAuthenticated.value" class="m-4 space-y-2">
-        <a
-          :href="explorerUrl(web3.network.key, web3.account)"
-          target="_blank"
-          class="block"
-        >
-          <UiButton
-            class="button-outline w-full flex justify-center items-center"
-          >
+        <a :href="explorerUrl(web3.network.key, web3.account)" target="_blank" class="block">
+          <UiButton class="button-outline w-full flex justify-center items-center">
             <Stamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
             <span v-text="web3.name || shorten(web3.account)" />
             <IH-external-link class="inline-block ml-1" />
@@ -84,9 +72,7 @@ watch(open, () => (step = null));
         <UiButton class="button-outline w-full" @click="step = 'connect'">
           Connect wallet
         </UiButton>
-        <UiButton class="button-outline w-full !text-red" @click="handleLogout">
-          Log out
-        </UiButton>
+        <UiButton class="button-outline w-full !text-red" @click="handleLogout"> Log out </UiButton>
       </div>
     </div>
   </UiModal>

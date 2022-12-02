@@ -31,9 +31,7 @@ const space = computed(() => spacesStore.spacesMap.get(id));
 </script>
 <template>
   <div>
-    <nav
-      class="border-b bg-skin-bg fixed top-0 z-10 right-0 left-0 md:left-[72px]"
-    >
+    <nav class="border-b bg-skin-bg fixed top-0 z-10 right-0 left-0 md:left-[72px]">
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
           <router-link :to="{ name: 'overview', params: { id } }" class="mr-2">
@@ -45,10 +43,7 @@ const space = computed(() => spacesStore.spacesMap.get(id));
         </div>
         <UiLoading v-if="!space" class="block p-4" />
         <div v-else class="space-x-2">
-          <UiButton
-            class="float-left leading-3 !px-3 rounded-r-none"
-            @click="modalOpen = true"
-          >
+          <UiButton class="float-left leading-3 !px-3 rounded-r-none" @click="modalOpen = true">
             <IH-collection class="inline-block" />
           </UiButton>
           <UiButton

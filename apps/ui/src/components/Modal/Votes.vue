@@ -61,10 +61,7 @@ watch(open, async () => {
           >
             {{ shortenAddress(vote.voter.id) }}
           </router-link>
-          <div
-            class="absolute right-4 top-3 text-skin-link"
-            v-text="choices[vote.choice]"
-          />
+          <div class="absolute right-4 top-3 text-skin-link" v-text="choices[vote.choice]" />
         </div>
       </div>
       <div v-else class="p-4 text-center">There isn't any votes yet!</div>

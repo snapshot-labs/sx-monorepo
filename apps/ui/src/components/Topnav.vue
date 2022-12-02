@@ -23,39 +23,23 @@ async function handleLogin(connector) {
 </script>
 
 <template>
-  <nav
-    class="border-b fixed top-0 right-0 z-10 bg-skin-bg left-0 md:left-[72px]"
-  >
+  <nav class="border-b fixed top-0 right-0 z-10 bg-skin-bg left-0 md:left-[72px]">
     <div class="flex items-center h-[71px] mx-4">
       <div class="flex-auto">
-        <router-link
-          :to="{ path: '/' }"
-          class="flex items-center"
-          style="font-size: 24px"
-        >
+        <router-link :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
           snapshot x
         </router-link>
       </div>
       <div :key="web3.account">
-        <UiButton
-          v-if="loading || web3.authLoading"
-          loading
-          class="!px-0 w-[46px]"
-        />
+        <UiButton v-if="loading || web3.authLoading" loading class="!px-0 w-[46px]" />
         <UiButton
           v-else
           class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
           @click="modalAccountOpen = true"
         >
-          <span
-            v-if="$auth.isAuthenticated.value"
-            class="sm:flex items-center space-x-2"
-          >
+          <span v-if="$auth.isAuthenticated.value" class="sm:flex items-center space-x-2">
             <Stamp :id="web3.account" :size="18" />
-            <span
-              class="hidden sm:block"
-              v-text="web3.name || shorten(web3.account)"
-            />
+            <span class="hidden sm:block" v-text="web3.name || shorten(web3.account)" />
           </span>
           <template v-else>
             <span class="hidden sm:block" v-text="'Connect wallet'" />
@@ -78,10 +62,6 @@ async function handleLogin(connector) {
   </nav>
   <div v-if="pendingCount > 0" class="pt-[43px]" />
   <teleport to="#modal">
-    <ModalAccount
-      :open="modalAccountOpen"
-      @close="modalAccountOpen = false"
-      @login="handleLogin"
-    />
+    <ModalAccount :open="modalAccountOpen" @close="modalAccountOpen = false" @login="handleLogin" />
   </teleport>
 </template>

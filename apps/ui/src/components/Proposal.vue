@@ -74,11 +74,7 @@ const modalOpenTimeline = ref(false);
       </div>
     </div>
     <teleport to="#modal">
-      <ModalVotes
-        :open="modalOpenVotes"
-        :proposal="proposal"
-        @close="modalOpenVotes = false"
-      />
+      <ModalVotes :open="modalOpenVotes" :proposal="proposal" @close="modalOpenVotes = false" />
       <ModalTimeline
         :open="modalOpenTimeline"
         :proposal="proposal"

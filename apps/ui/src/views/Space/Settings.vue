@@ -21,10 +21,7 @@ defineProps<{ space: Space }>();
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Discussions</div>
-          <h4
-            class="text-skin-link text-md"
-            v-text="space.discussions || '...'"
-          />
+          <h4 class="text-skin-link text-md" v-text="space.discussions || '...'" />
         </div>
       </div>
     </div>
@@ -34,31 +31,19 @@ defineProps<{ space: Space }>();
       <div class="mx-4 pt-3">
         <div class="mb-3">
           <div class="s-label !mb-0">Voting delay</div>
-          <h4
-            class="text-skin-link text-md"
-            v-text="_d(space.voting_delay) || 'No delay'"
-          />
+          <h4 class="text-skin-link text-md" v-text="_d(space.voting_delay) || 'No delay'" />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Min. voting period</div>
-          <h4
-            class="text-skin-link text-md"
-            v-text="_d(space.min_voting_period) || 'No min.'"
-          />
+          <h4 class="text-skin-link text-md" v-text="_d(space.min_voting_period) || 'No min.'" />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Max. voting period</div>
-          <h4
-            class="text-skin-link text-md"
-            v-text="_d(space.max_voting_period)"
-          />
+          <h4 class="text-skin-link text-md" v-text="_d(space.max_voting_period)" />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0" v-text="'Proposal threshold'" />
-          <h4
-            class="text-skin-link text-md"
-            v-text="space.proposal_threshold"
-          />
+          <h4 class="text-skin-link text-md" v-text="space.proposal_threshold" />
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0" v-text="'Quorum'" />
@@ -70,16 +55,8 @@ defineProps<{ space: Space }>();
     <div>
       <Label :label="'Controller'" />
       <div class="py-3 mx-4">
-        <a
-          :href="`https://goerli.voyager.online/contract/${space.controller}`"
-          target="_blank"
-        >
-          <Stamp
-            :id="space.controller"
-            type="avatar"
-            :size="18"
-            class="mr-2 rounded-sm"
-          />
+        <a :href="`https://goerli.voyager.online/contract/${space.controller}`" target="_blank">
+          <Stamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
           {{ shorten(space.controller) }}
           <IH-external-link class="inline-block" />
         </a>
@@ -88,24 +65,11 @@ defineProps<{ space: Space }>();
 
     <div>
       <Label :label="'Auth(s)'" />
-      <div
-        v-for="(auth, i) in space.authenticators"
-        :key="i"
-        class="mx-4 py-3 border-b"
-      >
-        <a
-          :href="`https://goerli.voyager.online/contract/${auth}`"
-          target="_blank"
-          class="flex"
-        >
+      <div v-for="(auth, i) in space.authenticators" :key="i" class="mx-4 py-3 border-b">
+        <a :href="`https://goerli.voyager.online/contract/${auth}`" target="_blank" class="flex">
           <h4 class="flex-auto" v-text="AUTHS[auth]" />
           <div>
-            <Stamp
-              :id="auth"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
+            <Stamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(auth) }} <IH-external-link class="inline-block" />
           </div>
         </a>
@@ -114,11 +78,7 @@ defineProps<{ space: Space }>();
 
     <div>
       <Label :label="'Strategie(s)'" />
-      <div
-        v-for="(strategy, i) in space.strategies"
-        :key="i"
-        class="mx-4 py-3 border-b"
-      >
+      <div v-for="(strategy, i) in space.strategies" :key="i" class="mx-4 py-3 border-b">
         <a
           :href="`https://goerli.voyager.online/contract/${strategy}`"
           target="_blank"
@@ -126,12 +86,7 @@ defineProps<{ space: Space }>();
         >
           <h4 class="flex-auto" v-text="STRATEGIES[strategy]" />
           <div>
-            <Stamp
-              :id="strategy"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
+            <Stamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(strategy) }} <IH-external-link class="inline-block" />
           </div>
         </a>
@@ -140,27 +95,15 @@ defineProps<{ space: Space }>();
 
     <div>
       <Label :label="'Execution(s)'" />
-      <div
-        v-for="(executor, i) in space.executors"
-        :key="i"
-        class="mx-4 py-3 border-b"
-      >
+      <div v-for="(executor, i) in space.executors" :key="i" class="mx-4 py-3 border-b">
         <a
           :href="`https://goerli.voyager.online/contract/${executor}`"
           target="_blank"
           class="flex"
         >
-          <h4
-            class="inline-block mr-3 flex-auto"
-            v-text="EXECUTORS[executor]"
-          />
+          <h4 class="inline-block mr-3 flex-auto" v-text="EXECUTORS[executor]" />
           <div>
-            <Stamp
-              :id="executor"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
+            <Stamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(executor) }} <IH-external-link class="inline-block" />
           </div>
         </a>

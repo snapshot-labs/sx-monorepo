@@ -13,24 +13,19 @@ export function useBalances() {
     const key = 'ckey_2d082caf47f04a46947f4f212a8';
     const url = `https://api.covalenthq.com/v1/${network}/address/${address}/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=true&key=${key}`;
     const results = await snapshot.utils.getJSON(url);
-    const etherItem = results.data.items.find(
-      item => item.contract_address === ETH_CONTRACT
-    );
+    const etherItem = results.data.items.find(item => item.contract_address === ETH_CONTRACT);
     assets.value = [
       etherItem,
       ...results.data.items.filter(
         item =>
-          parseFloat(
-            formatUnits(item.balance || 0, item.contract_decimals || 0)
-          ) > 0.001 && item.contract_address !== ETH_CONTRACT
+          parseFloat(formatUnits(item.balance || 0, item.contract_decimals || 0)) > 0.001 &&
+          item.contract_address !== ETH_CONTRACT
       )
     ]
       .sort((a, b) => b.quote - a.quote)
       .map(asset => {
         if (asset.quote_rate && asset.quote_rate_24h)
-          asset.percent =
-            (100 / asset.quote_rate) *
-            (asset.quote_rate - asset.quote_rate_24h);
+          asset.percent = (100 / asset.quote_rate) * (asset.quote_rate - asset.quote_rate_24h);
         return asset;
       });
     loading.value = false;

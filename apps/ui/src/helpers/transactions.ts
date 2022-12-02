@@ -1,32 +1,19 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
-import type {
-  SendTokenTransaction,
-  SendNftTransaction,
-  ContractCallTransaction
-} from '@/types';
+import type { SendTokenTransaction, SendNftTransaction, ContractCallTransaction } from '@/types';
 
 const abis = {
   erc20: ['function transfer(address _to, uint256 _value) returns (bool)'],
-  erc721: [
-    'function safeTransferFrom(address from, address to, uint256 tokenId)'
-  ],
+  erc721: ['function safeTransferFrom(address from, address to, uint256 tokenId)'],
   erc1155: [
     'function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)'
   ]
 };
 
-export function createSendTokenTransaction({
-  token,
-  form
-}): SendTokenTransaction {
-  const baseAmount = parseUnits(
-    form.amount.toString(),
-    token.contract_decimals
-  );
+export function createSendTokenTransaction({ token, form }): SendTokenTransaction {
+  const baseAmount = parseUnits(form.amount.toString(), token.contract_decimals);
 
-  const isEth =
-    token.contract_address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+  const isEth = token.contract_address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
   let data = '0x';
   if (!isEth) {
@@ -52,11 +39,7 @@ export function createSendTokenTransaction({
   };
 }
 
-export function createSendNftTransaction({
-  nft,
-  address,
-  form
-}): SendNftTransaction {
+export function createSendNftTransaction({ nft, address, form }): SendNftTransaction {
   let data = '';
 
   const baseAmount = parseUnits(form.amount.toString() || '1', 0);
@@ -74,11 +57,7 @@ export function createSendNftTransaction({
   } else if (nft.type === 'erc721') {
     const iface = new Interface(abis.erc721);
 
-    data = iface.encodeFunctionData('safeTransferFrom', [
-      address,
-      form.to,
-      nft.tokenId
-    ]);
+    data = iface.encodeFunctionData('safeTransferFrom', [address, form.to, nft.tokenId]);
   }
 
   return {
@@ -99,9 +78,7 @@ export function createSendNftTransaction({
   };
 }
 
-export function createContractCallTransaction({
-  form
-}): ContractCallTransaction {
+export function createContractCallTransaction({ form }): ContractCallTransaction {
   const args = Object.values(form.args);
 
   const iface = new Interface(form.abi);

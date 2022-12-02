@@ -136,7 +136,4 @@ export type ContractCallTransaction = BaseTransaction & {
   };
 };
 
-export type Transaction =
-  | SendTokenTransaction
-  | SendNftTransaction
-  | ContractCallTransaction;
+export type Transaction = SendTokenTransaction | SendNftTransaction | ContractCallTransaction;

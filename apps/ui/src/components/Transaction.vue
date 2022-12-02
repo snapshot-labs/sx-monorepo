@@ -7,15 +7,15 @@ defineProps<{ tx: Transaction }>();
 
 function getTitle(tx: Transaction) {
   if (tx._type === 'sendToken') {
-    return `Send <b>${_n(
-      formatUnits(tx._form.amount, tx._form.token.decimals)
-    )}</b> ${tx._form.token.symbol} to <b>${shorten(tx._form.recipient)}</b>`;
+    return `Send <b>${_n(formatUnits(tx._form.amount, tx._form.token.decimals))}</b> ${
+      tx._form.token.symbol
+    } to <b>${shorten(tx._form.recipient)}</b>`;
   }
 
   if (tx._type === 'sendNft') {
-    return `Send <b>${_n(
-      formatUnits(tx._form.amount, 0)
-    )}</b> NFT to <b>${shorten(tx._form.recipient)}</b>`;
+    return `Send <b>${_n(formatUnits(tx._form.amount, 0))}</b> NFT to <b>${shorten(
+      tx._form.recipient
+    )}</b>`;
   }
 
   if (tx._type === 'contractCall') {
@@ -25,9 +25,7 @@ function getTitle(tx: Transaction) {
 </script>
 
 <template>
-  <div
-    class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
-  >
+  <div class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between">
     <div class="flex items-center max-w-[70%]">
       <slot name="left" />
       <IH-stop v-if="tx._type === 'sendToken'" />

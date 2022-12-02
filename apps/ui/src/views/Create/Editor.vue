@@ -30,9 +30,7 @@ watch(proposals, () => {
   }
 });
 
-const proposalData = computed(() =>
-  JSON.stringify(omit(proposals[key], ['updatedAt']))
-);
+const proposalData = computed(() => JSON.stringify(omit(proposals[key], ['updatedAt'])));
 
 watch(proposalData, () => {
   proposals[key].updatedAt = Date.now();
@@ -50,11 +48,7 @@ watch(proposalData, () => {
     />
     <div class="s-base mb-5">
       <div class="s-label" v-text="'Description'" />
-      <textarea
-        v-model="proposals[key].body"
-        maxlength="280"
-        class="s-input mb-3 h-[160px]"
-      />
+      <textarea v-model="proposals[key].body" maxlength="280" class="s-input mb-3 h-[160px]" />
       <SIString
         v-model="proposals[key].discussion"
         :definition="{

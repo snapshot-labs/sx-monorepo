@@ -20,10 +20,7 @@ export function useAccount() {
     });
 
     votes.value = Object.fromEntries(
-      (data.votes as Vote[]).map(vote => [
-        `${vote.space.id}/${vote.proposal}`,
-        vote
-      ])
+      (data.votes as Vote[]).map(vote => [`${vote.space.id}/${vote.proposal}`, vote])
     );
   }
 

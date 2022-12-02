@@ -6,8 +6,7 @@ import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl as snapshotGetUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
 
-const IPFS_GATEWAY: string =
-  import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
+const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -46,8 +45,7 @@ export function shorten(str: string, key?: any): string {
   if (key === 'symbol') limit = 6;
   if (key === 'name') limit = 64;
   if (key === 'choice') limit = 12;
-  if (limit)
-    return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
+  if (limit) return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
   return shortenAddress(str);
 }
 
@@ -143,10 +141,7 @@ export function abiToDefinition(abi) {
 export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const entries = Object.entries(obj) as [K, any];
 
-  return Object.fromEntries(entries.filter(([k]) => !keys.includes(k))) as Omit<
-    T,
-    K
-  >;
+  return Object.fromEntries(entries.filter(([k]) => !keys.includes(k))) as Omit<T, K>;
 }
 
 export function clone<T>(obj: T): T {

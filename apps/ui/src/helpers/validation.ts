@@ -1,12 +1,7 @@
 import Ajv from 'ajv';
 import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
-import {
-  Zero,
-  MinInt256,
-  MaxInt256,
-  MaxUint256
-} from '@ethersproject/constants';
+import { Zero, MinInt256, MaxInt256, MaxUint256 } from '@ethersproject/constants';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export function validateForm(schema, form): Record<string, string> {

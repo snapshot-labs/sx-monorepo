@@ -76,10 +76,7 @@ onMounted(() => {
                 />
               </span>
             </div>
-            <a
-              :href="sanitizeUrl(getUrl(proposal.metadata_uri))"
-              target="_blank"
-            >
+            <a :href="sanitizeUrl(getUrl(proposal.metadata_uri))" target="_blank">
               <UiButton class="!w-[46px] !h-[46px] !px-[12px]">
                 <IH-dots-horizontal />
               </UiButton>
@@ -124,8 +121,7 @@ onMounted(() => {
                   You already voted <strong>against</strong> this proposal
                 </div>
                 <div v-else-if="userVote.choice === 3">
-                  You already <strong>abstained</strong> from voting on this
-                  proposal
+                  You already <strong>abstained</strong> from voting on this proposal
                 </div>
               </div>
             </template>
@@ -143,10 +139,7 @@ onMounted(() => {
               >
                 <IH-check class="inline-block" />
               </UiButton>
-              <UiButton
-                class="w-full !text-white !bg-red !border-red"
-                @click="vote(proposal, 2)"
-              >
+              <UiButton class="w-full !text-white !bg-red !border-red" @click="vote(proposal, 2)">
                 <IH-x class="inline-block" />
               </UiButton>
               <UiButton
@@ -172,11 +165,7 @@ onMounted(() => {
       </div>
     </Container>
     <teleport to="#modal">
-      <ModalVotes
-        :open="modalOpenVotes"
-        :proposal="proposal"
-        @close="modalOpenVotes = false"
-      />
+      <ModalVotes :open="modalOpenVotes" :proposal="proposal" @close="modalOpenVotes = false" />
       <ModalTimeline
         :open="modalOpenTimeline"
         :proposal="proposal"

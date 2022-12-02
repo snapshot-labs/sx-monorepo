@@ -1,17 +1,10 @@
 import { Ref, toRef } from 'vue';
 import { defineStore } from 'pinia';
 import apollo from '@/helpers/apollo';
-import {
-  PROPOSALS_QUERY,
-  PROPOSALS_SUMMARY_QUERY,
-  PROPOSAL_QUERY
-} from '@/helpers/queries';
+import { PROPOSALS_QUERY, PROPOSALS_SUMMARY_QUERY, PROPOSAL_QUERY } from '@/helpers/queries';
 import type { Proposal } from '@/types';
 
-function formatProposal(
-  proposal: Omit<Proposal, 'has_ended'>,
-  now: number = Date.now()
-): Proposal {
+function formatProposal(proposal: Omit<Proposal, 'has_ended'>, now: number = Date.now()): Proposal {
   return {
     ...proposal,
     has_ended: proposal.max_end * 1000 <= now
@@ -65,9 +58,7 @@ export const useProposalsStore = defineStore('proposals', {
         }
       });
 
-      record.value.proposals = data.proposals.map(proposal =>
-        formatProposal(proposal)
-      );
+      record.value.proposals = data.proposals.map(proposal => formatProposal(proposal));
       record.value.loaded = true;
       record.value.summaryLoaded = true;
       record.value.loading = false;
@@ -109,12 +100,8 @@ export const useProposalsStore = defineStore('proposals', {
 
       record.value.proposals = [
         ...record.value.proposals,
-        ...data.active.filter(
-          proposal => !this.getProposal(spaceId, proposal.proposal_id)
-        ),
-        ...data.expired.filter(
-          proposal => !this.getProposal(spaceId, proposal.proposal_id)
-        )
+        ...data.active.filter(proposal => !this.getProposal(spaceId, proposal.proposal_id)),
+        ...data.expired.filter(proposal => !this.getProposal(spaceId, proposal.proposal_id))
       ].map(proposal => formatProposal(proposal, now));
 
       record.value.summaryLoaded = true;

@@ -36,8 +36,8 @@ onMounted(() => spacesStore.fetchAll());
             <h4 class="inline-block" v-text="space.name" />
           </div>
           <div>
-            <b class="text-skin-link" v-text="space.proposal_count" /> proposals
-            · <b class="text-skin-link" v-text="space.vote_count" /> votes
+            <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·
+            <b class="text-skin-link" v-text="space.vote_count" /> votes
           </div>
         </router-link>
       </div>

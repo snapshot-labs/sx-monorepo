@@ -38,11 +38,7 @@ async function handleFileChange(e) {
 <template>
   <UiLoading v-if="loading" />
   <label v-else class="file-select">
-    <input
-      type="file"
-      accept="image/jpg, image/jpeg, image/png"
-      @change="handleFileChange"
-    />
+    <input type="file" accept="image/jpg, image/jpeg, image/png" @change="handleFileChange" />
     <slot />
   </label>
 </template>

@@ -11,9 +11,7 @@ onMounted(() => {
   proposalsStore.fetchAll(props.space.id);
 });
 
-const proposalsRecord = computed(
-  () => proposalsStore.proposals[props.space.id]
-);
+const proposalsRecord = computed(() => proposalsStore.proposals[props.space.id]);
 </script>
 
 <template>

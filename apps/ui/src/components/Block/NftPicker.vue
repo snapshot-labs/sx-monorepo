@@ -13,9 +13,7 @@ const emit = defineEmits<{
 
 const filteredNfts = computed(() =>
   props.nfts.filter(nft => {
-    return nft.displayTitle
-      .toLocaleLowerCase()
-      .includes(props.searchValue.toLocaleLowerCase());
+    return nft.displayTitle.toLocaleLowerCase().includes(props.searchValue.toLocaleLowerCase());
   })
 );
 </script>
@@ -25,11 +23,7 @@ const filteredNfts = computed(() =>
     <UiLoading />
   </div>
   <template v-else>
-    <div
-      v-if="filteredNfts.length === 0"
-      class="text-center py-3"
-      v-text="'No results'"
-    />
+    <div v-if="filteredNfts.length === 0" class="text-center py-3" v-text="'No results'" />
     <div v-else class="grid gap-2 grid-cols-3 py-3 px-2">
       <a
         v-for="(nft, i) in filteredNfts"

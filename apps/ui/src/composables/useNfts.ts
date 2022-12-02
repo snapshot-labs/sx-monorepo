@@ -15,16 +15,11 @@ export function useNfts() {
     const { assets } = await snapshot.utils.getJSON(url);
 
     nfts.value = assets
-      .filter(asset =>
-        SUPPORTED_ABIS.includes(asset.asset_contract?.schema_name)
-      )
+      .filter(asset => SUPPORTED_ABIS.includes(asset.asset_contract?.schema_name))
       .map(asset => {
         const tokenId = asset.token_id;
         const title = asset.name ?? 'Untitled';
-        const displayTitle =
-          title.match(/(#[0-9]+)$/) || !tokenId
-            ? title
-            : `${title} #${tokenId}`;
+        const displayTitle = title.match(/(#[0-9]+)$/) || !tokenId ? title : `${title} #${tokenId}`;
 
         return {
           ...asset,
@@ -41,9 +36,7 @@ export function useNfts() {
     loaded.value = true;
   }
 
-  const nftsMap = computed(
-    () => new Map(nfts.value.map(asset => [asset.id, asset]))
-  );
+  const nftsMap = computed(() => new Map(nfts.value.map(asset => [asset.id, asset])));
 
   return { loading, loaded, nfts, nftsMap, loadNfts };
 }

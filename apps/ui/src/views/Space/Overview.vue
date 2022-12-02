@@ -13,9 +13,7 @@ onMounted(() => {
   proposalsStore.fetchSummary(props.space.id, PROPOSALS_LIMIT);
 });
 
-const proposalsRecord = computed(
-  () => proposalsStore.proposals[props.space.id]
-);
+const proposalsRecord = computed(() => proposalsStore.proposals[props.space.id]);
 
 const grouped = computed(() => {
   const initialValue = {
@@ -60,22 +58,13 @@ const grouped = computed(() => {
           <b class="text-skin-link">{{ space.vote_count }}</b> votes
         </div>
         <div class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+          ut labore et dolore magna aliqua.
         </div>
         <div class="space-x-2">
-          <img
-            src="~@/assets/twitter.svg"
-            class="w-[28px] h-[28px] inline-block"
-          />
-          <img
-            src="~@/assets/discord.svg"
-            class="w-[28px] h-[28px] inline-block"
-          />
-          <img
-            src="~@/assets/github.svg"
-            class="w-[28px] h-[28px] inline-block"
-          />
+          <img src="~@/assets/twitter.svg" class="w-[28px] h-[28px] inline-block" />
+          <img src="~@/assets/discord.svg" class="w-[28px] h-[28px] inline-block" />
+          <img src="~@/assets/github.svg" class="w-[28px] h-[28px] inline-block" />
         </div>
       </div>
     </div>
