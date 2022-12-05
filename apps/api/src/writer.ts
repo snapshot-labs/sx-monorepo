@@ -1,7 +1,7 @@
 import { formatUnits } from '@ethersproject/units';
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet';
-import { getJSON, toAddress, getEvent, getSpaceName } from './utils';
+import { getJSON, toAddress, getEvent, getSpaceName, parseTimestamps } from './utils';
 import type { CheckpointWriter } from '@snapshot-labs/checkpoint';
 
 function intSequenceToString(intSequence) {
@@ -59,7 +59,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
 
   console.log('Handle propose');
   const format =
-    'proposal, author, quorum(uint256), snapshot, start, min_end, max_end, executor, execution_hash, metadata_uri_len, metadata_uri(felt*)';
+    'proposal, author, quorum(uint256), timestamps, execution_strategy, execution_hash, metadata_uri_len, metadata_uri(felt*)';
   const data: any = getEvent(event.data, format);
 
   const space = validateAndParseAddress(event.from_address);
@@ -87,6 +87,9 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
     console.log(JSON.stringify(e).slice(0, 256));
   }
 
+  const timestamps = parseTimestamps(data.timestamps);
+  if (!timestamps) return;
+
   const item = {
     id: `${space}/${proposal}`,
     proposal_id: proposal,
@@ -98,11 +101,11 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
     body,
     discussion,
     execution,
-    start: parseInt(BigInt(data.start).toString()),
-    end: parseInt(BigInt(data.max_end).toString()),
-    min_end: parseInt(BigInt(data.min_end).toString()),
-    max_end: parseInt(BigInt(data.max_end).toString()),
-    snapshot: parseInt(BigInt(data.snapshot).toString()),
+    start: parseInt(BigInt(timestamps.start).toString()),
+    end: parseInt(BigInt(timestamps.maxEnd).toString()),
+    min_end: parseInt(BigInt(timestamps.minEnd).toString()),
+    max_end: parseInt(BigInt(timestamps.maxEnd).toString()),
+    snapshot: parseInt(BigInt(timestamps.snapshot).toString()),
     scores_1: 0,
     scores_2: 0,
     scores_3: 0,

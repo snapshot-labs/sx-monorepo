@@ -66,3 +66,12 @@ export function getSpaceName(address) {
   const noun = faker.word.noun(6);
   return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
 }
+
+export function parseTimestamps(timestamps: string) {
+  const result = timestamps.replace('0x', '').match(/.{8}/g);
+  if (!result) return null;
+
+  const [snapshot, start, minEnd, maxEnd] = result.map(timestamp => parseInt(`0x${timestamp}`, 16));
+
+  return { snapshot, start, minEnd, maxEnd };
+}
