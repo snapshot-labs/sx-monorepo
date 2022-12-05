@@ -1,6 +1,6 @@
 import { StarkNetTx, EthereumSig } from '../../src/clients';
 import { getExecutionData } from '../../src/executors';
-import { Account, Provider, ec } from 'starknet';
+import { Account, Provider, ec, constants } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
 import { Choice } from '../../src/utils/choice';
 
@@ -13,7 +13,12 @@ describe('StarkNetTx', () => {
   const privKey = process.env.STARKNET_PK as string;
   const manaUrl = '';
 
-  const starkProvider = new Provider({ sequencer: { network: 'goerli-alpha-2' } });
+  const starkProvider = new Provider({
+    sequencer: {
+      baseUrl: 'https://alpha4-2.starknet.io',
+      chainId: constants.StarknetChainId.TESTNET2
+    }
+  });
 
   const wallet = Wallet.createRandom();
   const walletAddress = wallet.address;
