@@ -1,25 +1,31 @@
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const SUPPORTED_AUTHENTICATORS = {
-  '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369': true
+  '0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14': true
 };
 
 export const SUPPORTED_STRATEGIES = {
-  '0x515fbfa25bcf1e9419cdb8886cb8878d2705cdd2be8cf434675e19314b89d71': true,
-  '0x68da98d7798439f16b63b61644e7b27c932d5c051a455a978aa95488d5dcc9b': true
+  '0x58623786b93d9b6ed1f83cec5c6fa6bea5f399d2795ee56a6123bdd83f5aa48': true,
+  '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b': true
 };
 
 export const AUTHS = {
-  '0xb32364e042cb948be62a09355595a4b80dfff4eb11a485c1950ace70b0e835': 'Vanilla',
-  '0x6aac1e90da5df37bd59ac52b638a22de15231cbb78353b121df987873d0f369': 'Ethereum signature'
+  '0x5e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62': 'Vanilla',
+  '0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14': 'Ethereum signature',
+  '0x4112e7aef90c47058238ccb76bf79ad5188afdf366870015185e3c7468ccbd9':
+    'Ethereum signature session key',
+  '0x68a2d3c6d882ec0e2e94042556878d27e832a28e1308df04ad35fd8bae9ec6b': 'Ethereum transaction',
+  '0x64bb9fd620d7e4c5f5895329e8f1d3d5f485ccfb2b16345a1ca86658f24c9f6':
+    'Ethereum transaction session key',
+  '0x59283b509832027a386b3f419628a5b149e9d6462a6547c63e92bd4a09a7245': 'Starknet signature'
 };
 
 export const STRATEGIES = {
-  '0x515fbfa25bcf1e9419cdb8886cb8878d2705cdd2be8cf434675e19314b89d71': 'Vanilla',
-  '0x68da98d7798439f16b63b61644e7b27c932d5c051a455a978aa95488d5dcc9b': 'Single slot proof'
+  '0x58623786b93d9b6ed1f83cec5c6fa6bea5f399d2795ee56a6123bdd83f5aa48': 'Vanilla',
+  '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b': 'Single slot proof'
 };
 
 export const EXECUTORS = {
-  '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7': 'Vanilla',
-  '0x790a2f60ac5a1743ebfad2a00b06d1c40866dc92eead76a7ede6c805bc29a4b': 'Zodiac'
+  '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d': 'Vanilla',
+  '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81': 'Zodiac'
 };

@@ -8,7 +8,7 @@ import { useModal } from '@/composables/useModal';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from '@/helpers/constants';
 import type { Transaction, TransactionData, Proposal, Space } from '@/types';
 
-const vanillaExecutor = '0x70d94f64cfab000f8e26318f4413dfdaa1f19a3695e3222297edc62bbc936c7';
+const vanillaExecutor = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
 
 export function useActions() {
   const { web3 } = useWeb3();
