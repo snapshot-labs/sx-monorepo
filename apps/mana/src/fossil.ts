@@ -14,7 +14,7 @@ wallet = wallet.connect(provider);
 
 const fossilAddress = process.env.FOSSIL_ADDRESS || '';
 const fossilL1HeadersStoreAddress =
-  '0x6ca3d25e901ce1fff2a7dd4079a24ff63ca6bbf8ba956efc71c1467975ab78f';
+  '0x69606dd1655fdbbf8189e88566c54890be8f7e4a3650398ac17f6586a4a336d';
 
 const abi = ['function sendExactParentHashToL2(uint256)', 'function sendLatestParentHashToL2()'];
 
