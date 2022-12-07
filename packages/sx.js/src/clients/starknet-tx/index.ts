@@ -1,12 +1,14 @@
 import { Account, hash } from 'starknet';
 import * as utils from '../../utils';
 import { getAuthenticator } from '../../authenticators';
+import { defaultNetwork } from '../../networks';
 import type {
   EthSigProposeMessage,
   EthSigVoteMessage,
   VanillaVoteMessage,
   VanillaProposeMessage,
   Envelope,
+  ClientOpts,
   ClientConfig,
   StrategiesAddresses
 } from '../../types';
@@ -16,8 +18,11 @@ const { getSelectorFromName } = hash;
 export class StarkNetTx {
   config: ClientConfig;
 
-  constructor(config: ClientConfig) {
-    this.config = config;
+  constructor(opts: ClientOpts) {
+    this.config = {
+      networkConfig: defaultNetwork,
+      ...opts
+    };
   }
 
   async getProposeCalldata(
@@ -67,7 +72,10 @@ export class StarkNetTx {
     account: Account,
     envelope: Envelope<VanillaProposeMessage | EthSigProposeMessage>
   ) {
-    const authenticator = getAuthenticator(envelope.data.message.authenticator);
+    const authenticator = getAuthenticator(
+      envelope.data.message.authenticator,
+      this.config.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
@@ -95,7 +103,10 @@ export class StarkNetTx {
   }
 
   async vote(account: Account, envelope: Envelope<VanillaVoteMessage | EthSigVoteMessage>) {
-    const authenticator = getAuthenticator(envelope.data.message.authenticator);
+    const authenticator = getAuthenticator(
+      envelope.data.message.authenticator,
+      this.config.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }

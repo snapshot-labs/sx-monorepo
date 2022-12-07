@@ -6,20 +6,25 @@ import { Wallet } from '@ethersproject/wallet';
 import fetch from 'cross-fetch';
 import { domain, proposeTypes, voteTypes } from './types';
 import * as utils from '../../utils';
-import {
+import { defaultNetwork } from '../../networks';
+import type {
   Propose,
   Vote,
   EthSigProposeMessage,
   EthSigVoteMessage,
   Envelope,
-  EthereumSigClientConfig
+  EthereumSigClientConfig,
+  EthereumSigClientOpts
 } from '../../types';
 
 export class EthereumSig {
   config: EthereumSigClientConfig;
 
-  constructor(config: EthereumSigClientConfig) {
-    this.config = config;
+  constructor(opts: EthereumSigClientOpts) {
+    this.config = {
+      networkConfig: defaultNetwork,
+      ...opts
+    };
   }
 
   generateSalt() {

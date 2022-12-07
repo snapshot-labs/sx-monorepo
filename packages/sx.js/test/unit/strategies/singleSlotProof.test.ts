@@ -1,5 +1,6 @@
 import { defaultProvider } from 'starknet';
-import singleSlotProofStrategy from '../../../src/strategies/singleSlotProof';
+import createSingleSlotProofStrategy from '../../../src/strategies/singleSlotProof';
+import { defaultNetwork } from '../../../src/networks';
 import { getStorageVarAddress } from '../../../src/utils/encoding';
 import { proposeEnvelope, voteEnvelope } from '../fixtures';
 
@@ -9,6 +10,13 @@ const starkProvider = defaultProvider;
 const latestL1Block = 8050780;
 
 describe('singleSlotProofStrategy', () => {
+  const singleSlotProofStrategy = createSingleSlotProofStrategy({
+    fossilL1HeadersStoreAddress:
+      '0x69606dd1655fdbbf8189e88566c54890be8f7e4a3650398ac17f6586a4a336d',
+    fossilFactRegistryAddress: '0x2e39818908f0da118fde6b88b52e4dbdf13d2e171e488507f40deb6811bde3f'
+  });
+  const config = { starkProvider, ethUrl, networkConfig: defaultNetwork };
+
   let getStorageAtSpy;
   beforeAll(() => {
     const getStorageAt = starkProvider.getStorageAt;
@@ -41,7 +49,7 @@ describe('singleSlotProofStrategy', () => {
       '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b',
       1,
       voteEnvelope,
-      { ethUrl, starkProvider }
+      config
     );
 
     expect(params).toMatchSnapshot();
@@ -53,7 +61,7 @@ describe('singleSlotProofStrategy', () => {
       '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b',
       1,
       proposeEnvelope,
-      { ethUrl, starkProvider }
+      config
     );
 
     expect(params).toMatchSnapshot();
@@ -64,7 +72,7 @@ describe('singleSlotProofStrategy', () => {
       '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b',
       1,
       proposeEnvelope,
-      { ethUrl, starkProvider }
+      config
     );
 
     expect(params).toMatchSnapshot();

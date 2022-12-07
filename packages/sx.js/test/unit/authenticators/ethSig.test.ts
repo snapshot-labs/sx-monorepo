@@ -1,8 +1,10 @@
 import { hash } from 'starknet';
-import ethSigAuthenticator from '../../../src/authenticators/ethSig';
+import createEthSigAuthenticator from '../../../src/authenticators/ethSig';
 import { proposeEnvelope } from '../fixtures';
 
 describe('ethSigAuthenticator', () => {
+  const ethSigAuthenticator = createEthSigAuthenticator();
+
   it('should return type', () => {
     expect(ethSigAuthenticator.type).toBe('ethSig');
   });

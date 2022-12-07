@@ -1,10 +1,11 @@
 import { getExecutionData } from '../../../src/executors';
+import { defaultNetwork } from '../../../src/networks';
 
 describe('getExecutionData', () => {
   it('should create vanilla execution data', () => {
     const address = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
 
-    const data = getExecutionData(address);
+    const data = getExecutionData(address, defaultNetwork);
 
     expect(data).toEqual({
       executor: address,
@@ -21,7 +22,7 @@ describe('getExecutionData', () => {
       }
     ];
 
-    const data = getExecutionData('1', { calls });
+    const data = getExecutionData('1', defaultNetwork, { calls });
 
     expect(data).toEqual({
       executor: '1',
@@ -48,7 +49,7 @@ describe('getExecutionData', () => {
       }
     ];
 
-    const data = getExecutionData(address, { transactions });
+    const data = getExecutionData(address, defaultNetwork, { transactions });
 
     expect(data).toEqual({
       executor: address,
@@ -63,7 +64,7 @@ describe('getExecutionData', () => {
   it('should throw if contract is unknown', () => {
     const address = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-    expect(() => getExecutionData(address)).toThrowError(
+    expect(() => getExecutionData(address, defaultNetwork)).toThrowError(
       'Unknown executor 0x0000000000000000000000000000000000000000000000000000000000000000'
     );
   });
@@ -71,7 +72,7 @@ describe('getExecutionData', () => {
   it('should throw if inputs are missing', () => {
     const address = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
 
-    expect(() => getExecutionData(address)).toThrowError(
+    expect(() => getExecutionData(address, defaultNetwork)).toThrowError(
       'Not enough data to create execution for executor 0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81'
     );
   });

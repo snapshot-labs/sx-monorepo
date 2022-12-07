@@ -1,8 +1,10 @@
 import { hash } from 'starknet';
-import vanillaAuthenticator from '../../../src/authenticators/vanilla';
+import createVanillaAuthenticator from '../../../src/authenticators/vanilla';
 import { proposeEnvelope } from '../fixtures';
 
 describe('vanillaAuthenticator', () => {
+  const vanillaAuthenticator = createVanillaAuthenticator();
+
   it('should return type', () => {
     expect(vanillaAuthenticator.type).toBe('vanilla');
   });

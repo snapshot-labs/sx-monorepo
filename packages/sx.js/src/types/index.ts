@@ -1,7 +1,10 @@
 import type { Provider } from 'starknet';
 import type { Call } from 'starknet';
-import type { Choice } from './utils/choice';
-import type { MetaTransaction } from './utils/encoding/execution-hash';
+import type { Choice } from '../utils/choice';
+import type { MetaTransaction } from '../utils/encoding/execution-hash';
+import type { NetworkConfig } from './networkConfig';
+
+export * from './networkConfig';
 
 export interface Authenticator {
   type: string;
@@ -25,9 +28,20 @@ export interface Strategy {
   ): Promise<Call[]>;
 }
 
+export type ClientOpts = {
+  ethUrl: string;
+  starkProvider: Provider;
+  networkConfig?: NetworkConfig;
+};
+
 export type ClientConfig = {
   ethUrl: string;
   starkProvider: Provider;
+  networkConfig: NetworkConfig;
+};
+
+export type EthereumSigClientOpts = ClientOpts & {
+  manaUrl: string;
 };
 
 export type EthereumSigClientConfig = ClientConfig & {

@@ -31,7 +31,7 @@ export async function getStrategiesParams(
 ) {
   return Promise.all(
     strategies.map(strategyData => {
-      const strategy = getStrategy(strategyData.address);
+      const strategy = getStrategy(strategyData.address, config.networkConfig);
       if (!strategy) throw new Error('Invalid strategy');
 
       return strategy.getParams(
@@ -59,7 +59,7 @@ export async function getExtraProposeCalls(
 ) {
   const extraCalls = await Promise.all(
     strategies.map(strategyData => {
-      const strategy = getStrategy(strategyData.address);
+      const strategy = getStrategy(strategyData.address, config.networkConfig);
       if (!strategy) throw new Error('Invalid strategy');
 
       return strategy.getExtraProposeCalls(
