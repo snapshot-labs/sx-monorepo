@@ -4,7 +4,8 @@ import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { utils } from '@snapshot-labs/sx';
-import { defaultProvider, Account, ec } from 'starknet';
+import { Account, ec } from 'starknet';
+import { starkProvider } from './starkProvider';
 
 const ethPrivkey = process.env.ETH_PRIVKEY || '';
 const ethRpcUrl = process.env.ETH_RPC_URL || '';
@@ -21,7 +22,8 @@ const abi = ['function sendExactParentHashToL2(uint256)', 'function sendLatestPa
 const starknetPrivkey = process.env.STARKNET_PRIVKEY || '';
 const starknetAddress = process.env.STARKNET_ADDRESS || '';
 const starkKeyPair = ec.getKeyPair(starknetPrivkey);
-const starknetAccount = new Account(defaultProvider, starknetAddress, starkKeyPair);
+
+const starknetAccount = new Account(starkProvider, starknetAddress, starkKeyPair);
 
 async function sendExactParentHashToL2(blockNumber: number) {
   const contract = new Contract(fossilAddress, abi);

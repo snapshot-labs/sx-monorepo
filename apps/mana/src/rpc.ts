@@ -1,19 +1,13 @@
 import fetch from 'cross-fetch';
 global.fetch = fetch;
 import express from 'express';
-import { Account, Provider, ec, constants } from 'starknet';
+import { Account, ec } from 'starknet';
 import { clients } from '@snapshot-labs/sx';
 import { rpcError, rpcSuccess } from './utils';
+import { starkProvider } from './starkProvider';
 
 const starknetPrivkey = process.env.STARKNET_PRIVKEY || '';
 const starknetAddress = process.env.STARKNET_ADDRESS || '';
-
-const starkProvider = new Provider({
-  sequencer: {
-    baseUrl: 'https://alpha4-2.starknet.io',
-    chainId: constants.StarknetChainId.TESTNET2
-  }
-});
 
 const client = new clients.StarkNetTx({
   starkProvider,
