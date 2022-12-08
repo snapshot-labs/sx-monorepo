@@ -22,7 +22,7 @@ app.get('/', (req, res) =>
     port: PORT,
     starknet_address: process.env.STARKNET_ADDRESS || '',
     eth_address: process.env.ETH_ADDRESS || '',
-    fossil_address: process.env.ETH_ADDRESS || ''
+    fossil_address: process.env.FOSSIL_ADDRESS || ''
   })
 );
 
