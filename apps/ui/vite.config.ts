@@ -6,7 +6,7 @@ import Components from 'unplugin-vue-components/vite';
 import Icons from 'unplugin-icons/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import visualizer from 'rollup-plugin-visualizer';
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
+import inject from '@rollup/plugin-inject';
 
 const ELECTRON = process.env.ELECTRON || false;
 
@@ -41,6 +41,7 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
+    include: ['@snapshot-labs/sx'],
     esbuildOptions: {
       plugins: [
         GlobalPolyFill({
@@ -51,19 +52,25 @@ export default defineConfig({
   },
   build: {
     commonjsOptions: {
+      include: [/sx.js/, /node_modules/],
       transformMixedEsModules: true
     },
     rollupOptions: {
       plugins: [
-        // @ts-ignore
-        rollupNodePolyFill()
+        inject({
+          Buffer: ['buffer', 'Buffer']
+        })
       ]
     }
   },
   resolve: {
     alias: {
-      stream: 'rollup-plugin-node-polyfills/polyfills/stream',
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      // polyfills
+      stream: path.resolve(__dirname, 'node_modules/stream-browserify'),
+      events: path.resolve(__dirname, 'node_modules/events'),
+      util: path.resolve(__dirname, 'node_modules/util'),
+      buffer: path.resolve(__dirname, 'node_modules/buffer')
     },
     dedupe: ['@popperjs/core']
   }
