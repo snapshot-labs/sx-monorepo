@@ -1,15 +1,7 @@
 import { Ref, toRef } from 'vue';
 import { defineStore } from 'pinia';
-import apollo from '@/helpers/apollo';
-import { PROPOSALS_QUERY, PROPOSALS_SUMMARY_QUERY, PROPOSAL_QUERY } from '@/helpers/queries';
+import { currentNetwork } from '@/networks';
 import type { Proposal } from '@/types';
-
-function formatProposal(proposal: Omit<Proposal, 'has_ended'>, now: number = Date.now()): Proposal {
-  return {
-    ...proposal,
-    has_ended: proposal.max_end * 1000 <= now
-  };
-}
 
 type SpaceRecord = {
   loading: boolean;
@@ -50,15 +42,7 @@ export const useProposalsStore = defineStore('proposals', {
       record.value.loading = true;
       record.value.summaryLoading = true;
 
-      const { data } = await apollo.query({
-        query: PROPOSALS_QUERY,
-        variables: {
-          first: 5,
-          space: spaceId
-        }
-      });
-
-      record.value.proposals = data.proposals.map(proposal => formatProposal(proposal));
+      record.value.proposals = await currentNetwork.api.loadProposals(spaceId, 5);
       record.value.loaded = true;
       record.value.summaryLoaded = true;
       record.value.loading = false;
@@ -87,22 +71,12 @@ export const useProposalsStore = defineStore('proposals', {
 
       record.value.summaryLoading = true;
 
-      const now = Date.now();
-
-      const { data } = await apollo.query({
-        query: PROPOSALS_SUMMARY_QUERY,
-        variables: {
-          first: limit,
-          space: spaceId,
-          threshold: Math.floor(now / 1000)
-        }
-      });
+      const proposals = await currentNetwork.api.loadProposalsSummary(spaceId, limit);
 
       record.value.proposals = [
         ...record.value.proposals,
-        ...data.active.filter(proposal => !this.getProposal(spaceId, proposal.proposal_id)),
-        ...data.expired.filter(proposal => !this.getProposal(spaceId, proposal.proposal_id))
-      ].map(proposal => formatProposal(proposal, now));
+        ...proposals.filter(proposal => !this.getProposal(spaceId, proposal.proposal_id))
+      ];
 
       record.value.summaryLoaded = true;
       record.value.summaryLoading = false;
@@ -121,13 +95,10 @@ export const useProposalsStore = defineStore('proposals', {
       const record = toRef(this.proposals, spaceId) as Ref<SpaceRecord>;
       if (this.getProposal(spaceId, proposalId)) return;
 
-      const { data } = await apollo.query({
-        query: PROPOSAL_QUERY,
-        variables: { id: `${spaceId}/${proposalId}` }
-      });
+      const proposal = await currentNetwork.api.loadProposal(spaceId, proposalId);
 
       if (this.getProposal(spaceId, proposalId)) return;
-      record.value.proposals.push(formatProposal(data.proposal));
+      record.value.proposals.push(proposal);
     }
   }
 });

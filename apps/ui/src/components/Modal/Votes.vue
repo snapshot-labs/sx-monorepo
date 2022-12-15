@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Ref, ref, toRefs, watch } from 'vue';
-import apollo from '@/helpers/apollo';
-import { VOTES_QUERY } from '@/helpers/queries';
+import { currentNetwork } from '@/networks';
 import { shortenAddress } from '@/helpers/utils';
 import choices from '@/helpers/choices.json';
 import type { Proposal as ProposalType, Vote } from '@/types';
@@ -22,14 +21,7 @@ const { open } = toRefs(props);
 watch(open, async () => {
   if (open.value === false) return;
   console.log('Get votes');
-  const { data } = await apollo.query({
-    query: VOTES_QUERY,
-    variables: {
-      space: props.proposal.space.id,
-      proposal: props.proposal.proposal_id
-    }
-  });
-  votes.value = data.votes;
+  votes.value = await currentNetwork.api.loadProposalVotes(props.proposal);
   loaded.value = true;
 });
 </script>

@@ -1,7 +1,6 @@
 import { Ref, toRef } from 'vue';
 import { defineStore } from 'pinia';
-import apollo from '@/helpers/apollo';
-import { USER_QUERY } from '@/helpers/queries';
+import { currentNetwork } from '@/networks';
 import type { User } from '@/types';
 
 type UserRecord = {
@@ -34,12 +33,7 @@ export const useUsersStore = defineStore('users', {
       const record = toRef(this.users, userId) as Ref<UserRecord>;
       record.value.loading = false;
 
-      const { data } = await apollo.query({
-        query: USER_QUERY,
-        variables: { id: userId }
-      });
-
-      record.value.user = data.user;
+      record.value.user = await currentNetwork.api.loadUser(userId);
       record.value.loaded = true;
       record.value.loading = false;
     }

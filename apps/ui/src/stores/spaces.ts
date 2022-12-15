@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import apollo from '@/helpers/apollo';
-import { SPACES_QUERY, SPACE_QUERY } from '@/helpers/queries';
+import { currentNetwork } from '@/networks';
 import type { Space } from '@/types';
 
 export const useSpacesStore = defineStore('spaces', {
@@ -17,21 +16,17 @@ export const useSpacesStore = defineStore('spaces', {
       if (this.loading) return;
       this.loading = true;
 
-      const { data } = await apollo.query({ query: SPACES_QUERY });
-      this.spaces = data.spaces;
+      this.spaces = await currentNetwork.api.loadSpaces();
       this.loaded = true;
       this.loading = false;
     },
     async fetchSpace(id: string) {
       if (this.spacesMap.get(id)) return;
 
-      const { data } = await apollo.query({
-        query: SPACE_QUERY,
-        variables: { id }
-      });
+      const space = await currentNetwork.api.loadSpace(id);
 
       if (this.spacesMap.get(id)) return;
-      this.spaces.push(data.space);
+      this.spaces.push(space);
     }
   }
 });

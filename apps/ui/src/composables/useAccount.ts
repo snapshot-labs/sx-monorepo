@@ -1,6 +1,5 @@
 import { ref, Ref } from 'vue';
-import apollo from '@/helpers/apollo';
-import { VOTES_QUERY } from '@/helpers/queries';
+import { currentNetwork } from '@/networks';
 import { useWeb3 } from '@/composables/useWeb3';
 import type { Vote } from '@/types';
 
@@ -12,16 +11,7 @@ export function useAccount() {
   async function loadVotes() {
     const account = web3.value.account;
     console.log('Load votes for', account);
-    const { data } = await apollo.query({
-      query: VOTES_QUERY,
-      variables: {
-        voter: account
-      }
-    });
-
-    votes.value = Object.fromEntries(
-      (data.votes as Vote[]).map(vote => [`${vote.space.id}/${vote.proposal}`, vote])
-    );
+    votes.value = await currentNetwork.api.loadUserVotes(account);
   }
 
   return { account: web3.value.account, loadVotes, votes };
