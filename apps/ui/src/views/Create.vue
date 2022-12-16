@@ -12,7 +12,6 @@ const { propose } = useActions();
 const spacesStore = useSpacesStore();
 const id = route.params.id as string;
 const key = route.params.key;
-const executionHash = '1';
 const modalOpen = ref(false);
 
 onMounted(() => {
@@ -51,7 +50,6 @@ const space = computed(() => spacesStore.spacesMap.get(id));
             @click="
               propose(
                 space,
-                executionHash,
                 proposals[`${id}:${key}`].title,
                 proposals[`${id}:${key}`].body,
                 proposals[`${id}:${key}`].discussion,
