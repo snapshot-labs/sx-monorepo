@@ -4,8 +4,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useSpacesStore } from '@/stores/spaces';
 import { useActions } from '@/composables/useActions';
 import { useEditor } from '@/composables/useEditor';
+import { useModal } from '@/composables/useModal';
 
 const { proposals } = useEditor();
+const { modalOpen: globalModalOpen } = useModal();
 const route = useRoute();
 const router = useRouter();
 const { propose } = useActions();
@@ -18,8 +20,10 @@ onMounted(() => {
   spacesStore.fetchSpace(id);
 
   if (!key && route.name) {
+    globalModalOpen.value = false;
+
     const str = (Math.random() + 1).toString(36).substring(7);
-    router.push({
+    router.replace({
       name: route.name,
       params: { id, key: str }
     });

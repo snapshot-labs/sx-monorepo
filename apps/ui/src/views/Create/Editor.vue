@@ -26,13 +26,19 @@ if (!proposals[key].execution) proposals[key].execution = [];
 
 watch(proposals, () => {
   if (!proposals[key]) {
-    router.push({ name: 'editor' });
+    router.replace({ name: 'editor' });
   }
 });
 
-const proposalData = computed(() => JSON.stringify(omit(proposals[key], ['updatedAt'])));
+const proposalData = computed(() => {
+  if (!proposals[key]) return null;
+
+  return JSON.stringify(omit(proposals[key], ['updatedAt']));
+});
 
 watch(proposalData, () => {
+  if (!proposals[key]) return;
+
   proposals[key].updatedAt = Date.now();
 });
 </script>
