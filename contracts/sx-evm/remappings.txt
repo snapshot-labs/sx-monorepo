@@ -1,0 +1,3 @@
+forge-std/=lib/forge-std/src/
+forge-gas-snapshot/=lib/forge-gas-snapshot/src
+openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/
