@@ -13,3 +13,7 @@
 [submodule "lib/prb-test"]
 	path = lib/prb-test
 	url = https://github.com/paulrberg/prb-test
+[submodule "lib/zodiac"]
+	path = lib/zodiac
+	url = https://github.com/gnosis/zodiac
+	branch = v2.0.4
