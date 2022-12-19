@@ -23,7 +23,7 @@ const grouped = computed(() => {
 
   if (!proposalsRecord.value) return initialValue;
 
-  return proposalsRecord.value.proposals.reduce((v, proposal) => {
+  return proposalsRecord.value.summaryProposals.reduce((v, proposal) => {
     if (proposal.has_ended) v.ended.push(proposal);
     else v.active.push(proposal);
 

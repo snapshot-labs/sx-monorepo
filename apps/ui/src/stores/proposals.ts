@@ -6,21 +6,26 @@ import type { Proposal } from '@/types';
 type SpaceRecord = {
   loading: boolean;
   loaded: boolean;
+  proposals: Proposal[];
   summaryLoading: boolean;
   summaryLoaded: boolean;
-  proposals: Proposal[];
+  summaryProposals: Proposal[];
 };
 
 export const useProposalsStore = defineStore('proposals', {
   state: () => ({
-    proposals: {} as Record<string, SpaceRecord | undefined>
+    proposals: {} as Partial<Record<string, SpaceRecord>>,
+    summaryProposals: {} as Partial<Record<string, SpaceRecord>>
   }),
   getters: {
     getProposal: state => {
       return (spaceId: string, proposalId: number) => {
-        const proposals = state.proposals[spaceId]?.proposals ?? [];
+        const record = state.proposals[spaceId];
+        if (!record) return undefined;
 
-        return proposals.find(proposal => proposal.proposal_id === proposalId);
+        return [...record.proposals, ...record.summaryProposals].find(
+          proposal => proposal.proposal_id === proposalId
+        );
       };
     }
   },
@@ -30,9 +35,10 @@ export const useProposalsStore = defineStore('proposals', {
         this.proposals[spaceId] = {
           loading: false,
           loaded: false,
+          proposals: [],
           summaryLoading: false,
           summaryLoaded: false,
-          proposals: []
+          summaryProposals: []
         };
       }
 
@@ -40,44 +46,31 @@ export const useProposalsStore = defineStore('proposals', {
       if (record.value.loading || record.value.loaded) return;
 
       record.value.loading = true;
-      record.value.summaryLoading = true;
 
       record.value.proposals = await currentNetwork.api.loadProposals(spaceId, 5);
       record.value.loaded = true;
-      record.value.summaryLoaded = true;
       record.value.loading = false;
-      record.value.summaryLoading = false;
     },
     async fetchSummary(spaceId: string, limit = 3) {
       if (!this.proposals[spaceId]) {
         this.proposals[spaceId] = {
           loading: false,
           loaded: false,
+          proposals: [],
           summaryLoading: false,
           summaryLoaded: false,
-          proposals: []
+          summaryProposals: []
         };
       }
 
       const record = toRef(this.proposals, spaceId) as Ref<SpaceRecord>;
-      if (
-        record.value.loading ||
-        record.value.loaded ||
-        record.value.summaryLoading ||
-        record.value.summaryLoaded
-      ) {
+      if (record.value.summaryLoading || record.value.summaryLoaded) {
         return;
       }
 
       record.value.summaryLoading = true;
 
-      const proposals = await currentNetwork.api.loadProposalsSummary(spaceId, limit);
-
-      record.value.proposals = [
-        ...record.value.proposals,
-        ...proposals.filter(proposal => !this.getProposal(spaceId, proposal.proposal_id))
-      ];
-
+      record.value.summaryProposals = await currentNetwork.api.loadProposalsSummary(spaceId, limit);
       record.value.summaryLoaded = true;
       record.value.summaryLoading = false;
     },
@@ -86,9 +79,10 @@ export const useProposalsStore = defineStore('proposals', {
         this.proposals[spaceId] = {
           loading: false,
           loaded: false,
+          proposals: [],
           summaryLoading: false,
           summaryLoaded: false,
-          proposals: []
+          summaryProposals: []
         };
       }
 
