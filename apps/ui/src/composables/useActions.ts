@@ -5,7 +5,7 @@ import { useWeb3 } from '@/composables/useWeb3';
 import { useTxStatus } from '@/composables/useTxStatus';
 import { useAccount } from '@/composables/useAccount';
 import { useModal } from '@/composables/useModal';
-import type { Transaction, TransactionData, Proposal, Space } from '@/types';
+import type { Transaction, Proposal, Space } from '@/types';
 
 export function useActions() {
   const { web3 } = useWeb3();
@@ -50,19 +50,17 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
-    const executionData = execution.map(
-      (tx: Transaction, i: number): TransactionData => ({
-        ...tx,
-        nonce: i,
-        operation: '0'
-      })
-    );
+    const transactions = execution.map((tx: Transaction) => ({
+      ...tx,
+      nonce: 0,
+      operation: 0
+    }));
 
     const pinned = await pin({
       title,
       body,
       discussion,
-      execution: executionData
+      execution: transactions
     });
     if (!pinned || !pinned.cid) return;
     console.log('IPFS', pinned);
@@ -71,7 +69,8 @@ export function useActions() {
       auth.web3,
       web3.value.account,
       space,
-      pinned.cid
+      pinned.cid,
+      transactions
     );
 
     console.log('Envelope', envelope);

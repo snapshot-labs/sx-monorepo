@@ -92,11 +92,6 @@ export type BaseTransaction = {
   value: string;
 };
 
-export type TransactionData = BaseTransaction & {
-  nonce: number;
-  operation: '0';
-};
-
 export type SendTokenTransaction = BaseTransaction & {
   _type: 'sendToken';
   _form: {

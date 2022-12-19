@@ -1,9 +1,13 @@
 import { Provider, constants } from 'starknet';
 import { clients as Clients } from '@snapshot-labs/sx';
+import { getExecutionData } from '@snapshot-labs/sx/dist/executors';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from '@/helpers/constants';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Wallet } from '@ethersproject/wallet';
+import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Space, Proposal } from '@/types';
+
+const EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
 
 function pickAuthenticatorAndStrategies(authenticators: string[], strategies: string[]) {
   const authenticator = authenticators.find(
@@ -23,8 +27,6 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
 }
 
 export function createActions() {
-  const vanillaExecutor = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
-
   const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
   const ethUrl: string = import.meta.env.VITE_ETH_RPC_URL;
 
@@ -42,19 +44,26 @@ export function createActions() {
   });
 
   return {
-    propose: (web3: Web3Provider | Wallet, account: string, space: Space, cid: string) => {
+    propose: (
+      web3: Web3Provider | Wallet,
+      account: string,
+      space: Space,
+      cid: string,
+      transactions: MetaTransaction[]
+    ) => {
       const { authenticator, strategies } = pickAuthenticatorAndStrategies(
         space.authenticators,
         space.strategies
       );
 
+      const executionData = getExecutionData(EXECUTOR, { transactions });
+
       return client.propose(web3, account, {
         space: space.id,
         authenticator,
         strategies,
-        executor: vanillaExecutor,
         metadataUri: `ipfs://${cid}`,
-        executionParams: []
+        ...executionData
       });
     },
     vote: (web3: Web3Provider | Wallet, account: string, proposal: Proposal, choice: number) => {
