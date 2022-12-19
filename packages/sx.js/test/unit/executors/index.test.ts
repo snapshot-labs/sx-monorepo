@@ -54,9 +54,9 @@ describe('getExecutionData', () => {
     expect(data).toEqual({
       executor: address,
       executionParams: [
-        '0xa88f72e92cc519d617b684F8A78d3532E7bb61ca',
-        '0xa54ae382d03ab474d9d2ddd47d3fac68',
-        '0xb21b273bd32558c5eba5bb6576ac8592'
+        '0x196F0548E3140D2C7f6532a206dd54FbC12232a4',
+        '0x4de14679d438e4cb657be1175542ba99',
+        '0x395bb952697be0523cbdf6bc31276243'
       ]
     });
   });

@@ -21,6 +21,7 @@
     "@ethereumjs/block": "^3.6.3",
     "@ethereumjs/common": "^2.6.5",
     "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/hash": "^5.6.1",
     "@ethersproject/keccak256": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
@@ -31,6 +32,7 @@
     "starknet": "^4.14.0"
   },
   "devDependencies": {
+    "@ethersproject/units": "^5.7.0",
     "@snapshot-labs/eslint-config": "^0.1.0-beta.7",
     "@snapshot-labs/prettier-config": "^0.1.0-beta.7",
     "@types/bn.js": "^5.1.1",

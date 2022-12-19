@@ -33,7 +33,7 @@ export const goerli2: NetworkConfig = {
     '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81': {
       type: 'ethRelayer',
       params: {
-        destination: '0xa88f72e92cc519d617b684F8A78d3532E7bb61ca',
+        destination: '0x196F0548E3140D2C7f6532a206dd54FbC12232a4',
         chainId: 5
       }
     }
