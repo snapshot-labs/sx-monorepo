@@ -1,6 +1,5 @@
 import { Provider, constants } from 'starknet';
-import { clients as Clients } from '@snapshot-labs/sx';
-import { getExecutionData } from '@snapshot-labs/sx/dist/executors';
+import { clients as Clients, getExecutionData, defaultNetwork } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from '@/helpers/constants';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Wallet } from '@ethersproject/wallet';
@@ -56,7 +55,7 @@ export function createActions() {
         space.strategies
       );
 
-      const executionData = getExecutionData(EXECUTOR, { transactions });
+      const executionData = getExecutionData(EXECUTOR, defaultNetwork, { transactions });
 
       return client.propose(web3, account, {
         space: space.id,
