@@ -18,7 +18,7 @@ interface ISpaceOwnerActions {
 
     function setProposalThreshold() external;
 
-    function setMetadataUri() external;å
+    function setMetadataUri() external;
 
     function addVotingStrategies() external;
 
