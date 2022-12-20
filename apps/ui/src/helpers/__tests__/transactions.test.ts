@@ -9,17 +9,27 @@ import {
 describe('transactions', () => {
   describe('createSendTokenTransaction', () => {
     const ethToken = {
-      contract_decimals: 18,
-      contract_name: 'Ether',
-      contract_ticker_symbol: 'ETH',
-      contract_address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+      decimals: 18,
+      name: 'Ether',
+      symbol: 'ETH',
+      contractAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      logo: null,
+      tokenBalance: '0x0',
+      price: 0,
+      change: 0,
+      value: 0
     };
 
     const balToken = {
-      contract_decimals: 18,
-      contract_name: 'Balancer',
-      contract_ticker_symbol: 'BAL',
-      contract_address: '0xba100000625a3754423978a60c9317c58a424e3d'
+      decimals: 18,
+      name: 'Balancer',
+      symbol: 'BAL',
+      contractAddress: '0xba100000625a3754423978a60c9317c58a424e3d',
+      logo: null,
+      tokenBalance: '0x0',
+      price: 0,
+      change: 0,
+      value: 0
     };
 
     const form = {

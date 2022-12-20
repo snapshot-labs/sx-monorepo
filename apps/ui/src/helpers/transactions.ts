@@ -1,5 +1,6 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
+import type { Token } from '@/helpers/alchemy';
 import type { SendTokenTransaction, SendNftTransaction, ContractCallTransaction } from '@/types';
 
 const abis = {
@@ -10,10 +11,16 @@ const abis = {
   ]
 };
 
-export function createSendTokenTransaction({ token, form }): SendTokenTransaction {
-  const baseAmount = parseUnits(form.amount.toString(), token.contract_decimals);
+export function createSendTokenTransaction({
+  token,
+  form
+}: {
+  token: Token;
+  form: any;
+}): SendTokenTransaction {
+  const baseAmount = parseUnits(form.amount.toString(), token.decimals);
 
-  const isEth = token.contract_address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+  const isEth = token.contractAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
   let data = '0x';
   if (!isEth) {
@@ -26,14 +33,14 @@ export function createSendTokenTransaction({ token, form }): SendTokenTransactio
     _form: {
       recipient: form.to,
       token: {
-        name: token.contract_name,
-        decimals: token.contract_decimals,
-        symbol: token.contract_ticker_symbol,
-        address: token.contract_address
+        name: token.name,
+        decimals: token.decimals,
+        symbol: token.symbol,
+        address: token.contractAddress
       },
       amount: baseAmount.toString()
     },
-    to: isEth ? form.to : token.contract_address,
+    to: isEth ? form.to : token.contractAddress,
     data,
     value: isEth ? baseAmount.toString() : '0'
   };

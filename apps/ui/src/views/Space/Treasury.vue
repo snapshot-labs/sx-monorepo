@@ -6,6 +6,7 @@ import { useNfts } from '@/composables/useNfts';
 import space from '@/helpers/space.json';
 import { _n, shorten, explorerUrl } from '@/helpers/utils';
 import { ETH_CONTRACT } from '@/helpers/constants';
+import type { Token } from '@/helpers/alchemy';
 import type { Space } from '@/types';
 
 defineProps<{ space: Space }>();
@@ -17,13 +18,13 @@ const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 
 const totalQuote = computed(() =>
   assets.value.reduce((acc, asset) => {
-    return acc + asset.quote;
+    return acc + asset.value;
   }, 0)
 );
 
 const sortedAssets = computed(() =>
   (assets || []).value.sort((a, b) => {
-    const isEth = asset => asset.contract_address === ETH_CONTRACT;
+    const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
     if (isEth(a)) return -1;
     if (isEth(b)) return 1;
     return 0;
@@ -75,28 +76,28 @@ onMounted(() => {
         <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
         <div v-for="(asset, i) in sortedAssets" :key="i" class="mx-4 py-3 border-b flex">
           <div class="flex-auto flex items-center min-w-0">
-            <Stamp :id="asset.contract_address" type="token" :size="32" />
+            <Stamp :id="asset.contractAddress" type="token" :size="32" />
             <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
-              <h4 class="text-skin-link" v-text="asset.contract_ticker_symbol" />
-              <div class="text-sm truncate" v-text="asset.contract_name" />
+              <h4 class="text-skin-link" v-text="asset.symbol" />
+              <div class="text-sm truncate" v-text="asset.name" />
             </div>
           </div>
           <div
-            v-if="asset.quote_rate"
+            v-if="asset.price"
             class="flex-col items-end text-right leading-[22px] w-[180px] hidden md:block"
           >
-            <h4 class="text-skin-link" v-text="`$${_n(asset.quote_rate)}`" />
-            <div v-if="asset.percent" class="text-sm">
-              <div v-if="asset.percent > 0" class="text-green" v-text="`+${_n(asset.percent)}%`" />
-              <div v-if="asset.percent < 0" class="text-red" v-text="`${_n(asset.percent)}%`" />
+            <h4 class="text-skin-link" v-text="`$${_n(asset.price)}`" />
+            <div v-if="asset.change" class="text-sm">
+              <div v-if="asset.change > 0" class="text-green" v-text="`+${_n(asset.change)}%`" />
+              <div v-if="asset.change < 0" class="text-red" v-text="`${_n(asset.change)}%`" />
             </div>
           </div>
           <div class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px]">
             <h4
               class="text-skin-link"
-              v-text="_n(formatUnits(asset.balance || 0, asset.contract_decimals || 0))"
+              v-text="_n(formatUnits(asset.tokenBalance || 0, asset.decimals || 0))"
             />
-            <div v-if="asset.quote" class="text-sm" v-text="`$${_n(asset.quote)}`" />
+            <div v-if="asset.price" class="text-sm" v-text="`$${_n(asset.price)}`" />
           </div>
         </div>
       </div>

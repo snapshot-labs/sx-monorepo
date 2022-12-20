@@ -5,6 +5,7 @@ import { useBalances } from '@/composables/useBalances';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
+import type { Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -13,20 +14,17 @@ const DEFAULT_FORM_STATE = {
   value: ''
 };
 
-const props = defineProps({
-  open: Boolean,
-  address: {
-    type: String,
-    required: true
-  },
-  network: {
-    type: String,
-    required: true
-  },
-  initialState: Object
-});
+const props = defineProps<{
+  open: boolean;
+  address: string;
+  network: number;
+  initialState: any;
+}>();
 
-const emit = defineEmits(['add', 'close']);
+const emit = defineEmits<{
+  (e: 'add', transaction: Transaction);
+  (e: 'close');
+}>();
 
 const searchInput: Ref<HTMLElement | null> = ref(null);
 const form: {
@@ -46,10 +44,14 @@ const currentToken = computed(() => {
 
   if (!token) {
     return {
-      contract_decimals: 18,
-      contract_name: 'Ether',
-      contract_ticker_symbol: 'ETH',
-      contract_address: ETH_CONTRACT
+      decimals: 18,
+      name: 'Ether',
+      symbol: 'ETH',
+      contractAddress: ETH_CONTRACT,
+      tokenBalance: 0,
+      price: 0,
+      value: 0,
+      change: 0
     };
   }
 
@@ -78,7 +80,7 @@ function handleAmountUpdate(value) {
   if (value === '') {
     form.value = '';
   } else if (currentToken.value) {
-    form.value = parseFloat((value * currentToken.value.quote_rate).toFixed(2));
+    form.value = parseFloat((value * currentToken.value.price).toFixed(2));
   }
 }
 
@@ -88,15 +90,13 @@ function handleValueUpdate(value) {
   if (value === '') {
     form.amount = '';
   } else if (currentToken.value) {
-    form.amount = value / currentToken.value.quote_rate;
+    form.amount = value / currentToken.value.price;
   }
 }
 
 function handleMaxClick() {
   if (currentToken.value) {
-    handleAmountUpdate(
-      formatUnits(currentToken.value.balance, currentToken.value.contract_decimals)
-    );
+    handleAmountUpdate(formatUnits(currentToken.value.tokenBalance, currentToken.value.decimals));
   }
 }
 
@@ -130,7 +130,7 @@ watch(
 watch(currentToken, token => {
   if (!token || typeof form.amount === 'string') return;
 
-  form.value = parseFloat((form.amount * token.quote_rate).toFixed(2));
+  form.value = parseFloat((form.amount * token.price).toFixed(2));
 });
 </script>
 
@@ -191,13 +191,13 @@ watch(currentToken, token => {
           <div class="flex items-center">
             <Stamp
               v-if="currentToken"
-              :id="currentToken.contract_address"
+              :id="currentToken.contractAddress"
               type="token"
               class="mr-2"
               :size="20"
             />
             <div class="truncate">
-              {{ currentToken?.contract_ticker_symbol || 'Select token' }}
+              {{ currentToken?.symbol || 'Select token' }}
             </div>
           </div>
         </button>
