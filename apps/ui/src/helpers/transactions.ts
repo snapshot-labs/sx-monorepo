@@ -1,15 +1,8 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
+import { abis } from '@/helpers/abis';
 import type { Token } from '@/helpers/alchemy';
 import type { SendTokenTransaction, SendNftTransaction, ContractCallTransaction } from '@/types';
-
-const abis = {
-  erc20: ['function transfer(address _to, uint256 _value) returns (bool)'],
-  erc721: ['function safeTransferFrom(address from, address to, uint256 tokenId)'],
-  erc1155: [
-    'function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)'
-  ]
-};
 
 export function createSendTokenTransaction({
   token,

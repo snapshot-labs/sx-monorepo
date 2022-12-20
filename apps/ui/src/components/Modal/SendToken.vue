@@ -5,6 +5,7 @@ import { useBalances } from '@/composables/useBalances';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
+import type { Token } from '@/helpers/alchemy';
 import type { Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
@@ -37,10 +38,14 @@ const form: {
 const showPicker = ref(false);
 const pickerType: Ref<'token' | 'contact' | null> = ref(null);
 const searchValue = ref('');
+const customTokens: Ref<Token[]> = ref([]);
 const { loading, assets, assetsMap, loadBalances } = useBalances();
 
+const allAssets = computed(() => [...assets.value, ...customTokens.value]);
+
 const currentToken = computed(() => {
-  const token = assetsMap.value?.get(form.token);
+  let token = assetsMap.value?.get(form.token);
+  if (!token) token = customTokens.value.find(existing => existing.contractAddress === form.token);
 
   if (!token) {
     return {
@@ -48,7 +53,8 @@ const currentToken = computed(() => {
       name: 'Ether',
       symbol: 'ETH',
       contractAddress: ETH_CONTRACT,
-      tokenBalance: 0,
+      logo: null,
+      tokenBalance: '0x0',
       price: 0,
       value: 0,
       change: 0
@@ -63,9 +69,19 @@ onMounted(() => {
   loadBalances(props.address, props.network);
 });
 
+function handleAddCustomToken(token: Token) {
+  if (customTokens.value.find(existing => existing.contractAddress === token.contractAddress)) {
+    return;
+  }
+
+  customTokens.value.push(token);
+}
+
 function handlePickerClick(type: 'token' | 'contact') {
   showPicker.value = true;
   pickerType.value = type;
+
+  searchValue.value = '';
 
   nextTick(() => {
     if (searchInput.value) {
@@ -148,7 +164,7 @@ watch(currentToken, token => {
             ref="searchInput"
             v-model="searchValue"
             type="text"
-            placeholder="Search"
+            :placeholder="pickerType === 'token' ? 'Search name or paste address' : 'Search'"
             class="flex-auto bg-transparent text-skin-link"
           />
         </div>
@@ -157,13 +173,14 @@ watch(currentToken, token => {
     <template v-if="showPicker">
       <BlockTokenPicker
         v-if="pickerType === 'token'"
-        :assets="assets"
+        :assets="allAssets"
         :loading="loading"
         :search-value="searchValue"
         @pick="
           form.token = $event;
           showPicker = false;
         "
+        @add="handleAddCustomToken"
       />
       <BlockContactPicker
         v-else-if="pickerType === 'contact'"
