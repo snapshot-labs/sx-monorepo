@@ -10,6 +10,8 @@ import {
 } from './queries';
 import type { Space, Proposal, Vote, User } from '@/types';
 
+type PaginationOpts = { limit: number; skip?: number };
+
 function formatProposal(proposal: Omit<Proposal, 'has_ended'>, now: number = Date.now()): Proposal {
   return {
     ...proposal,
@@ -42,12 +44,16 @@ export function createApi() {
         (data.votes as Vote[]).map(vote => [`${vote.space.id}/${vote.proposal}`, vote])
       );
     },
-    loadProposals: async (spaceId: string, limit: number): Promise<Proposal[]> => {
+    loadProposals: async (
+      spaceId: string,
+      { limit, skip = 0 }: PaginationOpts
+    ): Promise<Proposal[]> => {
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
         variables: {
+          space: spaceId,
           first: limit,
-          space: spaceId
+          skip
         }
       });
 

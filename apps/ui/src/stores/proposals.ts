@@ -5,12 +5,16 @@ import type { Proposal } from '@/types';
 
 type SpaceRecord = {
   loading: boolean;
+  loadingMore: boolean;
   loaded: boolean;
   proposals: Proposal[];
+  hasMoreProposals: boolean;
   summaryLoading: boolean;
   summaryLoaded: boolean;
   summaryProposals: Proposal[];
 };
+
+const PROPOSALS_LIMIT = 20;
 
 export const useProposalsStore = defineStore('proposals', {
   state: () => ({
@@ -30,12 +34,14 @@ export const useProposalsStore = defineStore('proposals', {
     }
   },
   actions: {
-    async fetchAll(spaceId: string) {
+    async fetch(spaceId: string) {
       if (!this.proposals[spaceId]) {
         this.proposals[spaceId] = {
           loading: false,
+          loadingMore: false,
           loaded: false,
           proposals: [],
+          hasMoreProposals: true,
           summaryLoading: false,
           summaryLoaded: false,
           summaryProposals: []
@@ -47,16 +53,50 @@ export const useProposalsStore = defineStore('proposals', {
 
       record.value.loading = true;
 
-      record.value.proposals = await currentNetwork.api.loadProposals(spaceId, 5);
+      const proposals = await currentNetwork.api.loadProposals(spaceId, { limit: PROPOSALS_LIMIT });
+
+      record.value.proposals = proposals;
+      record.value.hasMoreProposals = proposals.length !== 0;
       record.value.loaded = true;
       record.value.loading = false;
+    },
+    async fetchMore(spaceId: string) {
+      if (!this.proposals[spaceId]) {
+        this.proposals[spaceId] = {
+          loading: false,
+          loadingMore: false,
+          loaded: false,
+          proposals: [],
+          hasMoreProposals: true,
+          summaryLoading: false,
+          summaryLoaded: false,
+          summaryProposals: []
+        };
+      }
+
+      const record = toRef(this.proposals, spaceId) as Ref<SpaceRecord>;
+      if (record.value.loading || !record.value.loaded) return;
+
+      record.value.loadingMore = true;
+
+      const proposals = await currentNetwork.api.loadProposals(spaceId, {
+        limit: PROPOSALS_LIMIT,
+        skip: record.value.proposals.length
+      });
+
+      record.value.proposals = [...record.value.proposals, ...proposals];
+
+      record.value.hasMoreProposals = proposals.length === PROPOSALS_LIMIT;
+      record.value.loadingMore = false;
     },
     async fetchSummary(spaceId: string, limit = 3) {
       if (!this.proposals[spaceId]) {
         this.proposals[spaceId] = {
           loading: false,
+          loadingMore: false,
           loaded: false,
           proposals: [],
+          hasMoreProposals: true,
           summaryLoading: false,
           summaryLoaded: false,
           summaryProposals: []
@@ -78,8 +118,10 @@ export const useProposalsStore = defineStore('proposals', {
       if (!this.proposals[spaceId]) {
         this.proposals[spaceId] = {
           loading: false,
+          loadingMore: false,
           loaded: false,
           proposals: [],
+          hasMoreProposals: true,
           summaryLoading: false,
           summaryLoaded: false,
           summaryProposals: []

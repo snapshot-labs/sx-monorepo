@@ -5,12 +5,17 @@ import type { Proposal as ProposalType } from '@/types';
 const props = defineProps<{
   title: string;
   loading?: boolean;
+  loadingMore?: boolean;
   limit?: number | 'off';
   proposals: ProposalType[];
   route?: {
     name: string;
     linkTitle: string;
   };
+}>();
+
+const emit = defineEmits<{
+  (e: 'endReached');
 }>();
 
 const currentLimit = computed(() => {
@@ -25,11 +30,13 @@ const currentLimit = computed(() => {
     <Label :label="title" />
     <UiLoading v-if="loading" class="block px-4 py-3" />
     <div v-else>
-      <Proposal
-        v-for="(proposal, i) in proposals.slice(0, currentLimit)"
-        :key="i"
-        :proposal="proposal"
-      />
+      <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="emit('endReached')">
+        <Proposal
+          v-for="(proposal, i) in proposals.slice(0, currentLimit)"
+          :key="i"
+          :proposal="proposal"
+        />
+      </BlockInfiniteScroller>
       <div v-if="!proposals.length" class="px-4 py-3 text-skin-link">
         <IH-exclamation-circle class="inline-block mr-2" />
         <span v-text="'There are no proposals here.'" />

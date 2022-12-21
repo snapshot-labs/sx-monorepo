@@ -7,11 +7,17 @@ const props = defineProps<{ space: Space }>();
 
 const proposalsStore = useProposalsStore();
 
-onMounted(() => {
-  proposalsStore.fetchAll(props.space.id);
-});
-
 const proposalsRecord = computed(() => proposalsStore.proposals[props.space.id]);
+
+async function handleEndReached() {
+  if (!proposalsRecord.value?.hasMoreProposals) return;
+
+  proposalsStore.fetchMore(props.space.id);
+}
+
+onMounted(() => {
+  proposalsStore.fetch(props.space.id);
+});
 </script>
 
 <template>
@@ -35,7 +41,9 @@ const proposalsRecord = computed(() => proposalsStore.proposals[props.space.id])
       title="Proposals"
       limit="off"
       :loading="!proposalsRecord?.loaded"
+      :loading-more="proposalsRecord?.loadingMore"
       :proposals="proposalsRecord?.proposals || []"
+      @end-reached="handleEndReached"
     />
   </div>
 </template>
