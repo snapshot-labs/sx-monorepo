@@ -3,7 +3,6 @@
 pragma solidity ^0.8.15;
 
 interface ISpaceOwnerActions {
-
     function cancelProposal() external;
 
     function setController() external;
@@ -31,5 +30,4 @@ interface ISpaceOwnerActions {
     function addExecutionStrategies() external;
 
     function removeExecutionStrategies() external;
-
 }

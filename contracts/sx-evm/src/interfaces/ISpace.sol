@@ -7,11 +7,4 @@ import "./space/ISpaceActions.sol";
 import "./space/ISpaceOwnerActions.sol";
 import "./space/ISpaceEvents.sol";
 
-interface ISpace is 
-    ISpaceState,
-    ISpaceActions,
-    ISpaceOwnerActions, 
-    ISpaceEvents
-{
-
-}
+interface ISpace is ISpaceState, ISpaceActions, ISpaceOwnerActions, ISpaceEvents {}

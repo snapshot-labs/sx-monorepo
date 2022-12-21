@@ -2,6 +2,4 @@
 
 pragma solidity ^0.8.15;
 
-interface ISpaceEvents {
-
-}
+interface ISpaceEvents {}
