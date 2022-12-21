@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useSpacesStore } from '@/stores/spaces';
 
 const spacesStore = useSpacesStore();
 
-onMounted(() => spacesStore.fetchAll());
+const infiniteScrollEnabled = ref(false);
+
+function handleEndReached() {
+  if (!spacesStore.hasMoreSpaces) return;
+
+  spacesStore.fetchMore();
+}
+
+onMounted(() => spacesStore.fetch());
 </script>
 
 <template>
@@ -21,47 +29,43 @@ onMounted(() => spacesStore.fetchAll());
     </Container>
     <Container v-if="spacesStore.loaded" class="max-w-screen-md" slim>
       <div class="x-block mb-3">
-        <router-link
-          v-for="space in spacesStore.spaces"
-          :key="space.id"
-          :to="{ name: 'overview', params: { id: space.id } }"
-          class="p-4 text-skin-text border-b last:border-b-0 block"
+        <BlockInfiniteScroller
+          :enabled="infiniteScrollEnabled"
+          :loading-more="spacesStore.loadingMore"
+          @end-reached="handleEndReached"
         >
-          <div class="mb-2 flex items-center space-x-2">
-            <Stamp
-              :id="space.id"
-              :size="24"
-              class="inline-block border-skin-bg !bg-skin-bg rounded-sm"
-            />
-            <h4 class="inline-block" v-text="space.name" />
-          </div>
-          <div>
-            <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·
-            <b class="text-skin-link" v-text="space.vote_count" /> votes
-          </div>
-        </router-link>
+          <router-link
+            v-for="space in spacesStore.spaces"
+            :key="space.id"
+            :to="{ name: 'overview', params: { id: space.id } }"
+            class="p-4 text-skin-text border-b last-of-type:border-b-0 block"
+          >
+            <div class="mb-2 flex items-center space-x-2">
+              <Stamp
+                :id="space.id"
+                :size="24"
+                class="inline-block border-skin-bg !bg-skin-bg rounded-sm"
+              />
+              <h4 class="inline-block" v-text="space.name" />
+            </div>
+            <div>
+              <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·
+              <b class="text-skin-link" v-text="space.vote_count" /> votes
+            </div>
+          </router-link>
+          <template #loading>
+            <div class="flex justify-center border-t">
+              <UiLoading class="block px-4 py-3" />
+            </div>
+          </template>
+        </BlockInfiniteScroller>
       </div>
-    </Container>
-    <Container class="max-w-screen-md">
-      <router-link
-        :to="{
-          name: 'editor',
-          params: { id: spacesStore.spaces[0]?.id || '0' }
-        }"
-        class="mb-2 block"
+      <UiButton
+        v-if="!infiniteScrollEnabled && spacesStore.hasMoreSpaces"
+        class="w-full"
+        @click="infiniteScrollEnabled = true"
+        >Load more</UiButton
       >
-        <h3 v-text="'Editor'" />
-      </router-link>
-      <a
-        href="https://github.com/snapshot-labs?q=sx&type=all&language=&sort="
-        target="_blank"
-        class="mb-2 block"
-      >
-        <h3>
-          GitHub
-          <IH-external-link class="inline-block" />
-        </h3>
-      </a>
     </Container>
   </div>
 </template>

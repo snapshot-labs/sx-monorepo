@@ -4,7 +4,7 @@ import { onMounted } from 'vue';
 
 const spacesStore = useSpacesStore();
 
-onMounted(() => spacesStore.fetchAll());
+onMounted(() => spacesStore.fetch());
 </script>
 
 <template>
@@ -15,7 +15,7 @@ onMounted(() => spacesStore.fetchAll());
     <UiLoading v-if="!spacesStore.loaded" class="block py-2" />
     <div v-else class="space-y-3 p-2">
       <router-link
-        v-for="(space, i) in spacesStore.spaces"
+        v-for="(space, i) in spacesStore.spaces.slice(0, 5)"
         :key="i"
         :to="{ name: 'overview', params: { id: space.id } }"
         class="block"

@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount, Ref } from 'vue';
 
-defineProps<{
-  loadingMore?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    enabled?: boolean;
+    loadingMore?: boolean;
+  }>(),
+  { enabled: true, loadingMore: false }
+);
 
 const emit = defineEmits<{
   (e: 'endReached');
@@ -18,6 +22,11 @@ function updateIntersectionObserver() {
   const lastElement = container.value.children[container.value.children.length - 1];
 
   intersectionObserver.observe(lastElement);
+}
+
+function cleanup() {
+  mutationObserver.disconnect();
+  intersectionObserver.disconnect();
 }
 
 const intersectionObserver = new IntersectionObserver(
@@ -36,16 +45,19 @@ const mutationObserver = new MutationObserver(() => {
   updateIntersectionObserver();
 });
 
-watch(container, v => {
-  if (!v) return;
+watch([container, () => props.enabled], ([ref, enabled]) => {
+  if (!enabled) {
+    return cleanup();
+  }
 
-  mutationObserver.observe(v, { childList: true });
+  if (!ref) return;
+
+  mutationObserver.observe(ref, { childList: true });
   updateIntersectionObserver();
 });
 
 onBeforeUnmount(() => {
-  mutationObserver.disconnect();
-  intersectionObserver.disconnect();
+  cleanup();
 });
 </script>
 

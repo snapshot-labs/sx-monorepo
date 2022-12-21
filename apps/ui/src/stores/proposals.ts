@@ -56,7 +56,7 @@ export const useProposalsStore = defineStore('proposals', {
       const proposals = await currentNetwork.api.loadProposals(spaceId, { limit: PROPOSALS_LIMIT });
 
       record.value.proposals = proposals;
-      record.value.hasMoreProposals = proposals.length !== 0;
+      record.value.hasMoreProposals = proposals.length === PROPOSALS_LIMIT;
       record.value.loaded = true;
       record.value.loading = false;
     },

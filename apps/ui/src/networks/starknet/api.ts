@@ -81,8 +81,14 @@ export function createApi() {
 
       return formatProposal(data.proposal);
     },
-    loadSpaces: async (): Promise<Space[]> => {
-      const { data } = await apollo.query({ query: SPACES_QUERY });
+    loadSpaces: async ({ limit, skip = 0 }: PaginationOpts): Promise<Space[]> => {
+      const { data } = await apollo.query({
+        query: SPACES_QUERY,
+        variables: {
+          first: limit,
+          skip
+        }
+      });
 
       return data.spaces;
     },
