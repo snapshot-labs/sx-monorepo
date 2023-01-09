@@ -14,6 +14,7 @@ const routes: any[] = [
   { path: '/', name: 'home', component: Home },
   {
     path: '/:id',
+    name: 'space',
     component: Space,
     children: [
       { path: '', name: 'overview', component: Overview },

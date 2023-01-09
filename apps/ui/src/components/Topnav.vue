@@ -1,11 +1,18 @@
 <script setup>
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { shorten } from '@/helpers/utils';
+import { useUiStore } from '@/stores/ui';
 import { useModal } from '@/composables/useModal';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useTxStatus } from '@/composables/useTxStatus';
 import { useUserSkin } from '@/composables/useUserSkin';
 
+const emit = defineEmits(['toggle']);
+
+const route = useRoute();
+
+const uiStore = useUiStore();
 const { pendingCount } = useTxStatus();
 const { modalAccountOpen } = useModal();
 
@@ -23,12 +30,29 @@ async function handleLogin(connector) {
 </script>
 
 <template>
-  <nav class="border-b fixed top-0 right-0 z-10 bg-skin-bg left-0 md:left-[72px]">
-    <div class="flex items-center h-[71px] mx-4">
+  <nav
+    class="border-b fixed top-0 right-0 z-10 left-0 lg:left-[72px]"
+    :class="{
+      'translate-x-[72px]': uiStore.sidebarOpen
+    }"
+  >
+    <div
+      class="flex items-center h-[71px] px-4 bg-skin-bg"
+      :class="{
+        'lg:translate-x-[240px]': route.matched[0]?.name === 'space',
+        'translate-x-[240px]': uiStore.sidebarOpen && route.matched[0]?.name === 'space'
+      }"
+    >
       <div class="flex-auto">
-        <router-link :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
-          snapshot x
-        </router-link>
+        <div class="flex items-center">
+          <IH-menu-alt-2
+            class="inline-block text-skin-link mr-3 cursor-pointer lg:hidden"
+            @click="emit('toggle')"
+          />
+          <router-link :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
+            snapshot x
+          </router-link>
+        </div>
       </div>
       <div :key="web3.account">
         <UiButton v-if="loading || web3.authLoading" loading class="!px-0 w-[46px]" />
