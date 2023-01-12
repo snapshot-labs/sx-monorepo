@@ -33,14 +33,15 @@ async function handleLogin(connector) {
   <nav
     class="border-b fixed top-0 right-0 z-10 left-0 lg:left-[72px]"
     :class="{
-      'translate-x-[72px]': uiStore.sidebarOpen
+      'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
     }"
   >
     <div
       class="flex items-center h-[71px] px-4 bg-skin-bg"
       :class="{
-        'lg:translate-x-[240px]': route.matched[0]?.name === 'space',
-        'translate-x-[240px]': uiStore.sidebarOpen && route.matched[0]?.name === 'space'
+        'lg:ml-[240px]': route.matched[0]?.name === 'space',
+        'translate-x-[240px] lg:translate-x-0':
+          uiStore.sidebarOpen && route.matched[0]?.name === 'space'
       }"
     >
       <div class="flex-auto">
