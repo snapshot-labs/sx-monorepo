@@ -34,7 +34,7 @@ const space = computed(() => spacesStore.spacesMap.get(id));
 </script>
 <template>
   <div>
-    <nav class="border-b bg-skin-bg fixed top-0 z-10 right-0 left-0 md:left-[72px]">
+    <nav class="border-b bg-skin-bg fixed top-0 z-10 right-0 left-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
           <router-link :to="{ name: 'overview', params: { id } }" class="mr-2">
