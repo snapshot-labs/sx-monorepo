@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi';
+import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
-import { Wallet } from '@ethersproject/wallet';
 import { createExecutionHash } from '../../utils/encoding';
 import { SplitUint256 } from '../../utils/split-uint256';
 import { defaultNetwork } from '../../networks';
@@ -9,11 +9,11 @@ import type { MetaTransaction } from '../../utils/encoding';
 import type { ExecutionInput, NetworkConfig } from '../../types';
 
 export class Zodiac {
-  config: { networkConfig: NetworkConfig; wallet: Wallet };
+  config: { networkConfig: NetworkConfig; signer: Signer };
 
   zodiacInterface: Interface;
 
-  constructor(opts: { networkConfig?: NetworkConfig; wallet: Wallet }) {
+  constructor(opts: { networkConfig?: NetworkConfig; signer: Signer }) {
     this.config = {
       networkConfig: defaultNetwork,
       ...opts
@@ -30,7 +30,7 @@ export class Zodiac {
 
     const { destination, chainId } = executorConfig.params;
 
-    const zodiacModule = new Contract(destination, this.zodiacInterface, this.config.wallet);
+    const zodiacModule = new Contract(destination, this.zodiacInterface, this.config.signer);
 
     const { executionHash, txHashes } = createExecutionHash(
       input.transactions,
@@ -56,7 +56,7 @@ export class Zodiac {
 
     const { destination } = executorConfig.params;
 
-    const zodiacModule = new Contract(destination, this.zodiacInterface, this.config.wallet);
+    const zodiacModule = new Contract(destination, this.zodiacInterface, this.config.signer);
 
     return zodiacModule.executeProposalTx(
       proposalIndex,

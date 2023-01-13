@@ -23,7 +23,7 @@ describe('SpaceManager', () => {
 
   it('should finalizeProposal', async () => {
     const space = '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28';
-    const proposalId = 26;
+    const proposalId = 52;
     const executor = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
 
     const transactions = [
