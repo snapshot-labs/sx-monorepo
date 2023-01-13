@@ -105,6 +105,17 @@ onMounted(() => {
             <BlockExecution :txs="execution" />
           </div>
         </div>
+        <div
+          v-if="execution && execution.length > 0 && proposal.scores_total >= proposal.space.quorum"
+        >
+          <h4 class="mb-3 eyebrow flex items-center">
+            <IH-play class="inline-block mr-2" />
+            <span>Actions</span>
+          </h4>
+          <div class="mb-4">
+            <BlockActions />
+          </div>
+        </div>
         <div>
           <Vote :proposal="proposal">
             <template #voted="{ vote: userVote }">
