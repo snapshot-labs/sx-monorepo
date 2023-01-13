@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import rpc from './rpc';
 import fossil from './fossil';
+import space from './space';
 import pkg from '../package.json';
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ limit: '4mb', extended: false }));
 app.use(cors({ maxAge: 86400 }));
 app.use('/', rpc);
 app.use('/fossil', fossil);
+app.use('/space', space);
 
 app.get('/', (req, res) =>
   res.json({

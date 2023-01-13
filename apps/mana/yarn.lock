@@ -580,14 +580,15 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@snapshot-labs/sx@^0.1.0-beta.15":
-  version "0.1.0-beta.15"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.15.tgz#5df6ec2524510ba24e353ca1074bc34dc87ddd67"
-  integrity sha512-13vdmzyDaqHAWdMi5RJO0bQDsJ8fSC8VfXMMZagFvEY40tvS3UyCuny5UhnOw2IvhSfjXWv14zsOVN/IsjarKg==
+"@snapshot-labs/sx@^0.1.0-beta.16":
+  version "0.1.0-beta.16"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.16.tgz#22fe46f06788e912defe4cbd11ee3b37100ac129"
+  integrity sha512-kLXk4YtVZSA3JqHB9iW5JjxGkimqt1oFVzrCZzbI1pYxV8Md+bT/6LibgvhurUI+R9YZ8hi6Xx9Vxys1H45bjw==
   dependencies:
     "@ethereumjs/block" "^3.6.3"
     "@ethereumjs/common" "^2.6.5"
     "@ethersproject/abi" "^5.7.0"
+    "@ethersproject/contracts" "^5.7.0"
     "@ethersproject/hash" "^5.6.1"
     "@ethersproject/keccak256" "^5.7.0"
     "@ethersproject/providers" "^5.7.0"
