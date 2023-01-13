@@ -1,7 +1,7 @@
 import type { Provider } from 'starknet';
 import type { Call } from 'starknet';
 import type { Choice } from '../utils/choice';
-import type { MetaTransaction } from '../utils/encoding/execution-hash';
+import type { MetaTransaction } from '../utils/encoding';
 import type { NetworkConfig } from './networkConfig';
 
 export * from './networkConfig';

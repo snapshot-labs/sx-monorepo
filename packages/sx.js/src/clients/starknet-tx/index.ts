@@ -1,5 +1,7 @@
 import { Account, hash } from 'starknet';
-import * as utils from '../../utils';
+import { IntsSequence } from '../../utils/ints-sequence';
+import { getVoteCalldata, getProposeCalldata } from '../../utils/encoding';
+import { getStrategies, getStrategiesParams, getExtraProposeCalls } from '../../utils/strategies';
 import { getAuthenticator } from '../../authenticators';
 import { defaultNetwork } from '../../networks';
 import type {
@@ -32,7 +34,7 @@ export class StarkNetTx {
     const { address, data } = envelope;
     const { strategies, executor, metadataUri, executionParams } = data.message;
 
-    const strategiesParams = await utils.strategies.getStrategiesParams(
+    const strategiesParams = await getStrategiesParams(
       'propose',
       strategiesAddresses,
       envelope.address,
@@ -40,9 +42,9 @@ export class StarkNetTx {
       this.config
     );
 
-    return utils.encoding.getProposeCalldata(
+    return getProposeCalldata(
       address,
-      utils.intsSequence.IntsSequence.LEFromString(metadataUri),
+      IntsSequence.LEFromString(metadataUri),
       executor,
       strategies,
       strategiesParams,
@@ -57,7 +59,7 @@ export class StarkNetTx {
     const { address, data } = envelope;
     const { strategies, proposal, choice } = data.message;
 
-    const strategiesParams = await utils.strategies.getStrategiesParams(
+    const strategiesParams = await getStrategiesParams(
       'vote',
       strategiesAddresses,
       envelope.address,
@@ -65,7 +67,7 @@ export class StarkNetTx {
       this.config
     );
 
-    return utils.encoding.getVoteCalldata(address, proposal, choice, strategies, strategiesParams);
+    return getVoteCalldata(address, proposal, choice, strategies, strategiesParams);
   }
 
   async propose(
@@ -80,14 +82,11 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const strategiesAddresses = await utils.strategies.getStrategies(
-      envelope.data.message,
-      this.config
-    );
+    const strategiesAddresses = await getStrategies(envelope.data.message, this.config);
 
     const calldata = await this.getProposeCalldata(strategiesAddresses, envelope);
     const call = authenticator.createCall(envelope, getSelectorFromName('propose'), calldata);
-    const extraCalls = await utils.strategies.getExtraProposeCalls(
+    const extraCalls = await getExtraProposeCalls(
       strategiesAddresses,
       envelope.address,
       envelope.data.message,
@@ -111,10 +110,7 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const strategiesAddresses = await utils.strategies.getStrategies(
-      envelope.data.message,
-      this.config
-    );
+    const strategiesAddresses = await getStrategies(envelope.data.message, this.config);
     const calldata = await this.getVoteCalldata(strategiesAddresses, envelope);
     const call = authenticator.createCall(envelope, getSelectorFromName('vote'), calldata);
 

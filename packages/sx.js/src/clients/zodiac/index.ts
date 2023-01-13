@@ -1,11 +1,11 @@
 import { Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
-import { createExecutionHash } from '../../utils/encoding/execution-hash';
+import { createExecutionHash } from '../../utils/encoding';
 import { SplitUint256 } from '../../utils/split-uint256';
 import { defaultNetwork } from '../../networks';
 import ZodiacAbi from './abis/zodiac.json';
-import type { MetaTransaction } from '../../utils/encoding/execution-hash';
+import type { MetaTransaction } from '../../utils/encoding';
 import type { ExecutionInput, NetworkConfig } from '../../types';
 
 export class Zodiac {

@@ -1,4 +1,4 @@
-import { createExecutionHash, MetaTransaction } from '../utils/encoding/execution-hash';
+import { createExecutionHash, MetaTransaction } from '../utils/encoding';
 import { SplitUint256 } from '../utils/split-uint256';
 import { EthRelayerExecutionConfig } from '../types';
 

@@ -1,4 +1,4 @@
-import { createStarknetExecutionParams } from '../utils/encoding/starknet-execution-params';
+import { createStarknetExecutionParams } from '../utils/encoding';
 import type { Call } from 'starknet';
 
 export default function createStarknetExecutor() {

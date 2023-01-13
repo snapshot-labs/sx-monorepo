@@ -1,5 +1,5 @@
 import { getStrategy } from '../strategies';
-import * as utils from '../utils';
+import { getStorageVarAddress } from '../utils/encoding';
 import type { Propose, Vote, ClientConfig, StrategiesAddresses } from '../types';
 
 export async function getStrategies(
@@ -11,7 +11,7 @@ export async function getStrategies(
       id =>
         config.starkProvider.getStorageAt(
           data.space,
-          utils.encoding.getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))
+          getStorageVarAddress('Voting_voting_strategies_store', id.toString(16))
         ) as Promise<string>
     )
   );

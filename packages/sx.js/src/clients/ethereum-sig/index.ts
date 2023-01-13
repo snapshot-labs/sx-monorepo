@@ -5,7 +5,10 @@ import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'cross-fetch';
 import { domain, proposeTypes, voteTypes } from './types';
-import * as utils from '../../utils';
+import { SplitUint256 } from '../../utils/split-uint256';
+import { hexPadRight, flatten2DArray } from '../../utils/encoding';
+import { bytesToHex } from '../../utils/bytes';
+import { getStrategies, getStrategiesParams } from '../../utils/strategies';
 import { defaultNetwork } from '../../networks';
 import type {
   Propose,
@@ -28,9 +31,7 @@ export class EthereumSig {
   }
 
   generateSalt() {
-    return Number(
-      utils.splitUint256.SplitUint256.fromHex(utils.bytes.bytesToHex(randomBytes(4))).toHex()
-    );
+    return Number(SplitUint256.fromHex(bytesToHex(randomBytes(4))).toHex());
   }
 
   public async sign<T extends EthSigProposeMessage | EthSigVoteMessage>(
@@ -70,8 +71,8 @@ export class EthereumSig {
   }
 
   public async propose(web3: Web3Provider | Wallet, address: string, data: Propose) {
-    const strategies = await utils.strategies.getStrategies(data, this.config);
-    const strategiesParams = await utils.strategies.getStrategiesParams(
+    const strategies = await getStrategies(data, this.config);
+    const strategiesParams = await getStrategiesParams(
       'propose',
       strategies,
       address,
@@ -81,16 +82,16 @@ export class EthereumSig {
 
     const message: EthSigProposeMessage = {
       ...data,
-      space: utils.encoding.hexPadRight(data.space),
-      authenticator: utils.encoding.hexPadRight(data.authenticator),
+      space: hexPadRight(data.space),
+      authenticator: hexPadRight(data.authenticator),
       author: address,
-      executor: utils.encoding.hexPadRight(data.executor),
-      executionHash: utils.encoding.hexPadRight(hash.computeHashOnElements(data.executionParams)),
-      strategiesHash: utils.encoding.hexPadRight(
+      executor: hexPadRight(data.executor),
+      executionHash: hexPadRight(hash.computeHashOnElements(data.executionParams)),
+      strategiesHash: hexPadRight(
         hash.computeHashOnElements(data.strategies.map(strategy => `0x${strategy.toString(16)}`))
       ),
-      strategiesParamsHash: utils.encoding.hexPadRight(
-        hash.computeHashOnElements(utils.encoding.flatten2DArray(strategiesParams))
+      strategiesParamsHash: hexPadRight(
+        hash.computeHashOnElements(flatten2DArray(strategiesParams))
       ),
       salt: this.generateSalt()
     };
@@ -99,8 +100,8 @@ export class EthereumSig {
   }
 
   public async vote(web3: Web3Provider | Wallet, address: string, data: Vote) {
-    const strategies = await utils.strategies.getStrategies(data, this.config);
-    const strategiesParams = await utils.strategies.getStrategiesParams(
+    const strategies = await getStrategies(data, this.config);
+    const strategiesParams = await getStrategiesParams(
       'vote',
       strategies,
       address,
@@ -110,14 +111,14 @@ export class EthereumSig {
 
     const message: EthSigVoteMessage = {
       ...data,
-      space: utils.encoding.hexPadRight(data.space),
-      authenticator: utils.encoding.hexPadRight(data.authenticator),
+      space: hexPadRight(data.space),
+      authenticator: hexPadRight(data.authenticator),
       voter: address,
-      strategiesHash: utils.encoding.hexPadRight(
+      strategiesHash: hexPadRight(
         hash.computeHashOnElements(data.strategies.map(strategy => `0x${strategy.toString(16)}`))
       ),
-      strategiesParamsHash: utils.encoding.hexPadRight(
-        hash.computeHashOnElements(utils.encoding.flatten2DArray(strategiesParams))
+      strategiesParamsHash: hexPadRight(
+        hash.computeHashOnElements(flatten2DArray(strategiesParams))
       ),
       salt: this.generateSalt()
     };

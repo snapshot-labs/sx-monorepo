@@ -1,6 +1,6 @@
-import { utils } from '..';
 import type { Call } from 'starknet';
-import { getStorageVarAddress, offsetStorageVar } from '../utils/encoding';
+import { getProofInputs } from '../utils/storage-proofs';
+import { getStorageVarAddress, offsetStorageVar, getSlotKey } from '../utils/encoding';
 import type {
   SingleSlotProofStrategyConfig,
   ClientConfig,
@@ -116,7 +116,7 @@ export default function createSingleSlotProofStrategy(
         method: 'eth_getProof',
         params: [
           strategyParams[0],
-          [utils.encoding.getSlotKey(envelope.address, strategyParams[1])],
+          [getSlotKey(envelope.address, strategyParams[1])],
           `0x${block.toString(16)}`
         ]
       })
@@ -125,7 +125,7 @@ export default function createSingleSlotProofStrategy(
     const data = await response.json();
     if (data.error) throw new Error('Failed to fetch proofs');
 
-    return utils.storageProofs.getProofInputs(block, data.result);
+    return getProofInputs(block, data.result);
   }
 
   return {

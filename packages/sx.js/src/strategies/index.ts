@@ -1,10 +1,10 @@
 import createVanillaStrategy from './vanilla';
 import createSingleSlotProofStrategy from './singleSlotProof';
-import * as utils from '../utils';
+import { hexPadLeft } from '../utils/encoding';
 import type { Strategy, NetworkConfig } from '../types';
 
 export function getStrategy(address: string, networkConfig: NetworkConfig): Strategy | null {
-  const strategy = networkConfig.strategies[utils.encoding.hexPadLeft(address)];
+  const strategy = networkConfig.strategies[hexPadLeft(address)];
   if (!strategy) return null;
 
   if (strategy.type === 'vanilla') {
