@@ -66,4 +66,36 @@ export class Zodiac {
       transaction.operation
     );
   }
+
+  async executeProposalTxBatch(
+    proposalIndex: number,
+    executor: string,
+    transactions: MetaTransaction[]
+  ) {
+    const executorConfig = this.config.networkConfig.executors[executor];
+    if (executorConfig?.type !== 'ethRelayer') throw new Error('Expected ethRelayer executor');
+
+    const { destination } = executorConfig.params;
+
+    const zodiacModule = new Contract(destination, this.zodiacInterface, this.config.signer);
+
+    const { tos, values, data, operations } = transactions.reduce(
+      (acc, transaction) => {
+        acc.tos.push(transaction.to);
+        acc.values.push(transaction.value);
+        acc.data.push(transaction.data);
+        acc.operations.push(transaction.operation);
+
+        return acc;
+      },
+      {
+        tos: [] as string[],
+        values: [] as (string | number)[],
+        data: [] as string[],
+        operations: [] as number[]
+      }
+    );
+
+    return zodiacModule.executeProposalTxBatch(proposalIndex, tos, values, data, operations);
+  }
 }

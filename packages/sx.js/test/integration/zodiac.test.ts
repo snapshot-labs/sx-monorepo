@@ -39,4 +39,13 @@ describe('Zodiac', () => {
 
     expect(receipt).toBeDefined();
   }, 60e3);
+
+  it('should executeProposalTxBatch', async () => {
+    const proposalIndex = 0;
+
+    const receipt = await zodiac.executeProposalTxBatch(proposalIndex, executor, transactions);
+    console.log('Receipt', receipt);
+
+    expect(receipt).toBeDefined();
+  }, 60e3);
 });
