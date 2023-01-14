@@ -21,7 +21,10 @@ provide('web3', web3);
 const skin = computed(() => userSkin.value);
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
-onMounted(async () => await init());
+onMounted(async () => {
+  uiStore.restorePendingTransactions();
+  await init();
+});
 
 watch(scrollDisabled, val => {
   const el = document.body;

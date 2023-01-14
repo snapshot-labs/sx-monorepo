@@ -5,7 +5,6 @@ import { shorten } from '@/helpers/utils';
 import { useUiStore } from '@/stores/ui';
 import { useModal } from '@/composables/useModal';
 import { useWeb3 } from '@/composables/useWeb3';
-import { useTxStatus } from '@/composables/useTxStatus';
 import { useUserSkin } from '@/composables/useUserSkin';
 
 const emit = defineEmits(['toggle']);
@@ -13,7 +12,6 @@ const emit = defineEmits(['toggle']);
 const route = useRoute();
 
 const uiStore = useUiStore();
-const { pendingCount } = useTxStatus();
 const { modalAccountOpen } = useModal();
 
 const { login, web3 } = useWeb3();
@@ -71,21 +69,14 @@ async function handleLogin(connector) {
             <IH-login class="sm:hidden inline-block" />
           </template>
         </UiButton>
+        <PendingTransactionsIndicator class="ml-2" />
         <UiButton class="!px-0 w-[46px] ml-2" @click="toggleSkin">
           <IH-light-bulb v-if="getMode() === 'dark'" class="inline-block" />
           <IH-moon v-else class="inline-block" />
         </UiButton>
       </div>
     </div>
-    <div
-      v-if="pendingCount > 0"
-      class="bg-blue text-white text-center py-2 fixed top-[72px] w-full"
-    >
-      <UiLoading :fill-white="true" class="mr-2" />
-      {{ pendingCount }} pending transaction
-    </div>
   </nav>
-  <div v-if="pendingCount > 0" class="pt-[43px]" />
   <teleport to="#modal">
     <ModalAccount :open="modalAccountOpen" @close="modalAccountOpen = false" @login="handleLogin" />
   </teleport>

@@ -1,17 +1,17 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { currentNetwork } from '@/networks';
 import { pin } from '@snapshot-labs/pineapple';
+import { useUiStore } from '@/stores/ui';
 import { useWeb3 } from '@/composables/useWeb3';
-import { useTxStatus } from '@/composables/useTxStatus';
 import { useAccount } from '@/composables/useAccount';
 import { useModal } from '@/composables/useModal';
 import type { Transaction, Proposal, Space } from '@/types';
 
 export function useActions() {
+  const uiStore = useUiStore();
   const { web3 } = useWeb3();
   const { modalAccountOpen } = useModal();
   const auth = getInstance();
-  const { pendingCount } = useTxStatus();
   const { loadVotes } = useAccount();
 
   async function forceLogin() {
@@ -30,12 +30,13 @@ export function useActions() {
     );
 
     console.log('envelope', envelope);
-    pendingCount.value++;
+    uiStore.broadcastingTransactionsCount++;
 
     const receipt = await currentNetwork.actions.send(envelope);
 
-    pendingCount.value--;
     console.log('Receipt', receipt);
+    uiStore.broadcastingTransactionsCount--;
+    uiStore.addPendingTransaction(receipt.transaction_hash);
 
     await loadVotes();
   }
@@ -73,13 +74,14 @@ export function useActions() {
       transactions
     );
 
-    console.log('Envelope', envelope);
-    pendingCount.value++;
+    console.log('envelope', envelope);
+    uiStore.broadcastingTransactionsCount++;
 
     const receipt = await currentNetwork.actions.send(envelope);
 
-    pendingCount.value--;
     console.log('Receipt', receipt);
+    uiStore.broadcastingTransactionsCount--;
+    uiStore.addPendingTransaction(receipt.transaction_hash);
   }
 
   return {

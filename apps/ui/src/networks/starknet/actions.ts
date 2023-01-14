@@ -1,6 +1,6 @@
-import { Provider, constants } from 'starknet';
 import { clients as Clients, getExecutionData, defaultNetwork } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from '@/helpers/constants';
+import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Wallet } from '@ethersproject/wallet';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
@@ -25,16 +25,9 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
   return { authenticator, strategies: selectedStrategies };
 }
 
-export function createActions() {
+export function createActions(starkProvider: Provider) {
   const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
   const ethUrl: string = import.meta.env.VITE_ETH_RPC_URL;
-
-  const starkProvider = new Provider({
-    sequencer: {
-      baseUrl: 'https://alpha4-2.starknet.io',
-      chainId: constants.StarknetChainId.TESTNET2
-    }
-  });
 
   const client = new Clients.EthereumSig({
     starkProvider,

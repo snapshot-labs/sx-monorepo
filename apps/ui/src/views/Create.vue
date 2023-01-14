@@ -44,6 +44,7 @@ const space = computed(() => spacesStore.spacesMap.get(id));
           </router-link>
           <h4 class="py-2 inline-block">New proposal</h4>
         </div>
+        <PendingTransactionsIndicator class="mr-2" />
         <UiLoading v-if="!space" class="block p-4" />
         <div v-else class="space-x-2">
           <UiButton class="float-left leading-3 !px-3 rounded-r-none" @click="modalOpen = true">
