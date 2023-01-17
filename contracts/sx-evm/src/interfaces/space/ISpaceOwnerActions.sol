@@ -2,32 +2,34 @@
 
 pragma solidity ^0.8.15;
 
+import "../../types.sol";
+
 interface ISpaceOwnerActions {
-    function cancelProposal() external;
+    function cancelProposal(uint256 proposalId) external;
 
-    function setController() external;
+    function setController(uint256 controller) external;
 
-    function setQuorum() external;
+    function setQuorum(uint256 quorum) external;
 
-    function setVotingDelay() external;
+    function setVotingDelay(uint32 delay) external;
 
-    function setMinVotingDuration() external;
+    function setMinVotingDuration(uint32 duration) external;
 
-    function setMaxVotingDuration() external;
+    function setMaxVotingDuration(uint32 duration) external;
 
-    function setProposalThreshold() external;
+    function setProposalThreshold(uint256 threshold) external;
 
-    function setMetadataUri() external;
+    function setMetadataUri(string calldata metadataUri) external;
 
-    function addVotingStrategies() external;
+    function addVotingStrategies(Strategy[] calldata _votingStrategies) external;
 
-    function removeVotingStrategies() external;
+    function removeVotingStrategies(uint256[] calldata indicesToRemove) external;
 
-    function addAuthenticators() external;
+    function addAuthenticators(address[] calldata _authenticators) external;
 
-    function removeAuthenticators() external;
+    function removeAuthenticators(address[] calldata _authenticators) external;
 
-    function addExecutionStrategies() external;
+    function addExecutionStrategies(address[] calldata _executionStrategies) external;
 
-    function removeExecutionStrategies() external;
+    function removeExecutionStrategies(address[] calldata _executionStrategies) external;
 }

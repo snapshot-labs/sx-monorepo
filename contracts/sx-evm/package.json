@@ -16,6 +16,8 @@
     "lint": "yarn lint:sol && yarn prettier:check",
     "lint:sol": "solhint \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
-    "prettier": "prettier --write \"**/*.{json,md,sol,yml}\""
+    "prettier": "prettier --write \"**/*.{json,md,sol,yml}\"",
+    "format": "yarn prettier",
+    "test": "forge test --optimize -vv"
   }
 }

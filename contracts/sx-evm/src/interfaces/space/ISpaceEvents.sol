@@ -1,5 +1,28 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.15;
 
-interface ISpaceEvents {}
+import "src/types.sol";
+
+interface ISpaceEvents {
+    event ProposalCreated(
+        uint256 nextProposalId,
+        address proposerAddress,
+        Proposal proposal,
+        string metadataUri,
+        bytes executionParams
+    );
+
+    event VotingStrategiesAdded(Strategy[] votingStrategies);
+    event VotingStrategiesRemoved(uint8[] indices);
+    event ExecutionStrategiesAdded(address[] executionStrategies);
+    event ExecutionStrategiesRemoved(address[] executionStrategies);
+    event AuthenticatorsAdded(address[] authenticators);
+    event AuthenticatorsRemoved(address[] authenticators);
+
+    event MaxVotingDurationUpdated(uint32 previous, uint32 newMaxVotingDuration);
+    event MinVotingDurationUpdated(uint32 previous, uint32 newMinVotingDuration);
+    event MetadataUriUpdated(string newMetadataUri);
+    event ProposalThresholdUpdated(uint256 previous, uint256 newProposalThreshold);
+    event QuorumUpdated(uint256 previous, uint256 newQuorum);
+    event VotingDelayUpdated(uint256 previous, uint256 newVotingDelay);
+}

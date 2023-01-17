@@ -12,7 +12,9 @@ out = "out"
 solc = "0.8.15"
 src = "src"
 test = "test"
-
+via_ir = true
+ffi = true
+fs_permissions = [{ access = "read-write", path = ".forge-snapshots/"}]
 
 [profile.ci]
 fuzz = { runs = 1_000 }
