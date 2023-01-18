@@ -23,6 +23,7 @@ export type Proposal = {
     id: string;
     quorum: number;
     authenticators: string[];
+    executors: string[];
   };
   author: {
     id: string;
@@ -32,7 +33,7 @@ export type Proposal = {
   title: string;
   body: string;
   discussion: string;
-  execution: string;
+  execution: Transaction[];
   start: number;
   min_end: number;
   max_end: number;

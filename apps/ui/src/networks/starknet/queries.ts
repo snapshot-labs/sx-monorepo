@@ -9,6 +9,7 @@ export const PROPOSAL_QUERY = gql`
         id
         quorum
         authenticators
+        executors
       }
       author {
         id
@@ -50,6 +51,7 @@ export const PROPOSALS_QUERY = gql`
         id
         quorum
         authenticators
+        executors
       }
       author {
         id
@@ -104,6 +106,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
       id
       quorum
       authenticators
+      executors
     }
     author {
       id

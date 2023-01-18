@@ -5,7 +5,6 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useProposalsStore } from '@/stores/proposals';
 import { _rt, _n, shortenAddress, getUrl } from '@/helpers/utils';
 import { useActions } from '@/composables/useActions';
-import type { Transaction } from '@/types';
 
 const route = useRoute();
 const proposalsStore = useProposalsStore();
@@ -24,22 +23,6 @@ const discussion = computed(() => {
   if (output === 'about:blank') return null;
 
   return output;
-});
-
-const execution = computed(() => {
-  const rawExecution = proposal.value?.execution;
-  if (!rawExecution) return null;
-
-  let parsed = null;
-  try {
-    parsed = JSON.parse(rawExecution);
-  } catch (err) {
-    console.log('failed to parse execution');
-  }
-
-  if (!parsed || !Array.isArray(parsed)) return null;
-
-  return parsed as Transaction[];
 });
 
 onMounted(() => {
@@ -96,24 +79,28 @@ onMounted(() => {
             <Preview :url="discussion" />
           </a>
         </div>
-        <div v-if="execution && execution.length > 0">
+        <div v-if="proposal.execution && proposal.execution.length > 0">
           <h4 class="mb-3 eyebrow flex items-center">
             <IH-play class="inline-block mr-2" />
             <span>Execution</span>
           </h4>
           <div class="mb-4">
-            <BlockExecution :txs="execution" />
+            <BlockExecution :txs="proposal.execution" />
           </div>
         </div>
         <div
-          v-if="execution && execution.length > 0 && proposal.scores_total >= proposal.space.quorum"
+          v-if="
+            proposal.execution &&
+            proposal.execution.length > 0 &&
+            proposal.scores_total >= proposal.space.quorum
+          "
         >
           <h4 class="mb-3 eyebrow flex items-center">
             <IH-play class="inline-block mr-2" />
             <span>Actions</span>
           </h4>
           <div class="mb-4">
-            <BlockActions />
+            <BlockActions :proposal="proposal" />
           </div>
         </div>
         <div>

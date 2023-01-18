@@ -8,13 +8,29 @@ import {
   SPACE_QUERY,
   USER_QUERY
 } from './queries';
-import type { Space, Proposal, Vote, User } from '@/types';
+import type { Space, Proposal, Vote, User, Transaction } from '@/types';
+
+type ApiProposal = Omit<Proposal, 'has_ended' | 'execution'> & { execution: string };
 
 type PaginationOpts = { limit: number; skip?: number };
 
-function formatProposal(proposal: Omit<Proposal, 'has_ended'>, now: number = Date.now()): Proposal {
+function formatExecution(execution: string): Transaction[] {
+  if (execution === '') return [];
+
+  try {
+    const result = JSON.parse(execution);
+
+    return Array.isArray(result) ? result : [];
+  } catch (err) {
+    console.log('failed to parse execution');
+    return [];
+  }
+}
+
+function formatProposal(proposal: ApiProposal, now: number = Date.now()): Proposal {
   return {
     ...proposal,
+    execution: formatExecution(proposal.execution),
     has_ended: proposal.max_end * 1000 <= now
   };
 }

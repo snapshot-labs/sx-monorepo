@@ -1181,14 +1181,15 @@
     json-to-graphql-query "^2.2.4"
     lodash.set "^4.3.2"
 
-"@snapshot-labs/sx@^0.1.0-beta.16":
-  version "0.1.0-beta.16"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.16.tgz#22fe46f06788e912defe4cbd11ee3b37100ac129"
-  integrity sha512-kLXk4YtVZSA3JqHB9iW5JjxGkimqt1oFVzrCZzbI1pYxV8Md+bT/6LibgvhurUI+R9YZ8hi6Xx9Vxys1H45bjw==
+"@snapshot-labs/sx@^0.1.0-beta.17":
+  version "0.1.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.17.tgz#6309ac8e69b1bf83d61e85578cad2eb8ab3ecbed"
+  integrity sha512-JQPxq63QqHolGUS8Tw2nArSMq6EuQc9C2qyDZWl99d3Y/HJzt3frjtP1tseg96kuzSuRS6eLAmO6kb7w2mNhkA==
   dependencies:
     "@ethereumjs/block" "^3.6.3"
     "@ethereumjs/common" "^2.6.5"
     "@ethersproject/abi" "^5.7.0"
+    "@ethersproject/abstract-signer" "^5.7.0"
     "@ethersproject/contracts" "^5.7.0"
     "@ethersproject/hash" "^5.6.1"
     "@ethersproject/keccak256" "^5.7.0"

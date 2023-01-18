@@ -9,6 +9,10 @@ export const SUPPORTED_STRATEGIES = {
   '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b': true
 };
 
+export const SUPPORTED_EXECUTORS = {
+  '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81': true
+};
+
 export const AUTHS = {
   '0x5e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62': 'Vanilla',
   '0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14': 'Ethereum signature',
