@@ -3,7 +3,6 @@ import { currentNetwork } from '@/networks';
 import { pin } from '@snapshot-labs/pineapple';
 import { useUiStore } from '@/stores/ui';
 import { useWeb3 } from '@/composables/useWeb3';
-import { useAccount } from '@/composables/useAccount';
 import { useModal } from '@/composables/useModal';
 import type { Transaction, Proposal, Space } from '@/types';
 
@@ -12,10 +11,17 @@ export function useActions() {
   const { web3 } = useWeb3();
   const { modalAccountOpen } = useModal();
   const auth = getInstance();
-  const { loadVotes } = useAccount();
 
   async function forceLogin() {
     modalAccountOpen.value = true;
+  }
+
+  async function send(envelope: any) {
+    const receipt = await currentNetwork.actions.send(envelope);
+
+    console.log('Receipt', receipt);
+    uiStore.broadcastingTransactionsCount--;
+    uiStore.addPendingTransaction(receipt.transaction_hash);
   }
 
   async function vote(proposal: Proposal, choice: number) {
@@ -32,13 +38,7 @@ export function useActions() {
     console.log('envelope', envelope);
     uiStore.broadcastingTransactionsCount++;
 
-    const receipt = await currentNetwork.actions.send(envelope);
-
-    console.log('Receipt', receipt);
-    uiStore.broadcastingTransactionsCount--;
-    uiStore.addPendingTransaction(receipt.transaction_hash);
-
-    await loadVotes();
+    await send(envelope);
   }
 
   async function propose(
@@ -77,11 +77,7 @@ export function useActions() {
     console.log('envelope', envelope);
     uiStore.broadcastingTransactionsCount++;
 
-    const receipt = await currentNetwork.actions.send(envelope);
-
-    console.log('Receipt', receipt);
-    uiStore.broadcastingTransactionsCount--;
-    uiStore.addPendingTransaction(receipt.transaction_hash);
+    await send(envelope);
   }
 
   async function finalizeProposal(proposal: Proposal) {

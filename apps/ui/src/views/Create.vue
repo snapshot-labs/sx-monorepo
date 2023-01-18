@@ -15,6 +15,7 @@ const spacesStore = useSpacesStore();
 const id = route.params.id as string;
 const key = route.params.key;
 const modalOpen = ref(false);
+const sending = ref(false);
 
 onMounted(() => {
   spacesStore.fetchSpace(id);
@@ -31,6 +32,26 @@ onMounted(() => {
 });
 
 const space = computed(() => spacesStore.spacesMap.get(id));
+
+async function handleProposeClick() {
+  if (!space.value) return;
+
+  sending.value = true;
+
+  try {
+    await propose(
+      space.value,
+      proposals[`${id}:${key}`].title,
+      proposals[`${id}:${key}`].body,
+      proposals[`${id}:${key}`].discussion,
+      proposals[`${id}:${key}`].execution
+    );
+
+    router.back();
+  } finally {
+    sending.value = false;
+  }
+}
 </script>
 <template>
   <div>
@@ -52,15 +73,8 @@ const space = computed(() => spacesStore.spacesMap.get(id));
           </UiButton>
           <UiButton
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
-            @click="
-              propose(
-                space,
-                proposals[`${id}:${key}`].title,
-                proposals[`${id}:${key}`].body,
-                proposals[`${id}:${key}`].discussion,
-                proposals[`${id}:${key}`].execution
-              )
-            "
+            :loading="sending"
+            @click="handleProposeClick"
           >
             <span class="hidden mr-2 md:inline-block" v-text="'Publish'" />
             <IH-paper-airplane class="inline-block rotate-90" />

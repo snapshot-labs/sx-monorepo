@@ -13,6 +13,7 @@ const id = parseInt((route.params.id as string) || '0');
 const space = route.params.space as string;
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
+const sendingType = ref<null | number>(null);
 
 const proposal = computed(() => proposalsStore.getProposal(space, id));
 
@@ -28,6 +29,18 @@ const discussion = computed(() => {
 onMounted(() => {
   proposalsStore.fetchProposal(space, id);
 });
+
+async function handleVoteClick(choice: number) {
+  if (!proposal.value) return;
+
+  sendingType.value = choice;
+
+  try {
+    await vote(proposal.value, choice);
+  } finally {
+    sendingType.value = null;
+  }
+}
 </script>
 
 <template>
@@ -133,16 +146,25 @@ onMounted(() => {
             <div class="grid grid-cols-3 gap-2">
               <UiButton
                 class="w-full !text-white !bg-green !border-green"
-                @click="vote(proposal, 1)"
+                :primary="true"
+                :loading="sendingType === 1"
+                @click="handleVoteClick(1)"
               >
                 <IH-check class="inline-block" />
               </UiButton>
-              <UiButton class="w-full !text-white !bg-red !border-red" @click="vote(proposal, 2)">
+              <UiButton
+                class="w-full !text-white !bg-red !border-red"
+                :primary="true"
+                :loading="sendingType === 2"
+                @click="handleVoteClick(2)"
+              >
                 <IH-x class="inline-block" />
               </UiButton>
               <UiButton
                 class="w-full !text-white !bg-gray-500 !border-gray-500"
-                @click="vote(proposal, 3)"
+                :primary="true"
+                :loading="sendingType === 3"
+                @click="handleVoteClick(3)"
               >
                 <IH-arrow-right class="inline-block" />
               </UiButton>
