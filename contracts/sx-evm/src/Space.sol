@@ -252,7 +252,7 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
         uint32 timestamp,
         address userAddress,
         IndexedStrategy[] calldata userVotingStrategies
-    ) internal view returns (uint256) {
+    ) internal returns (uint256) {
         // Ensure there are no duplicates to avoid an attack where people double count a voting strategy
         _assertNoDuplicateIndices(userVotingStrategies);
 
