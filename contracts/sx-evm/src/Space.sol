@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
-import "forge-std/console2.sol";
 import "src/interfaces/IVotingStrategy.sol";
 // import "src/interfaces/ISpace.sol"; TODO: add this later when everything has been impl
 import "src/interfaces/space/ISpaceEvents.sol";
@@ -8,6 +7,7 @@ import "src/SpaceErrors.sol";
 import "src/types.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@zodiac/core/Module.sol";
+import "src/interfaces/IExecutionStrategy.sol";
 
 /**
  * @author  SnapshotLabs
@@ -39,6 +39,10 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
     mapping(address => bool) private authenticators;
     // Mapping of all `Proposal`s of this space (past and present).
     mapping(uint256 => Proposal) private proposalRegistry;
+    // Mapping used to know if a voter already voted on a specific proposal. Here to prevent double voting.
+    mapping(uint256 => mapping(address => bool)) private voteRegistry;
+    // Mapping used to check the current voting power in favor of a `Choice` for a specific proposal.
+    mapping(uint256 => mapping(Choice => uint256)) private votePower;
 
     // ------------------------------------
     // |                                  |
@@ -150,6 +154,7 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
             votingStrategies[indicesToRemove[i]].params = new bytes(0);
         }
 
+        // TODO: should we check that there are still voting strategies left after this?
         emit VotingStrategiesRemoved(indicesToRemove);
     }
 
@@ -172,6 +177,7 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
         for (uint256 i = 0; i < _authenticators.length; i++) {
             authenticators[_authenticators[i]] = false;
         }
+        // TODO: should we check that there are still authenticators left? same for other setters..
         emit AuthenticatorsRemoved(_authenticators);
     }
 
@@ -264,26 +270,36 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
             // no longer a valid voting strategy. See `_removeVotingStrategies`.
             if (votingStrategy.addy == address(0)) revert InvalidVotingStrategyIndex(i);
             IVotingStrategy strategy = IVotingStrategy(votingStrategy.addy);
+
+            // With solc 0.8, this will revert in case of overflow.
             totalVotingPower += strategy.getVotingPower(
                 timestamp,
                 userAddress,
                 votingStrategy.params,
                 userVotingStrategies[i].params
             );
-            // TODO: use SafeMath, check overflow
         }
 
         return totalVotingPower;
     }
 
-    // TODO: fix this function once we have `vote`
     /**
-     * @notice  Returns whether the quorum has been reached for this particular proposal or not.
-     * @param   proposalId  The proposal ID.
+     * @notice  Returns some information regarding state of quorum and votes.
+     * @param   quorum  The quorum to reach.
+     * @param   proposalId  The proposal id.
      * @return  bool  Whether or not the quorum has been reached.
      */
-    function _quorumReached(uint256 proposalId) internal view returns (bool) {
-        return (true);
+    function _quorumInfo(uint256 quorum, uint256 proposalId) internal view returns (bool, uint256, uint256, uint256) {
+        uint256 votesFor = votePower[proposalId][Choice.For];
+        uint256 votesAgainst = votePower[proposalId][Choice.Against];
+        uint256 votesAbstain = votePower[proposalId][Choice.Abstain];
+
+        // With solc 0.8, this will revert if an overflow occurs.
+        uint256 total = votesFor + votesAgainst + votesAbstain;
+
+        bool quorumReached = total >= quorum;
+
+        return (quorumReached, votesFor, votesAgainst, votesAbstain);
     }
 
     // ------------------------------------
@@ -370,6 +386,8 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
         Proposal memory proposal = proposalRegistry[proposalId];
         _assertProposalExists(proposal);
 
+        (bool quorumReached, , , ) = _quorumInfo(proposal.quorum, proposalId);
+
         if (proposal.finalizationStatus == FinalizationStatus.NotExecuted) {
             // Proposal has not been executed yet. Let's look at the current timestamp.
             uint256 current = block.timestamp;
@@ -383,7 +401,7 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
                 // We are somewhere between `proposal.startTimestamp` and `proposal.maxEndTimestamp`.
                 if (current > proposal.minEndTimestamp) {
                     // We've passed `proposal.minEndTimestamp`, check if quorum has been reached.
-                    if (_quorumReached(proposalId)) {
+                    if (quorumReached) {
                         // Quorum has been reached, this proposal is finalizable.
                         return ProposalStatus.VotingPeriodFinalizable;
                     } else {
@@ -409,7 +427,7 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
     // ------------------------------------
 
     /**
-     * @notice  Creates a proposal.
+     * @notice  Create a proposal.
      * @param   proposerAddress  The address of the proposal creator.
      * @param   metadataUri  The metadata URI for the proposal.
      * @param   executionStrategy  The execution contract and associated execution parameters to use for this proposal.
@@ -422,8 +440,6 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
         IndexedStrategy[] calldata userVotingStrategies
     ) external {
         _assertValidAuthenticator();
-        console2.log(executionStrategy.addy);
-        // console2.log(executionStrategy.params);
         _assertValidExecutionStrategy(executionStrategy.addy);
 
         // Casting to `uint32` is fine because this gives us until year ~2106.
@@ -432,7 +448,6 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
         uint256 votingPower = _getCumulativeVotingPower(snapshotTimestamp, proposerAddress, userVotingStrategies);
         if (votingPower < proposalThreshold) revert ProposalThresholdNotReached(votingPower);
 
-        // TODO: use SafeMath
         uint32 startTimestamp = snapshotTimestamp + votingDelay;
         uint32 minEndTimestamp = startTimestamp + minVotingDuration;
         uint32 maxEndTimestamp = startTimestamp + maxVotingDuration;
@@ -454,5 +469,129 @@ contract Space is ISpaceEvents, Module, SpaceErrors {
         emit ProposalCreated(nextProposalId, proposerAddress, proposal, metadataUri, executionStrategy.params);
 
         nextProposalId++;
+    }
+
+    /**
+     * @notice  Cast a vote
+     * @param   voterAddress  Voter's address.
+     * @param   proposalId  Proposal id.
+     * @param   choice  Choice can be `For`, `Against` or `Abstain`.
+     * @param   userVotingStrategies  Strategies to use to compute the voter's voting power.
+     */
+    function vote(
+        address voterAddress,
+        uint256 proposalId,
+        Choice choice,
+        IndexedStrategy[] calldata userVotingStrategies
+    ) external {
+        _assertValidAuthenticator();
+
+        Proposal memory proposal = proposalRegistry[proposalId];
+        _assertProposalExists(proposal);
+
+        if (proposal.finalizationStatus != FinalizationStatus.NotExecuted) revert ProposalAlreadyExecuted();
+
+        uint32 currentTimestamp = uint32(block.timestamp);
+
+        if (currentTimestamp >= proposal.maxEndTimestamp) revert VotingPeriodHasEnded();
+        if (currentTimestamp < proposal.startTimestamp) revert VotingPeriodHasNotStarted();
+
+        // Ensure voter has not already voted.
+        if (voteRegistry[proposalId][voterAddress] == true) revert UserHasAlreadyVoted();
+
+        uint256 votingPower = _getCumulativeVotingPower(proposal.snapshotTimestamp, voterAddress, userVotingStrategies);
+
+        if (votingPower == 0) revert UserHasNoVotingPower();
+
+        uint256 previousVotingPower = votePower[proposalId][choice];
+        // With solc 0.8, this will revert if an overflow occurs.
+        uint256 newVotingPower = previousVotingPower + votingPower;
+
+        votePower[proposalId][choice] = newVotingPower;
+        voteRegistry[proposalId][voterAddress] = true;
+
+        Vote memory userVote = Vote(choice, votingPower);
+        emit VoteCreated(proposalId, voterAddress, userVote);
+    }
+
+    /**
+     * @notice  Finalize a proposal.
+     * @param   proposalId  The proposal to cancel
+     * @param   executionParams  The execution parameters, as described in `propose()`.
+     */
+    function finalizeProposal(uint256 proposalId, bytes calldata executionParams) external {
+        // TODO: check if we should use `memory` here and only use `storage` in the end
+        // of this function when we actually modify the proposal
+        Proposal storage proposal = proposalRegistry[proposalId];
+        _assertProposalExists(proposal);
+
+        if (proposal.finalizationStatus != FinalizationStatus.NotExecuted) revert ProposalAlreadyExecuted();
+
+        uint32 currentTimestamp = uint32(block.timestamp);
+
+        if (proposal.minEndTimestamp > currentTimestamp) revert MinVotingDurationHasNotElapsed();
+
+        bytes32 recoveredHash = keccak256(executionParams);
+        if (proposal.executionHash != recoveredHash) revert ExecutionHashMismatch();
+
+        (bool quorumReached, uint256 votesFor, uint256 votesAgainst, uint256 votesAbstain) = _quorumInfo(
+            proposal.quorum,
+            proposalId
+        );
+
+        ProposalOutcome proposalOutcome;
+        if (quorumReached) {
+            // Quorum has been reached, determine if proposal should be accepted or rejected.
+            if (votesFor > votesAgainst) {
+                proposalOutcome = ProposalOutcome.Accepted;
+            } else {
+                proposalOutcome = ProposalOutcome.Rejected;
+            }
+        } else {
+            // Quorum not reached, check to see if the voting period is over.
+            if (currentTimestamp < proposal.maxEndTimestamp) {
+                // Voting period is not over yet; revert.
+                revert QuorumNotReachedYet();
+            } else {
+                // Voting period has ended but quorum wasn't reached: set outcome to `REJECTED`.
+                proposalOutcome = ProposalOutcome.Rejected;
+            }
+        }
+
+        // Ensure the execution strategy is still valid.
+        if (executionStrategies[proposal.executionStrategy] == false) {
+            proposalOutcome = ProposalOutcome.Cancelled;
+        }
+
+        IExecutionStrategy(proposal.executionStrategy).execute(proposalOutcome, executionParams);
+
+        // TODO: should we set votePower[proposalId][choice] to 0 to get some nice ETH refund?
+        // `ProposalOutcome` and `FinalizatonStatus` are almost the same enum except from their first
+        // variant, so by adding `1` we will get the corresponding `FinalizationStatus`.
+        proposal.finalizationStatus = FinalizationStatus(uint8(proposalOutcome) + 1);
+
+        emit ProposalFinalized(proposalId, proposalOutcome);
+    }
+
+    /**
+     * @notice  Cancel a proposal. Only callable by the owner.
+     * @param   proposalId  The proposal to cancel
+     * @param   executionParams  The execution parameters, as described in `propose()`.
+     */
+    function cancelProposal(uint256 proposalId, bytes calldata executionParams) external onlyOwner {
+        Proposal storage proposal = proposalRegistry[proposalId];
+        _assertProposalExists(proposal);
+
+        if (proposal.finalizationStatus != FinalizationStatus.NotExecuted) revert ProposalAlreadyExecuted();
+
+        bytes32 recoveredHash = keccak256(executionParams);
+        if (proposal.executionHash != recoveredHash) revert ExecutionHashMismatch();
+
+        ProposalOutcome proposalOutcome = ProposalOutcome.Cancelled;
+
+        IExecutionStrategy(proposal.executionStrategy).execute(proposalOutcome, executionParams);
+
+        proposal.finalizationStatus = FinalizationStatus.FinalizedAndCancelled;
+        emit ProposalFinalized(proposalId, proposalOutcome);
     }
 }

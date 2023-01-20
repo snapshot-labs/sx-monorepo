@@ -58,3 +58,14 @@ enum ProposalStatus {
     VotingPeriodFinalizable,
     Finalizable
 }
+
+enum Choice {
+    For,
+    Against,
+    Abstain
+}
+
+struct Vote {
+    Choice choice;
+    uint256 votingPower;
+}

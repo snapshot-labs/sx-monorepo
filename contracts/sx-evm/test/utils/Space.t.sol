@@ -9,9 +9,13 @@ import "../../src/Space.sol";
 import "../../src/authenticators/VanillaAuthenticator.sol";
 import "../../src/voting-strategies/VanillaVotingStrategy.sol";
 import "../../src/execution-strategies/VanillaExecutionStrategy.sol";
+import "../../src/interfaces/space/ISpaceEvents.sol";
+import "../../src/types.sol";
+import "../../src/SpaceErrors.sol";
 
 abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, SpaceErrors {
     bytes4 constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),(uint8,bytes)[])"));
+    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[])"));
 
     Space space;
     VanillaVotingStrategy vanillaVotingStrategy;
@@ -50,13 +54,13 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, SpaceErrors {
         vanillaExecutionStrategy = new VanillaExecutionStrategy();
 
         votingDelay = 0;
-        minVotingDuration = 1;
+        minVotingDuration = 0;
         maxVotingDuration = 1000;
         proposalThreshold = 1;
         quorum = 1;
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
         authenticators.push(address(vanillaAuthenticator));
-        executionStrategy = Strategy(address(0), new bytes(0));
+        executionStrategy = Strategy(address(vanillaExecutionStrategy), new bytes(0));
         executionStrategies.push(executionStrategy);
         userVotingStrategies.push(IndexedStrategy(0, new bytes(0)));
         executionStrategiesAddresses.push(executionStrategy.addy);
@@ -73,6 +77,34 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, SpaceErrors {
             votingStrategies,
             authenticators,
             executionStrategiesAddresses
+        );
+    }
+
+    function _createProposal(
+        address _author,
+        string memory _metadataUri,
+        Strategy memory _executionStrategy,
+        IndexedStrategy[] memory _userVotingStrategies
+    ) internal returns (uint256) {
+        vanillaAuthenticator.authenticate(
+            address(space),
+            PROPOSE_SELECTOR,
+            abi.encode(_author, _metadataUri, _executionStrategy, _userVotingStrategies)
+        );
+
+        return space.nextProposalId() - 1;
+    }
+
+    function _vote(
+        address _author,
+        uint256 _proposalId,
+        Choice _choice,
+        IndexedStrategy[] memory _userVotingStrategies
+    ) internal {
+        vanillaAuthenticator.authenticate(
+            address(space),
+            VOTE_SELECTOR,
+            abi.encode(_author, _proposalId, _choice, _userVotingStrategies)
         );
     }
 }

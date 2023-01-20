@@ -12,7 +12,12 @@ interface ISpaceActions {
         IndexedStrategy[] calldata userVotingStrategies
     ) external;
 
-    function vote() external;
+    function vote(
+        address voterAddress,
+        uint256 proposalId,
+        Choice choice,
+        IndexedStrategy[] calldata userVotingStrategies
+    ) external;
 
-    function finalize() external;
+    function finalizeProposal(uint256 proposalId, bytes calldata executionParams) external;
 }

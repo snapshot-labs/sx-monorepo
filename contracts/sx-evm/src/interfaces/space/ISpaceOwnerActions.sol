@@ -5,7 +5,7 @@ pragma solidity ^0.8.15;
 import "../../types.sol";
 
 interface ISpaceOwnerActions {
-    function cancelProposal(uint256 proposalId) external;
+    function cancelProposal(uint256 proposalId, bytes calldata executionParams) external;
 
     function setController(uint256 controller) external;
 
@@ -23,7 +23,7 @@ interface ISpaceOwnerActions {
 
     function addVotingStrategies(Strategy[] calldata _votingStrategies) external;
 
-    function removeVotingStrategies(uint256[] calldata indicesToRemove) external;
+    function removeVotingStrategies(uint8[] calldata indicesToRemove) external;
 
     function addAuthenticators(address[] calldata _authenticators) external;
 
