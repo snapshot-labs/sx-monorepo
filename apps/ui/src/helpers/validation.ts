@@ -11,6 +11,10 @@ export function validateForm(schema, form): Record<string, string> {
     validate: isAddress
   });
 
+  ajv.addFormat('long', {
+    validate: () => true
+  });
+
   ajv.addFormat('uint256', {
     validate: value => {
       if (!value.match(/^([0-9]|[1-9][0-9]+)$/)) return false;

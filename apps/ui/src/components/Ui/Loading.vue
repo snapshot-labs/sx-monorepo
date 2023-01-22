@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  fillWhite: boolean;
+  fillWhite?: boolean;
 }>();
 </script>
 

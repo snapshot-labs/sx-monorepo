@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useProposalsStore } from '@/stores/proposals';
 import { Space, Proposal as ProposalType } from '@/types';
 
@@ -8,6 +8,7 @@ const PROPOSALS_LIMIT = 4;
 const props = defineProps<{ space: Space }>();
 
 const proposalsStore = useProposalsStore();
+const editSpaceModalOpen = ref(false);
 
 onMounted(() => {
   proposalsStore.fetchSummary(props.space.id, PROPOSALS_LIMIT);
@@ -30,6 +31,14 @@ const grouped = computed(() => {
     return v;
   }, initialValue);
 });
+
+const spaceState = computed(() => {
+  return {
+    name: props.space.name,
+    about: props.space.about || '',
+    website: ''
+  };
+});
 </script>
 
 <template>
@@ -41,6 +50,9 @@ const grouped = computed(() => {
             <IH-plus-sm class="inline-block" />
           </UiButton>
         </router-link>
+        <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
+          <IH-cog class="inline-block" />
+        </UiButton>
       </div>
     </div>
     <div class="px-4">
@@ -92,4 +104,11 @@ const grouped = computed(() => {
       />
     </div>
   </div>
+  <teleport to="#modal">
+    <ModalEditSpace
+      :open="editSpaceModalOpen"
+      :initial-state="spaceState"
+      @close="editSpaceModalOpen = false"
+    />
+  </teleport>
 </template>

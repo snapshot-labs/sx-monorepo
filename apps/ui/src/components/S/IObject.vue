@@ -10,6 +10,7 @@ import { ref, computed } from 'vue';
 import IObject from './IObject.vue';
 import IArray from './IArray.vue';
 import IString from './IString.vue';
+import IText from './IText.vue';
 import IAddress from './IAddress.vue';
 import INumber from './INumber.vue';
 import IBoolean from './IBoolean.vue';
@@ -49,7 +50,9 @@ const getComponent = (name: string, format: string) => {
     case 'array':
       return IArray;
     case 'string':
-      return format === 'address' ? IAddress : IString;
+      if (format === 'long') return IText;
+      if (format === 'address') return IAddress;
+      return IString;
     case 'number':
       return INumber;
     case 'boolean':
