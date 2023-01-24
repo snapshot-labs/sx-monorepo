@@ -33,7 +33,6 @@ type Proposal {
   discussion: Text
   execution: Text
   start: Int
-  end: Int
   min_end: Int
   max_end: Int
   snapshot: Int

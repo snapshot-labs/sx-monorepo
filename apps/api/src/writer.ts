@@ -102,7 +102,6 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
     discussion,
     execution,
     start: parseInt(BigInt(timestamps.start).toString()),
-    end: parseInt(BigInt(timestamps.maxEnd).toString()),
     min_end: parseInt(BigInt(timestamps.minEnd).toString()),
     max_end: parseInt(BigInt(timestamps.maxEnd).toString()),
     snapshot: parseInt(BigInt(timestamps.snapshot).toString()),
