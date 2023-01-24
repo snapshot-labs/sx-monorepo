@@ -1,0 +1,63 @@
+type Space @entity {
+  id: ID!
+  name: String
+  about: String
+  controller: Bytes
+  voting_delay: Int
+  min_voting_period: Int
+  max_voting_period: Int
+  proposal_threshold: BigDecimal
+  quorum: BigDecimal
+  strategies: [Bytes!]
+  strategies_params: [String!]
+  authenticators: [Bytes!]
+  executors: [Bytes!]
+  proposal_count: Int
+  vote_count: Int
+  created: Int
+  tx: Bytes
+}
+
+type Proposal @entity {
+  id: ID!
+  proposal_id: Int
+  space: Space
+  author: User
+  execution_hash: String
+  metadata_uri: String
+  title: String
+  body: String
+  discussion: String
+  execution: Bytes
+  start: Int
+  min_end: Int
+  max_end: Int
+  snapshot: Int
+  strategies: [Bytes!]
+  strategies_params: [String!]
+  scores_1: BigDecimal
+  scores_2: BigDecimal
+  scores_3: BigDecimal
+  scores_total: BigDecimal
+  quorum: BigDecimal
+  created: Int
+  tx: Bytes
+  vote_count: Int
+}
+
+type Vote @entity {
+  id: ID!
+  voter: User
+  space: Space
+  proposal: Int
+  choice: Int
+  vp: BigDecimal
+  created: Int
+}
+
+type User @entity {
+  id: ID!
+  proposal_count: Int
+  vote_count: Int
+  created: Int
+}
