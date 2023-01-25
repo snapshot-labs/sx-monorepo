@@ -81,12 +81,15 @@ export function handleProposalCreated(event: ProposalCreated): void {
 }
 
 export function handleVoteCreated(event: VoteCreated): void {
+  let choice = event.params.vote.choice + 1
+  let vp = event.params.vote.votingPower.toBigDecimal()
+
   let vote = new Vote(`${SPACE}/${event.params.proposalId}/${event.params.voterAddress.toHexString()}`)
   vote.voter = event.params.voterAddress.toHexString()
   vote.space = SPACE
   vote.proposal = event.params.proposalId.toI32()
-  vote.choice = event.params.vote.choice
-  vote.vp = event.params.vote.votingPower.toBigDecimal()
+  vote.choice = choice
+  vote.vp = vp
   vote.created = event.block.timestamp.toI32()
   vote.save()
 
@@ -94,6 +97,17 @@ export function handleVoteCreated(event: VoteCreated): void {
   if (space !== null) {
     space.vote_count += 1
     space.save()
+  }
+
+  let proposal = Proposal.load(`${SPACE}/${event.params.proposalId}`)
+  if (proposal !== null) {
+    proposal.setBigDecimal(
+      `scores_${choice.toString()}`,
+      proposal.getBigDecimal(`scores_${choice.toString()}`).plus(vp)
+    )
+    proposal.scores_total = proposal.scores_total.plus(vp)
+    proposal.vote_count += 1
+    proposal.save()
   }
 
   let user = User.load(event.params.voterAddress.toHexString())
