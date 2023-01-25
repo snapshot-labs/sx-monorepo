@@ -28,7 +28,7 @@ type Proposal @entity {
   title: String!
   body: String!
   discussion: String!
-  execution: Bytes!
+  execution: String!
   start: Int!
   min_end: Int!
   max_end: Int!

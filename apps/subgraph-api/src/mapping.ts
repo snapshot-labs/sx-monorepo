@@ -1,4 +1,4 @@
-import { Address, BigDecimal } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { ProposalCreated, VoteCreated } from '../generated/Space/Space'
 import { Space, Proposal, Vote, User} from '../generated/schema'
 
@@ -32,6 +32,8 @@ export function handleSpaceCreated(event: ProposalCreated): void {
 }
 
 export function handleProposalCreated(event: ProposalCreated): void {
+  let metadataUri = event.params.metadataUri
+
   handleSpaceCreated(event)
 
   let space = Space.load(SPACE)
@@ -44,11 +46,11 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.space = SPACE
   proposal.author = event.params.proposerAddress.toHexString()
   proposal.execution_hash = event.params.proposal.executionHash.toHexString()
-  proposal.metadata_uri = event.params.metadataUri
-  proposal.title = 'Lorem ipsum dolor sit amet, consectetur adipiscing'
-  proposal.body = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-  proposal.discussion = 'https://forum.balancer.fi/t/rfc-closing-year-2-funding-gap/4243'
-  proposal.execution = event.params.proposal.executionStrategy
+  proposal.metadata_uri = metadataUri
+  proposal.title = ''
+  proposal.body = ''
+  proposal.discussion = ''
+  proposal.execution = ''
   proposal.start = event.params.proposal.startTimestamp.toI32()
   proposal.min_end = event.params.proposal.minEndTimestamp.toI32()
   proposal.max_end = event.params.proposal.maxEndTimestamp.toI32()
@@ -63,6 +65,24 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.created = event.block.timestamp.toI32()
   proposal.tx = event.transaction.hash
   proposal.vote_count = 0
+
+  if (metadataUri.startsWith('ipfs://')) {
+    let hash = metadataUri.slice(7)
+    let data = ipfs.cat(hash)
+
+    if (data !== null) {
+      let value = json.try_fromBytes(data as Bytes)
+      let obj = value.value.toObject()
+      let title = obj.get('title')
+      let body = obj.get('body')
+      let discussion = obj.get('discussion')
+
+      if (title) proposal.title = title.toString()
+      if (body) proposal.body = body.toString()
+      if (discussion) proposal.discussion = discussion.toString()
+    }
+  }
+
   proposal.save()
 
   space.proposal_count += 1
