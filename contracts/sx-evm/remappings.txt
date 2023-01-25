@@ -5,4 +5,3 @@ forge-gas-snapshot/=lib/forge-gas-snapshot/src
 @prb/test/=lib/prb-test/src/
 @zodiac/=lib/zodiac/contracts/
 @gnosis.pm/safe-contracts=lib/safe-contracts
-@solidity-bytes-utils/contracts/=lib/solidity-bytes-utils/contracts

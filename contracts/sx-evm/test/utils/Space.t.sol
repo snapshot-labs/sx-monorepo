@@ -22,12 +22,16 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, SpaceErrors {
     VanillaAuthenticator vanillaAuthenticator;
     VanillaExecutionStrategy vanillaExecutionStrategy;
 
+    uint256 public constant authorKey = 1234;
+    uint256 public constant voterKey = 5678;
+    uint256 public constant unauthorizedKey = 4321;
+
     // Address of the meta transaction relayer
     address public relayer = address(this);
     address public owner = address(1);
-    address public author = address(2);
-    address public voter = address(3);
-    address public unauthorized = address(4);
+    address public author = vm.addr(authorKey);
+    address public voter = vm.addr(voterKey);
+    address public unauthorized = vm.addr(unauthorizedKey);
 
     Strategy[] votingStrategies;
     address[] authenticators;
@@ -48,7 +52,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, SpaceErrors {
 
     string public proposalMetadataUri = "SOC Test Proposal";
 
-    function setUp() public {
+    function setUp() public virtual {
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
         vanillaExecutionStrategy = new VanillaExecutionStrategy();
