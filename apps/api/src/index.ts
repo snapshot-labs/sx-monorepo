@@ -5,6 +5,8 @@ import path from 'path';
 import fs from 'fs';
 import Checkpoint, { LogLevel } from '@snapshot-labs/checkpoint';
 import config from './config.json';
+import spaceFactoryAbi from './abis/spaceFactory.json';
+import spaceAbi from './abis/space.json';
 import * as writer from './writer';
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
@@ -17,7 +19,11 @@ if (process.env.NETWORK_NODE_URL) {
 
 const checkpoint = new Checkpoint(config, writer, schema, {
   logLevel: LogLevel.Info,
-  prettifyLogs: process.env.NODE_ENV !== 'production'
+  prettifyLogs: process.env.NODE_ENV !== 'production',
+  abis: {
+    SpaceFactory: spaceFactoryAbi,
+    Space: spaceAbi
+  }
 });
 
 checkpoint.reset().then(() => checkpoint.start());

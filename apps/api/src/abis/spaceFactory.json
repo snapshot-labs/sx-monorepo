@@ -1,0 +1,184 @@
+[
+  {
+    "name": "Uint256",
+    "size": 2,
+    "type": "struct",
+    "members": [
+      {
+        "name": "low",
+        "type": "felt",
+        "offset": 0
+      },
+      {
+        "name": "high",
+        "type": "felt",
+        "offset": 1
+      }
+    ]
+  },
+  {
+    "data": [
+      {
+        "name": "deployer_address",
+        "type": "felt"
+      },
+      {
+        "name": "space_address",
+        "type": "felt"
+      },
+      {
+        "name": "voting_delay",
+        "type": "felt"
+      },
+      {
+        "name": "min_voting_duration",
+        "type": "felt"
+      },
+      {
+        "name": "max_voting_duration",
+        "type": "felt"
+      },
+      {
+        "name": "proposal_threshold",
+        "type": "Uint256"
+      },
+      {
+        "name": "controller",
+        "type": "felt"
+      },
+      {
+        "name": "quorum",
+        "type": "Uint256"
+      },
+      {
+        "name": "voting_strategies_len",
+        "type": "felt"
+      },
+      {
+        "name": "voting_strategies",
+        "type": "felt*"
+      },
+      {
+        "name": "voting_strategy_params_flat_len",
+        "type": "felt"
+      },
+      {
+        "name": "voting_strategy_params_flat",
+        "type": "felt*"
+      },
+      {
+        "name": "authenticators_len",
+        "type": "felt"
+      },
+      {
+        "name": "authenticators",
+        "type": "felt*"
+      },
+      {
+        "name": "execution_strategies_len",
+        "type": "felt"
+      },
+      {
+        "name": "execution_strategies",
+        "type": "felt*"
+      },
+      {
+        "name": "metadata_uri_len",
+        "type": "felt"
+      },
+      {
+        "name": "metadata_uri",
+        "type": "felt*"
+      }
+    ],
+    "keys": [],
+    "name": "space_deployed",
+    "type": "event"
+  },
+  {
+    "name": "constructor",
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "space_class_hash",
+        "type": "felt"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "name": "deploySpace",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "public_key",
+        "type": "felt"
+      },
+      {
+        "name": "voting_delay",
+        "type": "felt"
+      },
+      {
+        "name": "min_voting_duration",
+        "type": "felt"
+      },
+      {
+        "name": "max_voting_duration",
+        "type": "felt"
+      },
+      {
+        "name": "proposal_threshold",
+        "type": "Uint256"
+      },
+      {
+        "name": "controller",
+        "type": "felt"
+      },
+      {
+        "name": "quorum",
+        "type": "Uint256"
+      },
+      {
+        "name": "voting_strategies_len",
+        "type": "felt"
+      },
+      {
+        "name": "voting_strategies",
+        "type": "felt*"
+      },
+      {
+        "name": "voting_strategy_params_flat_len",
+        "type": "felt"
+      },
+      {
+        "name": "voting_strategy_params_flat",
+        "type": "felt*"
+      },
+      {
+        "name": "authenticators_len",
+        "type": "felt"
+      },
+      {
+        "name": "authenticators",
+        "type": "felt*"
+      },
+      {
+        "name": "execution_strategies_len",
+        "type": "felt"
+      },
+      {
+        "name": "execution_strategies",
+        "type": "felt*"
+      },
+      {
+        "name": "metadata_uri_len",
+        "type": "felt"
+      },
+      {
+        "name": "metadata_uri",
+        "type": "felt*"
+      }
+    ],
+    "outputs": []
+  }
+]

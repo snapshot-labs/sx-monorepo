@@ -1,7 +1,7 @@
 import { formatUnits } from '@ethersproject/units';
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { validateAndParseAddress } from 'starknet';
-import { getJSON, toAddress, getEvent, getSpaceName, parseTimestamps } from './utils';
+import { getJSON, toAddress, getSpaceName, parseTimestamps } from './utils';
 import type { CheckpointWriter } from '@snapshot-labs/checkpoint';
 
 function intSequenceToString(intSequence) {
@@ -10,6 +10,10 @@ function intSequenceToString(intSequence) {
     .filter(str => str !== '')
     .map(str => str.replace('\x00', '').split('').reverse().join(''))
     .join('');
+}
+
+function uint256toString(uint256) {
+  return (BigInt(uint256.low) + (BigInt(uint256.high) << BigInt(128))).toString();
 }
 
 export const handleSpaceCreated: CheckpointWriter = async ({
@@ -22,23 +26,20 @@ export const handleSpaceCreated: CheckpointWriter = async ({
   if (!event) return;
 
   console.log('Handle space created');
-  const format =
-    'deployer_address, space_address, voting_delay, min_voting_period, max_voting_period, proposal_threshold(uint256), controller, quorum(uint256), strategies_len, strategies(felt*), strategies_params_len, strategies_params(felt*), authenticators_len, authenticators(felt*), executors_len, executors(felt*)';
-  const data: any = getEvent(event.data, format);
 
   const item = {
-    id: validateAndParseAddress(data.space_address),
-    name: getSpaceName(data.space_address),
-    controller: validateAndParseAddress(data.controller),
-    voting_delay: BigInt(data.voting_delay).toString(),
-    min_voting_period: BigInt(data.min_voting_period).toString(),
-    max_voting_period: BigInt(data.max_voting_period).toString(),
-    proposal_threshold: data.proposal_threshold,
-    quorum: data.quorum,
-    strategies: JSON.stringify(data.strategies),
-    strategies_params: JSON.stringify(data.strategies_params),
-    authenticators: JSON.stringify(data.authenticators),
-    executors: JSON.stringify(data.executors),
+    id: validateAndParseAddress(event.space_address),
+    name: getSpaceName(event.space_address),
+    controller: validateAndParseAddress(event.controller),
+    voting_delay: BigInt(event.voting_delay).toString(),
+    min_voting_period: BigInt(event.min_voting_duration).toString(),
+    max_voting_period: BigInt(event.max_voting_duration).toString(),
+    proposal_threshold: uint256toString(event.proposal_threshold),
+    quorum: uint256toString(event.quorum),
+    strategies: JSON.stringify(event.voting_strategies),
+    strategies_params: JSON.stringify(event.voting_strategy_params_flat),
+    authenticators: JSON.stringify(event.authenticators),
+    executors: JSON.stringify(event.executors),
     proposal_count: 0,
     vote_count: 0,
     created: block.timestamp,
@@ -54,21 +55,18 @@ export const handleSpaceCreated: CheckpointWriter = async ({
   await mysql.queryAsync(query, [item]);
 };
 
-export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql }) => {
-  if (!event) return;
+export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, event, mysql }) => {
+  if (!rawEvent || !event) return;
 
   console.log('Handle propose');
-  const format =
-    'proposal, author, quorum(uint256), timestamps, execution_strategy, execution_hash, metadata_uri_len, metadata_uri(felt*)';
-  const data: any = getEvent(event.data, format);
 
-  const space = validateAndParseAddress(event.from_address);
+  const space = validateAndParseAddress(rawEvent.from_address);
   const [{ strategies, strategies_params }] = await mysql.queryAsync(
     'SELECT strategies, strategies_params FROM spaces WHERE id = ? LIMIT 1',
     [space]
   );
-  const proposal = parseInt(BigInt(data.proposal).toString());
-  const author = toAddress(data.author);
+  const proposal = parseInt(BigInt(event.proposal_id).toString());
+  const author = toAddress(event.proposer_address.value);
   let title = '';
   let body = '';
   let discussion = '';
@@ -76,7 +74,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
   let metadataUri = '';
 
   try {
-    metadataUri = intSequenceToString(data.metadata_uri);
+    metadataUri = intSequenceToString(event.metadata_uri);
     const metadata: any = await getJSON(metadataUri);
     console.log('Metadata', metadata);
     if (metadata.title) title = metadata.title;
@@ -87,7 +85,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
     console.log(JSON.stringify(e).slice(0, 256));
   }
 
-  const timestamps = parseTimestamps(data.timestamps);
+  const timestamps = parseTimestamps(event.proposal.timestamps);
   if (!timestamps) return;
 
   const item = {
@@ -95,7 +93,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
     proposal_id: proposal,
     space,
     author,
-    execution_hash: data.execution_hash,
+    execution_hash: event.proposal.execution_hash,
     metadata_uri: metadataUri,
     title,
     body,
@@ -109,7 +107,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
     scores_2: 0,
     scores_3: 0,
     scores_total: 0,
-    quorum: data.quorum,
+    quorum: uint256toString(event.proposal.quorum),
     strategies,
     strategies_params,
     created: block.timestamp,
@@ -134,18 +132,16 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, event, mysql 
   await mysql.queryAsync(query, [item, item.space, user, author]);
 };
 
-export const handleVote: CheckpointWriter = async ({ block, event, mysql }) => {
-  if (!event) return;
+export const handleVote: CheckpointWriter = async ({ block, rawEvent, event, mysql }) => {
+  if (!rawEvent || !event) return;
 
-  console.log('Handle vote');
-  const format = 'proposal, voter, choice, vp';
-  const data: any = getEvent(event.data, format);
+  console.log('Handle vote', event);
 
-  const space = validateAndParseAddress(event.from_address);
-  const proposal = parseInt(BigInt(data.proposal).toString());
-  const voter = toAddress(data.voter);
-  const choice = parseInt(BigInt(data.choice).toString());
-  const vp = parseFloat(formatUnits(BigInt(data.vp).toString(), 18));
+  const space = validateAndParseAddress(rawEvent.from_address);
+  const proposal = parseInt(event.proposal_id);
+  const voter = toAddress(event.voter_address.value);
+  const choice = parseInt(BigInt(event.vote.choice).toString());
+  const vp = parseFloat(formatUnits(uint256toString(event.vote.voting_power), 18));
 
   const item = {
     id: `${space}/${proposal}/${voter}`,

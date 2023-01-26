@@ -19,6 +19,7 @@ type Space {
   vote_count: Int
   created: Int
   tx: String
+  proposals: [Proposal]! @derivedFrom(field: "space")
 }
 
 type Proposal {
@@ -63,4 +64,6 @@ type User {
   proposal_count: Int
   vote_count: Int
   created: Int
+  proposals: [Proposal]! @derivedFrom(field: "author")
+  votes: [Vote]! @derivedFrom(field: "voter")
 }

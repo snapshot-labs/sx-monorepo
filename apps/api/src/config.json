@@ -1,8 +1,9 @@
 {
-  "network_node_url": "https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
+  "network_node_url": "https://starknet-goerli2.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
   "sources": [
     {
       "contract": "0xe1e511e496a72791ab3d591ba7d571a32de4261d84e4d183f26b6325970e20",
+      "abi": "SpaceFactory",
       "start": 14808,
       "events": [
         {
@@ -14,6 +15,7 @@
   ],
   "templates": {
     "Space": {
+      "abi": "Space",
       "events": [
         {
           "name": "proposal_created",
