@@ -60,8 +60,8 @@ enum ProposalStatus {
 }
 
 enum Choice {
-    For,
     Against,
+    For,
     Abstain
 }
 
