@@ -6,5 +6,6 @@ import "./space/ISpaceState.sol";
 import "./space/ISpaceActions.sol";
 import "./space/ISpaceOwnerActions.sol";
 import "./space/ISpaceEvents.sol";
+import "./space/ISpaceErrors.sol";
 
-interface ISpace is ISpaceState, ISpaceActions, ISpaceOwnerActions, ISpaceEvents {}
+interface ISpace is ISpaceState, ISpaceActions, ISpaceOwnerActions, ISpaceEvents, ISpaceErrors {}

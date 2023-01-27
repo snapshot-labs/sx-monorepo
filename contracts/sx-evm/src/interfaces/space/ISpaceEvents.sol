@@ -20,7 +20,7 @@ interface ISpaceEvents {
     event ExecutionStrategiesRemoved(address[] executionStrategies);
     event AuthenticatorsAdded(address[] authenticators);
     event AuthenticatorsRemoved(address[] authenticators);
-
+    event ControllerUpdated(address previous, address newController);
     event MaxVotingDurationUpdated(uint32 previous, uint32 newMaxVotingDuration);
     event MinVotingDurationUpdated(uint32 previous, uint32 newMinVotingDuration);
     event MetadataUriUpdated(string newMetadataUri);

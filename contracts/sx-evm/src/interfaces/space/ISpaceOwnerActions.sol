@@ -7,7 +7,7 @@ import "../../types.sol";
 interface ISpaceOwnerActions {
     function cancelProposal(uint256 proposalId, bytes calldata executionParams) external;
 
-    function setController(uint256 controller) external;
+    function setController(address controller) external;
 
     function setQuorum(uint256 quorum) external;
 

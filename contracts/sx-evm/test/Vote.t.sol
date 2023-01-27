@@ -4,7 +4,6 @@ pragma solidity ^0.8.15;
 
 import "./utils/Space.t.sol";
 import "forge-std/Test.sol";
-import "../src/SpaceErrors.sol";
 import "../src/types.sol";
 
 contract VoteTest is SpaceTest {

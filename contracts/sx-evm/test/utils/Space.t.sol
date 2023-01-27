@@ -10,10 +10,10 @@ import "../../src/authenticators/VanillaAuthenticator.sol";
 import "../../src/voting-strategies/VanillaVotingStrategy.sol";
 import "../../src/execution-strategies/VanillaExecutionStrategy.sol";
 import "../../src/interfaces/space/ISpaceEvents.sol";
+import "../../src/interfaces/space/ISpaceErrors.sol";
 import "../../src/types.sol";
-import "../../src/SpaceErrors.sol";
 
-abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, SpaceErrors {
+abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors {
     bytes4 constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),(uint8,bytes)[])"));
     bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[])"));
 
