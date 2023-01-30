@@ -30,6 +30,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({
   const item = {
     id: validateAndParseAddress(event.space_address),
     name: getSpaceName(event.space_address),
+    about: null,
     controller: validateAndParseAddress(event.controller),
     voting_delay: BigInt(event.voting_delay).toString(),
     min_voting_period: BigInt(event.min_voting_duration).toString(),
@@ -46,6 +47,16 @@ export const handleSpaceCreated: CheckpointWriter = async ({
     tx: tx.transaction_hash
   };
 
+  try {
+    const metadataUri = shortStringArrToStr(event.new_metadata_uri).replaceAll('\x00', '');
+    const metadata: any = await getJSON(metadataUri);
+
+    if (metadata.name) item.name = metadata.name;
+    if (metadata.description) item.about = metadata.description;
+  } catch (e) {
+    console.log('failed to parse space metadata', e);
+  }
+
   instance.executeTemplate('Space', {
     contract: item.id,
     start: block.block_number
@@ -53,6 +64,27 @@ export const handleSpaceCreated: CheckpointWriter = async ({
 
   const query = `INSERT IGNORE INTO spaces SET ?;`;
   await mysql.queryAsync(query, [item]);
+};
+
+export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, event, mysql }) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space metadata uri updated');
+
+  const space = validateAndParseAddress(rawEvent.from_address);
+
+  try {
+    const metadataUri = shortStringArrToStr(event.new_metadata_uri).replaceAll('\x00', '');
+    const metadata: any = await getJSON(metadataUri);
+
+    const name = metadata.name || '';
+    const description = metadata.description || '';
+
+    const query = `UPDATE spaces SET name = ?, about = ? WHERE id = ? LIMIT 1;`;
+    await mysql.queryAsync(query, [name, description, space]);
+  } catch (e) {
+    console.log('failed to update space metadata', e);
+  }
 };
 
 export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, event, mysql }) => {

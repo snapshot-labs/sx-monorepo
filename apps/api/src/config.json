@@ -24,6 +24,10 @@
         {
           "name": "vote_created",
           "fn": "handleVote"
+        },
+        {
+          "name": "metadata_uri_updated",
+          "fn": "handleMetadataUriUpdated"
         }
       ]
     }
