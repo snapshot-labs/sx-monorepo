@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRefs } from 'vue';
+import { toRefs, computed } from 'vue';
 import { useEditor } from '@/composables/useEditor';
 
 const props = defineProps<{
@@ -13,6 +13,8 @@ defineEmits<{
 
 const { drafts, removeDraft } = useEditor();
 const { open } = toRefs(props);
+
+const spaceDrafts = computed(() => drafts.value.filter(draft => draft.space === props.space));
 </script>
 
 <template>
@@ -21,9 +23,9 @@ const { open } = toRefs(props);
       <h3 v-text="'Drafts'" />
     </template>
     <div>
-      <div v-if="drafts.length > 0">
+      <div v-if="spaceDrafts.length > 0">
         <div
-          v-for="proposal in drafts"
+          v-for="proposal in spaceDrafts"
           :key="proposal.id"
           class="py-3 px-4 border-b last:border-b-0 flex justify-between items-center"
         >
