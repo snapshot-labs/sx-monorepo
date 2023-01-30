@@ -16,6 +16,7 @@ dataSources:
       entities:
         - ProposalCreated
         - VoteCreated
+        - MetadataUriUpdated
       abis:
         - name: Space
           file: ./abis/Space.json
@@ -24,4 +25,6 @@ dataSources:
           handler: handleProposalCreated
         - event: VoteCreated(uint256,address,(uint8,uint256))
           handler: handleVoteCreated
+        - event: MetadataUriUpdated(string)
+          handler: handleMetadataUriUpdated
       file: ./src/mapping.ts

@@ -1,5 +1,5 @@
 import { Address, BigDecimal, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
-import { ProposalCreated, VoteCreated } from '../generated/Space/Space'
+import { ProposalCreated, VoteCreated, MetadataUriUpdated } from '../generated/Space/Space'
 import { Space, Proposal, Vote, User} from '../generated/schema'
 
 let SPACE = '0x95DC6f73301356c9909921e21b735601C42fc1a8'
@@ -140,4 +140,30 @@ export function handleVoteCreated(event: VoteCreated): void {
   }
   user.vote_count += 1
   user.save()
+}
+
+export function handleMetadataUriUpdated(event: MetadataUriUpdated): void {
+  let metadataUri = event.params.newMetadataUri
+
+  let space = Space.load(SPACE)
+  if (space == null) {
+    space = new Space(SPACE)
+  }
+
+  if (metadataUri.startsWith('ipfs://')) {
+    let hash = metadataUri.slice(7)
+    let data = ipfs.cat(hash)
+
+    if (data !== null) {
+      let value = json.try_fromBytes(data as Bytes)
+      let obj = value.value.toObject()
+      let title = obj.get('name')
+      let description = obj.get('description')
+
+      if (title) space.name = title.toString()
+      if (description) space.about = description.toString()
+    }
+  }
+
+  space.save()
 }
