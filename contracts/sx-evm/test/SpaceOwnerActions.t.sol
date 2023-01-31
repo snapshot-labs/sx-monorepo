@@ -61,20 +61,20 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testSetMaxVotingDuration() public {
         vm.expectEmit(true, true, true, true);
         uint32 nextDuration = maxVotingDuration + 1;
-        emit MaxVotingDurationUpdated(maxVotingDuration, nextDuration);
+        emit MaxVotingDurationUpdated(nextDuration);
         vm.prank(owner);
         space.setMaxVotingDuration(nextDuration);
 
         assertEq(space.maxVotingDuration(), nextDuration, "Max Voting Duration did not get updated");
     }
 
-    function testUnauthorizedSetMaxVotingDelay() public {
+    function testSetMaxVotingDurationUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
         space.setMaxVotingDuration(2000);
     }
 
-    function testSetInvalidMaxVotingDelay() public {
+    function testSetMaxVotingDurationInvalid() public {
         // Need to update the minimum voting duration
         space.setMinVotingDuration(1);
 
@@ -88,7 +88,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testSetMinVotingDelay() public {
         vm.expectEmit(true, true, true, true);
         uint32 nextDuration = minVotingDuration + 1;
-        emit MinVotingDurationUpdated(minVotingDuration, nextDuration);
+        emit MinVotingDurationUpdated(nextDuration);
         vm.prank(owner);
         space.setMinVotingDuration(nextDuration);
 
@@ -101,7 +101,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.setMinVotingDuration(2000);
     }
 
-    function testSetInvalidMinVotingDuration() public {
+    function testSetMinVotingDurationInvalid() public {
         vm.expectRevert(abi.encodeWithSelector(InvalidDuration.selector, maxVotingDuration + 1, maxVotingDuration));
         vm.prank(owner);
         space.setMinVotingDuration(maxVotingDuration + 1);
@@ -130,7 +130,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testSetProposalThreshold() public {
         uint256 nextThreshold = 2;
         vm.expectEmit(true, true, true, true);
-        emit ProposalThresholdUpdated(proposalThreshold, nextThreshold);
+        emit ProposalThresholdUpdated(nextThreshold);
         vm.prank(owner);
         space.setProposalThreshold(nextThreshold);
 
@@ -148,7 +148,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testSetQuorum() public {
         uint256 newQuorum = 2;
         vm.expectEmit(true, true, true, true);
-        emit QuorumUpdated(quorum, newQuorum);
+        emit QuorumUpdated(newQuorum);
         vm.prank(owner);
         space.setQuorum(newQuorum);
 
@@ -166,7 +166,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testSetVotingDelay() public {
         uint32 nextDelay = 10;
         vm.expectEmit(true, true, true, true);
-        emit VotingDelayUpdated(votingDelay, nextDelay);
+        emit VotingDelayUpdated(nextDelay);
         vm.prank(owner);
         space.setVotingDelay(nextDelay);
 

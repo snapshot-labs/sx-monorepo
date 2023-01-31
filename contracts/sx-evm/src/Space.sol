@@ -60,16 +60,12 @@ contract Space is ISpace, Ownable {
         address[] memory _authenticators,
         address[] memory _executionStrategies
     ) {
-        if (_minVotingDuration > _maxVotingDuration) revert InvalidDuration(_minVotingDuration, _maxVotingDuration);
-        if (_authenticators.length == 0) revert EmptyArray();
-        if (_executionStrategies.length == 0) revert EmptyArray();
-
         transferOwnership(_controller);
-        votingDelay = _votingDelay;
-        minVotingDuration = _minVotingDuration;
-        maxVotingDuration = _maxVotingDuration;
-        proposalThreshold = _proposalThreshold;
-        quorum = _quorum;
+        _setMaxVotingDuration(_maxVotingDuration);
+        _setMinVotingDuration(_minVotingDuration);
+        _setProposalThreshold(_proposalThreshold);
+        _setQuorum(_quorum);
+        _setVotingDelay(_votingDelay);
         _addVotingStrategies(_votingStrategies);
         _addAuthenticators(_authenticators);
         _addExecutionStrategies(_executionStrategies);
@@ -85,6 +81,28 @@ contract Space is ISpace, Ownable {
     // |            INTERNAL              |
     // |                                  |
     // ------------------------------------
+
+    function _setMaxVotingDuration(uint32 _maxVotingDuration) internal {
+        if (_maxVotingDuration < minVotingDuration) revert InvalidDuration(minVotingDuration, _maxVotingDuration);
+        maxVotingDuration = _maxVotingDuration;
+    }
+
+    function _setMinVotingDuration(uint32 _minVotingDuration) internal {
+        if (_minVotingDuration > maxVotingDuration) revert InvalidDuration(_minVotingDuration, maxVotingDuration);
+        minVotingDuration = _minVotingDuration;
+    }
+
+    function _setProposalThreshold(uint256 _proposalThreshold) internal {
+        proposalThreshold = _proposalThreshold;
+    }
+
+    function _setQuorum(uint256 _quorum) internal {
+        quorum = _quorum;
+    }
+
+    function _setVotingDelay(uint32 _votingDelay) internal {
+        votingDelay = _votingDelay;
+    }
 
     /**
      * @notice  Internal function to add voting strategies.
@@ -105,12 +123,12 @@ contract Space is ISpace, Ownable {
     /**
      * @notice  Internal function to remove voting strategies.
      * @dev     Does not shrink the array but simply sets the values to 0.
-     * @param   indicesToRemove  Indices of the strategies to remove.
+     * @param   _votingStrategyIndices  Indices of the strategies to remove.
      */
-    function _removeVotingStrategies(uint8[] memory indicesToRemove) internal {
-        for (uint8 i = 0; i < indicesToRemove.length; i++) {
-            votingStrategies[indicesToRemove[i]].addy = address(0);
-            votingStrategies[indicesToRemove[i]].params = new bytes(0);
+    function _removeVotingStrategies(uint8[] memory _votingStrategyIndices) internal {
+        for (uint8 i = 0; i < _votingStrategyIndices.length; i++) {
+            votingStrategies[_votingStrategyIndices[i]].addy = address(0);
+            votingStrategies[_votingStrategyIndices[i]].params = new bytes(0);
         }
 
         // TODO: should we check that there are still voting strategies left after this?
@@ -263,46 +281,38 @@ contract Space is ISpace, Ownable {
     // |                                  |
     // ------------------------------------
 
-    function setController(address _newController) external override onlyOwner {
-        transferOwnership(_newController);
-        emit ControllerUpdated(owner(), _newController);
+    function setController(address _controller) external override onlyOwner {
+        transferOwnership(_controller);
+        emit ControllerUpdated(_controller);
     }
 
     function setMaxVotingDuration(uint32 _maxVotingDuration) external override onlyOwner {
-        if (_maxVotingDuration < minVotingDuration) revert InvalidDuration(minVotingDuration, _maxVotingDuration);
-        emit MaxVotingDurationUpdated(maxVotingDuration, _maxVotingDuration);
-
-        maxVotingDuration = _maxVotingDuration;
+        _setMaxVotingDuration(_maxVotingDuration);
+        emit MaxVotingDurationUpdated(_maxVotingDuration);
     }
 
     function setMinVotingDuration(uint32 _minVotingDuration) external override onlyOwner {
-        if (_minVotingDuration > maxVotingDuration) revert InvalidDuration(_minVotingDuration, maxVotingDuration);
-
-        emit MinVotingDurationUpdated(minVotingDuration, _minVotingDuration);
-
-        minVotingDuration = _minVotingDuration;
+        _setMinVotingDuration(_minVotingDuration);
+        emit MinVotingDurationUpdated(_minVotingDuration);
     }
 
     function setMetadataUri(string calldata _metadataUri) external override onlyOwner {
         emit MetadataUriUpdated(_metadataUri);
     }
 
-    function setProposalThreshold(uint256 _threshold) external override onlyOwner {
-        emit ProposalThresholdUpdated(proposalThreshold, _threshold);
-
-        proposalThreshold = _threshold;
+    function setProposalThreshold(uint256 _proposalThreshold) external override onlyOwner {
+        _setProposalThreshold(_proposalThreshold);
+        emit ProposalThresholdUpdated(_proposalThreshold);
     }
 
     function setQuorum(uint256 _quorum) external override onlyOwner {
-        emit QuorumUpdated(quorum, _quorum);
-        quorum = _quorum;
+        _setQuorum(_quorum);
+        emit QuorumUpdated(_quorum);
     }
 
     function setVotingDelay(uint32 _votingDelay) external override onlyOwner {
-        emit VotingDelayUpdated(votingDelay, _votingDelay);
-
-        votingDelay = _votingDelay;
-        // TODO: check it's not too big?
+        _setVotingDelay(_votingDelay);
+        emit VotingDelayUpdated(_votingDelay);
     }
 
     function addVotingStrategies(Strategy[] calldata _votingStrategies) external override onlyOwner {
@@ -310,9 +320,9 @@ contract Space is ISpace, Ownable {
         emit VotingStrategiesAdded(_votingStrategies);
     }
 
-    function removeVotingStrategies(uint8[] calldata indicesToRemove) external override onlyOwner {
-        _removeVotingStrategies(indicesToRemove);
-        emit VotingStrategiesRemoved(indicesToRemove);
+    function removeVotingStrategies(uint8[] calldata _votingStrategyIndices) external override onlyOwner {
+        _removeVotingStrategies(_votingStrategyIndices);
+        emit VotingStrategiesRemoved(_votingStrategyIndices);
     }
 
     function addAuthenticators(address[] calldata _authenticators) external override onlyOwner {

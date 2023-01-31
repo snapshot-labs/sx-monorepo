@@ -20,11 +20,11 @@ interface ISpaceEvents {
     event ExecutionStrategiesRemoved(address[] executionStrategies);
     event AuthenticatorsAdded(address[] authenticators);
     event AuthenticatorsRemoved(address[] authenticators);
-    event ControllerUpdated(address previous, address newController);
-    event MaxVotingDurationUpdated(uint32 previous, uint32 newMaxVotingDuration);
-    event MinVotingDurationUpdated(uint32 previous, uint32 newMinVotingDuration);
+    event ControllerUpdated(address newController);
+    event MaxVotingDurationUpdated(uint32 newMaxVotingDuration);
+    event MinVotingDurationUpdated(uint32 newMinVotingDuration);
     event MetadataUriUpdated(string newMetadataUri);
-    event ProposalThresholdUpdated(uint256 previous, uint256 newProposalThreshold);
-    event QuorumUpdated(uint256 previous, uint256 newQuorum);
-    event VotingDelayUpdated(uint256 previous, uint256 newVotingDelay);
+    event ProposalThresholdUpdated(uint256 newProposalThreshold);
+    event QuorumUpdated(uint256 newQuorum);
+    event VotingDelayUpdated(uint256 newVotingDelay);
 }
