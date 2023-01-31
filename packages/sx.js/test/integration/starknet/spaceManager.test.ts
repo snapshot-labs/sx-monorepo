@@ -43,4 +43,16 @@ describe('SpaceManager', () => {
 
     expect(receipt.transaction_hash).toBeDefined();
   }, 60e3);
+
+  it('should set metadata uri', async () => {
+    const space = '0x026edc90b91a5f5a1d859141c583d7a4666d8bf4123c3ea401d991f637ef1cfc';
+
+    const receipt = await spaceManager.setMetadataUri(
+      space,
+      'ipfs://bafkreifwhih7x4fxrpa6kp7n7jo6zeuvdlbvx3agm6tiw73toor6m6hvya'
+    );
+    console.log('Receipt', receipt);
+
+    expect(receipt.transaction_hash).toBeDefined();
+  }, 60e3);
 });
