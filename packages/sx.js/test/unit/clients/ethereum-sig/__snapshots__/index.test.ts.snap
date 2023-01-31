@@ -1,64 +1,64 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EthereumSig should create propose envelope 1`] = `
-Object {
+{
   "address": "0x0538D033B879aC94C709c1E408CC081345427379",
-  "data": Object {
-    "domain": Object {
+  "data": {
+    "domain": {
       "chainId": 5,
       "name": "snapshot-x",
       "version": "1",
     },
-    "message": Object {
+    "message": {
       "authenticator": "0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14",
       "author": "0x0538D033B879aC94C709c1E408CC081345427379",
       "executionHash": "0x049ee3eba8c1600700ee1b87eb599f16716b0b1022947733551fde4050ca6804",
-      "executionParams": Array [],
+      "executionParams": [],
       "executor": "0x04ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d",
       "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
       "salt": 0,
       "space": "0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28",
-      "strategies": Array [
+      "strategies": [
         1,
       ],
       "strategiesHash": "0x078d74f61aeaa8286418fd34b3a12a610445eba11d00ecc82ecac2542d55f7a4",
       "strategiesParamsHash": "0x04c643e1ba37b388f483a9dce226443876069bc87ff7ed6763c1f12048ff5cf9",
     },
-    "types": Object {
-      "Propose": Array [
-        Object {
+    "types": {
+      "Propose": [
+        {
           "name": "authenticator",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "space",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "author",
           "type": "address",
         },
-        Object {
+        {
           "name": "metadata_uri",
           "type": "string",
         },
-        Object {
+        {
           "name": "executor",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "execution_hash",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "strategies_hash",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "strategies_params_hash",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "salt",
           "type": "uint256",
         },
@@ -70,58 +70,58 @@ Object {
 `;
 
 exports[`EthereumSig should create vote envelope 1`] = `
-Object {
+{
   "address": "0x0538D033B879aC94C709c1E408CC081345427379",
-  "data": Object {
-    "domain": Object {
+  "data": {
+    "domain": {
       "chainId": 5,
       "name": "snapshot-x",
       "version": "1",
     },
-    "message": Object {
+    "message": {
       "authenticator": "0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14",
       "choice": 1,
       "proposal": 3,
       "salt": 0,
       "space": "0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28",
-      "strategies": Array [
+      "strategies": [
         1,
       ],
       "strategiesHash": "0x078d74f61aeaa8286418fd34b3a12a610445eba11d00ecc82ecac2542d55f7a4",
       "strategiesParamsHash": "0x04c643e1ba37b388f483a9dce226443876069bc87ff7ed6763c1f12048ff5cf9",
       "voter": "0x0538D033B879aC94C709c1E408CC081345427379",
     },
-    "types": Object {
-      "Vote": Array [
-        Object {
+    "types": {
+      "Vote": [
+        {
           "name": "authenticator",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "space",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "voter",
           "type": "address",
         },
-        Object {
+        {
           "name": "proposal",
           "type": "uint256",
         },
-        Object {
+        {
           "name": "choice",
           "type": "uint256",
         },
-        Object {
+        {
           "name": "strategies_hash",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "strategies_params_hash",
           "type": "bytes32",
         },
-        Object {
+        {
           "name": "salt",
           "type": "uint256",
         },

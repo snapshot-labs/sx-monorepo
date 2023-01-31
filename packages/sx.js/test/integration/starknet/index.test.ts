@@ -1,6 +1,6 @@
 import { StarkNetTx, EthereumSig } from '../../../src/clients';
 import { getExecutionData } from '../../../src/executors';
-import { Account, Provider, ec, constants } from 'starknet';
+import { Account, Provider, constants } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
 import { Choice } from '../../../src/utils/choice';
 import { defaultNetwork } from '../../../src/networks';
@@ -23,7 +23,7 @@ describe('StarkNetTx', () => {
 
   const wallet = Wallet.createRandom();
   const walletAddress = wallet.address;
-  const account = new Account(starkProvider, address, ec.getKeyPair(privKey));
+  const account = new Account(starkProvider, address, privKey);
 
   describe('vanilla authenticator', () => {
     const client = new StarkNetTx({ starkProvider, ethUrl });

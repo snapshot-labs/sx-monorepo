@@ -1,6 +1,6 @@
 module.exports = {
   setupFiles: ['<rootDir>/setup.ts'],
-  extraGlobals: ['Math'],
+  sandboxInjectedGlobals: ['Math'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   }

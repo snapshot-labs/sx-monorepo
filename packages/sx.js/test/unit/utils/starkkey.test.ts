@@ -3,12 +3,10 @@ import { verify } from '../../../src/utils/starkkey';
 import { domain, voteTypes } from '../../../src/clients/starknet/starknet-sig/types';
 
 describe('starkkey', () => {
-  let starkKeyPair = ec.genKeyPair();
-  const privKey = starkKeyPair.getPrivate('hex');
-  starkKeyPair = ec.getKeyPair(`0x${privKey}`);
-  const pubKey = starkKeyPair.getPublic('hex');
-  const address = ec.getStarkKey(starkKeyPair);
-  const account = new Account(defaultProvider, address, starkKeyPair);
+  const privKey = ec.starkCurve.utils.randomPrivateKey();
+  const pubKey = ec.starkCurve.getPublicKey(privKey);
+  const address = ec.starkCurve.getStarkKey(privKey);
+  const account = new Account(defaultProvider, address, privKey);
   // console.log('Privkey', privKey);
   // console.log('Pubkey', pubKey);
   // console.log('Address', address);
@@ -21,7 +19,7 @@ describe('starkkey', () => {
     };
     const data = { types: voteTypes, primaryType: 'Vote', domain, message };
     const sig = await account.signMessage(data);
-    const result = verify(pubKey, address, data, sig);
+    const result = verify(Buffer.from(pubKey).toString('hex'), address, data, sig);
     expect(result).toBe(true);
   });
 });

@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`singleSlotProofStrategy should return extra propose calls 1`] = `
-Array [
-  Object {
-    "calldata": Array [
+[
+  {
+    "calldata": [
       15,
       8050779,
       "0xb4fbf271143f4fbf",
@@ -452,7 +452,7 @@ Array [
 `;
 
 exports[`singleSlotProofStrategy should return params for propose 1`] = `
-Array [
+[
   "0x6e6fe0699d595d9c",
   "0x03246eb8617716b8",
   "0x275c0ee0ca61305b",
@@ -759,7 +759,7 @@ Array [
 `;
 
 exports[`singleSlotProofStrategy should return params for vote 1`] = `
-Array [
+[
   "0x6e6fe0699d595d9c",
   "0x03246eb8617716b8",
   "0x275c0ee0ca61305b",
