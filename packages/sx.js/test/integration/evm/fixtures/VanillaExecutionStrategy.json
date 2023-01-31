@@ -1,0 +1,399 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "enum ProposalOutcome",
+          "name": "proposalOutcome",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes",
+          "name": "executionParams",
+          "type": "bytes"
+        }
+      ],
+      "name": "execute",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x6080806040523461001657610186908161001c8239f35b600080fdfe608060048036101561001057600080fd5b600090813560e01c63fb4d364c1461002757600080fd5b346101755760407ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc360112610175576003813510156101755760249267ffffffffffffffff908435828111610146573660238201121561014657808401359280841161014a577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0603f81601f87011601168301908382109082111761014a576040528282523686848301011161014657916020918187879501848301370101528154907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821461011c57506001018155604051f35b601191507f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8480fd5b86866041877f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b5080fdfea164736f6c634300080f000a",
+    "sourceMap": "107:256:50:-:0;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060048036101561001057600080fd5b600090813560e01c63fb4d364c1461002757600080fd5b346101755760407ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc360112610175576003813510156101755760249267ffffffffffffffff908435828111610146573660238201121561014657808401359280841161014a577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0603f81601f87011601168301908382109082111761014a576040528282523686848301011161014657916020918187879501848301370101528154907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821461011c57506001018155604051f35b601191507f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8480fd5b86866041877f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b5080fdfea164736f6c634300080f000a",
+    "sourceMap": "107:256:50:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "execute(uint8,bytes)": "fb4d364c"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"enum ProposalOutcome\",\"name\":\"proposalOutcome\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"executionParams\",\"type\":\"bytes\"}],\"name\":\"execute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/execution-strategies/VanillaExecutionStrategy.sol\":\"VanillaExecutionStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@solidity-bytes-utils/contracts/=lib/solidity-bytes-utils/contracts/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":solidity-bytes-utils/=lib/solidity-bytes-utils/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/execution-strategies/VanillaExecutionStrategy.sol\":{\"keccak256\":\"0xda9e41b80324956ed8f8ef0f9a546ab982a6b89bec84bf4f53b27d3f6535bca8\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1db0557780a0739bfd8ffb600473f4c7636420b77f2256d3458191b223df5665\",\"dweb:/ipfs/QmSYcoX6wDy2jZKZ244wUPcrgVi9tVk5VRdMsvHnxB39PU\"]},\"src/interfaces/IExecutionStrategy.sol\":{\"keccak256\":\"0xac78d843d74540be1e2f96abb9b1b910ca78334a18754ffc2bfa9ebf33b76b5d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://796a74c8ad5537d8fa00558491c1a195aec51e77158b4f768e9bbea7f17e2eaa\",\"dweb:/ipfs/QmddTMMNx7erQ8EZTjZoM1rDpw5guZDkZ9Tqwe9TtxEWga\"]},\"src/types.sol\":{\"keccak256\":\"0xcd2f8b4a343bc68791b521e07eade9a0a24dc6dc92da5aa7a66adb84a4636a59\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c37d29b7c90f8dc17ebfacdf5ee8c6c9406c7529aac92e51acf8953615f9ec75\",\"dweb:/ipfs/QmQa3pvqyaomQSDjDFjdsRdGGNBr43HgBxyoiPAczwah2q\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "enum ProposalOutcome",
+              "name": "proposalOutcome",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes",
+              "name": "executionParams",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "execute"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@prb/test/=lib/prb-test/src/",
+        ":@solidity-bytes-utils/contracts/=lib/solidity-bytes-utils/contracts/",
+        ":@zodiac/=lib/zodiac/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+        ":forge-gas-snapshot/=lib/forge-gas-snapshot/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+        ":prb-test/=lib/prb-test/src/",
+        ":safe-contracts/=lib/safe-contracts/contracts/",
+        ":solidity-bytes-utils/=lib/solidity-bytes-utils/contracts/",
+        ":zodiac/=lib/zodiac/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 10000
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "src/execution-strategies/VanillaExecutionStrategy.sol": "VanillaExecutionStrategy"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "src/execution-strategies/VanillaExecutionStrategy.sol": {
+        "keccak256": "0xda9e41b80324956ed8f8ef0f9a546ab982a6b89bec84bf4f53b27d3f6535bca8",
+        "urls": [
+          "bzz-raw://1db0557780a0739bfd8ffb600473f4c7636420b77f2256d3458191b223df5665",
+          "dweb:/ipfs/QmSYcoX6wDy2jZKZ244wUPcrgVi9tVk5VRdMsvHnxB39PU"
+        ],
+        "license": "MIT"
+      },
+      "src/interfaces/IExecutionStrategy.sol": {
+        "keccak256": "0xac78d843d74540be1e2f96abb9b1b910ca78334a18754ffc2bfa9ebf33b76b5d",
+        "urls": [
+          "bzz-raw://796a74c8ad5537d8fa00558491c1a195aec51e77158b4f768e9bbea7f17e2eaa",
+          "dweb:/ipfs/QmddTMMNx7erQ8EZTjZoM1rDpw5guZDkZ9Tqwe9TtxEWga"
+        ],
+        "license": "MIT"
+      },
+      "src/types.sol": {
+        "keccak256": "0xcd2f8b4a343bc68791b521e07eade9a0a24dc6dc92da5aa7a66adb84a4636a59",
+        "urls": [
+          "bzz-raw://c37d29b7c90f8dc17ebfacdf5ee8c6c9406c7529aac92e51acf8953615f9ec75",
+          "dweb:/ipfs/QmQa3pvqyaomQSDjDFjdsRdGGNBr43HgBxyoiPAczwah2q"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/execution-strategies/VanillaExecutionStrategy.sol",
+    "id": 32940,
+    "exportedSymbols": {
+      "Choice": [
+        33318
+      ],
+      "FinalizationStatus": [
+        33306
+      ],
+      "IExecutionStrategy": [
+        32963
+      ],
+      "IndexedStrategy": [
+        33297
+      ],
+      "Proposal": [
+        33287
+      ],
+      "ProposalOutcome": [
+        33301
+      ],
+      "ProposalStatus": [
+        33314
+      ],
+      "Strategy": [
+        33292
+      ],
+      "VanillaExecutionStrategy": [
+        32939
+      ],
+      "Vote": [
+        33324
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "33:331:50",
+    "nodes": [
+      {
+        "id": 32920,
+        "nodeType": "PragmaDirective",
+        "src": "33:24:50",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".15"
+        ]
+      },
+      {
+        "id": 32921,
+        "nodeType": "ImportDirective",
+        "src": "59:46:50",
+        "nodes": [],
+        "absolutePath": "src/interfaces/IExecutionStrategy.sol",
+        "file": "../interfaces/IExecutionStrategy.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 32940,
+        "sourceUnit": 32964,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 32939,
+        "nodeType": "ContractDefinition",
+        "src": "107:256:50",
+        "nodes": [
+          {
+            "id": 32925,
+            "nodeType": "VariableDeclaration",
+            "src": "169:19:50",
+            "nodes": [],
+            "constant": false,
+            "mutability": "mutable",
+            "name": "numExecuted",
+            "nameLocation": "177:11:50",
+            "scope": 32939,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 32924,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "169:7:50",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "internal"
+          },
+          {
+            "id": 32938,
+            "nodeType": "FunctionDefinition",
+            "src": "233:128:50",
+            "nodes": [],
+            "body": {
+              "id": 32937,
+              "nodeType": "Block",
+              "src": "331:30:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 32935,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "UnaryOperation",
+                    "operator": "++",
+                    "prefix": false,
+                    "src": "341:13:50",
+                    "subExpression": {
+                      "id": 32934,
+                      "name": "numExecuted",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 32925,
+                      "src": "341:11:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 32936,
+                  "nodeType": "ExpressionStatement",
+                  "src": "341:13:50"
+                }
+              ]
+            },
+            "baseFunctions": [
+              32962
+            ],
+            "functionSelector": "fb4d364c",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "execute",
+            "nameLocation": "242:7:50",
+            "overrides": {
+              "id": 32932,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "322:8:50"
+            },
+            "parameters": {
+              "id": 32931,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 32928,
+                  "mutability": "mutable",
+                  "name": "proposalOutcome",
+                  "nameLocation": "266:15:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 32938,
+                  "src": "250:31:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_ProposalOutcome_$33301",
+                    "typeString": "enum ProposalOutcome"
+                  },
+                  "typeName": {
+                    "id": 32927,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 32926,
+                      "name": "ProposalOutcome",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 33301,
+                      "src": "250:15:50"
+                    },
+                    "referencedDeclaration": 33301,
+                    "src": "250:15:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_ProposalOutcome_$33301",
+                      "typeString": "enum ProposalOutcome"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 32930,
+                  "mutability": "mutable",
+                  "name": "executionParams",
+                  "nameLocation": "296:15:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 32938,
+                  "src": "283:28:50",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 32929,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "283:5:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "249:63:50"
+            },
+            "returnParameters": {
+              "id": 32933,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "331:0:50"
+            },
+            "scope": 32939,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 32922,
+              "name": "IExecutionStrategy",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 32963,
+              "src": "144:18:50"
+            },
+            "id": 32923,
+            "nodeType": "InheritanceSpecifier",
+            "src": "144:18:50"
+          }
+        ],
+        "canonicalName": "VanillaExecutionStrategy",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          32939,
+          32963
+        ],
+        "name": "VanillaExecutionStrategy",
+        "nameLocation": "116:24:50",
+        "scope": 32940,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 50
+}

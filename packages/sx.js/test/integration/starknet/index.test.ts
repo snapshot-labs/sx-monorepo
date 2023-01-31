@@ -1,9 +1,9 @@
-import { StarkNetTx, EthereumSig } from '../../src/clients';
-import { getExecutionData } from '../../src/executors';
+import { StarkNetTx, EthereumSig } from '../../../src/clients';
+import { getExecutionData } from '../../../src/executors';
 import { Account, Provider, ec, constants } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
-import { Choice } from '../../src/utils/choice';
-import { defaultNetwork } from '../../src/networks';
+import { Choice } from '../../../src/utils/choice';
+import { defaultNetwork } from '../../../src/networks';
 
 describe('StarkNetTx', () => {
   expect(process.env.STARKNET_ADDRESS).toBeDefined();

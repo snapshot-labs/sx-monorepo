@@ -1,9 +1,13 @@
 import { Account, hash } from 'starknet';
-import { IntsSequence } from '../../utils/ints-sequence';
-import { getVoteCalldata, getProposeCalldata } from '../../utils/encoding';
-import { getStrategies, getStrategiesParams, getExtraProposeCalls } from '../../utils/strategies';
-import { getAuthenticator } from '../../authenticators';
-import { defaultNetwork } from '../../networks';
+import { IntsSequence } from '../../../utils/ints-sequence';
+import { getVoteCalldata, getProposeCalldata } from '../../../utils/encoding';
+import {
+  getStrategies,
+  getStrategiesParams,
+  getExtraProposeCalls
+} from '../../../utils/strategies';
+import { getAuthenticator } from '../../../authenticators';
+import { defaultNetwork } from '../../../networks';
 import type {
   EthSigProposeMessage,
   EthSigVoteMessage,
@@ -13,7 +17,7 @@ import type {
   ClientOpts,
   ClientConfig,
   StrategiesAddresses
-} from '../../types';
+} from '../../../types';
 
 const { getSelectorFromName } = hash;
 

@@ -1,6 +1,6 @@
 import { Account, Provider, ec, constants } from 'starknet';
 import { parseEther } from '@ethersproject/units';
-import { SpaceManager } from '../../src/clients/space-manager';
+import { SpaceManager } from '../../../src/clients';
 
 describe('SpaceManager', () => {
   expect(process.env.STARKNET_ADDRESS).toBeDefined();

@@ -5,11 +5,11 @@ import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'cross-fetch';
 import { domain, proposeTypes, voteTypes } from './types';
-import { SplitUint256 } from '../../utils/split-uint256';
-import { hexPadRight, flatten2DArray } from '../../utils/encoding';
-import { bytesToHex } from '../../utils/bytes';
-import { getStrategies, getStrategiesParams } from '../../utils/strategies';
-import { defaultNetwork } from '../../networks';
+import { SplitUint256 } from '../../../utils/split-uint256';
+import { hexPadRight, flatten2DArray } from '../../../utils/encoding';
+import { bytesToHex } from '../../../utils/bytes';
+import { getStrategies, getStrategiesParams } from '../../../utils/strategies';
+import { defaultNetwork } from '../../../networks';
 import type {
   Propose,
   Vote,
@@ -18,7 +18,7 @@ import type {
   Envelope,
   EthereumSigClientConfig,
   EthereumSigClientOpts
-} from '../../types';
+} from '../../../types';
 
 export class EthereumSig {
   config: EthereumSigClientConfig;

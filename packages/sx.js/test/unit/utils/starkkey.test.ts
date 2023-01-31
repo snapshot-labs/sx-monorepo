@@ -1,6 +1,6 @@
 import { Account, ec, defaultProvider } from 'starknet';
 import { verify } from '../../../src/utils/starkkey';
-import { domain, voteTypes } from '../../../src/clients/starknet-sig/types';
+import { domain, voteTypes } from '../../../src/clients/starknet/starknet-sig/types';
 
 describe('starkkey', () => {
   let starkKeyPair = ec.genKeyPair();

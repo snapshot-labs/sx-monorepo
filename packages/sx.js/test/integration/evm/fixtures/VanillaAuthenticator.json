@@ -1,0 +1,414 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "functionSelector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "authenticate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x60808060405234610016576102c3908161001c8239f35b600080fdfe6080604052600436101561001257600080fd5b6000803560e01c63f2a40be41461002857600080fd5b346101175760607ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126101175760043573ffffffffffffffffffffffffffffffffffffffff8116810361010b576024357fffffffff0000000000000000000000000000000000000000000000000000000081168103610113576044359067ffffffffffffffff821161010f573660238301121561010f57816004013592846100d185610198565b936100df604051958661014a565b858552366024878301011161010b5785610106966024602093018388013785010152610211565b604051f35b5080fd5b8380fd5b8280fd5b80fd5b507f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b90601f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0910116810190811067ffffffffffffffff82111761018b57604052565b61019361011a565b604052565b7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f60209267ffffffffffffffff81116101d4575b01160190565b6101dc61011a565b6101ce565b3d1561020c573d906101f282610198565b91610200604051938461014a565b82523d6000602084013e565b606090565b916040519060207fffffffff00000000000000000000000000000000000000000000000000000000818401941684528151916000915b8383106102a05750508261027660246000979585899896899611610294575b810103600481018452018261014a565b51925af16102826101e1565b501561028a57565b3d806000803e6000fd5b85838284010152610266565b818301810151858401602401529182019161024756fea164736f6c634300080f000a",
+    "sourceMap": "90:243:49:-:0;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x6080604052600436101561001257600080fd5b6000803560e01c63f2a40be41461002857600080fd5b346101175760607ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126101175760043573ffffffffffffffffffffffffffffffffffffffff8116810361010b576024357fffffffff0000000000000000000000000000000000000000000000000000000081168103610113576044359067ffffffffffffffff821161010f573660238301121561010f57816004013592846100d185610198565b936100df604051958661014a565b858552366024878301011161010b5785610106966024602093018388013785010152610211565b604051f35b5080fd5b8380fd5b8280fd5b80fd5b507f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b90601f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0910116810190811067ffffffffffffffff82111761018b57604052565b61019361011a565b604052565b7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f60209267ffffffffffffffff81116101d4575b01160190565b6101dc61011a565b6101ce565b3d1561020c573d906101f282610198565b91610200604051938461014a565b82523d6000602084013e565b606090565b916040519060207fffffffff00000000000000000000000000000000000000000000000000000000818401941684528151916000915b8383106102a05750508261027660246000979585899896899611610294575b810103600481018452018261014a565b51925af16102826101e1565b501561028a57565b3d806000803e6000fd5b85838284010152610266565b818301810151858401602401529182019161024756fea164736f6c634300080f000a",
+    "sourceMap": "90:243:49:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;:::i;:::-;;;;;;;;;;;;;;319:4;90:243;;;;;;;;;;;;;319:4;:::i;:::-;90:243;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;:::o;:::-;;;:::i;:::-;;;;;;;;;;;;;:::i;:::-;;;;;;;;:::i;:::-;;;;-1:-1:-1;90:243:49;;;;:::o;:::-;;;:::o;97:474:48:-;;90:243:49;;222:40:48;;90:243:49;222:40:48;;;90:243:49;;;;;;;-1:-1:-1;90:243:49;;;;;;;;;;222:40:48;90:243:49;-1:-1:-1;90:243:49;;;;;;;;;;;;;;222:40:48;;;;;;;;;:::i;:::-;210:53;;;;;;:::i;:::-;;277:8;273:292;;97:474::o;273:292::-;381:174;;-1:-1:-1;381:174:48;;-1:-1:-1;381:174:48;90:243:49;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "authenticate(address,bytes4,bytes)": "f2a40be4"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"bytes4\",\"name\":\"functionSelector\",\"type\":\"bytes4\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"authenticate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/authenticators/VanillaAuthenticator.sol\":\"VanillaAuthenticator\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@solidity-bytes-utils/contracts/=lib/solidity-bytes-utils/contracts/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":solidity-bytes-utils/=lib/solidity-bytes-utils/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/authenticators/Authenticator.sol\":{\"keccak256\":\"0xacdbe2433d324d7a74e288b46ee8f48f1b08bc8e44cda6b36a9befe4be1c420e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9dff53c66b19b6f7ef9e466266a9cf28700cfa3b6d1b54cda57ca697c1b478f2\",\"dweb:/ipfs/QmZL8pShWWndiY2UM4NGA1vfKT8UQGm6fJ6n9NEz9VJrmC\"]},\"src/authenticators/VanillaAuthenticator.sol\":{\"keccak256\":\"0x75782c1a97cda98a1a63d338a76b1642ecd6bb1a7b3e857dc36c0cca67a0fa56\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://f135726b9f8730b1096a8adb8e95a7aec75013960b2306a1bfc67901e2201592\",\"dweb:/ipfs/QmfVU5r1JfwHGph1REr8JzrcCx9aRGQ78Wwxv1iJ6PyrWe\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.15+commit.e14f2714"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "functionSelector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "authenticate"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@prb/test/=lib/prb-test/src/",
+        ":@solidity-bytes-utils/contracts/=lib/solidity-bytes-utils/contracts/",
+        ":@zodiac/=lib/zodiac/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+        ":forge-gas-snapshot/=lib/forge-gas-snapshot/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+        ":prb-test/=lib/prb-test/src/",
+        ":safe-contracts/=lib/safe-contracts/contracts/",
+        ":solidity-bytes-utils/=lib/solidity-bytes-utils/contracts/",
+        ":zodiac/=lib/zodiac/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 10000
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "src/authenticators/VanillaAuthenticator.sol": "VanillaAuthenticator"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "src/authenticators/Authenticator.sol": {
+        "keccak256": "0xacdbe2433d324d7a74e288b46ee8f48f1b08bc8e44cda6b36a9befe4be1c420e",
+        "urls": [
+          "bzz-raw://9dff53c66b19b6f7ef9e466266a9cf28700cfa3b6d1b54cda57ca697c1b478f2",
+          "dweb:/ipfs/QmZL8pShWWndiY2UM4NGA1vfKT8UQGm6fJ6n9NEz9VJrmC"
+        ],
+        "license": "MIT"
+      },
+      "src/authenticators/VanillaAuthenticator.sol": {
+        "keccak256": "0x75782c1a97cda98a1a63d338a76b1642ecd6bb1a7b3e857dc36c0cca67a0fa56",
+        "urls": [
+          "bzz-raw://f135726b9f8730b1096a8adb8e95a7aec75013960b2306a1bfc67901e2201592",
+          "dweb:/ipfs/QmfVU5r1JfwHGph1REr8JzrcCx9aRGQ78Wwxv1iJ6PyrWe"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/authenticators/VanillaAuthenticator.sol",
+    "id": 32919,
+    "exportedSymbols": {
+      "Authenticator": [
+        32896
+      ],
+      "VanillaAuthenticator": [
+        32918
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "33:301:49",
+    "nodes": [
+      {
+        "id": 32898,
+        "nodeType": "PragmaDirective",
+        "src": "33:24:49",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".15"
+        ]
+      },
+      {
+        "id": 32899,
+        "nodeType": "ImportDirective",
+        "src": "59:29:49",
+        "nodes": [],
+        "absolutePath": "src/authenticators/Authenticator.sol",
+        "file": "./Authenticator.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 32919,
+        "sourceUnit": 32897,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 32918,
+        "nodeType": "ContractDefinition",
+        "src": "90:243:49",
+        "nodes": [
+          {
+            "id": 32917,
+            "nodeType": "FunctionDefinition",
+            "src": "143:188:49",
+            "nodes": [],
+            "body": {
+              "id": 32916,
+              "nodeType": "Block",
+              "src": "234:97:49",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 32911,
+                        "name": "target",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 32903,
+                        "src": "293:6:49",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 32912,
+                        "name": "functionSelector",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 32905,
+                        "src": "301:16:49",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes4",
+                          "typeString": "bytes4"
+                        }
+                      },
+                      {
+                        "id": 32913,
+                        "name": "data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 32907,
+                        "src": "319:4:49",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes4",
+                          "typeString": "bytes4"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "id": 32910,
+                      "name": "_call",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 32895,
+                      "src": "287:5:49",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_bytes4_$_t_bytes_memory_ptr_$returns$__$",
+                        "typeString": "function (address,bytes4,bytes memory)"
+                      }
+                    },
+                    "id": 32914,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "287:37:49",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 32915,
+                  "nodeType": "ExpressionStatement",
+                  "src": "287:37:49"
+                }
+              ]
+            },
+            "functionSelector": "f2a40be4",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "authenticate",
+            "nameLocation": "152:12:49",
+            "parameters": {
+              "id": 32908,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 32903,
+                  "mutability": "mutable",
+                  "name": "target",
+                  "nameLocation": "173:6:49",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 32917,
+                  "src": "165:14:49",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 32902,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "165:7:49",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 32905,
+                  "mutability": "mutable",
+                  "name": "functionSelector",
+                  "nameLocation": "188:16:49",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 32917,
+                  "src": "181:23:49",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes4",
+                    "typeString": "bytes4"
+                  },
+                  "typeName": {
+                    "id": 32904,
+                    "name": "bytes4",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "181:6:49",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes4",
+                      "typeString": "bytes4"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 32907,
+                  "mutability": "mutable",
+                  "name": "data",
+                  "nameLocation": "219:4:49",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 32917,
+                  "src": "206:17:49",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 32906,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "206:5:49",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "164:60:49"
+            },
+            "returnParameters": {
+              "id": 32909,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "234:0:49"
+            },
+            "scope": 32918,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 32900,
+              "name": "Authenticator",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 32896,
+              "src": "123:13:49"
+            },
+            "id": 32901,
+            "nodeType": "InheritanceSpecifier",
+            "src": "123:13:49"
+          }
+        ],
+        "canonicalName": "VanillaAuthenticator",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          32918,
+          32896
+        ],
+        "name": "VanillaAuthenticator",
+        "nameLocation": "99:20:49",
+        "scope": 32919,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 49
+}

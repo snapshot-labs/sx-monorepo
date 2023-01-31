@@ -1,12 +1,12 @@
 import { Interface } from '@ethersproject/abi';
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
-import { createExecutionHash } from '../../utils/encoding';
-import { SplitUint256 } from '../../utils/split-uint256';
-import { defaultNetwork } from '../../networks';
+import { createExecutionHash } from '../../../utils/encoding';
+import { SplitUint256 } from '../../../utils/split-uint256';
+import { defaultNetwork } from '../../../networks';
 import ZodiacAbi from './abis/zodiac.json';
-import type { MetaTransaction } from '../../utils/encoding';
-import type { ExecutionInput, NetworkConfig } from '../../types';
+import type { MetaTransaction } from '../../../utils/encoding';
+import type { ExecutionInput, NetworkConfig } from '../../../types';
 
 export class Zodiac {
   config: { networkConfig: NetworkConfig; signer: Signer };

@@ -1,7 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { parseEther } from '@ethersproject/units';
-import { Zodiac } from '../../src/clients/zodiac';
+import { Zodiac } from '../../../src/clients';
 
 describe('Zodiac', () => {
   expect(process.env.ETH_PK).toBeDefined();

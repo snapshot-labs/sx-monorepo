@@ -1,7 +1,7 @@
-import { getExecutionData } from '../../executors';
-import { defaultNetwork } from '../../networks';
+import { getExecutionData } from '../../../executors';
+import { defaultNetwork } from '../../../networks';
 import type { Account } from 'starknet';
-import type { ClientOpts, ClientConfig, ExecutionInput } from '../../types';
+import type { ClientOpts, ClientConfig, ExecutionInput } from '../../../types';
 
 export class SpaceManager {
   config: Omit<ClientConfig, 'ethUrl'> & {
