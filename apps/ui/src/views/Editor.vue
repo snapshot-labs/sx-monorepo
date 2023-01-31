@@ -6,6 +6,7 @@ import { useActions } from '@/composables/useActions';
 import { useEditor } from '@/composables/useEditor';
 import { useModal } from '@/composables/useModal';
 import { omit } from '@/helpers/utils';
+import type { NetworkID } from '@/types';
 
 const { proposals } = useEditor();
 const { modalOpen: globalModalOpen } = useModal();
@@ -14,6 +15,7 @@ const router = useRouter();
 const { propose } = useActions();
 const spacesStore = useSpacesStore();
 const id = route.params.id as string;
+const [networkId, spaceId] = id.split(':');
 const key = route.params.key;
 const proposalKey = `${id}:${key}`;
 
@@ -40,7 +42,7 @@ if (!proposals[proposalKey]) {
 if (!proposals[proposalKey].execution) proposals[proposalKey].execution = [];
 
 onMounted(() => {
-  spacesStore.fetchSpace(id);
+  spacesStore.fetchSpace(spaceId, networkId as NetworkID);
 
   if (!key && route.name) {
     globalModalOpen.value = false;
@@ -144,7 +146,12 @@ async function handleProposeClick() {
       <BlockExecutionEditable v-model="proposals[proposalKey].execution" class="mb-4" />
     </Container>
     <teleport to="#modal">
-      <ModalDrafts :open="modalOpen" :space="id" @close="modalOpen = false" />
+      <ModalDrafts
+        :open="modalOpen"
+        :network-id="networkId"
+        :space="spaceId"
+        @close="modalOpen = false"
+      />
     </teleport>
   </div>
 </template>

@@ -133,8 +133,26 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
 `;
 
 export const VOTES_QUERY = gql`
-  query ($space: String, $proposal: Int, $voter: String) {
-    votes(where: { space: $space, proposal: $proposal, voter: $voter }) {
+  query ($space: String, $proposal: Int) {
+    votes(where: { space: $space, proposal: $proposal }) {
+      id
+      voter {
+        id
+      }
+      space {
+        id
+      }
+      proposal
+      choice
+      vp
+      created
+    }
+  }
+`;
+
+export const USER_VOTES_QUERY = gql`
+  query ($voter: String) {
+    votes(where: { voter: $voter }) {
       id
       voter {
         id

@@ -4,6 +4,7 @@ import { useEditor } from '@/composables/useEditor';
 
 const props = defineProps<{
   open: boolean;
+  networkId: string;
   space: string;
 }>();
 
@@ -14,7 +15,9 @@ defineEmits<{
 const { drafts, removeDraft } = useEditor();
 const { open } = toRefs(props);
 
-const spaceDrafts = computed(() => drafts.value.filter(draft => draft.space === props.space));
+const spaceDrafts = computed(() =>
+  drafts.value.filter(draft => draft.space === props.space && draft.networkId === props.networkId)
+);
 </script>
 
 <template>
@@ -32,7 +35,7 @@ const spaceDrafts = computed(() => drafts.value.filter(draft => draft.space === 
           <router-link
             :to="{
               name: 'editor',
-              params: { id: space, key: proposal.key }
+              params: { id: `${networkId}:${space}`, key: proposal.key }
             }"
             @click="$emit('close')"
           >

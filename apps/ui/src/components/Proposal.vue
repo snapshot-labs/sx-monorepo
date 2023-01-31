@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { _rt, shortenAddress } from '@/helpers/utils';
 import { useActions } from '@/composables/useActions';
-import type { Proposal as ProposalType } from '@/types';
+import type { Proposal as ProposalType, Choice } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
@@ -11,7 +11,7 @@ const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const sendingType = ref<null | number>(null);
 
-async function handleVoteClick(choice: number) {
+async function handleVoteClick(choice: Choice) {
   sendingType.value = choice;
 
   try {
@@ -28,7 +28,10 @@ async function handleVoteClick(choice: number) {
         <router-link
           :to="{
             name: 'proposal',
-            params: { id: proposal.proposal_id, space: proposal.space.id }
+            params: {
+              id: proposal.proposal_id,
+              space: `${proposal.network}:${proposal.space.id}`
+            }
           }"
           class="block"
         >
@@ -37,7 +40,7 @@ async function handleVoteClick(choice: number) {
         <router-link
           :to="{
             name: 'user',
-            params: { id: proposal.author.id }
+            params: { id: `${proposal.network}:${proposal.author.id}` }
           }"
         >
           <Stamp :id="proposal.author.id" :size="24" class="mr-1" />

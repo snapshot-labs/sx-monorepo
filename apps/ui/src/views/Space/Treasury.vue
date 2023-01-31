@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, Ref } from 'vue';
 import { formatUnits } from '@ethersproject/units';
+import { useClipboard } from '@vueuse/core';
 import { useBalances } from '@/composables/useBalances';
 import { useNfts } from '@/composables/useNfts';
 import space from '@/helpers/space.json';
@@ -13,6 +14,7 @@ defineProps<{ space: Space }>();
 
 const page: Ref<'tokens' | 'nfts'> = ref('tokens');
 
+const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 
@@ -41,8 +43,9 @@ onMounted(() => {
   <div class="p-4 space-x-2 flex">
     <div class="flex-auto" />
     <a>
-      <UiButton class="!px-0 w-[46px]">
-        <IH-duplicate class="inline-block" />
+      <UiButton class="!px-0 w-[46px]" @click="copy(space.wallet)">
+        <IH-duplicate v-if="!copied" class="inline-block" />
+        <IH-check v-else class="inline-block" />
       </UiButton>
     </a>
     <router-link :to="{ name: 'editor' }">

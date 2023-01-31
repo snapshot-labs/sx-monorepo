@@ -1,31 +1,16 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { shorten, _d } from '@/helpers/utils';
-import { AUTHS, STRATEGIES, EXECUTORS } from '@/helpers/constants';
+import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
-defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space }>();
+
+const network = computed(() => getNetwork(props.space.network));
 </script>
 
 <template>
   <div class="space-y-3">
-    <div>
-      <Label :label="'Profile'" />
-      <div class="mx-4 pt-3">
-        <div class="mb-3">
-          <div class="s-label !mb-0">Name</div>
-          <h4 class="text-skin-link text-md" v-text="space.name" />
-        </div>
-        <div class="mb-3">
-          <div class="s-label !mb-0">About</div>
-          <h4 class="text-skin-link text-md" v-text="space.about || '...'" />
-        </div>
-        <div class="mb-3">
-          <div class="s-label !mb-0">Discussions</div>
-          <h4 class="text-skin-link text-md" v-text="space.discussions || '...'" />
-        </div>
-      </div>
-    </div>
-
     <div>
       <Label :label="'Voting'" />
       <div class="mx-4 pt-3">
@@ -67,7 +52,7 @@ defineProps<{ space: Space }>();
       <Label :label="'Auth(s)'" />
       <div v-for="(auth, i) in space.authenticators" :key="i" class="mx-4 py-3 border-b">
         <a :href="`https://goerli.voyager.online/contract/${auth}`" target="_blank" class="flex">
-          <h4 class="flex-auto" v-text="AUTHS[auth]" />
+          <h4 class="flex-auto" v-text="network.constants.AUTHS[auth]" />
           <div>
             <Stamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(auth) }} <IH-external-link class="inline-block" />
@@ -84,7 +69,7 @@ defineProps<{ space: Space }>();
           target="_blank"
           class="flex"
         >
-          <h4 class="flex-auto" v-text="STRATEGIES[strategy]" />
+          <h4 class="flex-auto" v-text="network.constants.STRATEGIES[strategy]" />
           <div>
             <Stamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(strategy) }} <IH-external-link class="inline-block" />
@@ -101,7 +86,7 @@ defineProps<{ space: Space }>();
           target="_blank"
           class="flex"
         >
-          <h4 class="inline-block mr-3 flex-auto" v-text="EXECUTORS[executor]" />
+          <h4 class="inline-block mr-3 flex-auto" v-text="network.constants.EXECUTORS[executor]" />
           <div>
             <Stamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(executor) }} <IH-external-link class="inline-block" />

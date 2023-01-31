@@ -26,10 +26,11 @@ export function useEditor() {
   const drafts = computed(() => {
     return Object.entries(removeEmpty(proposals))
       .map(([k, value]) => {
-        const [space, key] = k.split(':');
+        const [networkId, space, key] = k.split(':');
 
         return {
           id: k,
+          networkId,
           space,
           key,
           ...value

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useActions } from '@/composables/useActions';
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
+import type { Space } from '@/types';
 
 type FormState = { name: string; about?: string; website?: string };
 
@@ -39,29 +41,38 @@ const definition = {
 
 const props = defineProps<{
   open: boolean;
-  initialState?: FormState;
+  space: Space;
 }>();
 
 const emit = defineEmits(['add', 'close']);
 
+const { updateMetadata } = useActions();
+
+const sending = ref(false);
 const form: FormState = reactive(clone(DEFAULT_FORM_STATE));
 
 const formErrors = computed(() => validateForm(definition, form));
 
-function handleSubmit() {
-  emit('close');
+async function handleSubmit() {
+  sending.value = true;
+
+  try {
+    await updateMetadata(props.space, {
+      name: form.name,
+      description: form.about || '',
+      external_url: form.website || ''
+    });
+    emit('close');
+  } finally {
+    sending.value = false;
+  }
 }
 
-watch(
-  () => props.open,
-  () => {
-    if (!props.initialState) return;
-
-    form.name = props.initialState.name;
-    form.about = props.initialState.about;
-    form.website = props.initialState.website;
-  }
-);
+onMounted(() => {
+  form.name = props.space.name;
+  form.about = props.space.about;
+  form.website = '';
+});
 </script>
 
 <template>
@@ -73,7 +84,12 @@ watch(
       <SIObject v-model="form" :error="formErrors" :definition="definition" />
     </div>
     <template #footer>
-      <UiButton class="w-full" :disabled="Object.keys(formErrors).length > 0" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :loading="sending"
+        :disabled="Object.keys(formErrors).length > 0"
+        @click="handleSubmit"
+      >
         Save
       </UiButton>
     </template>

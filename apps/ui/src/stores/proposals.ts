@@ -1,7 +1,7 @@
 import { Ref, toRef } from 'vue';
 import { defineStore } from 'pinia';
-import { currentNetwork } from '@/networks';
-import type { Proposal } from '@/types';
+import { getNetwork } from '@/networks';
+import type { NetworkID, Proposal } from '@/types';
 
 type SpaceRecord = {
   loading: boolean;
@@ -16,15 +16,17 @@ type SpaceRecord = {
 
 const PROPOSALS_LIMIT = 20;
 
+// TODO: create special _id that is used for UI that is prefixed by networkId
+const getUniqueSpaceId = (spaceId: string, networkId: NetworkID) => `${networkId}:${spaceId}`;
+
 export const useProposalsStore = defineStore('proposals', {
   state: () => ({
-    proposals: {} as Partial<Record<string, SpaceRecord>>,
-    summaryProposals: {} as Partial<Record<string, SpaceRecord>>
+    proposals: {} as Partial<Record<string, SpaceRecord>>
   }),
   getters: {
     getProposal: state => {
-      return (spaceId: string, proposalId: number) => {
-        const record = state.proposals[spaceId];
+      return (spaceId: string, proposalId: number, networkId: NetworkID) => {
+        const record = state.proposals[getUniqueSpaceId(spaceId, networkId)];
         if (!record) return undefined;
 
         return [...record.proposals, ...record.summaryProposals].find(
@@ -34,9 +36,11 @@ export const useProposalsStore = defineStore('proposals', {
     }
   },
   actions: {
-    async fetch(spaceId: string) {
-      if (!this.proposals[spaceId]) {
-        this.proposals[spaceId] = {
+    async fetch(spaceId: string, networkId: NetworkID) {
+      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+
+      if (!this.proposals[uniqueSpaceId]) {
+        this.proposals[uniqueSpaceId] = {
           loading: false,
           loadingMore: false,
           loaded: false,
@@ -48,21 +52,25 @@ export const useProposalsStore = defineStore('proposals', {
         };
       }
 
-      const record = toRef(this.proposals, spaceId) as Ref<SpaceRecord>;
+      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
       if (record.value.loading || record.value.loaded) return;
 
       record.value.loading = true;
 
-      const proposals = await currentNetwork.api.loadProposals(spaceId, { limit: PROPOSALS_LIMIT });
+      const proposals = await getNetwork(networkId).api.loadProposals(spaceId, {
+        limit: PROPOSALS_LIMIT
+      });
 
       record.value.proposals = proposals;
       record.value.hasMoreProposals = proposals.length === PROPOSALS_LIMIT;
       record.value.loaded = true;
       record.value.loading = false;
     },
-    async fetchMore(spaceId: string) {
-      if (!this.proposals[spaceId]) {
-        this.proposals[spaceId] = {
+    async fetchMore(spaceId: string, networkId: NetworkID) {
+      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+
+      if (!this.proposals[uniqueSpaceId]) {
+        this.proposals[uniqueSpaceId] = {
           loading: false,
           loadingMore: false,
           loaded: false,
@@ -74,12 +82,12 @@ export const useProposalsStore = defineStore('proposals', {
         };
       }
 
-      const record = toRef(this.proposals, spaceId) as Ref<SpaceRecord>;
+      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
       if (record.value.loading || !record.value.loaded) return;
 
       record.value.loadingMore = true;
 
-      const proposals = await currentNetwork.api.loadProposals(spaceId, {
+      const proposals = await getNetwork(networkId).api.loadProposals(spaceId, {
         limit: PROPOSALS_LIMIT,
         skip: record.value.proposals.length
       });
@@ -89,9 +97,11 @@ export const useProposalsStore = defineStore('proposals', {
       record.value.hasMoreProposals = proposals.length === PROPOSALS_LIMIT;
       record.value.loadingMore = false;
     },
-    async fetchSummary(spaceId: string, limit = 3) {
-      if (!this.proposals[spaceId]) {
-        this.proposals[spaceId] = {
+    async fetchSummary(spaceId: string, networkId: NetworkID, limit = 3) {
+      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+
+      if (!this.proposals[uniqueSpaceId]) {
+        this.proposals[uniqueSpaceId] = {
           loading: false,
           loadingMore: false,
           loaded: false,
@@ -103,20 +113,24 @@ export const useProposalsStore = defineStore('proposals', {
         };
       }
 
-      const record = toRef(this.proposals, spaceId) as Ref<SpaceRecord>;
+      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
       if (record.value.summaryLoading || record.value.summaryLoaded) {
         return;
       }
 
       record.value.summaryLoading = true;
-
-      record.value.summaryProposals = await currentNetwork.api.loadProposalsSummary(spaceId, limit);
+      record.value.summaryProposals = await getNetwork(networkId).api.loadProposalsSummary(
+        spaceId,
+        limit
+      );
       record.value.summaryLoaded = true;
       record.value.summaryLoading = false;
     },
-    async fetchProposal(spaceId: string, proposalId: number) {
-      if (!this.proposals[spaceId]) {
-        this.proposals[spaceId] = {
+    async fetchProposal(spaceId: string, proposalId: number, networkId: NetworkID) {
+      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+
+      if (!this.proposals[uniqueSpaceId]) {
+        this.proposals[uniqueSpaceId] = {
           loading: false,
           loadingMore: false,
           loaded: false,
@@ -128,12 +142,12 @@ export const useProposalsStore = defineStore('proposals', {
         };
       }
 
-      const record = toRef(this.proposals, spaceId) as Ref<SpaceRecord>;
-      if (this.getProposal(spaceId, proposalId)) return;
+      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
+      if (this.getProposal(spaceId, proposalId, networkId)) return;
 
-      const proposal = await currentNetwork.api.loadProposal(spaceId, proposalId);
+      const proposal = await getNetwork(networkId).api.loadProposal(spaceId, proposalId);
 
-      if (this.getProposal(spaceId, proposalId)) return;
+      if (this.getProposal(spaceId, proposalId, networkId)) return;
       record.value.proposals.push(proposal);
     }
   }

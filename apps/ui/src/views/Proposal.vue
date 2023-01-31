@@ -5,17 +5,20 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useProposalsStore } from '@/stores/proposals';
 import { _rt, _n, shortenAddress, getUrl } from '@/helpers/utils';
 import { useActions } from '@/composables/useActions';
+import type { Choice, NetworkID } from '@/types';
 
 const route = useRoute();
 const proposalsStore = useProposalsStore();
 const { vote } = useActions();
 const id = parseInt((route.params.id as string) || '0');
-const space = route.params.space as string;
+const spaceParam = route.params.space as string;
+const [networkId, space] = spaceParam.split(':');
+
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const sendingType = ref<null | number>(null);
 
-const proposal = computed(() => proposalsStore.getProposal(space, id));
+const proposal = computed(() => proposalsStore.getProposal(space, id, networkId));
 
 const discussion = computed(() => {
   if (!proposal.value?.discussion) return null;
@@ -27,10 +30,10 @@ const discussion = computed(() => {
 });
 
 onMounted(() => {
-  proposalsStore.fetchProposal(space, id);
+  proposalsStore.fetchProposal(space, id, networkId as NetworkID);
 });
 
-async function handleVoteClick(choice: number) {
+async function handleVoteClick(choice: Choice) {
   if (!proposal.value) return;
 
   sendingType.value = choice;
@@ -57,7 +60,7 @@ async function handleVoteClick(choice: number) {
               <router-link
                 :to="{
                   name: 'user',
-                  params: { id: proposal.author.id }
+                  params: { id: `${proposal.network}:${proposal.author.id}` }
                 }"
               >
                 <Stamp :id="proposal.author.id" :size="24" class="mr-1" />

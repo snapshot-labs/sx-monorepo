@@ -37,7 +37,7 @@ onMounted(() => spacesStore.fetch());
           <router-link
             v-for="space in spacesStore.spaces"
             :key="space.id"
-            :to="{ name: 'overview', params: { id: space.id } }"
+            :to="{ name: 'overview', params: { id: `${space.network}:${space.id}` } }"
             class="p-4 text-skin-text border-b last-of-type:border-b-0 block"
           >
             <div class="mb-2 flex items-center space-x-2">
@@ -47,6 +47,9 @@ onMounted(() => spacesStore.fetch());
                 class="inline-block border-skin-bg !bg-skin-bg rounded-sm"
               />
               <h4 class="inline-block" v-text="space.name" />
+              <span class="font-mono bg-neutral-600 text-white text-xs rounded px-2">{{
+                space.network
+              }}</span>
             </div>
             <div>
               <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·

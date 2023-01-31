@@ -1,13 +1,10 @@
 import { Wallet } from '@ethersproject/wallet';
 import { clients as Clients, getExecutionData, defaultNetwork } from '@snapshot-labs/sx';
-import {
-  SUPPORTED_AUTHENTICATORS,
-  SUPPORTED_EXECUTORS,
-  SUPPORTED_STRATEGIES
-} from '@/helpers/constants';
+import { SUPPORTED_AUTHENTICATORS, SUPPORTED_EXECUTORS, SUPPORTED_STRATEGIES } from './constants';
 import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
+import type { NetworkActions } from '@/networks/types';
 import type { Space, Proposal, Transaction } from '@/types';
 
 const EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
@@ -37,7 +34,7 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
   return { authenticator, strategies: selectedStrategies };
 }
 
-export function createActions(starkProvider: Provider) {
+export function createActions(starkProvider: Provider): NetworkActions {
   const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
   const ethUrl: string = import.meta.env.VITE_ETH_RPC_URL;
 
@@ -48,6 +45,9 @@ export function createActions(starkProvider: Provider) {
   });
 
   return {
+    setMetadataUri: (web3: Web3Provider | Wallet, spaceId: string, metadataUri: string) => {
+      throw new Error('Unsupported');
+    },
     propose: (
       web3: Web3Provider | Wallet,
       account: string,
@@ -84,7 +84,7 @@ export function createActions(starkProvider: Provider) {
         choice
       });
     },
-    finalizeProposal: async (proposal: Proposal) => {
+    finalizeProposal: async (web3: Web3Provider | Wallet, proposal: Proposal) => {
       const res = await fetch(
         `${manaUrl}/space/${proposal.space.id}/${proposal.proposal_id}/finalize`,
         {

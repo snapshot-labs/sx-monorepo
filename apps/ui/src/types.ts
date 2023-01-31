@@ -1,5 +1,16 @@
+export type NetworkID = 'gor' | 'sn-tn2';
+export type Choice = 1 | 2 | 3;
+
+// TODO: would be nice for API to use the same format
+export type SpaceMetadata = {
+  name: string;
+  description: string;
+  external_url: string;
+};
+
 export type Space = {
   id: string;
+  network: NetworkID;
   name: string;
   about?: string;
   controller: string;
@@ -19,6 +30,7 @@ export type Space = {
 export type Proposal = {
   id: string;
   proposal_id: number;
+  network: NetworkID;
   space: {
     id: string;
     quorum: number;

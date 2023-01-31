@@ -1,7 +1,7 @@
 import { Ref, toRef } from 'vue';
 import { defineStore } from 'pinia';
-import { currentNetwork } from '@/networks';
-import type { User } from '@/types';
+import { getNetwork } from '@/networks';
+import type { NetworkID, User } from '@/types';
 
 type UserRecord = {
   loading: boolean;
@@ -21,7 +21,7 @@ export const useUsersStore = defineStore('users', {
     }
   },
   actions: {
-    async fetchUser(userId: string) {
+    async fetchUser(userId: string, networkId: NetworkID) {
       if (this.getUser(userId)) return;
 
       this.users[userId] = {
@@ -33,7 +33,7 @@ export const useUsersStore = defineStore('users', {
       const record = toRef(this.users, userId) as Ref<UserRecord>;
       record.value.loading = false;
 
-      record.value.user = await currentNetwork.api.loadUser(userId);
+      record.value.user = await getNetwork(networkId).api.loadUser(userId);
       record.value.loaded = true;
       record.value.loading = false;
     }

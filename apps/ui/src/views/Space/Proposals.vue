@@ -7,16 +7,18 @@ const props = defineProps<{ space: Space }>();
 
 const proposalsStore = useProposalsStore();
 
-const proposalsRecord = computed(() => proposalsStore.proposals[props.space.id]);
+const proposalsRecord = computed(
+  () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
+);
 
 async function handleEndReached() {
   if (!proposalsRecord.value?.hasMoreProposals) return;
 
-  proposalsStore.fetchMore(props.space.id);
+  proposalsStore.fetchMore(props.space.id, props.space.network);
 }
 
 onMounted(() => {
-  proposalsStore.fetch(props.space.id);
+  proposalsStore.fetch(props.space.id, props.space.network);
 });
 </script>
 
@@ -32,7 +34,7 @@ onMounted(() => {
         </a>
         <router-link :to="{ name: 'editor' }">
           <UiButton class="!px-0 w-[46px]">
-            <IH-plus-sm class="inline-block" />
+            <IH-pencil-alt class="inline-block" />
           </UiButton>
         </router-link>
       </div>

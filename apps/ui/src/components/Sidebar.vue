@@ -17,7 +17,7 @@ onMounted(() => spacesStore.fetch());
       <router-link
         v-for="(space, i) in spacesStore.spaces.slice(0, 5)"
         :key="i"
-        :to="{ name: 'overview', params: { id: space.id } }"
+        :to="{ name: 'overview', params: { id: `${space.network}:${space.id}` } }"
         class="block"
       >
         <Stamp :id="space.id" :size="32" class="!rounded-[4px]" />

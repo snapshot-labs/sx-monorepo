@@ -3,14 +3,16 @@ import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUiStore } from '@/stores/ui';
 import { useSpacesStore } from '@/stores/spaces';
+import type { NetworkID } from '@/types';
 
 const uiStore = useUiStore();
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const id = route.params.id as string;
+const [networkId, spaceId] = id.split(':');
 
 onMounted(() => {
-  spacesStore.fetchSpace(id);
+  spacesStore.fetchSpace(spaceId, networkId as NetworkID);
 });
 </script>
 

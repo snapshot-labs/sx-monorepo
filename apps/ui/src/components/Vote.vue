@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useAccount } from '@/composables/useAccount';
-import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from '@/helpers/constants';
+import { getNetwork } from '@/networks';
 import type { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
@@ -9,11 +9,13 @@ const props = defineProps<{ proposal: ProposalType }>();
 const { votes } = useAccount();
 
 const isSupported = computed(() => {
+  const network = getNetwork(props.proposal.network);
+
   const hasSupportedAuthenticator = props.proposal.space.authenticators.find(
-    authenticator => SUPPORTED_AUTHENTICATORS[authenticator]
+    authenticator => network.constants.SUPPORTED_AUTHENTICATORS[authenticator]
   );
   const hasSupportedStrategies = props.proposal.strategies.find(
-    strategy => SUPPORTED_STRATEGIES[strategy]
+    strategy => network.constants.SUPPORTED_STRATEGIES[strategy]
   );
 
   return hasSupportedAuthenticator && hasSupportedStrategies;
@@ -21,7 +23,11 @@ const isSupported = computed(() => {
 </script>
 
 <template>
-  <slot v-if="votes[proposal.id]" name="voted" :vote="votes[proposal.id]">
+  <slot
+    v-if="votes[`${proposal.network}:${proposal.id}`]"
+    name="voted"
+    :vote="votes[`${proposal.network}:${proposal.id}`]"
+  >
     You have already voted for this proposal
   </slot>
 

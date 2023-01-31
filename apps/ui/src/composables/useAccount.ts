@@ -1,5 +1,5 @@
 import { ref, Ref } from 'vue';
-import { currentNetwork } from '@/networks';
+import { enabledNetworks, getNetwork } from '@/networks';
 import { useWeb3 } from '@/composables/useWeb3';
 import type { Vote } from '@/types';
 
@@ -11,7 +11,15 @@ export function useAccount() {
   async function loadVotes() {
     const account = web3.value.account;
     console.log('Load votes for', account);
-    votes.value = await currentNetwork.api.loadUserVotes(account);
+
+    const allNetworkVotes = await Promise.all(
+      enabledNetworks.map(networkId => {
+        const network = getNetwork(networkId);
+        return network.api.loadUserVotes(account);
+      })
+    );
+
+    votes.value = allNetworkVotes.reduce((acc, b) => ({ ...acc, ...b }));
   }
 
   return { account: web3.value.account, loadVotes, votes };

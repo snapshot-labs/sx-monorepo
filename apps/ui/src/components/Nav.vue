@@ -34,7 +34,7 @@ const items = {
         v-for="(item, i) in items"
         :key="i"
         :to="{ name: i }"
-        class="px-4 py-2 block space-x-2 text-skin-text flex items-center"
+        class="px-4 py-[7px] block space-x-2 text-skin-text flex items-center"
         :class="route.name === i && 'text-skin-link'"
       >
         <IH-globe-alt v-if="i === 'overview'" class="inline-block" />

@@ -10,6 +10,8 @@ import inject from '@rollup/plugin-inject';
 
 const ELECTRON = process.env.ELECTRON || false;
 
+const target = ['esnext'];
+
 export default defineConfig({
   base: ELECTRON ? path.resolve(__dirname, './dist') : undefined,
   define: {
@@ -41,8 +43,9 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    include: ['@snapshot-labs/sx'],
+    include: ['@snapshot-labs/sx', '@snapshot-labs/snapshot-oc'],
     esbuildOptions: {
+      target,
       plugins: [
         GlobalPolyFill({
           buffer: true
@@ -51,8 +54,9 @@ export default defineConfig({
     }
   },
   build: {
+    target,
     commonjsOptions: {
-      include: [/sx.js/, /node_modules/],
+      include: [/sx.js/, /soc.js/, /node_modules/],
       transformMixedEsModules: true
     },
     rollupOptions: {
