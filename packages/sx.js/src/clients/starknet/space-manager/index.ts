@@ -73,7 +73,7 @@ export class SpaceManager {
         params.executionStrategies.length,
         ...params.executionStrategies,
         metadataUriArr.length,
-        ...metadataUriArr
+        ...metadataUriArr.map(v => `0x${v.toString(16)}`)
       ]
     });
   }
