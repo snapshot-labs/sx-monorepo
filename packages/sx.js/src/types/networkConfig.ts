@@ -35,6 +35,7 @@ export type EthRelayerExecutionConfig = {
 };
 
 export type NetworkConfig = {
+  spaceFactory: string;
   authenticators: {
     [key: string]: VanillaAuthenticatorConfig | EthSigAuthenticatorConfig | undefined;
   };
