@@ -7,27 +7,37 @@ import type { ClientOpts, ClientConfig, ExecutionInput } from '../../../types';
 export class SpaceManager {
   config: Omit<ClientConfig, 'ethUrl'> & {
     account: Account;
+    disableEstimation: boolean;
   };
 
-  constructor(opts: Omit<ClientOpts, 'ethUrl'> & { account: Account }) {
+  constructor(
+    opts: Omit<ClientOpts, 'ethUrl'> & { account: Account; disableEstimation?: boolean }
+  ) {
     this.config = {
       networkConfig: defaultNetwork,
-      ...opts
+      ...opts,
+      disableEstimation: !!opts.disableEstimation
     };
+  }
+
+  async execute(call: Parameters<Account['execute']>[0]) {
+    if (this.config.disableEstimation) {
+      return this.config.account.execute(call);
+    }
+
+    const fee = await this.config.account.estimateFee(call);
+    return this.config.account.execute(call, undefined, {
+      maxFee: fee.suggestedMaxFee
+    });
   }
 
   async setMetadataUri(space: string, metadataUri: string) {
     const metadataUriArr = strToShortStringArr(metadataUri);
 
-    const call = {
+    return this.execute({
       contractAddress: space,
       entrypoint: 'setMetadataUri',
       calldata: [metadataUriArr.length, ...metadataUriArr.map(v => `0x${v.toString(16)}`)]
-    };
-
-    const fee = await this.config.account.estimateFee(call);
-    return this.config.account.execute(call, undefined, {
-      maxFee: fee.suggestedMaxFee
     });
   }
 
@@ -39,15 +49,10 @@ export class SpaceManager {
   ) {
     const { executionParams } = getExecutionData(executor, this.config.networkConfig, input);
 
-    const call = {
+    return this.execute({
       contractAddress: space,
       entrypoint: 'finalizeProposal',
       calldata: [proposalId, executionParams.length, ...executionParams]
-    };
-
-    const fee = await this.config.account.estimateFee(call);
-    return this.config.account.execute(call, undefined, {
-      maxFee: fee.suggestedMaxFee
     });
   }
 }
