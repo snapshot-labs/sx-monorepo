@@ -1,6 +1,7 @@
 import { Address, BigDecimal, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
+import { JSON } from 'assemblyscript-json'
 import { ProposalCreated, VoteCreated, MetadataUriUpdated } from '../generated/Space/Space'
-import { Space, Proposal, Vote, User} from '../generated/schema'
+import { Space, Proposal, Vote, User } from '../generated/schema'
 
 let SPACE = '0x95DC6f73301356c9909921e21b735601C42fc1a8'
 let VANILLA_AUTH = '0xc4fb316710643f7FfBB566e5586862076198DAdB'
@@ -80,6 +81,13 @@ export function handleProposalCreated(event: ProposalCreated): void {
       if (title) proposal.title = title.toString()
       if (body) proposal.body = body.toString()
       if (discussion) proposal.discussion = discussion.toString()
+
+      // Using different parser for execution to overcome limitations in graph-ts
+      let jsonObj: JSON.Obj = <JSON.Obj>(JSON.parse(data.toString()))
+      let execution = jsonObj.getArr('execution')
+      if (execution) {
+        proposal.execution = execution.toString()
+      }
     }
   }
 
