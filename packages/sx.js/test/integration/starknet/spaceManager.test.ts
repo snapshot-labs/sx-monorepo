@@ -28,7 +28,7 @@ describe('SpaceManager', () => {
       minVotingDuration: 0,
       maxVotingDuration: 86400,
       proposalThreshold: 1n,
-      qorum: 1n,
+      quorum: 1n,
       authenticators: ['0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14'],
       votingStrategies: ['0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b'],
       votingStrategiesParams: [['0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6', '0x3']],

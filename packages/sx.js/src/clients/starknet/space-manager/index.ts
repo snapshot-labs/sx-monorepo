@@ -39,14 +39,14 @@ export class SpaceManager {
     minVotingDuration: number;
     maxVotingDuration: number;
     proposalThreshold: bigint;
-    qorum: bigint;
+    quorum: bigint;
     authenticators: string[];
     votingStrategies: string[];
     votingStrategiesParams: string[][];
     executionStrategies: string[];
     metadataUri: string;
   }) {
-    const quorum = SplitUint256.fromUint(params.qorum);
+    const quorum = SplitUint256.fromUint(params.quorum);
     const proposalThreshold = SplitUint256.fromUint(params.proposalThreshold);
     const metadataUriArr = strToShortStringArr(params.metadataUri);
     const votingStrategyParamsFlat = flatten2DArray(params.votingStrategiesParams);
