@@ -1,5 +1,5 @@
 import { Wallet } from '@ethersproject/wallet';
-import { clients as Clients, getExecutionData, defaultNetwork } from '@snapshot-labs/sx';
+import { clients as Clients, getExecutionData, defaultNetwork, clients } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_EXECUTORS, SUPPORTED_STRATEGIES } from './constants';
 import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
@@ -45,8 +45,14 @@ export function createActions(starkProvider: Provider): NetworkActions {
   });
 
   return {
-    setMetadataUri: (web3: Web3Provider | Wallet, spaceId: string, metadataUri: string) => {
-      throw new Error('Unsupported');
+    setMetadataUri: async (web3: any, spaceId: string, metadataUri: string) => {
+      const spaceManager = new clients.SpaceManager({
+        starkProvider,
+        account: web3.provider.account,
+        disableEstimation: true
+      });
+
+      return spaceManager.setMetadataUri(spaceId, metadataUri);
     },
     propose: (
       web3: Web3Provider | Wallet,

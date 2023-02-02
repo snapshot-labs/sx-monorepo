@@ -12,6 +12,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   return {
     hasRelayer: true,
     hasReceive: true,
+    managerConnectors: ['argentx'],
     actions: createActions(provider),
     api: createApi(constants.API_URL, networkId),
     constants,
@@ -26,7 +27,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
         };
       },
       waitForTransaction: txId =>
-        provider.waitForTransaction(txId, ['ACCEPTED_ON_L1', 'ACCEPTED_ON_L2']),
+        provider.waitForTransaction(txId, undefined, ['ACCEPTED_ON_L1', 'ACCEPTED_ON_L2']),
       getTransactionLink: txId => `https://testnet-2.starkscan.co/tx/${txId}`
     }
   };

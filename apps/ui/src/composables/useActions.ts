@@ -4,6 +4,7 @@ import { useUiStore } from '@/stores/ui';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useModal } from '@/composables/useModal';
 import type { Transaction, Proposal, SpaceMetadata, Space, Choice, NetworkID } from '@/types';
+import type { Connector } from '@/networks/types';
 
 export function useActions() {
   const uiStore = useUiStore();
@@ -34,9 +35,11 @@ export function useActions() {
 
   async function updateMetadata(space: Space, metadata: SpaceMetadata) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
 
     const pinned = await network.helpers.pin(metadata);
 

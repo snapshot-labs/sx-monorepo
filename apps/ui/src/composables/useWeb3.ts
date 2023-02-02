@@ -86,6 +86,12 @@ export function useWeb3() {
       state.account = acc;
       state.name = names[acc];
       state.type = connector;
+
+      if (typeof connector === 'undefined') {
+        // NOTE: metamask doesn't return connectorName
+        state.type = 'injected';
+      }
+
       state.walletconnect = auth.provider.value?.wc?.peerMeta?.name || '';
     } catch (e) {
       state.account = '';

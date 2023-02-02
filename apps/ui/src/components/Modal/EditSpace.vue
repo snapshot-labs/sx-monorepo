@@ -70,7 +70,7 @@ async function handleSubmit() {
 
 onMounted(() => {
   form.name = props.space.name;
-  form.about = props.space.about;
+  form.about = props.space.about || '';
   form.website = '';
 });
 </script>

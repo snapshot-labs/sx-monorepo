@@ -4,6 +4,13 @@ import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import type { Space, Proposal, Vote, User, Choice } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
+export type Connector =
+  | 'argentx'
+  | 'injected'
+  | 'walletconnect'
+  | 'walletlink'
+  | 'portis'
+  | 'gnosis';
 
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
 
@@ -37,6 +44,7 @@ export type NetworkApi = {
 export type Network = {
   hasRelayer: boolean;
   hasReceive: boolean;
+  managerConnectors: Connector[];
   actions: NetworkActions;
   api: NetworkApi;
   constants: {

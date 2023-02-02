@@ -34,10 +34,10 @@
     tslib "^2.3.0"
     zen-observable-ts "^1.2.5"
 
-"@argent/get-starknet@^4.8.8":
-  version "4.8.8"
-  resolved "https://registry.yarnpkg.com/@argent/get-starknet/-/get-starknet-4.8.8.tgz#74f9d4c5cf7b441078ca4760919d8749f0cc02c3"
-  integrity sha512-jPtIr/saoGw+bN5oMa8KLRwZ2mCxSr2IWcI3EcESEV3jt94EGx2y7OYMOjQ4NijMrxCd00M8s06k/8bQ/VKVdQ==
+"@argent/get-starknet@^5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@argent/get-starknet/-/get-starknet-5.2.0.tgz#4368a4e030c5cad1ae47e0574bfe7cd3c20f5d6d"
+  integrity sha512-ovnnNHJD5SLxc/7MU6dHaaMd9mdzMD363LpQQpKIiUs0yGREFYaRdaPUbyuReaaJcQUByMYMH7Euz1UClUidQw==
   dependencies:
     get-starknet "^1.0.0"
 
@@ -1363,10 +1363,10 @@
     json-to-graphql-query "^2.2.4"
     lodash.set "^4.3.2"
 
-"@snapshot-labs/sx@^0.1.0-beta.18":
-  version "0.1.0-beta.18"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.18.tgz#2be674560faaa2f4541bb09f5cc017ecfd532def"
-  integrity sha512-QkEN68pjeFhnMOYOFLqnCU1EA4TRoVRa/FIRFaoPWGHQFp5mXQUhCD5ErMJo91PQB7+N4vwqzbIjycXMdoRTSg==
+"@snapshot-labs/sx@^0.1.0-beta.19":
+  version "0.1.0-beta.19"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.19.tgz#9dde448e31a6b18a3930efe398fc639483b9a5e3"
+  integrity sha512-NRG2d0xfQlvcH8trUqnezOCjRmS9JNR8UDHbz327M1PTzJhUtD8a8tr5iEa6uoZVmgihcZmsr+wLUfj51ixGaQ==
   dependencies:
     "@ethereumjs/block" "^3.6.3"
     "@ethereumjs/common" "^2.6.5"
