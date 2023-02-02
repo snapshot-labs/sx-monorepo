@@ -18,7 +18,7 @@ const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const sendingType = ref<null | number>(null);
 
-const proposal = computed(() => proposalsStore.getProposal(space, id, networkId));
+const proposal = computed(() => proposalsStore.getProposal(space, id, networkId as NetworkID));
 
 const discussion = computed(() => {
   if (!proposal.value?.discussion) return null;

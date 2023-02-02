@@ -19,7 +19,8 @@
       "@/*": ["src/*"]
     },
     "noImplicitAny": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": false
   },
   "vueCompilerOptions": {
     "narrowingTypesInInlineHandlers": true
