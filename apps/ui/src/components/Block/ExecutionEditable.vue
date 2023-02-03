@@ -98,7 +98,7 @@ function editTx(index: number) {
             <template #left>
               <div
                 v-if="txs.length > 1"
-                class="handle mr-2 text-white cursor-pointer opacity-50 hover:opacity-100"
+                class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
               >
                 <IH-switch-vertical />
               </div>
