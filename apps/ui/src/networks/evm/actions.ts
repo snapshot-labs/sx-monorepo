@@ -30,6 +30,9 @@ export function createActions(): NetworkActions {
   const client = new clients.SnapshotEVMClient();
 
   return {
+    createSpace() {
+      throw new Error('createSpace is not implemented for this network');
+    },
     setMetadataUri: (web3: Web3Provider | Wallet, spaceId: string, metadataUri: string) => {
       const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
 

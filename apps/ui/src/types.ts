@@ -8,6 +8,14 @@ export type SpaceMetadata = {
   external_url: string;
 };
 
+export type SpaceSettings = {
+  votingDelay: number;
+  minVotingDuration: number;
+  maxVotingDuration: number;
+  proposalThreshold: string;
+  quorum: string;
+};
+
 export type Space = {
   id: string;
   network: NetworkID;

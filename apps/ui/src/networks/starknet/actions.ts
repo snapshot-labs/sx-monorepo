@@ -45,6 +45,30 @@ export function createActions(starkProvider: Provider): NetworkActions {
   });
 
   return {
+    async createSpace(
+      web3: any,
+      params: {
+        controller: string;
+        votingDelay: number;
+        minVotingDuration: number;
+        maxVotingDuration: number;
+        proposalThreshold: bigint;
+        qorum: bigint;
+        authenticators: string[];
+        votingStrategies: string[];
+        votingStrategiesParams: string[][];
+        executionStrategies: string[];
+        metadataUri: string;
+      }
+    ) {
+      const spaceManager = new clients.SpaceManager({
+        starkProvider,
+        account: web3.provider.account,
+        disableEstimation: true
+      });
+
+      return spaceManager.deploySpace(params);
+    },
     setMetadataUri: async (web3: any, spaceId: string, metadataUri: string) => {
       const spaceManager = new clients.SpaceManager({
         starkProvider,

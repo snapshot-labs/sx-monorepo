@@ -8,6 +8,7 @@ import Editor from '@/views/Editor.vue';
 import Treasury from '@/views/Space/Treasury.vue';
 import Proposal from '@/views/Proposal.vue';
 import User from '@/views/User.vue';
+import Create from '@/views/Create.vue';
 
 const routes: any[] = [
   { path: '/', name: 'home', component: Home },
@@ -28,7 +29,8 @@ const routes: any[] = [
     component: Editor
   },
   { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
-  { path: '/profile/:id', name: 'user', component: User }
+  { path: '/profile/:id', name: 'user', component: User },
+  { path: '/create', name: 'create', component: Create }
 ];
 
 const router = createRouter({

@@ -13,6 +13,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   const provider = createProvider(`https://rpc.brovider.xyz/${chainId}`);
 
   return {
+    name: 'Ethereum (goerli)',
     hasRelayer: false,
     hasReceive: false,
     managerConnectors: ['injected', 'walletconnect', 'walletlink', 'portis', 'gnosis'],

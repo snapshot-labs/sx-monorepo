@@ -15,6 +15,22 @@ export type Connector =
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
 
 export type NetworkActions = {
+  createSpace(
+    signer: Web3Provider | Wallet,
+    params: {
+      controller: string;
+      votingDelay: number;
+      minVotingDuration: number;
+      maxVotingDuration: number;
+      proposalThreshold: bigint;
+      qorum: bigint;
+      authenticators: string[];
+      votingStrategies: string[];
+      votingStrategiesParams: string[][];
+      executionStrategies: string[];
+      metadataUri: string;
+    }
+  );
   setMetadataUri(signer: Web3Provider | Wallet, spaceId: string, metadataUri: string);
   propose(
     signer: Web3Provider | Wallet,
@@ -42,6 +58,7 @@ export type NetworkApi = {
 };
 
 export type Network = {
+  name: string;
   hasRelayer: boolean;
   hasReceive: boolean;
   managerConnectors: Connector[];

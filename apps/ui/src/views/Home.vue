@@ -21,6 +21,9 @@ onMounted(() => spacesStore.fetch());
       <Container class="max-w-screen-md">
         <div class="eyebrow mb-3" v-text="'Snapshot X'" />
         <h1 class="mb-5 mono">Where decisions<br />get made.</h1>
+        <router-link :to="{ name: 'create' }">
+          <UiButton>Create new space</UiButton>
+        </router-link>
       </Container>
     </div>
     <Container class="max-w-screen-md">

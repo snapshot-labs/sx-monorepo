@@ -10,6 +10,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   const provider = createProvider();
 
   return {
+    name: 'Starknet (testnet2)',
     hasRelayer: true,
     hasReceive: true,
     managerConnectors: ['argentx'],
