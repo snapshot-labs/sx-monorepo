@@ -48,7 +48,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({
   };
 
   try {
-    const metadataUri = shortStringArrToStr(event.new_metadata_uri).replaceAll('\x00', '');
+    const metadataUri = shortStringArrToStr(event.metadata_uri).replaceAll('\x00', '');
     const metadata: any = await getJSON(metadataUri);
 
     if (metadata.name) item.name = metadata.name;
