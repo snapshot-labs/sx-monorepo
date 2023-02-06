@@ -1,3 +1,4 @@
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { createApi } from '../common/graphqlApi';
 import { createActions } from './actions';
 import { createProvider } from './provider';
@@ -7,7 +8,9 @@ import type { Network } from '@/networks/types';
 import type { NetworkID } from '@/types';
 
 export function createEvmNetwork(networkId: NetworkID): Network {
-  const provider = createProvider('https://rpc.brovider.xyz/5');
+  const chainId = 5;
+
+  const provider = createProvider(`https://rpc.brovider.xyz/${chainId}`);
 
   return {
     hasRelayer: false,
@@ -18,8 +21,13 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     constants,
     helpers: {
       pin: pinGraph,
-      waitForTransaction: txId => provider.waitForTransaction(txId),
-      getTransactionLink: txId => `https://goerli.etherscan.io/tx/${txId}`
+      waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+      getExplorerUrl: (id, type) => {
+        let dataType: 'tx' | 'address' = 'tx';
+        if (['address', 'contract'].includes(type)) dataType = 'address';
+
+        return `${networks[chainId].explorer}/${dataType}/${id}`;
+      }
     }
   };
 }

@@ -26,7 +26,9 @@ const uiStore = useUiStore();
         <a
           v-for="pendingTx in uiStore.pendingTransactions"
           :key="pendingTx.txId"
-          :href="getNetwork(pendingTx.networkId).helpers.getTransactionLink(pendingTx.txId)"
+          :href="
+            getNetwork(pendingTx.networkId).helpers.getExplorerUrl(pendingTx.txId, 'transaction')
+          "
           target="_blank"
           class="border rounded-lg px-3 py-2 flex items-center w-full mb-2 last:mb-0"
         >

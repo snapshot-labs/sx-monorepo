@@ -28,7 +28,12 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       },
       waitForTransaction: txId =>
         provider.waitForTransaction(txId, undefined, ['ACCEPTED_ON_L1', 'ACCEPTED_ON_L2']),
-      getTransactionLink: txId => `https://testnet-2.starkscan.co/tx/${txId}`
+      getExplorerUrl: (id, type) => {
+        let dataType: 'tx' | 'contract' = 'tx';
+        if (['address', 'contract'].includes(type)) dataType = 'contract';
+
+        return `https://testnet-2.starkscan.co/${dataType}/${id}`;
+      }
     }
   };
 }

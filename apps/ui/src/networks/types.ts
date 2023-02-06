@@ -59,6 +59,6 @@ export type Network = {
   helpers: {
     pin: (content: any) => Promise<{ cid: string; provider: string }>;
     waitForTransaction(txId: string): Promise<any>;
-    getTransactionLink(txId: string): string;
+    getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract'): string;
   };
 };

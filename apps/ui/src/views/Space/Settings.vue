@@ -40,7 +40,7 @@ const network = computed(() => getNetwork(props.space.network));
     <div>
       <Label :label="'Controller'" />
       <div class="py-3 mx-4">
-        <a :href="`https://goerli.voyager.online/contract/${space.controller}`" target="_blank">
+        <a :href="network.helpers.getExplorerUrl(space.controller, 'contract')" target="_blank">
           <Stamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
           {{ shorten(space.controller) }}
           <IH-external-link class="inline-block" />
@@ -51,7 +51,7 @@ const network = computed(() => getNetwork(props.space.network));
     <div>
       <Label :label="'Auth(s)'" />
       <div v-for="(auth, i) in space.authenticators" :key="i" class="mx-4 py-3 border-b">
-        <a :href="`https://goerli.voyager.online/contract/${auth}`" target="_blank" class="flex">
+        <a :href="network.helpers.getExplorerUrl(auth, 'contract')" target="_blank" class="flex">
           <h4 class="flex-auto" v-text="network.constants.AUTHS[auth]" />
           <div>
             <Stamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
@@ -65,7 +65,7 @@ const network = computed(() => getNetwork(props.space.network));
       <Label :label="'Strategie(s)'" />
       <div v-for="(strategy, i) in space.strategies" :key="i" class="mx-4 py-3 border-b">
         <a
-          :href="`https://goerli.voyager.online/contract/${strategy}`"
+          :href="network.helpers.getExplorerUrl(strategy, 'contract')"
           target="_blank"
           class="flex"
         >
@@ -82,7 +82,7 @@ const network = computed(() => getNetwork(props.space.network));
       <Label :label="'Execution(s)'" />
       <div v-for="(executor, i) in space.executors" :key="i" class="mx-4 py-3 border-b">
         <a
-          :href="`https://goerli.voyager.online/contract/${executor}`"
+          :href="network.helpers.getExplorerUrl(executor, 'contract')"
           target="_blank"
           class="flex"
         >
