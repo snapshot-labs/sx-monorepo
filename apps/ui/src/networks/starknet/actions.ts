@@ -1,6 +1,6 @@
-import { Wallet } from '@ethersproject/wallet';
 import { clients as Clients, getExecutionData, defaultNetwork, clients } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_EXECUTORS, SUPPORTED_STRATEGIES } from './constants';
+import { verifyNetwork } from '@/helpers/utils';
 import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
@@ -34,7 +34,10 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
   return { authenticator, strategies: selectedStrategies };
 }
 
-export function createActions(starkProvider: Provider): NetworkActions {
+export function createActions(
+  starkProvider: Provider,
+  { l1ChainId }: { l1ChainId: number }
+): NetworkActions {
   const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
   const ethUrl: string = import.meta.env.VITE_ETH_RPC_URL;
 
@@ -78,13 +81,15 @@ export function createActions(starkProvider: Provider): NetworkActions {
 
       return spaceManager.setMetadataUri(spaceId, metadataUri);
     },
-    propose: (
-      web3: Web3Provider | Wallet,
+    propose: async (
+      web3: Web3Provider,
       account: string,
       space: Space,
       cid: string,
       transactions: MetaTransaction[]
     ) => {
+      await verifyNetwork(web3, l1ChainId);
+
       const { authenticator, strategies } = pickAuthenticatorAndStrategies(
         space.authenticators,
         space.strategies
@@ -100,7 +105,9 @@ export function createActions(starkProvider: Provider): NetworkActions {
         ...executionData
       });
     },
-    vote: (web3: Web3Provider | Wallet, account: string, proposal: Proposal, choice: number) => {
+    vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
+      await verifyNetwork(web3, l1ChainId);
+
       const { authenticator, strategies } = pickAuthenticatorAndStrategies(
         proposal.space.authenticators,
         proposal.strategies
@@ -114,7 +121,7 @@ export function createActions(starkProvider: Provider): NetworkActions {
         choice
       });
     },
-    finalizeProposal: async (web3: Web3Provider | Wallet, proposal: Proposal) => {
+    finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
       const res = await fetch(
         `${manaUrl}/space/${proposal.space.id}/${proposal.proposal_id}/finalize`,
         {
@@ -134,10 +141,10 @@ export function createActions(starkProvider: Provider): NetworkActions {
 
       return receipt;
     },
-    receiveProposal: (web3: Web3Provider | Wallet, proposal: Proposal) => {
-      const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+    receiveProposal: async (web3: Web3Provider, proposal: Proposal) => {
+      await verifyNetwork(web3, l1ChainId);
 
-      const zodiac = new Clients.Zodiac({ signer });
+      const zodiac = new Clients.Zodiac({ signer: web3.getSigner() });
 
       const executor = proposal.space.executors.find(executor => SUPPORTED_EXECUTORS[executor]);
       if (!executor) throw new Error('Unsupported space');
@@ -146,13 +153,13 @@ export function createActions(starkProvider: Provider): NetworkActions {
         transactions: convertToMetaTransactions(proposal.execution)
       });
     },
-    executeTransactions: (web3: Web3Provider | Wallet, proposal: Proposal) => {
+    executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
+      await verifyNetwork(web3, l1ChainId);
+
       // TODO: make it dynamic once we have way to fetch it somehow
       const proposalIndex = 3;
 
-      const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
-
-      const zodiac = new Clients.Zodiac({ signer });
+      const zodiac = new Clients.Zodiac({ signer: web3.getSigner() });
 
       const executor = proposal.space.executors.find(executor => SUPPORTED_EXECUTORS[executor]);
       if (!executor) throw new Error('Unsupported space');

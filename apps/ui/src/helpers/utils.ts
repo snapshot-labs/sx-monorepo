@@ -5,6 +5,7 @@ import duration from 'dayjs/plugin/duration';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl as snapshotGetUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
+import type { Web3Provider } from '@ethersproject/providers';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 
@@ -151,4 +152,16 @@ export function omit<T extends Record<string, unknown>, K extends keyof T>(
 
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
+}
+
+export async function verifyNetwork(web3Provider: Web3Provider, chainId: number) {
+  if (!web3Provider.provider.request) return;
+
+  const network = await web3Provider.getNetwork();
+  if (network.chainId === chainId) return;
+
+  await web3Provider.provider.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{ chainId: `0x${chainId.toString(16)}` }]
+  });
 }

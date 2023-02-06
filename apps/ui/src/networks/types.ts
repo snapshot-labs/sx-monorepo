@@ -1,4 +1,3 @@
-import type { Wallet } from '@ethersproject/wallet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import type { Space, Proposal, Vote, User, Choice } from '@/types';
@@ -16,7 +15,7 @@ export type Connector =
 
 export type NetworkActions = {
   createSpace(
-    signer: Web3Provider | Wallet,
+    web3: Web3Provider,
     params: {
       controller: string;
       votingDelay: number;
@@ -31,18 +30,18 @@ export type NetworkActions = {
       metadataUri: string;
     }
   );
-  setMetadataUri(signer: Web3Provider | Wallet, spaceId: string, metadataUri: string);
+  setMetadataUri(web3: Web3Provider, spaceId: string, metadataUri: string);
   propose(
-    signer: Web3Provider | Wallet,
+    web3: Web3Provider,
     account: string,
     space: Space,
     cid: string,
     transactions: MetaTransaction[]
   );
-  vote(signer: Web3Provider | Wallet, account: string, proposal: Proposal, choice: Choice);
-  finalizeProposal(signer: Web3Provider | Wallet, proposal: Proposal);
-  receiveProposal(signer: Web3Provider | Wallet, proposal: Proposal);
-  executeTransactions(signer: Web3Provider | Wallet, proposal: Proposal);
+  vote(web3: Web3Provider, account: string, proposal: Proposal, choice: Choice);
+  finalizeProposal(web3: Web3Provider, proposal: Proposal);
+  receiveProposal(web3: Web3Provider, proposal: Proposal);
+  executeTransactions(web3: Web3Provider, proposal: Proposal);
   send(envelope: any): Promise<any>;
 };
 

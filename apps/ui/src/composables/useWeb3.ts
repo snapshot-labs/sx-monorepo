@@ -112,6 +112,12 @@ export function useWeb3() {
       };
     }
     state.network = networks[chainId];
+
+    const connector = auth.provider.value?.connectorName;
+    if (typeof connector === 'undefined') {
+      // NOTE: metamask doesn't return connectorName
+      state.type = 'injected';
+    }
   }
 
   return {

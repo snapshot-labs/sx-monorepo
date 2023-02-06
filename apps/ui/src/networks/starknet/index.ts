@@ -7,6 +7,8 @@ import type { Network } from '@/networks/types';
 import type { NetworkID } from '@/types';
 
 export function createStarknetNetwork(networkId: NetworkID): Network {
+  const l1ChainId = 5;
+
   const provider = createProvider();
 
   return {
@@ -14,7 +16,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     hasRelayer: true,
     hasReceive: true,
     managerConnectors: ['argentx'],
-    actions: createActions(provider),
+    actions: createActions(provider, { l1ChainId }),
     api: createApi(constants.API_URL, networkId),
     constants,
     helpers: {

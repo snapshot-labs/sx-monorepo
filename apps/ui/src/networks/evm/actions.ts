@@ -1,6 +1,6 @@
-import { Wallet } from '@ethersproject/wallet';
 import { clients } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from './constants';
+import { verifyNetwork } from '@/helpers/utils';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { NetworkActions } from '@/networks/types';
 import type { Space, Proposal } from '@/types';
@@ -26,24 +26,24 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
   return { authenticator, strategies: selectedStrategies };
 }
 
-export function createActions(): NetworkActions {
+export function createActions(chainId: number): NetworkActions {
   const client = new clients.SnapshotEVMClient();
 
   return {
     createSpace() {
       throw new Error('createSpace is not implemented for this network');
     },
-    setMetadataUri: (web3: Web3Provider | Wallet, spaceId: string, metadataUri: string) => {
-      const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+    setMetadataUri: async (web3: Web3Provider, spaceId: string, metadataUri: string) => {
+      await verifyNetwork(web3, chainId);
 
       return client.setMetadataUri({
-        signer,
+        signer: web3.getSigner(),
         space: spaceId,
         metadataUri
       });
     },
-    propose: (web3: Web3Provider | Wallet, account: string, space: Space, cid: string) => {
-      const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+    propose: async (web3: Web3Provider, account: string, space: Space, cid: string) => {
+      await verifyNetwork(web3, chainId);
 
       const { authenticator, strategies } = pickAuthenticatorAndStrategies(
         space.authenticators,
@@ -51,7 +51,7 @@ export function createActions(): NetworkActions {
       );
 
       return client.propose({
-        signer,
+        signer: web3.getSigner(),
         space: space.id,
         authenticator,
         userVotingStrategies: strategies.map(index => ({
@@ -62,15 +62,10 @@ export function createActions(): NetworkActions {
         metadataUri: `ipfs://${cid}`
       });
     },
-    vote: async (
-      web3: Web3Provider | Wallet,
-      account: string,
-      proposal: Proposal,
-      choice: number
-    ) => {
-      if (choice < 1 || choice > 3) throw new Error('Invalid chocie');
+    vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
+      await verifyNetwork(web3, chainId);
 
-      const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+      if (choice < 1 || choice > 3) throw new Error('Invalid chocie');
 
       const { authenticator, strategies } = pickAuthenticatorAndStrategies(
         proposal.space.authenticators,
@@ -81,7 +76,7 @@ export function createActions(): NetworkActions {
       const convertedChoice: Choice = (choice - 1) as Choice;
 
       return client.vote({
-        signer,
+        signer: web3.getSigner(),
         space: proposal.space.id,
         authenticator,
         userVotingStrategies: strategies.map(index => ({
@@ -92,11 +87,11 @@ export function createActions(): NetworkActions {
         choice: convertedChoice
       });
     },
-    finalizeProposal: async (web3: Web3Provider | Wallet, proposal: Proposal) => {
-      const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+    finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
+      await verifyNetwork(web3, chainId);
 
-      return await client.finalizeProposal({
-        signer,
+      return client.finalizeProposal({
+        signer: web3.getSigner(),
         space: proposal.space.id,
         proposal: proposal.proposal_id,
         executionParams: '0x00'
