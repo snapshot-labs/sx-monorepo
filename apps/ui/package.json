@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@iconify-json/heroicons-outline": "^1.1.2",
+    "@iconify-json/heroicons-solid": "^1.1.6",
     "@rollup/plugin-inject": "^5.0.2",
     "@types/node": "^18.6.1",
     "@vitejs/plugin-vue": "^3.0.1",

@@ -779,6 +779,13 @@
   dependencies:
     "@iconify/types" "*"
 
+"@iconify-json/heroicons-solid@^1.1.6":
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/@iconify-json/heroicons-solid/-/heroicons-solid-1.1.6.tgz#8ac9484f5345e753fa1cc0d18b1d728e88e429cc"
+  integrity sha512-akzICPMJ4TIQ13RxprpBNtSYl7M3+k4c5bAivtvK62B18wHS6yT1qWEFH9Q3+n08EQm2E99uHZ9yl2Wam8uMuQ==
+  dependencies:
+    "@iconify/types" "*"
+
 "@iconify/types@*", "@iconify/types@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@iconify/types/-/types-1.1.0.tgz#dc15fc988b1b3fd558dd140a24ede7e0aac11280"

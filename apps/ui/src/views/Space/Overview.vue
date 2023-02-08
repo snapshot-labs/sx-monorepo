@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { useSpacesStore } from '@/stores/spaces';
 import { useProposalsStore } from '@/stores/proposals';
 import { _n } from '@/helpers/utils';
 import { Space, Proposal as ProposalType } from '@/types';
@@ -8,6 +9,7 @@ const PROPOSALS_LIMIT = 4;
 
 const props = defineProps<{ space: Space }>();
 
+const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
 const editSpaceModalOpen = ref(false);
 
@@ -15,9 +17,11 @@ onMounted(() => {
   proposalsStore.fetchSummary(props.space.id, props.space.network, PROPOSALS_LIMIT);
 });
 
-const proposalsRecord = computed(
-  () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
-);
+const spaceIdComposite = `${props.space.network}:${props.space.id}`;
+
+const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
+
+const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
 
 const grouped = computed(() => {
   const initialValue = {
@@ -47,6 +51,10 @@ const grouped = computed(() => {
         </router-link>
         <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
           <IH-cog class="inline-block" />
+        </UiButton>
+        <UiButton class="w-[46px] !px-0" @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
+          <IS-star v-if="spaceStarred" class="inline-block" />
+          <IH-star v-else class="inline-block" />
         </UiButton>
       </div>
     </div>

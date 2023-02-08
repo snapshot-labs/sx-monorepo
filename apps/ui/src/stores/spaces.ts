@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
+import { useStorage } from '@vueuse/core';
 import { enabledNetworks, getNetwork } from '@/networks';
 import type { Space, NetworkID } from '@/types';
+import pkg from '../../package.json';
 
 const SPACES_LIMIT = 10;
 
@@ -22,7 +24,8 @@ export const useSpacesStore = defineStore('spaces', {
           hasMoreSpaces: true
         }
       ])
-    ) as Record<NetworkID, NetworkRecord>
+    ) as Record<NetworkID, NetworkRecord>,
+    starredSpacesIds: useStorage(`${pkg.name}.spaces-starred`, [] as string[])
   }),
   getters: {
     spaces: state => Object.values(state.networksMap).flatMap(record => record.spaces),
@@ -101,6 +104,13 @@ export const useSpacesStore = defineStore('spaces', {
 
       if (this.spacesMap.get(uniqueId)) return;
       this.networksMap[networkId].spaces.push(space);
+    },
+    toggleSpaceStar(id: string) {
+      if (this.starredSpacesIds.includes(id)) {
+        this.starredSpacesIds = this.starredSpacesIds.filter((spaceId: string) => spaceId !== id);
+      } else {
+        this.starredSpacesIds.unshift(id);
+      }
     }
   }
 });
