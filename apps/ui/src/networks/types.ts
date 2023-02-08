@@ -11,6 +11,19 @@ export type Connector =
   | 'portis'
   | 'gnosis';
 
+export type StrategyTemplate = {
+  address: string;
+  name: string;
+  paramsDefinition: any;
+  generateSummary?: (params: Record<string, any>) => string;
+  generateParams?: (params: Record<string, any>) => any[];
+};
+
+export type StrategyConfig = StrategyTemplate & {
+  id: string;
+  params: Record<string, any>;
+};
+
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
 
 export type NetworkActions = {
@@ -71,6 +84,9 @@ export type Network = {
     AUTHS: { [key: string]: string };
     STRATEGIES: { [key: string]: string };
     EXECUTORS: { [key: string]: string };
+    EDITOR_AUTHENTICATORS: StrategyTemplate[];
+    EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
+    EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
   };
   helpers: {
     pin: (content: any) => Promise<{ cid: string; provider: string }>;

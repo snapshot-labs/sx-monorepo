@@ -12,7 +12,7 @@ import type {
   Choice,
   NetworkID
 } from '@/types';
-import type { Connector } from '@/networks/types';
+import type { Connector, StrategyConfig } from '@/networks/types';
 
 export function useActions() {
   const uiStore = useUiStore();
@@ -44,7 +44,10 @@ export function useActions() {
   async function createSpace(
     networkId: NetworkID,
     metadata: SpaceMetadata,
-    settings: SpaceSettings
+    settings: SpaceSettings,
+    authenticators: StrategyConfig[],
+    votingStrategies: StrategyConfig[],
+    executionStrategies: StrategyConfig[]
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -65,10 +68,12 @@ export function useActions() {
       maxVotingDuration: settings.maxVotingDuration,
       proposalThreshold: BigInt(settings.proposalThreshold),
       qorum: BigInt(settings.quorum),
-      authenticators: ['0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14'],
-      votingStrategies: ['0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b'],
-      votingStrategiesParams: [['0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6', '0x3']],
-      executionStrategies: ['0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81'],
+      authenticators: authenticators.map(config => config.address),
+      votingStrategies: votingStrategies.map(config => config.address),
+      votingStrategiesParams: votingStrategies.map(config =>
+        config.generateParams ? config.generateParams(config.params) : []
+      ),
+      executionStrategies: executionStrategies.map(config => config.address),
       metadataUri: `ipfs://${pinned.cid}`
     });
 

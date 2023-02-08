@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, reactive, computed, Ref } from 'vue';
+import { ref, reactive, computed, watch, Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useActions } from '@/composables/useActions';
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
+import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceSettings } from '@/types';
 
 type MetadataState = { name: string; about?: string; website?: string };
@@ -103,11 +104,18 @@ const settingsForm: SpaceSettings = reactive(
     quorum: '1'
   })
 );
+const authenticators = ref([] as StrategyConfig[]);
+const votingStrategies = ref([] as StrategyConfig[]);
+const executionStrategies = ref([] as StrategyConfig[]);
 
+const selectedNetwork = computed(() => getNetwork(selectedNetworkId.value));
 const metadataFormErrors = computed(() => validateForm(metadataDefinition, metadataForm));
 const settingsFormErrors = computed(() => validateForm(settingsDefinition, settingsForm));
 const disabled = computed(
   () =>
+    authenticators.value.length === 0 ||
+    votingStrategies.value.length === 0 ||
+    executionStrategies.value.length === 0 ||
     Object.keys(metadataFormErrors.value).length > 0 ||
     Object.keys(settingsFormErrors.value).length > 0
 );
@@ -123,7 +131,10 @@ async function handleSubmit() {
         description: metadataForm.about || '',
         external_url: metadataForm.website || ''
       },
-      settingsForm
+      settingsForm,
+      authenticators.value,
+      votingStrategies.value,
+      executionStrategies.value
     );
 
     if (result) router.back();
@@ -131,6 +142,12 @@ async function handleSubmit() {
     sending.value = false;
   }
 }
+
+watch(selectedNetworkId, () => {
+  authenticators.value = [];
+  votingStrategies.value = [];
+  executionStrategies.value = [];
+});
 </script>
 
 <template>
@@ -162,6 +179,31 @@ async function handleSubmit() {
           :definition="settingsDefinition"
         />
       </div>
+
+      <BlockStrategiesConfig
+        v-model="authenticators"
+        :available-strategies="selectedNetwork.constants.EDITOR_AUTHENTICATORS"
+        title="Authenticators"
+        description="Lorem ipsum..."
+        class="mt-6"
+      />
+
+      <BlockStrategiesConfig
+        v-model="votingStrategies"
+        :available-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
+        title="Voting strategies"
+        description="Lorem ipsum..."
+        class="mt-6"
+      />
+
+      <BlockStrategiesConfig
+        v-model="executionStrategies"
+        :available-strategies="selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES"
+        title="Execution strategies"
+        description="Lorem ipsum..."
+        class="mt-6"
+      />
+
       <UiButton class="w-full" :loading="sending" :disabled="disabled" @click="handleSubmit">
         Create
       </UiButton>

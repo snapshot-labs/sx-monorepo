@@ -23,3 +23,9 @@ export const STRATEGIES = {
 export const EXECUTORS = {
   '0x81519c29621ba131ea398c15b17391f53e8b9a94': 'Vanilla'
 };
+
+export const EDITOR_AUTHENTICATORS = [];
+
+export const EDITOR_VOTING_STRATEGIES = [];
+
+export const EDITOR_EXECUTION_STRATEGIES = [];
