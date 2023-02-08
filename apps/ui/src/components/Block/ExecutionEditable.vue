@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, Ref } from 'vue';
 import draggable from 'vuedraggable';
-import space from '@/helpers/space.json';
+import spaceData from '@/helpers/space.json';
 import { Transaction as TransactionType } from '@/types';
 
 const props = defineProps<{ modelValue: TransactionType[] }>();
@@ -120,15 +120,15 @@ function editTx(index: number) {
     <teleport to="#modal">
       <ModalSendToken
         :open="modalOpen.sendToken"
-        :address="space.wallet"
-        :network="space.network"
+        :address="spaceData.wallet"
+        :network="spaceData.network"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
       />
       <ModalSendNft
         :open="modalOpen.sendNft"
-        :address="space.wallet"
+        :address="spaceData.wallet"
         :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"

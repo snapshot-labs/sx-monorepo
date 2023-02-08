@@ -1,22 +1,27 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, Ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { formatUnits } from '@ethersproject/units';
 import { useClipboard } from '@vueuse/core';
 import { useBalances } from '@/composables/useBalances';
+import { useEditor } from '@/composables/useEditor';
 import { useNfts } from '@/composables/useNfts';
 import spaceData from '@/helpers/space.json';
 import { _n, shorten, explorerUrl } from '@/helpers/utils';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import type { Token } from '@/helpers/alchemy';
 import type { Space } from '@/types';
+import { Transaction as TransactionType } from '@/types';
 
-defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space }>();
 
 const page: Ref<'tokens' | 'nfts'> = ref('tokens');
 
+const router = useRouter();
 const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
+const { createDraft } = useEditor();
 
 const totalQuote = computed(() =>
   assets.value.reduce((acc, asset) => {
@@ -33,6 +38,19 @@ const sortedAssets = computed(() =>
   })
 );
 
+const modalOpen = ref({
+  sendToken: false
+});
+
+function openModal(type: 'sendToken') {
+  modalOpen.value[type] = true;
+}
+
+function addTx(tx: TransactionType) {
+  const draftId = createDraft(`${props.space.network}:${props.space.id}`, { execution: [tx] });
+  router.push(`create/${draftId}`);
+}
+
 onMounted(() => {
   loadBalances(spaceData.wallet, spaceData.network);
   loadNfts(spaceData.wallet);
@@ -48,11 +66,9 @@ onMounted(() => {
         <IH-check v-else class="inline-block" />
       </UiButton>
     </a>
-    <router-link :to="{ name: 'editor' }">
-      <UiButton class="!px-0 w-[46px]">
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </UiButton>
-    </router-link>
+    <UiButton class="!px-0 w-[46px]" @click="openModal('sendToken')">
+      <IH-arrow-sm-right class="inline-block -rotate-45" />
+    </UiButton>
   </div>
   <div class="space-y-3">
     <div>
@@ -115,4 +131,13 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <teleport to="#modal">
+    <ModalSendToken
+      :open="modalOpen.sendToken"
+      :address="spaceData.wallet"
+      :network="spaceData.network"
+      @close="modalOpen.sendToken = false"
+      @add="addTx"
+    />
+  </teleport>
 </template>

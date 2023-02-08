@@ -8,15 +8,16 @@ import { useModal } from '@/composables/useModal';
 import { omit } from '@/helpers/utils';
 import type { NetworkID } from '@/types';
 
-const { proposals } = useEditor();
+const { proposals, createDraft } = useEditor();
 const { modalOpen: globalModalOpen } = useModal();
 const route = useRoute();
 const router = useRouter();
 const { propose } = useActions();
 const spacesStore = useSpacesStore();
+
 const id = route.params.id as string;
 const [networkId, spaceId] = id.split(':');
-const key = route.params.key;
+const key = route.params.key as string;
 const proposalKey = `${id}:${key}`;
 
 const modalOpen = ref(false);
@@ -30,16 +31,8 @@ const proposalData = computed(() => {
 });
 
 if (!proposals[proposalKey]) {
-  proposals[proposalKey] = {
-    title: '',
-    body: '',
-    discussion: '',
-    execution: [],
-    updatedAt: Date.now()
-  };
+  createDraft(id, { id: key });
 }
-
-if (!proposals[proposalKey].execution) proposals[proposalKey].execution = [];
 
 onMounted(() => {
   spacesStore.fetchSpace(spaceId, networkId as NetworkID);
@@ -47,19 +40,23 @@ onMounted(() => {
   if (!key && route.name) {
     globalModalOpen.value = false;
 
-    const str = (Math.random() + 1).toString(36).substring(7);
+    const draftId = createDraft(id);
+
     router.replace({
       name: route.name,
-      params: { id, key: str }
+      params: { id, key: draftId }
     });
   }
 });
 
-watch(proposals, () => {
-  if (!proposals[proposalKey]) {
-    router.replace({ name: 'editor' });
+watch(
+  () => proposals[proposalKey],
+  (to, from) => {
+    if (from && !to) {
+      router.replace({ name: 'editor' });
+    }
   }
-});
+);
 
 watch(proposalData, () => {
   if (!proposals[proposalKey]) return;

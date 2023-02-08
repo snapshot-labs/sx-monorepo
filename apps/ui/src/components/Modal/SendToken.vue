@@ -19,7 +19,7 @@ const props = defineProps<{
   open: boolean;
   address: string;
   network: number;
-  initialState: any;
+  initialState?: any;
 }>();
 
 const emit = defineEmits<{
