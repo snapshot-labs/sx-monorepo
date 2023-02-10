@@ -18,11 +18,14 @@ abstract contract SignatureVerifier is EIP712 {
         keccak256(
             "Propose(address space,address author,string metadataUri,Strategy executionStrategy,"
             "IndexedStrategy[] userVotingStrategies,uint256 salt)"
+            "IndexedStrategy(uint8 index,bytes params)"
+            "Strategy(address addy,bytes params)"
         );
     bytes32 private constant VOTE_TYPEHASH =
         keccak256(
             "Vote(address space,address voter,uint256 proposalId,Choice choice,"
             "IndexedStrategy[] userVotingStrategies,uint256 salt)"
+            "IndexedStrategy(uint8 index,bytes params)"
         );
 
     mapping(address => mapping(uint256 => bool)) private usedSalts;

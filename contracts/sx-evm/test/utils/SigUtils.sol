@@ -18,11 +18,14 @@ abstract contract SigUtils {
         keccak256(
             "Propose(address space,address author,string metadataUri,Strategy executionStrategy,"
             "IndexedStrategy[] userVotingStrategies,uint256 salt)"
+            "IndexedStrategy(uint8 index,bytes params)"
+            "Strategy(address addy,bytes params)"
         );
     bytes32 private constant VOTE_TYPEHASH =
         keccak256(
             "Vote(address space,address voter,uint256 proposalId,Choice choice,"
             "IndexedStrategy[] userVotingStrategies,uint256 salt)"
+            "IndexedStrategy(uint8 index,bytes params)"
         );
 
     constructor(string memory _name, string memory _version) {
