@@ -77,7 +77,9 @@ abstract contract SignatureVerifier is EIP712 {
 
         address recoveredAddress = ECDSA.recover(
             _hashTypedDataV4(
-                keccak256(abi.encode(VOTE_TYPEHASH, space, voter, proposeId, choice, userVotingStrategies.hash(), salt))
+                keccak256(
+                    abi.encode(VOTE_TYPEHASH, space, voter, proposeId, uint8(choice), userVotingStrategies.hash(), salt)
+                )
             ),
             v,
             r,
