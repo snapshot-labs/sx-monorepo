@@ -72,7 +72,7 @@ onMounted(() => {
   </div>
   <div class="space-y-3">
     <div>
-      <Label label="Treasury" />
+      <Label label="Treasury" sticky />
       <a
         :href="explorerUrl('1', spaceData.wallet)"
         target="_blank"
