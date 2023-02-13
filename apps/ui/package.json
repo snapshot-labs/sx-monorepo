@@ -11,7 +11,8 @@
     "lint": "yarn lint:nofix --fix",
     "typecheck": "vue-tsc --noEmit",
     "test:unit": "vitest",
-    "electron:start": "electron ."
+    "electron:start": "electron .",
+    "electron:build": "ELECTRON=true yarn build"
   },
   "eslintConfig": {
     "extends": "@snapshot-labs/vue"
