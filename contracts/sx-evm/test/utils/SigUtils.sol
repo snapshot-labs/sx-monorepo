@@ -23,7 +23,7 @@ abstract contract SigUtils {
         );
     bytes32 private constant VOTE_TYPEHASH =
         keccak256(
-            "Vote(address space,address voter,uint256 proposalId,Choice choice,"
+            "Vote(address space,address voter,uint256 proposalId,uint8 choice,"
             "IndexedStrategy[] userVotingStrategies,uint256 salt)"
             "IndexedStrategy(uint8 index,bytes params)"
         );
@@ -93,15 +93,7 @@ abstract contract SigUtils {
                     )
                 ),
                 keccak256(
-                    abi.encode(
-                        VOTE_TYPEHASH,
-                        space,
-                        voter,
-                        proposalId,
-                        uint8(choice),
-                        usedVotingStrategies.hash(),
-                        salt
-                    )
+                    abi.encode(VOTE_TYPEHASH, space, voter, proposalId, choice, usedVotingStrategies.hash(), salt)
                 )
             )
         );
