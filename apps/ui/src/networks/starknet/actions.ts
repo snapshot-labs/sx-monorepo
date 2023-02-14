@@ -7,7 +7,8 @@ import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/exec
 import type { NetworkActions } from '@/networks/types';
 import type { Space, Proposal, Transaction } from '@/types';
 
-const EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
+const VANILLA_EXECUTOR = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
+const ZODIAC_EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
 
 function convertToMetaTransactions(transactions: Transaction[]): MetaTransaction[] {
   return transactions.map((tx: Transaction) => ({
@@ -15,6 +16,25 @@ function convertToMetaTransactions(transactions: Transaction[]): MetaTransaction
     nonce: 0,
     operation: 0
   }));
+}
+
+function buildExecution(space: Space, transactions: MetaTransaction[]) {
+  if (space.executors.find(executor => executor === ZODIAC_EXECUTOR)) {
+    return getExecutionData(ZODIAC_EXECUTOR, defaultNetwork, { transactions });
+  }
+
+  if (space.executors.find(executor => executor === VANILLA_EXECUTOR)) {
+    if (transactions.length) {
+      console.warn('transactions will be ignored as vanilla executor is used');
+    }
+
+    return {
+      executor: VANILLA_EXECUTOR,
+      executionParams: []
+    };
+  }
+
+  throw new Error('No supported executor configured for this space');
 }
 
 function pickAuthenticatorAndStrategies(authenticators: string[], strategies: string[]) {
@@ -95,7 +115,7 @@ export function createActions(
         space.strategies
       );
 
-      const executionData = getExecutionData(EXECUTOR, defaultNetwork, { transactions });
+      const executionData = buildExecution(space, transactions);
 
       return client.propose(web3, account, {
         space: space.id,
