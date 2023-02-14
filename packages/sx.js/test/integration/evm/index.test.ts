@@ -2,6 +2,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { SnapshotEVMClient } from '../../../src/clients/evm';
 import { deployDependency } from './utils';
+import SpaceFactoryContract from './fixtures/SpaceFactory.json';
 import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
@@ -16,11 +17,13 @@ describe('SnapshotEVMClient', () => {
   );
   const client = new SnapshotEVMClient();
 
+  let spaceFactory = '';
   let authenticator = '';
   let votingStrategy = '';
   let executionStrategy = '';
   let spaceAddress = '';
   beforeAll(async () => {
+    spaceFactory = await deployDependency(signer, SpaceFactoryContract);
     authenticator = await deployDependency(signer, VanillaAuthenciatorContract);
     votingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
     executionStrategy = await deployDependency(signer, VanillaExecutionStrategyContract);
@@ -29,6 +32,7 @@ describe('SnapshotEVMClient', () => {
 
     const res = await client.deploy({
       signer,
+      spaceFactory,
       owner,
       votingDelay: 0,
       minVotingDuration: 0,
@@ -45,7 +49,7 @@ describe('SnapshotEVMClient', () => {
       executionStrategies: [executionStrategy]
     });
 
-    spaceAddress = res.address;
+    spaceAddress = res.spaceAddress;
   });
 
   it('should propose via authenticator', async () => {

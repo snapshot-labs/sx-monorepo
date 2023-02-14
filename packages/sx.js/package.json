@@ -10,6 +10,7 @@
     "lint": "yarn lint:nofix --fix",
     "prepare": "yarn build",
     "prepublishOnly": "yarn run lint",
+    "anvil": "anvil --code-size-limit 100000",
     "test": "jest -c test/jest.config.unit.js",
     "test:integration": "jest -c test/jest.config.integration.js test/integration/starknet",
     "test:integration:evm": "jest -c test/jest.config.integration.js test/integration/evm"
