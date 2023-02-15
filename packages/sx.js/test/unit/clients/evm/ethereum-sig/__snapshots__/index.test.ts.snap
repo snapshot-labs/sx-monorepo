@@ -1,0 +1,165 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EthereumSig should create propose envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0xc4fb316710643f7ffbb566e5586862076198dadb",
+    "executionParams": [],
+    "executor": "0x81519c29621ba131ea398c15b17391f53e8b9a94",
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "space": "0x95DC6f73301356c9909921e21b735601C42fc1a8",
+    "strategies": [
+      0,
+    ],
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "domain": {
+      "chainId": 31337,
+      "name": "SOC",
+      "verifyingContract": "0xc4fb316710643f7ffbb566e5586862076198dadb",
+      "version": "1",
+    },
+    "message": {
+      "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "executionStrategy": {
+        "addy": "0x81519c29621ba131ea398c15b17391f53e8b9a94",
+        "params": "0x00",
+      },
+      "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+      "salt": 0,
+      "space": "0x95DC6f73301356c9909921e21b735601C42fc1a8",
+      "userVotingStrategies": [
+        {
+          "index": 0,
+          "params": "0x00",
+        },
+      ],
+    },
+    "signature": "0x8d8f1ca692deb4017275d70b765d6a92bf7e99bb6b763fb0e6ab285b61162feb18703053a04cc01c1cea70610742cb3fe5f3010c5ff3bd74c035d2028a6333ea1b",
+    "types": {
+      "IndexedStrategy": [
+        {
+          "name": "index",
+          "type": "uint8",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+        },
+      ],
+      "Propose": [
+        {
+          "name": "space",
+          "type": "address",
+        },
+        {
+          "name": "author",
+          "type": "address",
+        },
+        {
+          "name": "metadataUri",
+          "type": "string",
+        },
+        {
+          "name": "executionStrategy",
+          "type": "Strategy",
+        },
+        {
+          "name": "userVotingStrategies",
+          "type": "IndexedStrategy[]",
+        },
+        {
+          "name": "salt",
+          "type": "uint256",
+        },
+      ],
+      "Strategy": [
+        {
+          "name": "addy",
+          "type": "address",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`EthereumSig should create vote envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0xc4fb316710643f7ffbb566e5586862076198dadb",
+    "choice": 1,
+    "proposal": 3,
+    "space": "0x95DC6f73301356c9909921e21b735601C42fc1a8",
+    "strategies": [
+      0,
+    ],
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "domain": {
+      "chainId": 31337,
+      "name": "SOC",
+      "verifyingContract": "0xc4fb316710643f7ffbb566e5586862076198dadb",
+      "version": "1",
+    },
+    "message": {
+      "choice": 1,
+      "proposalId": 3,
+      "salt": 0,
+      "space": "0x95DC6f73301356c9909921e21b735601C42fc1a8",
+      "userVotingStrategies": [
+        {
+          "index": 0,
+          "params": "0x00",
+        },
+      ],
+      "voter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    },
+    "signature": "0x80f9297d3565b37d3eb1ec531a191f90ff69592c71f1796e3714f780f2e7ce1104ff1aba0b327da02ee2d49dad5cf55fdbda4a7b37b4c3bd248937252ea482c11c",
+    "types": {
+      "IndexedStrategy": [
+        {
+          "name": "index",
+          "type": "uint8",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+        },
+      ],
+      "Vote": [
+        {
+          "name": "space",
+          "type": "address",
+        },
+        {
+          "name": "voter",
+          "type": "address",
+        },
+        {
+          "name": "proposalId",
+          "type": "uint256",
+        },
+        {
+          "name": "choice",
+          "type": "uint8",
+        },
+        {
+          "name": "userVotingStrategies",
+          "type": "IndexedStrategy[]",
+        },
+        {
+          "name": "salt",
+          "type": "uint256",
+        },
+      ],
+    },
+  },
+}
+`;

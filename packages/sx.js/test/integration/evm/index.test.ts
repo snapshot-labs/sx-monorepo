@@ -1,10 +1,12 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
+import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
 import { deployDependency } from './utils';
 import SpaceFactoryContract from './fixtures/SpaceFactory.json';
 import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
 import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
+import EthSigAuthenticatorContract from './fixtures/EthSigAuthenticator.json';
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
 
@@ -21,6 +23,7 @@ describe('EthereumTx', () => {
   let client: EthereumTx;
   let vanillaAuthenticator = '';
   let ethTxAuthenticator = '';
+  let ethSigAuthenticator = '';
   let votingStrategy = '';
   let executionStrategy = '';
   let spaceAddress = '';
@@ -28,6 +31,7 @@ describe('EthereumTx', () => {
     spaceFactory = await deployDependency(signer, SpaceFactoryContract);
     vanillaAuthenticator = await deployDependency(signer, VanillaAuthenciatorContract);
     ethTxAuthenticator = await deployDependency(signer, EthTxAuthenticatorContract);
+    ethSigAuthenticator = await deployDependency(signer, EthSigAuthenticatorContract, 'SOC', '1');
     votingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
     executionStrategy = await deployDependency(signer, VanillaExecutionStrategyContract);
 
@@ -40,6 +44,9 @@ describe('EthereumTx', () => {
           },
           [ethTxAuthenticator]: {
             type: 'ethTx'
+          },
+          [ethSigAuthenticator]: {
+            type: 'ethSig'
           }
         },
         strategies: {
@@ -66,7 +73,7 @@ describe('EthereumTx', () => {
       maxVotingDuration: 86400,
       proposalThreshold: 0,
       quorum: 1,
-      authenticators: [vanillaAuthenticator, ethTxAuthenticator],
+      authenticators: [vanillaAuthenticator, ethTxAuthenticator, ethSigAuthenticator],
       votingStrategies: [
         {
           addy: votingStrategy,
@@ -150,6 +157,49 @@ describe('EthereumTx', () => {
           choice: 0
         }
       };
+
+      const res = await client.vote({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+  });
+
+  describe('ethSig authenticator', () => {
+    const ethSigClient = new EthereumSig();
+
+    it('should propose via authenticator', async () => {
+      const envelope = await ethSigClient.propose({
+        signer,
+        data: {
+          space: spaceAddress,
+          authenticator: ethSigAuthenticator,
+          strategies: [0],
+          executor: executionStrategy,
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+          executionParams: []
+        }
+      });
+
+      const res = await client.propose({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+
+    it('should vote via authenticator', async () => {
+      const envelope = await ethSigClient.vote({
+        signer,
+        data: {
+          space: spaceAddress,
+          authenticator: ethSigAuthenticator,
+          strategies: [0],
+          proposal: 3,
+          choice: 0
+        }
+      });
 
       const res = await client.vote({
         signer,

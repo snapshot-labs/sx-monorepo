@@ -1,5 +1,6 @@
 import createVanillaAuthenticator from './vanilla';
 import createEthTxAuthenticator from './ethTx';
+import createEthSigAuthenticator from './ethSig';
 import type { Authenticator, NetworkConfig } from '../../types';
 
 export function getAuthenticator(
@@ -15,6 +16,10 @@ export function getAuthenticator(
 
   if (authenticator.type === 'ethTx') {
     return createEthTxAuthenticator();
+  }
+
+  if (authenticator.type === 'ethSig') {
+    return createEthSigAuthenticator();
   }
 
   return null;
