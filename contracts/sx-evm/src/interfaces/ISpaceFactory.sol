@@ -20,17 +20,4 @@ interface ISpaceFactory is ISpaceFactoryErrors, ISpaceFactoryEvents {
         address[] calldata executionStrategiesAddresses,
         bytes32 salt
     ) external;
-
-    function getSpaceAddress(
-        address controller,
-        uint32 votingDelay,
-        uint32 minVotingDuration,
-        uint32 maxVotingDuration,
-        uint256 proposalThreshold,
-        uint256 quorum,
-        Strategy[] memory votingStrategies,
-        address[] memory authenticators,
-        address[] memory executionStrategies,
-        bytes32 salt
-    ) external view returns (address);
 }

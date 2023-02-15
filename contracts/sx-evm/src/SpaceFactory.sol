@@ -53,48 +53,4 @@ contract SpaceFactory is ISpaceFactory {
             revert SpaceCreationFailed();
         }
     }
-
-    function getSpaceAddress(
-        address controller,
-        uint32 votingDelay,
-        uint32 minVotingDuration,
-        uint32 maxVotingDuration,
-        uint256 proposalThreshold,
-        uint256 quorum,
-        Strategy[] memory votingStrategies,
-        address[] memory authenticators,
-        address[] memory executionStrategies,
-        bytes32 salt
-    ) external view override returns (address) {
-        return
-            address(
-                uint160(
-                    uint(
-                        keccak256(
-                            abi.encodePacked(
-                                bytes1(0xff),
-                                address(this),
-                                salt,
-                                keccak256(
-                                    abi.encodePacked(
-                                        type(Space).creationCode,
-                                        abi.encode(
-                                            controller,
-                                            votingDelay,
-                                            minVotingDuration,
-                                            maxVotingDuration,
-                                            proposalThreshold,
-                                            quorum,
-                                            votingStrategies,
-                                            authenticators,
-                                            executionStrategies
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            );
-    }
 }

@@ -18,6 +18,8 @@
     "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
     "prettier": "prettier --write \"**/*.{json,md,sol,yml}\"",
     "format": "yarn prettier",
-    "test": "forge test --optimize -vv"
+    "test": "forge test --optimize -vv",
+    "deploy-modules": "forge script script/ModulesSetup.s.sol:ModulesSetup --rpc-url $GOERLI_RPC_URL --optimize --broadcast --verify -vvvv",
+    "deploy-space": "forge script script/SpaceSetup.s.sol:SpaceSetup --rpc-url $GOERLI_RPC_URL --optimize --broadcast --verify -vvvv"
   }
 }
