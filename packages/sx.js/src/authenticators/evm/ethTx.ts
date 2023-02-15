@@ -1,21 +1,12 @@
 import EthTxAuthenticatorAbi from './abis/EthTxAuthenticator.json';
-import type {
-  Authenticator,
-  Envelope,
-  VanillaProposeMessage,
-  VanillaVoteMessage,
-  EthCall
-} from '../../types/index';
+import type { Envelope } from '../../clients/evm/types';
+import type { Authenticator, Propose, Vote, EthCall } from '../../types/index';
 
-export default function createEthTxAuthenticator(): Authenticator<EthCall> {
+export default function createEthTxAuthenticator(): Authenticator<'evm'> {
   return {
     type: 'ethTx',
-    createCall(
-      envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
-      selector: string,
-      calldata: string[]
-    ): EthCall {
-      const { space } = envelope.data.message;
+    createCall(envelope: Envelope<Propose | Vote>, selector: string, calldata: string[]): EthCall {
+      const { space } = envelope.data;
 
       return {
         abi: EthTxAuthenticatorAbi,

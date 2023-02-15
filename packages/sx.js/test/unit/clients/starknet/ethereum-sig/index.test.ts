@@ -1,8 +1,8 @@
 import { defaultProvider } from 'starknet';
 import { Wallet } from '@ethersproject/wallet';
-import { EthereumSig } from '../../../../src/clients';
-import { getStorageVarAddress } from '../../../../src/utils/encoding';
-import { Choice } from '../../../../src/utils/choice';
+import { EthereumSig } from '../../../../../src/clients';
+import { getStorageVarAddress } from '../../../../../src/utils/encoding';
+import { Choice } from '../../../../../src/utils/choice';
 
 const latestL1Block = 8050780;
 

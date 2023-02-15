@@ -6,7 +6,7 @@ import type {
   VanillaVoteMessage
 } from '../../types';
 
-export default function createVanillaAuthenticator(): Authenticator<Call> {
+export default function createVanillaAuthenticator(): Authenticator<'starknet'> {
   return {
     type: 'vanilla',
     createCall(

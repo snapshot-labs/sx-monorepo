@@ -1,6 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { SnapshotEVMClient } from '../../../src/clients/evm';
+import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
 import { deployDependency } from './utils';
 import SpaceFactoryContract from './fixtures/SpaceFactory.json';
 import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
@@ -8,7 +8,7 @@ import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
 
-describe('SnapshotEVMClient', () => {
+describe('EthereumTx', () => {
   const PROPOSAL_ID = 1;
 
   const provider = new JsonRpcProvider('http://127.0.0.1:8545');
@@ -18,7 +18,7 @@ describe('SnapshotEVMClient', () => {
   );
 
   let spaceFactory = '';
-  let client: SnapshotEVMClient;
+  let client: EthereumTx;
   let vanillaAuthenticator = '';
   let ethTxAuthenticator = '';
   let votingStrategy = '';
@@ -31,7 +31,7 @@ describe('SnapshotEVMClient', () => {
     votingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
     executionStrategy = await deployDependency(signer, VanillaExecutionStrategyContract);
 
-    client = new SnapshotEVMClient({
+    client = new EthereumTx({
       networkConfig: {
         spaceFactory: '0x00',
         authenticators: {
@@ -81,20 +81,14 @@ describe('SnapshotEVMClient', () => {
 
   describe('vanilla authenticator', () => {
     it('should propose via authenticator', async () => {
-      const address = await signer.getAddress();
-
       const envelope = {
-        address,
-        sig: null,
         data: {
-          message: {
-            space: spaceAddress,
-            authenticator: vanillaAuthenticator,
-            strategies: [0],
-            executor: executionStrategy,
-            metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-            executionParams: []
-          }
+          space: spaceAddress,
+          authenticator: vanillaAuthenticator,
+          strategies: [0],
+          executor: executionStrategy,
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+          executionParams: []
         }
       };
 
@@ -106,20 +100,14 @@ describe('SnapshotEVMClient', () => {
     });
 
     it('should vote via authenticator', async () => {
-      const address = await signer.getAddress();
-
       const envelope = {
-        address,
-        sig: null,
         data: {
-          message: {
-            space: spaceAddress,
-            authenticator: vanillaAuthenticator,
-            strategies: [0],
-            executionParams: [],
-            proposal: 1,
-            choice: 0
-          }
+          space: spaceAddress,
+          authenticator: vanillaAuthenticator,
+          strategies: [0],
+          executionParams: [],
+          proposal: 1,
+          choice: 0
         }
       };
 
@@ -133,20 +121,14 @@ describe('SnapshotEVMClient', () => {
 
   describe('ethTx authenticator', () => {
     it('should propose via authenticator', async () => {
-      const address = await signer.getAddress();
-
       const envelope = {
-        address,
-        sig: null,
         data: {
-          message: {
-            space: spaceAddress,
-            authenticator: ethTxAuthenticator,
-            strategies: [0],
-            executor: executionStrategy,
-            metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-            executionParams: []
-          }
+          space: spaceAddress,
+          authenticator: ethTxAuthenticator,
+          strategies: [0],
+          executor: executionStrategy,
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+          executionParams: []
         }
       };
 
@@ -158,20 +140,14 @@ describe('SnapshotEVMClient', () => {
     });
 
     it('should vote via authenticator', async () => {
-      const address = await signer.getAddress();
-
       const envelope = {
-        address,
-        sig: null,
         data: {
-          message: {
-            space: spaceAddress,
-            authenticator: ethTxAuthenticator,
-            strategies: [0],
-            executionParams: [],
-            proposal: 2,
-            choice: 0
-          }
+          space: spaceAddress,
+          authenticator: ethTxAuthenticator,
+          strategies: [0],
+          executionParams: [],
+          proposal: 2,
+          choice: 0
         }
       };
 

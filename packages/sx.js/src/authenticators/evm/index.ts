@@ -1,11 +1,11 @@
 import createVanillaAuthenticator from './vanilla';
 import createEthTxAuthenticator from './ethTx';
-import type { Authenticator, EthCall, NetworkConfig } from '../../types';
+import type { Authenticator, NetworkConfig } from '../../types';
 
 export function getAuthenticator(
   address: string,
   networkConfig: NetworkConfig
-): Authenticator<EthCall> | null {
+): Authenticator<'evm'> | null {
   const authenticator = networkConfig.authenticators[address];
   if (!authenticator) return null;
 

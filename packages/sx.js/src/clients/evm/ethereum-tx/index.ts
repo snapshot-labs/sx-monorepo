@@ -1,30 +1,15 @@
 import { Contract } from '@ethersproject/contracts';
 import { Interface } from '@ethersproject/abi';
 import randomBytes from 'randombytes';
-import { getAuthenticator } from '../../authenticators/evm';
-import { evmGoerli } from '../../networks';
+import { getAuthenticator } from '../../../authenticators/evm/index';
+import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import SpaceFactoryAbi from './abis/SpaceFactory.json';
 import type { Signer } from '@ethersproject/abstract-signer';
-import type {
-  NetworkConfig,
-  ClientOpts,
-  Envelope,
-  VanillaVoteMessage,
-  VanillaProposeMessage
-} from '../../types';
+import type { Envelope, AddressConfig, IndexedConfig } from '../types';
+import type { NetworkConfig, ClientOpts, Propose, Vote } from '../../../types/index';
 
-type AddressConfig = {
-  addy: string;
-  params: string;
-};
-
-type IndexedConfig = {
-  index: number;
-  params: string;
-};
-
-export class SnapshotEVMClient {
+export class EthereumTx {
   networkConfig: NetworkConfig;
 
   constructor(opts?: Pick<ClientOpts, 'networkConfig'>) {
@@ -80,24 +65,18 @@ export class SnapshotEVMClient {
     return { spaceAddress, txId: response.hash };
   }
 
-  async propose({
-    signer,
-    envelope
-  }: {
-    signer: Signer;
-    envelope: Envelope<VanillaProposeMessage>;
-  }) {
+  async propose({ signer, envelope }: { signer: Signer; envelope: Envelope<Propose> }) {
     const proposerAddress = await signer.getAddress();
 
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('propose', [
       proposerAddress,
-      envelope.data.message.metadataUri,
+      envelope.data.metadataUri,
       {
-        addy: envelope.data.message.executor,
+        addy: envelope.data.executor,
         params: '0x00'
       } as AddressConfig,
-      envelope.data.message.strategies.map(index => ({
+      envelope.data.strategies.map(index => ({
         index,
         params: '0x00'
       })) as IndexedConfig[]
@@ -106,25 +85,25 @@ export class SnapshotEVMClient {
     const selector = functionData.slice(0, 10);
     const calldata = `0x${functionData.slice(10)}`;
 
-    const authenticator = getAuthenticator(envelope.data.message.authenticator, this.networkConfig);
+    const authenticator = getAuthenticator(envelope.data.authenticator, this.networkConfig);
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
 
     const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
-    const authenticatorContract = new Contract(envelope.data.message.authenticator, abi, signer);
+    const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
     return authenticatorContract.authenticate(...args);
   }
 
-  async vote({ signer, envelope }: { signer: Signer; envelope: Envelope<VanillaVoteMessage> }) {
+  async vote({ signer, envelope }: { signer: Signer; envelope: Envelope<Vote> }) {
     const voterAddress = await signer.getAddress();
 
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('vote', [
       voterAddress,
-      envelope.data.message.proposal,
-      envelope.data.message.choice,
-      envelope.data.message.strategies.map(index => ({
+      envelope.data.proposal,
+      envelope.data.choice,
+      envelope.data.strategies.map(index => ({
         index,
         params: '0x00'
       })) as IndexedConfig[]
@@ -133,13 +112,13 @@ export class SnapshotEVMClient {
     const selector = functionData.slice(0, 10);
     const calldata = `0x${functionData.slice(10)}`;
 
-    const authenticator = getAuthenticator(envelope.data.message.authenticator, this.networkConfig);
+    const authenticator = getAuthenticator(envelope.data.authenticator, this.networkConfig);
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
     const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
 
-    const authenticatorContract = new Contract(envelope.data.message.authenticator, abi, signer);
+    const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
     return authenticatorContract.authenticate(...args);
   }
 
