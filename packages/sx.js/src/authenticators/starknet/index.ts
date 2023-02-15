@@ -1,12 +1,13 @@
 import createVanillaAuthenticator from './vanilla';
 import createEthSigAuthenticator from './ethSig';
-import { hexPadLeft } from '../utils/encoding';
-import type { Authenticator, NetworkConfig } from '../types';
+import { hexPadLeft } from '../../utils/encoding';
+import type { Call } from 'starknet';
+import type { Authenticator, NetworkConfig } from '../../types';
 
 export function getAuthenticator(
   address: string,
   networkConfig: NetworkConfig
-): Authenticator | null {
+): Authenticator<Call> | null {
   const authenticator = networkConfig.authenticators[hexPadLeft(address)];
   if (!authenticator) return null;
 

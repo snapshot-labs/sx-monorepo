@@ -1,5 +1,24 @@
 import type { NetworkConfig } from './types';
 
+export const evmGoerli: NetworkConfig = {
+  spaceFactory: '0x00',
+  authenticators: {
+    '0xc4fb316710643f7FfBB566e5586862076198DAdB': {
+      type: 'vanilla'
+    }
+  },
+  strategies: {
+    '0xc441215878B3869b2468BA239911BA6B506619F7': {
+      type: 'vanilla'
+    }
+  },
+  executors: {
+    '0x81519C29621Ba131ea398c15B17391F53e8B9A94': {
+      type: 'vanilla'
+    }
+  }
+};
+
 export const goerli2: NetworkConfig = {
   spaceFactory: '0x00e1e511e496a72791ab3d591ba7d571a32de4261d84e4d183f26b6325970e20',
   authenticators: {

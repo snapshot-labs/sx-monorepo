@@ -1,7 +1,12 @@
 import type { Call } from 'starknet';
-import type { Authenticator, Envelope, VanillaProposeMessage, VanillaVoteMessage } from '../types';
+import type {
+  Authenticator,
+  Envelope,
+  VanillaProposeMessage,
+  VanillaVoteMessage
+} from '../../types';
 
-export default function createVanillaAuthenticator(): Authenticator {
+export default function createVanillaAuthenticator(): Authenticator<Call> {
   return {
     type: 'vanilla',
     createCall(

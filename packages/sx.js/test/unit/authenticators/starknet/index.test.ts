@@ -1,5 +1,5 @@
-import { getAuthenticator } from '../../../src/authenticators';
-import { defaultNetwork } from '../../../src/networks';
+import { getAuthenticator } from '../../../../src/authenticators/starknet';
+import { defaultNetwork } from '../../../../src/networks';
 
 describe('authenticators', () => {
   describe('getAuthenticator', () => {

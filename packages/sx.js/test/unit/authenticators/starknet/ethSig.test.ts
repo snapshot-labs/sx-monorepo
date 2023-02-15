@@ -1,6 +1,6 @@
 import { hash } from 'starknet';
-import createEthSigAuthenticator from '../../../src/authenticators/ethSig';
-import { proposeEnvelope } from '../fixtures';
+import createEthSigAuthenticator from '../../../../src/authenticators/starknet/ethSig';
+import { proposeEnvelope } from '../../fixtures';
 
 describe('ethSigAuthenticator', () => {
   const ethSigAuthenticator = createEthSigAuthenticator();

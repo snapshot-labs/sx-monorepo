@@ -1,3 +1,4 @@
+import { ContractInterface } from '@ethersproject/contracts';
 import type { Provider } from 'starknet';
 import type { Call } from 'starknet';
 import type { Choice } from '../utils/choice';
@@ -6,10 +7,10 @@ import type { NetworkConfig } from './networkConfig';
 
 export * from './networkConfig';
 
-export interface Authenticator {
+export type Authenticator<T extends Call | EthCall> = {
   type: string;
-  createCall(envelope: Envelope<Message>, selector: string, calldata: string[]): Call;
-}
+  createCall(envelope: Envelope<Message>, selector: string, calldata: string[]): T;
+};
 
 export interface Strategy {
   type: string;
@@ -100,4 +101,9 @@ export type StrategiesAddresses = { index: number; address: string }[];
 export type ExecutionInput = {
   calls?: Call[];
   transactions?: MetaTransaction[];
+};
+
+export type EthCall = {
+  abi: ContractInterface;
+  args: any[];
 };

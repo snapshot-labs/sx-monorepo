@@ -6,7 +6,7 @@ import {
   getStrategiesParams,
   getExtraProposeCalls
 } from '../../../utils/strategies';
-import { getAuthenticator } from '../../../authenticators';
+import { getAuthenticator } from '../../../authenticators/starknet';
 import { defaultNetwork } from '../../../networks';
 import type {
   EthSigProposeMessage,

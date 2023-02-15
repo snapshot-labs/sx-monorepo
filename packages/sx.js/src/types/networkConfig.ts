@@ -2,6 +2,10 @@ export type VanillaAuthenticatorConfig = {
   type: 'vanilla';
 };
 
+export type EthTxAuthenticatorConfig = {
+  type: 'ethTx';
+};
+
 export type EthSigAuthenticatorConfig = {
   type: 'ethSig';
 };
@@ -37,7 +41,11 @@ export type EthRelayerExecutionConfig = {
 export type NetworkConfig = {
   spaceFactory: string;
   authenticators: {
-    [key: string]: VanillaAuthenticatorConfig | EthSigAuthenticatorConfig | undefined;
+    [key: string]:
+      | VanillaAuthenticatorConfig
+      | EthTxAuthenticatorConfig
+      | EthSigAuthenticatorConfig
+      | undefined;
   };
   strategies: { [key: string]: VanillaStrategyConfig | SingleSlotProofStrategyConfig | undefined };
   executors: {

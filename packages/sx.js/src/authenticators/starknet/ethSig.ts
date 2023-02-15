@@ -1,9 +1,9 @@
-import { getRSVFromSig } from '../utils/encoding';
-import { SplitUint256 } from '../utils/split-uint256';
+import { getRSVFromSig } from '../../utils/encoding';
+import { SplitUint256 } from '../../utils/split-uint256';
 import type { Call } from 'starknet';
-import type { Authenticator, Envelope, EthSigProposeMessage, EthSigVoteMessage } from '../types';
+import type { Authenticator, Envelope, EthSigProposeMessage, EthSigVoteMessage } from '../../types';
 
-export default function createEthSigAuthenticator(): Authenticator {
+export default function createEthSigAuthenticator(): Authenticator<Call> {
   return {
     type: 'ethSig',
     createCall(

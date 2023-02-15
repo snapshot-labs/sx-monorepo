@@ -1,6 +1,6 @@
 import { hash } from 'starknet';
-import createVanillaAuthenticator from '../../../src/authenticators/vanilla';
-import { proposeEnvelope } from '../fixtures';
+import createVanillaAuthenticator from '../../../../src/authenticators/starknet/vanilla';
+import { proposeEnvelope } from '../../fixtures';
 
 describe('vanillaAuthenticator', () => {
   const vanillaAuthenticator = createVanillaAuthenticator();
