@@ -44,7 +44,7 @@ onMounted(() => {
       limit="off"
       :loading="!proposalsRecord?.loaded"
       :loading-more="proposalsRecord?.loadingMore"
-      :proposals="proposalsRecord?.proposals || []"
+      :proposals="proposalsStore.getSpaceProposals(props.space.id, props.space.network)"
       @end-reached="handleEndReached"
     />
   </div>
