@@ -1,12 +1,27 @@
 import randomBytes from 'randombytes';
 import { SplitUint256 } from '../../../utils/split-uint256';
 import { bytesToHex } from '../../../utils/bytes';
+import { getStrategiesParams } from '../../../strategies/evm';
+import { evmGoerli } from '../../../networks';
 import { domain as baseDomain, proposeTypes, voteTypes } from './types';
-import type { SignatureData, EIP712ProposeMessage, Envelope, EIP712VoteMessage } from '../types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
-import type { Propose, Vote } from '../../../types';
+import type {
+  Propose,
+  Vote,
+  Envelope,
+  SignatureData,
+  EIP712ProposeMessage,
+  EIP712VoteMessage
+} from '../types';
+import type { NetworkConfig, ClientOpts } from '../../../types';
 
 export class EthereumSig {
+  networkConfig: NetworkConfig;
+
+  constructor(opts?: Pick<ClientOpts, 'networkConfig'>) {
+    this.networkConfig = opts?.networkConfig || evmGoerli;
+  }
+
   generateSalt() {
     return Number(SplitUint256.fromHex(bytesToHex(randomBytes(4))).toHex());
   }
@@ -44,6 +59,14 @@ export class EthereumSig {
   }): Promise<Envelope<Propose>> {
     const author = await signer.getAddress();
 
+    const strategiesParams = await getStrategiesParams(
+      'propose',
+      data.strategies,
+      author,
+      data,
+      this.networkConfig
+    );
+
     const message: EIP712ProposeMessage = {
       space: data.space,
       author,
@@ -52,9 +75,9 @@ export class EthereumSig {
         addy: data.executor,
         params: '0x00'
       },
-      userVotingStrategies: data.strategies.map(index => ({
-        index,
-        params: '0x00'
+      userVotingStrategies: data.strategies.map((strategyConfig, i) => ({
+        index: strategyConfig.index,
+        params: strategiesParams[i]
       })),
       salt: this.generateSalt()
     };
@@ -76,14 +99,22 @@ export class EthereumSig {
   }): Promise<Envelope<Vote>> {
     const voter = await signer.getAddress();
 
+    const strategiesParams = await getStrategiesParams(
+      'propose',
+      data.strategies,
+      voter,
+      data,
+      this.networkConfig
+    );
+
     const message: EIP712VoteMessage = {
       space: data.space,
       voter,
       proposalId: data.proposal,
       choice: data.choice,
-      userVotingStrategies: data.strategies.map(index => ({
-        index,
-        params: '0x00'
+      userVotingStrategies: data.strategies.map((strategyConfig, i) => ({
+        index: strategyConfig.index,
+        params: strategiesParams[i]
       })),
       salt: this.generateSalt()
     };

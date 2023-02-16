@@ -8,7 +8,7 @@ import type {
   Strategy,
   VanillaProposeMessage,
   VanillaVoteMessage
-} from '../types';
+} from '../../types';
 
 export default function createVanillaStrategy(): Strategy {
   return {

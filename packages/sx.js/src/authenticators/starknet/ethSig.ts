@@ -3,7 +3,7 @@ import { SplitUint256 } from '../../utils/split-uint256';
 import type { Call } from 'starknet';
 import type { Authenticator, Envelope, EthSigProposeMessage, EthSigVoteMessage } from '../../types';
 
-export default function createEthSigAuthenticator(): Authenticator<'starknet'> {
+export default function createEthSigAuthenticator(): Authenticator {
   return {
     type: 'ethSig',
     createCall(

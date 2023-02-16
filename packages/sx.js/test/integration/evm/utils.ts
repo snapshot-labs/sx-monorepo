@@ -1,5 +1,26 @@
-import { Signer } from '@ethersproject/abstract-signer';
-import { ContractFactory, ContractInterface } from '@ethersproject/contracts';
+import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
+import SpaceFactoryContract from './fixtures/SpaceFactory.json';
+import CompTokenContract from './fixtures/CompToken.json';
+import CompVotingStrategy from './fixtures/CompVotingStrategy.json';
+import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
+import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
+import EthSigAuthenticatorContract from './fixtures/EthSigAuthenticator.json';
+import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
+import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
+import type { Signer } from '@ethersproject/abstract-signer';
+import type { NetworkConfig } from '../../../src/types';
+
+export type TestConfig = {
+  compToken: string;
+  spaceFactory: string;
+  vanillaAuthenticator: string;
+  ethTxAuthenticator: string;
+  ethSigAuthenticator: string;
+  vanillaVotingStrategy: string;
+  compVotingStrategy: string;
+  executionStrategy: string;
+  networkConfig: NetworkConfig;
+};
 
 type ContractDetails = {
   abi: ContractInterface;
@@ -18,4 +39,64 @@ export async function deployDependency(
   const contract = await factory.deploy(...args);
 
   return contract.address;
+}
+
+export async function setup(signer: Signer): Promise<TestConfig> {
+  const user = await signer.getAddress();
+
+  const compToken = await deployDependency(signer, CompTokenContract);
+  const spaceFactory = await deployDependency(signer, SpaceFactoryContract);
+  const vanillaAuthenticator = await deployDependency(signer, VanillaAuthenciatorContract);
+  const ethTxAuthenticator = await deployDependency(signer, EthTxAuthenticatorContract);
+  const ethSigAuthenticator = await deployDependency(
+    signer,
+    EthSigAuthenticatorContract,
+    'SOC',
+    '1'
+  );
+  const vanillaVotingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
+  const compVotingStrategy = await deployDependency(signer, CompVotingStrategy);
+  const executionStrategy = await deployDependency(signer, VanillaExecutionStrategyContract);
+
+  const compTokenContract = new Contract(compToken, CompTokenContract.abi, signer);
+  await compTokenContract.mint(user, 1);
+  await compTokenContract.delegate(user);
+
+  return {
+    compToken: compToken,
+    spaceFactory,
+    vanillaAuthenticator,
+    ethTxAuthenticator,
+    ethSigAuthenticator,
+    vanillaVotingStrategy,
+    compVotingStrategy,
+    executionStrategy,
+    networkConfig: {
+      spaceFactory: '0x00',
+      authenticators: {
+        [vanillaAuthenticator]: {
+          type: 'vanilla'
+        },
+        [ethTxAuthenticator]: {
+          type: 'ethTx'
+        },
+        [ethSigAuthenticator]: {
+          type: 'ethSig'
+        }
+      },
+      strategies: {
+        [vanillaVotingStrategy]: {
+          type: 'vanilla'
+        },
+        [compVotingStrategy]: {
+          type: 'comp'
+        }
+      },
+      executors: {
+        [executionStrategy]: {
+          type: 'vanilla'
+        }
+      }
+    }
+  };
 }

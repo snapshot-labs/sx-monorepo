@@ -3,14 +3,15 @@ import { Interface } from '@ethersproject/abi';
 import { getCreate2Address } from '@ethersproject/address';
 import { keccak256 } from '@ethersproject/keccak256';
 import randomBytes from 'randombytes';
-import { getAuthenticator } from '../../../authenticators/evm/index';
+import { getAuthenticator } from '../../../authenticators/evm';
+import { getStrategiesParams } from '../../../strategies/evm';
 import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import SpaceFactoryAbi from './abis/SpaceFactory.json';
 import SpaceBytecode from './abis/bytecode/Space.json';
 import type { Signer } from '@ethersproject/abstract-signer';
-import type { Envelope, AddressConfig, IndexedConfig } from '../types';
-import type { NetworkConfig, ClientOpts, Propose, Vote } from '../../../types/index';
+import type { Propose, Vote, Envelope, AddressConfig } from '../types';
+import type { NetworkConfig, ClientOpts } from '../../../types';
 
 export class EthereumTx {
   networkConfig: NetworkConfig;
@@ -73,6 +74,13 @@ export class EthereumTx {
 
   async propose({ signer, envelope }: { signer: Signer; envelope: Envelope<Propose> }) {
     const proposerAddress = await signer.getAddress();
+    const strategiesParams = await getStrategiesParams(
+      'propose',
+      envelope.data.strategies,
+      proposerAddress,
+      envelope.data,
+      this.networkConfig
+    );
 
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('propose', [
@@ -82,10 +90,10 @@ export class EthereumTx {
         addy: envelope.data.executor,
         params: '0x00'
       } as AddressConfig,
-      envelope.data.strategies.map(index => ({
-        index,
-        params: '0x00'
-      })) as IndexedConfig[]
+      envelope.data.strategies.map((strategyConfig, i) => ({
+        index: strategyConfig.index,
+        params: strategiesParams[i]
+      }))
     ]);
 
     const selector = functionData.slice(0, 10);
@@ -103,16 +111,23 @@ export class EthereumTx {
 
   async vote({ signer, envelope }: { signer: Signer; envelope: Envelope<Vote> }) {
     const voterAddress = await signer.getAddress();
+    const strategiesParams = await getStrategiesParams(
+      'propose',
+      envelope.data.strategies,
+      voterAddress,
+      envelope.data,
+      this.networkConfig
+    );
 
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('vote', [
       voterAddress,
       envelope.data.proposal,
       envelope.data.choice,
-      envelope.data.strategies.map(index => ({
-        index,
-        params: '0x00'
-      })) as IndexedConfig[]
+      envelope.data.strategies.map((strategyConfig, i) => ({
+        index: strategyConfig.index,
+        params: strategiesParams[i]
+      }))
     ]);
 
     const selector = functionData.slice(0, 10);

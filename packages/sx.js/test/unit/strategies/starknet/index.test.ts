@@ -1,5 +1,5 @@
-import { getStrategy } from '../../../src/strategies';
-import { defaultNetwork } from '../../../src/networks';
+import { getStrategy } from '../../../../src/strategies/starknet';
+import { defaultNetwork } from '../../../../src/networks';
 
 describe('voting strategies', () => {
   describe('getStrategy', () => {

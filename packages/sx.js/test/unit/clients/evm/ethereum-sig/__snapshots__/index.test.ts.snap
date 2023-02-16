@@ -9,7 +9,10 @@ exports[`EthereumSig should create propose envelope 1`] = `
     "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
     "space": "0x95DC6f73301356c9909921e21b735601C42fc1a8",
     "strategies": [
-      0,
+      {
+        "address": "0xc441215878B3869b2468BA239911BA6B506619F7",
+        "index": 0,
+      },
     ],
   },
   "signatureData": {
@@ -97,7 +100,10 @@ exports[`EthereumSig should create vote envelope 1`] = `
     "proposal": 3,
     "space": "0x95DC6f73301356c9909921e21b735601C42fc1a8",
     "strategies": [
-      0,
+      {
+        "address": "0xc441215878B3869b2468BA239911BA6B506619F7",
+        "index": 0,
+      },
     ],
   },
   "signatureData": {

@@ -6,7 +6,7 @@ import type { Authenticator, NetworkConfig } from '../../types';
 export function getAuthenticator(
   address: string,
   networkConfig: NetworkConfig
-): Authenticator<'starknet'> | null {
+): Authenticator | null {
   const authenticator = networkConfig.authenticators[hexPadLeft(address)];
   if (!authenticator) return null;
 

@@ -1,20 +1,14 @@
-import { ContractInterface } from '@ethersproject/contracts';
 import type { Provider } from 'starknet';
 import type { Call } from 'starknet';
-import type { Envelope as EvmEnvelope } from '../clients/evm/types';
 import type { Choice } from '../utils/choice';
 import type { MetaTransaction } from '../utils/encoding';
 import type { NetworkConfig } from './networkConfig';
 
 export * from './networkConfig';
 
-export type Authenticator<T extends 'starknet' | 'evm'> = {
+export type Authenticator = {
   type: string;
-  createCall(
-    envelope: T extends 'starknet' ? Envelope<Message> : EvmEnvelope<Propose | Vote>,
-    selector: string,
-    calldata: string[]
-  ): T extends 'starknet' ? Call : EthCall;
+  createCall(envelope: Envelope<Message>, selector: string, calldata: string[]): Call;
 };
 
 export interface Strategy {
@@ -106,9 +100,4 @@ export type StrategiesAddresses = { index: number; address: string }[];
 export type ExecutionInput = {
   calls?: Call[];
   transactions?: MetaTransaction[];
-};
-
-export type EthCall = {
-  abi: ContractInterface;
-  args: any[];
 };

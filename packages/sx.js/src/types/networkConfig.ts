@@ -14,6 +14,10 @@ export type VanillaStrategyConfig = {
   type: 'vanilla';
 };
 
+export type CompStrategyConfig = {
+  type: 'comp';
+};
+
 export type SingleSlotProofStrategyConfig = {
   type: 'singleSlotProof';
   params: {
@@ -47,7 +51,13 @@ export type NetworkConfig = {
       | EthSigAuthenticatorConfig
       | undefined;
   };
-  strategies: { [key: string]: VanillaStrategyConfig | SingleSlotProofStrategyConfig | undefined };
+  strategies: {
+    [key: string]:
+      | VanillaStrategyConfig
+      | CompStrategyConfig
+      | SingleSlotProofStrategyConfig
+      | undefined;
+  };
   executors: {
     [key: string]:
       | StarknetExecutionConfig

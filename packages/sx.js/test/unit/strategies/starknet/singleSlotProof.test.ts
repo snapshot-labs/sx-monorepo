@@ -1,8 +1,8 @@
 import { defaultProvider } from 'starknet';
-import createSingleSlotProofStrategy from '../../../src/strategies/singleSlotProof';
-import { defaultNetwork } from '../../../src/networks';
-import { getStorageVarAddress } from '../../../src/utils/encoding';
-import { proposeEnvelope, voteEnvelope } from '../fixtures';
+import createSingleSlotProofStrategy from '../../../../src/strategies/starknet/singleSlotProof';
+import { defaultNetwork } from '../../../../src/networks';
+import { getStorageVarAddress } from '../../../../src/utils/encoding';
+import { proposeEnvelope, voteEnvelope } from '../../fixtures';
 
 const ethUrl = process.env.GOERLI_NODE_URL as string;
 const starkProvider = defaultProvider;

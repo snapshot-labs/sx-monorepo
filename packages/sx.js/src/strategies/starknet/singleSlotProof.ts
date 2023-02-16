@@ -1,6 +1,6 @@
 import type { Call } from 'starknet';
-import { getProofInputs } from '../utils/storage-proofs';
-import { getStorageVarAddress, offsetStorageVar, getSlotKey } from '../utils/encoding';
+import { getProofInputs } from '../../utils/storage-proofs';
+import { getStorageVarAddress, offsetStorageVar, getSlotKey } from '../../utils/encoding';
 import type {
   SingleSlotProofStrategyConfig,
   ClientConfig,
@@ -8,7 +8,7 @@ import type {
   Strategy,
   VanillaProposeMessage,
   VanillaVoteMessage
-} from '../types';
+} from '../../types';
 
 const proposalRegistryStore = 'Voting_proposal_registry_store';
 const strategyParamsStore = 'Voting_voting_strategy_params_store';

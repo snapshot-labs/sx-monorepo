@@ -1,4 +1,4 @@
-import { getStrategy } from '../strategies';
+import { getStrategy } from '../strategies/starknet';
 import { getStorageVarAddress } from '../utils/encoding';
 import type { Propose, Vote, ClientConfig, StrategiesAddresses } from '../types';
 

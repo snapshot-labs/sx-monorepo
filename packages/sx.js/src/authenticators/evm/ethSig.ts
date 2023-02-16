@@ -1,12 +1,11 @@
 import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
 import { getRSVFromSig, hexPadLeft } from '../../utils/encoding';
-import type { Envelope } from '../../clients/evm/types';
-import type { Authenticator, Propose, Vote, EthCall } from '../../types';
+import type { Authenticator, Envelope, Propose, Vote, Call } from '../../clients/evm/types';
 
-export default function createEthSigAuthenticator(): Authenticator<'evm'> {
+export default function createEthSigAuthenticator(): Authenticator {
   return {
     type: 'ethSig',
-    createCall(envelope: Envelope<Propose | Vote>, selector: string, calldata: string[]): EthCall {
+    createCall(envelope: Envelope<Propose | Vote>, selector: string, calldata: string[]): Call {
       const { signatureData, data } = envelope;
       const { space } = data;
 

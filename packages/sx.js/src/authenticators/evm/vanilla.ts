@@ -1,11 +1,10 @@
 import VanillaAuthenticatorAbi from './abis/VanillaAuthenticator.json';
-import type { Envelope } from '../../clients/evm/types';
-import type { Authenticator, Propose, Vote, EthCall } from '../../types';
+import type { Authenticator, Envelope, Propose, Vote, Call } from '../../clients/evm/types';
 
-export default function createVanillaAuthenticator(): Authenticator<'evm'> {
+export default function createVanillaAuthenticator(): Authenticator {
   return {
     type: 'vanilla',
-    createCall(envelope: Envelope<Propose | Vote>, selector: string, calldata: string[]): EthCall {
+    createCall(envelope: Envelope<Propose | Vote>, selector: string, calldata: string[]): Call {
       const { space } = envelope.data;
 
       return {
