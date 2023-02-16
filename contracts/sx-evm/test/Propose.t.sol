@@ -22,30 +22,20 @@ contract ProposeTest is SpaceTest {
             maxEndTimestamp,
             executionHash,
             executionStrategy.addy,
-            FinalizationStatus.NotExecuted,
+            FinalizationStatus.Pending,
             votingStrategies
         );
 
         vm.expectEmit(true, true, true, true);
         emit ProposalCreated(proposalId, author, proposal, proposalMetadataUri, executionStrategy.params);
 
-        uint256 actualProposalId = _createProposal(
-            author,
-            proposalMetadataUri,
-            executionStrategy,
-            userVotingStrategies
-        );
+        _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
 
         // Actual content of the proposal struct
         Proposal memory _proposal = space.getProposal(proposalId);
 
         // Checking expectations and actual values match
-        assertEq(_proposal.quorum, proposal.quorum, "Quorum not set properly");
-        assertEq(_proposal.startTimestamp, proposal.startTimestamp, "StartTimestamp not set properly");
-        assertEq(_proposal.minEndTimestamp, proposal.minEndTimestamp, "MinEndTimestamp not set properly");
-        assertEq(_proposal.maxEndTimestamp, proposal.maxEndTimestamp, "MaxEndTimestamp not set properly");
-        assertEq(_proposal.executionStrategy, proposal.executionStrategy, "ExecutionStrategy not set properly");
-        assertEq(_proposal.executionHash, proposal.executionHash, "Execution Hash not computed properly");
+        assertEq(keccak256(abi.encode(_proposal)), keccak256(abi.encode(proposal)));
     }
 
     function testProposeInvalidAuth() public {

@@ -3,11 +3,9 @@
 pragma solidity ^0.8.15;
 
 import "./utils/Space.t.sol";
-import "forge-std/Test.sol";
-import "../src/types.sol";
 
 contract VoteTest is SpaceTest {
-    function testVoteWorks() public {
+    function testVote() public {
         uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
 
         vm.expectEmit(true, true, true, true);
@@ -39,9 +37,9 @@ contract VoteTest is SpaceTest {
 
         _vote(author, proposalId, Choice.For, userVotingStrategies);
 
-        space.finalizeProposal(proposalId, executionStrategy.params);
+        space.execute(proposalId, executionStrategy.params);
 
-        vm.expectRevert(abi.encodeWithSelector(ProposalAlreadyExecuted.selector));
+        vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
         _vote(author, proposalId, Choice.For, userVotingStrategies);
     }
 
@@ -83,9 +81,6 @@ contract VoteTest is SpaceTest {
     }
 
     function testVoteRemovedVotingStrategy() public {
-        // Strategy[] memory newVotingStrategies = new Strategy[](1);
-        // newVotingStrategies[0] = votingStrategies[0];
-        // space.addVotingStrategies(newVotingStrategies);
         uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
 
         // removing the voting strategy at index 0
@@ -141,7 +136,7 @@ contract VoteTest is SpaceTest {
         VanillaVotingStrategy strat3 = new VanillaVotingStrategy();
         Strategy[] memory toAdd = new Strategy[](2);
         toAdd[0] = Strategy(address(strat2), new bytes(0));
-        toAdd[1] = Strategy(address(strat2), new bytes(0));
+        toAdd[1] = Strategy(address(strat3), new bytes(0));
 
         space.addVotingStrategies(toAdd);
 

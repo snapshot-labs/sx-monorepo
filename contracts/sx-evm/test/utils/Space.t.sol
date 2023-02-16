@@ -26,26 +26,28 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors {
     uint256 public constant voterKey = 5678;
     uint256 public constant unauthorizedKey = 4321;
 
-    // Address of the meta transaction relayer
+    // Address of the meta transaction relayer (mana)
     address public relayer = address(this);
-    address public owner = address(1);
+    address public owner = address(this);
     address public author = vm.addr(authorKey);
     address public voter = vm.addr(voterKey);
     address public unauthorized = vm.addr(unauthorizedKey);
 
+    // Initial whitelisted modules set in the space
     Strategy[] votingStrategies;
     address[] authenticators;
-    Strategy executionStrategy;
-    Strategy[] executionStrategies;
-    address[] executionStrategiesAddresses;
+    address[] executionStrategies;
 
+    // Initial space parameters
     uint32 public votingDelay;
     uint32 public minVotingDuration;
     uint32 public maxVotingDuration;
     uint256 public proposalThreshold;
     uint32 public quorum;
 
+    // Default voting and execution strategy setups
     IndexedStrategy[] public userVotingStrategies;
+    Strategy public executionStrategy;
 
     // TODO: emit in the space factory event - (once we have a factory)
     string public spaceMetadataUri = "SOC Test Space";
@@ -64,12 +66,9 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors {
         quorum = 1;
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
         authenticators.push(address(vanillaAuthenticator));
-        executionStrategy = Strategy(address(vanillaExecutionStrategy), new bytes(0));
-        executionStrategies.push(executionStrategy);
+        executionStrategies.push(address(vanillaExecutionStrategy));
         userVotingStrategies.push(IndexedStrategy(0, new bytes(0)));
-        executionStrategiesAddresses.push(executionStrategy.addy);
-
-        owner = address(this);
+        executionStrategy = Strategy(address(vanillaExecutionStrategy), new bytes(0));
 
         space = new Space(
             owner,
@@ -80,7 +79,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors {
             quorum,
             votingStrategies,
             authenticators,
-            executionStrategiesAddresses
+            executionStrategies
         );
     }
 

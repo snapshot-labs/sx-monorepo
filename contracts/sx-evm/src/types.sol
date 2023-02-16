@@ -21,45 +21,33 @@ struct Proposal {
     Strategy[] votingStrategies;
 }
 
-// A struct that represents any kind of strategy (i.e a pair of `address` and `bytes`)
 struct Strategy {
     address addy;
     bytes params;
 }
 
-// Similar to `Strategy` except it's an `index` (uint8) and not an `address`
 struct IndexedStrategy {
     uint8 index;
     bytes params;
 }
 
-// Outcome of a proposal after being voted on.
-enum ProposalOutcome {
-    Accepted,
-    Rejected,
+// An enum that stores whether a proposal is pending, executed, or cancelled.
+enum FinalizationStatus {
+    Pending,
+    Executed,
     Cancelled
 }
 
-// Similar to `ProposalOutcome` except is starts with `NotExecuted`.
-// notice: it is important it starts with `NotExecuted` because it correponds to
-// `0` which is the default value in Solidity.
-enum FinalizationStatus {
-    NotExecuted,
-    FinalizedAndAccepted,
-    FinalizedAndRejected,
-    FinalizedAndCancelled
-}
-
-// Status of a proposal. If executed, it will be its outcome; else it will be some
-// information regarding its current status.
+// The status of a proposal as defined by the `getProposalStatus` function of the
+// proposal's execution strategy.
 enum ProposalStatus {
-    Accepted,
-    Rejected,
-    Cancelled,
-    WaitingForVotingPeriodToStart,
+    VotingDelay,
     VotingPeriod,
-    VotingPeriodFinalizable,
-    Finalizable
+    VotingPeriodAccepted,
+    Accepted,
+    Executed,
+    Rejected,
+    Cancelled
 }
 
 enum Choice {

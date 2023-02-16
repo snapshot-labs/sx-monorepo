@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
+
 pragma solidity ^0.8.15;
 
-import "forge-std/Test.sol";
+import "./utils/Space.t.sol";
 import "./mocks/Avatar.sol";
 import "../src/execution-strategies/AvatarExecutionStrategy.sol";
+import "../src/types.sol";
 
-contract AvatarExecutionStrategyTest is Test {
+contract AvatarExecutionStrategyTest is SpaceTest {
     error SpaceNotEnabled();
     error TransactionsFailed();
     error InvalidSpace();
@@ -15,38 +17,71 @@ contract AvatarExecutionStrategyTest is Test {
     event SpaceEnabled(address space);
     event SpaceDisabled(address space);
 
-    address owner = address(1);
-    address unauthorized = address(2);
-
     Avatar public avatar;
     AvatarExecutionStrategy public avatarExecutionStrategy;
 
-    function setUp() public {
+    address recipient = address(0xc0ffee);
+
+    function setUp() public override {
+        super.setUp();
+
         avatar = new Avatar();
         vm.deal(address(avatar), 1000);
 
+        // Deploy and activate the execution strategy on the avatar
         address[] memory spaces = new address[](1);
-        // We use this test contract as a dummy space contract for the test.
-        spaces[0] = address(this);
+        spaces[0] = address(space);
         avatarExecutionStrategy = new AvatarExecutionStrategy(owner, address(avatar), spaces);
-
         avatar.enableModule(address(avatarExecutionStrategy));
+
+        // Activate the execution strategy on the space
+        address[] memory executionStrategies = new address[](1);
+        executionStrategies[0] = address(avatarExecutionStrategy);
+
+        space.addExecutionStrategies(executionStrategies);
     }
 
-    function testSingleTx() public {
-        // Creating a transaction that will send 1 wei to the owner
+    function testExecution() public {
         MetaTransaction[] memory transactions = new MetaTransaction[](1);
-        transactions[0] = MetaTransaction(address(owner), 1, "", Enum.Operation.Call);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataUri,
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            userVotingStrategies
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies);
+        vm.warp(block.timestamp + space.maxVotingDuration());
 
-        assertEq(owner.balance, 0); // sanity check
-        avatarExecutionStrategy.execute(ProposalOutcome.Accepted, abi.encode(transactions));
-        // owner should have received 1 wei
-        assertEq(owner.balance, 1);
+        vm.expectEmit(true, true, true, true);
+        emit ProposalExecuted(proposalId);
+        space.execute(proposalId, abi.encode(transactions));
+
+        // recipient should have received 1 wei
+        assertEq(recipient.balance, 1);
+        assertEq(uint8(space.getProposalStatus(proposalId)), uint8(ProposalStatus.Executed));
+    }
+
+    function testInvalidTx() public {
+        // This transaction will fail because the avatar does not have enough funds
+        MetaTransaction[] memory transactions = new MetaTransaction[](1);
+        transactions[0] = MetaTransaction(address(owner), 1001, "", Enum.Operation.Call);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataUri,
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            userVotingStrategies
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies);
+        vm.warp(block.timestamp + space.maxVotingDuration());
+
+        vm.expectRevert(TransactionsFailed.selector);
+        space.execute(proposalId, abi.encode(transactions));
     }
 
     function testMultiTx() public {
         MetaTransaction[] memory transactions = new MetaTransaction[](2);
-        transactions[0] = MetaTransaction(address(owner), 1, "", Enum.Operation.Call);
+        transactions[0] = MetaTransaction(address(recipient), 1, "", Enum.Operation.Call);
         // Creating a transaction that will enable a new dummy module on the avatar
         transactions[1] = MetaTransaction(
             address(avatar),
@@ -54,13 +89,19 @@ contract AvatarExecutionStrategyTest is Test {
             abi.encodeWithSignature("enableModule(address)", address(0xbeef)),
             Enum.Operation.Call
         );
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataUri,
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            userVotingStrategies
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies);
+        vm.warp(block.timestamp + space.maxVotingDuration());
 
-        assertEq(owner.balance, 0); // sanity check
+        assertEq(recipient.balance, 0); // sanity check
         assertEq(avatar.isModuleEnabled(address(0xbeef)), false); // sanity check
-        avatarExecutionStrategy.execute(ProposalOutcome.Accepted, abi.encode(transactions));
-        // owner should have received 1 wei
-        assertEq(owner.balance, 1);
-        // dummy module should have been enabled
+        space.execute(proposalId, abi.encode(transactions));
+        assertEq(recipient.balance, 1);
         assertEq(avatar.isModuleEnabled(address(0xbeef)), true);
     }
 
@@ -74,31 +115,20 @@ contract AvatarExecutionStrategyTest is Test {
         );
         // invalid tx
         transactions[1] = MetaTransaction(address(owner), 1001, "", Enum.Operation.Call);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataUri,
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            userVotingStrategies
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies);
+        vm.warp(block.timestamp + space.maxVotingDuration());
+
         vm.expectRevert(TransactionsFailed.selector);
-        avatarExecutionStrategy.execute(ProposalOutcome.Accepted, abi.encode(transactions));
+        space.execute(proposalId, abi.encode(transactions));
         // both txs should have reverted despite the first one being valid
-        assertEq(owner.balance, 0);
+        assertEq(recipient.balance, 0);
         assertEq(avatar.isModuleEnabled(address(0xbeef)), false);
-    }
-
-    function testInvalidTx() public {
-        // This transaction will fail because the avatar does not have enough funds
-        MetaTransaction[] memory transactions = new MetaTransaction[](1);
-        transactions[0] = MetaTransaction(address(owner), 1001, "", Enum.Operation.Call);
-
-        vm.expectRevert(TransactionsFailed.selector);
-        avatarExecutionStrategy.execute(ProposalOutcome.Accepted, abi.encode(transactions));
-    }
-
-    function testInvalidCaller() public {
-        // Creating a transaction that will send 1 wei to the owner
-        MetaTransaction[] memory transactions = new MetaTransaction[](1);
-        transactions[0] = MetaTransaction(address(owner), 1, "", Enum.Operation.Call);
-
-        // Only whitelisted spaces can call the execute function
-        vm.prank(unauthorized);
-        vm.expectRevert(SpaceNotEnabled.selector);
-        avatarExecutionStrategy.execute(ProposalOutcome.Accepted, abi.encode(transactions));
     }
 
     function testSetTarget() public {
@@ -156,11 +186,9 @@ contract AvatarExecutionStrategyTest is Test {
     }
 
     function testEnableSpaceTwice() public {
-        // This space is already enabled
-        address space = address(this);
         vm.prank(owner);
         vm.expectRevert(InvalidSpace.selector);
-        avatarExecutionStrategy.enableSpace(space);
+        avatarExecutionStrategy.enableSpace(address(space));
     }
 
     function testUnauthorizedEnableSpace() public {
@@ -171,12 +199,26 @@ contract AvatarExecutionStrategyTest is Test {
     }
 
     function testDisableSpace() public {
-        address space = address(this);
         vm.prank(owner);
         vm.expectEmit(true, true, true, true);
-        emit SpaceDisabled(space);
-        avatarExecutionStrategy.disableSpace(space);
-        assertEq(avatarExecutionStrategy.isSpaceEnabled(space), false);
+        emit SpaceDisabled(address(space));
+        avatarExecutionStrategy.disableSpace(address(space));
+        assertEq(avatarExecutionStrategy.isSpaceEnabled(address(space)), false);
+
+        // Check that proposals from the disabled space can't be executed
+        MetaTransaction[] memory transactions = new MetaTransaction[](1);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataUri,
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            userVotingStrategies
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies);
+        vm.warp(block.timestamp + space.maxVotingDuration());
+
+        vm.expectRevert(SpaceNotEnabled.selector);
+        space.execute(proposalId, abi.encode(transactions));
     }
 
     function testDisableInvalidSpace() public {
@@ -188,9 +230,8 @@ contract AvatarExecutionStrategyTest is Test {
     }
 
     function testUnauthorizedDisableSpace() public {
-        address space = address(this);
         vm.prank(unauthorized);
         vm.expectRevert("Ownable: caller is not the owner");
-        avatarExecutionStrategy.disableSpace(space);
+        avatarExecutionStrategy.disableSpace(address(space));
     }
 }

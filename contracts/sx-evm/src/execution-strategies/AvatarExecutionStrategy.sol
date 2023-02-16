@@ -3,12 +3,12 @@
 pragma solidity ^0.8.15;
 
 import "@zodiac/interfaces/IAvatar.sol";
-import "../interfaces/IExecutionStrategy.sol";
+import "./SimpleQuorumExecutionStrategy.sol";
 import "../utils/SpaceManager.sol";
 
 /// @title Avatar Execution Strategy - An Execution strategy that executes transactions on an Avatar contract
 /// @dev An Avatar contract is any contract that implements the IAvatar interface, eg a Gnosis Safe.
-contract AvatarExecutionStrategy is SpaceManager, IExecutionStrategy {
+contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy {
     error SpaceNotEnabled();
     error TransactionsFailed();
 
@@ -54,13 +54,11 @@ contract AvatarExecutionStrategy is SpaceManager, IExecutionStrategy {
 
     /// @notice Executes a proposal from the avatar contract if the proposal outcome is accepted.
     ///         Must be called by a whitelisted space contract.
-    /// @param proposalOutcome The outcome of the proposal
-    /// @param executionParams The encoded transactions to execute
-    function execute(ProposalOutcome proposalOutcome, bytes memory executionParams) external override {
+    /// @param proposal The proposal to execute.
+    /// @param executionParams The encoded transactions to execute.
+    function execute(Proposal memory proposal, bytes memory executionParams) external override {
         if (spaces[msg.sender] == false) revert SpaceNotEnabled();
-        if (proposalOutcome == ProposalOutcome.Accepted) {
-            _execute(executionParams);
-        }
+        _execute(executionParams);
     }
 
     /// @notice Decodes and executes a batch of transactions from the avatar contract.

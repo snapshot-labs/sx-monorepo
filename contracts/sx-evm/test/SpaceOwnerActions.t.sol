@@ -5,62 +5,58 @@ import "./utils/Space.t.sol";
 
 contract SpaceOwnerActionsTest is SpaceTest {
     // ------- Cancel Proposal ----
-    function testCancelWorks() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
 
+    function testCancel() public {
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
         _vote(author, proposalId, Choice.For, userVotingStrategies);
 
-        // Check that the event gets fired correctly.
         vm.expectEmit(true, true, true, true);
-        emit ProposalFinalized(proposalId, ProposalOutcome.Cancelled);
-
-        space.cancelProposal(proposalId, executionStrategy.params);
+        emit ProposalCancelled(proposalId);
+        space.cancel(proposalId);
     }
 
     function testCancelInvalidProposal() public {
         uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        uint256 invalidProposalId = proposalId + 1;
-
         _vote(author, proposalId, Choice.For, userVotingStrategies);
 
+        // proposal does not exist
+        uint256 invalidProposalId = proposalId + 1;
         vm.expectRevert(abi.encodeWithSelector(InvalidProposal.selector));
-        space.cancelProposal(invalidProposalId, executionStrategy.params);
+        space.cancel(invalidProposalId);
     }
 
     function testCancelUnauthorized() public {
         uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-
         _vote(author, proposalId, Choice.For, userVotingStrategies);
 
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.cancelProposal(proposalId, executionStrategy.params);
+        space.cancel(proposalId);
     }
 
     function testCancelAlreadyExecuted() public {
         uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-
         _vote(author, proposalId, Choice.For, userVotingStrategies);
-        space.finalizeProposal(proposalId, executionStrategy.params);
+        space.execute(proposalId, executionStrategy.params);
 
-        vm.expectRevert(abi.encodeWithSelector(ProposalAlreadyExecuted.selector));
-        space.cancelProposal(proposalId, executionStrategy.params);
+        vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Executed));
+        space.cancel(proposalId);
     }
 
-    function testCancelExecutionMismatch() public {
+    function testCancelAlreadyCancelled() public {
         uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-
         _vote(author, proposalId, Choice.For, userVotingStrategies);
+        space.cancel(proposalId);
 
-        vm.expectRevert(abi.encodeWithSelector(ExecutionHashMismatch.selector));
-        space.cancelProposal(proposalId, new bytes(4242));
+        vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Cancelled));
+        space.cancel(proposalId);
     }
 
     // ------- MaxVotingDuration ----
 
     function testSetMaxVotingDuration() public {
-        vm.expectEmit(true, true, true, true);
         uint32 nextDuration = maxVotingDuration + 1;
+        vm.expectEmit(true, true, true, true);
         emit MaxVotingDurationUpdated(nextDuration);
         vm.prank(owner);
         space.setMaxVotingDuration(nextDuration);
@@ -75,7 +71,6 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testSetMaxVotingDurationInvalid() public {
-        // Need to update the minimum voting duration
         space.setMinVotingDuration(1);
 
         vm.expectRevert(abi.encodeWithSelector(InvalidDuration.selector, 1, 0));
@@ -86,8 +81,8 @@ contract SpaceOwnerActionsTest is SpaceTest {
     // ------- MinVotingDuration ----
 
     function testSetMinVotingDelay() public {
-        vm.expectEmit(true, true, true, true);
         uint32 nextDuration = minVotingDuration + 1;
+        vm.expectEmit(true, true, true, true);
         emit MinVotingDurationUpdated(nextDuration);
         vm.prank(owner);
         space.setMinVotingDuration(nextDuration);
@@ -288,7 +283,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         _vote(author, proposalId, Choice.For, userVotingStrategies);
 
         // Ensure we can finalize
-        space.finalizeProposal(proposalId, newExecutionStrategies[0].params);
+        space.execute(proposalId, newExecutionStrategies[0].params);
 
         // Remove this strategy
         vm.expectEmit(true, true, true, true);
@@ -305,12 +300,12 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testAddExecutionStrategyUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.removeExecutionStrategies(executionStrategiesAddresses);
+        space.removeExecutionStrategies(executionStrategies);
     }
 
     function testRemoveExecutionStrategyUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.removeExecutionStrategies(executionStrategiesAddresses);
+        space.removeExecutionStrategies(executionStrategies);
     }
 }

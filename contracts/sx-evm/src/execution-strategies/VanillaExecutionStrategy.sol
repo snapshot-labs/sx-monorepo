@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.15;
 
-import "../interfaces/IExecutionStrategy.sol";
+import "./SimpleQuorumExecutionStrategy.sol";
 
-contract VanillaExecutionStrategy is IExecutionStrategy {
+contract VanillaExecutionStrategy is SimpleQuorumExecutionStrategy {
     uint256 numExecuted;
 
     // solhint-disable no-unused-vars
-    function execute(ProposalOutcome proposalOutcome, bytes memory executionParams) external override {
+    function execute(Proposal memory proposal, bytes memory executionParams) external override {
         numExecuted++;
     }
 }

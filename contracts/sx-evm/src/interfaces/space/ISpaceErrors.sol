@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.15;
 
+import "../../types.sol";
+
 interface ISpaceErrors {
     // Min duration should be smaller than or equal to max duration
     error InvalidDuration(uint32 minVotingDuration, uint32 maxVotingDuration);
@@ -11,22 +13,18 @@ interface ISpaceErrors {
     error InvalidVotingStrategyAddress();
     error InvalidVotingStrategyIndex(uint256 index);
     error InvalidProposal();
-
     error AuthenticatorNotWhitelisted(address auth);
     error ExecutionStrategyNotWhitelisted(address strategy);
-
     error ProposalThresholdNotReached(uint256 votingPower);
-
     error DuplicateFound(uint a, uint b);
-
-    error ProposalAlreadyExecuted();
+    error ProposalAlreadyFinalized();
     error MinVotingDurationHasNotElapsed();
     error ExecutionHashMismatch();
     error QuorumNotReachedYet();
-
+    error UserHasAlreadyVoted();
+    error UserHasNoVotingPower();
+    error InvalidProposalStatus(ProposalStatus status);
     error VotingPeriodHasEnded();
     error VotingPeriodHasNotStarted();
-    error UserHasAlreadyVoted();
-
-    error UserHasNoVotingPower();
+    error ProposalFinalized();
 }
