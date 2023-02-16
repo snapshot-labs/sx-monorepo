@@ -1,7 +1,6 @@
 import createVanillaAuthenticator from './vanilla';
 import createEthSigAuthenticator from './ethSig';
 import { hexPadLeft } from '../../utils/encoding';
-import type { Call } from 'starknet';
 import type { Authenticator, NetworkConfig } from '../../types';
 
 export function getAuthenticator(

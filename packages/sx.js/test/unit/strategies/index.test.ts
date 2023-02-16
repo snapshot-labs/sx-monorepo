@@ -1,6 +1,4 @@
 import { getStrategy } from '../../../src/strategies';
-import vanillaStrategy from '../../../src/strategies/vanilla';
-import singleSlotProofStrategy from '../../../src/strategies/singleSlotProof';
 import { defaultNetwork } from '../../../src/networks';
 
 describe('voting strategies', () => {
