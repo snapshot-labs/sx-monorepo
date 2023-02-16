@@ -48,7 +48,6 @@ contract FinalizeProposalTest is SpaceTest {
         address[] memory newExecutionStrategiesAddresses = new address[](1);
         newExecutionStrategiesAddresses[0] = newExecutionStrategies[0].addy;
 
-        // Add the strategy
         space.addExecutionStrategies(newExecutionStrategiesAddresses);
 
         uint256 proposalId = _createProposal(
@@ -60,17 +59,16 @@ contract FinalizeProposalTest is SpaceTest {
 
         _vote(author, proposalId, Choice.For, userVotingStrategies);
 
-        // Remove the strategy
         space.removeExecutionStrategies(newExecutionStrategiesAddresses);
 
-        // Ensure that the proposal gets cancelled if the strategy has been removed.
+        // Ensure that the proposal still can be finalized even if the execution strategy is removed.
         vm.expectEmit(true, true, true, true);
-        emit ProposalFinalized(proposalId, ProposalOutcome.Cancelled);
+        emit ProposalFinalized(proposalId, ProposalOutcome.Accepted);
         space.finalizeProposal(proposalId, newExecutionStrategies[0].params);
 
         // Double check by checking the proposal execution status
         Proposal memory proposal = space.getProposal(proposalId);
-        assertEq(uint8(proposal.finalizationStatus), uint8(FinalizationStatus.FinalizedAndCancelled));
+        assertEq(uint8(proposal.finalizationStatus), uint8(FinalizationStatus.FinalizedAndAccepted));
     }
 
     function testFinalizeMinDurationNotElapsed() public {

@@ -18,6 +18,7 @@ struct Proposal {
     bytes32 executionHash;
     address executionStrategy;
     FinalizationStatus finalizationStatus;
+    Strategy[] votingStrategies;
 }
 
 // A struct that represents any kind of strategy (i.e a pair of `address` and `bytes`)

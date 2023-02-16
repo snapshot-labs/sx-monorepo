@@ -209,7 +209,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.removeVotingStrategies(newIndices);
 
         // Try creating a proposal using these strategies that were just removed.
-        vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 0));
+        vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 1));
         _createProposal(author, proposalMetadataUri, executionStrategy, newUserVotingStrategies);
 
         // Try creating a proposal with the previous voting strategy that was never removed.

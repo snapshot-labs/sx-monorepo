@@ -81,4 +81,80 @@ contract VoteTest is SpaceTest {
         vm.expectRevert(abi.encodeWithSelector(UserHasNoVotingPower.selector));
         _vote(author, proposalId, Choice.For, empty);
     }
+
+    function testVoteRemovedVotingStrategy() public {
+        // Strategy[] memory newVotingStrategies = new Strategy[](1);
+        // newVotingStrategies[0] = votingStrategies[0];
+        // space.addVotingStrategies(newVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+
+        // removing the voting strategy at index 0
+        uint8[] memory removeIndices = new uint8[](1);
+        removeIndices[0] = 0;
+        space.removeVotingStrategies(removeIndices);
+
+        // casting a vote with the voting strategy that was just removed.
+        // this is possible because voting strategies are stored inside a proposal.
+        _vote(author, proposalId, Choice.For, userVotingStrategies);
+    }
+
+    function testVoteAddedVotingStrategy() public {
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+
+        // adding a new voting strategy which will reside at index 1
+        Strategy[] memory newVotingStrategies = new Strategy[](1);
+        newVotingStrategies[0] = votingStrategies[0];
+        space.addVotingStrategies(newVotingStrategies);
+
+        // attempting to use the new voting strategy to cast a vote.
+        // this will fail fail because the strategy was added after the proposal was created.
+        IndexedStrategy[] memory newUserVotingStrategies = new IndexedStrategy[](1);
+        newUserVotingStrategies[0] = IndexedStrategy(1, new bytes(0));
+        vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 1)); // array out of bounds
+        _vote(author, proposalId, Choice.For, newUserVotingStrategies);
+    }
+
+    function testVoteInvalidVotingStrategy() public {
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+
+        // This voting strategy is not registered in the space.
+        IndexedStrategy[] memory newUserVotingStrategies = new IndexedStrategy[](1);
+        newUserVotingStrategies[0] = IndexedStrategy(1, new bytes(0));
+        vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 1)); // array out of bounds
+        _vote(author, proposalId, Choice.For, newUserVotingStrategies);
+    }
+
+    function testVoteDuplicateUsedVotingStrategy() public {
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+
+        IndexedStrategy[] memory duplicateStrategies = new IndexedStrategy[](2);
+        duplicateStrategies[0] = userVotingStrategies[0];
+        duplicateStrategies[1] = userVotingStrategies[0];
+        vm.expectRevert(
+            abi.encodeWithSelector(DuplicateFound.selector, duplicateStrategies[0].index, duplicateStrategies[1].index)
+        );
+        _vote(author, proposalId, Choice.For, duplicateStrategies);
+    }
+
+    function testVoteMultipleStrategies() public {
+        VanillaVotingStrategy strat2 = new VanillaVotingStrategy();
+        VanillaVotingStrategy strat3 = new VanillaVotingStrategy();
+        Strategy[] memory toAdd = new Strategy[](2);
+        toAdd[0] = Strategy(address(strat2), new bytes(0));
+        toAdd[1] = Strategy(address(strat2), new bytes(0));
+
+        space.addVotingStrategies(toAdd);
+
+        IndexedStrategy[] memory newVotingStrategies = new IndexedStrategy[](3);
+        newVotingStrategies[0] = userVotingStrategies[0]; // base strat
+        newVotingStrategies[1] = IndexedStrategy(1, new bytes(0)); // strat2
+        newVotingStrategies[2] = IndexedStrategy(2, new bytes(0)); // strat3
+
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+
+        uint256 expectedVotingPower = 3; // 1 voting power per vanilla strat, so 3
+        vm.expectEmit(true, true, true, true);
+        emit VoteCreated(proposalId, author, Vote(Choice.For, expectedVotingPower));
+        _vote(author, proposalId, Choice.For, newVotingStrategies);
+    }
 }

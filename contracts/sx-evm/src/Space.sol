@@ -219,14 +219,14 @@ contract Space is ISpace, Ownable {
 
     /**
      * @notice  Internal function that will loop over the used voting strategies and
-                return the cumulative voting power of a user.
+                return the cumulative voting power of a user when creating a proposal.
      * @dev     
      * @param   timestamp  Timestamp of the snapshot.
      * @param   userAddress  Address for which to compute the voting power.
      * @param   userVotingStrategies The desired voting strategies to check.
      * @return  uint256  The total voting power of a user (over those specified voting strategies).
      */
-    function _getCumulativeVotingPower(
+    function _getCumulativeProposingPower(
         uint32 timestamp,
         address userAddress,
         IndexedStrategy[] calldata userVotingStrategies
@@ -236,11 +236,12 @@ contract Space is ISpace, Ownable {
 
         uint256 totalVotingPower = 0;
         for (uint256 i = 0; i < userVotingStrategies.length; i++) {
-            uint256 index = userVotingStrategies[i].index;
-            Strategy memory votingStrategy = votingStrategies[index];
+            uint256 votingStrategyIndex = userVotingStrategies[i].index;
+            if (votingStrategyIndex >= votingStrategies.length) revert InvalidVotingStrategyIndex(votingStrategyIndex);
+            Strategy memory votingStrategy = votingStrategies[votingStrategyIndex];
             // A strategyAddress set to 0 indicates that this address has already been removed and is
             // no longer a valid voting strategy. See `_removeVotingStrategies`.
-            if (votingStrategy.addy == address(0)) revert InvalidVotingStrategyIndex(i);
+            if (votingStrategy.addy == address(0)) revert InvalidVotingStrategyIndex(votingStrategyIndex);
             IVotingStrategy strategy = IVotingStrategy(votingStrategy.addy);
 
             // With solc 0.8, this will revert in case of overflow.
@@ -251,7 +252,48 @@ contract Space is ISpace, Ownable {
                 userVotingStrategies[i].params
             );
         }
+        return totalVotingPower;
+    }
 
+    /**
+     * @notice  Internal function that will loop over the used voting strategies and
+                return the cumulative voting power of a user when voting. 
+     * @dev     
+     * @param   timestamp  Timestamp of the snapshot.
+     * @param   userAddress  Address for which to compute the voting power.
+     * @param   userVotingStrategies The desired voting strategies to check.
+     * @param   _votingStrategies The array of voting strategies that are used for this proposal.
+                We cannot use the `votingStrategies` state variable because it might have updated 
+                since the proposal was created.
+     * @return  uint256  The total voting power of a user (over those specified voting strategies).
+     */
+    function _getCumulativeVotingPower(
+        uint32 timestamp,
+        address userAddress,
+        IndexedStrategy[] calldata userVotingStrategies,
+        Strategy[] memory _votingStrategies
+    ) internal returns (uint256) {
+        // Ensure there are no duplicates to avoid an attack where people double count a voting strategy
+        _assertNoDuplicateIndices(userVotingStrategies);
+
+        uint256 totalVotingPower = 0;
+        for (uint256 i = 0; i < userVotingStrategies.length; i++) {
+            uint256 votingStrategyIndex = userVotingStrategies[i].index;
+            if (votingStrategyIndex >= _votingStrategies.length) revert InvalidVotingStrategyIndex(votingStrategyIndex);
+            Strategy memory votingStrategy = _votingStrategies[votingStrategyIndex];
+            // A strategyAddress set to 0 indicates that this address has already been removed and is
+            // no longer a valid voting strategy. See `_removeVotingStrategies`.
+            if (votingStrategy.addy == address(0)) revert InvalidVotingStrategyIndex(votingStrategyIndex);
+            IVotingStrategy strategy = IVotingStrategy(votingStrategy.addy);
+
+            // With solc 0.8, this will revert in case of overflow.
+            totalVotingPower += strategy.getVotingPower(
+                timestamp,
+                userAddress,
+                votingStrategy.params,
+                userVotingStrategies[i].params
+            );
+        }
         return totalVotingPower;
     }
 
@@ -432,7 +474,7 @@ contract Space is ISpace, Ownable {
         // Casting to `uint32` is fine because this gives us until year ~2106.
         uint32 snapshotTimestamp = uint32(block.timestamp);
 
-        uint256 votingPower = _getCumulativeVotingPower(snapshotTimestamp, proposerAddress, userVotingStrategies);
+        uint256 votingPower = _getCumulativeProposingPower(snapshotTimestamp, proposerAddress, userVotingStrategies);
         if (votingPower < proposalThreshold) revert ProposalThresholdNotReached(votingPower);
 
         uint32 startTimestamp = snapshotTimestamp + votingDelay;
@@ -449,7 +491,8 @@ contract Space is ISpace, Ownable {
             maxEndTimestamp,
             executionHash,
             executionStrategy.addy,
-            FinalizationStatus.NotExecuted
+            FinalizationStatus.NotExecuted,
+            votingStrategies
         );
 
         proposalRegistry[nextProposalId] = proposal;
@@ -486,7 +529,12 @@ contract Space is ISpace, Ownable {
         // Ensure voter has not already voted.
         if (voteRegistry[proposalId][voterAddress] == true) revert UserHasAlreadyVoted();
 
-        uint256 votingPower = _getCumulativeVotingPower(proposal.snapshotTimestamp, voterAddress, userVotingStrategies);
+        uint256 votingPower = _getCumulativeVotingPower(
+            proposal.snapshotTimestamp,
+            voterAddress,
+            userVotingStrategies,
+            proposal.votingStrategies
+        );
 
         if (votingPower == 0) revert UserHasNoVotingPower();
 
@@ -540,11 +588,6 @@ contract Space is ISpace, Ownable {
                 // Voting period has ended but quorum wasn't reached: set outcome to `REJECTED`.
                 proposalOutcome = ProposalOutcome.Rejected;
             }
-        }
-
-        // Ensure the execution strategy is still valid.
-        if (executionStrategies[proposal.executionStrategy] == false) {
-            proposalOutcome = ProposalOutcome.Cancelled;
         }
 
         IExecutionStrategy(proposal.executionStrategy).execute(proposalOutcome, executionParams);
