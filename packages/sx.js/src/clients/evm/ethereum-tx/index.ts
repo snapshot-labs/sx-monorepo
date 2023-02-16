@@ -1,10 +1,13 @@
 import { Contract } from '@ethersproject/contracts';
 import { Interface } from '@ethersproject/abi';
+import { getCreate2Address } from '@ethersproject/address';
+import { keccak256 } from '@ethersproject/keccak256';
 import randomBytes from 'randombytes';
 import { getAuthenticator } from '../../../authenticators/evm/index';
 import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import SpaceFactoryAbi from './abis/SpaceFactory.json';
+import SpaceBytecode from './abis/bytecode/Space.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { Envelope, AddressConfig, IndexedConfig } from '../types';
 import type { NetworkConfig, ClientOpts, Propose, Vote } from '../../../types/index';
@@ -41,6 +44,7 @@ export class EthereumTx {
     votingStrategies: AddressConfig[];
     executionStrategies: string[];
   }): Promise<{ txId: string; spaceAddress: string }> {
+    const spaceInterface = new Interface(SpaceAbi);
     const spaceFactoryContract = new Contract(spaceFactory, SpaceFactoryAbi, signer);
 
     const salt = `0x${randomBytes(32).toString('hex')}`;
@@ -57,10 +61,12 @@ export class EthereumTx {
       salt
     ];
 
-    const [spaceAddress, response] = await Promise.all([
-      spaceFactoryContract.getSpaceAddress(...args),
-      spaceFactoryContract.createSpace(...args)
-    ]);
+    const functionData = spaceInterface.encodeDeploy(args.slice(0, -1));
+    const initCode = SpaceBytecode + functionData.slice(2);
+
+    const initCodeHash = keccak256(initCode);
+    const spaceAddress = getCreate2Address(spaceFactory, salt, initCodeHash);
+    const response = await spaceFactoryContract.createSpace(...args);
 
     return { spaceAddress, txId: response.hash };
   }

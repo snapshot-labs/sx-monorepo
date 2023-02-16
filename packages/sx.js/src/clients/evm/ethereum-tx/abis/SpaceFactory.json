@@ -1,6 +1,5 @@
 [
   "error SpaceCreationFailed()",
   "event SpaceCreated(address space, address owner, uint32 votingDelay, uint32 minVotingDuration, uint32 maxVotingDuration, uint256 proposalThreshold, uint256 quorum, tuple(address addy, bytes params)[] votingStrategies, address[] authenticators, address[] executionStrategiesAddresses)",
-  "function createSpace(address controller, uint32 votingDelay, uint32 minVotingDuration, uint32 maxVotingDuration, uint256 proposalThreshold, uint256 quorum, tuple(address addy, bytes params)[] votingStrategies, address[] authenticators, address[] executionStrategies, bytes32 salt)",
-  "function getSpaceAddress(address controller, uint32 votingDelay, uint32 minVotingDuration, uint32 maxVotingDuration, uint256 proposalThreshold, uint256 quorum, tuple(address addy, bytes params)[] votingStrategies, address[] authenticators, address[] executionStrategies, bytes32 salt) view returns (address)"
+  "function createSpace(address controller, uint32 votingDelay, uint32 minVotingDuration, uint32 maxVotingDuration, uint256 proposalThreshold, uint256 quorum, tuple(address addy, bytes params)[] votingStrategies, address[] authenticators, address[] executionStrategies, bytes32 salt)"
 ]
