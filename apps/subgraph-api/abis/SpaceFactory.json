@@ -1,0 +1,156 @@
+[
+  {
+    "inputs": [],
+    "name": "SpaceCreationFailed",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "space",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "votingDelay",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "minVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "maxVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "proposalThreshold",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quorum",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct Strategy[]",
+        "name": "votingStrategies",
+        "type": "tuple[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "authenticators",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "executionStrategiesAddresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "SpaceCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "controller",
+        "type": "address"
+      },
+      {
+        "internalType": "uint32",
+        "name": "votingDelay",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "minVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "maxVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "proposalThreshold",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quorum",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct Strategy[]",
+        "name": "votingStrategies",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "authenticators",
+        "type": "address[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "executionStrategies",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "salt",
+        "type": "bytes32"
+      }
+    ],
+    "name": "createSpace",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

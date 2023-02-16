@@ -1,50 +1,46 @@
-import { Address, BigDecimal, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
+import { BigDecimal, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
+import { SpaceCreated } from '../generated/SpaceFactory/SpaceFactory'
 import { ProposalCreated, VoteCreated, MetadataUriUpdated } from '../generated/Space/Space'
+import { Space as SpaceTemplate } from '../generated/templates'
 import { Space, Proposal, Vote, User } from '../generated/schema'
 
-let SPACE = '0x95DC6f73301356c9909921e21b735601C42fc1a8'
-let VANILLA_AUTH = '0xc4fb316710643f7FfBB566e5586862076198DAdB'
-let VANILLA_STRATEGY = '0xc441215878B3869b2468BA239911BA6B506619F7'
-let VANILLA_EXECUTION = '0x81519C29621Ba131ea398c15B17391F53e8B9A94'
+export function handleSpaceCreated(event: SpaceCreated): void {
+  let space = new Space(event.params.space.toHexString())
+  space.name = 'Fellow DAO ' + event.params.space.toHexString().slice(0, 6)
+  space.about = ''
+  space.controller = event.params.owner
+  space.voting_delay = event.params.votingDelay.toI32()
+  space.min_voting_period = event.params.minVotingDuration.toI32()
+  space.max_voting_period = event.params.maxVotingDuration.toI32()
+  space.proposal_threshold = event.params.proposalThreshold.toBigDecimal()
+  space.quorum = event.params.quorum.toBigDecimal()
+  space.strategies = event.params.votingStrategies.map<Bytes>((strategy) => strategy.addy)
+  space.strategies_params = event.params.votingStrategies.map<string>((strategy) =>
+    strategy.params.toHexString()
+  )
+  space.authenticators = event.params.authenticators.map<Bytes>((address) => address)
+  space.executors = event.params.executionStrategiesAddresses.map<Bytes>((address) => address)
+  space.proposal_count = 0
+  space.vote_count = 0
+  space.created = event.block.timestamp.toI32()
+  space.tx = event.transaction.hash
+  space.save()
 
-export function handleSpaceCreated(event: ProposalCreated): void {
-  let space = Space.load(SPACE)
-  if (space == null) {
-    space = new Space(SPACE)
-    space.name = 'Fellow DAO'
-    space.about = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-    space.controller = event.params.proposerAddress
-    space.voting_delay = 0
-    space.min_voting_period = event.params.proposal.minEndTimestamp.toI32()
-    space.max_voting_period = event.params.proposal.maxEndTimestamp.toI32()
-    space.proposal_threshold = event.params.proposal.quorum.toBigDecimal()
-    space.quorum = event.params.proposal.quorum.toBigDecimal()
-    space.strategies = [Address.fromString(VANILLA_STRATEGY)]
-    space.strategies_params = ['strategies params']
-    space.authenticators = [Address.fromString(VANILLA_AUTH)]
-    space.executors = [Address.fromString(VANILLA_EXECUTION)]
-    space.proposal_count = 0
-    space.vote_count = 0
-    space.created = event.block.timestamp.toI32()
-    space.tx = event.transaction.hash
-    space.save()
-  }
+  SpaceTemplate.create(event.params.space)
 }
 
 export function handleProposalCreated(event: ProposalCreated): void {
-  let metadataUri = event.params.metadataUri
-
-  handleSpaceCreated(event)
-
-  let space = Space.load(SPACE)
+  let space = Space.load(event.address.toHexString())
   if (space == null) {
-    space = new Space(SPACE)
+    return
   }
 
-  let proposal = new Proposal(`${SPACE}/${event.params.nextProposalId}`)
+  let metadataUri = event.params.metadataUri
+
+  let proposal = new Proposal(`${space.id}/${event.params.nextProposalId}`)
   proposal.proposal_id = event.params.nextProposalId.toI32()
-  proposal.space = SPACE
+  proposal.space = space.id
   proposal.author = event.params.proposerAddress.toHexString()
   proposal.execution_hash = event.params.proposal.executionHash.toHexString()
   proposal.metadata_uri = metadataUri
@@ -83,7 +79,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
       if (discussion) proposal.discussion = discussion.toString()
 
       // Using different parser for execution to overcome limitations in graph-ts
-      let jsonObj: JSON.Obj = <JSON.Obj>(JSON.parse(data.toString()))
+      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(data.toString())
       let execution = jsonObj.getArr('execution')
       if (execution) {
         proposal.execution = execution.toString()
@@ -109,25 +105,29 @@ export function handleProposalCreated(event: ProposalCreated): void {
 }
 
 export function handleVoteCreated(event: VoteCreated): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
   let choice = event.params.vote.choice + 1
   let vp = event.params.vote.votingPower.toBigDecimal()
 
-  let vote = new Vote(`${SPACE}/${event.params.proposalId}/${event.params.voterAddress.toHexString()}`)
+  let vote = new Vote(
+    `${space.id}/${event.params.proposalId}/${event.params.voterAddress.toHexString()}`
+  )
   vote.voter = event.params.voterAddress.toHexString()
-  vote.space = SPACE
+  vote.space = space.id
   vote.proposal = event.params.proposalId.toI32()
   vote.choice = choice
   vote.vp = vp
   vote.created = event.block.timestamp.toI32()
   vote.save()
 
-  let space = Space.load(SPACE)
-  if (space !== null) {
-    space.vote_count += 1
-    space.save()
-  }
+  space.vote_count += 1
+  space.save()
 
-  let proposal = Proposal.load(`${SPACE}/${event.params.proposalId}`)
+  let proposal = Proposal.load(`${space.id}/${event.params.proposalId}`)
   if (proposal !== null) {
     proposal.setBigDecimal(
       `scores_${choice.toString()}`,
@@ -151,12 +151,12 @@ export function handleVoteCreated(event: VoteCreated): void {
 }
 
 export function handleMetadataUriUpdated(event: MetadataUriUpdated): void {
-  let metadataUri = event.params.newMetadataUri
-
-  let space = Space.load(SPACE)
+  let space = Space.load(event.address.toHexString())
   if (space == null) {
-    space = new Space(SPACE)
+    return
   }
+
+  let metadataUri = event.params.newMetadataUri
 
   if (metadataUri.startsWith('ipfs://')) {
     let hash = metadataUri.slice(7)
