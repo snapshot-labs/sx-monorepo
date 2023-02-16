@@ -1,5 +1,5 @@
 import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
-import { getRSVFromSig } from '../../utils/encoding';
+import { getRSVFromSig, hexPadLeft } from '../../utils/encoding';
 import type { Envelope } from '../../clients/evm/types';
 import type { Authenticator, Propose, Vote, EthCall } from '../../types';
 
@@ -16,8 +16,8 @@ export default function createEthSigAuthenticator(): Authenticator<'evm'> {
 
       const args = [
         v,
-        r.toHex(),
-        s.toHex(),
+        hexPadLeft(r.toHex()),
+        hexPadLeft(s.toHex()),
         signatureData.message.salt,
         space,
         selector,
