@@ -30,8 +30,7 @@ contract SpaceSetup is Script {
     uint32 public maxVotingDuration;
     uint256 public proposalThreshold;
     uint32 public quorum;
-
-    //string public spaceMetadataUri = "SOC Test Space";
+    string metadataUri = "SX Test Space";
 
     Strategy[2] public votingStrategies;
 
@@ -65,6 +64,7 @@ contract SpaceSetup is Script {
             maxVotingDuration,
             proposalThreshold,
             quorum,
+            metadataUri,
             votingStrategies,
             authenticators,
             executionStrategies,

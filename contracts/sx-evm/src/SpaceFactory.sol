@@ -19,6 +19,7 @@ contract SpaceFactory is ISpaceFactory {
         uint32 maxVotingDuration,
         uint256 proposalThreshold,
         uint256 quorum,
+        string calldata metadataUri,
         Strategy[] calldata votingStrategies,
         address[] calldata authenticators,
         address[] calldata executionStrategies,
@@ -45,6 +46,7 @@ contract SpaceFactory is ISpaceFactory {
                 maxVotingDuration,
                 proposalThreshold,
                 quorum,
+                metadataUri,
                 votingStrategies,
                 authenticators,
                 executionStrategies

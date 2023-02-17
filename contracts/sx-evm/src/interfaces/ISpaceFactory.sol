@@ -15,6 +15,7 @@ interface ISpaceFactory is ISpaceFactoryErrors, ISpaceFactoryEvents {
         uint32 maxVotingDuration,
         uint256 proposalThreshold,
         uint256 quorum,
+        string calldata metadataUri,
         Strategy[] calldata votingStrategies,
         address[] calldata authenticators,
         address[] calldata executionStrategiesAddresses,

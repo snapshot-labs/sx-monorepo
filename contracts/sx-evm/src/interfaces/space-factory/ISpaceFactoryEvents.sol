@@ -13,6 +13,7 @@ interface ISpaceFactoryEvents {
         uint32 maxVotingDuration,
         uint256 proposalThreshold,
         uint256 quorum,
+        string metadataUri,
         Strategy[] votingStrategies,
         address[] authenticators,
         address[] executionStrategiesAddresses
