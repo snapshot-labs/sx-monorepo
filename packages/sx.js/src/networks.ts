@@ -1,19 +1,28 @@
 import type { NetworkConfig } from './types';
 
 export const evmGoerli: NetworkConfig = {
-  spaceFactory: '0x00',
+  spaceFactory: '0xf8d933026b7bd549314a31e6c5b2616c631a9e87',
   authenticators: {
-    '0xc4fb316710643f7FfBB566e5586862076198DAdB': {
+    '0x86bfa0726cba0febeee457f04b705ab74b54d01c': {
       type: 'vanilla'
+    },
+    '0x486039513b72967cd81272f204d4eaff68d0dfd0': {
+      type: 'ethSig'
+    },
+    '0x37315ce75920b653f0f13734c709e199876455c9': {
+      type: 'ethTx'
     }
   },
   strategies: {
-    '0xc441215878B3869b2468BA239911BA6B506619F7': {
+    '0x395ed61716b48dc904140b515e9f682e33330154': {
       type: 'vanilla'
+    },
+    '0xbbd17346378f76c1c94032594b57c93c24857b19': {
+      type: 'comp'
     }
   },
   executors: {
-    '0x81519C29621Ba131ea398c15B17391F53e8B9A94': {
+    '0xb1001fdf62c020761039a750b27e73c512fdaa5e': {
       type: 'vanilla'
     }
   }

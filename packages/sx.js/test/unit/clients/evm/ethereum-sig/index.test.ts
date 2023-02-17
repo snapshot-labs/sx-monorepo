@@ -4,9 +4,9 @@ import { EthereumSig } from '../../../../../src/clients/evm/ethereum-sig';
 import { Choice } from '../../../../../src/utils/choice';
 
 describe('EthereumSig', () => {
-  const space = '0x95DC6f73301356c9909921e21b735601C42fc1a8';
-  const authenticator = '0xc4fb316710643f7ffbb566e5586862076198dadb';
-  const executor = '0x81519c29621ba131ea398c15b17391f53e8b9a94';
+  const space = '0x6d5608420702714a6c8168ec9c70706e8d1cf641';
+  const authenticator = '0x86bfa0726cba0febeee457f04b705ab74b54d01c';
+  const executor = '0xb1001fdf62c020761039a750b27e73c512fdaa5e';
 
   const provider = new JsonRpcProvider('http://127.0.0.1:8545');
   const signer = new Wallet(
@@ -29,7 +29,7 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0xc441215878B3869b2468BA239911BA6B506619F7' }],
+        strategies: [{ index: 0, address: '0x395ed61716b48dc904140b515e9f682e33330154' }],
         executor,
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
         executionParams: []
@@ -45,7 +45,7 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0xc441215878B3869b2468BA239911BA6B506619F7' }],
+        strategies: [{ index: 0, address: '0x395ed61716b48dc904140b515e9f682e33330154' }],
         proposal: 3,
         choice: Choice.FOR
       }
