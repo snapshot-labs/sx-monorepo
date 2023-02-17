@@ -20,10 +20,9 @@ export class EthereumTx {
     this.networkConfig = opts?.networkConfig || evmGoerli;
   }
 
-  async deploy({
+  async deploySpace({
     signer,
-    spaceFactory,
-    owner,
+    controller,
     votingDelay,
     minVotingDuration,
     maxVotingDuration,
@@ -34,23 +33,26 @@ export class EthereumTx {
     executionStrategies
   }: {
     signer: Signer;
-    spaceFactory: string;
-    owner: string;
+    controller: string;
     votingDelay: number;
     minVotingDuration: number;
     maxVotingDuration: number;
-    proposalThreshold: number;
-    quorum: number;
+    proposalThreshold: bigint;
+    quorum: bigint;
     authenticators: string[];
     votingStrategies: AddressConfig[];
     executionStrategies: string[];
   }): Promise<{ txId: string; spaceAddress: string }> {
     const spaceInterface = new Interface(SpaceAbi);
-    const spaceFactoryContract = new Contract(spaceFactory, SpaceFactoryAbi, signer);
+    const spaceFactoryContract = new Contract(
+      this.networkConfig.spaceFactory,
+      SpaceFactoryAbi,
+      signer
+    );
 
     const salt = `0x${randomBytes(32).toString('hex')}`;
     const args = [
-      owner,
+      controller,
       votingDelay,
       minVotingDuration,
       maxVotingDuration,
@@ -66,7 +68,7 @@ export class EthereumTx {
     const initCode = SpaceBytecode + functionData.slice(2);
 
     const initCodeHash = keccak256(initCode);
-    const spaceAddress = getCreate2Address(spaceFactory, salt, initCodeHash);
+    const spaceAddress = getCreate2Address(this.networkConfig.spaceFactory, salt, initCodeHash);
     const response = await spaceFactoryContract.createSpace(...args);
 
     return { spaceAddress, txId: response.hash };

@@ -23,17 +23,16 @@ describe('EthereumTx', () => {
     ethTxClient = new EthereumTx({ networkConfig: testConfig.networkConfig });
     ethSigClient = new EthereumSig({ networkConfig: testConfig.networkConfig });
 
-    const owner = await signer.getAddress();
+    const controller = await signer.getAddress();
 
-    const res = await ethTxClient.deploy({
+    const res = await ethTxClient.deploySpace({
       signer,
-      spaceFactory: testConfig.spaceFactory,
-      owner,
+      controller,
       votingDelay: 0,
       minVotingDuration: 0,
       maxVotingDuration: 86400,
-      proposalThreshold: 1,
-      quorum: 1,
+      proposalThreshold: 1n,
+      quorum: 1n,
       authenticators: [
         testConfig.vanillaAuthenticator,
         testConfig.ethTxAuthenticator,

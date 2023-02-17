@@ -72,7 +72,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     compVotingStrategy,
     executionStrategy,
     networkConfig: {
-      spaceFactory: '0x00',
+      spaceFactory,
       authenticators: {
         [vanillaAuthenticator]: {
           type: 'vanilla'
