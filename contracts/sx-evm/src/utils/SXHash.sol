@@ -4,10 +4,9 @@ pragma solidity ^0.8.15;
 
 import "src/types.sol";
 
-/// @title SOC Types Hashing Library
-/// @notice This library contains functions for hashing SOC types for use in eip712 signatures.
-/// TODO: rename once we have a better name for SOC
-library SOCHash {
+/// @title SX Types Hashing Library
+/// @notice This library contains functions for hashing SX types for use in eip712 signatures.
+library SXHash {
     bytes32 private constant STRATEGY_TYPEHASH = keccak256("Strategy(address addy,bytes params)");
     bytes32 private constant INDEXED_STRATEGY_TYPEHASH = keccak256("IndexedStrategy(uint8 index,bytes params)");
 

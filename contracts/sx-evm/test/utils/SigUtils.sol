@@ -3,11 +3,11 @@
 pragma solidity ^0.8.15;
 
 import "../../src/types.sol";
-import { SOCHash } from "../../src/utils/SOCHash.sol";
+import { SXHash } from "../../src/utils/SXHash.sol";
 
 abstract contract SigUtils {
-    using SOCHash for Strategy;
-    using SOCHash for IndexedStrategy[];
+    using SXHash for Strategy;
+    using SXHash for IndexedStrategy[];
 
     string private name;
     string private version;

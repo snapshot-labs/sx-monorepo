@@ -12,7 +12,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     error InvalidFunctionSelector();
     error SaltAlreadyUsed();
 
-    string private constant name = "SOC";
+    string private constant name = "snapshot-x";
     string private constant version = "1";
 
     EthSigAuthenticator public ethSigAuth;

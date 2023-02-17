@@ -38,7 +38,7 @@ contract ModulesDeployment is Script {
         whitelistStrategy = new WhitelistStrategy();
 
         vanillaAuthenticator = new VanillaAuthenticator();
-        ethSigAuthenticator = new EthSigAuthenticator("SOC", "0.1.0");
+        ethSigAuthenticator = new EthSigAuthenticator("snapshot-x", "0.1.0");
         ethTxAuthenticator = new EthTxAuthenticator();
 
         vanillaExecutionStrategy = new VanillaExecutionStrategy();

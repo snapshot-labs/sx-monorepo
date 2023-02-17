@@ -1,7 +1,7 @@
 {
-  "name": "snapshot-oc",
+  "name": "sx-evm",
   "description": "On-chain voting framework",
-  "repository": "snapshot-labs/snapshot-oc",
+  "repository": "snapshot-labs/sx-evm",
   "author": "SnapshotLabs",
   "license": "MIT",
   "devDependencies": {

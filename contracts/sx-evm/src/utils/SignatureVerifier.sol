@@ -5,11 +5,11 @@ pragma solidity ^0.8.15;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "src/types.sol";
-import { SOCHash } from "src/utils/SOCHash.sol";
+import { SXHash } from "src/utils/SXHash.sol";
 
 abstract contract SignatureVerifier is EIP712 {
-    using SOCHash for Strategy;
-    using SOCHash for IndexedStrategy[];
+    using SXHash for Strategy;
+    using SXHash for IndexedStrategy[];
 
     error InvalidSignature();
     error SaltAlreadyUsed();

@@ -1,5 +1,5 @@
-# Snapshot-OC
+# Snapshot-X EVM
 
-Snapshot-OC is Snapshot's On-Chain voting framework.
+Snapshot-X EVM is Snapshot's on-chain voting framework.
 
 The goal of this framework is to provide a modular and secure voting system.
