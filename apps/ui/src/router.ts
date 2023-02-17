@@ -9,6 +9,7 @@ import Treasury from '@/views/Space/Treasury.vue';
 import Proposal from '@/views/Proposal.vue';
 import User from '@/views/User.vue';
 import Create from '@/views/Create.vue';
+import Explore from '@/views/Explore.vue';
 
 const routes: any[] = [
   { path: '/', name: 'home', component: Home },
@@ -30,7 +31,8 @@ const routes: any[] = [
   },
   { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
   { path: '/profile/:id', name: 'user', component: User },
-  { path: '/create', name: 'create', component: Create }
+  { path: '/create', name: 'create', component: Create },
+  { path: '/explore', name: 'explore', component: Explore }
 ];
 
 const router = createRouter({

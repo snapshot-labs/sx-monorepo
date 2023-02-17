@@ -25,7 +25,7 @@ const user = computed(() => {
     <div class="relative bg-skin-border h-[140px] -mb-[70px]" />
     <Container slim>
       <div class="text-center mb-4 relative">
-        <Stamp :id="userId" :size="90" class="mb-2 border-[4px] border-skin-bg !bg-skin-bg" />
+        <Stamp :id="userId" :size="90" class="mb-2 border-[4px] border-skin-bg !bg-skin-border" />
         <h1>{{ shortenAddress(userId) }}</h1>
         <div>
           <b class="text-skin-link">{{ user.proposal_count }}</b> proposals ·

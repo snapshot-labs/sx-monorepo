@@ -64,7 +64,7 @@ const grouped = computed(() => {
           <Stamp
             :id="space.id"
             :size="90"
-            class="mb-2 border-[4px] border-skin-bg !bg-skin-bg !rounded-lg"
+            class="mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-lg"
           />
         </router-link>
         <h1 v-text="space.name" />

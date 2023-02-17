@@ -4,7 +4,7 @@ import { enabledNetworks, getNetwork } from '@/networks';
 import type { Space, NetworkID } from '@/types';
 import pkg from '../../package.json';
 
-const SPACES_LIMIT = 10;
+const SPACES_LIMIT = 1000;
 
 type NetworkRecord = {
   spaces: Record<string, Space>;
