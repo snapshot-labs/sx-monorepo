@@ -10,11 +10,13 @@ contract VoteTest is SpaceTest {
 
         vm.expectEmit(true, true, true, true);
         emit VoteCreated(proposalId, author, Vote(Choice.For, 1));
+        snapStart("Vote");
         vanillaAuthenticator.authenticate(
             address(space),
             VOTE_SELECTOR,
             abi.encode(author, proposalId, Choice.For, userVotingStrategies)
         );
+        snapEnd();
     }
 
     function testVoteInvalidAuth() public {

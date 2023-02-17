@@ -42,6 +42,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(authorKey, digest);
 
+        snapStart("ProposeWithSig");
         ethSigAuth.authenticate(
             v,
             r,
@@ -51,6 +52,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             PROPOSE_SELECTOR,
             abi.encode(author, proposalMetadataUri, executionStrategy, userVotingStrategies)
         );
+        snapEnd();
     }
 
     function testAuthenticateProposeInvalidSigner() public {
@@ -181,6 +183,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(voterKey, digest);
 
+        snapStart("VoteWithSig");
         ethSigAuth.authenticate(
             v,
             r,
@@ -190,6 +193,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             VOTE_SELECTOR,
             abi.encode(voter, proposalId, Choice.For, userVotingStrategies)
         );
+        snapEnd();
     }
 
     function testAuthenticateVoteInvalidSigner() public {

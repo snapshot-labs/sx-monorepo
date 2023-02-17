@@ -13,7 +13,9 @@ contract ExecuteTest is SpaceTest {
 
         vm.expectEmit(true, true, true, true);
         emit ProposalExecuted(proposalId);
+        snapStart("Execute");
         space.execute(proposalId, executionStrategy.params);
+        snapEnd();
 
         assertEq(uint8(space.getProposalStatus(proposalId)), uint8(ProposalStatus.Executed));
     }
