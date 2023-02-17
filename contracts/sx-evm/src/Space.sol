@@ -20,7 +20,7 @@ contract Space is ISpace, Ownable {
     uint32 public maxVotingDuration;
     // Minimum duration a proposal can last.
     uint32 public minVotingDuration;
-    // Next proposal nonce, increased by one everytime a new proposal is created.
+    // Next proposal nonce, increased by one every time a new proposal is created.
     uint256 public nextProposalId;
     // Minimum voting power required by a user to create a new proposal (used to prevent proposal spamming).
     uint256 public proposalThreshold;
@@ -158,8 +158,8 @@ contract Space is ISpace, Ownable {
     }
 
     /**
-     * @notice  Internal function to add exection strategies.
-     * @param   _executionStrategies  Array of exectuion strategies to add.
+     * @notice  Internal function to add execution strategies.
+     * @param   _executionStrategies  Array of execution strategies to add.
      */
     function _addExecutionStrategies(address[] memory _executionStrategies) internal {
         for (uint256 i = 0; i < _executionStrategies.length; i++) {

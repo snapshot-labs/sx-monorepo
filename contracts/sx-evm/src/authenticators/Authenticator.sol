@@ -10,7 +10,7 @@ abstract contract Authenticator {
     function _call(address target, bytes4 functionSelector, bytes memory data) internal {
         (bool success, ) = target.call(abi.encodePacked(functionSelector, data));
         if (!success) {
-            // If the call failed, we revert with the propogated error message.
+            // If the call failed, we revert with the propagated error message.
             assembly {
                 let returnDataSize := returndatasize()
                 returndatacopy(0, 0, returnDataSize)

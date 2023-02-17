@@ -5,7 +5,7 @@ pragma solidity ^0.8.15;
 import "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 
 struct Proposal {
-    // We store the quroum for each proposal so that if the quorum is changed mid proposal,
+    // We store the quorum for each proposal so that if the quorum is changed mid proposal,
     // the proposal will still use the previous quorum *
     uint256 quorum;
     // notice: `uint32::max` corresponds to year ~2106.
