@@ -15,8 +15,6 @@ import { Transaction as TransactionType } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const page: Ref<'tokens' | 'nfts'> = ref('tokens');
-
 const router = useRouter();
 const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
@@ -29,6 +27,12 @@ const totalQuote = computed(() =>
   }, 0)
 );
 
+const page: Ref<'tokens' | 'nfts'> = ref('tokens');
+const modalOpen = ref({
+  tokens: false,
+  nfts: false
+});
+
 const sortedAssets = computed(() =>
   (assets || []).value.sort((a, b) => {
     const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
@@ -38,11 +42,7 @@ const sortedAssets = computed(() =>
   })
 );
 
-const modalOpen = ref({
-  sendToken: false
-});
-
-function openModal(type: 'sendToken') {
+function openModal(type: 'tokens' | 'nfts') {
   modalOpen.value[type] = true;
 }
 
@@ -66,7 +66,7 @@ onMounted(() => {
         <IH-check v-else class="inline-block" />
       </UiButton>
     </a>
-    <UiButton class="!px-0 w-[46px]" @click="openModal('sendToken')">
+    <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
       <IH-arrow-sm-right class="inline-block -rotate-45" />
     </UiButton>
   </div>
@@ -120,7 +120,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div v-else>
+      <div v-else-if="page === 'nfts'">
         <UiLoading v-if="nftsLoading && !nftsLoaded" class="px-4 py-3 block" />
         <div class="grid gap-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-6 py-3 px-2">
           <div v-for="(nft, i) in nfts" :key="i" class="block px-3 py-1 mb-3">
@@ -133,10 +133,16 @@ onMounted(() => {
   </div>
   <teleport to="#modal">
     <ModalSendToken
-      :open="modalOpen.sendToken"
+      :open="modalOpen.tokens"
       :address="spaceData.wallet"
       :network="spaceData.network"
-      @close="modalOpen.sendToken = false"
+      @close="modalOpen.tokens = false"
+      @add="addTx"
+    />
+    <ModalSendNft
+      :open="modalOpen.nfts"
+      :address="spaceData.wallet"
+      @close="modalOpen.nfts = false"
       @add="addTx"
     />
   </teleport>
