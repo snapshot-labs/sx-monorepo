@@ -13,7 +13,6 @@ const route = useRoute();
 
 const uiStore = useUiStore();
 const { modalAccountOpen } = useModal();
-
 const { login, web3 } = useWeb3();
 const { toggleSkin, getMode } = useUserSkin();
 

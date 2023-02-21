@@ -7,6 +7,8 @@ import router from '@/router';
 import '@/helpers/auth';
 import '@/style.scss';
 
+if (top?.location !== location) document.documentElement.style.display = 'none';
+
 const pinia = createPinia();
 const app = createApp({ render: () => h(App) })
   .use(router)
