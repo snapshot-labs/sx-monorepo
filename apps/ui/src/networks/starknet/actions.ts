@@ -76,7 +76,7 @@ export function createActions(
         minVotingDuration: number;
         maxVotingDuration: number;
         proposalThreshold: bigint;
-        qorum: bigint;
+        quorum: bigint;
         authenticators: string[];
         votingStrategies: string[];
         votingStrategiesParams: string[][];

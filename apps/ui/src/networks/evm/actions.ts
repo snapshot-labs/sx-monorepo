@@ -7,7 +7,7 @@ import type { Space, Proposal } from '@/types';
 
 type Choice = 0 | 1 | 2;
 
-const EXECUTOR = '0x81519C29621Ba131ea398c15B17391F53e8B9A94';
+const EXECUTOR = '0xb1001fdf62c020761039a750b27e73c512fdaa5e';
 
 function pickAuthenticatorAndStrategies(authenticators: string[], strategies: string[]) {
   const authenticator = authenticators.find(
@@ -15,9 +15,8 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
   );
 
   const selectedStrategies = strategies
-    .map((strategy, index) => [index, strategy] as const)
-    .filter(([, strategy]) => SUPPORTED_STRATEGIES[strategy])
-    .map(([index]) => index);
+    .map((strategy, index) => ({ address: strategy, index } as const))
+    .filter(({ address }) => SUPPORTED_STRATEGIES[address]);
 
   if (!authenticator || selectedStrategies.length === 0) {
     throw new Error('Unsupported space');
@@ -27,7 +26,7 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
 }
 
 export function createActions(chainId: number): NetworkActions {
-  const client = new clients.SnapshotEVMClient();
+  const client = new clients.EvmEthereumTx();
 
   return {
     createSpace() {
@@ -52,14 +51,16 @@ export function createActions(chainId: number): NetworkActions {
 
       return client.propose({
         signer: web3.getSigner(),
-        space: space.id,
-        authenticator,
-        userVotingStrategies: strategies.map(index => ({
-          index,
-          params: '0x00'
-        })),
-        executionStrategy: { addy: EXECUTOR, params: '0x00' },
-        metadataUri: `ipfs://${cid}`
+        envelope: {
+          data: {
+            space: space.id,
+            authenticator,
+            strategies,
+            executor: EXECUTOR,
+            executionParams: [],
+            metadataUri: `ipfs://${cid}`
+          }
+        }
       });
     },
     vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
@@ -77,14 +78,15 @@ export function createActions(chainId: number): NetworkActions {
 
       return client.vote({
         signer: web3.getSigner(),
-        space: proposal.space.id,
-        authenticator,
-        userVotingStrategies: strategies.map(index => ({
-          index,
-          params: '0x00'
-        })),
-        proposal: proposal.proposal_id,
-        choice: convertedChoice
+        envelope: {
+          data: {
+            space: proposal.space.id,
+            authenticator,
+            strategies,
+            proposal: proposal.proposal_id,
+            choice: convertedChoice
+          }
+        }
       });
     },
     finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {

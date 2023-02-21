@@ -67,7 +67,7 @@ export function useActions() {
       minVotingDuration: settings.minVotingDuration,
       maxVotingDuration: settings.maxVotingDuration,
       proposalThreshold: BigInt(settings.proposalThreshold),
-      qorum: BigInt(settings.quorum),
+      quorum: BigInt(settings.quorum),
       authenticators: authenticators.map(config => config.address),
       votingStrategies: votingStrategies.map(config => config.address),
       votingStrategiesParams: votingStrategies.map(config =>
