@@ -2,92 +2,62 @@
 import { ref, reactive, computed, watch, Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useActions } from '@/composables/useActions';
+import { useWeb3 } from '@/composables/useWeb3';
 import { clone } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
-import { enabledNetworks, getNetwork } from '@/networks';
+import { getNetwork } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceSettings } from '@/types';
 
+const PAGES = [
+  {
+    id: 'profile',
+    title: 'Profile'
+  },
+  {
+    id: 'network',
+    title: 'Network'
+  },
+  {
+    id: 'strategies',
+    title: 'Strategies'
+  },
+  {
+    id: 'auths',
+    title: 'Auths'
+  },
+  {
+    id: 'executions',
+    title: 'Executions'
+  },
+  {
+    id: 'voting',
+    title: 'Voting'
+  },
+  {
+    id: 'controller',
+    title: 'Controller'
+  }
+] as const;
+
+type PageID = typeof PAGES[number]['id'];
 type MetadataState = { name: string; about?: string; website?: string };
-
-const metadataDefinition = {
-  type: 'object',
-  title: 'Space',
-  additionalProperties: false,
-  required: ['name'],
-  properties: {
-    name: {
-      type: 'string',
-      title: 'Name',
-      minLength: 1,
-      examples: ['Space name']
-    },
-    about: {
-      type: 'string',
-      format: 'long',
-      title: 'About',
-      examples: ['Space description']
-    },
-    website: {
-      type: 'string',
-      title: 'Website',
-      examples: ['Space website URL']
-    }
-  }
-};
-
-const settingsDefinition = {
-  type: 'object',
-  title: 'SpaceSettings',
-  additionalProperties: false,
-  required: [
-    'votingDelay',
-    'minVotingDuration',
-    'maxVotingDuration',
-    'proposalThreshold',
-    'quorum'
-  ],
-  properties: {
-    votingDelay: {
-      type: 'number',
-      title: 'Voting delay',
-      examples: ['0']
-    },
-    minVotingDuration: {
-      type: 'number',
-      title: 'Min. voting duration',
-      examples: ['0']
-    },
-    maxVotingDuration: {
-      type: 'number',
-      title: 'Max. voting duration',
-      examples: ['86400']
-    },
-    proposalThreshold: {
-      type: 'string',
-      format: 'uint256',
-      title: 'Proposal threshold',
-      examples: ['1']
-    },
-    quorum: {
-      type: 'string',
-      format: 'uint256',
-      title: 'Quorum',
-      examples: ['1']
-    }
-  }
-};
-
-const availableNetworks = enabledNetworks.map(id => ({
-  id,
-  name: getNetwork(id).name
-}));
 
 const router = useRouter();
 const { createSpace } = useActions();
+const { web3 } = useWeb3();
 
+const pagesRefs = ref([] as HTMLElement[]);
 const sending = ref(false);
-const selectedNetworkId: Ref<NetworkID> = ref('sn-tn2');
+const currentPage: Ref<PageID> = ref('profile');
+const pagesErrors: Ref<Record<PageID, Record<string, string>>> = ref({
+  profile: {},
+  network: {},
+  strategies: {},
+  auths: {},
+  executions: {},
+  voting: {},
+  controller: {}
+});
 const metadataForm: MetadataState = reactive(
   clone({
     name: '',
@@ -95,6 +65,10 @@ const metadataForm: MetadataState = reactive(
     website: ''
   })
 );
+const selectedNetworkId: Ref<NetworkID> = ref('sn-tn2');
+const authenticators = ref([] as StrategyConfig[]);
+const votingStrategies = ref([] as StrategyConfig[]);
+const executionStrategies = ref([] as StrategyConfig[]);
 const settingsForm: SpaceSettings = reactive(
   clone({
     votingDelay: 0,
@@ -104,21 +78,41 @@ const settingsForm: SpaceSettings = reactive(
     quorum: '1'
   })
 );
-const authenticators = ref([] as StrategyConfig[]);
-const votingStrategies = ref([] as StrategyConfig[]);
-const executionStrategies = ref([] as StrategyConfig[]);
+const controller = ref(web3.value.account);
 
 const selectedNetwork = computed(() => getNetwork(selectedNetworkId.value));
-const metadataFormErrors = computed(() => validateForm(metadataDefinition, metadataForm));
-const settingsFormErrors = computed(() => validateForm(settingsDefinition, settingsForm));
-const disabled = computed(
-  () =>
-    authenticators.value.length === 0 ||
-    votingStrategies.value.length === 0 ||
-    executionStrategies.value.length === 0 ||
-    Object.keys(metadataFormErrors.value).length > 0 ||
-    Object.keys(settingsFormErrors.value).length > 0
+const accessiblePages = computed(() => {
+  const invalidPageIndex = PAGES.findIndex(page => !validatePage(page.id));
+
+  return Object.fromEntries(
+    PAGES.map((page, i) => [page.id, invalidPageIndex === -1 ? true : i <= invalidPageIndex])
+  );
+});
+const showCreate = computed(
+  () => PAGES.findIndex(page => page.id === currentPage.value) === PAGES.length - 1
 );
+const nextDisabled = computed(() => !validatePage(currentPage.value));
+const submitDisabled = computed(() => PAGES.some(page => !validatePage(page.id)));
+
+function validatePage(page: PageID) {
+  if (page === 'strategies') return votingStrategies.value.length > 0;
+  if (page === 'auths') return authenticators.value.length > 0;
+  if (page === 'executions') return executionStrategies.value.length > 0;
+
+  return Object.values(pagesErrors.value[page]).length === 0;
+}
+
+function handleErrors(page: PageID, errors: any) {
+  pagesErrors.value[page] = errors;
+}
+
+function handleNextClick() {
+  const currentIndex = PAGES.findIndex(page => page.id === currentPage.value);
+  if (currentIndex === PAGES.length - 1) return;
+
+  currentPage.value = PAGES[currentIndex + 1].id;
+  pagesRefs.value[currentIndex + 1].scrollIntoView();
+}
 
 async function handleSubmit() {
   sending.value = true;
@@ -143,6 +137,15 @@ async function handleSubmit() {
   }
 }
 
+watch(
+  () => web3.value.account,
+  value => {
+    if (!controller.value && value) {
+      controller.value = value;
+    }
+  }
+);
+
 watch(selectedNetworkId, () => {
   authenticators.value = [];
   votingStrategies.value = [];
@@ -152,61 +155,82 @@ watch(selectedNetworkId, () => {
 
 <template>
   <div>
-    <Container class="pt-5">
-      <h2>Deploy space</h2>
-      <div class="s-box pt-4">
-        <SIObject
-          v-model="metadataForm"
-          :error="metadataFormErrors"
-          :definition="metadataDefinition"
-        />
+    <div class="pt-5 flex max-w-[50rem] mx-auto px-4">
+      <div
+        class="flex fixed lg:sticky top-[72px] inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
+      >
+        <button
+          v-for="page in PAGES"
+          ref="pagesRefs"
+          :key="page.id"
+          :disabled="!accessiblePages[page.id]"
+          class="px-3 py-1 block lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto"
+          :class="{
+            'bg-skin-active': page.id === currentPage,
+            'hover:bg-skin-hover': page.id !== currentPage
+          }"
+          @click="currentPage = page.id"
+        >
+          {{ page.title }}
+        </button>
       </div>
-
-      <fieldset class="my-3">
-        <legend>Network:</legend>
-
-        <div v-for="network in availableNetworks" :key="network.id">
-          <input v-model="selectedNetworkId" :value="network.id" type="radio" />
-          <label class="ml-2" :for="network.id">{{ network.name }}</label>
+      <div class="flex-1">
+        <div class="mt-8 lg:mt-0">
+          <BlockSpaceFormProfile
+            v-if="currentPage === 'profile'"
+            :form="metadataForm"
+            @errors="v => handleErrors('profile', v)"
+          />
+          <BlockSpaceFormNetwork
+            v-else-if="currentPage === 'network'"
+            v-model="selectedNetworkId"
+          />
+          <BlockSpaceFormStrategies
+            v-else-if="currentPage === 'strategies'"
+            v-model="votingStrategies"
+            :available-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
+            title="Voting strategies"
+            description="Lorem ipsum..."
+          />
+          <BlockSpaceFormStrategies
+            v-else-if="currentPage === 'auths'"
+            v-model="authenticators"
+            :available-strategies="selectedNetwork.constants.EDITOR_AUTHENTICATORS"
+            title="Authenticators"
+            description="Lorem ipsum..."
+          />
+          <BlockSpaceFormStrategies
+            v-else-if="currentPage === 'executions'"
+            v-model="executionStrategies"
+            :available-strategies="selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES"
+            title="Execution strategies"
+            description="Lorem ipsum..."
+          />
+          <BlockSpaceFormVoting
+            v-else-if="currentPage === 'voting'"
+            :form="settingsForm"
+            @errors="v => handleErrors('voting', v)"
+          />
+          <BlockSpaceFormController
+            v-else-if="currentPage === 'controller'"
+            v-model="controller"
+            @errors="v => handleErrors('controller', v)"
+          />
         </div>
-      </fieldset>
 
-      <div class="s-box">
-        <h3 class="mb-2">Settings</h3>
-        <SIObject
-          v-model="settingsForm"
-          :error="settingsFormErrors"
-          :definition="settingsDefinition"
-        />
+        <UiButton
+          v-if="showCreate"
+          class="w-full"
+          :loading="sending"
+          :disabled="submitDisabled"
+          @click="handleSubmit"
+        >
+          Create
+        </UiButton>
+        <UiButton v-else class="w-full" :disabled="nextDisabled" @click="handleNextClick">
+          Next
+        </UiButton>
       </div>
-
-      <BlockStrategiesConfig
-        v-model="authenticators"
-        :available-strategies="selectedNetwork.constants.EDITOR_AUTHENTICATORS"
-        title="Authenticators"
-        description="Lorem ipsum..."
-        class="mt-6"
-      />
-
-      <BlockStrategiesConfig
-        v-model="votingStrategies"
-        :available-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
-        title="Voting strategies"
-        description="Lorem ipsum..."
-        class="mt-6"
-      />
-
-      <BlockStrategiesConfig
-        v-model="executionStrategies"
-        :available-strategies="selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES"
-        title="Execution strategies"
-        description="Lorem ipsum..."
-        class="mt-6"
-      />
-
-      <UiButton class="w-full" :loading="sending" :disabled="disabled" @click="handleSubmit">
-        Create
-      </UiButton>
-    </Container>
+    </div>
   </div>
 </template>

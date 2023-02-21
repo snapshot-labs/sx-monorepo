@@ -10,6 +10,8 @@
   --heading-color: #faf9fc;
   --border-color: #333237;
   --block-bg: #1c1b20;
+  --active-bg: #29282e;
+  --hover-bg: #232227;
 }
 
 [data-color-scheme='light'] {
@@ -21,6 +23,8 @@
   --heading-color: #111111;
   --border-color: #e5e5e6;
   --block-bg: white;
+  --active-bg: #ededed;
+  --hover-bg: #f7f7f7;
 }
 
 @font-face {
@@ -230,4 +234,18 @@ a,
   .s-input {
     @apply focus-within:border-skin-link;
   }
+}
+
+// Styles for get-starknet@v1 to unify overlay and prevent mismatched z-indexes
+.s-overlay {
+  z-index: 40 !important;
+
+  .s-overlay__scrim {
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+  }
+}
+
+.s-dialog {
+  z-index: 41 !important;
 }

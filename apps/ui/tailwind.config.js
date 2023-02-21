@@ -13,6 +13,8 @@ module.exports = {
         'skin-link': 'var(--link-color)',
         'skin-bg': 'var(--bg-color)',
         'skin-block-bg': 'var(--block-bg)',
+        'skin-active': 'var(--active-bg)',
+        'skin-hover': 'var(--hover-bg)',
         'skin-heading': 'var(--heading-color)',
         blue: '#384aff',
         green: '#21b66f',
