@@ -67,17 +67,15 @@ abstract contract SignatureVerifier is EIP712 {
         usedSalts[author][salt] = true;
     }
 
-    function _verifyVoteSig(uint8 v, bytes32 r, bytes32 s, uint256 salt, address space, bytes memory data) internal {
+    function _verifyVoteSig(uint8 v, bytes32 r, bytes32 s, address space, bytes memory data) internal view {
         (address voter, uint256 proposeId, Choice choice, IndexedStrategy[] memory userVotingStrategies) = abi.decode(
             data,
             (address, uint256, Choice, IndexedStrategy[])
         );
 
-        if (usedSalts[voter][salt]) revert SaltAlreadyUsed();
-
         address recoveredAddress = ECDSA.recover(
             _hashTypedDataV4(
-                keccak256(abi.encode(VOTE_TYPEHASH, space, voter, proposeId, choice, userVotingStrategies.hash(), salt))
+                keccak256(abi.encode(VOTE_TYPEHASH, space, voter, proposeId, choice, userVotingStrategies.hash()))
             ),
             v,
             r,
@@ -85,8 +83,5 @@ abstract contract SignatureVerifier is EIP712 {
         );
 
         if (recoveredAddress != voter) revert InvalidSignature();
-
-        // Mark salt as used to prevent replay attacks
-        usedSalts[voter][salt] = true;
     }
 }
