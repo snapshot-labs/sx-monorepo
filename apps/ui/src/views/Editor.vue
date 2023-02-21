@@ -70,7 +70,7 @@ async function handleProposeClick() {
   sending.value = true;
 
   try {
-    await propose(
+    const result = await propose(
       space.value,
       proposals[`${id}:${key}`].title,
       proposals[`${id}:${key}`].body,
@@ -78,7 +78,7 @@ async function handleProposeClick() {
       proposals[`${id}:${key}`].execution
     );
 
-    router.back();
+    if (result) router.back();
   } finally {
     sending.value = false;
   }
