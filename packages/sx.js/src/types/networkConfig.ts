@@ -18,6 +18,10 @@ export type CompStrategyConfig = {
   type: 'comp';
 };
 
+export type WhitelistStrategyConfig = {
+  type: 'whitelist';
+};
+
 export type SingleSlotProofStrategyConfig = {
   type: 'singleSlotProof';
   params: {
@@ -55,6 +59,7 @@ export type NetworkConfig = {
     [key: string]:
       | VanillaStrategyConfig
       | CompStrategyConfig
+      | WhitelistStrategyConfig
       | SingleSlotProofStrategyConfig
       | undefined;
   };

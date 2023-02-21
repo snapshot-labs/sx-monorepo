@@ -1,11 +1,12 @@
 import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
 import SpaceFactoryContract from './fixtures/SpaceFactory.json';
 import CompTokenContract from './fixtures/CompToken.json';
-import CompVotingStrategy from './fixtures/CompVotingStrategy.json';
 import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
 import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
 import EthSigAuthenticatorContract from './fixtures/EthSigAuthenticator.json';
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
+import CompVotingStrategy from './fixtures/CompVotingStrategy.json';
+import WhitelistStrategy from './fixtures/WhitelistStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { NetworkConfig } from '../../../src/types';
@@ -18,6 +19,7 @@ export type TestConfig = {
   ethSigAuthenticator: string;
   vanillaVotingStrategy: string;
   compVotingStrategy: string;
+  whitelistStrategy: string;
   executionStrategy: string;
   networkConfig: NetworkConfig;
 };
@@ -56,6 +58,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
   );
   const vanillaVotingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
   const compVotingStrategy = await deployDependency(signer, CompVotingStrategy);
+  const whitelistStrategy = await deployDependency(signer, WhitelistStrategy);
   const executionStrategy = await deployDependency(signer, VanillaExecutionStrategyContract);
 
   const compTokenContract = new Contract(compToken, CompTokenContract.abi, signer);
@@ -70,6 +73,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     ethSigAuthenticator,
     vanillaVotingStrategy,
     compVotingStrategy,
+    whitelistStrategy,
     executionStrategy,
     networkConfig: {
       spaceFactory,
@@ -90,6 +94,9 @@ export async function setup(signer: Signer): Promise<TestConfig> {
         },
         [compVotingStrategy]: {
           type: 'comp'
+        },
+        [whitelistStrategy]: {
+          type: 'whitelist'
         }
       },
       executors: {

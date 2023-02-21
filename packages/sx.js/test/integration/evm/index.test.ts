@@ -1,4 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { AbiCoder } from '@ethersproject/abi';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
 import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
@@ -25,6 +26,16 @@ describe('EthereumTx', () => {
 
     const controller = await signer.getAddress();
 
+    const whitelist = [
+      {
+        addy: controller,
+        vp: 1n
+      }
+    ];
+
+    const abiCoder = new AbiCoder();
+    const whitelistParams = abiCoder.encode(['tuple(address addy, uint256 vp)[]'], [whitelist]);
+
     const res = await ethTxClient.deploySpace({
       signer,
       controller,
@@ -46,6 +57,10 @@ describe('EthereumTx', () => {
         {
           addy: testConfig.compVotingStrategy,
           params: testConfig.compToken
+        },
+        {
+          addy: testConfig.whitelistStrategy,
+          params: whitelistParams
         }
       ],
       executionStrategies: [testConfig.executionStrategy]
@@ -203,6 +218,46 @@ describe('EthereumTx', () => {
           strategies: [{ index: 1, address: testConfig.compVotingStrategy }],
           executionParams: [],
           proposal: 4,
+          choice: 0
+        }
+      };
+
+      const res = await ethTxClient.vote({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+  });
+
+  describe('whitelistStrategy + vanilla authenticator', () => {
+    it('should propose via authenticator', async () => {
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 2, address: testConfig.whitelistStrategy }],
+          executor: testConfig.executionStrategy,
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+          executionParams: []
+        }
+      };
+
+      const res = await ethTxClient.propose({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+
+    it('should vote via authenticator', async () => {
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 2, address: testConfig.whitelistStrategy }],
+          executionParams: [],
+          proposal: 5,
           choice: 0
         }
       };

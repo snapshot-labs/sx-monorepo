@@ -1,5 +1,6 @@
 import createVanillaStrategy from './vanilla';
 import createCompStrategy from './comp';
+import createWhitelistStrategy from './whitelist';
 import type { Propose, Vote, StrategyConfig, Strategy } from '../../clients/evm/types';
 import type { NetworkConfig } from '../../types';
 
@@ -13,6 +14,10 @@ function getStrategy(address: string, networkConfig: NetworkConfig): Strategy | 
 
   if (strategy.type === 'comp') {
     return createCompStrategy();
+  }
+
+  if (strategy.type === 'whitelist') {
+    return createWhitelistStrategy();
   }
 
   return null;

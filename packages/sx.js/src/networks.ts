@@ -19,6 +19,9 @@ export const evmGoerli: NetworkConfig = {
     },
     '0xbbd17346378f76c1c94032594b57c93c24857b19': {
       type: 'comp'
+    },
+    '0xc89a0c93af823f794f96f7b2b63fc2a1f1ae9427': {
+      type: 'whitelist'
     }
   },
   executors: {
