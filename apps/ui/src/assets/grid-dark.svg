@@ -1,21 +1,11 @@
-<svg width="360" height="361" viewBox="0 0 360 361" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g clip-path="url(#clip0_2_2)">
-        <path d="M360 60.5H0" stroke="#333237"/>
-        <path d="M360 120.5H0" stroke="#333237"/>
-        <path d="M360 180.5H0" stroke="#333237"/>
-        <path d="M360 240.5H0" stroke="#333237"/>
-        <path d="M360 300.5H0" stroke="#333237"/>
-        <path d="M360 360.5H0" stroke="#333237"/>
-        <path d="M359.5 360V0" stroke="#333237"/>
-        <path d="M299.5 360V0" stroke="#333237"/>
-        <path d="M239.5 360V0" stroke="#333237"/>
-        <path d="M179.5 360V0" stroke="#333237"/>
-        <path d="M119.5 360V0" stroke="#333237"/>
-        <path d="M59.5 360V0" stroke="#333237"/>
-    </g>
-    <defs>
-        <clipPath id="clip0_2_2">
-            <rect width="360" height="361" fill="white"/>
-        </clipPath>
-    </defs>
+<svg width="44" height="44" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+  <g clip-path="url(#clip0_2_2)">
+    <path d="M50 44H0" stroke="#333237"/>
+    <path d="M44 50V0" stroke="#333237"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_2_2">
+      <rect width="45" height="45"/>
+    </clipPath>
+  </defs>
 </svg>

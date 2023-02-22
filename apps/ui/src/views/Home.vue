@@ -6,8 +6,8 @@
         <h1 class="mb-5 mono">Where decisions<br />get made.</h1>
       </Container>
     </div>
-    <Container class="max-w-screen-md mb-4" slim>
-      <div class="x-block overflow-hidden text-skin-link">
+    <Container class="max-w-screen-md space-y-4">
+      <div class="border rounded-lg overflow-hidden text-skin-link">
         <div class="flex">
           <div class="px-4 bg-[color:var(--border-color)] flex justify-center items-center">
             <IH-exclamation class="my-1" />
@@ -17,8 +17,6 @@
           </div>
         </div>
       </div>
-    </Container>
-    <Container class="max-w-screen-md space-y-4">
       <div class="space-y-2">
         <h3>Getting started</h3>
         <div class="space-x-2">
