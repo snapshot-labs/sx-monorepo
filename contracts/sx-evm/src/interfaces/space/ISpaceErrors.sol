@@ -16,7 +16,7 @@ interface ISpaceErrors {
     error AuthenticatorNotWhitelisted(address auth);
     error ExecutionStrategyNotWhitelisted(address strategy);
     error ProposalThresholdNotReached(uint256 votingPower);
-    error DuplicateFound(uint a, uint b);
+    error DuplicateFound(uint8 index);
     error ProposalAlreadyFinalized();
     error MinVotingDurationHasNotElapsed();
     error ExecutionHashMismatch();

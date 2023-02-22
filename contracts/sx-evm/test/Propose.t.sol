@@ -72,7 +72,7 @@ contract ProposeTest is SpaceTest {
         invalidUsedStrategies[2] = IndexedStrategy(2, new bytes(0));
         invalidUsedStrategies[3] = IndexedStrategy(0, new bytes(0)); // Duplicate index
 
-        vm.expectRevert(abi.encodeWithSelector(DuplicateFound.selector, 0, 0));
+        vm.expectRevert(abi.encodeWithSelector(DuplicateFound.selector, 0));
         _createProposal(author, proposalMetadataUri, executionStrategy, invalidUsedStrategies);
     }
 

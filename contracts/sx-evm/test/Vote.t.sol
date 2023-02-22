@@ -127,9 +127,7 @@ contract VoteTest is SpaceTest {
         IndexedStrategy[] memory duplicateStrategies = new IndexedStrategy[](2);
         duplicateStrategies[0] = userVotingStrategies[0];
         duplicateStrategies[1] = userVotingStrategies[0];
-        vm.expectRevert(
-            abi.encodeWithSelector(DuplicateFound.selector, duplicateStrategies[0].index, duplicateStrategies[1].index)
-        );
+        vm.expectRevert(abi.encodeWithSelector(DuplicateFound.selector, duplicateStrategies[0].index));
         _vote(author, proposalId, Choice.For, duplicateStrategies);
     }
 
