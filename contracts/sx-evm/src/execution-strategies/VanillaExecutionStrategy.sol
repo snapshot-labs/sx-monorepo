@@ -7,8 +7,19 @@ import "./SimpleQuorumExecutionStrategy.sol";
 contract VanillaExecutionStrategy is SimpleQuorumExecutionStrategy {
     uint256 numExecuted;
 
-    // solhint-disable no-unused-vars
-    function execute(Proposal memory proposal, bytes memory executionParams) external override {
+    function execute(
+        Proposal memory proposal,
+        uint256 votesFor,
+        uint256 votesAgainst,
+        uint256 votesAbstain,
+        bytes memory payload
+    ) external override {
+        ProposalStatus proposalStatus = getProposalStatus(proposal, votesFor, votesAgainst, votesAbstain);
+        if ((proposalStatus != ProposalStatus.Accepted) && (proposalStatus != ProposalStatus.VotingPeriodAccepted)) {
+            revert InvalidProposalStatus(proposalStatus);
+        }
+        // Check that the execution payload matches the payload supplied when the proposal was created
+        if (proposal.executionPayloadHash != keccak256(payload)) revert InvalidPayload();
         numExecuted++;
     }
 }

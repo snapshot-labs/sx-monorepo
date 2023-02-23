@@ -45,8 +45,8 @@ contract SpaceSetup is Script {
         authenticators[1] = ethSigAuthenticator;
         authenticators[2] = ethTxAuthenticator;
 
-        address[] memory executionStrategies = new address[](1);
-        executionStrategies[0] = vanillaExecutionStrategy;
+        Strategy[] memory executionStrategies = new Strategy[](1);
+        executionStrategies[0] = Strategy(vanillaExecutionStrategy, new bytes(quorum));
 
         votingDelay = 0;
         minVotingDuration = 0;
@@ -63,7 +63,6 @@ contract SpaceSetup is Script {
             minVotingDuration,
             maxVotingDuration,
             proposalThreshold,
-            quorum,
             metadataUri,
             votingStrategies,
             authenticators,

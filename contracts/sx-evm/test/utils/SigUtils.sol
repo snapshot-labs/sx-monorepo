@@ -8,6 +8,7 @@ import { SXHash } from "../../src/utils/SXHash.sol";
 abstract contract SigUtils {
     using SXHash for Strategy;
     using SXHash for IndexedStrategy[];
+    using SXHash for IndexedStrategy;
 
     string private name;
     string private version;
@@ -38,7 +39,7 @@ abstract contract SigUtils {
         address space,
         address author,
         string memory metadataUri,
-        Strategy memory executionStrategy,
+        IndexedStrategy memory executionStrategy,
         IndexedStrategy[] memory usedVotingStrategies,
         uint256 salt
     ) internal view returns (bytes32) {

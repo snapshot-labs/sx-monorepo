@@ -34,9 +34,9 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         avatar.enableModule(address(avatarExecutionStrategy));
 
         // Activate the execution strategy on the space
-        address[] memory executionStrategies = new address[](1);
-        executionStrategies[0] = address(avatarExecutionStrategy);
-
+        Strategy[] memory executionStrategies = new Strategy[](1);
+        executionStrategies[0] = Strategy(address(avatarExecutionStrategy), abi.encode(uint256(quorum)));
+        // This strategy will reside at index 1 in the space's execution strategies array
         space.addExecutionStrategies(executionStrategies);
     }
 
@@ -46,7 +46,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataUri,
-            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            IndexedStrategy(1, abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies);
@@ -68,13 +68,13 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataUri,
-            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            IndexedStrategy(1, abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
-        vm.expectRevert(TransactionsFailed.selector);
+        vm.expectRevert(ExecutionFailed.selector);
         space.execute(proposalId, abi.encode(transactions));
     }
 
@@ -91,7 +91,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataUri,
-            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            IndexedStrategy(1, abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies);
@@ -117,13 +117,13 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataUri,
-            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            IndexedStrategy(1, abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
-        vm.expectRevert(TransactionsFailed.selector);
+        vm.expectRevert(ExecutionFailed.selector);
         space.execute(proposalId, abi.encode(transactions));
         // both txs should have reverted despite the first one being valid
         assertEq(recipient.balance, 0);
@@ -210,7 +210,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataUri,
-            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            IndexedStrategy(1, abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies);

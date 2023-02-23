@@ -3,10 +3,16 @@
 pragma solidity ^0.8.15;
 
 import "../interfaces/IExecutionStrategy.sol";
+import "forge-std/console2.sol";
 
 abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
-    // solhint-disable no-unused-vars
-    function execute(Proposal memory proposal, bytes memory executionParams) external virtual override;
+    function execute(
+        Proposal memory proposal,
+        uint256 votesFor,
+        uint256 votesAgainst,
+        uint256 votesAbstain,
+        bytes memory payload
+    ) external virtual override;
 
     function getProposalStatus(
         Proposal memory proposal,
@@ -14,7 +20,9 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
         uint256 votesAgainst,
         uint256 votesAbstain
     ) public view override returns (ProposalStatus) {
-        bool accepted = _quorumReached(proposal.quorum, votesFor, votesAgainst, votesAbstain) &&
+        // Decode the quorum parameter from the execution strategy's params
+        uint256 quorum = abi.decode(proposal.executionStrategy.params, (uint256));
+        bool accepted = _quorumReached(quorum, votesFor, votesAgainst, votesAbstain) &&
             _supported(votesFor, votesAgainst);
         if (proposal.finalizationStatus == FinalizationStatus.Cancelled) {
             return ProposalStatus.Cancelled;
@@ -37,17 +45,21 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
         }
     }
 
-    function _quorumReached(
-        uint256 quorum,
-        uint256 votesFor,
-        uint256 votesAgainst,
-        uint256 votesAbstain
-    ) internal pure returns (bool) {
-        uint256 totalVotes = votesFor + votesAgainst + votesAbstain;
-        return totalVotes >= quorum;
+    function getQuorum(Proposal memory proposal) external pure override returns (uint256) {
+        return abi.decode(proposal.executionStrategy.params, (uint256));
     }
 
-    function _supported(uint256 votesFor, uint256 votesAgainst) internal pure returns (bool) {
-        return votesFor > votesAgainst;
+    function _quorumReached(
+        uint256 _quorum,
+        uint256 _votesFor,
+        uint256 _votesAgainst,
+        uint256 _votesAbstain
+    ) internal pure returns (bool) {
+        uint256 totalVotes = _votesFor + _votesAgainst + _votesAbstain;
+        return totalVotes >= _quorum;
+    }
+
+    function _supported(uint256 _votesFor, uint256 _votesAgainst) internal pure returns (bool) {
+        return _votesFor > _votesAgainst;
     }
 }

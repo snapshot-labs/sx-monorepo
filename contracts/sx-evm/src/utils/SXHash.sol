@@ -27,4 +27,9 @@ library SXHash {
         }
         return keccak256(abi.encodePacked(indexedStrategyHashes));
     }
+
+    function hash(IndexedStrategy memory indexedStrategy) internal pure returns (bytes32) {
+        return
+            keccak256(abi.encode(INDEXED_STRATEGY_TYPEHASH, indexedStrategy.index, keccak256(indexedStrategy.params)));
+    }
 }

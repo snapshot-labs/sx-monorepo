@@ -8,8 +8,8 @@ import "src/types.sol";
 import { SXHash } from "src/utils/SXHash.sol";
 
 abstract contract SignatureVerifier is EIP712 {
-    using SXHash for Strategy;
     using SXHash for IndexedStrategy[];
+    using SXHash for IndexedStrategy;
 
     error InvalidSignature();
     error SaltAlreadyUsed();
@@ -36,9 +36,9 @@ abstract contract SignatureVerifier is EIP712 {
         (
             address author,
             string memory metadataUri,
-            Strategy memory executionStrategy,
+            IndexedStrategy memory executionStrategy,
             IndexedStrategy[] memory userVotingStrategies
-        ) = abi.decode(data, (address, string, Strategy, IndexedStrategy[]));
+        ) = abi.decode(data, (address, string, IndexedStrategy, IndexedStrategy[]));
 
         if (usedSalts[author][salt]) revert SaltAlreadyUsed();
 
