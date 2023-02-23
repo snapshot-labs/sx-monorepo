@@ -8,7 +8,6 @@ import "../src/execution-strategies/AvatarExecutionStrategy.sol";
 import "../src/types.sol";
 
 contract AvatarExecutionStrategyTest is SpaceTest {
-    error SpaceNotEnabled();
     error TransactionsFailed();
     error InvalidSpace();
 
@@ -217,7 +216,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         _vote(author, proposalId, Choice.For, userVotingStrategies);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
-        vm.expectRevert(SpaceNotEnabled.selector);
+        vm.expectRevert(InvalidSpace.selector);
         space.execute(proposalId, abi.encode(transactions));
     }
 

@@ -47,4 +47,9 @@ contract SpaceManager is OwnableUpgradeable {
     function isSpaceEnabled(address space) public view returns (bool) {
         return spaces[space];
     }
+
+    modifier onlySpace(address callerAddress) {
+        if (!isSpaceEnabled(callerAddress)) revert InvalidSpace();
+        _;
+    }
 }

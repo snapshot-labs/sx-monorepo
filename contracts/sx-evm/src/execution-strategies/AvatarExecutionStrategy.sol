@@ -9,7 +9,6 @@ import "../utils/SpaceManager.sol";
 /// @title Avatar Execution Strategy - An Execution strategy that executes transactions on an Avatar contract
 /// @dev An Avatar contract is any contract that implements the IAvatar interface, eg a Gnosis Safe.
 contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy {
-    error SpaceNotEnabled();
     error TransactionsFailed();
 
     /// @dev Emitted each time a new Avatar Execution Strategy is deployed.
@@ -56,8 +55,7 @@ contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy 
     ///         Must be called by a whitelisted space contract.
     /// @param proposal The proposal to execute.
     /// @param executionParams The encoded transactions to execute.
-    function execute(Proposal memory proposal, bytes memory executionParams) external override {
-        if (spaces[msg.sender] == false) revert SpaceNotEnabled();
+    function execute(Proposal memory proposal, bytes memory executionParams) external override onlySpace(msg.sender) {
         _execute(executionParams);
     }
 
