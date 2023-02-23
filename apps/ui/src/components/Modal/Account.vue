@@ -1,8 +1,8 @@
 <script setup>
 import { toRefs, watch } from 'vue';
 import { getInjected } from '@snapshot-labs/lock/src/utils';
-import { shorten, explorerUrl, getUrl } from '@/helpers/utils';
-import connectors from '@/helpers/connectors.json';
+import { shorten, explorerUrl } from '@/helpers/utils';
+import connectors, { mapConnectorId, getConnectorIconUrl } from '@/helpers/connectors';
 import { useWeb3 } from '@/composables/useWeb3';
 
 const injected = getInjected();
@@ -10,7 +10,8 @@ if (injected)
   connectors['injected'] = {
     ...connectors['injected'],
     ...injected,
-    ...{ id: 'injected' }
+    ...{ id: 'injected' },
+    icon: connectors[mapConnectorId(injected.id)]?.icon ?? injected.icon
   };
 
 const props = defineProps({ open: Boolean });
@@ -49,7 +50,7 @@ watch(open, () => (step = null));
             class="button-outline w-full flex justify-center items-center"
           >
             <img
-              :src="getUrl(connector.icon)"
+              :src="getConnectorIconUrl(connector.icon)"
               height="28"
               width="28"
               class="mr-2 -mt-1"
