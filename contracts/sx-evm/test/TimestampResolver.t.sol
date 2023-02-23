@@ -22,9 +22,6 @@ contract TimestampResolverTest is Test {
     }
 
     function testTimestampResolver() public {
-        console.log(block.timestamp);
-        console.log(block.number);
-
         compToken.mint(user, 1);
         compToken.delegate(user);
         vm.roll(block.number + 1);
