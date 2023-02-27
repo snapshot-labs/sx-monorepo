@@ -1,5 +1,5 @@
 export const domain = {
-  name: 'SOC',
+  name: 'snapshot-x',
   version: '1',
   chainId: 31337
 };
@@ -9,13 +9,9 @@ export const proposeTypes = {
     { name: 'space', type: 'address' },
     { name: 'author', type: 'address' },
     { name: 'metadataUri', type: 'string' },
-    { name: 'executionStrategy', type: 'Strategy' },
+    { name: 'executionStrategy', type: 'IndexedStrategy' },
     { name: 'userVotingStrategies', type: 'IndexedStrategy[]' },
     { name: 'salt', type: 'uint256' }
-  ],
-  Strategy: [
-    { name: 'addy', type: 'address' },
-    { name: 'params', type: 'bytes' }
   ],
   IndexedStrategy: [
     { name: 'index', type: 'uint8' },
@@ -29,8 +25,7 @@ export const voteTypes = {
     { name: 'voter', type: 'address' },
     { name: 'proposalId', type: 'uint256' },
     { name: 'choice', type: 'uint8' },
-    { name: 'userVotingStrategies', type: 'IndexedStrategy[]' },
-    { name: 'salt', type: 'uint256' }
+    { name: 'userVotingStrategies', type: 'IndexedStrategy[]' }
   ],
   IndexedStrategy: [
     { name: 'index', type: 'uint8' },

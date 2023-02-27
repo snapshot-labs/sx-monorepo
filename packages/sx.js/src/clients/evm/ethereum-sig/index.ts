@@ -72,8 +72,8 @@ export class EthereumSig {
       author,
       metadataUri: data.metadataUri,
       executionStrategy: {
-        addy: data.executor,
-        params: '0x00'
+        index: data.executor.index,
+        params: data.executionParams
       },
       userVotingStrategies: data.strategies.map((strategyConfig, i) => ({
         index: strategyConfig.index,
@@ -100,7 +100,7 @@ export class EthereumSig {
     const voter = await signer.getAddress();
 
     const strategiesParams = await getStrategiesParams(
-      'propose',
+      'vote',
       data.strategies,
       voter,
       data,
@@ -115,8 +115,7 @@ export class EthereumSig {
       userVotingStrategies: data.strategies.map((strategyConfig, i) => ({
         index: strategyConfig.index,
         params: strategiesParams[i]
-      })),
-      salt: this.generateSalt()
+      }))
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, voteTypes);

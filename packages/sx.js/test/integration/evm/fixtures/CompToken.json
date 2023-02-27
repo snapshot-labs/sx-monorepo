@@ -1628,18 +1628,10 @@
     "absolutePath": "test/mocks/CompToken.sol",
     "id": 37137,
     "exportedSymbols": {
-      "CompToken": [
-        37136
-      ],
-      "ERC20": [
-        26487
-      ],
-      "ERC20Permit": [
-        26737
-      ],
-      "ERC20VotesComp": [
-        27494
-      ]
+      "CompToken": [37136],
+      "ERC20": [26487],
+      "ERC20Permit": [26737],
+      "ERC20VotesComp": [27494]
     },
     "nodeType": "SourceUnit",
     "src": "33:342:72",
@@ -1649,12 +1641,7 @@
         "nodeType": "PragmaDirective",
         "src": "33:24:72",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".15"
-        ]
+        "literals": ["solidity", "^", "0.8", ".15"]
       },
       {
         "id": 37109,
@@ -1877,9 +1864,7 @@
                       "id": 37129,
                       "name": "_mint",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        27130
-                      ],
+                      "overloadedDeclarations": [27130],
                       "referencedDeclaration": 27130,
                       "src": "348:5:72",
                       "typeDescriptions": {
@@ -2008,17 +1993,7 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          37136,
-          27494,
-          27438,
-          26737,
-          28341,
-          27555,
-          26487,
-          27519,
-          26565,
-          27577,
-          25900
+          37136, 27494, 27438, 26737, 28341, 27555, 26487, 27519, 26565, 27577, 25900
         ],
         "name": "CompToken",
         "nameLocation": "189:9:72",

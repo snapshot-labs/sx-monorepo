@@ -11,8 +11,8 @@ export type Propose = {
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];
-  executor: string;
-  executionParams: string[];
+  executor: StrategyConfig;
+  executionParams: string;
   metadataUri: string;
 };
 
@@ -71,7 +71,7 @@ export type EIP712ProposeMessage = {
   space: string;
   author: string;
   metadataUri: string;
-  executionStrategy: AddressConfig;
+  executionStrategy: IndexedConfig;
   userVotingStrategies: IndexedConfig[];
   salt: number;
 };
@@ -82,5 +82,4 @@ export type EIP712VoteMessage = {
   proposalId: number;
   choice: number;
   userVotingStrategies: IndexedConfig[];
-  salt: number;
 };

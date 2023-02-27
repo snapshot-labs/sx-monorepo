@@ -27,7 +27,7 @@ export class EthereumTx {
     minVotingDuration,
     maxVotingDuration,
     proposalThreshold,
-    quorum,
+    metadataUri,
     authenticators,
     votingStrategies,
     executionStrategies
@@ -38,10 +38,10 @@ export class EthereumTx {
     minVotingDuration: number;
     maxVotingDuration: number;
     proposalThreshold: bigint;
-    quorum: bigint;
+    metadataUri: string;
     authenticators: string[];
     votingStrategies: AddressConfig[];
-    executionStrategies: string[];
+    executionStrategies: AddressConfig[];
   }): Promise<{ txId: string; spaceAddress: string }> {
     const spaceInterface = new Interface(SpaceAbi);
     const spaceFactoryContract = new Contract(
@@ -51,25 +51,23 @@ export class EthereumTx {
     );
 
     const salt = `0x${randomBytes(32).toString('hex')}`;
-    const args = [
+
+    const baseArgs = [
       controller,
       votingDelay,
       minVotingDuration,
       maxVotingDuration,
       proposalThreshold,
-      quorum,
-      votingStrategies,
-      authenticators,
-      executionStrategies,
-      salt
+      metadataUri
     ];
+    const strategies = [votingStrategies, authenticators, executionStrategies];
 
-    const functionData = spaceInterface.encodeDeploy(args.slice(0, -1));
+    const functionData = spaceInterface.encodeDeploy([...baseArgs.slice(0, -1), ...strategies]);
     const initCode = SpaceBytecode + functionData.slice(2);
 
     const initCodeHash = keccak256(initCode);
     const spaceAddress = getCreate2Address(this.networkConfig.spaceFactory, salt, initCodeHash);
-    const response = await spaceFactoryContract.createSpace(...args);
+    const response = await spaceFactoryContract.createSpace(...baseArgs, ...strategies, salt);
 
     return { spaceAddress, txId: response.hash };
   }
@@ -89,9 +87,9 @@ export class EthereumTx {
       proposerAddress,
       envelope.data.metadataUri,
       {
-        addy: envelope.data.executor,
-        params: '0x00'
-      } as AddressConfig,
+        index: envelope.data.executor.index,
+        params: envelope.data.executionParams
+      },
       envelope.data.strategies.map((strategyConfig, i) => ({
         index: strategyConfig.index,
         params: strategiesParams[i]
@@ -145,7 +143,7 @@ export class EthereumTx {
     return authenticatorContract.authenticate(...args);
   }
 
-  async finalizeProposal({
+  async execute({
     signer,
     space,
     proposal,
@@ -158,23 +156,13 @@ export class EthereumTx {
   }) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
 
-    return spaceContract.finalizeProposal(proposal, executionParams);
+    return spaceContract.execute(proposal, executionParams);
   }
 
-  async cancelProposal({
-    signer,
-    space,
-    proposal,
-    executionParams
-  }: {
-    signer: Signer;
-    space: string;
-    proposal: number;
-    executionParams: string;
-  }) {
+  async cancel({ signer, space, proposal }: { signer: Signer; space: string; proposal: number }) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
 
-    return spaceContract.cancelProposal(proposal, executionParams);
+    return spaceContract.cancel(proposal);
   }
 
   async getProposal({

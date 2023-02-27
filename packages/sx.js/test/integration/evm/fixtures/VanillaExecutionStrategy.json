@@ -1,15 +1,117 @@
 {
   "abi": [
     {
+      "inputs": [],
+      "name": "ExecutionFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPayload",
+      "type": "error"
+    },
+    {
       "inputs": [
         {
-          "internalType": "enum ProposalOutcome",
-          "name": "proposalOutcome",
+          "internalType": "enum ProposalStatus",
+          "name": "status",
           "type": "uint8"
+        }
+      ],
+      "name": "InvalidProposalStatus",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "snapshotTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "startTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "minEndTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxEndTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "executionPayloadHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "addy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "params",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct Strategy",
+              "name": "executionStrategy",
+              "type": "tuple"
+            },
+            {
+              "internalType": "enum FinalizationStatus",
+              "name": "finalizationStatus",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "addy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "params",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct Strategy[]",
+              "name": "votingStrategies",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct Proposal",
+          "name": "proposal",
+          "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votesFor",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votesAgainst",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votesAbstain",
+          "type": "uint256"
         },
         {
           "internalType": "bytes",
-          "name": "executionParams",
+          "name": "payload",
           "type": "bytes"
         }
       ],
@@ -17,22 +119,209 @@
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "snapshotTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "startTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "minEndTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxEndTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "executionPayloadHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "addy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "params",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct Strategy",
+              "name": "executionStrategy",
+              "type": "tuple"
+            },
+            {
+              "internalType": "enum FinalizationStatus",
+              "name": "finalizationStatus",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "addy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "params",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct Strategy[]",
+              "name": "votingStrategies",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct Proposal",
+          "name": "proposal",
+          "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votesFor",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votesAgainst",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votesAbstain",
+          "type": "uint256"
+        }
+      ],
+      "name": "getProposalStatus",
+      "outputs": [
+        {
+          "internalType": "enum ProposalStatus",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "snapshotTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "startTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "minEndTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxEndTimestamp",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "executionPayloadHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "addy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "params",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct Strategy",
+              "name": "executionStrategy",
+              "type": "tuple"
+            },
+            {
+              "internalType": "enum FinalizationStatus",
+              "name": "finalizationStatus",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "addy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "params",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct Strategy[]",
+              "name": "votingStrategies",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct Proposal",
+          "name": "proposal",
+          "type": "tuple"
+        }
+      ],
+      "name": "getQuorum",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
     }
   ],
   "bytecode": {
-    "object": "0x6080806040523461001657610186908161001c8239f35b600080fdfe608060048036101561001057600080fd5b600090813560e01c63fb4d364c1461002757600080fd5b346101755760407ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc360112610175576003813510156101755760249267ffffffffffffffff908435828111610146573660238201121561014657808401359280841161014a577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0603f81601f87011601168301908382109082111761014a576040528282523686848301011161014657916020918187879501848301370101528154907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821461011c57506001018155604051f35b601191507f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8480fd5b86866041877f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b5080fdfea164736f6c634300080f000a",
-    "sourceMap": "107:256:50:-:0;;;;;;;;;;;;;;;;;",
+    "object": "0x60808060405234610016576106ca908161001c8239f35b600080fdfe6040608081526004908136101561001557600080fd5b600091823560e01c80633f6253c214610136578063414ac1cc146100bf5763aa92548c1461004257600080fd5b346100bb5760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126100bb5780359067ffffffffffffffff82116100b75761009460a091602093369101610439565b01510151916020838051810103126100b457506020809201519051908152f35b80fd5b8380fd5b8280fd5b5091346100b45760807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126100b45782359067ffffffffffffffff82116100b457506101166101329361012792369101610439565b6064359060443590602435906105a8565b905191829182610566565b0390f35b50346100bb5760a07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126100bb5767ffffffffffffffff81358181116102ce576101859036908401610439565b906084359081116102ce5761019d903690840161035b565b906101b0606435604435602435846105a8565b60078110156102a257600381141580610297575b610260575060800151906020815191012003610239578254907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821461020d5750600101825551f35b8360116024927f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b90517f7c6953f9000000000000000000000000000000000000000000000000000000008152fd5b8361029386519283927fe6ace38e0000000000000000000000000000000000000000000000000000000084528301610566565b0390fd5b5060028114156101c4565b6024866021867f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8480fd5b907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f604051930116820182811067ffffffffffffffff82111761031657604052565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b359063ffffffff8216820361035657565b600080fd5b81601f820112156103565780359067ffffffffffffffff8211610316576103a960207fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f850116016102d2565b928284526020838301011161035657816000926020809301838601378301015290565b91909160408184031261035657604080519167ffffffffffffffff91830182811184821017610316576040528294813573ffffffffffffffffffffffffffffffffffffffff81168103610356578452602082013592831161035657602092610434920161035b565b910152565b9190916101008082850312610356576040519081019167ffffffffffffffff928281108482111761031657604052819461047282610345565b8352602091610482838201610345565b8385015261049260408201610345565b60408501526104a360608201610345565b60608501526080810135608085015260a081013585811161035657826104ca9183016103cc565b60a085015260c081013560038110156103565760c085015260e081013590858211610356570181601f8201121561035657803594808611610316578560051b9084806105178185016102d2565b8099815201928401019380851161035657858401925b858410610541575050505050505060e00152565b833583811161035657879161055b848480948a01016103cc565b81520193019261052d565b9190602083019260078210156105795752565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602160045260246000fd5b919092602060a084015101516020818051810103126103565760206105d9910151916105d48487610682565b610682565b10159283610678575b505060c08101805160038110156105795760020361060257505050600690565b5160038110156105795760010361061a575050600490565b63ffffffff9081602082015116421060001461063857505050600090565b6040810151821642101561064e57505050600190565b6060015116421015610669571561066457600290565b600190565b1561067357600390565b600590565b11915038806105e2565b8119811161068e570190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fdfea164736f6c634300080f000a",
+    "sourceMap": "106:808:51:-:0;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x608060048036101561001057600080fd5b600090813560e01c63fb4d364c1461002757600080fd5b346101755760407ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc360112610175576003813510156101755760249267ffffffffffffffff908435828111610146573660238201121561014657808401359280841161014a577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0603f81601f87011601168301908382109082111761014a576040528282523686848301011161014657916020918187879501848301370101528154907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821461011c57506001018155604051f35b601191507f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8480fd5b86866041877f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b5080fdfea164736f6c634300080f000a",
-    "sourceMap": "107:256:50:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
+    "object": "0x6040608081526004908136101561001557600080fd5b600091823560e01c80633f6253c214610136578063414ac1cc146100bf5763aa92548c1461004257600080fd5b346100bb5760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126100bb5780359067ffffffffffffffff82116100b75761009460a091602093369101610439565b01510151916020838051810103126100b457506020809201519051908152f35b80fd5b8380fd5b8280fd5b5091346100b45760807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126100b45782359067ffffffffffffffff82116100b457506101166101329361012792369101610439565b6064359060443590602435906105a8565b905191829182610566565b0390f35b50346100bb5760a07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc3601126100bb5767ffffffffffffffff81358181116102ce576101859036908401610439565b906084359081116102ce5761019d903690840161035b565b906101b0606435604435602435846105a8565b60078110156102a257600381141580610297575b610260575060800151906020815191012003610239578254907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821461020d5750600101825551f35b8360116024927f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b90517f7c6953f9000000000000000000000000000000000000000000000000000000008152fd5b8361029386519283927fe6ace38e0000000000000000000000000000000000000000000000000000000084528301610566565b0390fd5b5060028114156101c4565b6024866021867f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8480fd5b907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f604051930116820182811067ffffffffffffffff82111761031657604052565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b359063ffffffff8216820361035657565b600080fd5b81601f820112156103565780359067ffffffffffffffff8211610316576103a960207fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f850116016102d2565b928284526020838301011161035657816000926020809301838601378301015290565b91909160408184031261035657604080519167ffffffffffffffff91830182811184821017610316576040528294813573ffffffffffffffffffffffffffffffffffffffff81168103610356578452602082013592831161035657602092610434920161035b565b910152565b9190916101008082850312610356576040519081019167ffffffffffffffff928281108482111761031657604052819461047282610345565b8352602091610482838201610345565b8385015261049260408201610345565b60408501526104a360608201610345565b60608501526080810135608085015260a081013585811161035657826104ca9183016103cc565b60a085015260c081013560038110156103565760c085015260e081013590858211610356570181601f8201121561035657803594808611610316578560051b9084806105178185016102d2565b8099815201928401019380851161035657858401925b858410610541575050505050505060e00152565b833583811161035657879161055b848480948a01016103cc565b81520193019261052d565b9190602083019260078210156105795752565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602160045260246000fd5b919092602060a084015101516020818051810103126103565760206105d9910151916105d48487610682565b610682565b10159283610678575b505060c08101805160038110156105795760020361060257505050600690565b5160038110156105795760010361061a575050600490565b63ffffffff9081602082015116421060001461063857505050600090565b6040810151821642101561064e57505050600190565b6060015116421015610669571561066457600290565b600190565b1561067357600390565b600590565b11915038806105e2565b8119811161068e570190565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fdfea164736f6c634300080f000a",
+    "sourceMap": "106:808:51:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1897:26:50;106:808:51;;;;;;;:::i;:::-;1897:26:50;;:33;;106:808:51;;;;;1886:56:50;;106:808:51;;;;1886:56:50;106:808:51;1886:56:50;;;106:808:51;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;:::i;:::-;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;:::i;:::-;;438:65;106:808;;;;;;438:65;;:::i;:::-;106:808;;;;;;536:23;518:41;;;517:102;;;106:808;513:177;;806:29;106:808;806:29;106:808;;;;;;;839:18;806:51;802:80;;106:808;;;;;;;;;;;;;;;;;;;;;;;;;802:80;106:808;;866:16;;;;513:177;106:808;642:37;106:808;;642:37;;;;;;;;;:::i;:::-;;;;517:102;565:53;583:35;565:53;;;517:102;;106:808;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;-1:-1:-1;106:808:51;;;;;;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;:::i;:::-;;;;;;;;;;:::i;:::-;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;-1:-1:-1;106:808:51;;;;;-1:-1:-1;106:808:51;421:1356:50;;;;734:33;:26;;;;:33;;;106:808:51;;;723:56:50;;106:808:51;;;;734:33:50;2159:41;723:56;;106:808:51;2159:25:50;;;;;:::i;:::-;:41;:::i;:::-;2217:21;;805:110;;;;421:1356;929:27;;;;;106:808:51;;;;;;;;960:28:50;929:59;960:28;;1004:31;;;1011:24;1004:31;:::o;925:846::-;106:808:51;;;;;;;;1056:58:50;106:808:51;;1130:30:50;;1137:23;1130:30;:::o;1052:719::-;106:808:51;1199:23:50;;734:33;1199:23;;106:808:51;;1181:15:50;:41;1177:594;106:808:51;;;1238:33:50;;;-1:-1:-1;1238:33:50;:::o;1177:594::-;1310:24;;;106:808:51;;;1181:15:50;1292:42;106:808:51;;;1350:34:50;;;106:808:51;1350:34:50;:::o;1288:483::-;1423:24;;106:808:51;;1181:15:50;1405:42;106:808:51;;;1463:162:50;;;960:28;1495:42;:::o;1463:162::-;106:808:51;1576:34:50;:::o;1401:370::-;1641:130;;;106:808:51;1669:30:50;:::o;1641:130::-;1737:23;1730:30;:::o;805:110::-;2359:25;;-1:-1:-1;805:110:50;;;;106:808:51;;;;;;;;;:::o;:::-;;;;;;;;;",
     "linkReferences": {}
   },
   "methodIdentifiers": {
-    "execute(uint8,bytes)": "fb4d364c"
+    "execute((uint32,uint32,uint32,uint32,bytes32,(address,bytes),uint8,(address,bytes)[]),uint256,uint256,uint256,bytes)": "3f6253c2",
+    "getProposalStatus((uint32,uint32,uint32,uint32,bytes32,(address,bytes),uint8,(address,bytes)[]),uint256,uint256,uint256)": "414ac1cc",
+    "getQuorum((uint32,uint32,uint32,uint32,bytes32,(address,bytes),uint8,(address,bytes)[]))": "aa92548c"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"enum ProposalOutcome\",\"name\":\"proposalOutcome\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"executionParams\",\"type\":\"bytes\"}],\"name\":\"execute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/execution-strategies/VanillaExecutionStrategy.sol\":\"VanillaExecutionStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@solidity-bytes-utils/contracts/=lib/solidity-bytes-utils/contracts/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":solidity-bytes-utils/=lib/solidity-bytes-utils/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/execution-strategies/VanillaExecutionStrategy.sol\":{\"keccak256\":\"0xda9e41b80324956ed8f8ef0f9a546ab982a6b89bec84bf4f53b27d3f6535bca8\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1db0557780a0739bfd8ffb600473f4c7636420b77f2256d3458191b223df5665\",\"dweb:/ipfs/QmSYcoX6wDy2jZKZ244wUPcrgVi9tVk5VRdMsvHnxB39PU\"]},\"src/interfaces/IExecutionStrategy.sol\":{\"keccak256\":\"0xac78d843d74540be1e2f96abb9b1b910ca78334a18754ffc2bfa9ebf33b76b5d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://796a74c8ad5537d8fa00558491c1a195aec51e77158b4f768e9bbea7f17e2eaa\",\"dweb:/ipfs/QmddTMMNx7erQ8EZTjZoM1rDpw5guZDkZ9Tqwe9TtxEWga\"]},\"src/types.sol\":{\"keccak256\":\"0xcd2f8b4a343bc68791b521e07eade9a0a24dc6dc92da5aa7a66adb84a4636a59\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c37d29b7c90f8dc17ebfacdf5ee8c6c9406c7529aac92e51acf8953615f9ec75\",\"dweb:/ipfs/QmQa3pvqyaomQSDjDFjdsRdGGNBr43HgBxyoiPAczwah2q\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"ExecutionFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidPayload\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"enum ProposalStatus\",\"name\":\"status\",\"type\":\"uint8\"}],\"name\":\"InvalidProposalStatus\",\"type\":\"error\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint32\",\"name\":\"snapshotTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"startTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"minEndTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"maxEndTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"bytes32\",\"name\":\"executionPayloadHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addy\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"params\",\"type\":\"bytes\"}],\"internalType\":\"struct Strategy\",\"name\":\"executionStrategy\",\"type\":\"tuple\"},{\"internalType\":\"enum FinalizationStatus\",\"name\":\"finalizationStatus\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addy\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"params\",\"type\":\"bytes\"}],\"internalType\":\"struct Strategy[]\",\"name\":\"votingStrategies\",\"type\":\"tuple[]\"}],\"internalType\":\"struct Proposal\",\"name\":\"proposal\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"votesFor\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"votesAgainst\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"votesAbstain\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"payload\",\"type\":\"bytes\"}],\"name\":\"execute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint32\",\"name\":\"snapshotTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"startTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"minEndTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"maxEndTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"bytes32\",\"name\":\"executionPayloadHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addy\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"params\",\"type\":\"bytes\"}],\"internalType\":\"struct Strategy\",\"name\":\"executionStrategy\",\"type\":\"tuple\"},{\"internalType\":\"enum FinalizationStatus\",\"name\":\"finalizationStatus\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addy\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"params\",\"type\":\"bytes\"}],\"internalType\":\"struct Strategy[]\",\"name\":\"votingStrategies\",\"type\":\"tuple[]\"}],\"internalType\":\"struct Proposal\",\"name\":\"proposal\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"votesFor\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"votesAgainst\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"votesAbstain\",\"type\":\"uint256\"}],\"name\":\"getProposalStatus\",\"outputs\":[{\"internalType\":\"enum ProposalStatus\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint32\",\"name\":\"snapshotTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"startTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"minEndTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"maxEndTimestamp\",\"type\":\"uint32\"},{\"internalType\":\"bytes32\",\"name\":\"executionPayloadHash\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addy\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"params\",\"type\":\"bytes\"}],\"internalType\":\"struct Strategy\",\"name\":\"executionStrategy\",\"type\":\"tuple\"},{\"internalType\":\"enum FinalizationStatus\",\"name\":\"finalizationStatus\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addy\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"params\",\"type\":\"bytes\"}],\"internalType\":\"struct Strategy[]\",\"name\":\"votingStrategies\",\"type\":\"tuple[]\"}],\"internalType\":\"struct Proposal\",\"name\":\"proposal\",\"type\":\"tuple\"}],\"name\":\"getQuorum\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"errors\":{\"InvalidProposalStatus(uint8)\":[{\"params\":{\"status\":\"The current status of the proposal.\"}}]},\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"errors\":{\"ExecutionFailed()\":[{\"notice\":\"Thrown when the execution of a proposal fails.\"}],\"InvalidPayload()\":[{\"notice\":\"Thrown when the execution payload supplied to the execution strategy is not equal to the payload supplied when the proposal was created.\"}],\"InvalidProposalStatus(uint8)\":[{\"notice\":\"Thrown when the current status of a proposal does not allow the desired action.\"}]},\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/execution-strategies/VanillaExecutionStrategy.sol\":\"VanillaExecutionStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":solidity-bytes-utils/=lib/solidity-bytes-utils/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"lib/forge-std/src/console2.sol\":{\"keccak256\":\"0x225cc1ec33efd35c90e78aec0792ed9751cd6217e646271172421e96e2e2cc0f\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6c6adbd216e40ca2387835b8618c82e7153cb826023d38943bbb0c2e992644aa\",\"dweb:/ipfs/QmZeejwEkm7iH9NHih7dPbuNqivuFn27EkgJesgByzS9wD\"]},\"lib/safe-contracts/contracts/common/Enum.sol\":{\"keccak256\":\"0x473e45b1a5cc47be494b0e123c9127f0c11c1e0992a321ae5a644c0bfdb2c14f\",\"license\":\"LGPL-3.0-only\",\"urls\":[\"bzz-raw://948e6d5a8bd7377f7795b6e28584eab9be5c0a8db240bf5e606744a175238c3d\",\"dweb:/ipfs/QmQQaUmQfpuejV41jbxKSTgEBYYCcVTjCsDMgf2htgz6ej\"]},\"src/execution-strategies/SimpleQuorumExecutionStrategy.sol\":{\"keccak256\":\"0x1c521dcef8dad384c98a2dcef1a486174332132e25d7028169193d0a12f892a6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://dfe6f7e2dd9b99b46aed86604744d98e5d95ef92afc3cd1b65c6b53f45b16e3b\",\"dweb:/ipfs/QmYwZThqywLhRSyA5JDZMwsGgG9SsoU4TAT4iQuHMWMSuH\"]},\"src/execution-strategies/VanillaExecutionStrategy.sol\":{\"keccak256\":\"0xac020a4fbb5bf04bf0de4253a8fc365aa0dae1cf8afd777ab682373407dfebdc\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://df171a67696c5795c01e334be3acdcdae1477d6ee48584d734ed3aad099a3c48\",\"dweb:/ipfs/Qmf5qmNyjbAmUdSXAxnnkN7czqNuPLGmrQawZug6AbLgEp\"]},\"src/interfaces/IExecutionStrategy.sol\":{\"keccak256\":\"0x145e821fed9563b2e3f0aafac87a73b672738e24410e466b2bed0d5999524e71\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://c7a11a5c790f3cbd0079dfed44b9cd6332c152099557fd0f4c9d6574d5e85819\",\"dweb:/ipfs/QmV48kcRh9EKfggf8uv9aEfSXBk3b8G1ooBxuGbDanp55P\"]},\"src/interfaces/execution-strategies/IExecutionStrategyErrors.sol\":{\"keccak256\":\"0x77513dcd3a14004fcdde82676bd8e76055543f31780104068ad6e92a479dd12a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://98a2053bbe93ef0510f00ad0e326359f295f2bb7205286544b42d49552fef7fd\",\"dweb:/ipfs/Qmdm5P5JtCfBMYVNyY7ryRWUrUZNK4Wjt66nRUE5f2sMKP\"]},\"src/types.sol\":{\"keccak256\":\"0xe0e229dc0f5df238cb8d0db6414c42528d622c5c954eb1c7229cc7534b46804d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9fa12cf13bc455ad4667f0093c4ff97f70b50fc7e8eff966246735140f6038db\",\"dweb:/ipfs/QmUUJXUzCN5E7AnubaEiTArPhhEHXM6pRh91YXxmZA63FR\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.15+commit.e14f2714"
@@ -41,21 +330,308 @@
     "output": {
       "abi": [
         {
+          "inputs": [],
+          "type": "error",
+          "name": "ExecutionFailed"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "InvalidPayload"
+        },
+        {
           "inputs": [
             {
-              "internalType": "enum ProposalOutcome",
-              "name": "proposalOutcome",
+              "internalType": "enum ProposalStatus",
+              "name": "status",
               "type": "uint8"
+            }
+          ],
+          "type": "error",
+          "name": "InvalidProposalStatus"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "struct Proposal",
+              "name": "proposal",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "uint32",
+                  "name": "snapshotTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "startTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "minEndTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "maxEndTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "executionPayloadHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "struct Strategy",
+                  "name": "executionStrategy",
+                  "type": "tuple",
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "addy",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "params",
+                      "type": "bytes"
+                    }
+                  ]
+                },
+                {
+                  "internalType": "enum FinalizationStatus",
+                  "name": "finalizationStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "struct Strategy[]",
+                  "name": "votingStrategies",
+                  "type": "tuple[]",
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "addy",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "params",
+                      "type": "bytes"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "internalType": "uint256",
+              "name": "votesFor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "votesAgainst",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "votesAbstain",
+              "type": "uint256"
             },
             {
               "internalType": "bytes",
-              "name": "executionParams",
+              "name": "payload",
               "type": "bytes"
             }
           ],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "execute"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "struct Proposal",
+              "name": "proposal",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "uint32",
+                  "name": "snapshotTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "startTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "minEndTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "maxEndTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "executionPayloadHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "struct Strategy",
+                  "name": "executionStrategy",
+                  "type": "tuple",
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "addy",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "params",
+                      "type": "bytes"
+                    }
+                  ]
+                },
+                {
+                  "internalType": "enum FinalizationStatus",
+                  "name": "finalizationStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "struct Strategy[]",
+                  "name": "votingStrategies",
+                  "type": "tuple[]",
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "addy",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "params",
+                      "type": "bytes"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "internalType": "uint256",
+              "name": "votesFor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "votesAgainst",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "votesAbstain",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getProposalStatus",
+          "outputs": [
+            {
+              "internalType": "enum ProposalStatus",
+              "name": "",
+              "type": "uint8"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "struct Proposal",
+              "name": "proposal",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "uint32",
+                  "name": "snapshotTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "startTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "minEndTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "maxEndTimestamp",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "executionPayloadHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "struct Strategy",
+                  "name": "executionStrategy",
+                  "type": "tuple",
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "addy",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "params",
+                      "type": "bytes"
+                    }
+                  ]
+                },
+                {
+                  "internalType": "enum FinalizationStatus",
+                  "name": "finalizationStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "struct Strategy[]",
+                  "name": "votingStrategies",
+                  "type": "tuple[]",
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "addy",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "params",
+                      "type": "bytes"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function",
+          "name": "getQuorum",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
         }
       ],
       "devdoc": {
@@ -75,7 +651,6 @@
         ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
         ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
         ":@prb/test/=lib/prb-test/src/",
-        ":@solidity-bytes-utils/contracts/=lib/solidity-bytes-utils/contracts/",
         ":@zodiac/=lib/zodiac/contracts/",
         ":ds-test/=lib/forge-std/lib/ds-test/src/",
         ":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
@@ -101,27 +676,59 @@
       "viaIR": true
     },
     "sources": {
-      "src/execution-strategies/VanillaExecutionStrategy.sol": {
-        "keccak256": "0xda9e41b80324956ed8f8ef0f9a546ab982a6b89bec84bf4f53b27d3f6535bca8",
+      "lib/forge-std/src/console2.sol": {
+        "keccak256": "0x225cc1ec33efd35c90e78aec0792ed9751cd6217e646271172421e96e2e2cc0f",
         "urls": [
-          "bzz-raw://1db0557780a0739bfd8ffb600473f4c7636420b77f2256d3458191b223df5665",
-          "dweb:/ipfs/QmSYcoX6wDy2jZKZ244wUPcrgVi9tVk5VRdMsvHnxB39PU"
+          "bzz-raw://6c6adbd216e40ca2387835b8618c82e7153cb826023d38943bbb0c2e992644aa",
+          "dweb:/ipfs/QmZeejwEkm7iH9NHih7dPbuNqivuFn27EkgJesgByzS9wD"
+        ],
+        "license": "MIT"
+      },
+      "lib/safe-contracts/contracts/common/Enum.sol": {
+        "keccak256": "0x473e45b1a5cc47be494b0e123c9127f0c11c1e0992a321ae5a644c0bfdb2c14f",
+        "urls": [
+          "bzz-raw://948e6d5a8bd7377f7795b6e28584eab9be5c0a8db240bf5e606744a175238c3d",
+          "dweb:/ipfs/QmQQaUmQfpuejV41jbxKSTgEBYYCcVTjCsDMgf2htgz6ej"
+        ],
+        "license": "LGPL-3.0-only"
+      },
+      "src/execution-strategies/SimpleQuorumExecutionStrategy.sol": {
+        "keccak256": "0x1c521dcef8dad384c98a2dcef1a486174332132e25d7028169193d0a12f892a6",
+        "urls": [
+          "bzz-raw://dfe6f7e2dd9b99b46aed86604744d98e5d95ef92afc3cd1b65c6b53f45b16e3b",
+          "dweb:/ipfs/QmYwZThqywLhRSyA5JDZMwsGgG9SsoU4TAT4iQuHMWMSuH"
+        ],
+        "license": "MIT"
+      },
+      "src/execution-strategies/VanillaExecutionStrategy.sol": {
+        "keccak256": "0xac020a4fbb5bf04bf0de4253a8fc365aa0dae1cf8afd777ab682373407dfebdc",
+        "urls": [
+          "bzz-raw://df171a67696c5795c01e334be3acdcdae1477d6ee48584d734ed3aad099a3c48",
+          "dweb:/ipfs/Qmf5qmNyjbAmUdSXAxnnkN7czqNuPLGmrQawZug6AbLgEp"
         ],
         "license": "MIT"
       },
       "src/interfaces/IExecutionStrategy.sol": {
-        "keccak256": "0xac78d843d74540be1e2f96abb9b1b910ca78334a18754ffc2bfa9ebf33b76b5d",
+        "keccak256": "0x145e821fed9563b2e3f0aafac87a73b672738e24410e466b2bed0d5999524e71",
         "urls": [
-          "bzz-raw://796a74c8ad5537d8fa00558491c1a195aec51e77158b4f768e9bbea7f17e2eaa",
-          "dweb:/ipfs/QmddTMMNx7erQ8EZTjZoM1rDpw5guZDkZ9Tqwe9TtxEWga"
+          "bzz-raw://c7a11a5c790f3cbd0079dfed44b9cd6332c152099557fd0f4c9d6574d5e85819",
+          "dweb:/ipfs/QmV48kcRh9EKfggf8uv9aEfSXBk3b8G1ooBxuGbDanp55P"
+        ],
+        "license": "MIT"
+      },
+      "src/interfaces/execution-strategies/IExecutionStrategyErrors.sol": {
+        "keccak256": "0x77513dcd3a14004fcdde82676bd8e76055543f31780104068ad6e92a479dd12a",
+        "urls": [
+          "bzz-raw://98a2053bbe93ef0510f00ad0e326359f295f2bb7205286544b42d49552fef7fd",
+          "dweb:/ipfs/Qmdm5P5JtCfBMYVNyY7ryRWUrUZNK4Wjt66nRUE5f2sMKP"
         ],
         "license": "MIT"
       },
       "src/types.sol": {
-        "keccak256": "0xcd2f8b4a343bc68791b521e07eade9a0a24dc6dc92da5aa7a66adb84a4636a59",
+        "keccak256": "0xe0e229dc0f5df238cb8d0db6414c42528d622c5c954eb1c7229cc7534b46804d",
         "urls": [
-          "bzz-raw://c37d29b7c90f8dc17ebfacdf5ee8c6c9406c7529aac92e51acf8953615f9ec75",
-          "dweb:/ipfs/QmQa3pvqyaomQSDjDFjdsRdGGNBr43HgBxyoiPAczwah2q"
+          "bzz-raw://9fa12cf13bc455ad4667f0093c4ff97f70b50fc7e8eff966246735140f6038db",
+          "dweb:/ipfs/QmUUJXUzCN5E7AnubaEiTArPhhEHXM6pRh91YXxmZA63FR"
         ],
         "license": "MIT"
       }
@@ -130,82 +737,61 @@
   },
   "ast": {
     "absolutePath": "src/execution-strategies/VanillaExecutionStrategy.sol",
-    "id": 32940,
+    "id": 33759,
     "exportedSymbols": {
-      "Choice": [
-        33318
-      ],
-      "FinalizationStatus": [
-        33306
-      ],
-      "IExecutionStrategy": [
-        32963
-      ],
-      "IndexedStrategy": [
-        33297
-      ],
-      "Proposal": [
-        33287
-      ],
-      "ProposalOutcome": [
-        33301
-      ],
-      "ProposalStatus": [
-        33314
-      ],
-      "Strategy": [
-        33292
-      ],
-      "VanillaExecutionStrategy": [
-        32939
-      ],
-      "Vote": [
-        33324
-      ]
+      "Choice": [34319],
+      "Enum": [30820],
+      "FinalizationStatus": [34307],
+      "IExecutionStrategy": [33814],
+      "IExecutionStrategyErrors": [33904],
+      "IndexedStrategy": [34303],
+      "MetaTransaction": [34335],
+      "Proposal": [34293],
+      "ProposalStatus": [34315],
+      "SimpleQuorumExecutionStrategy": [33694],
+      "Strategy": [34298],
+      "VanillaExecutionStrategy": [33758],
+      "Vote": [34325],
+      "console2": [25082]
     },
     "nodeType": "SourceUnit",
-    "src": "33:331:50",
+    "src": "33:882:51",
     "nodes": [
       {
-        "id": 32920,
+        "id": 33696,
         "nodeType": "PragmaDirective",
-        "src": "33:24:50",
+        "src": "33:24:51",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".15"
-        ]
+        "literals": ["solidity", "^", "0.8", ".15"]
       },
       {
-        "id": 32921,
+        "id": 33697,
         "nodeType": "ImportDirective",
-        "src": "59:46:50",
+        "src": "59:45:51",
         "nodes": [],
-        "absolutePath": "src/interfaces/IExecutionStrategy.sol",
-        "file": "../interfaces/IExecutionStrategy.sol",
+        "absolutePath": "src/execution-strategies/SimpleQuorumExecutionStrategy.sol",
+        "file": "./SimpleQuorumExecutionStrategy.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 32940,
-        "sourceUnit": 32964,
+        "scope": 33759,
+        "sourceUnit": 33695,
         "symbolAliases": [],
         "unitAlias": ""
       },
       {
-        "id": 32939,
+        "id": 33758,
         "nodeType": "ContractDefinition",
-        "src": "107:256:50",
+        "src": "106:808:51",
         "nodes": [
           {
-            "id": 32925,
+            "id": 33701,
             "nodeType": "VariableDeclaration",
-            "src": "169:19:50",
+            "src": "179:19:51",
             "nodes": [],
             "constant": false,
             "mutability": "mutable",
             "name": "numExecuted",
-            "nameLocation": "177:11:50",
-            "scope": 32939,
+            "nameLocation": "187:11:51",
+            "scope": 33758,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -213,10 +799,10 @@
               "typeString": "uint256"
             },
             "typeName": {
-              "id": 32924,
+              "id": 33700,
               "name": "uint256",
               "nodeType": "ElementaryTypeName",
-              "src": "169:7:50",
+              "src": "179:7:51",
               "typeDescriptions": {
                 "typeIdentifier": "t_uint256",
                 "typeString": "uint256"
@@ -225,19 +811,519 @@
             "visibility": "internal"
           },
           {
-            "id": 32938,
+            "id": 33757,
             "nodeType": "FunctionDefinition",
-            "src": "233:128:50",
+            "src": "205:707:51",
             "nodes": [],
             "body": {
-              "id": 32937,
+              "id": 33756,
               "nodeType": "Block",
-              "src": "331:30:50",
+              "src": "396:516:51",
               "nodes": [],
               "statements": [
                 {
+                  "assignments": [33718],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 33718,
+                      "mutability": "mutable",
+                      "name": "proposalStatus",
+                      "nameLocation": "421:14:51",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 33756,
+                      "src": "406:29:51",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                        "typeString": "enum ProposalStatus"
+                      },
+                      "typeName": {
+                        "id": 33717,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 33716,
+                          "name": "ProposalStatus",
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 34315,
+                          "src": "406:14:51"
+                        },
+                        "referencedDeclaration": 34315,
+                        "src": "406:14:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                          "typeString": "enum ProposalStatus"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 33725,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 33720,
+                        "name": "proposal",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 33704,
+                        "src": "456:8:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Proposal_$34293_memory_ptr",
+                          "typeString": "struct Proposal memory"
+                        }
+                      },
+                      {
+                        "id": 33721,
+                        "name": "votesFor",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 33706,
+                        "src": "466:8:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 33722,
+                        "name": "votesAgainst",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 33708,
+                        "src": "476:12:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      {
+                        "id": 33723,
+                        "name": "votesAbstain",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 33710,
+                        "src": "490:12:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_struct$_Proposal_$34293_memory_ptr",
+                          "typeString": "struct Proposal memory"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 33719,
+                      "name": "getProposalStatus",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 33633,
+                      "src": "438:17:51",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$_t_struct$_Proposal_$34293_memory_ptr_$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_enum$_ProposalStatus_$34315_$",
+                        "typeString": "function (struct Proposal memory,uint256,uint256,uint256) view returns (enum ProposalStatus)"
+                      }
+                    },
+                    "id": 33724,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "438:65:51",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                      "typeString": "enum ProposalStatus"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "406:97:51"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "id": 33736,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "components": [
+                        {
+                          "commonType": {
+                            "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                            "typeString": "enum ProposalStatus"
+                          },
+                          "id": 33729,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "id": 33726,
+                            "name": "proposalStatus",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 33718,
+                            "src": "518:14:51",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                              "typeString": "enum ProposalStatus"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "!=",
+                          "rightExpression": {
+                            "expression": {
+                              "id": 33727,
+                              "name": "ProposalStatus",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 34315,
+                              "src": "536:14:51",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_enum$_ProposalStatus_$34315_$",
+                                "typeString": "type(enum ProposalStatus)"
+                              }
+                            },
+                            "id": 33728,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "memberName": "Accepted",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 34311,
+                            "src": "536:23:51",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                              "typeString": "enum ProposalStatus"
+                            }
+                          },
+                          "src": "518:41:51",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        }
+                      ],
+                      "id": 33730,
+                      "isConstant": false,
+                      "isInlineArray": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "TupleExpression",
+                      "src": "517:43:51",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "&&",
+                    "rightExpression": {
+                      "components": [
+                        {
+                          "commonType": {
+                            "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                            "typeString": "enum ProposalStatus"
+                          },
+                          "id": 33734,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "id": 33731,
+                            "name": "proposalStatus",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 33718,
+                            "src": "565:14:51",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                              "typeString": "enum ProposalStatus"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "!=",
+                          "rightExpression": {
+                            "expression": {
+                              "id": 33732,
+                              "name": "ProposalStatus",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 34315,
+                              "src": "583:14:51",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_enum$_ProposalStatus_$34315_$",
+                                "typeString": "type(enum ProposalStatus)"
+                              }
+                            },
+                            "id": 33733,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "memberName": "VotingPeriodAccepted",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 34310,
+                            "src": "583:35:51",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                              "typeString": "enum ProposalStatus"
+                            }
+                          },
+                          "src": "565:53:51",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        }
+                      ],
+                      "id": 33735,
+                      "isConstant": false,
+                      "isInlineArray": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "TupleExpression",
+                      "src": "564:55:51",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "src": "517:102:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 33742,
+                  "nodeType": "IfStatement",
+                  "src": "513:177:51",
+                  "trueBody": {
+                    "id": 33741,
+                    "nodeType": "Block",
+                    "src": "621:69:51",
+                    "statements": [
+                      {
+                        "errorCall": {
+                          "arguments": [
+                            {
+                              "id": 33738,
+                              "name": "proposalStatus",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 33718,
+                              "src": "664:14:51",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                                "typeString": "enum ProposalStatus"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_enum$_ProposalStatus_$34315",
+                                "typeString": "enum ProposalStatus"
+                              }
+                            ],
+                            "id": 33737,
+                            "name": "InvalidProposalStatus",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 33897,
+                            "src": "642:21:51",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_error_pure$_t_enum$_ProposalStatus_$34315_$returns$__$",
+                              "typeString": "function (enum ProposalStatus) pure"
+                            }
+                          },
+                          "id": 33739,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "642:37:51",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$__$",
+                            "typeString": "tuple()"
+                          }
+                        },
+                        "id": 33740,
+                        "nodeType": "RevertStatement",
+                        "src": "635:44:51"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    },
+                    "id": 33748,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "expression": {
+                        "id": 33743,
+                        "name": "proposal",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 33704,
+                        "src": "806:8:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Proposal_$34293_memory_ptr",
+                          "typeString": "struct Proposal memory"
+                        }
+                      },
+                      "id": 33744,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "executionPayloadHash",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 34282,
+                      "src": "806:29:51",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "arguments": [
+                        {
+                          "id": 33746,
+                          "name": "payload",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 33712,
+                          "src": "849:7:51",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        ],
+                        "id": 33745,
+                        "name": "keccak256",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": -8,
+                        "src": "839:9:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                          "typeString": "function (bytes memory) pure returns (bytes32)"
+                        }
+                      },
+                      "id": 33747,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "839:18:51",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "src": "806:51:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 33752,
+                  "nodeType": "IfStatement",
+                  "src": "802:80:51",
+                  "trueBody": {
+                    "errorCall": {
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "id": 33749,
+                        "name": "InvalidPayload",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 33903,
+                        "src": "866:14:51",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_error_pure$__$returns$__$",
+                          "typeString": "function () pure"
+                        }
+                      },
+                      "id": 33750,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "866:16:51",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_tuple$__$",
+                        "typeString": "tuple()"
+                      }
+                    },
+                    "id": 33751,
+                    "nodeType": "RevertStatement",
+                    "src": "859:23:51"
+                  }
+                },
+                {
                   "expression": {
-                    "id": 32935,
+                    "id": 33754,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -245,14 +1331,14 @@
                     "nodeType": "UnaryOperation",
                     "operator": "++",
                     "prefix": false,
-                    "src": "341:13:50",
+                    "src": "892:13:51",
                     "subExpression": {
-                      "id": 32934,
+                      "id": 33753,
                       "name": "numExecuted",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 32925,
-                      "src": "341:11:50",
+                      "referencedDeclaration": 33701,
+                      "src": "892:11:51",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
@@ -263,74 +1349,153 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 32936,
+                  "id": 33755,
                   "nodeType": "ExpressionStatement",
-                  "src": "341:13:50"
+                  "src": "892:13:51"
                 }
               ]
             },
-            "baseFunctions": [
-              32962
-            ],
-            "functionSelector": "fb4d364c",
+            "baseFunctions": [33523],
+            "functionSelector": "3f6253c2",
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "execute",
-            "nameLocation": "242:7:50",
+            "nameLocation": "214:7:51",
             "overrides": {
-              "id": 32932,
+              "id": 33714,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
-              "src": "322:8:50"
+              "src": "387:8:51"
             },
             "parameters": {
-              "id": 32931,
+              "id": 33713,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 32928,
+                  "id": 33704,
                   "mutability": "mutable",
-                  "name": "proposalOutcome",
-                  "nameLocation": "266:15:50",
+                  "name": "proposal",
+                  "nameLocation": "247:8:51",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32938,
-                  "src": "250:31:50",
+                  "scope": 33757,
+                  "src": "231:24:51",
                   "stateVariable": false,
-                  "storageLocation": "default",
+                  "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_ProposalOutcome_$33301",
-                    "typeString": "enum ProposalOutcome"
+                    "typeIdentifier": "t_struct$_Proposal_$34293_memory_ptr",
+                    "typeString": "struct Proposal"
                   },
                   "typeName": {
-                    "id": 32927,
+                    "id": 33703,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 32926,
-                      "name": "ProposalOutcome",
+                      "id": 33702,
+                      "name": "Proposal",
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 33301,
-                      "src": "250:15:50"
+                      "referencedDeclaration": 34293,
+                      "src": "231:8:51"
                     },
-                    "referencedDeclaration": 33301,
-                    "src": "250:15:50",
+                    "referencedDeclaration": 34293,
+                    "src": "231:8:51",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_ProposalOutcome_$33301",
-                      "typeString": "enum ProposalOutcome"
+                      "typeIdentifier": "t_struct$_Proposal_$34293_storage_ptr",
+                      "typeString": "struct Proposal"
                     }
                   },
                   "visibility": "internal"
                 },
                 {
                   "constant": false,
-                  "id": 32930,
+                  "id": 33706,
                   "mutability": "mutable",
-                  "name": "executionParams",
-                  "nameLocation": "296:15:50",
+                  "name": "votesFor",
+                  "nameLocation": "273:8:51",
                   "nodeType": "VariableDeclaration",
-                  "scope": 32938,
-                  "src": "283:28:50",
+                  "scope": 33757,
+                  "src": "265:16:51",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33705,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "265:7:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33708,
+                  "mutability": "mutable",
+                  "name": "votesAgainst",
+                  "nameLocation": "299:12:51",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33757,
+                  "src": "291:20:51",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33707,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "291:7:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33710,
+                  "mutability": "mutable",
+                  "name": "votesAbstain",
+                  "nameLocation": "329:12:51",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33757,
+                  "src": "321:20:51",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 33709,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "321:7:51",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 33712,
+                  "mutability": "mutable",
+                  "name": "payload",
+                  "nameLocation": "364:7:51",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33757,
+                  "src": "351:20:51",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -338,10 +1503,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 32929,
+                    "id": 33711,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "283:5:50",
+                    "src": "351:5:51",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -350,15 +1515,15 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "249:63:50"
+              "src": "221:156:51"
             },
             "returnParameters": {
-              "id": 32933,
+              "id": 33715,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "331:0:50"
+              "src": "396:0:51"
             },
-            "scope": 32939,
+            "scope": 33758,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -368,32 +1533,29 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 32922,
-              "name": "IExecutionStrategy",
+              "id": 33698,
+              "name": "SimpleQuorumExecutionStrategy",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 32963,
-              "src": "144:18:50"
+              "referencedDeclaration": 33694,
+              "src": "143:29:51"
             },
-            "id": 32923,
+            "id": 33699,
             "nodeType": "InheritanceSpecifier",
-            "src": "144:18:50"
+            "src": "143:29:51"
           }
         ],
         "canonicalName": "VanillaExecutionStrategy",
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          32939,
-          32963
-        ],
+        "linearizedBaseContracts": [33758, 33694, 33814, 33904],
         "name": "VanillaExecutionStrategy",
-        "nameLocation": "116:24:50",
-        "scope": 32940,
-        "usedErrors": []
+        "nameLocation": "115:24:51",
+        "scope": 33759,
+        "usedErrors": [33897, 33900, 33903]
       }
     ],
     "license": "MIT"
   },
-  "id": 50
+  "id": 51
 }

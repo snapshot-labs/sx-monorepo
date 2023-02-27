@@ -17,7 +17,7 @@ export default function createEthSigAuthenticator(): Authenticator {
         v,
         hexPadLeft(r.toHex()),
         hexPadLeft(s.toHex()),
-        signatureData.message.salt,
+        signatureData.message.salt || '0x00',
         space,
         selector,
         ...calldata

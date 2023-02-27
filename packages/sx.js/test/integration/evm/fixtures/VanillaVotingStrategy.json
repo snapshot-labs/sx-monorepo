@@ -157,12 +157,8 @@
     "absolutePath": "src/voting-strategies/VanillaVotingStrategy.sol",
     "id": 33493,
     "exportedSymbols": {
-      "IVotingStrategy": [
-        32996
-      ],
-      "VanillaVotingStrategy": [
-        33492
-      ]
+      "IVotingStrategy": [32996],
+      "VanillaVotingStrategy": [33492]
     },
     "nodeType": "SourceUnit",
     "src": "33:372:62",
@@ -172,12 +168,7 @@
         "nodeType": "PragmaDirective",
         "src": "33:24:62",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".15"
-        ]
+        "literals": ["solidity", "^", "0.8", ".15"]
       },
       {
         "id": 33472,
@@ -232,9 +223,7 @@
                 }
               ]
             },
-            "baseFunctions": [
-              32995
-            ],
+            "baseFunctions": [32995],
             "functionSelector": "871d81b7",
             "implemented": true,
             "kind": "function",
@@ -422,10 +411,7 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          33492,
-          32996
-        ],
+        "linearizedBaseContracts": [33492, 32996],
         "name": "VanillaVotingStrategy",
         "nameLocation": "113:21:62",
         "scope": 33493,

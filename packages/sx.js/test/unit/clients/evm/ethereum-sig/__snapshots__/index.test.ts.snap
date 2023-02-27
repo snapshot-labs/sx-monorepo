@@ -4,8 +4,11 @@ exports[`EthereumSig should create propose envelope 1`] = `
 {
   "data": {
     "authenticator": "0x86bfa0726cba0febeee457f04b705ab74b54d01c",
-    "executionParams": [],
-    "executor": "0xb1001fdf62c020761039a750b27e73c512fdaa5e",
+    "executionParams": "0x00",
+    "executor": {
+      "address": "0xb1001fdf62c020761039a750b27e73c512fdaa5e",
+      "index": 0,
+    },
     "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
     "space": "0x6d5608420702714a6c8168ec9c70706e8d1cf641",
     "strategies": [
@@ -19,14 +22,14 @@ exports[`EthereumSig should create propose envelope 1`] = `
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "domain": {
       "chainId": 31337,
-      "name": "SOC",
+      "name": "snapshot-x",
       "verifyingContract": "0x86bfa0726cba0febeee457f04b705ab74b54d01c",
       "version": "1",
     },
     "message": {
       "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
       "executionStrategy": {
-        "addy": "0xb1001fdf62c020761039a750b27e73c512fdaa5e",
+        "index": 0,
         "params": "0x00",
       },
       "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
@@ -39,7 +42,7 @@ exports[`EthereumSig should create propose envelope 1`] = `
         },
       ],
     },
-    "signature": "0x325bfc82ad50aeeecc5e693e5e84508febddf5336dbac26f5a148ff6bd23dfb4797a34e9a238102447c749b2acfb92282da3f0240d46c132e5ce18d05795d9751c",
+    "signature": "0xb9c4ad4779ec21a4649e9749e0bdff53bd89f89dec4d2c7c2d78431b2324975227b2da2deaff144f2f96907fd088d5bec1603a4658c51bc9d01ceae3f8433f901c",
     "types": {
       "IndexedStrategy": [
         {
@@ -66,7 +69,7 @@ exports[`EthereumSig should create propose envelope 1`] = `
         },
         {
           "name": "executionStrategy",
-          "type": "Strategy",
+          "type": "IndexedStrategy",
         },
         {
           "name": "userVotingStrategies",
@@ -75,16 +78,6 @@ exports[`EthereumSig should create propose envelope 1`] = `
         {
           "name": "salt",
           "type": "uint256",
-        },
-      ],
-      "Strategy": [
-        {
-          "name": "addy",
-          "type": "address",
-        },
-        {
-          "name": "params",
-          "type": "bytes",
         },
       ],
     },
@@ -110,14 +103,13 @@ exports[`EthereumSig should create vote envelope 1`] = `
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "domain": {
       "chainId": 31337,
-      "name": "SOC",
+      "name": "snapshot-x",
       "verifyingContract": "0x86bfa0726cba0febeee457f04b705ab74b54d01c",
       "version": "1",
     },
     "message": {
       "choice": 1,
       "proposalId": 3,
-      "salt": 0,
       "space": "0x6d5608420702714a6c8168ec9c70706e8d1cf641",
       "userVotingStrategies": [
         {
@@ -127,7 +119,7 @@ exports[`EthereumSig should create vote envelope 1`] = `
       ],
       "voter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     },
-    "signature": "0x58e9230f4ca63c650d0cfdfa94da3fe0ad1a0688435e1bbababb2fc42014230805ad318b14e615fbb0743a9bab0ef00b03238840100842f7c7f2da6d4ba423ed1c",
+    "signature": "0x010130cfb76fddd19253283976d72849b9e21a7a48ee00de9f714bda5ab80d82755bc2a5352f23a6613ca0f1ad683879585877acdad9189df1afada6157e2c331b",
     "types": {
       "IndexedStrategy": [
         {
@@ -159,10 +151,6 @@ exports[`EthereumSig should create vote envelope 1`] = `
         {
           "name": "userVotingStrategies",
           "type": "IndexedStrategy[]",
-        },
-        {
-          "name": "salt",
-          "type": "uint256",
         },
       ],
     },

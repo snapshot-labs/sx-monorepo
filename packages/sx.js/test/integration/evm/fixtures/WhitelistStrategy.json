@@ -156,12 +156,8 @@
     "absolutePath": "src/voting-strategies/WhitelistStrategy.sol",
     "id": 30823,
     "exportedSymbols": {
-      "IVotingStrategy": [
-        29773
-      ],
-      "WhitelistStrategy": [
-        30822
-      ]
+      "IVotingStrategy": [29773],
+      "WhitelistStrategy": [30822]
     },
     "nodeType": "SourceUnit",
     "src": "33:1642:53",
@@ -171,12 +167,7 @@
         "nodeType": "PragmaDirective",
         "src": "33:24:53",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".15"
-        ]
+        "literals": ["solidity", "^", "0.8", ".15"]
       },
       {
         "id": 30689,
@@ -276,9 +267,7 @@
               "nodes": [],
               "statements": [
                 {
-                  "assignments": [
-                    30710
-                  ],
+                  "assignments": [30710],
                   "declarations": [
                     {
                       "constant": false,
@@ -436,9 +425,7 @@
                   "src": "658:56:53"
                 },
                 {
-                  "assignments": [
-                    30720
-                  ],
+                  "assignments": [30720],
                   "declarations": [
                     {
                       "constant": false,
@@ -533,9 +520,7 @@
                   "src": "725:33:53"
                 },
                 {
-                  "assignments": [
-                    30727
-                  ],
+                  "assignments": [30727],
                   "declarations": [
                     {
                       "constant": false,
@@ -586,9 +571,7 @@
                   "src": "768:15:53"
                 },
                 {
-                  "assignments": [
-                    30731
-                  ],
+                  "assignments": [30731],
                   "declarations": [
                     {
                       "constant": false,
@@ -623,9 +606,7 @@
                   "src": "793:11:53"
                 },
                 {
-                  "assignments": [
-                    30734
-                  ],
+                  "assignments": [30734],
                   "declarations": [
                     {
                       "constant": false,
@@ -1617,9 +1598,7 @@
                 }
               ]
             },
-            "baseFunctions": [
-              29772
-            ],
+            "baseFunctions": [29772],
             "functionSelector": "871d81b7",
             "implemented": true,
             "kind": "function",
@@ -1807,10 +1786,7 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          30822,
-          29773
-        ],
+        "linearizedBaseContracts": [30822, 29773],
         "name": "WhitelistStrategy",
         "nameLocation": "113:17:53",
         "scope": 30823,

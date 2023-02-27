@@ -30,9 +30,9 @@ describe('EthereumSig', () => {
         space,
         authenticator,
         strategies: [{ index: 0, address: '0x395ed61716b48dc904140b515e9f682e33330154' }],
-        executor,
-        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-        executionParams: []
+        executor: { index: 0, address: executor },
+        executionParams: '0x00',
+        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
       }
     });
 

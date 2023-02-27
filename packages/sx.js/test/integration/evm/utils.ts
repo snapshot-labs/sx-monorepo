@@ -53,7 +53,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
   const ethSigAuthenticator = await deployDependency(
     signer,
     EthSigAuthenticatorContract,
-    'SOC',
+    'snapshot-x',
     '1'
   );
   const vanillaVotingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
