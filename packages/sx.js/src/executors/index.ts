@@ -1,6 +1,7 @@
 import createStarknetExecutor from './starknet';
 import createVanillaExecutor from './vanilla';
 import createEthRelayerExecutor from './ethRelayer';
+import createAvatarExecutor from './avatar';
 import type { ExecutionInput, NetworkConfig } from '../types';
 
 export function getExecutionData(
@@ -24,6 +25,10 @@ export function getExecutionData(
 
   if (executor.type === 'vanilla') {
     return createVanillaExecutor().getExecutionData(executorAddress);
+  }
+
+  if (executor.type === 'avatar' && input?.transactions) {
+    return createAvatarExecutor().getExecutionData(executorAddress, input.transactions);
   }
 
   throw new Error(`Not enough data to create execution for executor ${executorAddress}`);

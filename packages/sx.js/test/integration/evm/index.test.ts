@@ -1,8 +1,8 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { AbiCoder } from '@ethersproject/abi';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
 import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
+import { getExecutionData } from '../../../src/executors';
 import { setup, TestConfig } from './utils';
 
 describe('EthereumTx', () => {
@@ -20,58 +20,10 @@ describe('EthereumTx', () => {
   let spaceAddress = '';
   beforeAll(async () => {
     testConfig = await setup(signer);
+    spaceAddress = testConfig.spaceAddress;
 
     ethTxClient = new EthereumTx({ networkConfig: testConfig.networkConfig });
     ethSigClient = new EthereumSig({ networkConfig: testConfig.networkConfig });
-
-    const controller = await signer.getAddress();
-
-    const whitelist = [
-      {
-        addy: controller,
-        vp: 1n
-      }
-    ];
-
-    const abiCoder = new AbiCoder();
-    const whitelistParams = abiCoder.encode(['tuple(address addy, uint256 vp)[]'], [whitelist]);
-
-    const res = await ethTxClient.deploySpace({
-      signer,
-      controller,
-      votingDelay: 0,
-      minVotingDuration: 0,
-      maxVotingDuration: 86400,
-      proposalThreshold: 1n,
-      metadataUri: 'metadataUri',
-      authenticators: [
-        testConfig.vanillaAuthenticator,
-        testConfig.ethTxAuthenticator,
-        testConfig.ethSigAuthenticator
-      ],
-      votingStrategies: [
-        {
-          addy: testConfig.vanillaVotingStrategy,
-          params: '0x00'
-        },
-        {
-          addy: testConfig.compVotingStrategy,
-          params: testConfig.compToken
-        },
-        {
-          addy: testConfig.whitelistStrategy,
-          params: whitelistParams
-        }
-      ],
-      executionStrategies: [
-        {
-          addy: testConfig.executionStrategy,
-          params: '0x0000000000000000000000000000000000000000000000000000000000000001'
-        }
-      ]
-    });
-
-    spaceAddress = res.spaceAddress;
   });
 
   describe('vanilla authenticator', () => {
@@ -81,7 +33,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executor: { index: 0, address: testConfig.executionStrategy },
+          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
           executionParams: '0x00',
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -100,7 +52,6 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionParams: [],
           proposal: 1,
           choice: 0
         }
@@ -121,7 +72,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethTxAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executor: { index: 0, address: testConfig.executionStrategy },
+          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
           executionParams: '0x00',
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -140,7 +91,6 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethTxAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionParams: [],
           proposal: 2,
           choice: 0
         }
@@ -162,7 +112,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethSigAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executor: { index: 0, address: testConfig.executionStrategy },
+          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
           executionParams: '0x00',
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -202,7 +152,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 1, address: testConfig.compVotingStrategy }],
-          executor: { index: 0, address: testConfig.executionStrategy },
+          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
           executionParams: '0x00',
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -241,7 +191,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 2, address: testConfig.whitelistStrategy }],
-          executor: { index: 0, address: testConfig.executionStrategy },
+          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
           executionParams: '0x00',
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -273,14 +223,75 @@ describe('EthereumTx', () => {
     });
   });
 
-  it.skip('should execute', async () => {
-    const res = await ethTxClient.execute({
-      signer,
-      space: spaceAddress,
-      proposal: PROPOSAL_ID,
-      executionParams: '0x00'
+  describe('avatar execution', () => {
+    const transactions = [
+      {
+        to: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
+        value: 1,
+        data: '0x',
+        operation: 0,
+        nonce: 0
+      }
+    ];
+
+    it('should propose with avatar', async () => {
+      const { executionParams } = getExecutionData(
+        testConfig.avatarExecutionStrategy,
+        testConfig.networkConfig,
+        { transactions }
+      );
+
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          executor: { index: 1, address: testConfig.avatarExecutionStrategy },
+          executionParams: executionParams[0],
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+        }
+      };
+
+      const res = await ethTxClient.propose({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
     });
-    expect(res.hash).toBeDefined();
+
+    it('should vote via authenticator', async () => {
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          proposal: 6,
+          choice: 1
+        }
+      };
+
+      const res = await ethTxClient.vote({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+
+    it('should execute', async () => {
+      const { executionParams } = getExecutionData(
+        testConfig.avatarExecutionStrategy,
+        testConfig.networkConfig,
+        { transactions }
+      );
+
+      const res = await ethTxClient.execute({
+        signer,
+        space: spaceAddress,
+        proposal: 6,
+        executionParams: executionParams[0]
+      });
+      expect(res.hash).toBeDefined();
+    });
   });
 
   it('should cancel', async () => {

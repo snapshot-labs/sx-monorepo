@@ -46,6 +46,10 @@ export type EthRelayerExecutionConfig = {
   };
 };
 
+export type AvatarExecutionConfig = {
+  type: 'avatar';
+};
+
 export type NetworkConfig = {
   spaceFactory: string;
   authenticators: {
@@ -68,6 +72,7 @@ export type NetworkConfig = {
       | StarknetExecutionConfig
       | VanillaExecutionConfig
       | EthRelayerExecutionConfig
+      | AvatarExecutionConfig
       | undefined;
   };
 };
