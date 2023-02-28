@@ -26,6 +26,13 @@ export interface Strategy {
     envelope: Envelope<Message>,
     clientConfig: ClientConfig
   ): Promise<Call[]>;
+  getVotingPower: (
+    strategyAddress: string,
+    voterAddress: string,
+    timestamp: number,
+    params: string[],
+    clientConfig: ClientConfig
+  ) => Promise<bigint>;
 }
 
 export type ClientOpts = {

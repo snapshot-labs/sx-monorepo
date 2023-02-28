@@ -1,4 +1,5 @@
-import type { Call } from 'starknet';
+import { Contract, Call } from 'starknet';
+import SingleSlotProofAbi from './abis/singleSlotProof.json';
 import { getProofInputs } from '../../utils/storage-proofs';
 import { getStorageVarAddress, offsetStorageVar, getSlotKey } from '../../utils/encoding';
 import type {
@@ -96,6 +97,30 @@ export default function createSingleSlotProofStrategy(
   }
 
   async function fetchProofInputs(
+    address: string,
+    userAddress: string,
+    slotKey: string,
+    block: number,
+    clientConfig: ClientConfig
+  ) {
+    const response = await fetch(clientConfig.ethUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_getProof',
+        params: [address, [getSlotKey(userAddress, slotKey)], `0x${block.toString(16)}`]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error('Failed to fetch proofs');
+
+    return getProofInputs(block, data.result);
+  }
+
+  async function fetchEnvelopeProofInputs(
     call: 'propose' | 'vote',
     address: string,
     index: number,
@@ -107,25 +132,13 @@ export default function createSingleSlotProofStrategy(
       fetchStrategyParams(index, envelope, clientConfig)
     ]);
 
-    const response = await fetch(clientConfig.ethUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'eth_getProof',
-        params: [
-          strategyParams[0],
-          [getSlotKey(envelope.address, strategyParams[1])],
-          `0x${block.toString(16)}`
-        ]
-      })
-    });
-
-    const data = await response.json();
-    if (data.error) throw new Error('Failed to fetch proofs');
-
-    return getProofInputs(block, data.result);
+    return fetchProofInputs(
+      strategyParams[0],
+      envelope.address,
+      strategyParams[1],
+      block,
+      clientConfig
+    );
   }
 
   return {
@@ -137,7 +150,13 @@ export default function createSingleSlotProofStrategy(
       envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
       clientConfig: ClientConfig
     ): Promise<string[]> {
-      const proofInputs = await fetchProofInputs(call, address, index, envelope, clientConfig);
+      const proofInputs = await fetchEnvelopeProofInputs(
+        call,
+        address,
+        index,
+        envelope,
+        clientConfig
+      );
 
       return proofInputs.storageProofs[0];
     },
@@ -147,7 +166,13 @@ export default function createSingleSlotProofStrategy(
       envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
       clientConfig: ClientConfig
     ): Promise<Call[]> {
-      const proofInputs = await fetchProofInputs('propose', address, index, envelope, clientConfig);
+      const proofInputs = await fetchEnvelopeProofInputs(
+        'propose',
+        address,
+        index,
+        envelope,
+        clientConfig
+      );
 
       return [
         {
@@ -168,6 +193,55 @@ export default function createSingleSlotProofStrategy(
           ]
         }
       ];
+    },
+    async getVotingPower(
+      strategyAddress: string,
+      voterAddress: string,
+      timestamp: number,
+      params: string[],
+      clientConfig: ClientConfig
+    ) {
+      const formattedTimestamp = `0x${timestamp.toString(16)}`;
+
+      const key = getStorageVarAddress(timestampToEthBlockNumberStore, formattedTimestamp);
+      let storedBlock = await clientConfig.starkProvider.getStorageAt(strategyAddress, key);
+
+      // proposer might not have used SSP strategy, use latest L1 block
+      if (storedBlock === '0x0') {
+        storedBlock = await clientConfig.starkProvider.getStorageAt(
+          fossilL1HeadersStoreAddress,
+          getStorageVarAddress(latestL1BlockStore)
+        );
+      }
+
+      const block = parseInt(storedBlock as string, 16) - 1;
+
+      const strategyContract = new Contract(
+        SingleSlotProofAbi,
+        strategyAddress,
+        clientConfig.starkProvider
+      );
+
+      const proofInputs = await fetchProofInputs(
+        params[0],
+        voterAddress,
+        params[1],
+        block,
+        clientConfig
+      );
+
+      try {
+        const { voting_power } = await strategyContract.getVotingPower(
+          formattedTimestamp,
+          { value: voterAddress },
+          params,
+          proofInputs.storageProofs[0]
+        );
+
+        return BigInt(voting_power.low) + (BigInt(voting_power.high) << BigInt(128));
+      } catch (err) {
+        return 0n;
+      }
     }
   };
 }

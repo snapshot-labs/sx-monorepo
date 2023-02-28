@@ -4,7 +4,7 @@ import createWhitelistStrategy from './whitelist';
 import type { Propose, Vote, StrategyConfig, Strategy } from '../../clients/evm/types';
 import type { NetworkConfig } from '../../types';
 
-function getStrategy(address: string, networkConfig: NetworkConfig): Strategy | null {
+export function getStrategy(address: string, networkConfig: NetworkConfig): Strategy | null {
   const strategy = networkConfig.strategies[address];
   if (!strategy) return null;
 

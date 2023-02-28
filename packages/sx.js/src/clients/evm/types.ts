@@ -1,5 +1,6 @@
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
 import type { ContractInterface } from '@ethersproject/contracts';
+import type { Provider } from '@ethersproject/providers';
 import type { Choice } from '../../utils/choice';
 
 export type StrategyConfig = {
@@ -52,6 +53,13 @@ export type Strategy = {
     signerAddress: string,
     data: Propose | Vote
   ): Promise<string>;
+  getVotingPower(
+    strategyAddress: string,
+    voterAddress: string,
+    timestamp: number,
+    params: string,
+    provider: Provider
+  ): Promise<bigint>;
 };
 
 export type SignatureData = {

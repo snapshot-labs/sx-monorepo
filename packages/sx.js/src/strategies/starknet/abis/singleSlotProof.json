@@ -1,0 +1,83 @@
+[
+  {
+    "name": "Address",
+    "size": 1,
+    "type": "struct",
+    "members": [
+      {
+        "name": "value",
+        "type": "felt",
+        "offset": 0
+      }
+    ]
+  },
+  {
+    "name": "Uint256",
+    "size": 2,
+    "type": "struct",
+    "members": [
+      {
+        "name": "low",
+        "type": "felt",
+        "offset": 0
+      },
+      {
+        "name": "high",
+        "type": "felt",
+        "offset": 1
+      }
+    ]
+  },
+  {
+    "name": "constructor",
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "fact_registry_address",
+        "type": "felt"
+      },
+      {
+        "name": "l1_headers_store_address",
+        "type": "felt"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "name": "getVotingPower",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "timestamp",
+        "type": "felt"
+      },
+      {
+        "name": "voter_address",
+        "type": "Address"
+      },
+      {
+        "name": "params_len",
+        "type": "felt"
+      },
+      {
+        "name": "params",
+        "type": "felt*"
+      },
+      {
+        "name": "user_params_len",
+        "type": "felt"
+      },
+      {
+        "name": "user_params",
+        "type": "felt*"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "voting_power",
+        "type": "Uint256"
+      }
+    ],
+    "stateMutability": "view"
+  }
+]

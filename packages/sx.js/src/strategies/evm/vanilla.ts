@@ -5,6 +5,9 @@ export default function createVanillaStrategy(): Strategy {
     type: 'vanilla',
     async getParams(): Promise<string> {
       return '0x00';
+    },
+    async getVotingPower(): Promise<bigint> {
+      return 1n;
     }
   };
 }

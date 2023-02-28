@@ -7,7 +7,7 @@ import { proposeEnvelope, voteEnvelope } from '../../fixtures';
 const ethUrl = process.env.GOERLI_NODE_URL as string;
 const starkProvider = defaultProvider;
 
-const latestL1Block = 8050780;
+const latestL1Block = 8098550;
 
 describe('singleSlotProofStrategy', () => {
   const singleSlotProofStrategy = createSingleSlotProofStrategy({
@@ -76,5 +76,46 @@ describe('singleSlotProofStrategy', () => {
     );
 
     expect(params).toMatchSnapshot();
+  });
+
+  describe('getVotingPower', () => {
+    const params = ['0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6', '0x3'];
+    const timestamp = 1669849240;
+
+    it('should compute voting power for user with delegated tokens', async () => {
+      const votingPower = await singleSlotProofStrategy.getVotingPower(
+        '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b',
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        timestamp,
+        params,
+        config
+      );
+
+      expect(votingPower.toString()).toEqual('100000000000000000');
+    }, 15_000);
+
+    it('should compute voting power for user with delegated tokens and no matching timestamp (latest l1)', async () => {
+      const votingPower = await singleSlotProofStrategy.getVotingPower(
+        '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b',
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        timestamp + 1,
+        params,
+        config
+      );
+
+      expect(votingPower.toString()).toEqual('1050000000000000000');
+    }, 15_000);
+
+    it('should compute voting power for user with no delegated tokens', async () => {
+      const votingPower = await singleSlotProofStrategy.getVotingPower(
+        '0xd1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b',
+        '0x000000000000000000000000000000000000dead',
+        timestamp,
+        params,
+        config
+      );
+
+      expect(votingPower.toString()).toEqual('0');
+    }, 15_000);
   });
 });

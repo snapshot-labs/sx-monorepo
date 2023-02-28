@@ -36,4 +36,20 @@ describe('vanillaStrategy', () => {
 
     expect(params).toEqual([]);
   });
+
+  describe('getVotingPower', () => {
+    const timestamp = 1669849240;
+
+    it('should compute voting power for user', async () => {
+      const votingPower = await vanillaStrategy.getVotingPower(
+        '0x058623786b93d9b6ed1f83cec5c6fa6bea5f399d2795ee56a6123bdd83f5aa48',
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        timestamp,
+        ['0x00'],
+        config
+      );
+
+      expect(votingPower.toString()).toEqual('1');
+    });
+  });
 });

@@ -1,0 +1,1 @@
+["function getPriorVotes(address account, uint256 blockNumber) view returns (uint96)"]

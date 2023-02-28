@@ -2,7 +2,6 @@
 
 import type { Call } from 'starknet';
 import type {
-  VanillaStrategyConfig,
   ClientConfig,
   Envelope,
   Strategy,
@@ -29,6 +28,9 @@ export default function createVanillaStrategy(): Strategy {
       clientConfig: ClientConfig
     ): Promise<Call[]> {
       return [];
+    },
+    async getVotingPower(): Promise<bigint> {
+      return 1n;
     }
   };
 }
