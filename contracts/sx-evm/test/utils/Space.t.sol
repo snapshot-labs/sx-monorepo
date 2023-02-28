@@ -16,7 +16,7 @@ import "../../src/types.sol";
 
 abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {
     bytes4 constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(uint8,bytes),(uint8,bytes)[])"));
-    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[])"));
+    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
     bytes4 constant UPDATE_PROPOSAL_SELECTOR =
         bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
 
@@ -28,6 +28,8 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     uint256 public constant authorKey = 1234;
     uint256 public constant voterKey = 5678;
     uint256 public constant unauthorizedKey = 4321;
+
+    string voteMetadataUri = "Hi";
 
     // Address of the meta transaction relayer (mana)
     address public relayer = address(this);
@@ -103,12 +105,13 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
         address _author,
         uint256 _proposalId,
         Choice _choice,
-        IndexedStrategy[] memory _userVotingStrategies
+        IndexedStrategy[] memory _userVotingStrategies,
+        string memory _voteMetadataUri
     ) internal {
         vanillaAuthenticator.authenticate(
             address(space),
             VOTE_SELECTOR,
-            abi.encode(_author, _proposalId, _choice, _userVotingStrategies)
+            abi.encode(_author, _proposalId, _choice, _userVotingStrategies, _voteMetadataUri)
         );
     }
 }

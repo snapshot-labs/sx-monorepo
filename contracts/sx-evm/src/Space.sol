@@ -9,8 +9,6 @@ import "src/types.sol";
 import "src/interfaces/IVotingStrategy.sol";
 import "src/interfaces/IExecutionStrategy.sol";
 
-import "forge-std/console2.sol";
-
 /**
  * @author  SnapshotLabs
  * @title   Space Contract.
@@ -472,12 +470,14 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
      * @param   proposalId  Proposal id.
      * @param   choice  Choice can be `For`, `Against` or `Abstain`.
      * @param   userVotingStrategies  Strategies to use to compute the voter's voting power.
+     * @param   voteMetadataUri  An optional metadata to give information about the vote.
      */
     function vote(
         address voterAddress,
         uint256 proposalId,
         Choice choice,
-        IndexedStrategy[] calldata userVotingStrategies
+        IndexedStrategy[] calldata userVotingStrategies,
+        string calldata voteMetadataUri
     ) external override {
         _assertValidAuthenticator();
 
@@ -504,7 +504,7 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
 
         voteRegistry[proposalId][voterAddress] = true;
 
-        emit VoteCreated(proposalId, voterAddress, Vote(choice, votingPower));
+        emit VoteCreated(proposalId, voterAddress, Vote(choice, votingPower), voteMetadataUri);
     }
 
     /**

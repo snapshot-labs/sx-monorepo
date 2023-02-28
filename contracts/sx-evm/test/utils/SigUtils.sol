@@ -83,7 +83,8 @@ abstract contract SigUtils {
         address voter,
         uint256 proposalId,
         Choice choice,
-        IndexedStrategy[] memory usedVotingStrategies
+        IndexedStrategy[] memory usedVotingStrategies,
+        string memory voteMetadataUri
     ) internal view returns (bytes32) {
         bytes32 digest = keccak256(
             abi.encodePacked(
@@ -97,7 +98,17 @@ abstract contract SigUtils {
                         authenticator
                     )
                 ),
-                keccak256(abi.encode(VOTE_TYPEHASH, space, voter, proposalId, choice, usedVotingStrategies.hash()))
+                keccak256(
+                    abi.encode(
+                        VOTE_TYPEHASH,
+                        space,
+                        voter,
+                        proposalId,
+                        choice,
+                        usedVotingStrategies.hash(),
+                        keccak256(bytes(voteMetadataUri))
+                    )
+                )
             )
         );
 

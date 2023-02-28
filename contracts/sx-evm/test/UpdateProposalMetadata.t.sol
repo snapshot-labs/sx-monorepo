@@ -41,7 +41,7 @@ contract updateProposalTest is SpaceTest {
 
         // Fast forward and finish the proposal to ensure everything is still working properly.
         vm.warp(block.timestamp + votingDelay);
-        _vote(author, proposalId, Choice.For, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
         space.execute(proposalId, executionStrategy.params);
     }
 

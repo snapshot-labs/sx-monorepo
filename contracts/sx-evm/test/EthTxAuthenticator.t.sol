@@ -5,7 +5,6 @@ pragma solidity ^0.8.15;
 import "./utils/Space.t.sol";
 import "./utils/Authenticator.t.sol";
 import "../src/authenticators/EthTxAuthenticator.sol";
-import "forge-std/console2.sol";
 
 contract EthTxAuthenticatorTest is SpaceTest {
     EthTxAuthenticator ethTxAuth;
@@ -32,7 +31,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(author, proposalMetadataUri, executionStrategy, userVotingStrategies)
+            abi.encode(author, proposalMetadataUri, executionStrategy, userVotingStrategies, voteMetadataUri)
         );
         snapEnd();
     }
@@ -43,7 +42,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(author, proposalMetadataUri, executionStrategy, userVotingStrategies)
+            abi.encode(author, proposalMetadataUri, executionStrategy, userVotingStrategies, voteMetadataUri)
         );
     }
 
@@ -53,7 +52,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             bytes4(0xdeadbeef),
-            abi.encode(author, proposalMetadataUri, executionStrategy, userVotingStrategies)
+            abi.encode(author, proposalMetadataUri, executionStrategy, userVotingStrategies, voteMetadataUri)
         );
     }
 
@@ -66,7 +65,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             VOTE_SELECTOR,
-            abi.encode(voter, proposalId, Choice.For, userVotingStrategies)
+            abi.encode(voter, proposalId, Choice.For, userVotingStrategies, voteMetadataUri)
         );
         snapEnd();
     }
@@ -79,7 +78,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             VOTE_SELECTOR,
-            abi.encode(voter, proposalId, Choice.For, userVotingStrategies)
+            abi.encode(voter, proposalId, Choice.For, userVotingStrategies, voteMetadataUri)
         );
     }
 
@@ -91,7 +90,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             bytes4(0xdeadbeef),
-            abi.encode(voter, proposalId, Choice.For, userVotingStrategies)
+            abi.encode(voter, proposalId, Choice.For, userVotingStrategies, voteMetadataUri)
         );
     }
 
@@ -115,7 +114,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             VOTE_SELECTOR,
-            abi.encode(voter, proposalId, Choice.For, userVotingStrategies)
+            abi.encode(voter, proposalId, Choice.For, userVotingStrategies, voteMetadataUri)
         );
 
         space.execute(proposalId, executionStrategy.params);

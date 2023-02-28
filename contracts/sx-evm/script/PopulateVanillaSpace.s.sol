@@ -11,7 +11,7 @@ import "../src/types.sol";
 
 contract PopulateVanillaSpace is Script {
     bytes4 constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),(uint8,bytes)[])"));
-    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[])"));
+    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
 
     Space space;
     VanillaVotingStrategy vanillaVotingStrategy;
@@ -21,6 +21,8 @@ contract PopulateVanillaSpace is Script {
     string public proposalMetadataUri = "SOC Test Proposal";
     Strategy public executionStrategy;
     IndexedStrategy[] public userVotingStrategies;
+
+    string voteMetadataUri = "";
 
     function run() public {
         space = Space(0x95DC6f73301356c9909921e21b735601C42fc1a8);
@@ -37,7 +39,7 @@ contract PopulateVanillaSpace is Script {
             userVotingStrategies
         );
 
-        _vote(address(this), proposalId, Choice.For, userVotingStrategies);
+        _vote(address(this), proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
     }
 
     function _createProposal(
@@ -59,12 +61,13 @@ contract PopulateVanillaSpace is Script {
         address _author,
         uint256 _proposalId,
         Choice _choice,
-        IndexedStrategy[] memory _userVotingStrategies
+        IndexedStrategy[] memory _userVotingStrategies,
+        string memory _voteMetadataUri
     ) internal {
         vanillaAuthenticator.authenticate(
             address(space),
             VOTE_SELECTOR,
-            abi.encode(_author, _proposalId, _choice, _userVotingStrategies)
+            abi.encode(_author, _proposalId, _choice, _userVotingStrategies, _voteMetadataUri)
         );
     }
 }

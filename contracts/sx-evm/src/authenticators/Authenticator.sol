@@ -5,7 +5,7 @@ pragma solidity ^0.8.15;
 abstract contract Authenticator {
     bytes4 internal constant PROPOSE_SELECTOR =
         bytes4(keccak256("propose(address,string,(uint8,bytes),(uint8,bytes)[])"));
-    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[])"));
+    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
     bytes4 constant UPDATE_PROPOSAL_SELECTOR =
         bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
 

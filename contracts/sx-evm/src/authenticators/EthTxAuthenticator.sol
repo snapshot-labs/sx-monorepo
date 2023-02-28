@@ -34,8 +34,12 @@ contract EthTxAuthenticator is Authenticator {
         if (voter != msg.sender) revert InvalidMessageSender();
     }
 
+    /**
+     * @notice  Internal function to verify that the the message sender is indeed the proposer
+     * @param   data  The data to verify
+     */
     function _verifyUpdateProposal(bytes calldata data) internal view {
-        (address author, , , ) = abi.decode(data, (address, uint256, Strategy, string));
+        (address author, , , ) = abi.decode(data, (address, uint256, IndexedStrategy, string));
         if (author != msg.sender) revert InvalidMessageSender();
     }
 

@@ -3,7 +3,6 @@
 pragma solidity ^0.8.15;
 
 import "../interfaces/IExecutionStrategy.sol";
-import "forge-std/console2.sol";
 
 abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
     function execute(
