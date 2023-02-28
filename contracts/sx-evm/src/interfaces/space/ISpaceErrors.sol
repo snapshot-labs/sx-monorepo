@@ -7,6 +7,7 @@ interface ISpaceErrors {
     // Array is empty
     error EmptyArray();
 
+    error InvalidCaller();
     // All strategy addresses must be != address(0).
     error InvalidStrategyAddress();
     error InvalidVotingStrategyIndex(uint256 index);
@@ -24,4 +25,5 @@ interface ISpaceErrors {
     error VotingPeriodHasEnded();
     error VotingPeriodHasNotStarted();
     error ProposalFinalized();
+    error VotingDelayHasPassed();
 }

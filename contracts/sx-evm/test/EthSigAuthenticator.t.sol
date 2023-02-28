@@ -14,6 +14,8 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
 
     string private constant name = "snapshot-x";
     string private constant version = "1";
+    string newMetadataUri = "Test456";
+    IndexedStrategy newStrategy = IndexedStrategy(0, new bytes(0));
 
     EthSigAuthenticator public ethSigAuth;
 
@@ -195,7 +197,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     }
 
     function testAuthenticateVoteInvalidSigner() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        uint256 proposalId = 1;
 
         uint256 salt = 0;
         bytes32 digest = _getVoteDigest(
@@ -221,7 +223,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     }
 
     function testAuthenticateVoteInvalidSignature() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        uint256 proposalId = 1;
 
         uint256 salt = 0;
         // Signing with an incorrect vote choice
@@ -284,7 +286,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     }
 
     function testAuthenticateVoteInvalidSelector() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        uint256 proposalId = 1;
 
         uint256 salt = 0;
         bytes32 digest = _getVoteDigest(
@@ -306,6 +308,85 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             address(space),
             bytes4(0xdeadbeef),
             abi.encode(voter, proposalId, Choice.For, userVotingStrategies)
+        );
+    }
+
+    function testAuthenticateUpdateProposal() public {
+        space.setVotingDelay(10);
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+
+        bytes32 digest = _getUpdateProposalDigest(
+            address(ethSigAuth),
+            address(space),
+            author,
+            proposalId,
+            newStrategy,
+            newMetadataUri
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(authorKey, digest);
+
+        // vm.expectEmit(true, true, true, true);
+        // emit ProposalUpdated(proposalId, newStrategy, newMetadataUri);
+        ethSigAuth.authenticate(
+            v,
+            r,
+            s,
+            0,
+            address(space),
+            UPDATE_PROPOSAL_SELECTOR,
+            abi.encode(author, proposalId, newStrategy, newMetadataUri)
+        );
+    }
+
+    function testAuthenticateUpdateProposalInvalidSignature() public {
+        space.setVotingDelay(10);
+        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+
+        bytes32 digest = _getUpdateProposalDigest(
+            address(ethSigAuth),
+            address(space),
+            author,
+            proposalId + 1, // proposalId + 1 will be invalid
+            newStrategy,
+            newMetadataUri
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(authorKey, digest);
+
+        vm.expectRevert(InvalidSignature.selector);
+        ethSigAuth.authenticate(
+            v,
+            r,
+            s,
+            0,
+            address(space),
+            UPDATE_PROPOSAL_SELECTOR,
+            abi.encode(author, proposalId, newStrategy, newMetadataUri)
+        );
+    }
+
+    function testAuthenticateUpdateProposalInvalidSelector() public {
+        uint256 proposalId = 1;
+
+        uint256 salt = 0;
+        bytes32 digest = _getUpdateProposalDigest(
+            address(ethSigAuth),
+            address(space),
+            author,
+            proposalId,
+            newStrategy,
+            newMetadataUri
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(authorKey, digest);
+
+        vm.expectRevert(InvalidFunctionSelector.selector);
+        ethSigAuth.authenticate(
+            v,
+            r,
+            s,
+            salt,
+            address(space),
+            bytes4(0xdeadbeef),
+            abi.encode(author, proposalId, newStrategy, newMetadataUri)
         );
     }
 }

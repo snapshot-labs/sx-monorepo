@@ -17,6 +17,8 @@ import "../../src/types.sol";
 abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {
     bytes4 constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(uint8,bytes),(uint8,bytes)[])"));
     bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[])"));
+    bytes4 constant UPDATE_PROPOSAL_SELECTOR =
+        bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
 
     Space space;
     VanillaVotingStrategy vanillaVotingStrategy;

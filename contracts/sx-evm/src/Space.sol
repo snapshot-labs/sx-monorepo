@@ -421,13 +421,13 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
 
     /**
      * @notice  Create a proposal.
-     * @param   proposerAddress  The address of the proposal creator.
+     * @param   author  The address of the proposal creator.
      * @param   metadataUri  The metadata URI for the proposal.
      * @param   executionStrategy  The execution strategy index and associated execution payload to use in the proposal.
      * @param   userVotingStrategies  The voting strategies indexes to use and the associated parameters for each.
      */
     function propose(
-        address proposerAddress,
+        address author,
         string calldata metadataUri,
         IndexedStrategy calldata executionStrategy,
         IndexedStrategy[] calldata userVotingStrategies
@@ -438,7 +438,7 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
         // Casting to `uint32` is fine because this gives us until year ~2106.
         uint32 snapshotTimestamp = uint32(block.timestamp);
 
-        uint256 votingPower = _getCumulativeProposingPower(snapshotTimestamp, proposerAddress, userVotingStrategies);
+        uint256 votingPower = _getCumulativeProposingPower(snapshotTimestamp, author, userVotingStrategies);
         if (votingPower < proposalThreshold) revert ProposalThresholdNotReached(votingPower);
 
         uint32 startTimestamp = snapshotTimestamp + votingDelay;
@@ -455,12 +455,13 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
             maxEndTimestamp,
             executionPayloadHash,
             executionStrategies[executionStrategy.index],
+            author,
             FinalizationStatus.Pending,
             votingStrategies
         );
 
         proposalRegistry[nextProposalId] = proposal;
-        emit ProposalCreated(nextProposalId, proposerAddress, proposal, metadataUri, executionStrategy.params);
+        emit ProposalCreated(nextProposalId, author, proposal, metadataUri, executionStrategy.params);
 
         nextProposalId++;
     }
@@ -541,5 +542,31 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
         if (proposal.finalizationStatus != FinalizationStatus.Pending) revert ProposalFinalized();
         proposal.finalizationStatus = FinalizationStatus.Cancelled;
         emit ProposalCancelled(proposalId);
+    }
+
+    /**
+     * @notice  Updates the proposal executionStrategy and metadata. Will only work if voting has 
+                not started yet, i.e `voting_delay` has not elapsed yet.
+     * @param   proposalId          The id of the proposal to edit
+     * @param   executionStrategy   The new strategy to use
+     * @param   metadataUri         The new metadata
+     */
+    function updateProposal(
+        address author,
+        uint256 proposalId,
+        IndexedStrategy calldata executionStrategy,
+        string calldata metadataUri
+    ) external {
+        _assertValidAuthenticator();
+        _assertValidExecutionStrategy(executionStrategy.index);
+
+        Proposal storage proposal = proposalRegistry[proposalId];
+        if (author != proposal.author) revert InvalidCaller();
+        if (block.timestamp >= proposal.startTimestamp) revert VotingDelayHasPassed();
+
+        proposal.executionPayloadHash = keccak256(executionStrategy.params);
+        proposal.executionStrategy = executionStrategies[executionStrategy.index];
+
+        emit ProposalUpdated(proposalId, executionStrategy, metadataUri);
     }
 }

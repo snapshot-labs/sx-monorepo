@@ -6,7 +6,7 @@ import "src/types.sol";
 
 interface ISpaceActions {
     function propose(
-        address proposerAddress,
+        address author,
         string calldata metadataUri,
         IndexedStrategy calldata executionStrategy,
         IndexedStrategy[] calldata userVotingStrategies
@@ -20,4 +20,11 @@ interface ISpaceActions {
     ) external;
 
     function execute(uint256 proposalId, bytes calldata payload) external;
+
+    function updateProposal(
+        address author,
+        uint256 proposalId,
+        IndexedStrategy calldata executionStrategy,
+        string calldata metadataUri
+    ) external;
 }

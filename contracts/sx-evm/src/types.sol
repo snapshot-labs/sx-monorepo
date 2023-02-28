@@ -16,6 +16,7 @@ struct Proposal {
     bytes32 executionPayloadHash;
     // Struct containing the execution strategy address and parameters required for the strategy.
     Strategy executionStrategy;
+    address author;
     // An enum that stores whether a proposal is pending, executed, or cancelled.
     FinalizationStatus finalizationStatus;
     // Array of structs containing the voting strategy addresses and parameters required for each.
