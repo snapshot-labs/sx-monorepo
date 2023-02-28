@@ -91,4 +91,8 @@ contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy 
             if (!success) revert ExecutionFailed();
         }
     }
+
+    function getStrategyType() external pure override returns (string memory) {
+        return "SimpleQuorumAvatar";
+    }
 }

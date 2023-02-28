@@ -62,4 +62,6 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
     function _supported(uint256 _votesFor, uint256 _votesAgainst) internal pure returns (bool) {
         return _votesFor > _votesAgainst;
     }
+
+    function getStrategyType() external view virtual override returns (string memory);
 }

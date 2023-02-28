@@ -22,4 +22,8 @@ contract VanillaExecutionStrategy is SimpleQuorumExecutionStrategy {
         if (proposal.executionPayloadHash != keccak256(payload)) revert InvalidPayload();
         numExecuted++;
     }
+
+    function getStrategyType() external pure override returns (string memory) {
+        return "SimpleQuorumVanilla";
+    }
 }
