@@ -1,4 +1,5 @@
 import Ajv from 'ajv';
+import { validateAndParseAddress } from 'starknet';
 import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
 import { Zero, MinInt256, MaxInt256, MaxUint256 } from '@ethersproject/constants';
@@ -8,7 +9,13 @@ export function validateForm(schema, form): Record<string, string> {
   const ajv = new Ajv({ allErrors: true });
 
   ajv.addFormat('address', {
-    validate: isAddress
+    validate: (value: string) => {
+      try {
+        return !!validateAndParseAddress(value);
+      } catch (err) {
+        return isAddress(value);
+      }
+    }
   });
 
   ajv.addFormat('long', {

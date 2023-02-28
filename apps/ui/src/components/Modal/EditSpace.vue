@@ -1,42 +1,18 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { useActions } from '@/composables/useActions';
 import { clone } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
-import type { Space } from '@/types';
+import type { Space, SpaceMetadata, NetworkID } from '@/types';
 
-type FormState = { name: string; about?: string; website?: string };
-
-const DEFAULT_FORM_STATE: FormState = {
+const DEFAULT_FORM_STATE: SpaceMetadata = {
   name: '',
-  about: '',
-  website: ''
-};
-
-const definition = {
-  type: 'object',
-  title: 'Space',
-  additionalProperties: false,
-  required: ['name'],
-  properties: {
-    name: {
-      type: 'string',
-      title: 'Name',
-      minLength: 1,
-      examples: ['Space name']
-    },
-    about: {
-      type: 'string',
-      format: 'long',
-      title: 'About',
-      examples: ['Space description']
-    },
-    website: {
-      type: 'string',
-      title: 'Website',
-      examples: ['Space website URL']
-    }
-  }
+  description: '',
+  externalUrl: '',
+  twitter: '',
+  github: '',
+  discord: '',
+  walletNetwork: 'gor',
+  walletAddress: ''
 };
 
 const props = defineProps<{
@@ -48,42 +24,83 @@ const emit = defineEmits(['add', 'close']);
 
 const { updateMetadata } = useActions();
 
+const showPicker = ref(false);
+const searchValue = ref('');
 const sending = ref(false);
-const form: FormState = reactive(clone(DEFAULT_FORM_STATE));
+const formErrors = ref({} as Record<string, string>);
+const form: SpaceMetadata = reactive(clone(DEFAULT_FORM_STATE));
 
-const formErrors = computed(() => validateForm(definition, form));
+function handlePickerSelect(value: string) {
+  showPicker.value = false;
+  form.walletAddress = value;
+}
 
 async function handleSubmit() {
   sending.value = true;
 
   try {
-    await updateMetadata(props.space, {
-      name: form.name,
-      description: form.about || '',
-      external_url: form.website || ''
-    });
+    await updateMetadata(props.space, form);
     emit('close');
   } finally {
     sending.value = false;
   }
 }
 
-onMounted(() => {
-  form.name = props.space.name;
-  form.about = props.space.about || '';
-  form.website = '';
-});
+watch(
+  () => props.open,
+  () => {
+    showPicker.value = false;
+
+    form.name = props.space.name;
+    form.description = props.space.about || '';
+    form.externalUrl = props.space.external_url;
+    form.github = props.space.github;
+    form.discord = props.space.discord;
+    form.twitter = props.space.twitter;
+
+    const [walletNetwork, walletAddress] = props.space.wallet.split(':');
+    form.walletNetwork = walletNetwork as NetworkID;
+    form.walletAddress = walletAddress;
+  }
+);
 </script>
 
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3>Edit profile</h3>
+      <h3 v-if="!showPicker">Edit profile</h3>
+      <template v-else>
+        <h3>Select contact</h3>
+        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+          <IH-arrow-narrow-left class="mr-2" />
+        </a>
+        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+          <IH-search class="mx-2" />
+          <input
+            ref="searchInput"
+            v-model="searchValue"
+            type="text"
+            placeholder="Search"
+            class="flex-auto bg-transparent text-skin-link"
+          />
+        </div>
+      </template>
     </template>
-    <div class="s-box p-4">
-      <SIObject v-model="form" :error="formErrors" :definition="definition" />
+    <BlockContactPicker
+      v-if="showPicker"
+      :loading="false"
+      :search-value="searchValue"
+      @pick="handlePickerSelect"
+    />
+    <div v-else class="p-4">
+      <BlockSpaceFormProfile
+        :show-title="false"
+        :form="form"
+        @pick="showPicker = true"
+        @errors="v => (formErrors = v)"
+      />
     </div>
-    <template #footer>
+    <template v-if="!showPicker" #footer>
       <UiButton
         class="w-full"
         :loading="sending"

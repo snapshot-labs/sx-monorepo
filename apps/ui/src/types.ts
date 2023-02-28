@@ -1,11 +1,15 @@
 export type NetworkID = 'gor' | 'sn-tn2';
 export type Choice = 1 | 2 | 3;
 
-// TODO: would be nice for API to use the same format
 export type SpaceMetadata = {
   name: string;
   description: string;
-  external_url: string;
+  externalUrl: string;
+  twitter: string;
+  github: string;
+  discord: string;
+  walletNetwork: NetworkID;
+  walletAddress: string;
 };
 
 export type SpaceSettings = {
@@ -21,6 +25,11 @@ export type Space = {
   network: NetworkID;
   name: string;
   about?: string;
+  external_url: string;
+  twitter: string;
+  github: string;
+  discord: string;
+  wallet: string;
   controller: string;
   voting_delay: number;
   min_voting_period: number;

@@ -14,6 +14,7 @@ import IText from './IText.vue';
 import IAddress from './IAddress.vue';
 import INumber from './INumber.vue';
 import IBoolean from './IBoolean.vue';
+import ISelect from './ISelect.vue';
 
 const props = defineProps<{
   modelValue: any;
@@ -43,15 +44,16 @@ const inputValue = computed({
   }
 });
 
-const getComponent = (name: string, format: string) => {
-  switch (name) {
+const getComponent = (property: { type: string; format: string; enum?: string[] }) => {
+  switch (property.type) {
     case 'object':
       return IObject;
     case 'array':
       return IArray;
     case 'string':
-      if (format === 'long') return IText;
-      if (format === 'address') return IAddress;
+      if (property.format === 'long') return IText;
+      if (property.format === 'address') return IAddress;
+      if (property.enum) return ISelect;
       return IString;
     case 'number':
       return INumber;
@@ -65,7 +67,7 @@ const getComponent = (name: string, format: string) => {
 
 <template>
   <component
-    :is="getComponent(property.type, property.format)"
+    :is="getComponent(property)"
     v-for="(property, i) in definition.properties"
     :key="i"
     v-bind="$attrs"

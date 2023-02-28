@@ -174,6 +174,11 @@ export const SPACE_QUERY = gql`
       id
       name
       about
+      external_url
+      github
+      twitter
+      discord
+      wallet
       controller
       voting_delay
       min_voting_period
@@ -196,6 +201,11 @@ export const SPACES_QUERY = gql`
       id
       name
       about
+      external_url
+      github
+      twitter
+      discord
+      wallet
       controller
       voting_delay
       min_voting_period

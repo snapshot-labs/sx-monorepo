@@ -78,9 +78,19 @@ const grouped = computed(() => {
           </span>
         </div>
         <div class="space-x-2">
-          <img src="~@/assets/twitter.svg" class="w-[28px] h-[28px] inline-block" />
-          <img src="~@/assets/discord.svg" class="w-[28px] h-[28px] inline-block" />
-          <img src="~@/assets/github.svg" class="w-[28px] h-[28px] inline-block" />
+          <a v-if="space.twitter" :href="`https://twitter.com/${space.twitter}`" target="_blank">
+            <img src="~@/assets/twitter.svg" class="w-[28px] h-[28px] inline-block" />
+          </a>
+          <a
+            v-if="space.discord"
+            :href="`https://discord.com/invite/${space.discord}`"
+            target="_blank"
+          >
+            <img src="~@/assets/discord.svg" class="w-[28px] h-[28px] inline-block" />
+          </a>
+          <a v-if="space.github" :href="`https://github.com/${space.github}`" target="_blank">
+            <img src="~@/assets/github.svg" class="w-[28px] h-[28px] inline-block" />
+          </a>
         </div>
       </div>
     </div>

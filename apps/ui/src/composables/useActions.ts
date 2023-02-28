@@ -3,6 +3,7 @@ import { getNetwork } from '@/networks';
 import { useUiStore } from '@/stores/ui';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useModal } from '@/composables/useModal';
+import { createErc1155Metadata } from '@/helpers/utils';
 import type {
   Transaction,
   Proposal,
@@ -59,7 +60,7 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    const pinned = await network.helpers.pin(metadata);
+    const pinned = await network.helpers.pin(createErc1155Metadata(metadata));
 
     const receipt = await network.actions.createSpace(auth.web3, {
       controller: web3.value.account,
@@ -94,7 +95,7 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    const pinned = await network.helpers.pin(metadata);
+    const pinned = await network.helpers.pin(createErc1155Metadata(metadata));
 
     const receipt = await network.actions.setMetadataUri(
       auth.web3,

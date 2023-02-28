@@ -6,6 +6,7 @@ import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl as snapshotGetUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
+import type { SpaceMetadata } from '@/types';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 
@@ -164,4 +165,25 @@ export async function verifyNetwork(web3Provider: Web3Provider, chainId: number)
     method: 'wallet_switchEthereumChain',
     params: [{ chainId: `0x${chainId.toString(16)}` }]
   });
+}
+
+/**
+ * This function creates ERC1155 metadata object for space. external_url is stored
+ * at top level same as OpenSea, other extra properties are stored in the
+ * properties object per ERC1155 spec.
+ * @param metadata space metadata
+ * @returns ERC1155 metadata object
+ */
+export function createErc1155Metadata(metadata: SpaceMetadata) {
+  return {
+    name: metadata.name,
+    description: metadata.description,
+    external_url: metadata.externalUrl,
+    properties: {
+      github: metadata.github,
+      twitter: metadata.twitter,
+      discord: metadata.discord,
+      wallets: [`${metadata.walletNetwork}:${metadata.walletAddress}`]
+    }
+  };
 }

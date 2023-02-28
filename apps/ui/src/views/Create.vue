@@ -6,7 +6,7 @@ import { useWeb3 } from '@/composables/useWeb3';
 import { clone } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
-import type { NetworkID, SpaceSettings } from '@/types';
+import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
 const PAGES = [
   {
@@ -40,13 +40,14 @@ const PAGES = [
 ] as const;
 
 type PageID = typeof PAGES[number]['id'];
-type MetadataState = { name: string; about?: string; website?: string };
 
 const router = useRouter();
 const { createSpace } = useActions();
 const { web3 } = useWeb3();
 
 const pagesRefs = ref([] as HTMLElement[]);
+const showPicker = ref(false);
+const searchValue = ref('');
 const sending = ref(false);
 const currentPage: Ref<PageID> = ref('profile');
 const pagesErrors: Ref<Record<PageID, Record<string, string>>> = ref({
@@ -58,11 +59,16 @@ const pagesErrors: Ref<Record<PageID, Record<string, string>>> = ref({
   voting: {},
   controller: {}
 });
-const metadataForm: MetadataState = reactive(
+const metadataForm: SpaceMetadata = reactive(
   clone({
     name: '',
-    about: '',
-    website: ''
+    description: '',
+    externalUrl: '',
+    twitter: '',
+    github: '',
+    discord: '',
+    walletNetwork: 'gor',
+    walletAddress: ''
   })
 );
 const selectedNetworkId: Ref<NetworkID> = ref('sn-tn2');
@@ -114,17 +120,18 @@ function handleNextClick() {
   pagesRefs.value[currentIndex + 1].scrollIntoView();
 }
 
+function handlePickerSelect(value: string) {
+  showPicker.value = false;
+  metadataForm.walletAddress = value;
+}
+
 async function handleSubmit() {
   sending.value = true;
 
   try {
     const result = await createSpace(
       selectedNetworkId.value,
-      {
-        name: metadataForm.name,
-        description: metadataForm.about || '',
-        external_url: metadataForm.website || ''
-      },
+      metadataForm,
       settingsForm,
       authenticators.value,
       votingStrategies.value,
@@ -179,6 +186,7 @@ watch(selectedNetworkId, () => {
           <BlockSpaceFormProfile
             v-if="currentPage === 'profile'"
             :form="metadataForm"
+            @pick="showPicker = true"
             @errors="v => handleErrors('profile', v)"
           />
           <BlockSpaceFormNetwork
@@ -232,5 +240,30 @@ watch(selectedNetworkId, () => {
         </UiButton>
       </div>
     </div>
+    <teleport to="#modal">
+      <UiModal :open="showPicker" @close="showPicker = false">
+        <template #header>
+          <h3>Select contact</h3>
+          <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+            <IH-arrow-narrow-left class="mr-2" />
+          </a>
+          <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+            <IH-search class="mx-2" />
+            <input
+              ref="searchInput"
+              v-model="searchValue"
+              type="text"
+              placeholder="Search"
+              class="flex-auto bg-transparent text-skin-link"
+            />
+          </div>
+        </template>
+        <BlockContactPicker
+          :loading="false"
+          :search-value="searchValue"
+          @pick="handlePickerSelect"
+        />
+      </UiModal>
+    </teleport>
   </div>
 </template>
