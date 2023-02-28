@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -33,7 +33,7 @@ abstract contract SignatureVerifier is EIP712 {
             "IndexedStrategy(uint8 index,bytes params)"
         );
 
-    mapping(address => mapping(uint256 => bool)) private usedSalts;
+    mapping(address author => mapping(uint256 salt => bool used)) private usedSalts;
 
     constructor(string memory name, string memory version) EIP712(name, version) {}
 

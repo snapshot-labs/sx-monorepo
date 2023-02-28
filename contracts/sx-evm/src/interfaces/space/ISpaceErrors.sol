@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.18;
 
 interface ISpaceErrors {
     // Min duration should be smaller than or equal to max duration

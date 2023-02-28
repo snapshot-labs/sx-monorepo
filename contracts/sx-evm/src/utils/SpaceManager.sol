@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract SpaceManager is OwnableUpgradeable {
     error InvalidSpace();
 
-    mapping(address => bool) internal spaces;
+    mapping(address space => bool isEnabled) internal spaces;
 
     /// @notice Emitted when a space is enabled.
     event SpaceEnabled(address space);

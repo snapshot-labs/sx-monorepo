@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -35,13 +35,13 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
     Strategy[] private executionStrategies;
 
     // Mapping of allowed authenticators.
-    mapping(address => bool) private authenticators;
+    mapping(address auth => bool allowed) private authenticators;
     // Mapping of all `Proposal`s of this space (past and present).
-    mapping(uint256 => Proposal) private proposalRegistry;
+    mapping(uint256 proposalId => Proposal proposal) private proposalRegistry;
     // Mapping used to know if a voter already voted on a specific proposal. Here to prevent double voting.
-    mapping(uint256 => mapping(address => bool)) private voteRegistry;
+    mapping(uint256 proposalId => mapping(address voter => bool hasVoted)) private voteRegistry;
     // Mapping used to check the current voting power in favor of a `Choice` for a specific proposal.
-    mapping(uint256 => mapping(Choice => uint256)) private votePower;
+    mapping(uint256 proposalId => mapping(Choice choice => uint256 votePower)) private votePower;
 
     // ------------------------------------
     // |                                  |

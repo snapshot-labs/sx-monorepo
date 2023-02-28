@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.18;
 
 import "@zodiac/interfaces/IAvatar.sol";
 
 contract Avatar {
     error NotAuthorized();
 
-    mapping(address => bool) internal modules;
+    mapping(address module => bool isEnabled) internal modules;
 
     receive() external payable {}
 

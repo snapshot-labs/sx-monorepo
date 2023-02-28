@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.18;
 
 abstract contract TimestampResolver {
     error TimestampInFuture();
     error InvalidBlockNumber();
 
-    mapping(uint32 => uint256) public timestampToBlockNumber;
+    mapping(uint32 timestamp => uint256 blockNumber) public timestampToBlockNumber;
 
     /// @notice Resolves a timestamp to a block number in such a way that the same timestamp
     /// always resolves to the same block number. If the timestamp is in the future, reverts.
