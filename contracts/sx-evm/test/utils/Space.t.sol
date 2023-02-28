@@ -59,6 +59,8 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
 
     string public proposalMetadataUri = "SOC Test Proposal";
 
+    bytes[] public votingStrategyMetadata;
+
     function setUp() public virtual {
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
@@ -81,6 +83,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
             maxVotingDuration,
             proposalThreshold,
             votingStrategies,
+            votingStrategyMetadata,
             authenticators,
             executionStrategies
         );

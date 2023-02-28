@@ -28,9 +28,10 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         compVotingStrategy = new CompVotingStrategy();
         compToken = new CompToken();
         newStrategies[0] = Strategy(address(compVotingStrategy), abi.encodePacked(address(compToken)));
+        bytes[] memory newData = new bytes[](0);
 
         // Update contract's voting strategies.
-        space.addVotingStrategies(newStrategies);
+        space.addVotingStrategies(newStrategies, newData);
 
         // Mint tokens for the user
         compToken.mint(user, 10000);

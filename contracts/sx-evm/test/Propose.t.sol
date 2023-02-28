@@ -82,8 +82,9 @@ contract ProposeTest is SpaceTest {
         Strategy[] memory toAdd = new Strategy[](2);
         toAdd[0] = Strategy(address(strat2), new bytes(0));
         toAdd[1] = Strategy(address(strat2), new bytes(0));
+        bytes[] memory newData = new bytes[](0);
 
-        space.addVotingStrategies(toAdd);
+        space.addVotingStrategies(toAdd, newData);
 
         IndexedStrategy[] memory newVotingStrategies = new IndexedStrategy[](3);
         newVotingStrategies[0] = userVotingStrategies[0]; // base strat

@@ -14,6 +14,7 @@ interface ISpaceFactoryEvents {
         uint256 proposalThreshold,
         string metadataUri,
         Strategy[] votingStrategies,
+        bytes[] votingStrategyMetadata,
         address[] authenticators,
         Strategy[] executionStrategies
     );

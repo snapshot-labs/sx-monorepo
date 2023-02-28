@@ -32,13 +32,14 @@ contract SpaceSetup is Script {
     uint32 public quorum;
     string metadataUri = "SX Test Space";
 
-    Strategy[2] public votingStrategies;
-
     function run() public {
         Strategy[] memory votingStrategies = new Strategy[](2);
+        bytes[] memory votingStrategyMetadata = new bytes[](2);
         votingStrategies[0] = Strategy(vanillaVotingStrategy, new bytes(0));
+        votingStrategyMetadata[0] = new bytes(0);
         address uni = address(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984); // Goerli UNI token
         votingStrategies[1] = Strategy(compVotingStrategy, abi.encode(uni));
+        votingStrategyMetadata[1] = new bytes(18); // UNI token decimals
 
         address[] memory authenticators = new address[](3);
         authenticators[0] = vanillaAuthenticator;
@@ -65,6 +66,7 @@ contract SpaceSetup is Script {
             proposalThreshold,
             metadataUri,
             votingStrategies,
+            votingStrategyMetadata,
             authenticators,
             executionStrategies,
             keccak256(abi.encodePacked("SOC Test Space: 2"))

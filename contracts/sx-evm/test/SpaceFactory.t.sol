@@ -27,6 +27,8 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
     uint256 public proposalThreshold;
     uint32 public quorum;
 
+    bytes[] votingStrategyMetadata;
+
     string metadataUri = "SX-EVM";
 
     function setUp() public {
@@ -57,6 +59,7 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
             maxVotingDuration,
             proposalThreshold,
             votingStrategies,
+            votingStrategyMetadata,
             authenticators,
             executionStrategies,
             salt
@@ -72,6 +75,7 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
             proposalThreshold,
             metadataUri,
             votingStrategies,
+            votingStrategyMetadata,
             authenticators,
             executionStrategies
         );
@@ -84,6 +88,7 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
             proposalThreshold,
             metadataUri,
             votingStrategies,
+            votingStrategyMetadata,
             authenticators,
             executionStrategies,
             salt
@@ -101,6 +106,7 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
             proposalThreshold,
             metadataUri,
             votingStrategies,
+            votingStrategyMetadata,
             authenticators,
             executionStrategies,
             salt
@@ -117,6 +123,7 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
             proposalThreshold,
             metadataUri,
             votingStrategies,
+            votingStrategyMetadata,
             authenticators,
             executionStrategies,
             salt
@@ -130,6 +137,7 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
         uint32 _maxVotingDuration,
         uint256 _proposalThreshold,
         Strategy[] memory _votingStrategies,
+        bytes[] memory _votingStrategyMetadata,
         address[] memory _authenticators,
         Strategy[] memory _executionStrategies,
         bytes32 salt
@@ -153,6 +161,7 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
                                             _maxVotingDuration,
                                             _proposalThreshold,
                                             _votingStrategies,
+                                            _votingStrategyMetadata,
                                             _authenticators,
                                             _executionStrategies
                                         )
