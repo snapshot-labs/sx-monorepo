@@ -129,6 +129,21 @@ a,
   }
 }
 
+.choice-text {
+  &._1 {
+    @apply text-green;
+  }
+  &._2 {
+    @apply text-red;
+  }
+  &._3 {
+    @apply text-gray-500;
+  }
+  &._quorum {
+    @apply text-skin-border;
+  }
+}
+
 #app {
   height: 100%;
 }
