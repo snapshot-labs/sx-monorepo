@@ -2,6 +2,11 @@ type Space @entity {
   id: ID!
   name: String!
   about: String!
+  external_url: String!
+  github: String!
+  twitter: String!
+  discord: String!
+  wallet: String!
   controller: Bytes!
   voting_delay: Int!
   min_voting_period: Int!

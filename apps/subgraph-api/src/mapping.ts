@@ -165,11 +165,28 @@ export function handleMetadataUriUpdated(event: MetadataUriUpdated): void {
     if (data !== null) {
       let value = json.try_fromBytes(data as Bytes)
       let obj = value.value.toObject()
-      let title = obj.get('name')
+      let name = obj.get('name')
       let description = obj.get('description')
+      let externalUrl = obj.get('external_url')
+      let properties = obj.get('properties')
 
-      if (title) space.name = title.toString()
+      if (name) space.name = name.toString()
       if (description) space.about = description.toString()
+      if (externalUrl) space.external_url = externalUrl.toString()
+
+      if (properties) {
+        const propertiesObj = properties.toObject()
+
+        let github = propertiesObj.get('github')
+        let twitter = propertiesObj.get('twitter')
+        let discord = propertiesObj.get('discord')
+        let wallets = propertiesObj.get('wallets')
+
+        if (github) space.github = github.toString()
+        if (twitter) space.twitter = twitter.toString()
+        if (discord) space.discord = discord.toString()
+        if (wallets && wallets.toArray().length > 0) space.wallet = wallets.toArray()[0].toString()
+      }
     }
   }
 
