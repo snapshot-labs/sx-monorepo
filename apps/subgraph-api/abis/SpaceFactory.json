@@ -45,9 +45,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "quorum",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "metadataUri",
+        "type": "string"
       },
       {
         "components": [
@@ -69,15 +69,33 @@
       },
       {
         "indexed": false,
+        "internalType": "bytes[]",
+        "name": "votingStrategyMetadata",
+        "type": "bytes[]"
+      },
+      {
+        "indexed": false,
         "internalType": "address[]",
         "name": "authenticators",
         "type": "address[]"
       },
       {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
         "indexed": false,
-        "internalType": "address[]",
-        "name": "executionStrategiesAddresses",
-        "type": "address[]"
+        "internalType": "struct Strategy[]",
+        "name": "executionStrategies",
+        "type": "tuple[]"
       }
     ],
     "name": "SpaceCreated",
@@ -111,9 +129,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "quorum",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "metadataUri",
+        "type": "string"
       },
       {
         "components": [
@@ -133,14 +151,31 @@
         "type": "tuple[]"
       },
       {
+        "internalType": "bytes[]",
+        "name": "votingStrategyMetadata",
+        "type": "bytes[]"
+      },
+      {
         "internalType": "address[]",
         "name": "authenticators",
         "type": "address[]"
       },
       {
-        "internalType": "address[]",
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct Strategy[]",
         "name": "executionStrategies",
-        "type": "address[]"
+        "type": "tuple[]"
       },
       {
         "internalType": "bytes32",

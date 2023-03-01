@@ -1,0 +1,335 @@
+[
+  {
+    "inputs": [],
+    "name": "ExecutionFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPayload",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum ProposalStatus",
+        "name": "status",
+        "type": "uint8"
+      }
+    ],
+    "name": "InvalidProposalStatus",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "snapshotTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "startTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "minEndTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxEndTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "executionPayloadHash",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addy",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy",
+            "name": "executionStrategy",
+            "type": "tuple"
+          },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
+          {
+            "internalType": "enum FinalizationStatus",
+            "name": "finalizationStatus",
+            "type": "uint8"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addy",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy[]",
+            "name": "votingStrategies",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct Proposal",
+        "name": "proposal",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votesFor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votesAgainst",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votesAbstain",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "payload",
+        "type": "bytes"
+      }
+    ],
+    "name": "execute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "snapshotTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "startTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "minEndTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxEndTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "executionPayloadHash",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addy",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy",
+            "name": "executionStrategy",
+            "type": "tuple"
+          },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
+          {
+            "internalType": "enum FinalizationStatus",
+            "name": "finalizationStatus",
+            "type": "uint8"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addy",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy[]",
+            "name": "votingStrategies",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct Proposal",
+        "name": "proposal",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votesFor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votesAgainst",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votesAbstain",
+        "type": "uint256"
+      }
+    ],
+    "name": "getProposalStatus",
+    "outputs": [
+      {
+        "internalType": "enum ProposalStatus",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "snapshotTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "startTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "minEndTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxEndTimestamp",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "executionPayloadHash",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addy",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy",
+            "name": "executionStrategy",
+            "type": "tuple"
+          },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
+          {
+            "internalType": "enum FinalizationStatus",
+            "name": "finalizationStatus",
+            "type": "uint8"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addy",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy[]",
+            "name": "votingStrategies",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct Proposal",
+        "name": "proposal",
+        "type": "tuple"
+      }
+    ],
+    "name": "getQuorum",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getStrategyType",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

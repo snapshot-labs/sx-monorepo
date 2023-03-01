@@ -6,9 +6,9 @@ dataSources:
     name: SpaceFactory
     network: goerli
     source:
-      address: '0xf8d933026b7bD549314A31E6c5b2616c631A9E87'
+      address: '0xfC38E50eA8fc64Fb68B9fece13b16404B8D43864'
       abi: SpaceFactory
-      startBlock: 8501860
+      startBlock: 8577681
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -18,8 +18,10 @@ dataSources:
       abis:
         - name: SpaceFactory
           file: ./abis/SpaceFactory.json
+        - name: IExecutionStrategy
+          file: ./abis/IExecutionStrategy.json
       eventHandlers:
-        - event: SpaceCreated(address,address,uint32,uint32,uint32,uint256,uint256,(address,bytes)[],address[],address[])
+        - event: SpaceCreated(address,address,uint32,uint32,uint32,uint256,string,(address,bytes)[],bytes[],address[],(address,bytes)[])
           handler: handleSpaceCreated
       file: ./src/mapping.ts
 templates:
@@ -40,9 +42,11 @@ templates:
         - name: Space
           file: ./abis/Space.json
       eventHandlers:
-        - event: ProposalCreated(uint256,address,(uint256,uint32,uint32,uint32,uint32,bytes32,address,uint8),string,bytes)
+        - event: ProposalCreated(uint256,address,(uint32,uint32,uint32,uint32,bytes32,(address,bytes),address,uint8,(address,bytes)[]),string,bytes)
           handler: handleProposalCreated
-        - event: VoteCreated(uint256,address,(uint8,uint256))
+        - event: ProposalExecuted(uint256)
+          handler: handleProposalExecuted
+        - event: VoteCreated(uint256,address,(uint8,uint256),string)
           handler: handleVoteCreated
         - event: MetadataUriUpdated(string)
           handler: handleMetadataUriUpdated
