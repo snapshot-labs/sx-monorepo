@@ -20,10 +20,12 @@ type Space {
   strategies_params: [String]
   authenticators: [String]
   executors: [String]
+  executors_types: [String]
   proposal_count: Int
   vote_count: Int
   created: Int
   tx: String
+  executed: Boolean
   proposals: [Proposal]! @derivedFrom(field: "space")
 }
 
