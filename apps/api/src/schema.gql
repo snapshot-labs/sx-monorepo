@@ -25,7 +25,6 @@ type Space {
   vote_count: Int
   created: Int
   tx: String
-  executed: Boolean
   proposals: [Proposal]! @derivedFrom(field: "space")
 }
 
@@ -54,6 +53,7 @@ type Proposal {
   created: Int
   tx: String
   vote_count: Int
+  executed: Boolean
 }
 
 type Vote {
