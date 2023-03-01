@@ -5,8 +5,8 @@ import { Choice } from '../../../../../src/utils/choice';
 
 describe('EthereumSig', () => {
   const space = '0x6d5608420702714a6c8168ec9c70706e8d1cf641';
-  const authenticator = '0x86bfa0726cba0febeee457f04b705ab74b54d01c';
-  const executor = '0xb1001fdf62c020761039a750b27e73c512fdaa5e';
+  const authenticator = '0x277f388b77cd36fff1c0e976c49a7c54413a449a';
+  const executor = '0x6241b5c89350bb3c465179706cf26050ea32444f';
 
   const provider = new JsonRpcProvider('http://127.0.0.1:8545');
   const signer = new Wallet(
@@ -29,7 +29,7 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0x395ed61716b48dc904140b515e9f682e33330154' }],
+        strategies: [{ index: 0, address: '0xf3e55d22845689be3e062975444d09799e522a6c' }],
         executor: { index: 0, address: executor },
         executionParams: '0x00',
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
@@ -45,9 +45,10 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0x395ed61716b48dc904140b515e9f682e33330154' }],
-        proposal: 3,
-        choice: Choice.FOR
+        strategies: [{ index: 0, address: '0xf3e55d22845689be3e062975444d09799e522a6c' }],
+        proposal: 1,
+        choice: Choice.FOR,
+        metadataUri: ''
       }
     });
 

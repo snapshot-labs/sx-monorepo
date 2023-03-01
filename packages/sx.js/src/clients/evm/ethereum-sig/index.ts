@@ -115,7 +115,8 @@ export class EthereumSig {
       userVotingStrategies: data.strategies.map((strategyConfig, i) => ({
         index: strategyConfig.index,
         params: strategiesParams[i]
-      }))
+      })),
+      voteMetadataUri: data.metadataUri
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, voteTypes);

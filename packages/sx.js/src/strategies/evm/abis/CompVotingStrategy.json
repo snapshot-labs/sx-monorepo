@@ -3,5 +3,5 @@
   "error InvalidByteArray()",
   "error TimestampInFuture()",
   "function getVotingPower(uint32 timestamp, address voterAddress, bytes params, bytes) returns (uint256)",
-  "function timestampToBlockNumber(uint32) view returns (uint256)"
+  "function timestampToBlockNumber(uint32 timestamp) view returns (uint256 blockNumber)"
 ]

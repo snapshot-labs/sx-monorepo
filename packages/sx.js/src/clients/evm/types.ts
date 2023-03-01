@@ -23,6 +23,7 @@ export type Vote = {
   strategies: StrategyConfig[];
   proposal: number;
   choice: Choice;
+  metadataUri: string;
 };
 
 export type AddressConfig = {
@@ -90,4 +91,5 @@ export type EIP712VoteMessage = {
   proposalId: number;
   choice: number;
   userVotingStrategies: IndexedConfig[];
+  voteMetadataUri: string;
 };

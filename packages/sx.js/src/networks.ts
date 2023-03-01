@@ -1,31 +1,31 @@
 import type { NetworkConfig } from './types';
 
 export const evmGoerli: NetworkConfig = {
-  spaceFactory: '0xf8d933026b7bd549314a31e6c5b2616c631a9e87',
+  spaceFactory: '0xfc38e50ea8fc64fb68b9fece13b16404b8d43864',
   authenticators: {
-    '0x86bfa0726cba0febeee457f04b705ab74b54d01c': {
+    '0xdd66652e93293c32aa3288509d9a46c785e3f786': {
       type: 'vanilla'
     },
-    '0x486039513b72967cd81272f204d4eaff68d0dfd0': {
+    '0x277f388b77cd36fff1c0e976c49a7c54413a449a': {
       type: 'ethSig'
     },
-    '0x37315ce75920b653f0f13734c709e199876455c9': {
+    '0xcc3fb327de5428d182ba2e739aea5978c0e2ce35': {
       type: 'ethTx'
     }
   },
   strategies: {
-    '0x395ed61716b48dc904140b515e9f682e33330154': {
+    '0xf3e55d22845689be3e062975444d09799e522a6c': {
       type: 'vanilla'
     },
-    '0xbbd17346378f76c1c94032594b57c93c24857b19': {
+    '0x0bed117707f698fccb68223de297bf3e3df7082c': {
       type: 'comp'
     },
-    '0xc89a0c93af823f794f96f7b2b63fc2a1f1ae9427': {
+    '0x95287283ed7c583120b06ff48a655062976ac41c': {
       type: 'whitelist'
     }
   },
   executors: {
-    '0xb1001fdf62c020761039a750b27e73c512fdaa5e': {
+    '0x6241b5c89350bb3c465179706cf26050ea32444f': {
       type: 'vanilla'
     }
   }

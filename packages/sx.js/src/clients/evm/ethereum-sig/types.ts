@@ -25,7 +25,8 @@ export const voteTypes = {
     { name: 'voter', type: 'address' },
     { name: 'proposalId', type: 'uint256' },
     { name: 'choice', type: 'uint8' },
-    { name: 'userVotingStrategies', type: 'IndexedStrategy[]' }
+    { name: 'userVotingStrategies', type: 'IndexedStrategy[]' },
+    { name: 'voteMetadataUri', type: 'string' }
   ],
   IndexedStrategy: [
     { name: 'index', type: 'uint8' },

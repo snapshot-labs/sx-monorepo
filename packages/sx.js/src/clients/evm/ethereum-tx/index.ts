@@ -1,4 +1,4 @@
-import { Contract } from '@ethersproject/contracts';
+import { Contract, ContractFactory } from '@ethersproject/contracts';
 import { Interface } from '@ethersproject/abi';
 import { getCreate2Address } from '@ethersproject/address';
 import { keccak256 } from '@ethersproject/keccak256';
@@ -9,6 +9,8 @@ import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import SpaceFactoryAbi from './abis/SpaceFactory.json';
 import SpaceBytecode from './abis/bytecode/Space.json';
+import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
+import AvatarExecutionStrategyBytecode from './abis/bytecode/AvatarExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { Propose, Vote, Envelope, AddressConfig } from '../types';
 import type { NetworkConfig, ClientOpts } from '../../../types';
@@ -18,6 +20,28 @@ export class EthereumTx {
 
   constructor(opts?: Pick<ClientOpts, 'networkConfig'>) {
     this.networkConfig = opts?.networkConfig || evmGoerli;
+  }
+
+  async deployAvatarExecution({
+    signer,
+    controller,
+    target,
+    spaces
+  }: {
+    signer: Signer;
+    controller: string;
+    target: string;
+    spaces: string[];
+  }) {
+    const factory = new ContractFactory(
+      AvatarExecutionStrategyAbi,
+      AvatarExecutionStrategyBytecode,
+      signer
+    );
+
+    const contract = await factory.deploy(controller, target, spaces);
+
+    return contract.address;
   }
 
   async deploySpace({
@@ -60,7 +84,7 @@ export class EthereumTx {
       proposalThreshold,
       metadataUri
     ];
-    const strategies = [votingStrategies, authenticators, executionStrategies];
+    const strategies = [votingStrategies, [], authenticators, executionStrategies];
 
     const functionData = spaceInterface.encodeDeploy([...baseArgs.slice(0, -1), ...strategies]);
     const initCode = SpaceBytecode + functionData.slice(2);
@@ -127,7 +151,8 @@ export class EthereumTx {
       envelope.data.strategies.map((strategyConfig, i) => ({
         index: strategyConfig.index,
         params: strategiesParams[i]
-      }))
+      })),
+      envelope.data.metadataUri
     ]);
 
     const selector = functionData.slice(0, 10);

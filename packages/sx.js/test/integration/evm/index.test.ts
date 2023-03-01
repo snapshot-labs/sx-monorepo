@@ -53,7 +53,8 @@ describe('EthereumTx', () => {
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           proposal: 1,
-          choice: 0
+          choice: 0,
+          metadataUri: ''
         }
       };
 
@@ -92,7 +93,8 @@ describe('EthereumTx', () => {
           authenticator: testConfig.ethTxAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           proposal: 2,
-          choice: 0
+          choice: 0,
+          metadataUri: ''
         }
       };
 
@@ -133,7 +135,8 @@ describe('EthereumTx', () => {
           authenticator: testConfig.ethSigAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           proposal: 3,
-          choice: 0
+          choice: 0,
+          metadataUri: ''
         }
       });
 
@@ -172,7 +175,8 @@ describe('EthereumTx', () => {
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 1, address: testConfig.compVotingStrategy }],
           proposal: 4,
-          choice: 0
+          choice: 0,
+          metadataUri: ''
         }
       };
 
@@ -211,7 +215,8 @@ describe('EthereumTx', () => {
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 2, address: testConfig.whitelistStrategy }],
           proposal: 5,
-          choice: 0
+          choice: 0,
+          metadataUri: ''
         }
       };
 
@@ -266,7 +271,8 @@ describe('EthereumTx', () => {
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           proposal: 6,
-          choice: 1
+          choice: 1,
+          metadataUri: ''
         }
       };
 
