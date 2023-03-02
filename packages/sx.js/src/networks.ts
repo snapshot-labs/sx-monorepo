@@ -1,6 +1,7 @@
 import type { NetworkConfig } from './types';
 
 export const evmGoerli: NetworkConfig = {
+  eip712ChainId: 5,
   spaceFactory: '0xfc38e50ea8fc64fb68b9fece13b16404b8d43864',
   authenticators: {
     '0xdd66652e93293c32aa3288509d9a46c785e3f786': {
@@ -32,6 +33,7 @@ export const evmGoerli: NetworkConfig = {
 };
 
 export const goerli2: NetworkConfig = {
+  eip712ChainId: 5,
   spaceFactory: '0x00e1e511e496a72791ab3d591ba7d571a32de4261d84e4d183f26b6325970e20',
   authenticators: {
     '0x05e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62': {

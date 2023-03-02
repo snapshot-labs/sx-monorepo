@@ -1,7 +1,6 @@
 export const domain = {
   name: 'snapshot-x',
-  version: '1',
-  chainId: 31337
+  version: '0.1.0'
 };
 
 export const proposeTypes = {

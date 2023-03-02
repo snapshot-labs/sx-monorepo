@@ -4,7 +4,7 @@ import { snakeCase } from 'snake-case';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'cross-fetch';
-import { domain, proposeTypes, voteTypes } from './types';
+import { baseDomain, proposeTypes, voteTypes } from './types';
 import { SplitUint256 } from '../../../utils/split-uint256';
 import { hexPadRight, flatten2DArray } from '../../../utils/encoding';
 import { bytesToHex } from '../../../utils/bytes';
@@ -41,6 +41,12 @@ export class EthereumSig {
     types
   ): Promise<Envelope<T>> {
     const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+
+    const domain = {
+      ...baseDomain,
+      chainId: this.config.networkConfig.eip712ChainId
+    };
+
     const data = { domain, types, message };
 
     const typedData = Object.fromEntries(

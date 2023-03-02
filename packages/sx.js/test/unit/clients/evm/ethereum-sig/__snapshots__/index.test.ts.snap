@@ -21,10 +21,10 @@ exports[`EthereumSig should create propose envelope 1`] = `
   "signatureData": {
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "domain": {
-      "chainId": 31337,
+      "chainId": 5,
       "name": "snapshot-x",
       "verifyingContract": "0x277f388b77cd36fff1c0e976c49a7c54413a449a",
-      "version": "1",
+      "version": "0.1.0",
     },
     "message": {
       "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
@@ -42,7 +42,7 @@ exports[`EthereumSig should create propose envelope 1`] = `
         },
       ],
     },
-    "signature": "0x1ae82f3ec1ba10c6eaf4924217fcd0f2833fd5857d2c0879948acff503df7047129f2d55efc99e1dc462ac439ba6ea708b0cc501fa8f8ee1a65c13fe4f0772861b",
+    "signature": "0x880baf7f259fa851874968dbe0f0fcb97f2144873741e1ee18b1c23fc0b386192027af9e9b9f918a65490cf9a1d79cfe4e42c4025a1ca9553f50e17aa13b521c1b",
     "types": {
       "IndexedStrategy": [
         {
@@ -103,10 +103,10 @@ exports[`EthereumSig should create vote envelope 1`] = `
   "signatureData": {
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "domain": {
-      "chainId": 31337,
+      "chainId": 5,
       "name": "snapshot-x",
       "verifyingContract": "0x277f388b77cd36fff1c0e976c49a7c54413a449a",
-      "version": "1",
+      "version": "0.1.0",
     },
     "message": {
       "choice": 1,
@@ -121,7 +121,7 @@ exports[`EthereumSig should create vote envelope 1`] = `
       "voteMetadataUri": "",
       "voter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     },
-    "signature": "0x4b98c72344bc9b003a44b74af667e328c8c1a5390d7a6ef81269138abd4bd23c1748dd4aa038c98e8885676ec0ae9b3a669067aee952b3488b3bc0a429460fdb1b",
+    "signature": "0x9367c563148fb7daecc2316800c220198c07015c9c613f7bd934c051f5e2c2cf3e6e695b697718c7a5acd92e5dac8594111a6dd315790a630e8fa3b06198b9271c",
     "types": {
       "IndexedStrategy": [
         {

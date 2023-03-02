@@ -51,6 +51,7 @@ export type AvatarExecutionConfig = {
 };
 
 export type NetworkConfig = {
+  eip712ChainId: number;
   spaceFactory: string;
   authenticators: {
     [key: string]:

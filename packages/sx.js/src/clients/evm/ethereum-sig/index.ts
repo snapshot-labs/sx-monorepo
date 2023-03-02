@@ -15,11 +15,17 @@ import type {
 } from '../types';
 import type { NetworkConfig, ClientOpts } from '../../../types';
 
+type EthereumSigClientOpts = Pick<ClientOpts, 'networkConfig'> & {
+  manaUrl?: string;
+};
+
 export class EthereumSig {
+  manaUrl: string;
   networkConfig: NetworkConfig;
 
-  constructor(opts?: Pick<ClientOpts, 'networkConfig'>) {
+  constructor(opts?: EthereumSigClientOpts) {
     this.networkConfig = opts?.networkConfig || evmGoerli;
+    this.manaUrl = opts?.manaUrl || 'https://testnet.mana.pizza';
   }
 
   generateSalt() {
@@ -36,6 +42,7 @@ export class EthereumSig {
 
     const domain = {
       ...baseDomain,
+      chainId: this.networkConfig.eip712ChainId,
       verifyingContract
     };
 
@@ -48,6 +55,27 @@ export class EthereumSig {
       types,
       message
     };
+  }
+
+  public async send(envelope) {
+    const body = {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'send',
+        params: { envelope },
+        id: null
+      })
+    };
+
+    const res = await fetch(`${this.manaUrl}/eth_rpc`, body);
+    const json = await res.json();
+
+    return json.result;
   }
 
   public async propose({
