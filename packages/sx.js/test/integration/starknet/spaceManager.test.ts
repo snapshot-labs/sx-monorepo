@@ -12,7 +12,7 @@ describe('SpaceManager', () => {
   const starkProvider = new Provider({
     sequencer: {
       baseUrl: 'https://alpha4-2.starknet.io',
-      chainId: constants.StarknetChainId.TESTNET2
+      chainId: constants.StarknetChainId.SN_GOERLI2
     }
   });
   const account = new Account(starkProvider, address, privKey);

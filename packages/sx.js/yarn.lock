@@ -3921,17 +3921,16 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-starknet@^5.0.0-beta.4:
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.0.0-beta.4.tgz#b51d4031dfb902c1e13e990063a1d98da5de76b2"
-  integrity sha512-pn2wS1HJNL8f8/58s6g2pnFbwJBAE296CMe1foNlszGfiUcZSKhWGoqoNJjMN4cdv1dUqTeF1JmYjsigcoeb2A==
+starknet@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.0.1.tgz#8e655e10e16bf4561f890a6e69657e876a5f0dc1"
+  integrity sha512-nbcVWS15Q7P/wCp1cRF5H6schoxqt+VfiY7uuU2H5IMtDhieQBEW/H85A8jEUv9R0QFpRCKZcFTN4aFJrudkuA==
   dependencies:
     "@ethersproject/bytes" "^5.6.1"
     "@noble/curves" "^0.5.1"
     ethereum-cryptography "^1.0.3"
     isomorphic-fetch "^3.0.0"
     json-bigint "^1.0.0"
-    minimalistic-assert "^1.0.1"
     pako "^2.0.4"
     ts-custom-error "^3.3.1"
     url-join "^4.0.1"
