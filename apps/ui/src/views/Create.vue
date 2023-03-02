@@ -71,7 +71,7 @@ const metadataForm: SpaceMetadata = reactive(
     walletAddress: ''
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref('sn-tn2');
+const selectedNetworkId: Ref<NetworkID> = ref('gor');
 const authenticators = ref([] as StrategyConfig[]);
 const votingStrategies = ref([] as StrategyConfig[]);
 const executionStrategies = ref([] as StrategyConfig[]);

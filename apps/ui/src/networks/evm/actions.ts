@@ -29,8 +29,34 @@ export function createActions(chainId: number): NetworkActions {
   const client = new clients.EvmEthereumTx();
 
   return {
-    createSpace() {
-      throw new Error('createSpace is not implemented for this network');
+    async createSpace(
+      web3: any,
+      params: {
+        controller: string;
+        votingDelay: number;
+        minVotingDuration: number;
+        maxVotingDuration: number;
+        proposalThreshold: bigint;
+        quorum: bigint;
+        authenticators: string[];
+        votingStrategies: string[];
+        votingStrategiesParams: string[][];
+        executionStrategies: string[];
+        metadataUri: string;
+      }
+    ) {
+      await verifyNetwork(web3, chainId);
+
+      const response = await client.deploySpace({
+        signer: web3.getSigner(),
+        ...params,
+        votingStrategies: params.votingStrategies.map((strategy, i) => ({
+          addy: strategy,
+          params: params.votingStrategiesParams[i][0] ?? '0x'
+        }))
+      });
+
+      return { hash: response.txId };
     },
     setMetadataUri: async (web3: Web3Provider, spaceId: string, metadataUri: string) => {
       await verifyNetwork(web3, chainId);
