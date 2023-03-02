@@ -30,6 +30,7 @@ export const PROPOSAL_QUERY = gql`
       scores_3
       scores_total
       strategies
+      strategies_params
       created
       tx
       vote_count
@@ -75,6 +76,7 @@ export const PROPOSALS_QUERY = gql`
       scores_3
       scores_total
       strategies
+      strategies_params
       created
       tx
       vote_count
@@ -131,6 +133,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
     scores_3
     scores_total
     strategies
+    strategies_params
     created
     tx
     vote_count
@@ -191,6 +194,7 @@ export const SPACE_QUERY = gql`
       max_voting_period
       proposal_threshold
       strategies
+      strategies_params
       authenticators
       executors
       executors_types
@@ -218,6 +222,7 @@ export const SPACES_QUERY = gql`
       max_voting_period
       proposal_threshold
       strategies
+      strategies_params
       authenticators
       executors
       executors_types

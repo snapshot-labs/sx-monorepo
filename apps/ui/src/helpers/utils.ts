@@ -56,8 +56,8 @@ export function explorerUrl(network, str: string, type = 'address'): string {
   return `${networks[network].explorer}/${type}/${str}`;
 }
 
-export function _n(value) {
-  const formatter = new Intl.NumberFormat('en', { notation: 'standard' });
+export function _n(value: any, notation: 'standard' | 'compact' = 'standard') {
+  const formatter = new Intl.NumberFormat('en', { notation });
   return formatter.format(value);
 }
 

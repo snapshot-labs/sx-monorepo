@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { useWeb3 } from '@/composables/useWeb3';
+import { useActions } from '@/composables/useActions';
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useProposalsStore } from '@/stores/proposals';
+import { getNetwork } from '@/networks';
 import { _rt, _n, shortenAddress, getUrl } from '@/helpers/utils';
-import { useActions } from '@/composables/useActions';
 import type { Choice, NetworkID } from '@/types';
 
 const route = useRoute();
 const proposalsStore = useProposalsStore();
+const auth = getInstance();
+const { web3 } = useWeb3();
 const { vote } = useActions();
 const id = parseInt((route.params.id as string) || '0');
 const spaceParam = route.params.space as string;
@@ -17,6 +22,8 @@ const [networkId, space] = spaceParam.split(':');
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const sendingType = ref<null | number>(null);
+const votingPower = ref(0n);
+const loadingVotingPower = ref(true);
 
 const proposal = computed(() => proposalsStore.getProposal(space, id, networkId as NetworkID));
 
@@ -29,9 +36,31 @@ const discussion = computed(() => {
   return output;
 });
 
-onMounted(() => {
-  proposalsStore.fetchProposal(space, id, networkId as NetworkID);
-});
+async function getVotingPower() {
+  const network = getNetwork(networkId as NetworkID);
+
+  if (!web3.value.account || !proposal.value) {
+    votingPower.value = 0n;
+    loadingVotingPower.value = false;
+    return;
+  }
+
+  loadingVotingPower.value = true;
+  try {
+    votingPower.value = await network.actions.getVotingPower(
+      auth.web3,
+      proposal.value.strategies,
+      proposal.value.strategies_params,
+      web3.value.account,
+      proposal.value.snapshot
+    );
+  } catch (err) {
+    console.warn('err', err);
+    votingPower.value = 0n;
+  } finally {
+    loadingVotingPower.value = false;
+  }
+}
 
 async function handleVoteClick(choice: Choice) {
   if (!proposal.value) return;
@@ -44,6 +73,12 @@ async function handleVoteClick(choice: Choice) {
     sendingType.value = null;
   }
 }
+
+onMounted(() => {
+  proposalsStore.fetchProposal(space, id, networkId as NetworkID);
+});
+
+watch([() => web3.value.account, proposal], () => getVotingPower());
 </script>
 
 <template>
@@ -75,6 +110,17 @@ async function handleVoteClick(choice: Choice) {
                 />
               </span>
             </div>
+            <UiButton
+              v-if="web3.account && web3.type !== 'argentx'"
+              :loading="loadingVotingPower"
+              :class="{
+                '!px-0 w-[46px]': loadingVotingPower
+              }"
+              class="mr-2"
+            >
+              <IH-lightning-bolt class="inline-block" />
+              <span class="ml-1">{{ _n(votingPower, 'compact') }}</span>
+            </UiButton>
             <a :href="sanitizeUrl(getUrl(proposal.metadata_uri))" target="_blank">
               <UiButton class="!w-[46px] !h-[46px] !px-[12px]">
                 <IH-dots-horizontal />

@@ -36,6 +36,7 @@ export type Space = {
   max_voting_period: number;
   proposal_threshold: number;
   strategies: string[];
+  strategies_params: any[];
   authenticators: string[];
   executors: string[];
   executors_types: string[];
@@ -73,6 +74,7 @@ export type Proposal = {
   scores_3: number;
   scores_total: number;
   strategies: string[];
+  strategies_params: any[];
   created: number;
   tx: string;
   vote_count: number;

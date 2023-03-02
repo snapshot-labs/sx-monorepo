@@ -62,6 +62,13 @@ export type NetworkActions = {
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
+  getVotingPower(
+    web3: Web3Provider,
+    strategiesAddresses: string[],
+    strategiesParams: any[],
+    voterAddress: string,
+    timestamp: number
+  ): Promise<bigint>;
   send(envelope: any): Promise<any>;
 };
 

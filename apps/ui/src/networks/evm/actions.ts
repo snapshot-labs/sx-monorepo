@@ -1,4 +1,4 @@
-import { clients, getExecutionData, evmGoerli } from '@snapshot-labs/sx';
+import { clients, getExecutionData, getEvmStrategy, evmGoerli } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from './constants';
 import { verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
@@ -204,6 +204,30 @@ export function createActions(chainId: number): NetworkActions {
         executionParams: executionData.executionParams[0]
       });
     },
-    send: (envelope: any) => ethSigClient.send(envelope)
+    send: (envelope: any) => ethSigClient.send(envelope),
+    getVotingPower: async (
+      web3: Web3Provider,
+      strategiesAddresses: string[],
+      strategiesParams: any[],
+      voterAddress: string,
+      timestamp: number
+    ): Promise<bigint> => {
+      const votingPowers = await Promise.all(
+        strategiesAddresses.map((address, i) => {
+          const strategy = getEvmStrategy(address, evmGoerli);
+          if (!strategy) return 0n;
+
+          return strategy.getVotingPower(
+            address,
+            voterAddress,
+            Math.floor(timestamp / 1000), // TODO: unify
+            strategiesParams[i],
+            web3
+          );
+        })
+      );
+
+      return votingPowers.reduce((a, b) => a + b, 0n);
+    }
   };
 }
