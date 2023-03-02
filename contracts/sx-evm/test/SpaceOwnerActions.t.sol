@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./utils/Space.t.sol";
+import { SpaceTest } from "./utils/Space.t.sol";
+import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
+import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 
 contract SpaceOwnerActionsTest is SpaceTest {
     // ------- Cancel Proposal ----

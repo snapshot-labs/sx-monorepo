@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "forge-std/Test.sol";
-import "../src/voting-strategies/CompVotingStrategy.sol";
-import "./mocks/CompToken.sol";
+import { Test } from "forge-std/Test.sol";
+import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
+import { CompToken } from "./mocks/CompToken.sol";
 
 contract CompVotingStrategyTest is Test {
     error InvalidByteArray();

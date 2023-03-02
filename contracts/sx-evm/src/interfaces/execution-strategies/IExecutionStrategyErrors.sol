@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "../../types.sol";
+import { ProposalStatus } from "../../types.sol";
 
 interface IExecutionStrategyErrors {
     /// @notice Thrown when the current status of a proposal does not allow the desired action.

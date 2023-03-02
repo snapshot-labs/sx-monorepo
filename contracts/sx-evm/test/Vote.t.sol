@@ -2,7 +2,9 @@
 
 pragma solidity ^0.8.18;
 
-import "./utils/Space.t.sol";
+import { SpaceTest } from "./utils/Space.t.sol";
+import { Choice, IndexedStrategy, Strategy, Vote } from "../src/types.sol";
+import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 
 contract VoteTest is SpaceTest {
     function testVote() public {

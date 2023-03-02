@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import "src/interfaces/ISpace.sol";
-import "src/types.sol";
-import "src/interfaces/IVotingStrategy.sol";
-import "src/interfaces/IExecutionStrategy.sol";
+import { ISpace } from "src/interfaces/ISpace.sol";
+import { Choice, FinalizationStatus, IndexedStrategy, Proposal, ProposalStatus, Strategy, Vote } from "src/types.sol";
+import { IVotingStrategy } from "src/interfaces/IVotingStrategy.sol";
+import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 
 /**
  * @author  SnapshotLabs
@@ -211,7 +211,7 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
      * @dev     it has already been set. Time complexity is O(n).
      * @param   strats  Array to check for duplicates.
      */
-    function _assertNoDuplicateIndices(IndexedStrategy[] memory strats) internal {
+    function _assertNoDuplicateIndices(IndexedStrategy[] memory strats) internal pure {
         if (strats.length < 2) {
             return;
         }

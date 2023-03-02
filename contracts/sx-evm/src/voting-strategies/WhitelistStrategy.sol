@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "../interfaces/IVotingStrategy.sol";
+import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
 
 contract WhitelistStrategy is IVotingStrategy {
     struct Member {
@@ -16,7 +16,7 @@ contract WhitelistStrategy is IVotingStrategy {
      * @param   params  The list of members. Needs to be sorted in ascending `addy` order
      * @return  uint256  The voting power of `voterAddress` if it exists: else 0
      */
-    function _getVotingPower(address voterAddress, bytes calldata params) internal returns (uint256) {
+    function _getVotingPower(address voterAddress, bytes calldata params) internal pure returns (uint256) {
         Member[] memory members = abi.decode(params, (Member[]));
 
         uint256 high = members.length - 1;
@@ -48,7 +48,7 @@ contract WhitelistStrategy is IVotingStrategy {
         address voterAddress,
         bytes calldata params, // Need to be sorted by ascending `addy`s
         bytes calldata /* userParams */
-    ) external override returns (uint256) {
+    ) external pure override returns (uint256) {
         return _getVotingPower(voterAddress, params);
     }
 }

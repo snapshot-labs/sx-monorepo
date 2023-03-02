@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "forge-std/Test.sol";
-import "../src/voting-strategies/WhitelistStrategy.sol";
+import { Test } from "forge-std/Test.sol";
+import { WhitelistStrategy } from "../src/voting-strategies/WhitelistStrategy.sol";
 
 contract WhitelistStrategyTest is Test {
     WhitelistStrategy public whitelistStrategy;

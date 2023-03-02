@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.18;
 
-import "../types.sol";
-import "./execution-strategies/IExecutionStrategyErrors.sol";
+import { IndexedStrategy, Proposal, ProposalStatus } from "../types.sol";
+import { IExecutionStrategyErrors } from "./execution-strategies/IExecutionStrategyErrors.sol";
 
 interface IExecutionStrategy is IExecutionStrategyErrors {
     function execute(

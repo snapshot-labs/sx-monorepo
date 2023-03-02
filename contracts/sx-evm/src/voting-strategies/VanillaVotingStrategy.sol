@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "../interfaces/IVotingStrategy.sol";
+import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
 
 contract VanillaVotingStrategy is IVotingStrategy {
     function getVotingPower(

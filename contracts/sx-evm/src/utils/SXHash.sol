@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "src/types.sol";
+import { IndexedStrategy, Strategy } from "src/types.sol";
 
 /// @title SX Types Hashing Library
 /// @notice This library contains functions for hashing SX types for use in eip712 signatures.

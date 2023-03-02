@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "src/types.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { Choice, IndexedStrategy } from "src/types.sol";
 import { SXHash } from "src/utils/SXHash.sol";
 
 abstract contract SignatureVerifier is EIP712 {
@@ -35,6 +35,7 @@ abstract contract SignatureVerifier is EIP712 {
 
     mapping(address author => mapping(uint256 salt => bool used)) private usedSalts;
 
+    // solhint-disable-next-line no-empty-blocks
     constructor(string memory name, string memory version) EIP712(name, version) {}
 
     function _verifyProposeSig(uint8 v, bytes32 r, bytes32 s, uint256 salt, address space, bytes memory data) internal {
@@ -103,7 +104,7 @@ abstract contract SignatureVerifier is EIP712 {
         if (recoveredAddress != voter) revert InvalidSignature();
     }
 
-    function _verifyUpdateProposalSig(uint8 v, bytes32 r, bytes32 s, address space, bytes memory data) internal {
+    function _verifyUpdateProposalSig(uint8 v, bytes32 r, bytes32 s, address space, bytes memory data) internal view {
         (address author, uint256 proposalId, IndexedStrategy memory executionStrategy, string memory metadataUri) = abi
             .decode(data, (address, uint256, IndexedStrategy, string));
 

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title Space Manager - A contract that manages spaces that are able to execute transactions via this contract
 /// @author Snapshot Labs
@@ -19,6 +19,7 @@ contract SpaceManager is OwnableUpgradeable {
 
     /// @notice Initialize the contract with a list of spaces. Called only once.
     /// @param _spaces List of spaces.
+    // solhint-disable-next-line func-name-mixedcase
     function __SpaceManager_init(address[] memory _spaces) internal initializer {
         for (uint256 i = 0; i < _spaces.length; i++) {
             spaces[_spaces[i]] = true;

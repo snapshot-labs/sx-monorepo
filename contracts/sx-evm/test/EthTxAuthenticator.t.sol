@@ -2,18 +2,18 @@
 
 pragma solidity ^0.8.18;
 
-import "./utils/Space.t.sol";
-import "./utils/Authenticator.t.sol";
-import "../src/authenticators/EthTxAuthenticator.sol";
+import { SpaceTest } from "./utils/Space.t.sol";
+import { AuthenticatorTest } from "./utils/Authenticator.t.sol";
+import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
+import { Choice, IndexedStrategy } from "../src/types.sol";
 
 contract EthTxAuthenticatorTest is SpaceTest {
-    EthTxAuthenticator ethTxAuth;
-
     error InvalidFunctionSelector();
     error InvalidMessageSender();
 
-    string newMetadataUri = "Test42";
-    IndexedStrategy newStrategy = IndexedStrategy(0, new bytes(0));
+    EthTxAuthenticator internal ethTxAuth;
+    string internal newMetadataUri = "Test42";
+    IndexedStrategy internal newStrategy = IndexedStrategy(0, new bytes(0));
 
     function setUp() public virtual override {
         super.setUp();

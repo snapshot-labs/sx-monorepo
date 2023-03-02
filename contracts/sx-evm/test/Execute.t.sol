@@ -2,8 +2,9 @@
 
 pragma solidity ^0.8.18;
 
-import "./utils/Space.t.sol";
-import "../src/types.sol";
+import { SpaceTest } from "./utils/Space.t.sol";
+import { Choice, IndexedStrategy, ProposalStatus, Strategy } from "../src/types.sol";
+import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 
 contract ExecuteTest is SpaceTest {
     function testExecute() public {

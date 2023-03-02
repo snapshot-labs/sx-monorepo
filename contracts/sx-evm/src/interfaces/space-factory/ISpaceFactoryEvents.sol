@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "../../types.sol";
+import { Strategy } from "../../types.sol";
 
 interface ISpaceFactoryEvents {
     event SpaceCreated(

@@ -2,46 +2,48 @@
 
 pragma solidity ^0.8.18;
 
-import "forge-std/Test.sol";
+import { Test } from "forge-std/Test.sol";
 import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
 
-import "../../src/Space.sol";
-import "../../src/authenticators/VanillaAuthenticator.sol";
-import "../../src/voting-strategies/VanillaVotingStrategy.sol";
-import "../../src/execution-strategies/VanillaExecutionStrategy.sol";
-import "../../src/interfaces/space/ISpaceEvents.sol";
-import "../../src/interfaces/space/ISpaceErrors.sol";
-import "../../src/interfaces/execution-strategies/IExecutionStrategyErrors.sol";
-import "../../src/types.sol";
+import { Space } from "../../src/Space.sol";
+import { VanillaAuthenticator } from "../../src/authenticators/VanillaAuthenticator.sol";
+import { VanillaVotingStrategy } from "../../src/voting-strategies/VanillaVotingStrategy.sol";
+import { VanillaExecutionStrategy } from "../../src/execution-strategies/VanillaExecutionStrategy.sol";
+import { ISpaceEvents } from "../../src/interfaces/space/ISpaceEvents.sol";
+import { ISpaceErrors } from "../../src/interfaces/space/ISpaceErrors.sol";
+import { IExecutionStrategyErrors } from "../../src/interfaces/execution-strategies/IExecutionStrategyErrors.sol";
+import { Choice, Strategy, IndexedStrategy } from "../../src/types.sol";
 
+// solhint-disable-next-line max-states-count
 abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {
-    bytes4 constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(uint8,bytes),(uint8,bytes)[])"));
-    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
-    bytes4 constant UPDATE_PROPOSAL_SELECTOR =
+    bytes4 internal constant PROPOSE_SELECTOR =
+        bytes4(keccak256("propose(address,string,(uint8,bytes),(uint8,bytes)[])"));
+    bytes4 internal constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
+    bytes4 internal constant UPDATE_PROPOSAL_SELECTOR =
         bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
 
-    Space space;
-    VanillaVotingStrategy vanillaVotingStrategy;
-    VanillaAuthenticator vanillaAuthenticator;
-    VanillaExecutionStrategy vanillaExecutionStrategy;
+    Space internal space;
+    VanillaVotingStrategy internal vanillaVotingStrategy;
+    VanillaAuthenticator internal vanillaAuthenticator;
+    VanillaExecutionStrategy internal vanillaExecutionStrategy;
 
-    uint256 public constant authorKey = 1234;
-    uint256 public constant voterKey = 5678;
-    uint256 public constant unauthorizedKey = 4321;
+    uint256 public constant AUTHOR_KEY = 1234;
+    uint256 public constant VOTER_KEY = 5678;
+    uint256 public constant UNAUTHORIZED_KEY = 4321;
 
-    string voteMetadataUri = "Hi";
+    string internal voteMetadataUri = "Hi";
 
     // Address of the meta transaction relayer (mana)
     address public relayer = address(this);
     address public owner = address(this);
-    address public author = vm.addr(authorKey);
-    address public voter = vm.addr(voterKey);
-    address public unauthorized = vm.addr(unauthorizedKey);
+    address public author = vm.addr(AUTHOR_KEY);
+    address public voter = vm.addr(VOTER_KEY);
+    address public unauthorized = vm.addr(UNAUTHORIZED_KEY);
 
     // Initial whitelisted modules set in the space
-    Strategy[] votingStrategies;
-    address[] authenticators;
-    Strategy[] executionStrategies;
+    Strategy[] internal votingStrategies;
+    address[] internal authenticators;
+    Strategy[] internal executionStrategies;
 
     // Initial space parameters
     uint32 public votingDelay;

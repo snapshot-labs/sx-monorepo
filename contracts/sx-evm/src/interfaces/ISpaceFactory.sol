@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.18;
 
-import "./space-factory/ISpaceFactoryErrors.sol";
-import "./space-factory/ISpaceFactoryEvents.sol";
+import { ISpaceFactoryErrors } from "./space-factory/ISpaceFactoryErrors.sol";
+import { ISpaceFactoryEvents } from "./space-factory/ISpaceFactoryEvents.sol";
 
-import "../types.sol";
+import { Strategy } from "../types.sol";
 
 interface ISpaceFactory is ISpaceFactoryErrors, ISpaceFactoryEvents {
     function createSpace(

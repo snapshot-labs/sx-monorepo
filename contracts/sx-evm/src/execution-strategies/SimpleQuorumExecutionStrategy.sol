@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.18;
 
-import "../interfaces/IExecutionStrategy.sol";
+import { IExecutionStrategy } from "../interfaces/IExecutionStrategy.sol";
+import { FinalizationStatus, Proposal, ProposalStatus } from "../types.sol";
 
 abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
     function execute(

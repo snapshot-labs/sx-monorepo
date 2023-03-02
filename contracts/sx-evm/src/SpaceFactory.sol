@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.18;
 
-import "./Space.sol";
-import "./interfaces/ISpaceFactory.sol";
-import "./types.sol";
+import { Space } from "./Space.sol";
+import { ISpaceFactory } from "./interfaces/ISpaceFactory.sol";
+import { IndexedStrategy, Strategy } from "./types.sol";
 
 /**
  * @title   Space Factory

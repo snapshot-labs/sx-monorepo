@@ -2,12 +2,13 @@
 
 pragma solidity ^0.8.18;
 
-import "./Authenticator.sol";
-import "../utils/SignatureVerifier.sol";
+import { Authenticator } from "./Authenticator.sol";
+import { SignatureVerifier } from "../utils/SignatureVerifier.sol";
 
 contract EthSigAuthenticator is Authenticator, SignatureVerifier {
     error InvalidFunctionSelector();
 
+    // solhint-disable-next-line no-empty-blocks
     constructor(string memory name, string memory version) SignatureVerifier(name, version) {}
 
     function authenticate(

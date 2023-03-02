@@ -1,24 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "forge-std/Test.sol";
-import "../src/authenticators/VanillaAuthenticator.sol";
-import "../src/voting-strategies/VanillaVotingStrategy.sol";
-import "../src/execution-strategies/VanillaExecutionStrategy.sol";
-import "../src/SpaceFactory.sol";
-import "../src/interfaces/space-factory/ISpaceFactoryEvents.sol";
-import "../src/interfaces/space-factory/ISpaceFactoryErrors.sol";
+import { Test } from "forge-std/Test.sol";
+import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
+import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
+import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
+import { SpaceFactory } from "../src/SpaceFactory.sol";
+import { ISpaceFactoryEvents } from "../src/interfaces/space-factory/ISpaceFactoryEvents.sol";
+import { ISpaceFactoryErrors } from "../src/interfaces/space-factory/ISpaceFactoryErrors.sol";
+import { Strategy } from "../src/types.sol";
+import { Space } from "../src/Space.sol";
 
 contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
     SpaceFactory public factory;
 
-    VanillaVotingStrategy vanillaVotingStrategy;
-    VanillaAuthenticator vanillaAuthenticator;
-    VanillaExecutionStrategy vanillaExecutionStrategy;
+    VanillaVotingStrategy internal vanillaVotingStrategy;
+    VanillaAuthenticator internal vanillaAuthenticator;
+    VanillaExecutionStrategy internal vanillaExecutionStrategy;
 
-    Strategy[] votingStrategies;
-    address[] authenticators;
-    Strategy[] executionStrategies;
+    Strategy[] internal votingStrategies;
+    address[] internal authenticators;
+    Strategy[] internal executionStrategies;
 
     address public controller;
     uint32 public votingDelay;
@@ -27,9 +29,9 @@ contract SpaceFactoryTest is Test, ISpaceFactoryEvents, ISpaceFactoryErrors {
     uint256 public proposalThreshold;
     uint32 public quorum;
 
-    bytes[] votingStrategyMetadata;
+    bytes[] internal votingStrategyMetadata;
 
-    string metadataUri = "SX-EVM";
+    string internal metadataUri = "SX-EVM";
 
     function setUp() public {
         factory = new SpaceFactory();

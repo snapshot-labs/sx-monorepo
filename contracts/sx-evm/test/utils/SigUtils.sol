@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "../../src/types.sol";
+import { Choice, IndexedStrategy, Strategy } from "../../src/types.sol";
 import { SXHash } from "../../src/utils/SXHash.sol";
 
 abstract contract SigUtils {

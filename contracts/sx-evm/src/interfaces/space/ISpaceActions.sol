@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "src/types.sol";
+import { Choice, IndexedStrategy } from "src/types.sol";
 
 interface ISpaceActions {
     function propose(

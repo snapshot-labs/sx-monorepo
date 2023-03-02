@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
+import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 
 struct Proposal {
     // notice: `uint32::max` corresponds to year ~2106.

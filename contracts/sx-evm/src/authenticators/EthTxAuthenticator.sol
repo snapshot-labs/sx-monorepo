@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.18;
 
-import "./Authenticator.sol";
-import "../types.sol";
+import { Authenticator } from "./Authenticator.sol";
+import { Choice, IndexedStrategy, Strategy } from "../types.sol";
 
 /**
  * @author  SnapshotLabs

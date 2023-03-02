@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "./utils/Space.t.sol";
+import { SpaceTest } from "./utils/Space.t.sol";
 
 contract SpaceStateTest is SpaceTest {
     function testGetInvalidProposal() public {

@@ -2,10 +2,13 @@
 
 pragma solidity ^0.8.18;
 
-import "./space/ISpaceState.sol";
-import "./space/ISpaceActions.sol";
-import "./space/ISpaceOwnerActions.sol";
-import "./space/ISpaceEvents.sol";
-import "./space/ISpaceErrors.sol";
+import { ISpaceState } from "./space/ISpaceState.sol";
+import { ISpaceActions } from "./space/ISpaceActions.sol";
+import { ISpaceOwnerActions } from "./space/ISpaceOwnerActions.sol";
+import { ISpaceEvents } from "./space/ISpaceEvents.sol";
+import { ISpaceErrors } from "./space/ISpaceErrors.sol";
 
-interface ISpace is ISpaceState, ISpaceActions, ISpaceOwnerActions, ISpaceEvents, ISpaceErrors {}
+// solhint-disable-next-line no-empty-blocks
+interface ISpace is ISpaceState, ISpaceActions, ISpaceOwnerActions, ISpaceEvents, ISpaceErrors {
+
+}

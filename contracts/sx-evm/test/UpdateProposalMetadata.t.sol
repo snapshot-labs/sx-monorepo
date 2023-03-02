@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.18;
 
-import "./utils/Space.t.sol";
-import "../src/types.sol";
+import { SpaceTest } from "./utils/Space.t.sol";
+import { Choice, IndexedStrategy } from "../src/types.sol";
 
-contract updateProposalTest is SpaceTest {
-    string newMetadataUri = "Testing123";
-    IndexedStrategy newStrategy = IndexedStrategy(0, new bytes(0));
+contract UpdateProposalTest is SpaceTest {
+    string internal newMetadataUri = "Testing123";
+    IndexedStrategy internal newStrategy = IndexedStrategy(0, new bytes(0));
 
     function setUp() public virtual override {
         super.setUp();
