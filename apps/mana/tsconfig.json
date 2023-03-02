@@ -8,6 +8,6 @@
     "strict": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
-    "moduleResolution": "Node"
+    "moduleResolution": "node16"
   }
 }
