@@ -31,7 +31,9 @@ const isSupported = computed(() => {
     You have already voted for this proposal
   </slot>
 
-  <slot v-else-if="proposal.has_ended" name="ended"> Proposal voting window has ended </slot>
+  <slot v-else-if="proposal.has_ended || proposal.executed" name="ended">
+    Proposal voting window has ended
+  </slot>
 
   <slot v-else-if="!isSupported" name="unsupported">
     Voting for this proposal is not supported

@@ -1,4 +1,5 @@
 import type { Web3Provider } from '@ethersproject/providers';
+import type { Signer } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import type { Space, Proposal, Vote, User, Choice } from '@/types';
 
@@ -17,6 +18,12 @@ export type StrategyTemplate = {
   paramsDefinition: any;
   generateSummary?: (params: Record<string, any>) => string;
   generateParams?: (params: Record<string, any>) => any[];
+  deploy?: (
+    client: any,
+    signer: Signer,
+    controller: string,
+    params: Record<string, any>
+  ) => Promise<string>;
 };
 
 export type StrategyConfig = StrategyTemplate & {
@@ -39,7 +46,7 @@ export type NetworkActions = {
       authenticators: string[];
       votingStrategies: string[];
       votingStrategiesParams: string[][];
-      executionStrategies: string[];
+      executionStrategies: StrategyConfig[];
       metadataUri: string;
     }
   );

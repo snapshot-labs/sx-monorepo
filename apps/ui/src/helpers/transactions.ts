@@ -1,8 +1,14 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 import { abis } from '@/helpers/abis';
+import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Token } from '@/helpers/alchemy';
-import type { SendTokenTransaction, SendNftTransaction, ContractCallTransaction } from '@/types';
+import type {
+  SendTokenTransaction,
+  SendNftTransaction,
+  ContractCallTransaction,
+  Transaction
+} from '@/types';
 
 export function createSendTokenTransaction({
   token,
@@ -99,4 +105,12 @@ export function createContractCallTransaction({ form }): ContractCallTransaction
       amount: form.amount
     }
   };
+}
+
+export function convertToMetaTransactions(transactions: Transaction[]): MetaTransaction[] {
+  return transactions.map((tx: Transaction) => ({
+    ...tx,
+    nonce: 0,
+    operation: 0
+  }));
 }

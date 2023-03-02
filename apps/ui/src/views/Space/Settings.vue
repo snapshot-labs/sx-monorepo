@@ -30,10 +30,6 @@ const network = computed(() => getNetwork(props.space.network));
           <div class="s-label !mb-0" v-text="'Proposal threshold'" />
           <h4 class="text-skin-link text-md" v-text="space.proposal_threshold" />
         </div>
-        <div class="mb-3">
-          <div class="s-label !mb-0" v-text="'Quorum'" />
-          <h4 class="text-skin-link text-md" v-text="space.quorum" />
-        </div>
       </div>
     </div>
 
@@ -86,7 +82,10 @@ const network = computed(() => getNetwork(props.space.network));
           target="_blank"
           class="flex"
         >
-          <h4 class="inline-block mr-3 flex-auto" v-text="network.constants.EXECUTORS[executor]" />
+          <h4
+            class="inline-block mr-3 flex-auto"
+            v-text="network.constants.EXECUTORS[executor] || space.executors_types[i]"
+          />
           <div>
             <Stamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(executor) }} <IH-external-link class="inline-block" />

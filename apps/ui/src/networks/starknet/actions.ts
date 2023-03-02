@@ -1,22 +1,15 @@
 import { clients as Clients, getExecutionData, defaultNetwork, clients } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_EXECUTORS, SUPPORTED_STRATEGIES } from './constants';
 import { verifyNetwork } from '@/helpers/utils';
+import { convertToMetaTransactions } from '@/helpers/transactions';
 import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import type { NetworkActions } from '@/networks/types';
-import type { Space, Proposal, Transaction } from '@/types';
+import type { NetworkActions, StrategyConfig } from '@/networks/types';
+import type { Space, Proposal } from '@/types';
 
 const VANILLA_EXECUTOR = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
 const ZODIAC_EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
-
-function convertToMetaTransactions(transactions: Transaction[]): MetaTransaction[] {
-  return transactions.map((tx: Transaction) => ({
-    ...tx,
-    nonce: 0,
-    operation: 0
-  }));
-}
 
 function buildExecution(space: Space, transactions: MetaTransaction[]) {
   if (space.executors.find(executor => executor === ZODIAC_EXECUTOR)) {
@@ -80,7 +73,7 @@ export function createActions(
         authenticators: string[];
         votingStrategies: string[];
         votingStrategiesParams: string[][];
-        executionStrategies: string[];
+        executionStrategies: StrategyConfig[];
         metadataUri: string;
       }
     ) {
@@ -90,7 +83,10 @@ export function createActions(
         disableEstimation: true
       });
 
-      return spaceManager.deploySpace(params);
+      return spaceManager.deploySpace({
+        ...params,
+        executionStrategies: params.executionStrategies.map(strategy => strategy.address)
+      });
     },
     setMetadataUri: async (web3: any, spaceId: string, metadataUri: string) => {
       const spaceManager = new clients.SpaceManager({

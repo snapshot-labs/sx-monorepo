@@ -45,30 +45,34 @@ async function handleExecuteTransactionsClick() {
 
 <template>
   <div class="x-block !border-x rounded-lg p-3">
-    <UiButton
-      class="block mb-2 w-full flex justify-center items-center"
-      :loading="finalizeProposalSending"
-      @click="handleFinalizeProposalClick"
-    >
-      <IH-check-circle class="inline-block mr-2" />
-      Finalize proposal
-    </UiButton>
-    <UiButton
-      v-if="getNetwork(proposal.network).hasReceive"
-      class="block mb-2 w-full flex justify-center items-center"
-      :loading="receiveProposalSending"
-      @click="handleReceiveProposalClick"
-    >
-      <IH-database class="inline-block mr-2" />
-      Receive proposal
-    </UiButton>
-    <UiButton
-      class="block mb-2 w-full flex justify-center items-center"
-      :loading="executeTransactionsSending"
-      @click="handleExecuteTransactionsClick"
-    >
-      <IH-play class="inline-block mr-2" />
-      Execute transactions
-    </UiButton>
+    <div v-if="proposal.executed">Proposal has been already executed</div>
+    <template v-else>
+      <UiButton
+        v-if="getNetwork(proposal.network).hasReceive"
+        class="block mb-2 w-full flex justify-center items-center"
+        :loading="finalizeProposalSending"
+        @click="handleFinalizeProposalClick"
+      >
+        <IH-check-circle class="inline-block mr-2" />
+        Finalize proposal
+      </UiButton>
+      <UiButton
+        v-if="getNetwork(proposal.network).hasReceive"
+        class="block mb-2 w-full flex justify-center items-center"
+        :loading="receiveProposalSending"
+        @click="handleReceiveProposalClick"
+      >
+        <IH-database class="inline-block mr-2" />
+        Receive proposal
+      </UiButton>
+      <UiButton
+        class="block mb-2 w-full flex justify-center items-center"
+        :loading="executeTransactionsSending"
+        @click="handleExecuteTransactionsClick"
+      >
+        <IH-play class="inline-block mr-2" />
+        Execute transactions
+      </UiButton>
+    </template>
   </div>
 </template>

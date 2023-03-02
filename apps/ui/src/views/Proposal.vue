@@ -108,7 +108,7 @@ async function handleVoteClick(choice: Choice) {
           v-if="
             proposal.execution &&
             proposal.execution.length > 0 &&
-            proposal.scores_total >= proposal.space.quorum
+            proposal.scores_total >= proposal.quorum
           "
         >
           <h4 class="mb-3 eyebrow flex items-center">

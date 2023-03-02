@@ -20,9 +20,7 @@ const labels = {
 
 const showAlternatives = ref(false);
 
-const progress = computed(() =>
-  Math.min(props.proposal.scores_total / props.proposal.space.quorum, 1)
-);
+const progress = computed(() => Math.min(props.proposal.scores_total / props.proposal.quorum, 1));
 
 const adjustedScores = computed(() =>
   [props.proposal.scores_1, props.proposal.scores_2, props.proposal.scores_3].map(score => {

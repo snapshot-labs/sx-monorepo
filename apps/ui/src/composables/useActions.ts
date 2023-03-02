@@ -74,7 +74,7 @@ export function useActions() {
       votingStrategiesParams: votingStrategies.map(config =>
         config.generateParams ? config.generateParams(config.params) : []
       ),
-      executionStrategies: executionStrategies.map(config => config.address),
+      executionStrategies,
       metadataUri: `ipfs://${pinned.cid}`
     });
 
