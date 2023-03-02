@@ -32,7 +32,7 @@ export function useActions() {
       const receipt = await network.actions.send(envelope);
 
       console.log('Receipt', receipt);
-      uiStore.addPendingTransaction(receipt.transaction_hash, networkId);
+      uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);
     } else {
       uiStore.addPendingTransaction(envelope.hash, networkId);
     }
@@ -79,10 +79,7 @@ export function useActions() {
     });
 
     console.log('Receipt', receipt);
-    uiStore.addPendingTransaction(
-      network.hasRelayer ? receipt.transaction_hash : receipt.hash,
-      networkId
-    );
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);
 
     return true;
   }
@@ -104,10 +101,7 @@ export function useActions() {
     );
 
     console.log('Receipt', receipt);
-    uiStore.addPendingTransaction(
-      network.hasRelayer ? receipt.transaction_hash : receipt.hash,
-      space.network
-    );
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
   async function vote(proposal: Proposal, choice: Choice) {
@@ -169,10 +163,7 @@ export function useActions() {
     const receipt = await network.actions.finalizeProposal(auth.web3, proposal);
 
     console.log('Receipt', receipt);
-    uiStore.addPendingTransaction(
-      network.hasRelayer ? receipt.transaction_hash : receipt.hash,
-      proposal.network
-    );
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, proposal.network);
   }
 
   async function receiveProposal(proposal: Proposal) {

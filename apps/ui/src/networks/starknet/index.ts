@@ -1,4 +1,5 @@
 import { pin } from '@snapshot-labs/pineapple';
+import { TransactionStatus } from 'starknet';
 import { createApi } from '../common/graphqlApi';
 import { createActions } from './actions';
 import { createProvider } from './provider';
@@ -30,7 +31,9 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
         };
       },
       waitForTransaction: txId =>
-        provider.waitForTransaction(txId, undefined, ['ACCEPTED_ON_L1', 'ACCEPTED_ON_L2']),
+        provider.waitForTransaction(txId, {
+          successStates: [TransactionStatus.ACCEPTED_ON_L1, TransactionStatus.ACCEPTED_ON_L2]
+        }),
       getExplorerUrl: (id, type) => {
         let dataType: 'tx' | 'contract' = 'tx';
         if (['address', 'contract'].includes(type)) dataType = 'contract';

@@ -1163,10 +1163,10 @@
     json-to-graphql-query "^2.2.4"
     lodash.set "^4.3.2"
 
-"@snapshot-labs/sx@^0.1.0-beta.21":
-  version "0.1.0-beta.21"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.21.tgz#b835a853c1283a384b81dda24d580abde36aeb1a"
-  integrity sha512-Q1xAFBnA/LP8iWvgf6TXfRgVw76ma1LBonewFg2U8zYLZLiXDnC0D27Ahn7/fFn4oPb0/q2wtRDWCICj+fem1w==
+"@snapshot-labs/sx@^0.1.0-beta.23":
+  version "0.1.0-beta.23"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.23.tgz#8c1c9c2b917cf0b49aeffa9d7d185aa6a7373de0"
+  integrity sha512-ZEbAVBs3SUoqWCdsS5TGYbkT5xSc0x1mFtx5fft1sVBCv9I5pnWhg3qJVjOtv615fAKURtNjtdZL/PifkFqCSQ==
   dependencies:
     "@ethereumjs/block" "^3.6.3"
     "@ethereumjs/common" "^2.6.5"
@@ -1180,7 +1180,7 @@
     cross-fetch "^3.1.5"
     randombytes "^2.1.0"
     snake-case "^3.0.4"
-    starknet "^5.0.0-beta.4"
+    starknet "5.0.1"
 
 "@solana/buffer-layout@^4.0.0":
   version "4.0.1"
@@ -6838,17 +6838,16 @@ sshpk@^1.7.0:
     safer-buffer "^2.0.2"
     tweetnacl "~0.14.0"
 
-starknet@^5.0.0-beta.4:
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.0.0-beta.4.tgz#b51d4031dfb902c1e13e990063a1d98da5de76b2"
-  integrity sha512-pn2wS1HJNL8f8/58s6g2pnFbwJBAE296CMe1foNlszGfiUcZSKhWGoqoNJjMN4cdv1dUqTeF1JmYjsigcoeb2A==
+starknet@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.0.1.tgz#8e655e10e16bf4561f890a6e69657e876a5f0dc1"
+  integrity sha512-nbcVWS15Q7P/wCp1cRF5H6schoxqt+VfiY7uuU2H5IMtDhieQBEW/H85A8jEUv9R0QFpRCKZcFTN4aFJrudkuA==
   dependencies:
     "@ethersproject/bytes" "^5.6.1"
     "@noble/curves" "^0.5.1"
     ethereum-cryptography "^1.0.3"
     isomorphic-fetch "^3.0.0"
     json-bigint "^1.0.0"
-    minimalistic-assert "^1.0.1"
     pako "^2.0.4"
     ts-custom-error "^3.3.1"
     url-join "^4.0.1"

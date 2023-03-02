@@ -64,7 +64,12 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
 }
 
 export function createActions(chainId: number): NetworkActions {
+  const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
+
   const client = new clients.EvmEthereumTx();
+  const ethSigClient = new clients.EvmEthereumSig({
+    manaUrl
+  });
 
   return {
     async createSpace(
@@ -140,20 +145,18 @@ export function createActions(chainId: number): NetworkActions {
       const executionData = buildExecution(space, transactions);
       const index = space.executors.findIndex(executor => executor === executionData.executor);
 
-      return client.propose({
+      return ethSigClient.propose({
         signer: web3.getSigner(),
-        envelope: {
-          data: {
-            space: space.id,
-            authenticator,
-            strategies,
-            executor: {
-              index,
-              address: executionData.executor
-            },
-            executionParams: executionData.executionParams[0],
-            metadataUri: `ipfs://${cid}`
-          }
+        data: {
+          space: space.id,
+          authenticator,
+          strategies,
+          executor: {
+            index,
+            address: executionData.executor
+          },
+          executionParams: executionData.executionParams[0],
+          metadataUri: `ipfs://${cid}`
         }
       });
     },
@@ -172,17 +175,15 @@ export function createActions(chainId: number): NetworkActions {
       if (choice === 2) convertedChoice = 0;
       if (choice === 3) convertedChoice = 2;
 
-      return client.vote({
+      return ethSigClient.vote({
         signer: web3.getSigner(),
-        envelope: {
-          data: {
-            space: proposal.space.id,
-            authenticator,
-            strategies,
-            proposal: proposal.proposal_id,
-            choice: convertedChoice,
-            metadataUri: ''
-          }
+        data: {
+          space: proposal.space.id,
+          authenticator,
+          strategies,
+          proposal: proposal.proposal_id,
+          choice: convertedChoice,
+          metadataUri: ''
         }
       });
     },
@@ -203,6 +204,6 @@ export function createActions(chainId: number): NetworkActions {
         executionParams: executionData.executionParams[0]
       });
     },
-    send: (): any => null
+    send: (envelope: any) => ethSigClient.send(envelope)
   };
 }
