@@ -20,11 +20,7 @@ contract Avatar {
     }
 
     function isModuleEnabled(address _module) external view returns (bool) {
-        if (modules[_module]) {
-            return true;
-        } else {
-            return false;
-        }
+        return modules[_module];
     }
 
     function execTransactionFromModule(
