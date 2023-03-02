@@ -1,14 +1,13 @@
 import express from 'express';
-import { Account, ec } from 'starknet';
+import { Account } from 'starknet';
 import { clients } from '@snapshot-labs/sx';
 import { starkProvider } from './starkProvider';
 
 const starknetPrivkey = process.env.STARKNET_PRIVKEY || '';
 const starknetAddress = process.env.STARKNET_ADDRESS || '';
-const starkKeyPair = ec.getKeyPair(starknetPrivkey);
 const executor = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
 
-const account = new Account(starkProvider, starknetAddress, starkKeyPair);
+const account = new Account(starkProvider, starknetAddress, starknetPrivkey);
 const spaceManager = new clients.SpaceManager({
   starkProvider,
   account

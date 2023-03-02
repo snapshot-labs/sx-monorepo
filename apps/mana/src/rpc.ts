@@ -1,7 +1,7 @@
 import fetch from 'cross-fetch';
 global.fetch = fetch;
 import express from 'express';
-import { Account, ec } from 'starknet';
+import { Account } from 'starknet';
 import { clients } from '@snapshot-labs/sx';
 import { rpcError, rpcSuccess } from './utils';
 import { starkProvider } from './starkProvider';
@@ -13,8 +13,7 @@ const client = new clients.StarkNetTx({
   starkProvider,
   ethUrl: process.env.ETH_RPC_URL as string
 });
-const starkKeyPair = ec.getKeyPair(starknetPrivkey);
-const account = new Account(starkProvider, starknetAddress, starkKeyPair);
+const account = new Account(starkProvider, starknetAddress, starknetPrivkey);
 
 const router = express.Router();
 
