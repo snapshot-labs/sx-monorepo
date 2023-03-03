@@ -21,7 +21,5 @@ interface IExecutionStrategy is IExecutionStrategyErrors {
         uint256 votesAbstain
     ) external view returns (ProposalStatus);
 
-    function getQuorum(Proposal memory proposal) external view returns (uint256);
-
     function getStrategyType() external view returns (string memory);
 }
