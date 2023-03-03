@@ -40,7 +40,7 @@ function buildExecution(space: SpaceExecutionData, transactions: MetaTransaction
 
     return {
       executor: VANILLA_EXECUTOR,
-      executionParams: []
+      executionParams: ['0x00']
     };
   }
 
