@@ -4,7 +4,6 @@ import type { Signer } from '@ethersproject/abstract-signer';
 export const API_URL = 'https://api.thegraph.com/subgraphs/name/snapshot-labs/sx-goerli';
 
 export const SUPPORTED_AUTHENTICATORS = {
-  '0xdd66652e93293c32aa3288509d9a46c785e3f786': true,
   '0xcc3fb327de5428d182ba2e739aea5978c0e2ce35': true,
   '0x277f388b77cd36fff1c0e976c49a7c54413a449a': true
 };
@@ -36,11 +35,6 @@ export const EXECUTORS = {
 };
 
 export const EDITOR_AUTHENTICATORS = [
-  {
-    address: '0xdd66652e93293c32aa3288509d9a46c785e3f786',
-    name: 'Vanilla',
-    paramsDefinition: null
-  },
   {
     address: '0xcc3fb327de5428d182ba2e739aea5978c0e2ce35',
     name: 'Ethereum transaction',
