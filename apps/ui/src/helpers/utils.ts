@@ -187,3 +187,8 @@ export function createErc1155Metadata(metadata: SpaceMetadata) {
     }
   };
 }
+
+export function compareAddresses(a: string, b: string): boolean {
+  // TODO: in future ignore padding as well
+  return a.toLowerCase() === b.toLowerCase();
+}

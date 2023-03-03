@@ -2,13 +2,15 @@
 import { ref, onMounted, computed } from 'vue';
 import { useSpacesStore } from '@/stores/spaces';
 import { useProposalsStore } from '@/stores/proposals';
-import { _n } from '@/helpers/utils';
+import { _n, compareAddresses } from '@/helpers/utils';
+import { useWeb3 } from '@/composables/useWeb3';
 import { Space, Proposal as ProposalType } from '@/types';
 
 const PROPOSALS_LIMIT = 4;
 
 const props = defineProps<{ space: Space }>();
 
+const { web3 } = useWeb3();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
 const editSpaceModalOpen = ref(false);
@@ -20,6 +22,9 @@ onMounted(() => {
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
 const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
+const spaceIsEditable = computed(() =>
+  compareAddresses(props.space.controller, web3.value.account)
+);
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
 
@@ -49,7 +54,7 @@ const grouped = computed(() => {
             <IH-pencil-alt class="inline-block" />
           </UiButton>
         </router-link>
-        <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
+        <UiButton v-if="spaceIsEditable" class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
           <IH-cog class="inline-block" />
         </UiButton>
         <UiButton class="w-[46px] !px-0" @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
