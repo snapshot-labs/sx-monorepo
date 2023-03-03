@@ -97,7 +97,8 @@ export class EthereumTx {
   }
 
   async propose({ signer, envelope }: { signer: Signer; envelope: Envelope<Propose> }) {
-    const proposerAddress = await signer.getAddress();
+    const proposerAddress = envelope.signatureData?.address || (await signer.getAddress());
+
     const strategiesParams = await getStrategiesParams(
       'propose',
       envelope.data.strategies,
@@ -134,7 +135,8 @@ export class EthereumTx {
   }
 
   async vote({ signer, envelope }: { signer: Signer; envelope: Envelope<Vote> }) {
-    const voterAddress = await signer.getAddress();
+    const voterAddress = envelope.signatureData?.address || (await signer.getAddress());
+
     const strategiesParams = await getStrategiesParams(
       'propose',
       envelope.data.strategies,

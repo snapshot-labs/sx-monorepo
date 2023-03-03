@@ -13,6 +13,10 @@ describe('EthereumTx', () => {
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
     provider
   );
+  const manaSigner = new Wallet(
+    '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+    provider
+  );
 
   let ethTxClient: EthereumTx;
   let ethSigClient: EthereumSig;
@@ -121,7 +125,7 @@ describe('EthereumTx', () => {
       });
 
       const res = await ethTxClient.propose({
-        signer,
+        signer: manaSigner,
         envelope
       });
       expect(res.hash).toBeDefined();
@@ -129,7 +133,7 @@ describe('EthereumTx', () => {
 
     it('should vote via authenticator', async () => {
       const envelope = await ethSigClient.vote({
-        signer,
+        signer: manaSigner,
         data: {
           space: spaceAddress,
           authenticator: testConfig.ethSigAuthenticator,
