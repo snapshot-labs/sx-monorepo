@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "../interfaces/IVotingStrategy.sol";
-import "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import "../utils/TimestampResolver.sol";
+import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import { TimestampResolver } from "../utils/TimestampResolver.sol";
 
 contract OZVotesVotingStrategy is IVotingStrategy, TimestampResolver {
     error InvalidByteArray();
@@ -14,7 +14,7 @@ contract OZVotesVotingStrategy is IVotingStrategy, TimestampResolver {
         bytes calldata params,
         bytes calldata /* userParams */
     ) external override returns (uint256) {
-        address tokenAddress = BytesToAddress(params, 0);
+        address tokenAddress = bytesToAddress(params, 0);
         uint256 blockNumber = resolveSnapshotTimestamp(timestamp);
         return uint256(IVotes(tokenAddress).getPastVotes(voterAddress, blockNumber));
     }
@@ -24,10 +24,11 @@ contract OZVotesVotingStrategy is IVotingStrategy, TimestampResolver {
     /// @param _start The index to start extracting the address from
     /// @dev Function from the library, with the require switched for a revert statement:
     /// https://github.com/GNSPS/solidity-bytes-utils/blob/master/contracts/BytesLib.sol
-    function BytesToAddress(bytes memory _bytes, uint256 _start) internal pure returns (address) {
+    function bytesToAddress(bytes memory _bytes, uint256 _start) internal pure returns (address) {
         if (_bytes.length < _start + 20) revert InvalidByteArray();
         address tempAddress;
 
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             tempAddress := div(mload(add(add(_bytes, 0x20), _start)), 0x1000000000000000000000000)
         }

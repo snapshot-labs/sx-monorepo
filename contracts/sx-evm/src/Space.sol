@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import { ISpace } from "src/interfaces/ISpace.sol";
@@ -14,7 +16,7 @@ import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
  * @title   Space Contract.
  * @notice  Logic and bookkeeping contract.
  */
-contract Space is ISpace, Ownable, ReentrancyGuard {
+contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuard {
     // Maximum duration a proposal can last.
     uint32 public maxVotingDuration;
     // Minimum duration a proposal can last.
@@ -49,17 +51,19 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
     // |                                  |
     // ------------------------------------
 
-    constructor(
+    function initialize(
         address _controller,
         uint32 _votingDelay,
         uint32 _minVotingDuration,
         uint32 _maxVotingDuration,
         uint256 _proposalThreshold,
+        string memory _metadataUri,
         Strategy[] memory _votingStrategies,
-        bytes[] memory, // data
+        bytes[] memory _votingStrategyMetadata,
         address[] memory _authenticators,
         Strategy[] memory _executionStrategies
-    ) {
+    ) public initializer {
+        __Ownable_init();
         transferOwnership(_controller);
         _setMaxVotingDuration(_maxVotingDuration);
         _setMinVotingDuration(_minVotingDuration);
@@ -71,8 +75,19 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
 
         nextProposalId = 1;
 
-        // No event events emitted here because the constructor is called by the factory,
-        // which emits a space creation event.
+        emit SpaceCreated(
+            address(this),
+            _controller,
+            _votingDelay,
+            _minVotingDuration,
+            _maxVotingDuration,
+            _proposalThreshold,
+            _metadataUri,
+            _votingStrategies,
+            _votingStrategyMetadata,
+            _authenticators,
+            _executionStrategies
+        );
     }
 
     // ------------------------------------
@@ -80,6 +95,13 @@ contract Space is ISpace, Ownable, ReentrancyGuard {
     // |            INTERNAL              |
     // |                                  |
     // ------------------------------------
+
+    /**
+     * @notice Only the space controller can authorize an upgrade to this contract.
+     * @param newImplementation The address of the new implementation.
+     */
+    // solhint-disable-next-line no-empty-blocks
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function _setMaxVotingDuration(uint32 _maxVotingDuration) internal {
         if (_maxVotingDuration < minVotingDuration) revert InvalidDuration(minVotingDuration, _maxVotingDuration);

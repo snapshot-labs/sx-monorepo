@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import { SpaceV2 } from "./mocks/SpaceV2.sol";
 import { SpaceTest } from "./utils/Space.t.sol";
 import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
@@ -299,5 +300,33 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
         space.removeExecutionStrategies(indices);
+    }
+
+    // ------- Upgrading a Space ----
+
+    event Upgraded(address indexed implementation);
+
+    function testSpaceUpgrade() public {
+        SpaceV2 spaceV2Implementation = new SpaceV2();
+
+        vm.expectEmit(true, true, true, true);
+        emit Upgraded(address(spaceV2Implementation));
+
+        space.upgradeTo(address(spaceV2Implementation));
+
+        // casting Space to SpaceV2
+        SpaceV2 space = SpaceV2(address(space));
+
+        // testing new functionality added in V2
+        assertEq(space.getMagicNumber(), 0);
+        space.setMagicNumber(42);
+        assertEq(space.getMagicNumber(), 42);
+    }
+
+    function testSpaceUpgradeUnauthorized() public {
+        SpaceV2 spaceV2Implementation = new SpaceV2();
+        vm.prank(unauthorized);
+        vm.expectRevert("Ownable: caller is not the owner");
+        space.upgradeTo(address(spaceV2Implementation));
     }
 }

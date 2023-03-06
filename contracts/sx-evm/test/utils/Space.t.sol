@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 
 import { Test } from "forge-std/Test.sol";
 import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
+import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import { Space } from "../../src/Space.sol";
 import { VanillaAuthenticator } from "../../src/authenticators/VanillaAuthenticator.sol";
@@ -22,6 +23,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     bytes4 internal constant UPDATE_PROPOSAL_SELECTOR =
         bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
 
+    Space internal masterSpace;
     Space internal space;
     VanillaVotingStrategy internal vanillaVotingStrategy;
     VanillaAuthenticator internal vanillaAuthenticator;
@@ -64,6 +66,8 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     bytes[] public votingStrategyMetadata;
 
     function setUp() public virtual {
+        masterSpace = new Space();
+
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
         vanillaExecutionStrategy = new VanillaExecutionStrategy();
@@ -78,16 +82,25 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
         executionStrategies.push(Strategy(address(vanillaExecutionStrategy), abi.encode(uint256(quorum))));
         userVotingStrategies.push(IndexedStrategy(0, new bytes(0)));
         executionStrategy = IndexedStrategy(0, new bytes(0));
-        space = new Space(
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalThreshold,
-            votingStrategies,
-            votingStrategyMetadata,
-            authenticators,
-            executionStrategies
+        space = Space(
+            address(
+                new ERC1967Proxy(
+                    address(masterSpace),
+                    abi.encodeWithSelector(
+                        Space.initialize.selector,
+                        owner,
+                        votingDelay,
+                        minVotingDuration,
+                        maxVotingDuration,
+                        proposalThreshold,
+                        spaceMetadataUri,
+                        votingStrategies,
+                        votingStrategyMetadata,
+                        authenticators,
+                        executionStrategies
+                    )
+                )
+            )
         );
     }
 

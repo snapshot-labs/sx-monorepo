@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "forge-std/Test.sol";
-import "../src/voting-strategies/OZVotesVotingStrategy.sol";
-import "./mocks/ERC20VotesToken.sol";
+import { Test } from "forge-std/Test.sol";
+import { OZVotesVotingStrategy } from "../src/voting-strategies/OZVotesVotingStrategy.sol";
+import { ERC20VotesToken } from "./mocks/ERC20VotesToken.sol";
 
 contract OZVotesVotingStrategyTest is Test {
     error InvalidByteArray();
