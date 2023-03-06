@@ -49,24 +49,20 @@ async function processBlock(blockNumber: number) {
   });
   const block = (await res.json()).result;
   const processBlockInputs = utils.storageProofs.getProcessBlockInputs(block);
-  return starknetAccount.execute(
-    [
-      {
-        contractAddress: fossilL1HeadersStoreAddress,
-        entrypoint: 'process_block',
-        calldata: [
-          processBlockInputs.blockOptions,
-          processBlockInputs.blockNumber,
-          processBlockInputs.headerInts.bytesLength,
-          processBlockInputs.headerInts.values.length,
-          // @ts-ignore
-          ...processBlockInputs.headerInts.values
-        ]
-      }
-    ],
-    undefined,
-    { maxFee: '857400005301800' }
-  );
+  return starknetAccount.execute([
+    {
+      contractAddress: fossilL1HeadersStoreAddress,
+      entrypoint: 'process_block',
+      calldata: [
+        processBlockInputs.blockOptions,
+        processBlockInputs.blockNumber,
+        processBlockInputs.headerInts.bytesLength,
+        processBlockInputs.headerInts.values.length,
+        // @ts-ignore
+        ...processBlockInputs.headerInts.values
+      ]
+    }
+  ]);
 }
 
 const router = express.Router();
