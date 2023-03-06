@@ -220,7 +220,7 @@ export function createActions(chainId: number): NetworkActions {
           return strategy.getVotingPower(
             address,
             voterAddress,
-            Math.floor(timestamp / 1000), // TODO: unify
+            timestamp,
             strategiesParams[i],
             web3
           );

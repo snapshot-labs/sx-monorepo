@@ -42,7 +42,7 @@ async function getVotingPower() {
       props.space.strategies,
       props.space.strategies_params,
       web3.value.account,
-      Date.now()
+      Math.floor(Date.now() / 1000)
     );
   } catch (err) {
     console.warn('err', err);
