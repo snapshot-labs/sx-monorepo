@@ -16,8 +16,14 @@ dayjs.extend(duration);
 
 dayjs.updateLocale('en', {
   relativeTime: {
-    future: '%s ago',
-    past: '%s left',
+    future: value => {
+      if (value === 'now') return 'in few seconds';
+      return `${value} left`;
+    },
+    past: value => {
+      if (value === 'now') return 'just now';
+      return `${value} ago`;
+    },
     s: 'now',
     m: '1m',
     mm: '%dm',
@@ -106,7 +112,7 @@ export function _t(number) {
 
 export function _rt(number) {
   try {
-    return dayjs(number * 1e3).toNow(false);
+    return dayjs(number * 1e3).fromNow(false);
   } catch (e) {
     console.log(e);
     return '';
