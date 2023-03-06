@@ -1,5 +1,9 @@
 import { clients, getExecutionData, getEvmStrategy, evmGoerli } from '@snapshot-labs/sx';
-import { SUPPORTED_AUTHENTICATORS, SUPPORTED_STRATEGIES } from './constants';
+import {
+  RELAYER_AUTHENTICATORS,
+  SUPPORTED_AUTHENTICATORS,
+  SUPPORTED_STRATEGIES
+} from './constants';
 import { verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type { Web3Provider } from '@ethersproject/providers';
@@ -60,7 +64,11 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
     throw new Error('Unsupported space');
   }
 
-  return { authenticator, strategies: selectedStrategies };
+  return {
+    useRelayer: !!RELAYER_AUTHENTICATORS[authenticator],
+    authenticator,
+    strategies: selectedStrategies
+  };
 }
 
 export function createActions(chainId: number): NetworkActions {
@@ -137,7 +145,7 @@ export function createActions(chainId: number): NetworkActions {
     ) => {
       await verifyNetwork(web3, chainId);
 
-      const { authenticator, strategies } = pickAuthenticatorAndStrategies(
+      const { useRelayer, authenticator, strategies } = pickAuthenticatorAndStrategies(
         space.authenticators,
         space.strategies
       );
@@ -145,18 +153,29 @@ export function createActions(chainId: number): NetworkActions {
       const executionData = buildExecution(space, transactions);
       const index = space.executors.findIndex(executor => executor === executionData.executor);
 
-      return ethSigClient.propose({
+      const data = {
+        space: space.id,
+        authenticator,
+        strategies,
+        executor: {
+          index,
+          address: executionData.executor
+        },
+        executionParams: executionData.executionParams[0],
+        metadataUri: `ipfs://${cid}`
+      };
+
+      if (useRelayer) {
+        return ethSigClient.propose({
+          signer: web3.getSigner(),
+          data
+        });
+      }
+
+      return client.propose({
         signer: web3.getSigner(),
-        data: {
-          space: space.id,
-          authenticator,
-          strategies,
-          executor: {
-            index,
-            address: executionData.executor
-          },
-          executionParams: executionData.executionParams[0],
-          metadataUri: `ipfs://${cid}`
+        envelope: {
+          data
         }
       });
     },
@@ -165,7 +184,7 @@ export function createActions(chainId: number): NetworkActions {
 
       if (choice < 1 || choice > 3) throw new Error('Invalid chocie');
 
-      const { authenticator, strategies } = pickAuthenticatorAndStrategies(
+      const { useRelayer, authenticator, strategies } = pickAuthenticatorAndStrategies(
         proposal.space.authenticators,
         proposal.strategies
       );
@@ -175,15 +194,26 @@ export function createActions(chainId: number): NetworkActions {
       if (choice === 2) convertedChoice = 0;
       if (choice === 3) convertedChoice = 2;
 
-      return ethSigClient.vote({
+      const data = {
+        space: proposal.space.id,
+        authenticator,
+        strategies,
+        proposal: proposal.proposal_id,
+        choice: convertedChoice,
+        metadataUri: ''
+      };
+
+      if (useRelayer) {
+        return ethSigClient.vote({
+          signer: web3.getSigner(),
+          data
+        });
+      }
+
+      return client.vote({
         signer: web3.getSigner(),
-        data: {
-          space: proposal.space.id,
-          authenticator,
-          strategies,
-          proposal: proposal.proposal_id,
-          choice: convertedChoice,
-          metadataUri: ''
+        envelope: {
+          data
         }
       });
     },

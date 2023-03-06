@@ -28,7 +28,7 @@ export function useActions() {
     console.log('envelope', envelope);
 
     // TODO: unify send/soc to both return txHash under same property
-    if (network.hasRelayer) {
+    if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
 
       console.log('Receipt', receipt);

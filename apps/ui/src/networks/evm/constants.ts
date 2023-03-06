@@ -18,6 +18,10 @@ export const SUPPORTED_EXECUTORS = {
   '0x6241b5c89350bb3c465179706cf26050ea32444f': true
 };
 
+export const RELAYER_AUTHENTICATORS = {
+  '0x277f388b77cd36fff1c0e976c49a7c54413a449a': true
+};
+
 export const AUTHS = {
   '0xdd66652e93293c32aa3288509d9a46c785e3f786': 'Vanilla',
   '0x277f388b77cd36fff1c0e976c49a7c54413a449a': 'Ethereum signature',

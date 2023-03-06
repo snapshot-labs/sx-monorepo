@@ -85,7 +85,6 @@ export type NetworkApi = {
 
 export type Network = {
   name: string;
-  hasRelayer: boolean;
   hasReceive: boolean;
   managerConnectors: Connector[];
   actions: NetworkActions;
