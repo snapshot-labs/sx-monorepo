@@ -17,7 +17,7 @@ onMounted(() => spacesStore.fetch());
           <router-link
             v-for="space in spacesStore.spaces"
             :key="space.id"
-            :to="{ name: 'overview', params: { id: `${space.network}:${space.id}` } }"
+            :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
             class="p-4 text-skin-text border rounded-lg block h-[240px] relative"
           >
             <Stamp

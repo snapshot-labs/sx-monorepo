@@ -22,7 +22,7 @@ const spacesStore = useSpacesStore();
     >
       <template #item="{ element }">
         <router-link
-          :to="{ name: 'overview', params: { id: element } }"
+          :to="{ name: 'space-overview', params: { id: element } }"
           class="block"
           @click="uiStore.sidebarOpen = false"
         >

@@ -70,6 +70,14 @@ watch(open, () => (step = null));
             <IH-external-link class="inline-block ml-1" />
           </UiButton>
         </a>
+        <router-link to="/settings" class="block">
+          <UiButton
+            class="button-outline w-full flex justify-center items-center"
+            @click="emit('close')"
+          >
+            <span>Settings</span>
+          </UiButton>
+        </router-link>
         <UiButton class="button-outline w-full" @click="step = 'connect'">
           Connect wallet
         </UiButton>
