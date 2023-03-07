@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUiStore } from '@/stores/ui';
+import { useSpacesStore } from '@/stores/spaces';
+import { useTreasury } from '@/composables/useTreasury';
 
 // TODO: need to import all icons https://github.com/antfu/unplugin-icons/issues/5
 // move to this when stable to avoid imports https://www.npmjs.com/package/@iconify/tailwind
@@ -13,8 +15,15 @@ import IHUsers from '~icons/heroicons-outline/users';
 
 const route = useRoute();
 const uiStore = useUiStore();
+const spacesStore = useSpacesStore();
 
-const NAVIGATION_CONFIG = {
+const currentRouteName = computed(() => String(route.matched[0]?.name));
+const space = computed(() =>
+  currentRouteName.value === 'space' ? spacesStore.spacesMap.get(route.params.id as string) : null
+);
+const { treasury } = useTreasury(space);
+
+const navigationConfig = computed(() => ({
   space: {
     overview: {
       name: 'Overview',
@@ -24,10 +33,14 @@ const NAVIGATION_CONFIG = {
       name: 'Proposals',
       icon: IHNewspaper
     },
-    treasury: {
-      name: 'Treasury',
-      icon: IHCash
-    },
+    ...(treasury.value
+      ? {
+          treasury: {
+            name: 'Treasury',
+            icon: IHCash
+          }
+        }
+      : undefined),
     settings: {
       name: 'Settings',
       icon: IHCog
@@ -39,9 +52,8 @@ const NAVIGATION_CONFIG = {
       icon: IHUsers
     }
   }
-};
-const currentRouteName = computed(() => String(route.matched[0]?.name));
-const navigationItems = computed(() => NAVIGATION_CONFIG[currentRouteName.value || '']);
+}));
+const navigationItems = computed(() => navigationConfig.value[currentRouteName.value || '']);
 </script>
 
 <template>
@@ -58,7 +70,7 @@ const navigationItems = computed(() => NAVIGATION_CONFIG[currentRouteName.value 
         v-for="(item, key) in navigationItems"
         :key="key"
         :to="{ name: `${currentRouteName}-${key}` }"
-        class="px-4 py-[7px] block space-x-2 text-skin-text flex items-center"
+        class="px-4 py-[7px] space-x-2 text-skin-text flex items-center"
         :class="route.name === `${currentRouteName}-${key}` && 'text-skin-link'"
       >
         <component :is="item.icon" class="inline-block"></component>

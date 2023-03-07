@@ -174,6 +174,8 @@ watch(currentToken, token => {
       <BlockTokenPicker
         v-if="pickerType === 'token'"
         :assets="allAssets"
+        :address="address"
+        :network="network"
         :loading="loading"
         :search-value="searchValue"
         @pick="

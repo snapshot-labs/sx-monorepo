@@ -140,7 +140,11 @@ async function handleProposeClick() {
         <Preview :url="proposals[proposalKey].discussion" />
       </div>
       <h4 class="eyebrow mb-3">Execution</h4>
-      <BlockExecutionEditable v-model="proposals[proposalKey].execution" class="mb-4" />
+      <BlockExecutionEditable
+        v-model="proposals[proposalKey].execution"
+        :space="space"
+        class="mb-4"
+      />
     </Container>
     <teleport to="#modal">
       <ModalDrafts

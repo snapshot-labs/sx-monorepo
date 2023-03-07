@@ -6,7 +6,6 @@ import snapshot from '@snapshot-labs/snapshot.js';
 import { abis } from '@/helpers/abis';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _n, shorten } from '@/helpers/utils';
-import spaceData from '@/helpers/space.json';
 import type { Token } from '@/helpers/alchemy';
 
 const { Multicaller, getProvider } = snapshot.utils;
@@ -15,6 +14,8 @@ const props = defineProps<{
   searchValue: string;
   loading: boolean;
   assets: Token[];
+  address: string;
+  network: number;
 }>();
 
 const emit = defineEmits<{
@@ -59,7 +60,7 @@ async function fetchCustomToken(address) {
 
   customTokenLoading.value = true;
 
-  const network = spaceData.network;
+  const network = props.network;
   const provider = getProvider(network);
   const tokens = [address];
 
@@ -69,7 +70,7 @@ async function fetchCustomToken(address) {
       multi.call(`${token}.name`, token, 'name');
       multi.call(`${token}.symbol`, token, 'symbol');
       multi.call(`${token}.decimals`, token, 'decimals');
-      multi.call(`${token}.balance`, token, 'balanceOf', [spaceData.wallet]);
+      multi.call(`${token}.balance`, token, 'balanceOf', [props.address]);
     });
 
     const result = await multi.execute();
