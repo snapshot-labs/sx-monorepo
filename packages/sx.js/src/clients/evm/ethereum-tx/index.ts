@@ -54,6 +54,7 @@ export class EthereumTx {
     metadataUri,
     authenticators,
     votingStrategies,
+    votingStrategiesMetadata,
     executionStrategies
   }: {
     signer: Signer;
@@ -65,6 +66,7 @@ export class EthereumTx {
     metadataUri: string;
     authenticators: string[];
     votingStrategies: AddressConfig[];
+    votingStrategiesMetadata: string[];
     executionStrategies: AddressConfig[];
   }): Promise<{ txId: string; spaceAddress: string }> {
     const spaceInterface = new Interface(SpaceAbi);
@@ -84,7 +86,12 @@ export class EthereumTx {
       proposalThreshold,
       metadataUri
     ];
-    const strategies = [votingStrategies, [], authenticators, executionStrategies];
+    const strategies = [
+      votingStrategies,
+      votingStrategiesMetadata,
+      authenticators,
+      executionStrategies
+    ];
 
     const functionData = spaceInterface.encodeDeploy([...baseArgs.slice(0, -1), ...strategies]);
     const initCode = SpaceBytecode + functionData.slice(2);

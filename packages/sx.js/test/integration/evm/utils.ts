@@ -38,6 +38,8 @@ type ContractDetails = {
   };
 };
 
+const COMP_TOKEN_DECIMALS = 18n;
+
 export async function deployDependency(
   signer: Signer,
   contractDetails: ContractDetails,
@@ -86,7 +88,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
   await avatarContract.enableModule(avatarExecutionStrategy);
 
   const compTokenContract = new Contract(compToken, CompTokenContract.abi, signer);
-  await compTokenContract.mint(controller, 1);
+  await compTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
   await compTokenContract.delegate(controller);
 
   await signer.sendTransaction({
@@ -163,6 +165,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
         params: abiCoder.encode(['tuple(address addy, uint256 vp)[]'], [whitelist])
       }
     ],
+    votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00'],
     executionStrategies: [
       {
         addy: vanillaExecutionStrategy,
