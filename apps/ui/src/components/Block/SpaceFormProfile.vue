@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch, onMounted } from 'vue';
 import { validateForm } from '@/helpers/validation';
-import { enabledNetworks } from '@/networks';
+import { getNetwork, enabledNetworks } from '@/networks';
 
 const props = withDefaults(
   defineProps<{
@@ -17,6 +17,11 @@ const emit = defineEmits<{
   (e: 'errors', value: any);
   (e: 'pick', field: any);
 }>();
+
+const availableNetworks = enabledNetworks.map(id => ({
+  id,
+  name: getNetwork(id).name
+}));
 
 const definition = {
   type: 'object',
@@ -59,6 +64,7 @@ const definition = {
     walletNetwork: {
       type: 'string',
       enum: enabledNetworks,
+      options: availableNetworks,
       title: 'Treasury network'
     },
     walletAddress: {
