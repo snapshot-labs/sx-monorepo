@@ -1,28 +1,28 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "forge-std/Script.sol";
-
-import "../src/Space.sol";
-import "../src/authenticators/VanillaAuthenticator.sol";
-import "../src/voting-strategies/VanillaVotingStrategy.sol";
-import "../src/execution-strategies/VanillaExecutionStrategy.sol";
-import "../src/types.sol";
+import { Script } from "forge-std/Script.sol";
+import { Space } from "../src/Space.sol";
+import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
+import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
+import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
+import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 
 contract PopulateVanillaSpace is Script {
-    bytes4 constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),(uint8,bytes)[])"));
-    bytes4 constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
+    bytes4 internal constant PROPOSE_SELECTOR =
+        bytes4(keccak256("propose(address,string,(address,bytes),(uint8,bytes)[])"));
+    bytes4 internal constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
 
-    Space space;
-    VanillaVotingStrategy vanillaVotingStrategy;
-    VanillaAuthenticator vanillaAuthenticator;
-    VanillaExecutionStrategy vanillaExecutionStrategy;
+    Space internal space;
+    VanillaVotingStrategy internal vanillaVotingStrategy;
+    VanillaAuthenticator internal vanillaAuthenticator;
+    VanillaExecutionStrategy internal vanillaExecutionStrategy;
 
     string public proposalMetadataUri = "SOC Test Proposal";
     Strategy public executionStrategy;
     IndexedStrategy[] public userVotingStrategies;
 
-    string voteMetadataUri = "";
+    string internal voteMetadataUri = "";
 
     function run() public {
         space = Space(0x95DC6f73301356c9909921e21b735601C42fc1a8);

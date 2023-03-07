@@ -16,7 +16,7 @@
   "scripts": {
     "clean": "rimraf cache out",
     "lint": "yarn lint:sol && yarn prettier:check",
-    "lint:sol": "solhint \"{src,test}/**/*.sol\"",
+    "lint:sol": "solhint \"{src,test,script}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
     "prettier": "prettier --write \"**/*.{json,md,sol,yml}\"",
     "format": "yarn prettier",

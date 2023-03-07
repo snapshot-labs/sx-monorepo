@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "forge-std/Script.sol";
+import { Script } from "forge-std/Script.sol";
+import { ProxyFactory } from "../src/ProxyFactory.sol";
+import { Space } from "../src/Space.sol";
+import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
+import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
+import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
+import { Strategy } from "../src/types.sol";
 
-import "../src/ProxyFactory.sol";
-import "../src/Space.sol";
-import "../src/authenticators/VanillaAuthenticator.sol";
-import "../src/voting-strategies/VanillaVotingStrategy.sol";
-import "../src/execution-strategies/VanillaExecutionStrategy.sol";
-
+// solhint-disable-next-line max-states-count
 contract SpaceSetup is Script {
     Space public space;
-    address masterSpace = address(0x1234);
+    address internal masterSpace = address(0x1234);
     ProxyFactory public spaceFactory = ProxyFactory(0xcae03d02f6840D865ccDD6668f1C2FDCA47F2240);
     address public vanillaVotingStrategy = address(0x395eD61716b48DC904140b515e9F682E33330154);
     address public compVotingStrategy = address(0xbBD17346378F76c1c94032594b57C93c24857B19);
@@ -26,7 +27,7 @@ contract SpaceSetup is Script {
     uint32 public maxVotingDuration;
     uint256 public proposalThreshold;
     uint32 public quorum;
-    string metadataUri = "SX Test Space";
+    string internal metadataUri = "SX Test Space";
 
     function run() public {
         Strategy[] memory votingStrategies = new Strategy[](2);

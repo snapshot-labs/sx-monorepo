@@ -163,10 +163,10 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
     }
 
     function _predictProxyAddress(
-        address factory,
+        address _factory,
         address implementation,
         bytes32 salt
-    ) internal view returns (address) {
+    ) internal pure returns (address) {
         return
             address(
                 uint160(
@@ -174,7 +174,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
                         keccak256(
                             abi.encodePacked(
                                 bytes1(0xff),
-                                factory,
+                                _factory,
                                 salt,
                                 keccak256(
                                     abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(implementation, ""))

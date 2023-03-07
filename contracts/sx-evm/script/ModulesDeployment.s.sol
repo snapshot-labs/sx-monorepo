@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
-import "forge-std/Script.sol";
-
-import "../src/Space.sol";
-import "../src/authenticators/VanillaAuthenticator.sol";
-import "../src/voting-strategies/VanillaVotingStrategy.sol";
-import "../src/execution-strategies/VanillaExecutionStrategy.sol";
-
-import "../src/authenticators/EthSigAuthenticator.sol";
-import "../src/authenticators/EthTxAuthenticator.sol";
-
-import "../src/voting-strategies/CompVotingStrategy.sol";
-import "../src/voting-strategies/WhitelistStrategy.sol";
-
-import "../src/ProxyFactory.sol";
+import { Script } from "forge-std/Script.sol";
+import { Space } from "../src/Space.sol";
+import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
+import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
+import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
+import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
+import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
+import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
+import { WhitelistStrategy } from "../src/voting-strategies/WhitelistStrategy.sol";
+import { ProxyFactory } from "../src/ProxyFactory.sol";
 
 contract ModulesDeployment is Script {
     VanillaVotingStrategy public vanillaVotingStrategy;
