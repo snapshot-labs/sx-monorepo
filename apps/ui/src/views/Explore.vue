@@ -18,8 +18,18 @@ onMounted(() => spacesStore.fetch());
             v-for="space in spacesStore.spaces"
             :key="space.id"
             :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
-            class="p-4 text-skin-text border rounded-lg block h-[240px] relative"
+            class="p-4 text-skin-text border rounded-lg block h-[240px] relative group"
           >
+            <button
+              class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
+              @click.prevent="spacesStore.toggleSpaceStar(`${space.network}:${space.id}`)"
+            >
+              <IS-star
+                v-if="spacesStore.starredSpacesIds.includes(`${space.network}:${space.id}`)"
+                class="inline-block"
+              />
+              <IH-star v-else class="inline-block" />
+            </button>
             <Stamp
               :id="space.id"
               :size="32"
