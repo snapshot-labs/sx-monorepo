@@ -8,8 +8,8 @@ import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExe
 
 contract ExecuteTest is SpaceTest {
     function testExecute() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
         // vm.expectEmit(true, true, true, true);
@@ -22,9 +22,9 @@ contract ExecuteTest is SpaceTest {
     }
 
     function testExecuteInvalidProposal() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
         uint256 invalidProposalId = proposalId + 1;
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposal.selector));
@@ -32,8 +32,8 @@ contract ExecuteTest is SpaceTest {
     }
 
     function testExecuteAlreadyExecuted() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
         space.execute(proposalId, executionStrategy.params);
 
@@ -43,8 +43,8 @@ contract ExecuteTest is SpaceTest {
 
     function testExecuteMinDurationNotElapsed() public {
         space.setMinVotingDuration(100);
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.VotingPeriod));
         space.execute(proposalId, executionStrategy.params);
@@ -54,14 +54,14 @@ contract ExecuteTest is SpaceTest {
     }
 
     function testExecuteQuorumNotReachedYet() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.VotingPeriod));
         space.execute(proposalId, executionStrategy.params);
     }
 
     function testExecuteQuorumNotReachedAtAll() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
@@ -71,8 +71,8 @@ contract ExecuteTest is SpaceTest {
     }
 
     function testExecuteWithAgainstVote() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
@@ -82,8 +82,8 @@ contract ExecuteTest is SpaceTest {
     }
 
     function testExecuteWithAbstainVote() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.Abstain, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.Abstain, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
@@ -103,12 +103,12 @@ contract ExecuteTest is SpaceTest {
 
         uint256 proposalId = _createProposal(
             author,
-            proposalMetadataUri,
+            proposalMetadataURI,
             IndexedStrategy(1, new bytes(0)),
             userVotingStrategies
         );
 
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         // New strategy index should be `1` (`0` is used for the first one).
         uint8[] memory newIndices = new uint8[](1);
@@ -122,8 +122,8 @@ contract ExecuteTest is SpaceTest {
     }
 
     function testExecuteInvalidPayload() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         vm.expectRevert(abi.encodeWithSelector(InvalidPayload.selector));
         space.execute(proposalId, new bytes(4242));

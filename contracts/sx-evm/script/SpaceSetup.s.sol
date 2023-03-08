@@ -27,7 +27,7 @@ contract SpaceSetup is Script {
     uint32 public maxVotingDuration;
     uint256 public proposalThreshold;
     uint32 public quorum;
-    string internal metadataUri = "SX Test Space";
+    string internal metadataURI = "SX Test Space";
 
     function run() public {
         Strategy[] memory votingStrategies = new Strategy[](2);
@@ -60,7 +60,7 @@ contract SpaceSetup is Script {
                 minVotingDuration,
                 maxVotingDuration,
                 proposalThreshold,
-                metadataUri,
+                metadataURI,
                 votingStrategies,
                 votingStrategyMetadata,
                 authenticators,

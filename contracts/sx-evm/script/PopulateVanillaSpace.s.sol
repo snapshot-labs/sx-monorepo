@@ -18,11 +18,11 @@ contract PopulateVanillaSpace is Script {
     VanillaAuthenticator internal vanillaAuthenticator;
     VanillaExecutionStrategy internal vanillaExecutionStrategy;
 
-    string public proposalMetadataUri = "SOC Test Proposal";
+    string public proposalMetadataURI = "SOC Test Proposal";
     Strategy public executionStrategy;
     IndexedStrategy[] public userVotingStrategies;
 
-    string internal voteMetadataUri = "";
+    string internal voteMetadataURI = "";
 
     function run() public {
         space = Space(0x95DC6f73301356c9909921e21b735601C42fc1a8);
@@ -34,24 +34,24 @@ contract PopulateVanillaSpace is Script {
 
         uint256 proposalId = _createProposal(
             address(this),
-            proposalMetadataUri,
+            proposalMetadataURI,
             executionStrategy,
             userVotingStrategies
         );
 
-        _vote(address(this), proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        _vote(address(this), proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
     }
 
     function _createProposal(
         address _author,
-        string memory _metadataUri,
+        string memory _metadataURI,
         Strategy memory _executionStrategy,
         IndexedStrategy[] memory _userVotingStrategies
     ) internal returns (uint256) {
         vanillaAuthenticator.authenticate(
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(_author, _metadataUri, _executionStrategy, _userVotingStrategies)
+            abi.encode(_author, _metadataURI, _executionStrategy, _userVotingStrategies)
         );
 
         return space.nextProposalId() - 1;
@@ -62,12 +62,12 @@ contract PopulateVanillaSpace is Script {
         uint256 _proposalId,
         Choice _choice,
         IndexedStrategy[] memory _userVotingStrategies,
-        string memory _voteMetadataUri
+        string memory _voteMetadataURI
     ) internal {
         vanillaAuthenticator.authenticate(
             address(space),
             VOTE_SELECTOR,
-            abi.encode(_author, _proposalId, _choice, _userVotingStrategies, _voteMetadataUri)
+            abi.encode(_author, _proposalId, _choice, _userVotingStrategies, _voteMetadataURI)
         );
     }
 }

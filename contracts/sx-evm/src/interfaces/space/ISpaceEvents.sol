@@ -11,18 +11,17 @@ interface ISpaceEvents {
         uint32 minVotingDuration,
         uint32 maxVotingDuration,
         uint256 proposalThreshold,
-        string metadataUri,
+        string metadataURI,
         Strategy[] votingStrategies,
-        bytes[] votingStrategyMetadata,
+        string[] votingStrategyMetadataURIs,
         address[] authenticators,
         Strategy[] executionStrategies
     );
-    event VoteCreated(uint256 proposalId, address voterAddress, Vote vote);
-    event ProposalCreated(uint256 nextProposalId, address author, Proposal proposal, string metadataUri, bytes payload);
-    event VoteCreated(uint256 proposalId, address voterAddress, Vote vote, string voteMetadataUri);
+    event ProposalCreated(uint256 nextProposalId, address author, Proposal proposal, string metadataURI, bytes payload);
+    event VoteCreated(uint256 proposalId, address voterAddress, Vote vote, string metadataURI);
     event ProposalExecuted(uint256 proposalId);
     event ProposalCancelled(uint256 proposalId);
-    event VotingStrategiesAdded(Strategy[] votingStrategies, bytes[] data);
+    event VotingStrategiesAdded(Strategy[] newVotingStrategies, string[] newVotingStrategyMetadataURIs);
     event VotingStrategiesRemoved(uint8[] indices);
     event ExecutionStrategiesAdded(Strategy[] executionStrategies);
     event ExecutionStrategiesRemoved(uint8[] executionStrategies);
@@ -31,9 +30,9 @@ interface ISpaceEvents {
     event ControllerUpdated(address newController);
     event MaxVotingDurationUpdated(uint32 newMaxVotingDuration);
     event MinVotingDurationUpdated(uint32 newMinVotingDuration);
-    event MetadataUriUpdated(string newMetadataUri);
+    event MetadataURIUpdated(string newMetadataURI);
     event ProposalThresholdUpdated(uint256 newProposalThreshold);
     event QuorumUpdated(uint256 newQuorum);
     event VotingDelayUpdated(uint256 newVotingDelay);
-    event ProposalUpdated(uint256 proposalId, IndexedStrategy newStrategy, string newMetadataUri);
+    event ProposalUpdated(uint256 proposalId, IndexedStrategy newStrategy, string newMetadataURI);
 }

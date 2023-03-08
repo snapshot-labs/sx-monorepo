@@ -10,8 +10,8 @@ contract SpaceOwnerActionsTest is SpaceTest {
     // ------- Cancel Proposal ----
 
     function testCancel() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         vm.expectEmit(true, true, true, true);
         emit ProposalCancelled(proposalId);
@@ -21,8 +21,8 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelInvalidProposal() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         // proposal does not exist
         uint256 invalidProposalId = proposalId + 1;
@@ -31,8 +31,8 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelUnauthorized() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
@@ -40,8 +40,8 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelAlreadyExecuted() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         space.execute(proposalId, executionStrategy.params);
 
         vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
@@ -49,8 +49,8 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelAlreadyCancelled() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         space.cancel(proposalId);
 
         vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
@@ -107,22 +107,22 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.setMinVotingDuration(maxVotingDuration + 1);
     }
 
-    // ------- MetadataUri ----
+    // ------- MetadataURI ----
 
-    function testSetMetadataUri() public {
-        string memory newMetadataUri = "All your bases are belong to us";
+    function testSetMetadataURI() public {
+        string memory newMetadataURI = "All your bases are belong to us";
         vm.expectEmit(true, true, true, true);
-        emit MetadataUriUpdated(newMetadataUri);
-        space.setMetadataUri(newMetadataUri);
+        emit MetadataURIUpdated(newMetadataURI);
+        space.setMetadataURI(newMetadataURI);
 
-        // Metadata Uri is not stored in the contract state so we can't check it
+        // Metadata URI is not stored in the contract state so we can't check it
     }
 
-    function testSetMetadataUriUnauthorized() public {
-        string memory newMetadataUri = "All your bases are belong to us";
+    function testSetMetadataURIUnauthorized() public {
+        string memory newMetadataURI = "All your bases are belong to us";
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.setMetadataUri(newMetadataUri);
+        space.setMetadataURI(newMetadataURI);
     }
 
     // ------- ProposalThreshold ----
@@ -174,18 +174,18 @@ contract SpaceOwnerActionsTest is SpaceTest {
         uint8[] memory newIndices = new uint8[](1);
         newIndices[0] = 1;
 
-        bytes[] memory votingStrategyMetadata = new bytes[](0);
+        string[] memory votingStrategyMetadataURIs = new string[](0);
 
         IndexedStrategy[] memory newUserVotingStrategies = new IndexedStrategy[](1);
         newUserVotingStrategies[0] = IndexedStrategy(newIndices[0], new bytes(0));
 
         vm.expectEmit(true, true, true, true);
-        emit VotingStrategiesAdded(newVotingStrategies, votingStrategyMetadata);
+        emit VotingStrategiesAdded(newVotingStrategies, votingStrategyMetadataURIs);
         vm.prank(owner);
-        space.addVotingStrategies(newVotingStrategies, votingStrategyMetadata);
+        space.addVotingStrategies(newVotingStrategies, votingStrategyMetadataURIs);
 
         // Try creating a proposal using these new strategies.
-        _createProposal(author, proposalMetadataUri, executionStrategy, newUserVotingStrategies);
+        _createProposal(author, proposalMetadataURI, executionStrategy, newUserVotingStrategies);
 
         // Remove the voting strategies
         vm.expectEmit(true, true, true, true);
@@ -194,18 +194,18 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
         // Try creating a proposal using these strategies that were just removed.
         vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 1));
-        _createProposal(author, proposalMetadataUri, executionStrategy, newUserVotingStrategies);
+        _createProposal(author, proposalMetadataURI, executionStrategy, newUserVotingStrategies);
 
         // Try creating a proposal with the previous voting strategy that was never removed.
-        _createProposal(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
     }
 
     function testAddVotingStrategiesUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        bytes[] memory newData = new bytes[](0);
+        string[] memory votingStrategyMetadataURIs = new string[](0);
 
-        space.addVotingStrategies(votingStrategies, newData);
+        space.addVotingStrategies(votingStrategies, votingStrategyMetadataURIs);
     }
 
     function testRemoveVotingStrategiesUnauthorized() public {
@@ -227,7 +227,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.addAuthenticators(newAuths);
 
         // The new authenticator is this contract so we can call `propose` directly.
-        space.propose(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        space.propose(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
 
         vm.expectEmit(true, true, true, true);
         emit AuthenticatorsRemoved(newAuths);
@@ -235,7 +235,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
         // Ensure we can't propose with this authenticator anymore
         vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector, address(this)));
-        space.propose(author, proposalMetadataUri, executionStrategy, userVotingStrategies);
+        space.propose(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
     }
 
     function testAddAuthenticatorsUnauthorized() public {
@@ -265,12 +265,12 @@ contract SpaceOwnerActionsTest is SpaceTest {
         // Creating a proposal with the new execution strategy
         uint256 proposalId = _createProposal(
             author,
-            proposalMetadataUri,
+            proposalMetadataURI,
             IndexedStrategy(1, new bytes(0)),
             userVotingStrategies
         );
 
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataUri);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         // Ensure we can finalize
         space.execute(proposalId, new bytes(0));
@@ -285,7 +285,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
         // Ensure we can't propose with this execution strategy anymore
         vm.expectRevert(abi.encodeWithSelector(ExecutionStrategyNotWhitelisted.selector));
-        _createProposal(author, proposalMetadataUri, IndexedStrategy(1, new bytes(0)), userVotingStrategies);
+        _createProposal(author, proposalMetadataURI, IndexedStrategy(1, new bytes(0)), userVotingStrategies);
     }
 
     function testAddExecutionStrategyUnauthorized() public {

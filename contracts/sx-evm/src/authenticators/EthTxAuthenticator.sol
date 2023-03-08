@@ -8,7 +8,7 @@ import { Choice, IndexedStrategy, Strategy } from "../types.sol";
 /**
  * @author  SnapshotLabs
  * @title   EthTxAuthenticator
- * @notice  Authenticates a vote / a proposal by ensuring `msg.sender`
+ * @notice  Authenticates a user by ensuring `msg.sender`
  *          corresponds to the voter / proposal author.
  */
 

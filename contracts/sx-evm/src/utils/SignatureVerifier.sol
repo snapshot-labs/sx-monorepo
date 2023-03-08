@@ -16,20 +16,20 @@ abstract contract SignatureVerifier is EIP712 {
 
     bytes32 private constant PROPOSE_TYPEHASH =
         keccak256(
-            "Propose(address space,address author,string metadataUri,IndexedStrategy executionStrategy,"
+            "Propose(address space,address author,string metadataURI,IndexedStrategy executionStrategy,"
             "IndexedStrategy[] userVotingStrategies,uint256 salt)"
             "IndexedStrategy(uint8 index,bytes params)"
         );
     bytes32 private constant VOTE_TYPEHASH =
         keccak256(
             "Vote(address space,address voter,uint256 proposalId,uint8 choice,"
-            "IndexedStrategy[] userVotingStrategies,string voteMetadataUri)"
+            "IndexedStrategy[] userVotingStrategies,string voteMetadataURI)"
             "IndexedStrategy(uint8 index,bytes params)"
         );
     bytes32 private constant UPDATE_PROPOSAL_TYPEHASH =
         keccak256(
             "updateProposal(address space,address author,uint256 proposalId,"
-            "IndexedStrategy executionStrategy,string metadataUri)"
+            "IndexedStrategy executionStrategy,string metadataURI)"
             "IndexedStrategy(uint8 index,bytes params)"
         );
 
@@ -41,7 +41,7 @@ abstract contract SignatureVerifier is EIP712 {
     function _verifyProposeSig(uint8 v, bytes32 r, bytes32 s, uint256 salt, address space, bytes memory data) internal {
         (
             address author,
-            string memory metadataUri,
+            string memory metadataURI,
             IndexedStrategy memory executionStrategy,
             IndexedStrategy[] memory userVotingStrategies
         ) = abi.decode(data, (address, string, IndexedStrategy, IndexedStrategy[]));
@@ -55,7 +55,7 @@ abstract contract SignatureVerifier is EIP712 {
                         PROPOSE_TYPEHASH,
                         space,
                         author,
-                        keccak256(bytes(metadataUri)),
+                        keccak256(bytes(metadataURI)),
                         executionStrategy.hash(),
                         userVotingStrategies.hash(),
                         salt
@@ -79,7 +79,7 @@ abstract contract SignatureVerifier is EIP712 {
             uint256 proposeId,
             Choice choice,
             IndexedStrategy[] memory userVotingStrategies,
-            string memory voteMetadataUri
+            string memory voteMetadataURI
         ) = abi.decode(data, (address, uint256, Choice, IndexedStrategy[], string));
 
         address recoveredAddress = ECDSA.recover(
@@ -92,7 +92,7 @@ abstract contract SignatureVerifier is EIP712 {
                         proposeId,
                         choice,
                         userVotingStrategies.hash(),
-                        keccak256(bytes(voteMetadataUri))
+                        keccak256(bytes(voteMetadataURI))
                     )
                 )
             ),
@@ -105,7 +105,7 @@ abstract contract SignatureVerifier is EIP712 {
     }
 
     function _verifyUpdateProposalSig(uint8 v, bytes32 r, bytes32 s, address space, bytes memory data) internal view {
-        (address author, uint256 proposalId, IndexedStrategy memory executionStrategy, string memory metadataUri) = abi
+        (address author, uint256 proposalId, IndexedStrategy memory executionStrategy, string memory metadataURI) = abi
             .decode(data, (address, uint256, IndexedStrategy, string));
 
         address recoveredAddress = ECDSA.recover(
@@ -117,7 +117,7 @@ abstract contract SignatureVerifier is EIP712 {
                         author,
                         proposalId,
                         executionStrategy.hash(),
-                        keccak256(bytes(metadataUri))
+                        keccak256(bytes(metadataURI))
                     )
                 )
             ),
