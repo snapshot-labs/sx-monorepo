@@ -29,8 +29,8 @@ async function handleVoteClick(choice: Choice) {
           :to="{
             name: 'proposal',
             params: {
-              id: proposal.proposal_id,
-              space: `${proposal.network}:${proposal.space.id}`
+              pid: proposal.proposal_id,
+              id: `${proposal.network}:${proposal.space.id}`
             }
           }"
           class="block"
