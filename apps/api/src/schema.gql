@@ -18,6 +18,7 @@ type Space {
   quorum: Float
   strategies: [String]
   strategies_params: [String]
+  strategies_metadata: [String]
   authenticators: [String]
   executors: [String]
   executors_types: [String]

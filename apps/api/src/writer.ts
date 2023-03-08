@@ -44,6 +44,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({
     quorum: uint256toString(event.quorum),
     strategies: JSON.stringify(event.voting_strategies),
     strategies_params: JSON.stringify(event.voting_strategy_params_flat),
+    strategies_metadata: JSON.stringify([]),
     authenticators: JSON.stringify(event.authenticators),
     executors: JSON.stringify(event.execution_strategies),
     proposal_count: 0,
