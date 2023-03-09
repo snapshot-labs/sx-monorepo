@@ -17,21 +17,17 @@ export default function createCompStrategy(): Strategy {
       params: string,
       provider: Provider
     ): Promise<bigint> {
+      const compContract = new Contract(params, ICompAbi, provider);
       const votingStrategyContract = new Contract(
         strategyAddress,
         CompVotingStrtategyAbi,
         provider
       );
 
-      let block;
       const storedBlock = await votingStrategyContract.timestampToBlockNumber(timestamp);
-      if (storedBlock.toNumber() > 1) block = storedBlock.toNumber();
-      else {
-        block = (await provider.getBlockNumber()) - 1;
-      }
+      const blockTag = storedBlock.toNumber() > 1 ? storedBlock.toNumber : undefined;
 
-      const compContract = new Contract(params, ICompAbi, provider);
-      const votingPower = await compContract.getPriorVotes(voterAddress, block);
+      const votingPower = await compContract.getCurrentVotes(voterAddress, { blockTag });
 
       return BigInt(votingPower.toString());
     }
