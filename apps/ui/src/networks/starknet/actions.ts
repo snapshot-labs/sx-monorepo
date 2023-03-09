@@ -195,7 +195,6 @@ export function createActions(
       );
     },
     getVotingPower: async (
-      web3: Web3Provider,
       strategiesAddresses: string[],
       strategiesParams: any[],
       voterAddress: string,

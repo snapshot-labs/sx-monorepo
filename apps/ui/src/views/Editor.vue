@@ -3,8 +3,10 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useSpacesStore } from '@/stores/spaces';
 import { useActions } from '@/composables/useActions';
+import { useWeb3 } from '@/composables/useWeb3';
 import { useEditor } from '@/composables/useEditor';
 import { useModal } from '@/composables/useModal';
+import { getNetwork } from '@/networks';
 import { omit } from '@/helpers/utils';
 import type { NetworkID } from '@/types';
 
@@ -13,6 +15,7 @@ const { modalOpen: globalModalOpen } = useModal();
 const route = useRoute();
 const router = useRouter();
 const { propose } = useActions();
+const { web3 } = useWeb3();
 const spacesStore = useSpacesStore();
 
 const id = route.params.id as string;
@@ -22,6 +25,8 @@ const proposalKey = `${id}:${key}`;
 
 const modalOpen = ref(false);
 const sending = ref(false);
+const fetchingVotingPower = ref(true);
+const votingPowerValid = ref(false);
 
 const space = computed(() => spacesStore.spacesMap.get(id));
 const proposalData = computed(() => {
@@ -32,6 +37,50 @@ const proposalData = computed(() => {
 
 if (!proposals[proposalKey]) {
   createDraft(id, { id: key });
+}
+
+async function handleProposeClick() {
+  if (!space.value) return;
+
+  sending.value = true;
+
+  try {
+    const proposal = proposals[proposalKey];
+
+    const result = await propose(
+      space.value,
+      proposal.title,
+      proposal.body,
+      proposal.discussion,
+      proposal.execution
+    );
+
+    if (result) router.back();
+  } finally {
+    sending.value = false;
+  }
+}
+
+async function getVotingPower() {
+  if (!space.value || !web3.value.account) return;
+
+  fetchingVotingPower.value = true;
+  try {
+    const network = getNetwork(space.value.network);
+
+    const currentVotingPower = await network.actions.getVotingPower(
+      space.value.strategies,
+      space.value.strategies_params,
+      web3.value.account,
+      Math.floor(Date.now() / 1000)
+    );
+
+    votingPowerValid.value = currentVotingPower >= BigInt(space.value.proposal_threshold);
+  } catch (err) {
+    console.warn('err', err);
+  } finally {
+    fetchingVotingPower.value = false;
+  }
 }
 
 onMounted(() => {
@@ -49,6 +98,8 @@ onMounted(() => {
   }
 });
 
+watch([space, () => web3.value.account], () => getVotingPower());
+
 watch(
   () => proposals[proposalKey],
   (to, from) => {
@@ -63,26 +114,6 @@ watch(proposalData, () => {
 
   proposals[proposalKey].updatedAt = Date.now();
 });
-
-async function handleProposeClick() {
-  if (!space.value) return;
-
-  sending.value = true;
-
-  try {
-    const result = await propose(
-      space.value,
-      proposals[`${id}:${key}`].title,
-      proposals[`${id}:${key}`].body,
-      proposals[`${id}:${key}`].discussion,
-      proposals[`${id}:${key}`].execution
-    );
-
-    if (result) router.back();
-  } finally {
-    sending.value = false;
-  }
-}
 </script>
 <template>
   <div>
@@ -104,7 +135,8 @@ async function handleProposeClick() {
           </UiButton>
           <UiButton
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
-            :loading="sending"
+            :loading="sending || (web3.account !== '' && fetchingVotingPower)"
+            :disabled="!fetchingVotingPower && !votingPowerValid"
             @click="handleProposeClick"
           >
             <span class="hidden mr-2 md:inline-block" v-text="'Publish'" />
@@ -114,6 +146,9 @@ async function handleProposeClick() {
       </div>
     </nav>
     <Container v-if="proposals[proposalKey]" class="pt-5 s-box">
+      <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error">
+        You do not have enough voting power to create proposal in this space.
+      </UiAlert>
       <h4 class="eyebrow mb-3">Context</h4>
       <SIString
         v-model="proposals[proposalKey].title"

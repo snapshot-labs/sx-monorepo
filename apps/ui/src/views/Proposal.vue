@@ -48,7 +48,6 @@ async function getVotingPower() {
   loadingVotingPower.value = true;
   try {
     votingPower.value = await network.actions.getVotingPower(
-      auth.web3,
       proposal.value.strategies,
       proposal.value.strategies_params,
       web3.value.account,
