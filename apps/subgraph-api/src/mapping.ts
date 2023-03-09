@@ -26,8 +26,8 @@ function updateSpaceMetadata(space: Space, metadataUri: string): void {
   let properties = obj.get('properties')
 
   if (name) space.name = name.toString()
-  if (description) space.about = description.toString()
-  if (externalUrl) space.external_url = externalUrl.toString()
+  space.about = description ? description.toString() : ''
+  space.external_url = externalUrl ? externalUrl.toString() : ''
 
   if (properties) {
     const propertiesObj = properties.toObject()
@@ -37,10 +37,15 @@ function updateSpaceMetadata(space: Space, metadataUri: string): void {
     let discord = propertiesObj.get('discord')
     let wallets = propertiesObj.get('wallets')
 
-    if (github) space.github = github.toString()
-    if (twitter) space.twitter = twitter.toString()
-    if (discord) space.discord = discord.toString()
-    if (wallets && wallets.toArray().length > 0) space.wallet = wallets.toArray()[0].toString()
+    space.github = github ? github.toString() : ''
+    space.twitter = twitter ? twitter.toString() : ''
+    space.discord = discord ? discord.toString() : ''
+    space.wallet = wallets && wallets.toArray().length > 0 ? wallets.toArray()[0].toString() : ''
+  } else {
+    space.github = ''
+    space.twitter = ''
+    space.discord = ''
+    space.wallet = ''
   }
 }
 
