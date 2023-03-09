@@ -5,9 +5,11 @@ import { Proposal as ProposalType } from '@/types';
 const props = withDefaults(
   defineProps<{
     proposal: ProposalType;
-    width?: number | 'full';
+    withDetails: boolean;
+    width?: number;
   }>(),
   {
+    withDetails: false,
     width: 100
   }
 );
@@ -46,9 +48,14 @@ const visibleResults = computed(() =>
 </script>
 
 <template>
-  <div class="h-full">
+  <div
+    class="h-full"
+    :class="{
+      'flex items-center': !withDetails
+    }"
+  >
     <div
-      v-if="width === 'full'"
+      v-if="withDetails"
       class="inline-block text-skin-link mb-2 cursor-pointer hover:opacity-80"
       @click="showAlternatives = !showAlternatives"
     >
@@ -63,7 +70,7 @@ const visibleResults = computed(() =>
     <div
       class="rounded-full h-[6px] overflow-hidden"
       :style="{
-        width: width === 'full' ? '100%' : `${width}px`
+        width: withDetails ? '100%' : `${width}px`
       }"
     >
       <div

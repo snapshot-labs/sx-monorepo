@@ -111,13 +111,13 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
     proposal_id
     space {
       id
-      quorum
       authenticators
       executors
     }
     author {
       id
     }
+    quorum
     execution_hash
     metadata_uri
     title
