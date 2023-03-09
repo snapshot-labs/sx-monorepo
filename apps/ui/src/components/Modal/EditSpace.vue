@@ -97,6 +97,7 @@ watch(
         :show-title="false"
         :form="form"
         @pick="showPicker = true"
+        @no-network="form.walletAddress = null"
         @errors="v => (formErrors = v)"
       />
     </div>

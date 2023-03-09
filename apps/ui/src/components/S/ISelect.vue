@@ -41,8 +41,8 @@ const inputValue = computed({
       <option disabled value="">Please select one</option>
       <option
         v-for="option in definition.options || definition.enum"
-        :key="option.id ?? option"
-        :value="option.id ?? option"
+        :key="option.id === undefined ? option : option.id"
+        :value="option.id === undefined ? option : option.id"
       >
         {{ option.name ?? option }}
       </option>

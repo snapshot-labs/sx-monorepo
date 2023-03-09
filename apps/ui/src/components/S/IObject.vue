@@ -45,7 +45,11 @@ const inputValue = computed({
 });
 
 const getComponent = (property: { type: string; format: string; enum?: string[] }) => {
-  switch (property.type) {
+  let type = property.type;
+  if (Array.isArray(property.type)) {
+    type = property.type[0];
+  }
+  switch (type) {
     case 'object':
       return IObject;
     case 'array':
