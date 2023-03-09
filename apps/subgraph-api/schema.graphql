@@ -15,6 +15,7 @@ type Space @entity {
   quorum: BigDecimal!
   strategies: [Bytes!]!
   strategies_params: [String!]!
+  strategies_metadata: [String!]!
   authenticators: [Bytes!]!
   executors: [Bytes!]!
   executors_types: [String!]!

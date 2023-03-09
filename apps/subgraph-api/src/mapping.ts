@@ -58,6 +58,9 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   space.strategies_params = event.params.votingStrategies.map<string>((strategy) =>
     strategy.params.toHexString()
   )
+  space.strategies_metadata = event.params.votingStrategyMetadata.map<string>((metadata) =>
+    metadata.toHexString()
+  )
   space.authenticators = event.params.authenticators.map<Bytes>((address) => address)
   space.executors = event.params.executionStrategies.map<Bytes>((strategy) => strategy.addy)
   space.proposal_count = 0
