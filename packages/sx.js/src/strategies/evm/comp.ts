@@ -25,7 +25,7 @@ export default function createCompStrategy(): Strategy {
       );
 
       const storedBlock = await votingStrategyContract.timestampToBlockNumber(timestamp);
-      const blockTag = storedBlock.toNumber() > 1 ? storedBlock.toNumber : undefined;
+      const blockTag = storedBlock.toNumber() > 1 ? storedBlock.toNumber() : undefined;
 
       const votingPower = await compContract.getCurrentVotes(voterAddress, { blockTag });
 
