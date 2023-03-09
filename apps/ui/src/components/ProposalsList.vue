@@ -37,7 +37,7 @@ const currentLimit = computed(() => {
           :proposal="proposal"
         />
       </BlockInfiniteScroller>
-      <div v-if="!proposals.length" class="px-4 py-3 text-skin-link">
+      <div v-if="!proposals.length" class="px-4 py-3 flex items-center text-skin-link">
         <IH-exclamation-circle class="inline-block mr-2" />
         <span v-text="'There are no proposals here.'" />
       </div>
