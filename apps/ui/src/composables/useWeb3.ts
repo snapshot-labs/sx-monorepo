@@ -7,7 +7,7 @@ import { getNames } from '@/helpers/ens';
 
 networks['starknet'] = {
   key: 'starknet',
-  name: 'StarkNet',
+  name: 'Starknet',
   explorer: 'https://goerli.voyager.online'
 };
 
