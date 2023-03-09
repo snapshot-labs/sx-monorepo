@@ -24,12 +24,12 @@ const filteredNfts = computed(() =>
   </div>
   <template v-else>
     <div v-if="filteredNfts.length === 0" class="text-center py-3" v-text="'No results'" />
-    <div v-else class="grid gap-2 grid-cols-3 py-3 px-2">
+    <div v-else class="grid gap-3 grid-cols-3 p-3">
       <a
         v-for="(nft, i) in filteredNfts"
         :key="i"
         role="button"
-        class="block px-3 py-1 mb-3 hover:opacity-80 transition-opacity"
+        class="block hover:opacity-80 transition-opacity"
         @click="emit('pick', nft.id)"
       >
         <NftPreview :item="nft" class="w-full" />
