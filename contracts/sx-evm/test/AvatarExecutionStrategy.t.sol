@@ -36,8 +36,10 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         // Activate the execution strategy on the space
         Strategy[] memory executionStrategies = new Strategy[](1);
         executionStrategies[0] = Strategy(address(avatarExecutionStrategy), abi.encode(uint256(quorum)));
+        string[] memory executionStrategyMetadataURIs = new string[](1);
+        executionStrategyMetadataURIs[0] = "bafkreihnggomfnqri7y2dzolhebfsyon36bcbl3taehnabr35pd5zddwyu";
         // This strategy will reside at index 1 in the space's execution strategies array
-        space.addExecutionStrategies(executionStrategies);
+        space.addExecutionStrategies(executionStrategies, executionStrategyMetadataURIs);
     }
 
     function testExecution() public {

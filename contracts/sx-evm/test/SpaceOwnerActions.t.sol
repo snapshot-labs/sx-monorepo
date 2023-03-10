@@ -256,11 +256,13 @@ contract SpaceOwnerActionsTest is SpaceTest {
         Strategy[] memory newExecutionStrategies = new Strategy[](1);
         VanillaExecutionStrategy _vanilla = new VanillaExecutionStrategy();
         newExecutionStrategies[0] = Strategy(address(_vanilla), abi.encode(uint256(quorum)));
+        string[] memory newExecutionStrategyMetadataURIs = new string[](1);
+        newExecutionStrategyMetadataURIs[0] = "bafkreihnggomfnqri7y2dzolhebfsyon36bcbl3taehnabr35pd5zddwyu";
 
         vm.expectEmit(true, true, true, true);
-        emit ExecutionStrategiesAdded(newExecutionStrategies);
+        emit ExecutionStrategiesAdded(newExecutionStrategies, newExecutionStrategyMetadataURIs);
         // New strategy index should be `1` (`0` is used for the first one).
-        space.addExecutionStrategies(newExecutionStrategies);
+        space.addExecutionStrategies(newExecutionStrategies, newExecutionStrategyMetadataURIs);
 
         // Creating a proposal with the new execution strategy
         uint256 proposalId = _createProposal(
@@ -291,7 +293,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testAddExecutionStrategyUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.addExecutionStrategies(executionStrategies);
+        space.addExecutionStrategies(executionStrategies, executionStrategyMetadataURIs);
     }
 
     function testRemoveExecutionStrategyUnauthorized() public {

@@ -61,7 +61,8 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         Strategy[] memory _votingStrategies,
         string[] memory _votingStrategyMetadataURIs,
         address[] memory _authenticators,
-        Strategy[] memory _executionStrategies
+        Strategy[] memory _executionStrategies,
+        string[] memory _executionStrategyMetadataURIs
     ) public initializer {
         __Ownable_init();
         transferOwnership(_controller);
@@ -86,7 +87,8 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
             _votingStrategies,
             _votingStrategyMetadataURIs,
             _authenticators,
-            _executionStrategies
+            _executionStrategies,
+            _executionStrategyMetadataURIs
         );
     }
 
@@ -386,9 +388,12 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         emit AuthenticatorsRemoved(_authenticators);
     }
 
-    function addExecutionStrategies(Strategy[] calldata _executionStrategies) external override onlyOwner {
+    function addExecutionStrategies(
+        Strategy[] calldata _executionStrategies,
+        string[] memory executionStrategyMetadataURIs
+    ) external override onlyOwner {
         _addExecutionStrategies(_executionStrategies);
-        emit ExecutionStrategiesAdded(_executionStrategies);
+        emit ExecutionStrategiesAdded(_executionStrategies, executionStrategyMetadataURIs);
     }
 
     function removeExecutionStrategies(uint8[] calldata _executionStrategies) external override onlyOwner {
