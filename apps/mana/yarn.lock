@@ -538,10 +538,6 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
 "@jridgewell/resolve-uri@^3.0.3":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@jridgewell/resolve-uri/-/resolve-uri-3.1.0.tgz#2203b118c157721addfe69d47b70465463066d78"
@@ -560,7 +556,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
->>>>>>> b6cca42 (chore: bump ts)
 "@noble/curves@^0.5.1":
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-0.5.2.tgz#77aaecc6575d34ecfa1144f7ce47a91b2b242f6c"
@@ -568,10 +563,6 @@
   dependencies:
     "@noble/hashes" "1.1.5"
 
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> b6cca42 (chore: bump ts)
 "@noble/hashes@1.1.2", "@noble/hashes@~1.1.1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.1.2.tgz#e9e035b9b166ca0af657a7848eb2718f0f22f183"
@@ -614,10 +605,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@snapshot-labs/sx@^0.1.0-beta.22":
-  version "0.1.0-beta.22"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.22.tgz#95e6f5717f2f1835cb2866d289ca6db571ae27bb"
-  integrity sha512-nw+YaeXxsGyepH3P+jNC0+uNVxH2DrRSf0T+2pbexa5YvHA2+MIXRAEUkRDxboyrfYE7h3I8CUD0WMIEzaTYOw==
+"@snapshot-labs/sx@^0.1.0-beta.25":
+  version "0.1.0-beta.25"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.25.tgz#fdd7ddf89d15d05024cb0131570754e39f444ffb"
+  integrity sha512-dEwZ0+yd6lCdTZmEREdD/tmZQgF1AiBilkjpvpTb2v15/4fWhC9iqrixbWFjrRuBazZvf4kDj3gQshv5woYBcg==
   dependencies:
     "@ethereumjs/block" "^3.6.3"
     "@ethereumjs/common" "^2.6.5"
