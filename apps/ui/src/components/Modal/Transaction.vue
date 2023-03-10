@@ -252,7 +252,7 @@ watch(
         />
       </div>
     </div>
-    <template #footer>
+    <template v-if="!showPicker" #footer>
       <UiButton class="w-full" @click="handleSubmit">Confirm</UiButton>
     </template>
   </UiModal>
