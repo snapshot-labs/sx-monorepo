@@ -3,22 +3,20 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, IndexedStrategy, Strategy, Vote } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 
 contract VoteTest is SpaceTest {
     function testVote() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
 
-        // vm.expectEmit(true, true, true, true);
-        // emit VoteCreated(proposalId, author, Vote(Choice.For, 1), voteMetadataURI);
-        snapStart("Vote");
+        vm.expectEmit(true, true, true, true);
+        emit VoteCastWithMetadata(proposalId, author, Choice.For, 1, voteMetadataURI);
         vanillaAuthenticator.authenticate(
             address(space),
             VOTE_SELECTOR,
             abi.encode(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI)
         );
-        snapEnd();
     }
 
     function testVoteInvalidAuth() public {
@@ -153,7 +151,7 @@ contract VoteTest is SpaceTest {
 
         uint256 expectedVotingPower = 3; // 1 voting power per vanilla strat, so 3
         vm.expectEmit(true, true, true, true);
-        emit VoteCreated(proposalId, author, Vote(Choice.For, expectedVotingPower), voteMetadataURI);
+        emit VoteCastWithMetadata(proposalId, author, Choice.For, expectedVotingPower, voteMetadataURI);
         _vote(author, proposalId, Choice.For, newVotingStrategies, voteMetadataURI);
     }
 }

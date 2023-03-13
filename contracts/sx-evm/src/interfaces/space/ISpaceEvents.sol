@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import { IndexedStrategy, Proposal, Strategy, Vote } from "src/types.sol";
+import { IndexedStrategy, Proposal, Strategy, Choice } from "src/types.sol";
 
 interface ISpaceEvents {
     event SpaceCreated(
@@ -18,8 +18,15 @@ interface ISpaceEvents {
         Strategy[] executionStrategies,
         string[] executionStrategyMetadataURIs
     );
-    event ProposalCreated(uint256 nextProposalId, address author, Proposal proposal, string metadataURI, bytes payload);
-    event VoteCreated(uint256 proposalId, address voterAddress, Vote vote, string metadataURI);
+    event ProposalCreated(uint256 nextProposalId, address author, Proposal proposal, string metadataUri, bytes payload);
+    event VoteCast(uint256 proposalId, address voterAddress, Choice choice, uint256 votingPower);
+    event VoteCastWithMetadata(
+        uint256 proposalId,
+        address voterAddress,
+        Choice choice,
+        uint256 votingPower,
+        string metadataUri
+    );
     event ProposalExecuted(uint256 proposalId);
     event ProposalCancelled(uint256 proposalId);
     event VotingStrategiesAdded(Strategy[] newVotingStrategies, string[] newVotingStrategyMetadataURIs);

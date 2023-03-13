@@ -12,11 +12,9 @@ contract ExecuteTest is SpaceTest {
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
-        // vm.expectEmit(true, true, true, true);
-        // emit ProposalExecuted(proposalId);
-        snapStart("Execute");
+        vm.expectEmit(true, true, true, true);
+        emit ProposalExecuted(proposalId);
         space.execute(proposalId, executionStrategy.params);
-        snapEnd();
 
         assertEq(uint8(space.getProposalStatus(proposalId)), uint8(ProposalStatus.Executed));
     }

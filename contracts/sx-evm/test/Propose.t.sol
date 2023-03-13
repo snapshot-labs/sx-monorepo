@@ -31,9 +31,7 @@ contract ProposeTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit ProposalCreated(proposalId, author, proposal, proposalMetadataURI, executionStrategy.params);
 
-        snapStart("Propose");
         _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
-        snapEnd();
 
         // Actual content of the proposal struct
         Proposal memory _proposal = space.getProposal(proposalId);
