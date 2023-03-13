@@ -5,7 +5,7 @@ import { Proposal as ProposalType } from '@/types';
 const props = withDefaults(
   defineProps<{
     proposal: ProposalType;
-    withDetails: boolean;
+    withDetails?: boolean;
     width?: number;
   }>(),
   {
