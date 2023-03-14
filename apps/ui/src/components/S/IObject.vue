@@ -60,6 +60,7 @@ const getComponent = (property: { type: string; format: string; enum?: string[] 
       if (property.enum) return ISelect;
       return IString;
     case 'number':
+    case 'integer':
       return INumber;
     case 'boolean':
       return IBoolean;

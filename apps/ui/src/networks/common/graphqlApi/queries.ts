@@ -8,6 +8,7 @@ export const PROPOSAL_QUERY = gql`
       space {
         id
         authenticators
+        strategies_metadata
         executors
         executors_types
       }
@@ -54,6 +55,7 @@ export const PROPOSALS_QUERY = gql`
         id
         quorum
         authenticators
+        strategies_metadata
         executors
         executors_types
       }
@@ -112,6 +114,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
     space {
       id
       authenticators
+      strategies_metadata
       executors
     }
     author {
@@ -195,6 +198,7 @@ export const SPACE_QUERY = gql`
       proposal_threshold
       strategies
       strategies_params
+      strategies_metadata
       authenticators
       executors
       executors_types
@@ -223,6 +227,7 @@ export const SPACES_QUERY = gql`
       proposal_threshold
       strategies
       strategies_params
+      strategies_metadata
       authenticators
       executors
       executors_types

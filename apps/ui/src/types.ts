@@ -40,6 +40,7 @@ export type Space = {
   proposal_threshold: string;
   strategies: string[];
   strategies_params: any[];
+  strategies_metadata: string[];
   authenticators: string[];
   executors: string[];
   executors_types: string[];
@@ -56,6 +57,7 @@ export type Proposal = {
   space: {
     id: string;
     authenticators: string[];
+    strategies_metadata: string[];
     executors: string[];
     executors_types: string[];
   };

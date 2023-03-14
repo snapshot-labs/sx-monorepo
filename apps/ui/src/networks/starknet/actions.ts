@@ -78,9 +78,8 @@ export function createActions(
         maxVotingDuration: number;
         proposalThreshold: bigint;
         quorum: bigint;
-        authenticators: string[];
-        votingStrategies: string[];
-        votingStrategiesParams: string[][];
+        authenticators: StrategyConfig[];
+        votingStrategies: StrategyConfig[];
         executionStrategies: StrategyConfig[];
         metadataUri: string;
       }
@@ -93,6 +92,11 @@ export function createActions(
 
       return spaceManager.deploySpace({
         ...params,
+        authenticators: params.authenticators.map(config => config.address),
+        votingStrategies: params.votingStrategies.map(strategy => strategy.address),
+        votingStrategiesParams: params.votingStrategies.map(strategy =>
+          strategy.generateParams ? strategy.generateParams(strategy.params) : []
+        ),
         executionStrategies: params.executionStrategies.map(strategy => strategy.address)
       });
     },

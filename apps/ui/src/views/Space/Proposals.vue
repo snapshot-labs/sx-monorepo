@@ -19,6 +19,9 @@ const loadingVotingPower = ref(true);
 const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
+const votingPowerDecimals = computed(() => {
+  return Math.max(...props.space.strategies_metadata.map(metadata => parseInt(metadata, 16)), 0);
+});
 
 async function handleEndReached() {
   if (!proposalsRecord.value?.hasMoreProposals) return;
@@ -76,7 +79,7 @@ watch(
           }"
         >
           <IH-lightning-bolt class="inline-block" />
-          <span class="ml-1">{{ _n(votingPower, 'compact') }}</span>
+          <span class="ml-1">{{ _n(Number(votingPower) / 10 ** votingPowerDecimals) }}</span>
         </UiButton>
         <router-link :to="{ name: 'editor' }">
           <UiButton class="!px-0 w-[46px]">

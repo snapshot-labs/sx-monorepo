@@ -83,11 +83,8 @@ export function useActions() {
       maxVotingDuration: settings.maxVotingDuration,
       proposalThreshold: BigInt(settings.proposalThreshold),
       quorum: BigInt(settings.quorum),
-      authenticators: authenticators.map(config => config.address),
-      votingStrategies: votingStrategies.map(config => config.address),
-      votingStrategiesParams: votingStrategies.map(config =>
-        config.generateParams ? config.generateParams(config.params) : []
-      ),
+      authenticators,
+      votingStrategies,
       executionStrategies,
       metadataUri: `ipfs://${pinned.cid}`
     });

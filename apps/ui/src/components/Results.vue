@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { _n } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
   defineProps<{
     proposal: ProposalType;
+    decimals?: number;
     withDetails?: boolean;
     width?: number;
   }>(),
   {
+    decimals: 0,
     withDetails: false,
     width: 100
   }
@@ -64,7 +67,7 @@ const visibleResults = computed(() =>
           {{ result.progress.toFixed(0) }}%
         </span>
         <IH-lightning-bolt class="inline-block ml-1" />
-        {{ result.score }}
+        {{ _n(Number(result.score) / 10 ** decimals) }}
       </div>
     </div>
     <div
