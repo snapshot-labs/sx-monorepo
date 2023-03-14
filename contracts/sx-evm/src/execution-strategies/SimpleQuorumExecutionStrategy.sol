@@ -6,6 +6,9 @@ import { IExecutionStrategy } from "../interfaces/IExecutionStrategy.sol";
 import { FinalizationStatus, Proposal, ProposalStatus } from "../types.sol";
 
 abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
+    /// @notice Returned if transaction execution fails.
+    error TransactionsFailed();
+
     function execute(
         Proposal memory proposal,
         uint256 votesFor,

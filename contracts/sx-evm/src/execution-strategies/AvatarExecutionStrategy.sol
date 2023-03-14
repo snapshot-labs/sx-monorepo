@@ -10,8 +10,6 @@ import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
 /// @title Avatar Execution Strategy - An Execution strategy that executes transactions on an Avatar contract
 /// @dev An Avatar contract is any contract that implements the IAvatar interface, eg a Gnosis Safe.
 contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy {
-    error TransactionsFailed();
-
     /// @dev Emitted each time a new Avatar Execution Strategy is deployed.
     event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces);
 
