@@ -68,6 +68,7 @@ watch(route, () => {
         <router-view :key="route.path" class="flex-auto mt-[72px] ml-0 lg:ml-[72px]" />
       </div>
     </div>
+    <Notifications />
     <div id="modal" />
   </div>
 </template>

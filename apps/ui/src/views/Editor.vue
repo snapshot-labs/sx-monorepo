@@ -146,7 +146,7 @@ watch(proposalData, () => {
       </div>
     </nav>
     <Container v-if="proposals[proposalKey]" class="pt-5 s-box">
-      <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error">
+      <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>
       <h4 class="eyebrow mb-3">Context</h4>

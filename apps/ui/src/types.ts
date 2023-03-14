@@ -1,3 +1,6 @@
+// UI
+export type NotificationType = 'error' | 'warning';
+
 export type NetworkID = 'gor' | 'sn-tn2';
 export type Choice = 1 | 2 | 3;
 

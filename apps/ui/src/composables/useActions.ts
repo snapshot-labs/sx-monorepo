@@ -21,6 +21,20 @@ export function useActions() {
   const { modalAccountOpen } = useModal();
   const auth = getInstance();
 
+  function wrapWithErrors(fn) {
+    return async (...args) => {
+      try {
+        return await fn(...args);
+      } catch (err) {
+        if (err.code !== 'ACTION_REJECTED' && err.message !== 'User abort') {
+          uiStore.addNotification('error', 'Something went wrong. Please try again later.');
+        }
+
+        throw err;
+      }
+    };
+  }
+
   async function wrapPromise(networkId: NetworkID, promise: Promise<any>) {
     const network = getNetwork(networkId);
 
@@ -191,7 +205,7 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }
 
-  return {
+  const actions = {
     createSpace,
     updateMetadata,
     vote,
@@ -200,4 +214,8 @@ export function useActions() {
     receiveProposal,
     executeTransactions
   };
+
+  return Object.fromEntries(
+    Object.entries(actions).map(([key, value]) => [key, wrapWithErrors(value)])
+  );
 }
