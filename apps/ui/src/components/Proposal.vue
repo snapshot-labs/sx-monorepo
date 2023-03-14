@@ -58,6 +58,7 @@ async function handleVoteClick(choice: Choice) {
       <div class="hidden md:block">
         <Vote :proposal="proposal">
           <template #unsupported><div /></template>
+          <template #waiting><div /></template>
           <template #voted>
             <Results :proposal="proposal" />
           </template>

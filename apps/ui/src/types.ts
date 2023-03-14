@@ -78,6 +78,7 @@ export type Proposal = {
   created: number;
   tx: string;
   vote_count: number;
+  has_started: boolean;
   has_ended: boolean;
   executed: boolean;
 };

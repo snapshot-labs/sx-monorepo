@@ -13,7 +13,9 @@ import type { PaginationOpts, NetworkApi } from '@/networks/types';
 import type { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/types';
 
 type ApiSpace = Omit<Space, 'network'>;
-type ApiProposal = Omit<Proposal, 'has_ended' | 'execution' | 'network'> & { execution: string };
+type ApiProposal = Omit<Proposal, 'has_started' | 'has_ended' | 'execution' | 'network'> & {
+  execution: string;
+};
 
 function formatExecution(execution: string): Transaction[] {
   if (execution === '') return [];
@@ -43,6 +45,7 @@ function formatProposal(
   return {
     ...proposal,
     execution: formatExecution(proposal.execution),
+    has_started: proposal.start * 1000 >= now,
     has_ended: proposal.max_end * 1000 <= now,
     network: networkId
   };
