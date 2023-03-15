@@ -68,13 +68,15 @@ async function getVotingPower() {
   try {
     const network = getNetwork(space.value.network);
 
-    const currentVotingPower = await network.actions.getVotingPower(
+    const votingPowers = await network.actions.getVotingPower(
       space.value.strategies,
       space.value.strategies_params,
+      space.value.strategies_metadata,
       web3.value.account,
       Math.floor(Date.now() / 1000)
     );
 
+    const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);
     votingPowerValid.value = currentVotingPower >= BigInt(space.value.proposal_threshold);
   } catch (err) {
     console.warn('err', err);

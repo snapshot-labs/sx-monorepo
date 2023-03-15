@@ -11,7 +11,7 @@ import { convertToMetaTransactions } from '@/helpers/transactions';
 import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import type { NetworkActions, StrategyConfig } from '@/networks/types';
+import type { NetworkActions, StrategyConfig, VotingPower } from '@/networks/types';
 import type { Space, Proposal } from '@/types';
 
 const VANILLA_EXECUTOR = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
@@ -201,9 +201,10 @@ export function createActions(
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],
+      strategiesMetadata: string[],
       voterAddress: string,
       timestamp: number
-    ): Promise<bigint> => {
+    ): Promise<VotingPower[]> => {
       const offsetsLength = parseInt(strategiesParams[0], 16);
       const offsets = strategiesParams
         .slice(1, offsetsLength + 1)
@@ -215,19 +216,26 @@ export function createActions(
         return elements.slice(offset, last);
       });
 
-      const votingPowers = await Promise.all(
-        strategiesAddresses.map((address, i) => {
+      return Promise.all(
+        strategiesAddresses.map(async (address, i) => {
           const strategy = getStarknetStrategy(address, defaultNetwork);
-          if (!strategy) return 0n;
+          if (!strategy) return { address, value: 0n, decimals: 0 };
 
-          return strategy.getVotingPower(address, voterAddress, timestamp, params2D[i], {
-            ...clientConfig,
-            networkConfig: defaultNetwork
-          });
+          const value = await strategy.getVotingPower(
+            address,
+            voterAddress,
+            timestamp,
+            params2D[i],
+            {
+              ...clientConfig,
+              networkConfig: defaultNetwork
+            }
+          );
+
+          const token = strategy.type === 'singleSlotProof' ? params2D[i][0] : undefined;
+          return { address, value, decimals: 0, token };
         })
       );
-
-      return votingPowers.reduce((a, b) => a + b, 0n);
     },
     send: (envelope: any) => client.send(envelope)
   };

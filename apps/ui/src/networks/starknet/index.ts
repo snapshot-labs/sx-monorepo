@@ -14,6 +14,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
   return {
     name: 'Starknet (testnet2)',
+    baseNetworkId: 'gor',
     hasReceive: true,
     managerConnectors: ['argentx'],
     actions: createActions(provider, { l1ChainId }),

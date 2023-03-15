@@ -8,7 +8,7 @@ import {
 import { verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { NetworkActions, StrategyConfig } from '@/networks/types';
+import type { NetworkActions, StrategyConfig, VotingPower } from '@/networks/types';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Space, Proposal } from '@/types';
 
@@ -242,25 +242,32 @@ export function createActions(provider: Provider, chainId: number): NetworkActio
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],
+      strategiesMetadata: string[],
       voterAddress: string,
       timestamp: number
-    ): Promise<bigint> => {
-      const votingPowers = await Promise.all(
-        strategiesAddresses.map((address, i) => {
+    ): Promise<VotingPower[]> => {
+      return Promise.all(
+        strategiesAddresses.map(async (address, i) => {
           const strategy = getEvmStrategy(address, evmGoerli);
-          if (!strategy) return 0n;
+          if (!strategy) return { address, value: 0n, decimals: 0 };
 
-          return strategy.getVotingPower(
+          const value = await strategy.getVotingPower(
             address,
             voterAddress,
             timestamp,
             strategiesParams[i],
             provider
           );
+
+          const token = strategy.type === 'comp' ? strategiesParams[i] : undefined;
+          return {
+            address,
+            value,
+            decimals: strategiesMetadata[i] ? parseInt(strategiesMetadata[i], 16) : 0,
+            token
+          };
         })
       );
-
-      return votingPowers.reduce((a, b) => a + b, 0n);
     }
   };
 }
