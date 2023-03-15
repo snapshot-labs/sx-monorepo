@@ -3,11 +3,11 @@ import snapshot from '@snapshot-labs/snapshot.js';
 
 const SUPPORTED_ABIS = ['ERC721', 'ERC1155'];
 
-const nfts: Ref<any[]> = ref([]);
-const loading = ref(true);
-const loaded = ref(false);
-
 export function useNfts() {
+  const nfts: Ref<any[]> = ref([]);
+  const loading = ref(true);
+  const loaded = ref(false);
+
   async function loadNfts(address) {
     loading.value = true;
 

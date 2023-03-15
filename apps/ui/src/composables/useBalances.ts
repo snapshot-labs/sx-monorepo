@@ -2,11 +2,11 @@ import { ref, computed, Ref } from 'vue';
 import { formatUnits } from '@ethersproject/units';
 import { getBalances, GetBalancesResponse } from '@/helpers/alchemy';
 
-const assets: Ref<GetBalancesResponse> = ref([]);
-const loading = ref(true);
-const loaded = ref(false);
-
 export function useBalances() {
+  const assets: Ref<GetBalancesResponse> = ref([]);
+  const loading = ref(true);
+  const loaded = ref(false);
+
   async function loadBalances(address: string, networkId: number) {
     const data = await getBalances(address, networkId);
 
