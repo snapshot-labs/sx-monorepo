@@ -7,6 +7,29 @@ import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 
 contract SpaceOwnerActionsTest is SpaceTest {
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    // ------- Transfer Ownership -------
+
+    function testTransferOwnership() public {
+        address newOwner = address(2);
+        vm.expectEmit(true, true, true, true);
+        emit OwnershipTransferred(owner, newOwner);
+        space.transferOwnership(newOwner);
+    }
+
+    function testTransferOwnershipInvalid() public {
+        address newOwner = address(0);
+        vm.expectRevert("Ownable: new owner is the zero address");
+        space.transferOwnership(newOwner);
+    }
+
+    function testRenounceOwnership() public {
+        vm.expectEmit(true, true, true, true);
+        emit OwnershipTransferred(owner, address(0));
+        space.renounceOwnership();
+    }
+
     // ------- Cancel Proposal ----
 
     function testCancel() public {

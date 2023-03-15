@@ -52,7 +52,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     // ------------------------------------
 
     function initialize(
-        address _controller,
+        address _owner,
         uint32 _votingDelay,
         uint32 _minVotingDuration,
         uint32 _maxVotingDuration,
@@ -65,7 +65,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         string[] memory _executionStrategyMetadataURIs
     ) public initializer {
         __Ownable_init();
-        transferOwnership(_controller);
+        transferOwnership(_owner);
         _setMaxVotingDuration(_maxVotingDuration);
         _setMinVotingDuration(_minVotingDuration);
         _setProposalThreshold(_proposalThreshold);
@@ -78,7 +78,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
 
         emit SpaceCreated(
             address(this),
-            _controller,
+            _owner,
             _votingDelay,
             _minVotingDuration,
             _maxVotingDuration,
@@ -99,7 +99,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     // ------------------------------------
 
     /**
-     * @notice Only the space controller can authorize an upgrade to this contract.
+     * @notice Only the space owner can authorize an upgrade to this contract.
      * @param newImplementation The address of the new implementation.
      */
     // solhint-disable-next-line no-empty-blocks
@@ -332,11 +332,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     // |                                  |
     // ------------------------------------
 
-    function setController(address _controller) external override onlyOwner {
-        transferOwnership(_controller);
-        emit ControllerUpdated(_controller);
-    }
-
     function setMaxVotingDuration(uint32 _maxVotingDuration) external override onlyOwner {
         _setMaxVotingDuration(_maxVotingDuration);
         emit MaxVotingDurationUpdated(_maxVotingDuration);
@@ -402,10 +397,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     // |             GETTERS              |
     // |                                  |
     // ------------------------------------
-
-    function getController() external view override returns (address) {
-        return owner();
-    }
 
     function getProposal(uint256 proposalId) external view override returns (Proposal memory) {
         Proposal memory proposal = proposalRegistry[proposalId];
@@ -552,7 +543,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     }
 
     /**
-     * @notice  Cancel a proposal. Only callable by the space controller.
+     * @notice  Cancel a proposal. Only callable by the space owner.
      * @param   proposalId  The proposal to cancel
      */
     function cancel(uint256 proposalId) external override onlyOwner {

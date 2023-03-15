@@ -7,8 +7,6 @@ import { Strategy } from "../../types.sol";
 interface ISpaceOwnerActions {
     function cancel(uint256 proposalId) external;
 
-    function setController(address controller) external;
-
     function setVotingDelay(uint32 delay) external;
 
     function setMinVotingDuration(uint32 duration) external;

@@ -5,8 +5,6 @@ pragma solidity ^0.8.18;
 import { Proposal, ProposalStatus } from "src/types.sol";
 
 interface ISpaceState {
-    function getController() external view returns (address);
-
     function maxVotingDuration() external view returns (uint32);
 
     function minVotingDuration() external view returns (uint32);

@@ -35,7 +35,6 @@ interface ISpaceEvents {
     event ExecutionStrategiesRemoved(uint8[] executionStrategyIndices);
     event AuthenticatorsAdded(address[] newAuthenticators);
     event AuthenticatorsRemoved(address[] authenticators);
-    event ControllerUpdated(address newController);
     event MaxVotingDurationUpdated(uint32 newMaxVotingDuration);
     event MinVotingDurationUpdated(uint32 newMinVotingDuration);
     event MetadataURIUpdated(string newMetadataURI);
