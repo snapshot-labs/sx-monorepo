@@ -30,7 +30,13 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth.authenticate(
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(author, proposalMetadataURI, executionStrategy, userVotingStrategies, voteMetadataURI)
+            abi.encode(
+                author,
+                proposalMetadataURI,
+                executionStrategy,
+                abi.encode(userVotingStrategies),
+                voteMetadataURI
+            )
         );
     }
 

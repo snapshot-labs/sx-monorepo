@@ -14,6 +14,8 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
     CompVotingStrategy internal compVotingStrategy;
     CompToken internal compToken;
 
+    uint256 constant TOKEN_AMOUNT = 10000;
+
     string internal constant NAME = "snapshot-x";
     string internal constant VERSION = "1";
 
@@ -52,11 +54,19 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         // Update contract's voting strategies.
         space.addVotingStrategies(newVotingStrategies, newVotingStrategyMetadataURIs);
 
+        uint8[] memory toRemove = new uint8[](1);
+        toRemove[0] = 0;
+        // Remove the vanilla voting strategy.
+        space.removeVotingStrategies(toRemove);
+
         // Mint tokens for the users
-        compToken.mint(author, 10000);
-        compToken.mint(voter, 10000);
-        compToken.mint(voter2, 10000);
-        compToken.mint(voter3, 10000);
+        compToken.mint(author, TOKEN_AMOUNT);
+        compToken.mint(voter, TOKEN_AMOUNT);
+        compToken.mint(voter2, TOKEN_AMOUNT);
+        compToken.mint(voter3, TOKEN_AMOUNT);
+        compToken.mint(voter4, TOKEN_AMOUNT);
+        compToken.mint(voter5, TOKEN_AMOUNT);
+        compToken.mint(voter6, TOKEN_AMOUNT);
         // Delegate to self to activate checkpoints
         vm.prank(author);
         compToken.delegate(author);
@@ -66,6 +76,12 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         compToken.delegate(voter2);
         vm.prank(voter3);
         compToken.delegate(voter3);
+        vm.prank(voter4);
+        compToken.delegate(voter4);
+        vm.prank(voter5);
+        compToken.delegate(voter5);
+        vm.prank(voter6);
+        compToken.delegate(voter6);
 
         // Adding the eth sig authenticator to the space
         ethSigAuth = new EthSigAuthenticator(NAME, VERSION);
@@ -78,10 +94,19 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         // Remove old one to make sure state is clean.
         space.removeAuthenticators(authenticators);
 
-        // Delete strategy [0] because it's the vanilla one.
-        delete userVotingStrategies[0];
-        // Add the new comp voting strategy which should be at index 1.
-        userVotingStrategies.push(IndexedStrategy(1, new bytes(0)));
+        // Replace with comp voting strategy which should be at index 1.
+        userVotingStrategies[0] = IndexedStrategy(1, newVotingStrategies[0].params);
+
+        Strategy[] memory currentVotingStrategies = new Strategy[](2);
+        (address addy0, bytes memory params0) = space.votingStrategies(0);
+        currentVotingStrategies[0] = Strategy(addy0, params0);
+        (address addy1, bytes memory params1) = space.votingStrategies(1);
+        currentVotingStrategies[1] = Strategy(addy1, params1);
+
+        // Udpdate the proposal validation params
+        space.setProposalValidationStrategy(
+            Strategy(address(votingPowerProposalValidationContract), abi.encode(TOKEN_AMOUNT, currentVotingStrategies))
+        );
     }
 
     function testVoteAndProposeWithCompToken() public {
@@ -95,7 +120,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
                 address(author),
                 proposalMetadataURI,
                 executionStrategy,
-                userVotingStrategies,
+                abi.encode(userVotingStrategies),
                 0
             )
         );
@@ -107,7 +132,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
             0,
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(author, proposalMetadataURI, executionStrategy, userVotingStrategies)
+            abi.encode(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies))
         );
 
         (v, r, s) = vm.sign(
@@ -118,7 +143,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
                 address(author),
                 proposalMetadataURI,
                 executionStrategy,
-                userVotingStrategies,
+                abi.encode(userVotingStrategies),
                 1
             )
         );
@@ -132,7 +157,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
             1,
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(author, proposalMetadataURI, executionStrategy, userVotingStrategies)
+            abi.encode(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies))
         );
         snapEnd();
 

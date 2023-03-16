@@ -10,13 +10,10 @@ interface ISpaceErrors {
     error InvalidCaller();
     // All strategy addresses must be != address(0).
     error InvalidStrategyAddress();
-    error InvalidVotingStrategyIndex(uint256 index);
     error InvalidProposal();
     error AuthenticatorNotWhitelisted(address auth);
     error InvalidExecutionStrategyIndex(uint256 index);
     error ExecutionStrategyNotWhitelisted();
-    error ProposalThresholdNotReached(uint256 votingPower);
-    error DuplicateFound(uint8 index);
     error ProposalAlreadyFinalized();
     error MinVotingDurationHasNotElapsed();
     error QuorumNotReachedYet();
@@ -26,4 +23,5 @@ interface ISpaceErrors {
     error VotingPeriodHasNotStarted();
     error ProposalFinalized();
     error VotingDelayHasPassed();
+    error FailedToPassProposalValidation();
 }

@@ -21,7 +21,7 @@ contract EthTxAuthenticator is Authenticator {
      * @param   data  The data to verify
      */
     function _verifyPropose(bytes calldata data) internal view {
-        (address author, , , ) = abi.decode(data, (address, string, Strategy, IndexedStrategy[]));
+        (address author, , , ) = abi.decode(data, (address, string, Strategy, bytes));
         if (author != msg.sender) revert InvalidMessageSender();
     }
 

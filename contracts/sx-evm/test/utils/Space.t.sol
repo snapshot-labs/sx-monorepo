@@ -10,6 +10,9 @@ import { Space } from "../../src/Space.sol";
 import { VanillaAuthenticator } from "../../src/authenticators/VanillaAuthenticator.sol";
 import { VanillaVotingStrategy } from "../../src/voting-strategies/VanillaVotingStrategy.sol";
 import { VanillaExecutionStrategy } from "../../src/execution-strategies/VanillaExecutionStrategy.sol";
+import {
+    VotingPowerProposalValidationStrategy
+} from "../../src/proposal-validation-strategies/VotingPowerProposalValidationStrategy.sol";
 import { ISpaceEvents } from "../../src/interfaces/space/ISpaceEvents.sol";
 import { ISpaceErrors } from "../../src/interfaces/space/ISpaceErrors.sol";
 import { IExecutionStrategyErrors } from "../../src/interfaces/execution-strategies/IExecutionStrategyErrors.sol";
@@ -17,8 +20,7 @@ import { Choice, Strategy, IndexedStrategy } from "../../src/types.sol";
 
 // solhint-disable-next-line max-states-count
 abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {
-    bytes4 internal constant PROPOSE_SELECTOR =
-        bytes4(keccak256("propose(address,string,(uint8,bytes),(uint8,bytes)[])"));
+    bytes4 internal constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(uint8,bytes),bytes)"));
     bytes4 internal constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
     bytes4 internal constant UPDATE_PROPOSAL_SELECTOR =
         bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
@@ -28,6 +30,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     VanillaVotingStrategy internal vanillaVotingStrategy;
     VanillaAuthenticator internal vanillaAuthenticator;
     VanillaExecutionStrategy internal vanillaExecutionStrategy;
+    VotingPowerProposalValidationStrategy internal votingPowerProposalValidationContract;
 
     uint256 public constant AUTHOR_KEY = 1234;
     uint256 public constant VOTER_KEY = 5678;
@@ -53,6 +56,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     uint32 public maxVotingDuration;
     uint256 public proposalThreshold;
     uint32 public quorum;
+    Strategy public votingPowerProposalValidationStrategy;
 
     // Default voting and execution strategy setups
     IndexedStrategy[] public userVotingStrategies;
@@ -70,6 +74,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
         vanillaExecutionStrategy = new VanillaExecutionStrategy();
+        votingPowerProposalValidationContract = new VotingPowerProposalValidationStrategy();
 
         votingDelay = 0;
         minVotingDuration = 0;
@@ -81,6 +86,10 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
         executionStrategies.push(Strategy(address(vanillaExecutionStrategy), abi.encode(uint256(quorum))));
         userVotingStrategies.push(IndexedStrategy(0, new bytes(0)));
         executionStrategy = IndexedStrategy(0, new bytes(0));
+        votingPowerProposalValidationStrategy = Strategy(
+            address(votingPowerProposalValidationContract),
+            abi.encode(proposalThreshold, votingStrategies)
+        );
         space = Space(
             address(
                 new ERC1967Proxy(
@@ -91,7 +100,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
                         votingDelay,
                         minVotingDuration,
                         maxVotingDuration,
-                        proposalThreshold,
+                        votingPowerProposalValidationStrategy,
                         spaceMetadataURI,
                         votingStrategies,
                         votingStrategyMetadataURIs,
@@ -113,7 +122,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
         vanillaAuthenticator.authenticate(
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(_author, _metadataURI, _executionStrategy, _userVotingStrategies)
+            abi.encode(_author, _metadataURI, _executionStrategy, abi.encode(_userVotingStrategies))
         );
 
         return space.nextProposalId() - 1;

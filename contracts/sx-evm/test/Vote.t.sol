@@ -7,6 +7,9 @@ import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 
 contract VoteTest is SpaceTest {
+    error DuplicateFound(uint8 index);
+    error InvalidStrategyIndex(uint256 index);
+
     function testVote() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
 
@@ -108,7 +111,7 @@ contract VoteTest is SpaceTest {
         // this will fail fail because the strategy was added after the proposal was created.
         IndexedStrategy[] memory newUserVotingStrategies = new IndexedStrategy[](1);
         newUserVotingStrategies[0] = IndexedStrategy(1, new bytes(0));
-        vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 1)); // array out of bounds
+        vm.expectRevert(abi.encodeWithSelector(InvalidStrategyIndex.selector, 1)); // array out of bounds
         _vote(author, proposalId, Choice.For, newUserVotingStrategies, voteMetadataURI);
     }
 
@@ -118,7 +121,7 @@ contract VoteTest is SpaceTest {
         // This voting strategy is not registered in the space.
         IndexedStrategy[] memory newUserVotingStrategies = new IndexedStrategy[](1);
         newUserVotingStrategies[0] = IndexedStrategy(1, new bytes(0));
-        vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 1)); // array out of bounds
+        vm.expectRevert(abi.encodeWithSelector(InvalidStrategyIndex.selector, 1)); // array out of bounds
         _vote(author, proposalId, Choice.For, newUserVotingStrategies, voteMetadataURI);
     }
 

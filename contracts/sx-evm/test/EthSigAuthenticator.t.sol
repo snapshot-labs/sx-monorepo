@@ -41,7 +41,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             address(author),
             proposalMetadataURI,
             executionStrategy,
-            userVotingStrategies,
+            abi.encode(userVotingStrategies),
             salt
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(AUTHOR_KEY, digest);
@@ -53,7 +53,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             salt,
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(author, proposalMetadataURI, executionStrategy, userVotingStrategies)
+            abi.encode(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies))
         );
     }
 
@@ -65,7 +65,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             address(author),
             proposalMetadataURI,
             executionStrategy,
-            userVotingStrategies,
+            abi.encode(userVotingStrategies),
             salt
         );
 
@@ -93,7 +93,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             address(author),
             "invalid metadata URI",
             executionStrategy,
-            userVotingStrategies,
+            abi.encode(userVotingStrategies),
             salt
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(AUTHOR_KEY, digest);
@@ -118,7 +118,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             address(author),
             proposalMetadataURI,
             executionStrategy,
-            userVotingStrategies,
+            abi.encode(userVotingStrategies),
             salt
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(AUTHOR_KEY, digest);
@@ -129,7 +129,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             salt,
             address(space),
             PROPOSE_SELECTOR,
-            abi.encode(author, proposalMetadataURI, executionStrategy, userVotingStrategies)
+            abi.encode(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies))
         );
 
         vm.expectRevert(SaltAlreadyUsed.selector);
@@ -152,7 +152,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             address(author),
             proposalMetadataURI,
             executionStrategy,
-            userVotingStrategies,
+            abi.encode(userVotingStrategies),
             salt
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(AUTHOR_KEY, digest);

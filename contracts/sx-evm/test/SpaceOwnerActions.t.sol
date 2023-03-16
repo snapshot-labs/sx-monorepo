@@ -7,6 +7,7 @@ import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 
 contract SpaceOwnerActionsTest is SpaceTest {
+    error InvalidStrategyIndex(uint256 index);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     // ------- Transfer Ownership -------
@@ -146,22 +147,28 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.setMetadataURI(newMetadataURI);
     }
 
-    // ------- ProposalThreshold ----
+    // ------- ProposalValidationStrategy ----
 
-    function testSetProposalThreshold() public {
-        uint256 nextThreshold = 2;
+    function testSetProposalValidationStrategy() public {
+        Strategy memory nextProposalValidationStrategy = Strategy(address(42), new bytes(0));
         vm.expectEmit(true, true, true, true);
-        emit ProposalThresholdUpdated(nextThreshold);
+        emit ProposalValidationStrategyUpdated(nextProposalValidationStrategy);
         vm.prank(owner);
-        space.setProposalThreshold(nextThreshold);
+        space.setProposalValidationStrategy(nextProposalValidationStrategy);
 
-        assertEq(space.proposalThreshold(), nextThreshold, "Proposal Threshold did not get updated");
+        Strategy memory newStrat = Strategy(address(42), new bytes(0));
+        assertEq(
+            newStrat.addy,
+            nextProposalValidationStrategy.addy,
+            "Proposal Validation Strategy did not get updated"
+        );
     }
 
-    function testSetProposalThresholdUnauthorized() public {
+    function testSetProposalValidationStrategyUnauthorized() public {
+        Strategy memory nextStrat = Strategy(address(42), new bytes(0));
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.setProposalThreshold(2);
+        space.setProposalValidationStrategy(nextStrat);
     }
 
     // ------- VotingDelay ----
@@ -205,20 +212,27 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.prank(owner);
         space.addVotingStrategies(newVotingStrategies, votingStrategyMetadataURIs);
 
-        // Try creating a proposal using these new strategies.
-        _createProposal(author, proposalMetadataURI, executionStrategy, newUserVotingStrategies);
+        // Create a proposal using the default proposal validation strategy
+        uint256 proposalId1 = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        // Cast a vote with the new voting strategy.
+        _vote(author, proposalId1, Choice.For, newUserVotingStrategies, voteMetadataURI);
 
         // Remove the voting strategies
         vm.expectEmit(true, true, true, true);
         emit VotingStrategiesRemoved(newIndices);
         space.removeVotingStrategies(newIndices);
 
-        // Try creating a proposal using these strategies that were just removed.
-        vm.expectRevert(abi.encodeWithSelector(InvalidVotingStrategyIndex.selector, 1));
-        _createProposal(author, proposalMetadataURI, executionStrategy, newUserVotingStrategies);
+        // Create a proposal using the default proposal validation strategy
+        uint256 proposalId2 = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
 
-        // Try creating a proposal with the previous voting strategy that was never removed.
-        _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        // Try voting on a proposal using the strategies that were just removed.
+        vm.expectRevert(abi.encodeWithSelector(InvalidStrategyIndex.selector, 1));
+        _vote(author, proposalId2, Choice.For, newUserVotingStrategies, voteMetadataURI);
+
+        // Create a proposal with the default proposal validation strategy
+        uint256 proposalId3 = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        // Cast a vote with the strategy that was never removed
+        _vote(author, proposalId3, Choice.For, userVotingStrategies, voteMetadataURI);
     }
 
     function testAddVotingStrategiesUnauthorized() public {
@@ -248,7 +262,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.addAuthenticators(newAuths);
 
         // The new authenticator is this contract so we can call `propose` directly.
-        space.propose(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        space.propose(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies));
 
         vm.expectEmit(true, true, true, true);
         emit AuthenticatorsRemoved(newAuths);
@@ -256,7 +270,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
         // Ensure we can't propose with this authenticator anymore
         vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector, address(this)));
-        space.propose(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        space.propose(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies));
     }
 
     function testAddAuthenticatorsUnauthorized() public {

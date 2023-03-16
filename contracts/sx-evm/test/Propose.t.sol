@@ -4,8 +4,12 @@ pragma solidity ^0.8.18;
 import { SpaceTest } from "./utils/Space.t.sol";
 import { FinalizationStatus, IndexedStrategy, Proposal, Strategy } from "../src/types.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
+import { StupidProposalValidationStrategy } from "./mocks/StupidProposalValidation.sol";
 
 contract ProposeTest is SpaceTest {
+    error DuplicateFound(uint8 index);
+    error InvalidStrategyIndex(uint256 index);
+
     function testPropose() public {
         uint256 proposalId = space.nextProposalId();
 
@@ -43,7 +47,7 @@ contract ProposeTest is SpaceTest {
     function testProposeInvalidAuth() public {
         //  Using this contract as an authenticator, which is not whitelisted
         vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector, address(this)));
-        space.propose(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        space.propose(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies));
     }
 
     function testProposeInvalidExecutionStrategy() public {
@@ -63,6 +67,15 @@ contract ProposeTest is SpaceTest {
         // out of bounds revert
         vm.expectRevert();
         _createProposal(author, proposalMetadataURI, executionStrategy, invalidUsedStrategies);
+    }
+
+    function testProposeRefusedValidation() public {
+        StupidProposalValidationStrategy stupidProposalValidationStrategy = new StupidProposalValidationStrategy();
+        Strategy memory validationStrategy = Strategy(address(stupidProposalValidationStrategy), new bytes(0));
+        space.setProposalValidationStrategy(validationStrategy);
+
+        vm.expectRevert(FailedToPassProposalValidation.selector);
+        _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
     }
 
     function testProposeDuplicateUserVotingStrategy() public {

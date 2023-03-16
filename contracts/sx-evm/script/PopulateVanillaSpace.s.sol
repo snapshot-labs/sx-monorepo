@@ -9,8 +9,7 @@ import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExe
 import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 
 contract PopulateVanillaSpace is Script {
-    bytes4 internal constant PROPOSE_SELECTOR =
-        bytes4(keccak256("propose(address,string,(address,bytes),(uint8,bytes)[])"));
+    bytes4 internal constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),bytes)"));
     bytes4 internal constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
 
     Space internal space;

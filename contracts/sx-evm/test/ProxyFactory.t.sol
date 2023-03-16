@@ -28,6 +28,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
     uint32 public minVotingDuration;
     uint32 public maxVotingDuration;
     uint256 public proposalThreshold;
+    Strategy public proposalValidationStrategy;
     uint32 public quorum;
     string public metadataURI = "SX-EVM";
     string[] public votingStrategyMetadataURIs;
@@ -149,7 +150,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
             votingDelay,
             minVotingDuration,
             maxVotingDuration,
-            proposalThreshold,
+            proposalValidationStrategy,
             metadataURI,
             votingStrategies,
             votingStrategyMetadataURIs,

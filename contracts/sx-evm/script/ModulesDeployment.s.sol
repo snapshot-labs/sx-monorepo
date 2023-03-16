@@ -6,6 +6,9 @@ import { Space } from "../src/Space.sol";
 import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
+import {
+    VotingPowerProposalValidationStrategy
+} from "../src/proposal-validation-strategies/VotingPowerProposalValidationStrategy.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
 import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
@@ -17,6 +20,7 @@ contract ModulesDeployment is Script {
     CompVotingStrategy public compVotingStrategy;
     WhitelistStrategy public whitelistStrategy;
     VanillaAuthenticator public vanillaAuthenticator;
+    VotingPowerProposalValidationStrategy public votingPowerProposalValidationContract;
     EthSigAuthenticator public ethSigAuthenticator;
     EthTxAuthenticator public ethTxAuthenticator;
     VanillaExecutionStrategy public vanillaExecutionStrategy;
@@ -32,6 +36,7 @@ contract ModulesDeployment is Script {
         ethSigAuthenticator = new EthSigAuthenticator("snapshot-x", "0.1.0");
         ethTxAuthenticator = new EthTxAuthenticator();
         vanillaExecutionStrategy = new VanillaExecutionStrategy();
+        votingPowerProposalValidationContract = new VotingPowerProposalValidationStrategy();
         spaceFactory = new ProxyFactory();
         vm.stopBroadcast();
     }

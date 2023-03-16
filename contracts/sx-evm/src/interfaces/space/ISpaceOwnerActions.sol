@@ -13,7 +13,7 @@ interface ISpaceOwnerActions {
 
     function setMaxVotingDuration(uint32 duration) external;
 
-    function setProposalThreshold(uint256 threshold) external;
+    function setProposalValidationStrategy(Strategy calldata proposalValidationStrategy) external;
 
     function setMetadataURI(string calldata metadataURI) external;
 

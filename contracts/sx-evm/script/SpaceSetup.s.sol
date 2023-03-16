@@ -21,6 +21,8 @@ contract SpaceSetup is Script {
     address public ethSigAuthenticator = address(0x328c6F186639f1981Dc25eD4517E8Ed2aDd85569);
     address public ethTxAuthenticator = address(0x37315Ce75920B653f0f13734c709e199876455C9);
     address public vanillaExecutionStrategy = address(0xb1001Fdf62C020761039A750b27e73C512fDaa5E);
+    address public votingPowerProposalValidationContract = address(42); // TODO: update
+    Strategy public votingPowerProposalValidationStrategy;
     address public owner = address(0x2842c82E20ab600F443646e1BC8550B44a513D82);
     uint32 public votingDelay;
     uint32 public minVotingDuration;
@@ -49,6 +51,10 @@ contract SpaceSetup is Script {
         maxVotingDuration = 1000;
         proposalThreshold = 1;
         quorum = 1;
+        votingPowerProposalValidationStrategy = Strategy(
+            votingPowerProposalValidationContract,
+            abi.encode(proposalThreshold, votingStrategies)
+        );
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
         spaceFactory.deployProxy(
@@ -59,7 +65,7 @@ contract SpaceSetup is Script {
                 votingDelay,
                 minVotingDuration,
                 maxVotingDuration,
-                proposalThreshold,
+                votingPowerProposalValidationStrategy,
                 metadataURI,
                 votingStrategies,
                 votingStrategyMetadata,
