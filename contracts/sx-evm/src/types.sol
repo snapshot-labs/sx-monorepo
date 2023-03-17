@@ -62,4 +62,6 @@ struct MetaTransaction {
     uint256 value;
     bytes data;
     Enum.Operation operation;
+    // We require a salt so that the struct can always be unique and we can use its hash as a unique identifier.
+    uint256 salt;
 }

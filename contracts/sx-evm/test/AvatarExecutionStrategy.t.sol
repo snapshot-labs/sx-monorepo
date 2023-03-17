@@ -44,7 +44,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
 
     function testExecution() public {
         MetaTransaction[] memory transactions = new MetaTransaction[](1);
-        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
@@ -66,7 +66,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
     function testInvalidTx() public {
         // This transaction will fail because the avatar does not have enough funds
         MetaTransaction[] memory transactions = new MetaTransaction[](1);
-        transactions[0] = MetaTransaction(address(owner), 1001, "", Enum.Operation.Call);
+        transactions[0] = MetaTransaction(address(owner), 1001, "", Enum.Operation.Call, 0);
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
@@ -82,13 +82,14 @@ contract AvatarExecutionStrategyTest is SpaceTest {
 
     function testMultiTx() public {
         MetaTransaction[] memory transactions = new MetaTransaction[](2);
-        transactions[0] = MetaTransaction(address(recipient), 1, "", Enum.Operation.Call);
+        transactions[0] = MetaTransaction(address(recipient), 1, "", Enum.Operation.Call, 0);
         // Creating a transaction that will enable a new dummy module on the avatar
         transactions[1] = MetaTransaction(
             address(avatar),
             0,
             abi.encodeWithSignature("enableModule(address)", address(0xbeef)),
-            Enum.Operation.Call
+            Enum.Operation.Call,
+            0
         );
         uint256 proposalId = _createProposal(
             author,
@@ -112,10 +113,11 @@ contract AvatarExecutionStrategyTest is SpaceTest {
             address(avatar),
             0,
             abi.encodeWithSignature("enableModule(address)", address(0xbeef)),
-            Enum.Operation.Call
+            Enum.Operation.Call,
+            0
         );
         // invalid tx
-        transactions[1] = MetaTransaction(address(owner), 1001, "", Enum.Operation.Call);
+        transactions[1] = MetaTransaction(address(owner), 1001, "", Enum.Operation.Call, 0);
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
@@ -208,7 +210,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
 
         // Check that proposals from the disabled space can't be executed
         MetaTransaction[] memory transactions = new MetaTransaction[](1);
-        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,

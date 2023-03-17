@@ -14,7 +14,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
     CompVotingStrategy internal compVotingStrategy;
     CompToken internal compToken;
 
-    uint256 constant TOKEN_AMOUNT = 10000;
+    uint256 internal constant TOKEN_AMOUNT = 10000;
 
     string internal constant NAME = "snapshot-x";
     string internal constant VERSION = "1";
