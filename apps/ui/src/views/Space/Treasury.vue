@@ -160,8 +160,8 @@ onMounted(() => {
             There are no NFTs in treasury.
           </div>
           <UiLoading v-if="nftsLoading && !nftsLoaded" class="px-4 py-3 block" />
-          <div class="grid gap-4 grid-cols-3 md:grid-cols-4 lg:grid-cols-6 p-4">
-            <div v-for="(nft, i) in nfts" :key="i" class="block">
+          <div class="flex flex-row flex-wrap gap-4 p-4">
+            <div v-for="(nft, i) in nfts" :key="i" class="block max-w-[120px]">
               <NftPreview :item="nft" class="w-full" />
               <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
             </div>
