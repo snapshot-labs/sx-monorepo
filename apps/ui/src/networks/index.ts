@@ -7,6 +7,8 @@ const evmNetwork = createEvmNetwork('gor');
 
 export const enabledNetworks: NetworkID[] = ['gor', 'sn-tn2'];
 
+export const evmNetworks: NetworkID[] = ['gor'];
+
 export const getNetwork = (id: NetworkID) => {
   if (id === 'gor') return evmNetwork;
   if (id === 'sn-tn2') return starknetNetwork;

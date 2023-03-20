@@ -20,7 +20,7 @@ export type SpaceSettings = {
   minVotingDuration: number;
   maxVotingDuration: number;
   proposalThreshold: string;
-  quorum: string;
+  quorum?: string;
 };
 
 export type Space = {

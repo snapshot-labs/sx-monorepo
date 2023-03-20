@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { validateForm } from '@/helpers/validation';
+import { evmNetworks } from '@/networks';
+import type { NetworkID } from '@/types';
 
 const props = defineProps<{
   form: any;
+  selectedNetworkId: NetworkID;
 }>();
 
 const emit = defineEmits<{
@@ -13,13 +16,13 @@ const emit = defineEmits<{
 const definition = {
   type: 'object',
   title: 'SpaceSettings',
-  additionalProperties: false,
+  additionalProperties: true,
   required: [
     'votingDelay',
     'minVotingDuration',
     'maxVotingDuration',
     'proposalThreshold',
-    'quorum'
+    ...(!evmNetworks.includes(props.selectedNetworkId) ? ['quorum'] : [])
   ],
   properties: {
     votingDelay: {
@@ -43,12 +46,14 @@ const definition = {
       title: 'Proposal threshold',
       examples: ['1']
     },
-    quorum: {
-      type: 'string',
-      format: 'uint256',
-      title: 'Quorum',
-      examples: ['1']
-    }
+    ...(!evmNetworks.includes(props.selectedNetworkId) && {
+      quorum: {
+        type: 'string',
+        format: 'uint256',
+        title: 'Quorum',
+        examples: ['1']
+      }
+    })
   }
 };
 

@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork } from '@/networks';
+import { getNetwork, evmNetworks } from '@/networks';
 import { useUiStore } from '@/stores/ui';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useModal } from '@/composables/useModal';
@@ -82,7 +82,9 @@ export function useActions() {
       minVotingDuration: settings.minVotingDuration,
       maxVotingDuration: settings.maxVotingDuration,
       proposalThreshold: BigInt(settings.proposalThreshold),
-      quorum: BigInt(settings.quorum),
+      ...(!evmNetworks.includes(networkId) && settings.quorum
+        ? { quorum: BigInt(settings.quorum) }
+        : {}),
       authenticators,
       votingStrategies,
       executionStrategies,
