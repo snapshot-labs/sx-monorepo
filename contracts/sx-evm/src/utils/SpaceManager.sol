@@ -20,7 +20,7 @@ contract SpaceManager is OwnableUpgradeable {
     /// @notice Initialize the contract with a list of spaces. Called only once.
     /// @param _spaces List of spaces.
     // solhint-disable-next-line func-name-mixedcase
-    function __SpaceManager_init(address[] memory _spaces) internal initializer {
+    function __SpaceManager_init(address[] memory _spaces) internal onlyInitializing {
         for (uint256 i = 0; i < _spaces.length; i++) {
             spaces[_spaces[i]] = true;
         }

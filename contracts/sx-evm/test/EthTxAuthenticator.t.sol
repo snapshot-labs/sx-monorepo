@@ -5,7 +5,8 @@ pragma solidity ^0.8.18;
 import { SpaceTest } from "./utils/Space.t.sol";
 import { AuthenticatorTest } from "./utils/Authenticator.t.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
-import { Choice, IndexedStrategy } from "../src/types.sol";
+import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
+import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 
 contract EthTxAuthenticatorTest is SpaceTest {
     error InvalidFunctionSelector();
@@ -13,7 +14,8 @@ contract EthTxAuthenticatorTest is SpaceTest {
 
     EthTxAuthenticator internal ethTxAuth;
     string internal newMetadataURI = "Test42";
-    IndexedStrategy internal newStrategy = IndexedStrategy(0, new bytes(0));
+
+    Strategy internal newStrategy;
 
     function setUp() public virtual override {
         super.setUp();
@@ -23,6 +25,8 @@ contract EthTxAuthenticatorTest is SpaceTest {
         address[] memory newAuths = new address[](1);
         newAuths[0] = address(ethTxAuth);
         space.addAuthenticators(newAuths);
+
+        newStrategy = Strategy(address(new VanillaExecutionStrategy(quorum)), new bytes(0));
     }
 
     function testAuthenticateTxPropose() public {

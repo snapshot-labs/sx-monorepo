@@ -20,10 +20,10 @@ import { Choice, Strategy, IndexedStrategy } from "../../src/types.sol";
 
 // solhint-disable-next-line max-states-count
 abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {
-    bytes4 internal constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(uint8,bytes),bytes)"));
+    bytes4 internal constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),bytes)"));
     bytes4 internal constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
     bytes4 internal constant UPDATE_PROPOSAL_SELECTOR =
-        bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
+        bytes4(keccak256("updateProposal(address,uint256,(address,bytes),string)"));
 
     Space internal masterSpace;
     Space internal space;
@@ -60,7 +60,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
 
     // Default voting and execution strategy setups
     IndexedStrategy[] public userVotingStrategies;
-    IndexedStrategy public executionStrategy;
+    Strategy public executionStrategy;
 
     // Dummy metadata URIs
     string public spaceMetadataURI = "SOC Test Space";
@@ -71,21 +71,22 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     function setUp() public virtual {
         masterSpace = new Space();
 
+        quorum = 1;
+
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
-        vanillaExecutionStrategy = new VanillaExecutionStrategy();
+        vanillaExecutionStrategy = new VanillaExecutionStrategy(quorum);
         votingPowerProposalValidationContract = new VotingPowerProposalValidationStrategy();
 
         votingDelay = 0;
         minVotingDuration = 0;
         maxVotingDuration = 1000;
         proposalThreshold = 1;
-        quorum = 1;
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
         authenticators.push(address(vanillaAuthenticator));
         executionStrategies.push(Strategy(address(vanillaExecutionStrategy), abi.encode(uint256(quorum))));
         userVotingStrategies.push(IndexedStrategy(0, new bytes(0)));
-        executionStrategy = IndexedStrategy(0, new bytes(0));
+        executionStrategy = Strategy(address(vanillaExecutionStrategy), new bytes(0));
         votingPowerProposalValidationStrategy = Strategy(
             address(votingPowerProposalValidationContract),
             abi.encode(proposalThreshold, votingStrategies)
@@ -116,7 +117,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     function _createProposal(
         address _author,
         string memory _metadataURI,
-        IndexedStrategy memory _executionStrategy,
+        Strategy memory _executionStrategy,
         IndexedStrategy[] memory _userVotingStrategies
     ) internal returns (uint256) {
         vanillaAuthenticator.authenticate(

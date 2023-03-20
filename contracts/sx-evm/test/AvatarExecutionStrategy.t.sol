@@ -8,7 +8,6 @@ import { AvatarExecutionStrategy } from "../src/execution-strategies/AvatarExecu
 import { Choice, Enum, IndexedStrategy, MetaTransaction, ProposalStatus, Strategy } from "../src/types.sol";
 
 contract AvatarExecutionStrategyTest is SpaceTest {
-    error TransactionsFailed();
     error InvalidSpace();
 
     event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces);
@@ -30,16 +29,8 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         // Deploy and activate the execution strategy on the avatar
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
-        avatarExecutionStrategy = new AvatarExecutionStrategy(owner, address(avatar), spaces);
+        avatarExecutionStrategy = new AvatarExecutionStrategy(owner, address(avatar), spaces, quorum);
         avatar.enableModule(address(avatarExecutionStrategy));
-
-        // Activate the execution strategy on the space
-        Strategy[] memory executionStrategies = new Strategy[](1);
-        executionStrategies[0] = Strategy(address(avatarExecutionStrategy), abi.encode(uint256(quorum)));
-        string[] memory executionStrategyMetadataURIs = new string[](1);
-        executionStrategyMetadataURIs[0] = "bafkreihnggomfnqri7y2dzolhebfsyon36bcbl3taehnabr35pd5zddwyu";
-        // This strategy will reside at index 1 in the space's execution strategies array
-        space.addExecutionStrategies(executionStrategies, executionStrategyMetadataURIs);
     }
 
     function testExecution() public {
@@ -48,7 +39,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
-            IndexedStrategy(1, abi.encode(transactions)),
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
@@ -70,7 +61,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
-            IndexedStrategy(1, abi.encode(transactions)),
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
@@ -94,7 +85,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
-            IndexedStrategy(1, abi.encode(transactions)),
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
@@ -121,7 +112,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
-            IndexedStrategy(1, abi.encode(transactions)),
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
@@ -214,7 +205,7 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         uint256 proposalId = _createProposal(
             author,
             proposalMetadataURI,
-            IndexedStrategy(1, abi.encode(transactions)),
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
             userVotingStrategies
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);

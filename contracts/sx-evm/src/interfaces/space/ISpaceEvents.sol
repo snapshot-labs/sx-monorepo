@@ -14,9 +14,7 @@ interface ISpaceEvents {
         string metadataURI,
         Strategy[] votingStrategies,
         string[] votingStrategyMetadataURIs,
-        address[] authenticators,
-        Strategy[] executionStrategies,
-        string[] executionStrategyMetadataURIs
+        address[] authenticators
     );
     event ProposalCreated(uint256 nextProposalId, address author, Proposal proposal, string metadataUri, bytes payload);
     event VoteCast(uint256 proposalId, address voterAddress, Choice choice, uint256 votingPower);
@@ -41,5 +39,5 @@ interface ISpaceEvents {
     event ProposalValidationStrategyUpdated(Strategy newProposalValidationStrategy);
     event QuorumUpdated(uint256 newQuorum);
     event VotingDelayUpdated(uint256 newVotingDelay);
-    event ProposalUpdated(uint256 proposalId, IndexedStrategy newExecutionStrategy, string newMetadataURI);
+    event ProposalUpdated(uint256 proposalId, Strategy newExecutionStrategy, string newMetadataURI);
 }

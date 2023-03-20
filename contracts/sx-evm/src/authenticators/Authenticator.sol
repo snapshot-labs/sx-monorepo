@@ -3,10 +3,10 @@
 pragma solidity ^0.8.18;
 
 abstract contract Authenticator {
-    bytes4 internal constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(uint8,bytes),bytes)"));
+    bytes4 internal constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),bytes)"));
     bytes4 internal constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
     bytes4 internal constant UPDATE_PROPOSAL_SELECTOR =
-        bytes4(keccak256("updateProposal(address,uint256,(uint8,bytes),string)"));
+        bytes4(keccak256("updateProposal(address,uint256,(address,bytes),string)"));
 
     function _call(address target, bytes4 functionSelector, bytes memory data) internal {
         // solhint-disable-next-line avoid-low-level-calls

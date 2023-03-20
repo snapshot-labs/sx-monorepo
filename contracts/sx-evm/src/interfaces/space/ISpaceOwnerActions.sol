@@ -27,11 +27,4 @@ interface ISpaceOwnerActions {
     function addAuthenticators(address[] calldata _authenticators) external;
 
     function removeAuthenticators(address[] calldata _authenticators) external;
-
-    function addExecutionStrategies(
-        Strategy[] calldata _executionStrategies,
-        string[] calldata _executionStrategyMetadataURIs
-    ) external;
-
-    function removeExecutionStrategies(uint8[] calldata _executionStrategies) external;
 }

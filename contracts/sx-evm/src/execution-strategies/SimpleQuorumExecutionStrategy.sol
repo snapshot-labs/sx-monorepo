@@ -4,10 +4,15 @@ pragma solidity ^0.8.18;
 
 import { IExecutionStrategy } from "../interfaces/IExecutionStrategy.sol";
 import { FinalizationStatus, Proposal, ProposalStatus } from "../types.sol";
+import { SpaceManager } from "../utils/SpaceManager.sol";
 
-abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
-    /// @notice Returned if transaction execution fails.
-    error TransactionsFailed();
+abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceManager {
+    uint256 public quorum;
+
+    // solhint-disable-next-line func-name-mixedcase
+    function __SimpleQuorumExecutionStrategy_init(uint256 _quorum) internal onlyInitializing {
+        quorum = _quorum;
+    }
 
     function execute(
         Proposal memory proposal,
@@ -23,8 +28,6 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy {
         uint256 votesAgainst,
         uint256 votesAbstain
     ) public view override returns (ProposalStatus) {
-        // Decode the quorum parameter from the execution strategy's params
-        uint256 quorum = abi.decode(proposal.executionStrategy.params, (uint256));
         bool accepted = _quorumReached(quorum, votesFor, votesAgainst, votesAbstain) &&
             _supported(votesFor, votesAgainst);
         if (proposal.finalizationStatus == FinalizationStatus.Cancelled) {

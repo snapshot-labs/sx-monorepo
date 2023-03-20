@@ -8,6 +8,10 @@ import { Proposal, ProposalStatus } from "../types.sol";
 contract VanillaExecutionStrategy is SimpleQuorumExecutionStrategy {
     uint256 internal numExecuted;
 
+    constructor(uint256 _quorum) {
+        quorum = _quorum;
+    }
+
     function execute(
         Proposal memory proposal,
         uint256 votesFor,

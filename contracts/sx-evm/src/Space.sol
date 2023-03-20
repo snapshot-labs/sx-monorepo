@@ -39,9 +39,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     // The proposal validation contract.
     Strategy public proposalValidationStrategy;
 
-    // Array of available execution strategies that proposal authors can use to determine how to execute a proposal.
-    Strategy[] private executionStrategies;
-
     // Mapping of allowed authenticators.
     mapping(address auth => bool allowed) private authenticators;
     // Mapping of all `Proposal`s of this space (past and present).
@@ -66,9 +63,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         string memory _metadataURI,
         Strategy[] memory _votingStrategies,
         string[] memory _votingStrategyMetadataURIs,
-        address[] memory _authenticators,
-        Strategy[] memory _executionStrategies,
-        string[] memory _executionStrategyMetadataURIs
+        address[] memory _authenticators
     ) public initializer {
         __Ownable_init();
         transferOwnership(_owner);
@@ -78,7 +73,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         _setVotingDelay(_votingDelay);
         _addVotingStrategies(_votingStrategies);
         _addAuthenticators(_authenticators);
-        _addExecutionStrategies(_executionStrategies);
 
         nextProposalId = 1;
 
@@ -92,9 +86,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
             _metadataURI,
             _votingStrategies,
             _votingStrategyMetadataURIs,
-            _authenticators,
-            _executionStrategies,
-            _executionStrategyMetadataURIs
+            _authenticators
         );
     }
 
@@ -183,45 +175,10 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     }
 
     /**
-     * @notice  Internal function to add execution strategies.
-     * @param   _executionStrategies  Array of execution strategies to add.
-     */
-    function _addExecutionStrategies(Strategy[] memory _executionStrategies) internal {
-        if (_executionStrategies.length == 0) revert EmptyArray();
-        for (uint256 i = 0; i < _executionStrategies.length; i++) {
-            // A strategy set to 0 is used to indicate that the strategy is no longer active,
-            // so we need to prevent the user from adding a null invalid strategy address.
-            if (_executionStrategies[i].addy == address(0)) revert InvalidStrategyAddress();
-            executionStrategies.push(_executionStrategies[i]);
-        }
-    }
-
-    /**
-     * @notice  Internal function to remove execution strategies.
-     * @param   _executionStrategyIndices  Indices of the strategies to remove
-     */
-    function _removeExecutionStrategies(uint8[] memory _executionStrategyIndices) internal {
-        if (_executionStrategyIndices.length == 0) revert EmptyArray();
-        for (uint8 i = 0; i < _executionStrategyIndices.length; i++) {
-            executionStrategies[_executionStrategyIndices[i]] = Strategy(address(0), new bytes(0));
-        }
-    }
-
-    /**
      * @notice  Internal function to ensure `msg.sender` is in the list of allowed authenticators.
      */
     function _assertValidAuthenticator() internal view {
         if (authenticators[msg.sender] != true) revert AuthenticatorNotWhitelisted(msg.sender);
-    }
-
-    /**
-     * @notice  Internal function to ensure `executionStrategy` is in the array of whitelisted execution strategies.
-     * @param   executionStrategyIndex The execution strategy to check.
-     */
-    function _assertValidExecutionStrategy(uint8 executionStrategyIndex) internal view {
-        if (executionStrategyIndex >= executionStrategies.length)
-            revert InvalidExecutionStrategyIndex(executionStrategyIndex);
-        if (executionStrategies[executionStrategyIndex].addy == address(0)) revert ExecutionStrategyNotWhitelisted();
     }
 
     /**
@@ -288,19 +245,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         emit AuthenticatorsRemoved(_authenticators);
     }
 
-    function addExecutionStrategies(
-        Strategy[] calldata _executionStrategies,
-        string[] memory executionStrategyMetadataURIs
-    ) external override onlyOwner {
-        _addExecutionStrategies(_executionStrategies);
-        emit ExecutionStrategiesAdded(_executionStrategies, executionStrategyMetadataURIs);
-    }
-
-    function removeExecutionStrategies(uint8[] calldata _executionStrategies) external override onlyOwner {
-        _removeExecutionStrategies(_executionStrategies);
-        emit ExecutionStrategiesRemoved(_executionStrategies);
-    }
-
     // ------------------------------------
     // |                                  |
     // |             GETTERS              |
@@ -317,7 +261,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         Proposal memory proposal = proposalRegistry[proposalId];
         _assertProposalExists(proposal);
         return
-            IExecutionStrategy(proposal.executionStrategy.addy).getProposalStatus(
+            proposal.executionStrategy.getProposalStatus(
                 proposal,
                 votePower[proposalId][Choice.For],
                 votePower[proposalId][Choice.Against],
@@ -348,11 +292,10 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     function propose(
         address author,
         string calldata metadataURI,
-        IndexedStrategy calldata executionStrategy,
+        Strategy calldata executionStrategy,
         bytes calldata userParams
     ) external override {
         _assertValidAuthenticator();
-        _assertValidExecutionStrategy(executionStrategy.index);
 
         // Casting to `uint32` is fine because this gives us until year ~2106.
         uint32 snapshotTimestamp = uint32(block.timestamp);
@@ -378,7 +321,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
             minEndTimestamp,
             maxEndTimestamp,
             executionPayloadHash,
-            executionStrategies[executionStrategy.index],
+            IExecutionStrategy(executionStrategy.addy),
             author,
             FinalizationStatus.Pending,
             votingStrategies
@@ -442,7 +385,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         // We add reentrancy protection here to prevent this function being re-entered by the execution strategy.
         // We cannot use the Checks-Effects-Interactions pattern because the proposal status is checked inside
         // the execution strategy (so essentially forced to do Checks-Interactions-Effects).
-        IExecutionStrategy(proposal.executionStrategy.addy).execute(
+        proposal.executionStrategy.execute(
             proposal,
             votePower[proposalId][Choice.For],
             votePower[proposalId][Choice.Against],
@@ -477,18 +420,17 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     function updateProposal(
         address author,
         uint256 proposalId,
-        IndexedStrategy calldata executionStrategy,
+        Strategy calldata executionStrategy,
         string calldata metadataURI
     ) external override {
         _assertValidAuthenticator();
-        _assertValidExecutionStrategy(executionStrategy.index);
 
         Proposal storage proposal = proposalRegistry[proposalId];
         if (author != proposal.author) revert InvalidCaller();
         if (block.timestamp >= proposal.startTimestamp) revert VotingDelayHasPassed();
 
         proposal.executionPayloadHash = keccak256(executionStrategy.params);
-        proposal.executionStrategy = executionStrategies[executionStrategy.index];
+        proposal.executionStrategy = IExecutionStrategy(executionStrategy.addy);
 
         emit ProposalUpdated(proposalId, executionStrategy, metadataURI);
     }

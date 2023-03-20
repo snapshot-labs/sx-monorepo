@@ -17,9 +17,9 @@ abstract contract SigUtils {
 
     bytes32 private constant PROPOSE_TYPEHASH =
         keccak256(
-            "Propose(address space,address author,string metadataURI,IndexedStrategy executionStrategy,"
+            "Propose(address space,address author,string metadataURI,Strategy executionStrategy,"
             "bytes userParams,uint256 salt)"
-            "IndexedStrategy(uint8 index,bytes params)"
+            "Strategy(address addy,bytes params)"
         );
     bytes32 private constant VOTE_TYPEHASH =
         keccak256(
@@ -30,8 +30,8 @@ abstract contract SigUtils {
     bytes32 private constant UPDATE_PROPOSAL_TYPEHASH =
         keccak256(
             "updateProposal(address space,address author,uint256 proposalId,"
-            "IndexedStrategy executionStrategy,string metadataURI)"
-            "IndexedStrategy(uint8 index,bytes params)"
+            "Strategy executionStrategy,string metadataURI)"
+            "Strategy(address addy,bytes params)"
         );
 
     constructor(string memory _name, string memory _version) {
@@ -44,7 +44,7 @@ abstract contract SigUtils {
         address space,
         address author,
         string memory metadataURI,
-        IndexedStrategy memory executionStrategy,
+        Strategy memory executionStrategy,
         bytes memory userParams,
         uint256 salt
     ) internal view returns (bytes32) {
@@ -120,7 +120,7 @@ abstract contract SigUtils {
         address space,
         address author,
         uint256 proposalId,
-        IndexedStrategy memory executionStrategy,
+        Strategy memory executionStrategy,
         string memory metadataURI
     ) internal view returns (bytes32) {
         bytes32 digest = keccak256(

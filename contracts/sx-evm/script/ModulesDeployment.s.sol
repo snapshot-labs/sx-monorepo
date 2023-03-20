@@ -35,7 +35,8 @@ contract ModulesDeployment is Script {
         vanillaAuthenticator = new VanillaAuthenticator();
         ethSigAuthenticator = new EthSigAuthenticator("snapshot-x", "0.1.0");
         ethTxAuthenticator = new EthTxAuthenticator();
-        vanillaExecutionStrategy = new VanillaExecutionStrategy();
+        // TODO: set quorum prior to this deploy (or remove)
+        vanillaExecutionStrategy = new VanillaExecutionStrategy(1);
         votingPowerProposalValidationContract = new VotingPowerProposalValidationStrategy();
         spaceFactory = new ProxyFactory();
         vm.stopBroadcast();

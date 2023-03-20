@@ -285,60 +285,6 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.removeAuthenticators(authenticators);
     }
 
-    // ------- ExecutionStrategies ----
-
-    function testAddAndRemoveExecutionStrategies() public {
-        Strategy[] memory newExecutionStrategies = new Strategy[](1);
-        VanillaExecutionStrategy _vanilla = new VanillaExecutionStrategy();
-        newExecutionStrategies[0] = Strategy(address(_vanilla), abi.encode(uint256(quorum)));
-        string[] memory newExecutionStrategyMetadataURIs = new string[](1);
-        newExecutionStrategyMetadataURIs[0] = "bafkreihnggomfnqri7y2dzolhebfsyon36bcbl3taehnabr35pd5zddwyu";
-
-        vm.expectEmit(true, true, true, true);
-        emit ExecutionStrategiesAdded(newExecutionStrategies, newExecutionStrategyMetadataURIs);
-        // New strategy index should be `1` (`0` is used for the first one).
-        space.addExecutionStrategies(newExecutionStrategies, newExecutionStrategyMetadataURIs);
-
-        // Creating a proposal with the new execution strategy
-        uint256 proposalId = _createProposal(
-            author,
-            proposalMetadataURI,
-            IndexedStrategy(1, new bytes(0)),
-            userVotingStrategies
-        );
-
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-
-        // Ensure we can finalize
-        space.execute(proposalId, new bytes(0));
-
-        uint8[] memory newIndices = new uint8[](1);
-        newIndices[0] = 1;
-
-        // Remove this strategy
-        vm.expectEmit(true, true, true, true);
-        emit ExecutionStrategiesRemoved(newIndices);
-        space.removeExecutionStrategies(newIndices);
-
-        // Ensure we can't propose with this execution strategy anymore
-        vm.expectRevert(abi.encodeWithSelector(ExecutionStrategyNotWhitelisted.selector));
-        _createProposal(author, proposalMetadataURI, IndexedStrategy(1, new bytes(0)), userVotingStrategies);
-    }
-
-    function testAddExecutionStrategyUnauthorized() public {
-        vm.expectRevert("Ownable: caller is not the owner");
-        vm.prank(unauthorized);
-        space.addExecutionStrategies(executionStrategies, executionStrategyMetadataURIs);
-    }
-
-    function testRemoveExecutionStrategyUnauthorized() public {
-        uint8[] memory indices = new uint8[](1);
-        indices[0] = 0;
-        vm.expectRevert("Ownable: caller is not the owner");
-        vm.prank(unauthorized);
-        space.removeExecutionStrategies(indices);
-    }
-
     // ------- Upgrading a Space ----
 
     event Upgraded(address indexed implementation);

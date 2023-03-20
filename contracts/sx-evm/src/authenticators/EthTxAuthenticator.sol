@@ -39,7 +39,7 @@ contract EthTxAuthenticator is Authenticator {
      * @param   data  The data to verify
      */
     function _verifyUpdateProposal(bytes calldata data) internal view {
-        (address author, , , ) = abi.decode(data, (address, uint256, IndexedStrategy, string));
+        (address author, , , ) = abi.decode(data, (address, uint256, Strategy, string));
         if (author != msg.sender) revert InvalidMessageSender();
     }
 

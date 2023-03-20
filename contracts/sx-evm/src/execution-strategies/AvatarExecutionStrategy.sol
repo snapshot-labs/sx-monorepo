@@ -4,12 +4,11 @@ pragma solidity ^0.8.18;
 
 import { IAvatar } from "@zodiac/interfaces/IAvatar.sol";
 import { SimpleQuorumExecutionStrategy } from "./SimpleQuorumExecutionStrategy.sol";
-import { SpaceManager } from "../utils/SpaceManager.sol";
 import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
 
 /// @title Avatar Execution Strategy - An Execution strategy that executes transactions on an Avatar contract
 /// @dev An Avatar contract is any contract that implements the IAvatar interface, eg a Gnosis Safe.
-contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy {
+contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
     /// @dev Emitted each time a new Avatar Execution Strategy is deployed.
     event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces);
 
@@ -23,8 +22,9 @@ contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy 
     /// @param _owner Address of the owner of this contract.
     /// @param _target Address of the avatar that this module will pass transactions to.
     /// @param _spaces Array of whitelisted space contracts.
-    constructor(address _owner, address _target, address[] memory _spaces) {
-        bytes memory initParams = abi.encode(_owner, _target, _spaces);
+    /// @param _quorum The quorum required to execute a proposal.
+    constructor(address _owner, address _target, address[] memory _spaces, uint256 _quorum) {
+        bytes memory initParams = abi.encode(_owner, _target, _spaces, _quorum);
         setUp(initParams);
     }
 
@@ -32,13 +32,14 @@ contract AvatarExecutionStrategy is SpaceManager, SimpleQuorumExecutionStrategy 
     /// @param initParams ABI encoded parameters, in the same order as the constructor.
     /// @notice Can only be called once.
     function setUp(bytes memory initParams) public initializer {
-        (address _owner, address _target, address[] memory _spaces) = abi.decode(
+        (address _owner, address _target, address[] memory _spaces, uint256 _quorum) = abi.decode(
             initParams,
-            (address, address, address[])
+            (address, address, address[], uint256)
         );
         __Ownable_init();
         transferOwnership(_owner);
         __SpaceManager_init(_spaces);
+        __SimpleQuorumExecutionStrategy_init(_quorum);
         target = _target;
         emit AvatarExecutionStrategySetUp(_owner, _target, _spaces);
     }
