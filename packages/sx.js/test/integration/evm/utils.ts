@@ -5,14 +5,16 @@ import ProxyFactoryContract from './fixtures/ProxyFactory.json';
 import SpaceContract from './fixtures/Space.json';
 import AvatarContract from './fixtures/Avatar.json';
 import CompTokenContract from './fixtures/CompToken.json';
+import Erc20VotesTokenContract from './fixtures/Erc20VotesToken.json';
 import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
 import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
 import EthSigAuthenticatorContract from './fixtures/EthSigAuthenticator.json';
 import VanillaProposalValidationStrategyContract from './fixtures/VanillaProposalValidationStrategy.json';
 import VotingPowerProposalValidationStrategyContract from './fixtures/VotingPowerProposalValidationStrategy.json';
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
-import CompVotingStrategy from './fixtures/CompVotingStrategy.json';
-import WhitelistVotingStrategy from './fixtures/WhitelistVotingStrategy.json';
+import CompVotingStrategyContract from './fixtures/CompVotingStrategy.json';
+import OzVotesVotingStrategyContract from './fixtures/OzVotesVotingStrategy.json';
+import WhitelistVotingStrategyContract from './fixtures/WhitelistVotingStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
 import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
@@ -30,6 +32,7 @@ export type TestConfig = {
   votingPowerProposalValidationStrategy: string;
   vanillaVotingStrategy: string;
   compVotingStrategy: string;
+  ozVotesVotingStrategy: string;
   whitelistVotingStrategy: string;
   vanillaExecutionStrategy: string;
   avatarExecutionStrategy: string;
@@ -62,6 +65,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
 
   const avatar = await deployDependency(signer, AvatarContract);
   const compToken = await deployDependency(signer, CompTokenContract);
+  const erc20VotesToken = await deployDependency(signer, Erc20VotesTokenContract, 'VOTES', 'VOTES');
   const proxyFactory = await deployDependency(signer, ProxyFactoryContract);
   const masterSpace = await deployDependency(signer, SpaceContract);
   const vanillaAuthenticator = await deployDependency(signer, VanillaAuthenciatorContract);
@@ -81,8 +85,9 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     VotingPowerProposalValidationStrategyContract
   );
   const vanillaVotingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
-  const compVotingStrategy = await deployDependency(signer, CompVotingStrategy);
-  const whitelistVotingStrategy = await deployDependency(signer, WhitelistVotingStrategy);
+  const compVotingStrategy = await deployDependency(signer, CompVotingStrategyContract);
+  const ozVotesVotingStrategy = await deployDependency(signer, OzVotesVotingStrategyContract);
+  const whitelistVotingStrategy = await deployDependency(signer, WhitelistVotingStrategyContract);
   const vanillaExecutionStrategy = await deployDependency(
     signer,
     VanillaExecutionStrategyContract,
@@ -110,6 +115,14 @@ export async function setup(signer: Signer): Promise<TestConfig> {
   await compTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
   await compTokenContract.delegate(controller);
 
+  const erc20VotesTokenContract = new Contract(
+    erc20VotesToken,
+    Erc20VotesTokenContract.abi,
+    signer
+  );
+  await erc20VotesTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
+  await erc20VotesTokenContract.delegate(controller);
+
   await signer.sendTransaction({
     to: avatar,
     value: '21'
@@ -136,6 +149,9 @@ export async function setup(signer: Signer): Promise<TestConfig> {
       },
       [compVotingStrategy]: {
         type: 'comp'
+      },
+      [ozVotesVotingStrategy]: {
+        type: 'ozVotes'
       },
       [whitelistVotingStrategy]: {
         type: 'whitelist'
@@ -188,6 +204,10 @@ export async function setup(signer: Signer): Promise<TestConfig> {
               params: compToken
             },
             {
+              addy: ozVotesVotingStrategy,
+              params: erc20VotesToken
+            },
+            {
               addy: whitelistVotingStrategy,
               params: whitelistVotingStrategyParams
             }
@@ -205,6 +225,10 @@ export async function setup(signer: Signer): Promise<TestConfig> {
       {
         addy: compVotingStrategy,
         params: compToken
+      },
+      {
+        addy: ozVotesVotingStrategy,
+        params: erc20VotesToken
       },
       {
         addy: whitelistVotingStrategy,
@@ -228,6 +252,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     votingPowerProposalValidationStrategy,
     vanillaVotingStrategy,
     compVotingStrategy,
+    ozVotesVotingStrategy,
     whitelistVotingStrategy,
     vanillaExecutionStrategy,
     avatarExecutionStrategy,

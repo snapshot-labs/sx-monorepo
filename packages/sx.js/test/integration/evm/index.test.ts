@@ -188,13 +188,13 @@ describe('EthereumTx', () => {
     });
   });
 
-  describe('whitelistVotingStrategy + vanilla authenticator', () => {
+  describe('ozVotesVotingStrategy + vanilla authenticator', () => {
     it('should propose via authenticator', async () => {
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 2, address: testConfig.whitelistVotingStrategy }],
+          strategies: [{ index: 2, address: testConfig.ozVotesVotingStrategy }],
           executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -212,8 +212,47 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 2, address: testConfig.whitelistVotingStrategy }],
+          strategies: [{ index: 2, address: testConfig.ozVotesVotingStrategy }],
           proposal: 5,
+          choice: 0,
+          metadataUri: ''
+        }
+      };
+
+      const res = await ethTxClient.vote({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+  });
+
+  describe('whitelistVotingStrategy + vanilla authenticator', () => {
+    it('should propose via authenticator', async () => {
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 3, address: testConfig.whitelistVotingStrategy }],
+          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+        }
+      };
+
+      const res = await ethTxClient.propose({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+
+    it('should vote via authenticator', async () => {
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 3, address: testConfig.whitelistVotingStrategy }],
+          proposal: 6,
           choice: 0,
           metadataUri: ''
         }
@@ -271,7 +310,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          proposal: 6,
+          proposal: 7,
           choice: 1,
           metadataUri: ''
         }
@@ -294,7 +333,7 @@ describe('EthereumTx', () => {
       const res = await ethTxClient.execute({
         signer,
         space: spaceAddress,
-        proposal: 6,
+        proposal: 7,
         executionParams: executionParams[0]
       });
       expect(res.hash).toBeDefined();

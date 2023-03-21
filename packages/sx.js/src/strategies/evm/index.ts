@@ -1,5 +1,6 @@
 import createVanillaStrategy from './vanilla';
 import createCompStrategy from './comp';
+import createOzVotesStrategy from './ozVotes';
 import createWhitelistStrategy from './whitelist';
 import type { Propose, Vote, StrategyConfig, Strategy } from '../../clients/evm/types';
 import type { EvmNetworkConfig } from '../../types';
@@ -14,6 +15,10 @@ export function getStrategy(address: string, networkConfig: EvmNetworkConfig): S
 
   if (strategy.type === 'comp') {
     return createCompStrategy();
+  }
+
+  if (strategy.type === 'ozVotes') {
+    return createOzVotesStrategy();
   }
 
   if (strategy.type === 'whitelist') {

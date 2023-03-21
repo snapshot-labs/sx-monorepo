@@ -18,6 +18,10 @@ export type CompStrategyConfig = {
   type: 'comp';
 };
 
+export type OzVotesStrategyConfig = {
+  type: 'ozVotes';
+};
+
 export type WhitelistStrategyConfig = {
   type: 'whitelist';
 };
@@ -64,6 +68,7 @@ export type NetworkConfig = {
     [key: string]:
       | VanillaStrategyConfig
       | CompStrategyConfig
+      | OzVotesStrategyConfig
       | WhitelistStrategyConfig
       | SingleSlotProofStrategyConfig
       | undefined;
