@@ -1,4 +1,5 @@
 import randomBytes from 'randombytes';
+import { AbiCoder } from '@ethersproject/abi';
 import { SplitUint256 } from '../../../utils/split-uint256';
 import { bytesToHex } from '../../../utils/bytes';
 import { getStrategiesParams } from '../../../strategies/evm';
@@ -13,15 +14,16 @@ import type {
   EIP712ProposeMessage,
   EIP712VoteMessage
 } from '../types';
-import type { NetworkConfig, ClientOpts } from '../../../types';
+import type { EvmNetworkConfig } from '../../../types';
 
-type EthereumSigClientOpts = Pick<ClientOpts, 'networkConfig'> & {
+type EthereumSigClientOpts = {
+  networkConfig: EvmNetworkConfig;
   manaUrl?: string;
 };
 
 export class EthereumSig {
   manaUrl: string;
-  networkConfig: NetworkConfig;
+  networkConfig: EvmNetworkConfig;
 
   constructor(opts?: EthereumSigClientOpts) {
     this.networkConfig = opts?.networkConfig || evmGoerli;
@@ -95,18 +97,21 @@ export class EthereumSig {
       this.networkConfig
     );
 
+    const abiCoder = new AbiCoder();
     const message: EIP712ProposeMessage = {
       space: data.space,
       author,
-      metadataUri: data.metadataUri,
-      executionStrategy: {
-        index: data.executor.index,
-        params: data.executionParams
-      },
-      userVotingStrategies: data.strategies.map((strategyConfig, i) => ({
-        index: strategyConfig.index,
-        params: strategiesParams[i]
-      })),
+      metadataURI: data.metadataUri,
+      executionStrategy: data.executionStrategy,
+      userParams: abiCoder.encode(
+        ['tuple(int8 index, bytes params)[]'],
+        [
+          data.strategies.map((strategyConfig, i) => ({
+            index: strategyConfig.index,
+            params: strategiesParams[i]
+          }))
+        ]
+      ),
       salt: this.generateSalt()
     };
 
@@ -144,7 +149,7 @@ export class EthereumSig {
         index: strategyConfig.index,
         params: strategiesParams[i]
       })),
-      voteMetadataUri: data.metadataUri
+      voteMetadataURI: data.metadataUri
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, voteTypes);

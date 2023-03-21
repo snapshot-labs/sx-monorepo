@@ -4,10 +4,9 @@ exports[`EthereumSig should create propose envelope 1`] = `
 {
   "data": {
     "authenticator": "0x277f388b77cd36fff1c0e976c49a7c54413a449a",
-    "executionParams": "0x00",
-    "executor": {
-      "address": "0x6241b5c89350bb3c465179706cf26050ea32444f",
-      "index": 0,
+    "executionStrategy": {
+      "addy": "0x6241b5c89350bb3c465179706cf26050ea32444f",
+      "params": "0x00",
     },
     "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
     "space": "0x6d5608420702714a6c8168ec9c70706e8d1cf641",
@@ -29,31 +28,16 @@ exports[`EthereumSig should create propose envelope 1`] = `
     "message": {
       "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
       "executionStrategy": {
-        "index": 0,
+        "addy": "0x6241b5c89350bb3c465179706cf26050ea32444f",
         "params": "0x00",
       },
-      "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+      "metadataURI": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
       "salt": 0,
       "space": "0x6d5608420702714a6c8168ec9c70706e8d1cf641",
-      "userVotingStrategies": [
-        {
-          "index": 0,
-          "params": "0x00",
-        },
-      ],
+      "userParams": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
     },
-    "signature": "0x880baf7f259fa851874968dbe0f0fcb97f2144873741e1ee18b1c23fc0b386192027af9e9b9f918a65490cf9a1d79cfe4e42c4025a1ca9553f50e17aa13b521c1b",
+    "signature": "0xeb082bdf825eba431f899b1abbb27d9893a52d17160a4f8e2fc0c3274e480a9606de5ca525196d3b07f0a2ec3eefb8de21355d6ad2d331402ce2adfda60cf69f1c",
     "types": {
-      "IndexedStrategy": [
-        {
-          "name": "index",
-          "type": "uint8",
-        },
-        {
-          "name": "params",
-          "type": "bytes",
-        },
-      ],
       "Propose": [
         {
           "name": "space",
@@ -64,20 +48,30 @@ exports[`EthereumSig should create propose envelope 1`] = `
           "type": "address",
         },
         {
-          "name": "metadataUri",
+          "name": "metadataURI",
           "type": "string",
         },
         {
           "name": "executionStrategy",
-          "type": "IndexedStrategy",
+          "type": "Strategy",
         },
         {
-          "name": "userVotingStrategies",
-          "type": "IndexedStrategy[]",
+          "name": "userParams",
+          "type": "bytes",
         },
         {
           "name": "salt",
           "type": "uint256",
+        },
+      ],
+      "Strategy": [
+        {
+          "name": "addy",
+          "type": "address",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
         },
       ],
     },
@@ -118,10 +112,10 @@ exports[`EthereumSig should create vote envelope 1`] = `
           "params": "0x00",
         },
       ],
-      "voteMetadataUri": "",
+      "voteMetadataURI": "",
       "voter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     },
-    "signature": "0x9367c563148fb7daecc2316800c220198c07015c9c613f7bd934c051f5e2c2cf3e6e695b697718c7a5acd92e5dac8594111a6dd315790a630e8fa3b06198b9271c",
+    "signature": "0xa7fb4c6206515c60d78ad09d625ed7794be5d45c5956fd78682c200e8e07d17143877bd7b7061d5667ecfc3f7784d9a522f3a9ccb10cfa05d49b0e8071a0a5131c",
     "types": {
       "IndexedStrategy": [
         {
@@ -155,7 +149,7 @@ exports[`EthereumSig should create vote envelope 1`] = `
           "type": "IndexedStrategy[]",
         },
         {
-          "name": "voteMetadataUri",
+          "name": "voteMetadataURI",
           "type": "string",
         },
       ],

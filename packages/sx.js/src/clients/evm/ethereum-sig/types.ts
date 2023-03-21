@@ -7,13 +7,13 @@ export const proposeTypes = {
   Propose: [
     { name: 'space', type: 'address' },
     { name: 'author', type: 'address' },
-    { name: 'metadataUri', type: 'string' },
-    { name: 'executionStrategy', type: 'IndexedStrategy' },
-    { name: 'userVotingStrategies', type: 'IndexedStrategy[]' },
+    { name: 'metadataURI', type: 'string' },
+    { name: 'executionStrategy', type: 'Strategy' },
+    { name: 'userParams', type: 'bytes' },
     { name: 'salt', type: 'uint256' }
   ],
-  IndexedStrategy: [
-    { name: 'index', type: 'uint8' },
+  Strategy: [
+    { name: 'addy', type: 'address' },
     { name: 'params', type: 'bytes' }
   ]
 };
@@ -25,7 +25,7 @@ export const voteTypes = {
     { name: 'proposalId', type: 'uint256' },
     { name: 'choice', type: 'uint8' },
     { name: 'userVotingStrategies', type: 'IndexedStrategy[]' },
-    { name: 'voteMetadataUri', type: 'string' }
+    { name: 'voteMetadataURI', type: 'string' }
   ],
   IndexedStrategy: [
     { name: 'index', type: 'uint8' },

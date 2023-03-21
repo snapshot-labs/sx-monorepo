@@ -12,18 +12,6 @@ describe('compStrategy', () => {
   });
 
   describe('getVotingPower', () => {
-    it('should compute voting power for user with delegated tokens', async () => {
-      const votingPower = await compStrategy.getVotingPower(
-        '0xbbd17346378f76c1c94032594b57c93c24857b19',
-        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
-        1677159023,
-        params,
-        provider
-      );
-
-      expect(votingPower.toString()).toEqual('245589152463309972774');
-    });
-
     it('should compute voting power for user with delegated tokens at specific timestamp', async () => {
       const votingPower = await compStrategy.getVotingPower(
         '0x0bed117707f698fccb68223de297bf3e3df7082c',

@@ -1,8 +1,9 @@
-import type { NetworkConfig } from './types';
+import type { NetworkConfig, EvmNetworkConfig } from './types';
 
-export const evmGoerli: NetworkConfig = {
+export const evmGoerli: EvmNetworkConfig = {
   eip712ChainId: 5,
-  spaceFactory: '0xfc38e50ea8fc64fb68b9fece13b16404b8d43864',
+  proxyFactory: '',
+  masterSpace: '',
   authenticators: {
     '0xdd66652e93293c32aa3288509d9a46c785e3f786': {
       type: 'vanilla'

@@ -1,0 +1,415 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "validate",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608080604052346100155760f8908161001b8239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c630721609514602857600080fd5b3460b75760607ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260b75760043573ffffffffffffffffffffffffffffffffffffffff81160360b75767ffffffffffffffff9160243583811160b757609290369060040160bb565b505060443592831160b4575060ac602092369060040160bb565b505060018152f35b80fd5b5080fd5b9181601f8401121560e65782359167ffffffffffffffff831160e6576020838186019501011160e657565b600080fdfea164736f6c6343000812000a",
+    "sourceMap": "153:268:79:-:0;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x6080806040526004361015601257600080fd5b600090813560e01c630721609514602857600080fd5b3460b75760607ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260b75760043573ffffffffffffffffffffffffffffffffffffffff81160360b75767ffffffffffffffff9160243583811160b757609290369060040160bb565b505060443592831160b4575060ac602092369060040160bb565b505060018152f35b80fd5b5080fd5b9181601f8401121560e65782359167ffffffffffffffff831160e6576020838186019501011160e657565b600080fdfea164736f6c6343000812000a",
+    "sourceMap": "153:268:79:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;:::i;:::-;;;408:4;153:268;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "validate(address,bytes,bytes)": "07216095"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.18+commit.87f61d96\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"validate\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol\":\"VanillaProposalValidationStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/interfaces/IProposalValidationStrategy.sol\":{\"keccak256\":\"0x34d0f7ab219de781b8416c7e01433fd3f73b047c67ad2ed22fee977da1b60a97\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://58d5fdd6547db317888d26834acab262d2645166127fce4f5c0799df0208276d\",\"dweb:/ipfs/QmQf4bergX91ahoUuFUnCNJtnq1b6A4Hjm8QN6pgrXUqdS\"]},\"src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol\":{\"keccak256\":\"0x28d784abe97dad5a7f846ddfcdb2322d0b6913daf6afe897b4ce1d9f805fee81\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://2046d959e611388cbdbfcfc6d1e8794fed625f6fa6603a97cdd1df3afd6db97e\",\"dweb:/ipfs/QmSoCUy59ZJEJVKua83cqT44XvTGRWEwkkeRp8ghPAbBKQ\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.18+commit.87f61d96"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "validate",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@prb/test/=lib/prb-test/src/",
+        ":@zodiac/=lib/zodiac/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+        ":forge-gas-snapshot/=lib/forge-gas-snapshot/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+        ":prb-test/=lib/prb-test/src/",
+        ":safe-contracts/=lib/safe-contracts/contracts/",
+        ":zodiac/=lib/zodiac/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 10000
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol": "VanillaProposalValidationStrategy"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "src/interfaces/IProposalValidationStrategy.sol": {
+        "keccak256": "0x34d0f7ab219de781b8416c7e01433fd3f73b047c67ad2ed22fee977da1b60a97",
+        "urls": [
+          "bzz-raw://58d5fdd6547db317888d26834acab262d2645166127fce4f5c0799df0208276d",
+          "dweb:/ipfs/QmQf4bergX91ahoUuFUnCNJtnq1b6A4Hjm8QN6pgrXUqdS"
+        ],
+        "license": "MIT"
+      },
+      "src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol": {
+        "keccak256": "0x28d784abe97dad5a7f846ddfcdb2322d0b6913daf6afe897b4ce1d9f805fee81",
+        "urls": [
+          "bzz-raw://2046d959e611388cbdbfcfc6d1e8794fed625f6fa6603a97cdd1df3afd6db97e",
+          "dweb:/ipfs/QmSoCUy59ZJEJVKua83cqT44XvTGRWEwkkeRp8ghPAbBKQ"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol",
+    "id": 36099,
+    "exportedSymbols": {
+      "IProposalValidationStrategy": [
+        35598
+      ],
+      "VanillaProposalValidationStrategy": [
+        36098
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "33:389:79",
+    "nodes": [
+      {
+        "id": 36078,
+        "nodeType": "PragmaDirective",
+        "src": "33:24:79",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".18"
+        ]
+      },
+      {
+        "id": 36080,
+        "nodeType": "ImportDirective",
+        "src": "59:92:79",
+        "nodes": [],
+        "absolutePath": "src/interfaces/IProposalValidationStrategy.sol",
+        "file": "../interfaces/IProposalValidationStrategy.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 36099,
+        "sourceUnit": 35599,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 36079,
+              "name": "IProposalValidationStrategy",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 35598,
+              "src": "68:27:79",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 36098,
+        "nodeType": "ContractDefinition",
+        "src": "153:268:79",
+        "nodes": [
+          {
+            "id": 36097,
+            "nodeType": "FunctionDefinition",
+            "src": "233:186:79",
+            "nodes": [],
+            "body": {
+              "id": 36096,
+              "nodeType": "Block",
+              "src": "391:28:79",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "hexValue": "74727565",
+                    "id": 36094,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "bool",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "408:4:79",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "value": "true"
+                  },
+                  "functionReturnParameters": 36093,
+                  "id": 36095,
+                  "nodeType": "Return",
+                  "src": "401:11:79"
+                }
+              ]
+            },
+            "baseFunctions": [
+              35597
+            ],
+            "functionSelector": "07216095",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "validate",
+            "nameLocation": "242:8:79",
+            "overrides": {
+              "id": 36090,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "367:8:79"
+            },
+            "parameters": {
+              "id": 36089,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 36084,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 36097,
+                  "src": "260:7:79",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 36083,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "260:7:79",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 36086,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 36097,
+                  "src": "288:14:79",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 36085,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "288:5:79",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 36088,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 36097,
+                  "src": "323:14:79",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 36087,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "323:5:79",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "250:107:79"
+            },
+            "returnParameters": {
+              "id": 36093,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 36092,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 36097,
+                  "src": "385:4:79",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 36091,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "385:4:79",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "384:6:79"
+            },
+            "scope": 36098,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 36081,
+              "name": "IProposalValidationStrategy",
+              "nameLocations": [
+                "199:27:79"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 35598,
+              "src": "199:27:79"
+            },
+            "id": 36082,
+            "nodeType": "InheritanceSpecifier",
+            "src": "199:27:79"
+          }
+        ],
+        "canonicalName": "VanillaProposalValidationStrategy",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          36098,
+          35598
+        ],
+        "name": "VanillaProposalValidationStrategy",
+        "nameLocation": "162:33:79",
+        "scope": 36099,
+        "usedErrors": []
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 79
+}

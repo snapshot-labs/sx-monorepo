@@ -2,9 +2,9 @@ import createVanillaStrategy from './vanilla';
 import createCompStrategy from './comp';
 import createWhitelistStrategy from './whitelist';
 import type { Propose, Vote, StrategyConfig, Strategy } from '../../clients/evm/types';
-import type { NetworkConfig } from '../../types';
+import type { EvmNetworkConfig } from '../../types';
 
-export function getStrategy(address: string, networkConfig: NetworkConfig): Strategy | null {
+export function getStrategy(address: string, networkConfig: EvmNetworkConfig): Strategy | null {
   const strategy = networkConfig.strategies[address];
   if (!strategy) return null;
 
@@ -28,7 +28,7 @@ export async function getStrategiesParams(
   strategies: StrategyConfig[],
   signerAddress: string,
   data: Propose | Vote,
-  networkConfig: NetworkConfig
+  networkConfig: EvmNetworkConfig
 ) {
   return Promise.all(
     strategies.map(strategyConfig => {

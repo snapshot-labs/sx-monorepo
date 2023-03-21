@@ -1,5 +1,0 @@
-[
-  "error SpaceCreationFailed()",
-  "event SpaceCreated(address space, address owner, uint32 votingDelay, uint32 minVotingDuration, uint32 maxVotingDuration, uint256 proposalThreshold, string metadataUri, tuple(address addy, bytes params)[] votingStrategies, bytes[] votingStrategyMetadata, address[] authenticators, tuple(address addy, bytes params)[] executionStrategies)",
-  "function createSpace(address controller, uint32 votingDelay, uint32 minVotingDuration, uint32 maxVotingDuration, uint256 proposalThreshold, string metadataUri, tuple(address addy, bytes params)[] votingStrategies, bytes[] votingStrategyMetadata, address[] authenticators, tuple(address addy, bytes params)[] executionStrategies, bytes32 salt)"
-]

@@ -2,11 +2,11 @@ import createStarknetExecutor from './starknet';
 import createVanillaExecutor from './vanilla';
 import createEthRelayerExecutor from './ethRelayer';
 import createAvatarExecutor from './avatar';
-import type { ExecutionInput, NetworkConfig } from '../types';
+import type { EvmNetworkConfig, NetworkConfig, ExecutionInput } from '../types';
 
 export function getExecutionData(
   executorAddress: string,
-  networkConfig: NetworkConfig,
+  networkConfig: NetworkConfig | EvmNetworkConfig,
   input?: ExecutionInput
 ) {
   const executor = networkConfig.executors[executorAddress];

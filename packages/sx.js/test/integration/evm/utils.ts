@@ -1,34 +1,39 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
-import SpaceFactoryContract from './fixtures/SpaceFactory.json';
+import ProxyFactoryContract from './fixtures/ProxyFactory.json';
+import SpaceContract from './fixtures/Space.json';
 import AvatarContract from './fixtures/Avatar.json';
 import CompTokenContract from './fixtures/CompToken.json';
 import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
 import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
 import EthSigAuthenticatorContract from './fixtures/EthSigAuthenticator.json';
+import VanillaProposalValidationStrategyContract from './fixtures/VanillaProposalValidationStrategy.json';
+import VotingPowerProposalValidationStrategyContract from './fixtures/VotingPowerProposalValidationStrategy.json';
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
 import CompVotingStrategy from './fixtures/CompVotingStrategy.json';
-import WhitelistStrategy from './fixtures/WhitelistStrategy.json';
+import WhitelistVotingStrategy from './fixtures/WhitelistVotingStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
 import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
-import type { NetworkConfig } from '../../../src/types';
+import type { EvmNetworkConfig } from '../../../src/types';
 
 export type TestConfig = {
   controller: string;
-  spaceFactory: string;
+  proxyFactory: string;
   spaceAddress: string;
   compToken: string;
   vanillaAuthenticator: string;
   ethTxAuthenticator: string;
   ethSigAuthenticator: string;
+  vanillaProposalValidationStrategy: string;
+  votingPowerProposalValidationStrategy: string;
   vanillaVotingStrategy: string;
   compVotingStrategy: string;
-  whitelistStrategy: string;
+  whitelistVotingStrategy: string;
   vanillaExecutionStrategy: string;
   avatarExecutionStrategy: string;
-  networkConfig: NetworkConfig;
+  networkConfig: EvmNetworkConfig;
 };
 
 type ContractDetails = {
@@ -57,7 +62,8 @@ export async function setup(signer: Signer): Promise<TestConfig> {
 
   const avatar = await deployDependency(signer, AvatarContract);
   const compToken = await deployDependency(signer, CompTokenContract);
-  const spaceFactory = await deployDependency(signer, SpaceFactoryContract);
+  const proxyFactory = await deployDependency(signer, ProxyFactoryContract);
+  const masterSpace = await deployDependency(signer, SpaceContract);
   const vanillaAuthenticator = await deployDependency(signer, VanillaAuthenciatorContract);
   const ethTxAuthenticator = await deployDependency(signer, EthTxAuthenticatorContract);
   const ethSigAuthenticator = await deployDependency(
@@ -66,16 +72,29 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     'snapshot-x',
     '0.1.0'
   );
+  const vanillaProposalValidationStrategy = await deployDependency(
+    signer,
+    VanillaProposalValidationStrategyContract
+  );
+  const votingPowerProposalValidationStrategy = await deployDependency(
+    signer,
+    VotingPowerProposalValidationStrategyContract
+  );
   const vanillaVotingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
   const compVotingStrategy = await deployDependency(signer, CompVotingStrategy);
-  const whitelistStrategy = await deployDependency(signer, WhitelistStrategy);
-  const vanillaExecutionStrategy = await deployDependency(signer, VanillaExecutionStrategyContract);
+  const whitelistVotingStrategy = await deployDependency(signer, WhitelistVotingStrategy);
+  const vanillaExecutionStrategy = await deployDependency(
+    signer,
+    VanillaExecutionStrategyContract,
+    1
+  );
   const avatarExecutionStrategy = await deployDependency(
     signer,
     AvatarExecutionStrategyContract,
     controller,
     avatar,
-    []
+    [],
+    1
   );
 
   const avatarContract = new Contract(avatar, AvatarContract.abi, signer);
@@ -98,7 +117,8 @@ export async function setup(signer: Signer): Promise<TestConfig> {
 
   const networkConfig = {
     eip712ChainId: 31337,
-    spaceFactory,
+    proxyFactory,
+    masterSpace,
     authenticators: {
       [vanillaAuthenticator]: {
         type: 'vanilla'
@@ -117,7 +137,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
       [compVotingStrategy]: {
         type: 'comp'
       },
-      [whitelistStrategy]: {
+      [whitelistVotingStrategy]: {
         type: 'whitelist'
       }
     },
@@ -141,6 +161,10 @@ export async function setup(signer: Signer): Promise<TestConfig> {
   ];
 
   const abiCoder = new AbiCoder();
+  const whitelistVotingStrategyParams = abiCoder.encode(
+    ['tuple(address addy, uint256 vp)[]'],
+    [whitelist]
+  );
 
   const res = await ethTxClient.deploySpace({
     signer,
@@ -148,7 +172,29 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     votingDelay: 0,
     minVotingDuration: 0,
     maxVotingDuration: 86400,
-    proposalThreshold: 1n,
+    proposalValidationStrategy: {
+      addy: votingPowerProposalValidationStrategy,
+      params: abiCoder.encode(
+        ['uint256', 'tuple(address addy, bytes params)[]'],
+        [
+          1,
+          [
+            {
+              addy: vanillaVotingStrategy,
+              params: '0x00'
+            },
+            {
+              addy: compVotingStrategy,
+              params: compToken
+            },
+            {
+              addy: whitelistVotingStrategy,
+              params: whitelistVotingStrategyParams
+            }
+          ]
+        ]
+      )
+    },
     metadataUri: 'metadataUri',
     authenticators: [vanillaAuthenticator, ethTxAuthenticator, ethSigAuthenticator],
     votingStrategies: [
@@ -161,21 +207,11 @@ export async function setup(signer: Signer): Promise<TestConfig> {
         params: compToken
       },
       {
-        addy: whitelistStrategy,
-        params: abiCoder.encode(['tuple(address addy, uint256 vp)[]'], [whitelist])
+        addy: whitelistVotingStrategy,
+        params: whitelistVotingStrategyParams
       }
     ],
-    votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00'],
-    executionStrategies: [
-      {
-        addy: vanillaExecutionStrategy,
-        params: '0x0000000000000000000000000000000000000000000000000000000000000001'
-      },
-      {
-        addy: avatarExecutionStrategy,
-        params: '0x0000000000000000000000000000000000000000000000000000000000000001'
-      }
-    ]
+    votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00']
   });
 
   await avatarExecutionStrategyContract.enableSpace(res.spaceAddress);
@@ -183,14 +219,16 @@ export async function setup(signer: Signer): Promise<TestConfig> {
   return {
     controller,
     compToken: compToken,
-    spaceFactory,
+    proxyFactory,
     spaceAddress: res.spaceAddress,
     vanillaAuthenticator,
     ethTxAuthenticator,
     ethSigAuthenticator,
+    vanillaProposalValidationStrategy,
+    votingPowerProposalValidationStrategy,
     vanillaVotingStrategy,
     compVotingStrategy,
-    whitelistStrategy,
+    whitelistVotingStrategy,
     vanillaExecutionStrategy,
     avatarExecutionStrategy,
     networkConfig

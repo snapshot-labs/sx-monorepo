@@ -3,6 +3,16 @@ import type { ContractInterface } from '@ethersproject/contracts';
 import type { Provider } from '@ethersproject/providers';
 import type { Choice } from '../../utils/choice';
 
+export type AddressConfig = {
+  addy: string;
+  params: string;
+};
+
+export type IndexedConfig = {
+  index: number;
+  params: string;
+};
+
 export type StrategyConfig = {
   index: number;
   address: string;
@@ -12,8 +22,7 @@ export type Propose = {
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];
-  executor: StrategyConfig;
-  executionParams: string;
+  executionStrategy: AddressConfig;
   metadataUri: string;
 };
 
@@ -24,16 +33,6 @@ export type Vote = {
   proposal: number;
   choice: Choice;
   metadataUri: string;
-};
-
-export type AddressConfig = {
-  addy: string;
-  params: string;
-};
-
-export type IndexedConfig = {
-  index: number;
-  params: string;
 };
 
 export type Call = {
@@ -79,9 +78,9 @@ export type Envelope<T extends Propose | Vote> = {
 export type EIP712ProposeMessage = {
   space: string;
   author: string;
-  metadataUri: string;
-  executionStrategy: IndexedConfig;
-  userVotingStrategies: IndexedConfig[];
+  metadataURI: string;
+  executionStrategy: AddressConfig;
+  userParams: string;
   salt: number;
 };
 
@@ -91,5 +90,5 @@ export type EIP712VoteMessage = {
   proposalId: number;
   choice: number;
   userVotingStrategies: IndexedConfig[];
-  voteMetadataUri: string;
+  voteMetadataURI: string;
 };

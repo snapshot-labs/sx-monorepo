@@ -37,8 +37,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
-          executionParams: '0x00',
+          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -77,8 +76,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethTxAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
-          executionParams: '0x00',
+          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -118,8 +116,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethSigAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
-          executionParams: '0x00',
+          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       });
@@ -159,8 +156,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 1, address: testConfig.compVotingStrategy }],
-          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
-          executionParams: '0x00',
+          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -192,15 +188,14 @@ describe('EthereumTx', () => {
     });
   });
 
-  describe('whitelistStrategy + vanilla authenticator', () => {
+  describe('whitelistVotingStrategy + vanilla authenticator', () => {
     it('should propose via authenticator', async () => {
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 2, address: testConfig.whitelistStrategy }],
-          executor: { index: 0, address: testConfig.vanillaExecutionStrategy },
-          executionParams: '0x00',
+          strategies: [{ index: 2, address: testConfig.whitelistVotingStrategy }],
+          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -217,7 +212,7 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 2, address: testConfig.whitelistStrategy }],
+          strategies: [{ index: 2, address: testConfig.whitelistVotingStrategy }],
           proposal: 5,
           choice: 0,
           metadataUri: ''
@@ -255,8 +250,10 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executor: { index: 1, address: testConfig.avatarExecutionStrategy },
-          executionParams: executionParams[0],
+          executionStrategy: {
+            addy: testConfig.avatarExecutionStrategy,
+            params: executionParams[0]
+          },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -354,15 +351,6 @@ describe('EthereumTx', () => {
       signer,
       space: spaceAddress,
       metadataUri: 'https://snapshot.org'
-    });
-    expect(res.hash).toBeDefined();
-  });
-
-  it('should set proposal threshold', async () => {
-    const res = await ethTxClient.setProposalThreshold({
-      signer,
-      space: spaceAddress,
-      threshold: 0
     });
     expect(res.hash).toBeDefined();
   });

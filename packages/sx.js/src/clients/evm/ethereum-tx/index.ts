@@ -1,24 +1,21 @@
 import { Contract, ContractFactory } from '@ethersproject/contracts';
-import { Interface } from '@ethersproject/abi';
-import { getCreate2Address } from '@ethersproject/address';
-import { keccak256 } from '@ethersproject/keccak256';
+import { AbiCoder, Interface } from '@ethersproject/abi';
 import randomBytes from 'randombytes';
 import { getAuthenticator } from '../../../authenticators/evm';
 import { getStrategiesParams } from '../../../strategies/evm';
 import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
-import SpaceFactoryAbi from './abis/SpaceFactory.json';
-import SpaceBytecode from './abis/bytecode/Space.json';
+import ProxyFactoryAbi from './abis/ProxyFactory.json';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
 import AvatarExecutionStrategyBytecode from './abis/bytecode/AvatarExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { Propose, Vote, Envelope, AddressConfig } from '../types';
-import type { NetworkConfig, ClientOpts } from '../../../types';
+import type { EvmNetworkConfig } from '../../../types';
 
 export class EthereumTx {
-  networkConfig: NetworkConfig;
+  networkConfig: EvmNetworkConfig;
 
-  constructor(opts?: Pick<ClientOpts, 'networkConfig'>) {
+  constructor(opts?: { networkConfig: EvmNetworkConfig }) {
     this.networkConfig = opts?.networkConfig || evmGoerli;
   }
 
@@ -50,55 +47,53 @@ export class EthereumTx {
     votingDelay,
     minVotingDuration,
     maxVotingDuration,
-    proposalThreshold,
+    proposalValidationStrategy,
     metadataUri,
     authenticators,
     votingStrategies,
-    votingStrategiesMetadata,
-    executionStrategies
+    votingStrategiesMetadata
   }: {
     signer: Signer;
     controller: string;
     votingDelay: number;
     minVotingDuration: number;
     maxVotingDuration: number;
-    proposalThreshold: bigint;
+    proposalValidationStrategy: AddressConfig;
     metadataUri: string;
     authenticators: string[];
     votingStrategies: AddressConfig[];
     votingStrategiesMetadata: string[];
-    executionStrategies: AddressConfig[];
   }): Promise<{ txId: string; spaceAddress: string }> {
     const spaceInterface = new Interface(SpaceAbi);
-    const spaceFactoryContract = new Contract(
-      this.networkConfig.spaceFactory,
-      SpaceFactoryAbi,
+    const proxyFactoryContract = new Contract(
+      this.networkConfig.proxyFactory,
+      ProxyFactoryAbi,
       signer
     );
 
     const salt = `0x${randomBytes(32).toString('hex')}`;
 
-    const baseArgs = [
+    const functionData = spaceInterface.encodeFunctionData('initialize', [
       controller,
       votingDelay,
       minVotingDuration,
       maxVotingDuration,
-      proposalThreshold,
-      metadataUri
-    ];
-    const strategies = [
+      proposalValidationStrategy,
+      metadataUri,
       votingStrategies,
       votingStrategiesMetadata,
-      authenticators,
-      executionStrategies
-    ];
+      authenticators
+    ]);
 
-    const functionData = spaceInterface.encodeDeploy([...baseArgs.slice(0, -1), ...strategies]);
-    const initCode = SpaceBytecode + functionData.slice(2);
-
-    const initCodeHash = keccak256(initCode);
-    const spaceAddress = getCreate2Address(this.networkConfig.spaceFactory, salt, initCodeHash);
-    const response = await spaceFactoryContract.createSpace(...baseArgs, ...strategies, salt);
+    const spaceAddress = await proxyFactoryContract.predictProxyAddress(
+      this.networkConfig.masterSpace,
+      salt
+    );
+    const response = await proxyFactoryContract.deployProxy(
+      this.networkConfig.masterSpace,
+      functionData,
+      salt
+    );
 
     return { spaceAddress, txId: response.hash };
   }
@@ -114,18 +109,21 @@ export class EthereumTx {
       this.networkConfig
     );
 
+    const abiCoder = new AbiCoder();
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('propose', [
       proposerAddress,
       envelope.data.metadataUri,
-      {
-        index: envelope.data.executor.index,
-        params: envelope.data.executionParams
-      },
-      envelope.data.strategies.map((strategyConfig, i) => ({
-        index: strategyConfig.index,
-        params: strategiesParams[i]
-      }))
+      envelope.data.executionStrategy,
+      abiCoder.encode(
+        ['tuple(int8 index, bytes params)[]'],
+        [
+          envelope.data.strategies.map((strategyConfig, i) => ({
+            index: strategyConfig.index,
+            params: strategiesParams[i]
+          }))
+        ]
+      )
     ]);
 
     const selector = functionData.slice(0, 10);
@@ -266,21 +264,7 @@ export class EthereumTx {
   }) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
 
-    return spaceContract.setMetadataUri(metadataUri);
-  }
-
-  async setProposalThreshold({
-    signer,
-    space,
-    threshold
-  }: {
-    signer: Signer;
-    space: string;
-    threshold: number;
-  }) {
-    const spaceContract = new Contract(space, SpaceAbi, signer);
-
-    return spaceContract.setProposalThreshold(threshold);
+    return spaceContract.setMetadataURI(metadataUri);
   }
 
   async setVotingDelay({
