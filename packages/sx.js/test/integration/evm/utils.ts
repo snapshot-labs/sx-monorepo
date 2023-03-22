@@ -1,3 +1,4 @@
+import randomBytes from 'randombytes';
 import { AbiCoder } from '@ethersproject/abi';
 import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
@@ -61,6 +62,8 @@ export async function deployDependency(
 }
 
 export async function setup(signer: Signer): Promise<TestConfig> {
+  const precomputedSpaceSalt = `0x${randomBytes(32).toString('hex')}`;
+
   const controller = await signer.getAddress();
 
   const avatar = await deployDependency(signer, AvatarContract);
@@ -93,7 +96,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     VanillaExecutionStrategyContract,
     1
   );
-  const avatarExecutionStrategy = await deployDependency(
+  const masterAvatarExecutionStrategy = await deployDependency(
     signer,
     AvatarExecutionStrategyContract,
     controller,
@@ -102,36 +105,13 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     1
   );
 
-  const avatarContract = new Contract(avatar, AvatarContract.abi, signer);
-  const avatarExecutionStrategyContract = new Contract(
-    avatarExecutionStrategy,
-    AvatarExecutionStrategyContract.abi,
-    signer
-  );
-
-  await avatarContract.enableModule(avatarExecutionStrategy);
-
-  const compTokenContract = new Contract(compToken, CompTokenContract.abi, signer);
-  await compTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
-  await compTokenContract.delegate(controller);
-
-  const erc20VotesTokenContract = new Contract(
-    erc20VotesToken,
-    Erc20VotesTokenContract.abi,
-    signer
-  );
-  await erc20VotesTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
-  await erc20VotesTokenContract.delegate(controller);
-
-  await signer.sendTransaction({
-    to: avatar,
-    value: '21'
-  });
-
   const networkConfig = {
     eip712ChainId: 31337,
     proxyFactory,
     masterSpace,
+    executionStrategiesImplementations: {
+      SimpleQuorumAvatar: masterAvatarExecutionStrategy
+    },
     authenticators: {
       [vanillaAuthenticator]: {
         type: 'vanilla'
@@ -156,18 +136,44 @@ export async function setup(signer: Signer): Promise<TestConfig> {
       [whitelistVotingStrategy]: {
         type: 'whitelist'
       }
-    },
-    executors: {
-      [vanillaExecutionStrategy]: {
-        type: 'vanilla'
-      },
-      [avatarExecutionStrategy]: {
-        type: 'avatar'
-      }
     }
   } as const;
 
   const ethTxClient = new EthereumTx({ networkConfig });
+  const spaceAddress = await ethTxClient.predictSpaceAddress({
+    signer,
+    salt: precomputedSpaceSalt
+  });
+
+  const { address: avatarExecutionStrategy } = await ethTxClient.deployAvatarExecution({
+    signer,
+    params: {
+      controller,
+      target: avatar,
+      spaces: [spaceAddress],
+      quorum: 1n
+    }
+  });
+
+  const avatarContract = new Contract(avatar, AvatarContract.abi, signer);
+  await avatarContract.enableModule(avatarExecutionStrategy);
+
+  const compTokenContract = new Contract(compToken, CompTokenContract.abi, signer);
+  await compTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
+  await compTokenContract.delegate(controller);
+
+  const erc20VotesTokenContract = new Contract(
+    erc20VotesToken,
+    Erc20VotesTokenContract.abi,
+    signer
+  );
+  await erc20VotesTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
+  await erc20VotesTokenContract.delegate(controller);
+
+  await signer.sendTransaction({
+    to: avatar,
+    value: '21'
+  });
 
   const whitelist = [
     {
@@ -184,67 +190,68 @@ export async function setup(signer: Signer): Promise<TestConfig> {
 
   const res = await ethTxClient.deploySpace({
     signer,
-    controller,
-    votingDelay: 0,
-    minVotingDuration: 0,
-    maxVotingDuration: 86400,
-    proposalValidationStrategy: {
-      addy: votingPowerProposalValidationStrategy,
-      params: abiCoder.encode(
-        ['uint256', 'tuple(address addy, bytes params)[]'],
-        [
-          1,
+    params: {
+      controller,
+      votingDelay: 0,
+      minVotingDuration: 0,
+      maxVotingDuration: 86400,
+      proposalValidationStrategy: {
+        addy: votingPowerProposalValidationStrategy,
+        params: abiCoder.encode(
+          ['uint256', 'tuple(address addy, bytes params)[]'],
           [
-            {
-              addy: vanillaVotingStrategy,
-              params: '0x00'
-            },
-            {
-              addy: compVotingStrategy,
-              params: compToken
-            },
-            {
-              addy: ozVotesVotingStrategy,
-              params: erc20VotesToken
-            },
-            {
-              addy: whitelistVotingStrategy,
-              params: whitelistVotingStrategyParams
-            }
+            1,
+            [
+              {
+                addy: vanillaVotingStrategy,
+                params: '0x00'
+              },
+              {
+                addy: compVotingStrategy,
+                params: compToken
+              },
+              {
+                addy: ozVotesVotingStrategy,
+                params: erc20VotesToken
+              },
+              {
+                addy: whitelistVotingStrategy,
+                params: whitelistVotingStrategyParams
+              }
+            ]
           ]
-        ]
-      )
+        )
+      },
+      metadataUri: 'metadataUri',
+      authenticators: [vanillaAuthenticator, ethTxAuthenticator, ethSigAuthenticator],
+      votingStrategies: [
+        {
+          addy: vanillaVotingStrategy,
+          params: '0x00'
+        },
+        {
+          addy: compVotingStrategy,
+          params: compToken
+        },
+        {
+          addy: ozVotesVotingStrategy,
+          params: erc20VotesToken
+        },
+        {
+          addy: whitelistVotingStrategy,
+          params: whitelistVotingStrategyParams
+        }
+      ],
+      votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00']
     },
-    metadataUri: 'metadataUri',
-    authenticators: [vanillaAuthenticator, ethTxAuthenticator, ethSigAuthenticator],
-    votingStrategies: [
-      {
-        addy: vanillaVotingStrategy,
-        params: '0x00'
-      },
-      {
-        addy: compVotingStrategy,
-        params: compToken
-      },
-      {
-        addy: ozVotesVotingStrategy,
-        params: erc20VotesToken
-      },
-      {
-        addy: whitelistVotingStrategy,
-        params: whitelistVotingStrategyParams
-      }
-    ],
-    votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00']
+    salt: precomputedSpaceSalt
   });
-
-  await avatarExecutionStrategyContract.enableSpace(res.spaceAddress);
 
   return {
     controller,
     compToken: compToken,
     proxyFactory,
-    spaceAddress: res.spaceAddress,
+    spaceAddress: res.address,
     vanillaAuthenticator,
     ethTxAuthenticator,
     ethSigAuthenticator,

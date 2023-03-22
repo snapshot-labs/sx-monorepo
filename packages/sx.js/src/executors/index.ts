@@ -2,11 +2,27 @@ import createStarknetExecutor from './starknet';
 import createVanillaExecutor from './vanilla';
 import createEthRelayerExecutor from './ethRelayer';
 import createAvatarExecutor from './avatar';
-import type { EvmNetworkConfig, NetworkConfig, ExecutionInput } from '../types';
+import type { ExecutorType, NetworkConfig, ExecutionInput } from '../types';
+
+export function getEvmExecutionData(
+  type: ExecutorType,
+  executorAddress: string,
+  input?: ExecutionInput
+) {
+  if (type === 'SimpleQuorumVanilla') {
+    return createVanillaExecutor().getExecutionData(executorAddress);
+  }
+
+  if (type === 'SimpleQuorumAvatar' && input?.transactions) {
+    return createAvatarExecutor().getExecutionData(executorAddress, input.transactions);
+  }
+
+  throw new Error(`Not enough data to create execution for executor ${executorAddress}`);
+}
 
 export function getExecutionData(
   executorAddress: string,
-  networkConfig: NetworkConfig | EvmNetworkConfig,
+  networkConfig: NetworkConfig,
   input?: ExecutionInput
 ) {
   const executor = networkConfig.executors[executorAddress];

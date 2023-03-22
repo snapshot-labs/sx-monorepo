@@ -1,4 +1,4 @@
-import { Contract, ContractFactory } from '@ethersproject/contracts';
+import { Contract } from '@ethersproject/contracts';
 import { AbiCoder, Interface } from '@ethersproject/abi';
 import randomBytes from 'randombytes';
 import { getAuthenticator } from '../../../authenticators/evm';
@@ -7,10 +7,28 @@ import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
-import AvatarExecutionStrategyBytecode from './abis/bytecode/AvatarExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { Propose, Vote, Envelope, AddressConfig } from '../types';
 import type { EvmNetworkConfig } from '../../../types';
+
+type SpaceParams = {
+  controller: string;
+  votingDelay: number;
+  minVotingDuration: number;
+  maxVotingDuration: number;
+  proposalValidationStrategy: AddressConfig;
+  metadataUri: string;
+  authenticators: string[];
+  votingStrategies: AddressConfig[];
+  votingStrategiesMetadata: string[];
+};
+
+type AvatarExecutionStrategyParams = {
+  controller: string;
+  target: string;
+  spaces: string[];
+  quorum: bigint;
+};
 
 export class EthereumTx {
   networkConfig: EvmNetworkConfig;
@@ -21,57 +39,73 @@ export class EthereumTx {
 
   async deployAvatarExecution({
     signer,
-    controller,
-    target,
-    spaces
+    params: { controller, target, spaces, quorum },
+    salt
   }: {
     signer: Signer;
-    controller: string;
-    target: string;
-    spaces: string[];
-  }) {
-    const factory = new ContractFactory(
-      AvatarExecutionStrategyAbi,
-      AvatarExecutionStrategyBytecode,
-      signer
-    );
+    params: AvatarExecutionStrategyParams;
+    salt?: string;
+  }): Promise<{ txId: string; address: string }> {
+    salt = salt || `0x${randomBytes(32).toString('hex')}`;
 
-    const contract = await factory.deploy(controller, target, spaces);
+    const implementationAddress =
+      this.networkConfig.executionStrategiesImplementations['SimpleQuorumAvatar'];
 
-    return contract.address;
-  }
+    if (!implementationAddress) {
+      throw new Error('Missing SimpleQuorumAvatar implementation address');
+    }
 
-  async deploySpace({
-    signer,
-    controller,
-    votingDelay,
-    minVotingDuration,
-    maxVotingDuration,
-    proposalValidationStrategy,
-    metadataUri,
-    authenticators,
-    votingStrategies,
-    votingStrategiesMetadata
-  }: {
-    signer: Signer;
-    controller: string;
-    votingDelay: number;
-    minVotingDuration: number;
-    maxVotingDuration: number;
-    proposalValidationStrategy: AddressConfig;
-    metadataUri: string;
-    authenticators: string[];
-    votingStrategies: AddressConfig[];
-    votingStrategiesMetadata: string[];
-  }): Promise<{ txId: string; spaceAddress: string }> {
-    const spaceInterface = new Interface(SpaceAbi);
+    const abiCoder = new AbiCoder();
+    const avatarExecutionStrategyInterface = new Interface(AvatarExecutionStrategyAbi);
     const proxyFactoryContract = new Contract(
       this.networkConfig.proxyFactory,
       ProxyFactoryAbi,
       signer
     );
 
-    const salt = `0x${randomBytes(32).toString('hex')}`;
+    const initParams = abiCoder.encode(
+      ['address', 'address', 'address[]', 'uint256'],
+      [controller, target, spaces, quorum]
+    );
+    const functionData = avatarExecutionStrategyInterface.encodeFunctionData('setUp', [initParams]);
+
+    const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
+    const response = await proxyFactoryContract.deployProxy(
+      implementationAddress,
+      functionData,
+      salt
+    );
+
+    return { address, txId: response.hash };
+  }
+
+  async deploySpace({
+    signer,
+    params: {
+      controller,
+      votingDelay,
+      minVotingDuration,
+      maxVotingDuration,
+      proposalValidationStrategy,
+      metadataUri,
+      authenticators,
+      votingStrategies,
+      votingStrategiesMetadata
+    },
+    salt
+  }: {
+    signer: Signer;
+    params: SpaceParams;
+    salt?: string;
+  }): Promise<{ txId: string; address: string }> {
+    salt = salt || `0x${randomBytes(32).toString('hex')}`;
+
+    const spaceInterface = new Interface(SpaceAbi);
+    const proxyFactoryContract = new Contract(
+      this.networkConfig.proxyFactory,
+      ProxyFactoryAbi,
+      signer
+    );
 
     const functionData = spaceInterface.encodeFunctionData('initialize', [
       controller,
@@ -85,7 +119,7 @@ export class EthereumTx {
       authenticators
     ]);
 
-    const spaceAddress = await proxyFactoryContract.predictProxyAddress(
+    const address = await proxyFactoryContract.predictProxyAddress(
       this.networkConfig.masterSpace,
       salt
     );
@@ -95,7 +129,17 @@ export class EthereumTx {
       salt
     );
 
-    return { spaceAddress, txId: response.hash };
+    return { address, txId: response.hash };
+  }
+
+  async predictSpaceAddress({ signer, salt }: { signer: Signer; salt: string }) {
+    const proxyFactoryContract = new Contract(
+      this.networkConfig.proxyFactory,
+      ProxyFactoryAbi,
+      signer
+    );
+
+    return proxyFactoryContract.predictProxyAddress(this.networkConfig.masterSpace, salt);
   }
 
   async propose({ signer, envelope }: { signer: Signer; envelope: Envelope<Propose> }) {

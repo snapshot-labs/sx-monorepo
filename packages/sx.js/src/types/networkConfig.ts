@@ -1,3 +1,5 @@
+export type ExecutorType = 'SimpleQuorumVanilla' | 'SimpleQuorumAvatar';
+
 export type VanillaAuthenticatorConfig = {
   type: 'vanilla';
 };
@@ -83,7 +85,10 @@ export type NetworkConfig = {
   };
 };
 
-export type EvmNetworkConfig = Omit<NetworkConfig, 'spaceFactory'> & {
+export type EvmNetworkConfig = Omit<NetworkConfig, 'spaceFactory' | 'executors'> & {
   proxyFactory: string;
   masterSpace: string;
+  executionStrategiesImplementations: {
+    [key in ExecutorType]?: string;
+  };
 };

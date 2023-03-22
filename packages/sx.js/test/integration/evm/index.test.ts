@@ -2,7 +2,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
 import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
-import { getExecutionData } from '../../../src/executors';
+import { getEvmExecutionData } from '../../../src/executors';
 import { setup, TestConfig } from './utils';
 
 describe('EthereumTx', () => {
@@ -278,9 +278,9 @@ describe('EthereumTx', () => {
     ];
 
     it('should propose with avatar', async () => {
-      const { executionParams } = getExecutionData(
+      const { executionParams } = getEvmExecutionData(
+        'SimpleQuorumAvatar',
         testConfig.avatarExecutionStrategy,
-        testConfig.networkConfig,
         { transactions }
       );
 
@@ -324,9 +324,9 @@ describe('EthereumTx', () => {
     });
 
     it('should execute', async () => {
-      const { executionParams } = getExecutionData(
+      const { executionParams } = getEvmExecutionData(
+        'SimpleQuorumAvatar',
         testConfig.avatarExecutionStrategy,
-        testConfig.networkConfig,
         { transactions }
       );
 
