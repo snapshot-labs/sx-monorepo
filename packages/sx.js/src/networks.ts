@@ -2,30 +2,33 @@ import type { NetworkConfig, EvmNetworkConfig } from './types';
 
 export const evmGoerli: EvmNetworkConfig = {
   eip712ChainId: 5,
-  proxyFactory: '',
-  masterSpace: '',
+  proxyFactory: '0x12a1fffffd70677939d61d641ea043bc9060c718',
+  masterSpace: '0xb5e5c8a9a999da1aabb2b45dc9f72f2be042e204',
   executionStrategiesImplementations: {
-    SimpleQuorumAvatar: ''
+    SimpleQuorumAvatar: '0x6f12c67cad3e566b60a6ae0146761110f1ea6eb2'
   },
   authenticators: {
-    '0xdd66652e93293c32aa3288509d9a46c785e3f786': {
+    '0x6896120fdf2d791e4dc1c673d8becd54b14dd607': {
       type: 'vanilla'
     },
-    '0x277f388b77cd36fff1c0e976c49a7c54413a449a': {
+    '0xc537d997ddc783e071f82ccbfaa0d768d310001b': {
       type: 'ethSig'
     },
-    '0xcc3fb327de5428d182ba2e739aea5978c0e2ce35': {
+    '0xddb36b865a1021524b936fb29fcba5fac073db74': {
       type: 'ethTx'
     }
   },
   strategies: {
-    '0xf3e55d22845689be3e062975444d09799e522a6c': {
+    '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': {
       type: 'vanilla'
     },
-    '0x0bed117707f698fccb68223de297bf3e3df7082c': {
+    '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': {
       type: 'comp'
     },
-    '0x95287283ed7c583120b06ff48a655062976ac41c': {
+    '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': {
+      type: 'ozVotes'
+    },
+    '0xf50bf15e9fe61e27625a4ecdfc23211297e8be85': {
       type: 'whitelist'
     }
   }

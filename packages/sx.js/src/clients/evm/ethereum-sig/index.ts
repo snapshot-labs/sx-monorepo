@@ -17,7 +17,7 @@ import type {
 import type { EvmNetworkConfig } from '../../../types';
 
 type EthereumSigClientOpts = {
-  networkConfig: EvmNetworkConfig;
+  networkConfig?: EvmNetworkConfig;
   manaUrl?: string;
 };
 
