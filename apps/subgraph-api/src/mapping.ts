@@ -1,51 +1,34 @@
 import { Address, BigDecimal, BigInt, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
-import { SpaceCreated } from '../generated/SpaceFactory/SpaceFactory'
-import { IExecutionStrategy } from '../generated/SpaceFactory/IExecutionStrategy'
+import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
+import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
 import {
-  Space as SpaceContract,
+  SpaceCreated,
   ProposalCreated,
   ProposalExecuted,
-  VoteCreated,
-  MetadataUriUpdated,
+  VoteCast,
+  MetadataURIUpdated,
 } from '../generated/templates/Space/Space'
 import { Space as SpaceTemplate } from '../generated/templates'
-import { Space, Proposal, Vote, User } from '../generated/schema'
+import { Space, ExecutionStrategy, Proposal, Vote, User } from '../generated/schema'
+import { updateSpaceMetadata } from './helpers'
 
-function updateSpaceMetadata(space: Space, metadataUri: string): void {
-  if (!metadataUri.startsWith('ipfs://')) return
+const MASTER_SPACE = Address.fromString('0xB5E5c8a9A999Da1AABb2b45DC9F72F2be042e204')
+const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x6F12C67cAd3e566B60A6AE0146761110F1Ea6Eb2')
 
-  let hash = metadataUri.slice(7)
-  let data = ipfs.cat(hash)
+export function handleProxyDeployed(event: ProxyDeployed): void {
+  if (event.params.implementation.equals(MASTER_SPACE)) {
+    SpaceTemplate.create(event.params.proxy)
+  } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_AVATAR)) {
+    let executionStrategyContract = AvatarExecutionStrategy.bind(event.params.proxy)
+    let typeResult = executionStrategyContract.try_getStrategyType()
+    let quorumResult = executionStrategyContract.try_quorum()
+    if (typeResult.reverted || quorumResult.reverted) return
 
-  let value = json.try_fromBytes(data as Bytes)
-  let obj = value.value.toObject()
-  let name = obj.get('name')
-  let description = obj.get('description')
-  let externalUrl = obj.get('external_url')
-  let properties = obj.get('properties')
-
-  if (name) space.name = name.toString()
-  space.about = description ? description.toString() : ''
-  space.external_url = externalUrl ? externalUrl.toString() : ''
-
-  if (properties) {
-    const propertiesObj = properties.toObject()
-
-    let github = propertiesObj.get('github')
-    let twitter = propertiesObj.get('twitter')
-    let discord = propertiesObj.get('discord')
-    let wallets = propertiesObj.get('wallets')
-
-    space.github = github ? github.toString() : ''
-    space.twitter = twitter ? twitter.toString() : ''
-    space.discord = discord ? discord.toString() : ''
-    space.wallet = wallets && wallets.toArray().length > 0 ? wallets.toArray()[0].toString() : ''
-  } else {
-    space.github = ''
-    space.twitter = ''
-    space.discord = ''
-    space.wallet = ''
+    let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
+    executionStrategy.type = typeResult.value
+    executionStrategy.quorum = new BigDecimal(quorumResult.value)
+    executionStrategy.save()
   }
 }
 
@@ -57,37 +40,26 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   space.voting_delay = event.params.votingDelay.toI32()
   space.min_voting_period = event.params.minVotingDuration.toI32()
   space.max_voting_period = event.params.maxVotingDuration.toI32()
-  space.proposal_threshold = event.params.proposalThreshold.toBigDecimal()
+  space.proposal_threshold = new BigDecimal(new BigInt(0))
   space.quorum = new BigDecimal(new BigInt(0))
   space.strategies = event.params.votingStrategies.map<Bytes>((strategy) => strategy.addy)
   space.strategies_params = event.params.votingStrategies.map<string>((strategy) =>
     strategy.params.toHexString()
   )
-  space.strategies_metadata = event.params.votingStrategyMetadata.map<string>((metadata) =>
-    metadata.toHexString()
-  )
+  space.validation_strategy = event.params.proposalValidationStrategy.addy
+  space.validation_strategy_params = event.params.proposalValidationStrategy.params.toHexString()
+
+  // NOTE: for now we are still using it as raw data, instead of URI
+  space.strategies_metadata = event.params.votingStrategyMetadataURIs
   space.authenticators = event.params.authenticators.map<Bytes>((address) => address)
-  space.executors = event.params.executionStrategies.map<Bytes>((strategy) => strategy.addy)
   space.proposal_count = 0
   space.vote_count = 0
   space.created = event.block.timestamp.toI32()
   space.tx = event.transaction.hash
 
-  space.executors_types = event.params.executionStrategies.map<string>((strategy) => {
-    let executionStrategyContract = IExecutionStrategy.bind(
-      Address.fromString(strategy.addy.toHexString())
-    )
-
-    let typeResult = executionStrategyContract.try_getStrategyType()
-    if (typeResult.reverted) return ''
-    return typeResult.value
-  })
-
-  updateSpaceMetadata(space, event.params.metadataUri)
+  updateSpaceMetadata(space, event.params.metadataURI)
 
   space.save()
-
-  SpaceTemplate.create(event.params.space)
 }
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -122,10 +94,11 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.tx = event.transaction.hash
   proposal.vote_count = 0
 
-  let spaceContract = SpaceContract.bind(Address.fromString(space.id))
-  let quorumResult = spaceContract.try_quorum(event.params.nextProposalId)
-  if (!quorumResult.reverted) {
-    proposal.quorum = new BigDecimal(quorumResult.value)
+  let executionStrategy = ExecutionStrategy.load(
+    event.params.proposal.executionStrategy.toHexString()
+  )
+  if (executionStrategy !== null) {
+    proposal.quorum = executionStrategy.quorum
   }
 
   if (metadataUri.startsWith('ipfs://')) {
@@ -180,19 +153,19 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   proposal.save()
 }
 
-export function handleVoteCreated(event: VoteCreated): void {
+export function handleVoteCreated(event: VoteCast): void {
   let space = Space.load(event.address.toHexString())
   if (space == null) {
     return
   }
 
   // Swap For/Against
-  let choice = event.params.vote.choice
-  if (event.params.vote.choice === 0) choice = 2
-  if (event.params.vote.choice === 1) choice = 1
-  if (event.params.vote.choice === 2) choice = 3
+  let choice = event.params.choice
+  if (event.params.choice === 0) choice = 2
+  if (event.params.choice === 1) choice = 1
+  if (event.params.choice === 2) choice = 3
 
-  let vp = event.params.vote.votingPower.toBigDecimal()
+  let vp = event.params.votingPower.toBigDecimal()
 
   let vote = new Vote(
     `${space.id}/${event.params.proposalId}/${event.params.voterAddress.toHexString()}`
@@ -231,13 +204,13 @@ export function handleVoteCreated(event: VoteCreated): void {
   user.save()
 }
 
-export function handleMetadataUriUpdated(event: MetadataUriUpdated): void {
+export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {
   let space = Space.load(event.address.toHexString())
   if (space == null) {
     return
   }
 
-  updateSpaceMetadata(space, event.params.newMetadataUri)
+  updateSpaceMetadata(space, event.params.newMetadataURI)
 
   space.save()
 }

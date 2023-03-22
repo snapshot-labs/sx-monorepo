@@ -17,12 +17,20 @@ type Space @entity {
   strategies_params: [String!]!
   strategies_metadata: [String!]!
   authenticators: [Bytes!]!
+  validation_strategy: Bytes!
+  validation_strategy_params: String!
   executors: [Bytes!]!
   executors_types: [String!]!
   proposal_count: Int!
   vote_count: Int!
   created: Int!
   tx: Bytes!
+}
+
+type ExecutionStrategy @entity {
+  id: ID!
+  type: String!
+  quorum: BigDecimal!
 }
 
 type Proposal @entity {

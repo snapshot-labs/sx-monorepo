@@ -1,5 +1,31 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_target",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_spaces",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_quorum",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "inputs": [],
     "name": "ExecutionFailed",
     "type": "error"
@@ -19,6 +45,133 @@
     ],
     "name": "InvalidProposalStatus",
     "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSpace",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_target",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "_spaces",
+        "type": "address[]"
+      }
+    ],
+    "name": "AvatarExecutionStrategySetUp",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "version",
+        "type": "uint8"
+      }
+    ],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "space",
+        "type": "address"
+      }
+    ],
+    "name": "SpaceDisabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "space",
+        "type": "address"
+      }
+    ],
+    "name": "SpaceEnabled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newTarget",
+        "type": "address"
+      }
+    ],
+    "name": "TargetSet",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "space",
+        "type": "address"
+      }
+    ],
+    "name": "disableSpace",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "space",
+        "type": "address"
+      }
+    ],
+    "name": "enableSpace",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -50,21 +203,9 @@
             "type": "bytes32"
           },
           {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy",
+            "internalType": "contract IExecutionStrategy",
             "name": "executionStrategy",
-            "type": "tuple"
+            "type": "address"
           },
           {
             "internalType": "address",
@@ -154,21 +295,9 @@
             "type": "bytes32"
           },
           {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy",
+            "internalType": "contract IExecutionStrategy",
             "name": "executionStrategy",
-            "type": "tuple"
+            "type": "address"
           },
           {
             "internalType": "address",
@@ -230,85 +359,53 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "getStrategyType",
+    "outputs": [
       {
-        "components": [
-          {
-            "internalType": "uint32",
-            "name": "snapshotTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "startTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "minEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "maxEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "executionPayloadHash",
-            "type": "bytes32"
-          },
-          {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy",
-            "name": "executionStrategy",
-            "type": "tuple"
-          },
-          {
-            "internalType": "address",
-            "name": "author",
-            "type": "address"
-          },
-          {
-            "internalType": "enum FinalizationStatus",
-            "name": "finalizationStatus",
-            "type": "uint8"
-          },
-          {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy[]",
-            "name": "votingStrategies",
-            "type": "tuple[]"
-          }
-        ],
-        "internalType": "struct Proposal",
-        "name": "proposal",
-        "type": "tuple"
+        "internalType": "string",
+        "name": "",
+        "type": "string"
       }
     ],
-    "name": "getQuorum",
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "space",
+        "type": "address"
+      }
+    ],
+    "name": "isSpaceEnabled",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "quorum",
     "outputs": [
       {
         "internalType": "uint256",
@@ -321,15 +418,61 @@
   },
   {
     "inputs": [],
-    "name": "getStrategyType",
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_target",
+        "type": "address"
+      }
+    ],
+    "name": "setTarget",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "initParams",
+        "type": "bytes"
+      }
+    ],
+    "name": "setUp",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "target",
     "outputs": [
       {
-        "internalType": "string",
+        "internalType": "address",
         "name": "",
-        "type": "string"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

@@ -3,81 +3,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_controller",
-        "type": "address"
-      },
-      {
-        "internalType": "uint32",
-        "name": "_votingDelay",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint32",
-        "name": "_minVotingDuration",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint32",
-        "name": "_maxVotingDuration",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_proposalThreshold",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "addy",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct Strategy[]",
-        "name": "_votingStrategies",
-        "type": "tuple[]"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "address[]",
-        "name": "_authenticators",
-        "type": "address[]"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "addy",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct Strategy[]",
-        "name": "_executionStrategies",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "auth",
         "type": "address"
       }
@@ -104,6 +29,11 @@
   {
     "inputs": [],
     "name": "ExecutionStrategyNotWhitelisted",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FailedToPassProposalValidation",
     "type": "error"
   },
   {
@@ -156,7 +86,7 @@
         "type": "uint256"
       }
     ],
-    "name": "InvalidVotingStrategyIndex",
+    "name": "InvalidStrategyIndex",
     "type": "error"
   },
   {
@@ -172,17 +102,6 @@
   {
     "inputs": [],
     "name": "ProposalFinalized",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "votingPower",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProposalThresholdNotReached",
     "type": "error"
   },
   {
@@ -220,8 +139,27 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "previousAdmin",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAdmin",
+        "type": "address"
+      }
+    ],
+    "name": "AdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address[]",
-        "name": "authenticators",
+        "name": "newAuthenticators",
         "type": "address[]"
       }
     ],
@@ -245,13 +183,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
-        "name": "newController",
+        "name": "beacon",
         "type": "address"
       }
     ],
-    "name": "ControllerUpdated",
+    "name": "BeaconUpgraded",
     "type": "event"
   },
   {
@@ -272,8 +210,14 @@
         ],
         "indexed": false,
         "internalType": "struct Strategy[]",
-        "name": "executionStrategies",
+        "name": "newExecutionStrategies",
         "type": "tuple[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "string[]",
+        "name": "newExecutionStrategyMetadataURIs",
+        "type": "string[]"
       }
     ],
     "name": "ExecutionStrategiesAdded",
@@ -285,11 +229,24 @@
       {
         "indexed": false,
         "internalType": "uint8[]",
-        "name": "executionStrategies",
+        "name": "executionStrategyIndices",
         "type": "uint8[]"
       }
     ],
     "name": "ExecutionStrategiesRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "version",
+        "type": "uint8"
+      }
+    ],
+    "name": "Initialized",
     "type": "event"
   },
   {
@@ -311,11 +268,11 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "newMetadataUri",
+        "name": "newMetadataURI",
         "type": "string"
       }
     ],
-    "name": "MetadataUriUpdated",
+    "name": "MetadataURIUpdated",
     "type": "event"
   },
   {
@@ -406,21 +363,9 @@
             "type": "bytes32"
           },
           {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy",
+            "internalType": "contract IExecutionStrategy",
             "name": "executionStrategy",
-            "type": "tuple"
+            "type": "address"
           },
           {
             "internalType": "address",
@@ -490,28 +435,15 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newProposalThreshold",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProposalThresholdUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
         "name": "proposalId",
         "type": "uint256"
       },
       {
         "components": [
           {
-            "internalType": "uint8",
-            "name": "index",
-            "type": "uint8"
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
           },
           {
             "internalType": "bytes",
@@ -520,18 +452,43 @@
           }
         ],
         "indexed": false,
-        "internalType": "struct IndexedStrategy",
-        "name": "newStrategy",
+        "internalType": "struct Strategy",
+        "name": "newExecutionStrategy",
         "type": "tuple"
       },
       {
         "indexed": false,
         "internalType": "string",
-        "name": "newMetadataUri",
+        "name": "newMetadataURI",
         "type": "string"
       }
     ],
     "name": "ProposalUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct Strategy",
+        "name": "newProposalValidationStrategy",
+        "type": "tuple"
+      }
+    ],
+    "name": "ProposalValidationStrategyUpdated",
     "type": "event"
   },
   {
@@ -552,6 +509,110 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "space",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "votingDelay",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "minVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "maxVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct Strategy",
+        "name": "proposalValidationStrategy",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataURI",
+        "type": "string"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct Strategy[]",
+        "name": "votingStrategies",
+        "type": "tuple[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "string[]",
+        "name": "votingStrategyMetadataURIs",
+        "type": "string[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "authenticators",
+        "type": "address[]"
+      }
+    ],
+    "name": "SpaceCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "implementation",
+        "type": "address"
+      }
+    ],
+    "name": "Upgraded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "proposalId",
         "type": "uint256"
@@ -563,31 +624,56 @@
         "type": "address"
       },
       {
-        "components": [
-          {
-            "internalType": "enum Choice",
-            "name": "choice",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "votingPower",
-            "type": "uint256"
-          }
-        ],
         "indexed": false,
-        "internalType": "struct Vote",
-        "name": "vote",
-        "type": "tuple"
+        "internalType": "enum Choice",
+        "name": "choice",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "votingPower",
+        "type": "uint256"
+      }
+    ],
+    "name": "VoteCast",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "voterAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum Choice",
+        "name": "choice",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "votingPower",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "string",
-        "name": "voteMetadataUri",
+        "name": "metadataUri",
         "type": "string"
       }
     ],
-    "name": "VoteCreated",
+    "name": "VoteCastWithMetadata",
     "type": "event"
   },
   {
@@ -621,14 +707,14 @@
         ],
         "indexed": false,
         "internalType": "struct Strategy[]",
-        "name": "votingStrategies",
+        "name": "newVotingStrategies",
         "type": "tuple[]"
       },
       {
         "indexed": false,
-        "internalType": "bytes[]",
-        "name": "data",
-        "type": "bytes[]"
+        "internalType": "string[]",
+        "name": "newVotingStrategyMetadataURIs",
+        "type": "string[]"
       }
     ],
     "name": "VotingStrategiesAdded",
@@ -640,7 +726,7 @@
       {
         "indexed": false,
         "internalType": "uint8[]",
-        "name": "indices",
+        "name": "votingStrategyIndices",
         "type": "uint8[]"
       }
     ],
@@ -676,38 +762,13 @@
           }
         ],
         "internalType": "struct Strategy[]",
-        "name": "_executionStrategies",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "addExecutionStrategies",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "addy",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct Strategy[]",
         "name": "_votingStrategies",
         "type": "tuple[]"
       },
       {
-        "internalType": "bytes[]",
-        "name": "votingStrategyMetadata",
-        "type": "bytes[]"
+        "internalType": "string[]",
+        "name": "votingStrategyMetadataURIs",
+        "type": "string[]"
       }
     ],
     "name": "addVotingStrategies",
@@ -744,19 +805,6 @@
     "name": "execute",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getController",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -797,21 +845,9 @@
             "type": "bytes32"
           },
           {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy",
+            "internalType": "contract IExecutionStrategy",
             "name": "executionStrategy",
-            "type": "tuple"
+            "type": "address"
           },
           {
             "internalType": "address",
@@ -893,6 +929,83 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_votingDelay",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_minVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "_maxVotingDuration",
+        "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct Strategy",
+        "name": "_proposalValidationStrategy",
+        "type": "tuple"
+      },
+      {
+        "internalType": "string",
+        "name": "_metadataURI",
+        "type": "string"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct Strategy[]",
+        "name": "_votingStrategies",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "string[]",
+        "name": "_votingStrategyMetadataURIs",
+        "type": "string[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_authenticators",
+        "type": "address[]"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "maxVotingDuration",
     "outputs": [
@@ -958,6 +1071,24 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "proposalValidationStrategy",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "addy",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "params",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -966,15 +1097,15 @@
       },
       {
         "internalType": "string",
-        "name": "metadataUri",
+        "name": "metadataURI",
         "type": "string"
       },
       {
         "components": [
           {
-            "internalType": "uint8",
-            "name": "index",
-            "type": "uint8"
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
           },
           {
             "internalType": "bytes",
@@ -982,26 +1113,14 @@
             "type": "bytes"
           }
         ],
-        "internalType": "struct IndexedStrategy",
+        "internalType": "struct Strategy",
         "name": "executionStrategy",
         "type": "tuple"
       },
       {
-        "components": [
-          {
-            "internalType": "uint8",
-            "name": "index",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct IndexedStrategy[]",
-        "name": "userVotingStrategies",
-        "type": "tuple[]"
+        "internalType": "bytes",
+        "name": "userParams",
+        "type": "bytes"
       }
     ],
     "name": "propose",
@@ -1010,19 +1129,13 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "proposalId",
-        "type": "uint256"
-      }
-    ],
-    "name": "quorum",
+    "inputs": [],
+    "name": "proxiableUUID",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "",
-        "type": "uint256"
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",
@@ -1037,19 +1150,6 @@
       }
     ],
     "name": "removeAuthenticators",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint8[]",
-        "name": "_executionStrategies",
-        "type": "uint8[]"
-      }
-    ],
-    "name": "removeExecutionStrategies",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1077,19 +1177,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_controller",
-        "type": "address"
-      }
-    ],
-    "name": "setController",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint32",
         "name": "_maxVotingDuration",
         "type": "uint32"
@@ -1104,11 +1191,11 @@
     "inputs": [
       {
         "internalType": "string",
-        "name": "_metadataUri",
+        "name": "_metadataURI",
         "type": "string"
       }
     ],
-    "name": "setMetadataUri",
+    "name": "setMetadataURI",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1129,12 +1216,24 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_proposalThreshold",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "params",
+            "type": "bytes"
+          }
+        ],
+        "internalType": "struct Strategy",
+        "name": "_proposalValidationStrategy",
+        "type": "tuple"
       }
     ],
-    "name": "setProposalThreshold",
+    "name": "setProposalValidationStrategy",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1180,9 +1279,9 @@
       {
         "components": [
           {
-            "internalType": "uint8",
-            "name": "index",
-            "type": "uint8"
+            "internalType": "address",
+            "name": "addy",
+            "type": "address"
           },
           {
             "internalType": "bytes",
@@ -1190,19 +1289,50 @@
             "type": "bytes"
           }
         ],
-        "internalType": "struct IndexedStrategy",
+        "internalType": "struct Strategy",
         "name": "executionStrategy",
         "type": "tuple"
       },
       {
         "internalType": "string",
-        "name": "metadataUri",
+        "name": "metadataURI",
         "type": "string"
       }
     ],
     "name": "updateProposal",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newImplementation",
+        "type": "address"
+      }
+    ],
+    "name": "upgradeTo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newImplementation",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "upgradeToAndCall",
+    "outputs": [],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -1241,7 +1371,7 @@
       },
       {
         "internalType": "string",
-        "name": "voteMetadataUri",
+        "name": "metadataUri",
         "type": "string"
       }
     ],
@@ -1258,6 +1388,30 @@
         "internalType": "uint32",
         "name": "",
         "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "votingStrategies",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "addy",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "params",
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",

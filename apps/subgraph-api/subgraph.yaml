@@ -3,12 +3,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: SpaceFactory
+    name: ProxyFactory
     network: goerli
     source:
-      address: '0xfC38E50eA8fc64Fb68B9fece13b16404B8D43864'
-      abi: SpaceFactory
-      startBlock: 8577681
+      address: '0x12A1FfFFfd70677939D61d641eA043bc9060c718'
+      abi: ProxyFactory
+      startBlock: 8698550
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -16,13 +16,13 @@ dataSources:
       entities:
         - SpaceCreated
       abis:
-        - name: SpaceFactory
-          file: ./abis/SpaceFactory.json
-        - name: IExecutionStrategy
-          file: ./abis/IExecutionStrategy.json
+        - name: ProxyFactory
+          file: ./abis/ProxyFactory.json
+        - name: AvatarExecutionStrategy
+          file: ./abis/AvatarExecutionStrategy.json
       eventHandlers:
-        - event: SpaceCreated(address,address,uint32,uint32,uint32,uint256,string,(address,bytes)[],bytes[],address[],(address,bytes)[])
-          handler: handleSpaceCreated
+        - event: ProxyDeployed(address,address)
+          handler: handleProxyDeployed
       file: ./src/mapping.ts
 templates:
   - kind: ethereum
@@ -42,12 +42,14 @@ templates:
         - name: Space
           file: ./abis/Space.json
       eventHandlers:
-        - event: ProposalCreated(uint256,address,(uint32,uint32,uint32,uint32,bytes32,(address,bytes),address,uint8,(address,bytes)[]),string,bytes)
+        - event: SpaceCreated(address,address,uint32,uint32,uint32,(address,bytes),string,(address,bytes)[],string[],address[])
+          handler: handleSpaceCreated
+        - event: ProposalCreated(uint256,address,(uint32,uint32,uint32,uint32,bytes32,address,address,uint8,(address,bytes)[]),string,bytes)
           handler: handleProposalCreated
         - event: ProposalExecuted(uint256)
           handler: handleProposalExecuted
-        - event: VoteCreated(uint256,address,(uint8,uint256),string)
+        - event: VoteCast(uint256,address,uint8,uint256)
           handler: handleVoteCreated
-        - event: MetadataUriUpdated(string)
+        - event: MetadataURIUpdated(string)
           handler: handleMetadataUriUpdated
       file: ./src/mapping.ts
