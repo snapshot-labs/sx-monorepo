@@ -605,10 +605,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@snapshot-labs/sx@^0.1.0-beta.25":
-  version "0.1.0-beta.25"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.25.tgz#fdd7ddf89d15d05024cb0131570754e39f444ffb"
-  integrity sha512-dEwZ0+yd6lCdTZmEREdD/tmZQgF1AiBilkjpvpTb2v15/4fWhC9iqrixbWFjrRuBazZvf4kDj3gQshv5woYBcg==
+"@snapshot-labs/sx@^0.1.0-beta.26":
+  version "0.1.0-beta.26"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.26.tgz#ac755a7228dd676b46eeaa15ac41ff3968e7802e"
+  integrity sha512-V3IGK5L0RZElqgalrEiNcSsswnokoEpoNTM47dCml5ZOfGFCyLqcwbU7GasDc2ZphzGNLSnsSa234FQW8wEYAA==
   dependencies:
     "@ethereumjs/block" "^3.6.3"
     "@ethereumjs/common" "^2.6.5"
