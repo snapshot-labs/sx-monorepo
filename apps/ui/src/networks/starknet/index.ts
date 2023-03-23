@@ -11,35 +11,36 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   const l1ChainId = 5;
 
   const provider = createProvider();
+  const helpers = {
+    pin: async (content: any) => {
+      const pinned = await pin(content);
+      if (!pinned) throw new Error('Failed to pin');
+
+      return {
+        provider: pinned.provider,
+        cid: pinned.cid
+      };
+    },
+    waitForTransaction: txId =>
+      provider.waitForTransaction(txId, {
+        successStates: [TransactionStatus.ACCEPTED_ON_L1, TransactionStatus.ACCEPTED_ON_L2]
+      }),
+    getExplorerUrl: (id, type) => {
+      let dataType: 'tx' | 'contract' = 'tx';
+      if (['address', 'contract'].includes(type)) dataType = 'contract';
+
+      return `https://testnet-2.starkscan.co/${dataType}/${id}`;
+    }
+  };
 
   return {
     name: 'Starknet (testnet2)',
     baseNetworkId: 'gor',
     hasReceive: true,
     managerConnectors: ['argentx'],
-    actions: createActions(provider, { l1ChainId }),
+    actions: createActions(provider, helpers, { l1ChainId }),
     api: createApi(constants.API_URL, networkId),
     constants,
-    helpers: {
-      pin: async (content: any) => {
-        const pinned = await pin(content);
-        if (!pinned) throw new Error('Failed to pin');
-
-        return {
-          provider: pinned.provider,
-          cid: pinned.cid
-        };
-      },
-      waitForTransaction: txId =>
-        provider.waitForTransaction(txId, {
-          successStates: [TransactionStatus.ACCEPTED_ON_L1, TransactionStatus.ACCEPTED_ON_L2]
-        }),
-      getExplorerUrl: (id, type) => {
-        let dataType: 'tx' | 'contract' = 'tx';
-        if (['address', 'contract'].includes(type)) dataType = 'contract';
-
-        return `https://testnet-2.starkscan.co/${dataType}/${id}`;
-      }
-    }
+    helpers
   };
 }

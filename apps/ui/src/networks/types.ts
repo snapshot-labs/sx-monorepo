@@ -1,7 +1,7 @@
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
-import type { Space, Proposal, Vote, User, Choice, NetworkID } from '@/types';
+import type { Space, SpaceMetadata, Proposal, Vote, User, Choice, NetworkID } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
 export type Connector =
@@ -15,6 +15,7 @@ export type Connector =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  type?: string;
   paramsDefinition: any;
   generateSummary?: (params: Record<string, any>) => string;
   generateParams?: (params: Record<string, any>) => any[];
@@ -23,6 +24,7 @@ export type StrategyTemplate = {
     client: any,
     signer: Signer,
     controller: string,
+    spaceAddress: string,
     params: Record<string, any>
   ) => Promise<string>;
 };
@@ -52,12 +54,13 @@ export type NetworkActions = {
       proposalThreshold: bigint;
       quorum?: bigint;
       authenticators: StrategyConfig[];
+      validationStrategy: StrategyConfig;
       votingStrategies: StrategyConfig[];
       executionStrategies: StrategyConfig[];
-      metadataUri: string;
+      metadata: SpaceMetadata;
     }
   );
-  setMetadataUri(web3: Web3Provider, spaceId: string, metadataUri: string);
+  setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
   propose(
     web3: Web3Provider,
     account: string,
@@ -90,6 +93,12 @@ export type NetworkApi = {
   loadUser(userId: string): Promise<User>;
 };
 
+export type NetworkHelpers = {
+  pin: (content: any) => Promise<{ cid: string; provider: string }>;
+  waitForTransaction(txId: string): Promise<any>;
+  getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract'): string;
+};
+
 export type Network = {
   name: string;
   baseNetworkId?: NetworkID;
@@ -106,12 +115,9 @@ export type Network = {
     STRATEGIES: { [key: string]: string };
     EXECUTORS: { [key: string]: string };
     EDITOR_AUTHENTICATORS: StrategyTemplate[];
+    EDITOR_PROPOSAL_VALIDATIONS: StrategyTemplate[];
     EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
     EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
   };
-  helpers: {
-    pin: (content: any) => Promise<{ cid: string; provider: string }>;
-    waitForTransaction(txId: string): Promise<any>;
-    getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract'): string;
-  };
+  helpers: NetworkHelpers;
 };

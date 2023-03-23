@@ -6,13 +6,13 @@ import {
   getStarknetStrategy
 } from '@snapshot-labs/sx';
 import { SUPPORTED_AUTHENTICATORS, SUPPORTED_EXECUTORS, SUPPORTED_STRATEGIES } from './constants';
-import { verifyNetwork } from '@/helpers/utils';
+import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import type { NetworkActions, StrategyConfig, VotingPower } from '@/networks/types';
-import type { Space, Proposal } from '@/types';
+import type { NetworkActions, NetworkHelpers, StrategyConfig, VotingPower } from '@/networks/types';
+import type { Space, SpaceMetadata, Proposal } from '@/types';
 
 const VANILLA_EXECUTOR = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
 const ZODIAC_EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
@@ -55,6 +55,7 @@ function pickAuthenticatorAndStrategies(authenticators: string[], strategies: st
 
 export function createActions(
   starkProvider: Provider,
+  helpers: NetworkHelpers,
   { l1ChainId }: { l1ChainId: number }
 ): NetworkActions {
   const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
@@ -79,9 +80,10 @@ export function createActions(
         proposalThreshold: bigint;
         quorum: bigint;
         authenticators: StrategyConfig[];
+        validationStrategy: StrategyConfig;
         votingStrategies: StrategyConfig[];
         executionStrategies: StrategyConfig[];
-        metadataUri: string;
+        metadata: SpaceMetadata;
       }
     ) {
       const spaceManager = new clients.SpaceManager({
@@ -90,6 +92,8 @@ export function createActions(
         disableEstimation: true
       });
 
+      const pinned = await helpers.pin(createErc1155Metadata(params.metadata));
+
       return spaceManager.deploySpace({
         ...params,
         authenticators: params.authenticators.map(config => config.address),
@@ -97,17 +101,20 @@ export function createActions(
         votingStrategiesParams: params.votingStrategies.map(strategy =>
           strategy.generateParams ? strategy.generateParams(strategy.params) : []
         ),
-        executionStrategies: params.executionStrategies.map(strategy => strategy.address)
+        executionStrategies: params.executionStrategies.map(strategy => strategy.address),
+        metadataUri: `ipfs://${pinned.cid}`
       });
     },
-    setMetadataUri: async (web3: any, spaceId: string, metadataUri: string) => {
+    setMetadata: async (web3: any, space: Space, metadata: SpaceMetadata) => {
       const spaceManager = new clients.SpaceManager({
         starkProvider,
         account: web3.provider.account,
         disableEstimation: true
       });
 
-      return spaceManager.setMetadataUri(spaceId, metadataUri);
+      const pinned = await helpers.pin(createErc1155Metadata(metadata));
+
+      return spaceManager.setMetadataUri(space.id, `ipfs://${pinned.cid}`);
     },
     propose: async (
       web3: Web3Provider,

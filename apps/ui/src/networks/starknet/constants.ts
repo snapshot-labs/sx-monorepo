@@ -49,6 +49,8 @@ export const EDITOR_AUTHENTICATORS = [
   }
 ];
 
+export const EDITOR_PROPOSAL_VALIDATIONS = [];
+
 export const EDITOR_VOTING_STRATEGIES = [
   {
     address: '0x58623786b93d9b6ed1f83cec5c6fa6bea5f399d2795ee56a6123bdd83f5aa48',

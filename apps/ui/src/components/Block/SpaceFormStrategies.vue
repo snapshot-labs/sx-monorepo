@@ -2,12 +2,18 @@
 import { ref, computed, Ref } from 'vue';
 import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
-const props = defineProps<{
-  modelValue: StrategyConfig[];
-  title: string;
-  description: string;
-  availableStrategies: StrategyTemplate[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: StrategyConfig[];
+    limit?: number;
+    title: string;
+    description: string;
+    availableStrategies: StrategyTemplate[];
+  }>(),
+  {
+    limit: Infinity
+  }
+);
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: StrategyConfig[]);
@@ -21,7 +27,11 @@ const activeStrategies = computed({
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
 const editStrategyModalOpen = ref(false);
 
+const limitReached = computed(() => activeStrategies.value.length >= props.limit);
+
 function addStrategy(strategy: StrategyTemplate) {
+  if (limitReached.value) return;
+
   const strategyConfig = {
     id: crypto.randomUUID(),
     params: {},
@@ -101,7 +111,11 @@ function handleStrategySave(value: Record<string, any>) {
         <button
           v-for="strategy in availableStrategies"
           :key="strategy.address"
+          :disabled="limitReached"
           class="flex items-center rounded-lg border cursor-pointer px-3 py-2 text-skin-link"
+          :class="{
+            'opacity-50 cursor-not-allowed': limitReached
+          }"
           @click="addStrategy(strategy)"
         >
           <IH-plus-circle />

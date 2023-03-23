@@ -1,65 +1,101 @@
+import { clients } from '@snapshot-labs/sx';
 import { shorten } from '@/helpers/utils';
 import type { Signer } from '@ethersproject/abstract-signer';
 
 export const API_URL = 'https://api.thegraph.com/subgraphs/name/snapshot-labs/sx-goerli';
 
 export const SUPPORTED_AUTHENTICATORS = {
-  '0xcc3fb327de5428d182ba2e739aea5978c0e2ce35': true,
-  '0x277f388b77cd36fff1c0e976c49a7c54413a449a': true
+  '0xddb36b865a1021524b936fb29fcba5fac073db74': true,
+  '0xc537d997ddc783e071f82ccbfaa0d768d310001b': true
 };
 
 export const SUPPORTED_STRATEGIES = {
-  '0xf3e55d22845689be3e062975444d09799e522a6c': true,
-  '0x0bed117707f698fccb68223de297bf3e3df7082c': true,
-  '0x95287283ed7c583120b06ff48a655062976ac41c': true
+  '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': true,
+  '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': true,
+  '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': true,
+  '0xf50bf15e9fe61e27625a4ecdfc23211297e8be85': true
 };
 
 export const SUPPORTED_EXECUTORS = {
-  '0x6241b5c89350bb3c465179706cf26050ea32444f': true
+  SimpleQuorumAvatar: true
 };
 
 export const RELAYER_AUTHENTICATORS = {
-  '0x277f388b77cd36fff1c0e976c49a7c54413a449a': true
+  '0xc537d997ddc783e071f82ccbfaa0d768d310001b': true
 };
 
 export const AUTHS = {
   '0xdd66652e93293c32aa3288509d9a46c785e3f786': 'Vanilla',
-  '0x277f388b77cd36fff1c0e976c49a7c54413a449a': 'Ethereum signature',
-  '0xcc3fb327de5428d182ba2e739aea5978c0e2ce35': 'Ethereum transaction'
+  '0xc537d997ddc783e071f82ccbfaa0d768d310001b': 'Ethereum signature',
+  '0xddb36b865a1021524b936fb29fcba5fac073db74': 'Ethereum transaction'
 };
 
 export const STRATEGIES = {
-  '0xf3e55d22845689be3e062975444d09799e522a6c': 'Vanilla',
-  '0x0bed117707f698fccb68223de297bf3e3df7082c': 'Delegated Comp Token',
-  '0x95287283ed7c583120b06ff48a655062976ac41c': 'Whitelist'
+  '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': 'Vanilla',
+  '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': 'Delegated Comp Token',
+  '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': 'Oz Votes',
+  '0xf50bf15e9fe61e27625a4ecdfc23211297e8be85': 'Whitelist'
 };
 
-export const EXECUTORS = {
-  '0x6241b5c89350bb3c465179706cf26050ea32444f': 'Vanilla'
-};
+export const EXECUTORS = {};
 
 export const EDITOR_AUTHENTICATORS = [
   {
-    address: '0xcc3fb327de5428d182ba2e739aea5978c0e2ce35',
+    address: '0xddb36b865a1021524b936fb29fcba5fac073db74',
     name: 'Ethereum transaction',
     paramsDefinition: null
   },
   {
-    address: '0x277f388b77cd36fff1c0e976c49a7c54413a449a',
+    address: '0xc537d997ddc783e071f82ccbfaa0d768d310001b',
     name: 'Ethereum signature',
+    paramsDefinition: null
+  }
+];
+
+export const EDITOR_PROPOSAL_VALIDATIONS = [
+  {
+    address: '0x80d9665e5761a778a97283dec14581c4c0bf8d51',
+    name: 'Vanilla',
     paramsDefinition: null
   }
 ];
 
 export const EDITOR_VOTING_STRATEGIES = [
   {
-    address: '0xf3e55d22845689be3e062975444d09799e522a6c',
+    address: '0xeba53160c146cbf77a150e9a218d4c2de5db6b51',
     name: 'Vanilla',
     paramsDefinition: null
   },
   {
-    address: '0x0bed117707f698fccb68223de297bf3e3df7082c',
+    address: '0x343baf4b44f7f79b14301cfa8068e3f8be7470de',
     name: 'Delegated Comp Token',
+    generateSummary: (params: Record<string, any>) =>
+      `(${shorten(params.contractAddress)}, ${params.decimals})`,
+    generateParams: (params: Record<string, any>) => [params.contractAddress],
+    generateMetadata: (params: Record<string, any>) => `0x${params.decimals.toString(16)}`,
+    paramsDefinition: {
+      type: 'object',
+      title: 'Params',
+      additionalProperties: false,
+      required: ['contractAddress', 'decimals'],
+      properties: {
+        contractAddress: {
+          type: 'string',
+          format: 'address',
+          title: 'Token address',
+          examples: ['0x0000…']
+        },
+        decimals: {
+          type: 'integer',
+          title: 'Decimals',
+          examples: ['18']
+        }
+      }
+    }
+  },
+  {
+    address: '0x4aaa33b4367dc5657854bd40738201651ec0cc7b',
+    name: 'Oz Votes',
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.decimals})`,
     generateParams: (params: Record<string, any>) => [params.contractAddress],
@@ -88,28 +124,7 @@ export const EDITOR_VOTING_STRATEGIES = [
 
 export const EDITOR_EXECUTION_STRATEGIES = [
   {
-    address: '0x6241b5c89350bb3c465179706cf26050ea32444f',
-    name: 'Vanilla',
-    generateSummary: (params: Record<string, any>) => `(${params.quorum})`,
-    generateParams: (params: Record<string, any>) => [
-      `0x${params.quorum.toString(16).padStart(64, '0')}`
-    ],
-    paramsDefinition: {
-      type: 'object',
-      title: 'Params',
-      additionalProperties: false,
-      required: ['quorum'],
-      properties: {
-        quorum: {
-          type: 'string',
-          title: 'Quorum',
-          examples: ['1']
-        }
-      }
-    }
-  },
-  {
-    address: '0x87f527c699ce6c7cb65718d5c7d468597d952cab',
+    address: '',
     type: 'SimpleQuorumAvatar',
     name: 'Avatar',
     generateSummary: (params: Record<string, any>) =>
@@ -117,13 +132,24 @@ export const EDITOR_EXECUTION_STRATEGIES = [
     generateParams: (params: Record<string, any>) => [
       `0x${params.quorum.toString(16).padStart(64, '0')}`
     ],
-    deploy: async (client: any, signer: Signer, controller, params: Record<string, any>) => {
-      return client.deployAvatarExecution({
+    deploy: async (
+      client: clients.EvmEthereumTx,
+      signer: Signer,
+      controller: string,
+      spaceAddress: string,
+      params: Record<string, any>
+    ): Promise<string> => {
+      const { address } = await client.deployAvatarExecution({
         signer,
-        controller,
-        target: params.contractAddress,
-        spaces: []
+        params: {
+          controller,
+          target: params.contractAddress,
+          spaces: [spaceAddress],
+          quorum: BigInt(params.quorum)
+        }
       });
+
+      return address;
     },
     paramsDefinition: {
       type: 'object',

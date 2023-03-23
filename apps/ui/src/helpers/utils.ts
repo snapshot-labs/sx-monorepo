@@ -180,7 +180,10 @@ export async function verifyNetwork(web3Provider: Web3Provider, chainId: number)
  * @param metadata space metadata
  * @returns ERC1155 metadata object
  */
-export function createErc1155Metadata(metadata: SpaceMetadata) {
+export function createErc1155Metadata(
+  metadata: SpaceMetadata,
+  extraProperties?: Record<string, any>
+) {
   const wallets: string[] = [];
   if (metadata.walletNetwork && metadata.walletAddress) {
     wallets.push(`${metadata.walletNetwork}:${metadata.walletAddress}`);
@@ -194,7 +197,8 @@ export function createErc1155Metadata(metadata: SpaceMetadata) {
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
-      wallets
+      wallets,
+      ...extraProperties
     }
   };
 }

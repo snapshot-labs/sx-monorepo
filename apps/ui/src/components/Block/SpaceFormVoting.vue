@@ -40,13 +40,13 @@ const definition = {
       title: 'Max. voting duration',
       examples: ['86400']
     },
-    proposalThreshold: {
-      type: 'string',
-      format: 'uint256',
-      title: 'Proposal threshold',
-      examples: ['1']
-    },
     ...(!evmNetworks.includes(props.selectedNetworkId) && {
+      proposalThreshold: {
+        type: 'string',
+        format: 'uint256',
+        title: 'Proposal threshold',
+        examples: ['1']
+      },
       quorum: {
         type: 'string',
         format: 'uint256',
