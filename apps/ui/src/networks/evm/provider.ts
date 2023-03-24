@@ -1,5 +1,5 @@
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 
 export function createProvider(RPC_URL: string) {
-  return new JsonRpcProvider(RPC_URL);
+  return new StaticJsonRpcProvider(RPC_URL);
 }
