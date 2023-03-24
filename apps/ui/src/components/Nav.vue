@@ -70,7 +70,7 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
         v-for="(item, key) in navigationItems"
         :key="key"
         :to="{ name: `${currentRouteName}-${key}` }"
-        class="px-4 py-[7px] space-x-2 text-skin-text flex items-center"
+        class="px-4 py-[6px] space-x-2 text-skin-text flex items-center"
         :class="route.name === `${currentRouteName}-${key}` && 'text-skin-link'"
       >
         <component :is="item.icon" class="inline-block"></component>

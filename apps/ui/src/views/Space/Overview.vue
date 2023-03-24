@@ -83,18 +83,21 @@ const grouped = computed(() => {
           </span>
         </div>
         <div class="space-x-2">
+          <a v-if="space.external_url" :href="space.external_url" target="_blank">
+            <IH-globe-alt class="w-[26px] h-[26px] inline-block text-[#606060]" />
+          </a>
           <a v-if="space.twitter" :href="`https://twitter.com/${space.twitter}`" target="_blank">
-            <img src="~@/assets/twitter.svg" class="w-[28px] h-[28px] inline-block" />
+            <img src="~@/assets/twitter.svg" class="w-[26px] h-[26px] inline-block" />
           </a>
           <a
             v-if="space.discord"
             :href="`https://discord.com/invite/${space.discord}`"
             target="_blank"
           >
-            <img src="~@/assets/discord.svg" class="w-[28px] h-[28px] inline-block" />
+            <img src="~@/assets/discord.svg" class="w-[26px] h-[26px] inline-block" />
           </a>
           <a v-if="space.github" :href="`https://github.com/${space.github}`" target="_blank">
-            <img src="~@/assets/github.svg" class="w-[28px] h-[28px] inline-block" />
+            <img src="~@/assets/github.svg" class="w-[26px] h-[26px] inline-block" />
           </a>
         </div>
       </div>
