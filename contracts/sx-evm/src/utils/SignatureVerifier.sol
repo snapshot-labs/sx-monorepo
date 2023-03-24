@@ -18,7 +18,7 @@ abstract contract SignatureVerifier is EIP712 {
     bytes32 private constant PROPOSE_TYPEHASH =
         keccak256(
             "Propose(address space,address author,string metadataURI,Strategy executionStrategy,"
-            "bytes userParams,uint256 salt)"
+            "bytes userProposalValidationParams,uint256 salt)"
             "Strategy(address addr,bytes params)"
         );
     bytes32 private constant VOTE_TYPEHASH =
@@ -40,8 +40,12 @@ abstract contract SignatureVerifier is EIP712 {
     constructor(string memory name, string memory version) EIP712(name, version) {}
 
     function _verifyProposeSig(uint8 v, bytes32 r, bytes32 s, uint256 salt, address space, bytes memory data) internal {
-        (address author, string memory metadataURI, Strategy memory executionStrategy, bytes memory userParams) = abi
-            .decode(data, (address, string, Strategy, bytes));
+        (
+            address author,
+            string memory metadataURI,
+            Strategy memory executionStrategy,
+            bytes memory userProposalValidationParams
+        ) = abi.decode(data, (address, string, Strategy, bytes));
 
         if (usedSalts[author][salt]) revert SaltAlreadyUsed();
 
@@ -54,7 +58,7 @@ abstract contract SignatureVerifier is EIP712 {
                         author,
                         keccak256(bytes(metadataURI)),
                         executionStrategy.hash(),
-                        keccak256(userParams),
+                        keccak256(userProposalValidationParams),
                         salt
                     )
                 )

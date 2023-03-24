@@ -287,13 +287,13 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
      * @param   author  The address of the proposal creator.
      * @param   metadataURI  The metadata URI for the proposal.
      * @param   executionStrategy  The execution strategy index and associated execution payload to use in the proposal.
-     * @param   userParams  The user provided parameters for proposal validation.
+     * @param   userProposalValidationParams  The user provided parameters for proposal validation.
      */
     function propose(
         address author,
         string calldata metadataURI,
         Strategy calldata executionStrategy,
-        bytes calldata userParams
+        bytes calldata userProposalValidationParams
     ) external override {
         _assertValidAuthenticator();
 
@@ -304,7 +304,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
             !IProposalValidationStrategy(proposalValidationStrategy.addr).validate(
                 author,
                 proposalValidationStrategy.params,
-                userParams
+                userProposalValidationParams
             )
         ) revert FailedToPassProposalValidation();
 
