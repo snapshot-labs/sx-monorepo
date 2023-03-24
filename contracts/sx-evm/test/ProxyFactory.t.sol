@@ -6,6 +6,9 @@ import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy
 import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
+import {
+    VotingPowerProposalValidationStrategy
+} from "../src/proposal-validation-strategies/VotingPowerProposalValidationStrategy.sol";
 import { ProxyFactory } from "../src/ProxyFactory.sol";
 import { Space } from "../src/Space.sol";
 import { IProxyFactoryEvents } from "../src/interfaces/factory/IProxyFactoryEvents.sol";
@@ -19,6 +22,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
     VanillaVotingStrategy public vanillaVotingStrategy;
     VanillaAuthenticator public vanillaAuthenticator;
     VanillaExecutionStrategy public vanillaExecutionStrategy;
+    VotingPowerProposalValidationStrategy public votingPowerProposalValidationStrategy;
     Strategy[] public votingStrategies;
     address[] public authenticators;
     Strategy[] public executionStrategies;
@@ -27,7 +31,6 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
     uint32 public votingDelay;
     uint32 public minVotingDuration;
     uint32 public maxVotingDuration;
-    uint256 public proposalThreshold;
     Strategy public proposalValidationStrategy;
     uint32 public quorum;
     string public metadataURI = "SX-EVM";
@@ -40,15 +43,22 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
         vanillaExecutionStrategy = new VanillaExecutionStrategy(quorum);
+
         owner = address(1);
         votingDelay = 0;
         minVotingDuration = 0;
         maxVotingDuration = 1000;
-        proposalThreshold = 1;
+        uint256 proposalThreshold = 1;
         quorum = 1;
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
         authenticators.push(address(vanillaAuthenticator));
         executionStrategies.push(Strategy(address(vanillaExecutionStrategy), new bytes(0)));
+
+        VotingPowerProposalValidationStrategy validationContract = new VotingPowerProposalValidationStrategy();
+        proposalValidationStrategy = Strategy(
+            address(validationContract),
+            abi.encode(proposalThreshold, votingStrategies)
+        );
     }
 
     function testCreateSpace() public {
@@ -66,7 +76,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
                 votingDelay,
                 minVotingDuration,
                 maxVotingDuration,
-                proposalThreshold,
+                proposalValidationStrategy,
                 metadataURI,
                 votingStrategies,
                 votingStrategyMetadataURIs,
@@ -88,7 +98,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
                 votingDelay,
                 minVotingDuration,
                 maxVotingDuration,
-                proposalThreshold,
+                proposalValidationStrategy,
                 metadataURI,
                 votingStrategies,
                 votingStrategyMetadataURIs,
@@ -109,7 +119,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
                 votingDelay,
                 minVotingDuration,
                 maxVotingDuration,
-                proposalThreshold,
+                proposalValidationStrategy,
                 metadataURI,
                 votingStrategies,
                 votingStrategyMetadataURIs,
@@ -131,7 +141,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
                 votingDelay,
                 minVotingDuration,
                 maxVotingDuration,
-                proposalThreshold,
+                proposalValidationStrategy,
                 metadataURI,
                 votingStrategies,
                 votingStrategyMetadataURIs,

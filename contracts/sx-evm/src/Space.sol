@@ -26,8 +26,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     uint32 public minVotingDuration;
     // Next proposal nonce, increased by one every time a new proposal is created.
     uint256 public nextProposalId;
-    // Minimum voting power required by a user to create a new proposal (used to prevent proposal spamming).
-    uint256 public proposalThreshold;
     // Delay between when the proposal is created and when the voting period starts for this proposal.
     uint32 public votingDelay;
 

@@ -11,8 +11,6 @@ interface ISpaceState {
 
     function nextProposalId() external view returns (uint256);
 
-    function proposalThreshold() external view returns (uint256);
-
     function votingDelay() external view returns (uint32);
 
     function getProposal(uint256 proposalId) external view returns (Proposal memory);
