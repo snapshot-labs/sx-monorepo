@@ -68,6 +68,7 @@ async function handleVoteClick(choice: Choice) {
           <div class="space-x-2 py-2">
             <UiButton
               class="w-full !text-green !border-green !w-[40px] !h-[40px] !px-0"
+              title="For"
               :loading="sendingType === 1"
               @click="handleVoteClick(1)"
             >
@@ -75,6 +76,7 @@ async function handleVoteClick(choice: Choice) {
             </UiButton>
             <UiButton
               class="w-full !text-red !border-red !w-[40px] !h-[40px] !px-0"
+              title="Against"
               :loading="sendingType === 2"
               @click="handleVoteClick(2)"
             >
@@ -82,6 +84,7 @@ async function handleVoteClick(choice: Choice) {
             </UiButton>
             <UiButton
               class="w-full !text-gray-500 !border-gray-500 !w-[40px] !h-[40px] !px-0"
+              title="Abstain"
               :loading="sendingType === 3"
               @click="handleVoteClick(3)"
             >

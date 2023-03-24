@@ -196,6 +196,7 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
             <div class="grid grid-cols-3 gap-2">
               <UiButton
                 class="w-full !text-white !bg-green !border-green"
+                title="For"
                 :primary="true"
                 :loading="sendingType === 1"
                 @click="handleVoteClick(1)"
@@ -204,6 +205,7 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
               </UiButton>
               <UiButton
                 class="w-full !text-white !bg-red !border-red"
+                title="Against"
                 :primary="true"
                 :loading="sendingType === 2"
                 @click="handleVoteClick(2)"
@@ -212,6 +214,7 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
               </UiButton>
               <UiButton
                 class="w-full !text-white !bg-gray-500 !border-gray-500"
+                title="Abstain"
                 :primary="true"
                 :loading="sendingType === 3"
                 @click="handleVoteClick(3)"
