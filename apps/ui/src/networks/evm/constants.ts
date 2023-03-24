@@ -1,6 +1,8 @@
+import { AbiCoder } from '@ethersproject/abi';
 import { clients } from '@snapshot-labs/sx';
 import { shorten } from '@/helpers/utils';
 import type { Signer } from '@ethersproject/abstract-signer';
+import type { StrategyConfig } from '../types';
 
 export const API_URL = 'https://api.thegraph.com/subgraphs/name/snapshot-labs/sx-goerli';
 
@@ -57,6 +59,45 @@ export const EDITOR_PROPOSAL_VALIDATIONS = [
     address: '0x80d9665e5761a778a97283dec14581c4c0bf8d51',
     name: 'Vanilla',
     paramsDefinition: null
+  },
+  {
+    address: '0x03d512E0165d6B53ED2753Df2f3184fBd2b52E48',
+    type: 'VotingPower',
+    name: 'Voting Power',
+    validate: (params: Record<string, any>) => {
+      return params?.strategies?.length > 0;
+    },
+    generateSummary: (params: Record<string, any>) => `(${params.threshold})`,
+    generateParams: (params: Record<string, any>) => {
+      const abiCoder = new AbiCoder();
+
+      const strategies = params.strategies.map((strategy: StrategyConfig) => {
+        return {
+          addy: strategy.address,
+          params: strategy.generateParams ? strategy.generateParams(strategy.params)[0] : '0x00'
+        };
+      });
+
+      return [
+        abiCoder.encode(
+          ['uint256', 'tuple(address addy, bytes params)[]'],
+          [params.threshold, strategies]
+        )
+      ];
+    },
+    paramsDefinition: {
+      type: 'object',
+      title: 'Params',
+      additionalProperties: false,
+      required: ['threshold'],
+      properties: {
+        threshold: {
+          type: 'string',
+          title: 'Proposal threshold',
+          examples: ['1']
+        }
+      }
+    }
   }
 ];
 

@@ -17,6 +17,7 @@ export type StrategyTemplate = {
   name: string;
   type?: string;
   paramsDefinition: any;
+  validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
   generateParams?: (params: Record<string, any>) => any[];
   generateMetadata?: (params: Record<string, any>) => string;

@@ -78,7 +78,7 @@ const metadataForm: SpaceMetadata = reactive(
 );
 const selectedNetworkId: Ref<NetworkID> = ref('gor');
 const authenticators = ref([] as StrategyConfig[]);
-const validationStrategies = ref([] as StrategyConfig[]);
+const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
 const executionStrategies = ref([] as StrategyConfig[]);
 const settingsForm: SpaceSettings = reactive(
@@ -125,7 +125,13 @@ const submitDisabled = computed(() => activePages.value.some(page => !validatePa
 function validatePage(page: PageID) {
   if (page === 'strategies') return votingStrategies.value.length > 0;
   if (page === 'auths') return authenticators.value.length > 0;
-  if (page === 'validations') return validationStrategies.value.length > 0;
+  if (page === 'validations') {
+    if (!validationStrategy.value) return false;
+
+    return validationStrategy.value.validate
+      ? validationStrategy.value.validate(validationStrategy.value.params)
+      : true;
+  }
   if (page === 'executions') return executionStrategies.value.length > 0;
 
   return Object.values(pagesErrors.value[page]).length === 0;
@@ -157,7 +163,7 @@ async function handleSubmit() {
       metadataForm,
       settingsForm,
       authenticators.value,
-      validationStrategies.value[0],
+      validationStrategy.value,
       votingStrategies.value,
       executionStrategies.value
     );
@@ -179,7 +185,7 @@ watch(
 
 watch(selectedNetworkId, () => {
   authenticators.value = [];
-  validationStrategies.value = [];
+  validationStrategy.value = null;
   votingStrategies.value = [];
   executionStrategies.value = [];
 });
@@ -233,11 +239,11 @@ watch(selectedNetworkId, () => {
             title="Authenticators"
             description="Lorem ipsum..."
           />
-          <BlockSpaceFormStrategies
+          <BlockSpaceFormValidation
             v-else-if="currentPage === 'validations'"
-            v-model="validationStrategies"
-            :limit="1"
+            v-model="validationStrategy"
             :available-strategies="selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS"
+            :available-voting-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
             title="Proposal validation"
             description="Lorem ipsum..."
           />
