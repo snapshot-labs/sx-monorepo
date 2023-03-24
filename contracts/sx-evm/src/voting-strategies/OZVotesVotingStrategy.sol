@@ -10,13 +10,13 @@ contract OZVotesVotingStrategy is IVotingStrategy, TimestampResolver {
 
     function getVotingPower(
         uint32 timestamp,
-        address voterAddress,
+        address voter,
         bytes calldata params,
         bytes calldata /* userParams */
     ) external override returns (uint256) {
         address tokenAddress = bytesToAddress(params, 0);
         uint256 blockNumber = resolveSnapshotTimestamp(timestamp);
-        return uint256(IVotes(tokenAddress).getPastVotes(voterAddress, blockNumber));
+        return uint256(IVotes(tokenAddress).getPastVotes(voter, blockNumber));
     }
 
     /// @notice Extracts an address from a byte array

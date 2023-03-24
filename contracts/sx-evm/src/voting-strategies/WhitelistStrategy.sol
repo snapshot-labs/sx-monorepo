@@ -11,12 +11,12 @@ contract WhitelistStrategy is IVotingStrategy {
     }
 
     /**
-     * @notice  Binary search through `members` to find the voting power of `voterAddress`
-     * @param   voterAddress  The voter address
+     * @notice  Binary search through `members` to find the voting power of `voter`
+     * @param   voter  The voter address
      * @param   params  The list of members. Needs to be sorted in ascending `addr` order
-     * @return  uint256  The voting power of `voterAddress` if it exists: else 0
+     * @return  uint256  The voting power of `voter` if it exists: else 0
      */
-    function _getVotingPower(address voterAddress, bytes calldata params) internal pure returns (uint256) {
+    function _getVotingPower(address voter, bytes calldata params) internal pure returns (uint256) {
         Member[] memory members = abi.decode(params, (Member[]));
 
         uint256 high = members.length - 1;
@@ -28,7 +28,7 @@ contract WhitelistStrategy is IVotingStrategy {
             mid = (high + low) / 2; // Expecting high and low to never overflow
             currentAddress = members[mid].addr;
 
-            if (currentAddress < voterAddress) {
+            if (currentAddress < voter) {
                 low = mid + 1;
             } else {
                 high = mid;
@@ -36,7 +36,7 @@ contract WhitelistStrategy is IVotingStrategy {
         }
         if (high > members.length) {
             return (0);
-        } else if (members[high].addr == voterAddress) {
+        } else if (members[high].addr == voter) {
             return (members[high].vp);
         } else {
             return (0);
@@ -45,10 +45,10 @@ contract WhitelistStrategy is IVotingStrategy {
 
     function getVotingPower(
         uint32 /* timestamp */,
-        address voterAddress,
+        address voter,
         bytes calldata params, // Need to be sorted by ascending `addr`s
         bytes calldata /* userParams */
     ) external pure override returns (uint256) {
-        return _getVotingPower(voterAddress, params);
+        return _getVotingPower(voter, params);
     }
 }

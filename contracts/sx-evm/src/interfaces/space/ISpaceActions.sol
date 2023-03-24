@@ -13,7 +13,7 @@ interface ISpaceActions {
     ) external;
 
     function vote(
-        address voterAddress,
+        address voter,
         uint256 proposalId,
         Choice choice,
         IndexedStrategy[] calldata userVotingStrategies,
