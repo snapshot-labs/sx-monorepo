@@ -40,9 +40,13 @@ export function getExecution(space: SpaceExecutionData, transactions: MetaTransa
 }
 
 export function pickAuthenticatorAndStrategies(authenticators: string[], strategies: string[]) {
-  const authenticator = authenticators.find(
+  const supportedAuthenticators = authenticators.filter(
     authenticator => SUPPORTED_AUTHENTICATORS[authenticator]
   );
+
+  const authenticator =
+    supportedAuthenticators.find(authenticator => RELAYER_AUTHENTICATORS[authenticator]) ||
+    supportedAuthenticators[0];
 
   const selectedStrategies = strategies
     .map((strategy, index) => ({ address: strategy, index } as const))
