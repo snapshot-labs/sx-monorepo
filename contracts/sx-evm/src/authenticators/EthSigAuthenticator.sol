@@ -25,7 +25,7 @@ contract EthSigAuthenticator is Authenticator, SignatureVerifier {
         } else if (functionSelector == VOTE_SELECTOR) {
             _verifyVoteSig(v, r, s, target, data);
         } else if (functionSelector == UPDATE_PROPOSAL_SELECTOR) {
-            _verifyUpdateProposalSig(v, r, s, target, data);
+            _verifyUpdateProposalSig(v, r, s, salt, target, data);
         } else {
             revert InvalidFunctionSelector();
         }

@@ -30,7 +30,7 @@ abstract contract SigUtils {
     bytes32 private constant UPDATE_PROPOSAL_TYPEHASH =
         keccak256(
             "updateProposal(address space,address author,uint256 proposalId,"
-            "Strategy executionStrategy,string metadataURI)"
+            "Strategy executionStrategy,string metadataURI,uint256 salt)"
             "Strategy(address addr,bytes params)"
         );
 
@@ -121,7 +121,8 @@ abstract contract SigUtils {
         address author,
         uint256 proposalId,
         Strategy memory executionStrategy,
-        string memory metadataURI
+        string memory metadataURI,
+        uint256 salt
     ) internal view returns (bytes32) {
         bytes32 digest = keccak256(
             abi.encodePacked(
@@ -142,7 +143,8 @@ abstract contract SigUtils {
                         author,
                         proposalId,
                         executionStrategy.hash(),
-                        keccak256(bytes(metadataURI))
+                        keccak256(bytes(metadataURI)),
+                        salt
                     )
                 )
             )

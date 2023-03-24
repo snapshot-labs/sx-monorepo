@@ -315,6 +315,8 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     }
 
     function testAuthenticateUpdateProposal() public {
+        uint256 salt = 0;
+
         space.setVotingDelay(10);
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
 
@@ -324,7 +326,8 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             author,
             proposalId,
             newStrategy,
-            newMetadataURI
+            newMetadataURI,
+            salt
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(AUTHOR_KEY, digest);
 
@@ -334,7 +337,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             v,
             r,
             s,
-            0,
+            salt,
             address(space),
             UPDATE_PROPOSAL_SELECTOR,
             abi.encode(author, proposalId, newStrategy, newMetadataURI)
@@ -342,6 +345,8 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     }
 
     function testAuthenticateUpdateProposalInvalidSignature() public {
+        uint256 salt = 0;
+
         space.setVotingDelay(10);
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
 
@@ -351,7 +356,8 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             author,
             proposalId + 1, // proposalId + 1 will be invalid
             newStrategy,
-            newMetadataURI
+            newMetadataURI,
+            salt
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(AUTHOR_KEY, digest);
 
@@ -360,7 +366,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             v,
             r,
             s,
-            0,
+            salt,
             address(space),
             UPDATE_PROPOSAL_SELECTOR,
             abi.encode(author, proposalId, newStrategy, newMetadataURI)
@@ -377,7 +383,8 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             author,
             proposalId,
             newStrategy,
-            newMetadataURI
+            newMetadataURI,
+            salt
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(AUTHOR_KEY, digest);
 
