@@ -58,6 +58,31 @@ const network = computed(() => getNetwork(props.space.network));
     </div>
 
     <div>
+      <Label :label="'Proposal validation'" sticky />
+      <div class="mx-4 py-3 border-b">
+        <a
+          :href="network.helpers.getExplorerUrl(space.validation_strategy, 'contract')"
+          target="_blank"
+          class="flex"
+        >
+          <h4
+            class="flex-auto"
+            v-text="network.constants.PROPOSAL_VALIDATIONS[space.validation_strategy]"
+          />
+          <div>
+            <Stamp
+              :id="space.validation_strategy"
+              type="avatar"
+              :size="18"
+              class="mr-2 rounded-sm"
+            />
+            {{ shorten(space.validation_strategy) }} <IH-external-link class="inline-block" />
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div>
       <Label :label="'Strategie(s)'" sticky />
       <div v-for="(strategy, i) in space.strategies" :key="i" class="mx-4 py-3 border-b">
         <a

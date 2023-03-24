@@ -117,7 +117,7 @@ export function createActions(
 
       const { useRelayer, authenticator, strategies } = pickAuthenticatorAndStrategies(
         space.authenticators,
-        space.strategies
+        space.voting_power_validation_strategy_strategies
       );
 
       const { executor, executionData } = getExecution(space, transactions);

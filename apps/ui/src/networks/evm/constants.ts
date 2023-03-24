@@ -32,6 +32,11 @@ export const AUTHS = {
   '0xddb36b865a1021524b936fb29fcba5fac073db74': 'Ethereum transaction'
 };
 
+export const PROPOSAL_VALIDATIONS = {
+  '0x80d9665e5761a778a97283dec14581c4c0bf8d51': 'Vanilla',
+  '0x03d512e0165d6b53ed2753df2f3184fbd2b52e48': 'Voting power'
+};
+
 export const STRATEGIES = {
   '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': 'Vanilla',
   '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': 'Delegated Comp Token',

@@ -52,7 +52,7 @@ export function pickAuthenticatorAndStrategies(authenticators: string[], strateg
     .map((strategy, index) => ({ address: strategy, index } as const))
     .filter(({ address }) => SUPPORTED_STRATEGIES[address]);
 
-  if (!authenticator || selectedStrategies.length === 0) {
+  if (!authenticator || (strategies.length !== 0 && selectedStrategies.length === 0)) {
     throw new Error('Unsupported space');
   }
 

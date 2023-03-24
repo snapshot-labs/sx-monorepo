@@ -113,6 +113,7 @@ export type Network = {
     SUPPORTED_STRATEGIES: { [key: string]: boolean };
     SUPPORTED_EXECUTORS: { [key: string]: boolean };
     AUTHS: { [key: string]: string };
+    PROPOSAL_VALIDATIONS: { [key: string]: string };
     STRATEGIES: { [key: string]: string };
     EXECUTORS: { [key: string]: string };
     EDITOR_AUTHENTICATORS: StrategyTemplate[];

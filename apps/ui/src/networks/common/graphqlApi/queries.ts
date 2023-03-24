@@ -196,6 +196,9 @@ export const SPACE_QUERY = gql`
       min_voting_period
       max_voting_period
       proposal_threshold
+      validation_strategy
+      voting_power_validation_strategy_strategies
+      voting_power_validation_strategy_strategies_params
       strategies
       strategies_params
       strategies_metadata
@@ -225,6 +228,9 @@ export const SPACES_QUERY = gql`
       min_voting_period
       max_voting_period
       proposal_threshold
+      validation_strategy
+      voting_power_validation_strategy_strategies
+      voting_power_validation_strategy_strategies_params
       strategies
       strategies_params
       strategies_metadata

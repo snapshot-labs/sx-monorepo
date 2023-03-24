@@ -5,7 +5,7 @@ import type { NetworkID } from '@/types';
 const starknetNetwork = createStarknetNetwork('sn-tn2');
 const evmNetwork = createEvmNetwork('gor');
 
-export const enabledNetworks: NetworkID[] = ['gor', 'sn-tn2'];
+export const enabledNetworks: NetworkID[] = ['gor'];
 
 export const evmNetworks: NetworkID[] = ['gor'];
 

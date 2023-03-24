@@ -69,9 +69,9 @@ async function getVotingPower() {
     const network = getNetwork(space.value.network);
 
     const votingPowers = await network.actions.getVotingPower(
-      space.value.strategies,
-      space.value.strategies_params,
-      space.value.strategies_metadata,
+      space.value.voting_power_validation_strategy_strategies,
+      space.value.voting_power_validation_strategy_strategies_params,
+      [],
       web3.value.account,
       Math.floor(Date.now() / 1000)
     );
