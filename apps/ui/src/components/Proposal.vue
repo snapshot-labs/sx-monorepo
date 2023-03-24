@@ -33,7 +33,7 @@ async function handleVoteClick(choice: Choice) {
               id: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="block"
+          class="block max-w-fit"
         >
           <h3 v-text="proposal.title || `Proposal #${proposal.proposal_id}`" />
         </router-link>
