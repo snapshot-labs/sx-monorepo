@@ -9,7 +9,7 @@ defineProps({
   <h4
     class="eyebrow border-b py-2 px-4 text-skin-text"
     :class="{
-      'sticky top-[72px] bg-skin-bg': sticky
+      'sticky top-[71px] lg:top-[72px] bg-skin-bg': sticky
     }"
     v-text="label"
   />
