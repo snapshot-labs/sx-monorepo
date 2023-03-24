@@ -58,45 +58,6 @@ const definition = computed(() => {
   return {};
 });
 
-function handlePickerClick(field: string) {
-  showPicker.value = true;
-  pickerField.value = field;
-}
-
-function handlePickerSelect(value: string) {
-  showPicker.value = false;
-
-  if (!pickerField.value) return;
-
-  const isTopLevel = pickerField.value === 'to';
-  if (isTopLevel) form[pickerField.value] = value;
-  else form.args[pickerField.value] = value;
-}
-
-function handleSubmit() {
-  const tx = createContractCallTransaction({ form: clone(form) });
-
-  emit('add', tx);
-  emit('close');
-}
-
-watch(methods, methods => {
-  if (methods.length === 0) return;
-
-  if (!form.method || !methods.includes(form.method)) {
-    form.method = methods[0];
-  }
-});
-
-watch(currentMethod, () => {
-  if (ignoreFormUpdates.value === true) {
-    ignoreFormUpdates.value = false;
-  } else {
-    form.args = {};
-    form.amount = DEFAULT_FORM_STATE.amount;
-  }
-});
-
 const errors = computed(() =>
   validateForm(
     {
@@ -122,6 +83,75 @@ const errors = computed(() =>
 );
 const argsErrors = computed(() => validateForm(definition.value, form.args));
 
+function handlePickerClick(field: string) {
+  showPicker.value = true;
+  pickerField.value = field;
+}
+
+function handlePickerSelect(value: string) {
+  showPicker.value = false;
+
+  if (!pickerField.value) return;
+
+  const isTopLevel = pickerField.value === 'to';
+  if (isTopLevel) form[pickerField.value] = value;
+  else form.args[pickerField.value] = value;
+}
+
+function handleSubmit() {
+  const tx = createContractCallTransaction({ form: clone(form) });
+
+  emit('add', tx);
+  emit('close');
+}
+
+function handleMethodChange() {
+  form.args = {};
+  form.amount = DEFAULT_FORM_STATE.amount;
+}
+
+async function handleToChange(to: string) {
+  form.abi = [];
+  abiStr.value = '';
+  showAbiInput.value = false;
+  if (isAddress(to)) {
+    const provider = getProvider('5');
+    loading.value = true;
+    const code = await provider.getCode(to);
+    if (code !== '0x') {
+      console.log('Address is valid');
+      try {
+        form.abi = await getABI(to);
+      } catch (e) {
+        showAbiInput.value = true;
+        console.log(e);
+      }
+    }
+    loading.value = false;
+  }
+}
+
+watch(methods, methods => {
+  if (methods.length === 0) return;
+
+  if (!form.method || !methods.includes(form.method)) {
+    form.method = methods[0];
+  }
+});
+
+watch(
+  [currentMethod, () => form.to],
+  ([currentMethod, currentTo], [previousMethod, previousTo]) => {
+    if (ignoreFormUpdates.value) {
+      ignoreFormUpdates.value = false;
+      return;
+    }
+
+    if (currentMethod !== previousMethod) handleMethodChange();
+    if (currentTo !== previousTo) handleToChange(currentTo);
+  }
+);
+
 watch(abiStr, value => {
   try {
     const abi = JSON.parse(value);
@@ -132,32 +162,6 @@ watch(abiStr, value => {
     console.log('invalid abi', value);
   }
 });
-
-watch(
-  () => form.to,
-  async v => {
-    if (ignoreFormUpdates.value === true) return;
-
-    form.abi = [];
-    abiStr.value = '';
-    showAbiInput.value = false;
-    if (isAddress(v)) {
-      const provider = getProvider('5');
-      loading.value = true;
-      const code = await provider.getCode(v);
-      if (code !== '0x') {
-        console.log('Address is valid');
-        try {
-          form.abi = await getABI(v);
-        } catch (e) {
-          showAbiInput.value = true;
-          console.log(e);
-        }
-      }
-      loading.value = false;
-    }
-  }
-);
 
 watch(
   () => props.open,
