@@ -43,7 +43,7 @@ watch(route, () => {
 
 <template>
   <div
-    :class="skin"
+    :class="{ [skin]: true, 'overflow-hidden': scrollDisabled }"
     class="font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
