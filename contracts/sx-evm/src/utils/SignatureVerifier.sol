@@ -19,7 +19,7 @@ abstract contract SignatureVerifier is EIP712 {
         keccak256(
             "Propose(address space,address author,string metadataURI,Strategy executionStrategy,"
             "bytes userParams,uint256 salt)"
-            "Strategy(address addy,bytes params)"
+            "Strategy(address addr,bytes params)"
         );
     bytes32 private constant VOTE_TYPEHASH =
         keccak256(
@@ -31,7 +31,7 @@ abstract contract SignatureVerifier is EIP712 {
         keccak256(
             "updateProposal(address space,address author,uint256 proposalId,"
             "Strategy executionStrategy,string metadataURI)"
-            "Strategy(address addy,bytes params)"
+            "Strategy(address addr,bytes params)"
         );
 
     mapping(address author => mapping(uint256 salt => bool used)) private usedSalts;

@@ -158,8 +158,8 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
         Strategy memory newStrat = Strategy(address(42), new bytes(0));
         assertEq(
-            newStrat.addy,
-            nextProposalValidationStrategy.addy,
+            newStrat.addr,
+            nextProposalValidationStrategy.addr,
             "Proposal Validation Strategy did not get updated"
         );
     }

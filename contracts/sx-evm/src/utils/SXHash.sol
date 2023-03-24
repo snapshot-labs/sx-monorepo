@@ -7,11 +7,11 @@ import { IndexedStrategy, Strategy } from "src/types.sol";
 /// @title SX Types Hashing Library
 /// @notice This library contains functions for hashing SX types for use in eip712 signatures.
 library SXHash {
-    bytes32 private constant STRATEGY_TYPEHASH = keccak256("Strategy(address addy,bytes params)");
+    bytes32 private constant STRATEGY_TYPEHASH = keccak256("Strategy(address addr,bytes params)");
     bytes32 private constant INDEXED_STRATEGY_TYPEHASH = keccak256("IndexedStrategy(uint8 index,bytes params)");
 
     function hash(Strategy memory strategy) internal pure returns (bytes32) {
-        return keccak256(abi.encode(STRATEGY_TYPEHASH, strategy.addy, keccak256(strategy.params)));
+        return keccak256(abi.encode(STRATEGY_TYPEHASH, strategy.addr, keccak256(strategy.params)));
     }
 
     function hash(IndexedStrategy[] memory indexedStrategies) internal pure returns (bytes32) {

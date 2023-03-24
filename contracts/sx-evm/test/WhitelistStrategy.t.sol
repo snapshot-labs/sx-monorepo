@@ -16,9 +16,9 @@ contract WhitelistStrategyTest is Test {
 
         bytes memory params = abi.encode(members);
 
-        assertEq(whitelistStrategy.getVotingPower(0, members[0].addy, params, ""), members[0].vp);
-        assertEq(whitelistStrategy.getVotingPower(0, members[1].addy, params, ""), members[1].vp);
-        assertEq(whitelistStrategy.getVotingPower(0, members[2].addy, params, ""), members[2].vp);
+        assertEq(whitelistStrategy.getVotingPower(0, members[0].addr, params, ""), members[0].vp);
+        assertEq(whitelistStrategy.getVotingPower(0, members[1].addr, params, ""), members[1].vp);
+        assertEq(whitelistStrategy.getVotingPower(0, members[2].addr, params, ""), members[2].vp);
 
         // Index 0
         assertEq(whitelistStrategy.getVotingPower(0, address(0), params, ""), 0);
@@ -38,8 +38,8 @@ contract WhitelistStrategyTest is Test {
 
         bytes memory params = abi.encode(members);
 
-        assertEq(whitelistStrategy.getVotingPower(0, members[0].addy, params, ""), members[0].vp);
-        assertEq(whitelistStrategy.getVotingPower(0, members[1].addy, params, ""), members[1].vp);
+        assertEq(whitelistStrategy.getVotingPower(0, members[0].addr, params, ""), members[0].vp);
+        assertEq(whitelistStrategy.getVotingPower(0, members[1].addr, params, ""), members[1].vp);
 
         // Index 0
         assertEq(whitelistStrategy.getVotingPower(0, address(0), params, ""), 0);

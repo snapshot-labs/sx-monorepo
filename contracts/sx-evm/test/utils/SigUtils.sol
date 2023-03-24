@@ -19,7 +19,7 @@ abstract contract SigUtils {
         keccak256(
             "Propose(address space,address author,string metadataURI,Strategy executionStrategy,"
             "bytes userParams,uint256 salt)"
-            "Strategy(address addy,bytes params)"
+            "Strategy(address addr,bytes params)"
         );
     bytes32 private constant VOTE_TYPEHASH =
         keccak256(
@@ -31,7 +31,7 @@ abstract contract SigUtils {
         keccak256(
             "updateProposal(address space,address author,uint256 proposalId,"
             "Strategy executionStrategy,string metadataURI)"
-            "Strategy(address addy,bytes params)"
+            "Strategy(address addr,bytes params)"
         );
 
     constructor(string memory _name, string memory _version) {

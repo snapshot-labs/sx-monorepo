@@ -55,9 +55,9 @@ library GetCumulativePower {
             Strategy memory strategy = allowedStrategies[strategyIndex];
             // A strategy address set to 0 indicates that this address has already been removed and is
             // no longer a valid voting strategy. See `_removeVotingStrategies`.
-            if (strategy.addy == address(0)) revert InvalidStrategyIndex(strategyIndex);
+            if (strategy.addr == address(0)) revert InvalidStrategyIndex(strategyIndex);
 
-            totalVotingPower += IVotingStrategy(strategy.addy).getVotingPower(
+            totalVotingPower += IVotingStrategy(strategy.addr).getVotingPower(
                 timestamp,
                 userAddress,
                 strategy.params,

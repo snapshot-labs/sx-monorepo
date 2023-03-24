@@ -98,10 +98,10 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         userVotingStrategies[0] = IndexedStrategy(1, newVotingStrategies[0].params);
 
         Strategy[] memory currentVotingStrategies = new Strategy[](2);
-        (address addy0, bytes memory params0) = space.votingStrategies(0);
-        currentVotingStrategies[0] = Strategy(addy0, params0);
-        (address addy1, bytes memory params1) = space.votingStrategies(1);
-        currentVotingStrategies[1] = Strategy(addy1, params1);
+        (address addr0, bytes memory params0) = space.votingStrategies(0);
+        currentVotingStrategies[0] = Strategy(addr0, params0);
+        (address addr1, bytes memory params1) = space.votingStrategies(1);
+        currentVotingStrategies[1] = Strategy(addr1, params1);
 
         // Udpdate the proposal validation params
         space.setProposalValidationStrategy(

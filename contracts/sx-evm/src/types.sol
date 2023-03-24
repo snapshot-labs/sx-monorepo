@@ -25,7 +25,7 @@ struct Proposal {
 }
 
 struct Strategy {
-    address addy;
+    address addr;
     bytes params;
 }
 
