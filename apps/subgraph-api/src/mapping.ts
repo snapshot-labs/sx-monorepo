@@ -11,10 +11,19 @@ import {
 } from '../generated/templates/Space/Space'
 import { Space as SpaceTemplate } from '../generated/templates'
 import { Space, ExecutionStrategy, Proposal, Vote, User } from '../generated/schema'
-import { updateSpaceMetadata } from './helpers'
+import {
+  decodeProposalValidationParams,
+  getProposalValidationThreshold,
+  getProposalValidationStrategies,
+  getProposalValidationStrategiesParams,
+  updateSpaceMetadata,
+} from './helpers'
 
 const MASTER_SPACE = Address.fromString('0xB5E5c8a9A999Da1AABb2b45DC9F72F2be042e204')
 const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x6F12C67cAd3e566B60A6AE0146761110F1Ea6Eb2')
+const VOTING_POWER_VALIDATION_STRATEGY = Address.fromString(
+  '0x03d512E0165d6B53ED2753Df2f3184fBd2b52E48'
+)
 
 export function handleProxyDeployed(event: ProxyDeployed): void {
   if (event.params.implementation.equals(MASTER_SPACE)) {
@@ -40,7 +49,6 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   space.voting_delay = event.params.votingDelay.toI32()
   space.min_voting_period = event.params.minVotingDuration.toI32()
   space.max_voting_period = event.params.maxVotingDuration.toI32()
-  space.proposal_threshold = new BigDecimal(new BigInt(0))
   space.quorum = new BigDecimal(new BigInt(0))
   space.strategies = event.params.votingStrategies.map<Bytes>((strategy) => strategy.addy)
   space.strategies_params = event.params.votingStrategies.map<string>((strategy) =>
@@ -48,6 +56,23 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   )
   space.validation_strategy = event.params.proposalValidationStrategy.addy
   space.validation_strategy_params = event.params.proposalValidationStrategy.params.toHexString()
+
+  if (space.validation_strategy.equals(VOTING_POWER_VALIDATION_STRATEGY)) {
+    let params = decodeProposalValidationParams(event.params.proposalValidationStrategy.params)
+
+    if (params) {
+      space.proposal_threshold = new BigDecimal(getProposalValidationThreshold(params))
+      space.voting_power_validation_strategy_strategies = getProposalValidationStrategies(
+        params
+      ).map<Bytes>((strategy) => strategy)
+      space.voting_power_validation_strategy_strategies_params = getProposalValidationStrategiesParams(
+        params
+      ).map<string>((params) => params.toHexString())
+    } else {
+      space.proposal_threshold = new BigDecimal(new BigInt(0))
+      space.voting_power_validation_strategy_strategies = []
+    }
+  }
 
   // NOTE: for now we are still using it as raw data, instead of URI
   space.strategies_metadata = event.params.votingStrategyMetadataURIs

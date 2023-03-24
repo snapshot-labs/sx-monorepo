@@ -19,6 +19,8 @@ type Space @entity {
   authenticators: [Bytes!]!
   validation_strategy: Bytes!
   validation_strategy_params: String!
+  voting_power_validation_strategy_strategies: [Bytes!]!
+  voting_power_validation_strategy_strategies_params: [String!]!
   executors: [Bytes!]!
   executors_types: [String!]!
   proposal_count: Int!
