@@ -6,8 +6,9 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { Avatar } from "./mocks/Avatar.sol";
 import { AvatarExecutionStrategy } from "../src/execution-strategies/AvatarExecutionStrategy.sol";
 import { Choice, Enum, IndexedStrategy, MetaTransaction, ProposalStatus, Strategy } from "../src/types.sol";
+import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract AvatarExecutionStrategyTest is SpaceTest {
+abstract contract AvatarExecutionStrategyTest is SpaceTest {
     error InvalidSpace();
 
     event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces);
@@ -20,17 +21,11 @@ contract AvatarExecutionStrategyTest is SpaceTest {
 
     address private recipient = address(0xc0ffee);
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
 
         avatar = new Avatar();
         vm.deal(address(avatar), 1000);
-
-        // Deploy and activate the execution strategy on the avatar
-        address[] memory spaces = new address[](1);
-        spaces[0] = address(space);
-        avatarExecutionStrategy = new AvatarExecutionStrategy(owner, address(avatar), spaces, quorum);
-        avatar.enableModule(address(avatarExecutionStrategy));
     }
 
     function testExecution() public {
@@ -227,5 +222,44 @@ contract AvatarExecutionStrategyTest is SpaceTest {
         vm.prank(unauthorized);
         vm.expectRevert("Ownable: caller is not the owner");
         avatarExecutionStrategy.disableSpace(address(space));
+    }
+}
+
+contract AvatarExecutionStrategyTestDirect is AvatarExecutionStrategyTest {
+    function setUp() public override {
+        super.setUp();
+
+        address[] memory spaces = new address[](1);
+        spaces[0] = address(space);
+        avatarExecutionStrategy = new AvatarExecutionStrategy(owner, address(avatar), spaces, quorum);
+        avatar.enableModule(address(avatarExecutionStrategy));
+    }
+}
+
+contract AvatarExecutionStrategyTestProxy is AvatarExecutionStrategyTest {
+    function setUp() public override {
+        super.setUp();
+
+        address[] memory spaces = new address[](1);
+        spaces[0] = address(space);
+        AvatarExecutionStrategy masterAvatarExecutionStrategy = new AvatarExecutionStrategy(
+            owner,
+            address(avatar),
+            spaces,
+            quorum
+        );
+
+        avatarExecutionStrategy = AvatarExecutionStrategy(
+            address(
+                new ERC1967Proxy(
+                    address(masterAvatarExecutionStrategy),
+                    abi.encodeWithSelector(
+                        AvatarExecutionStrategy.setUp.selector,
+                        abi.encode(owner, address(avatar), spaces, quorum)
+                    )
+                )
+            )
+        );
+        avatar.enableModule(address(avatarExecutionStrategy));
     }
 }

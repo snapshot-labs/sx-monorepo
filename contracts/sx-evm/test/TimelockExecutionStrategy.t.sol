@@ -6,8 +6,9 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { Choice, Enum, IndexedStrategy, MetaTransaction, ProposalStatus, Strategy, Proposal } from "../src/types.sol";
 import { TimelockExecutionStrategy } from "../src/execution-strategies/TimelockExecutionStrategy.sol";
 import { MockImplementation } from "./mocks/MockImplementation.sol";
+import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract TimelockExecutionStrategyTest is SpaceTest {
+abstract contract TimelockExecutionStrategyTest is SpaceTest {
     error InvalidSpace();
     error TimelockDelayNotMet();
     error ProposalNotQueued();
@@ -20,16 +21,6 @@ contract TimelockExecutionStrategyTest is SpaceTest {
     TimelockExecutionStrategy public timelockExecutionStrategy;
 
     address private recipient = address(0xc0ffee);
-
-    function setUp() public override {
-        super.setUp();
-
-        address[] memory spaces = new address[](1);
-        spaces[0] = address(space);
-
-        timelockExecutionStrategy = new TimelockExecutionStrategy(owner, spaces, 1000, quorum);
-        vm.deal(address(timelockExecutionStrategy), 1000);
-    }
 
     function testQueueingFromUnauthorizedSpace() external {
         timelockExecutionStrategy.disableSpace(address(space));
@@ -378,5 +369,40 @@ contract TimelockExecutionStrategyTest is SpaceTest {
         vm.prank(vetoGuardian);
         vm.expectRevert(OnlyVetoGuardian.selector);
         timelockExecutionStrategy.veto(keccak256(abi.encode(transactions)));
+    }
+}
+
+contract TimelockExecutionStrategyTestDirect is TimelockExecutionStrategyTest {
+    function setUp() public override {
+        super.setUp();
+
+        address[] memory spaces = new address[](1);
+        spaces[0] = address(space);
+
+        timelockExecutionStrategy = new TimelockExecutionStrategy(owner, spaces, 1000, quorum);
+        vm.deal(address(timelockExecutionStrategy), 1000);
+    }
+}
+
+contract TimelockExecutionStrategyTestProxy is TimelockExecutionStrategyTest {
+    function setUp() public override {
+        super.setUp();
+
+        address[] memory spaces = new address[](1);
+        spaces[0] = address(space);
+        TimelockExecutionStrategy masterExecutionStrategy = new TimelockExecutionStrategy(owner, spaces, 1000, quorum);
+
+        timelockExecutionStrategy = TimelockExecutionStrategy(
+            address(
+                new ERC1967Proxy(
+                    address(masterExecutionStrategy),
+                    abi.encodeWithSelector(
+                        TimelockExecutionStrategy.setUp.selector,
+                        abi.encode(owner, spaces, 1000, quorum)
+                    )
+                )
+            )
+        );
+        vm.deal(address(timelockExecutionStrategy), 1000);
     }
 }
