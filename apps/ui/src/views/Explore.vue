@@ -35,12 +35,12 @@ onMounted(() => spacesStore.fetch());
               :size="32"
               class="border-skin-bg !bg-skin-border rounded-sm mb-2"
             />
-            <h3 v-text="space.name" />
+            <h3 class="truncate" v-text="space.name" />
             <h5 class="absolute bottom-4">
               <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·
               <b class="text-skin-link" v-text="space.vote_count" /> votes
             </h5>
-            <h5 v-text="space.about" />
+            <h5 class="line-clamp-2" v-text="space.about" />
           </router-link>
         </div>
       </div>
