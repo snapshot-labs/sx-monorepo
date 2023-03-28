@@ -1,6 +1,6 @@
 import { shorten } from '@/helpers/utils';
 
-export const API_URL = 'https://testnet-api-1.snapshotx.xyz';
+export const API_URL = 'https://api-1.snapshotx.xyz';
 
 export const SUPPORTED_AUTHENTICATORS = {
   '0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14': true
