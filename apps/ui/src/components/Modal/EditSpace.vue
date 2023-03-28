@@ -11,8 +11,8 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
   twitter: '',
   github: '',
   discord: '',
-  walletNetwork: 'gor',
-  walletAddress: ''
+  walletNetwork: null,
+  walletAddress: null
 };
 
 const props = defineProps<{
@@ -59,8 +59,13 @@ watch(
     form.twitter = props.space.twitter;
 
     const [walletNetwork, walletAddress] = props.space.wallet.split(':');
-    form.walletNetwork = walletNetwork as NetworkID;
-    form.walletAddress = walletAddress;
+    if (walletNetwork && walletAddress) {
+      form.walletNetwork = walletNetwork as NetworkID;
+      form.walletAddress = walletAddress;
+    } else {
+      form.walletNetwork = null;
+      form.walletAddress = null;
+    }
   }
 );
 </script>
