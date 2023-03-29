@@ -33,6 +33,13 @@ type ExecutionStrategy @entity {
   id: ID!
   type: String!
   quorum: BigDecimal!
+  timelock_delay: BigInt!
+}
+
+type ExecutionHash @entity {
+  id: ID!
+  execution_hash: String!
+  proposal_id: ID!
 }
 
 type Proposal @entity {
@@ -50,6 +57,9 @@ type Proposal @entity {
   min_end: Int!
   max_end: Int!
   snapshot: Int!
+  execution_time: Int!
+  execution_strategy: Bytes!
+  timelock_delay: BigInt!
   strategies: [Bytes!]!
   strategies_params: [String!]!
   scores_1: BigDecimal!
@@ -61,6 +71,7 @@ type Proposal @entity {
   tx: Bytes!
   vote_count: Int!
   executed: Boolean!
+  completed: Boolean!
 }
 
 type Vote @entity {

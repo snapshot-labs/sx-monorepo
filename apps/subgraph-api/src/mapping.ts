@@ -1,7 +1,8 @@
-import { Address, BigDecimal, BigInt, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, ipfs, json, log } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
+import { TimelockExecutionStrategy } from '../generated/ProxyFactory/TimelockExecutionStrategy'
 import {
   SpaceCreated,
   ProposalCreated,
@@ -9,8 +10,12 @@ import {
   VoteCast,
   MetadataURIUpdated,
 } from '../generated/templates/Space/Space'
-import { Space as SpaceTemplate } from '../generated/templates'
-import { Space, ExecutionStrategy, Proposal, Vote, User } from '../generated/schema'
+import { ProposalExecuted as TimelockProposalExecuted } from '../generated/templates/TimelockExecutionStrategy/TimelockExecutionStrategy'
+import {
+  Space as SpaceTemplate,
+  TimelockExecutionStrategy as TimelockExecutionStrategyTemplate,
+} from '../generated/templates'
+import { Space, ExecutionStrategy, ExecutionHash, Proposal, Vote, User } from '../generated/schema'
 import {
   decodeProposalValidationParams,
   getProposalValidationThreshold,
@@ -21,6 +26,9 @@ import {
 
 const MASTER_SPACE = Address.fromString('0xB5E5c8a9A999Da1AABb2b45DC9F72F2be042e204')
 const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x6F12C67cAd3e566B60A6AE0146761110F1Ea6Eb2')
+const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
+  '0x36b8D5bC9271060643200F11D8C9e90eCf0ee5A3'
+)
 const VOTING_POWER_VALIDATION_STRATEGY = Address.fromString(
   '0x03d512E0165d6B53ED2753Df2f3184fBd2b52E48'
 )
@@ -38,6 +46,20 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     executionStrategy.save()
+  } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_TIMELOCK)) {
+    let executionStrategyContract = TimelockExecutionStrategy.bind(event.params.proxy)
+    let typeResult = executionStrategyContract.try_getStrategyType()
+    let quorumResult = executionStrategyContract.try_quorum()
+    let timelockDelayResult = executionStrategyContract.try_timelockDelay()
+    if (typeResult.reverted || quorumResult.reverted || timelockDelayResult.reverted) return
+
+    let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
+    executionStrategy.type = typeResult.value
+    executionStrategy.quorum = new BigDecimal(quorumResult.value)
+    executionStrategy.timelock_delay = timelockDelayResult.value
+    executionStrategy.save()
+
+    TimelockExecutionStrategyTemplate.create(event.params.proxy)
   }
 }
 
@@ -95,7 +117,8 @@ export function handleProposalCreated(event: ProposalCreated): void {
 
   let metadataUri = event.params.metadataUri
 
-  let proposal = new Proposal(`${space.id}/${event.params.nextProposalId}`)
+  let proposalId = `${space.id}/${event.params.nextProposalId}`
+  let proposal = new Proposal(proposalId)
   proposal.proposal_id = event.params.nextProposalId.toI32()
   proposal.space = space.id
   proposal.author = event.params.author.toHexString()
@@ -118,13 +141,19 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.created = event.block.timestamp.toI32()
   proposal.tx = event.transaction.hash
   proposal.vote_count = 0
+  proposal.execution_strategy = event.params.proposal.executionStrategy
 
   let executionStrategy = ExecutionStrategy.load(
     event.params.proposal.executionStrategy.toHexString()
   )
   if (executionStrategy !== null) {
     proposal.quorum = executionStrategy.quorum
+    proposal.timelock_delay = executionStrategy.timelock_delay
   }
+
+  let executionHash = new ExecutionHash(proposal.execution_hash)
+  executionHash.proposal_id = proposalId
+  executionHash.save()
 
   if (metadataUri.startsWith('ipfs://')) {
     let hash = metadataUri.slice(7)
@@ -174,6 +203,22 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 
   proposal.executed = true
+
+  let executionStrategy = ExecutionStrategy.load(proposal.execution_strategy.toHexString())
+
+  if (executionStrategy !== null) {
+    if (
+      executionStrategy.type == 'SimpleQuorumVanilla' ||
+      executionStrategy.type == 'SimpleQuorumAvatar'
+    ) {
+      proposal.completed = true
+    }
+
+    if (executionStrategy.type == 'SimpleQuorumTimelock') {
+      proposal.execution_time =
+        event.block.timestamp.toI32() + executionStrategy.timelock_delay.toI32()
+    }
+  }
 
   proposal.save()
 }
@@ -238,4 +283,19 @@ export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {
   updateSpaceMetadata(space, event.params.newMetadataURI)
 
   space.save()
+}
+
+export function handleTimelockProposalExecuted(event: TimelockProposalExecuted): void {
+  let executionHash = ExecutionHash.load(event.params.executionPayloadHash.toHexString())
+  if (executionHash === null) {
+    return
+  }
+
+  let proposal = Proposal.load(executionHash.proposal_id)
+  if (proposal === null) {
+    return
+  }
+
+  proposal.completed = true
+  proposal.save()
 }

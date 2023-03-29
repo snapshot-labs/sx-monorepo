@@ -20,6 +20,8 @@ dataSources:
           file: ./abis/ProxyFactory.json
         - name: AvatarExecutionStrategy
           file: ./abis/AvatarExecutionStrategy.json
+        - name: TimelockExecutionStrategy
+          file: ./abis/TimelockExecutionStrategy.json
       eventHandlers:
         - event: ProxyDeployed(address,address)
           handler: handleProxyDeployed
@@ -52,4 +54,22 @@ templates:
           handler: handleVoteCreated
         - event: MetadataURIUpdated(string)
           handler: handleMetadataUriUpdated
+      file: ./src/mapping.ts
+  - kind: ethereum
+    name: TimelockExecutionStrategy
+    network: goerli
+    source:
+      abi: TimelockExecutionStrategy
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - ProposalExecuted
+      abis:
+        - name: TimelockExecutionStrategy
+          file: ./abis/TimelockExecutionStrategy.json
+      eventHandlers:
+        - event: ProposalExecuted(bytes32)
+          handler: handleTimelockProposalExecuted
       file: ./src/mapping.ts
