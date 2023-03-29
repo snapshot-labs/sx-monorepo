@@ -69,6 +69,7 @@ type Proposal @entity {
   quorum: BigDecimal!
   created: Int!
   tx: Bytes!
+  execution_tx: Bytes
   vote_count: Int!
   executed: Boolean!
   completed: Boolean!

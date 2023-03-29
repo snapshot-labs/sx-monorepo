@@ -212,6 +212,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
       executionStrategy.type == 'SimpleQuorumAvatar'
     ) {
       proposal.completed = true
+      proposal.execution_tx = event.transaction.hash
     }
 
     if (executionStrategy.type == 'SimpleQuorumTimelock') {
@@ -297,5 +298,6 @@ export function handleTimelockProposalExecuted(event: TimelockProposalExecuted):
   }
 
   proposal.completed = true
+  proposal.execution_tx = event.transaction.hash
   proposal.save()
 }
