@@ -155,7 +155,9 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
           v-if="
             proposal.execution &&
             proposal.execution.length > 0 &&
-            BigInt(proposal.scores_total) >= BigInt(proposal.quorum)
+            BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
+            BigInt(proposal.scores_1) > BigInt(proposal.scores_2) &&
+            proposal.has_execution_window_opened
           "
         >
           <h4 class="mb-3 eyebrow flex items-center">
