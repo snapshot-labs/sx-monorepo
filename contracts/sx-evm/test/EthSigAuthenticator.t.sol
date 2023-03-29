@@ -171,7 +171,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
 
     function testAuthenticateVote() public {
         // Creating demo proposal using vanilla authenticator (both vanilla and eth sig authenticators are whitelisted)
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         bytes32 digest = _getVoteDigest(
             address(ethSigAuth),
@@ -251,7 +251,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     }
 
     function testAuthenticateVoteReusedSignature() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         uint256 salt = 0;
         bytes32 digest = _getVoteDigest(
@@ -318,7 +318,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         uint256 salt = 0;
 
         space.setVotingDelay(10);
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         bytes32 digest = _getUpdateProposalDigest(
             address(ethSigAuth),
@@ -348,7 +348,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         uint256 salt = 0;
 
         space.setVotingDelay(10);
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         bytes32 digest = _getUpdateProposalDigest(
             address(ethSigAuth),

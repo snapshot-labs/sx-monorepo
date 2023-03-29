@@ -54,7 +54,7 @@ contract OptimisticTest is SpaceTest {
     }
 
     function testOptimisticQuorumNoVotes() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         vm.warp(block.timestamp + space.maxVotingDuration());
 
         vm.expectEmit(true, true, true, true);
@@ -65,7 +65,7 @@ contract OptimisticTest is SpaceTest {
     }
 
     function testOptimisticQuorumOneVote() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
 
@@ -77,7 +77,7 @@ contract OptimisticTest is SpaceTest {
     }
 
     function testOptimisticQuorumReached() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         _vote(address(42), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
@@ -89,7 +89,7 @@ contract OptimisticTest is SpaceTest {
     }
 
     function testOptimisticQuorumEquality() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         // 2 votes for
         _vote(address(1), proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         _vote(address(2), proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
@@ -106,7 +106,7 @@ contract OptimisticTest is SpaceTest {
     }
 
     function testOptimisticQuorumMinVotingPeriodReached() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(address(11), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         _vote(address(12), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
 
@@ -119,7 +119,7 @@ contract OptimisticTest is SpaceTest {
     }
 
     function testOptimisticQuorumMinVotingPeriodAccepted() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         vm.warp(block.timestamp + space.minVotingDuration());
 
@@ -136,7 +136,7 @@ contract OptimisticTest is SpaceTest {
             executionStrategy = Strategy(optimisticQuorumStrategy2, new bytes(0));
         }
 
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         // Add 200 FOR votes
         for (uint160 i = 10; i < 210; i++) {
             _vote(address(i), proposalId, Choice.For, userVotingStrategies, voteMetadataURI);

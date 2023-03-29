@@ -34,7 +34,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     // ------- Cancel Proposal ----
 
     function testCancel() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         vm.expectEmit(true, true, true, true);
@@ -43,7 +43,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelInvalidProposal() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         // proposal does not exist
@@ -53,7 +53,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelUnauthorized() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         vm.expectRevert("Ownable: caller is not the owner");
@@ -62,7 +62,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelAlreadyExecuted() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         space.execute(proposalId, executionStrategy.params);
 
@@ -71,7 +71,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
     }
 
     function testCancelAlreadyCancelled() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         space.cancel(proposalId);
 
@@ -213,7 +213,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.addVotingStrategies(newVotingStrategies, votingStrategyMetadataURIs);
 
         // Create a proposal using the default proposal validation strategy
-        uint256 proposalId1 = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId1 = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         // Cast a vote with the new voting strategy.
         _vote(author, proposalId1, Choice.For, newUserVotingStrategies, voteMetadataURI);
 
@@ -223,14 +223,14 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.removeVotingStrategies(newIndices);
 
         // Create a proposal using the default proposal validation strategy
-        uint256 proposalId2 = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId2 = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         // Try voting on a proposal using the strategies that were just removed.
         vm.expectRevert(abi.encodeWithSelector(InvalidStrategyIndex.selector, 1));
         _vote(author, proposalId2, Choice.For, newUserVotingStrategies, voteMetadataURI);
 
         // Create a proposal with the default proposal validation strategy
-        uint256 proposalId3 = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId3 = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         // Cast a vote with the strategy that was never removed
         _vote(author, proposalId3, Choice.For, userVotingStrategies, voteMetadataURI);
     }

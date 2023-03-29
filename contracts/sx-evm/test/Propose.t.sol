@@ -36,7 +36,7 @@ contract ProposeTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit ProposalCreated(proposalId, author, proposal, proposalMetadataURI, executionStrategy.params);
 
-        _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         // Actual content of the proposal struct
         Proposal memory _proposal = space.getProposal(proposalId);
@@ -51,49 +51,12 @@ contract ProposeTest is SpaceTest {
         space.propose(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies));
     }
 
-    function testProposeInvalidUserVotingStrategy() public {
-        IndexedStrategy[] memory invalidUsedStrategies = new IndexedStrategy[](1);
-        invalidUsedStrategies[0] = IndexedStrategy(42, new bytes(0));
-
-        // out of bounds revert
-        vm.expectRevert();
-        _createProposal(author, proposalMetadataURI, executionStrategy, invalidUsedStrategies);
-    }
-
     function testProposeRefusedValidation() public {
         StupidProposalValidationStrategy stupidProposalValidationStrategy = new StupidProposalValidationStrategy();
         Strategy memory validationStrategy = Strategy(address(stupidProposalValidationStrategy), new bytes(0));
         space.setProposalValidationStrategy(validationStrategy);
 
         vm.expectRevert(FailedToPassProposalValidation.selector);
-        _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
-    }
-
-    function testProposeDuplicateUserVotingStrategy() public {
-        IndexedStrategy[] memory invalidUsedStrategies = new IndexedStrategy[](4);
-        invalidUsedStrategies[0] = IndexedStrategy(0, new bytes(0));
-        invalidUsedStrategies[1] = IndexedStrategy(1, new bytes(0));
-        invalidUsedStrategies[2] = IndexedStrategy(2, new bytes(0));
-        invalidUsedStrategies[3] = IndexedStrategy(0, new bytes(0)); // Duplicate index
-
-        vm.expectRevert(abi.encodeWithSelector(DuplicateFound.selector, 0));
-        _createProposal(author, proposalMetadataURI, executionStrategy, invalidUsedStrategies);
-    }
-
-    function testProposeMultipleVotingStrategies() public {
-        VanillaVotingStrategy strat2 = new VanillaVotingStrategy();
-        Strategy[] memory toAdd = new Strategy[](2);
-        toAdd[0] = Strategy(address(strat2), new bytes(0));
-        toAdd[1] = Strategy(address(strat2), new bytes(0));
-        string[] memory newVotingStrategyMetadataURIs = new string[](2);
-
-        space.addVotingStrategies(toAdd, newVotingStrategyMetadataURIs);
-
-        IndexedStrategy[] memory newVotingStrategies = new IndexedStrategy[](3);
-        newVotingStrategies[0] = userVotingStrategies[0]; // base strat
-        newVotingStrategies[1] = IndexedStrategy(1, new bytes(0)); // strat2
-        newVotingStrategies[2] = IndexedStrategy(2, new bytes(0)); // strat3
-
-        _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
     }
 }

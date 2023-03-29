@@ -66,7 +66,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
 
     function testAuthenticateTxVote() public {
         // Creating demo proposal using vanilla authenticator (both vanilla and eth tx authenticators are whitelisted)
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         vm.prank(voter);
         ethTxAuth.authenticate(
@@ -103,7 +103,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
     function testAuthenticateTxUpdateProposal() public {
         uint32 votingDelay = 10;
         space.setVotingDelay(votingDelay);
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         vm.prank(author);
         vm.expectEmit(true, true, true, true);

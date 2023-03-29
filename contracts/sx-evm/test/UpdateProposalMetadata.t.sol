@@ -34,7 +34,7 @@ contract UpdateProposalTest is SpaceTest {
     }
 
     function testUpdateProposal() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         vm.expectEmit(true, true, true, true);
         emit ProposalUpdated(proposalId, newStrategy, newMetadataURI);
@@ -49,7 +49,7 @@ contract UpdateProposalTest is SpaceTest {
     }
 
     function testUpdateProposalAfterDelay() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         vm.warp(block.timestamp + votingDelay);
 
         vm.expectRevert(VotingDelayHasPassed.selector);
@@ -58,14 +58,14 @@ contract UpdateProposalTest is SpaceTest {
     }
 
     function testUpdateProposalInvalidCaller() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         vm.expectRevert(InvalidCaller.selector);
         _updateProposal(address(42), proposalId, newStrategy, newMetadataURI);
     }
 
     function testUpdateProposalUnauthenticated() public {
-        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, userVotingStrategies);
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector, address(this)));
         space.updateProposal(author, proposalId, newStrategy, newMetadataURI);

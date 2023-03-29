@@ -19,7 +19,7 @@ contract CompVotingStrategyTest is Test {
         compToken = new CompToken();
     }
 
-    function testGetVotingPowerS() public {
+    function testGetVotingPower() public {
         compToken.mint(user, 1);
         // Must delegate to self to activate checkpoints
         compToken.delegate(user);

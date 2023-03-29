@@ -8,6 +8,9 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { SigUtils } from "./utils/SigUtils.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
+import {
+    VotingPowerAndActiveProposalsLimiterValidationStrategy
+} from "../src/proposal-validation-strategies/VotingPowerAndActiveProposalsLimiterValidationStrategy.sol";
 import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 
 contract GasSnapshotsTest is SpaceTest, SigUtils {
@@ -21,6 +24,8 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
 
     EthSigAuthenticator internal ethSigAuth;
     EthTxAuthenticator internal ethTxAuth;
+    VotingPowerAndActiveProposalsLimiterValidationStrategy
+        internal votingPowerAndActiveProposalsLimiterValidationStrategy;
 
     uint256 internal key2;
     uint256 internal key3;
@@ -103,10 +108,14 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         (address addr1, bytes memory params1) = space.votingStrategies(1);
         currentVotingStrategies[1] = Strategy(addr1, params1);
 
-        // Udpdate the proposal validation params
+        // Set the proposal validation strategy to Comp token proposition power
+        votingPowerAndActiveProposalsLimiterValidationStrategy = new VotingPowerAndActiveProposalsLimiterValidationStrategy(
+            864000,
+            5
+        );
         space.setProposalValidationStrategy(
             Strategy(
-                address(votingPowerAndActiveProposalsLimiterValidationContract),
+                address(votingPowerAndActiveProposalsLimiterValidationStrategy),
                 abi.encode(TOKEN_AMOUNT, currentVotingStrategies)
             )
         );
@@ -152,7 +161,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         );
         // We take the snapshot on the second proposal because the first proposal will write to new
         // storage making it not representative of average usage.
-        snapStart("ProposeSigComp");
+        snapStart("ProposeSig");
         ethSigAuth.authenticate(
             v,
             r,

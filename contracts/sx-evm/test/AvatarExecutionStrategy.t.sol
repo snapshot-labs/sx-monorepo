@@ -35,7 +35,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             author,
             proposalMetadataURI,
             Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
-            userVotingStrategies
+            new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
@@ -57,7 +57,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             author,
             proposalMetadataURI,
             Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
-            userVotingStrategies
+            new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
@@ -81,7 +81,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             author,
             proposalMetadataURI,
             Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
-            userVotingStrategies
+            new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
@@ -108,7 +108,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             author,
             proposalMetadataURI,
             Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
-            userVotingStrategies
+            new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
@@ -201,7 +201,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             author,
             proposalMetadataURI,
             Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
-            userVotingStrategies
+            new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         vm.warp(block.timestamp + space.maxVotingDuration());
