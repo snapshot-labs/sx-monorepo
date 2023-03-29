@@ -6,8 +6,8 @@ import { SimpleQuorumExecutionStrategy } from "./SimpleQuorumExecutionStrategy.s
 import { SpaceManager } from "../utils/SpaceManager.sol";
 import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
-import { IERC1155Receiver } from "openzeppelin-contracts/contracts/interfaces/IERC1155Receiver.sol";
-import { IERC721Receiver } from "openzeppelin-contracts/contracts/interfaces/IERC721Receiver.sol";
+import { IERC1155Receiver } from "@openzeppelin/contracts/interfaces/IERC1155Receiver.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
 
 /// @title Timelock Execution Strategy - An Execution strategy that executes transactions according to a timelock delay.
 contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Receiver, IERC721Receiver {
