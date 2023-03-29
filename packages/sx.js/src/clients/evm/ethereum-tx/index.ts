@@ -7,6 +7,7 @@ import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
+import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { Propose, Vote, Envelope, AddressConfig } from '../types';
 import type { EvmNetworkConfig } from '../../../types';
@@ -27,6 +28,13 @@ type AvatarExecutionStrategyParams = {
   controller: string;
   target: string;
   spaces: string[];
+  quorum: bigint;
+};
+
+type TimelockExecutionStrategyParams = {
+  controller: string;
+  spaces: string[];
+  timelockDelay: bigint;
   quorum: bigint;
 };
 
@@ -68,6 +76,50 @@ export class EthereumTx {
       [controller, target, spaces, quorum]
     );
     const functionData = avatarExecutionStrategyInterface.encodeFunctionData('setUp', [initParams]);
+
+    const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
+    const response = await proxyFactoryContract.deployProxy(
+      implementationAddress,
+      functionData,
+      salt
+    );
+
+    return { address, txId: response.hash };
+  }
+
+  async deployTimelockExecution({
+    signer,
+    params: { controller, spaces, timelockDelay, quorum },
+    salt
+  }: {
+    signer: Signer;
+    params: TimelockExecutionStrategyParams;
+    salt?: string;
+  }): Promise<{ txId: string; address: string }> {
+    salt = salt || `0x${randomBytes(32).toString('hex')}`;
+
+    const implementationAddress =
+      this.networkConfig.executionStrategiesImplementations['SimpleQuorumTimelock'];
+
+    if (!implementationAddress) {
+      throw new Error('Missing SimpleQuorumTimelock implementation address');
+    }
+
+    const abiCoder = new AbiCoder();
+    const timelockExecutionStrategyInterface = new Interface(TimelockExecutionStrategyAbi);
+    const proxyFactoryContract = new Contract(
+      this.networkConfig.proxyFactory,
+      ProxyFactoryAbi,
+      signer
+    );
+
+    const initParams = abiCoder.encode(
+      ['address', 'address[]', 'uint256', 'uint256'],
+      [controller, spaces, timelockDelay, quorum]
+    );
+    const functionData = timelockExecutionStrategyInterface.encodeFunctionData('setUp', [
+      initParams
+    ]);
 
     const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
     const response = await proxyFactoryContract.deployProxy(
@@ -233,6 +285,24 @@ export class EthereumTx {
     const spaceContract = new Contract(space, SpaceAbi, signer);
 
     return spaceContract.execute(proposal, executionParams);
+  }
+
+  async executeQueuedProposal({
+    signer,
+    executionStrategy,
+    executionParams
+  }: {
+    signer: Signer;
+    executionStrategy: string;
+    executionParams: string;
+  }) {
+    const executionStrategyContract = new Contract(
+      executionStrategy,
+      TimelockExecutionStrategyAbi,
+      signer
+    );
+
+    return executionStrategyContract.executeQueuedProposal(executionParams);
   }
 
   async cancel({ signer, space, proposal }: { signer: Signer; space: string; proposal: number }) {

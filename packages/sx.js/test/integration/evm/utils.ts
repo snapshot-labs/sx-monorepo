@@ -18,6 +18,7 @@ import OzVotesVotingStrategyContract from './fixtures/OzVotesVotingStrategy.json
 import WhitelistVotingStrategyContract from './fixtures/WhitelistVotingStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
 import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
+import TimelockExecutionStrategyContract from './fixtures/TimelockExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { EvmNetworkConfig } from '../../../src/types';
 
@@ -37,6 +38,7 @@ export type TestConfig = {
   whitelistVotingStrategy: string;
   vanillaExecutionStrategy: string;
   avatarExecutionStrategy: string;
+  timelockExecutionStrategy: string;
   networkConfig: EvmNetworkConfig;
 };
 
@@ -104,13 +106,22 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     [],
     1
   );
+  const masterTimelockExecutionStrategy = await deployDependency(
+    signer,
+    TimelockExecutionStrategyContract,
+    controller,
+    [],
+    0,
+    1
+  );
 
   const networkConfig = {
     eip712ChainId: 31337,
     proxyFactory,
     masterSpace,
     executionStrategiesImplementations: {
-      SimpleQuorumAvatar: masterAvatarExecutionStrategy
+      SimpleQuorumAvatar: masterAvatarExecutionStrategy,
+      SimpleQuorumTimelock: masterTimelockExecutionStrategy
     },
     authenticators: {
       [vanillaAuthenticator]: {
@@ -155,6 +166,16 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     }
   });
 
+  const { address: timelockExecutionStrategy } = await ethTxClient.deployTimelockExecution({
+    signer,
+    params: {
+      controller,
+      spaces: [spaceAddress],
+      timelockDelay: 0n,
+      quorum: 1n
+    }
+  });
+
   const avatarContract = new Contract(avatar, AvatarContract.abi, signer);
   await avatarContract.enableModule(avatarExecutionStrategy);
 
@@ -172,6 +193,11 @@ export async function setup(signer: Signer): Promise<TestConfig> {
 
   await signer.sendTransaction({
     to: avatar,
+    value: '21'
+  });
+
+  await signer.sendTransaction({
+    to: timelockExecutionStrategy,
     value: '21'
   });
 
@@ -263,6 +289,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     whitelistVotingStrategy,
     vanillaExecutionStrategy,
     avatarExecutionStrategy,
+    timelockExecutionStrategy,
     networkConfig
   };
 }

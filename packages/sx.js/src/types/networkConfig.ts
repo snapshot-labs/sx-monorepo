@@ -1,4 +1,4 @@
-export type ExecutorType = 'SimpleQuorumVanilla' | 'SimpleQuorumAvatar';
+export type ExecutorType = 'SimpleQuorumVanilla' | 'SimpleQuorumAvatar' | 'SimpleQuorumTimelock';
 
 export type VanillaAuthenticatorConfig = {
   type: 'vanilla';

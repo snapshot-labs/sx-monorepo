@@ -13,7 +13,7 @@ export function getEvmExecutionData(
     return createVanillaExecutor().getExecutionData(executorAddress);
   }
 
-  if (type === 'SimpleQuorumAvatar' && input?.transactions) {
+  if (['SimpleQuorumAvatar', 'SimpleQuorumTimelock'].includes(type) && input?.transactions) {
     return createAvatarExecutor().getExecutionData(executorAddress, input.transactions);
   }
 

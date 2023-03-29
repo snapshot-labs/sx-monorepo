@@ -5,7 +5,8 @@ export const evmGoerli: EvmNetworkConfig = {
   proxyFactory: '0x12a1fffffd70677939d61d641ea043bc9060c718',
   masterSpace: '0xb5e5c8a9a999da1aabb2b45dc9f72f2be042e204',
   executionStrategiesImplementations: {
-    SimpleQuorumAvatar: '0x6f12c67cad3e566b60a6ae0146761110f1ea6eb2'
+    SimpleQuorumAvatar: '0x6f12c67cad3e566b60a6ae0146761110f1ea6eb2',
+    SimpleQuorumTimelock: '0x36b8D5bC9271060643200F11D8C9e90eCf0ee5A3'
   },
   authenticators: {
     '0x6896120fdf2d791e4dc1c673d8becd54b14dd607': {

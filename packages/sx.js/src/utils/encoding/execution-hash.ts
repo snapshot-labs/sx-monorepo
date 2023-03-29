@@ -32,7 +32,7 @@ export interface MetaTransaction {
   value: string | number;
   data: string;
   operation: number;
-  nonce: number;
+  salt: bigint;
 }
 
 /**

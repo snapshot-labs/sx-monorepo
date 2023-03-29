@@ -273,7 +273,7 @@ describe('EthereumTx', () => {
         value: 1,
         data: '0x',
         operation: 0,
-        nonce: 0
+        salt: 1n
       }
     ];
 
@@ -334,6 +334,95 @@ describe('EthereumTx', () => {
         signer,
         space: spaceAddress,
         proposal: 7,
+        executionParams: executionParams[0]
+      });
+      expect(res.hash).toBeDefined();
+    });
+  });
+
+  describe('timelock execution', () => {
+    const transactions = [
+      {
+        to: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
+        value: 2,
+        data: '0x',
+        operation: 0,
+        salt: 1n
+      }
+    ];
+
+    it('should propose with avatar', async () => {
+      const { executionParams } = getEvmExecutionData(
+        'SimpleQuorumTimelock',
+        testConfig.timelockExecutionStrategy,
+        { transactions }
+      );
+
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          executionStrategy: {
+            addy: testConfig.timelockExecutionStrategy,
+            params: executionParams[0]
+          },
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+        }
+      };
+
+      const res = await ethTxClient.propose({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+
+    it('should vote via authenticator', async () => {
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          proposal: 8,
+          choice: 1,
+          metadataUri: ''
+        }
+      };
+
+      const res = await ethTxClient.vote({
+        signer,
+        envelope
+      });
+      expect(res.hash).toBeDefined();
+    });
+
+    it('should execute', async () => {
+      const { executionParams } = getEvmExecutionData(
+        'SimpleQuorumTimelock',
+        testConfig.timelockExecutionStrategy,
+        { transactions }
+      );
+
+      const res = await ethTxClient.execute({
+        signer,
+        space: spaceAddress,
+        proposal: 8,
+        executionParams: executionParams[0]
+      });
+      expect(res.hash).toBeDefined();
+    });
+
+    it('should execute queued proposal', async () => {
+      const { executor, executionParams } = getEvmExecutionData(
+        'SimpleQuorumTimelock',
+        testConfig.timelockExecutionStrategy,
+        { transactions }
+      );
+
+      const res = await ethTxClient.executeQueuedProposal({
+        signer,
+        executionStrategy: executor,
         executionParams: executionParams[0]
       });
       expect(res.hash).toBeDefined();

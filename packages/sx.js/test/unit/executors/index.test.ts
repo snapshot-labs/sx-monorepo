@@ -45,7 +45,8 @@ describe('getExecutionData', () => {
         value: '0x0',
         data: '0x',
         operation: 0,
-        nonce: 0
+        nonce: 0,
+        salt: 1n
       }
     ];
 
