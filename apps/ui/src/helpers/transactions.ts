@@ -1,6 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 import { abis } from '@/helpers/abis';
+import { getSalt } from '@/helpers/utils';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Token } from '@/helpers/alchemy';
 import type {
@@ -41,7 +42,8 @@ export function createSendTokenTransaction({
     },
     to: isEth ? form.to : token.contractAddress,
     data,
-    value: isEth ? baseAmount.toString() : '0'
+    value: isEth ? baseAmount.toString() : '0',
+    salt: getSalt()
   };
 }
 
@@ -80,7 +82,8 @@ export function createSendNftTransaction({ nft, address, form }): SendNftTransac
     },
     to: nft.contractAddress,
     data,
-    value: '0'
+    value: '0',
+    salt: getSalt()
   };
 }
 
@@ -97,6 +100,7 @@ export function createContractCallTransaction({ form }): ContractCallTransaction
     value: iface.getFunction(form.method).payable
       ? parseUnits(form.amount.toString(), 18).toString()
       : '0',
+    salt: getSalt(),
     _form: {
       abi: form.abi,
       recipient: form.to,
@@ -110,7 +114,7 @@ export function createContractCallTransaction({ form }): ContractCallTransaction
 export function convertToMetaTransactions(transactions: Transaction[]): MetaTransaction[] {
   return transactions.map((tx: Transaction) => ({
     ...tx,
-    nonce: 0,
-    operation: 0
+    operation: 0,
+    salt: BigInt(tx.salt)
   }));
 }

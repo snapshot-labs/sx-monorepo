@@ -73,6 +73,7 @@ export type NetworkActions = {
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
+  executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
   getVotingPower(
     strategiesAddresses: string[],
     strategiesParams: any[],

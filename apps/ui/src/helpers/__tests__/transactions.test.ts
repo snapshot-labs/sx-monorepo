@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 
 import {
   createSendTokenTransaction,
@@ -7,6 +7,15 @@ import {
 } from '../transactions';
 
 describe('transactions', () => {
+  beforeAll(() => {
+    vi.stubGlobal('crypto', {
+      getRandomValues: (arr: Uint8Array) => {
+        arr.fill(0);
+        return arr;
+      }
+    });
+  });
+
   describe('createSendTokenTransaction', () => {
     const ethToken = {
       decimals: 18,

@@ -15,7 +15,12 @@ import type { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/type
 type ApiSpace = Omit<Space, 'network'>;
 type ApiProposal = Omit<
   Proposal,
-  'has_started' | 'has_execution_window_started' | 'has_ended' | 'execution' | 'network'
+  | 'has_started'
+  | 'has_execution_window_started'
+  | 'has_veto_period_ended'
+  | 'has_ended'
+  | 'execution'
+  | 'network'
 > & {
   execution: string;
 };
@@ -51,6 +56,7 @@ function formatProposal(
     has_started: proposal.start * 1000 >= now,
     has_execution_window_opened: proposal.min_end * 1000 <= now,
     has_ended: proposal.max_end * 1000 <= now,
+    has_veto_period_ended: proposal.execution_time === 0 || proposal.execution_time * 1000 <= now,
     network: networkId
   };
 }

@@ -205,6 +205,7 @@ export function createActions(
         convertToMetaTransactions(proposal.execution)
       );
     },
+    executeQueuedProposal: () => null,
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],

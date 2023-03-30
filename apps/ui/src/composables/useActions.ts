@@ -3,6 +3,7 @@ import { getNetwork, evmNetworks } from '@/networks';
 import { useUiStore } from '@/stores/ui';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useModal } from '@/composables/useModal';
+import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
   Transaction,
   Proposal,
@@ -139,7 +140,6 @@ export function useActions() {
 
     const transactions = execution.map((tx: Transaction) => ({
       ...tx,
-      nonce: 0,
       operation: 0
     }));
 
@@ -154,7 +154,13 @@ export function useActions() {
 
     await wrapPromise(
       space.network,
-      network.actions.propose(auth.web3, web3.value.account, space, pinned.cid, transactions)
+      network.actions.propose(
+        auth.web3,
+        web3.value.account,
+        space,
+        pinned.cid,
+        convertToMetaTransactions(transactions)
+      )
     );
 
     return true;
@@ -197,6 +203,18 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }
 
+  async function executeQueuedProposal(proposal: Proposal) {
+    if (!web3.value.account) return await forceLogin();
+    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
+
+    const network = getNetwork(proposal.network);
+
+    const receipt = await network.actions.executeQueuedProposal(auth.web3, proposal);
+    console.log('Receipt', receipt);
+
+    uiStore.addPendingTransaction(receipt.hash, 'gor');
+  }
+
   const actions = {
     createSpace,
     updateMetadata,
@@ -204,7 +222,8 @@ export function useActions() {
     propose,
     finalizeProposal,
     receiveProposal,
-    executeTransactions
+    executeTransactions,
+    executeQueuedProposal
   };
 
   return Object.fromEntries(

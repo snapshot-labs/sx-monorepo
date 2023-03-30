@@ -19,7 +19,8 @@ export const SUPPORTED_STRATEGIES = {
 };
 
 export const SUPPORTED_EXECUTORS = {
-  SimpleQuorumAvatar: true
+  SimpleQuorumAvatar: true,
+  SimpleQuorumTimelock: true
 };
 
 export const RELAYER_AUTHENTICATORS = {
@@ -175,9 +176,6 @@ export const EDITOR_EXECUTION_STRATEGIES = [
     name: 'Avatar',
     generateSummary: (params: Record<string, any>) =>
       `(${params.quorum}, ${shorten(params.contractAddress)})`,
-    generateParams: (params: Record<string, any>) => [
-      `0x${params.quorum.toString(16).padStart(64, '0')}`
-    ],
     deploy: async (
       client: clients.EvmEthereumTx,
       signer: Signer,
@@ -213,6 +211,49 @@ export const EDITOR_EXECUTION_STRATEGIES = [
           format: 'address',
           title: 'Avatar address',
           examples: ['0x0000…']
+        }
+      }
+    }
+  },
+  {
+    address: '',
+    type: 'SimpleQuorumTimelock',
+    name: 'Timelock',
+    generateSummary: (params: Record<string, any>) => `(${params.quorum}, ${params.timelockDelay})`,
+    deploy: async (
+      client: clients.EvmEthereumTx,
+      signer: Signer,
+      controller: string,
+      spaceAddress: string,
+      params: Record<string, any>
+    ): Promise<string> => {
+      const { address } = await client.deployTimelockExecution({
+        signer,
+        params: {
+          controller,
+          spaces: [spaceAddress],
+          timelockDelay: BigInt(params.timelockDelay),
+          quorum: BigInt(params.quorum)
+        }
+      });
+
+      return address;
+    },
+    paramsDefinition: {
+      type: 'object',
+      title: 'Params',
+      additionalProperties: false,
+      required: ['quorum', 'timelockDelay'],
+      properties: {
+        quorum: {
+          type: 'string',
+          title: 'Quorum',
+          examples: ['1']
+        },
+        timelockDelay: {
+          type: 'string',
+          title: 'Timelock delay',
+          examples: ['1']
         }
       }
     }

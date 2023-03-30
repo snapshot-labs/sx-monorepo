@@ -81,6 +81,8 @@ export type Proposal = {
   scores_2: number;
   scores_3: number;
   scores_total: number;
+  execution_time: number;
+  execution_strategy: string;
   strategies: string[];
   strategies_params: any[];
   created: number;
@@ -89,7 +91,9 @@ export type Proposal = {
   has_started: boolean;
   has_execution_window_opened: boolean;
   has_ended: boolean;
+  has_veto_period_ended: boolean;
   executed: boolean;
+  completed: boolean;
 };
 
 export type User = {
@@ -139,6 +143,7 @@ export type BaseTransaction = {
   to: string;
   data: string;
   value: string;
+  salt: string;
 };
 
 export type SendTokenTransaction = BaseTransaction & {

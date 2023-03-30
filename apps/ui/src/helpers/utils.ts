@@ -207,3 +207,10 @@ export function compareAddresses(a: string, b: string): boolean {
   // TODO: in future ignore padding as well
   return a.toLowerCase() === b.toLowerCase();
 }
+
+export function getSalt() {
+  const buffer = new Uint8Array(32);
+  crypto.getRandomValues(buffer);
+
+  return `0x${buffer.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')}`;
+}

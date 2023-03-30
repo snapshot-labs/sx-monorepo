@@ -6,11 +6,13 @@ import type { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
-const { finalizeProposal, receiveProposal, executeTransactions } = useActions();
+const { finalizeProposal, receiveProposal, executeTransactions, executeQueuedProposal } =
+  useActions();
 
 const finalizeProposalSending = ref(false);
 const receiveProposalSending = ref(false);
 const executeTransactionsSending = ref(false);
+const executeQueuedProposalSending = ref(false);
 
 async function handleFinalizeProposalClick() {
   finalizeProposalSending.value = true;
@@ -41,11 +43,21 @@ async function handleExecuteTransactionsClick() {
     executeTransactionsSending.value = false;
   }
 }
+
+async function handleExecuteQueuedProposalClick() {
+  executeQueuedProposalSending.value = true;
+
+  try {
+    await executeQueuedProposal(props.proposal);
+  } finally {
+    executeQueuedProposalSending.value = false;
+  }
+}
 </script>
 
 <template>
   <div class="x-block !border-x rounded-lg p-3">
-    <div v-if="proposal.executed">Proposal has been already executed</div>
+    <div v-if="proposal.completed">Proposal has been already executed</div>
     <template v-else>
       <UiButton
         v-if="getNetwork(proposal.network).hasReceive"
@@ -66,12 +78,24 @@ async function handleExecuteTransactionsClick() {
         Receive proposal
       </UiButton>
       <UiButton
+        v-if="!proposal.executed"
         class="block mb-2 w-full flex justify-center items-center"
         :loading="executeTransactionsSending"
         @click="handleExecuteTransactionsClick"
       >
         <IH-play class="inline-block mr-2" />
-        Execute transactions
+        Execute proposal
+      </UiButton>
+      <UiButton
+        v-if="proposal.executed && !proposal.completed"
+        :disabled="!proposal.has_veto_period_ended"
+        :title="proposal.has_veto_period_ended ? '' : 'Veto period has not ended yet'"
+        class="block mb-2 w-full flex justify-center items-center"
+        :loading="executeQueuedProposalSending"
+        @click="handleExecuteQueuedProposalClick"
+      >
+        <IH-play class="inline-block mr-2" />
+        Execute queued transactions
       </UiButton>
     </template>
   </div>

@@ -11,13 +11,6 @@ import {
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Space } from '@/types';
 
-export function getSalt() {
-  const buffer = new Uint8Array(32);
-  crypto.getRandomValues(buffer);
-
-  return `0x${buffer.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')}`;
-}
-
 export function getExecution(space: SpaceExecutionData, transactions: MetaTransaction[]) {
   const supportedExecutionIndex = space.executors_types.findIndex(
     executorType => SUPPORTED_EXECUTORS[executorType]

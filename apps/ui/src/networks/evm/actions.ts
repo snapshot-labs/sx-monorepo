@@ -1,8 +1,8 @@
 import { Provider } from '@ethersproject/providers';
 import { clients, getEvmStrategy, evmGoerli } from '@snapshot-labs/sx';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import { createErc1155Metadata, verifyNetwork, getSalt } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { getSalt, getExecution, pickAuthenticatorAndStrategies } from './helpers';
+import { getExecution, pickAuthenticatorAndStrategies } from './helpers';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { NetworkActions, NetworkHelpers, StrategyConfig, VotingPower } from '@/networks/types';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
@@ -199,6 +199,20 @@ export function createActions(
         signer: web3.getSigner(),
         space: proposal.space.id,
         proposal: proposal.proposal_id,
+        executionParams: executionData.executionParams[0]
+      });
+    },
+    executeQueuedProposal: async (web3: Web3Provider, proposal: Proposal) => {
+      await verifyNetwork(web3, chainId);
+
+      const { executor, executionData } = getExecution(
+        proposal.space,
+        convertToMetaTransactions(proposal.execution)
+      );
+
+      return client.executeQueuedProposal({
+        signer: web3.getSigner(),
+        executionStrategy: executor,
         executionParams: executionData.executionParams[0]
       });
     },

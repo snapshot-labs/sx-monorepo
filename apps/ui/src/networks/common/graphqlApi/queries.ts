@@ -30,12 +30,15 @@ export const PROPOSAL_QUERY = gql`
       scores_2
       scores_3
       scores_total
+      execution_time
+      execution_strategy
       strategies
       strategies_params
       created
       tx
       vote_count
       executed
+      completed
     }
   }
 `;
@@ -77,12 +80,15 @@ export const PROPOSALS_QUERY = gql`
       scores_2
       scores_3
       scores_total
+      execution_time
+      execution_strategy
       strategies
       strategies_params
       created
       tx
       vote_count
       executed
+      completed
     }
   }
 `;
@@ -135,12 +141,15 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
     scores_2
     scores_3
     scores_total
+    execution_time
+    execution_strategy
     strategies
     strategies_params
     created
     tx
     vote_count
     executed
+    completed
   }
 `;
 
