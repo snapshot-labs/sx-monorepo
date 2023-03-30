@@ -36,6 +36,7 @@ export const PROPOSAL_QUERY = gql`
       strategies_params
       created
       tx
+      execution_tx
       vote_count
       executed
       completed
@@ -86,6 +87,7 @@ export const PROPOSALS_QUERY = gql`
       strategies_params
       created
       tx
+      execution_tx
       vote_count
       executed
       completed
@@ -147,6 +149,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
     strategies_params
     created
     tx
+    execution_tx
     vote_count
     executed
     completed

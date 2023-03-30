@@ -87,6 +87,7 @@ export type Proposal = {
   strategies_params: any[];
   created: number;
   tx: string;
+  execution_tx: string | null;
   vote_count: number;
   has_started: boolean;
   has_execution_window_opened: boolean;
