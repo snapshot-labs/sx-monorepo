@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useWeb3 } from '@/composables/useWeb3';
-import { _n } from '@/helpers/utils';
+import { _c } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 import { VotingPower } from '@/networks/types';
 
@@ -34,7 +34,7 @@ const decimals = computed(() =>
       @click="modalOpen = true"
     >
       <IH-lightning-bolt class="inline-block" />
-      <span class="ml-1">{{ _n(Number(votingPower) / 10 ** decimals) }}</span>
+      <span class="ml-1">{{ _c(votingPower, decimals) }}</span>
     </UiButton>
     <teleport to="#modal">
       <ModalVotingPower

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, Ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { formatUnits } from '@ethersproject/units';
 import { useClipboard } from '@vueuse/core';
 import { useBalances } from '@/composables/useBalances';
 import { useEditor } from '@/composables/useEditor';
 import { useNfts } from '@/composables/useNfts';
 import { useTreasury } from '@/composables/useTreasury';
-import { _n, shorten } from '@/helpers/utils';
+import { _n, _c, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import type { Token } from '@/helpers/alchemy';
@@ -145,7 +144,7 @@ onMounted(() => {
             <div class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px]">
               <h4
                 class="text-skin-link"
-                v-text="_n(formatUnits(asset.tokenBalance || 0, asset.decimals || 0))"
+                v-text="_c(asset.tokenBalance || 0n, asset.decimals || 0)"
               />
               <div v-if="asset.price" class="text-sm" v-text="`$${_n(asset.price)}`" />
             </div>

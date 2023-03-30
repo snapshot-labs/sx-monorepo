@@ -67,6 +67,15 @@ export function _n(value: any, notation: 'standard' | 'compact' = 'standard') {
   return formatter.format(value);
 }
 
+export function _c(value: string | bigint, decimals = 18) {
+  const raw = BigInt(value);
+  const parsed = Number(raw) / 10 ** decimals;
+  if (raw !== 0n && parsed < 0.001) return `~0`;
+
+  const formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
+  return formatter.format(parsed);
+}
+
 export function jsonParse(input, fallback?) {
   if (typeof input !== 'string') {
     return fallback || {};
