@@ -102,12 +102,14 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
     },
     loadProposals: async (
       spaceId: string,
-      { limit, skip = 0 }: PaginationOpts
+      { limit, skip = 0 }: PaginationOpts,
+      searchQuery = ''
     ): Promise<Proposal[]> => {
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
         variables: {
           space: spaceId,
+          searchQuery,
           first: limit,
           skip
         }

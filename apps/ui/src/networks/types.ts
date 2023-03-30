@@ -87,7 +87,11 @@ export type NetworkActions = {
 export type NetworkApi = {
   loadProposalVotes(proposal: Proposal): Promise<Vote[]>;
   loadUserVotes(voter: string): Promise<{ [key: string]: Vote }>;
-  loadProposals(spaceId: string, paginationOpts: PaginationOpts): Promise<Proposal[]>;
+  loadProposals(
+    spaceId: string,
+    paginationOpts: PaginationOpts,
+    searchQuery?: string
+  ): Promise<Proposal[]>;
   loadProposalsSummary(spaceId: string, limit: number): Promise<Proposal[]>;
   loadProposal(spaceId: string, proposalId: number): Promise<Proposal>;
   loadSpaces(paginationOpts: PaginationOpts): Promise<Space[]>;

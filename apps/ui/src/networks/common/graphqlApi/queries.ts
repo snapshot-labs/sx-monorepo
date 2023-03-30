@@ -45,11 +45,11 @@ export const PROPOSAL_QUERY = gql`
 `;
 
 export const PROPOSALS_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $space: String!) {
+  query ($first: Int!, $skip: Int!, $space: String!, $searchQuery: String) {
     proposals(
       first: $first
       skip: $skip
-      where: { space: $space }
+      where: { space: $space, title_contains_nocase: $searchQuery }
       orderBy: created
       orderDirection: desc
     ) {
