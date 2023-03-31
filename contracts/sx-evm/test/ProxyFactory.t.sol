@@ -7,8 +7,8 @@ import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 import {
-    VotingPowerProposalValidationStrategy
-} from "../src/proposal-validation-strategies/VotingPowerProposalValidationStrategy.sol";
+    VanillaProposalValidationStrategy
+} from "../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
 import { ProxyFactory } from "../src/ProxyFactory.sol";
 import { Space } from "../src/Space.sol";
 import { IProxyFactoryEvents } from "../src/interfaces/factory/IProxyFactoryEvents.sol";
@@ -22,7 +22,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
     VanillaVotingStrategy public vanillaVotingStrategy;
     VanillaAuthenticator public vanillaAuthenticator;
     VanillaExecutionStrategy public vanillaExecutionStrategy;
-    VotingPowerProposalValidationStrategy public votingPowerProposalValidationStrategy;
+    VanillaProposalValidationStrategy public vanillaProposalValidationStrategy;
     Strategy[] public votingStrategies;
     address[] public authenticators;
     Strategy[] public executionStrategies;
@@ -43,6 +43,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
         vanillaExecutionStrategy = new VanillaExecutionStrategy(quorum);
+        vanillaProposalValidationStrategy = new VanillaProposalValidationStrategy();
 
         owner = address(1);
         votingDelay = 0;
@@ -53,10 +54,8 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
         authenticators.push(address(vanillaAuthenticator));
         executionStrategies.push(Strategy(address(vanillaExecutionStrategy), new bytes(0)));
-
-        VotingPowerProposalValidationStrategy validationContract = new VotingPowerProposalValidationStrategy();
         proposalValidationStrategy = Strategy(
-            address(validationContract),
+            address(vanillaProposalValidationStrategy),
             abi.encode(proposalThreshold, votingStrategies)
         );
     }

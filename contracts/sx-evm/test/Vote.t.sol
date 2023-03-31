@@ -8,7 +8,6 @@ import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStr
 
 contract VoteTest is SpaceTest {
     error DuplicateFound(uint8 index);
-    error InvalidStrategyIndex(uint256 index);
 
     function testVote() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
@@ -87,6 +86,12 @@ contract VoteTest is SpaceTest {
 
     function testVoteRemovedVotingStrategy() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
+
+        // adding a new voting strategy which will reside at index 1
+        Strategy[] memory newVotingStrategies = new Strategy[](1);
+        newVotingStrategies[0] = votingStrategies[0];
+        string[] memory newVotingStrategyMetadataURIs = new string[](0);
+        space.addVotingStrategies(newVotingStrategies, newVotingStrategyMetadataURIs);
 
         // removing the voting strategy at index 0
         uint8[] memory removeIndices = new uint8[](1);

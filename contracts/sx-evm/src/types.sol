@@ -20,8 +20,9 @@ struct Proposal {
     address author;
     // An enum that stores whether a proposal is pending, executed, or cancelled.
     FinalizationStatus finalizationStatus;
-    // Array of structs containing the voting strategy addresses and parameters required for each.
-    Strategy[] votingStrategies;
+    // Bit array where the index of each each bit corresponds to whether the voting strategy
+    // at that index is active at the time of proposal creation.
+    uint256 activeVotingStrategies;
 }
 
 struct Strategy {

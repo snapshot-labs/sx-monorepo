@@ -4,12 +4,17 @@ pragma solidity ^0.8.18;
 
 import { IProposalValidationStrategy } from "../interfaces/IProposalValidationStrategy.sol";
 import { IndexedStrategy, Strategy } from "../types.sol";
-import { ISpace } from "../interfaces/ISpace.sol";
-import { GetCumulativePower } from "../utils/GetCumulativePower.sol";
+import { ISpaceState } from "src/interfaces/space/ISpaceState.sol";
+import { IVotingStrategy } from "src/interfaces/IVotingStrategy.sol";
+import { SXUtils } from "../utils/SXUtils.sol";
+import { BitPacker } from "../utils/BitPacker.sol";
 import { ActiveProposalsLimiter } from "./ActiveProposalsLimiter.sol";
 
 contract VotingPowerAndActiveProposalsLimiterValidationStrategy is IProposalValidationStrategy, ActiveProposalsLimiter {
-    using GetCumulativePower for address;
+    using SXUtils for IndexedStrategy[];
+    using BitPacker for uint256;
+
+    error InvalidStrategyIndex(uint256 index);
 
     // solhint-disable-next-line no-empty-blocks
     constructor(uint32 _cooldown, uint224 _maxActiveProposals) ActiveProposalsLimiter(_cooldown, _maxActiveProposals) {}
@@ -34,8 +39,33 @@ contract VotingPowerAndActiveProposalsLimiterValidationStrategy is IProposalVali
         (uint256 proposalThreshold, Strategy[] memory allowedStrategies) = abi.decode(params, (uint256, Strategy[]));
         IndexedStrategy[] memory userStrategies = abi.decode(userParams, (IndexedStrategy[]));
 
-        uint256 votingPower = author.getCumulativePower(uint32(block.timestamp), userStrategies, allowedStrategies);
+        uint256 votingPower = _getCumulativePower(author, uint32(block.timestamp), userStrategies, allowedStrategies);
 
         return (votingPower >= proposalThreshold);
+    }
+
+    function _getCumulativePower(
+        address userAddress,
+        uint32 timestamp,
+        IndexedStrategy[] memory userStrategies,
+        Strategy[] memory allowedStrategies
+    ) internal returns (uint256) {
+        // Ensure there are no duplicates to avoid an attack where people double count a strategy
+        userStrategies.assertNoDuplicateIndices();
+
+        uint256 totalVotingPower;
+        for (uint256 i = 0; i < userStrategies.length; ++i) {
+            uint256 strategyIndex = userStrategies[i].index;
+            if (strategyIndex >= allowedStrategies.length) revert InvalidStrategyIndex(strategyIndex);
+            Strategy memory strategy = allowedStrategies[strategyIndex];
+
+            totalVotingPower += IVotingStrategy(strategy.addr).getVotingPower(
+                timestamp,
+                userAddress,
+                strategy.params,
+                userStrategies[i].params
+            );
+        }
+        return totalVotingPower;
     }
 }

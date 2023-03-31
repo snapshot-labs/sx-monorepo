@@ -9,7 +9,6 @@ import { StupidProposalValidationStrategy } from "./mocks/StupidProposalValidati
 
 contract ProposeTest is SpaceTest {
     error DuplicateFound(uint8 index);
-    error InvalidStrategyIndex(uint256 index);
 
     function testPropose() public {
         uint256 proposalId = space.nextProposalId();
@@ -19,6 +18,9 @@ contract ProposeTest is SpaceTest {
         uint32 startTimestamp = uint32(snapshotTimestamp + votingDelay);
         uint32 minEndTimestamp = uint32(startTimestamp + minVotingDuration);
         uint32 maxEndTimestamp = uint32(startTimestamp + maxVotingDuration);
+
+        // There is only one voting strategy, so the `activeVotingStrategies` bit array should be ..001 = 1
+        uint256 activeVotingStrategies = 1;
 
         // Expected content of the proposal struct
         Proposal memory proposal = Proposal(
@@ -30,7 +32,7 @@ contract ProposeTest is SpaceTest {
             IExecutionStrategy(executionStrategy.addr),
             author,
             FinalizationStatus.Pending,
-            votingStrategies
+            activeVotingStrategies
         );
 
         vm.expectEmit(true, true, true, true);

@@ -8,9 +8,11 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuar
 
 import { ISpace } from "src/interfaces/ISpace.sol";
 import { Choice, FinalizationStatus, IndexedStrategy, Proposal, ProposalStatus, Strategy } from "src/types.sol";
+import { IVotingStrategy } from "src/interfaces/IVotingStrategy.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 import { IProposalValidationStrategy } from "src/interfaces/IProposalValidationStrategy.sol";
-import { GetCumulativePower } from "./utils/GetCumulativePower.sol";
+import { SXUtils } from "./utils/SXUtils.sol";
+import { BitPacker } from "./utils/BitPacker.sol";
 
 /**
  * @author  SnapshotLabs
@@ -18,7 +20,8 @@ import { GetCumulativePower } from "./utils/GetCumulativePower.sol";
  * @notice  Logic and bookkeeping contract.
  */
 contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuard {
-    using GetCumulativePower for address;
+    using BitPacker for uint256;
+    using SXUtils for IndexedStrategy[];
 
     // Maximum duration a proposal can last.
     uint32 public maxVotingDuration;
@@ -29,10 +32,17 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     // Delay between when the proposal is created and when the voting period starts for this proposal.
     uint32 public votingDelay;
 
-    // Array of available voting strategies that users can use to determine their voting power.
-    /// @dev This needs to be an array because a mapping would limit a space to only one use per
-    ///      voting strategy contract.
-    Strategy[] public votingStrategies;
+    // Bit array where the index of each bit corresponds to whether the strategy at that index
+    // in `votingStrategies` is active.
+    uint256 public activeVotingStrategies;
+
+    // Mapping storing all voting strategies. Both active and inactive.
+    // To see whether the strategy at a specific index is active,
+    // check the corresponding index of the`activeVotingStrategies` bit array.
+    mapping(uint8 strategyIndex => Strategy strategy) public votingStrategies;
+
+    // Pointer to the next available voting strategy index.
+    uint8 public nextVotingStrategyIndex;
 
     // The proposal validation contract.
     Strategy public proposalValidationStrategy;
@@ -121,32 +131,34 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
 
     /**
      * @notice  Internal function to add voting strategies.
-     * @dev     `_votingStrategies` should not be set to `0`.
      * @param   _votingStrategies  Array of voting strategies to add.
      */
     function _addVotingStrategies(Strategy[] memory _votingStrategies) internal {
         if (_votingStrategies.length == 0) revert EmptyArray();
+        uint256 cachedActiveVotingStrategies = activeVotingStrategies;
+        uint8 cachedNextVotingStrategyIndex = nextVotingStrategyIndex;
+        if (cachedNextVotingStrategyIndex >= 256 - _votingStrategies.length) revert ExceedsStrategyLimit();
         for (uint256 i = 0; i < _votingStrategies.length; i++) {
-            // A voting strategy set to 0 is used to indicate that the voting strategy is no longer active,
-            // so we need to prevent the user from adding a null invalid strategy address.
             if (_votingStrategies[i].addr == address(0)) revert InvalidStrategyAddress();
-            votingStrategies.push(_votingStrategies[i]);
+            cachedActiveVotingStrategies = cachedActiveVotingStrategies.setBit(cachedNextVotingStrategyIndex, true);
+            votingStrategies[cachedNextVotingStrategyIndex] = _votingStrategies[i];
+            cachedNextVotingStrategyIndex++;
         }
+        activeVotingStrategies = cachedActiveVotingStrategies;
+        nextVotingStrategyIndex = cachedNextVotingStrategyIndex;
     }
 
     /**
      * @notice  Internal function to remove voting strategies.
-     * @dev     Does not shrink the array but simply sets the values to 0.
      * @param   _votingStrategyIndices  Indices of the strategies to remove.
      */
     function _removeVotingStrategies(uint8[] memory _votingStrategyIndices) internal {
         if (_votingStrategyIndices.length == 0) revert EmptyArray();
         for (uint8 i = 0; i < _votingStrategyIndices.length; i++) {
-            votingStrategies[_votingStrategyIndices[i]].addr = address(0);
-            votingStrategies[_votingStrategyIndices[i]].params = new bytes(0);
+            activeVotingStrategies = activeVotingStrategies.setBit(_votingStrategyIndices[i], false);
         }
-
-        // TODO: should we check that there are still voting strategies left after this?
+        // There must always be at least one active voting strategy.
+        if (activeVotingStrategies == 0) revert NoActiveVotingStrategies();
     }
 
     /**
@@ -188,6 +200,45 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         // so if proposal.startTimestamp is 0 it means this proposal does not exist
         // and hence `proposalId` is invalid.
         if (proposal.startTimestamp == 0) revert InvalidProposal();
+    }
+
+    /**
+     * @notice  Loop over the strategies and return the cumulative power.
+     * @dev
+     * @param   timestamp  Timestamp of the snapshot.
+     * @param   userAddress  Address for which to compute the voting power.
+     * @param   userStrategies The desired voting strategies to check.
+     * @param   allowedStrategies The array of strategies that were active at the time of the proposal snapshot.
+     * @return  uint256  The total voting power of a user (over those specified voting strategies).
+     */
+    function _getCumulativePower(
+        address userAddress,
+        uint32 timestamp,
+        IndexedStrategy[] memory userStrategies,
+        uint256 allowedStrategies
+    ) internal returns (uint256) {
+        // Ensure there are no duplicates to avoid an attack where people double count a strategy
+        userStrategies.assertNoDuplicateIndices();
+
+        uint256 totalVotingPower;
+        for (uint256 i = 0; i < userStrategies.length; ++i) {
+            uint8 strategyIndex = userStrategies[i].index;
+
+            // Check that the strategy is allowed for this proposal
+            if (!allowedStrategies.isBitSet(strategyIndex)) {
+                revert InvalidStrategyIndex(strategyIndex);
+            }
+
+            Strategy memory strategy = votingStrategies[strategyIndex];
+
+            totalVotingPower += IVotingStrategy(strategy.addr).getVotingPower(
+                timestamp,
+                userAddress,
+                strategy.params,
+                userStrategies[i].params
+            );
+        }
+        return totalVotingPower;
     }
 
     // ------------------------------------
@@ -322,7 +373,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
             IExecutionStrategy(executionStrategy.addr),
             author,
             FinalizationStatus.Pending,
-            votingStrategies
+            activeVotingStrategies
         );
 
         proposalRegistry[nextProposalId] = proposal;
@@ -347,7 +398,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         string calldata metadataUri
     ) external override {
         _assertValidAuthenticator();
-
         Proposal memory proposal = proposalRegistry[proposalId];
         _assertProposalExists(proposal);
         if (block.timestamp >= proposal.maxEndTimestamp) revert VotingPeriodHasEnded();
@@ -355,10 +405,11 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         if (proposal.finalizationStatus != FinalizationStatus.Pending) revert ProposalFinalized();
         if (voteRegistry[proposalId][voter]) revert UserHasAlreadyVoted();
 
-        uint256 votingPower = voter.getCumulativePower(
+        uint256 votingPower = _getCumulativePower(
+            voter,
             proposal.snapshotTimestamp,
             userVotingStrategies,
-            proposal.votingStrategies
+            proposal.activeVotingStrategies
         );
         if (votingPower == 0) revert UserHasNoVotingPower();
         votePower[proposalId][choice] += votingPower;

@@ -4,8 +4,8 @@ pragma solidity ^0.8.18;
 
 import { IndexedStrategy, Strategy } from "src/types.sol";
 
-/// @title SX Types Hashing Library
-/// @notice This library contains functions for hashing SX types for use in eip712 signatures.
+/// @title Library for hashing Snapshot X Types.
+/// @notice For use in EIP712 signatures.
 library SXHash {
     bytes32 private constant STRATEGY_TYPEHASH = keccak256("Strategy(address addr,bytes params)");
     bytes32 private constant INDEXED_STRATEGY_TYPEHASH = keccak256("IndexedStrategy(uint8 index,bytes params)");
