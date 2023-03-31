@@ -15,7 +15,7 @@
   },
   "scripts": {
     "clean": "rimraf cache out",
-    "coverage": "forge coverage",
+    "coverage": "forge coverage --report lcov",
     "lint": "yarn lint:sol && yarn prettier:check",
     "lint:sol": "solhint \"{src,test,script}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
