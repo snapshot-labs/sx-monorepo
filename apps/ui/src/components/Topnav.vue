@@ -79,7 +79,7 @@ watch(route, to => {
               ref="searchInput"
               v-model="searchValue"
               type="text"
-              placeholder="Search"
+              placeholder="Search proposals"
               class="bg-transparent text-skin-link text-[19px] w-full"
             />
           </form>
