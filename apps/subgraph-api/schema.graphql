@@ -6,6 +6,7 @@ type Space @entity {
   github: String!
   twitter: String!
   discord: String!
+  voting_power_symbol: String!
   wallet: String!
   controller: Bytes!
   voting_delay: Int!
@@ -16,6 +17,7 @@ type Space @entity {
   strategies: [Bytes!]!
   strategies_params: [String!]!
   strategies_metadata: [String!]!
+  strategies_parsed_metadata: [StrategiesParsedMetadata!]! @derivedFrom(field: "space")
   authenticators: [Bytes!]!
   validation_strategy: Bytes!
   validation_strategy_params: String!
@@ -27,6 +29,17 @@ type Space @entity {
   vote_count: Int!
   created: Int!
   tx: Bytes!
+}
+
+type StrategiesParsedMetadata @entity {
+  id: ID!
+  space: Space!
+  index: Int!
+  name: String!
+  description: String!
+  decimals: Int!
+  symbol: String!
+  token: String
 }
 
 type ExecutionStrategy @entity {

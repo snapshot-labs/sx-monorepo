@@ -1,5 +1,5 @@
 import { Bytes, BigInt, ipfs, json, ethereum, Address } from '@graphprotocol/graph-ts'
-import { Space, ExecutionStrategy } from '../generated/schema'
+import { Space, ExecutionStrategy, StrategiesParsedMetadata } from '../generated/schema'
 
 const TUPLE_PREFIX = '0x0000000000000000000000000000000000000000000000000000000000000020'
 const VOTING_POWER_VALIDATION_STRATEGY_PARAMS_SIGNATURE = '(uint256, (address,bytes)[])'
@@ -53,12 +53,14 @@ export function updateSpaceMetadata(space: Space, metadataUri: string): void {
     let github = propertiesObj.get('github')
     let twitter = propertiesObj.get('twitter')
     let discord = propertiesObj.get('discord')
+    let votingPowerSymbol = propertiesObj.get('voting_power_symbol')
     let wallets = propertiesObj.get('wallets')
     let executionStrategies = propertiesObj.get('executionStrategies')
 
     space.github = github ? github.toString() : ''
     space.twitter = twitter ? twitter.toString() : ''
     space.discord = discord ? discord.toString() : ''
+    space.voting_power_symbol = votingPowerSymbol ? votingPowerSymbol.toString() : 'VP'
     space.wallet = wallets && wallets.toArray().length > 0 ? wallets.toArray()[0].toString() : ''
 
     if (executionStrategies) {
@@ -82,5 +84,50 @@ export function updateSpaceMetadata(space: Space, metadataUri: string): void {
     space.wallet = ''
     space.executors = []
     space.executors_types = []
+  }
+}
+
+export function updateStrategiesParsedMetadata(spaceId: string, metadataUris: string[]): void {
+  for (let i = 0; i < metadataUris.length; i++) {
+    let metadataUri = metadataUris[i]
+
+    let strategyParsedMetadata = new StrategiesParsedMetadata(`${spaceId}/${i}`)
+    strategyParsedMetadata.space = spaceId
+    strategyParsedMetadata.index = i
+
+    if (!metadataUri.startsWith('ipfs://')) {
+      strategyParsedMetadata.save()
+      continue
+    }
+
+    let hash = metadataUri.slice(7)
+    let data = ipfs.cat(hash)
+
+    if (data !== null) {
+      let value = json.try_fromBytes(data as Bytes)
+      let obj = value.value.toObject()
+      let name = obj.get('name')
+      let description = obj.get('description')
+      let properties = obj.get('properties')
+
+      strategyParsedMetadata.name = name ? name.toString() : ''
+      strategyParsedMetadata.description = description ? description.toString() : ''
+
+      if (properties) {
+        let propertiesObj = properties.toObject()
+
+        let decimals = propertiesObj.get('decimals')
+        let symbol = propertiesObj.get('symbol')
+        let token = propertiesObj.get('token')
+
+        strategyParsedMetadata.decimals = decimals ? decimals.toBigInt().toI32() : 0
+        strategyParsedMetadata.symbol = symbol ? symbol.toString() : ''
+        if (token) {
+          strategyParsedMetadata.token = token.toString()
+        }
+      }
+
+      strategyParsedMetadata.save()
+    }
   }
 }
