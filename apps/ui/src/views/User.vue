@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
 import { useUsersStore } from '@/stores/users';
 import { shortenAddress } from '@/helpers/utils';
 import type { NetworkID } from '@/types';

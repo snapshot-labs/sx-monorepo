@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { validateForm } from '@/helpers/validation';
 import { evmNetworks } from '@/networks';
 import type { NetworkID } from '@/types';

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
 import { getNetwork } from '@/networks';
 import { Space, Proposal as ProposalType } from '@/types';
 

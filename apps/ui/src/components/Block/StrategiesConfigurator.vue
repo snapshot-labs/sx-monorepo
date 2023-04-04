@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed, Ref } from 'vue';
 import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
 const props = withDefaults(

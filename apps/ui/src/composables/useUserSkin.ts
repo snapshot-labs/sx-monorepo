@@ -1,4 +1,3 @@
-import { ref, watch } from 'vue';
 import { lsGet, lsSet } from '@/helpers/utils';
 
 const NOT_SET = 'none';

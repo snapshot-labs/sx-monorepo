@@ -5,7 +5,6 @@
   "main": "main.js",
   "scripts": {
     "dev": "vite --port=8080",
-    "prebuild": "yarn typecheck",
     "build": "vite build",
     "lint:nofix": "eslint \"./src/**/*.{ts,vue,json}\"",
     "lint": "yarn lint:nofix --fix",
@@ -15,7 +14,10 @@
     "electron:build": "ELECTRON=true yarn build"
   },
   "eslintConfig": {
-    "extends": "@snapshot-labs/vue"
+    "extends": [
+      "@snapshot-labs/vue",
+      "./.eslintrc-auto-import.json"
+    ]
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
@@ -50,6 +52,7 @@
     "scrollmonitor": "^1.2.9",
     "starknet": "5.0.1",
     "stream-browserify": "^3.0.0",
+    "unplugin-auto-import": "^0.15.2",
     "util": "^0.12.5",
     "vue": "^3.2.41",
     "vue-router": "^4.1.6",

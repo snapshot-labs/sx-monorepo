@@ -1,6 +1,4 @@
 <script setup>
-import { ref } from 'vue';
-
 const emit = defineEmits(['loading', 'input']);
 
 const loading = ref(false);

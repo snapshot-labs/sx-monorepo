@@ -5,8 +5,6 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-
 import IObject from './IObject.vue';
 import IArray from './IArray.vue';
 import IString from './IString.vue';

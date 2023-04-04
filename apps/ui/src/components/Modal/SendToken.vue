@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, computed, watch, onMounted, nextTick, Ref } from 'vue';
 import { formatUnits } from '@ethersproject/units';
-import { useBalances } from '@/composables/useBalances';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';

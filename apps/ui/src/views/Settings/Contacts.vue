@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, Ref } from 'vue';
 import { useContactsStore } from '@/stores/contacts';
 import { shorten, shortenAddress } from '@/helpers/utils';
 

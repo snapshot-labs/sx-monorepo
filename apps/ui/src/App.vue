@@ -1,12 +1,5 @@
 <script setup>
-import { computed, onMounted, provide, watch } from 'vue';
-import { useRoute } from 'vue-router';
 import { useUiStore } from '@/stores/ui';
-import { useModal } from '@/composables/useModal';
-import { useUserSkin } from '@/composables/useUserSkin';
-import { useApp } from '@/composables/useApp';
-import { useWeb3 } from '@/composables/useWeb3';
-import { useAccount } from '@/composables/useAccount';
 
 const route = useRoute();
 const uiStore = useUiStore();

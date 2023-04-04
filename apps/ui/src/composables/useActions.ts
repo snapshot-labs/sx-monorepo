@@ -1,8 +1,7 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getNetwork, evmNetworks } from '@/networks';
 import { useUiStore } from '@/stores/ui';
-import { useWeb3 } from '@/composables/useWeb3';
-import { useModal } from '@/composables/useModal';
+
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
   Transaction,

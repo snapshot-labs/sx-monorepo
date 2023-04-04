@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useAccount } from '@/composables/useAccount';
 import { shorten, shortenAddress } from '@/helpers/utils';
 import { useContactsStore } from '@/stores/contacts';
 

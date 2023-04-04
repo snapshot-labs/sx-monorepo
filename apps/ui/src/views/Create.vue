@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { ref, reactive, computed, watch, Ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useActions } from '@/composables/useActions';
-import { useWeb3 } from '@/composables/useWeb3';
 import { clone } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';

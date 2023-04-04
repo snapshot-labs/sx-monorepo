@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
-import { useActions } from '@/composables/useActions';
 import { clone } from '@/helpers/utils';
 import type { Space, SpaceMetadata, NetworkID } from '@/types';
 

@@ -1,6 +1,4 @@
-import { ref, Ref } from 'vue';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { useWeb3 } from '@/composables/useWeb3';
 import type { Vote } from '@/types';
 
 const votes: Ref<Record<string, Vote>> = ref({});

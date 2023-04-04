@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import type { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{

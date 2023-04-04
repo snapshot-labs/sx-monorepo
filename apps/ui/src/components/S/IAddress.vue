@@ -25,6 +25,6 @@ const emit = defineEmits<{
     <div v-if="showPicker" class="absolute top-[20px] right-3 z-10">
       <a @click="emit('pick', path || '')"><IH-identification /></a>
     </div>
-    <SIString v-bind="$attrs" class="!pr-7" />
+    <SIString v-bind="$attrs as any" class="!pr-7" />
   </div>
 </template>

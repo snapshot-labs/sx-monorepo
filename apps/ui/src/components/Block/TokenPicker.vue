@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed, watch, Ref } from 'vue';
 import { isAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
 import snapshot from '@snapshot-labs/snapshot.js';

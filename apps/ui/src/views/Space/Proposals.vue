@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { useWeb3 } from '@/composables/useWeb3';
 import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';

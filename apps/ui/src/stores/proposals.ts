@@ -1,4 +1,3 @@
-import { Ref, toRef } from 'vue';
 import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
 import type { NetworkID, Proposal } from '@/types';

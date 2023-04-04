@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted, ref } from 'vue';
 import { debouncedWatch } from '@vueuse/core';
 
 const props = defineProps({ url: String });

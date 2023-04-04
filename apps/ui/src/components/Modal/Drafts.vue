@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { toRefs, computed } from 'vue';
-import { useEditor } from '@/composables/useEditor';
-
 const props = defineProps<{
   open: boolean;
   networkId: string;

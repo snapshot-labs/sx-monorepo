@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, Ref } from 'vue';
 import draggable from 'vuedraggable';
-import { useTreasury } from '@/composables/useTreasury';
 import { Transaction as TransactionType, Space } from '@/types';
 
 const props = defineProps<{

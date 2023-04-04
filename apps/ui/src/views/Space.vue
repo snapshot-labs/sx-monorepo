@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useRoute } from 'vue-router';
 import { useUiStore } from '@/stores/ui';
 import { useSpacesStore } from '@/stores/spaces';
 import type { NetworkID } from '@/types';

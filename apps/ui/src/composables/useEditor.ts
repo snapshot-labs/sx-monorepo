@@ -1,4 +1,3 @@
-import { reactive, watch, computed } from 'vue';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
 import type { Drafts } from '@/types';
 import type { Proposal as ProposalType } from '@/types';

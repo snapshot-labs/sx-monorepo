@@ -11,6 +11,7 @@ jobs:
           node-version: '16'
           cache: 'yarn'
       - run: yarn --frozen-lockfile
+      - run: yarn build
       - run: yarn typecheck
       - run: yarn lint:nofix
       - run: yarn test:unit

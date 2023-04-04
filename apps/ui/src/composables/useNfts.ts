@@ -1,4 +1,3 @@
-import { ref, computed, Ref } from 'vue';
 import snapshot from '@snapshot-labs/snapshot.js';
 
 const SUPPORTED_ABIS = ['ERC721', 'ERC1155'];

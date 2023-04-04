@@ -1,9 +1,7 @@
 <script setup>
-import { toRefs, watch } from 'vue';
 import { getInjected } from '@snapshot-labs/lock/src/utils';
 import { shorten, explorerUrl } from '@/helpers/utils';
 import connectors, { mapConnectorId, getConnectorIconUrl } from '@/helpers/connectors';
-import { useWeb3 } from '@/composables/useWeb3';
 
 const injected = getInjected();
 if (injected)

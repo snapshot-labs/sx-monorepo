@@ -1,4 +1,3 @@
-import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 import { LockPlugin } from '@snapshot-labs/lock/plugins/vue3';
 import options from '@/helpers/auth';

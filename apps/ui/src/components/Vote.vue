@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useAccount } from '@/composables/useAccount';
 import { _t } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import type { Proposal as ProposalType } from '@/types';

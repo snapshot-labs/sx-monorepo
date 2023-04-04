@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { useSpacesStore } from '@/stores/spaces';
-import { useActions } from '@/composables/useActions';
-import { useWeb3 } from '@/composables/useWeb3';
-import { useEditor } from '@/composables/useEditor';
-import { useModal } from '@/composables/useModal';
 import { getNetwork } from '@/networks';
 import { omit } from '@/helpers/utils';
 import type { NetworkID } from '@/types';

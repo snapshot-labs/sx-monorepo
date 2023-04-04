@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { reactive, ref, computed, watch, Ref } from 'vue';
 import { Interface, Fragment, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';

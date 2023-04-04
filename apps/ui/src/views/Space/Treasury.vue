@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, ref, Ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { useClipboard } from '@vueuse/core';
-import { useBalances } from '@/composables/useBalances';
-import { useEditor } from '@/composables/useEditor';
-import { useNfts } from '@/composables/useNfts';
-import { useTreasury } from '@/composables/useTreasury';
 import { _n, _c, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';

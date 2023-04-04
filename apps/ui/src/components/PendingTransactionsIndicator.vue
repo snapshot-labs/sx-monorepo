@@ -5,7 +5,6 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useUiStore } from '@/stores/ui';
 
 const uiStore = useUiStore();

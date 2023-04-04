@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Ref, ref, toRefs, watch, computed } from 'vue';
 import { getNetwork } from '@/networks';
 import { shortenAddress } from '@/helpers/utils';
 import choices from '@/helpers/choices.json';

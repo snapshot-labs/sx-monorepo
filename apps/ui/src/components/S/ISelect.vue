@@ -5,8 +5,6 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-
 const props = defineProps<{
   modelValue?: string;
   error?: string;

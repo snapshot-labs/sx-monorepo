@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { reactive, ref, computed, watch, nextTick, Ref } from 'vue';
-import { useNfts } from '@/composables/useNfts';
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 

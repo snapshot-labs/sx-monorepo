@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { shorten, _d } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';

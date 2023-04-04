@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useActions } from '@/composables/useActions';
 import { getNetwork } from '@/networks';
 import { shorten } from '@/helpers/utils';
 import type { Proposal as ProposalType } from '@/types';

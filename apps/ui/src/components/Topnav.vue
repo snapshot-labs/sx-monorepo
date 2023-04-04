@@ -1,13 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { useFocus } from '@vueuse/core';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
 import { useUiStore } from '@/stores/ui';
-import { useModal } from '@/composables/useModal';
-import { useWeb3 } from '@/composables/useWeb3';
-import { useUserSkin } from '@/composables/useUserSkin';
 
 const emit = defineEmits(['toggle']);
 

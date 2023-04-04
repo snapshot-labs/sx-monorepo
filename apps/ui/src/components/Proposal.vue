@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { _rt, shortenAddress } from '@/helpers/utils';
-import { useActions } from '@/composables/useActions';
 import type { Proposal as ProposalType, Choice } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();

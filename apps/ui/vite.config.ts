@@ -2,6 +2,7 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import GlobalPolyFill from '@esbuild-plugins/node-globals-polyfill';
+import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import Icons from 'unplugin-icons/vite';
 import IconsResolver from 'unplugin-icons/resolver';
@@ -19,6 +20,13 @@ export default defineConfig({
   },
   plugins: [
     vue({ reactivityTransform: true }),
+    AutoImport({
+      imports: ['vue', 'vue-router'],
+      dirs: ['./src/composables'],
+      eslintrc: {
+        enabled: true
+      }
+    }),
     Components({
       directoryAsNamespace: true,
       resolvers: [

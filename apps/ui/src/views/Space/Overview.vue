@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
 import { useSpacesStore } from '@/stores/spaces';
 import { useProposalsStore } from '@/stores/proposals';
 import { _n, compareAddresses } from '@/helpers/utils';
-import { useWeb3 } from '@/composables/useWeb3';
 import { Space, Proposal as ProposalType } from '@/types';
 
 const PROPOSALS_LIMIT = 4;

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { getNetwork } from '@/networks';
 import { _n, shorten } from '@/helpers/utils';
 import { NetworkID } from '@/types';

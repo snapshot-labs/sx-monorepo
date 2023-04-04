@@ -1,9 +1,6 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 import { useUiStore } from '@/stores/ui';
 import { useSpacesStore } from '@/stores/spaces';
-import { useTreasury } from '@/composables/useTreasury';
 
 // TODO: need to import all icons https://github.com/antfu/unplugin-icons/issues/5
 // move to this when stable to avoid imports https://www.npmjs.com/package/@iconify/tailwind

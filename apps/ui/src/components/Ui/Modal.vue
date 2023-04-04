@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { watch, toRefs, onMounted, onBeforeUnmount } from 'vue';
-import { useModal } from '@/composables/useModal';
-
 const emit = defineEmits<{
   (e: 'close');
 }>();

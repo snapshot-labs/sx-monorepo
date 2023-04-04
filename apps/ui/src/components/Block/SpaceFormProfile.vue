@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, watch, onMounted } from 'vue';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, enabledNetworks } from '@/networks';
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { _n } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 

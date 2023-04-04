@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useWeb3 } from '@/composables/useWeb3';
 import { _c } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 import { VotingPower } from '@/networks/types';

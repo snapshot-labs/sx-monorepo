@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import { useSpacesStore } from '@/stores/spaces';
 
 const spacesStore = useSpacesStore();
