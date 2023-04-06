@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core';
-import { _n, _c, shorten } from '@/helpers/utils';
+import { _n, _c, shorten, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import type { Token } from '@/helpers/alchemy';
@@ -47,6 +47,13 @@ const sortedAssets = computed(() =>
   })
 );
 
+const treasuryExplorerUrl = computed(() => {
+  if (!currentNetwork.value || !treasury.value) return '';
+
+  const url = currentNetwork.value.helpers.getExplorerUrl(treasury.value.wallet, 'address');
+  return sanitizeUrl(url);
+});
+
 function openModal(type: 'tokens' | 'nfts') {
   modalOpen.value[type] = true;
 }
@@ -86,9 +93,12 @@ onMounted(() => {
       <div>
         <Label label="Treasury" sticky />
         <a
-          :href="currentNetwork?.helpers.getExplorerUrl(treasury.wallet, 'address')"
+          :href="treasuryExplorerUrl || '#'"
           target="_blank"
           class="flex justify-between items-center mx-4 py-3 border-b"
+          :class="{
+            'pointer-events-none': !treasuryExplorerUrl
+          }"
         >
           <Stamp :id="treasury.wallet" type="avatar" :size="32" class="mr-3" />
           <div class="flex-1 leading-[22px]">

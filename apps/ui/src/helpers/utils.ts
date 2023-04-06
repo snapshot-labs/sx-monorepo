@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
+import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl as snapshotGetUrl } from '@snapshot-labs/snapshot.js/src/utils';
 import pkg from '@/../package.json';
@@ -40,6 +41,13 @@ dayjs.updateLocale('en', {
 
 export function getUrl(str: string) {
   return snapshotGetUrl(str, IPFS_GATEWAY);
+}
+
+export function sanitizeUrl(url: string): string | null {
+  const sanitized = baseSanitizeUrl(url);
+  if (sanitized === 'about:blank') return null;
+
+  return sanitized;
 }
 
 export function shortenAddress(str = '') {

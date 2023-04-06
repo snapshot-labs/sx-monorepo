@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSpacesStore } from '@/stores/spaces';
 import { useProposalsStore } from '@/stores/proposals';
-import { _n, compareAddresses } from '@/helpers/utils';
+import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
 import { Space, Proposal as ProposalType } from '@/types';
 
 const PROPOSALS_LIMIT = 4;
@@ -22,6 +22,17 @@ const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
 const spaceIsEditable = computed(() =>
   compareAddresses(props.space.controller, web3.value.account)
+);
+
+const externalUrl = computed(() => sanitizeUrl(props.space.external_url));
+const twitterUrl = computed(() =>
+  props.space.twitter ? sanitizeUrl(`https://twitter.com/${props.space.twitter}`) : null
+);
+const discordUrl = computed(() =>
+  props.space.discord ? sanitizeUrl(`https://discord.com/invite/${props.space.discord}`) : null
+);
+const githubUrl = computed(() =>
+  props.space.github ? sanitizeUrl(`https://github.com/${props.space.github}`) : null
 );
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
@@ -81,20 +92,16 @@ const grouped = computed(() => {
           </span>
         </div>
         <div class="space-x-2">
-          <a v-if="space.external_url" :href="space.external_url" target="_blank">
+          <a v-if="externalUrl" :href="externalUrl" target="_blank">
             <IH-globe-alt class="w-[26px] h-[26px] inline-block text-[#606060]" />
           </a>
-          <a v-if="space.twitter" :href="`https://twitter.com/${space.twitter}`" target="_blank">
+          <a v-if="twitterUrl" :href="twitterUrl" target="_blank">
             <img src="~@/assets/twitter.svg" class="w-[26px] h-[26px] inline-block" />
           </a>
-          <a
-            v-if="space.discord"
-            :href="`https://discord.com/invite/${space.discord}`"
-            target="_blank"
-          >
+          <a v-if="discordUrl" :href="discordUrl" target="_blank">
             <img src="~@/assets/discord.svg" class="w-[26px] h-[26px] inline-block" />
           </a>
-          <a v-if="space.github" :href="`https://github.com/${space.github}`" target="_blank">
+          <a v-if="githubUrl" :href="githubUrl" target="_blank">
             <img src="~@/assets/github.svg" class="w-[26px] h-[26px] inline-block" />
           </a>
         </div>

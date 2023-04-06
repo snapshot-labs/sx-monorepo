@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
-import { _rt, _n, shortenAddress, getUrl } from '@/helpers/utils';
+import { _rt, _n, shortenAddress, getUrl, sanitizeUrl } from '@/helpers/utils';
 import { Choice, NetworkID } from '@/types';
 import { VotingPower } from '@/networks/types';
 
@@ -32,10 +31,13 @@ const votingPowerDecimals = computed(() => {
 const discussion = computed(() => {
   if (!proposal.value?.discussion) return null;
 
-  const output = sanitizeUrl(proposal.value.discussion);
-  if (output === 'about:blank') return null;
+  return sanitizeUrl(proposal.value.discussion);
+});
 
-  return output;
+const proposalMetadataUrl = computed(() => {
+  if (!proposal.value) return null;
+
+  return sanitizeUrl(getUrl(proposal.value.metadata_uri));
 });
 
 async function getVotingPower() {
@@ -118,7 +120,7 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
               :voting-powers="votingPowers"
               class="mr-2"
             />
-            <a :href="sanitizeUrl(getUrl(proposal.metadata_uri))" target="_blank">
+            <a v-if="proposalMetadataUrl" :href="proposalMetadataUrl" target="_blank">
               <UiButton class="!w-[46px] !h-[46px] !px-[12px]">
                 <IH-dots-horizontal />
               </UiButton>
