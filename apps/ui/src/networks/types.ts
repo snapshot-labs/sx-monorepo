@@ -1,7 +1,16 @@
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
-import type { Space, SpaceMetadata, Proposal, Vote, User, Choice, NetworkID } from '@/types';
+import type {
+  Space,
+  SpaceMetadata,
+  Proposal,
+  Vote,
+  User,
+  Choice,
+  NetworkID,
+  StrategyParsedMetadata
+} from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
 export type Connector =
@@ -20,7 +29,7 @@ export type StrategyTemplate = {
   validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
   generateParams?: (params: Record<string, any>) => any[];
-  generateMetadata?: (params: Record<string, any>) => string;
+  generateMetadata?: (params: Record<string, any>) => any;
   deploy?: (
     client: any,
     signer: Signer,
@@ -39,7 +48,8 @@ export type VotingPower = {
   address: string;
   value: bigint;
   decimals: number;
-  token?: string;
+  token: string | null;
+  symbol: string;
 };
 
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
@@ -77,7 +87,7 @@ export type NetworkActions = {
   getVotingPower(
     strategiesAddresses: string[],
     strategiesParams: any[],
-    strategiesMetadata: string[],
+    strategiesMetadata: StrategyParsedMetadata[],
     voterAddress: string,
     timestamp: number
   ): Promise<VotingPower[]>;

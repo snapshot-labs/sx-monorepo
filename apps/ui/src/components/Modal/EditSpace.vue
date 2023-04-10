@@ -9,6 +9,7 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
   twitter: '',
   github: '',
   discord: '',
+  votingPowerSymbol: '',
   walletNetwork: null,
   walletAddress: null
 };
@@ -55,6 +56,7 @@ watch(
     form.github = props.space.github;
     form.discord = props.space.discord;
     form.twitter = props.space.twitter;
+    form.votingPowerSymbol = props.space.voting_power_symbol;
 
     const [walletNetwork, walletAddress] = props.space.wallet.split(':');
     if (walletNetwork && walletAddress) {

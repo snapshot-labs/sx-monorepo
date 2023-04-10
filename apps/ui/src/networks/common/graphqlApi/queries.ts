@@ -7,8 +7,14 @@ export const PROPOSAL_QUERY = gql`
       proposal_id
       space {
         id
+        voting_power_symbol
         authenticators
         strategies_metadata
+        strategies_parsed_metadata {
+          decimals
+          symbol
+          token
+        }
         executors
         executors_types
       }
@@ -57,9 +63,15 @@ export const PROPOSALS_QUERY = gql`
       proposal_id
       space {
         id
+        voting_power_symbol
         quorum
         authenticators
         strategies_metadata
+        strategies_parsed_metadata {
+          decimals
+          symbol
+          token
+        }
         executors
         executors_types
       }
@@ -202,6 +214,7 @@ export const SPACE_QUERY = gql`
       github
       twitter
       discord
+      voting_power_symbol
       wallet
       controller
       voting_delay
@@ -214,6 +227,11 @@ export const SPACE_QUERY = gql`
       strategies
       strategies_params
       strategies_metadata
+      strategies_parsed_metadata {
+        decimals
+        symbol
+        token
+      }
       authenticators
       executors
       executors_types
@@ -234,6 +252,7 @@ export const SPACES_QUERY = gql`
       github
       twitter
       discord
+      voting_power_symbol
       wallet
       controller
       voting_delay
@@ -246,6 +265,11 @@ export const SPACES_QUERY = gql`
       strategies
       strategies_params
       strategies_metadata
+      strategies_parsed_metadata {
+        decimals
+        symbol
+        token
+      }
       authenticators
       executors
       executors_types

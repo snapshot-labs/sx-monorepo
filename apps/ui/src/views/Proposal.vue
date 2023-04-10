@@ -54,7 +54,7 @@ async function getVotingPower() {
     votingPowers.value = await network.actions.getVotingPower(
       proposal.value.strategies,
       proposal.value.strategies_params,
-      proposal.value.space.strategies_metadata,
+      proposal.value.space.strategies_parsed_metadata,
       web3.value.account,
       proposal.value.snapshot
     );
@@ -117,6 +117,7 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
             <VotingPowerIndicator
               :network-id="networkId as NetworkID"
               :loading="loadingVotingPower"
+              :voting-power-symbol="proposal.space.voting_power_symbol"
               :voting-powers="votingPowers"
               class="mr-2"
             />

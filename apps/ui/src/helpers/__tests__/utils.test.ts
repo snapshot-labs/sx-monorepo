@@ -12,6 +12,7 @@ describe('utils', () => {
         github: 'snapshot-labs',
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
+        votingPowerSymbol: 'VOTE',
         walletNetwork: 'gor',
         walletAddress: '0x000000000000000000000000000000000000dead'
       });
@@ -21,6 +22,7 @@ describe('utils', () => {
         description: 'Test description',
         external_url: 'https://test.com',
         properties: {
+          voting_power_symbol: 'VOTE',
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
           discord: 'snapshot',

@@ -12,7 +12,7 @@ import type { Provider } from 'starknet';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { NetworkActions, NetworkHelpers, StrategyConfig, VotingPower } from '@/networks/types';
-import type { Space, SpaceMetadata, Proposal } from '@/types';
+import type { Space, SpaceMetadata, StrategyParsedMetadata, Proposal } from '@/types';
 
 const VANILLA_EXECUTOR = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
 const ZODIAC_EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
@@ -209,7 +209,7 @@ export function createActions(
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],
-      strategiesMetadata: string[],
+      strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
       timestamp: number
     ): Promise<VotingPower[]> => {
@@ -227,7 +227,7 @@ export function createActions(
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getStarknetStrategy(address, defaultNetwork);
-          if (!strategy) return { address, value: 0n, decimals: 0 };
+          if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
           const value = await strategy.getVotingPower(
             address,
@@ -240,8 +240,8 @@ export function createActions(
             }
           );
 
-          const token = strategy.type === 'singleSlotProof' ? params2D[i][0] : undefined;
-          return { address, value, decimals: 0, token };
+          const token = strategy.type === 'singleSlotProof' ? params2D[i][0] : null;
+          return { address, value, decimals: 0, token, symbol: '' };
         })
       );
     },

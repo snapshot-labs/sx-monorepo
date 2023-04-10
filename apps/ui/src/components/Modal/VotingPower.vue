@@ -7,6 +7,7 @@ import { VotingPower } from '@/networks/types';
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
+  votingPowerSymbol: string;
   votingPowers: VotingPower[];
   finalDecimals: number;
 }>();
@@ -42,11 +43,12 @@ const baseNetwork = computed(() =>
             v-text="network.constants.STRATEGIES[strategy.address]"
           />
           <div class="text-skin-link">
-            {{ _n(Number(strategy.value) / 10 ** finalDecimals) }} VP
+            {{ _n(Number(strategy.value) / 10 ** finalDecimals) }} {{ votingPowerSymbol }}
           </div>
         </div>
-        <div v-if="strategy.token" class="flex justify-between">
+        <div class="flex justify-between">
           <a
+            v-if="strategy.token"
             :href="baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract')"
             target="_blank"
             class="flex items-center text-skin-text"
@@ -55,7 +57,11 @@ const baseNetwork = computed(() =>
             {{ shorten(strategy.token) }}
             <IH-external-link class="ml-1" />
           </a>
-          <div>{{ _n(Number(strategy.value) / 10 ** strategy.decimals) }} units</div>
+          <div v-else />
+          <div>
+            {{ _n(Number(strategy.value) / 10 ** strategy.decimals) }}
+            {{ strategy.symbol || 'units' }}
+          </div>
         </div>
       </div>
     </div>

@@ -211,6 +211,7 @@ export function createErc1155Metadata(
     description: metadata.description,
     external_url: metadata.externalUrl,
     properties: {
+      voting_power_symbol: metadata.votingPowerSymbol,
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,

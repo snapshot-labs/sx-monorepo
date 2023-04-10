@@ -6,7 +6,7 @@ import { getExecution, pickAuthenticatorAndStrategies } from './helpers';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { NetworkActions, NetworkHelpers, StrategyConfig, VotingPower } from '@/networks/types';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import type { Space, Proposal, SpaceMetadata } from '@/types';
+import type { Space, Proposal, SpaceMetadata, StrategyParsedMetadata } from '@/types';
 
 type Choice = 0 | 1 | 2;
 
@@ -66,6 +66,17 @@ export function createActions(
         })
       );
 
+      const metadataUris = await Promise.all(
+        params.votingStrategies.map(async config => {
+          if (!config.generateMetadata) return '';
+
+          const metadata = config.generateMetadata(config.params);
+          const pinned = await helpers.pin(metadata);
+
+          return `ipfs://${pinned.cid}`;
+        })
+      );
+
       const response = await client.deploySpace({
         signer: web3.getSigner(),
         salt,
@@ -76,9 +87,7 @@ export function createActions(
             addy: config.address,
             params: config.generateParams ? config.generateParams(config.params)[0] : '0x'
           })),
-          votingStrategiesMetadata: params.votingStrategies.map(config =>
-            config.generateMetadata ? config.generateMetadata(config.params) : '0x00'
-          ),
+          votingStrategiesMetadata: metadataUris,
           proposalValidationStrategy: {
             addy: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
@@ -220,14 +229,14 @@ export function createActions(
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],
-      strategiesMetadata: string[],
+      strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
       timestamp: number
     ): Promise<VotingPower[]> => {
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getEvmStrategy(address, evmGoerli);
-          if (!strategy) return { address, value: 0n, decimals: 0 };
+          if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
           const value = await strategy.getVotingPower(
             address,
@@ -241,7 +250,8 @@ export function createActions(
           return {
             address,
             value,
-            decimals: strategiesMetadata[i] ? parseInt(strategiesMetadata[i], 16) : 0,
+            decimals: strategiesMetadata[i]?.decimals ?? 0,
+            symbol: strategiesMetadata[i]?.symbol ?? '',
             token
           };
         })

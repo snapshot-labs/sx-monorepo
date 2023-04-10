@@ -11,6 +11,7 @@ export type SpaceMetadata = {
   twitter: string;
   github: string;
   discord: string;
+  votingPowerSymbol: string;
   walletNetwork: NetworkID | null;
   walletAddress: string | null;
 };
@@ -23,6 +24,12 @@ export type SpaceSettings = {
   quorum?: string;
 };
 
+export type StrategyParsedMetadata = {
+  decimals: number;
+  symbol: string;
+  token: string | null;
+};
+
 export type Space = {
   id: string;
   network: NetworkID;
@@ -32,6 +39,7 @@ export type Space = {
   twitter: string;
   github: string;
   discord: string;
+  voting_power_symbol: string;
   wallet: string;
   controller: string;
   voting_delay: number;
@@ -44,6 +52,7 @@ export type Space = {
   strategies: string[];
   strategies_params: any[];
   strategies_metadata: string[];
+  strategies_parsed_metadata: StrategyParsedMetadata[];
   authenticators: string[];
   executors: string[];
   executors_types: string[];
@@ -59,10 +68,12 @@ export type Proposal = {
   quorum: number;
   space: {
     id: string;
+    voting_power_symbol: string;
     authenticators: string[];
     strategies_metadata: string[];
     executors: string[];
     executors_types: string[];
+    strategies_parsed_metadata: StrategyParsedMetadata[];
   };
   author: {
     id: string;

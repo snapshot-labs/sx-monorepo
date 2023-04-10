@@ -62,6 +62,12 @@ const definition = computed(() => {
         title: 'Discord',
         examples: ['Discord handle']
       },
+      votingPowerSymbol: {
+        type: 'string',
+        maxLength: 6,
+        title: 'Voting power symbol',
+        examples: ['e.g. VP']
+      },
       walletNetwork: {
         type: ['string', 'null'],
         enum: [null, ...enabledNetworks],

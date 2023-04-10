@@ -36,7 +36,7 @@ async function getVotingPower() {
     votingPowers.value = await network.actions.getVotingPower(
       props.space.strategies,
       props.space.strategies_params,
-      props.space.strategies_metadata,
+      props.space.strategies_parsed_metadata,
       web3.value.account,
       Math.floor(Date.now() / 1000)
     );
@@ -68,6 +68,7 @@ watch(
         <VotingPowerIndicator
           :network-id="space.network"
           :loading="loadingVotingPower"
+          :voting-power-symbol="space.voting_power_symbol"
           :voting-powers="votingPowers"
         />
         <router-link :to="{ name: 'editor' }">
