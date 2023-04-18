@@ -18,6 +18,7 @@ const key = route.params.key as string;
 const proposalKey = `${id}:${key}`;
 
 const modalOpen = ref(false);
+const previewEnabled = ref(false);
 const sending = ref(false);
 const fetchingVotingPower = ref(true);
 const votingPowerValid = ref(false);
@@ -153,7 +154,22 @@ watch(proposalData, () => {
           title: 'Title'
         }"
       />
-      <div class="s-base mb-5">
+      <div class="flex">
+        <Link
+          :is-active="!previewEnabled"
+          text="Editor"
+          class="pr-3"
+          @click="previewEnabled = false"
+        />
+        <Link :is-active="previewEnabled" text="Preview" @click="previewEnabled = true" />
+      </div>
+      <Markdown
+        v-if="previewEnabled"
+        class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
+        :body="proposals[proposalKey].body"
+      />
+
+      <div v-else class="s-base mb-5">
         <div class="s-label" v-text="'Description'" />
         <textarea
           v-model="proposals[proposalKey].body"

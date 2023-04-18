@@ -127,9 +127,7 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
               </UiButton>
             </a>
           </div>
-          <div v-if="proposal.body" class="mb-4">
-            <p v-text="proposal.body" />
-          </div>
+          <Markdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
         </div>
 
         <div v-if="discussion">
