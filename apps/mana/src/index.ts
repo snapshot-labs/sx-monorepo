@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import rpc from './rpc';
-import ethRpc from './ethRpc';
+import ethRpc from './eth/rpc';
 import fossil from './fossil';
 import space from './space';
 import pkg from '../package.json';
@@ -16,9 +16,9 @@ app.use(express.json({ limit: '4mb' }));
 app.use(express.urlencoded({ limit: '4mb', extended: false }));
 app.use(cors({ maxAge: 86400 }));
 app.use('/', rpc);
-app.use('/eth_rpc', ethRpc);
 app.use('/fossil', fossil);
 app.use('/space', space);
+app.use('/eth_rpc', ethRpc);
 
 app.get('/', (req, res) =>
   res.json({

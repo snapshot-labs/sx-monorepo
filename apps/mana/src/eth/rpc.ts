@@ -1,13 +1,7 @@
 import express from 'express';
-import { Wallet } from '@ethersproject/wallet';
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { clients } from '@snapshot-labs/sx';
-import { rpcError, rpcSuccess } from './utils';
-
-const ethPrivkey = process.env.ETH_PRIVKEY || '';
-const ethRpcUrl = process.env.ETH_RPC_URL || '';
-const provider = new JsonRpcProvider(ethRpcUrl);
-const wallet = new Wallet(ethPrivkey, provider);
+import { wallet } from './dependencies';
+import { rpcError, rpcSuccess } from '../utils';
 
 const client = new clients.EvmEthereumTx();
 
@@ -46,7 +40,38 @@ async function send(id, params, res) {
   }
 }
 
-const fn = { send };
+async function execute(id, params, res) {
+  try {
+    const { space, proposalId, executionParams } = params;
+    const receipt = await client.execute({
+      signer: wallet,
+      space,
+      proposal: proposalId,
+      executionParams
+    });
+
+    return rpcSuccess(res, receipt, id);
+  } catch (e) {
+    return rpcError(res, 500, e, id);
+  }
+}
+
+async function executeQueuedProposal(id, params, res) {
+  try {
+    const { executionStrategy, executionParams } = params;
+    const receipt = await client.executeQueuedProposal({
+      signer: wallet,
+      executionStrategy,
+      executionParams
+    });
+
+    return rpcSuccess(res, receipt, id);
+  } catch (e) {
+    return rpcError(res, 500, e, id);
+  }
+}
+
+const fn = { send, execute, executeQueuedProposal };
 
 router.post('/', async (req, res) => {
   const { id, method, params } = req.body;
