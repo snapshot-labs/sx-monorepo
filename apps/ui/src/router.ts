@@ -6,7 +6,7 @@ import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearchProposals from '@/views/Space/SearchProposals.vue';
 import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
-import SpaceEditor from '@/views/Editor.vue';
+import Editor from '@/views/Editor.vue';
 import Proposal from '@/views/Proposal.vue';
 import User from '@/views/User.vue';
 import Create from '@/views/Create.vue';
@@ -16,10 +16,8 @@ import Explore from '@/views/Explore.vue';
 
 const routes: any[] = [
   { path: '/', name: 'home', component: Home },
-  { path: '/explore', name: 'explore', component: Explore },
-  { path: '/create', name: 'create', component: Create },
   {
-    path: '/:id([^:]+:[A-Za-z0-9]+)',
+    path: '/:id',
     name: 'space',
     component: Space,
     children: [
@@ -27,16 +25,17 @@ const routes: any[] = [
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
       { path: 'search', name: 'space-search-proposals', component: SpaceSearchProposals },
       { path: 'settings', name: 'space-settings', component: SpaceSettings },
-      { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
-      { path: 'create/:key?', name: 'editor', component: SpaceEditor },
-      { path: 'proposal/:pid', name: 'proposal', component: Proposal }
+      { path: 'treasury', name: 'space-treasury', component: SpaceTreasury }
     ]
   },
   {
-    path: '/profile/:id',
-    name: 'user',
-    component: User
+    path: '/:id/create/:key?',
+    name: 'editor',
+    component: Editor
   },
+  { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
+  { path: '/profile/:id', name: 'user', component: User },
+  { path: '/create', name: 'create', component: Create },
   {
     path: '/settings',
     name: 'settings',
@@ -46,11 +45,7 @@ const routes: any[] = [
       { path: 'contacts', name: 'settings-contacts', component: Contacts }
     ]
   },
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'error-404',
-    redirect: '/'
-  }
+  { path: '/explore', name: 'explore', component: Explore }
 ];
 
 const router = createRouter({
