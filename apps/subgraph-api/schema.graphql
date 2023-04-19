@@ -2,6 +2,7 @@ type Space @entity {
   id: ID!
   name: String!
   about: String!
+  avatar: String!
   external_url: String!
   github: String!
   twitter: String!

@@ -40,11 +40,13 @@ export function updateSpaceMetadata(space: Space, metadataUri: string): void {
   let obj = value.value.toObject()
   let name = obj.get('name')
   let description = obj.get('description')
+  let avatar = obj.get('avatar')
   let externalUrl = obj.get('external_url')
   let properties = obj.get('properties')
 
   if (name) space.name = name.toString()
   space.about = description ? description.toString() : ''
+  space.avatar = avatar ? avatar.toString() : ''
   space.external_url = externalUrl ? externalUrl.toString() : ''
 
   if (properties) {
