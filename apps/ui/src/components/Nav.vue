@@ -4,7 +4,7 @@ import { useSpacesStore } from '@/stores/spaces';
 
 // TODO: need to import all icons https://github.com/antfu/unplugin-icons/issues/5
 // move to this when stable to avoid imports https://www.npmjs.com/package/@iconify/tailwind
-import IHGlobeAlt from '~icons/heroicons-outline/cash';
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
