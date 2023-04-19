@@ -108,7 +108,11 @@ const network = computed(() => getNetwork(props.space.network));
         >
           <h4
             class="inline-block mr-3 flex-auto"
-            v-text="network.constants.EXECUTORS[executor] || space.executors_types[i]"
+            v-text="
+              network.constants.EXECUTORS[executor] ||
+              network.constants.EXECUTORS[space.executors_types[i]] ||
+              space.executors_types[i]
+            "
           />
           <div>
             <Stamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />

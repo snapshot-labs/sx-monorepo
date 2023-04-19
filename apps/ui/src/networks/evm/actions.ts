@@ -1,6 +1,6 @@
 import { Provider } from '@ethersproject/providers';
 import { clients, getEvmStrategy, evmGoerli } from '@snapshot-labs/sx';
-import { createErc1155Metadata, verifyNetwork, getSalt } from '@/helpers/utils';
+import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { getExecution, pickAuthenticatorAndStrategies } from './helpers';
 import type { Web3Provider } from '@ethersproject/providers';
@@ -23,8 +23,36 @@ export function createActions(
   });
 
   return {
+    async predictSpaceAddress(web3: Web3Provider, { salt }) {
+      await verifyNetwork(web3, chainId);
+
+      return client.predictSpaceAddress({ signer: web3.getSigner(), salt });
+    },
+    async deployDependency(
+      web3: Web3Provider,
+      params: {
+        controller: string;
+        spaceAddress: string;
+        strategy: StrategyConfig;
+      }
+    ) {
+      await verifyNetwork(web3, chainId);
+
+      if (!params.strategy.deploy) {
+        throw new Error('This strategy is not deployable');
+      }
+
+      return params.strategy.deploy(
+        client,
+        web3.getSigner(),
+        params.controller,
+        params.spaceAddress,
+        params.strategy.params
+      );
+    },
     async createSpace(
       web3: any,
+      salt: string,
       params: {
         controller: string;
         votingDelay: number;
@@ -41,28 +69,9 @@ export function createActions(
     ) {
       await verifyNetwork(web3, chainId);
 
-      const salt = getSalt();
-      const spaceAddress = await client.predictSpaceAddress({ signer: web3.getSigner(), salt });
-
-      const executionStrategies = await Promise.all(
-        params.executionStrategies.map(async config => {
-          if (!config.deploy) return config.address;
-
-          const address = await config.deploy(
-            client,
-            web3.getSigner(),
-            params.controller,
-            spaceAddress,
-            config.params
-          );
-
-          return address;
-        })
-      );
-
       const pinned = await helpers.pin(
         createErc1155Metadata(params.metadata, {
-          executionStrategies
+          executionStrategies: params.executionStrategies.map(config => config.address)
         })
       );
 

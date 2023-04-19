@@ -55,14 +55,45 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
+  async function predictSpaceAddress(networkId: NetworkID, salt: string): Promise<string | null> {
+    if (!web3.value.account) {
+      forceLogin();
+      return null;
+    }
+
+    const network = getNetwork(networkId);
+    return network.actions.predictSpaceAddress(auth.web3, { salt });
+  }
+
+  async function deployDependency(
+    networkId: NetworkID,
+    controller: string,
+    spaceAddress: string,
+    dependencyConfig: StrategyConfig
+  ) {
+    if (!web3.value.account) {
+      forceLogin();
+      return null;
+    }
+
+    const network = getNetwork(networkId);
+    return network.actions.deployDependency(auth.web3, {
+      controller,
+      spaceAddress,
+      strategy: dependencyConfig
+    });
+  }
+
   async function createSpace(
     networkId: NetworkID,
+    salt: string,
     metadata: SpaceMetadata,
     settings: SpaceSettings,
     authenticators: StrategyConfig[],
     validationStrategy: StrategyConfig,
     votingStrategies: StrategyConfig[],
-    executionStrategies: StrategyConfig[]
+    executionStrategies: StrategyConfig[],
+    controller: string
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -74,8 +105,8 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    const receipt = await network.actions.createSpace(auth.web3, {
-      controller: web3.value.account,
+    const receipt = await network.actions.createSpace(auth.web3, salt, {
+      controller,
       votingDelay: settings.votingDelay,
       minVotingDuration: settings.minVotingDuration,
       maxVotingDuration: settings.maxVotingDuration,
@@ -91,9 +122,8 @@ export function useActions() {
     });
 
     console.log('Receipt', receipt);
-    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);
 
-    return true;
+    return receipt.transaction_hash || receipt.hash;
   }
 
   async function updateMetadata(space: Space, metadata: SpaceMetadata) {
@@ -215,6 +245,8 @@ export function useActions() {
   }
 
   const actions = {
+    predictSpaceAddress,
+    deployDependency,
     createSpace,
     updateMetadata,
     vote,

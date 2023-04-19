@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { clone } from '@/helpers/utils';
+import { clone, getSalt } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
@@ -41,8 +41,7 @@ const PAGES = [
 
 type PageID = typeof PAGES[number]['id'];
 
-const router = useRouter();
-const { createSpace } = useActions();
+const { predictSpaceAddress } = useActions();
 const { web3 } = useWeb3();
 
 const pagesRefs = ref([] as HTMLElement[]);
@@ -88,6 +87,9 @@ const settingsForm: SpaceSettings = reactive(
   })
 );
 const controller = ref(web3.value.account);
+const confirming = ref(false);
+const salt: Ref<string | null> = ref(null);
+const predictedSpaceAddress: Ref<string | null> = ref(null);
 
 const selectedNetwork = computed(() => getNetwork(selectedNetworkId.value));
 const activePages = computed(() =>
@@ -152,23 +154,9 @@ function handlePickerSelect(value: string) {
 }
 
 async function handleSubmit() {
-  sending.value = true;
-
-  try {
-    const result = await createSpace(
-      selectedNetworkId.value,
-      metadataForm,
-      settingsForm,
-      authenticators.value,
-      validationStrategy.value,
-      votingStrategies.value,
-      executionStrategies.value
-    );
-
-    if (result) router.back();
-  } finally {
-    sending.value = false;
-  }
+  salt.value = getSalt();
+  predictedSpaceAddress.value = await predictSpaceAddress(selectedNetworkId.value, salt.value);
+  confirming.value = true;
 }
 
 watch(
@@ -190,7 +178,20 @@ watch(selectedNetworkId, () => {
 
 <template>
   <div>
-    <div class="pt-5 flex max-w-[50rem] mx-auto px-4">
+    <BlockCreationConfirmation
+      v-if="confirming && salt && validationStrategy"
+      :network-id="selectedNetworkId"
+      :salt="salt"
+      :predicted-space-address="predictedSpaceAddress"
+      :metadata="metadataForm"
+      :settings="settingsForm"
+      :authenticators="authenticators"
+      :validation-strategy="validationStrategy"
+      :voting-strategies="votingStrategies"
+      :execution-strategies="executionStrategies"
+      :controller="controller"
+    />
+    <div v-else class="pt-5 flex max-w-[50rem] mx-auto px-4">
       <div
         class="flex fixed lg:sticky top-[72px] inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
       >

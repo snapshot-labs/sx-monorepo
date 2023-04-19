@@ -70,8 +70,15 @@ export function createActions(
   const client = new Clients.EthereumSig(clientConfig);
 
   return {
+    async predictSpaceAddress() {
+      return null;
+    },
+    async deployDependency() {
+      throw new Error('Not implemented');
+    },
     async createSpace(
       web3: any,
+      salt: string,
       params: {
         controller: string;
         votingDelay: number;
