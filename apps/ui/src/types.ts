@@ -51,7 +51,6 @@ export type Space = {
   voting_power_validation_strategy_strategies_params: string[];
   strategies: string[];
   strategies_params: any[];
-  strategies_metadata: string[];
   strategies_parsed_metadata: StrategyParsedMetadata[];
   authenticators: string[];
   executors: string[];
@@ -70,7 +69,6 @@ export type Proposal = {
     id: string;
     voting_power_symbol: string;
     authenticators: string[];
-    strategies_metadata: string[];
     executors: string[];
     executors_types: string[];
     strategies_parsed_metadata: StrategyParsedMetadata[];

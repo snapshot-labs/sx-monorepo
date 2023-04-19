@@ -9,7 +9,6 @@ export const PROPOSAL_QUERY = gql`
         id
         voting_power_symbol
         authenticators
-        strategies_metadata
         strategies_parsed_metadata {
           decimals
           symbol
@@ -66,7 +65,6 @@ export const PROPOSALS_QUERY = gql`
         voting_power_symbol
         quorum
         authenticators
-        strategies_metadata
         strategies_parsed_metadata {
           decimals
           symbol
@@ -134,7 +132,6 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
     space {
       id
       authenticators
-      strategies_metadata
       executors
     }
     author {
@@ -226,7 +223,6 @@ export const SPACE_QUERY = gql`
       voting_power_validation_strategy_strategies_params
       strategies
       strategies_params
-      strategies_metadata
       strategies_parsed_metadata {
         decimals
         symbol
@@ -264,7 +260,6 @@ export const SPACES_QUERY = gql`
       voting_power_validation_strategy_strategies_params
       strategies
       strategies_params
-      strategies_metadata
       strategies_parsed_metadata {
         decimals
         symbol

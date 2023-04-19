@@ -23,7 +23,7 @@ const proposal = computed(() => proposalsStore.getProposal(space, id, networkId 
 const votingPowerDecimals = computed(() => {
   if (!proposal.value) return 0;
   return Math.max(
-    ...proposal.value.space.strategies_metadata.map(metadata => parseInt(metadata, 16)),
+    ...proposal.value.space.strategies_parsed_metadata.map(metadata => metadata.decimals),
     0
   );
 });
