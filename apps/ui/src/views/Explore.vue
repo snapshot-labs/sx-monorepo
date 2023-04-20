@@ -13,34 +13,7 @@ onMounted(() => spacesStore.fetch());
       <UiLoading v-if="!spacesStore.loaded" class="block mb-2" />
       <div v-if="spacesStore.loaded" class="max-w-screen-md">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-          <router-link
-            v-for="space in spacesStore.spaces"
-            :key="space.id"
-            :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
-            class="p-4 text-skin-text border rounded-lg block h-[240px] relative group"
-          >
-            <button
-              class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-              @click.prevent="spacesStore.toggleSpaceStar(`${space.network}:${space.id}`)"
-            >
-              <IS-star
-                v-if="spacesStore.starredSpacesIds.includes(`${space.network}:${space.id}`)"
-                class="inline-block"
-              />
-              <IH-star v-else class="inline-block" />
-            </button>
-            <Stamp
-              :id="space.id"
-              :size="32"
-              class="border-skin-bg !bg-skin-border rounded-sm mb-2"
-            />
-            <h3 class="truncate" v-text="space.name" />
-            <h5 class="absolute bottom-4">
-              <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·
-              <b class="text-skin-link" v-text="space.vote_count" /> votes
-            </h5>
-            <h5 class="line-clamp-2" v-text="space.about" />
-          </router-link>
+          <SpaceItem v-for="space in spacesStore.spaces" :key="space.id" :space="space" />
         </div>
       </div>
     </Container>

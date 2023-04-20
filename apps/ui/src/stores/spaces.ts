@@ -1,129 +1,46 @@
 import { defineStore } from 'pinia';
 import { useStorage } from '@vueuse/core';
-import { enabledNetworks, getNetwork } from '@/networks';
-import type { Space, NetworkID } from '@/types';
+import { getNetwork } from '@/networks';
+import { NetworkID } from '@/types';
+import { useSpaces } from '@/composables/useSpaces';
 import pkg from '../../package.json';
 
-const SPACES_LIMIT = 1000;
+export const useSpacesStore = defineStore('spaces', () => {
+  const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
 
-type NetworkRecord = {
-  spaces: Record<string, Space>;
-  spacesIdsList: string[];
-  hasMoreSpaces: boolean;
-};
+  const { loading, loaded, networksMap, spaces, spacesMap, hasMoreSpaces, fetch, fetchMore } =
+    useSpaces();
 
-export const useSpacesStore = defineStore('spaces', {
-  state: () => ({
-    loading: false,
-    loadingMore: false,
-    loaded: false,
-    networksMap: Object.fromEntries(
-      enabledNetworks.map(network => [
-        network,
-        {
-          spaces: {},
-          spacesIdsList: [],
-          hasMoreSpaces: true
-        } as NetworkRecord
-      ])
-    ),
-    starredSpacesIds: useStorage(`${pkg.name}.spaces-starred`, [] as string[])
-  }),
-  getters: {
-    spaces: state =>
-      Object.values(state.networksMap).flatMap(record =>
-        record.spacesIdsList.map(spaceId => record.spaces[spaceId])
-      ),
-    spacesMap: state =>
-      new Map(
-        Object.values(state.networksMap).flatMap(record =>
-          Object.values(record.spaces).map(space => [`${space.network}:${space.id}`, space])
-        )
-      ),
-    hasMoreSpaces: state =>
-      Object.values(state.networksMap).some(record => record.hasMoreSpaces === true)
-  },
-  actions: {
-    async _fetchSpaces(overwrite: boolean) {
-      const results = await Promise.all(
-        enabledNetworks.map(async id => {
-          const network = getNetwork(id);
+  async function fetchSpace(spaceId: string, networkId: NetworkID) {
+    const network = getNetwork(networkId);
 
-          const record = this.networksMap[id];
-          if (!record.hasMoreSpaces) {
-            return {
-              id,
-              spaces: [],
-              hasMoreSpaces: false
-            };
-          }
+    const space = await network.api.loadSpace(spaceId);
 
-          const spaces = await network.api.loadSpaces({
-            skip: overwrite ? 0 : record.spacesIdsList.length,
-            limit: SPACES_LIMIT
-          });
+    networksMap.value[networkId].spaces = {
+      ...networksMap.value[networkId].spaces,
+      [spaceId]: space
+    };
+  }
 
-          return {
-            id,
-            spaces,
-            hasMoreSpaces: spaces.length === SPACES_LIMIT
-          };
-        })
-      );
-
-      this.networksMap = Object.fromEntries(
-        results.map(result => {
-          const spacesIds = result.spaces.map(space => space.id);
-
-          return [
-            result.id,
-            {
-              spacesIdsList: overwrite
-                ? spacesIds
-                : [...this.networksMap[result.id].spacesIdsList, ...spacesIds],
-              spaces: {
-                ...this.networksMap[result.id].spaces,
-                ...Object.fromEntries(result.spaces.map(space => [space.id, space]))
-              },
-              hasMoreSpaces: result.hasMoreSpaces
-            }
-          ];
-        })
-      ) as Record<NetworkID, NetworkRecord>;
-    },
-    async fetch() {
-      if (this.loading || this.loaded) return;
-      this.loading = true;
-
-      await this._fetchSpaces(true);
-
-      this.loaded = true;
-      this.loading = false;
-    },
-    async fetchMore() {
-      if (this.loading || !this.loaded) return;
-      this.loadingMore = true;
-
-      await this._fetchSpaces(false);
-
-      this.loadingMore = false;
-    },
-    async fetchSpace(spaceId: string, networkId: NetworkID) {
-      const network = getNetwork(networkId);
-
-      const space = await network.api.loadSpace(spaceId);
-
-      this.networksMap[networkId].spaces = {
-        ...this.networksMap[networkId].spaces,
-        [spaceId]: space
-      };
-    },
-    toggleSpaceStar(id: string) {
-      if (this.starredSpacesIds.includes(id)) {
-        this.starredSpacesIds = this.starredSpacesIds.filter((spaceId: string) => spaceId !== id);
-      } else {
-        this.starredSpacesIds.unshift(id);
-      }
+  function toggleSpaceStar(id: string) {
+    if (starredSpacesIds.value.includes(id)) {
+      starredSpacesIds.value = starredSpacesIds.value.filter((spaceId: string) => spaceId !== id);
+    } else {
+      starredSpacesIds.value.unshift(id);
     }
   }
+
+  return {
+    starredSpacesIds,
+    loading,
+    loaded,
+    networksMap,
+    spaces,
+    spacesMap,
+    hasMoreSpaces,
+    fetch,
+    fetchMore,
+    fetchSpace,
+    toggleSpaceStar
+  };
 });

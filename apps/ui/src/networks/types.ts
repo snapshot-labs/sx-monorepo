@@ -13,6 +13,9 @@ import type {
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
+export type SpacesFilter = {
+  controller: string;
+};
 export type Connector =
   | 'argentx'
   | 'injected'
@@ -114,7 +117,7 @@ export type NetworkApi = {
   ): Promise<Proposal[]>;
   loadProposalsSummary(spaceId: string, limit: number): Promise<Proposal[]>;
   loadProposal(spaceId: string, proposalId: number): Promise<Proposal>;
-  loadSpaces(paginationOpts: PaginationOpts): Promise<Space[]>;
+  loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space>;
   loadUser(userId: string): Promise<User>;
 };

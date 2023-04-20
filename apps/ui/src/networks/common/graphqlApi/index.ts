@@ -9,7 +9,7 @@ import {
   SPACE_QUERY,
   USER_QUERY
 } from './queries';
-import type { PaginationOpts, NetworkApi } from '@/networks/types';
+import type { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import type { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/types';
 
 type ApiSpace = Omit<Space, 'network'>;
@@ -141,12 +141,16 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return formatProposal(data.proposal, networkId);
     },
-    loadSpaces: async ({ limit, skip = 0 }: PaginationOpts): Promise<Space[]> => {
+    loadSpaces: async (
+      { limit, skip = 0 }: PaginationOpts,
+      filter?: SpacesFilter
+    ): Promise<Space[]> => {
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
           first: limit,
-          skip
+          skip,
+          ...(filter ? { where: filter } : {})
         }
       });
 
