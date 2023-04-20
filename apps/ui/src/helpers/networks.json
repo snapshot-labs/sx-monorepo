@@ -1,0 +1,20 @@
+{
+  "1": {
+    "key": "1",
+    "name": "Ethereum Mainnet",
+    "chainId": 1,
+    "network": "homestead",
+    "multicall": "0xeefba1e63905ef1d7acba5a8513c70307c1ce441",
+    "explorer": "https://etherscan.io"
+  },
+  "5": {
+    "key": "5",
+    "name": "Ethereum Testnet Görli",
+    "shortName": "Görli",
+    "chainId": 5,
+    "network": "goerli",
+    "testnet": true,
+    "multicall": "0x77dca2c955b15e9de4dbbcf1246b4b85b651e50e",
+    "explorer": "https://goerli.etherscan.io"
+  }
+}

@@ -1,6 +1,6 @@
-import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
-import { call } from '@snapshot-labs/snapshot.js/src/utils';
 import { isAddress } from '@ethersproject/address';
+import { getProvider } from '@/helpers/provider';
+import { call } from '@/helpers/call';
 
 export async function getNames(addresses) {
   addresses = addresses.slice(0, 250).filter(isAddress);

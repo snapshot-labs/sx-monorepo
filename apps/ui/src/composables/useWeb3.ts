@@ -1,8 +1,8 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { formatUnits } from '@ethersproject/units';
 import { getNames } from '@/helpers/ens';
+import networks from '@/helpers/networks.json';
 
 networks['starknet'] = {
   key: 'starknet',

@@ -1,9 +1,9 @@
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { createApi } from '../common/graphqlApi';
 import { createActions } from './actions';
 import { createProvider } from './provider';
 import * as constants from './constants';
 import { pinGraph } from '@/helpers/graph';
+import networks from '@/helpers/networks.json';
 import type { Network } from '@/networks/types';
 import type { NetworkID } from '@/types';
 

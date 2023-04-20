@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Interface, Fragment, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import getProvider from '@snapshot-labs/snapshot.js/src/utils/provider';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { abiToDefinition, clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
+import { getProvider } from '@/helpers/provider';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -114,8 +114,8 @@ async function handleToChange(to: string) {
   abiStr.value = '';
   showAbiInput.value = false;
   if (isAddress(to)) {
-    const provider = getProvider('5');
     loading.value = true;
+    const provider = getProvider('5');
     const code = await provider.getCode(to);
     if (code !== '0x') {
       console.log('Address is valid');

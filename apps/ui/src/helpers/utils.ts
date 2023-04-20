@@ -3,8 +3,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { getUrl as snapshotGetUrl } from '@snapshot-labs/snapshot.js/src/utils';
+import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { SpaceMetadata } from '@/types';
@@ -39,8 +38,22 @@ dayjs.updateLocale('en', {
   }
 });
 
-export function getUrl(str: string) {
-  return snapshotGetUrl(str, IPFS_GATEWAY);
+export function getUrl(uri: string) {
+  const ipfsGateway = `https://${IPFS_GATEWAY}`;
+  if (!uri) return null;
+  if (
+    !uri.startsWith('ipfs://') &&
+    !uri.startsWith('ipns://') &&
+    !uri.startsWith('https://') &&
+    !uri.startsWith('http://')
+  ) {
+    return `${ipfsGateway}/ipfs/${uri}`;
+  }
+
+  const uriScheme = uri.split('://')[0];
+  if (uriScheme === 'ipfs') return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
+  if (uriScheme === 'ipns') return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  return uri;
 }
 
 export function sanitizeUrl(url: string): string | null {

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { isAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
-import snapshot from '@snapshot-labs/snapshot.js';
 import { abis } from '@/helpers/abis';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _n, shorten } from '@/helpers/utils';
+import { getProvider } from '@/helpers/provider';
+import Multicaller from '@/helpers/multicaller';
 import type { Token } from '@/helpers/alchemy';
-
-const { Multicaller, getProvider } = snapshot.utils;
 
 const props = defineProps<{
   searchValue: string;
