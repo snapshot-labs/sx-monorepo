@@ -18,6 +18,10 @@ export function validateForm(schema, form): Record<string, string> {
     }
   });
 
+  ajv.addFormat('stamp', {
+    validate: () => true
+  });
+
   ajv.addFormat('long', {
     validate: () => true
   });

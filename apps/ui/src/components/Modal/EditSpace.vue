@@ -4,6 +4,7 @@ import type { Space, SpaceMetadata, NetworkID } from '@/types';
 
 const DEFAULT_FORM_STATE: SpaceMetadata = {
   name: '',
+  avatar: '',
   description: '',
   externalUrl: '',
   twitter: '',
@@ -51,6 +52,7 @@ watch(
     showPicker.value = false;
 
     form.name = props.space.name;
+    form.avatar = props.space.avatar;
     form.description = props.space.about || '';
     form.externalUrl = props.space.external_url;
     form.github = props.space.github;
@@ -91,14 +93,16 @@ watch(
         </div>
       </template>
     </template>
+    <div v-if="!showPicker" class="relative bg-skin-border h-[100px] -mb-[50px]" />
     <BlockContactPicker
       v-if="showPicker"
       :loading="false"
       :search-value="searchValue"
       @pick="handlePickerSelect"
     />
-    <div v-else class="p-4">
+    <div v-else class="p-4 -mt-[80px]">
       <BlockSpaceFormProfile
+        :id="space.id"
         :show-title="false"
         :form="form"
         @pick="showPicker = true"

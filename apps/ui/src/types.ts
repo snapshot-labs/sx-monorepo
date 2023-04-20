@@ -6,6 +6,7 @@ export type Choice = 1 | 2 | 3;
 
 export type SpaceMetadata = {
   name: string;
+  avatar: string;
   description: string;
   externalUrl: string;
   twitter: string;
@@ -34,6 +35,7 @@ export type Space = {
   id: string;
   network: NetworkID;
   name: string;
+  avatar: string;
   about?: string;
   external_url: string;
   twitter: string;

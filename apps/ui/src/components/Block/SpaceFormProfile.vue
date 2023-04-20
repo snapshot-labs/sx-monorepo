@@ -6,6 +6,7 @@ const props = withDefaults(
   defineProps<{
     showTitle?: boolean;
     form: any;
+    id?: string;
   }>(),
   {
     showTitle: true
@@ -30,6 +31,12 @@ const definition = computed(() => {
     additionalProperties: true,
     required: ['name', 'walletNetwork', 'walletAddress'],
     properties: {
+      avatar: {
+        type: 'string',
+        format: 'stamp',
+        title: 'Avatar',
+        default: props.id
+      },
       name: {
         type: 'string',
         title: 'Name',

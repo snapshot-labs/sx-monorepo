@@ -62,6 +62,7 @@ const pagesErrors: Ref<Record<PageID, Record<string, string>>> = ref({
 const metadataForm: SpaceMetadata = reactive(
   clone({
     name: '',
+    avatar: '',
     description: '',
     externalUrl: '',
     twitter: '',

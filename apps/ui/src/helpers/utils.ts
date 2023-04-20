@@ -6,6 +6,7 @@ import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
+import { upload as pin } from '@snapshot-labs/pineapple';
 import type { SpaceMetadata } from '@/types';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
@@ -221,6 +222,7 @@ export function createErc1155Metadata(
 
   return {
     name: metadata.name,
+    avatar: metadata.avatar,
     description: metadata.description,
     external_url: metadata.externalUrl,
     properties: {
@@ -244,4 +246,21 @@ export function getSalt() {
   crypto.getRandomValues(buffer);
 
   return `0x${buffer.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')}`;
+}
+
+export async function imageUpload(file: File) {
+  if (!file) return;
+  // TODO: Additional Validations - File Size, File Type, Empty File, Hidden File
+  if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const receipt = await pin(formData);
+    return { name: file.name, url: `ipfs://${receipt.cid}` };
+  } catch (err) {
+    console.error(err);
+  }
 }

@@ -26,7 +26,7 @@ const spacesStore = useSpacesStore();
           class="block"
           @click="uiStore.sidebarOpen = false"
         >
-          <Stamp :id="element.split(':')[1]" :size="32" class="!rounded-[4px]" />
+          <Stamp :id="element.split(':')[1]" :size="32" type="space" class="!rounded-[4px]" />
         </router-link>
       </template>
     </draggable>
