@@ -487,4 +487,13 @@ describe('EthereumTx', () => {
     const res = await ethTxClient.setVotingDelay({ signer, space: spaceAddress, votingDelay: 10 });
     expect(res.hash).toBeDefined();
   });
+
+  it('should transfer ownership', async () => {
+    const res = await ethTxClient.transferOwnership({
+      signer,
+      space: spaceAddress,
+      owner: '0x000000000000000000000000000000000000dead'
+    });
+    expect(res.hash).toBeDefined();
+  });
 });

@@ -394,4 +394,18 @@ export class EthereumTx {
 
     return spaceContract.setVotingDelay(votingDelay);
   }
+
+  async transferOwnership({
+    signer,
+    space,
+    owner
+  }: {
+    signer: Signer;
+    space: string;
+    owner: string;
+  }) {
+    const spaceContract = new Contract(space, SpaceAbi, signer);
+
+    return spaceContract.transferOwnership(owner);
+  }
 }
