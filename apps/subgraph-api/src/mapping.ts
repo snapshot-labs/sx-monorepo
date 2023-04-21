@@ -9,6 +9,10 @@ import {
   ProposalExecuted,
   VoteCast,
   MetadataURIUpdated,
+  VotingDelayUpdated,
+  MinVotingDurationUpdated,
+  MaxVotingDurationUpdated,
+  OwnershipTransferred,
 } from '../generated/templates/Space/Space'
 import { ProposalExecuted as TimelockProposalExecuted } from '../generated/templates/TimelockExecutionStrategy/TimelockExecutionStrategy'
 import {
@@ -284,6 +288,46 @@ export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {
 
   updateSpaceMetadata(space, event.params.newMetadataURI)
 
+  space.save()
+}
+
+export function handleVotingDelayUpdated(event: VotingDelayUpdated): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  space.voting_delay = event.params.newVotingDelay.toI32()
+  space.save()
+}
+
+export function handleMinVotingDurationUpdated(event: MinVotingDurationUpdated): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  space.min_voting_period = event.params.newMinVotingDuration.toI32()
+  space.save()
+}
+
+export function handleMaxVotingDurationUpdated(event: MaxVotingDurationUpdated): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  space.max_voting_period = event.params.newMaxVotingDuration.toI32()
+  space.save()
+}
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  space.controller = event.params.newOwner
   space.save()
 }
 

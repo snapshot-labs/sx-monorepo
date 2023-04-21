@@ -54,6 +54,14 @@ templates:
           handler: handleVoteCreated
         - event: MetadataURIUpdated(string)
           handler: handleMetadataUriUpdated
+        - event: VotingDelayUpdated(uint256)
+          handler: handleVotingDelayUpdated
+        - event: MinVotingDurationUpdated(uint32)
+          handler: handleMinVotingDurationUpdated
+        - event: MaxVotingDurationUpdated(uint32)
+          handler: handleMaxVotingDurationUpdated
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
       file: ./src/mapping.ts
   - kind: ethereum
     name: TimelockExecutionStrategy
