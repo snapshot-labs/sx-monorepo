@@ -63,31 +63,34 @@ async function handleVoteClick(choice: Choice) {
           <template #ended>
             <Results :proposal="proposal" />
           </template>
-          <div class="space-x-2 py-2">
-            <UiButton
-              class="w-full !text-green !border-green !w-[40px] !h-[40px] !px-0"
-              title="For"
-              :loading="sendingType === 1"
-              @click="handleVoteClick(1)"
-            >
-              <IH-check class="inline-block" />
-            </UiButton>
-            <UiButton
-              class="w-full !text-red !border-red !w-[40px] !h-[40px] !px-0"
-              title="Against"
-              :loading="sendingType === 2"
-              @click="handleVoteClick(2)"
-            >
-              <IH-x class="inline-block" />
-            </UiButton>
-            <UiButton
-              class="w-full !text-gray-500 !border-gray-500 !w-[40px] !h-[40px] !px-0"
-              title="Abstain"
-              :loading="sendingType === 3"
-              @click="handleVoteClick(3)"
-            >
-              <IH-arrow-sm-right class="inline-block" />
-            </UiButton>
+          <div class="flex space-x-2 py-2">
+            <UiTooltip title="For">
+              <UiButton
+                class="w-full !text-green !border-green !w-[40px] !h-[40px] !px-0"
+                :loading="sendingType === 1"
+                @click="handleVoteClick(1)"
+              >
+                <IH-check class="inline-block" />
+              </UiButton>
+            </UiTooltip>
+            <UiTooltip title="Against">
+              <UiButton
+                class="w-full !text-red !border-red !w-[40px] !h-[40px] !px-0"
+                :loading="sendingType === 2"
+                @click="handleVoteClick(2)"
+              >
+                <IH-x class="inline-block" />
+              </UiButton>
+            </UiTooltip>
+            <UiTooltip title="Abstain">
+              <UiButton
+                class="w-full !text-gray-500 !border-gray-500 !w-[40px] !h-[40px] !px-0"
+                :loading="sendingType === 3"
+                @click="handleVoteClick(3)"
+              >
+                <IH-arrow-sm-right class="inline-block" />
+              </UiButton>
+            </UiTooltip>
           </div>
         </Vote>
       </div>

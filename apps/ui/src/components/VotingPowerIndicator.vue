@@ -31,19 +31,20 @@ const formattedVotingPower = computed(() => {
 
 <template>
   <div>
-    <UiButton
-      v-if="web3.account && web3.type !== 'argentx'"
-      :loading="loading"
-      :class="{
-        '!px-0 w-[46px]': loading
-      }"
-      class="flex flex-row items-center justify-center"
-      title="Voting power"
-      @click="modalOpen = true"
-    >
-      <IH-lightning-bolt class="inline-block" />
-      <span class="ml-1">{{ formattedVotingPower }}</span>
-    </UiButton>
+    <UiTooltip title="Voting power">
+      <UiButton
+        v-if="web3.account && web3.type !== 'argentx'"
+        :loading="loading"
+        :class="{
+          '!px-0 w-[46px]': loading
+        }"
+        class="flex flex-row items-center justify-center"
+        @click="modalOpen = true"
+      >
+        <IH-lightning-bolt class="inline-block" />
+        <span class="ml-1">{{ formattedVotingPower }}</span>
+      </UiButton>
+    </UiTooltip>
     <teleport to="#modal">
       <ModalVotingPower
         :open="modalOpen"

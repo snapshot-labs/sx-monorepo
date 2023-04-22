@@ -196,33 +196,36 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
               <Results :proposal="proposal" :decimals="votingPowerDecimals" with-details />
             </template>
             <div class="grid grid-cols-3 gap-2">
-              <UiButton
-                class="w-full !text-white !bg-green !border-green"
-                title="For"
-                :primary="true"
-                :loading="sendingType === 1"
-                @click="handleVoteClick(1)"
-              >
-                <IH-check class="inline-block" />
-              </UiButton>
-              <UiButton
-                class="w-full !text-white !bg-red !border-red"
-                title="Against"
-                :primary="true"
-                :loading="sendingType === 2"
-                @click="handleVoteClick(2)"
-              >
-                <IH-x class="inline-block" />
-              </UiButton>
-              <UiButton
-                class="w-full !text-white !bg-gray-500 !border-gray-500"
-                title="Abstain"
-                :primary="true"
-                :loading="sendingType === 3"
-                @click="handleVoteClick(3)"
-              >
-                <IH-arrow-right class="inline-block" />
-              </UiButton>
+              <UiTooltip title="For">
+                <UiButton
+                  class="w-full !text-white !bg-green !border-green"
+                  :primary="true"
+                  :loading="sendingType === 1"
+                  @click="handleVoteClick(1)"
+                >
+                  <IH-check class="inline-block" />
+                </UiButton>
+              </UiTooltip>
+              <UiTooltip title="Against">
+                <UiButton
+                  class="w-full !text-white !bg-red !border-red"
+                  :primary="true"
+                  :loading="sendingType === 2"
+                  @click="handleVoteClick(2)"
+                >
+                  <IH-x class="inline-block" />
+                </UiButton>
+              </UiTooltip>
+              <UiTooltip title="Abstain">
+                <UiButton
+                  class="w-full !text-white !bg-gray-500 !border-gray-500"
+                  :primary="true"
+                  :loading="sendingType === 3"
+                  @click="handleVoteClick(3)"
+                >
+                  <IH-arrow-right class="inline-block" />
+                </UiButton>
+              </UiTooltip>
             </div>
           </Vote>
           <div class="mt-3">
