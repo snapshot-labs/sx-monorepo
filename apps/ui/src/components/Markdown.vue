@@ -56,7 +56,7 @@ const parsed = computed(() => remarkable.render(props.body));
 
 <style lang="scss">
 .markdown-body {
-  font-size: 19px;
+  font-size: 22px;
   line-height: 1.3;
   word-wrap: break-word;
 }

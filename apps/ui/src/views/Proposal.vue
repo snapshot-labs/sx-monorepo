@@ -89,159 +89,141 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
 </script>
 
 <template>
-  <div>
-    <Container class="pt-5">
-      <UiLoading v-if="!proposal" />
-      <div v-else>
-        <div>
-          <h1 class="mb-3">
-            {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
-          </h1>
-          <div class="flex mb-4 items-center">
-            <div class="flex-auto space-x-2">
-              <router-link
-                :to="{
-                  name: 'user',
-                  params: { id: `${proposal.network}:${proposal.author.id}` }
-                }"
-              >
-                <Stamp :id="proposal.author.id" :size="24" class="mr-1" />
+  <div class="flex flex-col">
+    <UiLoading v-if="!proposal" class="ml-4 mt-3" />
+    <template v-else>
+      <div class="flex-1 md:mr-[340px]">
+        <div class="flex justify-between items-center mx-4 border-b">
+          <router-link
+            :to="{
+              name: 'user',
+              params: { id: `${proposal.network}:${proposal.author.id}` }
+            }"
+            class="flex items-center py-3"
+          >
+            <Stamp :id="proposal.author.id" :size="32" class="mr-1" />
+            <div class="flex flex-col ml-2 leading-4 gap-1">
+              <span class="text-md">
                 {{ shortenAddress(proposal.author.id) }}
-              </router-link>
-              <span
-                >·
-                <a
-                  class="text-skin-text"
-                  @click="modalOpenTimeline = true"
-                  v-text="_rt(proposal.created)"
-                />
               </span>
+              <span class="text-skin-text text-[16px]" v-text="_rt(proposal.created)" />
             </div>
-            <VotingPowerIndicator
-              :network-id="networkId as NetworkID"
-              :loading="loadingVotingPower"
-              :voting-power-symbol="proposal.space.voting_power_symbol"
-              :voting-powers="votingPowers"
-              class="mr-2"
-            />
-            <a v-if="proposalMetadataUrl" :href="proposalMetadataUrl" target="_blank">
-              <UiButton class="!w-[46px] !h-[46px] !px-[12px]">
-                <IH-dots-horizontal />
-              </UiButton>
-            </a>
-          </div>
-          <Markdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
-        </div>
-
-        <div v-if="discussion">
-          <h4 class="mb-3 eyebrow flex items-center">
-            <IH-chat-alt class="inline-block mr-2" />
-            <span>Discussion</span>
-          </h4>
-          <a :href="discussion" target="_blank" class="block mb-5">
-            <Preview :url="discussion" />
+          </router-link>
+          <a v-if="proposalMetadataUrl" :href="proposalMetadataUrl" target="_blank" class="mr-3">
+            <IH-dots-vertical />
           </a>
         </div>
-        <div v-if="proposal.execution && proposal.execution.length > 0">
-          <h4 class="mb-3 eyebrow flex items-center">
-            <IH-play class="inline-block mr-2" />
-            <span>Execution</span>
-          </h4>
-          <div class="mb-4">
-            <BlockExecution :txs="proposal.execution" />
-          </div>
-        </div>
-        <div
-          v-if="
-            proposal.execution &&
-            proposal.execution.length > 0 &&
-            BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
-            BigInt(proposal.scores_1) > BigInt(proposal.scores_2) &&
-            proposal.has_execution_window_opened
-          "
-        >
-          <h4 class="mb-3 eyebrow flex items-center">
-            <IH-play class="inline-block mr-2" />
-            <span>Actions</span>
-          </h4>
-          <div class="mb-4">
-            <BlockActions :proposal="proposal" />
-          </div>
-        </div>
-        <div>
-          <Vote :proposal="proposal">
-            <template #voted="{ vote: userVote }">
+        <Container class="pt-5 max-w-[630px] mx-0 md:mx-auto">
+          <div>
+            <h1 class="mb-4 text-[36px]">
+              {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
+            </h1>
+            <Markdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
+            <div v-if="discussion">
               <h4 class="mb-3 eyebrow flex items-center">
-                <IH-chart-bar class="inline-block mr-2" />
-                <span>Results</span>
+                <IH-chat-alt class="inline-block mr-2" />
+                <span>Discussion</span>
               </h4>
-              <Results :proposal="proposal" :decimals="votingPowerDecimals" with-details />
-              <div class="mt-2">
-                <div v-if="userVote.choice === 1">
-                  You already voted <strong>for</strong> this proposal
-                </div>
-                <div v-else-if="userVote.choice === 2">
-                  You already voted <strong>against</strong> this proposal
-                </div>
-                <div v-else-if="userVote.choice === 3">
-                  You already <strong>abstained</strong> from voting on this proposal
-                </div>
-              </div>
-            </template>
-            <template #ended>
-              <h4 class="mb-3 eyebrow flex items-center">
-                <IH-chart-bar class="inline-block mr-2" />
-                <span>Results</span>
-              </h4>
-              <Results :proposal="proposal" :decimals="votingPowerDecimals" with-details />
-            </template>
-            <div class="grid grid-cols-3 gap-2">
-              <UiTooltip title="For">
-                <UiButton
-                  class="w-full !text-white !bg-green !border-green"
-                  :primary="true"
-                  :loading="sendingType === 1"
-                  @click="handleVoteClick(1)"
-                >
-                  <IH-check class="inline-block" />
-                </UiButton>
-              </UiTooltip>
-              <UiTooltip title="Against">
-                <UiButton
-                  class="w-full !text-white !bg-red !border-red"
-                  :primary="true"
-                  :loading="sendingType === 2"
-                  @click="handleVoteClick(2)"
-                >
-                  <IH-x class="inline-block" />
-                </UiButton>
-              </UiTooltip>
-              <UiTooltip title="Abstain">
-                <UiButton
-                  class="w-full !text-white !bg-gray-500 !border-gray-500"
-                  :primary="true"
-                  :loading="sendingType === 3"
-                  @click="handleVoteClick(3)"
-                >
-                  <IH-arrow-right class="inline-block" />
-                </UiButton>
-              </UiTooltip>
+              <a :href="discussion" target="_blank" class="block mb-5">
+                <Preview :url="discussion" />
+              </a>
             </div>
-          </Vote>
-          <div class="mt-3">
-            <a class="text-skin-text" @click="modalOpenVotes = true">
-              {{ _n(proposal.vote_count) }} votes
-            </a>
-            ·
-            <a
-              class="text-skin-text"
-              @click="modalOpenTimeline = true"
-              v-text="_rt(proposal.max_end)"
-            />
+            <div v-if="proposal.execution && proposal.execution.length > 0">
+              <h4 class="mb-3 eyebrow flex items-center">
+                <IH-play class="inline-block mr-2" />
+                <span>Execution</span>
+              </h4>
+              <div class="mb-4">
+                <BlockExecution :txs="proposal.execution" />
+              </div>
+            </div>
+            <div
+              v-if="
+                proposal.execution &&
+                proposal.execution.length > 0 &&
+                BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
+                BigInt(proposal.scores_1) > BigInt(proposal.scores_2) &&
+                proposal.has_execution_window_opened
+              "
+            >
+              <h4 class="mb-3 eyebrow flex items-center">
+                <IH-play class="inline-block mr-2" />
+                <span>Actions</span>
+              </h4>
+              <div class="mb-4">
+                <BlockActions :proposal="proposal" />
+              </div>
+            </div>
+            <div>
+              <a class="text-skin-text" @click="modalOpenVotes = true">
+                {{ _n(proposal.vote_count) }} votes
+              </a>
+              ·
+              <a
+                class="text-skin-text"
+                @click="modalOpenTimeline = true"
+                v-text="_rt(proposal.max_end)"
+              />
+            </div>
           </div>
-        </div>
+        </Container>
       </div>
-    </Container>
+      <div
+        class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l"
+      >
+        <VotingPowerIndicator
+          v-if="web3.account"
+          v-slot="props"
+          :network-id="networkId as NetworkID"
+          :loading="loadingVotingPower"
+          :voting-power-symbol="proposal.space.voting_power_symbol"
+          :voting-powers="votingPowers"
+          class="mb-2 mt-4 first:mt-1"
+        >
+          <h4 class="block eyebrow">Your voting power</h4>
+          <div class="pt-2">
+            <UiLoading v-if="loadingVotingPower" />
+            <div v-else class="text-skin-link text-lg">
+              {{ props.formattedVotingPower }}
+            </div>
+          </div>
+        </VotingPowerIndicator>
+        <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
+        <Vote v-if="proposal" :proposal="proposal">
+          <div class="flex space-x-2 py-2">
+            <UiTooltip title="For">
+              <UiButton
+                class="!text-green !border-green !w-[48px] !h-[48px] !px-0"
+                :loading="sendingType === 1"
+                @click="handleVoteClick(1)"
+              >
+                <IH-check class="inline-block" />
+              </UiButton>
+            </UiTooltip>
+            <UiTooltip title="Against">
+              <UiButton
+                class="!text-red !border-red !w-[48px] !h-[48px] !px-0"
+                :loading="sendingType === 2"
+                @click="handleVoteClick(2)"
+              >
+                <IH-x class="inline-block" />
+              </UiButton>
+            </UiTooltip>
+            <UiTooltip title="Abstain">
+              <UiButton
+                class="!text-gray-500 !border-gray-500 !w-[48px] !h-[48px] !px-0"
+                :loading="sendingType === 3"
+                @click="handleVoteClick(3)"
+              >
+                <IH-arrow-sm-right class="inline-block" />
+              </UiButton>
+            </UiTooltip>
+          </div>
+        </Vote>
+        <h4 class="block eyebrow mb-2 mt-4">Results</h4>
+        <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
+      </div>
+    </template>
     <teleport to="#modal">
       <ModalVotes
         v-if="proposal"
