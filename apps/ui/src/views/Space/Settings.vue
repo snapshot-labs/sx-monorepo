@@ -1,11 +1,48 @@
 <script setup lang="ts">
-import { shorten, _d } from '@/helpers/utils';
+import { shorten, _d, compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
+const { web3 } = useWeb3();
+const { setVotingDelay, setMinVotingDuration, setMaxVotingDuration, transferOwnership } =
+  useActions();
+
 const network = computed(() => getNetwork(props.space.network));
+const spaceIsEditable = computed(() =>
+  compareAddresses(props.space.controller, web3.value.account)
+);
+
+const settingsLoading = ref({
+  votingDelay: false,
+  minVotingPeriod: false,
+  maxVotingPeriod: false,
+  controller: false
+});
+
+async function handleSave(
+  field: 'votingDelay' | 'minVotingPeriod' | 'maxVotingPeriod' | 'controller',
+  value: string
+) {
+  const fieldActions = {
+    votingDelay: setVotingDelay,
+    minVotingPeriod: setMinVotingDuration,
+    maxVotingPeriod: setMaxVotingDuration,
+    controller: transferOwnership
+  };
+
+  const action = fieldActions[field];
+  if (!action) return;
+
+  settingsLoading.value[field] = true;
+
+  try {
+    await action(props.space, field === 'controller' ? value : parseInt(value));
+  } finally {
+    settingsLoading.value[field] = false;
+  }
+}
 </script>
 
 <template>
@@ -15,17 +52,50 @@ const network = computed(() => getNetwork(props.space.network));
       <div class="mx-4 pt-3">
         <div class="mb-3">
           <div class="s-label !mb-0">Voting delay</div>
-          <h4 class="text-skin-link text-md" v-text="_d(space.voting_delay) || 'No delay'" />
+          <UiEditable
+            :editable="spaceIsEditable"
+            :initial-value="space.voting_delay.toString()"
+            :loading="settingsLoading.votingDelay"
+            :definition="{
+              format: 'number',
+              examples: ['0']
+            }"
+            @save="value => handleSave('votingDelay', value)"
+          >
+            <h4 class="text-skin-link text-md" v-text="_d(space.voting_delay) || 'No delay'" />
+          </UiEditable>
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Min. voting period</div>
-          <h4 class="text-skin-link text-md" v-text="_d(space.min_voting_period) || 'No min.'" />
+          <UiEditable
+            :editable="spaceIsEditable"
+            :initial-value="space.min_voting_period.toString()"
+            :loading="settingsLoading.minVotingPeriod"
+            :definition="{
+              format: 'number',
+              examples: ['0']
+            }"
+            @save="value => handleSave('minVotingPeriod', value)"
+          >
+            <h4 class="text-skin-link text-md" v-text="_d(space.min_voting_period) || 'No min.'" />
+          </UiEditable>
         </div>
         <div class="mb-3">
           <div class="s-label !mb-0">Max. voting period</div>
-          <h4 class="text-skin-link text-md" v-text="_d(space.max_voting_period)" />
+          <UiEditable
+            :editable="spaceIsEditable"
+            :initial-value="space.max_voting_period.toString()"
+            :loading="settingsLoading.maxVotingPeriod"
+            :definition="{
+              format: 'number',
+              examples: ['0']
+            }"
+            @save="value => handleSave('maxVotingPeriod', value)"
+          >
+            <h4 class="text-skin-link text-md" v-text="_d(space.max_voting_period)" />
+          </UiEditable>
         </div>
-        <div class="mb-3">
+        <div v-if="space.proposal_threshold !== '0'" class="mb-3">
           <div class="s-label !mb-0" v-text="'Proposal threshold'" />
           <h4 class="text-skin-link text-md" v-text="space.proposal_threshold" />
         </div>
@@ -35,11 +105,22 @@ const network = computed(() => getNetwork(props.space.network));
     <div>
       <Label :label="'Controller'" sticky />
       <div class="py-3 mx-4">
-        <a :href="network.helpers.getExplorerUrl(space.controller, 'contract')" target="_blank">
-          <Stamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
-          {{ shorten(space.controller) }}
-          <IH-external-link class="inline-block" />
-        </a>
+        <UiEditable
+          :editable="spaceIsEditable"
+          :initial-value="space.controller"
+          :loading="settingsLoading.controller"
+          :definition="{
+            format: 'address',
+            examples: ['0x0000…']
+          }"
+          @save="value => handleSave('controller', value)"
+        >
+          <a :href="network.helpers.getExplorerUrl(space.controller, 'contract')" target="_blank">
+            <Stamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            {{ shorten(space.controller) }}
+            <IH-external-link class="inline-block" />
+          </a>
+        </UiEditable>
       </div>
     </div>
 

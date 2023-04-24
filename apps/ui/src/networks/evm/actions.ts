@@ -232,6 +232,42 @@ export function createActions(
         executionParams: executionData.executionParams[0]
       });
     },
+    setVotingDelay: async (web3: Web3Provider, space: Space, votingDelay: number) => {
+      await verifyNetwork(web3, chainId);
+
+      return client.setVotingDelay({
+        signer: web3.getSigner(),
+        space: space.id,
+        votingDelay
+      });
+    },
+    setMinVotingDuration: async (web3: Web3Provider, space: Space, minVotingDuration: number) => {
+      await verifyNetwork(web3, chainId);
+
+      return client.setMinVotingDuration({
+        signer: web3.getSigner(),
+        space: space.id,
+        minVotingDuration
+      });
+    },
+    setMaxVotingDuration: async (web3: Web3Provider, space: Space, maxVotingDuration: number) => {
+      await verifyNetwork(web3, chainId);
+
+      return client.setMaxVotingDuration({
+        signer: web3.getSigner(),
+        space: space.id,
+        maxVotingDuration
+      });
+    },
+    transferOwnership: async (web3: Web3Provider, space: Space, owner: string) => {
+      await verifyNetwork(web3, chainId);
+
+      return client.transferOwnership({
+        signer: web3.getSigner(),
+        space: space.id,
+        owner
+      });
+    },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (
       strategiesAddresses: string[],

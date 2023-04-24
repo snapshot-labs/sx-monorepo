@@ -244,6 +244,46 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }
 
+  async function setVotingDelay(space: Space, votingDelay: number) {
+    if (!web3.value.account) return await forceLogin();
+
+    const network = getNetwork(space.network);
+    const receipt = await network.actions.setVotingDelay(auth.web3, space, votingDelay);
+    console.log('Receipt', receipt);
+
+    uiStore.addPendingTransaction(receipt.hash, 'gor');
+  }
+
+  async function setMinVotingDuration(space: Space, minVotingDuration: number) {
+    if (!web3.value.account) return await forceLogin();
+
+    const network = getNetwork(space.network);
+    const receipt = await network.actions.setMinVotingDuration(auth.web3, space, minVotingDuration);
+    console.log('Receipt', receipt);
+
+    uiStore.addPendingTransaction(receipt.hash, 'gor');
+  }
+
+  async function setMaxVotingDuration(space: Space, maxVotingDuration: number) {
+    if (!web3.value.account) return await forceLogin();
+
+    const network = getNetwork(space.network);
+    const receipt = await network.actions.setMaxVotingDuration(auth.web3, space, maxVotingDuration);
+    console.log('Receipt', receipt);
+
+    uiStore.addPendingTransaction(receipt.hash, 'gor');
+  }
+
+  async function transferOwnership(space: Space, owner: string) {
+    if (!web3.value.account) return await forceLogin();
+
+    const network = getNetwork(space.network);
+    const receipt = await network.actions.transferOwnership(auth.web3, space, owner);
+    console.log('Receipt', receipt);
+
+    uiStore.addPendingTransaction(receipt.hash, 'gor');
+  }
+
   const actions = {
     predictSpaceAddress,
     deployDependency,
@@ -254,7 +294,11 @@ export function useActions() {
     finalizeProposal,
     receiveProposal,
     executeTransactions,
-    executeQueuedProposal
+    executeQueuedProposal,
+    setVotingDelay,
+    setMinVotingDuration,
+    setMaxVotingDuration,
+    transferOwnership
   };
 
   return Object.fromEntries(
