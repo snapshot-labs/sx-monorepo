@@ -55,3 +55,27 @@ export function pickAuthenticatorAndStrategies(authenticators: string[], strateg
     strategies: selectedStrategies
   };
 }
+
+export async function executionCall(
+  baseUrl: string,
+  method: 'execute' | 'executeQueuedProposal',
+  params: any
+) {
+  const res = await fetch(`${baseUrl}/eth_rpc`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: method,
+      params,
+      id: null
+    })
+  });
+
+  const { error, result } = await res.json();
+  if (error) throw new Error('Finalization failed');
+
+  return result;
+}
