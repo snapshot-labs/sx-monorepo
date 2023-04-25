@@ -30,7 +30,7 @@ debouncedWatch(
 
 <template>
   <div v-if="preview?.meta?.title" class="!flex items-center border rounded-lg">
-    <div v-if="preview?.links?.icon[0]?.href" class="px-4 pr-0">
+    <div v-if="preview?.links?.icon?.[0]?.href" class="px-4 pr-0">
       <div class="w-[32px]">
         <img :src="preview.links.icon[0].href" width="32" height="32" class="bg-white rounded" />
       </div>
