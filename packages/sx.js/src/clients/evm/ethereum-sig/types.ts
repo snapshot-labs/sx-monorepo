@@ -18,6 +18,20 @@ export const proposeTypes = {
   ]
 };
 
+export const updateProposalTypes = {
+  updateProposal: [
+    { name: 'space', type: 'address' },
+    { name: 'author', type: 'address' },
+    { name: 'proposalId', type: 'uint256' },
+    { name: 'executionStrategy', type: 'Strategy' },
+    { name: 'metadataURI', type: 'string' }
+  ],
+  Strategy: [
+    { name: 'addy', type: 'address' },
+    { name: 'params', type: 'bytes' }
+  ]
+};
+
 export const voteTypes = {
   Vote: [
     { name: 'space', type: 'address' },

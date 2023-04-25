@@ -26,6 +26,14 @@ export type Propose = {
   metadataUri: string;
 };
 
+export type UpdateProposal = {
+  space: string;
+  proposal: number;
+  authenticator: string;
+  executionStrategy: AddressConfig;
+  metadataUri: string;
+};
+
 export type Vote = {
   space: string;
   authenticator: string;
@@ -42,7 +50,11 @@ export type Call = {
 
 export type Authenticator = {
   type: string;
-  createCall(envelope: Envelope<Propose | Vote>, selector: string, calldata: string[]): Call;
+  createCall(
+    envelope: Envelope<Propose | UpdateProposal | Vote>,
+    selector: string,
+    calldata: string[]
+  ): Call;
 };
 
 export type Strategy = {
@@ -70,7 +82,7 @@ export type SignatureData = {
   message: Record<string, any>;
 };
 
-export type Envelope<T extends Propose | Vote> = {
+export type Envelope<T extends Propose | UpdateProposal | Vote> = {
   signatureData?: SignatureData;
   data: T;
 };
@@ -82,6 +94,14 @@ export type EIP712ProposeMessage = {
   executionStrategy: AddressConfig;
   userParams: string;
   salt: number;
+};
+
+export type EIP712UpdateProposalMessage = {
+  space: string;
+  author: string;
+  proposalId: number;
+  executionStrategy: AddressConfig;
+  metadataURI: string;
 };
 
 export type EIP712VoteMessage = {

@@ -4,14 +4,16 @@ import { SplitUint256 } from '../../../utils/split-uint256';
 import { bytesToHex } from '../../../utils/bytes';
 import { getStrategiesParams } from '../../../strategies/evm';
 import { evmGoerli } from '../../../networks';
-import { domain as baseDomain, proposeTypes, voteTypes } from './types';
+import { domain as baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
   Propose,
+  UpdateProposal,
   Vote,
   Envelope,
   SignatureData,
   EIP712ProposeMessage,
+  EIP712UpdateProposalMessage,
   EIP712VoteMessage
 } from '../types';
 import type { EvmNetworkConfig } from '../../../types';
@@ -34,7 +36,9 @@ export class EthereumSig {
     return Number(SplitUint256.fromHex(bytesToHex(randomBytes(4))).toHex());
   }
 
-  public async sign<T extends EIP712ProposeMessage | EIP712VoteMessage>(
+  public async sign<
+    T extends EIP712ProposeMessage | EIP712UpdateProposalMessage | EIP712VoteMessage
+  >(
     signer: Signer & TypedDataSigner,
     verifyingContract: string,
     message: T,
@@ -116,6 +120,31 @@ export class EthereumSig {
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, proposeTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async updateProposal({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateProposal;
+  }): Promise<Envelope<UpdateProposal>> {
+    const author = await signer.getAddress();
+
+    const message: EIP712UpdateProposalMessage = {
+      space: data.space,
+      author,
+      proposalId: data.proposal,
+      executionStrategy: data.executionStrategy,
+      metadataURI: data.metadataUri
+    };
+
+    const signatureData = await this.sign(signer, data.authenticator, message, updateProposalTypes);
 
     return {
       signatureData,

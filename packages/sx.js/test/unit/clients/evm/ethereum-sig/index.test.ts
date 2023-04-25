@@ -38,6 +38,21 @@ describe('EthereumSig', () => {
     expect(envelope).toMatchSnapshot();
   });
 
+  it('should create update proposal envelope', async () => {
+    const envelope = await ethSigClient.updateProposal({
+      signer,
+      data: {
+        space,
+        proposal: 1,
+        authenticator,
+        executionStrategy: { addy: executor, params: '0x00' },
+        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+      }
+    });
+
+    expect(envelope).toMatchSnapshot();
+  });
+
   it('should create vote envelope', async () => {
     const envelope = await ethSigClient.vote({
       signer,

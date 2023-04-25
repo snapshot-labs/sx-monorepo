@@ -79,6 +79,75 @@ exports[`EthereumSig should create propose envelope 1`] = `
 }
 `;
 
+exports[`EthereumSig should create update proposal envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+    "executionStrategy": {
+      "addy": "0x6241b5c89350bb3c465179706cf26050ea32444f",
+      "params": "0x00",
+    },
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "proposal": 1,
+    "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "domain": {
+      "chainId": 5,
+      "name": "snapshot-x",
+      "verifyingContract": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+      "version": "0.1.0",
+    },
+    "message": {
+      "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "executionStrategy": {
+        "addy": "0x6241b5c89350bb3c465179706cf26050ea32444f",
+        "params": "0x00",
+      },
+      "metadataURI": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+      "proposalId": 1,
+      "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+    },
+    "signature": "0xe6cc864b565eec4ca1e451e6959cc7578827d596936bb2fc9e5a28fec332abe668fba42db5ffc58446fc814f517279d5ea0686892c396412fcbc8492fe5dfaaa1b",
+    "types": {
+      "Strategy": [
+        {
+          "name": "addy",
+          "type": "address",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+        },
+      ],
+      "updateProposal": [
+        {
+          "name": "space",
+          "type": "address",
+        },
+        {
+          "name": "author",
+          "type": "address",
+        },
+        {
+          "name": "proposalId",
+          "type": "uint256",
+        },
+        {
+          "name": "executionStrategy",
+          "type": "Strategy",
+        },
+        {
+          "name": "metadataURI",
+          "type": "string",
+        },
+      ],
+    },
+  },
+}
+`;
+
 exports[`EthereumSig should create vote envelope 1`] = `
 {
   "data": {

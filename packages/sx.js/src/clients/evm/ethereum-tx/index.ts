@@ -9,7 +9,7 @@ import ProxyFactoryAbi from './abis/ProxyFactory.json';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
 import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
-import type { Propose, Vote, Envelope, AddressConfig } from '../types';
+import type { Propose, UpdateProposal, Vote, Envelope, AddressConfig } from '../types';
 import type { EvmNetworkConfig } from '../../../types';
 
 type SpaceParams = {
@@ -220,6 +220,36 @@ export class EthereumTx {
           }))
         ]
       )
+    ]);
+
+    const selector = functionData.slice(0, 10);
+    const calldata = `0x${functionData.slice(10)}`;
+
+    const authenticator = getAuthenticator(envelope.data.authenticator, this.networkConfig);
+    if (!authenticator) {
+      throw new Error('Invalid authenticator');
+    }
+
+    const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
+    const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
+    return authenticatorContract.authenticate(...args);
+  }
+
+  async updateProposal({
+    signer,
+    envelope
+  }: {
+    signer: Signer;
+    envelope: Envelope<UpdateProposal>;
+  }) {
+    const authorAddress = envelope.signatureData?.address || (await signer.getAddress());
+
+    const spaceInterface = new Interface(SpaceAbi);
+    const functionData = spaceInterface.encodeFunctionData('updateProposal', [
+      authorAddress,
+      envelope.data.proposal,
+      envelope.data.executionStrategy,
+      envelope.data.metadataUri
     ]);
 
     const selector = functionData.slice(0, 10);
