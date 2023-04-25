@@ -49,7 +49,7 @@ watch(route, to => {
 
 <template>
   <nav
-    class="border-b fixed top-0 right-0 z-10 left-0 lg:left-[72px]"
+    class="border-b fixed top-0 right-0 z-50 left-0 lg:left-[72px]"
     :class="{
       'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
     }"
