@@ -5,31 +5,28 @@ import { getEvmExecutionData } from '@snapshot-labs/sx';
 import {
   RELAYER_AUTHENTICATORS,
   SUPPORTED_AUTHENTICATORS,
-  SUPPORTED_STRATEGIES,
-  SUPPORTED_EXECUTORS
+  SUPPORTED_STRATEGIES
 } from './constants';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Space } from '@/types';
 
-export function getExecution(space: SpaceExecutionData, transactions: MetaTransaction[]) {
-  const supportedExecutionIndex = space.executors_types.findIndex(
-    executorType => SUPPORTED_EXECUTORS[executorType]
+export function getExecutionData(
+  space: SpaceExecutionData,
+  executionStrategy: string,
+  transactions: MetaTransaction[]
+) {
+  const supportedExecutionIndex = space.executors.findIndex(
+    executor => executor === executionStrategy
   );
 
   if (supportedExecutionIndex === -1) {
     throw new Error('No supported executor configured for this space');
   }
 
-  const executor = space.executors[supportedExecutionIndex];
   const executorType = space.executors_types[supportedExecutionIndex] as ExecutorType;
-  const executionData = getEvmExecutionData(executorType, executor, {
+  return getEvmExecutionData(executorType, executionStrategy, {
     transactions
   });
-
-  return {
-    executor,
-    executionData
-  };
 }
 
 export function pickAuthenticatorAndStrategies(authenticators: string[], strategies: string[]) {

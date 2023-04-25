@@ -128,6 +128,7 @@ export function createActions(
       account: string,
       space: Space,
       cid: string,
+      executionStrategy: string,
       transactions: MetaTransaction[]
     ) => {
       await verifyNetwork(web3, l1ChainId);

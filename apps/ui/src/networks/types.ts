@@ -90,6 +90,7 @@ export type NetworkActions = {
     account: string,
     space: Space,
     cid: string,
+    executionStrategy: string,
     transactions: MetaTransaction[]
   );
   vote(web3: Web3Provider, account: string, proposal: Proposal, choice: Choice);
@@ -134,6 +135,7 @@ export type NetworkHelpers = {
 
 export type Network = {
   name: string;
+  baseChainId: number;
   baseNetworkId?: NetworkID;
   hasReceive: boolean;
   managerConnectors: Connector[];

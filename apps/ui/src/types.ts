@@ -4,6 +4,11 @@ export type NotificationType = 'error' | 'warning';
 export type NetworkID = 'gor' | 'sn-tn2';
 export type Choice = 1 | 2 | 3;
 
+export type SelectedStrategy = {
+  address: string;
+  type: string;
+};
+
 export type SpaceMetadata = {
   name: string;
   avatar: string;
@@ -138,6 +143,7 @@ export type Draft = {
   title: string;
   body: string;
   discussion: string;
+  executionStrategy: SelectedStrategy | null;
   execution: Transaction[];
   updatedAt: number;
 };

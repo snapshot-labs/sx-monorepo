@@ -24,6 +24,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
 
   return {
     name: 'Ethereum (goerli)',
+    baseChainId: chainId,
     hasReceive: false,
     managerConnectors: ['injected', 'walletconnect', 'walletlink', 'portis', 'gnosis'],
     actions: createActions(provider, helpers, chainId),

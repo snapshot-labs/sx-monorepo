@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
-import { Transaction as TransactionType, Space } from '@/types';
+import { getNetwork } from '@/networks';
+import { Transaction as TransactionType, Space, SelectedStrategy } from '@/types';
 
 const props = defineProps<{
   modelValue: TransactionType[];
   space?: Space;
+  selectedExecutionStrategy: SelectedStrategy;
 }>();
 
 const emit = defineEmits<{
@@ -25,6 +27,12 @@ const modalOpen = ref({
   contractCall: false
 });
 
+const network = computed(() => (props.space ? getNetwork(props.space.network) : null));
+const currentTreasury = computed(() =>
+  props.selectedExecutionStrategy.type === 'SimpleQuorumTimelock' && network.value
+    ? { wallet: props.selectedExecutionStrategy.address, network: network.value?.baseChainId }
+    : treasury.value
+);
 const txs = computed({
   get: () => props.modelValue,
   set: newValue => {
@@ -71,11 +79,11 @@ function editTx(index: number) {
       <div
         class="mb-3 flex flex-no-wrap overflow-x-scroll no-scrollbar scrolling-touch items-start space-x-3"
       >
-        <ExecutionButton :disabled="!treasury" @click="openModal('sendToken')">
+        <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendToken')">
           <IH-stop />
           Send token
         </ExecutionButton>
-        <ExecutionButton :disabled="!treasury" @click="openModal('sendNft')">
+        <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendNft')">
           <IH-photograph />
           Send NFT
         </ExecutionButton>
@@ -113,18 +121,18 @@ function editTx(index: number) {
     </div>
     <teleport to="#modal">
       <ModalSendToken
-        v-if="treasury"
+        v-if="currentTreasury"
         :open="modalOpen.sendToken"
-        :address="treasury.wallet"
-        :network="treasury.network"
+        :address="currentTreasury.wallet"
+        :network="currentTreasury.network"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
       />
       <ModalSendNft
-        v-if="treasury"
+        v-if="currentTreasury"
         :open="modalOpen.sendNft"
-        :address="treasury.wallet"
+        :address="currentTreasury.wallet"
         :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"

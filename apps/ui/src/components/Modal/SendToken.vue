@@ -63,10 +63,6 @@ const currentToken = computed(() => {
 });
 const formValid = computed(() => currentToken.value && form.to && form.amount !== '');
 
-onMounted(() => {
-  loadBalances(props.address, props.network);
-});
-
 function handleAddCustomToken(token: Token) {
   if (customTokens.value.find(existing => existing.contractAddress === token.contractAddress)) {
     return;
@@ -124,6 +120,10 @@ function handleSubmit() {
   emit('close');
 }
 
+onMounted(() => {
+  loadBalances(props.address, props.network);
+});
+
 watch(
   () => props.open,
   () => {
@@ -140,6 +140,10 @@ watch(
     }
   }
 );
+
+watch([() => props.address, () => props.network], ([address, network]) => {
+  loadBalances(address, network);
+});
 
 watch(currentToken, token => {
   if (!token || typeof form.amount === 'string') return;

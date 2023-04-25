@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useSpacesStore } from '@/stores/spaces';
 import { getNetwork } from '@/networks';
-import { omit } from '@/helpers/utils';
-import type { NetworkID } from '@/types';
+import { omit, shortenAddress } from '@/helpers/utils';
+import { NetworkID, SelectedStrategy } from '@/types';
 
 const { proposals, createDraft } = useEditor();
 const { modalOpen: globalModalOpen } = useModal();
@@ -23,7 +23,24 @@ const sending = ref(false);
 const fetchingVotingPower = ref(true);
 const votingPowerValid = ref(false);
 
+const network = computed(() => getNetwork(networkId as NetworkID));
 const space = computed(() => spacesStore.spacesMap.get(id));
+const supportedExecutionStrategies = computed(() => {
+  const spaceValue = space.value;
+  if (!spaceValue) return null;
+
+  return spaceValue.executors.filter(
+    (_, i) => network.value.constants.SUPPORTED_EXECUTORS[spaceValue.executors_types[i]]
+  );
+});
+const executionStrategy = computed({
+  get() {
+    return proposals[proposalKey].executionStrategy;
+  },
+  set(value: SelectedStrategy | null) {
+    proposals[proposalKey].executionStrategy = value;
+  }
+});
 const proposalData = computed(() => {
   if (!proposals[proposalKey]) return null;
 
@@ -35,18 +52,18 @@ if (!proposals[proposalKey]) {
 }
 
 async function handleProposeClick() {
-  if (!space.value) return;
+  const proposal = proposals[proposalKey];
+  if (!space.value || !proposal?.executionStrategy) return;
 
   sending.value = true;
 
   try {
-    const proposal = proposals[proposalKey];
-
     const result = await propose(
       space.value,
       proposal.title,
       proposal.body,
       proposal.discussion,
+      proposal.executionStrategy.address,
       proposal.execution
     );
 
@@ -133,7 +150,10 @@ watch(proposalData, () => {
           <UiButton
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
             :loading="sending || (web3.account !== '' && fetchingVotingPower)"
-            :disabled="!fetchingVotingPower && !votingPowerValid"
+            :disabled="
+              (!fetchingVotingPower && !votingPowerValid) ||
+              !proposals[proposalKey]?.executionStrategy
+            "
             @click="handleProposeClick"
           >
             <span class="hidden mr-2 md:inline-block" v-text="'Publish'" />
@@ -169,7 +189,7 @@ watch(proposalData, () => {
         :body="proposals[proposalKey].body"
       />
 
-      <div v-else class="s-base mb-5">
+      <div v-else class="s-base mb-3">
         <div class="s-label" v-text="'Description'" />
         <textarea
           v-model="proposals[proposalKey].body"
@@ -186,12 +206,41 @@ watch(proposalData, () => {
         />
         <Preview :url="proposals[proposalKey].discussion" />
       </div>
-      <h4 class="eyebrow mb-3">Execution</h4>
-      <BlockExecutionEditable
-        v-model="proposals[proposalKey].execution"
-        :space="space"
-        class="mb-4"
-      />
+      <div v-if="space">
+        <h4 class="eyebrow mb-3">Execution</h4>
+        <div class="flex flex-col gap-2 mb-3">
+          <div v-if="supportedExecutionStrategies && !supportedExecutionStrategies.length">
+            No supported execution strategies available.
+          </div>
+          <ExecutionButton
+            v-for="(executor, i) in supportedExecutionStrategies"
+            :key="executor"
+            class="flex-auto flex items-center gap-2"
+            :class="{
+              'border-skin-link': executionStrategy?.address === executor,
+              'text-skin-border': executionStrategy?.address !== executor
+            }"
+            @click="
+              executionStrategy = {
+                address: executor,
+                type: space.executors_types[i]
+              }
+            "
+          >
+            <IH-cog />
+            {{ network.constants.EXECUTORS[space.executors_types[i]] }} execution strategy ({{
+              shortenAddress(executor)
+            }})
+          </ExecutionButton>
+        </div>
+        <BlockExecutionEditable
+          v-if="executionStrategy"
+          v-model="proposals[proposalKey].execution"
+          :selected-execution-strategy="executionStrategy"
+          :space="space"
+          class="mb-4"
+        />
+      </div>
     </Container>
     <teleport to="#modal">
       <ModalDrafts

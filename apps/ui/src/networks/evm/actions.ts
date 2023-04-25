@@ -2,7 +2,7 @@ import { Provider } from '@ethersproject/providers';
 import { clients, getEvmStrategy, evmGoerli } from '@snapshot-labs/sx';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { executionCall, getExecution, pickAuthenticatorAndStrategies } from './helpers';
+import { executionCall, getExecutionData, pickAuthenticatorAndStrategies } from './helpers';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { NetworkActions, NetworkHelpers, StrategyConfig, VotingPower } from '@/networks/types';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
@@ -129,6 +129,7 @@ export function createActions(
       account: string,
       space: Space,
       cid: string,
+      executionStrategy: string,
       transactions: MetaTransaction[]
     ) => {
       await verifyNetwork(web3, chainId);
@@ -138,14 +139,14 @@ export function createActions(
         space.voting_power_validation_strategy_strategies
       );
 
-      const { executor, executionData } = getExecution(space, transactions);
+      const executionData = getExecutionData(space, executionStrategy, transactions);
 
       const data = {
         space: space.id,
         authenticator,
         strategies,
         executionStrategy: {
-          addy: executor,
+          addy: executionStrategy,
           params: executionData.executionParams[0]
         },
         metadataUri: `ipfs://${cid}`
@@ -208,8 +209,9 @@ export function createActions(
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
-      const { executionData } = getExecution(
+      const executionData = getExecutionData(
         proposal.space,
+        proposal.execution_strategy,
         convertToMetaTransactions(proposal.execution)
       );
 
@@ -222,13 +224,14 @@ export function createActions(
     executeQueuedProposal: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
-      const { executor, executionData } = getExecution(
+      const executionData = getExecutionData(
         proposal.space,
+        proposal.execution_strategy,
         convertToMetaTransactions(proposal.execution)
       );
 
       return executionCall(manaUrl, 'executeQueuedProposal', {
-        executionStrategy: executor,
+        executionStrategy: proposal.execution_strategy,
         executionParams: executionData.executionParams[0]
       });
     },

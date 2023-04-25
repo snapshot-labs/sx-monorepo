@@ -157,6 +157,7 @@ export function useActions() {
     title: string,
     body: string,
     discussion: string,
+    executionStrategy: string,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -188,6 +189,7 @@ export function useActions() {
         web3.value.account,
         space,
         pinned.cid,
+        executionStrategy,
         convertToMetaTransactions(transactions)
       )
     );

@@ -1,6 +1,5 @@
 import { lsGet, lsSet, omit } from '@/helpers/utils';
-import type { Drafts } from '@/types';
-import type { Proposal as ProposalType } from '@/types';
+import { Draft, Drafts } from '@/types';
 
 const proposals = reactive<Drafts>(lsGet('proposals', {}));
 
@@ -24,7 +23,7 @@ function generateId() {
   return (Math.random() + 1).toString(36).substring(7);
 }
 
-function createDraft(spaceId: string, payload?: Partial<ProposalType>) {
+function createDraft(spaceId: string, payload?: Partial<Draft> & { id?: string }) {
   const id = payload?.id || generateId();
   const key = `${spaceId}:${id}`;
 
@@ -32,6 +31,7 @@ function createDraft(spaceId: string, payload?: Partial<ProposalType>) {
     title: '',
     body: '',
     discussion: '',
+    executionStrategy: null,
     execution: [],
     updatedAt: Date.now(),
     ...payload

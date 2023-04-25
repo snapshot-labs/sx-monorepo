@@ -3,9 +3,8 @@ import { useClipboard } from '@vueuse/core';
 import { _n, _c, shorten, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';
+import { NetworkID, Space, Transaction, SelectedStrategy } from '@/types';
 import type { Token } from '@/helpers/alchemy';
-import type { NetworkID, Space } from '@/types';
-import { Transaction as TransactionType } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -54,12 +53,40 @@ const treasuryExplorerUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
+function getExecutionStrategy(): SelectedStrategy | null {
+  let executorIndex = props.space.executors.findIndex(
+    executorAddress => executorAddress === treasury.value?.wallet
+  );
+
+  if (executorIndex === -1) {
+    // If the treasury is not an executor, use the first avatar executor
+    executorIndex = props.space.executors_types.findIndex(e => e === 'SimpleQuorumAvatar');
+  }
+
+  if (executorIndex === -1) return null;
+
+  return {
+    address: props.space.executors[executorIndex],
+    type: props.space.executors_types[executorIndex]
+  };
+}
+
 function openModal(type: 'tokens' | 'nfts') {
   modalOpen.value[type] = true;
 }
 
-function addTx(tx: TransactionType) {
-  const draftId = createDraft(`${props.space.network}:${props.space.id}`, { execution: [tx] });
+function addTx(tx: Transaction) {
+  let executor = props.space.executors.find(e => e === treasury.value?.wallet);
+  if (!executor) {
+    // If the treasury is not an executor, use the first avatar executor
+    const executorIndex = props.space.executors_types.findIndex(e => e === 'SimpleQuorumAvatar');
+    executor = props.space.executors[executorIndex];
+  }
+
+  const draftId = createDraft(`${props.space.network}:${props.space.id}`, {
+    execution: [tx],
+    executionStrategy: getExecutionStrategy()
+  });
   router.push(`create/${draftId}`);
 }
 
