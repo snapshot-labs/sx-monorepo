@@ -59,17 +59,23 @@ const grouped = computed(() => {
     <div class="relative bg-skin-border h-[140px] -mb-[70px]">
       <div class="absolute right-4 top-4 space-x-2">
         <router-link :to="{ name: 'editor' }">
-          <UiButton class="!px-0 w-[46px]">
-            <IH-pencil-alt class="inline-block" />
-          </UiButton>
+          <UiTooltip title="New proposal">
+            <UiButton class="!px-0 w-[46px]">
+              <IH-pencil-alt class="inline-block" />
+            </UiButton>
+          </UiTooltip>
         </router-link>
-        <UiButton v-if="spaceIsEditable" class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
-          <IH-cog class="inline-block" />
-        </UiButton>
-        <UiButton class="w-[46px] !px-0" @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
-          <IS-star v-if="spaceStarred" class="inline-block" />
-          <IH-star v-else class="inline-block" />
-        </UiButton>
+        <UiTooltip v-if="spaceIsEditable" title="Edit space">
+          <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
+            <IH-cog class="inline-block" />
+          </UiButton>
+        </UiTooltip>
+        <UiTooltip :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'">
+          <UiButton class="w-[46px] !px-0" @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
+            <IS-star v-if="spaceStarred" class="inline-block" />
+            <IH-star v-else class="inline-block" />
+          </UiButton>
+        </UiTooltip>
       </div>
     </div>
     <div class="px-4">

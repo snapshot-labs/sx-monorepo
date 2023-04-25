@@ -72,9 +72,11 @@ watch(
           :voting-powers="votingPowers"
         />
         <router-link :to="{ name: 'editor' }">
-          <UiButton class="!px-0 w-[46px]">
-            <IH-pencil-alt class="inline-block" />
-          </UiButton>
+          <UiTooltip title="New proposal">
+            <UiButton class="!px-0 w-[46px]">
+              <IH-pencil-alt class="inline-block" />
+            </UiButton>
+          </UiTooltip>
         </router-link>
       </div>
     </div>

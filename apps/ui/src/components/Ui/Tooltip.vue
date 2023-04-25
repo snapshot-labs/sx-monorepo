@@ -43,7 +43,7 @@ const arrowStyle = computed(() => {
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative inline-block">
     <div
       ref="referenceRef"
       class="h-full"

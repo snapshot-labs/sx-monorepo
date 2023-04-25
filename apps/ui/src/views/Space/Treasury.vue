@@ -79,15 +79,17 @@ onMounted(() => {
   <template v-else>
     <div class="p-4 space-x-2 flex">
       <div class="flex-auto" />
-      <a>
+      <UiTooltip title="Copy address">
         <UiButton class="!px-0 w-[46px]" @click="copy(treasury.wallet)">
           <IH-duplicate v-if="!copied" class="inline-block" />
           <IH-check v-else class="inline-block" />
         </UiButton>
-      </a>
-      <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </UiButton>
+      </UiTooltip>
+      <UiTooltip :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
+        <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
+          <IH-arrow-sm-right class="inline-block -rotate-45" />
+        </UiButton>
+      </UiTooltip>
     </div>
     <div class="space-y-3">
       <div>
