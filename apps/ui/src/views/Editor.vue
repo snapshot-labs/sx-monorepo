@@ -173,7 +173,7 @@ watch(proposalData, () => {
         <div class="s-label" v-text="'Description'" />
         <textarea
           v-model="proposals[proposalKey].body"
-          maxlength="280"
+          maxlength="9600"
           class="s-input mb-3 h-[160px]"
         />
         <SIString
