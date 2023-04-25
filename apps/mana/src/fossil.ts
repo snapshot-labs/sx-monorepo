@@ -3,9 +3,9 @@ import fetch from 'cross-fetch';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { utils } from '@snapshot-labs/sx';
 import { Account } from 'starknet';
 import { starkProvider } from './starkProvider';
+import { getProcessBlockInputs } from './starknet/utils';
 
 const ethPrivkey = process.env.ETH_PRIVKEY || '';
 const ethRpcUrl = process.env.ETH_RPC_URL || '';
@@ -48,7 +48,7 @@ async function processBlock(blockNumber: number) {
     })
   });
   const block = (await res.json()).result;
-  const processBlockInputs = utils.storageProofs.getProcessBlockInputs(block);
+  const processBlockInputs = getProcessBlockInputs(block);
   return starknetAccount.execute([
     {
       contractAddress: fossilL1HeadersStoreAddress,

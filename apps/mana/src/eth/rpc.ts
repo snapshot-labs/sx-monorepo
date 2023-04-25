@@ -22,6 +22,11 @@ async function send(id, params, res) {
         signer: wallet,
         envelope: params.envelope
       });
+    } else if (types.updateProposal) {
+      receipt = await client.updateProposal({
+        signer: wallet,
+        envelope: params.envelope
+      });
     } else if (types.Vote) {
       receipt = await client.vote({
         signer: wallet,
