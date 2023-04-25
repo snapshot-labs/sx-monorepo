@@ -11,7 +11,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: TransactionType[]): void;
 }>();
 
-const { treasury } = useTreasury(props.space);
+const { treasury } = useTreasury(toRef(props, 'space'));
 
 const editedTx: Ref<number | null> = ref(null);
 const modalState: Ref<{

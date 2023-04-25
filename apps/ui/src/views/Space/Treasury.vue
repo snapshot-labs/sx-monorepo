@@ -13,7 +13,7 @@ const router = useRouter();
 const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
-const { treasury } = useTreasury(props.space);
+const { treasury } = useTreasury(toRef(props, 'space'));
 const { createDraft } = useEditor();
 
 const page: Ref<'tokens' | 'nfts'> = ref('tokens');

@@ -2,15 +2,11 @@ import { Space } from '@/types';
 
 type NullableSpace = Space | undefined | null;
 
-export function useTreasury(spaceRef?: Space | Ref<NullableSpace> | ComputedRef<NullableSpace>) {
+export function useTreasury(spaceRef: Ref<NullableSpace>) {
   const treasury = computed(() => {
-    if (!spaceRef) return;
+    if (!spaceRef.value || !spaceRef.value.wallet) return null;
 
-    const space = 'value' in spaceRef ? spaceRef.value : spaceRef;
-    if (!space || !space.wallet) return null;
-
-    const [networkId, wallet] = space.wallet.split(':');
-
+    const [networkId, wallet] = spaceRef.value.wallet.split(':');
     if (networkId !== 'gor' || !wallet) return null;
 
     return {
