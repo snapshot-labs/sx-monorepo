@@ -65,8 +65,7 @@ const visibleResults = computed(() =>
         <span class="choice-text" :class="`_${result.choice}`">
           {{ result.progress.toFixed(0) }}%
         </span>
-        <IH-lightning-bolt class="inline-block ml-1" />
-        {{ _n(Number(result.score) / 10 ** decimals) }}
+        {{ `${_n(Number(result.score) / 10 ** decimals)} ${proposal.space.voting_power_symbol}` }}
       </div>
     </div>
     <div
