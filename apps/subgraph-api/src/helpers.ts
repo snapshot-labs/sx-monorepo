@@ -1,5 +1,6 @@
 import { Bytes, BigInt, ipfs, json, ethereum, Address } from '@graphprotocol/graph-ts'
-import { Space, ExecutionStrategy, StrategiesParsedMetadata } from '../generated/schema'
+import { JSON } from 'assemblyscript-json'
+import { Space, Proposal, ExecutionStrategy, StrategiesParsedMetadata } from '../generated/schema'
 
 const TUPLE_PREFIX = '0x0000000000000000000000000000000000000000000000000000000000000020'
 const VOTING_POWER_VALIDATION_STRATEGY_PARAMS_SIGNATURE = '(uint256, (address,bytes)[])'
@@ -86,6 +87,32 @@ export function updateSpaceMetadata(space: Space, metadataUri: string): void {
     space.wallet = ''
     space.executors = []
     space.executors_types = []
+  }
+}
+
+export function updateProposalMetadata(proposal: Proposal, metadataUri: string): void {
+  if (!metadataUri.startsWith('ipfs://')) return
+
+  let hash = metadataUri.slice(7)
+  let data = ipfs.cat(hash)
+
+  if (!data) return
+
+  let value = json.try_fromBytes(data as Bytes)
+  let obj = value.value.toObject()
+  let title = obj.get('title')
+  let body = obj.get('body')
+  let discussion = obj.get('discussion')
+
+  if (title) proposal.title = title.toString()
+  if (body) proposal.body = body.toString()
+  if (discussion) proposal.discussion = discussion.toString()
+
+  // Using different parser for execution to overcome limitations in graph-ts
+  let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(data.toString())
+  let execution = jsonObj.getArr('execution')
+  if (execution) {
+    proposal.execution = execution.toString()
   }
 }
 

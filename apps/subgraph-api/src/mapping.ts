@@ -6,6 +6,7 @@ import { TimelockExecutionStrategy } from '../generated/ProxyFactory/TimelockExe
 import {
   SpaceCreated,
   ProposalCreated,
+  ProposalUpdated,
   ProposalExecuted,
   VoteCast,
   MetadataURIUpdated,
@@ -26,6 +27,7 @@ import {
   getProposalValidationStrategies,
   getProposalValidationStrategiesParams,
   updateSpaceMetadata,
+  updateProposalMetadata,
   updateStrategiesParsedMetadata,
 } from './helpers'
 
@@ -160,29 +162,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
   executionHash.proposal_id = proposalId
   executionHash.save()
 
-  if (metadataUri.startsWith('ipfs://')) {
-    let hash = metadataUri.slice(7)
-    let data = ipfs.cat(hash)
-
-    if (data !== null) {
-      let value = json.try_fromBytes(data as Bytes)
-      let obj = value.value.toObject()
-      let title = obj.get('title')
-      let body = obj.get('body')
-      let discussion = obj.get('discussion')
-
-      if (title) proposal.title = title.toString()
-      if (body) proposal.body = body.toString()
-      if (discussion) proposal.discussion = discussion.toString()
-
-      // Using different parser for execution to overcome limitations in graph-ts
-      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(data.toString())
-      let execution = jsonObj.getArr('execution')
-      if (execution) {
-        proposal.execution = execution.toString()
-      }
-    }
-  }
+  updateProposalMetadata(proposal, metadataUri)
 
   proposal.save()
 
@@ -199,6 +179,34 @@ export function handleProposalCreated(event: ProposalCreated): void {
   }
   user.proposal_count += 1
   user.save()
+}
+
+export function handleProposalUpdated(event: ProposalUpdated): void {
+  let proposalId = `${event.address.toHexString()}/${event.params.proposalId}`
+
+  let proposal = Proposal.load(proposalId)
+  if (proposal == null) {
+    return
+  }
+
+  proposal.execution_strategy = event.params.newExecutionStrategy.addy
+  proposal.execution_hash = event.params.newExecutionStrategy.params.toHexString()
+
+  let executionStrategy = ExecutionStrategy.load(
+    event.params.newExecutionStrategy.addy.toHexString()
+  )
+  if (executionStrategy !== null) {
+    proposal.quorum = executionStrategy.quorum
+    proposal.timelock_delay = executionStrategy.timelock_delay
+  }
+
+  let executionHash = new ExecutionHash(proposal.execution_hash)
+  executionHash.proposal_id = proposalId
+  executionHash.save()
+
+  updateProposalMetadata(proposal, event.params.newMetadataURI)
+
+  proposal.save()
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {

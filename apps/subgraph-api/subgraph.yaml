@@ -48,6 +48,8 @@ templates:
           handler: handleSpaceCreated
         - event: ProposalCreated(uint256,address,(uint32,uint32,uint32,uint32,bytes32,address,address,uint8,(address,bytes)[]),string,bytes)
           handler: handleProposalCreated
+        - event: ProposalUpdated(uint256,(address,bytes),string)
+          handler: handleProposalUpdated
         - event: ProposalExecuted(uint256)
           handler: handleProposalExecuted
         - event: VoteCast(uint256,address,uint8,uint256)
