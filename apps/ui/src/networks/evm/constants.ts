@@ -70,7 +70,7 @@ export const EDITOR_AUTHENTICATORS = [
     address: '0xc537d997ddc783e071f82ccbfaa0d768d310001b',
     name: 'Ethereum signature',
     about:
-      'Will authenticate a user based on a message signed by an Ethereum private key. Users create an EIP712 signature for the transaction which is checked for validity in this contract.',
+      'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
     icon: IHPencil,
     paramsDefinition: null
   }
@@ -127,6 +127,8 @@ export const EDITOR_VOTING_STRATEGIES = [
   {
     address: '0xeba53160c146cbf77a150e9a218d4c2de5db6b51',
     name: 'Vanilla',
+    about:
+      'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
     icon: IHBeaker,
     generateMetadata: (params: Record<string, any>) => ({
       name: 'Vanilla',
@@ -197,7 +199,7 @@ export const EDITOR_VOTING_STRATEGIES = [
     address: '0x4aaa33b4367dc5657854bd40738201651ec0cc7b',
     name: 'OpenZeppelin Votes',
     about:
-      'A strategy that allows delegated balances of Open Zeppelin style checkpoint tokens to be used as voting power.',
+      'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
     icon: IHCode,
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.decimals})`,
@@ -244,7 +246,7 @@ export const EDITOR_EXECUTION_STRATEGIES = [
     type: 'SimpleQuorumAvatar',
     name: 'Safe module (Zodiac)',
     about:
-      'An execution strategy that allows proposals to execute transactions from a specified target Avatar contract, the most popular one being a Gnosis Safe.',
+      'An execution strategy that allows proposals to execute transactions from a specified target Avatar contract, the most popular one being a Safe.',
     icon: IHUserCircle,
     generateSummary: (params: Record<string, any>) =>
       `(${params.quorum}, ${shorten(params.contractAddress)})`,
@@ -290,7 +292,7 @@ export const EDITOR_EXECUTION_STRATEGIES = [
     type: 'SimpleQuorumTimelock',
     name: 'Timelock',
     about:
-      'An execution strategy that is itself a Timelock contract. A timelockDelay is specified when the Timelock is deployed. When a proposal with this strategy is executed, the proposal transactions are queued in the Timelock for timelockDelay seconds before they can be executed.',
+      'Timelock implementation with a specified delay that queues proposal transactions for execution and includes an optional role to veto queued proposals.',
     icon: IHClock,
     generateSummary: (params: Record<string, any>) => `(${params.quorum}, ${params.timelockDelay})`,
     deploy: async (
