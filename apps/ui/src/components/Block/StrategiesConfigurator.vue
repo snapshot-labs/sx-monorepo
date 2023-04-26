@@ -5,10 +5,12 @@ const props = withDefaults(
   defineProps<{
     modelValue: StrategyConfig[];
     limit?: number;
+    unique?: boolean;
     availableStrategies: StrategyTemplate[];
   }>(),
   {
-    limit: Infinity
+    limit: Infinity,
+    unique: false
   }
 );
 
@@ -25,6 +27,9 @@ const editedStrategy: Ref<StrategyConfig | null> = ref(null);
 const editStrategyModalOpen = ref(false);
 
 const limitReached = computed(() => activeStrategies.value.length >= props.limit);
+const activeStrategiesMap = computed(() =>
+  Object.fromEntries(activeStrategies.value.map(strategy => [strategy.name, strategy]))
+);
 
 function addStrategy(strategy: StrategyTemplate) {
   if (limitReached.value) return;
@@ -103,10 +108,11 @@ function handleStrategySave(value: Record<string, any>) {
       <button
         v-for="strategy in availableStrategies"
         :key="strategy.address"
-        :disabled="limitReached"
+        :disabled="limitReached || (unique && !!activeStrategiesMap[strategy.name])"
         class="flex items-center rounded-lg border cursor-pointer px-3 py-2 text-skin-link"
         :class="{
-          'opacity-50 cursor-not-allowed': limitReached
+          'opacity-50 cursor-not-allowed':
+            limitReached || (unique && !!activeStrategiesMap[strategy.name])
         }"
         @click="addStrategy(strategy)"
       >

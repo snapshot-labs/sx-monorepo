@@ -234,6 +234,7 @@ watch(selectedNetworkId, () => {
           <BlockSpaceFormStrategies
             v-else-if="currentPage === 'auths'"
             v-model="authenticators"
+            unique
             :available-strategies="selectedNetwork.constants.EDITOR_AUTHENTICATORS"
             title="Authenticators"
             description="Lorem ipsum..."

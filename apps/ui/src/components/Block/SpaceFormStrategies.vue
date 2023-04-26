@@ -5,12 +5,14 @@ withDefaults(
   defineProps<{
     modelValue: StrategyConfig[];
     limit?: number;
+    unique?: boolean;
     title: string;
     description: string;
     availableStrategies: StrategyTemplate[];
   }>(),
   {
-    limit: Infinity
+    limit: Infinity,
+    unique: false
   }
 );
 
@@ -27,6 +29,7 @@ const emit = defineEmits<{
     </span>
     <BlockStrategiesConfigurator
       :model-value="modelValue"
+      :unique="unique"
       :available-strategies="availableStrategies"
       @update:model-value="value => emit('update:modelValue', value)"
     />
