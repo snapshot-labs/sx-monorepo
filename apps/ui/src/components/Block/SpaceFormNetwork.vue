@@ -18,7 +18,7 @@ const availableNetworks = enabledNetworks.map(id => ({
 
 <template>
   <div class="mb-4">
-    <h3>Space Network</h3>
+    <h3>Space network</h3>
     <div class="grid grid-cols-auto gap-3 pt-4">
       <button
         v-for="network in availableNetworks"

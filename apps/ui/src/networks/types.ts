@@ -1,3 +1,4 @@
+import { FunctionalComponent } from 'vue';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
@@ -27,6 +28,8 @@ export type Connector =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  about?: string;
+  icon?: FunctionalComponent;
   type?: string;
   paramsDefinition: any;
   validate?: (params: Record<string, any>) => boolean;

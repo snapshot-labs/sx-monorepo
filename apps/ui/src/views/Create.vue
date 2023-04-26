@@ -229,7 +229,7 @@ watch(selectedNetworkId, () => {
             v-model="votingStrategies"
             :available-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
             title="Voting strategies"
-            description="Lorem ipsum..."
+            description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
           />
           <BlockSpaceFormStrategies
             v-else-if="currentPage === 'auths'"
@@ -237,7 +237,7 @@ watch(selectedNetworkId, () => {
             unique
             :available-strategies="selectedNetwork.constants.EDITOR_AUTHENTICATORS"
             title="Authenticators"
-            description="Lorem ipsum..."
+            description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
           />
           <BlockSpaceFormValidation
             v-else-if="currentPage === 'validations'"
@@ -245,14 +245,14 @@ watch(selectedNetworkId, () => {
             :available-strategies="selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS"
             :available-voting-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
             title="Proposal validation"
-            description="Lorem ipsum..."
+            description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
           />
           <BlockSpaceFormStrategies
             v-else-if="currentPage === 'executions'"
             v-model="executionStrategies"
             :available-strategies="selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES"
             title="Execution strategies"
-            description="Lorem ipsum..."
+            description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."
           />
           <BlockSpaceFormVoting
             v-else-if="currentPage === 'voting'"
