@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
-import { _rt, _n, shortenAddress, getUrl, sanitizeUrl } from '@/helpers/utils';
+import { _rt, _n, shortenAddress, getUrl, sanitizeUrl, compareAddresses } from '@/helpers/utils';
 import { Choice, NetworkID } from '@/types';
 import { VotingPower } from '@/networks/types';
 
 const route = useRoute();
+const router = useRouter();
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
+const { createDraft } = useEditor();
 const id = parseInt((route.params.id as string) || '0');
 const spaceParam = route.params.space as string;
 const [networkId, space] = spaceParam.split(':');
@@ -43,6 +45,15 @@ const proposalMetadataUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
+const editable = computed(() => {
+  if (!proposal.value) return false;
+
+  return (
+    compareAddresses(proposal.value.author.id, web3.value.account) &&
+    proposal.value.start * 1000 > Date.now()
+  );
+});
+
 async function getVotingPower() {
   const network = getNetwork(networkId as NetworkID);
 
@@ -67,6 +78,30 @@ async function getVotingPower() {
   } finally {
     loadingVotingPower.value = false;
   }
+}
+
+async function handleEditClick() {
+  if (!proposal.value) return;
+
+  const draftId = createDraft(spaceParam, {
+    proposalId: proposal.value.proposal_id,
+    title: proposal.value.title,
+    body: proposal.value.body,
+    discussion: proposal.value.discussion,
+    executionStrategy: {
+      address: proposal.value.execution_strategy,
+      type: proposal.value.execution_strategy_type
+    },
+    execution: proposal.value.execution
+  });
+
+  router.push({
+    name: 'editor',
+    params: {
+      id: spaceParam,
+      key: draftId
+    }
+  });
 }
 
 async function handleVoteClick(choice: Choice) {
@@ -109,9 +144,18 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
               <span class="text-skin-text text-[16px]" v-text="_rt(proposal.created)" />
             </div>
           </router-link>
-          <a v-if="proposalMetadataUrl" :href="proposalMetadataUrl" target="_blank" class="mr-3">
-            <IH-dots-vertical />
-          </a>
+          <div class="flex items-center gap-4 mr-3">
+            <UiTooltip v-if="editable" title="Edit proposal">
+              <a @click="handleEditClick">
+                <IH-pencil />
+              </a>
+            </UiTooltip>
+            <UiTooltip title="View proposal metadata">
+              <a v-if="proposalMetadataUrl" :href="proposalMetadataUrl" target="_blank">
+                <IH-dots-vertical />
+              </a>
+            </UiTooltip>
+          </div>
         </div>
         <Container class="pt-5 max-w-[630px] mx-0 md:mx-auto">
           <div>

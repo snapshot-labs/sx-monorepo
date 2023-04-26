@@ -12,6 +12,10 @@ function removeEmpty(proposals: Drafts): Drafts {
       return acc;
     }
 
+    if (typeof proposal.proposalId === 'number') {
+      return acc;
+    }
+
     return {
       ...acc,
       [id]: proposal
@@ -23,7 +27,10 @@ function generateId() {
   return (Math.random() + 1).toString(36).substring(7);
 }
 
-function createDraft(spaceId: string, payload?: Partial<Draft> & { id?: string }) {
+function createDraft(
+  spaceId: string,
+  payload?: Partial<Draft> & { id?: string; proposalId?: number }
+) {
   const id = payload?.id || generateId();
   const key = `${spaceId}:${id}`;
 
@@ -34,6 +41,7 @@ function createDraft(spaceId: string, payload?: Partial<Draft> & { id?: string }
     executionStrategy: null,
     execution: [],
     updatedAt: Date.now(),
+    proposalId: null,
     ...payload
   };
   return id;

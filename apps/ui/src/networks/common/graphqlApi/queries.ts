@@ -37,6 +37,7 @@ export const PROPOSAL_QUERY = gql`
       scores_total
       execution_time
       execution_strategy
+      execution_strategy_type
       strategies
       strategies_params
       created
@@ -93,6 +94,7 @@ export const PROPOSALS_QUERY = gql`
       scores_total
       execution_time
       execution_strategy
+      execution_strategy_type
       strategies
       strategies_params
       created
@@ -154,6 +156,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
     scores_total
     execution_time
     execution_strategy
+    execution_strategy_type
     strategies
     strategies_params
     created

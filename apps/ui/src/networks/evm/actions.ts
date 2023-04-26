@@ -166,6 +166,49 @@ export function createActions(
         }
       });
     },
+    async updateProposal(
+      web3: Web3Provider,
+      account: string,
+      space: Space,
+      proposalId: number,
+      cid: string,
+      executionStrategy: string,
+      transactions: MetaTransaction[]
+    ) {
+      await verifyNetwork(web3, chainId);
+
+      const { useRelayer, authenticator } = pickAuthenticatorAndStrategies(
+        space.authenticators,
+        space.voting_power_validation_strategy_strategies
+      );
+
+      const executionData = getExecutionData(space, executionStrategy, transactions);
+
+      const data = {
+        space: space.id,
+        proposal: proposalId,
+        authenticator,
+        executionStrategy: {
+          addy: executionStrategy,
+          params: executionData.executionParams[0]
+        },
+        metadataUri: `ipfs://${cid}`
+      };
+
+      if (useRelayer) {
+        return ethSigClient.updateProposal({
+          signer: web3.getSigner(),
+          data
+        });
+      }
+
+      return client.updateProposal({
+        signer: web3.getSigner(),
+        envelope: {
+          data
+        }
+      });
+    },
     vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
       await verifyNetwork(web3, chainId);
 

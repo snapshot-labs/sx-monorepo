@@ -8,7 +8,7 @@ const { proposals, createDraft } = useEditor();
 const { modalOpen: globalModalOpen } = useModal();
 const route = useRoute();
 const router = useRouter();
-const { propose } = useActions();
+const { propose, updateProposal } = useActions();
 const { web3 } = useWeb3();
 const spacesStore = useSpacesStore();
 
@@ -58,15 +58,27 @@ async function handleProposeClick() {
   sending.value = true;
 
   try {
-    const result = await propose(
-      space.value,
-      proposal.title,
-      proposal.body,
-      proposal.discussion,
-      proposal.executionStrategy.address,
-      proposal.execution
-    );
-
+    let result;
+    if (proposal.proposalId) {
+      result = await updateProposal(
+        space.value,
+        proposal.proposalId,
+        proposal.title,
+        proposal.body,
+        proposal.discussion,
+        proposal.executionStrategy.address,
+        proposal.execution
+      );
+    } else {
+      result = await propose(
+        space.value,
+        proposal.title,
+        proposal.body,
+        proposal.discussion,
+        proposal.executionStrategy.address,
+        proposal.execution
+      );
+    }
     if (result) router.back();
   } finally {
     sending.value = false;
@@ -156,7 +168,10 @@ watch(proposalData, () => {
             "
             @click="handleProposeClick"
           >
-            <span class="hidden mr-2 md:inline-block" v-text="'Publish'" />
+            <span
+              class="hidden mr-2 md:inline-block"
+              v-text="proposals[proposalKey].proposalId ? 'Update' : 'Publish'"
+            />
             <IH-paper-airplane class="inline-block rotate-90" />
           </UiButton>
         </div>

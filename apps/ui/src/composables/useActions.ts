@@ -197,6 +197,53 @@ export function useActions() {
     return true;
   }
 
+  async function updateProposal(
+    space: Space,
+    proposalId: number,
+    title: string,
+    body: string,
+    discussion: string,
+    executionStrategy: string,
+    execution: Transaction[]
+  ) {
+    if (!web3.value.account) {
+      forceLogin();
+      return false;
+    }
+    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
+
+    const network = getNetwork(space.network);
+
+    const transactions = execution.map((tx: Transaction) => ({
+      ...tx,
+      operation: 0
+    }));
+
+    const pinned = await network.helpers.pin({
+      title,
+      body,
+      discussion,
+      execution: transactions
+    });
+    if (!pinned || !pinned.cid) return false;
+    console.log('IPFS', pinned);
+
+    await wrapPromise(
+      space.network,
+      network.actions.updateProposal(
+        auth.web3,
+        web3.value.account,
+        space,
+        proposalId,
+        pinned.cid,
+        executionStrategy,
+        convertToMetaTransactions(transactions)
+      )
+    );
+
+    return true;
+  }
+
   async function finalizeProposal(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
@@ -293,6 +340,7 @@ export function useActions() {
     updateMetadata,
     vote,
     propose,
+    updateProposal,
     finalizeProposal,
     receiveProposal,
     executeTransactions,

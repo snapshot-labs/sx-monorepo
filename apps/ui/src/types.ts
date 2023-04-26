@@ -99,6 +99,7 @@ export type Proposal = {
   scores_total: number;
   execution_time: number;
   execution_strategy: string;
+  execution_strategy_type: string;
   strategies: string[];
   strategies_params: any[];
   created: number;
@@ -140,6 +141,7 @@ export type Vote = {
 };
 
 export type Draft = {
+  proposalId: number | null;
   title: string;
   body: string;
   discussion: string;

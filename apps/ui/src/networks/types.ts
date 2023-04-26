@@ -96,6 +96,15 @@ export type NetworkActions = {
     executionStrategy: string,
     transactions: MetaTransaction[]
   );
+  updateProposal(
+    web3: Web3Provider,
+    account: string,
+    space: Space,
+    proposalId: number,
+    cid: string,
+    executionStrategy: string,
+    transactions: MetaTransaction[]
+  );
   vote(web3: Web3Provider, account: string, proposal: Proposal, choice: Choice);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);
