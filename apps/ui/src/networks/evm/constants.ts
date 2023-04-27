@@ -48,7 +48,7 @@ export const PROPOSAL_VALIDATIONS = {
 export const STRATEGIES = {
   '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': 'Vanilla',
   '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': 'Delegated Comp Token',
-  '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': 'Oz Votes',
+  '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': 'OpenZeppelin Votes',
   '0xf50bf15e9fe61e27625a4ecdfc23211297e8be85': 'Whitelist'
 };
 

@@ -335,7 +335,9 @@ export function createActions(
             provider
           );
 
-          const token = strategy.type === 'comp' ? strategiesParams[i] : undefined;
+          const token = ['comp', 'ozVotes'].includes(strategy.type)
+            ? strategiesParams[i]
+            : undefined;
           return {
             address,
             value,
