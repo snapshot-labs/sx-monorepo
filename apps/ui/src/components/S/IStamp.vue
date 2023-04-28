@@ -46,13 +46,13 @@ async function handleFileChange(e: Event) {
 <template>
   <div
     v-bind="$attrs"
-    class="relative h-[80px] group max-w-max cursor-pointer mb-3"
+    class="relative group max-w-max cursor-pointer mb-3 border-[4px] border-skin-bg rounded-lg overflow-hidden bg-skin-border"
     @click="openFilePicker()"
   >
     <img
       v-if="imgUrl"
       :src="imgUrl"
-      class="w-[80px] h-[80px] object-cover !rounded-lg group-hover:opacity-80"
+      class="w-[80px] h-[80px] object-cover group-hover:opacity-80"
       :class="{
         'opacity-80': isUploadingImage
       }"
@@ -61,7 +61,7 @@ async function handleFileChange(e: Event) {
       v-else
       :id="definition.default"
       :size="80"
-      class="pointer-events-none border-[4px] border-skin-bg !bg-skin-bg !rounded-lg group-hover:opacity-80"
+      class="pointer-events-none !rounded-none group-hover:opacity-80"
       type="space-sx"
       :class="{
         'opacity-80': isUploadingImage
