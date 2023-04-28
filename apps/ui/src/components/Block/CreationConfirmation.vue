@@ -7,7 +7,7 @@ import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 const props = defineProps<{
   networkId: NetworkID;
   salt: string;
-  predictedSpaceAddress: string | null;
+  predictedSpaceAddress: string;
   metadata: SpaceMetadata;
   settings: SpaceSettings;
   authenticators: StrategyConfig[];

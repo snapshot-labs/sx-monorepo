@@ -20,8 +20,8 @@ export function useActions() {
   const { modalAccountOpen } = useModal();
   const auth = getInstance();
 
-  function wrapWithErrors(fn) {
-    return async (...args) => {
+  function wrapWithErrors<T extends any[], U>(fn: (...args: T) => U) {
+    return async (...args: T): Promise<U> => {
       try {
         return await fn(...args);
       } catch (err) {
@@ -333,25 +333,21 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }
 
-  const actions = {
-    predictSpaceAddress,
-    deployDependency,
-    createSpace,
-    updateMetadata,
-    vote,
-    propose,
-    updateProposal,
-    finalizeProposal,
-    receiveProposal,
-    executeTransactions,
-    executeQueuedProposal,
-    setVotingDelay,
-    setMinVotingDuration,
-    setMaxVotingDuration,
-    transferOwnership
+  return {
+    predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
+    deployDependency: wrapWithErrors(deployDependency),
+    createSpace: wrapWithErrors(createSpace),
+    updateMetadata: wrapWithErrors(updateMetadata),
+    vote: wrapWithErrors(vote),
+    propose: wrapWithErrors(propose),
+    updateProposal: wrapWithErrors(updateProposal),
+    finalizeProposal: wrapWithErrors(finalizeProposal),
+    receiveProposal: wrapWithErrors(receiveProposal),
+    executeTransactions: wrapWithErrors(executeTransactions),
+    executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
+    setVotingDelay: wrapWithErrors(setVotingDelay),
+    setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
+    setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
+    transferOwnership: wrapWithErrors(transferOwnership)
   };
-
-  return Object.fromEntries(
-    Object.entries(actions).map(([key, value]) => [key, wrapWithErrors(value)])
-  );
 }

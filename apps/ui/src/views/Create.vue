@@ -180,7 +180,7 @@ watch(selectedNetworkId, () => {
 <template>
   <div>
     <BlockCreationConfirmation
-      v-if="confirming && salt && validationStrategy"
+      v-if="confirming && salt && predictedSpaceAddress && validationStrategy"
       :network-id="selectedNetworkId"
       :salt="salt"
       :predicted-space-address="predictedSpaceAddress"

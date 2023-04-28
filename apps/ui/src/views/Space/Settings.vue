@@ -32,13 +32,16 @@ async function handleSave(
     controller: transferOwnership
   };
 
-  const action = fieldActions[field];
-  if (!action) return;
+  if (!fieldActions[field]) return;
 
   settingsLoading.value[field] = true;
 
   try {
-    await action(props.space, field === 'controller' ? value : parseInt(value));
+    if (field === 'controller') {
+      await fieldActions[field](props.space, value);
+    } else {
+      await fieldActions[field](props.space, parseInt(value));
+    }
   } finally {
     settingsLoading.value[field] = false;
   }
