@@ -134,7 +134,7 @@ export const EDITOR_VOTING_STRATEGIES = [
       name: 'Vanilla',
       properties: {
         symbol: params.symbol,
-        decimals: 1
+        decimals: 0
       }
     }),
     paramsDefinition: {
