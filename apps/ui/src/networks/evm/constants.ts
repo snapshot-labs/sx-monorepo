@@ -10,6 +10,7 @@ import IHCube from '~icons/heroicons-outline/cube';
 import IHPencil from '~icons/heroicons-outline/pencil';
 import IHClock from '~icons/heroicons-outline/clock';
 import IHUserCircle from '~icons/heroicons-outline/user-circle';
+import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 
 export const API_URL = 'https://api.thegraph.com/subgraphs/name/snapshot-labs/sx-goerli';
 
@@ -80,12 +81,14 @@ export const EDITOR_PROPOSAL_VALIDATIONS = [
   {
     address: '0x80d9665e5761a778a97283dec14581c4c0bf8d51',
     name: 'Vanilla',
+    icon: IHBeaker,
     paramsDefinition: null
   },
   {
     address: '0x03d512E0165d6B53ED2753Df2f3184fBd2b52E48',
     type: 'VotingPower',
     name: 'Voting power',
+    icon: IHLightningBolt,
     validate: (params: Record<string, any>) => {
       return params?.strategies?.length > 0;
     },
