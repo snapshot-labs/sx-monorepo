@@ -12,10 +12,12 @@ const pendingTransactionsModalOpen = ref(false);
 </script>
 
 <template>
-  <UiTooltip title="Pending transactions">
+  <UiTooltip
+    v-if="uiStore.pendingTransactions.length > 0"
+    v-bind="$attrs"
+    title="Pending transactions"
+  >
     <UiButton
-      v-if="uiStore.pendingTransactions.length > 0"
-      v-bind="$attrs"
       class="!px-0 w-[46px] text-white bg-blue border-blue focus-within:border-blue focus:border-blue"
       @click="pendingTransactionsModalOpen = true"
     >
