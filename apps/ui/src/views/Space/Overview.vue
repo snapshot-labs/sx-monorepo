@@ -29,7 +29,7 @@ const twitterUrl = computed(() =>
   props.space.twitter ? sanitizeUrl(`https://twitter.com/${props.space.twitter}`) : null
 );
 const discordUrl = computed(() =>
-  props.space.discord ? sanitizeUrl(`https://discord.com/invite/${props.space.discord}`) : null
+  props.space.discord ? sanitizeUrl(`https://discord.gg/${props.space.discord}`) : null
 );
 const githubUrl = computed(() =>
   props.space.github ? sanitizeUrl(`https://github.com/${props.space.github}`) : null
