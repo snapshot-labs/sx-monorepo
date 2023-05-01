@@ -13,22 +13,16 @@ contract ProposeTest is SpaceTest {
     function testPropose() public {
         uint256 proposalId = space.nextProposalId();
 
-        bytes32 executionHash = keccak256(abi.encodePacked(executionStrategy.params));
-        uint32 snapshotTimestamp = uint32(block.timestamp);
-        uint32 startTimestamp = uint32(snapshotTimestamp + votingDelay);
-        uint32 minEndTimestamp = uint32(startTimestamp + minVotingDuration);
-        uint32 maxEndTimestamp = uint32(startTimestamp + maxVotingDuration);
-
         // There is only one voting strategy, so the `activeVotingStrategies` bit array should be ..001 = 1
         uint256 activeVotingStrategies = 1;
 
         // Expected content of the proposal struct
         Proposal memory proposal = Proposal(
-            snapshotTimestamp,
-            startTimestamp,
-            minEndTimestamp,
-            maxEndTimestamp,
-            executionHash,
+            uint32(block.timestamp),
+            uint32(block.timestamp + votingDelay),
+            uint32(block.timestamp + votingDelay + minVotingDuration),
+            uint32(block.timestamp + votingDelay + maxVotingDuration),
+            keccak256(abi.encodePacked(executionStrategy.params)),
             IExecutionStrategy(executionStrategy.addr),
             author,
             FinalizationStatus.Pending,
@@ -41,7 +35,31 @@ contract ProposeTest is SpaceTest {
         _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         // Actual content of the proposal struct
-        Proposal memory _proposal = space.getProposal(proposalId);
+        (
+            uint32 _snapshotTimestamp,
+            uint32 _startTimestamp,
+            uint32 _minEndTimestamp,
+            uint32 _maxEndTimestamp,
+            bytes32 _executionPayloadHash,
+            IExecutionStrategy _executionStrategy,
+            address _author,
+            FinalizationStatus _finalizationStatus,
+            uint256 _activeVotingStrategies
+        ) = space.proposals(proposalId);
+
+        Proposal memory _proposal = Proposal(
+            _snapshotTimestamp,
+            _startTimestamp,
+            _minEndTimestamp,
+            _maxEndTimestamp,
+            _executionPayloadHash,
+            IExecutionStrategy(_executionStrategy),
+            _author,
+            _finalizationStatus,
+            _activeVotingStrategies
+        );
+
+        // Proposal memory _proposal = space.proposalRegistry(proposalId);
 
         // Checking expectations and actual values match
         assertEq(keccak256(abi.encode(_proposal)), keccak256(abi.encode(proposal)));

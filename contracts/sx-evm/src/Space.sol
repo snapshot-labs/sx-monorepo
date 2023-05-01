@@ -6,7 +6,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import { ISpace } from "src/interfaces/ISpace.sol";
+import { ISpace, ISpaceState } from "src/interfaces/ISpace.sol";
 import { Choice, FinalizationStatus, IndexedStrategy, Proposal, ProposalStatus, Strategy } from "src/types.sol";
 import { IVotingStrategy } from "src/interfaces/IVotingStrategy.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
@@ -23,38 +23,30 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     using BitPacker for uint256;
     using SXUtils for IndexedStrategy[];
 
-    // Maximum duration a proposal can last.
-    uint32 public maxVotingDuration;
-    // Minimum duration a proposal can last.
-    uint32 public minVotingDuration;
-    // Next proposal nonce, increased by one every time a new proposal is created.
-    uint256 public nextProposalId;
-    // Delay between when the proposal is created and when the voting period starts for this proposal.
-    uint32 public votingDelay;
-
-    // Bit array where the index of each bit corresponds to whether the strategy at that index
-    // in `votingStrategies` is active.
-    uint256 public activeVotingStrategies;
-
-    // Mapping storing all voting strategies. Both active and inactive.
-    // To see whether the strategy at a specific index is active,
-    // check the corresponding index of the`activeVotingStrategies` bit array.
-    mapping(uint8 strategyIndex => Strategy strategy) public votingStrategies;
-
-    // Pointer to the next available voting strategy index.
-    uint8 public nextVotingStrategyIndex;
-
-    // The proposal validation contract.
-    Strategy public proposalValidationStrategy;
-
-    // Mapping of allowed authenticators.
-    mapping(address auth => bool allowed) private authenticators;
-    // Mapping of all `Proposal`s of this space (past and present).
-    mapping(uint256 proposalId => Proposal proposal) private proposalRegistry;
-    // Mapping used to know if a voter already voted on a specific proposal. Here to prevent double voting.
-    mapping(uint256 proposalId => mapping(address voter => bool hasVoted)) private voteRegistry;
-    // Mapping used to check the current voting power in favor of a `Choice` for a specific proposal.
-    mapping(uint256 proposalId => mapping(Choice choice => uint256 votePower)) private votePower;
+    /// @inheritdoc ISpaceState
+    uint32 public override maxVotingDuration;
+    /// @inheritdoc ISpaceState
+    uint32 public override minVotingDuration;
+    /// @inheritdoc ISpaceState
+    uint256 public override nextProposalId;
+    /// @inheritdoc ISpaceState
+    uint32 public override votingDelay;
+    /// @inheritdoc ISpaceState
+    uint256 public override activeVotingStrategies;
+    /// @inheritdoc ISpaceState
+    mapping(uint8 strategyIndex => Strategy strategy) public override votingStrategies;
+    /// @inheritdoc ISpaceState
+    uint8 public override nextVotingStrategyIndex;
+    /// @inheritdoc ISpaceState
+    Strategy public override proposalValidationStrategy;
+    /// @inheritdoc ISpaceState
+    mapping(address auth => bool allowed) public override authenticators;
+    /// @inheritdoc ISpaceState
+    mapping(uint256 proposalId => Proposal proposal) public override proposals;
+    // @inheritdoc ISpaceState
+    mapping(uint256 proposalId => mapping(Choice choice => uint256 votePower)) public override votePower;
+    /// @inheritdoc ISpaceState
+    mapping(uint256 proposalId => mapping(address voter => bool hasVoted)) public override voteRegistry;
 
     // ------------------------------------
     // |                                  |
@@ -300,14 +292,9 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     // |                                  |
     // ------------------------------------
 
-    function getProposal(uint256 proposalId) external view override returns (Proposal memory) {
-        Proposal memory proposal = proposalRegistry[proposalId];
-        _assertProposalExists(proposal);
-        return proposalRegistry[proposalId];
-    }
-
-    function getProposalStatus(uint256 proposalId) public view override returns (ProposalStatus) {
-        Proposal memory proposal = proposalRegistry[proposalId];
+    /// @inheritdoc ISpaceState
+    function getProposalStatus(uint256 proposalId) external view override returns (ProposalStatus) {
+        Proposal memory proposal = proposals[proposalId];
         _assertProposalExists(proposal);
         return
             proposal.executionStrategy.getProposalStatus(
@@ -316,13 +303,6 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
                 votePower[proposalId][Choice.Against],
                 votePower[proposalId][Choice.Abstain]
             );
-    }
-
-    function hasVoted(uint256 proposalId, address voter) external view override returns (bool) {
-        Proposal memory proposal = proposalRegistry[proposalId];
-        _assertProposalExists(proposal);
-
-        return voteRegistry[proposalId][voter];
     }
 
     // ------------------------------------
@@ -376,7 +356,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
             activeVotingStrategies
         );
 
-        proposalRegistry[nextProposalId] = proposal;
+        proposals[nextProposalId] = proposal;
         emit ProposalCreated(nextProposalId, author, proposal, metadataURI, executionStrategy.params);
 
         nextProposalId++;
@@ -398,7 +378,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         string calldata metadataUri
     ) external override {
         _assertValidAuthenticator();
-        Proposal memory proposal = proposalRegistry[proposalId];
+        Proposal memory proposal = proposals[proposalId];
         _assertProposalExists(proposal);
         if (block.timestamp >= proposal.maxEndTimestamp) revert VotingPeriodHasEnded();
         if (block.timestamp < proposal.startTimestamp) revert VotingPeriodHasNotStarted();
@@ -428,7 +408,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
      * @param   executionPayload  The execution payload, as described in `propose()`.
      */
     function execute(uint256 proposalId, bytes calldata executionPayload) external override nonReentrant {
-        Proposal storage proposal = proposalRegistry[proposalId];
+        Proposal storage proposal = proposals[proposalId];
         _assertProposalExists(proposal);
 
         // We add reentrancy protection here to prevent this function being re-entered by the execution strategy.
@@ -452,7 +432,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
      * @param   proposalId  The proposal to cancel
      */
     function cancel(uint256 proposalId) external override onlyOwner {
-        Proposal storage proposal = proposalRegistry[proposalId];
+        Proposal storage proposal = proposals[proposalId];
         _assertProposalExists(proposal);
         if (proposal.finalizationStatus != FinalizationStatus.Pending) revert ProposalFinalized();
         proposal.finalizationStatus = FinalizationStatus.Cancelled;
@@ -474,7 +454,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
     ) external override {
         _assertValidAuthenticator();
 
-        Proposal storage proposal = proposalRegistry[proposalId];
+        Proposal storage proposal = proposals[proposalId];
         if (author != proposal.author) revert InvalidCaller();
         if (block.timestamp >= proposal.startTimestamp) revert VotingDelayHasPassed();
 
