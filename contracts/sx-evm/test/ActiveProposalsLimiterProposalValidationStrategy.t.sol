@@ -3,10 +3,12 @@ pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
 import { Strategy } from "../src/types.sol";
-import { ActiveProposalsLimiterVanilla } from "./mocks/ActiveProposalsLimiterVanilla.sol";
+import {
+    ActiveProposalsLimiterProposalValidationStrategy
+} from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
 
-contract ActiveProposalsVanilla is SpaceTest {
-    ActiveProposalsLimiterVanilla internal spamProtec;
+contract ActiveProposalsLimterTest is SpaceTest {
+    ActiveProposalsLimiterProposalValidationStrategy internal activeProposalsLimiterProposalValidationStrategy;
     uint224 internal maxActive;
     uint32 internal cooldown;
 
@@ -16,9 +18,14 @@ contract ActiveProposalsVanilla is SpaceTest {
         maxActive = 5;
         cooldown = 1 weeks;
 
-        spamProtec = new ActiveProposalsLimiterVanilla(1 weeks, 5);
+        activeProposalsLimiterProposalValidationStrategy = new ActiveProposalsLimiterProposalValidationStrategy(
+            1 weeks,
+            5
+        );
 
-        space.setProposalValidationStrategy(Strategy(address(spamProtec), new bytes(0)));
+        space.setProposalValidationStrategy(
+            Strategy(address(activeProposalsLimiterProposalValidationStrategy), new bytes(0))
+        );
     }
 
     function testSpamOneProposal() public {

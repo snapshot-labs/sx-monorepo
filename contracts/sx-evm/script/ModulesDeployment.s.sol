@@ -7,8 +7,8 @@ import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 import {
-    VotingPowerProposalValidationStrategy
-} from "../src/proposal-validation-strategies/VotingPowerProposalValidationStrategy.sol";
+    PropositionPowerProposalValidationStrategy
+} from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
 import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
@@ -20,7 +20,7 @@ contract ModulesDeployment is Script {
     CompVotingStrategy public compVotingStrategy;
     WhitelistStrategy public whitelistStrategy;
     VanillaAuthenticator public vanillaAuthenticator;
-    VotingPowerProposalValidationStrategy public votingPowerProposalValidationStrategy;
+    PropositionPowerProposalValidationStrategy public propositionPowerProposalValidationStrategy;
     EthSigAuthenticator public ethSigAuthenticator;
     EthTxAuthenticator public ethTxAuthenticator;
     VanillaExecutionStrategy public vanillaExecutionStrategy;
@@ -37,7 +37,7 @@ contract ModulesDeployment is Script {
         ethTxAuthenticator = new EthTxAuthenticator();
         // TODO: set quorum prior to this deploy (or remove)
         vanillaExecutionStrategy = new VanillaExecutionStrategy(1);
-        votingPowerProposalValidationStrategy = new VotingPowerProposalValidationStrategy();
+        propositionPowerProposalValidationStrategy = new PropositionPowerProposalValidationStrategy();
         spaceFactory = new ProxyFactory();
         vm.stopBroadcast();
     }

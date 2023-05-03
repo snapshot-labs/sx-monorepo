@@ -6,11 +6,11 @@ import { Strategy, IndexedStrategy } from "../src/types.sol";
 import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import {
-    VotingPowerProposalValidationStrategy
-} from "../src/proposal-validation-strategies/VotingPowerProposalValidationStrategy.sol";
+    PropositionPowerProposalValidationStrategy
+} from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
 import { CompToken } from "./mocks/CompToken.sol";
 
-contract VotingPowerProposalValidationTest is SpaceTest {
+contract PropositionPowerProposalValidationTest is SpaceTest {
     error DuplicateFound(uint8 index);
     uint256 internal proposalThreshold = 100;
     CompToken internal compToken;
@@ -32,11 +32,11 @@ contract VotingPowerProposalValidationTest is SpaceTest {
         Strategy[] memory propositionPowerStrategies = new Strategy[](1);
         propositionPowerStrategies[0] = compVotingStrategy;
 
-        Strategy memory votingPowerProposalValidationStrategy = Strategy(
-            address(new VotingPowerProposalValidationStrategy()),
+        Strategy memory propositionPowerProposalValidationStrategy = Strategy(
+            address(new PropositionPowerProposalValidationStrategy()),
             abi.encode(proposalThreshold, propositionPowerStrategies)
         );
-        space.setProposalValidationStrategy(votingPowerProposalValidationStrategy);
+        space.setProposalValidationStrategy(propositionPowerProposalValidationStrategy);
 
         // The Comp token strategy is at index 0 of the proposal validation strategies
         userPropositionPowerStrategies.push(IndexedStrategy(0, new bytes(0)));
@@ -92,11 +92,11 @@ contract VotingPowerProposalValidationTest is SpaceTest {
         propositionPowerStrategies[1] = Strategy(address(additionalStrategy), new bytes(0));
 
         // Using a proposal threshold of 2
-        Strategy memory votingPowerProposalValidationStrategy = Strategy(
-            address(new VotingPowerProposalValidationStrategy()),
+        Strategy memory propositionPowerProposalValidationStrategy = Strategy(
+            address(new PropositionPowerProposalValidationStrategy()),
             abi.encode(2, propositionPowerStrategies)
         );
-        space.setProposalValidationStrategy(votingPowerProposalValidationStrategy);
+        space.setProposalValidationStrategy(propositionPowerProposalValidationStrategy);
 
         IndexedStrategy[] memory newUserPropositionPowerStrategies = new IndexedStrategy[](2);
         newUserPropositionPowerStrategies[0] = IndexedStrategy(0, new bytes(0));

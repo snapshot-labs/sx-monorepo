@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 
 import { IProposalValidationStrategy } from "../interfaces/IProposalValidationStrategy.sol";
 
+/// @title Vanilla Proposal Validation Strategy
 contract VanillaProposalValidationStrategy is IProposalValidationStrategy {
     function validate(
         address, // author,
