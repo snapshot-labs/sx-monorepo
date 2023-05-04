@@ -20,7 +20,7 @@ const user = computed(() => {
 <template>
   <UiLoading v-if="!usersStore.users[userId]?.loaded" class="block text-center p-4" />
   <div v-else-if="user">
-    <div class="relative bg-skin-border h-[140px] -mb-[70px]" />
+    <div class="relative bg-skin-border h-[140px] -mb-[70px] top-[-1px]" />
     <Container slim>
       <div class="text-center mb-4 relative">
         <Stamp :id="userId" :size="90" class="mb-2 border-[4px] border-skin-bg !bg-skin-border" />
