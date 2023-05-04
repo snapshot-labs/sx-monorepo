@@ -129,7 +129,7 @@ export function createActions(
       account: string,
       space: Space,
       cid: string,
-      executionStrategy: string,
+      executionStrategy: string | null,
       transactions: MetaTransaction[]
     ) => {
       await verifyNetwork(web3, chainId);
@@ -139,16 +139,24 @@ export function createActions(
         space.voting_power_validation_strategy_strategies
       );
 
-      const executionData = getExecutionData(space, executionStrategy, transactions);
+      let selectedExecutionStrategy;
+      if (executionStrategy) {
+        selectedExecutionStrategy = {
+          addy: executionStrategy,
+          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+        };
+      } else {
+        selectedExecutionStrategy = {
+          addy: '0x0000000000000000000000000000000000000000',
+          params: '0x'
+        };
+      }
 
       const data = {
         space: space.id,
         authenticator,
         strategies,
-        executionStrategy: {
-          addy: executionStrategy,
-          params: executionData.executionParams[0]
-        },
+        executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${cid}`
       };
 
@@ -172,7 +180,7 @@ export function createActions(
       space: Space,
       proposalId: number,
       cid: string,
-      executionStrategy: string,
+      executionStrategy: string | null,
       transactions: MetaTransaction[]
     ) {
       await verifyNetwork(web3, chainId);
@@ -182,16 +190,24 @@ export function createActions(
         space.voting_power_validation_strategy_strategies
       );
 
-      const executionData = getExecutionData(space, executionStrategy, transactions);
+      let selectedExecutionStrategy;
+      if (executionStrategy) {
+        selectedExecutionStrategy = {
+          addy: executionStrategy,
+          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+        };
+      } else {
+        selectedExecutionStrategy = {
+          addy: '0x0000000000000000000000000000000000000000',
+          params: '0x'
+        };
+      }
 
       const data = {
         space: space.id,
         proposal: proposalId,
         authenticator,
-        executionStrategy: {
-          addy: executionStrategy,
-          params: executionData.executionParams[0]
-        },
+        executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${cid}`
       };
 

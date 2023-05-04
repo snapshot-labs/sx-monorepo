@@ -132,7 +132,6 @@ function validatePage(page: PageID) {
       ? validationStrategy.value.validate(validationStrategy.value.params)
       : true;
   }
-  if (page === 'executions') return executionStrategies.value.length > 0;
 
   return Object.values(pagesErrors.value[page]).length === 0;
 }

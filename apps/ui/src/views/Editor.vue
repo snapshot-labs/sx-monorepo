@@ -85,7 +85,6 @@ const canSubmit = computed(() => {
   return (
     !fetchingVotingPower.value &&
     votingPowerValid.value &&
-    proposals[proposalKey]?.executionStrategy &&
     Object.keys(formErrors.value).length === 0
   );
 });
@@ -96,7 +95,7 @@ if (!proposals[proposalKey]) {
 
 async function handleProposeClick() {
   const proposal = proposals[proposalKey];
-  if (!space.value || !proposal?.executionStrategy) return;
+  if (!space.value) return;
 
   sending.value = true;
 
@@ -109,8 +108,8 @@ async function handleProposeClick() {
         proposal.title,
         proposal.body,
         proposal.discussion,
-        proposal.executionStrategy.address,
-        proposal.execution
+        proposal.executionStrategy?.address ?? null,
+        proposal.executionStrategy?.address ? proposal.execution : []
       );
     } else {
       result = await propose(
@@ -118,13 +117,21 @@ async function handleProposeClick() {
         proposal.title,
         proposal.body,
         proposal.discussion,
-        proposal.executionStrategy.address,
-        proposal.execution
+        proposal.executionStrategy?.address ?? null,
+        proposal.executionStrategy?.address ? proposal.execution : []
       );
     }
     if (result) router.back();
   } finally {
     sending.value = false;
+  }
+}
+
+async function handleExecutionStrategySelected(selectedExecutionStrategy: SelectedStrategy) {
+  if (executionStrategy.value?.address === selectedExecutionStrategy.address) {
+    executionStrategy.value = null;
+  } else {
+    executionStrategy.value = selectedExecutionStrategy;
   }
 }
 
@@ -259,9 +266,6 @@ watch(proposalData, () => {
       <div v-if="space">
         <h4 class="eyebrow mb-3">Execution</h4>
         <div class="flex flex-col gap-2 mb-3">
-          <div v-if="supportedExecutionStrategies && !supportedExecutionStrategies.length">
-            No supported execution strategies available.
-          </div>
           <ExecutionButton
             v-for="(executor, i) in supportedExecutionStrategies"
             :key="executor"
@@ -271,10 +275,10 @@ watch(proposalData, () => {
               'text-skin-border': executionStrategy?.address !== executor
             }"
             @click="
-              executionStrategy = {
+              handleExecutionStrategySelected({
                 address: executor,
                 type: space.executors_types[i]
-              }
+              })
             "
           >
             <IH-cog />

@@ -88,10 +88,13 @@ async function handleEditClick() {
     title: proposal.value.title,
     body: proposal.value.body,
     discussion: proposal.value.discussion,
-    executionStrategy: {
-      address: proposal.value.execution_strategy,
-      type: proposal.value.execution_strategy_type
-    },
+    executionStrategy:
+      proposal.value.execution_strategy_type === 'none'
+        ? null
+        : {
+            address: proposal.value.execution_strategy,
+            type: proposal.value.execution_strategy_type
+          },
     execution: proposal.value.execution
   });
 

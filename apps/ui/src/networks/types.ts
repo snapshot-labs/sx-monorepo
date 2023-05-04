@@ -93,7 +93,7 @@ export type NetworkActions = {
     account: string,
     space: Space,
     cid: string,
-    executionStrategy: string,
+    executionStrategy: string | null,
     transactions: MetaTransaction[]
   );
   updateProposal(
@@ -102,7 +102,7 @@ export type NetworkActions = {
     space: Space,
     proposalId: number,
     cid: string,
-    executionStrategy: string,
+    executionStrategy: string | null,
     transactions: MetaTransaction[]
   );
   vote(web3: Web3Provider, account: string, proposal: Proposal, choice: Choice);

@@ -157,7 +157,7 @@ export function useActions() {
     title: string,
     body: string,
     discussion: string,
-    executionStrategy: string,
+    executionStrategy: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -203,7 +203,7 @@ export function useActions() {
     title: string,
     body: string,
     discussion: string,
-    executionStrategy: string,
+    executionStrategy: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
