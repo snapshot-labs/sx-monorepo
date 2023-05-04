@@ -56,6 +56,9 @@ jobs:
       - name: "Show the Foundry config"
         run: "forge config"
 
+      - name: "Create env file"
+        run: "touch .env && echo GOERLI_RPC_URL=${{ secrets.GOERLI_RPC_URL }} >> .env"
+
       - name: "Run the tests"
         run: "yarn test"
   coverage:
