@@ -1,9 +1,32 @@
-import Ajv from 'ajv';
+import Ajv, { ErrorObject } from 'ajv';
 import { validateAndParseAddress } from 'starknet';
 import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
 import { Zero, MinInt256, MaxInt256, MaxUint256 } from '@ethersproject/constants';
 import { BigNumber } from '@ethersproject/bignumber';
+
+function getErrorMessage(errorObject: ErrorObject): string {
+  if (!errorObject.message) return 'Invalid field.';
+
+  if (errorObject.keyword === 'format') {
+    switch (errorObject.params.format) {
+      case 'address':
+        return 'Must be a valid address.';
+      case 'uint256':
+        return 'Must be a positive integer.';
+      case 'int256':
+        return 'Must be an integer.';
+      case 'ethValue':
+        return 'Must be a number.';
+      default:
+        return 'Invalid format.';
+    }
+  }
+
+  return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
+    .slice(1)
+    .toLocaleLowerCase()}.`;
+}
 
 export function validateForm(schema, form): Record<string, string> {
   const ajv = new Ajv({ allErrors: true });
@@ -84,7 +107,7 @@ export function validateForm(schema, form): Record<string, string> {
       current = current[subpath];
     }
 
-    current[path[path.length - 1]] = 'Invalid field';
+    current[path[path.length - 1]] = getErrorMessage(error);
   }
 
   return output;
