@@ -156,6 +156,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
   if (executionStrategy !== null) {
     proposal.quorum = executionStrategy.quorum
     proposal.timelock_delay = executionStrategy.timelock_delay
+    proposal.execution_strategy_type = executionStrategy.type
   }
 
   let executionHash = new ExecutionHash(proposal.execution_hash)
@@ -198,6 +199,7 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
   if (executionStrategy !== null) {
     proposal.quorum = executionStrategy.quorum
     proposal.timelock_delay = executionStrategy.timelock_delay
+    proposal.execution_strategy_type = executionStrategy.type
   }
 
   let executionHash = new ExecutionHash(proposal.execution_hash)

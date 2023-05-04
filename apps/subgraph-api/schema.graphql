@@ -73,6 +73,7 @@ type Proposal @entity {
   snapshot: Int!
   execution_time: Int!
   execution_strategy: Bytes!
+  execution_strategy_type: String!
   timelock_delay: BigInt!
   strategies: [Bytes!]!
   strategies_params: [String!]!
