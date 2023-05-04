@@ -9,5 +9,5 @@ export async function getABI(address: string) {
   const res = await fetch(`${uri}?${params}`);
   const { result } = await res.json();
 
-  return result;
+  return JSON.parse(result);
 }
