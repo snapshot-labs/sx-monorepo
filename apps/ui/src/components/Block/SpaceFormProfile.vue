@@ -51,6 +51,7 @@ const definition = computed(() => {
       },
       externalUrl: {
         type: 'string',
+        format: 'uri',
         title: 'Website',
         examples: ['Website URL']
       },
@@ -104,7 +105,9 @@ watch(
   }
 );
 
-const formErrors = computed(() => validateForm(definition.value, props.form));
+const formErrors = computed(() =>
+  validateForm(definition.value, props.form, { skipEmptyOptionalFields: true })
+);
 
 watch(formErrors, value => emit('errors', value));
 

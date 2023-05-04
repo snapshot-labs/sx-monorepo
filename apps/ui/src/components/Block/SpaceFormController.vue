@@ -12,8 +12,8 @@ const emit = defineEmits<{
 
 const definition = {
   type: 'string',
+  format: 'address',
   title: 'Space controller',
-  minLength: 1,
   examples: ['0x0000…']
 };
 

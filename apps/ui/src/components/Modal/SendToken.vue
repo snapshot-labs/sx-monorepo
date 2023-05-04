@@ -3,6 +3,7 @@ import { formatUnits } from '@ethersproject/units';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
+import { validateForm } from '@/helpers/validation';
 import type { Token } from '@/helpers/alchemy';
 import type { Transaction } from '@/types';
 
@@ -11,6 +12,13 @@ const DEFAULT_FORM_STATE = {
   token: ETH_CONTRACT,
   amount: '',
   value: ''
+};
+
+const RECIPIENT_DEFINITION = {
+  type: 'string',
+  format: 'address',
+  title: 'Recipient',
+  examples: ['Address']
 };
 
 const props = defineProps<{
@@ -61,7 +69,26 @@ const currentToken = computed(() => {
 
   return token;
 });
-const formValid = computed(() => currentToken.value && form.to && form.amount !== '');
+
+const formErrors = computed(() =>
+  validateForm(
+    {
+      type: 'object',
+      title: 'TokenTransfer',
+      additionalProperties: false,
+      required: ['to'],
+      properties: {
+        to: RECIPIENT_DEFINITION
+      }
+    },
+    {
+      to: form.to
+    }
+  )
+);
+const formValid = computed(
+  () => currentToken.value && Object.keys(formErrors.value).length === 0 && form.amount !== ''
+);
 
 function handleAddCustomToken(token: Token) {
   if (customTokens.value.find(existing => existing.contractAddress === token.contractAddress)) {
@@ -199,11 +226,8 @@ watch(currentToken, token => {
     <div v-if="!showPicker" class="s-box p-4">
       <SIAddress
         v-model="form.to"
-        :definition="{
-          type: 'string',
-          title: 'Recipient',
-          examples: ['Address or ENS']
-        }"
+        :definition="RECIPIENT_DEFINITION"
+        :error="formErrors.to"
         @pick="handlePickerClick('contact')"
       />
       <div class="s-base">

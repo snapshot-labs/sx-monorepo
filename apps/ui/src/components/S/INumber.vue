@@ -33,6 +33,7 @@ const inputValue = computed({
       v-model="inputValue"
       type="number"
       class="s-input"
+      v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
     />
   </SBase>

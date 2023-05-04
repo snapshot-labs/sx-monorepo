@@ -2,7 +2,21 @@
 import { useSpacesStore } from '@/stores/spaces';
 import { getNetwork } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
+import { validateForm } from '@/helpers/validation';
 import { NetworkID, SelectedStrategy } from '@/types';
+
+const TITLE_DEFINITION = {
+  type: 'string',
+  title: 'Title',
+  minLength: 1
+};
+
+const DISCUSSION_DEFINITION = {
+  type: 'string',
+  format: 'uri',
+  title: 'Discussion',
+  examples: ['e.g. https://forum.balancer.fi/t/proposal…']
+};
 
 const { proposals, createDraft } = useEditor();
 const { modalOpen: globalModalOpen } = useModal();
@@ -45,6 +59,35 @@ const proposalData = computed(() => {
   if (!proposals[proposalKey]) return null;
 
   return JSON.stringify(omit(proposals[proposalKey], ['updatedAt']));
+});
+const formErrors = computed(() =>
+  validateForm(
+    {
+      type: 'object',
+      title: 'Proposal',
+      additionalProperties: false,
+      required: ['title'],
+      properties: {
+        title: TITLE_DEFINITION,
+        discussion: DISCUSSION_DEFINITION
+      }
+    },
+    {
+      title: proposals[proposalKey].title,
+      discussion: proposals[proposalKey].discussion
+    },
+    {
+      skipEmptyOptionalFields: true
+    }
+  )
+);
+const canSubmit = computed(() => {
+  return (
+    !fetchingVotingPower.value &&
+    votingPowerValid.value &&
+    proposals[proposalKey]?.executionStrategy &&
+    Object.keys(formErrors.value).length === 0
+  );
 });
 
 if (!proposals[proposalKey]) {
@@ -162,10 +205,7 @@ watch(proposalData, () => {
           <UiButton
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
             :loading="sending || (web3.account !== '' && fetchingVotingPower)"
-            :disabled="
-              (!fetchingVotingPower && !votingPowerValid) ||
-              !proposals[proposalKey]?.executionStrategy
-            "
+            :disabled="!canSubmit"
             @click="handleProposeClick"
           >
             <span
@@ -184,10 +224,8 @@ watch(proposalData, () => {
       <h4 class="eyebrow mb-3">Context</h4>
       <SIString
         v-model="proposals[proposalKey].title"
-        :definition="{
-          type: 'string',
-          title: 'Title'
-        }"
+        :definition="TITLE_DEFINITION"
+        :error="formErrors.title"
       />
       <div class="flex">
         <Link
@@ -213,11 +251,8 @@ watch(proposalData, () => {
         />
         <SIString
           v-model="proposals[proposalKey].discussion"
-          :definition="{
-            type: 'string',
-            title: 'Discussion',
-            examples: ['e.g. https://forum.balancer.fi/t/proposal…']
-          }"
+          :definition="DISCUSSION_DEFINITION"
+          :error="formErrors.discussion"
         />
         <Preview :url="proposals[proposalKey].discussion" />
       </div>

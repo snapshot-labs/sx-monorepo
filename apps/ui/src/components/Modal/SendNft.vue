@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
+import { validateForm } from '@/helpers/validation';
 
 const DEFAULT_FORM_STATE = {
   to: '',
   nft: '',
   amount: ''
+};
+
+const RECIPIENT_DEFINITION = {
+  type: 'string',
+  format: 'address',
+  title: 'Recipient',
+  examples: ['Address']
 };
 
 const props = defineProps({
@@ -31,8 +39,27 @@ const form: { to: string; nft: string; amount: string | number } = reactive(
 const { loading, loaded, nfts, nftsMap, loadNfts } = useNfts();
 
 const currentNft = computed(() => nftsMap.value?.get(form.nft));
+const formErrors = computed(() =>
+  validateForm(
+    {
+      type: 'object',
+      title: 'TokenTransfer',
+      additionalProperties: false,
+      required: ['to'],
+      properties: {
+        to: RECIPIENT_DEFINITION
+      }
+    },
+    {
+      to: form.to
+    }
+  )
+);
 const formValid = computed(
-  () => currentNft.value && form.to && (currentNft.value.type !== 'erc1155' || form.amount !== '')
+  () =>
+    currentNft.value &&
+    Object.keys(formErrors.value).length === 0 &&
+    (currentNft.value.type !== 'erc1155' || form.amount !== '')
 );
 
 function handlePickerClick(type: 'nft' | 'contact') {
@@ -127,11 +154,8 @@ watch(
     <div v-if="!showPicker" class="s-box p-4">
       <SIAddress
         v-model="form.to"
-        :definition="{
-          type: 'string',
-          title: 'Recipient',
-          examples: ['Address or ENS']
-        }"
+        :definition="RECIPIENT_DEFINITION"
+        :error="formErrors.to"
         @pick="handlePickerClick('contact')"
       />
       <div class="s-base">

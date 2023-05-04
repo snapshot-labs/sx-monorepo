@@ -1,4 +1,5 @@
 import Ajv, { ErrorObject } from 'ajv';
+import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
@@ -10,6 +11,8 @@ function getErrorMessage(errorObject: ErrorObject): string {
 
   if (errorObject.keyword === 'format') {
     switch (errorObject.params.format) {
+      case 'uri':
+        return 'Must be a valid URL.';
       case 'address':
         return 'Must be a valid address.';
       case 'uint256':
@@ -28,11 +31,18 @@ function getErrorMessage(errorObject: ErrorObject): string {
     .toLocaleLowerCase()}.`;
 }
 
-export function validateForm(schema, form): Record<string, string> {
+export function validateForm(
+  schema,
+  form,
+  opts: { skipEmptyOptionalFields: boolean } = { skipEmptyOptionalFields: false }
+): Record<string, string> {
   const ajv = new Ajv({ allErrors: true });
+  addFormats(ajv);
 
   ajv.addFormat('address', {
     validate: (value: string) => {
+      if (!value) return false;
+
       try {
         return !!validateAndParseAddress(value);
       } catch (err) {
@@ -90,7 +100,18 @@ export function validateForm(schema, form): Record<string, string> {
 
   ajv.addKeyword('options');
 
-  ajv.validate(schema, form);
+  const requiredKeys = schema.required || [];
+  const processedForm = !opts.skipEmptyOptionalFields
+    ? form
+    : Object.fromEntries(
+        Object.entries(form).filter(([key, value]) => {
+          if (requiredKeys.includes(key)) return true;
+
+          return value !== '';
+        })
+      );
+
+  ajv.validate(schema, processedForm);
 
   const output = {};
   if (!ajv.errors) {

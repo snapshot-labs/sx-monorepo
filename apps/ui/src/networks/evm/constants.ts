@@ -277,7 +277,7 @@ export const EDITOR_EXECUTION_STRATEGIES = [
       required: ['quorum', 'contractAddress'],
       properties: {
         quorum: {
-          type: 'string',
+          type: 'integer',
           title: 'Quorum',
           examples: ['1']
         },
@@ -322,12 +322,12 @@ export const EDITOR_EXECUTION_STRATEGIES = [
       required: ['quorum', 'timelockDelay'],
       properties: {
         quorum: {
-          type: 'string',
+          type: 'integer',
           title: 'Quorum',
           examples: ['1']
         },
         timelockDelay: {
-          type: 'string',
+          type: 'integer',
           title: 'Timelock delay',
           examples: ['1']
         }

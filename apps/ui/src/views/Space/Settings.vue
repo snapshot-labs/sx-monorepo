@@ -57,13 +57,13 @@ async function handleSave(
           <div class="s-label !mb-0">Voting delay</div>
           <UiEditable
             :editable="spaceIsEditable"
-            :initial-value="space.voting_delay.toString()"
+            :initial-value="space.voting_delay"
             :loading="settingsLoading.votingDelay"
             :definition="{
-              format: 'number',
+              type: 'integer',
               examples: ['0']
             }"
-            @save="value => handleSave('votingDelay', value)"
+            @save="value => handleSave('votingDelay', value.toString())"
           >
             <h4 class="text-skin-link text-md" v-text="_d(space.voting_delay) || 'No delay'" />
           </UiEditable>
@@ -72,13 +72,13 @@ async function handleSave(
           <div class="s-label !mb-0">Min. voting period</div>
           <UiEditable
             :editable="spaceIsEditable"
-            :initial-value="space.min_voting_period.toString()"
+            :initial-value="space.min_voting_period"
             :loading="settingsLoading.minVotingPeriod"
             :definition="{
-              format: 'number',
+              type: 'integer',
               examples: ['0']
             }"
-            @save="value => handleSave('minVotingPeriod', value)"
+            @save="value => handleSave('minVotingPeriod', value.toString())"
           >
             <h4 class="text-skin-link text-md" v-text="_d(space.min_voting_period) || 'No min.'" />
           </UiEditable>
@@ -87,13 +87,13 @@ async function handleSave(
           <div class="s-label !mb-0">Max. voting period</div>
           <UiEditable
             :editable="spaceIsEditable"
-            :initial-value="space.max_voting_period.toString()"
+            :initial-value="space.max_voting_period"
             :loading="settingsLoading.maxVotingPeriod"
             :definition="{
-              format: 'number',
+              type: 'integer',
               examples: ['0']
             }"
-            @save="value => handleSave('maxVotingPeriod', value)"
+            @save="value => handleSave('maxVotingPeriod', value.toString())"
           >
             <h4 class="text-skin-link text-md" v-text="_d(space.max_voting_period)" />
           </UiEditable>
@@ -113,10 +113,11 @@ async function handleSave(
           :initial-value="space.controller"
           :loading="settingsLoading.controller"
           :definition="{
+            type: 'string',
             format: 'address',
             examples: ['0x0000…']
           }"
-          @save="value => handleSave('controller', value)"
+          @save="value => handleSave('controller', value.toString())"
         >
           <a :href="network.helpers.getExplorerUrl(space.controller, 'contract')" target="_blank">
             <Stamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
