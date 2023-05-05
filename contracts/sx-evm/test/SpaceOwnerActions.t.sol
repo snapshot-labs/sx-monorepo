@@ -299,13 +299,25 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testAddAuthenticatorsUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.removeAuthenticators(authenticators);
+        space.addAuthenticators(authenticators);
+    }
+
+    function testAddAuthenticatorsEmptyArray() public {
+        address[] memory emptyArray = new address[](0);
+        vm.expectRevert(EmptyArray.selector);
+        space.addAuthenticators(emptyArray);
     }
 
     function testRemoveAuthenticatorsUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
         space.removeAuthenticators(authenticators);
+    }
+
+    function testRemoveAuthenticatorsEmptyArray() public {
+        address[] memory emptyArray = new address[](0);
+        vm.expectRevert(EmptyArray.selector);
+        space.removeAuthenticators(emptyArray);
     }
 
     // ------- Upgrading a Space ----
