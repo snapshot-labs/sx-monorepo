@@ -9,13 +9,14 @@ import { SigUtils } from "./utils/SigUtils.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
 import {
-    VotingPowerAndActiveProposalsLimiterValidationStrategy
-} from "../src/proposal-validation-strategies/VotingPowerAndActiveProposalsLimiterValidationStrategy.sol";
+    PropositionPowerAndActiveProposalsLimiterValidationStrategy
+} from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol";
 import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
 
 // Similar to "GasSnapshots.t.sol" except this uses a forked network
+// solhint-disable-next-line max-states-count
 contract ForkedTest is SpaceTest, SigUtils {
-    uint256 goerliFork;
+    uint256 internal goerliFork;
 
     CompVotingStrategy internal compVotingStrategy;
     CompToken internal compToken;
@@ -27,8 +28,7 @@ contract ForkedTest is SpaceTest, SigUtils {
 
     EthSigAuthenticator internal ethSigAuth;
     EthTxAuthenticator internal ethTxAuth;
-    VotingPowerAndActiveProposalsLimiterValidationStrategy
-        internal votingPowerAndActiveProposalsLimiterValidationStrategy;
+    PropositionPowerAndActiveProposalsLimiterValidationStrategy internal validationStrategy;
 
     uint256 internal key2;
     uint256 internal key3;
@@ -117,16 +117,10 @@ contract ForkedTest is SpaceTest, SigUtils {
         currentVotingStrategies[1] = Strategy(addr1, params1);
 
         // Set the proposal validation strategy to Comp token proposition power.
-        votingPowerAndActiveProposalsLimiterValidationStrategy = new VotingPowerAndActiveProposalsLimiterValidationStrategy(
-            864000,
-            5
-        );
+        validationStrategy = new PropositionPowerAndActiveProposalsLimiterValidationStrategy(864000, 5);
         // Using the current active strategies in the space as the allowed strategies for proposal.
         space.setProposalValidationStrategy(
-            Strategy(
-                address(votingPowerAndActiveProposalsLimiterValidationStrategy),
-                abi.encode(TOKEN_AMOUNT, currentVotingStrategies)
-            )
+            Strategy(address(validationStrategy), abi.encode(TOKEN_AMOUNT, currentVotingStrategies))
         );
     }
 
