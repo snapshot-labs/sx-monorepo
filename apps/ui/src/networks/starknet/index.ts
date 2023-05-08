@@ -4,13 +4,15 @@ import { createApi } from '../common/graphqlApi';
 import { createActions } from './actions';
 import { createProvider } from './provider';
 import * as constants from './constants';
-import type { Network } from '@/networks/types';
-import type { NetworkID } from '@/types';
+import { Network } from '@/networks/types';
+import { NetworkID, Space } from '@/types';
 
 export function createStarknetNetwork(networkId: NetworkID): Network {
   const l1ChainId = 5;
 
   const provider = createProvider();
+  const api = createApi(constants.API_URL, networkId);
+
   const helpers = {
     pin: async (content: any) => {
       const pinned = await pin(content);
@@ -24,6 +26,15 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     waitForTransaction: txId =>
       provider.waitForTransaction(txId, {
         successStates: [TransactionStatus.ACCEPTED_ON_L1, TransactionStatus.ACCEPTED_ON_L2]
+      }),
+    waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
+      new Promise(resolve => {
+        setInterval(async () => {
+          const space = await api.loadSpace(spaceAddress);
+          if (space) {
+            resolve(space);
+          }
+        }, interval);
       }),
     getExplorerUrl: (id, type) => {
       let dataType: 'tx' | 'contract' = 'tx';
@@ -40,7 +51,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     hasReceive: true,
     managerConnectors: ['argentx'],
     actions: createActions(provider, helpers, { l1ChainId }),
-    api: createApi(constants.API_URL, networkId),
+    api,
     constants,
     helpers
   };

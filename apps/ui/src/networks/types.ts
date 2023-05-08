@@ -135,13 +135,14 @@ export type NetworkApi = {
   loadProposalsSummary(spaceId: string, limit: number): Promise<Proposal[]>;
   loadProposal(spaceId: string, proposalId: number): Promise<Proposal>;
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
-  loadSpace(spaceId: string): Promise<Space>;
+  loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User>;
 };
 
 export type NetworkHelpers = {
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
+  waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract'): string;
 };
 

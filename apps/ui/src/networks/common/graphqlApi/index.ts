@@ -156,11 +156,13 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return data.spaces.map(space => formatSpace(space, networkId));
     },
-    loadSpace: async (id: string): Promise<Space> => {
+    loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
         query: SPACE_QUERY,
         variables: { id }
       });
+
+      if (!data.space) return null;
 
       return formatSpace(data.space, networkId);
     },
