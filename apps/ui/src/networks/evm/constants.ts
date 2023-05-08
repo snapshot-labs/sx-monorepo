@@ -328,8 +328,8 @@ export const EDITOR_EXECUTION_STRATEGIES = [
         },
         timelockDelay: {
           type: 'integer',
-          title: 'Timelock delay',
-          examples: ['1']
+          format: 'duration',
+          title: 'Timelock delay'
         }
       }
     }

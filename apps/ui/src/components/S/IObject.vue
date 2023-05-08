@@ -10,6 +10,7 @@ import IArray from './IArray.vue';
 import IString from './IString.vue';
 import IText from './IText.vue';
 import IAddress from './IAddress.vue';
+import IDuration from './IDuration.vue';
 import INumber from './INumber.vue';
 import IBoolean from './IBoolean.vue';
 import ISelect from './ISelect.vue';
@@ -61,6 +62,7 @@ const getComponent = (property: { type: string; format: string; enum?: string[] 
       return IString;
     case 'number':
     case 'integer':
+      if (property.format === 'duration') return IDuration;
       return INumber;
     case 'boolean':
       return IBoolean;

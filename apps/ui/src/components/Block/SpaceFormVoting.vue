@@ -26,18 +26,18 @@ const definition = {
   properties: {
     votingDelay: {
       type: 'number',
-      title: 'Voting delay',
-      examples: ['0']
+      format: 'duration',
+      title: 'Voting delay'
     },
     minVotingDuration: {
       type: 'number',
-      title: 'Min. voting duration',
-      examples: ['0']
+      format: 'duration',
+      title: 'Min. voting duration'
     },
     maxVotingDuration: {
       type: 'number',
-      title: 'Max. voting duration',
-      examples: ['86400']
+      format: 'duration',
+      title: 'Max. voting duration'
     },
     ...(!evmNetworks.includes(props.selectedNetworkId) && {
       proposalThreshold: {

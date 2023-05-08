@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import SIDuration from '@/components/S/IDuration.vue';
 import SINumber from '@/components/S/INumber.vue';
 import SIString from '@/components/S/IString.vue';
 import { validateForm } from '@/helpers/validation';
 
 type Definition = {
-  type: 'string' | 'integer';
+  type: 'string' | 'number' | 'integer';
   format?: string;
-  examples: string[];
+  examples?: string[];
 };
 
 const props = withDefaults(
@@ -27,8 +28,15 @@ const editing = ref(false);
 const inputValue = ref(props.initialValue);
 
 const Component = computed(() => {
-  if (props.definition.type === 'integer') return SINumber;
-  return SIString;
+  switch (props.definition.type) {
+    case 'integer':
+    case 'number':
+      if (props.definition.format === 'duration') return SIDuration;
+
+      return SINumber;
+    default:
+      return SIString;
+  }
 });
 const formErrors = computed(() =>
   validateForm(
@@ -53,14 +61,21 @@ function handleSave() {
 </script>
 
 <template>
-  <div class="flex items-center gap-2 group w-fit" :class="{ 'mt-2': editing }">
+  <div
+    class="flex items-center gap-2 group"
+    :class="{
+      'mt-2': editing,
+      'w-fit': definition.format !== 'duration',
+      's-box w-full max-w-xl': definition.format === 'duration'
+    }"
+  >
     <UiLoading v-if="loading" />
     <template v-else>
       <component
         :is="Component"
         v-if="editing"
         v-model="inputValue"
-        class="!mb-0"
+        class="!mb-0 flex-1"
         :definition="definition"
         :error="formErrors.value"
       />
@@ -69,7 +84,8 @@ function handleSave() {
         <div
           class="flex gap-2 relative"
           :class="{
-            'top-[-15px]': !!formErrors.value
+            'top-[-15px]': !!formErrors.value,
+            'top-[-6px]': definition.format === 'duration'
           }"
         >
           <button :disabled="!!formErrors.value" class="hover:opacity-80" @click="handleSave">

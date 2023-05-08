@@ -61,7 +61,7 @@ async function handleSave(
             :loading="settingsLoading.votingDelay"
             :definition="{
               type: 'integer',
-              examples: ['0']
+              format: 'duration'
             }"
             @save="value => handleSave('votingDelay', value.toString())"
           >
@@ -76,7 +76,7 @@ async function handleSave(
             :loading="settingsLoading.minVotingPeriod"
             :definition="{
               type: 'integer',
-              examples: ['0']
+              format: 'duration'
             }"
             @save="value => handleSave('minVotingPeriod', value.toString())"
           >
@@ -91,7 +91,7 @@ async function handleSave(
             :loading="settingsLoading.maxVotingPeriod"
             :definition="{
               type: 'integer',
-              examples: ['0']
+              format: 'duration'
             }"
             @save="value => handleSave('maxVotingPeriod', value.toString())"
           >
