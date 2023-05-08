@@ -70,7 +70,9 @@ const metadataForm: SpaceMetadata = reactive(
     discord: '',
     votingPowerSymbol: '',
     walletNetwork: null,
-    walletAddress: null
+    walletAddress: null,
+    delegationApiType: null,
+    delegationApiUrl: null
   })
 );
 const selectedNetworkId: Ref<NetworkID> = ref('gor');

@@ -6,6 +6,7 @@ import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearchProposals from '@/views/Space/SearchProposals.vue';
 import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
+import SpaceDelegates from '@/views/Space/Delegates.vue';
 import Editor from '@/views/Editor.vue';
 import Proposal from '@/views/Proposal.vue';
 import User from '@/views/User.vue';
@@ -26,7 +27,8 @@ const routes: any[] = [
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
       { path: 'search', name: 'space-search-proposals', component: SpaceSearchProposals },
       { path: 'settings', name: 'space-settings', component: SpaceSettings },
-      { path: 'treasury', name: 'space-treasury', component: SpaceTreasury }
+      { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
+      { path: 'delegates', name: 'space-delegates', component: SpaceDelegates }
     ]
   },
   {

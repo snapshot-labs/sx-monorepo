@@ -226,6 +226,8 @@ export function createErc1155Metadata(
     description: metadata.description,
     external_url: metadata.externalUrl,
     properties: {
+      delegation_api_type: metadata.delegationApiType,
+      delegation_api_url: metadata.delegationApiUrl,
       voting_power_symbol: metadata.votingPowerSymbol,
       github: metadata.github,
       twitter: metadata.twitter,

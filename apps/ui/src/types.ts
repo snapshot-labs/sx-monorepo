@@ -20,6 +20,8 @@ export type SpaceMetadata = {
   votingPowerSymbol: string;
   walletNetwork: NetworkID | null;
   walletAddress: string | null;
+  delegationApiType: string | null;
+  delegationApiUrl: string | null;
 };
 
 export type SpaceSettings = {
@@ -43,6 +45,8 @@ export type Space = {
   avatar: string;
   about?: string;
   external_url: string;
+  delegation_api_type: string | null;
+  delegation_api_url: string | null;
   twitter: string;
   github: string;
   discord: string;

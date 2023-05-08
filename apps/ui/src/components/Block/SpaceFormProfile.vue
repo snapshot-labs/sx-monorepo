@@ -93,6 +93,26 @@ const definition = computed(() => {
               minLength: 1
             }
           }
+        : {}),
+      delegationApiType: {
+        type: ['string', 'null'],
+        enum: [null, 'governor-subgraph'],
+        options: [
+          { id: null, name: 'No delegation API' },
+          { id: 'governor-subgraph', name: 'Governor subgraph' }
+        ],
+        title: 'Delegation API type',
+        nullable: true
+      },
+      ...(props.form.delegationApiType !== null
+        ? {
+            delegationApiUrl: {
+              type: 'string',
+              format: 'uri',
+              title: 'Delegation API URL',
+              examples: ['https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2']
+            }
+          }
         : {})
     }
   };

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import IHCode from '~icons/heroicons-outline/code';
 import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
 const props = withDefaults(

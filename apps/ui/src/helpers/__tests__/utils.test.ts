@@ -15,7 +15,9 @@ describe('utils', () => {
         discord: 'snapshot',
         votingPowerSymbol: 'VOTE',
         walletNetwork: 'gor',
-        walletAddress: '0x000000000000000000000000000000000000dead'
+        walletAddress: '0x000000000000000000000000000000000000dead',
+        delegationApiType: 'governor-subgraph',
+        delegationApiUrl: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2'
       });
 
       expect(metadata).toEqual({
@@ -28,7 +30,10 @@ describe('utils', () => {
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
           discord: 'snapshot',
-          wallets: ['gor:0x000000000000000000000000000000000000dead']
+          wallets: ['gor:0x000000000000000000000000000000000000dead'],
+          delegation_api_type: 'governor-subgraph',
+          delegation_api_url:
+            'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2'
         }
       });
     });
