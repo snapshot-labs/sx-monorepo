@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.18;
 
@@ -35,7 +35,7 @@ contract OptimisticExec is OptimisticQuorumExecutionStrategy {
         numExecuted++;
     }
 
-    function getStrategyType() external pure returns (string memory) {
+    function getStrategyType() external pure override returns (string memory) {
         return "OptimisticQuorumExecution";
     }
 }

@@ -4,9 +4,10 @@ pragma solidity ^0.8.18;
 
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-/// @title Space Manager - A contract that manages spaces that are able to execute transactions via this contract
-/// @author Snapshot Labs
+/// @title Space Manager
+/// @notice Manages a whitelist of Spaces that are authorized to execute transactions via this contract.
 contract SpaceManager is OwnableUpgradeable {
+    /// @notice Thrown if a space is not in the whitelist.
     error InvalidSpace();
 
     mapping(address space => bool isEnabled) internal spaces;
@@ -49,6 +50,7 @@ contract SpaceManager is OwnableUpgradeable {
         return spaces[space];
     }
 
+    /// @dev Modifier that allows only the whitelisted spaces to call a function.
     modifier onlySpace(address callerAddress) {
         if (!isSpaceEnabled(callerAddress)) revert InvalidSpace();
         _;

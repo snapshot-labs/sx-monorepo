@@ -275,7 +275,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
             abi.encode(voter, proposalId, Choice.For, userVotingStrategies, voteMetadataURI)
         );
 
-        vm.expectRevert(UserHasAlreadyVoted.selector);
+        vm.expectRevert(UserAlreadyVoted.selector);
         ethSigAuth.authenticate(
             v,
             r,

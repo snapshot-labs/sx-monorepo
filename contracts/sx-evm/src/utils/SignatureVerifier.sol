@@ -7,12 +7,17 @@ import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import { Choice, IndexedStrategy, Strategy } from "src/types.sol";
 import { SXHash } from "src/utils/SXHash.sol";
 
+/// @title EIP712 Signature Verifier
+/// @notice Verifies Signatures for Snapshot X actions.
 abstract contract SignatureVerifier is EIP712 {
     using SXHash for IndexedStrategy[];
     using SXHash for IndexedStrategy;
     using SXHash for Strategy;
 
+    /// @notice Thrown if a signature is invalid.
     error InvalidSignature();
+
+    /// @notice Thrown if a user has already used a specific salt.
     error SaltAlreadyUsed();
 
     bytes32 private constant PROPOSE_TYPEHASH =
@@ -39,6 +44,7 @@ abstract contract SignatureVerifier is EIP712 {
     // solhint-disable-next-line no-empty-blocks
     constructor(string memory name, string memory version) EIP712(name, version) {}
 
+    /// @dev Verifies an EIP712 signature for a propose call.
     function _verifyProposeSig(uint8 v, bytes32 r, bytes32 s, uint256 salt, address space, bytes memory data) internal {
         (
             address author,
@@ -70,10 +76,11 @@ abstract contract SignatureVerifier is EIP712 {
 
         if (recoveredAddress != author) revert InvalidSignature();
 
-        // Mark salt as used to prevent replay attacks
+        // Mark salt as used to prevent replay attacks.
         usedSalts[author][salt] = true;
     }
 
+    /// @dev Verifies an EIP712 signature for a vote call.
     function _verifyVoteSig(uint8 v, bytes32 r, bytes32 s, address space, bytes memory data) internal view {
         (
             address voter,
@@ -105,6 +112,7 @@ abstract contract SignatureVerifier is EIP712 {
         if (recoveredAddress != voter) revert InvalidSignature();
     }
 
+    /// @dev Verifies an EIP712 signature for an update proposal call.
     function _verifyUpdateProposalSig(
         uint8 v,
         bytes32 r,
@@ -141,7 +149,7 @@ abstract contract SignatureVerifier is EIP712 {
 
         if (recoveredAddress != author) revert InvalidSignature();
 
-        // Mark salt as used to prevent replay attacks
+        // Mark salt as used to prevent replay attacks.
         usedSalts[author][salt] = true;
     }
 }

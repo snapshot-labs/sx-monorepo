@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.18;
 
@@ -26,7 +26,7 @@ contract VoteTest is SpaceTest {
     function testVoteInvalidAuth() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
-        vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector));
         space.vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
     }
 
@@ -73,7 +73,7 @@ contract VoteTest is SpaceTest {
 
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
-        vm.expectRevert(abi.encodeWithSelector(UserHasAlreadyVoted.selector));
+        vm.expectRevert(abi.encodeWithSelector(UserAlreadyVoted.selector));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
     }
 

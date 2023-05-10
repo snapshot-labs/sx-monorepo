@@ -9,22 +9,45 @@ import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/interfaces/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
 
-/// @title Timelock Execution Strategy - An Execution strategy that executes transactions according to a timelock delay.
+/// @title Timelock Execution Strategy
+/// @notice Used to execute proposal transactions according to a timelock delay.
 contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Receiver, IERC721Receiver {
     /// @notice Thrown if timelock delay is in the future.
     error TimelockDelayNotMet();
+
     /// @notice Thrown if the proposal execution payload hash is not queued.
     error ProposalNotQueued();
+
     /// @notice Thrown if the proposal execution payload hash is already queued.
     error DuplicateExecutionPayloadHash();
+
     /// @notice Thrown if veto caller is not the veto guardian.
     error OnlyVetoGuardian();
 
+    /// @notice Emitted when a transaction is queued.
+    /// @param transaction The transaction that was queued.
+    /// @param executionTime The time at which the transaction can be executed.
     event TransactionQueued(MetaTransaction transaction, uint256 executionTime);
+
+    /// @notice Emitted when a transaction is executed.
+    /// @param transaction The transaction that was executed.
     event TransactionExecuted(MetaTransaction transaction);
+
+    /// @notice Emitted when a veto guardian is set.
+    /// @param vetoGuardian The old veto guardian.
+    /// @param newVetoGuardian The new veto guardian.
     event VetoGuardianSet(address vetoGuardian, address newVetoGuardian);
+
+    /// @notice Emitted when a proposal is vetoed.
+    /// @param executionPayloadHash The hash of the proposal execution payload.
     event ProposalVetoed(bytes32 executionPayloadHash);
+
+    /// @notice Emitted when a proposal is queued.
+    /// @param executionPayloadHash The hash of the proposal execution payload.
     event ProposalQueued(bytes32 executionPayloadHash);
+
+    /// @notice Emitted when a proposal is executed.
+    /// @param executionPayloadHash The hash of the proposal execution payload.
     event ProposalExecuted(bytes32 executionPayloadHash);
 
     /// @notice The delay in seconds between a proposal being queued and the execution of the proposal.
@@ -34,6 +57,8 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
     mapping(bytes32 => uint256) public proposalExecutionTime;
 
     /// @notice Veto guardian is given permission to veto any queued proposal.
+    ///         We use a dedicated role for this instead of the owner as a DAO may want to
+    ///         renounce ownership of the contract while still maintaining a veto guardian.
     address public vetoGuardian;
 
     /// @notice Constructor
@@ -45,9 +70,11 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         setUp(abi.encode(_owner, _spaces, _timelockDelay, _quorum));
     }
 
-    function setUp(bytes memory initializeParams) public initializer {
+    /// @notice Initialization function, should be called immediately after deploying a new proxy to this contract.
+    /// @param initParams ABI encoded parameters, in the same order as the constructor.
+    function setUp(bytes memory initParams) public initializer {
         (address _owner, address[] memory _spaces, uint256 _timelockDelay, uint256 _quorum) = abi.decode(
-            initializeParams,
+            initParams,
             (address, address[], uint256, uint256)
         );
         __Ownable_init();
@@ -57,7 +84,12 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         timelockDelay = _timelockDelay;
     }
 
-    /// @notice Effectively a timelock queue function. Can only be called by approved spaces.
+    /// @notice Executes a proposal by queueing its transactions in the timelock. Can only be called by approved spaces.
+    /// @param proposal The proposal.
+    /// @param votesFor The number of votes for the proposal.
+    /// @param votesAgainst The number of votes against the proposal.
+    /// @param votesAbstain The number of abstaining votes for the proposal.
+    /// @param payload The proposal execution payload.
     function execute(
         Proposal memory proposal,
         uint256 votesFor,
@@ -84,7 +116,8 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         emit ProposalQueued(proposal.executionPayloadHash);
     }
 
-    /// @notice Executes a queued proposal. Can be called by anyone with the execution payload.
+    /// @notice Executes a queued proposal.
+    /// @param payload The proposal execution payload.
     function executeQueuedProposal(bytes memory payload) external {
         bytes32 executionPayloadHash = keccak256(payload);
 
@@ -112,6 +145,8 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         emit ProposalExecuted(executionPayloadHash);
     }
 
+    /// @notice Vetoes a queued proposal. Only callable by the veto guardian.
+    /// @param executionPayloadHash The hash of the proposal execution payload.
     function veto(bytes32 executionPayloadHash) external {
         if (msg.sender != vetoGuardian) revert OnlyVetoGuardian();
         if (proposalExecutionTime[executionPayloadHash] == 0) revert ProposalNotQueued();
@@ -120,16 +155,17 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         emit ProposalVetoed(executionPayloadHash);
     }
 
+    /// @notice Sets the veto guardian.
+    /// @param newVetoGuardian The new veto guardian.
     function setVetoGuardian(address newVetoGuardian) external onlyOwner {
         emit VetoGuardianSet(vetoGuardian, newVetoGuardian);
         vetoGuardian = newVetoGuardian;
     }
 
+    /// @notice Returns the strategy type string.
     function getStrategyType() external pure override returns (string memory) {
         return "SimpleQuorumTimelock";
     }
-
-    /// Receive Functions:
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}

@@ -30,23 +30,23 @@ abstract contract ActiveProposalsLimiter {
     function _validate(address author) internal returns (bool success) {
         uint256 packedData = usersPackedData[author];
 
-        // Least significant 32 bits is the lastTimestamp
+        // Least significant 32 bits is the lastTimestamp.
         uint256 lastTimestamp = uint32(packedData);
 
-        // Removing the least significant 32 bits (lastTimestamp) leaves us with the 224 bits for activeProposals
+        // Removing the least significant 32 bits (lastTimestamp) leaves us with the 224 bits for activeProposals.
         uint256 activeProposals = packedData >> 32;
 
         if (lastTimestamp == 0) {
-            // First time the user proposes, activeProposals is 1 no matter what
+            // First time the user proposes, activeProposals is 1 no matter what.
             activeProposals = 1;
         } else if (block.timestamp >= lastTimestamp + cooldown) {
-            // Cooldown passed, reset counter
+            // Cooldown passed, reset counter.
             activeProposals = 1;
         } else if (activeProposals == maxActiveProposals) {
             // Cooldown has not passed, but user has reached maximum active proposals.
             return false;
         } else {
-            // Cooldown has not passed, user has not reached maximum active proposals: increase counter
+            // Cooldown has not passed, user has not reached maximum active proposals: increase counter.
             activeProposals += 1;
         }
 

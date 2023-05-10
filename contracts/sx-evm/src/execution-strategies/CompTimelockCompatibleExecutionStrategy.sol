@@ -2,71 +2,14 @@
 
 pragma solidity ^0.8.18;
 
+import { ICompTimelock } from "../interfaces/ICompTimelock.sol";
 import { SimpleQuorumExecutionStrategy } from "./SimpleQuorumExecutionStrategy.sol";
 import { SpaceManager } from "../utils/SpaceManager.sol";
 import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 
-interface ICompTimelock {
-    /// @notice Msg.sender accepts admin status.
-    function acceptAdmin() external;
-
-    /// @notice Queue a transaction to be executed after a delay.
-    /// @param target The address of the contract to call.
-    /// @param value The amount of Ether to send.
-    /// @param signature The function signature to call.
-    /// @param data The calldata to send.
-    /// @param eta The timestamp at which to execute the transaction, in seconds.
-    /// @return The transaction hash.
-    function queueTransaction(
-        address target,
-        uint value,
-        string memory signature,
-        bytes memory data,
-        uint eta
-    ) external returns (bytes32);
-
-    /// @notice Execute a queued transaction.
-    /// @param target The address of the contract to call.
-    /// @param value The amount of Ether to send.
-    /// @param signature The function signature to call.
-    /// @param data The calldata to send.
-    /// @param eta The timestamp at which to execute the transaction, in seconds.
-    /// @return The transaction return data.
-    function executeTransaction(
-        address target,
-        uint value,
-        string memory signature,
-        bytes memory data,
-        uint eta
-    ) external payable returns (bytes memory);
-
-    /// @notice Cancel a queued transaction.
-    /// @param target The address of the contract to call.
-    /// @param value The amount of Ether to send.
-    /// @param signature The function signature to call.
-    /// @param data The calldata to send.
-    /// @param eta The timestamp at which to execute the transaction, in seconds.
-    function cancelTransaction(
-        address target,
-        uint value,
-        string memory signature,
-        bytes memory data,
-        uint eta
-    ) external;
-
-    function setDelay(uint delay) external;
-
-    function GRACE_PERIOD() external view returns (uint);
-
-    function MINIMUM_DELAY() external view returns (uint);
-
-    function MAXIMUM_DELAY() external view returns (uint);
-
-    function delay() external view returns (uint);
-}
-
-/// @title Timelock Execution Strategy - An Execution strategy that executes transactions according to a timelock delay.
+/// @title Comp Timelock Execution Strategy
+/// @notice An Execution strategy that provides compatibility with existing Comp Timelock contracts.
 contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrategy {
     /// @notice Thrown if timelock delay is in the future.
     error TimelockDelayNotMet();
@@ -127,7 +70,12 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
         return timelock.delay();
     }
 
-    /// @notice Effectively a timelock queue function. Can only be called by approved spaces.
+    /// @notice Executes a proposal by queueing its transactions in the timelock. Can only be called by approved spaces.
+    /// @param proposal The proposal.
+    /// @param votesFor The number of votes for the proposal.
+    /// @param votesAgainst The number of votes against the proposal.
+    /// @param votesAbstain The number of abstaining votes for the proposal.
+    /// @param payload The encoded payload of the proposal to execute.
     function execute(
         Proposal memory proposal,
         uint256 votesFor,
@@ -149,7 +97,7 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
 
         MetaTransaction[] memory transactions = abi.decode(payload, (MetaTransaction[]));
         for (uint256 i = 0; i < transactions.length; i++) {
-            // Comp Timelock does not support delegate calls
+            // Comp Timelock does not support delegate calls.
             if (transactions[i].operation == Enum.Operation.DelegateCall) {
                 revert InvalidTransaction();
             }
@@ -165,7 +113,8 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
         emit ProposalQueued(proposal.executionPayloadHash);
     }
 
-    /// @notice Executes a queued proposal. Can be called by anyone with the execution payload.
+    /// @notice Executes a queued proposal.
+    /// @param payload The encoded payload of the proposal to execute.
     function executeQueuedProposal(bytes memory payload) external {
         bytes32 executionPayloadHash = keccak256(payload);
 
@@ -174,7 +123,7 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
         if (executionTime == 0) revert ProposalNotQueued();
         if (proposalExecutionTime[executionPayloadHash] > block.timestamp) revert TimelockDelayNotMet();
 
-        // Reset the execution time to 0 to prevent reentrancy
+        // Reset the execution time to 0 to prevent reentrancy.
         proposalExecutionTime[executionPayloadHash] = 0;
 
         MetaTransaction[] memory transactions = abi.decode(payload, (MetaTransaction[]));
@@ -191,6 +140,8 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
         emit ProposalExecuted(executionPayloadHash);
     }
 
+    /// @notice Vetoes a queued proposal.
+    /// @param payload The encoded payload of the proposal to veto.
     function veto(bytes memory payload) external {
         bytes32 payloadHash = keccak256(payload);
         if (msg.sender != vetoGuardian) revert OnlyVetoGuardian();
@@ -213,11 +164,14 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
         emit ProposalVetoed(payloadHash);
     }
 
+    /// @notice Sets the veto guardian.
+    /// @param newVetoGuardian The new veto guardian.
     function setVetoGuardian(address newVetoGuardian) external onlyOwner {
         emit VetoGuardianSet(vetoGuardian, newVetoGuardian);
         vetoGuardian = newVetoGuardian;
     }
 
+    /// @notice Returns the strategy type string.
     function getStrategyType() external pure override returns (string memory) {
         return "CompTimelockCompatibleSimpleQuorum";
     }

@@ -4,7 +4,7 @@ pragma solidity ^0.8.18;
 
 import { IndexedStrategy } from "src/types.sol";
 
-/// @title Utilities Library for Snapshot X Types.
+/// @title Snapshot X Types Utilities Library
 library SXUtils {
     error DuplicateFound(uint8 index);
 
@@ -16,7 +16,7 @@ library SXUtils {
 
         uint256 bitMap;
         for (uint256 i = 0; i < strats.length; ++i) {
-            // Check that bit at index `strats[i].index` is not set
+            // Check that bit at index `strats[i].index` is not set.
             uint256 s = 1 << strats[i].index;
             if (bitMap & s != 0) revert DuplicateFound(strats[i].index);
             // Update aforementioned bit.

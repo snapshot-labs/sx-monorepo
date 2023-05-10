@@ -5,12 +5,10 @@ pragma solidity ^0.8.18;
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { IProxyFactory } from "./interfaces/IProxyFactory.sol";
 
-/**
- * @title   Proxy Factory
- * @notice  A contract to deploy and track ERC1967 proxies of a given UUPSUpgradeable implementation contract.
- * @author  Snapshot Labs
- */
+/// @title Proxy Factory
+/// @notice A contract to deploy and track ERC1967 proxies of a given implementation contract.
 contract ProxyFactory is IProxyFactory {
+    /// @inheritdoc IProxyFactory
     function deployProxy(address implementation, bytes memory initializer, bytes32 salt) external override {
         if (implementation == address(0) || implementation.code.length == 0) revert InvalidImplementation();
         if (predictProxyAddress(implementation, salt).code.length > 0) revert SaltAlreadyUsed();
@@ -22,6 +20,7 @@ contract ProxyFactory is IProxyFactory {
         emit ProxyDeployed(implementation, proxy);
     }
 
+    /// @inheritdoc IProxyFactory
     function predictProxyAddress(address implementation, bytes32 salt) public view override returns (address) {
         return
             address(

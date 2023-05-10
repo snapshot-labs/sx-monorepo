@@ -5,44 +5,52 @@ pragma solidity ^0.8.18;
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 
+/// @notice The data stored for each proposal when it is created.
 struct Proposal {
-    // notice: `uint32::max` corresponds to year ~2106.
+    // The timestamp at which voting power for the proposal is calculated. Overflows at year ~2106.
     uint32 snapshotTimestamp;
-    // * The same logic applies for why we store the 3 timestamps below (which could otherwise
-    // be inferred from the votingDelay, minVotingDuration, and maxVotingDuration state variables)
+    // We store the following 3 timestamps for each proposal despite the fact that they can be
+    // inferred from the votingDelay, minVotingDuration, and maxVotingDuration state variables
+    // because those variables may be updated during the lifetime of a proposal.
     uint32 startTimestamp;
     uint32 minEndTimestamp;
     uint32 maxEndTimestamp;
     // The hash of the execution payload. We do not store the payload itself to save gas.
     bytes32 executionPayloadHash;
-    // Struct containing the execution strategy address and parameters required for the strategy.
+    // The address of execution strategy used for the proposal.
     IExecutionStrategy executionStrategy;
+    // The address of the proposal creator.
     address author;
     // An enum that stores whether a proposal is pending, executed, or cancelled.
     FinalizationStatus finalizationStatus;
-    // Bit array where the index of each each bit corresponds to whether the voting strategy
+    // Bit array where the index of each each bit corresponds to whether the voting strategy.
     // at that index is active at the time of proposal creation.
     uint256 activeVotingStrategies;
 }
 
+/// @notice The data stored for each strategy.
 struct Strategy {
+    // The address of the strategy contract.
     address addr;
+    // The parameters of the strategy.
     bytes params;
 }
 
+/// @notice The data stored for each indexed strategy.
 struct IndexedStrategy {
     uint8 index;
     bytes params;
 }
 
+/// @notice The set of possible finalization statuses for a proposal.
+///         This is stored inside each Proposal struct.
 enum FinalizationStatus {
     Pending,
     Executed,
     Cancelled
 }
 
-// The status of a proposal as defined by the `getProposalStatus` function of the
-// proposal's execution strategy.
+/// @notice The set of possible statuses for a proposal.
 enum ProposalStatus {
     VotingDelay,
     VotingPeriod,
@@ -53,12 +61,14 @@ enum ProposalStatus {
     Cancelled
 }
 
+/// @notice The set of possible choices for a vote.
 enum Choice {
     Against,
     For,
     Abstain
 }
 
+/// @notice Transaction struct that can be used to represent transactions inside a proposal.
 struct MetaTransaction {
     address to;
     uint256 value;

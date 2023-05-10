@@ -5,6 +5,7 @@ pragma solidity ^0.8.18;
 import { IndexedStrategy, Proposal, ProposalStatus } from "../types.sol";
 import { IExecutionStrategyErrors } from "./execution-strategies/IExecutionStrategyErrors.sol";
 
+/// @title Execution Strategy Interface
 interface IExecutionStrategy is IExecutionStrategyErrors {
     function execute(
         Proposal memory proposal,

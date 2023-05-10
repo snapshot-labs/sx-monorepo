@@ -6,9 +6,12 @@ import { IExecutionStrategy } from "../interfaces/IExecutionStrategy.sol";
 import { FinalizationStatus, Proposal, ProposalStatus } from "../types.sol";
 import { SpaceManager } from "../utils/SpaceManager.sol";
 
+/// @title Simple Quorum Base Execution Strategy
 abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceManager {
+    /// @notice The quorum required to execute a proposal using this strategy.
     uint256 public quorum;
 
+    /// @dev Initializer
     // solhint-disable-next-line func-name-mixedcase
     function __SimpleQuorumExecutionStrategy_init(uint256 _quorum) internal onlyInitializing {
         quorum = _quorum;
@@ -22,6 +25,13 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceMana
         bytes memory payload
     ) external virtual override;
 
+    /// @notice Returns the status of a proposal that uses a simple quorum.
+    ///        A proposal is accepted if the for votes exceeds the against votes
+    ///        and a quorum of total votes (for + against + abstain) is reached.
+    /// @param proposal The proposal struct.
+    /// @param votesFor The number of votes for the proposal.
+    /// @param votesAgainst The number of votes against the proposal.
+    /// @param votesAbstain The number of votes abstaining from the proposal.
     function getProposalStatus(
         Proposal memory proposal,
         uint256 votesFor,

@@ -5,44 +5,15 @@ pragma solidity ^0.8.18;
 import { Authenticator } from "./Authenticator.sol";
 import { Choice, IndexedStrategy, Strategy } from "../types.sol";
 
-/**
- * @author  SnapshotLabs
- * @title   EthTxAuthenticator
- * @notice  Authenticates a user by ensuring `msg.sender`
- *          corresponds to the voter / proposal author.
- */
-
+/// @title Ethereum Transaction Authenticator
 contract EthTxAuthenticator is Authenticator {
     error InvalidFunctionSelector();
     error InvalidMessageSender();
 
-    /**
-     * @notice  Internal function to verify that the msg sender is indeed the proposal author
-     * @param   data  The data to verify
-     */
-    function _verifyPropose(bytes calldata data) internal view {
-        (address author, , , ) = abi.decode(data, (address, string, Strategy, bytes));
-        if (author != msg.sender) revert InvalidMessageSender();
-    }
-
-    /**
-     * @notice  Internal function to verify that the msg sender is indeed the voter
-     * @param   data  The data to verify
-     */
-    function _verifyVote(bytes calldata data) internal view {
-        (address voter, , , ) = abi.decode(data, (address, uint256, Choice, IndexedStrategy[]));
-        if (voter != msg.sender) revert InvalidMessageSender();
-    }
-
-    /**
-     * @notice  Internal function to verify that the the message sender is indeed the proposer
-     * @param   data  The data to verify
-     */
-    function _verifyUpdateProposal(bytes calldata data) internal view {
-        (address author, , , ) = abi.decode(data, (address, uint256, Strategy, string));
-        if (author != msg.sender) revert InvalidMessageSender();
-    }
-
+    /// @notice Authenticates a user by ensuring the sender address corresponds to the voter/author.
+    /// @param target The target Space contract address.
+    /// @param functionSelector The function selector of the function to be called.
+    /// @param data The calldata of the function to be called.
     function authenticate(address target, bytes4 functionSelector, bytes calldata data) external {
         if (functionSelector == PROPOSE_SELECTOR) {
             _verifyPropose(data);
@@ -54,5 +25,23 @@ contract EthTxAuthenticator is Authenticator {
             revert InvalidFunctionSelector();
         }
         _call(target, functionSelector, data);
+    }
+
+    /// @dev Verifies a proposal creation transaction.
+    function _verifyPropose(bytes calldata data) internal view {
+        (address author, , , ) = abi.decode(data, (address, string, Strategy, bytes));
+        if (author != msg.sender) revert InvalidMessageSender();
+    }
+
+    /// @dev Verifies a vote transaction.
+    function _verifyVote(bytes calldata data) internal view {
+        (address voter, , , ) = abi.decode(data, (address, uint256, Choice, IndexedStrategy[]));
+        if (voter != msg.sender) revert InvalidMessageSender();
+    }
+
+    /// @dev Verifies a proposal update transaction.
+    function _verifyUpdateProposal(bytes calldata data) internal view {
+        (address author, , , ) = abi.decode(data, (address, uint256, Strategy, string));
+        if (author != msg.sender) revert InvalidMessageSender();
     }
 }

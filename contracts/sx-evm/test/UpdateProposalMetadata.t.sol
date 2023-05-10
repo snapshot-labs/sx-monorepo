@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.18;
 
@@ -67,7 +67,7 @@ contract UpdateProposalTest is SpaceTest {
     function testUpdateProposalUnauthenticated() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
-        vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(AuthenticatorNotWhitelisted.selector));
         space.updateProposal(author, proposalId, newStrategy, newMetadataURI);
     }
 }

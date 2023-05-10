@@ -6,16 +6,21 @@ import { IAvatar } from "@zodiac/interfaces/IAvatar.sol";
 import { SimpleQuorumExecutionStrategy } from "./SimpleQuorumExecutionStrategy.sol";
 import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
 
-/// @title Avatar Execution Strategy - An Execution strategy that executes transactions on an Avatar contract
+/// @title Avatar Execution Strategy
+/// @notice Used to execute proposal transactions from an Avatar contract.
 /// @dev An Avatar contract is any contract that implements the IAvatar interface, eg a Gnosis Safe.
 contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
-    /// @dev Emitted each time a new Avatar Execution Strategy is deployed.
+    /// @notice Emitted when a new Avatar Execution Strategy is initialized.
+    /// @param _owner Address of the owner of the strategy.
+    /// @param _target Address of the avatar that this module will pass transactions to.
+    /// @param _spaces Array of whitelisted space contracts.
     event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces);
 
-    /// @dev Emitted each time the Target is set.
+    /// @notice Emitted each time the Target is set.
+    /// @param newTarget The new target address.
     event TargetSet(address indexed newTarget);
 
-    /// @dev Address of the avatar that this module will pass transactions to.
+    /// @notice Address of the avatar that this module will pass transactions to.
     address public target;
 
     /// @notice Constructor
@@ -28,9 +33,8 @@ contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
         setUp(initParams);
     }
 
-    /// @notice Initialize function, should be called immediately after deploying a new proxy to this contract.
+    /// @notice Initialization function, should be called immediately after deploying a new proxy to this contract.
     /// @param initParams ABI encoded parameters, in the same order as the constructor.
-    /// @notice Can only be called once.
     function setUp(bytes memory initParams) public initializer {
         (address _owner, address _target, address[] memory _spaces, uint256 _quorum) = abi.decode(
             initParams,
@@ -44,8 +48,8 @@ contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
         emit AvatarExecutionStrategySetUp(_owner, _target, _spaces);
     }
 
-    /// @notice Sets the target address
-    /// @param _target Address of the avatar that this module will pass transactions to.
+    /// @notice Sets the target address.
+    /// @param _target The new target address.
     function setTarget(address _target) external onlyOwner {
         target = _target;
         emit TargetSet(_target);
@@ -87,11 +91,12 @@ contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
                 transactions[i].data,
                 transactions[i].operation
             );
-            // If any transaction fails, the entire execution will revert
+            // If any transaction fails, the entire execution will revert.
             if (!success) revert ExecutionFailed();
         }
     }
 
+    /// @notice Returns the trategy type string.
     function getStrategyType() external pure override returns (string memory) {
         return "SimpleQuorumAvatar";
     }

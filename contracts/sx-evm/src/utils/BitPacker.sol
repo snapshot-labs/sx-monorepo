@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-/// @title Library for setting and checking bits in a uint256.
+/// @title Uint256 Bit Setting and Checking Library
 library BitPacker {
     /// @dev Sets the bit at the given index to the given value.
     function setBit(uint256 value, uint8 index, bool bit) internal pure returns (uint256) {
