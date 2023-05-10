@@ -29,9 +29,10 @@ function generateId() {
 
 function createDraft(
   spaceId: string,
-  payload?: Partial<Draft> & { id?: string; proposalId?: number }
+  payload?: Partial<Draft> & { proposalId?: number },
+  draftKey?: string
 ) {
-  const id = payload?.id || generateId();
+  const id = draftKey || generateId();
   const key = `${spaceId}:${id}`;
 
   proposals[key] = {

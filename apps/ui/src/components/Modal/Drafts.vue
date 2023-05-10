@@ -9,12 +9,25 @@ defineEmits<{
   (e: 'close');
 }>();
 
+const { param } = useRouteParser('id');
+const route = useRoute();
+const router = useRouter();
 const { drafts, removeDraft } = useEditor();
 const { open } = toRefs(props);
 
 const spaceDrafts = computed(() =>
   drafts.value.filter(draft => draft.space === props.space && draft.networkId === props.networkId)
 );
+
+function handleRemoveDraft(id: string) {
+  const currentId = `${param.value}:${route.params.key}`;
+
+  if (currentId === id) {
+    router.replace({ name: 'editor' });
+  }
+
+  removeDraft(id);
+}
 </script>
 
 <template>
@@ -39,7 +52,7 @@ const spaceDrafts = computed(() =>
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ proposal.key }}</span>
           </router-link>
-          <a @click="removeDraft(proposal.id)">
+          <a @click="handleRemoveDraft(proposal.id)">
             <IH-trash class="mr-2" />
           </a>
         </div>
