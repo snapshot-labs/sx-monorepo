@@ -34,9 +34,7 @@ contract WhitelistStrategy is IVotingStrategy {
                 high = mid;
             }
         }
-        if (high > members.length) {
-            return (0);
-        } else if (members[high].addr == voter) {
+        if (members[high].addr == voter) {
             return (members[high].vp);
         } else {
             return (0);

@@ -258,6 +258,21 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.addVotingStrategies(newVotingStrategies, votingStrategyMetadataURIs);
     }
 
+    function testAddVotingStrategiesEmptyArray() public {
+        Strategy[] memory newVotingStrategies = new Strategy[](0);
+        string[] memory votingStrategyMetadataURIs = new string[](0);
+        vm.expectRevert(EmptyArray.selector);
+        space.addVotingStrategies(newVotingStrategies, votingStrategyMetadataURIs);
+    }
+
+    function testAddVotingStrategiesInvalidAddress() public {
+        Strategy[] memory newVotingStrategies = new Strategy[](1);
+        string[] memory votingStrategyMetadataURIs = new string[](0);
+        newVotingStrategies[0] = Strategy(address(0), new bytes(0));
+        vm.expectRevert(InvalidStrategyAddress.selector);
+        space.addVotingStrategies(newVotingStrategies, votingStrategyMetadataURIs);
+    }
+
     function testAddVotingStrategiesUnauthorized() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);

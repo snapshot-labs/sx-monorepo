@@ -49,6 +49,39 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
         assertEq(uint8(space.getProposalStatus(proposalId)), uint8(ProposalStatus.Executed));
     }
 
+    function testExecutionProposalNotAccepted() public {
+        MetaTransaction[] memory transactions = new MetaTransaction[](1);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataURI,
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            new bytes(0)
+        );
+        vm.warp(block.timestamp + space.maxVotingDuration());
+
+        vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
+        space.execute(proposalId, abi.encode(transactions));
+    }
+
+    function testExecutionInvalidPayload() public {
+        MetaTransaction[] memory transactions = new MetaTransaction[](1);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataURI,
+            Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
+            new bytes(0)
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
+        vm.warp(block.timestamp + space.maxVotingDuration());
+
+        transactions[0] = MetaTransaction(recipient, 2, "", Enum.Operation.Call, 0);
+
+        vm.expectRevert(InvalidPayload.selector);
+        space.execute(proposalId, abi.encode(transactions));
+    }
+
     function testInvalidTx() public {
         // This transaction will fail because the avatar does not have enough funds
         MetaTransaction[] memory transactions = new MetaTransaction[](1);
@@ -222,6 +255,10 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
         vm.prank(unauthorized);
         vm.expectRevert("Ownable: caller is not the owner");
         avatarExecutionStrategy.disableSpace(address(space));
+    }
+
+    function testGetStrategyType() external {
+        assertEq(avatarExecutionStrategy.getStrategyType(), "SimpleQuorumAvatar");
     }
 }
 

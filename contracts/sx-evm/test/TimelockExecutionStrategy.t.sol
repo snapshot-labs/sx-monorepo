@@ -9,6 +9,8 @@ import { MockImplementation } from "./mocks/MockImplementation.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { TestERC1155 } from "./mocks/TestERC1155.sol";
 import { TestERC721 } from "./mocks/TestERC721.sol";
+import { IERC1155Receiver } from "@openzeppelin/contracts/interfaces/IERC1155Receiver.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
 
 abstract contract TimelockExecutionStrategyTest is SpaceTest {
     error InvalidSpace();
@@ -353,6 +355,27 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
         timelockExecutionStrategy.executeQueuedProposal(abi.encode(transactions));
     }
 
+    function testVetoUnqueuedProposal() external {
+        MetaTransaction[] memory transactions = new MetaTransaction[](1);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataURI,
+            Strategy(address(timelockExecutionStrategy), abi.encode(transactions)),
+            new bytes(0)
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
+        vm.warp(block.timestamp + space.maxVotingDuration());
+
+        // Set veto guardian
+        address vetoGuardian = address(0x7e20);
+        timelockExecutionStrategy.setVetoGuardian(vetoGuardian);
+
+        vm.prank(vetoGuardian);
+        vm.expectRevert(ProposalNotQueued.selector);
+        timelockExecutionStrategy.veto(keccak256(abi.encode(transactions)));
+    }
+
     function testVetoOnlyGuardian() external {
         MetaTransaction[] memory transactions = new MetaTransaction[](1);
         transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
@@ -383,6 +406,17 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
 
         erc1155.mint(author, 1, 1);
         erc1155.safeTransferFrom(author, address(timelockExecutionStrategy), 1, 1, "");
+
+        erc1155.mint(author, 2, 8);
+        erc1155.mint(author, 3, 8);
+        uint256[] memory ids = new uint256[](2);
+        ids[0] = 2;
+        ids[1] = 3;
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 8;
+        amounts[1] = 8;
+        erc1155.safeBatchTransferFrom(author, address(timelockExecutionStrategy), ids, amounts, "");
+
         vm.stopPrank();
 
         MetaTransaction[] memory transactions = new MetaTransaction[](2);
@@ -429,6 +463,12 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
 
         assertEq(erc721.ownerOf(1), address(author));
         assertEq(erc1155.balanceOf(author, 1), 1);
+    }
+
+    function testCheckViewFunctions() public {
+        assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC721Receiver).interfaceId));
+        assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC1155Receiver).interfaceId));
+        assertEq(timelockExecutionStrategy.getStrategyType(), "SimpleQuorumTimelock");
     }
 }
 

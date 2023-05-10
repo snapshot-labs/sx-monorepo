@@ -106,4 +106,8 @@ contract ExecuteTest is SpaceTest {
         vm.expectRevert();
         space.execute(proposalId, executionStrategy.params);
     }
+
+    function testGetStrategyType() external {
+        assertEq(vanillaExecutionStrategy.getStrategyType(), "SimpleQuorumVanilla");
+    }
 }

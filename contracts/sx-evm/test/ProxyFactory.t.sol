@@ -87,6 +87,74 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors {
         );
     }
 
+    function testCreateSpaceInvalidImplementation() public {
+        bytes32 salt = bytes32(keccak256(abi.encodePacked("random salt")));
+
+        vm.expectRevert(InvalidImplementation.selector);
+        factory.deployProxy(
+            address(0),
+            abi.encodeWithSelector(
+                Space.initialize.selector,
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators,
+                executionStrategies,
+                executionStrategyMetadataURIs
+            ),
+            salt
+        );
+
+        vm.expectRevert(InvalidImplementation.selector);
+        factory.deployProxy(
+            address(0x123),
+            abi.encodeWithSelector(
+                Space.initialize.selector,
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators,
+                executionStrategies,
+                executionStrategyMetadataURIs
+            ),
+            salt
+        );
+    }
+
+    function testCreateSpaceFailedInitialization() public {
+        bytes32 salt = bytes32(keccak256(abi.encodePacked("random salt")));
+
+        vm.expectRevert(FailedInitialization.selector);
+        factory.deployProxy(
+            address(masterSpace),
+            abi.encodeWithSelector(
+                Space.initialize.selector,
+                owner,
+                votingDelay,
+                maxVotingDuration,
+                minVotingDuration,
+                proposalValidationStrategy,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators,
+                executionStrategies,
+                executionStrategyMetadataURIs
+            ),
+            salt
+        );
+    }
+
     function testCreateSpaceReusedSalt() public {
         bytes32 salt = bytes32(keccak256(abi.encodePacked("random salt")));
         factory.deployProxy(

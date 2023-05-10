@@ -452,6 +452,10 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
 
         assertEq(erc721.ownerOf(1), address(author));
     }
+
+    function testViewFunctions() public {
+        assertEq(timelockExecutionStrategy.getStrategyType(), "CompTimelockCompatibleSimpleQuorum");
+    }
 }
 
 contract CompTimelockExecutionStrategyTestDirect is CompTimelockExecutionStrategyTest {
