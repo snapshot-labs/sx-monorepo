@@ -4,6 +4,8 @@ type Space @entity {
   about: String!
   avatar: String!
   external_url: String!
+  delegation_api_type: String
+  delegation_api_url: String
   github: String!
   twitter: String!
   discord: String!

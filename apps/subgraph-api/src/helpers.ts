@@ -1,4 +1,4 @@
-import { Bytes, BigInt, ipfs, json, ethereum, Address } from '@graphprotocol/graph-ts'
+import { Bytes, BigInt, ipfs, json, ethereum, Address, log } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
 import { Space, Proposal, ExecutionStrategy, StrategiesParsedMetadata } from '../generated/schema'
 
@@ -53,12 +53,27 @@ export function updateSpaceMetadata(space: Space, metadataUri: string): void {
   if (properties) {
     const propertiesObj = properties.toObject()
 
+    let delegation_api_type = propertiesObj.get('delegation_api_type')
+    let delegation_api_url = propertiesObj.get('delegation_api_url')
     let github = propertiesObj.get('github')
     let twitter = propertiesObj.get('twitter')
     let discord = propertiesObj.get('discord')
     let votingPowerSymbol = propertiesObj.get('voting_power_symbol')
     let wallets = propertiesObj.get('wallets')
     let executionStrategies = propertiesObj.get('executionStrategies')
+
+    let delegation_api_type_value =
+      delegation_api_type && !delegation_api_type.isNull() ? delegation_api_type.toString() : null
+    let delegation_api_url_value =
+      delegation_api_url && !delegation_api_url.isNull() ? delegation_api_url.toString() : null
+
+    if (delegation_api_type_value == 'governor-subgraph' && delegation_api_url_value) {
+      space.delegation_api_type = delegation_api_type_value
+      space.delegation_api_url = delegation_api_url_value
+    } else {
+      space.delegation_api_type = null
+      space.delegation_api_url = null
+    }
 
     space.github = github ? github.toString() : ''
     space.twitter = twitter ? twitter.toString() : ''
@@ -81,6 +96,8 @@ export function updateSpaceMetadata(space: Space, metadataUri: string): void {
       space.executors_types = []
     }
   } else {
+    space.delegation_api_type = null
+    space.delegation_api_url = null
     space.github = ''
     space.twitter = ''
     space.discord = ''
