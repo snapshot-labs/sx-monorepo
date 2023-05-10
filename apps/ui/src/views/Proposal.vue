@@ -2,18 +2,16 @@
 import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
 import { _rt, _n, shortenAddress, getUrl, sanitizeUrl, compareAddresses } from '@/helpers/utils';
-import { Choice, NetworkID } from '@/types';
+import { Choice } from '@/types';
 import { VotingPower } from '@/networks/types';
 
 const route = useRoute();
 const router = useRouter();
+const { param: spaceId, networkId, address: spaceAddress } = useRouteParser('space');
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
 const { createDraft } = useEditor();
-const id = parseInt((route.params.id as string) || '0');
-const spaceParam = route.params.space as string;
-const [networkId, space] = spaceParam.split(':');
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -21,7 +19,10 @@ const sendingType = ref<null | number>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 
-const proposal = computed(() => proposalsStore.getProposal(space, id, networkId as NetworkID));
+const id = computed(() => parseInt((route.params.id as string) || '0'));
+const proposal = computed(() =>
+  proposalsStore.getProposal(spaceAddress.value, id.value, networkId.value)
+);
 const votingPowerDecimals = computed(() => {
   if (!proposal.value) return 0;
   return Math.max(
@@ -55,7 +56,7 @@ const editable = computed(() => {
 });
 
 async function getVotingPower() {
-  const network = getNetwork(networkId as NetworkID);
+  const network = getNetwork(networkId.value);
 
   if (!web3.value.account || !proposal.value) {
     votingPowers.value = [];
@@ -83,7 +84,7 @@ async function getVotingPower() {
 async function handleEditClick() {
   if (!proposal.value) return;
 
-  const draftId = createDraft(spaceParam, {
+  const draftId = createDraft(spaceId.value, {
     proposalId: proposal.value.proposal_id,
     title: proposal.value.title,
     body: proposal.value.body,
@@ -101,7 +102,7 @@ async function handleEditClick() {
   router.push({
     name: 'editor',
     params: {
-      id: spaceParam,
+      id: spaceId.value,
       key: draftId
     }
   });
@@ -119,11 +120,14 @@ async function handleVoteClick(choice: Choice) {
   }
 }
 
-onMounted(() => {
-  proposalsStore.fetchProposal(space, id, networkId as NetworkID);
-});
-
 watch([() => web3.value.account, proposal], () => getVotingPower());
+watch(
+  [networkId, spaceAddress],
+  ([networkId, spaceAddress]) => {
+    proposalsStore.fetchProposal(spaceAddress, id.value, networkId);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -221,7 +225,7 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
         <VotingPowerIndicator
           v-if="web3.account"
           v-slot="props"
-          :network-id="networkId as NetworkID"
+          :network-id="networkId"
           :loading="loadingVotingPower"
           :voting-power-symbol="proposal.space.voting_power_symbol"
           :voting-powers="votingPowers"
