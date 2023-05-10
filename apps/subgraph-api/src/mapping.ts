@@ -157,6 +157,10 @@ export function handleProposalCreated(event: ProposalCreated): void {
     proposal.quorum = executionStrategy.quorum
     proposal.timelock_delay = executionStrategy.timelock_delay
     proposal.execution_strategy_type = executionStrategy.type
+  } else {
+    proposal.quorum = new BigDecimal(new BigInt(0))
+    proposal.timelock_delay = new BigInt(0)
+    proposal.execution_strategy_type = 'none'
   }
 
   let executionHash = new ExecutionHash(proposal.execution_hash)
@@ -200,6 +204,10 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
     proposal.quorum = executionStrategy.quorum
     proposal.timelock_delay = executionStrategy.timelock_delay
     proposal.execution_strategy_type = executionStrategy.type
+  } else {
+    proposal.quorum = new BigDecimal(new BigInt(0))
+    proposal.timelock_delay = new BigInt(0)
+    proposal.execution_strategy_type = 'none'
   }
 
   let executionHash = new ExecutionHash(proposal.execution_hash)
