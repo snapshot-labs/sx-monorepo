@@ -115,7 +115,7 @@ async function handleToChange(to: string) {
   showAbiInput.value = false;
   if (isAddress(to)) {
     loading.value = true;
-    const provider = getProvider('5');
+    const provider = getProvider(5);
     const code = await provider.getCode(to);
     if (code !== '0x') {
       console.log('Address is valid');

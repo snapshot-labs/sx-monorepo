@@ -5,7 +5,7 @@ import { call } from '@/helpers/call';
 export async function getNames(addresses) {
   addresses = addresses.slice(0, 250).filter(isAddress);
   if (addresses.length === 0) return {};
-  const network = '1';
+  const network = 1;
   const provider = getProvider(network);
   const abi = [
     {

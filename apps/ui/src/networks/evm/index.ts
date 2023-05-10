@@ -1,8 +1,8 @@
 import { createApi } from '../common/graphqlApi';
 import { createActions } from './actions';
-import { createProvider } from './provider';
 import * as constants from './constants';
 import { pinGraph } from '@/helpers/graph';
+import { getProvider } from '@/helpers/provider';
 import networks from '@/helpers/networks.json';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -10,7 +10,7 @@ import { NetworkID, Space } from '@/types';
 export function createEvmNetwork(networkId: NetworkID): Network {
   const chainId = 5;
 
-  const provider = createProvider(`https://rpc.brovider.xyz/${chainId}`);
+  const provider = getProvider(chainId);
   const api = createApi(constants.API_URL, networkId);
 
   const helpers = {
