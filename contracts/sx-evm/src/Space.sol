@@ -146,6 +146,12 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         emit AuthenticatorsRemoved(_authenticators);
     }
 
+    /// @dev Gates access to whitelisted authenticators only.
+    modifier onlyAuthenticator() {
+        if (authenticators[msg.sender] != true) revert AuthenticatorNotWhitelisted();
+        _;
+    }
+
     // ------------------------------------
     // |                                  |
     // |             GETTERS              |
@@ -177,9 +183,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         string calldata metadataURI,
         Strategy calldata executionStrategy,
         bytes calldata userProposalValidationParams
-    ) external override {
-        _assertValidAuthenticator();
-
+    ) external override onlyAuthenticator {
         // Casting to `uint32` is fine because this gives us until year ~2106.
         uint32 snapshotTimestamp = uint32(block.timestamp);
 
@@ -223,8 +227,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         Choice choice,
         IndexedStrategy[] calldata userVotingStrategies,
         string calldata metadataURI
-    ) external override {
-        _assertValidAuthenticator();
+    ) external override onlyAuthenticator {
         Proposal memory proposal = proposals[proposalId];
         _assertProposalExists(proposal);
         if (block.timestamp >= proposal.maxEndTimestamp) revert VotingPeriodHasEnded();
@@ -285,9 +288,7 @@ contract Space is ISpace, Initializable, UUPSUpgradeable, OwnableUpgradeable, Re
         uint256 proposalId,
         Strategy calldata executionStrategy,
         string calldata metadataURI
-    ) external override {
-        _assertValidAuthenticator();
-
+    ) external override onlyAuthenticator {
         Proposal storage proposal = proposals[proposalId];
         if (author != proposal.author) revert InvalidCaller();
         if (block.timestamp >= proposal.startTimestamp) revert VotingDelayHasPassed();

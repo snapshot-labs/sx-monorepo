@@ -50,9 +50,8 @@ contract SpaceManager is OwnableUpgradeable {
         return spaces[space];
     }
 
-    /// @dev Modifier that allows only the whitelisted spaces to call a function.
-    modifier onlySpace(address callerAddress) {
-        if (!isSpaceEnabled(callerAddress)) revert InvalidSpace();
+    modifier onlySpace() {
+        if (!isSpaceEnabled(msg.sender)) revert InvalidSpace();
         _;
     }
 }

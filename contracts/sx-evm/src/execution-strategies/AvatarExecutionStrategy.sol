@@ -68,7 +68,7 @@ contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
         uint256 votesAgainst,
         uint256 votesAbstain,
         bytes memory payload
-    ) external override onlySpace(msg.sender) {
+    ) external override onlySpace {
         ProposalStatus proposalStatus = getProposalStatus(proposal, votesFor, votesAgainst, votesAbstain);
         if ((proposalStatus != ProposalStatus.Accepted) && (proposalStatus != ProposalStatus.VotingPeriodAccepted)) {
             revert InvalidProposalStatus(proposalStatus);

@@ -96,7 +96,7 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         uint256 votesAgainst,
         uint256 votesAbstain,
         bytes memory payload
-    ) external override onlySpace(msg.sender) {
+    ) external override onlySpace {
         if (proposal.executionPayloadHash != keccak256(payload)) revert InvalidPayload();
 
         ProposalStatus proposalStatus = getProposalStatus(proposal, votesFor, votesAgainst, votesAbstain);
@@ -145,10 +145,9 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         emit ProposalExecuted(executionPayloadHash);
     }
 
-    /// @notice Vetoes a queued proposal. Only callable by the veto guardian.
+    /// @notice Vetoes a queued proposal.
     /// @param executionPayloadHash The hash of the proposal execution payload.
-    function veto(bytes32 executionPayloadHash) external {
-        if (msg.sender != vetoGuardian) revert OnlyVetoGuardian();
+    function veto(bytes32 executionPayloadHash) external onlyVetoGuardian {
         if (proposalExecutionTime[executionPayloadHash] == 0) revert ProposalNotQueued();
 
         proposalExecutionTime[executionPayloadHash] = 0;
@@ -160,6 +159,12 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
     function setVetoGuardian(address newVetoGuardian) external onlyOwner {
         emit VetoGuardianSet(vetoGuardian, newVetoGuardian);
         vetoGuardian = newVetoGuardian;
+    }
+
+    /// @dev Throws if called by any account other than the veto guardian.
+    modifier onlyVetoGuardian() {
+        if (msg.sender != vetoGuardian) revert OnlyVetoGuardian();
+        _;
     }
 
     /// @notice Returns the strategy type string.
