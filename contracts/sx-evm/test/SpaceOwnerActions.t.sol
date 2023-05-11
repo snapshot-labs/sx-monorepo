@@ -269,7 +269,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         Strategy[] memory newVotingStrategies = new Strategy[](1);
         string[] memory votingStrategyMetadataURIs = new string[](0);
         newVotingStrategies[0] = Strategy(address(0), new bytes(0));
-        vm.expectRevert(InvalidStrategyAddress.selector);
+        vm.expectRevert(ZeroAddress.selector);
         space.addVotingStrategies(newVotingStrategies, votingStrategyMetadataURIs);
     }
 
