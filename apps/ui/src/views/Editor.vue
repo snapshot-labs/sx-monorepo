@@ -19,7 +19,8 @@ const DISCUSSION_DEFINITION = {
 };
 
 const { proposals, createDraft } = useEditor();
-const { param, networkId, address } = useRouteParser('id');
+const { param } = useRouteParser('id');
+const { resolved, address, networkId } = useResolve(param);
 const route = useRoute();
 const router = useRouter();
 const { propose, updateProposal } = useActions();
@@ -32,38 +33,57 @@ const sending = ref(false);
 const fetchingVotingPower = ref(true);
 const votingPowerValid = ref(false);
 
-const network = computed(() => getNetwork(networkId.value));
-const space = computed(() => spacesStore.spacesMap.get(param.value));
+const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
+const space = computed(() => {
+  if (!resolved.value) return null;
+
+  return spacesStore.spacesMap.get(`${networkId.value}:${address.value}`);
+});
 const proposalKey = computed(() => {
+  if (!resolved.value) return null;
+
   const key = route.params.key as string;
-  return `${param.value}:${key}`;
+  return `${networkId.value}:${address.value}:${key}`;
 });
 const proposal = computed(() => {
+  if (!proposalKey.value) return null;
+
   if (!proposals[proposalKey.value]) {
-    createDraft(param.value, undefined, route.params.key as string);
+    createDraft(`${networkId.value}:${address.value}`, undefined, route.params.key as string);
   }
 
   return proposals[proposalKey.value];
 });
-const proposalData = computed(() => JSON.stringify(omit(proposal.value, ['updatedAt'])));
+const proposalData = computed(() => {
+  if (!proposal.value) return null;
+
+  return JSON.stringify(omit(proposal.value, ['updatedAt']));
+});
 const executionStrategy = computed({
   get() {
+    if (!proposal.value) return null;
+
     return proposal.value.executionStrategy;
   },
   set(value: SelectedStrategy | null) {
+    if (!proposal.value) return;
+
     proposal.value.executionStrategy = value;
   }
 });
 const supportedExecutionStrategies = computed(() => {
   const spaceValue = space.value;
-  if (!spaceValue) return null;
+  const networkValue = network.value;
+  if (!spaceValue || !networkValue) return null;
 
   return spaceValue.executors.filter(
-    (_, i) => network.value.constants.SUPPORTED_EXECUTORS[spaceValue.executors_types[i]]
+    (_, i) => networkValue.constants.SUPPORTED_EXECUTORS[spaceValue.executors_types[i]]
   );
 });
-const formErrors = computed(() =>
-  validateForm(
+const formErrors = computed(() => {
+  if (!proposal.value) return {};
+
+  return validateForm(
     {
       type: 'object',
       title: 'Proposal',
@@ -81,8 +101,8 @@ const formErrors = computed(() =>
     {
       skipEmptyOptionalFields: true
     }
-  )
-);
+  );
+});
 const canSubmit = computed(() => {
   return (
     !fetchingVotingPower.value &&
@@ -92,7 +112,7 @@ const canSubmit = computed(() => {
 });
 
 async function handleProposeClick() {
-  if (!space.value) return;
+  if (!space.value || !proposal.value) return;
 
   sending.value = true;
 
@@ -159,26 +179,35 @@ async function getVotingPower() {
 watch(
   [networkId, address],
   ([networkId, address]) => {
+    if (!networkId || !address) return;
+
     spacesStore.fetchSpace(address, networkId);
   },
   { immediate: true }
 );
 watch([space, () => web3.value.account], () => getVotingPower());
 watch(proposalData, () => {
+  if (!proposal.value) return;
+
   proposal.value.updatedAt = Date.now();
 });
 </script>
 
 <script lang="ts">
 import { NavigationGuard } from 'vue-router';
+import { resolver } from '@/helpers/resolver';
+
 const { createDraft } = useEditor();
 
-const handleRouteChange: NavigationGuard = to => {
+const handleRouteChange: NavigationGuard = async to => {
   if (to.params.key) {
     return true;
   }
 
-  const draftId = createDraft(to.params.id as string);
+  const resolved = await resolver.resolveName(to.params.id as string);
+  if (!resolved) return false;
+
+  const draftId = createDraft(`${resolved.networkId}:${resolved.address}`);
 
   return {
     ...to,
@@ -221,7 +250,7 @@ export default defineComponent({
           >
             <span
               class="hidden mr-2 md:inline-block"
-              v-text="proposal.proposalId ? 'Update' : 'Publish'"
+              v-text="proposal?.proposalId ? 'Update' : 'Publish'"
             />
             <IH-paper-airplane class="inline-block rotate-90" />
           </UiButton>
@@ -234,7 +263,7 @@ export default defineComponent({
       </UiAlert>
       <h4 class="eyebrow mb-3">Context</h4>
       <SIString
-        :key="proposalKey"
+        :key="proposalKey || ''"
         v-model="proposal.title"
         :definition="TITLE_DEFINITION"
         :error="formErrors.title"
@@ -258,14 +287,14 @@ export default defineComponent({
         <div class="s-label" v-text="'Description'" />
         <textarea v-model="proposal.body" maxlength="9600" class="s-input mb-3 h-[160px]" />
         <SIString
-          :key="proposalKey"
+          :key="proposalKey || ''"
           v-model="proposal.discussion"
           :definition="DISCUSSION_DEFINITION"
           :error="formErrors.discussion"
         />
-        <Preview :key="proposalKey" :url="proposal.discussion" />
+        <Preview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <div v-if="space">
+      <div v-if="space && network">
         <h4 class="eyebrow mb-3">Execution</h4>
         <div class="flex flex-col gap-2 mb-3">
           <ExecutionButton
@@ -300,6 +329,7 @@ export default defineComponent({
     </Container>
     <teleport to="#modal">
       <ModalDrafts
+        v-if="networkId && address"
         :open="modalOpen"
         :network-id="networkId"
         :space="address"

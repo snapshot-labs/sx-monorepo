@@ -9,7 +9,6 @@ defineEmits<{
   (e: 'close');
 }>();
 
-const { param } = useRouteParser('id');
 const route = useRoute();
 const router = useRouter();
 const { drafts, removeDraft } = useEditor();
@@ -20,7 +19,7 @@ const spaceDrafts = computed(() =>
 );
 
 function handleRemoveDraft(id: string) {
-  const currentId = `${param.value}:${route.params.key}`;
+  const currentId = `${props.networkId}:${props.space}:${route.params.key}`;
 
   if (currentId === id) {
     router.replace({ name: 'editor' });

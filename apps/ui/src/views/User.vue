@@ -5,11 +5,19 @@ import { shortenAddress } from '@/helpers/utils';
 const { networkId, address } = useRouteParser('id');
 const usersStore = useUsersStore();
 
-const user = computed(() => usersStore.getUser(address.value));
+const user = computed(() => (address.value ? usersStore.getUser(address.value) : null));
 
-watch([networkId, address], () => usersStore.fetchUser(address.value, networkId.value), {
-  immediate: true
-});
+watch(
+  [networkId, address],
+  () => {
+    if (!address.value || !networkId.value) return;
+
+    usersStore.fetchUser(address.value, networkId.value);
+  },
+  {
+    immediate: true
+  }
+);
 </script>
 
 <template>

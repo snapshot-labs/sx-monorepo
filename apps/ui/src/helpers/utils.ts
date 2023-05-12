@@ -179,6 +179,23 @@ export function abiToDefinition(abi) {
   return definition;
 }
 
+export function memoize<T extends any[], U>(fn: (...args: T) => U) {
+  const cache = new Map<string, any>();
+
+  return (...args: T): U => {
+    const key = JSON.stringify(args);
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+
+    const result = fn(...args);
+    cache.set(key, result);
+
+    return result;
+  };
+}
+
 export function omit<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   keys: K[]

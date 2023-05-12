@@ -4,6 +4,7 @@ import type { Proposal as ProposalType, Choice } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
+const route = useRoute();
 const { vote } = useActions();
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -28,7 +29,7 @@ async function handleVoteClick(choice: Choice) {
             name: 'proposal',
             params: {
               id: proposal.proposal_id,
-              space: `${proposal.network}:${proposal.space.id}`
+              space: `${route.params.id}`
             }
           }"
           class="block max-w-fit"

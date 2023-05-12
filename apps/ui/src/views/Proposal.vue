@@ -7,7 +7,8 @@ import { VotingPower } from '@/networks/types';
 
 const route = useRoute();
 const router = useRouter();
-const { param: spaceId, networkId, address: spaceAddress } = useRouteParser('space');
+const { param } = useRouteParser('space');
+const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
@@ -20,9 +21,13 @@ const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 
 const id = computed(() => parseInt((route.params.id as string) || '0'));
-const proposal = computed(() =>
-  proposalsStore.getProposal(spaceAddress.value, id.value, networkId.value)
-);
+const proposal = computed(() => {
+  if (!resolved.value || !spaceAddress.value || !networkId.value) {
+    return null;
+  }
+
+  return proposalsStore.getProposal(spaceAddress.value, id.value, networkId.value);
+});
 const votingPowerDecimals = computed(() => {
   if (!proposal.value) return 0;
   return Math.max(
@@ -56,6 +61,8 @@ const editable = computed(() => {
 });
 
 async function getVotingPower() {
+  if (!networkId.value) return;
+
   const network = getNetwork(networkId.value);
 
   if (!web3.value.account || !proposal.value) {
@@ -82,9 +89,11 @@ async function getVotingPower() {
 }
 
 async function handleEditClick() {
-  if (!proposal.value) return;
+  if (!proposal.value || !networkId.value || !spaceAddress.value) return;
 
-  const draftId = createDraft(spaceId.value, {
+  const spaceId = `${networkId.value}:${spaceAddress.value}`;
+
+  const draftId = createDraft(spaceId, {
     proposalId: proposal.value.proposal_id,
     title: proposal.value.title,
     body: proposal.value.body,
@@ -102,7 +111,7 @@ async function handleEditClick() {
   router.push({
     name: 'editor',
     params: {
-      id: spaceId.value,
+      id: spaceId,
       key: draftId
     }
   });
@@ -124,6 +133,8 @@ watch([() => web3.value.account, proposal], () => getVotingPower());
 watch(
   [networkId, spaceAddress],
   ([networkId, spaceAddress]) => {
+    if (!networkId || !spaceAddress) return;
+
     proposalsStore.fetchProposal(spaceAddress, id.value, networkId);
   },
   { immediate: true }
@@ -223,7 +234,7 @@ watch(
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l"
       >
         <VotingPowerIndicator
-          v-if="web3.account"
+          v-if="web3.account && networkId"
           v-slot="props"
           :network-id="networkId"
           :loading="loadingVotingPower"
@@ -283,6 +294,7 @@ watch(
         @close="modalOpenVotes = false"
       />
       <ModalTimeline
+        v-if="proposal"
         :open="modalOpenTimeline"
         :proposal="proposal"
         @close="modalOpenTimeline = false"

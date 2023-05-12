@@ -2,15 +2,28 @@
 import { useUiStore } from '@/stores/ui';
 import { useSpacesStore } from '@/stores/spaces';
 
-const { param, networkId, address } = useRouteParser('id');
+const { param } = useRouteParser('id');
+const { resolved, address, networkId } = useResolve(param);
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 
-const space = computed(() => spacesStore.spacesMap.get(param.value));
+const space = computed(() => {
+  if (!resolved.value) return null;
 
-watch([networkId, address], ([networkId, address]) => spacesStore.fetchSpace(address, networkId), {
-  immediate: true
+  return spacesStore.spacesMap.get(`${networkId.value}:${address.value}`);
 });
+
+watch(
+  [resolved, networkId, address],
+  ([resolved, networkId, address]) => {
+    if (!resolved || !networkId || !address) return;
+
+    spacesStore.fetchSpace(address, networkId);
+  },
+  {
+    immediate: true
+  }
+);
 </script>
 
 <template>

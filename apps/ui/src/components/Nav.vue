@@ -16,9 +16,13 @@ const route = useRoute();
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 
+const { param } = useRouteParser('id');
+const { resolved, address, networkId } = useResolve(param);
 const currentRouteName = computed(() => String(route.matched[0]?.name));
 const space = computed(() =>
-  currentRouteName.value === 'space' ? spacesStore.spacesMap.get(route.params.id as string) : null
+  currentRouteName.value === 'space' && resolved.value
+    ? spacesStore.spacesMap.get(`${networkId.value}:${address.value}`)
+    : null
 );
 const { treasury } = useTreasury(space);
 
