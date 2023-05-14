@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { enabledNetworks, getNetwork } from '@/networks';
+import { ETH_CONTRACT } from '@/helpers/constants';
 import type { NetworkID } from '@/types';
 
 defineProps<{
@@ -17,20 +18,19 @@ const availableNetworks = enabledNetworks.map(id => ({
 </script>
 
 <template>
-  <div class="mb-4">
+  <div class="mb-2">
     <h3>Space network</h3>
     <div class="grid grid-cols-auto gap-3 pt-4">
-      <button
+      <div
         v-for="network in availableNetworks"
         :key="network.id"
-        class="bg-skin-active rounded px-2 py-4 hover:bg-skin-hover"
-        :class="{
-          'bg-green hover:bg-green text-white': network.id === modelValue
-        }"
+        :class="{ 'border-skin-link': network.id === modelValue }"
+        class="flex items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
         @click="emit('update:modelValue', network.id)"
       >
+        <Stamp :id="ETH_CONTRACT" type="token" :size="32" class="mr-3" />
         {{ network.name }}
-      </button>
+      </div>
     </div>
   </div>
 </template>

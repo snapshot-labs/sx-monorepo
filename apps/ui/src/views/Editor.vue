@@ -302,8 +302,7 @@ export default defineComponent({
             :key="executor"
             class="flex-auto flex items-center gap-2"
             :class="{
-              'border-skin-link': executionStrategy?.address === executor,
-              'text-skin-border': executionStrategy?.address !== executor
+              'border-skin-link': executionStrategy?.address === executor
             }"
             @click="
               handleExecutionStrategySelected({

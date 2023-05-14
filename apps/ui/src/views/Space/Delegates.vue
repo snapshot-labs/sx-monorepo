@@ -45,7 +45,7 @@ onMounted(() => {
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]">
-          <IS-user-plus class="inline-block" />
+          <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
     </div>

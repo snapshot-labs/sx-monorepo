@@ -68,7 +68,7 @@ watch(route, to => {
           @click="emit('toggle')"
         />
         <div v-if="currentRouteName === 'space'" class="flex items-center flex-1 px-2 py-3 h-full">
-          <IH-search class="mr-3 flex-shrink-0" :class="{ 'text-skin-link': focused }" />
+          <IH-search class="mr-[12px] flex-shrink-0" :class="{ 'text-skin-link': focused }" />
           <form class="flex flex-grow" @submit="handleSearchSubmit">
             <input
               ref="searchInput"

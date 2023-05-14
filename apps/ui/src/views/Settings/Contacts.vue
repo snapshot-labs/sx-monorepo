@@ -29,7 +29,7 @@ function handleContactEdit(contact) {
       <div class="pt-4 px-4 space-x-2">
         <a>
           <UiButton class="!px-0 w-[46px]" @click="openModal('editContact')">
-            <IH-user-add class="inline-block" />
+            <IH-plus-sm class="inline-block" />
           </UiButton>
         </a>
       </div>
