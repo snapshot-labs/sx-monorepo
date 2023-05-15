@@ -24,7 +24,8 @@ contract ActiveProposalsLimterTest is SpaceTest {
         );
 
         space.setProposalValidationStrategy(
-            Strategy(address(activeProposalsLimiterProposalValidationStrategy), new bytes(0))
+            Strategy(address(activeProposalsLimiterProposalValidationStrategy), new bytes(0)),
+            ""
         );
     }
 

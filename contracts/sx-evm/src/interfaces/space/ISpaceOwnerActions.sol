@@ -27,7 +27,11 @@ interface ISpaceOwnerActions {
 
     /// @notice Sets the proposal validation strategy.
     /// @param proposalValidationStrategy The new proposal validation strategy.
-    function setProposalValidationStrategy(Strategy calldata proposalValidationStrategy) external;
+    /// @param proposalValidationStrategyMetadataURI The new metadata URI for the proposal validation strategy.
+    function setProposalValidationStrategy(
+        Strategy calldata proposalValidationStrategy,
+        string calldata proposalValidationStrategyMetadataURI
+    ) external;
 
     /// @notice Sets the metadata URI for the Space.
     /// @param metadataURI The new metadata URI.

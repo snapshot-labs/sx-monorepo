@@ -25,6 +25,7 @@ interface ISpaceEvents {
         uint32 minVotingDuration,
         uint32 maxVotingDuration,
         Strategy proposalValidationStrategy,
+        string proposalValidationStrategyMetadataURI,
         string metadataURI,
         Strategy[] votingStrategies,
         string[] votingStrategyMetadataURIs,
@@ -102,7 +103,11 @@ interface ISpaceEvents {
     /// @notice Emitted when the proposal validation strategy is updated.
     /// @param newProposalValidationStrategy The new proposal validation strategy,
     ///        consisting of a strategy address and an array of configuration parameters.
-    event ProposalValidationStrategyUpdated(Strategy newProposalValidationStrategy);
+    /// @param newProposalValidationStrategyMetadataURI The metadata URI for the proposal validation strategy.
+    event ProposalValidationStrategyUpdated(
+        Strategy newProposalValidationStrategy,
+        string newProposalValidationStrategyMetadataURI
+    );
 
     /// @notice Emitted when the voting delay is updated.
     /// @param newVotingDelay The new voting delay.

@@ -36,7 +36,7 @@ contract PropositionPowerProposalValidationTest is SpaceTest {
             address(new PropositionPowerProposalValidationStrategy()),
             abi.encode(proposalThreshold, propositionPowerStrategies)
         );
-        space.setProposalValidationStrategy(propositionPowerProposalValidationStrategy);
+        space.setProposalValidationStrategy(propositionPowerProposalValidationStrategy, "");
 
         // The Comp token strategy is at index 0 of the proposal validation strategies
         userPropositionPowerStrategies.push(IndexedStrategy(0, new bytes(0)));
@@ -96,7 +96,7 @@ contract PropositionPowerProposalValidationTest is SpaceTest {
             address(new PropositionPowerProposalValidationStrategy()),
             abi.encode(2, propositionPowerStrategies)
         );
-        space.setProposalValidationStrategy(propositionPowerProposalValidationStrategy);
+        space.setProposalValidationStrategy(propositionPowerProposalValidationStrategy, "");
 
         IndexedStrategy[] memory newUserPropositionPowerStrategies = new IndexedStrategy[](2);
         newUserPropositionPowerStrategies[0] = IndexedStrategy(0, new bytes(0));

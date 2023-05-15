@@ -151,9 +151,9 @@ contract SpaceOwnerActionsTest is SpaceTest {
     function testSetProposalValidationStrategy() public {
         Strategy memory nextProposalValidationStrategy = Strategy(address(42), new bytes(0));
         vm.expectEmit(true, true, true, true);
-        emit ProposalValidationStrategyUpdated(nextProposalValidationStrategy);
+        emit ProposalValidationStrategyUpdated(nextProposalValidationStrategy, "");
         vm.prank(owner);
-        space.setProposalValidationStrategy(nextProposalValidationStrategy);
+        space.setProposalValidationStrategy(nextProposalValidationStrategy, "");
 
         Strategy memory newStrat = Strategy(address(42), new bytes(0));
         assertEq(
@@ -167,7 +167,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         Strategy memory nextStrat = Strategy(address(42), new bytes(0));
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
-        space.setProposalValidationStrategy(nextStrat);
+        space.setProposalValidationStrategy(nextStrat, "");
     }
 
     // ------- VotingDelay ----

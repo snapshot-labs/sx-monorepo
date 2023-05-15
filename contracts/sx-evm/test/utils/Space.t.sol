@@ -65,7 +65,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
     string public spaceMetadataURI = "SOC Test Space";
     string public proposalMetadataURI = "SOC Test Proposal";
     string[] public votingStrategyMetadataURIs;
-    string[] public executionStrategyMetadataURIs;
+    string public proposalValidationStrategyMetadataURI;
 
     function setUp() public virtual {
         masterSpace = new Space();
@@ -97,6 +97,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
                         minVotingDuration,
                         maxVotingDuration,
                         proposalValidationStrategy,
+                        proposalValidationStrategyMetadataURI,
                         spaceMetadataURI,
                         votingStrategies,
                         votingStrategyMetadataURIs,

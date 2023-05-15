@@ -74,7 +74,7 @@ contract ProposeTest is SpaceTest {
     function testProposeRefusedValidation() public {
         StupidProposalValidationStrategy stupidProposalValidationStrategy = new StupidProposalValidationStrategy();
         Strategy memory validationStrategy = Strategy(address(stupidProposalValidationStrategy), new bytes(0));
-        space.setProposalValidationStrategy(validationStrategy);
+        space.setProposalValidationStrategy(validationStrategy, "");
 
         vm.expectRevert(FailedToPassProposalValidation.selector);
         _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));

@@ -14,6 +14,7 @@ interface ISpaceActions {
     /// @param   maxVotingDuration  The maximum duration of the voting period.
     /// @param   proposalValidationStrategy  The strategy to use to validate a proposal,
     ///          consisting of a strategy address and an array of configuration parameters.
+    /// @param   proposalValidationStrategyMetadataURI  The metadata URI for `proposalValidationStrategy`.
     /// @param   metadataURI  The metadata URI for the space.
     /// @param   votingStrategies  The whitelisted voting strategies,
     ///          each consisting of a strategy address and an array of configuration parameters.
@@ -25,6 +26,7 @@ interface ISpaceActions {
         uint32 minVotingDuration,
         uint32 maxVotingDuration,
         Strategy memory proposalValidationStrategy,
+        string memory proposalValidationStrategyMetadataURI,
         string memory metadataURI,
         Strategy[] memory votingStrategies,
         string[] memory votingStrategyMetadataURIs,
