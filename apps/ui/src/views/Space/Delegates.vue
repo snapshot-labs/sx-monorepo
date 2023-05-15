@@ -74,7 +74,7 @@ onMounted(() => {
           >
             <Stamp :id="delegate.id" type="avatar" :size="32" class="mr-3" />
             <div class="flex-1 leading-[22px]">
-              <h4 class="text-skin-link" v-text="shorten(delegate.id)" />
+              <h4 class="text-skin-link" v-text="delegate.name || shorten(delegate.id)" />
               <div class="text-sm" v-text="shorten(delegate.id)" />
             </div>
             <div
