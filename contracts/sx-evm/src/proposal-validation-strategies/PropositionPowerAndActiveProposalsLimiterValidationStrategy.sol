@@ -15,17 +15,26 @@ contract PropositionPowerAndActiveProposalsLimiterValidationStrategy is
     PropositionPower,
     IProposalValidationStrategy
 {
-    // solhint-disable-next-line no-empty-blocks
-    constructor(uint32 _cooldown, uint224 _maxActiveProposals) ActiveProposalsLimiter(_cooldown, _maxActiveProposals) {}
-
     /// @notice Validates an author by checking if the proposition power of the author exceeds a threshold over a set of
     ///         strategies and if the author has reached the maximum number of active proposals at the current timestamp.
+    /// @param author Author of the proposal.
+    /// @param params ABI encoded array that should contain the following:
+    ///                 cooldown: Duration to wait before the proposal counter gets reset.
+    ///                 maxActiveProposals: Maximum number of active proposals per author. Must be != 0.
+    ///                 proposalThreshold: Minimum proposition power required to create a proposal.
+    ///                 allowedStrategies: Array of allowed voting strategies.
+    /// @param userParams ABI encoded array that should contain the user voting strategies.
     function validate(address author, bytes calldata params, bytes calldata userParams) external returns (bool) {
-        (uint256 proposalThreshold, Strategy[] memory allowedStrategies) = abi.decode(params, (uint256, Strategy[]));
+        (
+            uint256 cooldown,
+            uint256 maxActiveProposals,
+            uint256 proposalThreshold,
+            Strategy[] memory allowedStrategies
+        ) = abi.decode(params, (uint256, uint256, uint256, Strategy[]));
         IndexedStrategy[] memory userStrategies = abi.decode(userParams, (IndexedStrategy[]));
 
         return
-            ActiveProposalsLimiter._validate(author) &&
+            ActiveProposalsLimiter._validate(author, cooldown, maxActiveProposals) &&
             PropositionPower._validate(author, proposalThreshold, allowedStrategies, userStrategies);
     }
 }

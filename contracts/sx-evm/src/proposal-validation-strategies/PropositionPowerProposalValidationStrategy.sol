@@ -13,7 +13,9 @@ contract PropositionPowerProposalValidationStrategy is PropositionPower, IPropos
     /// @notice Validates an author by checking if the proposition power of the author exceeds a threshold
     ///         over a set of strategies.
     /// @param author Author of the proposal.
-    /// @param params ABI encoded array that should contain the proposal threshold and allowed voting strategies.
+    /// @param params ABI encoded array that should contain the following:
+    ///                 proposalThreshold: Minimum proposition power required to create a proposal.
+    ///                 allowedStrategies: Array of allowed voting strategies.
     /// @param userParams ABI encoded array that should contain the user voting strategies.
     function validate(
         address author,

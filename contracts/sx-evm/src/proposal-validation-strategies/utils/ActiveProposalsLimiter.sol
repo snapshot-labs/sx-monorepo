@@ -8,27 +8,19 @@ abstract contract ActiveProposalsLimiter {
     /// @notice Thrown when the maximum number of active proposals per user is set to 0.
     error MaxActiveProposalsCannotBeZero();
 
-    /// @notice Cooldown duration to wait before the proposal counter gets reset.
-    uint32 public immutable cooldown;
-
-    /// @notice Maximum number of active proposals per user. Must be != 0.
-    uint224 public immutable maxActiveProposals;
-
-    /// @notice Mapping that stores and encoded Uint256 for each user, as follows:
+    /// @dev Mapping that stores an encoded Uint256 for each user for each space, as follows:
     //          [0..32] : 32 bits for the timestamp of the latest proposal made by the user
     //          [32..256] : 224 bits for the number of currently active proposals for this user
-    mapping(address => uint256) public usersPackedData;
-
-    constructor(uint32 _cooldown, uint224 _maxActiveProposals) {
-        if (_maxActiveProposals == 0) revert MaxActiveProposalsCannotBeZero();
-
-        cooldown = _cooldown;
-        maxActiveProposals = _maxActiveProposals;
-    }
+    mapping(address space => mapping(address author => uint256)) private usersPackedData;
 
     /// @dev Validates an author by checking if they have reached the maximum number of active proposals at the current timestamp.
-    function _validate(address author) internal returns (bool success) {
-        uint256 packedData = usersPackedData[author];
+    function _validate(address author, uint256 cooldown, uint256 maxActiveProposals) internal returns (bool success) {
+        if (maxActiveProposals == 0) revert MaxActiveProposalsCannotBeZero();
+
+        // The space calls the proposal validation strategy, therefore msg.sender corresponds to the space address.
+        address space = msg.sender;
+
+        uint256 packedData = usersPackedData[space][author];
 
         // Least significant 32 bits is the lastTimestamp.
         uint256 lastTimestamp = uint32(packedData);
@@ -50,7 +42,7 @@ abstract contract ActiveProposalsLimiter {
             activeProposals += 1;
         }
 
-        usersPackedData[author] = (activeProposals << 32) + uint32(block.timestamp);
+        usersPackedData[space][author] = (activeProposals << 32) + uint32(block.timestamp);
         return true;
     }
 }
