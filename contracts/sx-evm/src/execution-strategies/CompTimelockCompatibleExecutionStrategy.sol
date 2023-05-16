@@ -22,6 +22,13 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
     /// @notice Thrown if the transaction is invalid.
     error InvalidTransaction();
 
+    event CompTimelockCompatibleExecutionStrategySetUp(
+        address owner,
+        address vetoGuardian,
+        address[] spaces,
+        uint256 quorum,
+        address timelock
+    );
     event TransactionQueued(MetaTransaction transaction, uint256 executionTime);
     event TransactionExecuted(MetaTransaction transaction);
     event TransactionVetoed(MetaTransaction transaction);
@@ -41,23 +48,23 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
 
     /// @notice Constructor
     /// @param _owner Address of the owner of this contract.
+    /// @param _vetoGuardian Address of the veto guardian.
     /// @param _spaces Array of whitelisted space contracts.
     /// @param _quorum The quorum required to execute a proposal.
-    constructor(address _owner, address[] memory _spaces, uint256 _quorum, address _timelock) {
-        setUp(abi.encode(_owner, _spaces, _quorum, _timelock));
+    constructor(address _owner, address _vetoGuardian, address[] memory _spaces, uint256 _quorum, address _timelock) {
+        setUp(abi.encode(_owner, _vetoGuardian, _spaces, _quorum, _timelock));
     }
 
     function setUp(bytes memory initializeParams) public initializer {
-        (address _owner, address[] memory _spaces, uint256 _quorum, address _timelock) = abi.decode(
-            initializeParams,
-            (address, address[], uint256, address)
-        );
+        (address _owner, address _vetoGuardian, address[] memory _spaces, uint256 _quorum, address _timelock) = abi
+            .decode(initializeParams, (address, address, address[], uint256, address));
         __Ownable_init();
         transferOwnership(_owner);
+        vetoGuardian = _vetoGuardian;
         __SpaceManager_init(_spaces);
         __SimpleQuorumExecutionStrategy_init(_quorum);
-
         timelock = ICompTimelock(_timelock);
+        emit CompTimelockCompatibleExecutionStrategySetUp(_owner, _vetoGuardian, _spaces, _quorum, _timelock);
     }
 
     /// @notice Accepts admin role of the timelock contract. Must be called before using the timelock.

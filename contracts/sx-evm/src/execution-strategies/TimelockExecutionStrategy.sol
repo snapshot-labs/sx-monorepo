@@ -33,6 +33,20 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
     /// @param transaction The transaction that was executed.
     event TransactionExecuted(MetaTransaction transaction);
 
+    /// @notice Emitted when a new Timelock is set up.
+    /// @param owner The owner of the Timelock.
+    /// @param vetoGuardian The veto guardian of the Timelock.
+    /// @param spaces The spaces that are whitelisted for this Timelock.
+    /// @param quorum The quorum required to execute a proposal.
+    /// @param timelockDelay The delay in seconds between a proposal being queued and the execution of the proposal.
+    event TimelockExecutionStrategySetUp(
+        address owner,
+        address vetoGuardian,
+        address[] spaces,
+        uint256 quorum,
+        uint256 timelockDelay
+    );
+
     /// @notice Emitted when a veto guardian is set.
     /// @param vetoGuardian The old veto guardian.
     /// @param newVetoGuardian The new veto guardian.
@@ -63,25 +77,32 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
 
     /// @notice Constructor
     /// @param _owner Address of the owner of this contract.
+    /// @param _vetoGuardian Address of the veto guardian.
     /// @param _spaces Array of whitelisted space contracts.
     /// @param _timelockDelay The timelock delay in seconds.
     /// @param _quorum The quorum required to execute a proposal.
-    constructor(address _owner, address[] memory _spaces, uint256 _timelockDelay, uint256 _quorum) {
-        setUp(abi.encode(_owner, _spaces, _timelockDelay, _quorum));
+    constructor(
+        address _owner,
+        address _vetoGuardian,
+        address[] memory _spaces,
+        uint256 _timelockDelay,
+        uint256 _quorum
+    ) {
+        setUp(abi.encode(_owner, _vetoGuardian, _spaces, _timelockDelay, _quorum));
     }
 
     /// @notice Initialization function, should be called immediately after deploying a new proxy to this contract.
     /// @param initParams ABI encoded parameters, in the same order as the constructor.
     function setUp(bytes memory initParams) public initializer {
-        (address _owner, address[] memory _spaces, uint256 _timelockDelay, uint256 _quorum) = abi.decode(
-            initParams,
-            (address, address[], uint256, uint256)
-        );
+        (address _owner, address _vetoGuardian, address[] memory _spaces, uint256 _timelockDelay, uint256 _quorum) = abi
+            .decode(initParams, (address, address, address[], uint256, uint256));
         __Ownable_init();
         transferOwnership(_owner);
+        vetoGuardian = _vetoGuardian;
         __SpaceManager_init(_spaces);
         __SimpleQuorumExecutionStrategy_init(_quorum);
         timelockDelay = _timelockDelay;
+        emit TimelockExecutionStrategySetUp(_owner, _vetoGuardian, _spaces, _quorum, _timelockDelay);
     }
 
     /// @notice Executes a proposal by queueing its transactions in the timelock. Can only be called by approved spaces.

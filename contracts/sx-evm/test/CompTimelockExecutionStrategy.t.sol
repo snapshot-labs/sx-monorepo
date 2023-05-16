@@ -20,6 +20,13 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     error DuplicateExecutionPayloadHash();
     error OnlyVetoGuardian();
     error InvalidTransaction();
+    event CompTimelockCompatibleExecutionStrategySetUp(
+        address owner,
+        address vetoGuardian,
+        address[] spaces,
+        uint256 quorum,
+        address timelock
+    );
     event TransactionQueued(MetaTransaction transaction, uint256 executionTime);
     event ProposalVetoed(bytes32 executionPayloadHash);
     event VetoGuardianSet(address vetoGuardian, address newVetoGuardian);
@@ -27,7 +34,8 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     CompTimelockCompatibleExecutionStrategy public timelockExecutionStrategy;
     CompTimelock public timelock = new CompTimelock(address(this), 1000);
 
-    address private recipient = address(0xc0ffee);
+    address public vetoGuardian = address(0);
+    address public recipient = address(0xc0ffee);
 
     function finishSetUp() public {
         vm.deal(address(owner), 1000);
@@ -456,6 +464,24 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     function testViewFunctions() public {
         assertEq(timelockExecutionStrategy.getStrategyType(), "CompTimelockCompatibleSimpleQuorum");
     }
+
+    function testSetUp() public {
+        address[] memory spaces = new address[](1);
+        spaces[0] = address(space);
+        timelockExecutionStrategy = new CompTimelockCompatibleExecutionStrategy(
+            owner,
+            vetoGuardian,
+            spaces,
+            quorum,
+            address(timelock)
+        );
+
+        assertEq(timelockExecutionStrategy.owner(), owner);
+        assertEq(timelockExecutionStrategy.vetoGuardian(), vetoGuardian);
+        assertEq(timelockExecutionStrategy.quorum(), quorum);
+        assertEq(address(timelockExecutionStrategy.timelock()), address(timelock));
+        assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), true);
+    }
 }
 
 contract CompTimelockExecutionStrategyTestDirect is CompTimelockExecutionStrategyTest {
@@ -467,6 +493,7 @@ contract CompTimelockExecutionStrategyTestDirect is CompTimelockExecutionStrateg
 
         timelockExecutionStrategy = new CompTimelockCompatibleExecutionStrategy(
             owner,
+            vetoGuardian,
             spaces,
             quorum,
             address(timelock)
@@ -482,11 +509,13 @@ contract CompTimelockExecutionStrategyTestProxy is CompTimelockExecutionStrategy
 
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
+        address[] memory emptyArray = new address[](1);
         CompTimelockCompatibleExecutionStrategy masterExecutionStrategy = new CompTimelockCompatibleExecutionStrategy(
-            owner,
-            spaces,
-            quorum,
-            address(timelock)
+            address(1),
+            address(0),
+            emptyArray,
+            0,
+            address(0)
         );
 
         timelockExecutionStrategy = CompTimelockCompatibleExecutionStrategy(
@@ -495,7 +524,7 @@ contract CompTimelockExecutionStrategyTestProxy is CompTimelockExecutionStrategy
                     address(masterExecutionStrategy),
                     abi.encodeWithSelector(
                         CompTimelockCompatibleExecutionStrategy.setUp.selector,
-                        abi.encode(owner, spaces, quorum, address(timelock))
+                        abi.encode(owner, vetoGuardian, spaces, quorum, address(timelock))
                     )
                 )
             )
