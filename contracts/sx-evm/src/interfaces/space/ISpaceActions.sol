@@ -15,6 +15,7 @@ interface ISpaceActions {
     /// @param   proposalValidationStrategy  The strategy to use to validate a proposal,
     ///          consisting of a strategy address and an array of configuration parameters.
     /// @param   proposalValidationStrategyMetadataURI  The metadata URI for `proposalValidationStrategy`.
+    /// @param   daoURI  The ERC4824 DAO URI for the space.
     /// @param   metadataURI  The metadata URI for the space.
     /// @param   votingStrategies  The whitelisted voting strategies,
     ///          each consisting of a strategy address and an array of configuration parameters.
@@ -27,6 +28,7 @@ interface ISpaceActions {
         uint32 maxVotingDuration,
         Strategy memory proposalValidationStrategy,
         string memory proposalValidationStrategyMetadataURI,
+        string memory daoURI,
         string memory metadataURI,
         Strategy[] memory votingStrategies,
         string[] memory votingStrategyMetadataURIs,

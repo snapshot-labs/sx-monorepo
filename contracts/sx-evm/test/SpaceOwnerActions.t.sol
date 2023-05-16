@@ -128,6 +128,22 @@ contract SpaceOwnerActionsTest is SpaceTest {
         space.setMinVotingDuration(maxVotingDuration + 1);
     }
 
+    // ------- DaoURI ----
+    function testSetDaoURI() public {
+        string memory newDaoURI = "All your bases are belong to us";
+        vm.expectEmit(true, true, true, true);
+        emit DaoURIUpdated(newDaoURI);
+        space.setDaoURI(newDaoURI);
+        assertEq(space.daoURI(), newDaoURI);
+    }
+
+    function testSetDaoURIUnauthorized() public {
+        string memory newDaoURI = "All your bases are belong to us";
+        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(unauthorized);
+        space.setDaoURI(newDaoURI);
+    }
+
     // ------- MetadataURI ----
 
     function testSetMetadataURI() public {

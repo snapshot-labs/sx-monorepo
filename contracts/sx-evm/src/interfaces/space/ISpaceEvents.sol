@@ -26,6 +26,7 @@ interface ISpaceEvents {
         uint32 maxVotingDuration,
         Strategy proposalValidationStrategy,
         string proposalValidationStrategyMetadataURI,
+        string daoURI,
         string metadataURI,
         Strategy[] votingStrategies,
         string[] votingStrategyMetadataURIs,
@@ -99,6 +100,10 @@ interface ISpaceEvents {
     /// @notice Emitted when the metadata URI for the space is updated.
     /// @param newMetadataURI The new metadata URI.
     event MetadataURIUpdated(string newMetadataURI);
+
+    /// @notice Emitted when the DAO URI for the space is updated.
+    /// @param newDaoURI The new DAO URI.
+    event DaoURIUpdated(string newDaoURI);
 
     /// @notice Emitted when the proposal validation strategy is updated.
     /// @param newProposalValidationStrategy The new proposal validation strategy,

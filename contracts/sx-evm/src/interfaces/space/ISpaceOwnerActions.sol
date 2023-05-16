@@ -37,6 +37,10 @@ interface ISpaceOwnerActions {
     /// @param metadataURI The new metadata URI.
     function setMetadataURI(string calldata metadataURI) external;
 
+    /// @notice Sets the DAO URI for the Space.
+    /// @param daoURI The new DAO URI.
+    function setDaoURI(string calldata daoURI) external;
+
     /// @notice Adds an array of voting strategies.
     /// @param votingStrategies The array of voting strategies to add.
     /// @param votingStrategyMetadataURIs The array of metadata URIs for `votingStrategies`.
