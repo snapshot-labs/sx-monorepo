@@ -36,19 +36,19 @@ const navigationConfig = computed(() => ({
       name: 'Proposals',
       icon: IHNewspaper
     },
-    ...(treasury.value
-      ? {
-          treasury: {
-            name: 'Treasury',
-            icon: IHCash
-          }
-        }
-      : undefined),
     ...(space.value?.delegation_api_url
       ? {
           delegates: {
             name: 'Delegates',
             icon: IHLightningBolt
+          }
+        }
+      : undefined),
+    ...(treasury.value
+      ? {
+          treasury: {
+            name: 'Treasury',
+            icon: IHCash
           }
         }
       : undefined),
