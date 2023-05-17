@@ -31,6 +31,13 @@ const inputValue = computed({
     emit('update:modelValue', newValue);
   }
 });
+
+watch(
+  () => props.modelValue,
+  () => {
+    dirty.value = true;
+  }
+);
 </script>
 
 <template>

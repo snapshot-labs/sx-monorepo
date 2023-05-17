@@ -154,11 +154,13 @@ export function abiToDefinition(abi) {
   const definition = {
     title: abi.name,
     type: 'object',
-    properties: {},
-    additionalProperties: false
+    required: [] as string[],
+    additionalProperties: false,
+    properties: {}
   };
   abi.inputs.forEach(input => {
     definition.properties[input.name] = {};
+    definition.required.push(input.name);
     let type = 'string';
     if (input.type === 'bool') type = 'boolean';
     if (input.type === 'uint256') {

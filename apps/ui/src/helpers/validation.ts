@@ -5,6 +5,7 @@ import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
 import { Zero, MinInt256, MaxInt256, MaxUint256 } from '@ethersproject/constants';
 import { BigNumber } from '@ethersproject/bignumber';
+import { Interface } from '@ethersproject/abi';
 
 function getErrorMessage(errorObject: ErrorObject): string {
   if (!errorObject.message) return 'Invalid field.';
@@ -15,6 +16,8 @@ function getErrorMessage(errorObject: ErrorObject): string {
         return 'Must be a valid URL.';
       case 'address':
         return 'Must be a valid address.';
+      case 'abi':
+        return 'Must be a valid ABI.';
       case 'uint256':
         return 'Must be a positive integer.';
       case 'int256':
@@ -47,6 +50,22 @@ export function validateForm(
         return !!validateAndParseAddress(value);
       } catch (err) {
         return isAddress(value);
+      }
+    }
+  });
+
+  ajv.addFormat('abi', {
+    validate: (value: string) => {
+      if (!value) return false;
+
+      try {
+        const parsed = JSON.parse(value);
+        if (parsed.length === 0) return false;
+
+        new Interface(parsed);
+        return true;
+      } catch {
+        return false;
       }
     }
   });
