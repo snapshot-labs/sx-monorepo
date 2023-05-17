@@ -245,9 +245,9 @@ watch(
           <h4 class="block eyebrow">Your voting power</h4>
           <div class="pt-2">
             <UiLoading v-if="loadingVotingPower" />
-            <div v-else class="text-skin-link text-lg">
+            <button v-else class="text-skin-link text-lg" @click="props.onClick">
               {{ props.formattedVotingPower }}
-            </div>
+            </button>
           </div>
         </VotingPowerIndicator>
         <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>

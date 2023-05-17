@@ -27,11 +27,19 @@ const formattedVotingPower = computed(() => {
 
   return value;
 });
+
+function handleModalOpen() {
+  modalOpen.value = true;
+}
 </script>
 
 <template>
   <div>
-    <slot :formatted-voting-power="formattedVotingPower">
+    <slot
+      :voting-power="votingPower"
+      :formatted-voting-power="formattedVotingPower"
+      :on-click="handleModalOpen"
+    >
       <UiTooltip title="Voting power">
         <UiButton
           v-if="web3.account && web3.type !== 'argentx'"
@@ -40,7 +48,7 @@ const formattedVotingPower = computed(() => {
             '!px-0 w-[46px]': loading
           }"
           class="flex flex-row items-center justify-center"
-          @click="modalOpen = true"
+          @click="handleModalOpen"
         >
           <IH-lightning-bolt class="inline-block" />
           <span class="ml-1">{{ formattedVotingPower }}</span>
