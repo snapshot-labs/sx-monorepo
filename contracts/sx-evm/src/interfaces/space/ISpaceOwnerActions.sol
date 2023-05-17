@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import { Strategy } from "../../types.sol";
+import { Strategy, UpdateSettingsInput } from "../../types.sol";
 
 /// @title Space Owner Actions
 /// @notice The actions that can be performed by the owner of a Space,
@@ -13,51 +13,22 @@ interface ISpaceOwnerActions {
     /// @param   proposalId  The proposal to cancel.
     function cancel(uint256 proposalId) external;
 
-    /// @notice Sets the voting delay.
-    /// @param delay The new voting delay.
-    function setVotingDelay(uint32 delay) external;
-
-    /// @notice Sets the minimum voting duration.
-    /// @param duration The new minimum voting duration.
-    function setMinVotingDuration(uint32 duration) external;
-
-    /// @notice Sets the maximum voting duration.
-    /// @param duration The new maximum voting duration.
-    function setMaxVotingDuration(uint32 duration) external;
-
-    /// @notice Sets the proposal validation strategy.
-    /// @param proposalValidationStrategy The new proposal validation strategy.
-    /// @param proposalValidationStrategyMetadataURI The new metadata URI for the proposal validation strategy.
-    function setProposalValidationStrategy(
-        Strategy calldata proposalValidationStrategy,
-        string calldata proposalValidationStrategyMetadataURI
-    ) external;
-
-    /// @notice Sets the metadata URI for the Space.
-    /// @param metadataURI The new metadata URI.
-    function setMetadataURI(string calldata metadataURI) external;
-
-    /// @notice Sets the DAO URI for the Space.
-    /// @param daoURI The new DAO URI.
-    function setDaoURI(string calldata daoURI) external;
-
-    /// @notice Adds an array of voting strategies.
-    /// @param votingStrategies The array of voting strategies to add.
-    /// @param votingStrategyMetadataURIs The array of metadata URIs for `votingStrategies`.
-    function addVotingStrategies(
-        Strategy[] calldata votingStrategies,
-        string[] calldata votingStrategyMetadataURIs
-    ) external;
-
-    /// @notice Removes an array of voting strategies.
-    /// @param indicesToRemove The array of indices of the voting strategies to remove.
-    function removeVotingStrategies(uint8[] calldata indicesToRemove) external;
-
-    /// @notice Adds an array of authenticators.
-    /// @param authenticators The array of authenticator addresses to add.
-    function addAuthenticators(address[] calldata authenticators) external;
-
-    /// @notice Removes an array of authenticators.
-    /// @param authenticators The array of authenticator addresses to remove.
-    function removeAuthenticators(address[] calldata authenticators) external;
+    /// @notice Updates the settings.
+    /// @param input The settings to modify
+    /// @dev The structure should consist of:
+    ///     minVotingDuration The new minimum voting duration. Set to `NO_UPDATE_UINT32` to ignore.
+    ///     maxVotingDuration The new maximum voting duration. Set to `NO_UPDATE_UINT32` to ignore.
+    ///     votingDelay The new voting delay. Set to `NO_UPDATE_UINT32` to ignore.
+    ///     metadataURI The new metadataURI. Set to `NO_UPDATE_STRING` to ignore.
+    ///     daoURI The new daoURI. Set to `NO_UPDATE_STRING` to ignore.
+    ///     proposalValidationStrategy The new proposal validation strategy to use. Set
+    ///                 to `NO_UPDATE_STRATEGY` to ignore.
+    ///     proposalValidationStrategyMetadataURI The new metadata URI for the proposal validation strategy.
+    ///     authenticatorsToAdd The authenticators to add. Set to an empty array to ignore.
+    ///     authenticatorsToRemove The authenticators to remove. Set to an empty array to ignore.
+    ///     votingStrategiesToAdd The voting strategies to add. Set to an empty array to ignore.
+    ///     votingStrategyMetadataURIsToAdd The voting strategy metadata uris to add. Set to
+    ///                 an empty array to ignore.
+    ///     votignStrategiesToRemove The indices of voting strategies to remove. Set to empty array to ignore.
+    function updateSettings(UpdateSettingsInput calldata input) external;
 }

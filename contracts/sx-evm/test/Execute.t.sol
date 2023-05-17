@@ -3,7 +3,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, IndexedStrategy, ProposalStatus, Strategy } from "../src/types.sol";
+import { Choice, IndexedStrategy, ProposalStatus, Strategy, UpdateSettingsInput } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 
 contract ExecuteTest is SpaceTest {
@@ -40,7 +40,22 @@ contract ExecuteTest is SpaceTest {
     }
 
     function testExecuteMinDurationNotElapsed() public {
-        space.setMinVotingDuration(100);
+        space.updateSettings(
+            UpdateSettingsInput(
+                100,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                NO_UPDATE_STRING,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 

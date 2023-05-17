@@ -6,7 +6,7 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { AuthenticatorTest } from "./utils/Authenticator.t.sol";
 import { SigUtils } from "./utils/SigUtils.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
-import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
 
 contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     error InvalidSignature();
@@ -30,7 +30,23 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         ethSigAuth = new EthSigAuthenticator(NAME, VERSION);
         address[] memory newAuths = new address[](1);
         newAuths[0] = address(ethSigAuth);
-        space.addAuthenticators(newAuths);
+
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                "",
+                newAuths,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
     }
 
     function testAuthenticatePropose() public {
@@ -317,7 +333,22 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     function testAuthenticateUpdateProposal() public {
         uint256 salt = 0;
 
-        space.setVotingDelay(10);
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                10,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                NO_UPDATE_STRING,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         bytes32 digest = _getUpdateProposalDigest(
@@ -347,7 +378,22 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     function testAuthenticateUpdateProposalInvalidSignature() public {
         uint256 salt = 0;
 
-        space.setVotingDelay(10);
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                10,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                NO_UPDATE_STRING,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         bytes32 digest = _getUpdateProposalDigest(

@@ -116,7 +116,7 @@ interface ISpaceEvents {
 
     /// @notice Emitted when the voting delay is updated.
     /// @param newVotingDelay The new voting delay.
-    event VotingDelayUpdated(uint256 newVotingDelay);
+    event VotingDelayUpdated(uint32 newVotingDelay);
 
     /// @notice Emitted when a proposal is updated.
     /// @param proposalId The proposal id.

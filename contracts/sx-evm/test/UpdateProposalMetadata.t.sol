@@ -4,7 +4,7 @@ pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
-import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
 
 contract UpdateProposalTest is SpaceTest {
     string internal newMetadataURI = "Testing123";
@@ -17,7 +17,22 @@ contract UpdateProposalTest is SpaceTest {
 
         // Set the votingDelay to 10.
         votingDelay = 10;
-        space.setVotingDelay(votingDelay);
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                votingDelay,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                NO_UPDATE_STRING,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
     }
 
     function _updateProposal(

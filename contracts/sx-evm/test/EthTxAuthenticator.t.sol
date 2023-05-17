@@ -6,7 +6,7 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { AuthenticatorTest } from "./utils/Authenticator.t.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
-import { Choice, IndexedStrategy, Strategy } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
 
 contract EthTxAuthenticatorTest is SpaceTest {
     error InvalidFunctionSelector();
@@ -24,7 +24,22 @@ contract EthTxAuthenticatorTest is SpaceTest {
         ethTxAuth = new EthTxAuthenticator();
         address[] memory newAuths = new address[](1);
         newAuths[0] = address(ethTxAuth);
-        space.addAuthenticators(newAuths);
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                "",
+                newAuths,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
 
         newStrategy = Strategy(address(new VanillaExecutionStrategy(quorum)), new bytes(0));
     }
@@ -102,7 +117,22 @@ contract EthTxAuthenticatorTest is SpaceTest {
 
     function testAuthenticateTxUpdateProposal() public {
         uint32 votingDelay = 10;
-        space.setVotingDelay(votingDelay);
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                votingDelay,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                NO_UPDATE_STRING,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         vm.prank(author);

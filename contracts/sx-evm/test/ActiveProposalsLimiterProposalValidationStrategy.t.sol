@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Strategy } from "../src/types.sol";
+import { Strategy, UpdateSettingsInput } from "../src/types.sol";
 import {
     ActiveProposalsLimiterProposalValidationStrategy
 } from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
@@ -20,9 +20,25 @@ contract ActiveProposalsLimterTest is SpaceTest {
 
         activeProposalsLimiterProposalValidationStrategy = new ActiveProposalsLimiterProposalValidationStrategy();
 
-        space.setProposalValidationStrategy(
-            Strategy(address(activeProposalsLimiterProposalValidationStrategy), abi.encode(cooldown, maxActive)),
-            ""
+        Strategy memory newProposalStrategy = Strategy(
+            address(activeProposalsLimiterProposalValidationStrategy),
+            abi.encode(cooldown, maxActive)
+        );
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                newProposalStrategy,
+                "",
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
         );
     }
 

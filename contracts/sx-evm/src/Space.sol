@@ -8,7 +8,15 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import { IERC4824 } from "src/interfaces/IERC4824.sol";
 import { ISpace, ISpaceActions, ISpaceState, ISpaceOwnerActions } from "src/interfaces/ISpace.sol";
-import { Choice, FinalizationStatus, IndexedStrategy, Proposal, ProposalStatus, Strategy } from "src/types.sol";
+import {
+    Choice,
+    FinalizationStatus,
+    IndexedStrategy,
+    Proposal,
+    ProposalStatus,
+    Strategy,
+    UpdateSettingsInput
+} from "src/types.sol";
 import { IVotingStrategy } from "src/interfaces/IVotingStrategy.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 import { IProposalValidationStrategy } from "src/interfaces/IProposalValidationStrategy.sol";
@@ -21,6 +29,18 @@ import { BitPacker } from "./utils/BitPacker.sol";
 contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuard {
     using BitPacker for uint256;
     using SXUtils for IndexedStrategy[];
+
+    /// @dev Placeholder value to indicate the user does not want to update a string.
+    /// @dev Evaluates to: `0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048ba`.
+    bytes32 private constant NO_UPDATE_HASH = keccak256(abi.encodePacked("No update"));
+
+    /// @dev Placeholder value to indicate the user does not want to update an address.
+    /// @dev Evaluates to: `0xf2cda9b13ed04e585461605c0d6e804933ca8281`.
+    address private constant NO_UPDATE_ADDRESS = address(bytes20(keccak256(abi.encodePacked("No update"))));
+
+    /// @dev Placeholder value to indicate the user does not want to update a uint32.
+    /// @dev Evaluates to: `0xf2cda9b1`.
+    uint32 private constant NO_UPDATE_UINT32 = uint32(bytes4(keccak256(abi.encodePacked("No update"))));
 
     /// @inheritdoc IERC4824
     string public daoURI;
@@ -70,6 +90,9 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         _setMinVotingDuration(_minVotingDuration);
         _setProposalValidationStrategy(_proposalValidationStrategy);
         _setVotingDelay(_votingDelay);
+
+        if (_votingStrategies.length == 0) revert EmptyArray();
+        if (_authenticators.length == 0) revert EmptyArray();
         _addVotingStrategies(_votingStrategies);
         _addAuthenticators(_authenticators);
 
@@ -98,68 +121,70 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     // ------------------------------------
 
     /// @inheritdoc ISpaceOwnerActions
-    function setMaxVotingDuration(uint32 _maxVotingDuration) external override onlyOwner {
-        _setMaxVotingDuration(_maxVotingDuration);
-        emit MaxVotingDurationUpdated(_maxVotingDuration);
-    }
+    // solhint-disable-next-line code-complexity
+    function updateSettings(UpdateSettingsInput calldata input) external override onlyOwner {
+        if ((input.minVotingDuration != NO_UPDATE_UINT32) && (input.maxVotingDuration != NO_UPDATE_UINT32)) {
+            // Check that min and max VotingDuration are valid
+            // We don't use the internal `_setMinVotingDuration` and `_setMaxVotingDuration` functions because
+            // it would revert when `_minVotingDuration > maxVotingDuration` (when the new `_min` is
+            // bigger than the current `max`).
+            if (input.minVotingDuration > input.maxVotingDuration)
+                revert InvalidDuration(input.minVotingDuration, input.maxVotingDuration);
 
-    /// @inheritdoc ISpaceOwnerActions
-    function setMinVotingDuration(uint32 _minVotingDuration) external override onlyOwner {
-        _setMinVotingDuration(_minVotingDuration);
-        emit MinVotingDurationUpdated(_minVotingDuration);
-    }
+            minVotingDuration = input.minVotingDuration;
+            emit MinVotingDurationUpdated(input.minVotingDuration);
 
-    /// @inheritdoc ISpaceOwnerActions
-    function setMetadataURI(string calldata _metadataURI) external override onlyOwner {
-        emit MetadataURIUpdated(_metadataURI);
-    }
+            maxVotingDuration = input.maxVotingDuration;
+            emit MaxVotingDurationUpdated(input.maxVotingDuration);
+        } else if (input.minVotingDuration != NO_UPDATE_UINT32) {
+            _setMinVotingDuration(input.minVotingDuration);
+            emit MinVotingDurationUpdated(input.minVotingDuration);
+        } else if (input.maxVotingDuration != NO_UPDATE_UINT32) {
+            _setMaxVotingDuration(input.maxVotingDuration);
+            emit MaxVotingDurationUpdated(input.maxVotingDuration);
+        }
 
-    /// @inheritdoc ISpaceOwnerActions
-    function setDaoURI(string calldata newDaoURI) external override onlyOwner {
-        _setDaoURI(newDaoURI);
-        emit DaoURIUpdated(newDaoURI);
-    }
+        if (input.votingDelay != NO_UPDATE_UINT32) {
+            _setVotingDelay(input.votingDelay);
+            emit VotingDelayUpdated(input.votingDelay);
+        }
 
-    /// @inheritdoc ISpaceOwnerActions
-    function setProposalValidationStrategy(
-        Strategy calldata _proposalValidationStrategy,
-        string calldata proposalValidationStrategyMetadataURI
-    ) external override onlyOwner {
-        _setProposalValidationStrategy(_proposalValidationStrategy);
-        emit ProposalValidationStrategyUpdated(_proposalValidationStrategy, proposalValidationStrategyMetadataURI);
-    }
+        if (keccak256(abi.encodePacked(input.metadataURI)) != NO_UPDATE_HASH) {
+            emit MetadataURIUpdated(input.metadataURI);
+        }
 
-    /// @inheritdoc ISpaceOwnerActions
-    function setVotingDelay(uint32 _votingDelay) external override onlyOwner {
-        _setVotingDelay(_votingDelay);
-        emit VotingDelayUpdated(_votingDelay);
-    }
+        if (keccak256(abi.encodePacked(input.daoURI)) != NO_UPDATE_HASH) {
+            _setDaoURI(input.daoURI);
+            emit DaoURIUpdated(input.daoURI);
+        }
 
-    /// @inheritdoc ISpaceOwnerActions
-    function addVotingStrategies(
-        Strategy[] calldata _votingStrategies,
-        string[] calldata votingStrategyMetadataURIs
-    ) external override onlyOwner {
-        _addVotingStrategies(_votingStrategies);
-        emit VotingStrategiesAdded(_votingStrategies, votingStrategyMetadataURIs);
-    }
+        if (input.proposalValidationStrategy.addr != NO_UPDATE_ADDRESS) {
+            _setProposalValidationStrategy(input.proposalValidationStrategy);
+            emit ProposalValidationStrategyUpdated(
+                input.proposalValidationStrategy,
+                input.proposalValidationStrategyMetadataURI
+            );
+        }
 
-    /// @inheritdoc ISpaceOwnerActions
-    function removeVotingStrategies(uint8[] calldata _votingStrategyIndices) external override onlyOwner {
-        _removeVotingStrategies(_votingStrategyIndices);
-        emit VotingStrategiesRemoved(_votingStrategyIndices);
-    }
+        if (input.authenticatorsToAdd.length > 0) {
+            _addAuthenticators(input.authenticatorsToAdd);
+            emit AuthenticatorsAdded(input.authenticatorsToAdd);
+        }
 
-    /// @inheritdoc ISpaceOwnerActions
-    function addAuthenticators(address[] calldata _authenticators) external override onlyOwner {
-        _addAuthenticators(_authenticators);
-        emit AuthenticatorsAdded(_authenticators);
-    }
+        if (input.authenticatorsToRemove.length > 0) {
+            _removeAuthenticators(input.authenticatorsToRemove);
+            emit AuthenticatorsRemoved(input.authenticatorsToRemove);
+        }
 
-    /// @inheritdoc ISpaceOwnerActions
-    function removeAuthenticators(address[] calldata _authenticators) external override onlyOwner {
-        _removeAuthenticators(_authenticators);
-        emit AuthenticatorsRemoved(_authenticators);
+        if (input.votingStrategiesToAdd.length > 0) {
+            _addVotingStrategies(input.votingStrategiesToAdd);
+            emit VotingStrategiesAdded(input.votingStrategiesToAdd, input.votingStrategyMetadataURIsToAdd);
+        }
+
+        if (input.votingStrategiesToRemove.length > 0) {
+            _removeVotingStrategies(input.votingStrategiesToRemove);
+            emit VotingStrategiesRemoved(input.votingStrategiesToRemove);
+        }
     }
 
     /// @dev Gates access to whitelisted authenticators only.
@@ -354,7 +379,6 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
 
     /// @dev Adds an array of voting strategies.
     function _addVotingStrategies(Strategy[] memory _votingStrategies) internal {
-        if (_votingStrategies.length == 0) revert EmptyArray();
         uint256 cachedActiveVotingStrategies = activeVotingStrategies;
         uint8 cachedNextVotingStrategyIndex = nextVotingStrategyIndex;
         if (cachedNextVotingStrategyIndex >= 256 - _votingStrategies.length) revert ExceedsStrategyLimit();
@@ -370,7 +394,6 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
 
     /// @dev Removes an array of voting strategies, specified by their indices.
     function _removeVotingStrategies(uint8[] memory _votingStrategyIndices) internal {
-        if (_votingStrategyIndices.length == 0) revert EmptyArray();
         for (uint8 i = 0; i < _votingStrategyIndices.length; i++) {
             activeVotingStrategies = activeVotingStrategies.setBit(_votingStrategyIndices[i], false);
         }
@@ -380,7 +403,6 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
 
     /// @dev Adds an array of authenticators.
     function _addAuthenticators(address[] memory _authenticators) internal {
-        if (_authenticators.length == 0) revert EmptyArray();
         for (uint256 i = 0; i < _authenticators.length; i++) {
             authenticators[_authenticators[i]] = true;
         }
@@ -388,7 +410,6 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
 
     /// @dev Removes an array of authenticators.
     function _removeAuthenticators(address[] memory _authenticators) internal {
-        if (_authenticators.length == 0) revert EmptyArray();
         for (uint256 i = 0; i < _authenticators.length; i++) {
             authenticators[_authenticators[i]] = false;
         }
