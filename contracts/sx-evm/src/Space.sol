@@ -83,6 +83,10 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         string[] memory _votingStrategyMetadataURIs,
         address[] memory _authenticators
     ) public initializer {
+        if (_votingStrategies.length == 0) revert EmptyArray();
+        if (_authenticators.length == 0) revert EmptyArray();
+        if (_votingStrategies.length != _votingStrategyMetadataURIs.length) revert ArrayLengthMismatch();
+
         __Ownable_init();
         transferOwnership(_owner);
         _setDaoURI(_daoURI);
@@ -90,9 +94,6 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         _setMinVotingDuration(_minVotingDuration);
         _setProposalValidationStrategy(_proposalValidationStrategy);
         _setVotingDelay(_votingDelay);
-
-        if (_votingStrategies.length == 0) revert EmptyArray();
-        if (_authenticators.length == 0) revert EmptyArray();
         _addVotingStrategies(_votingStrategies);
         _addAuthenticators(_authenticators);
 
@@ -177,6 +178,8 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         }
 
         if (input.votingStrategiesToAdd.length > 0) {
+            if (input.votingStrategiesToAdd.length != input.votingStrategyMetadataURIsToAdd.length)
+                revert ArrayLengthMismatch();
             _addVotingStrategies(input.votingStrategiesToAdd);
             emit VotingStrategiesAdded(input.votingStrategiesToAdd, input.votingStrategyMetadataURIsToAdd);
         }

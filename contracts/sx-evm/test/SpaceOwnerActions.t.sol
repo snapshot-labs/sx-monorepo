@@ -359,7 +359,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         uint8[] memory newIndices = new uint8[](1);
         newIndices[0] = 1;
 
-        string[] memory votingStrategyMetadataURIs = new string[](0);
+        string[] memory votingStrategyMetadataURIs = new string[](1);
 
         IndexedStrategy[] memory newUserVotingStrategies = new IndexedStrategy[](1);
         newUserVotingStrategies[0] = IndexedStrategy(newIndices[0], new bytes(0));
@@ -493,7 +493,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
     function testAddVotingStrategiesInvalidAddress() public {
         Strategy[] memory newVotingStrategies = new Strategy[](1);
-        string[] memory votingStrategyMetadataURIs = new string[](0);
+        string[] memory votingStrategyMetadataURIs = new string[](1);
         newVotingStrategies[0] = Strategy(address(0), new bytes(0));
         vm.expectRevert(ZeroAddress.selector);
         space.updateSettings(
@@ -627,6 +627,37 @@ contract SpaceOwnerActionsTest is SpaceTest {
         assertEq(space.activeVotingStrategies().isBitSet(0), false);
         assertEq(space.activeVotingStrategies().isBitSet(1), true);
         assertEq(space.activeVotingStrategies().isBitSet(2), true);
+    }
+
+    function testUpdateVotingStrategiesArrayLengthMismatch() public {
+        Strategy[] memory _votingStrategiesToAdd = new Strategy[](2);
+        _votingStrategiesToAdd[0] = Strategy(address(0xc), new bytes(0));
+        _votingStrategiesToAdd[1] = Strategy(address(0xd), new bytes(0));
+
+        // Mismatched array lengths between voting strategies and their metadata URIs
+        string[] memory _votingStrategyMetadataURIsToAdd = new string[](1);
+        _votingStrategyMetadataURIsToAdd[0] = "test456";
+
+        uint8[] memory _indicesToRemove = new uint8[](1);
+        _indicesToRemove[0] = 0;
+
+        vm.expectRevert(abi.encodeWithSelector(ArrayLengthMismatch.selector));
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRATEGY,
+                "",
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                _votingStrategiesToAdd,
+                _votingStrategyMetadataURIsToAdd,
+                _indicesToRemove
+            )
+        );
     }
 
     function testUpdateStrategies() public {

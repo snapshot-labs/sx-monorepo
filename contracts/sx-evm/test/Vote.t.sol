@@ -107,7 +107,7 @@ contract VoteTest is SpaceTest {
         // adding a new voting strategy which will reside at index 1
         Strategy[] memory newVotingStrategies = new Strategy[](1);
         newVotingStrategies[0] = votingStrategies[0];
-        string[] memory newVotingStrategyMetadataURIs = new string[](0);
+        string[] memory newVotingStrategyMetadataURIs = new string[](1);
 
         // removing the voting strategy at index 0
         uint8[] memory removeIndices = new uint8[](1);
@@ -140,7 +140,7 @@ contract VoteTest is SpaceTest {
         // adding a new voting strategy which will reside at index 1
         Strategy[] memory newVotingStrategies = new Strategy[](1);
         newVotingStrategies[0] = votingStrategies[0];
-        string[] memory newVotingStrategyMetadataURIs = new string[](0);
+        string[] memory newVotingStrategyMetadataURIs = new string[](1);
         space.updateSettings(
             UpdateSettingsInput(
                 NO_UPDATE_UINT32,
@@ -192,7 +192,7 @@ contract VoteTest is SpaceTest {
         Strategy[] memory toAdd = new Strategy[](2);
         toAdd[0] = Strategy(address(strat2), new bytes(0));
         toAdd[1] = Strategy(address(strat3), new bytes(0));
-        string[] memory newVotingStrategyMetadataURIs = new string[](0);
+        string[] memory newVotingStrategyMetadataURIs = new string[](2);
 
         space.updateSettings(
             UpdateSettingsInput(

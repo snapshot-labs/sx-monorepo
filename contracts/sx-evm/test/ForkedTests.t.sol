@@ -60,7 +60,7 @@ contract ForkedTest is SpaceTest, SigUtils {
         compVotingStrategy = new CompVotingStrategy();
         compToken = new CompToken();
         newVotingStrategies[0] = Strategy(address(compVotingStrategy), abi.encodePacked(address(compToken)));
-        string[] memory newVotingStrategyMetadataURIs = new string[](0);
+        string[] memory newVotingStrategyMetadataURIs = new string[](1);
         uint8[] memory toRemove = new uint8[](1);
         toRemove[0] = 0;
 

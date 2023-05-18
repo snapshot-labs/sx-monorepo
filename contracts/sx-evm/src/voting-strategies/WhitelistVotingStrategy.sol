@@ -6,7 +6,7 @@ import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
 
 /// @title Whitelist Voting Strategy
 /// @notice Allows a variable voting power whitelist to be used for voting power.
-contract WhitelistStrategy is IVotingStrategy {
+contract WhitelistVotingStrategy is IVotingStrategy {
     /// @dev Stores the data for each member of the whitelist.
     struct Member {
         // The address of the member.

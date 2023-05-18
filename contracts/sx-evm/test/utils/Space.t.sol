@@ -94,6 +94,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
         minVotingDuration = 0;
         maxVotingDuration = 1000;
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
+        votingStrategyMetadataURIs.push("VanillaVotingStrategy");
         authenticators.push(address(vanillaAuthenticator));
         executionStrategies.push(Strategy(address(vanillaExecutionStrategy), abi.encode(uint256(quorum))));
         userVotingStrategies.push(IndexedStrategy(0, new bytes(0)));

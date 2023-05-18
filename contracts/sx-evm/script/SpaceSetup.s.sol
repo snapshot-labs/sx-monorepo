@@ -16,7 +16,7 @@ contract SpaceSetup is Script {
     ProxyFactory public spaceFactory = ProxyFactory(0xcae03d02f6840D865ccDD6668f1C2FDCA47F2240);
     address public vanillaVotingStrategy = address(0x395eD61716b48DC904140b515e9F682E33330154);
     address public compVotingStrategy = address(0xbBD17346378F76c1c94032594b57C93c24857B19);
-    address public whitelistStrategy = address(0xC89a0C93Af823F794F96F7b2B63Fc2a1f1AE9427);
+    address public whitelistVotingStrategy = address(0xC89a0C93Af823F794F96F7b2B63Fc2a1f1AE9427);
     address public vanillaAuthenticator = address(0x86bfa0726CBA0FeBEeE457F04b705AB74B54D01c);
     address public ethSigAuthenticator = address(0x328c6F186639f1981Dc25eD4517E8Ed2aDd85569);
     address public ethTxAuthenticator = address(0x37315Ce75920B653f0f13734c709e199876455C9);

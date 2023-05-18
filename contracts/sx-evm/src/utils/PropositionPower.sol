@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.18;
 
-import { SXUtils } from "../../utils/SXUtils.sol";
-import { IndexedStrategy, Strategy } from "../../types.sol";
-import { IVotingStrategy } from "../../interfaces/IVotingStrategy.sol";
+import { SXUtils } from "./SXUtils.sol";
+import { IndexedStrategy, Strategy } from "../types.sol";
+import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
 
 /// @title Proposition Power Proposal Validation Strategy Module
 /// @notice This module allows a proposal to be validated based on the proposition power of an author exceeding

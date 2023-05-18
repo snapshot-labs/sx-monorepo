@@ -12,13 +12,13 @@ import {
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
 import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
-import { WhitelistStrategy } from "../src/voting-strategies/WhitelistStrategy.sol";
+import { WhitelistVotingStrategy } from "../src/voting-strategies/WhitelistVotingStrategy.sol";
 import { ProxyFactory } from "../src/ProxyFactory.sol";
 
 contract ModulesDeployment is Script {
     VanillaVotingStrategy public vanillaVotingStrategy;
     CompVotingStrategy public compVotingStrategy;
-    WhitelistStrategy public whitelistStrategy;
+    WhitelistVotingStrategy public whitelistVotingStrategy;
     VanillaAuthenticator public vanillaAuthenticator;
     PropositionPowerProposalValidationStrategy public propositionPowerProposalValidationStrategy;
     EthSigAuthenticator public ethSigAuthenticator;
@@ -31,7 +31,7 @@ contract ModulesDeployment is Script {
         vm.startBroadcast(deployerPrivateKey);
         vanillaVotingStrategy = new VanillaVotingStrategy();
         compVotingStrategy = new CompVotingStrategy();
-        whitelistStrategy = new WhitelistStrategy();
+        whitelistVotingStrategy = new WhitelistVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
         ethSigAuthenticator = new EthSigAuthenticator("snapshot-x", "0.1.0");
         ethTxAuthenticator = new EthTxAuthenticator();

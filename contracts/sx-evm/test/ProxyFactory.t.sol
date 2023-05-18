@@ -54,6 +54,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         uint256 proposalThreshold = 1;
         quorum = 1;
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
+        votingStrategyMetadataURIs.push("VanillaVotingStrategy");
         authenticators.push(address(vanillaAuthenticator));
         executionStrategies.push(Strategy(address(vanillaExecutionStrategy), new bytes(0)));
         proposalValidationStrategy = Strategy(
@@ -62,7 +63,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         );
     }
 
-    function testCreateSpace1() public {
+    function testCreateSpace() public {
         bytes32 salt = bytes32(keccak256(abi.encodePacked("random salt")));
         // Pre-computed address of the space (possible because of CREATE2 deployment)
         address spaceProxy = _predictProxyAddress(address(factory), address(masterSpace), salt);

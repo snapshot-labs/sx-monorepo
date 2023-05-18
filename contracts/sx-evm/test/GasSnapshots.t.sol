@@ -53,7 +53,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         compVotingStrategy = new CompVotingStrategy();
         compToken = new CompToken();
         newVotingStrategies[0] = Strategy(address(compVotingStrategy), abi.encodePacked(address(compToken)));
-        string[] memory newVotingStrategyMetadataURIs = new string[](0);
+        string[] memory newVotingStrategyMetadataURIs = new string[](1);
 
         uint8[] memory votingStrategiesToRemove = new uint8[](1);
         votingStrategiesToRemove[0] = 0;

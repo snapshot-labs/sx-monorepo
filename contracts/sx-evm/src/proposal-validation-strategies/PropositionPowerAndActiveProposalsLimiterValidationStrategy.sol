@@ -4,8 +4,8 @@ pragma solidity ^0.8.18;
 
 import { IProposalValidationStrategy } from "../interfaces/IProposalValidationStrategy.sol";
 import { IndexedStrategy, Strategy } from "../types.sol";
-import { ActiveProposalsLimiter } from "./utils/ActiveProposalsLimiter.sol";
-import { PropositionPower } from "./utils/PropositionPower.sol";
+import { ActiveProposalsLimiter } from "../utils/ActiveProposalsLimiter.sol";
+import { PropositionPower } from "../utils/PropositionPower.sol";
 
 /// @title Proposition Power and Active Proposals Limiter Proposal Validation Strategy
 /// @notice Strategy that limits proposal creation to authors that exceed a threshold proposition

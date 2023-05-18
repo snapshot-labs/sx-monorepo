@@ -3,7 +3,7 @@
 pragma solidity ^0.8.18;
 
 import { IProposalValidationStrategy } from "../interfaces/IProposalValidationStrategy.sol";
-import { ActiveProposalsLimiter } from "./utils/ActiveProposalsLimiter.sol";
+import { ActiveProposalsLimiter } from "../utils/ActiveProposalsLimiter.sol";
 
 /// @title Active Proposals Limiter Proposal Validation Strategy
 /// @notice Strategy to limit proposal creation to a maximum number of active proposals per author.

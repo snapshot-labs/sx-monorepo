@@ -9,6 +9,9 @@ interface ISpaceErrors {
     /// @notice Thrown when an invalid empty array is supplied.
     error EmptyArray();
 
+    /// @notice Thrown when two arrays which must be of equal length are not.
+    error ArrayLengthMismatch();
+
     /// @notice Thrown when the caller is unauthorized to perform a certain action.
     error InvalidCaller();
 
