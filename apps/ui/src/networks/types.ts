@@ -15,7 +15,8 @@ import type {
 
 export type PaginationOpts = { limit: number; skip?: number };
 export type SpacesFilter = {
-  controller: string;
+  controller?: string;
+  id_in?: string[];
 };
 export type Connector =
   | 'argentx'

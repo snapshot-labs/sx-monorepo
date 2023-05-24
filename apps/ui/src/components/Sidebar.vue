@@ -13,7 +13,7 @@ const spacesStore = useSpacesStore();
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
     <draggable
-      v-model="spacesStore.starredSpacesIds"
+      v-model="spacesStore.starredSpaces"
       :delay="100"
       :delay-on-touch-only="true"
       :touch-start-threshold="35"
@@ -22,11 +22,11 @@ const spacesStore = useSpacesStore();
     >
       <template #item="{ element }">
         <router-link
-          :to="{ name: 'space-overview', params: { id: element } }"
+          :to="{ name: 'space-overview', params: { id: `${element.network}:${element.id}` } }"
           class="block"
           @click="uiStore.sidebarOpen = false"
         >
-          <Stamp :id="element.split(':')[1]" :size="32" type="space-sx" class="!rounded-[4px]" />
+          <Stamp :id="element.id" :size="32" type="space-sx" class="!rounded-[4px]" />
         </router-link>
       </template>
     </draggable>

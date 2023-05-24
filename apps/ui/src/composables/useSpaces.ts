@@ -47,6 +47,24 @@ export function useSpaces() {
     Object.values(networksMap.value).some(record => record.hasMoreSpaces === true)
   );
 
+  async function getSpaces(filter?: SpacesFilter) {
+    const results = await Promise.all(
+      enabledNetworks.map(async id => {
+        const network = getNetwork(id);
+
+        return network.api.loadSpaces(
+          {
+            skip: 0,
+            limit: SPACES_LIMIT
+          },
+          filter
+        );
+      })
+    );
+
+    return results.flat();
+  }
+
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
     const results = await Promise.all(
       enabledNetworks.map(async id => {
@@ -124,6 +142,7 @@ export function useSpaces() {
     spaces,
     spacesMap,
     hasMoreSpaces,
+    getSpaces,
     fetch,
     fetchMore
   };
