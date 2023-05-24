@@ -110,6 +110,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     signer,
     TimelockExecutionStrategyContract,
     controller,
+    controller,
     [],
     0,
     1
@@ -170,6 +171,7 @@ export async function setup(signer: Signer): Promise<TestConfig> {
     signer,
     params: {
       controller,
+      vetoGuardian: controller,
       spaces: [spaceAddress],
       timelockDelay: 0n,
       quorum: 1n
@@ -203,14 +205,14 @@ export async function setup(signer: Signer): Promise<TestConfig> {
 
   const whitelist = [
     {
-      addy: controller,
+      addr: controller,
       vp: 1n
     }
   ];
 
   const abiCoder = new AbiCoder();
   const whitelistVotingStrategyParams = abiCoder.encode(
-    ['tuple(address addy, uint256 vp)[]'],
+    ['tuple(address addr, uint256 vp)[]'],
     [whitelist]
   );
 
@@ -222,53 +224,55 @@ export async function setup(signer: Signer): Promise<TestConfig> {
       minVotingDuration: 0,
       maxVotingDuration: 86400,
       proposalValidationStrategy: {
-        addy: votingPowerProposalValidationStrategy,
+        addr: votingPowerProposalValidationStrategy,
         params: abiCoder.encode(
-          ['uint256', 'tuple(address addy, bytes params)[]'],
+          ['uint256', 'tuple(address addr, bytes params)[]'],
           [
             1,
             [
               {
-                addy: vanillaVotingStrategy,
+                addr: vanillaVotingStrategy,
                 params: '0x00'
               },
               {
-                addy: compVotingStrategy,
+                addr: compVotingStrategy,
                 params: compToken
               },
               {
-                addy: ozVotesVotingStrategy,
+                addr: ozVotesVotingStrategy,
                 params: erc20VotesToken
               },
               {
-                addy: whitelistVotingStrategy,
+                addr: whitelistVotingStrategy,
                 params: whitelistVotingStrategyParams
               }
             ]
           ]
         )
       },
+      proposalValidationStrategyMetadataUri: 'proposalValidationStrategyMetadataUri',
+      daoUri: 'daoUri',
       metadataUri: 'metadataUri',
       authenticators: [vanillaAuthenticator, ethTxAuthenticator, ethSigAuthenticator],
       votingStrategies: [
         {
-          addy: vanillaVotingStrategy,
+          addr: vanillaVotingStrategy,
           params: '0x00'
         },
         {
-          addy: compVotingStrategy,
+          addr: compVotingStrategy,
           params: compToken
         },
         {
-          addy: ozVotesVotingStrategy,
+          addr: ozVotesVotingStrategy,
           params: erc20VotesToken
         },
         {
-          addy: whitelistVotingStrategy,
+          addr: whitelistVotingStrategy,
           params: whitelistVotingStrategyParams
         }
       ],
-      votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00']
+      votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00', '0x00']
     },
     salt: precomputedSpaceSalt
   });

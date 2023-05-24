@@ -18,6 +18,8 @@ type SpaceParams = {
   minVotingDuration: number;
   maxVotingDuration: number;
   proposalValidationStrategy: AddressConfig;
+  proposalValidationStrategyMetadataUri: string;
+  daoUri: string;
   metadataUri: string;
   authenticators: string[];
   votingStrategies: AddressConfig[];
@@ -33,10 +35,30 @@ type AvatarExecutionStrategyParams = {
 
 type TimelockExecutionStrategyParams = {
   controller: string;
+  vetoGuardian: string;
   spaces: string[];
   timelockDelay: bigint;
   quorum: bigint;
 };
+
+type UpdateSettingsInput = {
+  minVotingDuration?: number;
+  maxVotingDuration?: number;
+  votingDelay?: number;
+  metadataUri?: string;
+  daoUri?: string;
+  proposalValidationStrategy?: AddressConfig;
+  proposalValidationStrategyMetadataUri?: string;
+  authenticatorsToAdd?: string[];
+  authenticatorsToRemove?: string[];
+  votingStrategiesToAdd?: AddressConfig[];
+  votingStrategiesToRemove?: number[];
+  votingStrategyMetadataUrisToAdd?: string[];
+};
+
+const NO_UPDATE_HASH = '0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048ba';
+const NO_UPDATE_ADDRESS = '0xf2cda9b13ed04e585461605c0d6e804933ca8281';
+const NO_UPDATE_UINT32 = '0xf2cda9b1';
 
 export class EthereumTx {
   networkConfig: EvmNetworkConfig;
@@ -89,7 +111,7 @@ export class EthereumTx {
 
   async deployTimelockExecution({
     signer,
-    params: { controller, spaces, timelockDelay, quorum },
+    params: { controller, vetoGuardian, spaces, timelockDelay, quorum },
     salt
   }: {
     signer: Signer;
@@ -114,8 +136,8 @@ export class EthereumTx {
     );
 
     const initParams = abiCoder.encode(
-      ['address', 'address[]', 'uint256', 'uint256'],
-      [controller, spaces, timelockDelay, quorum]
+      ['address', 'address', 'address[]', 'uint256', 'uint256'],
+      [controller, vetoGuardian, spaces, timelockDelay, quorum]
     );
     const functionData = timelockExecutionStrategyInterface.encodeFunctionData('setUp', [
       initParams
@@ -139,6 +161,8 @@ export class EthereumTx {
       minVotingDuration,
       maxVotingDuration,
       proposalValidationStrategy,
+      proposalValidationStrategyMetadataUri,
+      daoUri,
       metadataUri,
       authenticators,
       votingStrategies,
@@ -165,6 +189,8 @@ export class EthereumTx {
       minVotingDuration,
       maxVotingDuration,
       proposalValidationStrategy,
+      proposalValidationStrategyMetadataUri,
+      daoUri,
       metadataUri,
       votingStrategies,
       votingStrategiesMetadata,
@@ -341,20 +367,6 @@ export class EthereumTx {
     return spaceContract.cancel(proposal);
   }
 
-  async getProposal({
-    signer,
-    space,
-    proposal
-  }: {
-    signer: Signer;
-    space: string;
-    proposal: number;
-  }) {
-    const spaceContract = new Contract(space, SpaceAbi, signer);
-
-    return spaceContract.getProposal(proposal);
-  }
-
   async getProposalStatus({
     signer,
     space,
@@ -369,6 +381,36 @@ export class EthereumTx {
     return spaceContract.getProposalStatus(proposal);
   }
 
+  async updateSettings({
+    signer,
+    space,
+    settings
+  }: {
+    signer: Signer;
+    space: string;
+    settings: UpdateSettingsInput;
+  }) {
+    const spaceContract = new Contract(space, SpaceAbi, signer);
+
+    return spaceContract.updateSettings({
+      minVotingDuration: settings.minVotingDuration || NO_UPDATE_UINT32,
+      maxVotingDuration: settings.maxVotingDuration || NO_UPDATE_UINT32,
+      votingDelay: settings.votingDelay || NO_UPDATE_UINT32,
+      metadataURI: settings.metadataUri || NO_UPDATE_HASH,
+      daoURI: settings.daoUri || NO_UPDATE_HASH,
+      proposalValidationStrategy: settings.proposalValidationStrategy || {
+        addr: NO_UPDATE_ADDRESS,
+        params: '0x00'
+      },
+      proposalValidationStrategyMetadataURI: settings.proposalValidationStrategyMetadataUri || '',
+      authenticatorsToAdd: settings.authenticatorsToAdd || [],
+      authenticatorsToRemove: settings.authenticatorsToRemove || [],
+      votingStrategiesToAdd: settings.votingStrategiesToAdd || [],
+      votingStrategiesToRemove: settings.votingStrategiesToRemove || [],
+      votingStrategyMetadataURIsToAdd: settings.votingStrategyMetadataUrisToAdd || []
+    });
+  }
+
   async setMaxVotingDuration({
     signer,
     space,
@@ -378,9 +420,13 @@ export class EthereumTx {
     space: string;
     maxVotingDuration: number;
   }) {
-    const spaceContract = new Contract(space, SpaceAbi, signer);
-
-    return spaceContract.setMaxVotingDuration(maxVotingDuration);
+    return this.updateSettings({
+      signer,
+      space,
+      settings: {
+        maxVotingDuration
+      }
+    });
   }
 
   async setMinVotingDuration({
@@ -392,9 +438,13 @@ export class EthereumTx {
     space: string;
     minVotingDuration: number;
   }) {
-    const spaceContract = new Contract(space, SpaceAbi, signer);
-
-    return spaceContract.setMinVotingDuration(minVotingDuration);
+    return this.updateSettings({
+      signer,
+      space,
+      settings: {
+        minVotingDuration
+      }
+    });
   }
 
   async setMetadataUri({
@@ -406,9 +456,13 @@ export class EthereumTx {
     space: string;
     metadataUri: string;
   }) {
-    const spaceContract = new Contract(space, SpaceAbi, signer);
-
-    return spaceContract.setMetadataURI(metadataUri);
+    return this.updateSettings({
+      signer,
+      space,
+      settings: {
+        metadataUri
+      }
+    });
   }
 
   async setVotingDelay({
@@ -420,9 +474,13 @@ export class EthereumTx {
     space: string;
     votingDelay: number;
   }) {
-    const spaceContract = new Contract(space, SpaceAbi, signer);
-
-    return spaceContract.setVotingDelay(votingDelay);
+    return this.updateSettings({
+      signer,
+      space,
+      settings: {
+        votingDelay
+      }
+    });
   }
 
   async transferOwnership({

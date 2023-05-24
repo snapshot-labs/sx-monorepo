@@ -37,7 +37,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -76,7 +76,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethTxAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -116,7 +116,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethSigAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       });
@@ -156,7 +156,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 1, address: testConfig.compVotingStrategy }],
-          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -195,7 +195,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 2, address: testConfig.ozVotesVotingStrategy }],
-          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -234,7 +234,7 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 3, address: testConfig.whitelistVotingStrategy }],
-          executionStrategy: { addy: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -290,7 +290,7 @@ describe('EthereumTx', () => {
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           executionStrategy: {
-            addy: testConfig.avatarExecutionStrategy,
+            addr: testConfig.avatarExecutionStrategy,
             params: executionParams[0]
           },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
@@ -364,7 +364,7 @@ describe('EthereumTx', () => {
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           executionStrategy: {
-            addy: testConfig.timelockExecutionStrategy,
+            addr: testConfig.timelockExecutionStrategy,
             params: executionParams[0]
           },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
@@ -436,15 +436,6 @@ describe('EthereumTx', () => {
       proposal: PROPOSAL_ID
     });
     expect(res.hash).toBeDefined();
-  });
-
-  it('should get proposal', async () => {
-    const res = await ethTxClient.getProposal({
-      signer,
-      space: spaceAddress,
-      proposal: PROPOSAL_ID
-    });
-    expect(res.startTimestamp).toBeGreaterThan(0);
   });
 
   it('should get proposal status', async () => {

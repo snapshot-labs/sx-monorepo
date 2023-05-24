@@ -32,18 +32,18 @@
   ],
   "bytecode": {
     "object": "0x608080604052346100155760f8908161001b8239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c630721609514602857600080fd5b3460b75760607ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260b75760043573ffffffffffffffffffffffffffffffffffffffff81160360b75767ffffffffffffffff9160243583811160b757609290369060040160bb565b505060443592831160b4575060ac602092369060040160bb565b505060018152f35b80fd5b5080fd5b9181601f8401121560e65782359167ffffffffffffffff831160e6576020838186019501011160e657565b600080fdfea164736f6c6343000812000a",
-    "sourceMap": "153:268:79:-:0;;;;;;;;;;;;;;;;;",
+    "sourceMap": "201:268:98:-:0;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
     "object": "0x6080806040526004361015601257600080fd5b600090813560e01c630721609514602857600080fd5b3460b75760607ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260b75760043573ffffffffffffffffffffffffffffffffffffffff81160360b75767ffffffffffffffff9160243583811160b757609290369060040160bb565b505060443592831160b4575060ac602092369060040160bb565b505060018152f35b80fd5b5080fd5b9181601f8401121560e65782359167ffffffffffffffff831160e6576020838186019501011160e657565b600080fdfea164736f6c6343000812000a",
-    "sourceMap": "153:268:79:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;:::i;:::-;;;408:4;153:268;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;",
+    "sourceMap": "201:268:98:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;:::i;:::-;;;456:4;201:268;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;",
     "linkReferences": {}
   },
   "methodIdentifiers": {
     "validate(address,bytes,bytes)": "07216095"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.18+commit.87f61d96\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"validate\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol\":\"VanillaProposalValidationStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/interfaces/IProposalValidationStrategy.sol\":{\"keccak256\":\"0x34d0f7ab219de781b8416c7e01433fd3f73b047c67ad2ed22fee977da1b60a97\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://58d5fdd6547db317888d26834acab262d2645166127fce4f5c0799df0208276d\",\"dweb:/ipfs/QmQf4bergX91ahoUuFUnCNJtnq1b6A4Hjm8QN6pgrXUqdS\"]},\"src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol\":{\"keccak256\":\"0x28d784abe97dad5a7f846ddfcdb2322d0b6913daf6afe897b4ce1d9f805fee81\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://2046d959e611388cbdbfcfc6d1e8794fed625f6fa6603a97cdd1df3afd6db97e\",\"dweb:/ipfs/QmSoCUy59ZJEJVKua83cqT44XvTGRWEwkkeRp8ghPAbBKQ\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.18+commit.87f61d96\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"validate\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"title\":\"Vanilla Proposal Validation Strategy\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol\":\"VanillaProposalValidationStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/interfaces/IProposalValidationStrategy.sol\":{\"keccak256\":\"0x34d0f7ab219de781b8416c7e01433fd3f73b047c67ad2ed22fee977da1b60a97\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://58d5fdd6547db317888d26834acab262d2645166127fce4f5c0799df0208276d\",\"dweb:/ipfs/QmQf4bergX91ahoUuFUnCNJtnq1b6A4Hjm8QN6pgrXUqdS\"]},\"src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol\":{\"keccak256\":\"0x3950678a6769a02043db63333e58e248dff0f1da34590889cdd12c341e50efea\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a321a4820e952b9801c71c54195c51fb490b02c2c1fc40ceccb0182347bf5c43\",\"dweb:/ipfs/QmS71bjcstp72L9T86Ye5NbunrMWwR59jKRWdNRTreorJT\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.18+commit.87f61d96"
@@ -103,7 +103,8 @@
         ":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
         ":forge-gas-snapshot/=lib/forge-gas-snapshot/src/",
         ":forge-std/=lib/forge-std/src/",
-        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
         ":prb-test/=lib/prb-test/src/",
         ":safe-contracts/=lib/safe-contracts/contracts/",
         ":zodiac/=lib/zodiac/contracts/"
@@ -131,10 +132,10 @@
         "license": "MIT"
       },
       "src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol": {
-        "keccak256": "0x28d784abe97dad5a7f846ddfcdb2322d0b6913daf6afe897b4ce1d9f805fee81",
+        "keccak256": "0x3950678a6769a02043db63333e58e248dff0f1da34590889cdd12c341e50efea",
         "urls": [
-          "bzz-raw://2046d959e611388cbdbfcfc6d1e8794fed625f6fa6603a97cdd1df3afd6db97e",
-          "dweb:/ipfs/QmSoCUy59ZJEJVKua83cqT44XvTGRWEwkkeRp8ghPAbBKQ"
+          "bzz-raw://a321a4820e952b9801c71c54195c51fb490b02c2c1fc40ceccb0182347bf5c43",
+          "dweb:/ipfs/QmS71bjcstp72L9T86Ye5NbunrMWwR59jKRWdNRTreorJT"
         ],
         "license": "MIT"
       }
@@ -143,49 +144,40 @@
   },
   "ast": {
     "absolutePath": "src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol",
-    "id": 36099,
+    "id": 40269,
     "exportedSymbols": {
-      "IProposalValidationStrategy": [
-        35598
-      ],
-      "VanillaProposalValidationStrategy": [
-        36098
-      ]
+      "IProposalValidationStrategy": [39471],
+      "VanillaProposalValidationStrategy": [40268]
     },
     "nodeType": "SourceUnit",
-    "src": "33:389:79",
+    "src": "33:437:98",
     "nodes": [
       {
-        "id": 36078,
+        "id": 40247,
         "nodeType": "PragmaDirective",
-        "src": "33:24:79",
+        "src": "33:24:98",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".18"
-        ]
+        "literals": ["solidity", "^", "0.8", ".18"]
       },
       {
-        "id": 36080,
+        "id": 40249,
         "nodeType": "ImportDirective",
-        "src": "59:92:79",
+        "src": "59:92:98",
         "nodes": [],
         "absolutePath": "src/interfaces/IProposalValidationStrategy.sol",
         "file": "../interfaces/IProposalValidationStrategy.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 36099,
-        "sourceUnit": 35599,
+        "scope": 40269,
+        "sourceUnit": 39472,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 36079,
+              "id": 40248,
               "name": "IProposalValidationStrategy",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 35598,
-              "src": "68:27:79",
+              "referencedDeclaration": 39471,
+              "src": "68:27:98",
               "typeDescriptions": {}
             },
             "nameLocation": "-1:-1:-1"
@@ -194,73 +186,71 @@
         "unitAlias": ""
       },
       {
-        "id": 36098,
+        "id": 40268,
         "nodeType": "ContractDefinition",
-        "src": "153:268:79",
+        "src": "201:268:98",
         "nodes": [
           {
-            "id": 36097,
+            "id": 40267,
             "nodeType": "FunctionDefinition",
-            "src": "233:186:79",
+            "src": "281:186:98",
             "nodes": [],
             "body": {
-              "id": 36096,
+              "id": 40266,
               "nodeType": "Block",
-              "src": "391:28:79",
+              "src": "439:28:98",
               "nodes": [],
               "statements": [
                 {
                   "expression": {
                     "hexValue": "74727565",
-                    "id": 36094,
+                    "id": 40264,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "bool",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "408:4:79",
+                    "src": "456:4:98",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     },
                     "value": "true"
                   },
-                  "functionReturnParameters": 36093,
-                  "id": 36095,
+                  "functionReturnParameters": 40263,
+                  "id": 40265,
                   "nodeType": "Return",
-                  "src": "401:11:79"
+                  "src": "449:11:98"
                 }
               ]
             },
-            "baseFunctions": [
-              35597
-            ],
+            "baseFunctions": [39470],
             "functionSelector": "07216095",
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "validate",
-            "nameLocation": "242:8:79",
+            "nameLocation": "290:8:98",
             "overrides": {
-              "id": 36090,
+              "id": 40260,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
-              "src": "367:8:79"
+              "src": "415:8:98"
             },
             "parameters": {
-              "id": 36089,
+              "id": 40259,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 36084,
+                  "id": 40254,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36097,
-                  "src": "260:7:79",
+                  "scope": 40267,
+                  "src": "308:7:98",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -268,10 +258,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 36083,
+                    "id": 40253,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "260:7:79",
+                    "src": "308:7:98",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -282,13 +272,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 36086,
+                  "id": 40256,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36097,
-                  "src": "288:14:79",
+                  "scope": 40267,
+                  "src": "336:14:98",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -296,10 +286,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 36085,
+                    "id": 40255,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "288:5:79",
+                    "src": "336:5:98",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -309,13 +299,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 36088,
+                  "id": 40258,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36097,
-                  "src": "323:14:79",
+                  "scope": 40267,
+                  "src": "371:14:98",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -323,10 +313,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 36087,
+                    "id": 40257,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "323:5:79",
+                    "src": "371:5:98",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -335,21 +325,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "250:107:79"
+              "src": "298:107:98"
             },
             "returnParameters": {
-              "id": 36093,
+              "id": 40263,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 36092,
+                  "id": 40262,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 36097,
-                  "src": "385:4:79",
+                  "scope": 40267,
+                  "src": "433:4:98",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -357,10 +347,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 36091,
+                    "id": 40261,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "385:4:79",
+                    "src": "433:4:98",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -369,9 +359,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "384:6:79"
+              "src": "432:6:98"
             },
-            "scope": 36098,
+            "scope": 40268,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
@@ -381,35 +371,36 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 36081,
+              "id": 40251,
               "name": "IProposalValidationStrategy",
-              "nameLocations": [
-                "199:27:79"
-              ],
+              "nameLocations": ["247:27:98"],
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 35598,
-              "src": "199:27:79"
+              "referencedDeclaration": 39471,
+              "src": "247:27:98"
             },
-            "id": 36082,
+            "id": 40252,
             "nodeType": "InheritanceSpecifier",
-            "src": "199:27:79"
+            "src": "247:27:98"
           }
         ],
         "canonicalName": "VanillaProposalValidationStrategy",
         "contractDependencies": [],
         "contractKind": "contract",
+        "documentation": {
+          "id": 40250,
+          "nodeType": "StructuredDocumentation",
+          "src": "153:48:98",
+          "text": "@title Vanilla Proposal Validation Strategy"
+        },
         "fullyImplemented": true,
-        "linearizedBaseContracts": [
-          36098,
-          35598
-        ],
+        "linearizedBaseContracts": [40268, 39471],
         "name": "VanillaProposalValidationStrategy",
-        "nameLocation": "162:33:79",
-        "scope": 36099,
+        "nameLocation": "210:33:98",
+        "scope": 40269,
         "usedErrors": []
       }
     ],
     "license": "MIT"
   },
-  "id": 79
+  "id": 98
 }

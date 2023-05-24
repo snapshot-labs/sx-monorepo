@@ -107,7 +107,7 @@ export class EthereumSig {
       author,
       metadataURI: data.metadataUri,
       executionStrategy: data.executionStrategy,
-      userParams: abiCoder.encode(
+      userProposalValidationParams: abiCoder.encode(
         ['tuple(int8 index, bytes params)[]'],
         [
           data.strategies.map((strategyConfig, i) => ({

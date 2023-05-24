@@ -1,10 +1,15 @@
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
 import type { ContractInterface } from '@ethersproject/contracts';
 import type { Provider } from '@ethersproject/providers';
-import type { Choice } from '../../utils/choice';
+
+enum Choice {
+  Against = 0,
+  For = 1,
+  Abstain = 2
+}
 
 export type AddressConfig = {
-  addy: string;
+  addr: string;
   params: string;
 };
 
@@ -92,7 +97,7 @@ export type EIP712ProposeMessage = {
   author: string;
   metadataURI: string;
   executionStrategy: AddressConfig;
-  userParams: string;
+  userProposalValidationParams: string;
   salt: number;
 };
 

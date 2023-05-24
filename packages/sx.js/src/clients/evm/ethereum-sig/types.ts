@@ -9,11 +9,11 @@ export const proposeTypes = {
     { name: 'author', type: 'address' },
     { name: 'metadataURI', type: 'string' },
     { name: 'executionStrategy', type: 'Strategy' },
-    { name: 'userParams', type: 'bytes' },
+    { name: 'userProposalValidationParams', type: 'bytes' },
     { name: 'salt', type: 'uint256' }
   ],
   Strategy: [
-    { name: 'addy', type: 'address' },
+    { name: 'addr', type: 'address' },
     { name: 'params', type: 'bytes' }
   ]
 };
@@ -27,7 +27,7 @@ export const updateProposalTypes = {
     { name: 'metadataURI', type: 'string' }
   ],
   Strategy: [
-    { name: 'addy', type: 'address' },
+    { name: 'addr', type: 'address' },
     { name: 'params', type: 'bytes' }
   ]
 };

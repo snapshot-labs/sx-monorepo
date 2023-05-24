@@ -1,7 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../../../src/clients/evm/ethereum-sig';
-import { Choice } from '../../../../../src/utils/choice';
 
 describe('EthereumSig', () => {
   const space = '0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649';
@@ -30,7 +29,7 @@ describe('EthereumSig', () => {
         space,
         authenticator,
         strategies: [{ index: 0, address: '0xeba53160c146cbf77a150e9a218d4c2de5db6b51' }],
-        executionStrategy: { addy: executor, params: '0x00' },
+        executionStrategy: { addr: executor, params: '0x00' },
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
       }
     });
@@ -45,7 +44,7 @@ describe('EthereumSig', () => {
         space,
         proposal: 1,
         authenticator,
-        executionStrategy: { addy: executor, params: '0x00' },
+        executionStrategy: { addr: executor, params: '0x00' },
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
       }
     });
@@ -61,7 +60,7 @@ describe('EthereumSig', () => {
         authenticator,
         strategies: [{ index: 0, address: '0xeba53160c146cbf77a150e9a218d4c2de5db6b51' }],
         proposal: 1,
-        choice: Choice.FOR,
+        choice: 1,
         metadataUri: ''
       }
     });

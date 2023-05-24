@@ -37,18 +37,18 @@
   ],
   "bytecode": {
     "object": "0x6080806040523461001657610106908161001c8239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c63871d81b714602857600080fd5b3460c55760807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260c55760043563ffffffff81160360c55760243573ffffffffffffffffffffffffffffffffffffffff81160360c55767ffffffffffffffff9160443583811160c55760a090369060040160c9565b505060643592831160c2575060ba602092369060040160c9565b505060018152f35b80fd5b5080fd5b9181601f8401121560f45782359167ffffffffffffffff831160f4576020838186019501011160f457565b600080fdfea164736f6c6343000812000a",
-    "sourceMap": "129:300:89:-:0;;;;;;;;;;;;;;;;;",
+    "sourceMap": "164:293:110:-:0;;;;;;;;;;;;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
     "object": "0x6080806040526004361015601257600080fd5b600090813560e01c63871d81b714602857600080fd5b3460c55760807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260c55760043563ffffffff81160360c55760243573ffffffffffffffffffffffffffffffffffffffff81160360c55767ffffffffffffffff9160443583811160c55760a090369060040160c9565b505060643592831160c2575060ba602092369060040160c9565b505060018152f35b80fd5b5080fd5b9181601f8401121560f45782359167ffffffffffffffff831160f4576020838186019501011160f457565b600080fdfea164736f6c6343000812000a",
-    "sourceMap": "129:300:89:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;:::i;:::-;;;419:1;129:300;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;",
+    "sourceMap": "164:293:110:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;:::i;:::-;;;447:1;164:293;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;",
     "linkReferences": {}
   },
   "methodIdentifiers": {
     "getVotingPower(uint32,address,bytes,bytes)": "871d81b7"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.18+commit.87f61d96\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"getVotingPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/voting-strategies/VanillaVotingStrategy.sol\":\"VanillaVotingStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/interfaces/IVotingStrategy.sol\":{\"keccak256\":\"0xf9b2dfc29465304076cc018665feadf8446cd49a7cdd526b2fc51ea1d9bd8272\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://34f6249395178e81ea88aa736c086fa682dd81ef9b6357d488228b1de80505ac\",\"dweb:/ipfs/QmdWLCw5J84Esc75rxrBYTD7osvQiZLodWdosbbXpWVE9w\"]},\"src/voting-strategies/VanillaVotingStrategy.sol\":{\"keccak256\":\"0x0e1cd5c111c25b30a79a8c44ae55d1883ae7709af077431f57756775d47ed77e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5de1f8be5013a3bc02b4186ef70103152f04cfe08a8cc774c454686401f6e829\",\"dweb:/ipfs/QmTN8jLYaHCdgrEmnjxswkcqhf3hdv8Sypnw5XiGTrLJAn\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.18+commit.87f61d96\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"getVotingPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"title\":\"Vanilla Voting Strategy\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/voting-strategies/VanillaVotingStrategy.sol\":\"VanillaVotingStrategy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"src/interfaces/IVotingStrategy.sol\":{\"keccak256\":\"0xb420ab947a2fbf22b8f5905bd795361cb06c9869173cab6e4f4a94257d67a59c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a0482eff29d30b097625f577361fa674a448f8104b8d2e5f759f014a00a8ed8a\",\"dweb:/ipfs/QmW9naB7H1B6hJCDtm1dWqM2Zto1NUn4To9JMcjXk6ihPo\"]},\"src/voting-strategies/VanillaVotingStrategy.sol\":{\"keccak256\":\"0x64cca9cf4ad7e0fd92b1d8b94145617f35fc82f94de5a85e032487bf37c0cab2\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d3e350250eb95d4fe04517885b31486fde28a9036ffb1114ee06bd90a075e8ad\",\"dweb:/ipfs/QmaYUDsREYjbgGoRcQmR17BxDzsFmp9zTMGMUfFVxZ3yvr\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.18+commit.87f61d96"
@@ -113,7 +113,8 @@
         ":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
         ":forge-gas-snapshot/=lib/forge-gas-snapshot/src/",
         ":forge-std/=lib/forge-std/src/",
-        ":openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
         ":prb-test/=lib/prb-test/src/",
         ":safe-contracts/=lib/safe-contracts/contracts/",
         ":zodiac/=lib/zodiac/contracts/"
@@ -133,18 +134,18 @@
     },
     "sources": {
       "src/interfaces/IVotingStrategy.sol": {
-        "keccak256": "0xf9b2dfc29465304076cc018665feadf8446cd49a7cdd526b2fc51ea1d9bd8272",
+        "keccak256": "0xb420ab947a2fbf22b8f5905bd795361cb06c9869173cab6e4f4a94257d67a59c",
         "urls": [
-          "bzz-raw://34f6249395178e81ea88aa736c086fa682dd81ef9b6357d488228b1de80505ac",
-          "dweb:/ipfs/QmdWLCw5J84Esc75rxrBYTD7osvQiZLodWdosbbXpWVE9w"
+          "bzz-raw://a0482eff29d30b097625f577361fa674a448f8104b8d2e5f759f014a00a8ed8a",
+          "dweb:/ipfs/QmW9naB7H1B6hJCDtm1dWqM2Zto1NUn4To9JMcjXk6ihPo"
         ],
         "license": "MIT"
       },
       "src/voting-strategies/VanillaVotingStrategy.sol": {
-        "keccak256": "0x0e1cd5c111c25b30a79a8c44ae55d1883ae7709af077431f57756775d47ed77e",
+        "keccak256": "0x64cca9cf4ad7e0fd92b1d8b94145617f35fc82f94de5a85e032487bf37c0cab2",
         "urls": [
-          "bzz-raw://5de1f8be5013a3bc02b4186ef70103152f04cfe08a8cc774c454686401f6e829",
-          "dweb:/ipfs/QmTN8jLYaHCdgrEmnjxswkcqhf3hdv8Sypnw5XiGTrLJAn"
+          "bzz-raw://d3e350250eb95d4fe04517885b31486fde28a9036ffb1114ee06bd90a075e8ad",
+          "dweb:/ipfs/QmaYUDsREYjbgGoRcQmR17BxDzsFmp9zTMGMUfFVxZ3yvr"
         ],
         "license": "MIT"
       }
@@ -153,40 +154,40 @@
   },
   "ast": {
     "absolutePath": "src/voting-strategies/VanillaVotingStrategy.sol",
-    "id": 37240,
+    "id": 41614,
     "exportedSymbols": {
-      "IVotingStrategy": [35668],
-      "VanillaVotingStrategy": [37239]
+      "IVotingStrategy": [39545],
+      "VanillaVotingStrategy": [41613]
     },
     "nodeType": "SourceUnit",
-    "src": "33:397:89",
+    "src": "33:425:110",
     "nodes": [
       {
-        "id": 37217,
+        "id": 41590,
         "nodeType": "PragmaDirective",
-        "src": "33:24:89",
+        "src": "33:24:110",
         "nodes": [],
         "literals": ["solidity", "^", "0.8", ".18"]
       },
       {
-        "id": 37219,
+        "id": 41592,
         "nodeType": "ImportDirective",
-        "src": "59:68:89",
+        "src": "59:68:110",
         "nodes": [],
         "absolutePath": "src/interfaces/IVotingStrategy.sol",
         "file": "../interfaces/IVotingStrategy.sol",
         "nameLocation": "-1:-1:-1",
-        "scope": 37240,
-        "sourceUnit": 35669,
+        "scope": 41614,
+        "sourceUnit": 39546,
         "symbolAliases": [
           {
             "foreign": {
-              "id": 37218,
+              "id": 41591,
               "name": "IVotingStrategy",
               "nodeType": "Identifier",
               "overloadedDeclarations": [],
-              "referencedDeclaration": 35668,
-              "src": "68:15:89",
+              "referencedDeclaration": 39545,
+              "src": "68:15:110",
               "typeDescriptions": {}
             },
             "nameLocation": "-1:-1:-1"
@@ -195,71 +196,71 @@
         "unitAlias": ""
       },
       {
-        "id": 37239,
+        "id": 41613,
         "nodeType": "ContractDefinition",
-        "src": "129:300:89",
+        "src": "164:293:110",
         "nodes": [
           {
-            "id": 37238,
+            "id": 41612,
             "nodeType": "FunctionDefinition",
-            "src": "185:242:89",
+            "src": "220:235:110",
             "nodes": [],
             "body": {
-              "id": 37237,
+              "id": 41611,
               "nodeType": "Block",
-              "src": "402:25:89",
+              "src": "430:25:110",
               "nodes": [],
               "statements": [
                 {
                   "expression": {
                     "hexValue": "31",
-                    "id": 37235,
+                    "id": 41609,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": true,
                     "kind": "number",
                     "lValueRequested": false,
                     "nodeType": "Literal",
-                    "src": "419:1:89",
+                    "src": "447:1:110",
                     "typeDescriptions": {
                       "typeIdentifier": "t_rational_1_by_1",
                       "typeString": "int_const 1"
                     },
                     "value": "1"
                   },
-                  "functionReturnParameters": 37234,
-                  "id": 37236,
+                  "functionReturnParameters": 41608,
+                  "id": 41610,
                   "nodeType": "Return",
-                  "src": "412:8:89"
+                  "src": "440:8:110"
                 }
               ]
             },
-            "baseFunctions": [35667],
+            "baseFunctions": [39544],
             "functionSelector": "871d81b7",
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "getVotingPower",
-            "nameLocation": "194:14:89",
+            "nameLocation": "229:14:110",
             "overrides": {
-              "id": 37231,
+              "id": 41605,
               "nodeType": "OverrideSpecifier",
               "overrides": [],
-              "src": "375:8:89"
+              "src": "403:8:110"
             },
             "parameters": {
-              "id": 37230,
+              "id": 41604,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 37223,
+                  "id": 41597,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37238,
-                  "src": "218:6:89",
+                  "scope": 41612,
+                  "src": "253:6:110",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -267,10 +268,10 @@
                     "typeString": "uint32"
                   },
                   "typeName": {
-                    "id": 37222,
+                    "id": 41596,
                     "name": "uint32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "218:6:89",
+                    "src": "253:6:110",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint32",
                       "typeString": "uint32"
@@ -280,13 +281,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 37225,
+                  "id": 41599,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37238,
-                  "src": "250:7:89",
+                  "scope": 41612,
+                  "src": "285:7:110",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -294,10 +295,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 37224,
+                    "id": 41598,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "250:7:89",
+                    "src": "285:7:110",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -308,13 +309,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 37227,
+                  "id": 41601,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37238,
-                  "src": "286:14:89",
+                  "scope": 41612,
+                  "src": "314:14:110",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -322,10 +323,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 37226,
+                    "id": 41600,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "286:5:89",
+                    "src": "314:5:110",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -335,13 +336,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 37229,
+                  "id": 41603,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37238,
-                  "src": "323:14:89",
+                  "scope": 41612,
+                  "src": "351:14:110",
                   "stateVariable": false,
                   "storageLocation": "calldata",
                   "typeDescriptions": {
@@ -349,10 +350,10 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 37228,
+                    "id": 41602,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
-                    "src": "323:5:89",
+                    "src": "351:5:110",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes_storage_ptr",
                       "typeString": "bytes"
@@ -361,21 +362,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "208:152:89"
+              "src": "243:145:110"
             },
             "returnParameters": {
-              "id": 37234,
+              "id": 41608,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 37233,
+                  "id": 41607,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 37238,
-                  "src": "393:7:89",
+                  "scope": 41612,
+                  "src": "421:7:110",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -383,10 +384,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 37232,
+                    "id": 41606,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "393:7:89",
+                    "src": "421:7:110",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -395,9 +396,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "392:9:89"
+              "src": "420:9:110"
             },
-            "scope": 37239,
+            "scope": 41613,
             "stateMutability": "pure",
             "virtual": false,
             "visibility": "external"
@@ -407,30 +408,36 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 37220,
+              "id": 41594,
               "name": "IVotingStrategy",
-              "nameLocations": ["163:15:89"],
+              "nameLocations": ["198:15:110"],
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 35668,
-              "src": "163:15:89"
+              "referencedDeclaration": 39545,
+              "src": "198:15:110"
             },
-            "id": 37221,
+            "id": 41595,
             "nodeType": "InheritanceSpecifier",
-            "src": "163:15:89"
+            "src": "198:15:110"
           }
         ],
         "canonicalName": "VanillaVotingStrategy",
         "contractDependencies": [],
         "contractKind": "contract",
+        "documentation": {
+          "id": 41593,
+          "nodeType": "StructuredDocumentation",
+          "src": "129:35:110",
+          "text": "@title Vanilla Voting Strategy"
+        },
         "fullyImplemented": true,
-        "linearizedBaseContracts": [37239, 35668],
+        "linearizedBaseContracts": [41613, 39545],
         "name": "VanillaVotingStrategy",
-        "nameLocation": "138:21:89",
-        "scope": 37240,
+        "nameLocation": "173:21:110",
+        "scope": 41614,
         "usedErrors": []
       }
     ],
     "license": "MIT"
   },
-  "id": 89
+  "id": 110
 }

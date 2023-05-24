@@ -2,6 +2,6 @@
   "error InvalidBlockNumber()",
   "error InvalidByteArray()",
   "error TimestampInFuture()",
-  "function getVotingPower(uint32 timestamp, address voterAddress, bytes params, bytes) returns (uint256)",
+  "function getVotingPower(uint32 timestamp, address voter, bytes params, bytes) returns (uint256)",
   "function timestampToBlockNumber(uint32 timestamp) view returns (uint256 blockNumber)"
 ]

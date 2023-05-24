@@ -8,13 +8,13 @@ describe('whitelistStrategy', () => {
   const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
   const whitelist = [
     {
-      addy: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      addr: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
       vp: 21n
     }
   ];
 
   const abiCoder = new AbiCoder();
-  const whitelistParams = abiCoder.encode(['tuple(address addy, uint256 vp)[]'], [whitelist]);
+  const whitelistParams = abiCoder.encode(['tuple(address addr, uint256 vp)[]'], [whitelist]);
 
   it('should return type', () => {
     expect(whitelistStrategy.type).toBe('whitelist');

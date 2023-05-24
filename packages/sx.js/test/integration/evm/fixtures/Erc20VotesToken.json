@@ -1582,18 +1582,10 @@
     "absolutePath": "test/mocks/ERC20VotesToken.sol",
     "id": 48941,
     "exportedSymbols": {
-      "ERC20": [
-        27451
-      ],
-      "ERC20Permit": [
-        27701
-      ],
-      "ERC20Votes": [
-        28402
-      ],
-      "ERC20VotesToken": [
-        48940
-      ]
+      "ERC20": [27451],
+      "ERC20Permit": [27701],
+      "ERC20Votes": [28402],
+      "ERC20VotesToken": [48940]
     },
     "nodeType": "SourceUnit",
     "src": "32:531:112",
@@ -1603,12 +1595,7 @@
         "nodeType": "PragmaDirective",
         "src": "32:24:112",
         "nodes": [],
-        "literals": [
-          "solidity",
-          "^",
-          "0.8",
-          ".18"
-        ]
+        "literals": ["solidity", "^", "0.8", ".18"]
       },
       {
         "id": 48896,
@@ -1700,9 +1687,7 @@
                 "modifierName": {
                   "id": 48904,
                   "name": "ERC20Permit",
-                  "nameLocations": [
-                    "324:11:112"
-                  ],
+                  "nameLocations": ["324:11:112"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 27701,
                   "src": "324:11:112"
@@ -1742,9 +1727,7 @@
                 "modifierName": {
                   "id": 48907,
                   "name": "ERC20",
-                  "nameLocations": [
-                    "347:5:112"
-                  ],
+                  "nameLocations": ["347:5:112"],
                   "nodeType": "IdentifierPath",
                   "referencedDeclaration": 27451,
                   "src": "347:5:112"
@@ -1880,9 +1863,7 @@
                       "id": 48920,
                       "name": "_mint",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        28094
-                      ],
+                      "overloadedDeclarations": [28094],
                       "referencedDeclaration": 28094,
                       "src": "441:5:112",
                       "typeDescriptions": {
@@ -2044,9 +2025,7 @@
                       "id": 48933,
                       "name": "_burn",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [
-                        28117
-                      ],
+                      "overloadedDeclarations": [28117],
                       "referencedDeclaration": 28117,
                       "src": "534:5:112",
                       "typeDescriptions": {
@@ -2162,9 +2141,7 @@
             "baseName": {
               "id": 48897,
               "name": "ERC20Votes",
-              "nameLocations": [
-                "199:10:112"
-              ],
+              "nameLocations": ["199:10:112"],
               "nodeType": "IdentifierPath",
               "referencedDeclaration": 28402,
               "src": "199:10:112"
@@ -2179,16 +2156,7 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          48940,
-          28402,
-          27701,
-          29695,
-          28519,
-          27451,
-          28483,
-          27529,
-          28871,
-          26372
+          48940, 28402, 27701, 29695, 28519, 27451, 28483, 27529, 28871, 26372
         ],
         "name": "ERC20VotesToken",
         "nameLocation": "180:15:112",

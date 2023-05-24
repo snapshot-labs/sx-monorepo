@@ -14,10 +14,10 @@ export default function createWhitelistStrategy(): Strategy {
       params: string
     ): Promise<bigint> {
       const abiCoder = new AbiCoder();
-      const whitelistParams = abiCoder.decode(['tuple(address addy, uint256 vp)[]'], params);
+      const whitelistParams = abiCoder.decode(['tuple(address addr, uint256 vp)[]'], params);
 
       const match = whitelistParams[0].find(
-        (entry: any) => entry.addy.toLowerCase() === voterAddress.toLowerCase()
+        (entry: any) => entry.addr.toLowerCase() === voterAddress.toLowerCase()
       );
 
       if (match) {
