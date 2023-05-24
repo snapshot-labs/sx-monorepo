@@ -294,7 +294,14 @@ export default defineComponent({
         />
         <Preview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <div v-if="space && network">
+      <div
+        v-if="
+          space &&
+          network &&
+          supportedExecutionStrategies &&
+          supportedExecutionStrategies.length > 0
+        "
+      >
         <h4 class="eyebrow mb-3">Execution</h4>
         <div class="flex flex-col gap-2 mb-3">
           <ExecutionButton
