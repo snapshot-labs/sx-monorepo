@@ -1,6 +1,6 @@
 import express from 'express';
 import { clients } from '@snapshot-labs/sx';
-import { wallet } from './dependencies';
+import { signer } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
 const client = new clients.EvmEthereumTx();
@@ -19,17 +19,17 @@ async function send(id, params, res) {
 
     if (types.Propose) {
       receipt = await client.propose({
-        signer: wallet,
+        signer,
         envelope: params.envelope
       });
     } else if (types.updateProposal) {
       receipt = await client.updateProposal({
-        signer: wallet,
+        signer,
         envelope: params.envelope
       });
     } else if (types.Vote) {
       receipt = await client.vote({
-        signer: wallet,
+        signer,
         envelope: params.envelope
       });
     }
@@ -49,7 +49,7 @@ async function execute(id, params, res) {
   try {
     const { space, proposalId, executionParams } = params;
     const receipt = await client.execute({
-      signer: wallet,
+      signer,
       space,
       proposal: proposalId,
       executionParams
@@ -65,7 +65,7 @@ async function executeQueuedProposal(id, params, res) {
   try {
     const { executionStrategy, executionParams } = params;
     const receipt = await client.executeQueuedProposal({
-      signer: wallet,
+      signer,
       executionStrategy,
       executionParams
     });
