@@ -21,7 +21,8 @@ export default {
     icon: walletconnectIcon,
     options: {
       rpc: {
-        '1': 'https://cloudflare-eth.com'
+        '1': 'https://rpc.snapshotx.xyz/1',
+        '5': 'https://rpc.snapshotx.xyz/5'
       }
     }
   },
