@@ -1,6 +1,6 @@
 import express from 'express';
 import { clients } from '@snapshot-labs/sx';
-import { signer } from './dependencies';
+import { getWallet } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
 const client = new clients.EvmEthereumTx();
@@ -12,6 +12,8 @@ async function send(id, params, res) {
     const { signatureData, data } = params.envelope;
     const { types } = signatureData;
     let receipt;
+
+    const signer = getWallet(params.envelope.data.space);
 
     console.time('Send');
     console.log('Types', types);
@@ -48,6 +50,8 @@ async function send(id, params, res) {
 async function execute(id, params, res) {
   try {
     const { space, proposalId, executionParams } = params;
+    const signer = getWallet(space);
+
     const receipt = await client.execute({
       signer,
       space,
@@ -63,7 +67,9 @@ async function execute(id, params, res) {
 
 async function executeQueuedProposal(id, params, res) {
   try {
-    const { executionStrategy, executionParams } = params;
+    const { space, executionStrategy, executionParams } = params;
+    const signer = getWallet(space);
+
     const receipt = await client.executeQueuedProposal({
       signer,
       executionStrategy,
