@@ -8,7 +8,7 @@ dataSources:
     source:
       address: '0x12A1FfFFfd70677939D61d641eA043bc9060c718'
       abi: ProxyFactory
-      startBlock: 8768047
+      startBlock: 9049740
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -44,9 +44,9 @@ templates:
         - name: Space
           file: ./abis/Space.json
       eventHandlers:
-        - event: SpaceCreated(address,address,uint32,uint32,uint32,(address,bytes),string,(address,bytes)[],string[],address[])
+        - event: SpaceCreated(address,address,uint32,uint32,uint32,(address,bytes),string,string,string,(address,bytes)[],string[],address[])
           handler: handleSpaceCreated
-        - event: ProposalCreated(uint256,address,(uint32,uint32,uint32,uint32,bytes32,address,address,uint8,(address,bytes)[]),string,bytes)
+        - event: ProposalCreated(uint256,address,(uint32,uint32,uint32,uint32,bytes32,address,address,uint8,uint256),string,bytes)
           handler: handleProposalCreated
         - event: ProposalUpdated(uint256,(address,bytes),string)
           handler: handleProposalUpdated
@@ -56,7 +56,7 @@ templates:
           handler: handleVoteCreated
         - event: MetadataURIUpdated(string)
           handler: handleMetadataUriUpdated
-        - event: VotingDelayUpdated(uint256)
+        - event: VotingDelayUpdated(uint32)
           handler: handleVotingDelayUpdated
         - event: MinVotingDurationUpdated(uint32)
           handler: handleMinVotingDurationUpdated

@@ -218,21 +218,9 @@
             "type": "uint8"
           },
           {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy[]",
-            "name": "votingStrategies",
-            "type": "tuple[]"
+            "internalType": "uint256",
+            "name": "activeVotingStrategies",
+            "type": "uint256"
           }
         ],
         "internalType": "struct Proposal",
@@ -310,21 +298,9 @@
             "type": "uint8"
           },
           {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "addy",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes",
-                "name": "params",
-                "type": "bytes"
-              }
-            ],
-            "internalType": "struct Strategy[]",
-            "name": "votingStrategies",
-            "type": "tuple[]"
+            "internalType": "uint256",
+            "name": "activeVotingStrategies",
+            "type": "uint256"
           }
         ],
         "internalType": "struct Proposal",
