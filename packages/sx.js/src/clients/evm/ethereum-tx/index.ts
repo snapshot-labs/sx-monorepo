@@ -56,6 +56,10 @@ type UpdateSettingsInput = {
   votingStrategyMetadataUrisToAdd?: string[];
 };
 
+type CallOptions = {
+  noWait?: boolean;
+};
+
 const NO_UPDATE_HASH = '0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048ba';
 const NO_UPDATE_ADDRESS = '0xf2cda9b13ed04e585461605c0d6e804933ca8281';
 const NO_UPDATE_UINT32 = '0xf2cda9b1';
@@ -220,7 +224,10 @@ export class EthereumTx {
     return proxyFactoryContract.predictProxyAddress(this.networkConfig.masterSpace, salt);
   }
 
-  async propose({ signer, envelope }: { signer: Signer; envelope: Envelope<Propose> }) {
+  async propose(
+    { signer, envelope }: { signer: Signer; envelope: Envelope<Propose> },
+    opts: CallOptions = {}
+  ) {
     const proposerAddress = envelope.signatureData?.address || (await signer.getAddress());
 
     const strategiesParams = await getStrategiesParams(
@@ -258,16 +265,21 @@ export class EthereumTx {
 
     const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
     const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
-    return authenticatorContract.authenticate(...args);
+    const promise = authenticatorContract.authenticate(...args);
+
+    return opts.noWait ? null : promise;
   }
 
-  async updateProposal({
-    signer,
-    envelope
-  }: {
-    signer: Signer;
-    envelope: Envelope<UpdateProposal>;
-  }) {
+  async updateProposal(
+    {
+      signer,
+      envelope
+    }: {
+      signer: Signer;
+      envelope: Envelope<UpdateProposal>;
+    },
+    opts: CallOptions = {}
+  ) {
     const authorAddress = envelope.signatureData?.address || (await signer.getAddress());
 
     const spaceInterface = new Interface(SpaceAbi);
@@ -288,10 +300,15 @@ export class EthereumTx {
 
     const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
     const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
-    return authenticatorContract.authenticate(...args);
+    const promise = authenticatorContract.authenticate(...args);
+
+    return opts.noWait ? null : promise;
   }
 
-  async vote({ signer, envelope }: { signer: Signer; envelope: Envelope<Vote> }) {
+  async vote(
+    { signer, envelope }: { signer: Signer; envelope: Envelope<Vote> },
+    opts: CallOptions = {}
+  ) {
     const voterAddress = envelope.signatureData?.address || (await signer.getAddress());
 
     const strategiesParams = await getStrategiesParams(
@@ -324,47 +341,61 @@ export class EthereumTx {
     const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
 
     const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
-    return authenticatorContract.authenticate(...args);
+    const promise = authenticatorContract.authenticate(...args);
+
+    return opts.noWait ? null : promise;
   }
 
-  async execute({
-    signer,
-    space,
-    proposal,
-    executionParams
-  }: {
-    signer: Signer;
-    space: string;
-    proposal: number;
-    executionParams: string;
-  }) {
+  async execute(
+    {
+      signer,
+      space,
+      proposal,
+      executionParams
+    }: {
+      signer: Signer;
+      space: string;
+      proposal: number;
+      executionParams: string;
+    },
+    opts: CallOptions = {}
+  ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
+    const promise = spaceContract.execute(proposal, executionParams);
 
-    return spaceContract.execute(proposal, executionParams);
+    return opts.noWait ? null : promise;
   }
 
-  async executeQueuedProposal({
-    signer,
-    executionStrategy,
-    executionParams
-  }: {
-    signer: Signer;
-    executionStrategy: string;
-    executionParams: string;
-  }) {
+  async executeQueuedProposal(
+    {
+      signer,
+      executionStrategy,
+      executionParams
+    }: {
+      signer: Signer;
+      executionStrategy: string;
+      executionParams: string;
+    },
+    opts: CallOptions = {}
+  ) {
     const executionStrategyContract = new Contract(
       executionStrategy,
       TimelockExecutionStrategyAbi,
       signer
     );
+    const promise = executionStrategyContract.executeQueuedProposal(executionParams);
 
-    return executionStrategyContract.executeQueuedProposal(executionParams);
+    return opts.noWait ? null : promise;
   }
 
-  async cancel({ signer, space, proposal }: { signer: Signer; space: string; proposal: number }) {
+  async cancel(
+    { signer, space, proposal }: { signer: Signer; space: string; proposal: number },
+    opts: CallOptions = {}
+  ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
+    const promise = spaceContract.cancel(proposal);
 
-    return spaceContract.cancel(proposal);
+    return opts.noWait ? null : promise;
   }
 
   async getProposalStatus({
@@ -377,22 +408,23 @@ export class EthereumTx {
     proposal: number;
   }) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
-
     return spaceContract.getProposalStatus(proposal);
   }
 
-  async updateSettings({
-    signer,
-    space,
-    settings
-  }: {
-    signer: Signer;
-    space: string;
-    settings: UpdateSettingsInput;
-  }) {
+  async updateSettings(
+    {
+      signer,
+      space,
+      settings
+    }: {
+      signer: Signer;
+      space: string;
+      settings: UpdateSettingsInput;
+    },
+    opts: CallOptions = {}
+  ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
-
-    return spaceContract.updateSettings({
+    const promise = spaceContract.updateSettings({
       minVotingDuration: settings.minVotingDuration || NO_UPDATE_UINT32,
       maxVotingDuration: settings.maxVotingDuration || NO_UPDATE_UINT32,
       votingDelay: settings.votingDelay || NO_UPDATE_UINT32,
@@ -409,91 +441,121 @@ export class EthereumTx {
       votingStrategiesToRemove: settings.votingStrategiesToRemove || [],
       votingStrategyMetadataURIsToAdd: settings.votingStrategyMetadataUrisToAdd || []
     });
+
+    return opts.noWait ? null : promise;
   }
 
-  async setMaxVotingDuration({
-    signer,
-    space,
-    maxVotingDuration
-  }: {
-    signer: Signer;
-    space: string;
-    maxVotingDuration: number;
-  }) {
-    return this.updateSettings({
+  async setMaxVotingDuration(
+    {
       signer,
       space,
-      settings: {
-        maxVotingDuration
-      }
-    });
+      maxVotingDuration
+    }: {
+      signer: Signer;
+      space: string;
+      maxVotingDuration: number;
+    },
+    opts: CallOptions = {}
+  ) {
+    return this.updateSettings(
+      {
+        signer,
+        space,
+        settings: {
+          maxVotingDuration
+        }
+      },
+      opts
+    );
   }
 
-  async setMinVotingDuration({
-    signer,
-    space,
-    minVotingDuration
-  }: {
-    signer: Signer;
-    space: string;
-    minVotingDuration: number;
-  }) {
-    return this.updateSettings({
+  async setMinVotingDuration(
+    {
       signer,
       space,
-      settings: {
-        minVotingDuration
-      }
-    });
+      minVotingDuration
+    }: {
+      signer: Signer;
+      space: string;
+      minVotingDuration: number;
+    },
+    opts: CallOptions = {}
+  ) {
+    return this.updateSettings(
+      {
+        signer,
+        space,
+        settings: {
+          minVotingDuration
+        }
+      },
+      opts
+    );
   }
 
-  async setMetadataUri({
-    signer,
-    space,
-    metadataUri
-  }: {
-    signer: Signer;
-    space: string;
-    metadataUri: string;
-  }) {
-    return this.updateSettings({
+  async setMetadataUri(
+    {
       signer,
       space,
-      settings: {
-        metadataUri
-      }
-    });
+      metadataUri
+    }: {
+      signer: Signer;
+      space: string;
+      metadataUri: string;
+    },
+    opts: CallOptions = {}
+  ) {
+    return this.updateSettings(
+      {
+        signer,
+        space,
+        settings: {
+          metadataUri
+        }
+      },
+      opts
+    );
   }
 
-  async setVotingDelay({
-    signer,
-    space,
-    votingDelay
-  }: {
-    signer: Signer;
-    space: string;
-    votingDelay: number;
-  }) {
-    return this.updateSettings({
+  async setVotingDelay(
+    {
       signer,
       space,
-      settings: {
-        votingDelay
-      }
-    });
+      votingDelay
+    }: {
+      signer: Signer;
+      space: string;
+      votingDelay: number;
+    },
+    opts: CallOptions = {}
+  ) {
+    return this.updateSettings(
+      {
+        signer,
+        space,
+        settings: {
+          votingDelay
+        }
+      },
+      opts
+    );
   }
 
-  async transferOwnership({
-    signer,
-    space,
-    owner
-  }: {
-    signer: Signer;
-    space: string;
-    owner: string;
-  }) {
+  async transferOwnership(
+    {
+      signer,
+      space,
+      owner
+    }: {
+      signer: Signer;
+      space: string;
+      owner: string;
+    },
+    opts: CallOptions = {}
+  ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
+    const promise = spaceContract.transferOwnership(owner);
 
-    return spaceContract.transferOwnership(owner);
+    return opts.noWait ? null : promise;
   }
 }
