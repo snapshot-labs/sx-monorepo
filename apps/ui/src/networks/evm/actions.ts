@@ -1,5 +1,11 @@
 import { Provider } from '@ethersproject/providers';
-import { clients, getEvmStrategy, evmGoerli } from '@snapshot-labs/sx';
+import {
+  clients,
+  getEvmStrategy,
+  evmGoerli,
+  evmSepolia,
+  EvmNetworkConfig
+} from '@snapshot-labs/sx';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { executionCall, getExecutionData, pickAuthenticatorAndStrategies } from './helpers';
@@ -10,15 +16,22 @@ import type { Space, Proposal, SpaceMetadata, StrategyParsedMetadata } from '@/t
 
 type Choice = 0 | 1 | 2;
 
+const CONFIGS: Record<number, EvmNetworkConfig> = {
+  5: evmGoerli,
+  11155111: evmSepolia
+};
+
 export function createActions(
   provider: Provider,
   helpers: NetworkHelpers,
   chainId: number
 ): NetworkActions {
+  const networkConfig = CONFIGS[chainId];
   const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
 
-  const client = new clients.EvmEthereumTx();
+  const client = new clients.EvmEthereumTx({ networkConfig });
   const ethSigClient = new clients.EvmEthereumSig({
+    networkConfig,
     manaUrl
   });
 
@@ -93,17 +106,19 @@ export function createActions(
           ...params,
           authenticators: params.authenticators.map(config => config.address),
           votingStrategies: params.votingStrategies.map(config => ({
-            addy: config.address,
+            addr: config.address,
             params: config.generateParams ? config.generateParams(config.params)[0] : '0x'
           })),
           votingStrategiesMetadata: metadataUris,
           proposalValidationStrategy: {
-            addy: params.validationStrategy.address,
+            addr: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
               ? params.validationStrategy.generateParams(params.validationStrategy.params)[0]
               : '0x'
           },
-          metadataUri: `ipfs://${pinned.cid}`
+          metadataUri: `ipfs://${pinned.cid}`,
+          proposalValidationStrategyMetadataUri: '',
+          daoUri: ''
         }
       });
 
@@ -142,12 +157,12 @@ export function createActions(
       let selectedExecutionStrategy;
       if (executionStrategy) {
         selectedExecutionStrategy = {
-          addy: executionStrategy,
+          addr: executionStrategy,
           params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
         };
       } else {
         selectedExecutionStrategy = {
-          addy: '0x0000000000000000000000000000000000000000',
+          addr: '0x0000000000000000000000000000000000000000',
           params: '0x'
         };
       }
@@ -193,12 +208,12 @@ export function createActions(
       let selectedExecutionStrategy;
       if (executionStrategy) {
         selectedExecutionStrategy = {
-          addy: executionStrategy,
+          addr: executionStrategy,
           params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
         };
       } else {
         selectedExecutionStrategy = {
-          addy: '0x0000000000000000000000000000000000000000',
+          addr: '0x0000000000000000000000000000000000000000',
           params: '0x'
         };
       }
@@ -340,7 +355,7 @@ export function createActions(
     ): Promise<VotingPower[]> => {
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
-          const strategy = getEvmStrategy(address, evmGoerli);
+          const strategy = getEvmStrategy(address, networkConfig);
           if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
           const value = await strategy.getVotingPower(

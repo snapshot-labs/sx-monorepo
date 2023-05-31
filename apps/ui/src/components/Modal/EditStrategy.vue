@@ -17,7 +17,9 @@ const pickerField: Ref<string | null> = ref(null);
 const searchValue = ref('');
 const form: Ref<Record<string, any>> = ref({});
 
-const formErrors = computed(() => validateForm(props.definition, form.value));
+const formErrors = computed(() =>
+  validateForm(props.definition, form.value, { skipEmptyOptionalFields: true })
+);
 
 function handlePickerClick(field: string) {
   showPicker.value = true;

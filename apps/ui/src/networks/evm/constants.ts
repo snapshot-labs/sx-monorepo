@@ -16,14 +16,14 @@ export const API_URL = 'https://api.thegraph.com/subgraphs/name/snapshot-labs/sx
 
 export const SUPPORTED_AUTHENTICATORS = {
   '0xddb36b865a1021524b936fb29fcba5fac073db74': true,
-  '0xc537d997ddc783e071f82ccbfaa0d768d310001b': true
+  '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': true
 };
 
 export const SUPPORTED_STRATEGIES = {
   '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': true,
   '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': true,
   '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': true,
-  '0xf50bf15e9fe61e27625a4ecdfc23211297e8be85': true
+  '0x54449c058bbf0b777745944ea1a7b79786fbc958': true
 };
 
 export const SUPPORTED_EXECUTORS = {
@@ -32,17 +32,15 @@ export const SUPPORTED_EXECUTORS = {
 };
 
 export const RELAYER_AUTHENTICATORS = {
-  '0xc537d997ddc783e071f82ccbfaa0d768d310001b': true
+  '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': true
 };
 
 export const AUTHS = {
-  '0xdd66652e93293c32aa3288509d9a46c785e3f786': 'Vanilla',
-  '0xc537d997ddc783e071f82ccbfaa0d768d310001b': 'Ethereum signature',
+  '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': 'Ethereum signature',
   '0xddb36b865a1021524b936fb29fcba5fac073db74': 'Ethereum transaction'
 };
 
 export const PROPOSAL_VALIDATIONS = {
-  '0x80d9665e5761a778a97283dec14581c4c0bf8d51': 'Vanilla',
   '0x03d512e0165d6b53ed2753df2f3184fbd2b52e48': 'Voting power'
 };
 
@@ -50,7 +48,7 @@ export const STRATEGIES = {
   '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': 'Vanilla',
   '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': 'Delegated Comp Token',
   '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': 'OpenZeppelin Votes',
-  '0xf50bf15e9fe61e27625a4ecdfc23211297e8be85': 'Whitelist'
+  '0x54449c058bbf0b777745944ea1a7b79786fbc958': 'Whitelist'
 };
 
 export const EXECUTORS = {
@@ -68,7 +66,7 @@ export const EDITOR_AUTHENTICATORS = [
     paramsDefinition: null
   },
   {
-    address: '0xc537d997ddc783e071f82ccbfaa0d768d310001b',
+    address: '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4',
     name: 'Ethereum signature',
     about:
       'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
@@ -78,12 +76,6 @@ export const EDITOR_AUTHENTICATORS = [
 ];
 
 export const EDITOR_PROPOSAL_VALIDATIONS = [
-  {
-    address: '0x80d9665e5761a778a97283dec14581c4c0bf8d51',
-    name: 'Vanilla',
-    icon: IHBeaker,
-    paramsDefinition: null
-  },
   {
     address: '0x03d512E0165d6B53ED2753Df2f3184fBd2b52E48',
     type: 'VotingPower',
@@ -98,14 +90,14 @@ export const EDITOR_PROPOSAL_VALIDATIONS = [
 
       const strategies = params.strategies.map((strategy: StrategyConfig) => {
         return {
-          addy: strategy.address,
+          addr: strategy.address,
           params: strategy.generateParams ? strategy.generateParams(strategy.params)[0] : '0x00'
         };
       });
 
       return [
         abiCoder.encode(
-          ['uint256', 'tuple(address addy, bytes params)[]'],
+          ['uint256', 'tuple(address addr, bytes params)[]'],
           [params.threshold, strategies]
         )
       ];
@@ -117,7 +109,7 @@ export const EDITOR_PROPOSAL_VALIDATIONS = [
       required: ['threshold'],
       properties: {
         threshold: {
-          type: 'string',
+          type: 'integer',
           title: 'Proposal threshold',
           examples: ['1']
         }
@@ -309,6 +301,7 @@ export const EDITOR_EXECUTION_STRATEGIES = [
         signer,
         params: {
           controller,
+          vetoGuardian: params.vetoGuardian || '0x0000000000000000000000000000000000000000',
           spaces: [spaceAddress],
           timelockDelay: BigInt(params.timelockDelay),
           quorum: BigInt(params.quorum)
@@ -325,6 +318,12 @@ export const EDITOR_EXECUTION_STRATEGIES = [
           type: 'integer',
           title: 'Quorum',
           examples: ['1']
+        },
+        vetoGuardian: {
+          type: 'string',
+          format: 'address',
+          title: 'Veto guardian address',
+          examples: ['0x0000…']
         },
         timelockDelay: {
           type: 'integer',

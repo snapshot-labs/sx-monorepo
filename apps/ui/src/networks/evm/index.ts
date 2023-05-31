@@ -7,8 +7,19 @@ import networks from '@/helpers/networks.json';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
+const METADATA = {
+  gor: {
+    name: 'Ethereum Goerli',
+    chainId: 5
+  },
+  sep: {
+    name: 'Ethereum Sepolia',
+    chainId: 11155111
+  }
+};
+
 export function createEvmNetwork(networkId: NetworkID): Network {
-  const chainId = 5;
+  const { name, chainId } = METADATA[networkId];
 
   const provider = getProvider(chainId);
   const api = createApi(constants.API_URL, networkId);
@@ -34,7 +45,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   };
 
   return {
-    name: 'Ethereum Goerli',
+    name,
     baseChainId: chainId,
     hasReceive: false,
     managerConnectors: ['injected', 'walletconnect', 'walletlink', 'portis', 'gnosis'],
