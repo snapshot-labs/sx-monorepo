@@ -22,12 +22,7 @@ const spacesStore = useSpacesStore();
       />
       <IH-star v-else class="inline-block" />
     </button>
-    <Stamp
-      :id="space.id"
-      :size="32"
-      type="space-sx"
-      class="border-skin-bg !bg-skin-border rounded-sm mb-2"
-    />
+    <SpaceAvatar :space="space" :size="32" class="border-skin-bg !bg-skin-border rounded-sm mb-2" />
     <h3 class="truncate" v-text="space.name" />
     <h5 class="absolute bottom-4">
       <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·

@@ -249,6 +249,7 @@ export const SPACES_QUERY = gql`
     spaces(first: $first, skip: $skip, orderBy: vote_count, orderDirection: desc, where: $where) {
       id
       name
+      avatar
       about
       external_url
       github

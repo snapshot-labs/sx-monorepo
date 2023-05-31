@@ -81,8 +81,8 @@ const grouped = computed(() => {
     <div class="px-4">
       <div class="mb-4 relative">
         <router-link :to="{ name: 'space-overview' }">
-          <Stamp
-            :id="space.id"
+          <SpaceAvatar
+            :space="space"
             :size="90"
             type="space-sx"
             class="mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-lg"

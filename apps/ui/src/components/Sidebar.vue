@@ -26,7 +26,7 @@ const spacesStore = useSpacesStore();
           class="block"
           @click="uiStore.sidebarOpen = false"
         >
-          <Stamp :id="element.id" :size="32" type="space-sx" class="!rounded-[4px]" />
+          <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />
         </router-link>
       </template>
     </draggable>
