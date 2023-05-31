@@ -1,4 +1,4 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
 schema:
   file: ./schema.graphql
 dataSources:
@@ -6,12 +6,12 @@ dataSources:
     name: ProxyFactory
     network: goerli
     source:
-      address: '0x12A1FfFFfd70677939D61d641eA043bc9060c718'
+      address: "0x12A1FfFFfd70677939D61d641eA043bc9060c718"
       abi: ProxyFactory
       startBlock: 9049740
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - SpaceCreated
@@ -34,7 +34,7 @@ templates:
       abi: Space
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - ProposalCreated
@@ -72,7 +72,7 @@ templates:
       abi: TimelockExecutionStrategy
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - ProposalExecuted
@@ -83,3 +83,39 @@ templates:
         - event: ProposalExecuted(bytes32)
           handler: handleTimelockProposalExecuted
       file: ./src/mapping.ts
+  - name: SpaceMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleSpaceMetadata
+      entities:
+        - SpaceMetadata
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+  - name: ProposalMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleProposalMetadata
+      entities:
+        - ProposalMetadata
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+  - name: StrategiesParsedMetadataData
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleStrategiesParsedMetadataData
+      entities:
+        - StrategiesParsedMetadataData
+      abis:
+        - name: Space
+          file: ./abis/Space.json

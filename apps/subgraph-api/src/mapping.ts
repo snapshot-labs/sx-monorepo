@@ -1,5 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes, ipfs, json, log } from '@graphprotocol/graph-ts'
-import { JSON } from 'assemblyscript-json'
+import { Address, BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
 import { TimelockExecutionStrategy } from '../generated/ProxyFactory/TimelockExecutionStrategy'
@@ -19,6 +18,8 @@ import { ProposalExecuted as TimelockProposalExecuted } from '../generated/templ
 import {
   Space as SpaceTemplate,
   TimelockExecutionStrategy as TimelockExecutionStrategyTemplate,
+  SpaceMetadata as SpaceMetadataTemplate,
+  ProposalMetadata as ProposalMetadataTemplate,
 } from '../generated/templates'
 import { Space, ExecutionStrategy, ExecutionHash, Proposal, Vote, User } from '../generated/schema'
 import {
@@ -26,8 +27,6 @@ import {
   getProposalValidationThreshold,
   getProposalValidationStrategies,
   getProposalValidationStrategiesParams,
-  updateSpaceMetadata,
-  updateProposalMetadata,
   updateStrategiesParsedMetadata,
 } from './helpers'
 
@@ -52,6 +51,7 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
+    executionStrategy.timelock_delay = new BigInt(0)
     executionStrategy.save()
   } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_TIMELOCK)) {
     let executionStrategyContract = TimelockExecutionStrategy.bind(event.params.proxy)
@@ -72,8 +72,6 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
 
 export function handleSpaceCreated(event: SpaceCreated): void {
   let space = new Space(event.params.space.toHexString())
-  space.name = 'Fellow DAO ' + event.params.space.toHexString().slice(0, 6)
-  space.about = ''
   space.controller = event.params.owner
   space.voting_delay = event.params.votingDelay.toI32()
   space.min_voting_period = event.params.minVotingDuration.toI32()
@@ -100,7 +98,12 @@ export function handleSpaceCreated(event: SpaceCreated): void {
     } else {
       space.proposal_threshold = new BigDecimal(new BigInt(0))
       space.voting_power_validation_strategy_strategies = []
+      space.voting_power_validation_strategy_strategies_params = []
     }
+  } else {
+    space.proposal_threshold = new BigDecimal(new BigInt(0))
+    space.voting_power_validation_strategy_strategies = []
+    space.voting_power_validation_strategy_strategies_params = []
   }
 
   space.strategies_metadata = event.params.votingStrategyMetadataURIs
@@ -110,7 +113,12 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   space.created = event.block.timestamp.toI32()
   space.tx = event.transaction.hash
 
-  updateSpaceMetadata(space, event.params.metadataURI)
+  if (event.params.metadataURI.startsWith('ipfs://')) {
+    let hash = event.params.metadataURI.slice(7)
+    space.metadata = hash
+    SpaceMetadataTemplate.create(hash)
+  }
+
   updateStrategiesParsedMetadata(space.id, space.strategies_metadata)
 
   space.save()
@@ -122,19 +130,12 @@ export function handleProposalCreated(event: ProposalCreated): void {
     return
   }
 
-  let metadataUri = event.params.metadataUri
-
   let proposalId = `${space.id}/${event.params.proposalId}`
   let proposal = new Proposal(proposalId)
   proposal.proposal_id = event.params.proposalId.toI32()
   proposal.space = space.id
   proposal.author = event.params.author.toHexString()
   proposal.execution_hash = event.params.proposal.executionPayloadHash.toHexString()
-  proposal.metadata_uri = metadataUri
-  proposal.title = ''
-  proposal.body = ''
-  proposal.discussion = ''
-  proposal.execution = ''
   proposal.start = event.params.proposal.startTimestamp.toI32()
   proposal.min_end = event.params.proposal.minEndTimestamp.toI32()
   proposal.max_end = event.params.proposal.maxEndTimestamp.toI32()
@@ -149,6 +150,9 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.tx = event.transaction.hash
   proposal.vote_count = 0
   proposal.execution_strategy = event.params.proposal.executionStrategy
+  proposal.execution_time = 0
+  proposal.executed = false
+  proposal.completed = false
 
   let executionStrategy = ExecutionStrategy.load(
     event.params.proposal.executionStrategy.toHexString()
@@ -167,7 +171,12 @@ export function handleProposalCreated(event: ProposalCreated): void {
   executionHash.proposal_id = proposalId
   executionHash.save()
 
-  updateProposalMetadata(proposal, metadataUri)
+  let metadataUri = event.params.metadataUri
+  if (metadataUri.startsWith('ipfs://')) {
+    let hash = metadataUri.slice(7)
+    proposal.metadata = hash
+    ProposalMetadataTemplate.create(hash)
+  }
 
   proposal.save()
 
@@ -214,7 +223,12 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
   executionHash.proposal_id = proposalId
   executionHash.save()
 
-  updateProposalMetadata(proposal, event.params.newMetadataURI)
+  let metadataUri = event.params.newMetadataURI
+  if (metadataUri.startsWith('ipfs://')) {
+    let hash = metadataUri.slice(7)
+    proposal.metadata = hash
+    ProposalMetadataTemplate.create(hash)
+  }
 
   proposal.save()
 }
@@ -302,7 +316,11 @@ export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {
     return
   }
 
-  updateSpaceMetadata(space, event.params.newMetadataURI)
+  if (event.params.newMetadataURI.startsWith('ipfs://')) {
+    let hash = event.params.newMetadataURI.slice(7)
+    space.metadata = hash
+    SpaceMetadataTemplate.create(hash)
+  }
 
   space.save()
 }

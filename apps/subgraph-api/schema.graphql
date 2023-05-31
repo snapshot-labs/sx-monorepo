@@ -1,16 +1,6 @@
 type Space @entity {
   id: ID!
-  name: String!
-  about: String!
-  avatar: String!
-  external_url: String!
-  delegation_api_type: String
-  delegation_api_url: String
-  github: String!
-  twitter: String!
-  discord: String!
-  voting_power_symbol: String!
-  wallet: String!
+  metadata: SpaceMetadata
   controller: Bytes!
   voting_delay: Int!
   min_voting_period: Int!
@@ -26,18 +16,38 @@ type Space @entity {
   validation_strategy_params: String!
   voting_power_validation_strategy_strategies: [Bytes!]!
   voting_power_validation_strategy_strategies_params: [String!]!
-  executors: [Bytes!]!
-  executors_types: [String!]!
   proposal_count: Int!
   vote_count: Int!
   created: Int!
   tx: Bytes!
 }
 
+type SpaceMetadata @entity {
+  id: ID!
+  name: String!
+  about: String!
+  avatar: String!
+  external_url: String!
+  delegation_api_type: String
+  delegation_api_url: String
+  github: String!
+  twitter: String!
+  discord: String!
+  voting_power_symbol: String!
+  wallet: String!
+  executors: [Bytes!]!
+  executors_types: [String!]!
+}
+
 type StrategiesParsedMetadata @entity {
   id: ID!
   space: Space!
   index: Int!
+  data: StrategiesParsedMetadataData
+}
+
+type StrategiesParsedMetadataData @entity {
+  id: ID!
   name: String!
   description: String!
   decimals: Int!
@@ -54,7 +64,6 @@ type ExecutionStrategy @entity {
 
 type ExecutionHash @entity {
   id: ID!
-  execution_hash: String!
   proposal_id: ID!
 }
 
@@ -64,11 +73,7 @@ type Proposal @entity {
   space: Space!
   author: User!
   execution_hash: String!
-  metadata_uri: String!
-  title: String!
-  body: String!
-  discussion: String!
-  execution: String!
+  metadata: ProposalMetadata
   start: Int!
   min_end: Int!
   max_end: Int!
@@ -90,6 +95,14 @@ type Proposal @entity {
   vote_count: Int!
   executed: Boolean!
   completed: Boolean!
+}
+
+type ProposalMetadata @entity {
+  id: ID!
+  title: String!
+  body: String!
+  discussion: String!
+  execution: String!
 }
 
 type Vote @entity {

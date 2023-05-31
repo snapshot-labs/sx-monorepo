@@ -7,11 +7,12 @@
     "create-local": "graph create --node http://localhost:8020/ snapshot-labs/sx-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ snapshot-labs/sx-subgraph",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 snapshot-labs/sx-subgraph",
-    "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ snapshot-labs/sx-goerli"
+    "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ snapshot-labs/sx-subgraph",
+    "deploy-studio": "graph deploy --studio sx-goerli"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.26.0",
-    "@graphprotocol/graph-ts": "0.24.1",
+    "@graphprotocol/graph-cli": "0.50.1",
+    "@graphprotocol/graph-ts": "0.29.1",
     "assemblyscript-json": "^1.1.0"
   }
 }
