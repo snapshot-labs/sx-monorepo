@@ -24,12 +24,12 @@ export function useActions() {
     return async (...args: T): Promise<U> => {
       try {
         return await fn(...args);
-      } catch (err) {
-        if (err.code !== 'ACTION_REJECTED' && err.message !== 'User abort') {
+      } catch (e) {
+        if (e.code !== 'ACTION_REJECTED' && e.message !== 'User abort') {
           uiStore.addNotification('error', 'Something went wrong. Please try again later.');
         }
 
-        throw err;
+        throw e;
       }
     };
   }
@@ -38,7 +38,6 @@ export function useActions() {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
-    console.log('envelope', envelope);
 
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.signatureData || envelope.sig) {

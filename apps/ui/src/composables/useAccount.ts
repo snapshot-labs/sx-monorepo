@@ -8,7 +8,6 @@ export function useAccount() {
 
   async function loadVotes() {
     const account = web3.value.account;
-    console.log('Load votes for', account);
 
     const allNetworkVotes = await Promise.all(
       enabledNetworks.map(networkId => {

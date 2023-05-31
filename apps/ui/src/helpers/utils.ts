@@ -104,7 +104,7 @@ export function jsonParse(input, fallback?) {
   }
   try {
     return JSON.parse(input);
-  } catch (err) {
+  } catch (e) {
     return fallback || {};
   }
 }
@@ -281,7 +281,7 @@ export async function imageUpload(file: File) {
   try {
     const receipt = await pin(formData);
     return { name: file.name, url: `ipfs://${receipt.cid}` };
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
   }
 }

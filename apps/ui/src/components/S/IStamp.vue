@@ -36,8 +36,8 @@ async function handleFileChange(e: Event) {
 
     emit('update:modelValue', image.url);
     isUploadingImage.value = false;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.error('Failed to upload image', e);
     isUploadingImage.value = false;
   }
 }

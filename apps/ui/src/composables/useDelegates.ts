@@ -118,7 +118,7 @@ export function useDelegates(delegationApiUrl: string) {
       await _fetch(true);
 
       loaded.value = true;
-    } catch (err) {
+    } catch (e) {
       failed.value = true;
     } finally {
       loading.value = false;

@@ -48,7 +48,7 @@ export function validateForm(
 
       try {
         return !!validateAndParseAddress(value);
-      } catch (err) {
+      } catch (e) {
         return isAddress(value);
       }
     }

@@ -21,7 +21,7 @@ const network = computed(() => getNetwork(props.proposal.network));
 
 watch(open, async () => {
   if (open.value === false) return;
-  console.log('Get votes');
+
   votes.value = await network.value.api.loadProposalVotes(props.proposal);
   loaded.value = true;
 });

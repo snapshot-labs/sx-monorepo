@@ -6,8 +6,8 @@ function createWindow() {
     width: 400, // 357
     height: 660, // 600
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-    },
+      preload: path.join(__dirname, 'preload.js')
+    }
   });
 
   win.loadFile('dist/index.html');

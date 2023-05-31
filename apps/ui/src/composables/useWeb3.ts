@@ -58,7 +58,6 @@ export function useWeb3() {
         });
         // auth.provider.on('disconnect', async () => {});
       }
-      console.log('Provider', auth.provider.value);
       let network, accounts;
       try {
         if (connector === 'gnosis') {
@@ -77,8 +76,6 @@ export function useWeb3() {
       } catch (e) {
         console.log(e);
       }
-      console.log('Network', network);
-      console.log('Accounts', accounts);
       handleChainChanged(network.chainId);
       const acc = accounts.length > 0 ? accounts[0] : null;
       const names = await getNames([acc]);

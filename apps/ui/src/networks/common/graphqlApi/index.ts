@@ -32,8 +32,8 @@ function formatExecution(execution: string): Transaction[] {
     const result = JSON.parse(execution);
 
     return Array.isArray(result) ? result : [];
-  } catch (err) {
-    console.log('failed to parse execution');
+  } catch (e) {
+    console.log('Failed to parse execution');
     return [];
   }
 }

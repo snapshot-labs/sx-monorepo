@@ -169,8 +169,8 @@ async function getVotingPower() {
 
     const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);
     votingPowerValid.value = currentVotingPower >= BigInt(space.value.proposal_threshold);
-  } catch (err) {
-    console.warn('err', err);
+  } catch (e) {
+    console.warn('Failed to load voting power', e);
   } finally {
     fetchingVotingPower.value = false;
   }

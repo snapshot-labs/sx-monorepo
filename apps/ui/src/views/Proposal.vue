@@ -80,8 +80,8 @@ async function getVotingPower() {
       web3.value.account,
       proposal.value.snapshot
     );
-  } catch (err) {
-    console.warn('err', err);
+  } catch (e) {
+    console.warn('Failed to load voting power', e);
     votingPowers.value = [];
   } finally {
     loadingVotingPower.value = false;

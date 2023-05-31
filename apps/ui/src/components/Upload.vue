@@ -25,10 +25,10 @@ async function handleFileChange(e) {
     emit('input', `ipfs://${output.file.ipfs_hash}`);
     loading.value = false;
     emit('loading', loading.value);
-  } catch (error) {
+  } catch (e) {
     loading.value = false;
     emit('loading', loading.value);
-    console.log(error);
+    console.log('Failed to upload image', e);
   }
 }
 </script>

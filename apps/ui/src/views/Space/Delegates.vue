@@ -14,7 +14,7 @@ const currentNetwork = computed(() => {
 
   try {
     return getNetwork(props.space.network);
-  } catch (err) {
+  } catch (e) {
     return null;
   }
 });

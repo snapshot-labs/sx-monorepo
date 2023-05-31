@@ -26,7 +26,7 @@ const currentNetwork = computed(() => {
 
   try {
     return getNetwork(props.space.wallet.split(':')[0] as NetworkID);
-  } catch (err) {
+  } catch (e) {
     return null;
   }
 });

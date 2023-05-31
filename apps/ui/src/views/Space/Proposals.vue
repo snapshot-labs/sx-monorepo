@@ -40,8 +40,8 @@ async function getVotingPower() {
       web3.value.account,
       Math.floor(Date.now() / 1000)
     );
-  } catch (err) {
-    console.warn('err', err);
+  } catch (e) {
+    console.warn('Failed to load voting power', e);
     votingPowers.value = [];
   } finally {
     loadingVotingPower.value = false;

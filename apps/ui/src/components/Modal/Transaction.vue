@@ -181,8 +181,8 @@ watch(abiStr, value => {
     new Interface(abi);
     form.abi = abi;
     showAbiInput.value = false;
-  } catch (err) {
-    console.log('invalid abi', value);
+  } catch (e) {
+    console.log('Invalid abi', value);
   }
 });
 
