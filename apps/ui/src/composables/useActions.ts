@@ -34,10 +34,19 @@ export function useActions() {
     };
   }
 
+  function handleSafeEnvelope(envelope: any) {
+    if (envelope !== null) return false;
+
+    uiStore.addNotification('success', 'Transaction set up.');
+    return true;
+  }
+
   async function wrapPromise(networkId: NetworkID, promise: Promise<any>) {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
+
+    if (handleSafeEnvelope(envelope)) return;
 
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.signatureData || envelope.sig) {
@@ -299,6 +308,8 @@ export function useActions() {
     const receipt = await network.actions.setVotingDelay(auth.web3, space, votingDelay);
     console.log('Receipt', receipt);
 
+    if (handleSafeEnvelope(receipt)) return;
+
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }
 
@@ -308,6 +319,8 @@ export function useActions() {
     const network = getNetwork(space.network);
     const receipt = await network.actions.setMinVotingDuration(auth.web3, space, minVotingDuration);
     console.log('Receipt', receipt);
+
+    if (handleSafeEnvelope(receipt)) return;
 
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }
@@ -319,6 +332,8 @@ export function useActions() {
     const receipt = await network.actions.setMaxVotingDuration(auth.web3, space, maxVotingDuration);
     console.log('Receipt', receipt);
 
+    if (handleSafeEnvelope(receipt)) return;
+
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }
 
@@ -328,6 +343,8 @@ export function useActions() {
     const network = getNetwork(space.network);
     const receipt = await network.actions.transferOwnership(auth.web3, space, owner);
     console.log('Receipt', receipt);
+
+    if (handleSafeEnvelope(receipt)) return;
 
     uiStore.addPendingTransaction(receipt.hash, 'gor');
   }

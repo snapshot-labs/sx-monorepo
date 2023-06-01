@@ -6,7 +6,17 @@ import router from '@/router';
 import '@/helpers/auth';
 import '@/style.scss';
 
-if (top?.location !== location) document.documentElement.style.display = 'none';
+const knownHosts = ['app.safe.global', 'pilot.gnosisguild.org'];
+const parentUrl =
+  window.location != window.parent.location
+    ? document.referrer ||
+      document.location.ancestorOrigins[document.location.ancestorOrigins.length - 1]
+    : document.location.href;
+const parentHost = new URL(parentUrl).host;
+if (window !== window.parent && !knownHosts.includes(parentHost)) {
+  document.documentElement.style.display = 'none';
+  throw new Error(`Unknown host: ${parentHost}`);
+}
 
 const pinia = createPinia();
 const app = createApp({ render: () => h(App) })

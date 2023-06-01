@@ -35,6 +35,11 @@ export function createActions(
     manaUrl
   });
 
+  const getIsContract = async (address: string) => {
+    const code = await provider.getCode(address);
+    return code !== '0x';
+  };
+
   return {
     async predictSpaceAddress(web3: Web3Provider, { salt }) {
       await verifyNetwork(web3, chainId);
@@ -149,9 +154,12 @@ export function createActions(
     ) => {
       await verifyNetwork(web3, chainId);
 
+      const isContract = await getIsContract(account);
+
       const { useRelayer, authenticator, strategies } = pickAuthenticatorAndStrategies(
         space.authenticators,
-        space.voting_power_validation_strategy_strategies
+        space.voting_power_validation_strategy_strategies,
+        isContract
       );
 
       let selectedExecutionStrategy;
@@ -182,12 +190,17 @@ export function createActions(
         });
       }
 
-      return client.propose({
-        signer: web3.getSigner(),
-        envelope: {
-          data
+      return client.propose(
+        {
+          signer: web3.getSigner(),
+          envelope: {
+            data
+          }
+        },
+        {
+          noWait: isContract
         }
-      });
+      );
     },
     async updateProposal(
       web3: Web3Provider,
@@ -200,9 +213,12 @@ export function createActions(
     ) {
       await verifyNetwork(web3, chainId);
 
+      const isContract = await getIsContract(account);
+
       const { useRelayer, authenticator } = pickAuthenticatorAndStrategies(
         space.authenticators,
-        space.voting_power_validation_strategy_strategies
+        space.voting_power_validation_strategy_strategies,
+        isContract
       );
 
       let selectedExecutionStrategy;
@@ -233,21 +249,27 @@ export function createActions(
         });
       }
 
-      return client.updateProposal({
-        signer: web3.getSigner(),
-        envelope: {
-          data
-        }
-      });
+      return client.updateProposal(
+        {
+          signer: web3.getSigner(),
+          envelope: {
+            data
+          }
+        },
+        { noWait: isContract }
+      );
     },
     vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
       await verifyNetwork(web3, chainId);
 
       if (choice < 1 || choice > 3) throw new Error('Invalid chocie');
 
+      const isContract = await getIsContract(account);
+
       const { useRelayer, authenticator, strategies } = pickAuthenticatorAndStrategies(
         proposal.space.authenticators,
-        proposal.strategies
+        proposal.strategies,
+        isContract
       );
 
       let convertedChoice: Choice = 0;
@@ -271,12 +293,15 @@ export function createActions(
         });
       }
 
-      return client.vote({
-        signer: web3.getSigner(),
-        envelope: {
-          data
-        }
-      });
+      return client.vote(
+        {
+          signer: web3.getSigner(),
+          envelope: {
+            data
+          }
+        },
+        { noWait: isContract }
+      );
     },
     finalizeProposal: () => null,
     receiveProposal: () => null,
@@ -312,38 +337,62 @@ export function createActions(
     setVotingDelay: async (web3: Web3Provider, space: Space, votingDelay: number) => {
       await verifyNetwork(web3, chainId);
 
-      return client.setVotingDelay({
-        signer: web3.getSigner(),
-        space: space.id,
-        votingDelay
-      });
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
+
+      return client.setVotingDelay(
+        {
+          signer: web3.getSigner(),
+          space: space.id,
+          votingDelay
+        },
+        { noWait: isContract }
+      );
     },
     setMinVotingDuration: async (web3: Web3Provider, space: Space, minVotingDuration: number) => {
       await verifyNetwork(web3, chainId);
 
-      return client.setMinVotingDuration({
-        signer: web3.getSigner(),
-        space: space.id,
-        minVotingDuration
-      });
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
+
+      return client.setMinVotingDuration(
+        {
+          signer: web3.getSigner(),
+          space: space.id,
+          minVotingDuration
+        },
+        { noWait: isContract }
+      );
     },
     setMaxVotingDuration: async (web3: Web3Provider, space: Space, maxVotingDuration: number) => {
       await verifyNetwork(web3, chainId);
 
-      return client.setMaxVotingDuration({
-        signer: web3.getSigner(),
-        space: space.id,
-        maxVotingDuration
-      });
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
+
+      return client.setMaxVotingDuration(
+        {
+          signer: web3.getSigner(),
+          space: space.id,
+          maxVotingDuration
+        },
+        { noWait: isContract }
+      );
     },
     transferOwnership: async (web3: Web3Provider, space: Space, owner: string) => {
       await verifyNetwork(web3, chainId);
 
-      return client.transferOwnership({
-        signer: web3.getSigner(),
-        space: space.id,
-        owner
-      });
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
+
+      return client.transferOwnership(
+        {
+          signer: web3.getSigner(),
+          space: space.id,
+          owner
+        },
+        { noWait: isContract }
+      );
     },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (
