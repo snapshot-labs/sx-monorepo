@@ -82,7 +82,7 @@ onMounted(() => {
             >
               <h4
                 class="text-skin-link"
-                v-text="`${delegate.tokenHoldersRepresentedAmount} delegator(s)`"
+                v-text="`${_n(delegate.tokenHoldersRepresentedAmount)} delegator(s)`"
               />
               <div class="text-sm" v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`" />
             </div>
