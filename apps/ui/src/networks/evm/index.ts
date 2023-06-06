@@ -10,19 +10,21 @@ import { NetworkID, Space } from '@/types';
 const METADATA = {
   gor: {
     name: 'Ethereum Goerli',
-    chainId: 5
+    chainId: 5,
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-goerli/version/latest'
   },
   sep: {
     name: 'Ethereum Sepolia',
-    chainId: 11155111
+    chainId: 11155111,
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest'
   }
 };
 
 export function createEvmNetwork(networkId: NetworkID): Network {
-  const { name, chainId } = METADATA[networkId];
+  const { name, chainId, apiUrl } = METADATA[networkId];
 
   const provider = getProvider(chainId);
-  const api = createApi(constants.API_URL, networkId);
+  const api = createApi(apiUrl, networkId);
 
   const helpers = {
     pin: pinGraph,

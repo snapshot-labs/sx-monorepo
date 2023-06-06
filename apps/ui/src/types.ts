@@ -1,7 +1,7 @@
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
-export type NetworkID = 'gor' | 'sn-tn2';
+export type NetworkID = 'gor' | 'sep' | 'sn-tn2';
 export type Choice = 1 | 2 | 3;
 
 export type SelectedStrategy = {

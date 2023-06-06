@@ -9,21 +9,9 @@ import {
   SPACE_QUERY,
   USER_QUERY
 } from './queries';
-import type { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
-import type { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/types';
-
-type ApiSpace = Omit<Space, 'network'>;
-type ApiProposal = Omit<
-  Proposal,
-  | 'has_started'
-  | 'has_execution_window_started'
-  | 'has_veto_period_ended'
-  | 'has_ended'
-  | 'execution'
-  | 'network'
-> & {
-  execution: string;
-};
+import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
+import { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/types';
+import { ApiSpace, ApiProposal } from './types';
 
 function formatExecution(execution: string): Transaction[] {
   if (execution === '') return [];
@@ -41,7 +29,27 @@ function formatExecution(execution: string): Transaction[] {
 function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   return {
     ...space,
-    network: networkId
+    network: networkId,
+    name: space.metadata.name,
+    avatar: space.metadata.avatar,
+    about: space.metadata.about,
+    external_url: space.metadata.external_url,
+    github: space.metadata.github,
+    twitter: space.metadata.twitter,
+    discord: space.metadata.discord,
+    voting_power_symbol: space.metadata.voting_power_symbol,
+    wallet: space.metadata.wallet,
+    delegation_api_type: space.metadata.delegation_api_type,
+    delegation_api_url: space.metadata.delegation_api_url,
+    executors: space.metadata.executors,
+    executors_types: space.metadata.executors_types,
+    strategies_parsed_metadata: space.strategies_parsed_metadata.map(
+      ({ data: { decimals, symbol, token } }) => ({
+        decimals,
+        symbol,
+        token
+      })
+    )
   };
 }
 
@@ -52,7 +60,25 @@ function formatProposal(
 ): Proposal {
   return {
     ...proposal,
-    execution: formatExecution(proposal.execution),
+    space: {
+      id: proposal.space.id,
+      authenticators: proposal.space.authenticators,
+      voting_power_symbol: proposal.space.metadata.voting_power_symbol,
+      executors: proposal.space.metadata.executors,
+      executors_types: proposal.space.metadata.executors_types,
+      strategies_parsed_metadata: proposal.space.strategies_parsed_metadata.map(
+        ({ data: { decimals, symbol, token } }) => ({
+          decimals,
+          symbol,
+          token
+        })
+      )
+    },
+    metadata_uri: proposal.metadata.id,
+    title: proposal.metadata.title,
+    body: proposal.metadata.body,
+    discussion: proposal.metadata.discussion,
+    execution: formatExecution(proposal.metadata.execution),
     has_started: proposal.start * 1000 >= now,
     has_execution_window_opened: proposal.min_end * 1000 <= now,
     has_ended: proposal.max_end * 1000 <= now,
@@ -133,11 +159,13 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         formatProposal(proposal, networkId, now)
       );
     },
-    loadProposal: async (spaceId: string, proposalId: number): Promise<Proposal> => {
+    loadProposal: async (spaceId: string, proposalId: number): Promise<Proposal | null> => {
       const { data } = await apollo.query({
         query: PROPOSAL_QUERY,
         variables: { id: `${spaceId}/${proposalId}` }
       });
+
+      if (data.proposal.metadata === null) return null;
 
       return formatProposal(data.proposal, networkId);
     },
@@ -150,7 +178,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         variables: {
           first: limit,
           skip,
-          ...(filter ? { where: filter } : {})
+          where: {
+            ...filter,
+            metadata_not: null
+          }
         }
       });
 
@@ -163,6 +194,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       });
 
       if (!data.space) return null;
+      if (data.space.metadata === null) return null;
 
       return formatSpace(data.space, networkId);
     },

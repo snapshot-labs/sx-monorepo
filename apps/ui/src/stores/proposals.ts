@@ -166,6 +166,7 @@ export const useProposalsStore = defineStore('proposals', {
       const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
 
       const proposal = await getNetwork(networkId).api.loadProposal(spaceId, proposalId);
+      if (!proposal) return;
 
       record.value.proposals = {
         ...record.value.proposals,

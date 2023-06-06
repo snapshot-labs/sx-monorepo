@@ -12,8 +12,6 @@ import IHClock from '~icons/heroicons-outline/clock';
 import IHUserCircle from '~icons/heroicons-outline/user-circle';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 
-export const API_URL = 'https://api.thegraph.com/subgraphs/name/snapshot-labs/sx-goerli';
-
 export const SUPPORTED_AUTHENTICATORS = {
   '0xddb36b865a1021524b936fb29fcba5fac073db74': true,
   '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': true

@@ -134,7 +134,7 @@ export type NetworkApi = {
     searchQuery?: string
   ): Promise<Proposal[]>;
   loadProposalsSummary(spaceId: string, limit: number): Promise<Proposal[]>;
-  loadProposal(spaceId: string, proposalId: number): Promise<Proposal>;
+  loadProposal(spaceId: string, proposalId: number): Promise<Proposal | null>;
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User>;
@@ -156,7 +156,6 @@ export type Network = {
   actions: NetworkActions;
   api: NetworkApi;
   constants: {
-    API_URL: string;
     SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
     SUPPORTED_STRATEGIES: { [key: string]: boolean };
     SUPPORTED_EXECUTORS: { [key: string]: boolean };
