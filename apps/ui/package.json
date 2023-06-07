@@ -58,6 +58,7 @@
     "unplugin-auto-import": "^0.15.2",
     "util": "^0.12.5",
     "vue": "^3.2.41",
+    "vue-gtag": "^2.0.1",
     "vue-router": "^4.1.6",
     "vuedraggable": "^4.1.0"
   },
