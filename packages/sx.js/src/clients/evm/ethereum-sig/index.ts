@@ -78,7 +78,7 @@ export class EthereumSig {
       })
     };
 
-    const res = await fetch(`${this.manaUrl}/eth_rpc`, body);
+    const res = await fetch(`${this.manaUrl}/eth_rpc/${this.networkConfig.eip712ChainId}`, body);
     const json = await res.json();
 
     return json.result;

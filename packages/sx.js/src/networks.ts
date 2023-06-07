@@ -32,9 +32,41 @@ export const evmGoerli: EvmNetworkConfig = {
   }
 };
 
-export const evmSepolia = {
+export const evmSepolia: EvmNetworkConfig = {
   ...evmGoerli,
   eip712ChainId: 11155111
+};
+
+export const evmLineaGoerli: EvmNetworkConfig = {
+  eip712ChainId: 59140,
+  proxyFactory: '0x12a1fffffd70677939d61d641ea043bc9060c718',
+  masterSpace: '0x7cc62f8e9bf2b44ce704d2cdcd4aa8021d5a6f4b',
+  executionStrategiesImplementations: {
+    SimpleQuorumAvatar: '0x177f163f8f789f0d9c5c7993728adb106a7b12d4',
+    SimpleQuorumTimelock: '0xdb86512e7e3a2d0b93b74b8fe3ffe8ad780791be'
+  },
+  authenticators: {
+    '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': {
+      type: 'ethSig'
+    },
+    '0xddb36b865a1021524b936fb29fcba5fac073db74': {
+      type: 'ethTx'
+    }
+  },
+  strategies: {
+    '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': {
+      type: 'vanilla'
+    },
+    '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': {
+      type: 'comp'
+    },
+    '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': {
+      type: 'ozVotes'
+    },
+    '0x54449c058bbf0b777745944ea1a7b79786fbc958': {
+      type: 'whitelist'
+    }
+  }
 };
 
 export const goerli2: NetworkConfig = {
