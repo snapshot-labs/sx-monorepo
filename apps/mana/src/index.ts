@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import rpc from './rpc';
-import ethRpc from './eth/rpc';
+import ethRpc from './eth';
 import fossil from './fossil';
 import space from './space';
 import pkg from '../package.json';
