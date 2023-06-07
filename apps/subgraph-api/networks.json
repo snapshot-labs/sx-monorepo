@@ -10,5 +10,11 @@
       "address": "0x12A1FfFFfd70677939D61d641eA043bc9060c718",
       "startBlock": 3589272
     }
+  },
+  "linea-testnet": {
+    "ProxyFactory": {
+      "address": "0x12A1FfFFfd70677939D61d641eA043bc9060c718",
+      "startBlock": 858097
+    }
   }
 }

@@ -8,6 +8,7 @@
     "remove-local": "graph remove --node http://localhost:8020/ snapshot-labs/sx-subgraph",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 snapshot-labs/sx-subgraph",
     "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ snapshot-labs/sx-subgraph",
+    "deploy-linea-testnet": "graph deploy --network linea-testnet --studio sx-linea-testnet",
     "deploy-studio-goerli": "graph deploy --network goerli --studio sx-goerli",
     "deploy-studio-sepolia": "graph deploy --network sepolia --studio sx-sepolia"
   },
