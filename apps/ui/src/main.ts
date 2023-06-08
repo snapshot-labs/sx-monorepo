@@ -25,13 +25,23 @@ const app = createApp({ render: () => h(App) })
   .use(LockPlugin, options);
 
 app.use(pinia);
-app.use(VueGtag, {
-  config: {
-    id: 'G-8MQS50MVZX',
+app.use(
+  VueGtag,
+  {
+    bootstrap: import.meta.env.PROD,
     pageTrackerSkipSamePath: false,
-    params: { anonymize_ip: true }
-  }
-});
+    pageTrackerTemplate: to => ({
+      page_title: to.name,
+      page_path: to.path,
+      page_location: window.location.href
+    }),
+    config: {
+      id: import.meta.env.VITE_GA_MEASUREMENT_ID,
+      params: { anonymize_ip: true }
+    }
+  },
+  router
+);
 
 app.mount('#app');
 
