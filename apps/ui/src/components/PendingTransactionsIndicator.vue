@@ -17,10 +17,7 @@ const pendingTransactionsModalOpen = ref(false);
     v-bind="$attrs"
     title="Pending transactions"
   >
-    <UiButton
-      class="!px-0 w-[46px] text-white bg-blue border-blue focus-within:border-blue focus:border-blue"
-      @click="pendingTransactionsModalOpen = true"
-    >
+    <UiButton primary class="!px-0 w-[46px]" @click="pendingTransactionsModalOpen = true">
       {{ uiStore.pendingTransactions.length }}
     </UiButton>
   </UiTooltip>
