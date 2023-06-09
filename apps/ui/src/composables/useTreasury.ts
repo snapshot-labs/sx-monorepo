@@ -4,7 +4,8 @@ type NullableSpace = Space | undefined | null;
 
 const chainIds = {
   gor: 5,
-  sep: 11155111
+  sep: 11155111,
+  'linea-testnet': 59140
 };
 
 export function useTreasury(spaceRef: Ref<NullableSpace>) {

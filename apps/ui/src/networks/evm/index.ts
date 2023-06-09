@@ -1,7 +1,7 @@
 import { createApi } from '../common/graphqlApi';
 import { createActions } from './actions';
 import * as constants from './constants';
-import { pinGraph } from '@/helpers/graph';
+import { pinGraph } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import networks from '@/helpers/networks.json';
 import { Network } from '@/networks/types';
@@ -17,6 +17,11 @@ const METADATA = {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
     apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest'
+  },
+  'linea-testnet': {
+    name: 'Linea Testnet',
+    chainId: 59140,
+    apiUrl: 'https://thegraph.goerli.zkevm.consensys.net/subgraphs/name/snapshot-labs/sx-subgraph'
   }
 };
 

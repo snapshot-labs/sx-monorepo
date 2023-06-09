@@ -1,6 +1,3 @@
-type SpaceExecutionData = Pick<Space, 'executors' | 'executors_types'>;
-type ExecutorType = Parameters<typeof getEvmExecutionData>[0];
-
 import { getEvmExecutionData } from '@snapshot-labs/sx';
 import {
   RELAYER_AUTHENTICATORS,
@@ -9,6 +6,9 @@ import {
 } from './constants';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Space } from '@/types';
+
+type SpaceExecutionData = Pick<Space, 'executors' | 'executors_types'>;
+type ExecutorType = Parameters<typeof getEvmExecutionData>[0];
 
 export function getExecutionData(
   space: SpaceExecutionData,
@@ -60,10 +60,11 @@ export function pickAuthenticatorAndStrategies(
 
 export async function executionCall(
   baseUrl: string,
+  chainId: number,
   method: 'execute' | 'executeQueuedProposal',
   params: any
 ) {
-  const res = await fetch(`${baseUrl}/eth_rpc`, {
+  const res = await fetch(`${baseUrl}/eth_rpc/${chainId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

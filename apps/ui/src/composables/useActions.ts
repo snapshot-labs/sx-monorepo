@@ -286,7 +286,8 @@ export function useActions() {
     const receipt = await network.actions.executeTransactions(auth.web3, proposal);
     console.log('Receipt', receipt);
 
-    uiStore.addPendingTransaction(receipt.hash, 'gor');
+    const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
+    uiStore.addPendingTransaction(receipt.hash, targetNetwork);
   }
 
   async function executeQueuedProposal(proposal: Proposal) {
@@ -298,7 +299,8 @@ export function useActions() {
     const receipt = await network.actions.executeQueuedProposal(auth.web3, proposal);
     console.log('Receipt', receipt);
 
-    uiStore.addPendingTransaction(receipt.hash, 'gor');
+    const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
+    uiStore.addPendingTransaction(receipt.hash, targetNetwork);
   }
 
   async function setVotingDelay(space: Space, votingDelay: number) {
@@ -310,7 +312,7 @@ export function useActions() {
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, 'gor');
+    uiStore.addPendingTransaction(receipt.hash, space.network);
   }
 
   async function setMinVotingDuration(space: Space, minVotingDuration: number) {
@@ -322,7 +324,7 @@ export function useActions() {
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, 'gor');
+    uiStore.addPendingTransaction(receipt.hash, space.network);
   }
 
   async function setMaxVotingDuration(space: Space, maxVotingDuration: number) {
@@ -334,7 +336,7 @@ export function useActions() {
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, 'gor');
+    uiStore.addPendingTransaction(receipt.hash, space.network);
   }
 
   async function transferOwnership(space: Space, owner: string) {
@@ -346,7 +348,7 @@ export function useActions() {
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, 'gor');
+    uiStore.addPendingTransaction(receipt.hash, space.network);
   }
 
   return {

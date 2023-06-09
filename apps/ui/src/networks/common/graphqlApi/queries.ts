@@ -111,11 +111,7 @@ export const PROPOSALS_QUERY = gql`
     proposals(
       first: $first
       skip: $skip
-      where: {
-        metadata_not: null
-        space: $space
-        metadata_: { title_contains_nocase: $searchQuery }
-      }
+      where: { metadata_: {}, space: $space, metadata_: { title_contains_nocase: $searchQuery } }
       orderBy: created
       orderDirection: desc
     ) {
@@ -129,7 +125,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
   query ($first: Int!, $space: String!, $threshold: Int) {
     active: proposals(
       first: $first
-      where: { space: $space, metadata_not: null, max_end_gte: $threshold }
+      where: { space: $space, metadata_: {}, max_end_gte: $threshold }
       orderBy: created
       orderDirection: desc
     ) {
@@ -138,7 +134,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
 
     expired: proposals(
       first: $first
-      where: { space: $space, metadata_not: null, max_end_lt: $threshold }
+      where: { space: $space, metadata_: {}, max_end_lt: $threshold }
       orderBy: created
       orderDirection: desc
     ) {

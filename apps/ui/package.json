@@ -37,7 +37,7 @@
     "@snapshot-labs/lock": "^0.1.1012",
     "@snapshot-labs/pineapple": "^0.1.0-beta.1",
     "@snapshot-labs/prettier-config": "^0.1.0-beta.7",
-    "@snapshot-labs/sx": "^0.1.0-beta.30",
+    "@snapshot-labs/sx": "^0.1.0-beta.31",
     "@vueuse/core": "^9.4.0",
     "@walletconnect/client": "^1.7.8",
     "ajv": "^8.11.0",

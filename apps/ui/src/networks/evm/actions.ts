@@ -4,6 +4,7 @@ import {
   getEvmStrategy,
   evmGoerli,
   evmSepolia,
+  evmLineaGoerli,
   EvmNetworkConfig
 } from '@snapshot-labs/sx';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
@@ -18,7 +19,8 @@ type Choice = 0 | 1 | 2;
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   5: evmGoerli,
-  11155111: evmSepolia
+  11155111: evmSepolia,
+  59140: evmLineaGoerli
 };
 
 export function createActions(
@@ -316,7 +318,7 @@ export function createActions(
         convertToMetaTransactions(proposal.execution)
       );
 
-      return executionCall(manaUrl, 'execute', {
+      return executionCall(manaUrl, chainId, 'execute', {
         space: proposal.space.id,
         proposalId: proposal.proposal_id,
         executionParams: executionData.executionParams[0]
@@ -331,7 +333,7 @@ export function createActions(
         convertToMetaTransactions(proposal.execution)
       );
 
-      return executionCall(manaUrl, 'executeQueuedProposal', {
+      return executionCall(manaUrl, chainId, 'executeQueuedProposal', {
         space: proposal.space.id,
         executionStrategy: proposal.execution_strategy,
         executionParams: executionData.executionParams[0]

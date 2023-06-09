@@ -180,7 +180,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
           skip,
           where: {
             ...filter,
-            metadata_not: null
+            metadata_: {}
           }
         }
       });
