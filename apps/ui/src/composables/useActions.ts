@@ -25,7 +25,12 @@ export function useActions() {
       try {
         return await fn(...args);
       } catch (e) {
-        if (e.code !== 'ACTION_REJECTED' && e.message !== 'User abort') {
+        const isUserAbortError =
+          e.code === 4001 ||
+          e.message === 'User rejected the request.' ||
+          e.code === 'ACTION_REJECTED';
+
+        if (!isUserAbortError) {
           uiStore.addNotification('error', 'Something went wrong. Please try again later.');
         }
 
