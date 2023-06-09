@@ -11,22 +11,25 @@ const METADATA = {
   gor: {
     name: 'Ethereum Goerli',
     chainId: 5,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-goerli/version/latest'
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-goerli/version/latest',
+    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
   },
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest'
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest',
+    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
   },
   'linea-testnet': {
-    name: 'Linea Testnet',
+    name: 'Linea testnet',
     chainId: 59140,
-    apiUrl: 'https://thegraph.goerli.zkevm.consensys.net/subgraphs/name/snapshot-labs/sx-subgraph'
+    apiUrl: 'https://thegraph.goerli.zkevm.consensys.net/subgraphs/name/snapshot-labs/sx-subgraph',
+    avatar: 'ipfs://bafkreibn4mjs54bnmvkrkiaiwp47gvcz6bervg2kr5ubknytfyz6l5wbs4'
   }
 };
 
 export function createEvmNetwork(networkId: NetworkID): Network {
-  const { name, chainId, apiUrl } = METADATA[networkId];
+  const { name, chainId, apiUrl, avatar } = METADATA[networkId];
 
   const provider = getProvider(chainId);
   const api = createApi(apiUrl, networkId);
@@ -53,6 +56,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
 
   return {
     name,
+    avatar,
     baseChainId: chainId,
     hasReceive: false,
     managerConnectors: ['injected', 'walletconnect', 'walletlink', 'portis', 'gnosis'],

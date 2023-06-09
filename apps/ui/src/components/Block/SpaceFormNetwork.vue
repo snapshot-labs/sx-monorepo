@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { enabledNetworks, getNetwork } from '@/networks';
-import { ETH_CONTRACT } from '@/helpers/constants';
+import { getUrl } from '@/helpers/utils';
 import type { NetworkID } from '@/types';
 
 defineProps<{
@@ -11,10 +11,10 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: NetworkID);
 }>();
 
-const availableNetworks = enabledNetworks.map(id => ({
-  id,
-  name: getNetwork(id).name
-}));
+const availableNetworks = enabledNetworks.map(id => {
+  const { name, avatar } = getNetwork(id);
+  return { id, name, avatar };
+});
 </script>
 
 <template>
@@ -28,7 +28,7 @@ const availableNetworks = enabledNetworks.map(id => ({
         class="flex items-center rounded-lg border px-4 py-3 text-skin-link cursor-pointer"
         @click="emit('update:modelValue', network.id)"
       >
-        <Stamp :id="ETH_CONTRACT" type="token" :size="32" class="mr-3" />
+        <img :src="getUrl(network.avatar)" class="w-[32px] h-[32px] mr-3 rounded-lg" />
         {{ network.name }}
       </div>
     </div>

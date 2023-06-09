@@ -149,6 +149,7 @@ export type NetworkHelpers = {
 
 export type Network = {
   name: string;
+  avatar: string;
   baseChainId: number;
   baseNetworkId?: NetworkID;
   hasReceive: boolean;
