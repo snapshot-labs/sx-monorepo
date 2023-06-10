@@ -146,8 +146,14 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
 `;
 
 export const VOTES_QUERY = gql`
-  query ($space: String, $proposal: Int) {
-    votes(where: { space: $space, proposal: $proposal }, orderBy: vp, orderDirection: desc) {
+  query ($first: Int!, $skip: Int!, $space: String, $proposal: Int) {
+    votes(
+      first: $first
+      skip: $skip
+      where: { space: $space, proposal: $proposal }
+      orderBy: vp
+      orderDirection: desc
+    ) {
       id
       voter {
         id

@@ -126,7 +126,7 @@ export type NetworkActions = {
 };
 
 export type NetworkApi = {
-  loadProposalVotes(proposal: Proposal): Promise<Vote[]>;
+  loadProposalVotes(proposal: Proposal, paginationOpts: PaginationOpts): Promise<Vote[]>;
   loadUserVotes(voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
     spaceId: string,

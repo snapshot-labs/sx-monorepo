@@ -131,11 +131,11 @@ async function handleVoteClick(choice: Choice) {
 
 watch([() => web3.value.account, proposal], () => getVotingPower());
 watch(
-  [networkId, spaceAddress],
-  ([networkId, spaceAddress]) => {
+  [networkId, spaceAddress, id],
+  ([networkId, spaceAddress, id]) => {
     if (!networkId || !spaceAddress) return;
 
-    proposalsStore.fetchProposal(spaceAddress, id.value, networkId);
+    proposalsStore.fetchProposal(spaceAddress, id, networkId);
   },
   { immediate: true }
 );

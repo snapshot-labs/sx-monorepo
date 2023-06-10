@@ -103,12 +103,17 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   });
 
   return {
-    loadProposalVotes: async (proposal: Proposal): Promise<Vote[]> => {
+    loadProposalVotes: async (
+      proposal: Proposal,
+      { limit, skip = 0 }: PaginationOpts
+    ): Promise<Vote[]> => {
       const { data } = await apollo.query({
         query: VOTES_QUERY,
         variables: {
           space: proposal.space.id,
-          proposal: proposal.proposal_id
+          proposal: proposal.proposal_id,
+          first: limit,
+          skip
         }
       });
 
