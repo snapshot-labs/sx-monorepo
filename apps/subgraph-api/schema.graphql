@@ -95,6 +95,7 @@ type Proposal @entity {
   vote_count: Int!
   executed: Boolean!
   completed: Boolean!
+  cancelled: Boolean!
 }
 
 type ProposalMetadata @entity {

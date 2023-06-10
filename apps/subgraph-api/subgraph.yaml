@@ -52,6 +52,8 @@ templates:
           handler: handleProposalUpdated
         - event: ProposalExecuted(uint256)
           handler: handleProposalExecuted
+        - event: ProposalCancelled(uint256)
+          handler: handleProposalCancelled
         - event: VoteCast(uint256,address,uint8,uint256)
           handler: handleVoteCreated
         - event: MetadataURIUpdated(string)
