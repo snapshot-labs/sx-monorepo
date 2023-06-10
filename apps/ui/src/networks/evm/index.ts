@@ -39,9 +39,10 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
-        setInterval(async () => {
+        const timer = setInterval(async () => {
           const space = await api.loadSpace(spaceAddress);
           if (space) {
+            clearInterval(timer);
             resolve(space);
           }
         }, interval);
