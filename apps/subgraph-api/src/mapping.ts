@@ -272,7 +272,7 @@ export function handleProposalCancelled(event: ProposalCancelled): void {
   }
 
   space.proposal_count -= 1
-  space.vote_count = -proposal.vote_count
+  space.vote_count -= proposal.vote_count
   space.save()
 
   proposal.cancelled = true
