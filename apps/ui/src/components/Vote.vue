@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { _t } from '@/helpers/utils';
+import { useUiStore } from '@/stores/ui';
 import { getNetwork } from '@/networks';
-import type { Proposal as ProposalType } from '@/types';
+import { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
+const uiStore = useUiStore();
 const { votes } = useAccount();
 
 const isSupported = computed(() => {
@@ -30,6 +32,9 @@ const isSupported = computed(() => {
     You have already voted for this proposal
   </slot>
 
+  <slot v-else-if="uiStore.pendingVotes[proposal.id]" name="voted-pending">
+    You have already voted for this proposal
+  </slot>
   <slot v-else-if="proposal.has_started" name="waiting">
     Voting for this proposal hasn't started yet. Voting will start {{ _t(proposal.start) }}.
   </slot>

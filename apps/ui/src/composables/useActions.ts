@@ -163,6 +163,8 @@ export function useActions() {
       proposal.network,
       network.actions.vote(auth.web3, web3.value.account, proposal, choice)
     );
+
+    uiStore.addPendingVote(proposal.id);
   }
 
   async function propose(
