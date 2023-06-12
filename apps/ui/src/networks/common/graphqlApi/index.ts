@@ -10,6 +10,7 @@ import {
   USER_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
+import { getNames } from '@/helpers/ens';
 import { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/types';
 import { ApiSpace, ApiProposal } from './types';
 
@@ -117,7 +118,13 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.votes;
+      const addresses = data.votes.map(vote => vote.voter.id);
+      const names = await getNames(addresses);
+
+      return data.votes.map(vote => {
+        vote.voter.name = names[vote.voter.id] || null;
+        return vote;
+      });
     },
     loadUserVotes: async (voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({

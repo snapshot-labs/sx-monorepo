@@ -134,6 +134,7 @@ export type Vote = {
   id: string;
   voter: {
     id: string;
+    name?: string;
   };
   space: {
     id: string;

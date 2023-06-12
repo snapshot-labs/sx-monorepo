@@ -156,9 +156,7 @@ watch(
           >
             <Stamp :id="proposal.author.id" :size="32" class="mr-1" />
             <div class="flex flex-col ml-2 leading-4 gap-1">
-              <span class="text-md">
-                {{ shortenAddress(proposal.author.id) }}
-              </span>
+              {{ shortenAddress(proposal.author.id) }}
               <span class="text-skin-text text-[16px]" v-text="_rt(proposal.created)" />
             </div>
           </router-link>

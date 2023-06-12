@@ -99,7 +99,7 @@ watch(
               :to="{ name: 'user', params: { id: vote.voter.id } }"
               @click="$emit('close')"
             >
-              {{ shortenAddress(vote.voter.id) }}
+              {{ vote.voter.name || shortenAddress(vote.voter.id) }}
             </router-link>
             <div class="absolute right-4 top-3 text-skin-link" v-text="choices[vote.choice]" />
           </div>
