@@ -58,6 +58,7 @@ async function handleVoteClick(choice: Choice) {
         <Vote :proposal="proposal">
           <template #unsupported><div /></template>
           <template #waiting><div /></template>
+          <template #cancelled><div /></template>
           <template #voted-pending><div /></template>
           <template #voted>
             <Results :proposal="proposal" />

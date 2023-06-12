@@ -151,6 +151,9 @@ export function createActions(
     updateProposal: () => {
       throw new Error('Not implemented');
     },
+    cancelProposal: () => {
+      throw new Error('Not implemented');
+    },
     vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
       await verifyNetwork(web3, l1ChainId);
 

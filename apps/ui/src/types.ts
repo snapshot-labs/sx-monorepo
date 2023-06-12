@@ -78,6 +78,7 @@ export type Proposal = {
   quorum: number;
   space: {
     id: string;
+    controller: string;
     voting_power_symbol: string;
     authenticators: string[];
     executors: string[];
@@ -116,6 +117,7 @@ export type Proposal = {
   has_veto_period_ended: boolean;
   executed: boolean;
   completed: boolean;
+  cancelled: boolean;
 };
 
 export type User = {

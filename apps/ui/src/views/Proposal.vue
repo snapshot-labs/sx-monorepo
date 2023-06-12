@@ -11,7 +11,7 @@ const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
-const { vote } = useActions();
+const { vote, cancelProposal } = useActions();
 const { createDraft } = useEditor();
 
 const modalOpenVotes = ref(false);
@@ -19,6 +19,7 @@ const modalOpenTimeline = ref(false);
 const sendingType = ref<null | number>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
+const cancelling = ref(false);
 
 const id = computed(() => parseInt((route.params.id as string) || '0'));
 const proposal = computed(() => {
@@ -57,6 +58,16 @@ const editable = computed(() => {
   return (
     compareAddresses(proposal.value.author.id, web3.value.account) &&
     proposal.value.start * 1000 > Date.now()
+  );
+});
+
+const cancellable = computed(() => {
+  if (!proposal.value) return false;
+
+  return (
+    compareAddresses(proposal.value.space.controller, web3.value.account) &&
+    proposal.value.executed === false &&
+    proposal.value.cancelled === false
   );
 });
 
@@ -117,6 +128,18 @@ async function handleEditClick() {
   });
 }
 
+async function handleCancelClick() {
+  if (!proposal.value) return;
+
+  cancelling.value = true;
+
+  try {
+    await cancelProposal(proposal.value);
+  } finally {
+    cancelling.value = false;
+  }
+}
+
 async function handleVoteClick(choice: Choice) {
   if (!proposal.value) return;
 
@@ -164,6 +187,12 @@ watch(
             <UiTooltip v-if="editable" title="Edit proposal">
               <a @click="handleEditClick">
                 <IH-pencil />
+              </a>
+            </UiTooltip>
+            <UiTooltip v-if="cancellable" title="Cancel proposal">
+              <UiLoading v-if="cancelling" />
+              <a v-else @click="handleCancelClick">
+                <IS-x-mark />
               </a>
             </UiTooltip>
             <UiTooltip title="View proposal metadata">
@@ -280,8 +309,10 @@ watch(
             </UiTooltip>
           </div>
         </Vote>
-        <h4 class="block eyebrow mb-2 mt-4">Results</h4>
-        <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
+        <template v-if="!proposal.cancelled">
+          <h4 class="block eyebrow mb-2 mt-4">Results</h4>
+          <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
+        </template>
       </div>
     </template>
     <teleport to="#modal">

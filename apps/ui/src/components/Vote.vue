@@ -43,6 +43,8 @@ const isSupported = computed(() => {
     Proposal voting window has ended
   </slot>
 
+  <slot v-else-if="proposal.cancelled" name="cancelled">This proposal has been cancelled</slot>
+
   <slot v-else-if="!isSupported" name="unsupported">
     Voting for this proposal is not supported
   </slot>

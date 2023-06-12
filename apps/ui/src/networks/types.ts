@@ -106,6 +106,7 @@ export type NetworkActions = {
     executionStrategy: string | null,
     transactions: MetaTransaction[]
   );
+  cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(web3: Web3Provider, account: string, proposal: Proposal, choice: Choice);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);

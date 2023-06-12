@@ -48,6 +48,7 @@ const PROPOSAL_FRAGMENT = gql`
     proposal_id
     space {
       id
+      controller
       authenticators
       metadata {
         id
@@ -94,6 +95,7 @@ const PROPOSAL_FRAGMENT = gql`
     vote_count
     executed
     completed
+    cancelled
   }
 `;
 
@@ -111,7 +113,12 @@ export const PROPOSALS_QUERY = gql`
     proposals(
       first: $first
       skip: $skip
-      where: { metadata_: {}, space: $space, metadata_: { title_contains_nocase: $searchQuery } }
+      where: {
+        metadata_: {}
+        space: $space
+        cancelled: false
+        metadata_: { title_contains_nocase: $searchQuery }
+      }
       orderBy: created
       orderDirection: desc
     ) {
@@ -125,7 +132,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
   query ($first: Int!, $space: String!, $threshold: Int) {
     active: proposals(
       first: $first
-      where: { space: $space, metadata_: {}, max_end_gte: $threshold }
+      where: { space: $space, metadata_: {}, cancelled: false, max_end_gte: $threshold }
       orderBy: created
       orderDirection: desc
     ) {
@@ -134,7 +141,7 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
 
     expired: proposals(
       first: $first
-      where: { space: $space, metadata_: {}, max_end_lt: $threshold }
+      where: { space: $space, metadata_: {}, cancelled: false, max_end_lt: $threshold }
       orderBy: created
       orderDirection: desc
     ) {

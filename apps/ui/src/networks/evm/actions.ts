@@ -263,6 +263,21 @@ export function createActions(
         { noWait: isContract }
       );
     },
+    cancelProposal: async (web3: Web3Provider, proposal: Proposal) => {
+      await verifyNetwork(web3, chainId);
+
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
+
+      return client.cancel(
+        {
+          signer: web3.getSigner(),
+          space: proposal.space.id,
+          proposal: proposal.proposal_id
+        },
+        { noWait: isContract }
+      );
+    },
     vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
       await verifyNetwork(web3, chainId);
 

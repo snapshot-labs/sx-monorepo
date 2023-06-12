@@ -259,6 +259,19 @@ export function useActions() {
     return true;
   }
 
+  async function cancelProposal(proposal: Proposal) {
+    if (!web3.value.account) return await forceLogin();
+    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
+
+    const network = getNetwork(proposal.network);
+    const receipt = await network.actions.cancelProposal(auth.web3, proposal);
+    console.log('Receipt', receipt);
+
+    if (handleSafeEnvelope(receipt)) return;
+
+    uiStore.addPendingTransaction(receipt.hash, proposal.network);
+  }
+
   async function finalizeProposal(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
@@ -366,6 +379,7 @@ export function useActions() {
     vote: wrapWithErrors(vote),
     propose: wrapWithErrors(propose),
     updateProposal: wrapWithErrors(updateProposal),
+    cancelProposal: wrapWithErrors(cancelProposal),
     finalizeProposal: wrapWithErrors(finalizeProposal),
     receiveProposal: wrapWithErrors(receiveProposal),
     executeTransactions: wrapWithErrors(executeTransactions),

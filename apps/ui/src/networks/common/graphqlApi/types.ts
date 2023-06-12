@@ -52,6 +52,7 @@ export type ApiProposal = {
   };
   space: {
     id: string;
+    controller: string;
     metadata: {
       voting_power_symbol: string;
       executors: string[];
@@ -88,4 +89,5 @@ export type ApiProposal = {
   has_veto_period_ended: boolean;
   executed: boolean;
   completed: boolean;
+  cancelled: boolean;
 };
