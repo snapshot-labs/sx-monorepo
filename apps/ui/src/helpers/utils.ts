@@ -19,7 +19,7 @@ const ADDABLE_NETWORKS = {
       decimals: 18
     },
     rpcUrls: ['https://rpc.goerli.linea.build'],
-    blockExplorerUrls: ['https://explorer.goerli.linea.build']
+    blockExplorerUrls: ['https://goerli.lineascan.build']
   }
 };
 
