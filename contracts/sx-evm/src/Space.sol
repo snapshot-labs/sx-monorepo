@@ -419,11 +419,6 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         // TODO: should we check that there are still authenticators left? same for other setters..
     }
 
-    /// @dev Reverts if `msg.sender` is not in the list of whitelisted authenticators.
-    function _assertValidAuthenticator() internal view {
-        if (authenticators[msg.sender] != true) revert AuthenticatorNotWhitelisted();
-    }
-
     /// @dev Reverts if a specified proposal does not exist.
     function _assertProposalExists(Proposal memory proposal) internal pure {
         // startTimestamp cannot be set to 0 when a proposal is created,
