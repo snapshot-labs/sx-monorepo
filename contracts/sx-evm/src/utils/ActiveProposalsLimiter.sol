@@ -29,7 +29,7 @@ abstract contract ActiveProposalsLimiter {
         } else if (block.timestamp >= packedData.lastUpdate + cooldown) {
             // Cooldown passed, reset counter.
             packedData.activeProposals = 1;
-        } else if (packedData.activeProposals == maxActiveProposals) {
+        } else if (packedData.activeProposals >= maxActiveProposals) {
             // Cooldown has not passed, but user has reached maximum active proposals.
             return false;
         } else {

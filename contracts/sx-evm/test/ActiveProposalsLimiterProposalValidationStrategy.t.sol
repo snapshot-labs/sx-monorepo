@@ -69,6 +69,40 @@ contract ActiveProposalsLimterTest is SpaceTest {
         }
     }
 
+    // TODO: Increase Proposal Limit
+    function testDecreaseProposalLimit() public {
+        // The user goes to the maxActiveLimit.
+        for (uint256 i = 0; i < maxActive; i++) {
+            _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
+        }
+
+        // We now decrease the limit to 1.
+        Strategy memory newProposalStrategy = Strategy(
+            address(activeProposalsLimiterProposalValidationStrategy),
+            abi.encode(cooldown, 1) // Set the max number of proposals to 1
+        );
+        space.updateSettings(
+            UpdateSettingsInput(
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_UINT32,
+                NO_UPDATE_STRING,
+                NO_UPDATE_STRING,
+                newProposalStrategy,
+                "",
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_ADDRESSES,
+                NO_UPDATE_STRATEGIES,
+                NO_UPDATE_STRINGS,
+                NO_UPDATE_UINT8S
+            )
+        );
+
+        // Ensure the user cannot cast new proposals
+        vm.expectRevert(FailedToPassProposalValidation.selector);
+        _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
+    }
+
     function testSpamThenWaitThenSpam() public {
         // max * 2 so we would revert if `cooldown` is not respected
         for (uint256 i = 0; i < maxActive; i++) {
