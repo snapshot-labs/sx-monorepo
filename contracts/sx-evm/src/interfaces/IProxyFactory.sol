@@ -10,7 +10,8 @@ interface IProxyFactory is IProxyFactoryErrors, IProxyFactoryEvents {
     /// @notice Deploys a proxy contract using the given implementation and initializer function call.
     /// @param implementation The address of the implementation contract.
     /// @param initializer ABI encoded function call to initialize the proxy.
-    function deployProxy(address implementation, bytes memory initializer, bytes32 salt) external;
+    /// @param saltNonce a nonce used in combination with the sender's address and initializer to compute the salt.
+    function deployProxy(address implementation, bytes memory initializer, uint256 saltNonce) external;
 
     /// @notice Predicts the CREATE2 address of a proxy contract.
     /// @param implementation The address of the implementation contract.

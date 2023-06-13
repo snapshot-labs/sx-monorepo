@@ -72,7 +72,7 @@ contract SpaceSetup is Script {
                 authenticators,
                 executionStrategies
             ),
-            keccak256(abi.encodePacked("SOC Test Space: 2"))
+            0
         );
 
         vm.stopBroadcast();
