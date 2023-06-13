@@ -59,69 +59,82 @@ const parsed = computed(() => remarkable.render(props.body));
   font-size: 22px;
   line-height: 1.3;
   word-wrap: break-word;
-}
-.markdown-body::before {
-  display: table;
-  content: '';
-}
-.markdown-body blockquote {
-  color: var(--text-color);
-  border-left-color: var(--text-color);
-}
-.markdown-body::after {
-  display: table;
-  clear: both;
-  content: '';
-}
-.markdown-body > *:first-child {
-  margin-top: 0 !important;
-}
-.markdown-body > *:last-child {
-  margin-bottom: 0 !important;
-}
-.markdown-body a:not([href]) {
-  color: inherit;
-  text-decoration: none;
-}
-.markdown-body p,
-.markdown-body blockquote {
-  margin-top: 0;
-  margin-bottom: 16px;
-}
-.markdown-body blockquote {
-  padding: 0 1em;
-  color: #6a737d;
-  border-left: 0.25em solid #dfe2e5;
-}
-.markdown-body blockquote > :first-child {
-  margin-top: 0;
-}
-.markdown-body blockquote > :last-child {
-  margin-bottom: 0;
-}
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4,
-.markdown-body h5,
-.markdown-body h6 {
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 600;
-  line-height: 1.4 !important;
-}
-.markdown-body h1,
-.markdown-body h2 {
-  font-size: 1.25em;
-}
-.markdown-body h3,
-.markdown-body h4,
-.markdown-body h5,
-.markdown-body h6 {
-  font-size: 1em;
-}
-.markdown-body p {
-  font-size: 1em;
-  color: var(--content-color);
+
+  &::before {
+    display: table;
+    content: '';
+  }
+
+  &::after {
+    display: table;
+    clear: both;
+    content: '';
+  }
+
+  > *:first-child {
+    margin-top: 0 !important;
+  }
+
+  > *:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  a:not([href]) {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  p,
+  blockquote {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 1em;
+    color: var(--content-color);
+  }
+
+  blockquote {
+    padding: 0 1em;
+    color: var(--text-color);
+    border-left: 0.25em solid var(--text-color);
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+
+    > :first-child {
+      margin-top: 0;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    line-height: 1.4 !important;
+  }
+
+  h1,
+  h2 {
+    font-size: 1.25em;
+  }
+
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: 1em;
+  }
 }
 </style>
