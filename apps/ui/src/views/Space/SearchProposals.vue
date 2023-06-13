@@ -6,6 +6,7 @@ const PROPOSALS_LIMIT = 20;
 
 const props = defineProps<{ space: Space }>();
 
+const { setTitle } = useTitle();
 const route = useRoute();
 
 const loaded = ref(false);
@@ -61,6 +62,10 @@ onMounted(() => {
 
 watch(query, () => {
   fetch();
+});
+
+watchEffect(() => {
+  setTitle(`Proposals - ${props.space.name}`);
 });
 </script>
 

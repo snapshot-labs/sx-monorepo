@@ -18,6 +18,7 @@ const DISCUSSION_DEFINITION = {
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
+const { setTitle } = useTitle();
 const { proposals, createDraft } = useEditor();
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
@@ -190,6 +191,14 @@ watch(proposalData, () => {
   if (!proposal.value) return;
 
   proposal.value.updatedAt = Date.now();
+});
+
+watchEffect(() => {
+  if (!space.value) return;
+
+  const title = proposal.value?.proposalId ? 'Update proposal' : 'New proposal';
+
+  setTitle(`${title} - ${space.value.name}`);
 });
 </script>
 

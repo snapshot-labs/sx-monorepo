@@ -2,6 +2,7 @@
 import { useContactsStore } from '@/stores/contacts';
 import { shorten, shortenAddress } from '@/helpers/utils';
 
+useTitle('Contacts');
 const contactsStore = useContactsStore();
 
 const modalState: Ref<{

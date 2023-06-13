@@ -3,6 +3,7 @@ import { onMounted } from 'vue';
 import { useWeb3 } from '@/composables/useWeb3';
 import { useSpaces } from '@/composables/useSpaces';
 
+useTitle('My spaces');
 const { web3Account } = useWeb3();
 const { loaded, spaces, fetch } = useSpaces();
 

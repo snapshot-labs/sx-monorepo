@@ -9,6 +9,7 @@ const route = useRoute();
 const router = useRouter();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
+const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote, cancelProposal } = useActions();
@@ -162,6 +163,12 @@ watch(
   },
   { immediate: true }
 );
+
+watchEffect(() => {
+  if (!proposal.value) return;
+
+  setTitle(proposal.value.title || `Proposal #${proposal.value.proposal_id}`);
+});
 </script>
 
 <template>

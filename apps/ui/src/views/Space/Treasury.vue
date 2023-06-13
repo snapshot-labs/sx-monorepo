@@ -8,6 +8,7 @@ import type { Token } from '@/helpers/alchemy';
 
 const props = defineProps<{ space: Space }>();
 
+const { setTitle } = useTitle();
 const router = useRouter();
 const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
@@ -95,6 +96,10 @@ onMounted(() => {
 
   loadBalances(treasury.value.wallet, treasury.value.network);
   loadNfts(treasury.value.wallet);
+});
+
+watchEffect(() => {
+  setTitle(`Treasury - ${props.space.name}`);
 });
 </script>
 

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useUiStore } from '@/stores/ui';
 
 const route = useRoute();

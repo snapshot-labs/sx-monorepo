@@ -2,6 +2,7 @@
 import { useUsersStore } from '@/stores/users';
 import { shortenAddress } from '@/helpers/utils';
 
+const { setTitle } = useTitle();
 const { networkId, address } = useRouteParser('id');
 const usersStore = useUsersStore();
 
@@ -18,6 +19,10 @@ watch(
     immediate: true
   }
 );
+
+watchEffect(() => {
+  setTitle(`${address.value} user profile`);
+});
 </script>
 
 <template>

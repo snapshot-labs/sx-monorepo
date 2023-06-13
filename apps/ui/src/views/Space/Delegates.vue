@@ -5,6 +5,7 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
+const { setTitle } = useTitle();
 const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMore } = useDelegates(
   props.space.delegation_api_url as string
 );
@@ -29,6 +30,10 @@ onMounted(() => {
   if (!props.space.delegation_api_url) return;
 
   fetch();
+});
+
+watchEffect(() => {
+  setTitle(`Delegates - ${props.space.name}`);
 });
 </script>
 

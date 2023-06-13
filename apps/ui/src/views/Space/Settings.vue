@@ -5,6 +5,7 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
+const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { setVotingDelay, setMinVotingDuration, setMaxVotingDuration, transferOwnership } =
   useActions();
@@ -46,6 +47,10 @@ async function handleSave(
     settingsLoading.value[field] = false;
   }
 }
+
+watchEffect(() => {
+  setTitle(`Settings - ${props.space.name}`);
+});
 </script>
 
 <template>

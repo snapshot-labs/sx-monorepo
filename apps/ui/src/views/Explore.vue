@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { useSpacesStore } from '@/stores/spaces';
 
+const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
 
 onMounted(() => spacesStore.fetch());
+
+watchEffect(() => {
+  setTitle('Explore');
+});
 </script>
 
 <template>

@@ -6,6 +6,7 @@ import { VotingPower } from '@/networks/types';
 
 const props = defineProps<{ space: Space }>();
 
+const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const proposalsStore = useProposalsStore();
 
@@ -58,6 +59,10 @@ watch(
   () => web3.value.account,
   () => getVotingPower()
 );
+
+watchEffect(() => {
+  setTitle(`Proposals - ${props.space.name}`);
+});
 </script>
 
 <template>

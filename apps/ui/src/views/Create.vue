@@ -41,6 +41,7 @@ const PAGES = [
 
 type PageID = typeof PAGES[number]['id'];
 
+const { setTitle } = useTitle();
 const { predictSpaceAddress } = useActions();
 const { web3 } = useWeb3();
 
@@ -175,6 +176,10 @@ watch(selectedNetworkId, () => {
   validationStrategy.value = null;
   votingStrategies.value = [];
   executionStrategies.value = [];
+});
+
+watchEffect(() => {
+  setTitle('Create space');
 });
 </script>
 

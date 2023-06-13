@@ -8,9 +8,11 @@ const PROPOSALS_LIMIT = 4;
 
 const props = defineProps<{ space: Space }>();
 
+const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
+
 const editSpaceModalOpen = ref(false);
 
 onMounted(() => {
@@ -51,6 +53,10 @@ const grouped = computed(() => {
 
     return v;
   }, initialValue);
+});
+
+watchEffect(() => {
+  setTitle(props.space.name);
 });
 </script>
 
