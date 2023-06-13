@@ -82,7 +82,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         Strategy[] memory _votingStrategies,
         string[] memory _votingStrategyMetadataURIs,
         address[] memory _authenticators
-    ) public override initializer {
+    ) external override initializer {
         if (_votingStrategies.length == 0) revert EmptyArray();
         if (_authenticators.length == 0) revert EmptyArray();
         if (_votingStrategies.length != _votingStrategyMetadataURIs.length) revert ArrayLengthMismatch();
