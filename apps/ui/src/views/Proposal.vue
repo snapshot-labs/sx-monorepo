@@ -183,24 +183,48 @@ watch(
               <span class="text-skin-text text-[16px]" v-text="_rt(proposal.created)" />
             </div>
           </router-link>
-          <div class="flex items-center gap-4 mr-3">
-            <UiTooltip v-if="editable" title="Edit proposal">
-              <a @click="handleEditClick">
-                <IH-pencil />
-              </a>
-            </UiTooltip>
-            <UiTooltip v-if="cancellable" title="Cancel proposal">
-              <UiLoading v-if="cancelling" />
-              <a v-else @click="handleCancelClick">
-                <IS-x-mark />
-              </a>
-            </UiTooltip>
-            <UiTooltip title="View proposal metadata">
-              <a v-if="proposalMetadataUrl" :href="proposalMetadataUrl" target="_blank">
-                <IH-dots-vertical />
-              </a>
-            </UiTooltip>
-          </div>
+          <UiDropdown class="mr-3">
+            <template #button>
+              <IH-dots-vertical class="text-skin-link" />
+            </template>
+            <template #items>
+              <UiDropdownItem v-if="editable" v-slot="{ active }">
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleEditClick"
+                >
+                  <IS-pencil :width="16" />
+                  Edit proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="cancellable"
+                v-slot="{ active, disabled }"
+                :disabled="cancelling"
+              >
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleCancelClick"
+                >
+                  <IS-x-mark :width="16" />
+                  Cancel proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
+                <a
+                  :href="proposalMetadataUrl"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                >
+                  <IS-arrow-top-right-on-square :width="16" />
+                  View metadata
+                </a>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </div>
         <Container class="pt-5 max-w-[630px] mx-0 md:mx-auto">
           <div>
