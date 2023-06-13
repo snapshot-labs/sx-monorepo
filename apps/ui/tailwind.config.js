@@ -45,9 +45,7 @@ module.exports = {
       8: '64px'
     },
     fontFamily: {
-      serif: [
-        'Calibre, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji'
-      ]
+      serif: ['"Calibre", Helvetica, Arial, sans-serif']
     },
     fontSize: {
       '2xl': ['34px'],
