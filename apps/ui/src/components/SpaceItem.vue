@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useSpacesStore } from '@/stores/spaces';
+import { _n } from '@/helpers/utils';
 import { Space } from '@/types';
 
 defineProps<{ space: Space }>();
@@ -25,8 +26,8 @@ const spacesStore = useSpacesStore();
     <SpaceAvatar :space="space" :size="32" class="border-skin-bg !bg-skin-border rounded-sm mb-2" />
     <h3 class="truncate" v-text="space.name" />
     <h5 class="absolute bottom-4">
-      <b class="text-skin-link" v-text="space.proposal_count" /> proposals ·
-      <b class="text-skin-link" v-text="space.vote_count" /> votes
+      <b class="text-skin-link" v-text="_n(space.proposal_count)" /> proposals ·
+      <b class="text-skin-link" v-text="_n(space.vote_count)" /> votes
     </h5>
     <h5 class="line-clamp-2" v-text="space.about" />
   </router-link>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useUsersStore } from '@/stores/users';
-import { shortenAddress } from '@/helpers/utils';
+import { shortenAddress, _n } from '@/helpers/utils';
 
 const { setTitle } = useTitle();
 const { networkId, address } = useRouteParser('id');
@@ -34,8 +34,8 @@ watchEffect(() => {
         <Stamp :id="user.id" :size="90" class="mb-2 border-[4px] border-skin-bg !bg-skin-border" />
         <h1>{{ shortenAddress(user.id) }}</h1>
         <div>
-          <b class="text-skin-link">{{ user.proposal_count }}</b> proposals ·
-          <b class="text-skin-link">{{ user.vote_count }}</b> votes
+          <b class="text-skin-link">{{ _n(user.proposal_count) }}</b> proposals ·
+          <b class="text-skin-link">{{ _n(user.vote_count) }}</b> votes
         </div>
       </div>
     </Container>
