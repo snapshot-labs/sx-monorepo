@@ -23,6 +23,7 @@ export function handleSpaceMetadata(content: Bytes): void {
 
     let delegation_api_type = propertiesObj.get('delegation_api_type')
     let delegation_api_url = propertiesObj.get('delegation_api_url')
+    let cover = propertiesObj.get('cover')
     let github = propertiesObj.get('github')
     let twitter = propertiesObj.get('twitter')
     let discord = propertiesObj.get('discord')
@@ -44,6 +45,7 @@ export function handleSpaceMetadata(content: Bytes): void {
       spaceMetadata.delegation_api_url = null
     }
 
+    spaceMetadata.cover = cover ? cover.toString() : ''
     spaceMetadata.github = github ? github.toString() : ''
     spaceMetadata.twitter = twitter ? twitter.toString() : ''
     spaceMetadata.discord = discord ? discord.toString() : ''
@@ -65,6 +67,7 @@ export function handleSpaceMetadata(content: Bytes): void {
   } else {
     spaceMetadata.delegation_api_type = null
     spaceMetadata.delegation_api_url = null
+    spaceMetadata.cover = ''
     spaceMetadata.github = ''
     spaceMetadata.twitter = ''
     spaceMetadata.discord = ''

@@ -27,6 +27,7 @@ type SpaceMetadata @entity {
   name: String!
   about: String!
   avatar: String!
+  cover: String!
   external_url: String!
   delegation_api_type: String
   delegation_api_url: String
