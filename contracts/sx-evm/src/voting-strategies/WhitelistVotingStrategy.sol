@@ -7,6 +7,10 @@ import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
 /// @title Whitelist Voting Strategy
 /// @notice Allows a variable voting power whitelist to be used for voting power.
 contract WhitelistVotingStrategy is IVotingStrategy {
+    /// @notice Error thrown when the `voter` and address indicated by `voterIndex`
+    ///             don't match.
+    error VoterAndIndexMismatch();
+
     /// @dev Stores the data for each member of the whitelist.
     struct Member {
         // The address of the member.
@@ -19,34 +23,19 @@ contract WhitelistVotingStrategy is IVotingStrategy {
     /// @param voter The address to get the voting power of.
     /// @param params Parameter array containing the encoded whitelist of addresses and their voting power.
     ///               The array should be an ABI encoded array of Member structs sorted by ascending addresses.
+    /// @param userParams Expected to contain a `uint256` corresponding to the voterIndex in the array provided by `params`.
     /// @return votingPower The voting power of the address if it exists in the whitelist, otherwise 0.
     function getVotingPower(
         uint32 /* timestamp */,
         address voter,
         bytes calldata params,
-        bytes calldata /* userParams */
+        bytes calldata userParams
     ) external pure override returns (uint256 votingPower) {
         Member[] memory members = abi.decode(params, (Member[]));
+        uint256 voterIndex = abi.decode(userParams, (uint256));
 
-        uint256 high = members.length - 1;
-        uint256 low;
-        uint256 mid;
-        address currentAddress;
+        if (voter != members[voterIndex].addr) revert VoterAndIndexMismatch();
 
-        while (low < high) {
-            mid = (high + low) / 2; // Expecting high and low to never overflow
-            currentAddress = members[mid].addr;
-
-            if (currentAddress < voter) {
-                low = mid + 1;
-            } else {
-                high = mid;
-            }
-        }
-        if (members[high].addr == voter) {
-            return (members[high].vp);
-        } else {
-            return (0);
-        }
+        return members[voterIndex].vp;
     }
 }
