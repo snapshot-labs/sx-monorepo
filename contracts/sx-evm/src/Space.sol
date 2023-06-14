@@ -334,6 +334,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         string calldata metadataURI
     ) external override onlyAuthenticator {
         Proposal storage proposal = proposals[proposalId];
+        _assertProposalExists(proposal);
         if (author != proposal.author) revert InvalidCaller();
         if (block.timestamp >= proposal.startTimestamp) revert VotingDelayHasPassed();
 
