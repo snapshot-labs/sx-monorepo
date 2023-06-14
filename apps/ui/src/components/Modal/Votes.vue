@@ -2,12 +2,13 @@
 import { getNetwork } from '@/networks';
 import { shortenAddress } from '@/helpers/utils';
 import choices from '@/helpers/choices.json';
-import { Proposal as ProposalType, Vote } from '@/types';
+import { NetworkID, Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
 
 const props = defineProps<{
   open: boolean;
+  networkId: NetworkID;
   proposal: ProposalType;
 }>();
 
@@ -96,7 +97,12 @@ watch(
             />
             <Stamp :id="vote.voter.id" :size="24" class="mr-2" />
             <router-link
-              :to="{ name: 'user', params: { id: vote.voter.id } }"
+              :to="{
+                name: 'user',
+                params: {
+                  id: `${proposal.network}:${vote.voter.id}`
+                }
+              }"
               @click="$emit('close')"
             >
               {{ vote.voter.name || shortenAddress(vote.voter.id) }}

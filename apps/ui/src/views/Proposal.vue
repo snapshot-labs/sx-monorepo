@@ -350,6 +350,7 @@ watchEffect(() => {
       <ModalVotes
         v-if="proposal"
         :open="modalOpenVotes"
+        :network-id="proposal.network"
         :proposal="proposal"
         @close="modalOpenVotes = false"
       />

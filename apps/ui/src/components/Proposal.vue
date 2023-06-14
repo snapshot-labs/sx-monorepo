@@ -6,7 +6,6 @@ const props = defineProps<{ proposal: ProposalType }>();
 
 const route = useRoute();
 const { vote } = useActions();
-const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const sendingType = ref<null | number>(null);
 
@@ -99,7 +98,6 @@ async function handleVoteClick(choice: Choice) {
       </div>
     </div>
     <teleport to="#modal">
-      <ModalVotes :open="modalOpenVotes" :proposal="proposal" @close="modalOpenVotes = false" />
       <ModalTimeline
         :open="modalOpenTimeline"
         :proposal="proposal"
