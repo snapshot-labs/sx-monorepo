@@ -86,7 +86,6 @@ export type ApiProposal = {
   has_started: boolean;
   has_execution_window_opened: boolean;
   has_ended: boolean;
-  has_veto_period_ended: boolean;
   executed: boolean;
   completed: boolean;
   cancelled: boolean;

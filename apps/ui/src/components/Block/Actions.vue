@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import dayjs from 'dayjs';
+import { useIntervalFn } from '@vueuse/core';
 import { getNetwork } from '@/networks';
 import { shorten } from '@/helpers/utils';
 import type { Proposal as ProposalType } from '@/types';
@@ -12,11 +14,24 @@ const finalizeProposalSending = ref(false);
 const receiveProposalSending = ref(false);
 const executeTransactionsSending = ref(false);
 const executeQueuedProposalSending = ref(false);
+const currentTimestamp = ref(Date.now());
 
 const network = computed(() => getNetwork(props.proposal.network));
 const baseNetwork = computed(() =>
   network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
 );
+
+const { pause } = useIntervalFn(() => {
+  if (currentTimestamp.value > props.proposal.execution_time * 1000) {
+    pause();
+  }
+
+  currentTimestamp.value = Date.now();
+}, 1000);
+
+const countdown = computed(() => {
+  return Math.max(props.proposal.execution_time * 1000 - currentTimestamp.value, 0);
+});
 
 async function handleFinalizeProposalClick() {
   finalizeProposalSending.value = true;
@@ -75,7 +90,7 @@ async function handleExecuteQueuedProposalClick() {
     <template v-else>
       <UiButton
         v-if="network.hasReceive"
-        class="block mb-2 w-full flex justify-center items-center"
+        class="mb-2 w-full flex justify-center items-center"
         :loading="finalizeProposalSending"
         @click="handleFinalizeProposalClick"
       >
@@ -84,7 +99,7 @@ async function handleExecuteQueuedProposalClick() {
       </UiButton>
       <UiButton
         v-if="network.hasReceive"
-        class="block mb-2 w-full flex justify-center items-center"
+        class="mb-2 w-full flex justify-center items-center"
         :loading="receiveProposalSending"
         @click="handleReceiveProposalClick"
       >
@@ -93,7 +108,7 @@ async function handleExecuteQueuedProposalClick() {
       </UiButton>
       <UiButton
         v-if="!proposal.executed"
-        class="block mb-2 w-full flex justify-center items-center"
+        class="mb-2 w-full flex justify-center items-center"
         :loading="executeTransactionsSending"
         @click="handleExecuteTransactionsClick"
       >
@@ -102,14 +117,17 @@ async function handleExecuteQueuedProposalClick() {
       </UiButton>
       <UiButton
         v-if="proposal.executed && !proposal.completed"
-        :disabled="!proposal.has_veto_period_ended"
-        :title="proposal.has_veto_period_ended ? '' : 'Veto period has not ended yet'"
-        class="block mb-2 w-full flex justify-center items-center"
+        :disabled="countdown > 0"
+        :title="countdown === 0 ? '' : 'Veto period has not ended yet'"
+        class="mb-2 w-full flex justify-center items-center"
         :loading="executeQueuedProposalSending"
         @click="handleExecuteQueuedProposalClick"
       >
-        <IH-play class="inline-block mr-2" />
-        Execute queued transactions
+        <IH-play class="inline-block mr-2 flex-shrink-0" />
+        <template v-if="countdown === 0">Execute queued transactions</template>
+        <template v-else>
+          Execution available in {{ dayjs.duration(countdown).format('HH:mm:ss') }}
+        </template>
       </UiButton>
     </template>
   </div>
