@@ -64,7 +64,7 @@ export const useSpacesStore = defineStore('spaces', () => {
         : currentIds.filter((id: string) => !previousIds.includes(id));
 
       const spaces = await getSpaces({
-        id_in: newIds.map((id: string) => id.split(':')[1])
+        id_in: newIds
       });
 
       starredSpacesData.value = [...starredSpacesData.value, ...spaces];
