@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import { Strategy, UpdateSettingsInput } from "../../types.sol";
+import { Strategy, UpdateSettingsCalldata } from "../../types.sol";
 
 /// @title Space Owner Actions
 /// @notice The actions that can be performed by the owner of a Space,
@@ -30,5 +30,5 @@ interface ISpaceOwnerActions {
     ///     votingStrategyMetadataURIsToAdd The voting strategy metadata uris to add. Set to
     ///                 an empty array to ignore.
     ///     votignStrategiesToRemove The indices of voting strategies to remove. Set to empty array to ignore.
-    function updateSettings(UpdateSettingsInput calldata input) external;
+    function updateSettings(UpdateSettingsCalldata calldata input) external;
 }

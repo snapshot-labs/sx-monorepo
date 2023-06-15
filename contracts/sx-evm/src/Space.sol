@@ -15,7 +15,8 @@ import {
     Proposal,
     ProposalStatus,
     Strategy,
-    UpdateSettingsInput
+    UpdateSettingsCalldata,
+    InitializeCalldata
 } from "src/types.sol";
 import { IVotingStrategy } from "src/interfaces/IVotingStrategy.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
@@ -70,49 +71,24 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     mapping(uint256 proposalId => mapping(address voter => bool hasVoted)) public override voteRegistry;
 
     /// @inheritdoc ISpaceActions
-    function initialize(
-        address _owner,
-        uint32 _votingDelay,
-        uint32 _minVotingDuration,
-        uint32 _maxVotingDuration,
-        Strategy memory _proposalValidationStrategy,
-        string memory _proposalValidationStrategyMetadataURI,
-        string memory _daoURI,
-        string memory _metadataURI,
-        Strategy[] memory _votingStrategies,
-        string[] memory _votingStrategyMetadataURIs,
-        address[] memory _authenticators
-    ) external override initializer {
-        if (_votingStrategies.length == 0) revert EmptyArray();
-        if (_authenticators.length == 0) revert EmptyArray();
-        if (_votingStrategies.length != _votingStrategyMetadataURIs.length) revert ArrayLengthMismatch();
+    function initialize(InitializeCalldata calldata input) external override initializer {
+        if (input.votingStrategies.length == 0) revert EmptyArray();
+        if (input.authenticators.length == 0) revert EmptyArray();
+        if (input.votingStrategies.length != input.votingStrategyMetadataURIs.length) revert ArrayLengthMismatch();
 
         __Ownable_init();
-        transferOwnership(_owner);
-        _setDaoURI(_daoURI);
-        _setMaxVotingDuration(_maxVotingDuration);
-        _setMinVotingDuration(_minVotingDuration);
-        _setProposalValidationStrategy(_proposalValidationStrategy);
-        _setVotingDelay(_votingDelay);
-        _addVotingStrategies(_votingStrategies);
-        _addAuthenticators(_authenticators);
+        transferOwnership(input.owner);
+        _setDaoURI(input.daoURI);
+        _setMaxVotingDuration(input.maxVotingDuration);
+        _setMinVotingDuration(input.minVotingDuration);
+        _setProposalValidationStrategy(input.proposalValidationStrategy);
+        _setVotingDelay(input.votingDelay);
+        _addVotingStrategies(input.votingStrategies);
+        _addAuthenticators(input.authenticators);
 
         nextProposalId = 1;
 
-        emit SpaceCreated(
-            address(this),
-            _owner,
-            _votingDelay,
-            _minVotingDuration,
-            _maxVotingDuration,
-            _proposalValidationStrategy,
-            _proposalValidationStrategyMetadataURI,
-            _daoURI,
-            _metadataURI,
-            _votingStrategies,
-            _votingStrategyMetadataURIs,
-            _authenticators
-        );
+        emit SpaceCreated(address(this), input);
     }
 
     // ------------------------------------
@@ -123,7 +99,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
 
     /// @inheritdoc ISpaceOwnerActions
     // solhint-disable-next-line code-complexity
-    function updateSettings(UpdateSettingsInput calldata input) external override onlyOwner {
+    function updateSettings(UpdateSettingsCalldata calldata input) external override onlyOwner {
         if ((input.minVotingDuration != NO_UPDATE_UINT32) && (input.maxVotingDuration != NO_UPDATE_UINT32)) {
             // Check that min and max VotingDuration are valid
             // We don't use the internal `_setMinVotingDuration` and `_setMaxVotingDuration` functions because
@@ -367,7 +343,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     }
 
     /// @dev Sets the proposal validation strategy.
-    function _setProposalValidationStrategy(Strategy memory _proposalValidationStrategy) internal {
+    function _setProposalValidationStrategy(Strategy calldata _proposalValidationStrategy) internal {
         proposalValidationStrategy = _proposalValidationStrategy;
     }
 
@@ -377,12 +353,12 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     }
 
     /// @dev Sets the DAO URI.
-    function _setDaoURI(string memory _daoURI) internal {
+    function _setDaoURI(string calldata _daoURI) internal {
         daoURI = _daoURI;
     }
 
     /// @dev Adds an array of voting strategies.
-    function _addVotingStrategies(Strategy[] memory _votingStrategies) internal {
+    function _addVotingStrategies(Strategy[] calldata _votingStrategies) internal {
         uint256 cachedActiveVotingStrategies = activeVotingStrategies;
         uint8 cachedNextVotingStrategyIndex = nextVotingStrategyIndex;
         if (cachedNextVotingStrategyIndex >= 256 - _votingStrategies.length) revert ExceedsStrategyLimit();
@@ -397,7 +373,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     }
 
     /// @dev Removes an array of voting strategies, specified by their indices.
-    function _removeVotingStrategies(uint8[] memory _votingStrategyIndices) internal {
+    function _removeVotingStrategies(uint8[] calldata _votingStrategyIndices) internal {
         for (uint8 i = 0; i < _votingStrategyIndices.length; i++) {
             activeVotingStrategies = activeVotingStrategies.setBit(_votingStrategyIndices[i], false);
         }
@@ -406,14 +382,14 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     }
 
     /// @dev Adds an array of authenticators.
-    function _addAuthenticators(address[] memory _authenticators) internal {
+    function _addAuthenticators(address[] calldata _authenticators) internal {
         for (uint256 i = 0; i < _authenticators.length; i++) {
             authenticators[_authenticators[i]] = true;
         }
     }
 
     /// @dev Removes an array of authenticators.
-    function _removeAuthenticators(address[] memory _authenticators) internal {
+    function _removeAuthenticators(address[] calldata _authenticators) internal {
         for (uint256 i = 0; i < _authenticators.length; i++) {
             authenticators[_authenticators[i]] = false;
         }
@@ -432,11 +408,11 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     function _getCumulativePower(
         address userAddress,
         uint32 timestamp,
-        IndexedStrategy[] memory userStrategies,
+        IndexedStrategy[] calldata userStrategies,
         uint256 allowedStrategies
     ) internal returns (uint256) {
         // Ensure there are no duplicates to avoid an attack where people double count a strategy.
-        userStrategies.assertNoDuplicateIndices();
+        userStrategies.assertNoDuplicateIndicesCalldata();
 
         uint256 totalVotingPower;
         for (uint256 i = 0; i < userStrategies.length; ++i) {

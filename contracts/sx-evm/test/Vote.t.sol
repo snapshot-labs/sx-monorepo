@@ -3,7 +3,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 
 contract VoteTest is SpaceTest {
@@ -59,7 +59,7 @@ contract VoteTest is SpaceTest {
 
     function testVoteVotingPeriodHasNotStarted() public {
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 100,
@@ -113,7 +113,7 @@ contract VoteTest is SpaceTest {
         uint8[] memory removeIndices = new uint8[](1);
         removeIndices[0] = 0;
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -142,7 +142,7 @@ contract VoteTest is SpaceTest {
         newVotingStrategies[0] = votingStrategies[0];
         string[] memory newVotingStrategyMetadataURIs = new string[](1);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -195,7 +195,7 @@ contract VoteTest is SpaceTest {
         string[] memory newVotingStrategyMetadataURIs = new string[](2);
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,

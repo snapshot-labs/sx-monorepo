@@ -2,38 +2,28 @@
 
 pragma solidity ^0.8.18;
 
-import { Choice, IndexedStrategy, Strategy } from "src/types.sol";
+import { Choice, IndexedStrategy, Strategy, InitializeCalldata } from "src/types.sol";
 
 /// @title Space Actions
 /// @notice User focused actions that can be performed on a space.
 interface ISpaceActions {
     /// @notice  Initializes a space proxy after deployment.
-    /// @param   owner  The address of the space owner.
-    /// @param   votingDelay  The delay between the creation of a proposal and the start of the voting period.
-    /// @param   minVotingDuration  The minimum duration of the voting period.
-    /// @param   maxVotingDuration  The maximum duration of the voting period.
-    /// @param   proposalValidationStrategy  The strategy to use to validate a proposal,
-    ///          consisting of a strategy address and an array of configuration parameters.
-    /// @param   proposalValidationStrategyMetadataURI  The metadata URI for `proposalValidationStrategy`.
-    /// @param   daoURI  The ERC4824 DAO URI for the space.
-    /// @param   metadataURI  The metadata URI for the space.
-    /// @param   votingStrategies  The whitelisted voting strategies,
-    ///          each consisting of a strategy address and an array of configuration parameters.
-    /// @param   votingStrategyMetadataURIs  The metadata URIs for `votingStrategies`.
-    /// @param   authenticators The whitelisted authenticator addresses.
-    function initialize(
-        address owner,
-        uint32 votingDelay,
-        uint32 minVotingDuration,
-        uint32 maxVotingDuration,
-        Strategy memory proposalValidationStrategy,
-        string memory proposalValidationStrategyMetadataURI,
-        string memory daoURI,
-        string memory metadataURI,
-        Strategy[] memory votingStrategies,
-        string[] memory votingStrategyMetadataURIs,
-        address[] memory authenticators
-    ) external;
+    /// @param   input  The space initialization parameters, Consists of:
+    ///          owner  The address of the space owner.
+    ///          votingDelay  The delay between the creation of a proposal and the start of the voting period.
+    ///          minVotingDuration  The minimum duration of the voting period.
+    ///          maxVotingDuration  The maximum duration of the voting period.
+    ///          proposalValidationStrategy  The strategy to use to validate a proposal,
+    ///             consisting of a strategy address and an array of configuration parameters.
+    ///          proposalValidationStrategyMetadataURI  The metadata URI for `proposalValidationStrategy`.
+    ///          daoURI  The ERC4824 DAO URI for the space.
+    ///          metadataURI  The metadata URI for the space.
+    ///          votingStrategies  The whitelisted voting strategies,
+    ///             each consisting of a strategy address and an array of configuration parameters.
+    ///          votingStrategyMetadataURIs  The metadata URIs for `votingStrategies`.
+    ///          authenticators The whitelisted authenticator addresses.
+    /// @dev A struct is used here because of solidity's stack constraints.
+    function initialize(InitializeCalldata calldata input) external;
 
     /// @notice  Creates a proposal.
     /// @param   author  The address of the proposal creator.

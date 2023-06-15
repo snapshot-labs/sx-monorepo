@@ -3,7 +3,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, IndexedStrategy, ProposalStatus, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Choice, IndexedStrategy, ProposalStatus, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 
 contract ExecuteTest is SpaceTest {
@@ -41,7 +41,7 @@ contract ExecuteTest is SpaceTest {
 
     function testExecuteMinDurationNotElapsed() public {
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 100,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,

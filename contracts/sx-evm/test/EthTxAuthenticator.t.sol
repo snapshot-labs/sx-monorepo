@@ -6,7 +6,7 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { AuthenticatorTest } from "./utils/Authenticator.t.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
-import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 
 contract EthTxAuthenticatorTest is SpaceTest {
     error InvalidFunctionSelector();
@@ -25,7 +25,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         address[] memory newAuths = new address[](1);
         newAuths[0] = address(ethTxAuth);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -118,7 +118,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
     function testAuthenticateTxUpdateProposal() public {
         uint32 votingDelay = 10;
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 votingDelay,

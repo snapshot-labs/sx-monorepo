@@ -11,7 +11,7 @@ import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol
 import {
     PropositionPowerAndActiveProposalsLimiterValidationStrategy
 } from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol";
-import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 
 contract GasSnapshotsTest is SpaceTest, SigUtils {
     CompVotingStrategy internal compVotingStrategy;
@@ -60,7 +60,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
 
         // Update contract's voting strategies.
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -107,7 +107,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         newAuths[0] = address(ethSigAuth);
         newAuths[1] = address(ethTxAuth);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -136,7 +136,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         validationStrategy = new PropositionPowerAndActiveProposalsLimiterValidationStrategy();
         // Using the current active strategies in the space as the allowed strategies for proposal.
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,

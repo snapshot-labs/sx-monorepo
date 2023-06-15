@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { FinalizationStatus, IndexedStrategy, Proposal, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { FinalizationStatus, IndexedStrategy, Proposal, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 import { StupidProposalValidationStrategy } from "./mocks/StupidProposalValidation.sol";
@@ -75,7 +75,7 @@ contract ProposeTest is SpaceTest {
         StupidProposalValidationStrategy stupidProposalValidationStrategy = new StupidProposalValidationStrategy();
         Strategy memory validationStrategy = Strategy(address(stupidProposalValidationStrategy), new bytes(0));
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,

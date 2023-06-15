@@ -6,7 +6,7 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { AuthenticatorTest } from "./utils/Authenticator.t.sol";
 import { SigUtils } from "./utils/SigUtils.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
-import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 
 contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
     error InvalidSignature();
@@ -32,7 +32,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         newAuths[0] = address(ethSigAuth);
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -334,7 +334,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         uint256 salt = 0;
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 10,
@@ -379,7 +379,7 @@ contract EthSigAuthenticatorTest is SpaceTest, SigUtils {
         uint256 salt = 0;
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 10,

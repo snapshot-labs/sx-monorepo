@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import {
     ActiveProposalsLimiterProposalValidationStrategy
 } from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
@@ -25,7 +25,7 @@ contract ActiveProposalsLimterTest is SpaceTest {
             abi.encode(cooldown, maxActive)
         );
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -82,7 +82,7 @@ contract ActiveProposalsLimterTest is SpaceTest {
             abi.encode(cooldown, 1) // Set the max number of proposals to 1
         );
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,

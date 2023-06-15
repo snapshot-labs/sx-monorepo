@@ -14,7 +14,7 @@ import { Space } from "../src/Space.sol";
 import { ISpaceEvents } from "../src/interfaces/space/ISpaceEvents.sol";
 import { IProxyFactoryEvents } from "../src/interfaces/factory/IProxyFactoryEvents.sol";
 import { IProxyFactoryErrors } from "../src/interfaces/factory/IProxyFactoryErrors.sol";
-import { Strategy } from "../src/types.sol";
+import { Strategy, InitializeCalldata } from "../src/types.sol";
 
 // solhint-disable-next-line max-states-count
 contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISpaceEvents {
@@ -67,17 +67,19 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         uint256 saltNonce = 0;
         bytes memory initializer = abi.encodeWithSelector(
             Space.initialize.selector,
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalValidationStrategy,
-            proposalValidationStrategyMetadataURI,
-            daoURI,
-            metadataURI,
-            votingStrategies,
-            votingStrategyMetadataURIs,
-            authenticators
+            InitializeCalldata(
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                proposalValidationStrategyMetadataURI,
+                daoURI,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators
+            )
         );
 
         // Pre-computed address of the space (possible because of CREATE2 deployment)
@@ -99,17 +101,19 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         uint256 saltNonce = 0;
         bytes memory initializer = abi.encodeWithSelector(
             Space.initialize.selector,
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalValidationStrategy,
-            proposalValidationStrategyMetadataURI,
-            daoURI,
-            metadataURI,
-            votingStrategies,
-            votingStrategyMetadataURIs,
-            authenticators
+            InitializeCalldata(
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                proposalValidationStrategyMetadataURI,
+                daoURI,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators
+            )
         );
 
         vm.expectRevert(InvalidImplementation.selector);
@@ -121,19 +125,22 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
 
     function testCreateSpaceFailedInitialization() public {
         uint256 saltNonce = 0;
-        // No proposalValidationStrategyMetadataURI in the initializer
+        // Empty authenticator array
         bytes memory initializer = abi.encodeWithSelector(
             Space.initialize.selector,
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalValidationStrategy,
-            daoURI,
-            metadataURI,
-            votingStrategies,
-            votingStrategyMetadataURIs,
-            authenticators
+            InitializeCalldata(
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                proposalValidationStrategyMetadataURI,
+                daoURI,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                new address[](0)
+            )
         );
 
         vm.expectRevert(FailedInitialization.selector);
@@ -144,17 +151,19 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         uint256 saltNonce = 0;
         bytes memory initializer = abi.encodeWithSelector(
             Space.initialize.selector,
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalValidationStrategy,
-            proposalValidationStrategyMetadataURI,
-            daoURI,
-            metadataURI,
-            votingStrategies,
-            votingStrategyMetadataURIs,
-            authenticators
+            InitializeCalldata(
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                proposalValidationStrategyMetadataURI,
+                daoURI,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators
+            )
         );
 
         factory.deployProxy(address(masterSpace), initializer, saltNonce);
@@ -168,17 +177,19 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         uint256 saltNonce = 0;
         bytes memory initializer = abi.encodeWithSelector(
             Space.initialize.selector,
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalValidationStrategy,
-            proposalValidationStrategyMetadataURI,
-            daoURI,
-            metadataURI,
-            votingStrategies,
-            votingStrategyMetadataURIs,
-            authenticators
+            InitializeCalldata(
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                proposalValidationStrategyMetadataURI,
+                daoURI,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators
+            )
         );
 
         factory.deployProxy(address(masterSpace), initializer, saltNonce);
@@ -193,17 +204,19 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         // Initializing the space should revert as the space is already initialized
         vm.expectRevert("Initializable: contract is already initialized");
         Space(spaceProxy).initialize(
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalValidationStrategy,
-            proposalValidationStrategyMetadataURI,
-            daoURI,
-            metadataURI,
-            votingStrategies,
-            votingStrategyMetadataURIs,
-            authenticators
+            InitializeCalldata(
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                proposalValidationStrategyMetadataURI,
+                daoURI,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators
+            )
         );
     }
 
@@ -211,17 +224,19 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         uint256 saltNonce = 0;
         bytes memory initializer = abi.encodeWithSelector(
             Space.initialize.selector,
-            owner,
-            votingDelay,
-            minVotingDuration,
-            maxVotingDuration,
-            proposalValidationStrategy,
-            proposalValidationStrategyMetadataURI,
-            daoURI,
-            metadataURI,
-            votingStrategies,
-            votingStrategyMetadataURIs,
-            authenticators
+            InitializeCalldata(
+                owner,
+                votingDelay,
+                minVotingDuration,
+                maxVotingDuration,
+                proposalValidationStrategy,
+                proposalValidationStrategyMetadataURI,
+                daoURI,
+                metadataURI,
+                votingStrategies,
+                votingStrategyMetadataURIs,
+                authenticators
+            )
         );
         bytes32 salt = keccak256(abi.encodePacked(address(this), keccak256(initializer), saltNonce));
         // Checking predictProxyAddress in the factory returns the same address as the helper in this test

@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import { SpaceV2 } from "./mocks/SpaceV2.sol";
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, IndexedStrategy, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 import { BitPacker } from "../src/utils/BitPacker.sol";
 
@@ -86,7 +86,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 2000,
                 NO_UPDATE_UINT32,
@@ -107,7 +107,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(unauthorized);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -132,7 +132,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         emit MaxVotingDurationUpdated(nextDuration);
         vm.prank(owner);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 nextDuration,
                 NO_UPDATE_UINT32,
@@ -153,7 +153,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
     function testSetMaxVotingDurationInvalid() public {
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 1,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -172,7 +172,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectRevert(abi.encodeWithSelector(InvalidDuration.selector, 1, 0));
         vm.prank(owner);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 0,
                 NO_UPDATE_UINT32,
@@ -197,7 +197,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         emit MinVotingDurationUpdated(nextDuration);
         vm.prank(owner);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 nextDuration,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -220,7 +220,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectRevert(abi.encodeWithSelector(InvalidDuration.selector, maxVotingDuration + 1, maxVotingDuration));
         vm.prank(owner);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 maxVotingDuration + 1,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -244,7 +244,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         emit DaoURIUpdated(newDaoURI);
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -269,7 +269,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit MetadataURIUpdated(newMetadataURI);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -296,7 +296,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         emit ProposalValidationStrategyUpdated(nextProposalValidationStrategy, "");
         vm.prank(owner);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -328,7 +328,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         emit VotingDelayUpdated(nextDelay);
         vm.prank(owner);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 nextDelay,
@@ -368,7 +368,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         emit VotingStrategiesAdded(newVotingStrategies, votingStrategyMetadataURIs);
         vm.prank(owner);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -393,7 +393,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit VotingStrategiesRemoved(newIndices);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -427,7 +427,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         indices[0] = 0;
         vm.expectRevert(NoActiveVotingStrategies.selector);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -454,7 +454,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         // Adding the maximum number of voting strategies (254, see the comments in `_addVotingStrategies`).
         for (uint256 i = 0; i < 254; i++) {
             space.updateSettings(
-                UpdateSettingsInput(
+                UpdateSettingsCalldata(
                     NO_UPDATE_UINT32,
                     NO_UPDATE_UINT32,
                     NO_UPDATE_UINT32,
@@ -474,7 +474,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         // There are now 256 strategies added to the space, Try adding one more
         vm.expectRevert(abi.encodeWithSelector(ExceedsStrategyLimit.selector));
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -497,7 +497,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         newVotingStrategies[0] = Strategy(address(0), new bytes(0));
         vm.expectRevert(ZeroAddress.selector);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -524,7 +524,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit AuthenticatorsAdded(newAuths);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -546,7 +546,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit AuthenticatorsRemoved(newAuths);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -573,7 +573,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         newAuths[1] = address(222);
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -608,7 +608,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         _indicesToRemove[0] = 0;
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -643,7 +643,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
 
         vm.expectRevert(abi.encodeWithSelector(ArrayLengthMismatch.selector));
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -679,7 +679,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         _indicesToRemove[0] = 0;
 
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -721,7 +721,7 @@ contract SpaceOwnerActionsTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit MetadataURIUpdated(_metadataURI);
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 _minVotingDuration,
                 _maxVotingDuration,
                 _votingDelay,

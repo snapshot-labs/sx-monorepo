@@ -35,7 +35,7 @@ abstract contract PropositionPower {
         Strategy[] memory allowedStrategies
     ) internal returns (uint256) {
         // Ensure there are no duplicates to avoid an attack where people double count a strategy.
-        userStrategies.assertNoDuplicateIndices();
+        userStrategies.assertNoDuplicateIndicesMemory();
 
         uint256 totalVotingPower;
         for (uint256 i = 0; i < userStrategies.length; ++i) {

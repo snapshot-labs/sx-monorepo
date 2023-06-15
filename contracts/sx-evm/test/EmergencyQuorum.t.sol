@@ -3,7 +3,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, IndexedStrategy, Proposal, ProposalStatus, Strategy, UpdateSettingsInput } from "../src/types.sol";
+import { Choice, IndexedStrategy, Proposal, ProposalStatus, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { EmergencyQuorumStrategy } from "../src/execution-strategies/EmergencyQuorumStrategy.sol";
 
 contract EmergencyQuorumExec is EmergencyQuorumStrategy {
@@ -46,7 +46,7 @@ contract EmergencyQuorumTest is SpaceTest {
 
         minVotingDuration = 100;
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 minVotingDuration,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,

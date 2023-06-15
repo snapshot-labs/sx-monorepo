@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Strategy, IndexedStrategy, UpdateSettingsInput } from "../src/types.sol";
+import { Strategy, IndexedStrategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import {
@@ -37,7 +37,7 @@ contract PropositionPowerProposalValidationTest is SpaceTest {
             abi.encode(proposalThreshold, propositionPowerStrategies)
         );
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
@@ -112,7 +112,7 @@ contract PropositionPowerProposalValidationTest is SpaceTest {
             abi.encode(2, propositionPowerStrategies)
         );
         space.updateSettings(
-            UpdateSettingsInput(
+            UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
                 NO_UPDATE_UINT32,
