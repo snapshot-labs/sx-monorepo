@@ -12,8 +12,10 @@ type Notification = {
 type PendingTransaction = {
   networkId: NetworkID;
   txId: string;
+  createdAt: number;
 };
 
+const PENDING_TRANSACTIONS_TIMEOUT = 10 * 60 * 1000;
 const PENDING_TRANSACTIONS_STORAGE_KEY = 'pendingTransactions';
 
 function updateStorage(pendingTransactions: PendingTransaction[]) {
@@ -48,7 +50,8 @@ export const useUiStore = defineStore('ui', {
     async addPendingTransaction(txId: string, networkId: NetworkID) {
       this.pendingTransactions.push({
         networkId,
-        txId
+        txId,
+        createdAt: Date.now()
       });
       updateStorage(this.pendingTransactions);
 
@@ -60,7 +63,15 @@ export const useUiStore = defineStore('ui', {
       }
     },
     async restorePendingTransactions() {
-      this.pendingTransactions = lsGet(PENDING_TRANSACTIONS_STORAGE_KEY, []);
+      const persistedTransactions = lsGet(PENDING_TRANSACTIONS_STORAGE_KEY, []);
+
+      this.pendingTransactions = persistedTransactions.filter(
+        tx => tx.createdAt && tx.createdAt + PENDING_TRANSACTIONS_TIMEOUT > Date.now()
+      );
+
+      if (persistedTransactions.length !== this.pendingTransactions.length) {
+        updateStorage(this.pendingTransactions);
+      }
 
       this.pendingTransactions.forEach(async ({ networkId, txId }) => {
         try {
