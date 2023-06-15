@@ -14,7 +14,7 @@ contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
     /// @param _owner Address of the owner of the strategy.
     /// @param _target Address of the avatar that this module will pass transactions to.
     /// @param _spaces Array of whitelisted space contracts.
-    event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces);
+    event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces, uint256 _quorum);
 
     /// @notice Emitted each time the Target is set.
     /// @param newTarget The new target address.
@@ -45,7 +45,7 @@ contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
         __SpaceManager_init(_spaces);
         __SimpleQuorumExecutionStrategy_init(_quorum);
         target = _target;
-        emit AvatarExecutionStrategySetUp(_owner, _target, _spaces);
+        emit AvatarExecutionStrategySetUp(_owner, _target, _spaces, _quorum);
     }
 
     /// @notice Sets the target address.

@@ -11,7 +11,7 @@ import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy
 abstract contract AvatarExecutionStrategyTest is SpaceTest {
     error InvalidSpace();
 
-    event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces);
+    event AvatarExecutionStrategySetUp(address _owner, address _target, address[] _spaces, uint256 _quorum);
     event TargetSet(address indexed newTarget);
     event SpaceEnabled(address space);
     event SpaceDisabled(address space);
@@ -268,6 +268,8 @@ contract AvatarExecutionStrategyTestDirect is AvatarExecutionStrategyTest {
 
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
+        vm.expectEmit(true, true, true, true);
+        emit AvatarExecutionStrategySetUp(owner, address(avatar), spaces, quorum);
         avatarExecutionStrategy = new AvatarExecutionStrategy(owner, address(avatar), spaces, quorum);
         avatar.enableModule(address(avatarExecutionStrategy));
     }
@@ -279,6 +281,8 @@ contract AvatarExecutionStrategyTestProxy is AvatarExecutionStrategyTest {
 
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
+        vm.expectEmit(true, true, true, true);
+        emit AvatarExecutionStrategySetUp(owner, address(avatar), spaces, quorum);
         AvatarExecutionStrategy masterAvatarExecutionStrategy = new AvatarExecutionStrategy(
             owner,
             address(avatar),
