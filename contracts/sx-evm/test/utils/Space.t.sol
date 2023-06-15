@@ -87,7 +87,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
 
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
-        vanillaExecutionStrategy = new VanillaExecutionStrategy(quorum);
+        vanillaExecutionStrategy = new VanillaExecutionStrategy(owner, quorum);
         vanillaProposalValidationStrategy = new VanillaProposalValidationStrategy();
 
         votingDelay = 0;
@@ -96,7 +96,7 @@ abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IE
         votingStrategies.push(Strategy(address(vanillaVotingStrategy), new bytes(0)));
         votingStrategyMetadataURIs.push("VanillaVotingStrategy");
         authenticators.push(address(vanillaAuthenticator));
-        executionStrategies.push(Strategy(address(vanillaExecutionStrategy), abi.encode(uint256(quorum))));
+        executionStrategies.push(Strategy(address(vanillaExecutionStrategy), new bytes(0)));
         userVotingStrategies.push(IndexedStrategy(0, new bytes(0)));
         executionStrategy = Strategy(address(vanillaExecutionStrategy), new bytes(0));
         proposalValidationStrategy = Strategy(address(vanillaProposalValidationStrategy), new bytes(0));

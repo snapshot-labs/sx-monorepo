@@ -8,6 +8,8 @@ import { SpaceManager } from "../utils/SpaceManager.sol";
 
 /// @title Optimistic Quorum Base Execution Strategy
 abstract contract OptimisticQuorumExecutionStrategy is IExecutionStrategy, SpaceManager {
+    event QuorumUpdated(uint256 newQuorum);
+
     /// @notice The quorum required to execute a proposal using this strategy.
     uint256 public quorum;
 
@@ -15,6 +17,11 @@ abstract contract OptimisticQuorumExecutionStrategy is IExecutionStrategy, Space
     // solhint-disable-next-line func-name-mixedcase
     function __OptimisticQuorumExecutionStrategy_init(uint256 _quorum) internal onlyInitializing {
         quorum = _quorum;
+    }
+
+    function setQuorum(uint256 _quorum) external onlyOwner {
+        quorum = _quorum;
+        emit QuorumUpdated(_quorum);
     }
 
     function execute(

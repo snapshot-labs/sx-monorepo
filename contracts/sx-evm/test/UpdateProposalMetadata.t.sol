@@ -13,7 +13,7 @@ contract UpdateProposalTest is SpaceTest {
     function setUp() public virtual override {
         super.setUp();
 
-        newStrategy = Strategy(address(new VanillaExecutionStrategy(quorum)), new bytes(0));
+        newStrategy = Strategy(address(new VanillaExecutionStrategy(owner, quorum)), new bytes(0));
 
         // Set the votingDelay to 10.
         votingDelay = 10;

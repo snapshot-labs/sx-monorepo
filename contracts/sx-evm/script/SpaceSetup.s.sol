@@ -45,12 +45,12 @@ contract SpaceSetup is Script {
         authenticators[1] = ethSigAuthenticator;
         authenticators[2] = ethTxAuthenticator;
         Strategy[] memory executionStrategies = new Strategy[](1);
+        quorum = 1;
         executionStrategies[0] = Strategy(vanillaExecutionStrategy, new bytes(quorum));
         votingDelay = 0;
         minVotingDuration = 0;
         maxVotingDuration = 1000;
         proposalThreshold = 1;
-        quorum = 1;
         votingPowerProposalValidationStrategy = Strategy(
             votingPowerProposalValidationContract,
             abi.encode(proposalThreshold, votingStrategies)

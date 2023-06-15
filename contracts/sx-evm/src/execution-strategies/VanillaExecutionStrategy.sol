@@ -9,8 +9,15 @@ import { Proposal, ProposalStatus } from "../types.sol";
 contract VanillaExecutionStrategy is SimpleQuorumExecutionStrategy {
     uint256 internal numExecuted;
 
-    constructor(uint256 _quorum) {
-        quorum = _quorum;
+    constructor(address _owner, uint256 _quorum) {
+        setUp(abi.encode(_owner, _quorum));
+    }
+
+    function setUp(bytes memory initParams) public initializer {
+        (address _owner, uint256 _quorum) = abi.decode(initParams, (address, uint256));
+        __Ownable_init();
+        transferOwnership(_owner);
+        __SimpleQuorumExecutionStrategy_init(_quorum);
     }
 
     function execute(

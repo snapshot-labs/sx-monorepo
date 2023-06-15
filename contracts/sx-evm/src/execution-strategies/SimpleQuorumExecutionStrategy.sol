@@ -8,6 +8,8 @@ import { SpaceManager } from "../utils/SpaceManager.sol";
 
 /// @title Simple Quorum Base Execution Strategy
 abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceManager {
+    event QuorumUpdated(uint256 newQuorum);
+
     /// @notice The quorum required to execute a proposal using this strategy.
     uint256 public quorum;
 
@@ -15,6 +17,11 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceMana
     // solhint-disable-next-line func-name-mixedcase
     function __SimpleQuorumExecutionStrategy_init(uint256 _quorum) internal onlyInitializing {
         quorum = _quorum;
+    }
+
+    function setQuorum(uint256 _quorum) external onlyOwner {
+        quorum = _quorum;
+        emit QuorumUpdated(_quorum);
     }
 
     function execute(

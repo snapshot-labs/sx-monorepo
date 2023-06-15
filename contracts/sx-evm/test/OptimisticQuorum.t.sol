@@ -8,12 +8,14 @@ import { Choice, IndexedStrategy, Proposal, ProposalStatus, Strategy } from "../
 
 // Dummy implementation of the optimistic quorum
 contract OptimisticExec is OptimisticQuorumExecutionStrategy {
-    constructor(uint256 _quorum) {
-        setUp(abi.encode(_quorum));
+    constructor(address _owner, uint256 _quorum) {
+        setUp(abi.encode(_owner, _quorum));
     }
 
     function setUp(bytes memory initParams) public initializer {
-        uint256 _quorum = abi.decode(initParams, (uint256));
+        (address _owner, uint256 _quorum) = abi.decode(initParams, (address, uint256));
+        __Ownable_init();
+        transferOwnership(_owner);
         __OptimisticQuorumExecutionStrategy_init(_quorum);
     }
 
@@ -41,6 +43,8 @@ contract OptimisticExec is OptimisticQuorumExecutionStrategy {
 }
 
 contract OptimisticTest is SpaceTest {
+    event QuorumUpdated(uint256 newQuorum);
+
     OptimisticExec internal optimisticQuorumStrategy;
 
     function setUp() public virtual override {
@@ -48,7 +52,7 @@ contract OptimisticTest is SpaceTest {
 
         // Update Quorum. Will need 2 `NO` votes in order to be rejected.
         quorum = 2;
-        optimisticQuorumStrategy = new OptimisticExec(quorum);
+        optimisticQuorumStrategy = new OptimisticExec(owner, quorum);
 
         executionStrategy = Strategy(address(optimisticQuorumStrategy), new bytes(0));
     }
@@ -132,7 +136,7 @@ contract OptimisticTest is SpaceTest {
         // SET A QUORUM OF 100
         {
             quorum = 100;
-            address optimisticQuorumStrategy2 = address(new OptimisticExec(quorum));
+            address optimisticQuorumStrategy2 = address(new OptimisticExec(owner, quorum));
             executionStrategy = Strategy(optimisticQuorumStrategy2, new bytes(0));
         }
 
@@ -156,5 +160,33 @@ contract OptimisticTest is SpaceTest {
         space.execute(proposalId, executionStrategy.params);
 
         assertEq(uint8(space.getProposalStatus(proposalId)), uint8(ProposalStatus.Rejected));
+    }
+
+    function testOptimisticQuorumSetQuorum() public {
+        uint256 newQuorum = quorum * 2; // 4
+
+        vm.expectEmit(true, true, true, true);
+        emit QuorumUpdated(newQuorum);
+        optimisticQuorumStrategy.setQuorum(newQuorum);
+
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
+
+        // Cast two votes against. This should be enough to trigger the old quorum but not the new one.
+        _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
+        _vote(address(42), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
+        vm.warp(block.timestamp + space.maxVotingDuration());
+
+        // vm.expectEmit(true, true, true, true);
+        // emit ProposalExecuted(proposalId);
+        space.execute(proposalId, executionStrategy.params);
+
+        assertEq(uint8(space.getProposalStatus(proposalId)), uint8(ProposalStatus.Executed));
+    }
+
+    function testOptimisticQuorumSetQuorumUnauthorized() public {
+        uint256 newQuorum = quorum * 2; // 4
+        vm.prank(address(0xdeadbeef));
+        vm.expectRevert("Ownable: caller is not the owner");
+        optimisticQuorumStrategy.setQuorum(newQuorum);
     }
 }

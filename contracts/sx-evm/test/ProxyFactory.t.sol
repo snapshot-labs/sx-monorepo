@@ -40,14 +40,14 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
     string public proposalValidationStrategyMetadataURI;
 
     function setUp() public {
+        owner = address(1);
         masterSpace = new Space();
         factory = new ProxyFactory();
         vanillaVotingStrategy = new VanillaVotingStrategy();
         vanillaAuthenticator = new VanillaAuthenticator();
-        vanillaExecutionStrategy = new VanillaExecutionStrategy(quorum);
+        vanillaExecutionStrategy = new VanillaExecutionStrategy(owner, quorum);
         vanillaProposalValidationStrategy = new VanillaProposalValidationStrategy();
 
-        owner = address(1);
         votingDelay = 0;
         minVotingDuration = 0;
         maxVotingDuration = 1000;

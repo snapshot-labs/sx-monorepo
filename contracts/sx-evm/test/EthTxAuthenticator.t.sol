@@ -41,7 +41,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
             )
         );
 
-        newStrategy = Strategy(address(new VanillaExecutionStrategy(quorum)), new bytes(0));
+        newStrategy = Strategy(address(new VanillaExecutionStrategy(owner, quorum)), new bytes(0));
     }
 
     function testAuthenticateTxPropose() public {
