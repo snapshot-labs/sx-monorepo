@@ -54,15 +54,15 @@ interface ISpaceState {
     /// @notice Returns the proposal at a given ID.
     /// @dev Returns all zeros if the proposal does not exist.
     /// @param proposalId The ID of the proposal.
+    /// @return author The address of the proposal author.
     /// @return snapshotTimestamp The timestamp of the proposal snapshot.
     ///         All Voting Power will be calculated at this timestamp.
     /// @return startTimestamp The timestamp of the start of the voting period.
+    /// @return executionStrategy The address of the execution strategy used in the proposal.
     /// @return minEndTimestamp The timestamp of the minimum end of the voting period.
     /// @return maxEndTimestamp The timestamp of the maximum end of the voting period.
-    /// @return executionPayloadHash The keccak256 hash of the execution payload.
-    /// @return executionStrategy The address of the execution strategy used in the proposal.
-    /// @return author The address of the proposal author.
     /// @return finalizationStatus The finalization status of the proposal. See `FinalizationStatus`.
+    /// @return executionPayloadHash The keccak256 hash of the execution payload.
     /// @return activeVotingStrategies The bit array of the active voting strategies for the proposal.
     function proposals(
         uint256 proposalId
@@ -70,14 +70,14 @@ interface ISpaceState {
         external
         view
         returns (
+            address author,
             uint32 snapshotTimestamp,
             uint32 startTimestamp,
+            IExecutionStrategy executionStrategy,
             uint32 minEndTimestamp,
             uint32 maxEndTimestamp,
-            bytes32 executionPayloadHash,
-            IExecutionStrategy executionStrategy,
-            address author,
             FinalizationStatus finalizationStatus,
+            bytes32 executionPayloadHash,
             uint256 activeVotingStrategies
         );
 

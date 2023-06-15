@@ -16,7 +16,7 @@ contract WhitelistVotingStrategy is IVotingStrategy {
         // The address of the member.
         address addr;
         // The voting power of the member.
-        uint256 vp;
+        uint96 vp;
     }
 
     /// @notice Returns the voting power of an address at a given timestamp.

@@ -18,14 +18,14 @@ contract ProposeTest is SpaceTest {
 
         // Expected content of the proposal struct
         Proposal memory proposal = Proposal(
+            author,
             uint32(block.timestamp),
             uint32(block.timestamp + votingDelay),
+            IExecutionStrategy(executionStrategy.addr),
             uint32(block.timestamp + votingDelay + minVotingDuration),
             uint32(block.timestamp + votingDelay + maxVotingDuration),
-            keccak256(abi.encodePacked(executionStrategy.params)),
-            IExecutionStrategy(executionStrategy.addr),
-            author,
             FinalizationStatus.Pending,
+            keccak256(abi.encodePacked(executionStrategy.params)),
             activeVotingStrategies
         );
 
@@ -36,26 +36,26 @@ contract ProposeTest is SpaceTest {
 
         // Actual content of the proposal struct
         (
+            address _author,
             uint32 _snapshotTimestamp,
             uint32 _startTimestamp,
+            IExecutionStrategy _executionStrategy,
             uint32 _minEndTimestamp,
             uint32 _maxEndTimestamp,
-            bytes32 _executionPayloadHash,
-            IExecutionStrategy _executionStrategy,
-            address _author,
             FinalizationStatus _finalizationStatus,
+            bytes32 _executionPayloadHash,
             uint256 _activeVotingStrategies
         ) = space.proposals(proposalId);
 
         Proposal memory _proposal = Proposal(
+            _author,
             _snapshotTimestamp,
             _startTimestamp,
+            IExecutionStrategy(_executionStrategy),
             _minEndTimestamp,
             _maxEndTimestamp,
-            _executionPayloadHash,
-            IExecutionStrategy(_executionStrategy),
-            _author,
             _finalizationStatus,
+            _executionPayloadHash,
             _activeVotingStrategies
         );
 

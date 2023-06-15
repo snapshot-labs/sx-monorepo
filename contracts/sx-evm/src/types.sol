@@ -6,23 +6,31 @@ import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 
 /// @notice The data stored for each proposal when it is created.
+/// @dev Packed into 4 256-bit slots.
 struct Proposal {
-    // The timestamp at which voting power for the proposal is calculated. Overflows at year ~2106.
-    uint32 snapshotTimestamp;
-    // We store the following 3 timestamps for each proposal despite the fact that they can be
-    // inferred from the votingDelay, minVotingDuration, and maxVotingDuration state variables
-    // because those variables may be updated during the lifetime of a proposal.
-    uint32 startTimestamp;
-    uint32 minEndTimestamp;
-    uint32 maxEndTimestamp;
-    // The hash of the execution payload. We do not store the payload itself to save gas.
-    bytes32 executionPayloadHash;
-    // The address of execution strategy used for the proposal.
-    IExecutionStrategy executionStrategy;
+    // SLOT 1:
     // The address of the proposal creator.
     address author;
+    // The timestamp at which voting power for the proposal is calculated.
+    uint32 snapshotTimestamp;
+    // The timestamp at which the voting period starts.
+    uint32 startTimestamp;
+    //
+    // SLOT 2:
+    // The address of execution strategy used for the proposal.
+    IExecutionStrategy executionStrategy;
+    // The minimum timestamp at which the proposal can be finalized.
+    uint32 minEndTimestamp;
+    // The maximum timestamp at which the proposal can be finalized.
+    uint32 maxEndTimestamp;
     // An enum that stores whether a proposal is pending, executed, or cancelled.
     FinalizationStatus finalizationStatus;
+    //
+    // SLOT 3:
+    // The hash of the execution payload. We do not store the payload itself to save gas.
+    bytes32 executionPayloadHash;
+    //
+    // SLOT 4:
     // Bit array where the index of each each bit corresponds to whether the voting strategy.
     // at that index is active at the time of proposal creation.
     uint256 activeVotingStrategies;
