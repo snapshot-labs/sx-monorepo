@@ -52,11 +52,15 @@ export function useSpaces() {
       enabledNetworks.map(async id => {
         const network = getNetwork(id);
 
-        if (filter?.id_in) {
-          const filtered = filter.id_in.filter(spaceId => spaceId.startsWith(`${id}:`));
+        const requestFilter = {
+          ...filter
+        };
+
+        if (requestFilter?.id_in) {
+          const filtered = requestFilter.id_in.filter(spaceId => spaceId.startsWith(`${id}:`));
           if (filtered.length === 0) return [];
 
-          filter.id_in = filtered.map(spaceId => spaceId.split(':')[1]);
+          requestFilter.id_in = filtered.map(spaceId => spaceId.split(':')[1]);
         }
 
         return network.api.loadSpaces(
@@ -64,7 +68,7 @@ export function useSpaces() {
             skip: 0,
             limit: SPACES_LIMIT
           },
-          filter
+          requestFilter
         );
       })
     );
