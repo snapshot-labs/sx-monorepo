@@ -11,6 +11,7 @@ import { TestERC1155 } from "./mocks/TestERC1155.sol";
 import { TestERC721 } from "./mocks/TestERC721.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/interfaces/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
+import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 
 abstract contract TimelockExecutionStrategyTest is SpaceTest {
     error InvalidSpace();
@@ -476,6 +477,7 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
     function testCheckViewFunctions() public {
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC721Receiver).interfaceId));
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC1155Receiver).interfaceId));
+        assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC165).interfaceId));
         assertEq(timelockExecutionStrategy.getStrategyType(), "SimpleQuorumTimelock");
     }
 

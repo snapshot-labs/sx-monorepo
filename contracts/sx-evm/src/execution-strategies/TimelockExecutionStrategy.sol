@@ -8,6 +8,7 @@ import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/interfaces/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
+import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 
 /// @title Timelock Execution Strategy
 /// @notice Used to execute proposal transactions according to a timelock delay.
@@ -216,6 +217,9 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
 
     /// @notice IERC165 interface support
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return interfaceId == type(IERC721Receiver).interfaceId || interfaceId == type(IERC1155Receiver).interfaceId;
+        return
+            interfaceId == type(IERC721Receiver).interfaceId ||
+            interfaceId == type(IERC1155Receiver).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 }
