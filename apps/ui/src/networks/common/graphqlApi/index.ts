@@ -63,6 +63,7 @@ function formatProposal(
     ...proposal,
     space: {
       id: proposal.space.id,
+      avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,
       authenticators: proposal.space.authenticators,
       voting_power_symbol: proposal.space.metadata.voting_power_symbol,

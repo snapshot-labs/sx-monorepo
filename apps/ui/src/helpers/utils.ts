@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
+import sha3 from 'js-sha3';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
@@ -305,6 +306,21 @@ export function getSalt() {
   crypto.getRandomValues(buffer);
 
   return `0x${buffer.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')}`;
+}
+
+export function getCacheHash(value?: string) {
+  return value ? sha3.sha3_256(value).slice(0, 16) : undefined;
+}
+
+export function getStampUrl(
+  type: 'avatar' | 'space' | 'space-sx' | 'token',
+  id: string,
+  size: number,
+  hash?: string
+) {
+  const cacheParam = hash ? `&cb=${hash}` : '';
+
+  return `https://cdn.stamp.fyi/${type}/${id}?s=${size * 2}${cacheParam}`;
 }
 
 export async function imageUpload(file: File) {

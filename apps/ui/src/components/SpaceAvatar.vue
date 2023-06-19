@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import sha3 from 'js-sha3';
+import { getCacheHash } from '@/helpers/utils';
 
 const props = withDefaults(
   defineProps<{
@@ -11,9 +11,7 @@ const props = withDefaults(
   }
 );
 
-const cb = computed(() =>
-  props.space.avatar ? sha3.sha3_256(props.space.avatar).slice(0, 16) : undefined
-);
+const cb = computed(() => getCacheHash(props.space.avatar));
 </script>
 
 <template>

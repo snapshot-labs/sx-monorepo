@@ -52,6 +52,7 @@ const PROPOSAL_FRAGMENT = gql`
       authenticators
       metadata {
         id
+        avatar
         voting_power_symbol
         executors
         executors_types

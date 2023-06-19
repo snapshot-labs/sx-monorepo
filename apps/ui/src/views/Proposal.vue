@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
-import { _rt, _n, shortenAddress, getUrl, sanitizeUrl, compareAddresses } from '@/helpers/utils';
+import {
+  _rt,
+  _n,
+  shortenAddress,
+  getUrl,
+  getStampUrl,
+  getCacheHash,
+  sanitizeUrl,
+  compareAddresses
+} from '@/helpers/utils';
 import { Choice } from '@/types';
 import { VotingPower } from '@/networks/types';
 
 const route = useRoute();
 const router = useRouter();
+const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
@@ -167,6 +177,14 @@ watch(
 watchEffect(() => {
   if (!proposal.value) return;
 
+  const faviconUrl = getStampUrl(
+    'space-sx',
+    proposal.value.space.id,
+    16,
+    getCacheHash(proposal.value.space.avatar)
+  );
+
+  setFavicon(faviconUrl);
   setTitle(proposal.value.title || `Proposal #${proposal.value.proposal_id}`);
 });
 </script>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useUiStore } from '@/stores/ui';
 import { useSpacesStore } from '@/stores/spaces';
+import { getCacheHash, getStampUrl } from '@/helpers/utils';
 
+const { setFavicon } = useFavicon();
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const uiStore = useUiStore();
@@ -24,6 +26,13 @@ watch(
     immediate: true
   }
 );
+
+watchEffect(() => {
+  if (!space.value) return setFavicon(null);
+
+  const faviconUrl = getStampUrl('space-sx', space.value.id, 16, getCacheHash(space.value.avatar));
+  setFavicon(faviconUrl);
+});
 </script>
 
 <template>
