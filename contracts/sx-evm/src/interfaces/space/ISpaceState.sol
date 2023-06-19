@@ -20,7 +20,7 @@ interface ISpaceState {
     function votingDelay() external view returns (uint32);
 
     /// @notice Returns whether a given address is a whitelisted authenticator.
-    function authenticators(address) external view returns (bool);
+    function authenticators(address) external view returns (uint256);
 
     /// @notice Returns the voting strategy at a given index.
     /// @param index The index of the voting strategy.
@@ -49,7 +49,7 @@ interface ISpaceState {
     /// @notice Returns whether a voter has voted on a proposal.
     /// @param proposalId The ID of the proposal.
     /// @param voter The address of the voter.
-    function voteRegistry(uint256 proposalId, address voter) external view returns (bool);
+    function voteRegistry(uint256 proposalId, address voter) external view returns (uint256);
 
     /// @notice Returns the proposal at a given ID.
     /// @dev Returns all zeros if the proposal does not exist.

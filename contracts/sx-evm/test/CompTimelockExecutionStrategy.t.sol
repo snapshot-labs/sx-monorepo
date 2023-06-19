@@ -3,7 +3,17 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, Enum, IndexedStrategy, MetaTransaction, ProposalStatus, Strategy, Proposal } from "../src/types.sol";
+import {
+    Choice,
+    Enum,
+    IndexedStrategy,
+    MetaTransaction,
+    ProposalStatus,
+    Strategy,
+    Proposal,
+    TRUE,
+    FALSE
+} from "../src/types.sol";
 import {
     CompTimelockCompatibleExecutionStrategy
 } from "../src/execution-strategies/CompTimelockCompatibleExecutionStrategy.sol";
@@ -480,7 +490,7 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
         assertEq(timelockExecutionStrategy.vetoGuardian(), vetoGuardian);
         assertEq(timelockExecutionStrategy.quorum(), quorum);
         assertEq(address(timelockExecutionStrategy.timelock()), address(timelock));
-        assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), true);
+        assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), TRUE);
     }
 }
 

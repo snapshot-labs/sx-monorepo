@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import { SpaceTest } from "./utils/Space.t.sol";
+import { TRUE, FALSE, SpaceTest } from "./utils/Space.t.sol";
 import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 
@@ -20,7 +20,7 @@ contract VoteTest is SpaceTest {
             abi.encode(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI)
         );
 
-        assertTrue(space.voteRegistry(proposalId, author));
+        assertEq(space.voteRegistry(proposalId, author), TRUE);
     }
 
     function testVoteInvalidAuth() public {

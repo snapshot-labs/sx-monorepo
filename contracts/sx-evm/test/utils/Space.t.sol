@@ -16,7 +16,7 @@ import {
 import { ISpaceEvents } from "../../src/interfaces/space/ISpaceEvents.sol";
 import { ISpaceErrors } from "../../src/interfaces/space/ISpaceErrors.sol";
 import { IExecutionStrategyErrors } from "../../src/interfaces/execution-strategies/IExecutionStrategyErrors.sol";
-import { Choice, Strategy, IndexedStrategy, InitializeCalldata } from "../../src/types.sol";
+import { Choice, Strategy, IndexedStrategy, InitializeCalldata, TRUE, FALSE } from "../../src/types.sol";
 
 // solhint-disable-next-line max-states-count
 abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {

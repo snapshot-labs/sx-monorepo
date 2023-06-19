@@ -5,7 +5,16 @@ pragma solidity ^0.8.18;
 import { SpaceTest } from "./utils/Space.t.sol";
 import { Avatar } from "./mocks/Avatar.sol";
 import { AvatarExecutionStrategy } from "../src/execution-strategies/AvatarExecutionStrategy.sol";
-import { Choice, Enum, IndexedStrategy, MetaTransaction, ProposalStatus, Strategy } from "../src/types.sol";
+import {
+    Choice,
+    Enum,
+    IndexedStrategy,
+    MetaTransaction,
+    ProposalStatus,
+    Strategy,
+    TRUE,
+    FALSE
+} from "../src/types.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 abstract contract AvatarExecutionStrategyTest is SpaceTest {
@@ -196,7 +205,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit SpaceEnabled(space);
         avatarExecutionStrategy.enableSpace(space);
-        assertEq(avatarExecutionStrategy.isSpaceEnabled(space), true);
+        assertEq(avatarExecutionStrategy.isSpaceEnabled(space), TRUE);
     }
 
     function testEnableInvalidSpace() public {
@@ -225,7 +234,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
         vm.expectEmit(true, true, true, true);
         emit SpaceDisabled(address(space));
         avatarExecutionStrategy.disableSpace(address(space));
-        assertEq(avatarExecutionStrategy.isSpaceEnabled(address(space)), false);
+        assertEq(avatarExecutionStrategy.isSpaceEnabled(address(space)), FALSE);
 
         // Check that proposals from the disabled space can't be executed
         MetaTransaction[] memory transactions = new MetaTransaction[](1);

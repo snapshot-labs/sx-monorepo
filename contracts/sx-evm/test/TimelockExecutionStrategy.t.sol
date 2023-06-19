@@ -3,7 +3,17 @@
 pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
-import { Choice, Enum, IndexedStrategy, MetaTransaction, ProposalStatus, Strategy, Proposal } from "../src/types.sol";
+import {
+    Choice,
+    Enum,
+    IndexedStrategy,
+    MetaTransaction,
+    ProposalStatus,
+    Strategy,
+    Proposal,
+    TRUE,
+    FALSE
+} from "../src/types.sol";
 import { TimelockExecutionStrategy } from "../src/execution-strategies/TimelockExecutionStrategy.sol";
 import { MockImplementation } from "./mocks/MockImplementation.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -490,7 +500,7 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
         assertEq(timelockExecutionStrategy.vetoGuardian(), vetoGuardian);
         assertEq(timelockExecutionStrategy.quorum(), quorum);
         assertEq(timelockExecutionStrategy.timelockDelay(), 1000);
-        assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), true);
+        assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), TRUE);
     }
 }
 

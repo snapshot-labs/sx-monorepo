@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 import { SpaceV2 } from "./mocks/SpaceV2.sol";
-import { SpaceTest } from "./utils/Space.t.sol";
+import { TRUE, FALSE, SpaceTest } from "./utils/Space.t.sol";
 import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 import { BitPacker } from "../src/utils/BitPacker.sol";
@@ -590,9 +590,9 @@ contract SpaceOwnerActionsTest is SpaceTest {
         );
 
         // Ensure authenticators were correctly updated
-        assertEq(space.authenticators(newAuths[0]), true);
-        assertEq(space.authenticators(newAuths[1]), true);
-        assertEq(space.authenticators(authenticators[0]), false);
+        assertEq(space.authenticators(newAuths[0]), TRUE);
+        assertEq(space.authenticators(newAuths[1]), TRUE);
+        assertEq(space.authenticators(authenticators[0]), FALSE);
     }
 
     function testUpdateVotingStrategies() public {
@@ -701,9 +701,9 @@ contract SpaceOwnerActionsTest is SpaceTest {
         assertEq(params, _proposalValidationStrategy.params);
 
         // Ensure authenticators were correctly updated
-        assertEq(space.authenticators(newAuths[0]), true);
-        assertEq(space.authenticators(newAuths[1]), true);
-        assertEq(space.authenticators(authenticators[0]), false);
+        assertEq(space.authenticators(newAuths[0]), TRUE);
+        assertEq(space.authenticators(newAuths[1]), TRUE);
+        assertEq(space.authenticators(authenticators[0]), FALSE);
 
         // Ensure voting strategies were correctly updated
         assertEq(space.activeVotingStrategies().isBitSet(0), false);
