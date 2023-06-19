@@ -55,12 +55,11 @@ interface ISpaceState {
     /// @dev Returns all zeros if the proposal does not exist.
     /// @param proposalId The ID of the proposal.
     /// @return author The address of the proposal author.
-    /// @return snapshotTimestamp The timestamp of the proposal snapshot.
-    ///         All Voting Power will be calculated at this timestamp.
-    /// @return startTimestamp The timestamp of the start of the voting period.
+    /// @return startBlockNumber The block number of the start of the voting period.
+    ///         This is also the snapshot block number where voting power is calculated at.
     /// @return executionStrategy The address of the execution strategy used in the proposal.
-    /// @return minEndTimestamp The timestamp of the minimum end of the voting period.
-    /// @return maxEndTimestamp The timestamp of the maximum end of the voting period.
+    /// @return minEndBlockNumber The block number of the minimum end of the voting period.
+    /// @return maxEndBlockNumber The block number of the maximum end of the voting period.
     /// @return finalizationStatus The finalization status of the proposal. See `FinalizationStatus`.
     /// @return executionPayloadHash The keccak256 hash of the execution payload.
     /// @return activeVotingStrategies The bit array of the active voting strategies for the proposal.
@@ -71,11 +70,10 @@ interface ISpaceState {
         view
         returns (
             address author,
-            uint32 snapshotTimestamp,
-            uint32 startTimestamp,
+            uint32 startBlockNumber,
             IExecutionStrategy executionStrategy,
-            uint32 minEndTimestamp,
-            uint32 maxEndTimestamp,
+            uint32 minEndBlockNumber,
+            uint32 maxEndBlockNumber,
             FinalizationStatus finalizationStatus,
             bytes32 executionPayloadHash,
             uint256 activeVotingStrategies

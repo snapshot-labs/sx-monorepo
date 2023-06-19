@@ -204,9 +204,6 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         Strategy calldata executionStrategy,
         bytes calldata userProposalValidationParams
     ) external override onlyAuthenticator {
-        // Casting to `uint32` is fine because this gives us until year ~2106.
-        uint32 snapshotTimestamp = uint32(block.timestamp);
-
         if (
             !IProposalValidationStrategy(proposalValidationStrategy.addr).validate(
                 author,
@@ -215,20 +212,20 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
             )
         ) revert FailedToPassProposalValidation();
 
-        uint32 startTimestamp = snapshotTimestamp + votingDelay;
-        uint32 minEndTimestamp = startTimestamp + minVotingDuration;
-        uint32 maxEndTimestamp = startTimestamp + maxVotingDuration;
+        // Max block number of 2^32 - 1 = 4,294,967,295
+        uint32 startBlockNumber = uint32(block.number) + votingDelay;
+        uint32 minEndBlockNumber = startBlockNumber + minVotingDuration;
+        uint32 maxEndBlockNumber = startBlockNumber + maxVotingDuration;
 
         // The execution payload is the params of the supplied execution strategy struct.
         bytes32 executionPayloadHash = keccak256(executionStrategy.params);
 
         Proposal memory proposal = Proposal(
             author,
-            snapshotTimestamp,
-            startTimestamp,
+            startBlockNumber,
             IExecutionStrategy(executionStrategy.addr),
-            minEndTimestamp,
-            maxEndTimestamp,
+            minEndBlockNumber,
+            maxEndBlockNumber,
             FinalizationStatus.Pending,
             executionPayloadHash,
             activeVotingStrategies
@@ -250,8 +247,8 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     ) external override onlyAuthenticator {
         Proposal memory proposal = proposals[proposalId];
         _assertProposalExists(proposal);
-        if (block.timestamp >= proposal.maxEndTimestamp) revert VotingPeriodHasEnded();
-        if (block.timestamp < proposal.startTimestamp) revert VotingPeriodHasNotStarted();
+        if (block.number >= proposal.maxEndBlockNumber) revert VotingPeriodHasEnded();
+        if (block.number < proposal.startBlockNumber) revert VotingPeriodHasNotStarted();
         if (proposal.finalizationStatus != FinalizationStatus.Pending) revert ProposalFinalized();
         if (voteRegistry[proposalId][voter]) revert UserAlreadyVoted();
 
@@ -259,7 +256,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
 
         uint256 votingPower = _getCumulativePower(
             voter,
-            proposal.snapshotTimestamp,
+            proposal.startBlockNumber,
             userVotingStrategies,
             proposal.activeVotingStrategies
         );
@@ -315,7 +312,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         Proposal storage proposal = proposals[proposalId];
         _assertProposalExists(proposal);
         if (author != proposal.author) revert InvalidCaller();
-        if (block.timestamp >= proposal.startTimestamp) revert VotingDelayHasPassed();
+        if (block.number >= proposal.startBlockNumber) revert VotingDelayHasPassed();
 
         proposal.executionPayloadHash = keccak256(executionStrategy.params);
         proposal.executionStrategy = IExecutionStrategy(executionStrategy.addr);
@@ -401,16 +398,14 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
 
     /// @dev Reverts if a specified proposal does not exist.
     function _assertProposalExists(Proposal memory proposal) internal pure {
-        // startTimestamp cannot be set to 0 when a proposal is created,
-        // so if proposal.startTimestamp is 0 it means this proposal does not exist
-        // and hence `proposalId` is invalid.
-        if (proposal.startTimestamp == 0) revert InvalidProposal();
+        // If a proposal exists, then its execution payload hash will be non-zero.
+        if (proposal.executionPayloadHash == 0) revert InvalidProposal();
     }
 
     /// @dev Returns the cumulative voting power of a user over a set of voting strategies.
     function _getCumulativePower(
         address userAddress,
-        uint32 timestamp,
+        uint32 blockNumber,
         IndexedStrategy[] calldata userStrategies,
         uint256 allowedStrategies
     ) internal returns (uint256) {
@@ -429,7 +424,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
             Strategy memory strategy = votingStrategies[strategyIndex];
 
             totalVotingPower += IVotingStrategy(strategy.addr).getVotingPower(
-                timestamp,
+                blockNumber,
                 userAddress,
                 strategy.params,
                 userStrategies[i].params

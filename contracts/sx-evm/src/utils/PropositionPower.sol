@@ -23,14 +23,14 @@ abstract contract PropositionPower {
         Strategy[] memory allowedStrategies,
         IndexedStrategy[] memory userStrategies
     ) internal returns (bool) {
-        uint256 votingPower = _getCumulativePower(author, uint32(block.timestamp), userStrategies, allowedStrategies);
+        uint256 votingPower = _getCumulativePower(author, uint32(block.number), userStrategies, allowedStrategies);
         return (votingPower >= proposalThreshold);
     }
 
-    /// @dev Computes the cumulative proposition power of an address at a given timestamp over a set of strategies.
+    /// @dev Computes the cumulative proposition power of an address at a given block number over a set of strategies.
     function _getCumulativePower(
         address userAddress,
-        uint32 timestamp,
+        uint32 blockNumber,
         IndexedStrategy[] memory userStrategies,
         Strategy[] memory allowedStrategies
     ) internal returns (uint256) {
@@ -44,7 +44,7 @@ abstract contract PropositionPower {
             Strategy memory strategy = allowedStrategies[strategyIndex];
 
             totalVotingPower += IVotingStrategy(strategy.addr).getVotingPower(
-                timestamp,
+                blockNumber,
                 userAddress,
                 strategy.params,
                 userStrategies[i].params

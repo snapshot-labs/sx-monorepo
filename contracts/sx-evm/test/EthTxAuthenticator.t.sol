@@ -145,7 +145,7 @@ contract EthTxAuthenticatorTest is SpaceTest {
         );
 
         // Fast forward and ensure everything is still working correctly
-        vm.warp(block.timestamp + votingDelay);
+        vm.roll(block.number + votingDelay);
         vm.prank(voter);
         ethTxAuth.authenticate(
             address(space),

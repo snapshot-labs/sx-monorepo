@@ -19,14 +19,14 @@ contract WhitelistVotingStrategy is IVotingStrategy {
         uint96 vp;
     }
 
-    /// @notice Returns the voting power of an address at a given timestamp.
+    /// @notice Returns the voting power of an address.
     /// @param voter The address to get the voting power of.
     /// @param params Parameter array containing the encoded whitelist of addresses and their voting power.
     ///               The array should be an ABI encoded array of Member structs sorted by ascending addresses.
     /// @param userParams Expected to contain a `uint256` corresponding to the voterIndex in the array provided by `params`.
     /// @return votingPower The voting power of the address if it exists in the whitelist, otherwise 0.
     function getVotingPower(
-        uint32 /* timestamp */,
+        uint32 /* blockNumber */,
         address voter,
         bytes calldata params,
         bytes calldata userParams

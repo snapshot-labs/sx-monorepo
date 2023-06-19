@@ -11,18 +11,17 @@ struct Proposal {
     // SLOT 1:
     // The address of the proposal creator.
     address author;
-    // The timestamp at which voting power for the proposal is calculated.
-    uint32 snapshotTimestamp;
-    // The timestamp at which the voting period starts.
-    uint32 startTimestamp;
+    // The block number at which the voting period starts.
+    // This is also the snapshot block number where voting power is calculated at.
+    uint32 startBlockNumber;
     //
     // SLOT 2:
     // The address of execution strategy used for the proposal.
     IExecutionStrategy executionStrategy;
-    // The minimum timestamp at which the proposal can be finalized.
-    uint32 minEndTimestamp;
-    // The maximum timestamp at which the proposal can be finalized.
-    uint32 maxEndTimestamp;
+    // The minimum block number at which the proposal can be finalized.
+    uint32 minEndBlockNumber;
+    // The maximum block number at which the proposal can be finalized.
+    uint32 maxEndBlockNumber;
     // An enum that stores whether a proposal is pending, executed, or cancelled.
     FinalizationStatus finalizationStatus;
     //

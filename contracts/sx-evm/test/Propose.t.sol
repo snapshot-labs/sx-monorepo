@@ -19,11 +19,10 @@ contract ProposeTest is SpaceTest {
         // Expected content of the proposal struct
         Proposal memory proposal = Proposal(
             author,
-            uint32(block.timestamp),
-            uint32(block.timestamp + votingDelay),
+            uint32(block.number + votingDelay),
             IExecutionStrategy(executionStrategy.addr),
-            uint32(block.timestamp + votingDelay + minVotingDuration),
-            uint32(block.timestamp + votingDelay + maxVotingDuration),
+            uint32(block.number + votingDelay + minVotingDuration),
+            uint32(block.number + votingDelay + maxVotingDuration),
             FinalizationStatus.Pending,
             keccak256(abi.encodePacked(executionStrategy.params)),
             activeVotingStrategies
@@ -37,7 +36,6 @@ contract ProposeTest is SpaceTest {
         // Actual content of the proposal struct
         (
             address _author,
-            uint32 _snapshotTimestamp,
             uint32 _startTimestamp,
             IExecutionStrategy _executionStrategy,
             uint32 _minEndTimestamp,
@@ -49,7 +47,6 @@ contract ProposeTest is SpaceTest {
 
         Proposal memory _proposal = Proposal(
             _author,
-            _snapshotTimestamp,
             _startTimestamp,
             IExecutionStrategy(_executionStrategy),
             _minEndTimestamp,
@@ -58,8 +55,6 @@ contract ProposeTest is SpaceTest {
             _executionPayloadHash,
             _activeVotingStrategies
         );
-
-        // Proposal memory _proposal = space.proposalRegistry(proposalId);
 
         // Checking expectations and actual values match
         assertEq(keccak256(abi.encode(_proposal)), keccak256(abi.encode(proposal)));

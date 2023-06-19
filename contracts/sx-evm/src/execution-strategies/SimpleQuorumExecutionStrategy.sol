@@ -50,11 +50,11 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceMana
             return ProposalStatus.Cancelled;
         } else if (proposal.finalizationStatus == FinalizationStatus.Executed) {
             return ProposalStatus.Executed;
-        } else if (block.timestamp < proposal.startTimestamp) {
+        } else if (block.number < proposal.startBlockNumber) {
             return ProposalStatus.VotingDelay;
-        } else if (block.timestamp < proposal.minEndTimestamp) {
+        } else if (block.number < proposal.minEndBlockNumber) {
             return ProposalStatus.VotingPeriod;
-        } else if (block.timestamp < proposal.maxEndTimestamp) {
+        } else if (block.number < proposal.maxEndBlockNumber) {
             if (accepted) {
                 return ProposalStatus.VotingPeriodAccepted;
             } else {

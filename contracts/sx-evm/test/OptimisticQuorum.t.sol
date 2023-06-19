@@ -59,7 +59,7 @@ contract OptimisticTest is SpaceTest {
 
     function testOptimisticQuorumNoVotes() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
-        vm.warp(block.timestamp + space.maxVotingDuration());
+        vm.roll(block.number + space.maxVotingDuration());
 
         vm.expectEmit(true, true, true, true);
         emit ProposalExecuted(proposalId);
@@ -71,7 +71,7 @@ contract OptimisticTest is SpaceTest {
     function testOptimisticQuorumOneVote() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
-        vm.warp(block.timestamp + space.maxVotingDuration());
+        vm.roll(block.number + space.maxVotingDuration());
 
         vm.expectEmit(true, true, true, true);
         emit ProposalExecuted(proposalId);
@@ -84,7 +84,7 @@ contract OptimisticTest is SpaceTest {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         _vote(address(42), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
-        vm.warp(block.timestamp + space.maxVotingDuration());
+        vm.roll(block.number + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
         space.execute(proposalId, executionStrategy.params);
@@ -101,7 +101,7 @@ contract OptimisticTest is SpaceTest {
         _vote(address(11), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         _vote(address(12), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
 
-        vm.warp(block.timestamp + space.maxVotingDuration());
+        vm.roll(block.number + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
         space.execute(proposalId, executionStrategy.params);
@@ -114,7 +114,7 @@ contract OptimisticTest is SpaceTest {
         _vote(address(11), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         _vote(address(12), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
 
-        vm.warp(block.timestamp + space.minVotingDuration());
+        vm.roll(block.number + space.minVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
         space.execute(proposalId, executionStrategy.params);
@@ -125,7 +125,7 @@ contract OptimisticTest is SpaceTest {
     function testOptimisticQuorumMinVotingPeriodAccepted() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
-        vm.warp(block.timestamp + space.minVotingDuration());
+        vm.roll(block.number + space.minVotingDuration());
 
         space.execute(proposalId, executionStrategy.params);
 
@@ -154,7 +154,7 @@ contract OptimisticTest is SpaceTest {
             _vote(address(i), proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         }
 
-        vm.warp(block.timestamp + space.maxVotingDuration());
+        vm.roll(block.number + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
         space.execute(proposalId, executionStrategy.params);

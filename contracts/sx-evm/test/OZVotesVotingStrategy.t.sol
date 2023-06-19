@@ -26,7 +26,7 @@ contract OZVotesVotingStrategyTest is Test {
         vm.roll(block.number + 1);
         assertEq(
             ozVotesVotingStrategy.getVotingPower(
-                uint32(block.timestamp),
+                uint32(block.number),
                 user,
                 abi.encodePacked(address(erc20VotesToken)),
                 ""
@@ -41,7 +41,7 @@ contract OZVotesVotingStrategyTest is Test {
         vm.roll(block.number + 1);
         assertEq(
             ozVotesVotingStrategy.getVotingPower(
-                uint32(block.timestamp),
+                uint32(block.number),
                 user,
                 abi.encodePacked(address(erc20VotesToken)),
                 ""
@@ -56,7 +56,7 @@ contract OZVotesVotingStrategyTest is Test {
         vm.roll(block.number + 1);
         vm.expectRevert();
         // Token address is set to zero
-        ozVotesVotingStrategy.getVotingPower(uint32(block.timestamp), user, abi.encodePacked(address(0)), "");
+        ozVotesVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(0)), "");
     }
 
     function testGetVotingPowerInvalidParamsArray() public {
@@ -65,6 +65,6 @@ contract OZVotesVotingStrategyTest is Test {
         vm.roll(block.number + 1);
         vm.expectRevert(InvalidByteArray.selector);
         // Params array is too short
-        ozVotesVotingStrategy.getVotingPower(uint32(block.timestamp), user, abi.encodePacked("1234"), "");
+        ozVotesVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked("1234"), "");
     }
 }

@@ -16,7 +16,7 @@ contract PropositionPowerAndActiveProposalsLimiterValidationStrategy is
     IProposalValidationStrategy
 {
     /// @notice Validates an author by checking if the proposition power of the author exceeds a threshold over a set of
-    ///         strategies and if the author has reached the maximum number of active proposals at the current timestamp.
+    ///         strategies and if the author has reached the maximum number of active proposals at the current block.
     /// @param author Author of the proposal.
     /// @param params ABI encoded array that should contain the following:
     ///                 cooldown: Duration to wait before the proposal counter gets reset.

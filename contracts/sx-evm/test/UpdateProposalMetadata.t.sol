@@ -58,14 +58,14 @@ contract UpdateProposalTest is SpaceTest {
         _updateProposal(author, proposalId, newStrategy, newMetadataURI);
 
         // Fast forward and finish the proposal to ensure everything is still working properly.
-        vm.warp(block.timestamp + votingDelay);
+        vm.roll(block.number + votingDelay);
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
         space.execute(proposalId, executionStrategy.params);
     }
 
     function testUpdateProposalAfterDelay() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
-        vm.warp(block.timestamp + votingDelay);
+        vm.roll(block.number + votingDelay);
 
         vm.expectRevert(VotingDelayHasPassed.selector);
         // Try to update metadata. Should fail.

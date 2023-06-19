@@ -25,7 +25,7 @@ contract CompVotingStrategyTest is Test {
         compToken.delegate(user);
         vm.roll(block.number + 1);
         assertEq(
-            compVotingStrategy.getVotingPower(uint32(block.timestamp), user, abi.encodePacked(address(compToken)), ""),
+            compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(compToken)), ""),
             1
         );
     }
@@ -35,7 +35,7 @@ contract CompVotingStrategyTest is Test {
         // No delegation, so voting power is zero
         vm.roll(block.number + 1);
         assertEq(
-            compVotingStrategy.getVotingPower(uint32(block.timestamp), user, abi.encodePacked(address(compToken)), ""),
+            compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(compToken)), ""),
             0
         );
     }
@@ -46,7 +46,7 @@ contract CompVotingStrategyTest is Test {
         vm.roll(block.number + 1);
         vm.expectRevert();
         // Token address is set to zero
-        compVotingStrategy.getVotingPower(uint32(block.timestamp), user, abi.encodePacked(address(0)), "");
+        compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(0)), "");
     }
 
     function testGetVotingPowerInvalidParamsArray() public {
@@ -55,6 +55,6 @@ contract CompVotingStrategyTest is Test {
         vm.roll(block.number + 1);
         vm.expectRevert(InvalidByteArray.selector);
         // Params array is too short
-        compVotingStrategy.getVotingPower(uint32(block.timestamp), user, abi.encodePacked("1234"), "");
+        compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked("1234"), "");
     }
 }
