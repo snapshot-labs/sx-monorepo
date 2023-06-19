@@ -278,18 +278,20 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         Proposal storage proposal = proposals[proposalId];
         _assertProposalExists(proposal);
 
-        // We add reentrancy protection here to prevent this function being re-entered by the execution strategy.
-        // We cannot use the Checks-Effects-Interactions pattern because the proposal status is checked inside
-        // the execution strategy (so essentially forced to do Checks-Interactions-Effects).
+        // We cache the proposal because we will modify the *real* proposal's finalizationStatus before
+        // calling the `execute` function. We will use the `cachedProposal` as an argument to the `execute` function.
+        // This allows us to follow the CEI pattern to avoid reentrancy issues.
+        Proposal memory cachedProposal = proposal;
+
+        proposal.finalizationStatus = FinalizationStatus.Executed;
+
         proposal.executionStrategy.execute(
-            proposal,
+            cachedProposal,
             votePower[proposalId][Choice.For],
             votePower[proposalId][Choice.Against],
             votePower[proposalId][Choice.Abstain],
             executionPayload
         );
-
-        proposal.finalizationStatus = FinalizationStatus.Executed;
 
         emit ProposalExecuted(proposalId);
     }
