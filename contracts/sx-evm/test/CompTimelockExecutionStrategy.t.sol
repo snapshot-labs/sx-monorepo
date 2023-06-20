@@ -28,6 +28,7 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     error TimelockDelayNotMet();
     error ProposalNotQueued();
     error DuplicateExecutionPayloadHash();
+    error DuplicateMetaTransaction();
     error OnlyVetoGuardian();
     error InvalidTransaction();
     event CompTimelockCompatibleExecutionStrategySetUp(
@@ -94,6 +95,24 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
 
         vm.expectEmit(true, true, true, true);
         emit TransactionQueued(transactions[0], block.timestamp + 1000);
+        space.execute(proposalId, abi.encode(transactions));
+    }
+
+    function testQueueingDuplicateMetaTransaction() external {
+        MetaTransaction[] memory transactions = new MetaTransaction[](2);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
+        // Salt differs but content does not
+        transactions[1] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 1);
+        uint256 proposalId = _createProposal(
+            author,
+            proposalMetadataURI,
+            Strategy(address(timelockExecutionStrategy), abi.encode(transactions)),
+            new bytes(0)
+        );
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
+        vm.roll(block.number + space.maxVotingDuration());
+
+        vm.expectRevert(DuplicateMetaTransaction.selector);
         space.execute(proposalId, abi.encode(transactions));
     }
 
