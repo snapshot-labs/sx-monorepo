@@ -63,6 +63,16 @@ contract UpdateProposalTest is SpaceTest {
         space.execute(proposalId, executionStrategy.params);
     }
 
+    function testUpdateFinalizedProposal() public {
+        uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
+        vm.roll(block.number + votingDelay);
+        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
+        space.execute(proposalId, executionStrategy.params);
+
+        vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
+        _updateProposal(author, proposalId, newStrategy, newMetadataURI);
+    }
+
     function testUpdateProposalAfterDelay() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
         vm.roll(block.number + votingDelay);

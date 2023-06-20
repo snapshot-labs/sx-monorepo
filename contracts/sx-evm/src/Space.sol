@@ -313,6 +313,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
     ) external override onlyAuthenticator {
         Proposal storage proposal = proposals[proposalId];
         _assertProposalExists(proposal);
+        if (proposal.finalizationStatus != FinalizationStatus.Pending) revert ProposalFinalized();
         if (author != proposal.author) revert InvalidCaller();
         if (block.number >= proposal.startBlockNumber) revert VotingDelayHasPassed();
 
