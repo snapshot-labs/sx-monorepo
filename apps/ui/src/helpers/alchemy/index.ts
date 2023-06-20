@@ -4,8 +4,14 @@ export * from './types';
 
 const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
 
+const NETWORKS = {
+  1: 'mainnet',
+  5: 'goerli',
+  11155111: 'sepolia'
+};
+
 function getApiUrl(networkId: number) {
-  const network = networkId === 5 ? 'goerli' : 'mainnet';
+  const network = NETWORKS[networkId] ?? 'mainnet';
 
   return `https://eth-${network}.g.alchemy.com/v2/${apiKey}`;
 }

@@ -161,11 +161,23 @@ watchEffect(() => {
             <IH-exclamation-circle class="inline-block mr-2" />
             There are no tokens in treasury.
           </div>
-          <div v-for="(asset, i) in sortedAssets" :key="i" class="mx-4 py-3 border-b flex">
+          <a
+            v-for="(asset, i) in sortedAssets"
+            :key="i"
+            :href="
+              (asset.contractAddress === ETH_CONTRACT
+                ? treasuryExplorerUrl
+                : sanitizeUrl(
+                    currentNetwork.helpers.getExplorerUrl(asset.contractAddress, 'token')
+                  )) || '#'
+            "
+            target="_blank"
+            class="mx-4 py-3 border-b flex"
+          >
             <div class="flex-auto flex items-center min-w-0">
               <Stamp :id="asset.contractAddress" type="token" :size="32" />
               <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
-                <h4 class="text-skin-link" v-text="asset.symbol" />
+                <h4 v-text="asset.symbol" />
                 <div class="text-sm truncate" v-text="asset.name" />
               </div>
             </div>
@@ -186,7 +198,7 @@ watchEffect(() => {
               />
               <div v-if="asset.price" class="text-sm" v-text="`$${_n(asset.price)}`" />
             </div>
-          </div>
+          </a>
         </div>
         <div v-else-if="page === 'nfts'">
           <div
@@ -198,10 +210,16 @@ watchEffect(() => {
           </div>
           <UiLoading v-if="nftsLoading && !nftsLoaded" class="px-4 py-3 block" />
           <div class="flex flex-row flex-wrap gap-4 p-4">
-            <div v-for="(nft, i) in nfts" :key="i" class="block max-w-[120px]">
+            <a
+              v-for="(nft, i) in nfts"
+              :key="i"
+              :href="sanitizeUrl(nft.permalink) || '#'"
+              target="_blank"
+              class="block max-w-[120px]"
+            >
               <NftPreview :item="nft" class="w-full" />
               <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
-            </div>
+            </a>
           </div>
         </div>
       </div>

@@ -30,8 +30,9 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
         }, interval);
       }),
     getExplorerUrl: (id, type) => {
-      let dataType: 'tx' | 'contract' = 'tx';
-      if (['address', 'contract'].includes(type)) dataType = 'contract';
+      let dataType: 'tx' | 'contract' | 'token' = 'tx';
+      if (type === 'token') dataType = 'token';
+      else if (['address', 'contract'].includes(type)) dataType = 'contract';
 
       return `https://testnet-2.starkscan.co/${dataType}/${id}`;
     }

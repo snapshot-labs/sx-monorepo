@@ -145,7 +145,7 @@ export type NetworkHelpers = {
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
-  getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract'): string;
+  getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract' | 'token'): string;
 };
 
 export type Network = {

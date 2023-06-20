@@ -48,8 +48,9 @@ export function createEvmNetwork(networkId: NetworkID): Network {
         }, interval);
       }),
     getExplorerUrl: (id, type) => {
-      let dataType: 'tx' | 'address' = 'tx';
-      if (['address', 'contract'].includes(type)) dataType = 'address';
+      let dataType: 'tx' | 'address' | 'token' = 'tx';
+      if (type === 'token') dataType = 'token';
+      else if (['address', 'contract'].includes(type)) dataType = 'address';
 
       return `${networks[chainId].explorer}/${dataType}/${id}`;
     }
