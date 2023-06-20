@@ -124,8 +124,6 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
         uint256 votesAbstain,
         bytes memory payload
     ) external override onlySpace {
-        if (proposal.executionPayloadHash != keccak256(payload)) revert InvalidPayload();
-
         ProposalStatus proposalStatus = getProposalStatus(proposal, votesFor, votesAgainst, votesAbstain);
         if ((proposalStatus != ProposalStatus.Accepted) && (proposalStatus != ProposalStatus.VotingPeriodAccepted)) {
             revert InvalidProposalStatus(proposalStatus);

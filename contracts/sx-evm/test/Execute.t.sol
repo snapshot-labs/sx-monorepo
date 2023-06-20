@@ -34,7 +34,7 @@ contract ExecuteTest is SpaceTest {
         vm.roll(block.number + space.maxVotingDuration());
         space.execute(proposalId, executionStrategy.params);
 
-        vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Executed));
+        vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
         space.execute(proposalId, executionStrategy.params);
     }
 

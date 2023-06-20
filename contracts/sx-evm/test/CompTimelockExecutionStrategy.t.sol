@@ -147,7 +147,7 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
         emit TransactionQueued(transactions[0], block.timestamp + 1000);
         space.execute(proposalId, abi.encode(transactions));
 
-        vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Executed));
+        vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
         space.execute(proposalId, abi.encode(transactions));
     }
 

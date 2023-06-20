@@ -34,8 +34,6 @@ contract EmergencyQuorumExec is EmergencyQuorumExecutionStrategy {
         if ((proposalStatus != ProposalStatus.Accepted) && (proposalStatus != ProposalStatus.VotingPeriodAccepted)) {
             revert InvalidProposalStatus(proposalStatus);
         }
-        // Check that the execution payload matches the payload supplied when the proposal was created
-        if (proposal.executionPayloadHash != keccak256(payload)) revert InvalidPayload();
         numExecuted++;
     }
 
@@ -212,7 +210,7 @@ contract EmergencyQuorumTest is SpaceTest {
 
         space.cancel(proposalId);
 
-        vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, uint8(ProposalStatus.Cancelled)));
+        vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
         space.execute(proposalId, emergencyStrategy.params);
     }
 
@@ -229,7 +227,7 @@ contract EmergencyQuorumTest is SpaceTest {
 
         space.execute(proposalId, emergencyStrategy.params);
 
-        vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, uint8(ProposalStatus.Executed)));
+        vm.expectRevert(abi.encodeWithSelector(ProposalFinalized.selector));
         space.execute(proposalId, emergencyStrategy.params);
     }
 

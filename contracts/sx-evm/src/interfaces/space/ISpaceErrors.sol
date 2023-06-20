@@ -55,4 +55,8 @@ interface ISpaceErrors {
 
     /// @notice Thrown if a new proposal did not pass the proposal validation strategy for the space.
     error FailedToPassProposalValidation();
+
+    /// @notice Thrown when the execution payload supplied to the execution strategy is not equal
+    /// to the payload supplied when the proposal was created.
+    error InvalidPayload();
 }
