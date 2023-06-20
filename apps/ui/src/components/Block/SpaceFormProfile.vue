@@ -57,18 +57,21 @@ const definition = computed(() => {
       },
       github: {
         type: 'string',
+        format: 'github-handle',
         title: 'GitHub',
         examples: ['GitHub handle']
       },
       twitter: {
         type: 'string',
+        format: 'twitter-handle',
         title: 'Twitter',
         examples: ['Twitter handle']
       },
       discord: {
         type: 'string',
+        format: 'discord-handle',
         title: 'Discord',
-        examples: ['Discord handle']
+        examples: ['Discord handle or invite code']
       },
       votingPowerSymbol: {
         type: 'string',
