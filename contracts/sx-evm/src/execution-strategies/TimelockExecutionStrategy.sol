@@ -53,6 +53,11 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
     /// @param newVetoGuardian The new veto guardian.
     event VetoGuardianSet(address vetoGuardian, address newVetoGuardian);
 
+    /// @notice Emitted when the timelock delay is set.
+    /// @param timelockDelay The old timelock delay.
+    /// @param newTimelockDelay The new timelock delay.
+    event TimelockDelaySet(uint256 timelockDelay, uint256 newTimelockDelay);
+
     /// @notice Emitted when a proposal is vetoed.
     /// @param executionPayloadHash The hash of the proposal execution payload.
     event ProposalVetoed(bytes32 executionPayloadHash);
@@ -181,6 +186,11 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
     function setVetoGuardian(address newVetoGuardian) external onlyOwner {
         emit VetoGuardianSet(vetoGuardian, newVetoGuardian);
         vetoGuardian = newVetoGuardian;
+    }
+
+    function setTimelockDelay(uint256 newTimelockDelay) external onlyOwner {
+        emit TimelockDelaySet(timelockDelay, newTimelockDelay);
+        timelockDelay = newTimelockDelay;
     }
 
     /// @dev Throws if called by any account other than the veto guardian.

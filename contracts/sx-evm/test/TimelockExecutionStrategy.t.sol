@@ -38,6 +38,7 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
     );
     event TransactionQueued(MetaTransaction transaction, uint256 executionTime);
     event ProposalVetoed(bytes32 executionPayloadHash);
+    event TimelockDelaySet(uint256 timelockDelay, uint256 newTimelockDelay);
     event VetoGuardianSet(address vetoGuardian, address newVetoGuardian);
 
     TimelockExecutionStrategy public timelockExecutionStrategy;
@@ -342,6 +343,21 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
         timelockExecutionStrategy.executeQueuedProposal(abi.encode(transactions));
 
         assertEq(recipient.balance, 1);
+    }
+
+    function testSetTimelockDelay() external {
+        uint256 newTimelockDelay = 1000;
+        vm.expectEmit(true, true, true, true);
+        emit TimelockDelaySet(timelockExecutionStrategy.timelockDelay(), newTimelockDelay);
+        timelockExecutionStrategy.setTimelockDelay(newTimelockDelay);
+        assertEq(timelockExecutionStrategy.timelockDelay(), newTimelockDelay);
+    }
+
+    function testSetTimelockDelayUnauthorized() external {
+        vm.prank(unauthorized);
+        uint256 newTimelockDelay = 1000;
+        vm.expectRevert("Ownable: caller is not the owner");
+        timelockExecutionStrategy.setTimelockDelay(newTimelockDelay);
     }
 
     function testVetoProposal() external {
