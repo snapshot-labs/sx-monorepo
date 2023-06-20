@@ -388,6 +388,28 @@ export class EthereumTx {
     return opts.noWait ? null : promise;
   }
 
+  async vetoExecution(
+    {
+      signer,
+      executionStrategy,
+      executionHash
+    }: {
+      signer: Signer;
+      executionStrategy: string;
+      executionHash: string;
+    },
+    opts: CallOptions = {}
+  ) {
+    const executionStrategyContract = new Contract(
+      executionStrategy,
+      TimelockExecutionStrategyAbi,
+      signer
+    );
+    const promise = executionStrategyContract.veto(executionHash);
+
+    return opts.noWait ? null : promise;
+  }
+
   async cancel(
     { signer, space, proposal }: { signer: Signer; space: string; proposal: number },
     opts: CallOptions = {}
