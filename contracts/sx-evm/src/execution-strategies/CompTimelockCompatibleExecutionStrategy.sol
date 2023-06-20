@@ -137,6 +137,10 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
 
     /// @notice Executes a queued proposal.
     /// @param payload The encoded payload of the proposal to execute.
+    /// @dev Due to possible reentrancy, one cannot rely on the invariant that proposal payloads are executed atomically.
+    ///      As follows: If Proposal A is composed of MetaTransaction a1 and a2, and proposal B of MetaTransaction b1.
+    ///      If A.a1 executes code that triggers a proposal execution, then the execution order overall can potentially
+    ///      become [A.a1, B.b1, A.a2].
     function executeQueuedProposal(bytes memory payload) external {
         bytes32 executionPayloadHash = keccak256(payload);
 
