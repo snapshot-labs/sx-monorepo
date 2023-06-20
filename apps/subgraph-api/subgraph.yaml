@@ -84,6 +84,8 @@ templates:
       eventHandlers:
         - event: ProposalExecuted(bytes32)
           handler: handleTimelockProposalExecuted
+        - event: ProposalVetoed(bytes32)
+          handler: handleTimelockProposalVetoed
       file: ./src/mapping.ts
   - name: SpaceMetadata
     kind: file/ipfs

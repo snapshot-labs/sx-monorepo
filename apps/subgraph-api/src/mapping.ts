@@ -15,7 +15,10 @@ import {
   MaxVotingDurationUpdated,
   OwnershipTransferred,
 } from '../generated/templates/Space/Space'
-import { ProposalExecuted as TimelockProposalExecuted } from '../generated/templates/TimelockExecutionStrategy/TimelockExecutionStrategy'
+import {
+  ProposalExecuted as TimelockProposalExecuted,
+  ProposalVetoed as TimelockProposalVetoed,
+} from '../generated/templates/TimelockExecutionStrategy/TimelockExecutionStrategy'
 import {
   Space as SpaceTemplate,
   TimelockExecutionStrategy as TimelockExecutionStrategyTemplate,
@@ -58,12 +61,21 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     let executionStrategyContract = TimelockExecutionStrategy.bind(event.params.proxy)
     let typeResult = executionStrategyContract.try_getStrategyType()
     let quorumResult = executionStrategyContract.try_quorum()
+    let timelockVetoGuardianResult = executionStrategyContract.try_vetoGuardian()
     let timelockDelayResult = executionStrategyContract.try_timelockDelay()
-    if (typeResult.reverted || quorumResult.reverted || timelockDelayResult.reverted) return
+    if (
+      typeResult.reverted ||
+      quorumResult.reverted ||
+      timelockVetoGuardianResult.reverted ||
+      timelockDelayResult.reverted
+    ) {
+      return
+    }
 
     let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
+    executionStrategy.timelock_veto_guardian = timelockVetoGuardianResult.value
     executionStrategy.timelock_delay = timelockDelayResult.value
     executionStrategy.save()
 
@@ -153,6 +165,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.execution_strategy = event.params.proposal.executionStrategy
   proposal.execution_time = 0
   proposal.executed = false
+  proposal.vetoed = false
   proposal.completed = false
   proposal.cancelled = false
 
@@ -161,10 +174,12 @@ export function handleProposalCreated(event: ProposalCreated): void {
   )
   if (executionStrategy !== null) {
     proposal.quorum = executionStrategy.quorum
+    proposal.timelock_veto_guardian = executionStrategy.timelock_veto_guardian
     proposal.timelock_delay = executionStrategy.timelock_delay
     proposal.execution_strategy_type = executionStrategy.type
   } else {
     proposal.quorum = new BigDecimal(new BigInt(0))
+    proposal.timelock_veto_guardian = null
     proposal.timelock_delay = new BigInt(0)
     proposal.execution_strategy_type = 'none'
   }
@@ -396,5 +411,22 @@ export function handleTimelockProposalExecuted(event: TimelockProposalExecuted):
 
   proposal.completed = true
   proposal.execution_tx = event.transaction.hash
+  proposal.save()
+}
+
+export function handleTimelockProposalVetoed(event: TimelockProposalVetoed): void {
+  let executionHash = ExecutionHash.load(event.params.executionPayloadHash.toHexString())
+  if (executionHash === null) {
+    return
+  }
+
+  let proposal = Proposal.load(executionHash.proposal_id)
+  if (proposal === null) {
+    return
+  }
+
+  proposal.completed = true
+  proposal.vetoed = true
+  proposal.veto_tx = event.transaction.hash
   proposal.save()
 }
