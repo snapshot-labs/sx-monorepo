@@ -208,7 +208,7 @@ watchEffect(() => {
               <span class="text-skin-text text-[16px]" v-text="_rt(proposal.created)" />
             </div>
           </router-link>
-          <UiDropdown class="mr-3">
+          <UiDropdown>
             <template #button>
               <IH-dots-vertical class="text-skin-link" />
             </template>

@@ -58,14 +58,37 @@ const visibleResults = computed(() =>
   >
     <div
       v-if="withDetails"
-      class="inline-block text-skin-link mb-2 cursor-pointer hover:opacity-80"
+      class="inline-block text-skin-link mb-2 cursor-pointer hover:opacity-80 space-y-1"
       @click="showAlternatives = !showAlternatives"
     >
-      <div v-for="result in visibleResults" :key="result.choice" class="inline-block mr-4">
-        <span class="choice-text" :class="`_${result.choice}`">
-          {{ result.progress.toFixed(0) }}%
-        </span>
-        {{ `${_n(Number(result.score) / 10 ** decimals)} ${proposal.space.voting_power_symbol}` }}
+      <div
+        v-for="result in visibleResults"
+        :key="result.choice"
+        class="flex items-center space-x-2"
+      >
+        <div
+          class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+          :class="`_${result.choice}`"
+        >
+          <IH-check
+            v-if="result.choice === 1"
+            class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
+          />
+          <IH-x
+            v-else-if="result.choice === 2"
+            class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
+          />
+          <IH-arrow-sm-right
+            v-else-if="result.choice === 3"
+            class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
+          />
+        </div>
+        <span
+          v-text="
+            `${_n(Number(result.score) / 10 ** decimals)} ${proposal.space.voting_power_symbol}`
+          "
+        />
+        <span class="text-skin-text" v-text="`${_n(result.progress)}%`" />
       </div>
     </div>
     <div
