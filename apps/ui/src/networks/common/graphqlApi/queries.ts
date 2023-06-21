@@ -110,19 +110,8 @@ export const PROPOSAL_QUERY = gql`
 `;
 
 export const PROPOSALS_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $space: String!, $searchQuery: String) {
-    proposals(
-      first: $first
-      skip: $skip
-      where: {
-        metadata_: {}
-        space: $space
-        cancelled: false
-        metadata_: { title_contains_nocase: $searchQuery }
-      }
-      orderBy: created
-      orderDirection: desc
-    ) {
+  query ($first: Int!, $skip: Int!, $where: Proposal_filter) {
+    proposals(first: $first, skip: $skip, where: $where, orderBy: created, orderDirection: desc) {
       ...proposalFragment
     }
   }

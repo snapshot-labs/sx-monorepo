@@ -12,6 +12,7 @@ const proposalsStore = useProposalsStore();
 
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
+const filter = ref('all' as 'all' | 'active' | 'pending' | 'closed');
 
 const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
@@ -49,11 +50,20 @@ async function getVotingPower() {
   }
 }
 
-onMounted(() => {
-  proposalsStore.fetch(props.space.id, props.space.network);
+watch(
+  [props.space, filter],
+  ([toSpace, toFilter], [fromSpace, fromFilter]) => {
+    if (toSpace.id !== fromSpace?.id || toFilter !== fromFilter) {
+      proposalsStore.reset(toSpace.id, toSpace.network);
+      proposalsStore.fetch(toSpace.id, toSpace.network, toFilter);
+    }
 
-  getVotingPower();
-});
+    if (toSpace.id !== fromSpace?.id) {
+      getVotingPower();
+    }
+  },
+  { immediate: true }
+);
 
 watch(
   () => web3.value.account,
@@ -67,8 +77,20 @@ watchEffect(() => {
 
 <template>
   <div>
-    <div class="flex">
-      <div class="flex-auto" />
+    <div class="flex justify-between">
+      <div class="flex flex-row p-4 space-x-2">
+        <UiSelect
+          v-model="filter"
+          gap="12px"
+          placement="left"
+          :items="[
+            { key: 'all', label: 'All' },
+            { key: 'pending', label: 'Pending', indicator: 'bg-yellow-500' },
+            { key: 'active', label: 'Active', indicator: 'bg-green' },
+            { key: 'closed', label: 'Closed', indicator: 'bg-red' }
+          ]"
+        />
+      </div>
       <div class="flex flex-row p-4 space-x-2">
         <VotingPowerIndicator
           :network-id="space.network"

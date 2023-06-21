@@ -142,15 +142,32 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
     loadProposals: async (
       spaceId: string,
       { limit, skip = 0 }: PaginationOpts,
+      filter: 'all' | 'active' | 'pending' | 'closed' = 'all',
       searchQuery = ''
     ): Promise<Proposal[]> => {
+      const now = Date.now();
+
+      const filters: Record<string, any> = {};
+      if (filter === 'active') {
+        filters.start_lte = Math.floor(now / 1000);
+        filters.max_end_gte = Math.floor(now / 1000);
+      } else if (filter === 'pending') {
+        filters.start_gt = Math.floor(now / 1000);
+      } else if (filter === 'closed') {
+        filters.max_end_lt = Math.floor(now / 1000);
+      }
+
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
         variables: {
-          space: spaceId,
-          searchQuery,
           first: limit,
-          skip
+          skip,
+          where: {
+            space: spaceId,
+            cancelled: false,
+            metadata_: { title_contains_nocase: searchQuery },
+            ...filters
+          }
         }
       });
 

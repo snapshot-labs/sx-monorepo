@@ -1,5 +1,16 @@
 <script setup lang="ts">
 import { Menu, MenuButton, MenuItems } from '@headlessui/vue';
+
+withDefaults(
+  defineProps<{
+    gap?: string;
+    placement?: 'left' | 'right';
+  }>(),
+  {
+    gap: '8px',
+    placement: 'right'
+  }
+);
 </script>
 
 <template>
@@ -16,7 +27,8 @@ import { Menu, MenuButton, MenuItems } from '@headlessui/vue';
       leave-to-class="transform scale-95 opacity-0"
     >
       <MenuItems
-        class="absolute right-0 mt-2 origin-top-right rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+        :class="`z-[51] absolute ${placement}-0 origin-top-${placement} rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`"
+        :style="`margin-top: ${gap}`"
       >
         <slot name="items" />
       </MenuItems>

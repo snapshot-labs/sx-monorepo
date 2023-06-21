@@ -42,7 +42,15 @@ export const useProposalsStore = defineStore('proposals', {
     }
   },
   actions: {
-    async fetch(spaceId: string, networkId: NetworkID) {
+    reset(spaceId: string, networkId: NetworkID) {
+      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+      delete this.proposals[uniqueSpaceId];
+    },
+    async fetch(
+      spaceId: string,
+      networkId: NetworkID,
+      filter?: 'all' | 'active' | 'pending' | 'closed'
+    ) {
       const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 
       if (!this.proposals[uniqueSpaceId]) {
@@ -64,9 +72,13 @@ export const useProposalsStore = defineStore('proposals', {
 
       record.value.loading = true;
 
-      const proposals = await getNetwork(networkId).api.loadProposals(spaceId, {
-        limit: PROPOSALS_LIMIT
-      });
+      const proposals = await getNetwork(networkId).api.loadProposals(
+        spaceId,
+        {
+          limit: PROPOSALS_LIMIT
+        },
+        filter
+      );
 
       record.value.proposalsIdsList = proposals.map(proposal => proposal.proposal_id);
       record.value.proposals = {
