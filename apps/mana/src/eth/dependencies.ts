@@ -1,6 +1,5 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { NonceManager } from '@ethersproject/experimental';
 
 const addressIndicies = {
   // SekhmetDAO
@@ -8,7 +7,7 @@ const addressIndicies = {
 };
 
 export const createWalletProxy = (mnemonic: string, chainId: number) => {
-  const signers = new Map<string, NonceManager>();
+  const signers = new Map<string, Wallet>();
   const provider = new StaticJsonRpcProvider(`https://rpc.snapshotx.xyz/${chainId}`, chainId);
 
   return (spaceAddress: string) => {
@@ -19,9 +18,9 @@ export const createWalletProxy = (mnemonic: string, chainId: number) => {
       const path = `m/44'/60'/0'/0/${index}`;
 
       const wallet = Wallet.fromMnemonic(mnemonic, path);
-      signers.set(normalizedSpaceAddress, new NonceManager(wallet.connect(provider)));
+      signers.set(normalizedSpaceAddress, wallet.connect(provider));
     }
 
-    return signers.get(normalizedSpaceAddress) as NonceManager;
+    return signers.get(normalizedSpaceAddress) as Wallet;
   };
 };
