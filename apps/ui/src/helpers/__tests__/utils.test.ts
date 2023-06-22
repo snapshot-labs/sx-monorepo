@@ -8,6 +8,7 @@ describe('utils', () => {
       const metadata = createErc1155Metadata({
         name: 'Test',
         avatar: '',
+        cover: '',
         description: 'Test description',
         externalUrl: 'https://test.com',
         github: 'snapshot-labs',
@@ -27,6 +28,7 @@ describe('utils', () => {
         external_url: 'https://test.com',
         properties: {
           voting_power_symbol: 'VOTE',
+          cover: '',
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
           discord: 'snapshot',

@@ -33,6 +33,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     network: networkId,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
+    cover: space.metadata.cover,
     about: space.metadata.about,
     external_url: space.metadata.external_url,
     github: space.metadata.github,

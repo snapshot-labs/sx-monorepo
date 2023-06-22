@@ -11,6 +11,7 @@ export type ApiSpace = {
   metadata: {
     name: string;
     avatar: string;
+    cover: string;
     about?: string;
     external_url: string;
     twitter: string;

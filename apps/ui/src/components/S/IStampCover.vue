@@ -3,9 +3,12 @@ import { useUiStore } from '@/stores/ui';
 import { getUrl, imageUpload } from '@/helpers/utils';
 
 const props = defineProps<{
-  modelValue?: string;
+  space?: {
+    id: string;
+    cover: string;
+  };
+  modelValue?: string | null;
   error?: string;
-  definition: any;
 }>();
 
 const emit = defineEmits<{
@@ -51,27 +54,23 @@ async function handleFileChange(e: Event) {
 <template>
   <div
     v-bind="$attrs"
-    class="relative group max-w-max cursor-pointer mb-3 border-[4px] border-skin-bg rounded-lg overflow-hidden bg-skin-border"
+    class="relative bg-skin-border h-[100px] -mb-[50px] overflow-hidden cursor-pointer group"
     @click="openFilePicker()"
   >
     <img
       v-if="imgUrl"
       :src="imgUrl"
-      class="w-[80px] h-[80px] object-cover group-hover:opacity-80"
+      class="min-h-full object-cover group-hover:opacity-80"
       :class="{
         'opacity-80': isUploadingImage
       }"
     />
-    <Stamp
-      v-else
-      :id="definition.default"
-      :size="80"
-      class="pointer-events-none !rounded-none group-hover:opacity-80"
-      type="space-sx"
-      :class="{
-        'opacity-80': isUploadingImage
-      }"
+    <SpaceCover
+      v-else-if="props.space?.cover"
+      :space="props.space"
+      class="pointer-events-none !rounded-none min-h-full object-cover group-hover:opacity-80"
     />
+
     <div
       class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row w-full h-full items-center content-center justify-center"
     >

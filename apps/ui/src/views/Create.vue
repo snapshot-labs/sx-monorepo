@@ -64,6 +64,7 @@ const metadataForm: SpaceMetadata = reactive(
   clone({
     name: '',
     avatar: '',
+    cover: '',
     description: '',
     externalUrl: '',
     twitter: '',

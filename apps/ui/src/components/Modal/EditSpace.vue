@@ -5,6 +5,7 @@ import type { Space, SpaceMetadata, NetworkID } from '@/types';
 const DEFAULT_FORM_STATE: SpaceMetadata = {
   name: '',
   avatar: '',
+  cover: '',
   description: '',
   externalUrl: '',
   twitter: '',
@@ -97,23 +98,22 @@ watch(
         </div>
       </template>
     </template>
-    <div v-if="!showPicker" class="relative bg-skin-border h-[100px] -mb-[50px]" />
     <BlockContactPicker
       v-if="showPicker"
       :loading="false"
       :search-value="searchValue"
       @pick="handlePickerSelect"
     />
-    <div v-else class="p-4 -mt-[80px]">
-      <BlockSpaceFormProfile
-        :id="space.id"
-        :show-title="false"
-        :form="form"
-        @pick="showPicker = true"
-        @no-network="form.walletAddress = null"
-        @errors="v => (formErrors = v)"
-      />
-    </div>
+    <BlockSpaceFormProfile
+      v-else
+      :id="space.id"
+      :space="space"
+      :show-title="false"
+      :form="form"
+      @pick="showPicker = true"
+      @no-network="form.walletAddress = null"
+      @errors="v => (formErrors = v)"
+    />
     <template v-if="!showPicker" #footer>
       <UiButton
         class="w-full"

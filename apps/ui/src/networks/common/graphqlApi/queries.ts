@@ -6,6 +6,7 @@ const SPACE_FRAGMENT = gql`
     metadata {
       name
       avatar
+      cover
       about
       external_url
       github

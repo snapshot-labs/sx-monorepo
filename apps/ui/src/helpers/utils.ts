@@ -287,6 +287,7 @@ export function createErc1155Metadata(
       delegation_api_type: metadata.delegationApiType,
       delegation_api_url: metadata.delegationApiUrl,
       voting_power_symbol: metadata.votingPowerSymbol,
+      cover: metadata.cover,
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
@@ -313,14 +314,21 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type: 'avatar' | 'space' | 'space-sx' | 'token',
+  type: 'avatar' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
   id: string,
-  size: number,
+  size: number | { width: number; height: number },
   hash?: string
 ) {
+  let sizeParam = '';
+  if (typeof size === 'number') {
+    sizeParam = `?s=${size * 2}`;
+  } else {
+    sizeParam = `?w=${size.width}&h=${size.height}`;
+  }
+
   const cacheParam = hash ? `&cb=${hash}` : '';
 
-  return `https://cdn.stamp.fyi/${type}/${id}?s=${size * 2}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${id}${sizeParam}${cacheParam}`;
 }
 
 export async function imageUpload(file: File) {

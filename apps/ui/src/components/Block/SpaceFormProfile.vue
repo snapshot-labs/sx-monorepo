@@ -7,6 +7,10 @@ const props = withDefaults(
     showTitle?: boolean;
     form: any;
     id?: string;
+    space?: {
+      id: string;
+      cover: string;
+    };
   }>(),
   {
     showTitle: true
@@ -141,7 +145,8 @@ onMounted(() => {
 
 <template>
   <h3 v-if="showTitle" class="mb-4">Space profile</h3>
-  <div class="s-box">
+  <SIStampCover v-model="(form as any).cover" :space="space" />
+  <div class="s-box p-4 -mt-[80px]">
     <SIObject
       :model-value="form"
       :error="formErrors"
