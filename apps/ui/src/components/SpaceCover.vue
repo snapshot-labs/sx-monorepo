@@ -11,5 +11,5 @@ const cb = computed(() =>
 </script>
 
 <template>
-  <Stamp :id="space.id" :width="1500" :height="150" :cb="cb" type="space-cover-sx" />
+  <Stamp :id="space.id" :width="1500" :height="156" :cb="cb" type="space-cover-sx" />
 </template>
