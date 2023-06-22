@@ -2,18 +2,25 @@
 import dayjs from 'dayjs';
 import { useIntervalFn } from '@vueuse/core';
 import { getNetwork } from '@/networks';
-import { shorten } from '@/helpers/utils';
-import type { Proposal as ProposalType } from '@/types';
+import { compareAddresses, shorten } from '@/helpers/utils';
+import { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
-const { finalizeProposal, receiveProposal, executeTransactions, executeQueuedProposal } =
-  useActions();
+const { web3 } = useWeb3();
+const {
+  finalizeProposal,
+  receiveProposal,
+  executeTransactions,
+  executeQueuedProposal,
+  vetoProposal
+} = useActions();
 
 const finalizeProposalSending = ref(false);
 const receiveProposalSending = ref(false);
 const executeTransactionsSending = ref(false);
 const executeQueuedProposalSending = ref(false);
+const vetoProposalSending = ref(false);
 const currentTimestamp = ref(Date.now());
 
 const network = computed(() => getNetwork(props.proposal.network));
@@ -72,6 +79,16 @@ async function handleExecuteQueuedProposalClick() {
     executeQueuedProposalSending.value = false;
   }
 }
+
+async function handleVetoProposalClick() {
+  vetoProposalSending.value = true;
+
+  try {
+    await vetoProposal(props.proposal);
+  } finally {
+    vetoProposalSending.value = false;
+  }
+}
 </script>
 
 <template>
@@ -84,6 +101,17 @@ async function handleExecuteQueuedProposalClick() {
         :href="baseNetwork.helpers.getExplorerUrl(proposal.execution_tx, 'transaction')"
       >
         {{ shorten(proposal.execution_tx) }}
+        <IH-external-link class="inline-block ml-1"
+      /></a>
+    </div>
+    <div v-else-if="proposal.veto_tx">
+      Proposal has been vetoed at
+      <a
+        class="inline-flex items-center"
+        target="_blank"
+        :href="baseNetwork.helpers.getExplorerUrl(proposal.veto_tx, 'transaction')"
+      >
+        {{ shorten(proposal.veto_tx) }}
         <IH-external-link class="inline-block ml-1"
       /></a>
     </div>
@@ -128,6 +156,22 @@ async function handleExecuteQueuedProposalClick() {
         <template v-else>
           Execution available in {{ dayjs.duration(countdown).format('HH:mm:ss') }}
         </template>
+      </UiButton>
+      <UiButton
+        v-if="
+          proposal.executed &&
+          !proposal.completed &&
+          !proposal.vetoed &&
+          proposal.timelock_veto_guardian &&
+          compareAddresses(proposal.timelock_veto_guardian, web3.account)
+        "
+        :disabled="countdown === 0"
+        class="mb-2 w-full flex justify-center items-center"
+        :loading="vetoProposalSending"
+        @click="handleVetoProposalClick"
+      >
+        <IH-play class="inline-block mr-2 flex-shrink-0" />
+        Veto execution
       </UiButton>
     </template>
   </div>

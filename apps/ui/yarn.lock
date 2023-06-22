@@ -1154,10 +1154,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.7.tgz#c8e07e7e9baabee245020a72ac05835b65139823"
   integrity sha512-k/FUf4VWhwLFUmKuWs2mNvmPe691hqhvCJuujD4TfbIivWysmL1TqthwfdQUrQEAQUqVQ2ZKEiGkbufp5J27eQ==
 
-"@snapshot-labs/sx@^0.1.0-beta.31":
-  version "0.1.0-beta.31"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.31.tgz#b529ff1d31e2bd4a8504a7a992bfc182b80c5e10"
-  integrity sha512-jng6yNoydVqXs0BK7ZrWaTjpvxbnD/Ay2QDLTx039xcY5xBvHuI34ybPh0Yw9Y0x1RURv5Il7pkTwKqus+tsFA==
+"@snapshot-labs/sx@^0.1.0-beta.32":
+  version "0.1.0-beta.32"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.32.tgz#a43bcbc74b5cfc12343fa287aa2461d24c62d80c"
+  integrity sha512-BCcMu/RqsVp+umH9FAuT4uVhMMlOYAeUoxOUb0J3Gk3sEKdEegp2t9IRARp+vKjjbC26iUvIPl2OW9wcMugpjA==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/abstract-signer" "^5.7.0"

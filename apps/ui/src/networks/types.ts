@@ -112,6 +112,7 @@ export type NetworkActions = {
   receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
+  vetoProposal(web3: Web3Provider, proposal: Proposal);
   setVotingDelay(web3: Web3Provider, space: Space, votingDelay: number);
   setMinVotingDuration(web3: Web3Provider, space: Space, minVotingDuration: number);
   setMaxVotingDuration(web3: Web3Provider, space: Space, maxVotingDuration: number);

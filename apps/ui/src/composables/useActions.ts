@@ -323,6 +323,19 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.hash, targetNetwork);
   }
 
+  async function vetoProposal(proposal: Proposal) {
+    if (!web3.value.account) return await forceLogin();
+    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
+
+    const network = getNetwork(proposal.network);
+
+    const receipt = await network.actions.vetoProposal(auth.web3, proposal);
+    console.log('Receipt', receipt);
+
+    const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
+    uiStore.addPendingTransaction(receipt.hash, targetNetwork);
+  }
+
   async function setVotingDelay(space: Space, votingDelay: number) {
     if (!web3.value.account) return await forceLogin();
 
@@ -384,6 +397,7 @@ export function useActions() {
     receiveProposal: wrapWithErrors(receiveProposal),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
+    vetoProposal: wrapWithErrors(vetoProposal),
     setVotingDelay: wrapWithErrors(setVotingDelay),
     setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),

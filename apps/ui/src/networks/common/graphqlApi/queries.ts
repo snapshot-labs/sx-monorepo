@@ -89,13 +89,16 @@ const PROPOSAL_FRAGMENT = gql`
     execution_time
     execution_strategy
     execution_strategy_type
+    timelock_veto_guardian
     strategies
     strategies_params
     created
     tx
     execution_tx
+    veto_tx
     vote_count
     executed
+    vetoed
     completed
     cancelled
   }

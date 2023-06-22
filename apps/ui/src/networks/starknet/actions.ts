@@ -220,6 +220,7 @@ export function createActions(
       );
     },
     executeQueuedProposal: () => null,
+    vetoProposal: () => null,
     setVotingDelay: () => null,
     setMinVotingDuration: () => null,
     setMaxVotingDuration: () => null,
