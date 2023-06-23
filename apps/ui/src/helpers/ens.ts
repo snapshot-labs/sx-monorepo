@@ -18,13 +18,19 @@ export async function getNames(addresses: string[]) {
   if (addresses.length === 0) return {};
   const network = 1;
   const provider = getProvider(network);
-  const names = await call(
-    provider,
-    abi,
-    ['0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C', 'getNames', [addresses]],
-    { blockTag: 'latest' }
-  );
-  return Object.fromEntries(addresses.map((address, i) => [address, names[i]]));
+
+  try {
+    const names = await call(
+      provider,
+      abi,
+      ['0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C', 'getNames', [addresses]],
+      { blockTag: 'latest' }
+    );
+    return Object.fromEntries(addresses.map((address, i) => [address, names[i]]));
+  } catch (e) {
+    console.error('failed to reverse resolve names', e);
+    return {};
+  }
 }
 
 export async function resolveName(name: string, chainId: number) {
