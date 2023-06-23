@@ -63,7 +63,7 @@ body {
 
 .mono {
   font-size: 44px;
-  font-family: "Space Mono", Helvetica, Arial, sans-serif;
+  font-family: 'Space Mono', Helvetica, Arial, sans-serif;
   letter-spacing: -1px;
   font-weight: 700;
   line-height: 1.1em;
@@ -209,7 +209,8 @@ a,
   @apply mb-2;
 
   .s-input {
-    @apply mb-1 border border-red #{!important};
+    @apply border border-red;
+    @apply mb-1 #{!important};
   }
 
   .s-label {

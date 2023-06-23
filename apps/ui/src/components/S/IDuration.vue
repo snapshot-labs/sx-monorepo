@@ -33,17 +33,25 @@ watch(
 
 <template>
   <div>
-    <div v-text="definition.title" />
-    <div class="flex">
-      <SBase :definition="{ title: 'Days' }" class="flex-1">
+    <div :class="{ 'text-red': error }" v-text="definition.title" />
+    <div class="flex !mb-0" :class="{ 's-error': error }">
+      <SBase :definition="{ title: 'Days' }" class="flex-1" :error="error">
         <input v-model="days" class="s-input !rounded-r-none" type="number" min="0" />
       </SBase>
-      <SBase :definition="{ title: 'Hours' }" class="flex-1">
-        <input v-model="hours" class="s-input !rounded-none" type="number" min="0" />
+      <SBase :definition="{ title: 'Hours' }" class="flex-1" :error="error">
+        <input v-model="hours" class="s-input !rounded-none !border-l-0" type="number" min="0" />
       </SBase>
-      <SBase :definition="{ title: 'Minutes' }" class="flex-1">
-        <input v-model="minutes" class="s-input !rounded-l-none" type="number" min="0" />
+      <SBase :definition="{ title: 'Minutes' }" class="flex-1" :error="error">
+        <input
+          v-model="minutes"
+          class="s-input !rounded-l-none !border-l-0"
+          type="number"
+          min="0"
+        />
       </SBase>
+    </div>
+    <div v-if="error" class="s-base s-error">
+      <span class="s-input-error-message">{{ error }}</span>
     </div>
   </div>
 </template>

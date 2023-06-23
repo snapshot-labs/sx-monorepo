@@ -16,6 +16,7 @@ const props = withDefaults(
     editable: boolean;
     loading?: boolean;
     definition: Definition;
+    customErrorValidation?: (value: string | number) => string | undefined;
   }>(),
   { loading: false }
 );
@@ -38,8 +39,8 @@ const Component = computed(() => {
       return SIString;
   }
 });
-const formErrors = computed(() =>
-  validateForm(
+const formErrors = computed(() => {
+  const errors = validateForm(
     {
       type: 'object',
       title: 'Editable',
@@ -52,8 +53,14 @@ const formErrors = computed(() =>
     {
       value: inputValue.value
     }
-  )
-);
+  );
+
+  const customError = props.customErrorValidation?.(inputValue.value);
+  if (customError) errors.value = customError;
+
+  return errors;
+});
+
 function handleSave() {
   emit('save', inputValue.value);
   editing.value = false;
@@ -84,7 +91,8 @@ function handleSave() {
         <div
           class="flex gap-2 relative"
           :class="{
-            'top-[-15px]': !!formErrors.value,
+            'top-[-19.5px]': definition.format !== 'duration' && !!formErrors.value,
+            'top-[-18.5px]': definition.format === 'duration' && !!formErrors.value,
             'top-[-6px]': definition.format === 'duration'
           }"
         >

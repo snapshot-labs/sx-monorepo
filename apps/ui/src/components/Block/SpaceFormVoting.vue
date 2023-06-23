@@ -59,6 +59,11 @@ const definition = {
 const formErrors = computed(() => {
   const errors = validateForm(definition, props.form);
 
+  if (props.form.minVotingDuration > props.form.maxVotingDuration) {
+    errors.maxVotingDuration =
+      'Max. voting duration must be equal to or greater than min. voting duration.';
+  }
+
   emit('errors', errors);
 
   return errors;
