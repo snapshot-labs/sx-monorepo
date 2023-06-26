@@ -40,7 +40,7 @@ function handleModalOpen() {
       :formatted-voting-power="formattedVotingPower"
       :on-click="handleModalOpen"
     >
-      <UiTooltip title="Voting power">
+      <UiTooltip title="Your voting power">
         <UiButton
           v-if="web3.account && web3.type !== 'argentx'"
           :loading="loading"
@@ -50,7 +50,7 @@ function handleModalOpen() {
           class="flex flex-row items-center justify-center"
           @click="handleModalOpen"
         >
-          <IH-lightning-bolt class="inline-block" />
+          <IH-lightning-bolt class="inline-block -ml-1" />
           <span class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
       </UiTooltip>

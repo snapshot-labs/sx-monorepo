@@ -12,7 +12,7 @@ const proposalsStore = useProposalsStore();
 
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
-const filter = ref('all' as 'all' | 'active' | 'pending' | 'closed');
+const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
 
 const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
@@ -84,7 +84,7 @@ watchEffect(() => {
           gap="12px"
           placement="left"
           :items="[
-            { key: 'all', label: 'All' },
+            { key: 'any', label: 'Any' },
             { key: 'pending', label: 'Pending', indicator: 'bg-yellow-500' },
             { key: 'active', label: 'Active', indicator: 'bg-green' },
             { key: 'closed', label: 'Closed', indicator: 'bg-red' }

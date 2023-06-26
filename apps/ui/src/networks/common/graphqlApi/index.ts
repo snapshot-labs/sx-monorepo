@@ -143,7 +143,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
     loadProposals: async (
       spaceId: string,
       { limit, skip = 0 }: PaginationOpts,
-      filter: 'all' | 'active' | 'pending' | 'closed' = 'all',
+      filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
       searchQuery = ''
     ): Promise<Proposal[]> => {
       const now = Date.now();

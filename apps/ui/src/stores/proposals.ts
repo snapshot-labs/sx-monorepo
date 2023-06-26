@@ -49,7 +49,7 @@ export const useProposalsStore = defineStore('proposals', {
     async fetch(
       spaceId: string,
       networkId: NetworkID,
-      filter?: 'all' | 'active' | 'pending' | 'closed'
+      filter?: 'any' | 'active' | 'pending' | 'closed'
     ) {
       const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 

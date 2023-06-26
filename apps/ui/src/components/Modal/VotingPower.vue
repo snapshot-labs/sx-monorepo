@@ -27,7 +27,7 @@ const baseNetwork = computed(() =>
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3>Voting power</h3>
+      <h3>Your voting power</h3>
     </template>
     <UiLoading v-if="!loaded" class="p-4 block text-center" />
     <div v-else>

@@ -266,11 +266,10 @@ export default defineComponent({
         </div>
       </div>
     </nav>
-    <Container v-if="proposal" class="pt-5 s-box">
+    <Container v-if="proposal" class="pt-5 max-w-[630px] mx-0 md:mx-auto s-box">
       <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>
-      <h4 class="eyebrow mb-3">Context</h4>
       <SIString
         :key="proposalKey || ''"
         v-model="proposal.title"
@@ -280,7 +279,7 @@ export default defineComponent({
       <div class="flex">
         <Link
           :is-active="!previewEnabled"
-          text="Editor"
+          text="Write"
           class="pr-3"
           @click="previewEnabled = false"
         />
@@ -294,7 +293,7 @@ export default defineComponent({
 
       <div v-else class="s-base mb-3">
         <div class="s-label" v-text="'Description'" />
-        <textarea v-model="proposal.body" maxlength="9600" class="s-input mb-3 h-[160px]" />
+        <textarea v-model="proposal.body" maxlength="9600" class="s-input mb-3 h-[200px]" />
         <SIString
           :key="proposalKey || ''"
           v-model="proposal.discussion"
@@ -312,14 +311,11 @@ export default defineComponent({
         "
       >
         <h4 class="eyebrow mb-3">Execution</h4>
-        <div class="flex flex-col gap-2 mb-3">
+        <div class="border rounded-lg mb-3">
           <ExecutionButton
             v-for="(executor, i) in supportedExecutionStrategies"
             :key="executor"
             class="flex-auto flex items-center gap-2"
-            :class="{
-              'border-skin-link': executionStrategy?.address === executor
-            }"
             @click="
               handleExecutionStrategySelected({
                 address: executor,
@@ -327,10 +323,12 @@ export default defineComponent({
               })
             "
           >
-            <IH-cog />
-            {{ network.constants.EXECUTORS[space.executors_types[i]] }} execution strategy ({{
-              shortenAddress(executor)
-            }})
+            <IH-chip />
+            <span class="flex-1">
+              {{ network.constants.EXECUTORS[space.executors_types[i]] }}
+              execution strategy ({{ shortenAddress(executor) }})
+            </span>
+            <IH-check v-if="executionStrategy?.address === executor" />
           </ExecutionButton>
         </div>
         <BlockExecutionEditable

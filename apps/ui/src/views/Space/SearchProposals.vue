@@ -25,7 +25,7 @@ async function fetch() {
     {
       limit: PROPOSALS_LIMIT
     },
-    'all',
+    'any',
     query.value
   );
 
@@ -42,7 +42,7 @@ async function fetchMore() {
       limit: PROPOSALS_LIMIT,
       skip: proposals.value.length
     },
-    'all',
+    'any',
     query.value
   );
 

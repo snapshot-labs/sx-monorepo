@@ -133,7 +133,7 @@ export type NetworkApi = {
   loadProposals(
     spaceId: string,
     paginationOpts: PaginationOpts,
-    filter?: 'all' | 'active' | 'pending' | 'closed',
+    filter?: 'any' | 'active' | 'pending' | 'closed',
     searchQuery?: string
   ): Promise<Proposal[]>;
   loadProposalsSummary(spaceId: string, limit: number): Promise<Proposal[]>;

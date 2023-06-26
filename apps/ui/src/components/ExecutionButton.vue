@@ -17,7 +17,7 @@ const emit = defineEmits<{
 <template>
   <button
     :disabled="disabled"
-    class="button px-4 py-3 border-b border rounded-lg block min-w-[165px] text-start text-skin-link"
+    class="button w-full text-left px-4 py-3 border-b last:border-b-0 text-skin-link space-x-2"
     :class="{}"
     @click="emit('click')"
   >

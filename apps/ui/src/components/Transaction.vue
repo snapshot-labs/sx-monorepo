@@ -28,9 +28,9 @@ function getTitle(tx: Transaction) {
   <div class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between">
     <div class="flex items-center max-w-[70%]">
       <slot name="left" />
-      <IH-stop v-if="tx._type === 'sendToken'" />
+      <IH-cash v-if="tx._type === 'sendToken'" />
       <IH-photograph v-else-if="tx._type === 'sendNft'" />
-      <IH-chip v-else />
+      <IH-code v-else />
       <div class="ml-2 truncate text-skin-link" v-html="getTitle(tx)" />
     </div>
     <slot name="right" />

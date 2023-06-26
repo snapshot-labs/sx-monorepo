@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import draggable from 'vuedraggable';
+import Draggable from 'vuedraggable';
 import { getNetwork } from '@/networks';
 import { Transaction as TransactionType, Space, SelectedStrategy } from '@/types';
 
@@ -74,27 +74,23 @@ function editTx(index: number) {
 }
 </script>
 <template>
-  <div>
-    <div class="overflow-hidden w-auto">
-      <div
-        class="mb-3 flex flex-no-wrap overflow-x-scroll no-scrollbar scrolling-touch items-start space-x-3"
-      >
-        <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendToken')">
-          <IH-stop />
-          Send token
-        </ExecutionButton>
-        <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendNft')">
-          <IH-photograph />
-          Send NFT
-        </ExecutionButton>
-        <ExecutionButton @click="openModal('contractCall')">
-          <IH-chip />
-          Contract call
-        </ExecutionButton>
-      </div>
+  <div class="space-y-3">
+    <div class="overflow-hidden border rounded-lg">
+      <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendToken')">
+        <IH-cash class="inline-block" />
+        <span>Send token</span>
+      </ExecutionButton>
+      <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendNft')">
+        <IH-photograph class="inline-block" />
+        <span>Send NFT</span>
+      </ExecutionButton>
+      <ExecutionButton @click="openModal('contractCall')">
+        <IH-code class="inline-block" />
+        <span>Contract call</span>
+      </ExecutionButton>
     </div>
     <div v-if="txs.length > 0" class="x-block !border-x rounded-lg">
-      <draggable v-model="txs" handle=".handle" :item-key="() => undefined">
+      <Draggable v-model="txs" handle=".handle" :item-key="() => undefined">
         <template #item="{ element: tx, index: i }">
           <Transaction :tx="tx">
             <template #left>
@@ -117,7 +113,7 @@ function editTx(index: number) {
             </template>
           </Transaction>
         </template>
-      </draggable>
+      </Draggable>
     </div>
     <teleport to="#modal">
       <ModalSendToken
