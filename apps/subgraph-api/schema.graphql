@@ -93,6 +93,7 @@ type Proposal @entity {
   scores_total: BigDecimal!
   quorum: BigDecimal!
   created: Int!
+  edited: Int
   tx: Bytes!
   execution_tx: Bytes
   veto_tx: Bytes

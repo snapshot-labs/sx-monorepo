@@ -220,6 +220,7 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
     return
   }
 
+  proposal.edited = event.block.timestamp.toI32()
   proposal.execution_strategy = event.params.newExecutionStrategy.addr
   proposal.execution_hash = event.params.newExecutionStrategy.params.toHexString()
 
