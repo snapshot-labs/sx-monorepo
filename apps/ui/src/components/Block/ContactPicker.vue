@@ -40,28 +40,30 @@ const filteredContacts = computed(() =>
 </script>
 
 <template>
-  <div v-if="loading" class="px-4 py-3 block flex justify-center">
-    <UiLoading />
-  </div>
-  <template v-else>
-    <div v-if="filteredContacts.length === 0" class="text-center py-3" v-text="'No results'" />
-    <div
-      v-for="contact in filteredContacts"
-      :key="contact.address"
-      role="button"
-      class="px-3 py-[12px] border-b last:border-0 flex justify-between"
-      @click="emit('pick', contact.address)"
-    >
-      <div class="flex items-center max-w-full">
-        <Stamp :id="contact.address" type="avatar" :size="32" />
-        <div class="flex flex-col ml-3 leading-[20px] overflow-hidden">
-          <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
-          <div
-            class="text-sm text-ellipsis overflow-hidden"
-            v-text="shortenAddress(contact.address)"
-          />
+  <div>
+    <div v-if="loading" class="px-4 py-3 flex justify-center">
+      <UiLoading />
+    </div>
+    <template v-else>
+      <div v-if="filteredContacts.length === 0" class="text-center py-3" v-text="'No results'" />
+      <div
+        v-for="contact in filteredContacts"
+        :key="contact.address"
+        role="button"
+        class="px-3 py-[12px] border-b last:border-0 flex justify-between"
+        @click="emit('pick', contact.address)"
+      >
+        <div class="flex items-center max-w-full">
+          <Stamp :id="contact.address" type="avatar" :size="32" />
+          <div class="flex flex-col ml-3 leading-[20px] overflow-hidden">
+            <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
+            <div
+              class="text-sm text-ellipsis overflow-hidden"
+              v-text="shortenAddress(contact.address)"
+            />
+          </div>
         </div>
       </div>
-    </div>
-  </template>
+    </template>
+  </div>
 </template>
