@@ -55,7 +55,7 @@ abstract contract SignatureVerifier is EIP712 {
             bytes memory userProposalValidationParams
         ) = abi.decode(data, (address, string, Strategy, bytes));
 
-        if (usedSalts[author][salt] == TRUE) revert SaltAlreadyUsed();
+        if (usedSalts[author][salt] != FALSE) revert SaltAlreadyUsed();
 
         address recoveredAddress = ECDSA.recover(
             _hashTypedDataV4(
@@ -129,7 +129,7 @@ abstract contract SignatureVerifier is EIP712 {
             (address, uint256, Strategy, string)
         );
 
-        if (usedSalts[author][salt] == TRUE) revert SaltAlreadyUsed();
+        if (usedSalts[author][salt] != FALSE) revert SaltAlreadyUsed();
 
         address recoveredAddress = ECDSA.recover(
             _hashTypedDataV4(

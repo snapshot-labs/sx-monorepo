@@ -31,7 +31,7 @@ contract SpaceManager is OwnableUpgradeable {
     /// @notice Enable a space.
     /// @param space Address of the space.
     function enableSpace(address space) external onlyOwner {
-        if (space == address(0) || (spaces[space] == TRUE)) revert InvalidSpace();
+        if (space == address(0) || (spaces[space] != FALSE)) revert InvalidSpace();
         spaces[space] = TRUE;
         emit SpaceEnabled(space);
     }
