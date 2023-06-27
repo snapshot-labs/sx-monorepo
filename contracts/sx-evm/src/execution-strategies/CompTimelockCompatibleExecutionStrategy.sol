@@ -5,7 +5,7 @@ pragma solidity ^0.8.18;
 import { ICompTimelock } from "../interfaces/ICompTimelock.sol";
 import { SimpleQuorumExecutionStrategy } from "./SimpleQuorumExecutionStrategy.sol";
 import { SpaceManager } from "../utils/SpaceManager.sol";
-import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
+import { MetaTransaction, Proposal, ProposalStatus, TRUE, FALSE } from "../types.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 
 /// @title Comp Timelock Execution Strategy
@@ -41,6 +41,9 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
 
     /// @notice The time at which a proposal can be executed. Indexed by the hash of the proposal execution payload.
     mapping(bytes32 => uint256) public proposalExecutionTime;
+
+    /// @notice Mapping of queued transaction hashes.
+    mapping(bytes32 => uint256) public txHashes;
 
     /// @notice Veto guardian is given permission to veto any queued proposal.
     address public vetoGuardian;
@@ -104,11 +107,6 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
 
         MetaTransaction[] memory transactions = abi.decode(payload, (MetaTransaction[]));
 
-        // An array to check that there are no duplicates in the list of transactions.
-        // We must do this because the Compound Timelock will silently "merge" two duplicate transactions.
-        // This could be problematic for off-chain indexers and UI tools.
-        bytes32[] memory txHashes = new bytes32[](transactions.length);
-
         for (uint256 i = 0; i < transactions.length; i++) {
             // Comp Timelock does not support delegate calls.
             if (transactions[i].operation == Enum.Operation.DelegateCall) {
@@ -116,12 +114,16 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
             }
 
             // Check there are not duplicates.
-            // Do not include `executionTime` because it's a constant.
-            bytes32 txHash = keccak256(abi.encode(transactions[i].to, transactions[i].value, "", transactions[i].data));
-            for (uint256 j = 0; j < i; j++) {
-                if (txHashes[j] == txHash) revert DuplicateMetaTransaction();
-            }
-            txHashes[i] = txHash;
+            // We must do this because the Compound Timelock will silently "merge" two duplicate transactions.
+            // This could be problematic for off-chain indexers and UI tools.
+            bytes32 txHash = keccak256(
+                abi.encode(transactions[i].to, transactions[i].value, "", transactions[i].data, executionTime)
+            );
+            // We use `!= FALSE` rather than `== TRUE` for gas optimisations.
+            if (txHashes[txHash] != FALSE) revert DuplicateMetaTransaction();
+
+            // Store the transaction hash.
+            txHashes[txHash] = TRUE;
 
             timelock.queueTransaction(
                 transactions[i].to,
@@ -154,6 +156,12 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
 
         MetaTransaction[] memory transactions = abi.decode(payload, (MetaTransaction[]));
         for (uint256 i = 0; i < transactions.length; i++) {
+            // Clear out the transactions from the mapping.
+            bytes32 txHash = keccak256(
+                abi.encode(transactions[i].to, transactions[i].value, "", transactions[i].data, executionTime)
+            );
+            txHashes[txHash] = FALSE;
+
             timelock.executeTransaction(
                 transactions[i].to,
                 transactions[i].value,

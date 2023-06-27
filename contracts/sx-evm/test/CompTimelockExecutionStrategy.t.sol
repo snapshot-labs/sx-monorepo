@@ -116,6 +116,43 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
         space.execute(proposalId, abi.encode(transactions));
     }
 
+    function testQueueingDuplicateMetaTransactionDifferentProposals() external {
+        MetaTransaction[] memory transactions = new MetaTransaction[](1);
+        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
+
+        MetaTransaction[] memory duplicateTransactions = new MetaTransaction[](1);
+        // Salt differs but content does not
+        duplicateTransactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 1);
+
+        // Create a first proposal with some transactions, and vote on it.
+        uint256 firstProposalId = _createProposal(
+            author,
+            proposalMetadataURI,
+            Strategy(address(timelockExecutionStrategy), abi.encode(transactions)),
+            new bytes(0)
+        );
+        _vote(author, firstProposalId, Choice.For, userVotingStrategies, voteMetadataURI);
+
+        // Create a second proposal with the same transactions, and vote on it.
+        uint256 secondProposalId = _createProposal(
+            author,
+            proposalMetadataURI,
+            Strategy(address(timelockExecutionStrategy), abi.encode(duplicateTransactions)),
+            new bytes(0)
+        );
+        _vote(author, secondProposalId, Choice.For, userVotingStrategies, voteMetadataURI);
+
+        // Move forward in time.
+        vm.roll(block.number + space.maxVotingDuration());
+
+        // Queue the first one: it should work properly.
+        space.execute(firstProposalId, abi.encode(transactions));
+
+        // Ensure an error is thrown for the second proposal!
+        vm.expectRevert(DuplicateMetaTransaction.selector);
+        space.execute(secondProposalId, abi.encode(duplicateTransactions));
+    }
+
     function testQueueingRejectedProposal() external {
         MetaTransaction[] memory transactions = new MetaTransaction[](1);
         transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
@@ -175,33 +212,6 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
         // Will revert due to duplicate execution payload hash
         vm.expectRevert(DuplicateExecutionPayloadHash.selector);
         space.execute(proposalId2, abi.encode(transactions));
-    }
-
-    function testQueueingQueueDuplicateUniqueSalt() external {
-        MetaTransaction[] memory transactions = new MetaTransaction[](1);
-        transactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 0);
-        // Same transaction, but different salt
-        MetaTransaction[] memory transactions2 = new MetaTransaction[](1);
-        transactions2[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 1);
-        uint256 proposalId = _createProposal(
-            author,
-            proposalMetadataURI,
-            Strategy(address(timelockExecutionStrategy), abi.encode(transactions)),
-            new bytes(0)
-        );
-        uint256 proposalId2 = _createProposal(
-            author,
-            proposalMetadataURI,
-            Strategy(address(timelockExecutionStrategy), abi.encode(transactions2)),
-            new bytes(0)
-        );
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-        _vote(author, proposalId2, Choice.For, userVotingStrategies, voteMetadataURI);
-        vm.roll(block.number + space.maxVotingDuration());
-
-        space.execute(proposalId, abi.encode(transactions));
-
-        space.execute(proposalId2, abi.encode(transactions2));
     }
 
     function testQueueingInvalidPayload() external {
