@@ -21,7 +21,8 @@ contract OZVotesVotingStrategy is IVotingStrategy {
         bytes calldata params,
         bytes calldata /* userParams */
     ) external view override returns (uint256) {
-        address tokenAddress = bytesToAddress(params, 0);
+        if (params.length < 20) revert InvalidByteArray();
+        address tokenAddress = address(bytes20(params));
         // We subract 1 from the block number so that when blockNumber == block.number,
         // getPastVotes can still be called.
         return uint256(IVotes(tokenAddress).getPastVotes(voter, blockNumber - 1));

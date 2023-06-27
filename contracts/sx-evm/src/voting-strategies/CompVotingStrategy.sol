@@ -21,24 +21,10 @@ contract CompVotingStrategy is IVotingStrategy {
         bytes calldata params,
         bytes calldata /* userParams */
     ) external view override returns (uint256) {
-        address tokenAddress = bytesToAddress(params, 0);
+        if (params.length < 20) revert InvalidByteArray();
+        address tokenAddress = address(bytes20(params));
         // We subract 1 from the block number so that when blockNumber == block.number,
         // getPriorVotes can still be called.
         return uint256(IComp(tokenAddress).getPriorVotes(voter, blockNumber - 1));
-    }
-
-    /// @dev Extracts an address from a byte array.
-    /// @dev Taken from the linked library, with the require switched for a revert statement:
-    ///      https://github.com/GNSPS/solidity-bytes-utils/blob/master/contracts/BytesLib.sol
-    function bytesToAddress(bytes memory _bytes, uint256 _start) internal pure returns (address) {
-        if (_bytes.length < _start + 20) revert InvalidByteArray();
-        address tempAddress;
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            tempAddress := div(mload(add(add(_bytes, 0x20), _start)), 0x1000000000000000000000000)
-        }
-
-        return tempAddress;
     }
 }
