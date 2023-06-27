@@ -20,6 +20,12 @@ const DISCUSSION_DEFINITION = {
 
 const { setTitle } = useTitle();
 const { proposals, createDraft } = useEditor();
+const editorRef = ref<HTMLTextAreaElement | null>(null);
+const editor = useMarkdownEditor(editorRef, value => {
+  if (!proposal.value) return;
+
+  proposal.value.body = value;
+});
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const route = useRoute();
@@ -290,17 +296,57 @@ export default defineComponent({
         class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
         :body="proposal.body"
       />
-
-      <div v-else class="s-base mb-3">
-        <div class="s-label" v-text="'Description'" />
-        <textarea v-model="proposal.body" maxlength="9600" class="s-input mb-3 h-[200px]" />
-        <SIString
-          :key="proposalKey || ''"
-          v-model="proposal.discussion"
-          :definition="DISCUSSION_DEFINITION"
-          :error="formErrors.discussion"
-        />
-        <Preview :key="proposalKey || ''" :url="proposal.discussion" />
+      <div v-else>
+        <div class="flex justify-end gap-1 py-2 px-3 border rounded-t-lg">
+          <UiTooltip title="Add heading text">
+            <button
+              class="p-1 w-[26px] h-[26px] leading-[18px] hover:text-skin-link rounded focus-visible:ring-1"
+              @click="editor.heading"
+            >
+              H
+            </button>
+          </UiTooltip>
+          <UiTooltip title="Add bold text">
+            <button
+              class="p-1 w-[26px] h-[26px] leading-[18px] font-bold hover:text-skin-link rounded focus-visible:ring-1"
+              @click="editor.bold"
+            >
+              B
+            </button>
+          </UiTooltip>
+          <UiTooltip title="Add italic text">
+            <button
+              class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
+              @click="editor.italic"
+            >
+              I
+            </button>
+          </UiTooltip>
+          <UiTooltip title="Add a link">
+            <button
+              class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
+              @click="editor.link"
+            >
+              <IH-link class="w-[18px] h-[18px]" />
+            </button>
+          </UiTooltip>
+        </div>
+        <div class="s-base mb-3">
+          <div class="s-label" v-text="'Description'" />
+          <textarea
+            ref="editorRef"
+            v-model="proposal.body"
+            maxlength="9600"
+            class="s-input mb-3 h-[200px] !rounded-t-none"
+          />
+          <SIString
+            :key="proposalKey || ''"
+            v-model="proposal.discussion"
+            :definition="DISCUSSION_DEFINITION"
+            :error="formErrors.discussion"
+          />
+          <Preview :key="proposalKey || ''" :url="proposal.discussion" />
+        </div>
       </div>
       <div
         v-if="
