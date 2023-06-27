@@ -508,28 +508,11 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
     }
 
     function testSetUp() public {
-        address[] memory spaces = new address[](1);
-        spaces[0] = address(space);
-        timelockExecutionStrategy = new TimelockExecutionStrategy(owner, vetoGuardian, spaces, 1000, quorum);
-
         assertEq(timelockExecutionStrategy.owner(), owner);
         assertEq(timelockExecutionStrategy.vetoGuardian(), vetoGuardian);
         assertEq(timelockExecutionStrategy.quorum(), quorum);
         assertEq(timelockExecutionStrategy.timelockDelay(), 1000);
         assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), TRUE);
-    }
-}
-
-contract TimelockExecutionStrategyTestDirect is TimelockExecutionStrategyTest {
-    function setUp() public override {
-        super.setUp();
-
-        address[] memory spaces = new address[](1);
-        spaces[0] = address(space);
-
-        timelockExecutionStrategy = new TimelockExecutionStrategy(owner, vetoGuardian, spaces, 1000, quorum);
-        vm.deal(address(owner), 1000);
-        payable(timelockExecutionStrategy).transfer(1000);
     }
 }
 
@@ -540,13 +523,7 @@ contract TimelockExecutionStrategyTestProxy is TimelockExecutionStrategyTest {
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
         address[] memory emptyArray = new address[](1);
-        TimelockExecutionStrategy masterExecutionStrategy = new TimelockExecutionStrategy(
-            address(1),
-            address(0),
-            emptyArray,
-            0,
-            0
-        );
+        TimelockExecutionStrategy masterExecutionStrategy = new TimelockExecutionStrategy();
 
         timelockExecutionStrategy = TimelockExecutionStrategy(
             payable(

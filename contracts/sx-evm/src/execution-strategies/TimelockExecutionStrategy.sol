@@ -81,20 +81,11 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
     ///         renounce ownership of the contract while still maintaining a veto guardian.
     address public vetoGuardian;
 
-    /// @notice Constructor
-    /// @param _owner Address of the owner of this contract.
-    /// @param _vetoGuardian Address of the veto guardian.
-    /// @param _spaces Array of whitelisted space contracts.
-    /// @param _timelockDelay The timelock delay in seconds.
-    /// @param _quorum The quorum required to execute a proposal.
-    constructor(
-        address _owner,
-        address _vetoGuardian,
-        address[] memory _spaces,
-        uint256 _timelockDelay,
-        uint256 _quorum
-    ) {
-        setUp(abi.encode(_owner, _vetoGuardian, _spaces, _timelockDelay, _quorum));
+    /// @notice Constructor.
+    /// @dev We enforce implementations of this contract to be disabled as a security measure to prevent delegate
+    ///      calls to the SELFDESTRUCT opcode, irrecoverably disabling all the proxies using that implementation.
+    constructor() {
+        setUp(abi.encode(address(1), address(1), new address[](0), 0, 0));
     }
 
     /// @notice Initialization function, should be called immediately after deploying a new proxy to this contract.
