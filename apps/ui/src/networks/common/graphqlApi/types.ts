@@ -83,6 +83,7 @@ export type ApiProposal = {
   strategies: string[];
   strategies_params: any[];
   created: number;
+  edited: number | null;
   tx: string;
   execution_tx: string | null;
   veto_tx: string | null;

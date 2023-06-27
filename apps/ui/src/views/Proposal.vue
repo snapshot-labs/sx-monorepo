@@ -302,6 +302,7 @@ watchEffect(() => {
                 @click="modalOpenTimeline = true"
                 v-text="_rt(proposal.max_end)"
               />
+              <template v-if="proposal.edited"> · (edited)</template>
             </div>
           </div>
         </Container>

@@ -93,6 +93,7 @@ const PROPOSAL_FRAGMENT = gql`
     strategies
     strategies_params
     created
+    edited
     tx
     execution_tx
     veto_tx
