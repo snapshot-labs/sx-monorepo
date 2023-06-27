@@ -8,7 +8,7 @@ import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
 /// @notice Allows a variable voting power whitelist to be used for voting power.
 contract WhitelistVotingStrategy is IVotingStrategy {
     /// @notice Error thrown when the `voter` and address indicated by `voterIndex`
-    ///             don't match.
+    ///         don't match.
     error VoterAndIndexMismatch();
 
     /// @dev Stores the data for each member of the whitelist.
@@ -22,9 +22,9 @@ contract WhitelistVotingStrategy is IVotingStrategy {
     /// @notice Returns the voting power of an address.
     /// @param voter The address to get the voting power of.
     /// @param params Parameter array containing the encoded whitelist of addresses and their voting power.
-    ///               The array should be an ABI encoded array of Member structs sorted by ascending addresses.
+    ///               The array should be an ABI encoded array of Member structs.
     /// @param userParams Expected to contain a `uint256` corresponding to the voterIndex in the array provided by `params`.
-    /// @return votingPower The voting power of the address if it exists in the whitelist, otherwise 0.
+    /// @return votingPower The voting power of the address if it exists in the whitelist, otherwise reverts.
     function getVotingPower(
         uint32 /* blockNumber */,
         address voter,

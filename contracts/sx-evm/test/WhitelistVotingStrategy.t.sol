@@ -35,4 +35,17 @@ contract WhitelistVotingStrategyTest is Test {
         // `voter` is members[0] but the `voterIndex` is 1 (which corresponds to members[1]).
         whitelistVotingStrategy.getVotingPower(0, members[0].addr, params, abi.encode(1));
     }
+
+    function testWhitelistIndexOutOfBounds() public {
+        WhitelistVotingStrategy.Member[] memory members = new WhitelistVotingStrategy.Member[](3);
+        members[0] = WhitelistVotingStrategy.Member(address(1), 11);
+        members[1] = WhitelistVotingStrategy.Member(address(3), 33);
+        whitelistVotingStrategy = new WhitelistVotingStrategy();
+
+        bytes memory params = abi.encode(members);
+
+        vm.expectRevert(); // Out of bounds revert
+        // `voter` is members[0] but the `voterIndex` is 3 (which is out of bounds).
+        whitelistVotingStrategy.getVotingPower(0, members[0].addr, params, abi.encode(3));
+    }
 }
