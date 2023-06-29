@@ -44,6 +44,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     baseChainId: l1ChainId,
     baseNetworkId: 'gor',
     hasReceive: true,
+    supportsSimulation: true,
     managerConnectors: ['argentx'],
     actions: createActions(provider, helpers, { l1ChainId }),
     api,

@@ -156,6 +156,7 @@ export type Network = {
   baseChainId: number;
   baseNetworkId?: NetworkID;
   hasReceive: boolean;
+  supportsSimulation: boolean;
   managerConnectors: Connector[];
   actions: NetworkActions;
   api: NetworkApi;

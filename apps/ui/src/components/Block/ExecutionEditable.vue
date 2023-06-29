@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
 import { getNetwork } from '@/networks';
+import { useUiStore } from '@/stores/ui';
+import { simulate } from '@/helpers/tenderly';
 import { Transaction as TransactionType, Space, SelectedStrategy } from '@/types';
 
 const props = defineProps<{
@@ -13,6 +15,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: TransactionType[]): void;
 }>();
 
+const uiStore = useUiStore();
 const { treasury } = useTreasury(toRef(props, 'space'));
 
 const editedTx: Ref<number | null> = ref(null);
@@ -26,11 +29,13 @@ const modalOpen = ref({
   sendNft: false,
   contractCall: false
 });
+const simulationState: Ref<'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null> =
+  ref(null);
 
 const network = computed(() => (props.space ? getNetwork(props.space.network) : null));
 const currentTreasury = computed(() =>
   props.selectedExecutionStrategy.type === 'SimpleQuorumTimelock' && network.value
-    ? { wallet: props.selectedExecutionStrategy.address, network: network.value?.baseChainId }
+    ? { wallet: props.selectedExecutionStrategy.address, network: network.value.baseChainId }
     : treasury.value
 );
 const txs = computed({
@@ -72,6 +77,30 @@ function editTx(index: number) {
   modalState.value[tx._type] = tx._form;
   modalOpen.value[tx._type] = true;
 }
+
+async function handleSimulateClick() {
+  if (simulationState.value !== null || !currentTreasury.value) return;
+
+  simulationState.value = 'SIMULATING';
+
+  const valid = await simulate(
+    currentTreasury.value.network,
+    currentTreasury.value.wallet,
+    txs.value
+  );
+
+  if (valid) {
+    simulationState.value = 'SIMULATION_SUCCEDED';
+    uiStore.addNotification('success', 'Execution simulation succeeded');
+  } else {
+    simulationState.value = 'SIMULATION_FAILED';
+    uiStore.addNotification('error', 'Execution simulation failed');
+  }
+}
+
+watch(txs, () => {
+  simulationState.value = null;
+});
 </script>
 <template>
   <div class="space-y-3">
@@ -114,6 +143,35 @@ function editTx(index: number) {
           </Transaction>
         </template>
       </Draggable>
+      <div class="border-t px-4 py-2 space-x-2 flex items-center justify-between">
+        <div class="flex items-center max-w-[70%]">
+          {{ txs.length }} {{ txs.length === 1 ? 'transaction' : 'transactions' }}
+        </div>
+        <UiTooltip
+          v-if="!network?.supportsSimulation"
+          title="Simulation not supported on this network"
+        >
+          <IH-shield-exclamation />
+        </UiTooltip>
+        <UiTooltip v-else-if="simulationState === null" title="Simulate execution">
+          <button class="flex" @click="handleSimulateClick">
+            <IH-shield-check class="text-skin-link" />
+          </button>
+        </UiTooltip>
+        <UiLoading v-else-if="simulationState === 'SIMULATING'" />
+        <UiTooltip
+          v-if="simulationState === 'SIMULATION_SUCCEDED'"
+          title="Execution simulation succeeded"
+        >
+          <IH-shield-check class="text-green" />
+        </UiTooltip>
+        <UiTooltip
+          v-if="simulationState === 'SIMULATION_FAILED'"
+          title="Execution simulation failed"
+        >
+          <IH-shield-check class="text-red" />
+        </UiTooltip>
+      </div>
     </div>
     <teleport to="#modal">
       <ModalSendToken
