@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
+import { getUrl } from '@/helpers/utils';
 
 const props = defineProps<{
   body: string;
@@ -47,7 +48,11 @@ remarkable.inline.ruler.disable([
   'text'
 ]);
 
-const parsed = computed(() => remarkable.render(props.body));
+const parsed = computed(() => {
+  const formattedBody = props.body.replace(/ipfs:\/\/(\w+)/g, value => getUrl(value) || '#');
+
+  return remarkable.render(formattedBody);
+});
 </script>
 
 <template>

@@ -20,8 +20,10 @@ const DISCUSSION_DEFINITION = {
 
 const { setTitle } = useTitle();
 const { proposals, createDraft } = useEditor();
+const editorContainerRef = ref<HTMLDivElement | null>(null);
+const editorFileInputRef = ref<HTMLInputElement | null>(null);
 const editorRef = ref<HTMLTextAreaElement | null>(null);
-const editor = useMarkdownEditor(editorRef, value => {
+const editor = useMarkdownEditor(editorRef, editorFileInputRef, editorContainerRef, value => {
   if (!proposal.value) return;
 
   proposal.value.body = value;
@@ -296,7 +298,14 @@ export default defineComponent({
         class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
         :body="proposal.body"
       />
-      <div v-else>
+      <div
+        v-else
+        ref="editorContainerRef"
+        class="rounded-lg mb-3"
+        :class="{
+          'ring-2': editor.hovered.value
+        }"
+      >
         <div class="flex justify-end gap-1 py-2 px-3 border rounded-t-lg">
           <UiTooltip title="Add heading text">
             <button
@@ -322,7 +331,7 @@ export default defineComponent({
               I
             </button>
           </UiTooltip>
-          <UiTooltip title="Add a link">
+          <UiTooltip title="Add a link" class="w-[26px] h-[26px]">
             <button
               class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
               @click="editor.link"
@@ -330,23 +339,44 @@ export default defineComponent({
               <IH-link class="w-[18px] h-[18px]" />
             </button>
           </UiTooltip>
+          <UiTooltip title="Add an image" class="w-[26px] h-[26px]">
+            <label
+              class="flex justify-center p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
+            >
+              <input
+                ref="editorFileInputRef"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                :disabled="editor.uploading.value"
+              />
+              <UiLoading
+                v-if="editor.uploading.value"
+                :width="14"
+                :height="14"
+                class="inline-block"
+              />
+              <IS-photo v-else class="w-[18px] h-[18px]" />
+            </label>
+          </UiTooltip>
         </div>
-        <div class="s-base mb-3">
-          <div class="s-label" v-text="'Description'" />
+        <div class="s-base">
           <textarea
             ref="editorRef"
             v-model="proposal.body"
             maxlength="9600"
-            class="s-input mb-3 h-[200px] !rounded-t-none"
+            class="s-input h-[200px] !rounded-t-none !mb-0 !pt-[15px]"
           />
-          <SIString
-            :key="proposalKey || ''"
-            v-model="proposal.discussion"
-            :definition="DISCUSSION_DEFINITION"
-            :error="formErrors.discussion"
-          />
-          <Preview :key="proposalKey || ''" :url="proposal.discussion" />
         </div>
+      </div>
+      <div class="s-base">
+        <SIString
+          :key="proposalKey || ''"
+          v-model="proposal.discussion"
+          :definition="DISCUSSION_DEFINITION"
+          :error="formErrors.discussion"
+        />
+        <Preview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
       <div
         v-if="
