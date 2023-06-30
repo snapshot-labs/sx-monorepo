@@ -21,6 +21,11 @@ src
 │  ├─ WhitelistVotingStrategy.sol — "Strategy that gives predetermined voting power for members in a whitelist, otherwise zero"
 │  └─ VanillaVotingStrategy.sol — "Vanilla Strategy"
 ├─ execution-strategies
+│  ├─ timelocks
+│  |  ├─ CompTimelockCompatibleExecutionStrategy.sol - "Strategy that provides compatibility with existing Comp Timelock contracts"
+│  |  ├─ OptimisticCompTimelockCompatibleExecutionStrategy.sol - "Optimistic strategy that provides compatibility with existing Comp Timelock contracts"
+│  |  ├─ OptimisticTimelockExecutionStrategy.sol - "Optimistic strategy that can be used to execute proposal transactions according to a timelock delay"
+│  |  └─ TimelockExecutionStrategy.sol - "Strategy that can be used to execute proposal transactions according to a timelock delay"
 │  ├─ AvatarExecutionStrategy.sol - "Strategy that allows proposal transactions to be executed from an Avatar contract"
 │  ├─ TimelockExecutionStrategy.sol - "Strategy that can be used to execute proposal transactions according to a timelock delay"
 │  ├─ CompTimelockCompatibleExecutionStrategy.sol - "Strategy that provides compatibility with existing Comp Timelock contracts"

@@ -14,7 +14,7 @@ import {
     TRUE,
     FALSE
 } from "../src/types.sol";
-import { TimelockExecutionStrategy } from "../src/execution-strategies/TimelockExecutionStrategy.sol";
+import { TimelockExecutionStrategy } from "../src/execution-strategies/timelocks/TimelockExecutionStrategy.sol";
 import { MockImplementation } from "./mocks/MockImplementation.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { TestERC1155 } from "./mocks/TestERC1155.sol";

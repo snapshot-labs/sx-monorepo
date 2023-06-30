@@ -15,15 +15,16 @@ import {
     FALSE
 } from "../src/types.sol";
 import {
-    CompTimelockCompatibleExecutionStrategy
-} from "../src/execution-strategies/timelocks/CompTimelockCompatibleExecutionStrategy.sol";
+    OptimisticCompTimelockCompatibleExecutionStrategy
+} from "../src/execution-strategies/timelocks/OptimisticCompTimelockCompatibleExecutionStrategy.sol";
 import { MockImplementation } from "./mocks/MockImplementation.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { TestERC1155 } from "./mocks/TestERC1155.sol";
 import { TestERC721 } from "./mocks/TestERC721.sol";
 import { CompTimelock } from "./mocks/CompTimelock.sol";
 
-abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
+// Most tests are similar to `CompTimelockExecutionStrategyTest.t.sol`.
+abstract contract OptimisticCompTimelockExecutionStrategyTest is SpaceTest {
     error InvalidSpace();
     error TimelockDelayNotMet();
     error ProposalNotQueued();
@@ -31,7 +32,7 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     error DuplicateMetaTransaction();
     error OnlyVetoGuardian();
     error InvalidTransaction();
-    event CompTimelockCompatibleExecutionStrategySetUp(
+    event OptimisticCompTimelockCompatibleExecutionStrategySetUp(
         address owner,
         address vetoGuardian,
         address[] spaces,
@@ -42,7 +43,7 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     event ProposalVetoed(bytes32 executionPayloadHash);
     event VetoGuardianSet(address vetoGuardian, address newVetoGuardian);
 
-    CompTimelockCompatibleExecutionStrategy public timelockExecutionStrategy;
+    OptimisticCompTimelockCompatibleExecutionStrategy public timelockExecutionStrategy;
     CompTimelock public timelock = new CompTimelock(address(this), 1000);
 
     address public vetoGuardian = address(0);
@@ -90,7 +91,8 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
             Strategy(address(timelockExecutionStrategy), abi.encode(transactions)),
             new bytes(0)
         );
-        _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
+        // We do not cast a vote. The optimistic quorum should still accept the proposal
+        // at the end of the voting period.
         vm.roll(block.number + space.maxVotingDuration());
 
         vm.expectEmit(true, true, true, true);
@@ -124,14 +126,14 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
         // Salt differs but content does not
         duplicateTransactions[0] = MetaTransaction(recipient, 1, "", Enum.Operation.Call, 1);
 
-        // Create a first proposal with some transactions, and vote on it.
+        // Create a first proposal with some transactions. Do not vote on it (should get accepted because
+        // of optimistic quorum).
         uint256 firstProposalId = _createProposal(
             author,
             proposalMetadataURI,
             Strategy(address(timelockExecutionStrategy), abi.encode(transactions)),
             new bytes(0)
         );
-        _vote(author, firstProposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
         // Create a second proposal with the same transactions, and vote on it.
         uint256 secondProposalId = _createProposal(
@@ -162,6 +164,7 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
             Strategy(address(timelockExecutionStrategy), abi.encode(transactions)),
             new bytes(0)
         );
+        _vote(author, proposalId, Choice.Against, userVotingStrategies, voteMetadataURI);
         vm.roll(block.number + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
@@ -501,13 +504,13 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     }
 
     function testViewFunctions() public {
-        assertEq(timelockExecutionStrategy.getStrategyType(), "CompTimelockCompatibleSimpleQuorum");
+        assertEq(timelockExecutionStrategy.getStrategyType(), "CompTimelockCompatibleOptimisticQuorum");
     }
 
     function testSetUp() public {
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
-        timelockExecutionStrategy = new CompTimelockCompatibleExecutionStrategy(
+        timelockExecutionStrategy = new OptimisticCompTimelockCompatibleExecutionStrategy(
             owner,
             vetoGuardian,
             spaces,
@@ -523,14 +526,14 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     }
 }
 
-contract CompTimelockExecutionStrategyTestDirect is CompTimelockExecutionStrategyTest {
+contract OptimisticCompTimelockExecutionStrategyTestDirect is OptimisticCompTimelockExecutionStrategyTest {
     function setUp() public override {
         super.setUp();
 
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
 
-        timelockExecutionStrategy = new CompTimelockCompatibleExecutionStrategy(
+        timelockExecutionStrategy = new OptimisticCompTimelockCompatibleExecutionStrategy(
             owner,
             vetoGuardian,
             spaces,
@@ -542,27 +545,29 @@ contract CompTimelockExecutionStrategyTestDirect is CompTimelockExecutionStrateg
     }
 }
 
-contract CompTimelockExecutionStrategyTestProxy is CompTimelockExecutionStrategyTest {
+contract OptimisticCompTimelockExecutionStrategyTestProxy is OptimisticCompTimelockExecutionStrategyTest {
     function setUp() public override {
         super.setUp();
 
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
         address[] memory emptyArray = new address[](1);
-        CompTimelockCompatibleExecutionStrategy masterExecutionStrategy = new CompTimelockCompatibleExecutionStrategy(
-            address(1),
-            address(0),
-            emptyArray,
-            0,
-            address(0)
-        );
 
-        timelockExecutionStrategy = CompTimelockCompatibleExecutionStrategy(
+        // solhint-disable-next-line max-line-length
+        OptimisticCompTimelockCompatibleExecutionStrategy masterExecutionStrategy = new OptimisticCompTimelockCompatibleExecutionStrategy(
+                address(1),
+                address(0),
+                emptyArray,
+                0,
+                address(0)
+            );
+
+        timelockExecutionStrategy = OptimisticCompTimelockCompatibleExecutionStrategy(
             payable(
                 new ERC1967Proxy(
                     address(masterExecutionStrategy),
                     abi.encodeWithSelector(
-                        CompTimelockCompatibleExecutionStrategy.setUp.selector,
+                        OptimisticCompTimelockCompatibleExecutionStrategy.setUp.selector,
                         abi.encode(owner, vetoGuardian, spaces, quorum, address(timelock))
                     )
                 )
