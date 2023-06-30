@@ -372,7 +372,8 @@ export default defineComponent({
             <IH-chip />
             <span class="flex-1">
               {{ network.constants.EXECUTORS[space.executors_types[i]] }}
-              execution strategy ({{ shortenAddress(executor) }})
+              execution strategy
+              <span class="hidden sm:inline-block">({{ shortenAddress(executor) }})</span>
             </span>
             <IH-check v-if="executionStrategy?.address === executor" />
           </ExecutionButton>
