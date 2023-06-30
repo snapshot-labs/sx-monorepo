@@ -328,7 +328,7 @@ export default defineComponent({
               class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
               @click="editor.italic"
             >
-              I
+              <span class="mono !text-[17px] !font-normal">I</span>
             </button>
           </UiTooltip>
           <UiTooltip title="Add a link" class="w-[26px] h-[26px]">
@@ -336,7 +336,7 @@ export default defineComponent({
               class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
               @click="editor.link"
             >
-              <IH-link class="w-[18px] h-[18px]" />
+              <IS-link class="w-[18px] h-[18px]" />
             </button>
           </UiTooltip>
           <UiTooltip title="Add an image" class="w-[26px] h-[26px]">
@@ -369,7 +369,7 @@ export default defineComponent({
           />
         </div>
       </div>
-      <div class="s-base">
+      <div class="s-base mb-4">
         <SIString
           :key="proposalKey || ''"
           v-model="proposal.discussion"
@@ -386,7 +386,7 @@ export default defineComponent({
           supportedExecutionStrategies.length > 0
         "
       >
-        <h4 class="eyebrow mb-3">Execution</h4>
+        <h4 class="eyebrow mb-2">Execution</h4>
         <div class="border rounded-lg mb-3">
           <ExecutionButton
             v-for="(executor, i) in supportedExecutionStrategies"

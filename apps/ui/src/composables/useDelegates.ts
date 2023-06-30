@@ -21,7 +21,7 @@ type Governance = {
   totalDelegates: string;
 };
 
-const DELEGATES_LIMIT = 50;
+const DELEGATES_LIMIT = 40;
 
 const DELEGATES_QUERY = gql`
   query ($first: Int!, $skip: Int!) {
