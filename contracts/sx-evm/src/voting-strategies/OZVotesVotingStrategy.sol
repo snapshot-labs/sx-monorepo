@@ -27,19 +27,4 @@ contract OZVotesVotingStrategy is IVotingStrategy {
         // getPastVotes can still be called.
         return uint256(IVotes(tokenAddress).getPastVotes(voter, blockNumber - 1));
     }
-
-    /// @dev Extracts an address from a byte array.
-    /// @dev Taken from the linked library, with the require switched for a revert statement:
-    ///      https://github.com/GNSPS/solidity-bytes-utils/blob/master/contracts/BytesLib.sol
-    function bytesToAddress(bytes memory _bytes, uint256 _start) internal pure returns (address) {
-        if (_bytes.length < _start + 20) revert InvalidByteArray();
-        address tempAddress;
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            tempAddress := div(mload(add(add(_bytes, 0x20), _start)), 0x1000000000000000000000000)
-        }
-
-        return tempAddress;
-    }
 }
