@@ -5,7 +5,7 @@ pragma solidity ^0.8.18;
 import { ICompTimelock } from "../../interfaces/ICompTimelock.sol";
 import { SimpleQuorumExecutionStrategy } from "../SimpleQuorumExecutionStrategy.sol";
 import { SpaceManager } from "../../utils/SpaceManager.sol";
-import { MetaTransaction, Proposal, ProposalStatus, TRUE, FALSE } from "../../types.sol";
+import { MetaTransaction, Proposal, ProposalStatus } from "../../types.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 
 /// @title Comp Timelock Execution Strategy
@@ -116,7 +116,6 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
             bytes32 txHash = keccak256(
                 abi.encode(transactions[i].to, transactions[i].value, "", transactions[i].data, executionTime)
             );
-            // We use `!= FALSE` rather than `== TRUE` for gas optimisations.
             if (timelock.queuedTransactions(txHash) != false) revert DuplicateMetaTransaction();
 
             timelock.queueTransaction(
