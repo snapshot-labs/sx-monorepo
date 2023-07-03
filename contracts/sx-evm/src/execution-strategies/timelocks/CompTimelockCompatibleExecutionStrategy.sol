@@ -42,9 +42,6 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
     /// @notice The time at which a proposal can be executed. Indexed by the hash of the proposal execution payload.
     mapping(bytes32 => uint256) public proposalExecutionTime;
 
-    /// @notice Mapping of queued transaction hashes.
-    mapping(bytes32 => uint256) public txHashes;
-
     /// @notice Veto guardian is given permission to veto any queued proposal.
     address public vetoGuardian;
 
@@ -120,10 +117,7 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
                 abi.encode(transactions[i].to, transactions[i].value, "", transactions[i].data, executionTime)
             );
             // We use `!= FALSE` rather than `== TRUE` for gas optimisations.
-            if (txHashes[txHash] != FALSE) revert DuplicateMetaTransaction();
-
-            // Store the transaction hash.
-            txHashes[txHash] = TRUE;
+            if (timelock.queuedTransactions(txHash) != false) revert DuplicateMetaTransaction();
 
             timelock.queueTransaction(
                 transactions[i].to,
@@ -156,12 +150,6 @@ contract CompTimelockCompatibleExecutionStrategy is SimpleQuorumExecutionStrateg
 
         MetaTransaction[] memory transactions = abi.decode(payload, (MetaTransaction[]));
         for (uint256 i = 0; i < transactions.length; i++) {
-            // Clear out the transactions from the mapping.
-            bytes32 txHash = keccak256(
-                abi.encode(transactions[i].to, transactions[i].value, "", transactions[i].data, executionTime)
-            );
-            txHashes[txHash] = FALSE;
-
             timelock.executeTransaction(
                 transactions[i].to,
                 transactions[i].value,

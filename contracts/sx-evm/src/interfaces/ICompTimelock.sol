@@ -59,4 +59,6 @@ interface ICompTimelock {
     function MAXIMUM_DELAY() external view returns (uint);
 
     function delay() external view returns (uint);
+
+    function queuedTransactions(bytes32 hash) external view returns (bool);
 }
