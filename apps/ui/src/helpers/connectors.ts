@@ -20,10 +20,11 @@ export default {
     network: '1',
     icon: walletconnectIcon,
     options: {
-      rpc: {
-        '1': 'https://rpc.snapshotx.xyz/1',
-        '5': 'https://rpc.snapshotx.xyz/5'
-      }
+      projectId: 'e6454bd61aba40b786e866a69bd4c5c6',
+      chains: [5],
+      optionalChains: [1, 11155111],
+      methods: ['eth_sendTransaction', 'eth_signTypedData_v4'],
+      showQrModal: true
     }
   },
   walletlink: {
