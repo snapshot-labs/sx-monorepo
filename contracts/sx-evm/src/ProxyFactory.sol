@@ -11,7 +11,7 @@ contract ProxyFactory is IProxyFactory {
     /// @inheritdoc IProxyFactory
     function deployProxy(address implementation, bytes memory initializer, uint256 saltNonce) external override {
         if (implementation == address(0) || implementation.code.length == 0) revert InvalidImplementation();
-        bytes32 salt = keccak256(abi.encodePacked(msg.sender, keccak256(initializer), saltNonce));
+        bytes32 salt = keccak256(abi.encodePacked(msg.sender, saltNonce));
         if (predictProxyAddress(implementation, salt).code.length > 0) revert SaltAlreadyUsed();
         address proxy = address(new ERC1967Proxy{ salt: salt }(implementation, ""));
         // solhint-disable-next-line avoid-low-level-calls

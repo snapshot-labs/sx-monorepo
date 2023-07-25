@@ -83,13 +83,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         );
 
         // Pre-computed address of the space (possible because of CREATE2 deployment)
-        address spaceProxy = _predictProxyAddress(
-            address(factory),
-            address(this),
-            address(masterSpace),
-            initializer,
-            saltNonce
-        );
+        address spaceProxy = _predictProxyAddress(address(factory), address(this), address(masterSpace), saltNonce);
 
         vm.expectEmit(true, true, true, true);
         emit ProxyDeployed(address(masterSpace), spaceProxy);
@@ -193,13 +187,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         );
 
         factory.deployProxy(address(masterSpace), initializer, saltNonce);
-        address spaceProxy = _predictProxyAddress(
-            address(factory),
-            address(this),
-            address(masterSpace),
-            initializer,
-            saltNonce
-        );
+        address spaceProxy = _predictProxyAddress(address(factory), address(this), address(masterSpace), saltNonce);
 
         // Initializing the space should revert as the space is already initialized
         vm.expectRevert("Initializable: contract is already initialized");
@@ -238,11 +226,11 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
                 authenticators
             )
         );
-        bytes32 salt = keccak256(abi.encodePacked(address(this), keccak256(initializer), saltNonce));
+        bytes32 salt = keccak256(abi.encodePacked(address(this), saltNonce));
         // Checking predictProxyAddress in the factory returns the same address as the helper in this test
         assertEq(
             address(factory.predictProxyAddress(address(masterSpace), salt)),
-            _predictProxyAddress(address(factory), address(this), address(masterSpace), initializer, saltNonce)
+            _predictProxyAddress(address(factory), address(this), address(masterSpace), saltNonce)
         );
     }
 
@@ -250,7 +238,6 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         address _factory,
         address _sender,
         address implementation,
-        bytes memory initializer,
         uint256 saltNonce
     ) internal pure returns (address) {
         return
@@ -261,7 +248,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
                             abi.encodePacked(
                                 bytes1(0xff),
                                 _factory,
-                                keccak256(abi.encodePacked(_sender, keccak256(initializer), saltNonce)),
+                                keccak256(abi.encodePacked(_sender, saltNonce)),
                                 keccak256(
                                     abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(implementation, ""))
                                 )
