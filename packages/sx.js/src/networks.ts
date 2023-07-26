@@ -2,31 +2,31 @@ import type { NetworkConfig, EvmNetworkConfig } from './types';
 
 export const evmGoerli: EvmNetworkConfig = {
   eip712ChainId: 5,
-  proxyFactory: '0x12a1fffffd70677939d61d641ea043bc9060c718',
-  masterSpace: '0x7cc62f8e9bf2b44ce704d2cdcd4aa8021d5a6f4b',
+  proxyFactory: '0x4b4f7f64be813ccc66aefc3bfce2baa01188631c',
+  masterSpace: '0xd9c46d5420434355d0e5ca3e3ccb20ce7a533964',
   executionStrategiesImplementations: {
-    SimpleQuorumAvatar: '0x6f12c67cad3e566b60a6ae0146761110f1ea6eb2',
-    SimpleQuorumTimelock: '0xdb86512e7e3a2d0b93b74b8fe3ffe8ad780791be'
+    SimpleQuorumAvatar: '0x3813f3d97aa2f80e3af625605a31206e067fb2e5',
+    SimpleQuorumTimelock: '0x00c5e67e6f7fdf80d7bca249e38c355fbe62ba34'
   },
   authenticators: {
-    '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': {
+    '0x5f9b7d78c9a37a439d78f801e0e339c6e711e260': {
       type: 'ethSig'
     },
-    '0xddb36b865a1021524b936fb29fcba5fac073db74': {
+    '0xba06e6ccb877c332181a6867c05c8b746a21aed1': {
       type: 'ethTx'
     }
   },
   strategies: {
-    '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': {
+    '0xc1245c5dca7885c73e32294140f1e5d30688c202': {
       type: 'vanilla'
     },
-    '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': {
+    '0x0c2de612982efd102803161fc7c74cca15db932c': {
       type: 'comp'
     },
-    '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': {
+    '0x2c8631584474e750cedf2fb6a904f2e84777aefe': {
       type: 'ozVotes'
     },
-    '0x54449c058bbf0b777745944ea1a7b79786fbc958': {
+    '0x3cee21a33751a2722413ff62dec3dec48e7748a4': {
       type: 'whitelist'
     }
   }

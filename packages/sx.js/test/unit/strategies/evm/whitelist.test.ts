@@ -25,7 +25,7 @@ describe('whitelistStrategy', () => {
       const votingPower = await whitelistStrategy.getVotingPower(
         '0xc89a0c93af823f794f96f7b2b63fc2a1f1ae9427',
         '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
-        1677159023,
+        9343895,
         whitelistParams,
         provider
       );
@@ -37,7 +37,7 @@ describe('whitelistStrategy', () => {
       const votingPower = await whitelistStrategy.getVotingPower(
         '0xc89a0c93af823f794f96f7b2b63fc2a1f1ae9427',
         '0x000000000000000000000000000000000000dead',
-        1677159023,
+        9343895,
         whitelistParams,
         provider
       );

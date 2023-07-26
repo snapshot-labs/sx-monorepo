@@ -29,6 +29,7 @@ export type Propose = {
   strategies: StrategyConfig[];
   executionStrategy: AddressConfig;
   metadataUri: string;
+  extraProperties?: Record<string, any>;
 };
 
 export type UpdateProposal = {
@@ -46,6 +47,7 @@ export type Vote = {
   proposal: number;
   choice: Choice;
   metadataUri: string;
+  extraProperties?: Record<string, any>;
 };
 
 export type Call = {
@@ -73,7 +75,7 @@ export type Strategy = {
   getVotingPower(
     strategyAddress: string,
     voterAddress: string,
-    timestamp: number,
+    block: number,
     params: string,
     provider: Provider
   ): Promise<bigint>;

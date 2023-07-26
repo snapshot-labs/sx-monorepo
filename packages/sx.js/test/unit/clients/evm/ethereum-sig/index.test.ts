@@ -28,7 +28,7 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0xeba53160c146cbf77a150e9a218d4c2de5db6b51' }],
+        strategies: [{ index: 0, address: '0xc1245c5dca7885c73e32294140f1e5d30688c202' }],
         executionStrategy: { addr: executor, params: '0x00' },
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
       }
@@ -58,7 +58,7 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0xeba53160c146cbf77a150e9a218d4c2de5db6b51' }],
+        strategies: [{ index: 0, address: '0xc1245c5dca7885c73e32294140f1e5d30688c202' }],
         proposal: 1,
         choice: 1,
         metadataUri: ''

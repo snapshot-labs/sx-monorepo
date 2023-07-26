@@ -23,7 +23,7 @@ describe('EthereumTx', () => {
   let testConfig: TestConfig;
   let spaceAddress = '';
   beforeAll(async () => {
-    testConfig = await setup(signer);
+    testConfig = await setup(provider, signer);
     spaceAddress = testConfig.spaceAddress;
 
     ethTxClient = new EthereumTx({ networkConfig: testConfig.networkConfig });
@@ -149,13 +149,15 @@ describe('EthereumTx', () => {
     });
   });
 
+  // proposing with vanilla because compToken/ozVotes doesn't work with anvil for some reason
+  // throws ERC20Votes: block not yet mined even though it is requesting block.number - 1
   describe('compVotingStrategy + vanilla authenticator', () => {
     it('should propose via authenticator', async () => {
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 1, address: testConfig.compVotingStrategy }],
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -188,13 +190,15 @@ describe('EthereumTx', () => {
     });
   });
 
+  // proposing with vanilla because compToken/ozVotes doesn't work with anvil for some reason
+  // throws ERC20Votes: block not yet mined even though it is requesting block.number - 1
   describe('ozVotesVotingStrategy + vanilla authenticator', () => {
     it('should propose via authenticator', async () => {
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 2, address: testConfig.ozVotesVotingStrategy }],
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -235,7 +239,10 @@ describe('EthereumTx', () => {
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 3, address: testConfig.whitelistVotingStrategy }],
           executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
-          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+          extraProperties: {
+            voterIndex: 0
+          }
         }
       };
 
@@ -254,7 +261,10 @@ describe('EthereumTx', () => {
           strategies: [{ index: 3, address: testConfig.whitelistVotingStrategy }],
           proposal: 6,
           choice: 0,
-          metadataUri: ''
+          metadataUri: '',
+          extraProperties: {
+            voterIndex: 0
+          }
         }
       };
 
@@ -435,6 +445,7 @@ describe('EthereumTx', () => {
       space: spaceAddress,
       proposal: PROPOSAL_ID
     });
+
     expect(res.hash).toBeDefined();
   });
 
