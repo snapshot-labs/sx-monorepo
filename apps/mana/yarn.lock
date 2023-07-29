@@ -345,7 +345,7 @@
     elliptic "6.5.4"
     hash.js "1.1.7"
 
-"@ethersproject/solidity@5.7.0":
+"@ethersproject/solidity@5.7.0", "@ethersproject/solidity@^5.7.0":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/solidity/-/solidity-5.7.0.tgz#5e9c911d8a2acce2a5ebb48a5e2e0af20b631cb8"
   integrity sha512-HmabMd2Dt/raavyaGukF4XxizWKhKQ24DoLtdNbBmNKUOPqwjsKQSdV9GQtj9CBEea9DlzETlVER1gYeXXBGaA==
@@ -511,10 +511,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@snapshot-labs/sx@^0.1.0-beta.31":
-  version "0.1.0-beta.31"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.31.tgz#b529ff1d31e2bd4a8504a7a992bfc182b80c5e10"
-  integrity sha512-jng6yNoydVqXs0BK7ZrWaTjpvxbnD/Ay2QDLTx039xcY5xBvHuI34ybPh0Yw9Y0x1RURv5Il7pkTwKqus+tsFA==
+"@snapshot-labs/sx@^0.1.0-beta.33":
+  version "0.1.0-beta.33"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.33.tgz#afe5d3bb8d5919e875a10e119bcfd1577c6cd0e9"
+  integrity sha512-kPxk+qx+N7Gs/sPv9D2R2GJGUcln4EoLFVh47myKgYSc6huIchglPMUjKtMBNYhOtrbi/r8lP5D49qJrl5CPaQ==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/abstract-signer" "^5.7.0"
@@ -522,6 +522,7 @@
     "@ethersproject/hash" "^5.6.1"
     "@ethersproject/keccak256" "^5.7.0"
     "@ethersproject/providers" "^5.7.0"
+    "@ethersproject/solidity" "^5.7.0"
     "@ethersproject/wallet" "^5.7.0"
     cross-fetch "^3.1.5"
     randombytes "^2.1.0"
