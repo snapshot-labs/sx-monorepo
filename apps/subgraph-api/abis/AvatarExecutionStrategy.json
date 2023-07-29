@@ -31,11 +31,6 @@
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "InvalidPayload",
-    "type": "error"
-  },
-  {
     "inputs": [
       {
         "internalType": "enum ProposalStatus",
@@ -71,6 +66,12 @@
         "internalType": "address[]",
         "name": "_spaces",
         "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_quorum",
+        "type": "uint256"
       }
     ],
     "name": "AvatarExecutionStrategySetUp",
@@ -106,6 +107,19 @@
       }
     ],
     "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newQuorum",
+        "type": "uint256"
+      }
+    ],
+    "name": "QuorumUpdated",
     "type": "event"
   },
   {
@@ -178,29 +192,14 @@
       {
         "components": [
           {
-            "internalType": "uint32",
-            "name": "snapshotTimestamp",
-            "type": "uint32"
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
           },
           {
             "internalType": "uint32",
-            "name": "startTimestamp",
+            "name": "startBlockNumber",
             "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "minEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "maxEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "executionPayloadHash",
-            "type": "bytes32"
           },
           {
             "internalType": "contract IExecutionStrategy",
@@ -208,14 +207,24 @@
             "type": "address"
           },
           {
-            "internalType": "address",
-            "name": "author",
-            "type": "address"
+            "internalType": "uint32",
+            "name": "minEndBlockNumber",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxEndBlockNumber",
+            "type": "uint32"
           },
           {
             "internalType": "enum FinalizationStatus",
             "name": "finalizationStatus",
             "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "executionPayloadHash",
+            "type": "bytes32"
           },
           {
             "internalType": "uint256",
@@ -258,29 +267,14 @@
       {
         "components": [
           {
-            "internalType": "uint32",
-            "name": "snapshotTimestamp",
-            "type": "uint32"
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
           },
           {
             "internalType": "uint32",
-            "name": "startTimestamp",
+            "name": "startBlockNumber",
             "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "minEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "maxEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "executionPayloadHash",
-            "type": "bytes32"
           },
           {
             "internalType": "contract IExecutionStrategy",
@@ -288,14 +282,24 @@
             "type": "address"
           },
           {
-            "internalType": "address",
-            "name": "author",
-            "type": "address"
+            "internalType": "uint32",
+            "name": "minEndBlockNumber",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxEndBlockNumber",
+            "type": "uint32"
           },
           {
             "internalType": "enum FinalizationStatus",
             "name": "finalizationStatus",
             "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "executionPayloadHash",
+            "type": "bytes32"
           },
           {
             "internalType": "uint256",
@@ -358,9 +362,9 @@
     "name": "isSpaceEnabled",
     "outputs": [
       {
-        "internalType": "bool",
+        "internalType": "uint256",
         "name": "",
-        "type": "bool"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -395,6 +399,19 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_quorum",
+        "type": "uint256"
+      }
+    ],
+    "name": "setQuorum",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

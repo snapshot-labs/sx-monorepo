@@ -58,6 +58,11 @@
   },
   {
     "inputs": [],
+    "name": "InvalidPayload",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidProposal",
     "type": "error"
   },
@@ -285,29 +290,14 @@
       {
         "components": [
           {
-            "internalType": "uint32",
-            "name": "snapshotTimestamp",
-            "type": "uint32"
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
           },
           {
             "internalType": "uint32",
-            "name": "startTimestamp",
+            "name": "startBlockNumber",
             "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "minEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint32",
-            "name": "maxEndTimestamp",
-            "type": "uint32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "executionPayloadHash",
-            "type": "bytes32"
           },
           {
             "internalType": "contract IExecutionStrategy",
@@ -315,14 +305,24 @@
             "type": "address"
           },
           {
-            "internalType": "address",
-            "name": "author",
-            "type": "address"
+            "internalType": "uint32",
+            "name": "minEndBlockNumber",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxEndBlockNumber",
+            "type": "uint32"
           },
           {
             "internalType": "enum FinalizationStatus",
             "name": "finalizationStatus",
             "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "executionPayloadHash",
+            "type": "bytes32"
           },
           {
             "internalType": "uint256",
@@ -442,94 +442,91 @@
         "type": "address"
       },
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint32",
-        "name": "votingDelay",
-        "type": "uint32"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint32",
-        "name": "minVotingDuration",
-        "type": "uint32"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint32",
-        "name": "maxVotingDuration",
-        "type": "uint32"
-      },
-      {
         "components": [
           {
             "internalType": "address",
-            "name": "addr",
+            "name": "owner",
             "type": "address"
           },
           {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
+            "internalType": "uint32",
+            "name": "votingDelay",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "minVotingDuration",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxVotingDuration",
+            "type": "uint32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy",
+            "name": "proposalValidationStrategy",
+            "type": "tuple"
+          },
+          {
+            "internalType": "string",
+            "name": "proposalValidationStrategyMetadataURI",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "daoURI",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "metadataURI",
+            "type": "string"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy[]",
+            "name": "votingStrategies",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "string[]",
+            "name": "votingStrategyMetadataURIs",
+            "type": "string[]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "authenticators",
+            "type": "address[]"
           }
         ],
         "indexed": false,
-        "internalType": "struct Strategy",
-        "name": "proposalValidationStrategy",
+        "internalType": "struct InitializeCalldata",
+        "name": "input",
         "type": "tuple"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "proposalValidationStrategyMetadataURI",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "daoURI",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "metadataURI",
-        "type": "string"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "addr",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct Strategy[]",
-        "name": "votingStrategies",
-        "type": "tuple[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "string[]",
-        "name": "votingStrategyMetadataURIs",
-        "type": "string[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "address[]",
-        "name": "authenticators",
-        "type": "address[]"
       }
     ],
     "name": "SpaceCreated",
@@ -697,9 +694,9 @@
     "name": "authenticators",
     "outputs": [
       {
-        "internalType": "bool",
+        "internalType": "uint256",
         "name": "allowed",
-        "type": "bool"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -771,83 +768,90 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
-      },
-      {
-        "internalType": "uint32",
-        "name": "_votingDelay",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint32",
-        "name": "_minVotingDuration",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint32",
-        "name": "_maxVotingDuration",
-        "type": "uint32"
-      },
-      {
         "components": [
           {
             "internalType": "address",
-            "name": "addr",
+            "name": "owner",
             "type": "address"
           },
           {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
+            "internalType": "uint32",
+            "name": "votingDelay",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "minVotingDuration",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxVotingDuration",
+            "type": "uint32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy",
+            "name": "proposalValidationStrategy",
+            "type": "tuple"
+          },
+          {
+            "internalType": "string",
+            "name": "proposalValidationStrategyMetadataURI",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "daoURI",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "metadataURI",
+            "type": "string"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes",
+                "name": "params",
+                "type": "bytes"
+              }
+            ],
+            "internalType": "struct Strategy[]",
+            "name": "votingStrategies",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "string[]",
+            "name": "votingStrategyMetadataURIs",
+            "type": "string[]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "authenticators",
+            "type": "address[]"
           }
         ],
-        "internalType": "struct Strategy",
-        "name": "_proposalValidationStrategy",
+        "internalType": "struct InitializeCalldata",
+        "name": "input",
         "type": "tuple"
-      },
-      {
-        "internalType": "string",
-        "name": "_proposalValidationStrategyMetadataURI",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_daoURI",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_metadataURI",
-        "type": "string"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "addr",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "params",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct Strategy[]",
-        "name": "_votingStrategies",
-        "type": "tuple[]"
-      },
-      {
-        "internalType": "string[]",
-        "name": "_votingStrategyMetadataURIs",
-        "type": "string[]"
-      },
-      {
-        "internalType": "address[]",
-        "name": "_authenticators",
-        "type": "address[]"
       }
     ],
     "name": "initialize",
@@ -949,29 +953,14 @@
     "name": "proposals",
     "outputs": [
       {
-        "internalType": "uint32",
-        "name": "snapshotTimestamp",
-        "type": "uint32"
+        "internalType": "address",
+        "name": "author",
+        "type": "address"
       },
       {
         "internalType": "uint32",
-        "name": "startTimestamp",
+        "name": "startBlockNumber",
         "type": "uint32"
-      },
-      {
-        "internalType": "uint32",
-        "name": "minEndTimestamp",
-        "type": "uint32"
-      },
-      {
-        "internalType": "uint32",
-        "name": "maxEndTimestamp",
-        "type": "uint32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "executionPayloadHash",
-        "type": "bytes32"
       },
       {
         "internalType": "contract IExecutionStrategy",
@@ -979,14 +968,24 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "author",
-        "type": "address"
+        "internalType": "uint32",
+        "name": "minEndBlockNumber",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "maxEndBlockNumber",
+        "type": "uint32"
       },
       {
         "internalType": "enum FinalizationStatus",
         "name": "finalizationStatus",
         "type": "uint8"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "executionPayloadHash",
+        "type": "bytes32"
       },
       {
         "internalType": "uint256",
@@ -1199,7 +1198,7 @@
             "type": "uint8[]"
           }
         ],
-        "internalType": "struct UpdateSettingsInput",
+        "internalType": "struct UpdateSettingsCalldata",
         "name": "input",
         "type": "tuple"
       }
@@ -1325,9 +1324,9 @@
     "name": "voteRegistry",
     "outputs": [
       {
-        "internalType": "bool",
+        "internalType": "uint256",
         "name": "hasVoted",
-        "type": "bool"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

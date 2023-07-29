@@ -34,13 +34,13 @@ import {
   updateStrategiesParsedMetadata,
 } from './helpers'
 
-const MASTER_SPACE = Address.fromString('0x7cC62f8E9BF2b44ce704D2cdCd4aa8021d5A6f4B')
-const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x6F12C67cAd3e566B60A6AE0146761110F1Ea6Eb2')
+const MASTER_SPACE = Address.fromString('0xd9c46d5420434355d0E5Ca3e3cCb20cE7A533964')
+const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x3813f3d97Aa2F80e3aF625605A31206e067FB2e5')
 const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
-  '0xdb86512e7E3a2d0B93b74b8FE3fFE8AD780791BE'
+  '0x00C5E67e6F7FDf80d7bCA249E38C355FbE62Ba34'
 )
 const VOTING_POWER_VALIDATION_STRATEGY = Address.fromString(
-  '0x03d512E0165d6B53ED2753Df2f3184fBd2b52E48'
+  '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
 )
 
 export function handleProxyDeployed(event: ProxyDeployed): void {
@@ -85,20 +85,22 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
 
 export function handleSpaceCreated(event: SpaceCreated): void {
   let space = new Space(event.params.space.toHexString())
-  space.controller = event.params.owner
-  space.voting_delay = event.params.votingDelay.toI32()
-  space.min_voting_period = event.params.minVotingDuration.toI32()
-  space.max_voting_period = event.params.maxVotingDuration.toI32()
+  space.controller = event.params.input.owner
+  space.voting_delay = event.params.input.votingDelay.toI32()
+  space.min_voting_period = event.params.input.minVotingDuration.toI32()
+  space.max_voting_period = event.params.input.maxVotingDuration.toI32()
   space.quorum = new BigDecimal(new BigInt(0))
-  space.strategies = event.params.votingStrategies.map<Bytes>((strategy) => strategy.addr)
-  space.strategies_params = event.params.votingStrategies.map<string>((strategy) =>
+  space.strategies = event.params.input.votingStrategies.map<Bytes>((strategy) => strategy.addr)
+  space.strategies_params = event.params.input.votingStrategies.map<string>((strategy) =>
     strategy.params.toHexString()
   )
-  space.validation_strategy = event.params.proposalValidationStrategy.addr
-  space.validation_strategy_params = event.params.proposalValidationStrategy.params.toHexString()
+  space.validation_strategy = event.params.input.proposalValidationStrategy.addr
+  space.validation_strategy_params = event.params.input.proposalValidationStrategy.params.toHexString()
 
   if (space.validation_strategy.equals(VOTING_POWER_VALIDATION_STRATEGY)) {
-    let params = decodeProposalValidationParams(event.params.proposalValidationStrategy.params)
+    let params = decodeProposalValidationParams(
+      event.params.input.proposalValidationStrategy.params
+    )
 
     if (params) {
       space.proposal_threshold = new BigDecimal(getProposalValidationThreshold(params))
@@ -119,15 +121,15 @@ export function handleSpaceCreated(event: SpaceCreated): void {
     space.voting_power_validation_strategy_strategies_params = []
   }
 
-  space.strategies_metadata = event.params.votingStrategyMetadataURIs
-  space.authenticators = event.params.authenticators.map<Bytes>((address) => address)
+  space.strategies_metadata = event.params.input.votingStrategyMetadataURIs
+  space.authenticators = event.params.input.authenticators.map<Bytes>((address) => address)
   space.proposal_count = 0
   space.vote_count = 0
   space.created = event.block.timestamp.toI32()
   space.tx = event.transaction.hash
 
-  if (event.params.metadataURI.startsWith('ipfs://')) {
-    let hash = event.params.metadataURI.slice(7)
+  if (event.params.input.metadataURI.startsWith('ipfs://')) {
+    let hash = event.params.input.metadataURI.slice(7)
     space.metadata = hash
     SpaceMetadataTemplate.create(hash)
   }
@@ -149,10 +151,10 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.space = space.id
   proposal.author = event.params.author.toHexString()
   proposal.execution_hash = event.params.proposal.executionPayloadHash.toHexString()
-  proposal.start = event.params.proposal.startTimestamp.toI32()
-  proposal.min_end = event.params.proposal.minEndTimestamp.toI32()
-  proposal.max_end = event.params.proposal.maxEndTimestamp.toI32()
-  proposal.snapshot = event.params.proposal.snapshotTimestamp.toI32()
+  proposal.start = event.params.proposal.startBlockNumber.toI32()
+  proposal.min_end = event.params.proposal.minEndBlockNumber.toI32()
+  proposal.max_end = event.params.proposal.maxEndBlockNumber.toI32()
+  proposal.snapshot = event.params.proposal.startBlockNumber.toI32()
   proposal.strategies = space.strategies
   proposal.strategies_params = space.strategies_params
   proposal.scores_1 = BigDecimal.fromString('0')

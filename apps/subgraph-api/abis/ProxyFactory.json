@@ -46,9 +46,9 @@
         "type": "bytes"
       },
       {
-        "internalType": "bytes32",
-        "name": "salt",
-        "type": "bytes32"
+        "internalType": "uint256",
+        "name": "saltNonce",
+        "type": "uint256"
       }
     ],
     "name": "deployProxy",

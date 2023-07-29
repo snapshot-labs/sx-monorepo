@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ProxyFactory
-    network: goerli
+    network: sepolia
     source:
       abi: ProxyFactory
-      address: '0x12A1FfFFfd70677939D61d641eA043bc9060c718'
-      startBlock: 9091182
+      address: "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c"
+      startBlock: 3961351
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,7 +29,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: Space
-    network: goerli
+    network: sepolia
     source:
       abi: Space
     mapping:
@@ -44,9 +44,9 @@ templates:
         - name: Space
           file: ./abis/Space.json
       eventHandlers:
-        - event: SpaceCreated(address,address,uint32,uint32,uint32,(address,bytes),string,string,string,(address,bytes)[],string[],address[])
+        - event: SpaceCreated(address,(address,uint32,uint32,uint32,(address,bytes),string,string,string,(address,bytes)[],string[],address[]))
           handler: handleSpaceCreated
-        - event: ProposalCreated(uint256,address,(uint32,uint32,uint32,uint32,bytes32,address,address,uint8,uint256),string,bytes)
+        - event: ProposalCreated(uint256,address,(address,uint32,address,uint32,uint32,uint8,bytes32,uint256),string,bytes)
           handler: handleProposalCreated
         - event: ProposalUpdated(uint256,(address,bytes),string)
           handler: handleProposalUpdated
@@ -69,7 +69,7 @@ templates:
       file: ./src/mapping.ts
   - kind: ethereum
     name: TimelockExecutionStrategy
-    network: goerli
+    network: sepolia
     source:
       abi: TimelockExecutionStrategy
     mapping:
@@ -99,7 +99,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: goerli
+    network: sepolia
   - name: ProposalMetadata
     kind: file/ipfs
     mapping:
@@ -112,7 +112,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: goerli
+    network: sepolia
   - name: StrategiesParsedMetadataData
     kind: file/ipfs
     mapping:
@@ -125,4 +125,4 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: goerli
+    network: sepolia
