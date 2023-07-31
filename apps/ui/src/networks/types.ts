@@ -122,7 +122,7 @@ export type NetworkActions = {
     strategiesParams: any[],
     strategiesMetadata: StrategyParsedMetadata[],
     voterAddress: string,
-    timestamp: number
+    block: number
   ): Promise<VotingPower[]>;
   send(envelope: any): Promise<any>;
 };
@@ -133,11 +133,12 @@ export type NetworkApi = {
   loadProposals(
     spaceId: string,
     paginationOpts: PaginationOpts,
+    currentBlock: number,
     filter?: 'any' | 'active' | 'pending' | 'closed',
     searchQuery?: string
   ): Promise<Proposal[]>;
-  loadProposalsSummary(spaceId: string, limit: number): Promise<Proposal[]>;
-  loadProposal(spaceId: string, proposalId: number): Promise<Proposal | null>;
+  loadProposalsSummary(spaceId: string, currentBlock: number, limit: number): Promise<Proposal[]>;
+  loadProposal(spaceId: string, proposalId: number, currentBlock: number): Promise<Proposal | null>;
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User>;

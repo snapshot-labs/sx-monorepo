@@ -7,7 +7,7 @@ const goerliNetwork = createEvmNetwork('gor');
 const sepoliaNetwork = createEvmNetwork('sep');
 const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
-export const enabledNetworks: NetworkID[] = ['gor', 'sep', 'linea-testnet'];
+export const enabledNetworks: NetworkID[] = ['gor', 'sep'];
 
 export const evmNetworks: NetworkID[] = ['gor', 'sep', 'linea-testnet'];
 

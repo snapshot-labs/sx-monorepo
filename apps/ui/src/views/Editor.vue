@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSpacesStore } from '@/stores/spaces';
 import { getNetwork } from '@/networks';
+import { getProvider } from '@/helpers/provider';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { SelectedStrategy } from '@/types';
@@ -167,13 +168,14 @@ async function getVotingPower() {
   fetchingVotingPower.value = true;
   try {
     const network = getNetwork(space.value.network);
+    const currentBlock = await getProvider(network.baseChainId).getBlockNumber();
 
     const votingPowers = await network.actions.getVotingPower(
       space.value.voting_power_validation_strategy_strategies,
       space.value.voting_power_validation_strategy_strategies_params,
       [],
       web3.value.account,
-      Math.floor(Date.now() / 1000)
+      currentBlock
     );
 
     const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);

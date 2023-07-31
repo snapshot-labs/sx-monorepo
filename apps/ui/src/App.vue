@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useUiStore } from '@/stores/ui';
+import { useMetaStore } from '@/stores/meta';
 
 const route = useRoute();
 const uiStore = useUiStore();
+const metaStore = useMetaStore();
 const { modalOpen } = useModal();
 const { userSkin } = useUserSkin();
 const { init, app } = useApp();
@@ -15,6 +17,7 @@ const skin = computed(() => userSkin.value);
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
 onMounted(async () => {
+  metaStore.fetchBlocks();
   uiStore.restorePendingTransactions();
   await init();
 });
@@ -39,7 +42,7 @@ watch(route, () => {
     :class="{ [skin]: true, 'overflow-hidden': scrollDisabled }"
     class="font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
   >
-    <UiLoading v-if="app.loading || !app.init" class="overlay big" />
+    <UiLoading v-if="app.loading || !app.init || !metaStore.loaded" class="overlay big" />
     <div v-else class="pb-6 flex">
       <Sidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />
       <Topnav @toggle="uiStore.toggleSidebar" />

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
+import { useMetaStore } from '@/stores/meta';
 import type { NetworkID, Proposal } from '@/types';
 
 type SpaceRecord = {
@@ -19,171 +20,190 @@ const PROPOSALS_LIMIT = 20;
 // TODO: create special _id that is used for UI that is prefixed by networkId
 const getUniqueSpaceId = (spaceId: string, networkId: NetworkID) => `${networkId}:${spaceId}`;
 
-export const useProposalsStore = defineStore('proposals', {
-  state: () => ({
-    proposals: {} as Partial<Record<string, SpaceRecord>>
-  }),
-  getters: {
-    getSpaceProposals: state => {
-      return (spaceId: string, networkId: NetworkID) => {
-        const record = state.proposals[getUniqueSpaceId(spaceId, networkId)];
-        if (!record) return [];
+export const useProposalsStore = defineStore('proposals', () => {
+  const metaStore = useMetaStore();
+  const proposals = ref({} as Partial<Record<string, SpaceRecord>>);
 
-        return record.proposalsIdsList.map(proposalId => record.proposals[proposalId]);
-      };
-    },
-    getProposal: state => {
-      return (spaceId: string, proposalId: number, networkId: NetworkID) => {
-        const record = state.proposals[getUniqueSpaceId(spaceId, networkId)];
-        if (!record) return undefined;
+  const getSpaceProposals = (spaceId: string, networkId: NetworkID) => {
+    const record = proposals.value[getUniqueSpaceId(spaceId, networkId)];
+    if (!record) return [];
 
-        return record.proposals[proposalId];
+    return record.proposalsIdsList.map(proposalId => record.proposals[proposalId]);
+  };
+
+  const getProposal = (spaceId: string, proposalId: number, networkId: NetworkID) => {
+    const record = proposals.value[getUniqueSpaceId(spaceId, networkId)];
+    if (!record) return undefined;
+
+    return record.proposals[proposalId];
+  };
+
+  function reset(spaceId: string, networkId: NetworkID) {
+    const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+    delete proposals.value[uniqueSpaceId];
+  }
+
+  async function fetch(
+    spaceId: string,
+    networkId: NetworkID,
+    filter?: 'any' | 'active' | 'pending' | 'closed'
+  ) {
+    const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+
+    if (!proposals.value[uniqueSpaceId]) {
+      proposals.value[uniqueSpaceId] = {
+        loading: false,
+        loadingMore: false,
+        loaded: false,
+        proposalsIdsList: [],
+        proposals: {},
+        hasMoreProposals: true,
+        summaryLoading: false,
+        summaryLoaded: false,
+        summaryProposals: []
       };
     }
-  },
-  actions: {
-    reset(spaceId: string, networkId: NetworkID) {
-      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
-      delete this.proposals[uniqueSpaceId];
-    },
-    async fetch(
-      spaceId: string,
-      networkId: NetworkID,
-      filter?: 'any' | 'active' | 'pending' | 'closed'
-    ) {
-      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 
-      if (!this.proposals[uniqueSpaceId]) {
-        this.proposals[uniqueSpaceId] = {
-          loading: false,
-          loadingMore: false,
-          loaded: false,
-          proposalsIdsList: [],
-          proposals: {},
-          hasMoreProposals: true,
-          summaryLoading: false,
-          summaryLoaded: false,
-          summaryProposals: []
-        };
-      }
+    const record = toRef(proposals.value, uniqueSpaceId) as Ref<SpaceRecord>;
+    if (record.value.loading || record.value.loaded) return;
 
-      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
-      if (record.value.loading || record.value.loaded) return;
+    record.value.loading = true;
 
-      record.value.loading = true;
+    const fetchedProposals = await getNetwork(networkId).api.loadProposals(
+      spaceId,
+      {
+        limit: PROPOSALS_LIMIT
+      },
+      metaStore.currentBlocks.get(networkId) || 0,
+      filter
+    );
 
-      const proposals = await getNetwork(networkId).api.loadProposals(
-        spaceId,
-        {
-          limit: PROPOSALS_LIMIT
-        },
-        filter
-      );
+    record.value.proposalsIdsList = fetchedProposals.map(proposal => proposal.proposal_id);
+    record.value.proposals = {
+      ...record.value.proposals,
+      ...Object.fromEntries(fetchedProposals.map(proposal => [proposal.proposal_id, proposal]))
+    };
+    record.value.hasMoreProposals = fetchedProposals.length === PROPOSALS_LIMIT;
+    record.value.loaded = true;
+    record.value.loading = false;
+  }
 
-      record.value.proposalsIdsList = proposals.map(proposal => proposal.proposal_id);
-      record.value.proposals = {
-        ...record.value.proposals,
-        ...Object.fromEntries(proposals.map(proposal => [proposal.proposal_id, proposal]))
+  async function fetchMore(spaceId: string, networkId: NetworkID) {
+    const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+
+    if (!proposals.value[uniqueSpaceId]) {
+      proposals.value[uniqueSpaceId] = {
+        loading: false,
+        loadingMore: false,
+        loaded: false,
+        proposalsIdsList: [],
+        proposals: {},
+        hasMoreProposals: true,
+        summaryLoading: false,
+        summaryLoaded: false,
+        summaryProposals: []
       };
-      record.value.hasMoreProposals = proposals.length === PROPOSALS_LIMIT;
-      record.value.loaded = true;
-      record.value.loading = false;
-    },
-    async fetchMore(spaceId: string, networkId: NetworkID) {
-      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+    }
 
-      if (!this.proposals[uniqueSpaceId]) {
-        this.proposals[uniqueSpaceId] = {
-          loading: false,
-          loadingMore: false,
-          loaded: false,
-          proposalsIdsList: [],
-          proposals: {},
-          hasMoreProposals: true,
-          summaryLoading: false,
-          summaryLoaded: false,
-          summaryProposals: []
-        };
-      }
+    const record = toRef(proposals.value, uniqueSpaceId) as Ref<SpaceRecord>;
+    if (record.value.loading || !record.value.loaded) return;
 
-      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
-      if (record.value.loading || !record.value.loaded) return;
+    record.value.loadingMore = true;
 
-      record.value.loadingMore = true;
-
-      const proposals = await getNetwork(networkId).api.loadProposals(spaceId, {
+    const fetchedProposals = await getNetwork(networkId).api.loadProposals(
+      spaceId,
+      {
         limit: PROPOSALS_LIMIT,
         skip: record.value.proposalsIdsList.length
-      });
+      },
+      metaStore.currentBlocks.get(networkId) || 0
+    );
 
-      record.value.proposalsIdsList = [
-        ...record.value.proposalsIdsList,
-        ...proposals.map(proposal => proposal.proposal_id)
-      ];
-      record.value.proposals = {
-        ...record.value.proposals,
-        ...Object.fromEntries(proposals.map(proposal => [proposal.proposal_id, proposal]))
-      };
+    record.value.proposalsIdsList = [
+      ...record.value.proposalsIdsList,
+      ...fetchedProposals.map(proposal => proposal.proposal_id)
+    ];
+    record.value.proposals = {
+      ...record.value.proposals,
+      ...Object.fromEntries(fetchedProposals.map(proposal => [proposal.proposal_id, proposal]))
+    };
 
-      record.value.hasMoreProposals = proposals.length === PROPOSALS_LIMIT;
-      record.value.loadingMore = false;
-    },
-    async fetchSummary(spaceId: string, networkId: NetworkID, limit = 3) {
-      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+    record.value.hasMoreProposals = fetchedProposals.length === PROPOSALS_LIMIT;
+    record.value.loadingMore = false;
+  }
 
-      if (!this.proposals[uniqueSpaceId]) {
-        this.proposals[uniqueSpaceId] = {
-          loading: false,
-          loadingMore: false,
-          loaded: false,
-          proposalsIdsList: [],
-          proposals: {},
-          hasMoreProposals: true,
-          summaryLoading: false,
-          summaryLoaded: false,
-          summaryProposals: []
-        };
-      }
+  async function fetchSummary(spaceId: string, networkId: NetworkID, limit = 3) {
+    const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 
-      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
-      if (record.value.summaryLoading || record.value.summaryLoaded) {
-        return;
-      }
-
-      record.value.summaryLoading = true;
-      record.value.summaryProposals = await getNetwork(networkId).api.loadProposalsSummary(
-        spaceId,
-        limit
-      );
-      record.value.summaryLoaded = true;
-      record.value.summaryLoading = false;
-    },
-    async fetchProposal(spaceId: string, proposalId: number, networkId: NetworkID) {
-      const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
-
-      if (!this.proposals[uniqueSpaceId]) {
-        this.proposals[uniqueSpaceId] = {
-          loading: false,
-          loadingMore: false,
-          loaded: false,
-          proposalsIdsList: [],
-          proposals: {},
-          hasMoreProposals: true,
-          summaryLoading: false,
-          summaryLoaded: false,
-          summaryProposals: []
-        };
-      }
-
-      const record = toRef(this.proposals, uniqueSpaceId) as Ref<SpaceRecord>;
-
-      const proposal = await getNetwork(networkId).api.loadProposal(spaceId, proposalId);
-      if (!proposal) return;
-
-      record.value.proposals = {
-        ...record.value.proposals,
-        [proposalId]: proposal
+    if (!proposals.value[uniqueSpaceId]) {
+      proposals.value[uniqueSpaceId] = {
+        loading: false,
+        loadingMore: false,
+        loaded: false,
+        proposalsIdsList: [],
+        proposals: {},
+        hasMoreProposals: true,
+        summaryLoading: false,
+        summaryLoaded: false,
+        summaryProposals: []
       };
     }
+
+    const record = toRef(proposals.value, uniqueSpaceId) as Ref<SpaceRecord>;
+    if (record.value.summaryLoading || record.value.summaryLoaded) {
+      return;
+    }
+
+    record.value.summaryLoading = true;
+    record.value.summaryProposals = await getNetwork(networkId).api.loadProposalsSummary(
+      spaceId,
+      metaStore.currentBlocks.get(networkId) || 0,
+      limit
+    );
+    record.value.summaryLoaded = true;
+    record.value.summaryLoading = false;
   }
+
+  async function fetchProposal(spaceId: string, proposalId: number, networkId: NetworkID) {
+    const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
+
+    if (!proposals.value[uniqueSpaceId]) {
+      proposals.value[uniqueSpaceId] = {
+        loading: false,
+        loadingMore: false,
+        loaded: false,
+        proposalsIdsList: [],
+        proposals: {},
+        hasMoreProposals: true,
+        summaryLoading: false,
+        summaryLoaded: false,
+        summaryProposals: []
+      };
+    }
+
+    const record = toRef(proposals.value, uniqueSpaceId) as Ref<SpaceRecord>;
+
+    const proposal = await getNetwork(networkId).api.loadProposal(
+      spaceId,
+      proposalId,
+      metaStore.currentBlocks.get(networkId) || 0
+    );
+    if (!proposal) return;
+
+    record.value.proposals = {
+      ...record.value.proposals,
+      [proposalId]: proposal
+    };
+  }
+
+  return {
+    proposals,
+    reset,
+    fetch,
+    fetchMore,
+    fetchSummary,
+    fetchProposal,
+    getSpaceProposals,
+    getProposal
+  };
 });

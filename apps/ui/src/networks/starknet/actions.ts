@@ -230,7 +230,7 @@ export function createActions(
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
-      timestamp: number
+      block: number
     ): Promise<VotingPower[]> => {
       const offsetsLength = parseInt(strategiesParams[0], 16);
       const offsets = strategiesParams
@@ -248,16 +248,10 @@ export function createActions(
           const strategy = getStarknetStrategy(address, defaultNetwork);
           if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
-          const value = await strategy.getVotingPower(
-            address,
-            voterAddress,
-            timestamp,
-            params2D[i],
-            {
-              ...clientConfig,
-              networkConfig: defaultNetwork
-            }
-          );
+          const value = await strategy.getVotingPower(address, voterAddress, block, params2D[i], {
+            ...clientConfig,
+            networkConfig: defaultNetwork
+          });
 
           const token = strategy.type === 'singleSlotProof' ? params2D[i][0] : null;
           return { address, value, decimals: 0, token, symbol: '' };

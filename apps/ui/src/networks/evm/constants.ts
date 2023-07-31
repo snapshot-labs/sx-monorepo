@@ -13,15 +13,15 @@ import IHUserCircle from '~icons/heroicons-outline/user-circle';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 
 export const SUPPORTED_AUTHENTICATORS = {
-  '0xddb36b865a1021524b936fb29fcba5fac073db74': true,
-  '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': true
+  '0xba06e6ccb877c332181a6867c05c8b746a21aed1': true,
+  '0x5f9b7d78c9a37a439d78f801e0e339c6e711e260': true
 };
 
 export const SUPPORTED_STRATEGIES = {
-  '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': true,
-  '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': true,
-  '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': true,
-  '0x54449c058bbf0b777745944ea1a7b79786fbc958': true
+  '0xc1245c5dca7885c73e32294140f1e5d30688c202': true,
+  '0x0c2de612982efd102803161fc7c74cca15db932c': true,
+  '0x2c8631584474e750cedf2fb6a904f2e84777aefe': true,
+  '0x3cee21a33751a2722413ff62dec3dec48e7748a4': true
 };
 
 export const SUPPORTED_EXECUTORS = {
@@ -30,23 +30,23 @@ export const SUPPORTED_EXECUTORS = {
 };
 
 export const RELAYER_AUTHENTICATORS = {
-  '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': true
+  '0x5f9b7d78c9a37a439d78f801e0e339c6e711e260': true
 };
 
 export const AUTHS = {
-  '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4': 'Ethereum signature',
-  '0xddb36b865a1021524b936fb29fcba5fac073db74': 'Ethereum transaction'
+  '0x5f9b7d78c9a37a439d78f801e0e339c6e711e260': 'Ethereum signature',
+  '0xba06e6ccb877c332181a6867c05c8b746a21aed1': 'Ethereum transaction'
 };
 
 export const PROPOSAL_VALIDATIONS = {
-  '0x03d512e0165d6b53ed2753df2f3184fbd2b52e48': 'Voting power'
+  '0x6d9d6d08ef6b26348bd18f1fc8d953696b7cf311': 'Voting power'
 };
 
 export const STRATEGIES = {
-  '0xeba53160c146cbf77a150e9a218d4c2de5db6b51': 'Vanilla',
-  '0x343baf4b44f7f79b14301cfa8068e3f8be7470de': 'Delegated Comp Token',
-  '0x4aaa33b4367dc5657854bd40738201651ec0cc7b': 'OpenZeppelin Votes',
-  '0x54449c058bbf0b777745944ea1a7b79786fbc958': 'Whitelist'
+  '0xc1245c5dca7885c73e32294140f1e5d30688c202': 'Vanilla',
+  '0x0c2de612982efd102803161fc7c74cca15db932c': 'Delegated Comp Token',
+  '0x2c8631584474e750cedf2fb6a904f2e84777aefe': 'OpenZeppelin Votes',
+  '0x3cee21a33751a2722413ff62dec3dec48e7748a4': 'Whitelist'
 };
 
 export const EXECUTORS = {
@@ -56,7 +56,7 @@ export const EXECUTORS = {
 
 export const EDITOR_AUTHENTICATORS = [
   {
-    address: '0xddb36b865a1021524b936fb29fcba5fac073db74',
+    address: '0xba06e6ccb877c332181a6867c05c8b746a21aed1',
     name: 'Ethereum transaction',
     about:
       'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
@@ -64,7 +64,7 @@ export const EDITOR_AUTHENTICATORS = [
     paramsDefinition: null
   },
   {
-    address: '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4',
+    address: '0x5f9b7d78c9a37a439d78f801e0e339c6e711e260',
     name: 'Ethereum signature',
     about:
       'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
@@ -75,7 +75,7 @@ export const EDITOR_AUTHENTICATORS = [
 
 export const EDITOR_PROPOSAL_VALIDATIONS = [
   {
-    address: '0x03d512E0165d6B53ED2753Df2f3184fBd2b52E48',
+    address: '0x6d9d6d08ef6b26348bd18f1fc8d953696b7cf311',
     type: 'VotingPower',
     name: 'Voting power',
     icon: IHLightningBolt,
@@ -118,7 +118,7 @@ export const EDITOR_PROPOSAL_VALIDATIONS = [
 
 export const EDITOR_VOTING_STRATEGIES = [
   {
-    address: '0xeba53160c146cbf77a150e9a218d4c2de5db6b51',
+    address: '0xc1245c5dca7885c73e32294140f1e5d30688c202',
     name: 'Vanilla',
     about:
       'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
@@ -146,7 +146,7 @@ export const EDITOR_VOTING_STRATEGIES = [
     }
   },
   {
-    address: '0x343baf4b44f7f79b14301cfa8068e3f8be7470de',
+    address: '0x0c2de612982efd102803161fc7c74cca15db932c',
     name: 'Delegated Comp Token',
     about:
       'A strategy that allows delegated balances of Compound style checkpoint tokens to be used as voting power.',
@@ -189,7 +189,7 @@ export const EDITOR_VOTING_STRATEGIES = [
     }
   },
   {
-    address: '0x4aaa33b4367dc5657854bd40738201651ec0cc7b',
+    address: '0x2c8631584474e750cedf2fb6a904f2e84777aefe',
     name: 'OpenZeppelin Votes',
     about:
       'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',

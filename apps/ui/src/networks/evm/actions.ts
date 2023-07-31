@@ -46,7 +46,7 @@ export function createActions(
     async predictSpaceAddress(web3: Web3Provider, { salt }) {
       await verifyNetwork(web3, chainId);
 
-      return client.predictSpaceAddress({ signer: web3.getSigner(), salt });
+      return client.predictSpaceAddress({ signer: web3.getSigner(), saltNonce: salt });
     },
     async deployDependency(
       web3: Web3Provider,
@@ -109,7 +109,7 @@ export function createActions(
 
       const response = await client.deploySpace({
         signer: web3.getSigner(),
-        salt,
+        saltNonce: salt,
         params: {
           ...params,
           authenticators: params.authenticators.map(config => config.address),
@@ -429,7 +429,7 @@ export function createActions(
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
-      timestamp: number
+      block: number
     ): Promise<VotingPower[]> => {
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
@@ -439,7 +439,7 @@ export function createActions(
           const value = await strategy.getVotingPower(
             address,
             voterAddress,
-            timestamp,
+            block,
             strategiesParams[i],
             provider
           );

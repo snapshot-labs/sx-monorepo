@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
+import { getProvider } from '@/helpers/provider';
 import { Space } from '@/types';
 import { VotingPower } from '@/networks/types';
 
@@ -35,12 +36,14 @@ async function getVotingPower() {
 
   loadingVotingPower.value = true;
   try {
+    const currentBlock = await getProvider(network.baseChainId).getBlockNumber();
+
     votingPowers.value = await network.actions.getVotingPower(
       props.space.strategies,
       props.space.strategies_params,
       props.space.strategies_parsed_metadata,
       web3.value.account,
-      Math.floor(Date.now() / 1000)
+      currentBlock
     );
   } catch (e) {
     console.warn('Failed to load voting power', e);

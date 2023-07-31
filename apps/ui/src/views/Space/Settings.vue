@@ -65,8 +65,7 @@ watchEffect(() => {
             :initial-value="space.voting_delay"
             :loading="settingsLoading.votingDelay"
             :definition="{
-              type: 'integer',
-              format: 'duration'
+              type: 'integer'
             }"
             @save="value => handleSave('votingDelay', value.toString())"
           >
@@ -80,8 +79,7 @@ watchEffect(() => {
             :initial-value="space.min_voting_period"
             :loading="settingsLoading.minVotingPeriod"
             :definition="{
-              type: 'integer',
-              format: 'duration'
+              type: 'integer'
             }"
             :custom-error-validation="
               value =>
@@ -101,8 +99,7 @@ watchEffect(() => {
             :initial-value="space.max_voting_period"
             :loading="settingsLoading.maxVotingPeriod"
             :definition="{
-              type: 'integer',
-              format: 'duration'
+              type: 'integer'
             }"
             :custom-error-validation="
               value =>
