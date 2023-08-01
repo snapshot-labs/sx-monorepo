@@ -4,8 +4,9 @@ import { isAddress } from '@ethersproject/address';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { abiToDefinition, clone } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
+import { getValidator } from '@/helpers/validation';
 import { getProvider } from '@/helpers/provider';
+import { resolver } from '@/helpers/resolver';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -30,6 +31,10 @@ const ignoreFormUpdates = ref(true);
 const addressInvalid = ref(false);
 const showAbiInput = ref(false);
 const abiStr = ref('');
+const formValidated = ref(false);
+const formErrors = ref({} as Record<string, any>);
+const argsValidated = ref(false);
+const argsErrors = ref({} as Record<string, any>);
 
 const form = reactive(clone(DEFAULT_FORM_STATE));
 
@@ -58,44 +63,48 @@ const definition = computed(() => {
   return {};
 });
 
-const errors = computed(() => {
-  const formErrors = validateForm(
-    {
-      type: 'object',
-      properties: {
-        to: {
-          type: 'string',
-          format: 'address'
-        },
-        abi: {
-          type: 'string',
-          format: 'abi'
-        },
-        ...(currentMethod.value?.payable
-          ? {
-              amount: {
-                type: 'string',
-                format: 'ethValue'
-              }
-            }
-          : {})
+const formValidator = computed(() =>
+  getValidator({
+    $async: true,
+    type: 'object',
+    properties: {
+      to: {
+        type: 'string',
+        format: 'ens-or-address'
       },
-      additionalProperties: true
+      abi: {
+        type: 'string',
+        format: 'abi'
+      },
+      ...(currentMethod.value?.payable
+        ? {
+            amount: {
+              type: 'string',
+              format: 'ethValue'
+            }
+          }
+        : {})
     },
-    { to: form.to, abi: showAbiInput.value ? abiStr.value : undefined, amount: form.amount }
-  );
+    additionalProperties: true
+  })
+);
+const argsValidator = computed(() => getValidator(definition.value));
+
+const errors = computed(() => {
+  const errors = { ...formErrors.value };
 
   if (addressInvalid.value) {
-    formErrors.to = 'No contract found at this address.';
+    errors.to = 'No contract found at this address.';
   }
 
-  return formErrors;
+  return errors;
 });
-const argsErrors = computed(() => validateForm(definition.value, form.args));
 const formValid = computed(
   () =>
     form.abi.length > 0 &&
+    formValidated.value &&
     Object.keys(errors.value).length === 0 &&
+    argsValidated.value &&
     Object.keys(argsErrors.value).length === 0
 );
 
@@ -114,8 +123,8 @@ function handlePickerSelect(value: string) {
   else form.args[pickerField.value] = value;
 }
 
-function handleSubmit() {
-  const tx = createContractCallTransaction({ form: clone(form) });
+async function handleSubmit() {
+  const tx = await createContractCallTransaction({ form: clone(form) });
 
   emit('add', tx);
   emit('close');
@@ -132,19 +141,26 @@ async function handleToChange(to: string) {
   addressInvalid.value = false;
   showAbiInput.value = false;
 
-  if (!isAddress(to)) return;
+  let contractAddress = to;
+  const resolvedTo = await resolver.resolveName(form.to);
+  if (resolvedTo?.address) contractAddress = resolvedTo.address;
+
+  if (!isAddress(contractAddress)) {
+    console.log('not an address');
+    return;
+  }
 
   loading.value = true;
   const provider = getProvider(5);
 
   try {
-    const code = await provider.getCode(to);
+    const code = await provider.getCode(contractAddress);
     if (code === '0x') {
       addressInvalid.value = true;
       return;
     }
 
-    form.abi = await getABI(to);
+    form.abi = await getABI(contractAddress);
   } catch (e) {
     console.log(e);
     showAbiInput.value = true;
@@ -210,6 +226,24 @@ watch(
     }
   }
 );
+
+watchEffect(async () => {
+  argsValidated.value = false;
+
+  argsErrors.value = await argsValidator.value.validateAsync(form.args);
+  argsValidated.value = true;
+});
+
+watchEffect(async () => {
+  formValidated.value = false;
+
+  formErrors.value = await formValidator.value.validateAsync({
+    to: form.to,
+    abi: showAbiInput.value ? abiStr.value : undefined,
+    amount: form.amount
+  });
+  formValidated.value = true;
+});
 </script>
 
 <template>

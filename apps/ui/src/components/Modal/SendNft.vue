@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
+import { getValidator } from '@/helpers/validation';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -11,9 +11,9 @@ const DEFAULT_FORM_STATE = {
 
 const RECIPIENT_DEFINITION = {
   type: 'string',
-  format: 'address',
+  format: 'ens-or-address',
   title: 'Recipient',
-  examples: ['Address']
+  examples: ['Address or ENS']
 };
 
 const props = defineProps({
@@ -25,12 +25,25 @@ const props = defineProps({
   initialState: Object
 });
 
+const formValidator = getValidator({
+  $async: true,
+  type: 'object',
+  title: 'TokenTransfer',
+  additionalProperties: false,
+  required: ['to'],
+  properties: {
+    to: RECIPIENT_DEFINITION
+  }
+});
+
 const emit = defineEmits(['add', 'close']);
 
 const searchInput: Ref<HTMLElement | null> = ref(null);
 const showPicker = ref(false);
 const pickerType: Ref<'nft' | 'contact' | null> = ref(null);
 const searchValue = ref('');
+const formValidated = ref(false);
+const formErrors = ref({} as Record<string, any>);
 
 const form: { to: string; nft: string; amount: string | number } = reactive(
   clone(DEFAULT_FORM_STATE)
@@ -39,25 +52,11 @@ const form: { to: string; nft: string; amount: string | number } = reactive(
 const { loading, loaded, nfts, nftsMap, loadNfts } = useNfts();
 
 const currentNft = computed(() => nftsMap.value?.get(form.nft));
-const formErrors = computed(() =>
-  validateForm(
-    {
-      type: 'object',
-      title: 'TokenTransfer',
-      additionalProperties: false,
-      required: ['to'],
-      properties: {
-        to: RECIPIENT_DEFINITION
-      }
-    },
-    {
-      to: form.to
-    }
-  )
-);
+
 const formValid = computed(
   () =>
     currentNft.value &&
+    formValidated.value &&
     Object.keys(formErrors.value).length === 0 &&
     (currentNft.value.type !== 'erc1155' || form.amount !== '')
 );
@@ -77,8 +76,8 @@ function handlePickerClick(type: 'nft' | 'contact') {
   });
 }
 
-function handleSubmit() {
-  const tx = createSendNftTransaction({
+async function handleSubmit() {
+  const tx = await createSendNftTransaction({
     nft: currentNft.value,
     address: props.address,
     form: clone(form)
@@ -108,6 +107,15 @@ watch(
     }
   }
 );
+
+watchEffect(async () => {
+  formValidated.value = false;
+
+  formErrors.value = await formValidator.validateAsync({
+    to: form.to
+  });
+  formValidated.value = true;
+});
 </script>
 
 <template>

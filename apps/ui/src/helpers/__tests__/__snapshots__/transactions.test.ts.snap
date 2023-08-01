@@ -21,6 +21,27 @@ exports[`transactions > createContractCallTransaction > should create contract c
 }
 `;
 
+exports[`transactions > createContractCallTransaction > should create contract call transaction with ENS domain 1`] = `
+{
+  "_form": {
+    "abi": [
+      "function deny(address guy)",
+    ],
+    "amount": undefined,
+    "args": {
+      "guy": "me.sekhmet.eth",
+    },
+    "method": "deny",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  },
+  "_type": "contractCall",
+  "data": "0x9c52a7f1000000000000000000000000556b14cbda79a36dc33fcd461a04a5bcb5dc2a70",
+  "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "value": "0",
+}
+`;
+
 exports[`transactions > createContractCallTransaction > should create contract call transaction with payable 1`] = `
 {
   "_form": {

@@ -3,9 +3,9 @@ import { formatUnits } from '@ethersproject/units';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
-import type { Token } from '@/helpers/alchemy';
-import type { Transaction } from '@/types';
+import { getValidator } from '@/helpers/validation';
+import { Token } from '@/helpers/alchemy';
+import { Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -16,10 +16,21 @@ const DEFAULT_FORM_STATE = {
 
 const RECIPIENT_DEFINITION = {
   type: 'string',
-  format: 'address',
+  format: 'ens-or-address',
   title: 'Recipient',
-  examples: ['Address']
+  examples: ['Address or ENS']
 };
+
+const formValidator = getValidator({
+  $async: true,
+  type: 'object',
+  title: 'TokenTransfer',
+  additionalProperties: false,
+  required: ['to'],
+  properties: {
+    to: RECIPIENT_DEFINITION
+  }
+});
 
 const props = defineProps<{
   open: boolean;
@@ -45,6 +56,8 @@ const showPicker = ref(false);
 const pickerType: Ref<'token' | 'contact' | null> = ref(null);
 const searchValue = ref('');
 const customTokens: Ref<Token[]> = ref([]);
+const formValidated = ref(false);
+const formErrors = ref({} as Record<string, any>);
 const { loading, assets, assetsMap, loadBalances } = useBalances();
 
 const allAssets = computed(() => [...assets.value, ...customTokens.value]);
@@ -70,24 +83,12 @@ const currentToken = computed(() => {
   return token;
 });
 
-const formErrors = computed(() =>
-  validateForm(
-    {
-      type: 'object',
-      title: 'TokenTransfer',
-      additionalProperties: false,
-      required: ['to'],
-      properties: {
-        to: RECIPIENT_DEFINITION
-      }
-    },
-    {
-      to: form.to
-    }
-  )
-);
 const formValid = computed(
-  () => currentToken.value && Object.keys(formErrors.value).length === 0 && form.amount !== ''
+  () =>
+    currentToken.value &&
+    formValidated.value &&
+    Object.keys(formErrors.value).length === 0 &&
+    form.amount !== ''
 );
 
 function handleAddCustomToken(token: Token) {
@@ -137,8 +138,8 @@ function handleMaxClick() {
   }
 }
 
-function handleSubmit() {
-  const tx = createSendTokenTransaction({
+async function handleSubmit() {
+  const tx = await createSendTokenTransaction({
     token: currentToken.value,
     form: clone(form)
   });
@@ -176,6 +177,15 @@ watch(currentToken, token => {
   if (!token || typeof form.amount === 'string') return;
 
   form.value = parseFloat((form.amount * token.price).toFixed(2));
+});
+
+watchEffect(async () => {
+  formValidated.value = false;
+
+  formErrors.value = await formValidator.validateAsync({
+    to: form.to
+  });
+  formValidated.value = true;
 });
 </script>
 

@@ -57,6 +57,7 @@ const getComponent = (property: { type: string; format: string; enum?: string[] 
     case 'string':
       if (property.format === 'long') return IText;
       if (property.format === 'address') return IAddress;
+      if (property.format === 'ens-or-address') return IAddress;
       if (property.format === 'stamp') return IStamp;
       if (property.enum) return ISelect;
       return IString;

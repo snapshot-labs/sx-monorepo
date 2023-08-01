@@ -165,6 +165,7 @@ export function _rt(number) {
 
 export function abiToDefinition(abi) {
   const definition = {
+    $async: true,
     title: abi.name,
     type: 'object',
     required: [] as string[],
@@ -185,7 +186,7 @@ export function abiToDefinition(abi) {
       definition.properties[input.name].examples = ['0'];
     }
     if (input.type === 'address') {
-      definition.properties[input.name].format = 'address';
+      definition.properties[input.name].format = 'ens-or-address';
       definition.properties[input.name].examples = ['0x0000…'];
     }
     definition.properties[input.name].type = type;

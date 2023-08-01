@@ -48,14 +48,14 @@ describe('transactions', () => {
       value: 1076.29
     };
 
-    it('should create eth transaction', () => {
-      const tx = createSendTokenTransaction({ token: ethToken, form });
+    it('should create eth transaction', async () => {
+      const tx = await createSendTokenTransaction({ token: ethToken, form });
 
       expect(tx).toMatchSnapshot();
     });
 
-    it('should create erc20 transaction', () => {
-      const tx = createSendTokenTransaction({ token: balToken, form });
+    it('should create erc20 transaction', async () => {
+      const tx = await createSendTokenTransaction({ token: balToken, form });
 
       expect(tx).toMatchSnapshot();
     });
@@ -84,8 +84,8 @@ describe('transactions', () => {
       amount: '1'
     };
 
-    it('should create erc721 transaction', () => {
-      const tx = createSendNftTransaction({
+    it('should create erc721 transaction', async () => {
+      const tx = await createSendNftTransaction({
         nft: erc721Nft,
         form,
         address: '0x000000000000000000000000000000000000dead'
@@ -94,8 +94,8 @@ describe('transactions', () => {
       expect(tx).toMatchSnapshot();
     });
 
-    it('should create erc1155 transaction', () => {
-      const tx = createSendNftTransaction({
+    it('should create erc1155 transaction', async () => {
+      const tx = await createSendNftTransaction({
         nft: erc1155Nft,
         form,
         address: '0x000000000000000000000000000000000000dead'
@@ -106,8 +106,8 @@ describe('transactions', () => {
   });
 
   describe('createContractCallTransaction', () => {
-    it('should create contract call transaction', () => {
-      const tx = createContractCallTransaction({
+    it('should create contract call transaction', async () => {
+      const tx = await createContractCallTransaction({
         form: {
           to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
           abi: ['function deny(address guy)'],
@@ -121,14 +121,29 @@ describe('transactions', () => {
       expect(tx).toMatchSnapshot();
     });
 
-    it('should create contract call transaction with payable', () => {
-      const tx = createContractCallTransaction({
+    it('should create contract call transaction with payable', async () => {
+      const tx = await createContractCallTransaction({
         form: {
           to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
           abi: ['function deposit() payable'],
           method: 'deposit',
           args: {},
           amount: '20'
+        }
+      });
+
+      expect(tx).toMatchSnapshot();
+    });
+
+    it('should create contract call transaction with ENS domain', async () => {
+      const tx = await createContractCallTransaction({
+        form: {
+          to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
+          abi: ['function deny(address guy)'],
+          method: 'deny',
+          args: {
+            guy: 'me.sekhmet.eth'
+          }
         }
       });
 

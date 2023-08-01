@@ -32,8 +32,9 @@ const definition = {
     },
     address: {
       type: 'string',
+      format: 'address',
       title: 'Address',
-      examples: ['Address or ENS']
+      examples: ['Address']
     }
   }
 };
