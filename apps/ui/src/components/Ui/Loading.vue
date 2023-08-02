@@ -53,6 +53,13 @@ withDefaults(
     }
   }
 
+  &.big {
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
   &.overlay {
     position: fixed;
     text-align: center;
