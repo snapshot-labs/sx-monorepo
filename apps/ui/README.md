@@ -1,14 +1,11 @@
 [![Test CI](https://github.com/snapshot-labs/sx-ui/actions/workflows/test.yml/badge.svg)](https://github.com/snapshot-labs/sx-ui/actions/workflows/test.yml)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/snapshot-labs/sx-ui)
-[![GitHub issues help wanted](https://img.shields.io/github/issues/snapshot-labs/sx-ui/help%20wanted)](https://github.com/snapshot-labs/sx-ui/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 [![Discord](https://img.shields.io/discord/707079246388133940.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.snapshot.org/)
-[![Twitter](https://img.shields.io/twitter/follow/SnapshotLabs?label=SnapshotLabs&style=flat&logo=twitter&color=1DA1F2)](https://twitter.com/SnapshotLabs)
 
 # Snapshot X
 
-Snapshot X is an on-chain governance platform.
+An open source interface for Snapshot X protocol.
 
-**[testnet.snapshotx.xyz](https://testnet.snapshotx.xyz)**
+**[Website](https://snapshotx.xyz)**
 
 **[Documentation](https://obytejs.com)**
 
@@ -48,7 +45,7 @@ yarn test:unit
 yarn typecheck
 ```
 
-## Development Guide
+## Development guide
 
 This project uses `goerli` and `testnet-2` Starknet networks. Make sure that your Metamask/ArgentX is
 configured for those networks.
@@ -65,8 +62,8 @@ This is done manually currently.
 To do it:
 
 - Take some block on goerli at which you have your desired amount of WETH
-- Visit `https://testnet.mana.pizza/fossil/send/BLOCK_NUM_1` where BLOCK_NUM_1 is block you want to send to L2
-- Visit `https://testnet.mana.pizza/fossil/process/BLOCK_NUM_2` where BLOCK_NUM_2 is the block you used above **minus 1**
+- Visit `https://mana.pizza/fossil/send/BLOCK_NUM_1` where BLOCK_NUM_1 is block you want to send to L2
+- Visit `https://mana.pizza/fossil/process/BLOCK_NUM_2` where BLOCK_NUM_2 is the block you used above **minus 1**
 
 If you need to modify services that are used by sx-ui you can specify them in `.env` file or applicable
 file in `./src/networks`.
