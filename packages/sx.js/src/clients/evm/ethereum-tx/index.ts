@@ -1,7 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { AbiCoder, Interface } from '@ethersproject/abi';
-import { keccak256 } from '@ethersproject/keccak256';
-import { keccak256 as solidityKeccak256 } from '@ethersproject/solidity';
+import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
 import { getAuthenticator } from '../../../authenticators/evm';
 import { getStrategiesParams } from '../../../strategies/evm';
@@ -13,7 +12,6 @@ import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json'
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { Propose, UpdateProposal, Vote, Envelope, AddressConfig } from '../types';
 import type { EvmNetworkConfig } from '../../../types';
-import { assert } from 'console';
 
 type SpaceParams = {
   controller: string;
@@ -235,7 +233,7 @@ export class EthereumTx {
   }
 
   async getSalt({ sender, saltNonce }: { sender: string; saltNonce: string }) {
-    return solidityKeccak256(['address', 'uint256'], [sender, saltNonce]);
+    return keccak256(['address', 'uint256'], [sender, saltNonce]);
   }
 
   async predictSpaceAddress({ signer, saltNonce }: { signer: Signer; saltNonce: string }) {

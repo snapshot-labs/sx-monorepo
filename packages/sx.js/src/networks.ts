@@ -37,6 +37,16 @@ export const evmSepolia: EvmNetworkConfig = {
   eip712ChainId: 11155111
 };
 
+export const evmPolygon: EvmNetworkConfig = {
+  ...evmGoerli,
+  eip712ChainId: 137
+};
+
+export const evmArbitrum: EvmNetworkConfig = {
+  ...evmGoerli,
+  eip712ChainId: 42161
+};
+
 export const evmLineaGoerli: EvmNetworkConfig = {
   eip712ChainId: 59140,
   proxyFactory: '0x12a1fffffd70677939d61d641ea043bc9060c718',
