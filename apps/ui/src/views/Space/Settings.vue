@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, _d, compareAddresses } from '@/helpers/utils';
+import { shorten, _n, compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
@@ -59,7 +59,7 @@ watchEffect(() => {
       <Label :label="'Voting'" sticky />
       <div class="mx-4 pt-3">
         <div class="mb-3">
-          <div class="s-label !mb-0">Voting delay</div>
+          <div class="s-label !mb-0">Voting delay in blocks</div>
           <UiEditable
             :editable="spaceIsEditable"
             :initial-value="space.voting_delay"
@@ -69,11 +69,11 @@ watchEffect(() => {
             }"
             @save="value => handleSave('votingDelay', value.toString())"
           >
-            <h4 class="text-skin-link text-md" v-text="_d(space.voting_delay) || 'No delay'" />
+            <h4 class="text-skin-link text-md" v-text="_n(space.voting_delay) || 'No delay'" />
           </UiEditable>
         </div>
         <div class="mb-3">
-          <div class="s-label !mb-0">Min. voting period</div>
+          <div class="s-label !mb-0">Min. voting period in blocks</div>
           <UiEditable
             :editable="spaceIsEditable"
             :initial-value="space.min_voting_period"
@@ -89,11 +89,11 @@ watchEffect(() => {
             "
             @save="value => handleSave('minVotingPeriod', value.toString())"
           >
-            <h4 class="text-skin-link text-md" v-text="_d(space.min_voting_period) || 'No min.'" />
+            <h4 class="text-skin-link text-md" v-text="_n(space.min_voting_period) || 'No min.'" />
           </UiEditable>
         </div>
         <div class="mb-3">
-          <div class="s-label !mb-0">Max. voting period</div>
+          <div class="s-label !mb-0">Max. voting period in blocks</div>
           <UiEditable
             :editable="spaceIsEditable"
             :initial-value="space.max_voting_period"
@@ -109,7 +109,7 @@ watchEffect(() => {
             "
             @save="value => handleSave('maxVotingPeriod', value.toString())"
           >
-            <h4 class="text-skin-link text-md" v-text="_d(space.max_voting_period)" />
+            <h4 class="text-skin-link text-md" v-text="_n(space.max_voting_period)" />
           </UiEditable>
         </div>
         <div v-if="space.proposal_threshold !== '0'" class="mb-3">

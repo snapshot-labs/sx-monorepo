@@ -69,7 +69,7 @@ function handleSave() {
 
 <template>
   <div
-    class="flex items-center gap-2 group"
+    class="flex items-center gap-2"
     :class="{
       'mt-2': editing,
       'w-fit': definition.format !== 'duration',
@@ -105,11 +105,7 @@ function handleSave() {
         </div>
       </template>
       <template v-else>
-        <button
-          v-if="editable"
-          class="hidden group-hover:block hover:opacity-80"
-          @click="editing = !editing"
-        >
+        <button v-if="editable" class="hover:opacity-80" @click="editing = !editing">
           <IH-pencil />
         </button>
       </template>
