@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone, getSalt } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, enabledNetworks } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
@@ -77,7 +77,7 @@ const metadataForm: SpaceMetadata = reactive(
     delegationApiUrl: null
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref('gor');
+const selectedNetworkId: Ref<NetworkID> = ref(enabledNetworks[0]);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
@@ -101,11 +101,7 @@ const activePages = computed(() =>
   PAGES.filter(page => {
     const proposalValidations = selectedNetwork.value.constants.EDITOR_PROPOSAL_VALIDATIONS;
 
-    if (page.id === 'validations' && proposalValidations.length === 0) {
-      return false;
-    }
-
-    return true;
+    return !(page.id === 'validations' && proposalValidations.length === 0);
   })
 );
 const accessiblePages = computed(() => {

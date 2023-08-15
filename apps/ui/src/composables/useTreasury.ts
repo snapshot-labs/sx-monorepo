@@ -3,6 +3,8 @@ import { Space } from '@/types';
 type NullableSpace = Space | undefined | null;
 
 const chainIds = {
+  matic: 137,
+  arb1: 42161,
   gor: 5,
   sep: 11155111,
   'linea-testnet': 59140

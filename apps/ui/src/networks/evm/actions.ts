@@ -2,6 +2,8 @@ import { Provider } from '@ethersproject/providers';
 import {
   clients,
   getEvmStrategy,
+  evmArbitrum,
+  evmPolygon,
   evmGoerli,
   evmSepolia,
   evmLineaGoerli,
@@ -18,6 +20,8 @@ import type { Space, Proposal, SpaceMetadata, StrategyParsedMetadata } from '@/t
 type Choice = 0 | 1 | 2;
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
+  137: evmPolygon,
+  42161: evmArbitrum,
   5: evmGoerli,
   11155111: evmSepolia,
   59140: evmLineaGoerli

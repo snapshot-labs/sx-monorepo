@@ -103,7 +103,6 @@ export function useWeb3() {
         ...networks[defaultNetwork],
         chainId,
         name: 'Unknown',
-        network: 'unknown',
         unknown: true
       };
     }

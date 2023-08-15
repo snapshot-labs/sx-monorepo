@@ -5,15 +5,17 @@ export * from './types';
 const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
 
 const NETWORKS = {
-  1: 'mainnet',
-  5: 'goerli',
-  11155111: 'sepolia'
+  1: 'eth-mainnet',
+  5: 'eth-goerli',
+  11155111: 'eth-sepolia',
+  137: 'polygon-mainnet',
+  42161: 'arb-mainnet'
 };
 
 function getApiUrl(networkId: number) {
   const network = NETWORKS[networkId] ?? 'mainnet';
 
-  return `https://eth-${network}.g.alchemy.com/v2/${apiKey}`;
+  return `https://${network}.g.alchemy.com/v2/${apiKey}`;
 }
 
 export async function request(method: string, params: any[], networkId: number) {

@@ -8,6 +8,18 @@ import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
 const METADATA = {
+  matic: {
+    name: 'Polygon',
+    chainId: 137,
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-polygon/version/latest',
+    avatar: 'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am'
+  },
+  arb1: {
+    name: 'Arbitrum One',
+    chainId: 42161,
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
+    avatar: 'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq'
+  },
   gor: {
     name: 'Ethereum Goerli',
     chainId: 5,
