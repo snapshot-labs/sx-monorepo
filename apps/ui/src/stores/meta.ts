@@ -4,7 +4,8 @@ import { getProvider } from '@/helpers/provider';
 import { enabledNetworks, getNetwork } from '@/networks';
 
 export const useMetaStore = defineStore('meta', () => {
-  const loaded = ref(false);
+  const loaded = ref<boolean>(false);
+  const currentTs = ref<number>(Date.now() / 1e3);
   const currentBlocks = ref(new Map<NetworkID, number>());
 
   async function fetchBlocks() {
@@ -20,11 +21,14 @@ export const useMetaStore = defineStore('meta', () => {
     });
 
     await Promise.all(promises);
+
+    currentTs.value = Date.now() / 1e3;
     loaded.value = true;
   }
 
   return {
     loaded,
+    currentTs,
     currentBlocks,
     fetchBlocks
   };

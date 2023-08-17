@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { _t } from '@/helpers/utils';
 import { Proposal } from '@/types';
+import { useMetaStore } from '@/stores/meta';
+import { METADATA } from '@/networks/evm';
 
 const props = defineProps<{
   open: boolean;
@@ -19,7 +21,18 @@ const labels = {
   max_end: 'Max. end'
 };
 
+const metaStore = useMetaStore();
+
+function getTsFromBlock(network, blockNum) {
+  const networkBlockNum = metaStore.currentBlocks.get(network) || 0;
+  const blockDiff = networkBlockNum - blockNum;
+
+  return metaStore.currentTs.valueOf() - METADATA[network].blockTime * blockDiff;
+}
+
 const states = computed(() => {
+  const network = props.proposal.network;
+
   if (props.proposal.min_end === props.proposal.max_end) {
     return [
       {
@@ -28,11 +41,13 @@ const states = computed(() => {
       },
       {
         id: 'start',
-        value: props.proposal.start
+        block_number: props.proposal.start,
+        value: getTsFromBlock(network, props.proposal.start)
       },
       {
         id: 'end',
-        value: props.proposal.min_end
+        block_number: props.proposal.min_end,
+        value: getTsFromBlock(network, props.proposal.min_end)
       }
     ];
   }
@@ -44,15 +59,18 @@ const states = computed(() => {
     },
     {
       id: 'start',
-      value: props.proposal.start
+      block_number: props.proposal.start,
+      value: getTsFromBlock(network, props.proposal.start)
     },
     {
       id: 'min_end',
-      value: props.proposal.min_end
+      block_number: props.proposal.min_end,
+      value: getTsFromBlock(network, props.proposal.min_end)
     },
     {
       id: 'max_end',
-      value: props.proposal.max_end
+      block_number: props.proposal.max_end,
+      value: getTsFromBlock(network, props.proposal.max_end)
     }
   ];
 });

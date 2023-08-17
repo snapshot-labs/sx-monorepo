@@ -7,36 +7,41 @@ import networks from '@/helpers/networks.json';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
-const METADATA = {
+export const METADATA = {
   matic: {
     name: 'Polygon',
     chainId: 137,
     apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-polygon/version/latest',
-    avatar: 'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am'
+    avatar: 'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am',
+    blockTime: 2.15812
   },
   arb1: {
     name: 'Arbitrum One',
     chainId: 42161,
     apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
-    avatar: 'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq'
+    avatar: 'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
+    blockTime: 0.26082
   },
   gor: {
     name: 'Ethereum Goerli',
     chainId: 5,
     apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-goerli/version/latest',
-    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
+    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
+    blockTime: 15.52512
   },
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
     apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest',
-    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
+    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
+    blockTime: 13.2816
   },
   'linea-testnet': {
     name: 'Linea testnet',
     chainId: 59140,
     apiUrl: 'https://thegraph.goerli.zkevm.consensys.net/subgraphs/name/snapshot-labs/sx-subgraph',
-    avatar: 'ipfs://bafkreibn4mjs54bnmvkrkiaiwp47gvcz6bervg2kr5ubknytfyz6l5wbs4'
+    avatar: 'ipfs://bafkreibn4mjs54bnmvkrkiaiwp47gvcz6bervg2kr5ubknytfyz6l5wbs4',
+    blockTime: 13.52926
   }
 };
 
