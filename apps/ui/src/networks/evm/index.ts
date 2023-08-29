@@ -78,7 +78,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     avatar,
     baseChainId: chainId,
     hasReceive: false,
-    supportsSimulation: networkId === 'gor' || networkId === 'sep',
+    supportsSimulation: ['gor', 'sep', 'matic', 'arb1'].includes(networkId),
     managerConnectors: ['injected', 'walletconnect', 'walletlink', 'portis', 'gnosis'],
     actions: createActions(provider, helpers, chainId),
     api,
