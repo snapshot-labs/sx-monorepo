@@ -78,7 +78,7 @@ const visibleResults = computed(() =>
             v-else-if="result.choice === 2"
             class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
           />
-          <IH-arrow-sm-right
+          <IH-minus-sm
             v-else-if="result.choice === 3"
             class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
           />

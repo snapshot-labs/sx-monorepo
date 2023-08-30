@@ -354,7 +354,7 @@ watchEffect(() => {
                 :loading="sendingType === 3"
                 @click="handleVoteClick(3)"
               >
-                <IH-arrow-sm-right class="inline-block" />
+                <IH-minus-sm class="inline-block" />
               </UiButton>
             </UiTooltip>
           </div>
