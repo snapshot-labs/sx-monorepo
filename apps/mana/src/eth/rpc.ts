@@ -1,8 +1,17 @@
-import { clients, evmGoerli, evmSepolia, evmLineaGoerli } from '@snapshot-labs/sx';
+import {
+  clients,
+  evmPolygon,
+  evmArbitrum,
+  evmGoerli,
+  evmSepolia,
+  evmLineaGoerli
+} from '@snapshot-labs/sx';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
 export const NETWORKS = {
+  137: evmPolygon,
+  42161: evmArbitrum,
   5: evmGoerli,
   11155111: evmSepolia,
   59140: evmLineaGoerli

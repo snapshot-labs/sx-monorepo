@@ -2,8 +2,8 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 
 const addressIndicies = {
-  // SekhmetDAO
-  '0x65e4329e8c0fba31883b98e2cf3e81d3cdcac780': 1
+  '0x65e4329e8c0fba31883b98e2cf3e81d3cdcac780': 1, // SekhmetDAO
+  '0x4d95a8be4f1d24d50cc0d7b12f5576fa4bbd892b': 2 // Labs
 };
 
 export const createWalletProxy = (mnemonic: string, chainId: number) => {
