@@ -52,6 +52,8 @@ const fn = { send };
 
 router.post('/', async (req, res) => {
   const { id, method, params } = req.body;
+
+  if (!fn[method]) return rpcError(res, 500, 'wrong method', id);
   return await fn[method](id, params, res);
 });
 
