@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useUiStore } from '@/stores/ui';
 import { useSpacesStore } from '@/stores/spaces';
+import { compareAddresses } from '@/helpers/utils';
 
 // TODO: need to import all icons https://github.com/antfu/unplugin-icons/issues/5
 // move to this when stable to avoid imports https://www.npmjs.com/package/@iconify/tailwind
@@ -18,14 +19,20 @@ const spacesStore = useSpacesStore();
 
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
+const { web3 } = useWeb3();
+
 const currentRouteName = computed(() => String(route.matched[0]?.name));
 const space = computed(() =>
   currentRouteName.value === 'space' && resolved.value
     ? spacesStore.spacesMap.get(`${networkId.value}:${address.value}`)
     : null
 );
+
 const { treasury } = useTreasury(space);
 
+const isController = computed(() =>
+  space.value ? compareAddresses(space.value.controller, web3.value.account) : false
+);
 const navigationConfig = computed(() => ({
   space: {
     overview: {
@@ -52,10 +59,14 @@ const navigationConfig = computed(() => ({
           }
         }
       : undefined),
-    settings: {
-      name: 'Settings',
-      icon: IHCog
-    }
+    ...(isController.value
+      ? {
+          settings: {
+            name: 'Settings',
+            icon: IHCog
+          }
+        }
+      : undefined)
   },
   settings: {
     spaces: {

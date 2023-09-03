@@ -22,9 +22,7 @@ onMounted(() => {
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
 const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
-const spaceIsEditable = computed(() =>
-  compareAddresses(props.space.controller, web3.value.account)
-);
+const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const externalUrl = computed(() => sanitizeUrl(props.space.external_url));
 const twitterUrl = computed(() =>
@@ -79,7 +77,7 @@ watchEffect(() => {
             </UiButton>
           </UiTooltip>
         </router-link>
-        <UiTooltip v-if="spaceIsEditable" title="Edit profile">
+        <UiTooltip v-if="isController" title="Edit profile">
           <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
             <IH-cog class="inline-block" />
           </UiButton>

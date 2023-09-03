@@ -11,9 +11,7 @@ const { setVotingDelay, setMinVotingDuration, setMaxVotingDuration, transferOwne
   useActions();
 
 const network = computed(() => getNetwork(props.space.network));
-const spaceIsEditable = computed(() =>
-  compareAddresses(props.space.controller, web3.value.account)
-);
+const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const settingsLoading = ref({
   votingDelay: false,
@@ -61,7 +59,7 @@ watchEffect(() => {
         <div class="mb-3">
           <div class="s-label !mb-0">Voting delay in blocks</div>
           <UiEditable
-            :editable="spaceIsEditable"
+            :editable="isController"
             :initial-value="space.voting_delay"
             :loading="settingsLoading.votingDelay"
             :definition="{
@@ -75,7 +73,7 @@ watchEffect(() => {
         <div class="mb-3">
           <div class="s-label !mb-0">Min. voting period in blocks</div>
           <UiEditable
-            :editable="spaceIsEditable"
+            :editable="isController"
             :initial-value="space.min_voting_period"
             :loading="settingsLoading.minVotingPeriod"
             :definition="{
@@ -95,7 +93,7 @@ watchEffect(() => {
         <div class="mb-3">
           <div class="s-label !mb-0">Max. voting period in blocks</div>
           <UiEditable
-            :editable="spaceIsEditable"
+            :editable="isController"
             :initial-value="space.max_voting_period"
             :loading="settingsLoading.maxVotingPeriod"
             :definition="{
@@ -123,7 +121,7 @@ watchEffect(() => {
       <Label :label="'Controller'" sticky />
       <div class="py-3 mx-4">
         <UiEditable
-          :editable="spaceIsEditable"
+          :editable="isController"
           :initial-value="space.controller"
           :loading="settingsLoading.controller"
           :definition="{
