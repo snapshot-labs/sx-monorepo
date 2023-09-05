@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useUiStore } from '@/stores/ui';
-
 const uiStore = useUiStore();
 const { web3Account } = useWeb3();
 </script>

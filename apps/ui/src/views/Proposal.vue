@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
 import {
   _rt,
@@ -21,6 +20,7 @@ const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
+const metaStore = useMetaStore();
 const { web3 } = useWeb3();
 const { vote, cancelProposal } = useActions();
 const { createDraft } = useEditor();
@@ -166,9 +166,10 @@ async function handleVoteClick(choice: Choice) {
 watch([() => web3.value.account, proposal], () => getVotingPower());
 watch(
   [networkId, spaceAddress, id],
-  ([networkId, spaceAddress, id]) => {
+  async ([networkId, spaceAddress, id]) => {
     if (!networkId || !spaceAddress) return;
 
+    await metaStore.fetchBlock(networkId);
     proposalsStore.fetchProposal(spaceAddress, id, networkId);
   },
   { immediate: true }

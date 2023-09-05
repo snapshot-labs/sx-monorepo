@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useContactsStore } from '@/stores/contacts';
 import { shorten, shortenAddress } from '@/helpers/utils';
 
 useTitle('Contacts');

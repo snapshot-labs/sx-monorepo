@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useProposalsStore } from '@/stores/proposals';
 import { getNetwork } from '@/networks';
 import { getProvider } from '@/helpers/provider';
 import { Space } from '@/types';

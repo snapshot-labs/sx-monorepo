@@ -1,4 +1,3 @@
-import { useUiStore } from '@/stores/ui';
 import { imageUpload } from '@/helpers/utils';
 
 type Formatting = {

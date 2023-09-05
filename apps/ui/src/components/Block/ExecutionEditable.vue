@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
 import { getNetwork } from '@/networks';
-import { useUiStore } from '@/stores/ui';
 import { simulate } from '@/helpers/tenderly';
 import { Transaction as TransactionType, Space, SelectedStrategy } from '@/types';
 

@@ -22,7 +22,7 @@ export default defineConfig({
     vue({ reactivityTransform: true }),
     AutoImport({
       imports: ['vue', 'vue-router'],
-      dirs: ['./src/composables'],
+      dirs: ['./src/composables', './src/stores'],
       eslintrc: {
         enabled: true
       }

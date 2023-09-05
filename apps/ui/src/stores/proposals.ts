@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
-import { useMetaStore } from '@/stores/meta';
 import type { NetworkID, Proposal } from '@/types';
 
 type SpaceRecord = {

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useUiStore } from '@/stores/ui';
-import { useSpacesStore } from '@/stores/spaces';
 import draggable from 'vuedraggable';
 
 const uiStore = useUiStore();

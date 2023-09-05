@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { useUiStore } from '@/stores/ui';
-
 const uiStore = useUiStore();
 </script>
 

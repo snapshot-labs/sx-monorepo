@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useUiStore } from '@/stores/ui';
 import { getUrl, imageUpload } from '@/helpers/utils';
 
 const props = defineProps<{

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useUsersStore } from '@/stores/users';
 import { shortenAddress, _n } from '@/helpers/utils';
 
 const { setTitle } = useTitle();

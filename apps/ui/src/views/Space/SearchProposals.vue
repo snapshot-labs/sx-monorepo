@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getNetwork } from '@/networks';
-import { useMetaStore } from '@/stores/meta';
 import { Space, Proposal as ProposalType } from '@/types';
 
 const PROPOSALS_LIMIT = 20;

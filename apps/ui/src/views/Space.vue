@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useUiStore } from '@/stores/ui';
-import { useSpacesStore } from '@/stores/spaces';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 
 const { setFavicon } = useFavicon();
@@ -8,6 +6,7 @@ const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
+const metaStore = useMetaStore();
 
 const space = computed(() => {
   if (!resolved.value) return null;
@@ -17,9 +16,10 @@ const space = computed(() => {
 
 watch(
   [resolved, networkId, address],
-  ([resolved, networkId, address]) => {
+  async ([resolved, networkId, address]) => {
     if (!resolved || !networkId || !address) return;
 
+    await metaStore.fetchBlock(networkId);
     spacesStore.fetchSpace(address, networkId);
   },
   {

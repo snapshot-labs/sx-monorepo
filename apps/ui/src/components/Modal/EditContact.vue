@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
-import { useContactsStore } from '@/stores/contacts';
 import { validateForm } from '@/helpers/validation';
 
 const DEFAULT_FORM_STATE = {

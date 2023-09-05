@@ -2,7 +2,6 @@
 import { useFocus } from '@vueuse/core';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
-import { useUiStore } from '@/stores/ui';
 
 const emit = defineEmits(['toggle']);
 

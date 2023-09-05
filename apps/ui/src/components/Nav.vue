@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { useUiStore } from '@/stores/ui';
-import { useSpacesStore } from '@/stores/spaces';
 import { compareAddresses } from '@/helpers/utils';
 
 // TODO: need to import all icons https://github.com/antfu/unplugin-icons/issues/5

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useUiStore } from '@/stores/ui';
 import { getNetwork } from '@/networks';
 
 defineProps<{

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useSpacesStore } from '@/stores/spaces';
-import { useProposalsStore } from '@/stores/proposals';
 import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
 import { Space, Proposal as ProposalType } from '@/types';
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { shorten, shortenAddress } from '@/helpers/utils';
-import { useContactsStore } from '@/stores/contacts';
 
 const props = defineProps<{
   searchValue: string;

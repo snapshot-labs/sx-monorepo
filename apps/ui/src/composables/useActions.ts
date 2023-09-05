@@ -1,6 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getNetwork, evmNetworks } from '@/networks';
-import { useUiStore } from '@/stores/ui';
 
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {

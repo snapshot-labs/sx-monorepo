@@ -1,35 +1,38 @@
 import { defineStore } from 'pinia';
 import { NetworkID } from '@/types';
 import { getProvider } from '@/helpers/provider';
-import { enabledNetworks, getNetwork } from '@/networks';
+import { getNetwork } from '@/networks';
+import { METADATA } from '@/networks/evm';
 
 export const useMetaStore = defineStore('meta', () => {
-  const loaded = ref<boolean>(false);
-  const currentTs = ref<number>(Date.now() / 1e3);
+  const currentTs = ref(new Map<NetworkID, number>());
   const currentBlocks = ref(new Map<NetworkID, number>());
 
-  async function fetchBlocks() {
-    const promises = enabledNetworks.map(async network => {
-      const provider = getProvider(getNetwork(network).baseChainId);
+  async function fetchBlock(network) {
+    if (currentBlocks.value.get(network)) return;
 
-      try {
-        const blockNumber = await provider.getBlockNumber();
-        currentBlocks.value.set(network, blockNumber);
-      } catch (e) {
-        console.error(e);
-      }
-    });
+    const provider = getProvider(getNetwork(network).baseChainId);
 
-    await Promise.all(promises);
+    try {
+      const blockNumber = await provider.getBlockNumber();
+      currentBlocks.value.set(network, blockNumber);
+      currentTs.value.set(network, Date.now() / 1e3);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
-    currentTs.value = Date.now() / 1e3;
-    loaded.value = true;
+  function getTsFromBlock(network, blockNum) {
+    const networkBlockNum = currentBlocks.value.get(network) || 0;
+    const blockDiff = networkBlockNum - blockNum;
+
+    return (currentTs.value.get(network) || 0) - METADATA[network].blockTime * blockDiff;
   }
 
   return {
-    loaded,
     currentTs,
     currentBlocks,
-    fetchBlocks
+    fetchBlock,
+    getTsFromBlock
   };
 });

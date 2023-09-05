@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useSpacesStore } from '@/stores/spaces';
-
 const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
 

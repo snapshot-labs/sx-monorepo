@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useSpacesStore } from '@/stores/spaces';
 import { _n } from '@/helpers/utils';
 import { Space } from '@/types';
 

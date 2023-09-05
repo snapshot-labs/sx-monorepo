@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useSpacesStore } from '@/stores/spaces';
 import { getNetwork } from '@/networks';
 import { getProvider } from '@/helpers/provider';
 import { omit, shortenAddress } from '@/helpers/utils';
