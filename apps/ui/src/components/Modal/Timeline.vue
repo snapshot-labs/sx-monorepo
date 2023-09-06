@@ -19,7 +19,7 @@ const labels = {
   max_end: 'Max. end'
 };
 
-const { getTsFromBlock } = useMetaStore();
+const { getTsFromCurrent } = useMetaStore();
 
 const states = computed(() => {
   const network = props.proposal.network;
@@ -33,12 +33,12 @@ const states = computed(() => {
       {
         id: 'start',
         block_number: props.proposal.start,
-        value: getTsFromBlock(network, props.proposal.start)
+        value: getTsFromCurrent(network, props.proposal.start)
       },
       {
         id: 'end',
         block_number: props.proposal.min_end,
-        value: getTsFromBlock(network, props.proposal.min_end)
+        value: getTsFromCurrent(network, props.proposal.min_end)
       }
     ];
   }
@@ -51,17 +51,17 @@ const states = computed(() => {
     {
       id: 'start',
       block_number: props.proposal.start,
-      value: getTsFromBlock(network, props.proposal.start)
+      value: getTsFromCurrent(network, props.proposal.start)
     },
     {
       id: 'min_end',
       block_number: props.proposal.min_end,
-      value: getTsFromBlock(network, props.proposal.min_end)
+      value: getTsFromCurrent(network, props.proposal.min_end)
     },
     {
       id: 'max_end',
       block_number: props.proposal.max_end,
-      value: getTsFromBlock(network, props.proposal.max_end)
+      value: getTsFromCurrent(network, props.proposal.max_end)
     }
   ];
 });

@@ -55,11 +55,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   };
 }
 
-function formatProposal(
-  proposal: ApiProposal,
-  networkId: NetworkID,
-  currentBlock: number
-): Proposal {
+function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: number): Proposal {
   return {
     ...proposal,
     space: {
@@ -83,9 +79,9 @@ function formatProposal(
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
     execution: formatExecution(proposal.metadata.execution),
-    has_started: proposal.start <= currentBlock,
-    has_execution_window_opened: proposal.min_end <= currentBlock,
-    has_ended: proposal.max_end <= currentBlock,
+    has_started: proposal.start <= current,
+    has_execution_window_opened: proposal.min_end <= current,
+    has_ended: proposal.max_end <= current,
     network: networkId
   };
 }
@@ -143,18 +139,18 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
     loadProposals: async (
       spaceId: string,
       { limit, skip = 0 }: PaginationOpts,
-      currentBlock: number,
+      current: number,
       filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
       searchQuery = ''
     ): Promise<Proposal[]> => {
       const filters: Record<string, any> = {};
       if (filter === 'active') {
-        filters.start_lte = currentBlock;
-        filters.max_end_gte = currentBlock;
+        filters.start_lte = current;
+        filters.max_end_gte = current;
       } else if (filter === 'pending') {
-        filters.start_gt = currentBlock;
+        filters.start_gt = current;
       } else if (filter === 'closed') {
-        filters.max_end_lt = currentBlock;
+        filters.max_end_lt = current;
       }
 
       const { data } = await apollo.query({
@@ -171,26 +167,26 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.proposals.map(proposal => formatProposal(proposal, networkId, currentBlock));
+      return data.proposals.map(proposal => formatProposal(proposal, networkId, current));
     },
-    loadProposalsSummary: async (spaceId: string, currentBlock: number, limit: number) => {
+    loadProposalsSummary: async (spaceId: string, current: number, limit: number) => {
       const { data } = await apollo.query({
         query: PROPOSALS_SUMMARY_QUERY,
         variables: {
           first: limit,
           space: spaceId,
-          threshold: currentBlock
+          threshold: current
         }
       });
 
       return [...data.active, ...data.expired].map(proposal =>
-        formatProposal(proposal, networkId, currentBlock)
+        formatProposal(proposal, networkId, current)
       );
     },
     loadProposal: async (
       spaceId: string,
       proposalId: number,
-      currentBlock: number
+      current: number
     ): Promise<Proposal | null> => {
       const { data } = await apollo.query({
         query: PROPOSAL_QUERY,
@@ -199,7 +195,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       if (data.proposal.metadata === null) return null;
 
-      return formatProposal(data.proposal, networkId, currentBlock);
+      return formatProposal(data.proposal, networkId, current);
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,

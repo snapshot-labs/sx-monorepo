@@ -133,12 +133,12 @@ export type NetworkApi = {
   loadProposals(
     spaceId: string,
     paginationOpts: PaginationOpts,
-    currentBlock: number,
+    current: number,
     filter?: 'any' | 'active' | 'pending' | 'closed',
     searchQuery?: string
   ): Promise<Proposal[]>;
-  loadProposalsSummary(spaceId: string, currentBlock: number, limit: number): Promise<Proposal[]>;
-  loadProposal(spaceId: string, proposalId: number, currentBlock: number): Promise<Proposal | null>;
+  loadProposalsSummary(spaceId: string, current: number, limit: number): Promise<Proposal[]>;
+  loadProposal(spaceId: string, proposalId: number, current: number): Promise<Proposal | null>;
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User>;

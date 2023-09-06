@@ -7,9 +7,9 @@ const props = defineProps<{ proposal: ProposalType }>();
 
 const uiStore = useUiStore();
 const { votes } = useAccount();
-const { getTsFromBlock } = useMetaStore();
+const { getTsFromCurrent } = useMetaStore();
 
-const start = getTsFromBlock(props.proposal.network, props.proposal.start);
+const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
 const isSupported = computed(() => {
   const network = getNetwork(props.proposal.network);

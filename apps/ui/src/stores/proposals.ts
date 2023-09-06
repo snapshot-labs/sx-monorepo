@@ -73,7 +73,7 @@ export const useProposalsStore = defineStore('proposals', () => {
       {
         limit: PROPOSALS_LIMIT
       },
-      metaStore.currentBlocks.get(networkId) || 0,
+      metaStore.getCurrent(networkId) || 0,
       filter
     );
 
@@ -115,7 +115,7 @@ export const useProposalsStore = defineStore('proposals', () => {
         limit: PROPOSALS_LIMIT,
         skip: record.value.proposalsIdsList.length
       },
-      metaStore.currentBlocks.get(networkId) || 0
+      metaStore.getCurrent(networkId) || 0
     );
 
     record.value.proposalsIdsList = [
@@ -156,7 +156,7 @@ export const useProposalsStore = defineStore('proposals', () => {
     record.value.summaryLoading = true;
     record.value.summaryProposals = await getNetwork(networkId).api.loadProposalsSummary(
       spaceId,
-      metaStore.currentBlocks.get(networkId) || 0,
+      metaStore.getCurrent(networkId) || 0,
       limit
     );
     record.value.summaryLoaded = true;
@@ -185,7 +185,7 @@ export const useProposalsStore = defineStore('proposals', () => {
     const proposal = await getNetwork(networkId).api.loadProposal(
       spaceId,
       proposalId,
-      metaStore.currentBlocks.get(networkId) || 0
+      metaStore.getCurrent(networkId) || 0
     );
     if (!proposal) return;
 

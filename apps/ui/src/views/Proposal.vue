@@ -68,7 +68,8 @@ const editable = computed(() => {
 
   return (
     compareAddresses(proposal.value.author.id, web3.value.account) &&
-    proposal.value.start * 1000 > Date.now()
+    proposal.value.start >
+      (metaStore.getCurrent(proposal.value.network) || Number.POSITIVE_INFINITY)
   );
 });
 
