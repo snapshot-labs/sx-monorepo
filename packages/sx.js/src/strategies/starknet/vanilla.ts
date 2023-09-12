@@ -1,30 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import type { Call } from 'starknet';
-import type {
-  ClientConfig,
-  Envelope,
-  Strategy,
-  VanillaProposeMessage,
-  VanillaVoteMessage
-} from '../../types';
+import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
 export default function createVanillaStrategy(): Strategy {
   return {
     type: 'vanilla',
     async getParams(
       call: 'propose' | 'vote',
+      signerAddress: string,
       address: string,
       index: number,
-      envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
+      metadata: Record<string, any> | null,
+      envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig
     ): Promise<string[]> {
-      return [];
+      return ['0x0'];
     },
     async getExtraProposeCalls(
       address: string,
       index: number,
-      envelope: Envelope<VanillaProposeMessage | VanillaVoteMessage>,
+      envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig
     ): Promise<Call[]> {
       return [];

@@ -1,29 +1,27 @@
-import { hash } from 'starknet';
 import randomBytes from 'randombytes';
-import { snakeCase } from 'snake-case';
-import { Web3Provider } from '@ethersproject/providers';
-import { Wallet } from '@ethersproject/wallet';
-import fetch from 'cross-fetch';
-import { baseDomain, proposeTypes, voteTypes } from './types';
-import { SplitUint256 } from '../../../utils/split-uint256';
-import { hexPadRight, flatten2DArray } from '../../../utils/encoding';
-import { bytesToHex } from '../../../utils/bytes';
-import { getStrategies, getStrategiesParams } from '../../../utils/strategies';
-import { defaultNetwork } from '../../../networks';
-import type {
-  Propose,
-  Vote,
-  EthSigProposeMessage,
-  EthSigVoteMessage,
+import { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
+import { CallData, shortString } from 'starknet';
+import { getStrategiesParams } from '../../../utils/strategies';
+import { proposeTypes, updateProposalTypes, voteTypes } from './types';
+import {
+  ClientConfig,
+  ClientOpts,
   Envelope,
-  EthereumSigClientConfig,
-  EthereumSigClientOpts
+  Propose,
+  UpdateProposal,
+  Vote,
+  EIP712ProposeMessage,
+  EIP712UpdateProposalMessage,
+  EIP712VoteMessage,
+  SignatureData
 } from '../../../types';
+import { defaultNetwork } from '../../..';
+import { getRSVFromSig } from '../../../utils/encoding';
 
 export class EthereumSig {
-  config: EthereumSigClientConfig;
+  config: ClientConfig;
 
-  constructor(opts: EthereumSigClientOpts) {
+  constructor(opts: ClientOpts) {
     this.config = {
       networkConfig: defaultNetwork,
       ...opts
@@ -31,104 +29,144 @@ export class EthereumSig {
   }
 
   generateSalt() {
-    return Number(SplitUint256.fromHex(bytesToHex(randomBytes(4))).toHex());
+    return `0x${randomBytes(4).toString('hex')}`;
   }
 
-  public async sign<T extends EthSigProposeMessage | EthSigVoteMessage>(
-    web3: Web3Provider | Wallet,
-    address: string,
+  public async sign<
+    T extends EIP712ProposeMessage | EIP712UpdateProposalMessage | EIP712VoteMessage
+  >(
+    signer: Signer & TypedDataSigner,
     message: T,
-    types
-  ): Promise<Envelope<T>> {
-    const signer = Wallet.isSigner(web3) ? web3 : web3.getSigner();
+    types: Record<string, TypedDataField[]>
+  ): Promise<SignatureData> {
+    const address = await signer.getAddress();
 
     const domain = {
-      ...baseDomain,
       chainId: this.config.networkConfig.eip712ChainId
     };
 
-    const data = { domain, types, message };
+    const signature = await signer._signTypedData(domain, types, message);
+    const { r, s, v } = getRSVFromSig(signature);
 
-    const typedData = Object.fromEntries(
-      Object.entries(message).map(([k, v]) => [snakeCase(k), v])
-    );
-
-    const sig = await signer._signTypedData(domain, data.types, typedData);
-    return { address, sig, data } as any;
-  }
-
-  public async send(envelop) {
-    const init = {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'send',
-        params: { envelop },
-        id: null
-      })
+    return {
+      address,
+      signature: [r.toHex(), s.toHex(), v],
+      message
     };
-    const res = await fetch(this.config.manaUrl, init);
-    const json = await res.json();
-    return json.result;
   }
 
-  public async propose(web3: Web3Provider | Wallet, address: string, data: Propose) {
-    const strategies = await getStrategies(data, this.config);
+  public async propose({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: Propose;
+  }): Promise<Envelope<Propose>> {
+    const address = await signer.getAddress();
+
     const strategiesParams = await getStrategiesParams(
       'propose',
-      strategies,
+      data.strategies,
       address,
       data,
       this.config
     );
 
-    const message: EthSigProposeMessage = {
-      ...data,
-      space: hexPadRight(data.space),
-      authenticator: hexPadRight(data.authenticator),
+    const message = {
+      authenticator: data.authenticator,
+      space: data.space,
       author: address,
-      executor: hexPadRight(data.executor),
-      executionHash: hexPadRight(hash.computeHashOnElements(data.executionParams)),
-      strategiesHash: hexPadRight(
-        hash.computeHashOnElements(data.strategies.map(strategy => `0x${strategy.toString(16)}`))
-      ),
-      strategiesParamsHash: hexPadRight(
-        hash.computeHashOnElements(flatten2DArray(strategiesParams))
-      ),
+      executionStrategy: {
+        address: data.executionStrategy.addr,
+        params: data.executionStrategy.params
+      },
+      userProposalValidationParams: CallData.compile({
+        user_strategies: data.strategies.map((strategyConfig, i) => ({
+          index: strategyConfig.index,
+          params: strategiesParams[i]
+        }))
+      }),
+      metadataURI: shortString
+        .splitLongString(data.metadataUri)
+        .map(str => shortString.encodeShortString(str)),
       salt: this.generateSalt()
     };
 
-    return this.sign(web3, address, message, proposeTypes);
+    const signatureData = await this.sign(signer, message, proposeTypes);
+
+    return {
+      signatureData,
+      data
+    };
   }
 
-  public async vote(web3: Web3Provider | Wallet, address: string, data: Vote) {
-    const strategies = await getStrategies(data, this.config);
+  public async updateProposal({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateProposal;
+  }): Promise<Envelope<UpdateProposal>> {
+    const address = await signer.getAddress();
+
+    const message = {
+      authenticator: data.authenticator,
+      space: data.space,
+      author: address,
+      proposalId: `0x${data.proposal.toString(16)}`,
+      executionStrategy: {
+        address: data.executionStrategy.addr,
+        params: data.executionStrategy.params
+      },
+      metadataURI: shortString
+        .splitLongString(data.metadataUri)
+        .map(str => shortString.encodeShortString(str)),
+      salt: this.generateSalt()
+    };
+
+    const signatureData = await this.sign(signer, message, updateProposalTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async vote({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: Vote;
+  }): Promise<Envelope<Vote>> {
+    const address = await signer.getAddress();
+
     const strategiesParams = await getStrategiesParams(
       'vote',
-      strategies,
+      data.strategies,
       address,
       data,
       this.config
     );
 
-    const message: EthSigVoteMessage = {
-      ...data,
-      space: hexPadRight(data.space),
-      authenticator: hexPadRight(data.authenticator),
+    const message = {
+      authenticator: data.authenticator,
+      space: data.space,
       voter: address,
-      strategiesHash: hexPadRight(
-        hash.computeHashOnElements(data.strategies.map(strategy => `0x${strategy.toString(16)}`))
-      ),
-      strategiesParamsHash: hexPadRight(
-        hash.computeHashOnElements(flatten2DArray(strategiesParams))
-      ),
-      salt: this.generateSalt()
+      proposalId: `0x${data.proposal.toString(16)}`,
+      choice: `0x${data.choice.toString(16)}`,
+      userVotingStrategies: data.strategies.map((strategy, index) => ({
+        index: strategy.index,
+        params: strategiesParams[index]
+      })),
+      metadataURI: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
     };
 
-    return this.sign(web3, address, message, voteTypes);
+    const signatureData = await this.sign(signer, message, voteTypes);
+
+    return {
+      signatureData,
+      data
+    };
   }
 }

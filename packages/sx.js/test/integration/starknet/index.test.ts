@@ -1,220 +1,694 @@
-import { StarkNetTx, EthereumSig } from '../../../src/clients';
-import { getExecutionData } from '../../../src/executors';
-import { Account, Provider, constants } from 'starknet';
+import { Account, Provider, uint256 } from 'starknet';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { Choice } from '../../../src/utils/choice';
-import { defaultNetwork } from '../../../src/networks';
+import { EthereumSig, EthereumTx, L1Executor, StarkNetSig, StarkNetTx } from '../../../src/clients';
+import { getExecutionData } from '../../../src/executors';
+import { Choice } from '../../../src/types';
+import {
+  flush,
+  increaseTime,
+  loadL1MessagingContract,
+  postMessageToL2,
+  setTime,
+  setup,
+  TestConfig
+} from './utils';
 
-describe('StarkNetTx', () => {
-  expect(process.env.STARKNET_ADDRESS).toBeDefined();
-  expect(process.env.STARKNET_PK).toBeDefined();
-
-  const ethUrl = process.env.GOERLI_NODE_URL as string;
-  const address = process.env.STARKNET_ADDRESS as string;
-  const privKey = process.env.STARKNET_PK as string;
-  const manaUrl = '';
+describe('sx-starknet', () => {
+  const ethUrl = 'http://127.0.0.1:8545';
+  const address = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
+  const privateKey = '0xcd613e30d8f16adf91b7584a2265b1f5';
+  const ethPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
   const starkProvider = new Provider({
     sequencer: {
-      baseUrl: 'https://alpha4-2.starknet.io',
-      chainId: constants.StarknetChainId.SN_GOERLI2
+      baseUrl: 'http://127.0.0.1:5050'
     }
   });
 
-  const wallet = Wallet.createRandom();
+  const provider = new JsonRpcProvider('http://127.0.0.1:8545');
+  const wallet = new Wallet(ethPrivateKey, provider);
   const walletAddress = wallet.address;
-  const account = new Account(starkProvider, address, privKey);
+  const account = new Account(starkProvider, address, privateKey);
+
+  let client: StarkNetTx;
+  let ethSigClient: EthereumSig;
+  let ethTxClient: EthereumTx;
+  let starkSigClient: StarkNetSig;
+  let testConfig: TestConfig;
+  let spaceAddress = '';
+
+  beforeAll(async () => {
+    setTime(Math.floor(Date.now() / 1000));
+
+    testConfig = await setup({
+      starknetAccount: account,
+      ethereumWallet: wallet
+    });
+    spaceAddress = testConfig.spaceAddress;
+
+    client = new StarkNetTx({
+      starkProvider,
+      ethUrl,
+      networkConfig: testConfig.networkConfig
+    });
+    ethSigClient = new EthereumSig({
+      starkProvider,
+      ethUrl,
+      networkConfig: testConfig.networkConfig
+    });
+    ethTxClient = new EthereumTx({
+      starkProvider,
+      ethUrl,
+      networkConfig: testConfig.networkConfig,
+      sequencerUrl: 'http://127.0.0.1:5050'
+    });
+    starkSigClient = new StarkNetSig({
+      starkProvider,
+      ethUrl,
+      networkConfig: testConfig.networkConfig,
+      manaUrl: 'http://localhost:3000'
+    });
+  }, 300_000);
 
   describe('vanilla authenticator', () => {
-    const client = new StarkNetTx({ starkProvider, ethUrl });
-    const space = '0x7e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28';
-    const authenticator = '0x5e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62';
-    const strategy = 0;
-    const executor = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
-
     it('StarkNetTx.propose()', async () => {
       const envelope = {
-        address: walletAddress,
-        sig: null,
+        signatureData: {
+          address: walletAddress
+        },
         data: {
-          message: {
-            space,
-            authenticator,
-            strategies: [strategy],
-            executor,
-            metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-            executionParams: []
-          }
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy
+            }
+          ],
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: ['0x00']
+          },
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
 
       const receipt = await client.propose(account, envelope);
       console.log('Receipt', receipt);
 
-      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
 
       expect(receipt.transaction_hash).toBeDefined();
-    }, 60e3);
+    }, 60_000);
 
     it('StarkNetTx.vote()', async () => {
       const envelope = {
-        address: walletAddress,
-        sig: null,
+        signatureData: {
+          address: walletAddress
+        },
         data: {
-          message: {
-            space,
-            authenticator,
-            strategies: [strategy],
-            proposal: 1,
-            choice: Choice.FOR
-          }
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy
+            }
+          ],
+          proposal: 1,
+          choice: Choice.For
         }
       };
 
       const receipt = await client.vote(account, envelope);
       console.log('Receipt', receipt);
 
-      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
 
       expect(receipt.transaction_hash).toBeDefined();
-    }, 60e3);
+    }, 60_000);
   });
 
   describe('ethSig authenticator', () => {
-    const client = new StarkNetTx({ starkProvider, ethUrl });
-    const ethSigClient = new EthereumSig({ starkProvider, ethUrl, manaUrl });
-    const space = '0x7e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28';
-    const authenticator = '0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14';
-    const strategy = 0;
-    const executor = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
-
     it('StarkNetTx.propose()', async () => {
-      const envelope = await ethSigClient.propose(wallet, walletAddress, {
-        space,
-        authenticator,
-        strategies: [strategy],
-        executor,
-        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-        executionParams: []
-      });
+      const data = {
+        space: spaceAddress,
+        authenticator: testConfig.ethSigAuthenticator,
+        strategies: [
+          {
+            index: 0,
+            address: testConfig.vanillaVotingStrategy
+          }
+        ],
+        executionStrategy: {
+          addr: testConfig.vanillaExecutionStrategy,
+          params: ['0x00']
+        },
+        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+      };
+
+      const envelope = await ethSigClient.propose({ signer: wallet, data });
 
       const receipt = await client.propose(account, envelope);
       console.log('Receipt', receipt);
 
-      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
 
       expect(receipt.transaction_hash).toBeDefined();
-    }, 60e3);
+    }, 60_000);
 
     it('StarkNetTx.vote()', async () => {
-      const envelope = await ethSigClient.vote(wallet, walletAddress, {
-        space,
-        authenticator,
-        strategies: [strategy],
+      const data = {
+        space: spaceAddress,
+        authenticator: testConfig.ethSigAuthenticator,
+        strategies: [
+          {
+            index: 0,
+            address: testConfig.vanillaVotingStrategy
+          }
+        ],
         proposal: 2,
-        choice: Choice.FOR
-      });
+        choice: Choice.For
+      };
+
+      const envelope = await ethSigClient.vote({ signer: wallet, data });
 
       const receipt = await client.vote(account, envelope);
       console.log('Receipt', receipt);
 
-      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
 
       expect(receipt.transaction_hash).toBeDefined();
-    }, 60e3);
+    }, 60_000);
   });
 
-  describe('ethSig authenticator + single slot proof', () => {
-    expect(process.env.GOERLI_NODE_URL).toBeDefined();
-    expect(process.env.ETH_PK).toBeDefined();
-
-    const wallet = new Wallet(process.env.ETH_PK as string);
-    const walletAddress = wallet.address;
-
-    const client = new StarkNetTx({ starkProvider, ethUrl });
-    const ethSigClient = new EthereumSig({ starkProvider, ethUrl, manaUrl });
-    const space = '0x7e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28';
-    const authenticator = '0x64cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14';
-    const strategy = 1;
-    const executor = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
-
+  describe('ethTx authenticator', () => {
     it('StarkNetTx.propose()', async () => {
-      const envelope = await ethSigClient.propose(wallet, walletAddress, {
-        space,
-        authenticator,
-        strategies: [strategy],
-        executor,
-        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-        executionParams: []
+      const data = {
+        space: spaceAddress,
+        authenticator: testConfig.ethTxAuthenticator,
+        strategies: [
+          {
+            index: 0,
+            address: testConfig.vanillaVotingStrategy
+          }
+        ],
+        executionStrategy: {
+          addr: testConfig.vanillaExecutionStrategy,
+          params: ['0x101']
+        },
+        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+      };
+
+      const payload = await ethTxClient.getProposeHash(wallet, data);
+      const fee = await ethTxClient.estimateProposeFee(wallet, data);
+
+      await postMessageToL2(
+        testConfig.ethTxAuthenticator,
+        'commit',
+        [walletAddress, payload],
+        fee.overall_fee
+      );
+
+      const receipt = await client.propose(account, {
+        signatureData: {
+          address: walletAddress
+        },
+        data
       });
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+
+    it('StarkNetTx.vote()', async () => {
+      const data = {
+        space: spaceAddress,
+        authenticator: testConfig.ethTxAuthenticator,
+        strategies: [
+          {
+            index: 0,
+            address: testConfig.vanillaVotingStrategy
+          }
+        ],
+        proposal: 3,
+        choice: Choice.For
+      };
+
+      const payload = await ethTxClient.getVoteHash(wallet, data);
+      const fee = await ethTxClient.estimateVoteFee(wallet, data);
+
+      await postMessageToL2(
+        testConfig.ethTxAuthenticator,
+        'commit',
+        [walletAddress, payload],
+        fee.overall_fee
+      );
+
+      const receipt = await client.vote(account, {
+        signatureData: {
+          address: walletAddress
+        },
+        data
+      });
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+  });
+
+  describe('starkSig authenticator', () => {
+    it('StarkNetTx.propose()', async () => {
+      const data = {
+        space: spaceAddress,
+        authenticator: testConfig.starkSigAuthenticator,
+        strategies: [
+          {
+            index: 0,
+            address: testConfig.vanillaVotingStrategy
+          }
+        ],
+        executionStrategy: {
+          addr: testConfig.vanillaExecutionStrategy,
+          params: ['0x00']
+        },
+        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+      };
+
+      const envelope = await starkSigClient.propose({ signer: account, data });
 
       const receipt = await client.propose(account, envelope);
       console.log('Receipt', receipt);
 
-      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
 
       expect(receipt.transaction_hash).toBeDefined();
-    }, 60e3);
+    }, 60_000);
 
     it('StarkNetTx.vote()', async () => {
-      const envelope = await ethSigClient.vote(wallet, walletAddress, {
-        space,
-        authenticator,
-        strategies: [strategy],
-        proposal: 3,
-        choice: Choice.FOR
-      });
+      const data = {
+        space: spaceAddress,
+        authenticator: testConfig.starkSigAuthenticator,
+        strategies: [
+          {
+            index: 0,
+            address: testConfig.vanillaVotingStrategy
+          }
+        ],
+        proposal: 4,
+        choice: Choice.For
+      };
+
+      const envelope = await starkSigClient.vote({ signer: account, data });
 
       const receipt = await client.vote(account, envelope);
       console.log('Receipt', receipt);
 
-      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
 
       expect(receipt.transaction_hash).toBeDefined();
-    }, 60e3);
+    }, 60_000);
   });
 
-  describe('zodiac execution', () => {
-    const client = new StarkNetTx({ starkProvider, ethUrl });
-    const space = '0x7e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28';
-    const authenticator = '0x5e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62';
-    const strategy = 0;
+  describe('starkTx authenticator', () => {
+    it('StarkNetTx.propose()', async () => {
+      const envelope = {
+        signatureData: {
+          address
+        },
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.starkTxAuthenticator,
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy
+            }
+          ],
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: ['0x00']
+          },
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+        }
+      };
 
-    const executorAddress = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
+      const receipt = await client.propose(account, envelope);
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+
+    it('StarkNetTx.vote()', async () => {
+      const envelope = {
+        signatureData: {
+          address
+        },
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.starkTxAuthenticator,
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy
+            }
+          ],
+          proposal: 5,
+          choice: Choice.For
+        }
+      };
+
+      const receipt = await client.vote(account, envelope);
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+  });
+
+  describe('vanilla authenticator + merkle tree strategy', () => {
+    it('StarkNetTx.propose()', async () => {
+      const envelope = {
+        signatureData: {
+          address: walletAddress
+        },
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [
+            {
+              index: 1,
+              address: testConfig.merkleWhitelistVotingStrategy,
+              metadata: testConfig.merkleWhitelistStrategyMetadata
+            }
+          ],
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: ['0x00']
+          },
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+        }
+      };
+
+      const receipt = await client.propose(account, envelope);
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+
+    it('StarkNetTx.vote()', async () => {
+      const envelope = {
+        signatureData: {
+          address: walletAddress
+        },
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [
+            {
+              index: 1,
+              address: testConfig.merkleWhitelistVotingStrategy,
+              metadata: testConfig.merkleWhitelistStrategyMetadata
+            }
+          ],
+          proposal: 6,
+          choice: Choice.For
+        }
+      };
+
+      const receipt = await client.vote(account, envelope);
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+  });
+
+  describe('vanilla authenticator + erc20Votes strategy', () => {
+    it('StarkNetTx.propose()', async () => {
+      const envelope = {
+        signatureData: {
+          address
+        },
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [
+            {
+              index: 2,
+              address: testConfig.erc20VotesVotingStrategy
+            }
+          ],
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: ['0x00']
+          },
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+        }
+      };
+
+      const receipt = await client.propose(account, envelope);
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+
+    it('StarkNetTx.vote()', async () => {
+      const envelope = {
+        signatureData: {
+          address
+        },
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [
+            {
+              index: 2,
+              address: testConfig.erc20VotesVotingStrategy
+            }
+          ],
+          proposal: 7,
+          choice: Choice.For
+        }
+      };
+
+      const receipt = await client.vote(account, envelope);
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+  });
+
+  describe('ethRelayer execution', () => {
     const transactions = [
       {
-        to: '0x2842c82E20ab600F443646e1BC8550B44a513D82',
-        value: '0x0',
-        data: '0x',
+        to: wallet.address,
+        value: 0,
+        data: '0x11',
         operation: 0,
-        nonce: 0,
         salt: 1n
       }
     ];
 
-    it('StarkNetTx.propose()', async () => {
-      const executionData = getExecutionData(executorAddress, defaultNetwork, { transactions });
+    it('should propose with ethRelayer', async () => {
+      const { executionParams } = getExecutionData(
+        'EthRelayer',
+        testConfig.ethRelayerExecutionStrategy,
+        { transactions, destination: testConfig.l1AvatarExecutionStrategyContract.address }
+      );
 
       const envelope = {
-        address: walletAddress,
-        sig: null,
         data: {
-          message: {
-            space,
-            authenticator,
-            strategies: [strategy],
-            metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-            ...executionData
-          }
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          executionStrategy: {
+            addr: testConfig.ethRelayerExecutionStrategy,
+            params: executionParams
+          },
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
 
       const receipt = await client.propose(account, envelope);
       console.log('Receipt', receipt);
 
-      // await defaultProvider.waitForTransaction(receipt.transaction_hash);
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
 
       expect(receipt.transaction_hash).toBeDefined();
-    }, 60e3);
+    }, 60_000);
+
+    it('should vote via authenticator', async () => {
+      const envelope = {
+        data: {
+          space: spaceAddress,
+          authenticator: testConfig.vanillaAuthenticator,
+          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          proposal: 8,
+          choice: 1,
+          metadataUri: ''
+        }
+      };
+
+      const receipt = await client.vote(account, envelope);
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+
+    it('should execute', async () => {
+      await increaseTime(86400);
+      await loadL1MessagingContract(ethUrl, testConfig.starknetCore);
+
+      const { executionParams } = getExecutionData(
+        'EthRelayer',
+        testConfig.ethRelayerExecutionStrategy,
+        { transactions, destination: testConfig.l1AvatarExecutionStrategyContract.address }
+      );
+
+      const receipt = await client.execute({
+        signer: account,
+        space: spaceAddress,
+        proposalId: 8,
+        executionPayload: executionParams
+      });
+      console.log('Receipt', receipt);
+
+      await starkProvider.waitForTransaction(receipt.transaction_hash);
+
+      expect(receipt.transaction_hash).toBeDefined();
+    }, 60_000);
+
+    it('should execute on l1', async () => {
+      const flushL2Response = await flush();
+      const message_payload = flushL2Response.consumed_messages.from_l2[0].payload;
+
+      const { executionParams } = getExecutionData(
+        'EthRelayer',
+        testConfig.ethRelayerExecutionStrategy,
+        { transactions, destination: testConfig.l1AvatarExecutionStrategyContract.address }
+      );
+
+      const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
+
+      const proposal = {
+        startTimestamp: message_payload[1],
+        minEndTimestamp: message_payload[2],
+        maxEndTimestamp: message_payload[3],
+        finalizationStatus: message_payload[4],
+        executionPayloadHash: message_payload[5],
+        executionStrategy: message_payload[6],
+        authorAddressType: message_payload[7],
+        author: message_payload[8],
+        activeVotingStrategies: uint256.uint256ToBN({
+          low: message_payload[9],
+          high: message_payload[10]
+        })
+      };
+      const votesFor = uint256.uint256ToBN({
+        low: message_payload[11],
+        high: message_payload[12]
+      });
+      const votesAgainst = uint256.uint256ToBN({
+        low: message_payload[13],
+        high: message_payload[14]
+      });
+      const votesAbstain = uint256.uint256ToBN({
+        low: message_payload[15],
+        high: message_payload[16]
+      });
+
+      const l1ExecutorClient = new L1Executor();
+      const res = await l1ExecutorClient.execute({
+        signer: wallet,
+        executor: testConfig.l1AvatarExecutionStrategyContract.address,
+        space: spaceAddress,
+        proposal,
+        votesFor,
+        votesAgainst,
+        votesAbstain,
+        executionHash,
+        transactions
+      });
+
+      expect(res.hash).toBeDefined();
+    }, 60_000);
   });
+
+  it('should cancel proposal', async () => {
+    const res = await client.cancelProposal({
+      signer: account,
+      space: spaceAddress,
+      proposal: 3
+    });
+
+    expect(res.transaction_hash).toBeDefined();
+  }, 60_000);
+
+  it('should set min voting duration', async () => {
+    const res = await client.setMinVotingDuration({
+      signer: account,
+      space: spaceAddress,
+      minVotingDuration: 1
+    });
+
+    expect(res.transaction_hash).toBeDefined();
+  }, 60_000);
+
+  it('should set max voting duration', async () => {
+    const res = await client.setMaxVotingDuration({
+      signer: account,
+      space: spaceAddress,
+      maxVotingDuration: 1
+    });
+
+    expect(res.transaction_hash).toBeDefined();
+  }, 60_000);
+
+  it('should set voting delay', async () => {
+    const res = await client.setVotingDelay({
+      signer: account,
+      space: spaceAddress,
+      votingDelay: 1
+    });
+
+    expect(res.transaction_hash).toBeDefined();
+  }, 60_000);
+
+  it('should set metadataUri', async () => {
+    const res = await client.setMetadataUri({
+      signer: account,
+      space: spaceAddress,
+      metadataUri: ''
+    });
+
+    expect(res.transaction_hash).toBeDefined();
+  }, 60_000);
+
+  it('should transfer ownership', async () => {
+    const res = await client.transferOwnership({
+      signer: account,
+      space: spaceAddress,
+      owner: '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4'
+    });
+
+    expect(res.transaction_hash).toBeDefined();
+  }, 60_000);
 });

@@ -2,7 +2,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
 import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
-import { getEvmExecutionData } from '../../../src/executors';
+import { getExecutionData } from '../../../src/executors';
 import { setup, TestConfig } from './utils';
 
 describe('EthereumTx', () => {
@@ -288,7 +288,7 @@ describe('EthereumTx', () => {
     ];
 
     it('should propose with avatar', async () => {
-      const { executionParams } = getEvmExecutionData(
+      const { executionParams } = getExecutionData(
         'SimpleQuorumAvatar',
         testConfig.avatarExecutionStrategy,
         { transactions }
@@ -334,7 +334,7 @@ describe('EthereumTx', () => {
     });
 
     it('should execute', async () => {
-      const { executionParams } = getEvmExecutionData(
+      const { executionParams } = getExecutionData(
         'SimpleQuorumAvatar',
         testConfig.avatarExecutionStrategy,
         { transactions }
@@ -362,7 +362,7 @@ describe('EthereumTx', () => {
     ];
 
     it('should propose with avatar', async () => {
-      const { executionParams } = getEvmExecutionData(
+      const { executionParams } = getExecutionData(
         'SimpleQuorumTimelock',
         testConfig.timelockExecutionStrategy,
         { transactions }
@@ -408,7 +408,7 @@ describe('EthereumTx', () => {
     });
 
     it('should execute', async () => {
-      const { executionParams } = getEvmExecutionData(
+      const { executionParams } = getExecutionData(
         'SimpleQuorumTimelock',
         testConfig.timelockExecutionStrategy,
         { transactions }
@@ -424,7 +424,7 @@ describe('EthereumTx', () => {
     });
 
     it('should execute queued proposal', async () => {
-      const { executor, executionParams } = getEvmExecutionData(
+      const { executor, executionParams } = getExecutionData(
         'SimpleQuorumTimelock',
         testConfig.timelockExecutionStrategy,
         { transactions }
@@ -445,7 +445,6 @@ describe('EthereumTx', () => {
       space: spaceAddress,
       proposal: PROPOSAL_ID
     });
-
     expect(res.hash).toBeDefined();
   });
 
@@ -455,7 +454,8 @@ describe('EthereumTx', () => {
       space: spaceAddress,
       proposal: PROPOSAL_ID
     });
-    expect(typeof res).toBe('number');
+
+    expect(res).toBe(6);
   });
 
   it('should set max voting duration', async () => {
@@ -486,7 +486,11 @@ describe('EthereumTx', () => {
   });
 
   it('should set voting delay', async () => {
-    const res = await ethTxClient.setVotingDelay({ signer, space: spaceAddress, votingDelay: 10 });
+    const res = await ethTxClient.setVotingDelay({
+      signer,
+      space: spaceAddress,
+      votingDelay: 10
+    });
     expect(res.hash).toBeDefined();
   });
 

@@ -1,0 +1,167 @@
+[
+  {
+    "type": "impl",
+    "name": "StarkTxAuthenticator",
+    "interface_name": "sx::authenticators::stark_tx::IStarkTxAuthenticator"
+  },
+  {
+    "type": "struct",
+    "name": "sx::types::strategy::Strategy",
+    "members": [
+      {
+        "name": "address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "params",
+        "type": "core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "sx::types::choice::Choice",
+    "variants": [
+      {
+        "name": "Against",
+        "type": "()"
+      },
+      {
+        "name": "For",
+        "type": "()"
+      },
+      {
+        "name": "Abstain",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "sx::types::indexed_strategy::IndexedStrategy",
+    "members": [
+      {
+        "name": "index",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "params",
+        "type": "core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "sx::authenticators::stark_tx::IStarkTxAuthenticator",
+    "items": [
+      {
+        "type": "function",
+        "name": "authenticate_propose",
+        "inputs": [
+          {
+            "name": "space",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "author",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "execution_strategy",
+            "type": "sx::types::strategy::Strategy"
+          },
+          {
+            "name": "user_proposal_validation_params",
+            "type": "core::array::Array::<core::felt252>"
+          },
+          {
+            "name": "metadata_URI",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "authenticate_vote",
+        "inputs": [
+          {
+            "name": "space",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "voter",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "proposal_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "choice",
+            "type": "sx::types::choice::Choice"
+          },
+          {
+            "name": "user_voting_strategies",
+            "type": "core::array::Array::<sx::types::indexed_strategy::IndexedStrategy>"
+          },
+          {
+            "name": "metadata_URI",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "authenticate_update_proposal",
+        "inputs": [
+          {
+            "name": "space",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "author",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "proposal_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "execution_strategy",
+            "type": "sx::types::strategy::Strategy"
+          },
+          {
+            "name": "metadata_URI",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "sx::authenticators::stark_tx::StarkTxAuthenticator::Event",
+    "kind": "enum",
+    "variants": []
+  }
+]

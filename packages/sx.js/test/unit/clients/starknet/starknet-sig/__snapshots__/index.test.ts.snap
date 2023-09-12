@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StarkNetSig should create propose envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
+    "executionStrategy": {
+      "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+      "params": [
+        "0x101",
+      ],
+    },
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+    "strategies": [
+      {
+        "address": "0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815",
+        "index": 0,
+      },
+    ],
+  },
+  "signatureData": {
+    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "message": {
+      "author": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+      "executionStrategy": {
+        "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+        "params": [
+          "0x101",
+        ],
+      },
+      "metadataURI": [
+        "0x697066733a2f2f516d4e726d36784b75696231544874576b694e35434b7442",
+        "0x4565725143447055746d6744716961553278446d6361",
+      ],
+      "salt": "0x0",
+      "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+      "userProposalValidationParams": [
+        "1",
+        "0",
+        "1",
+        "0",
+      ],
+    },
+    "primaryType": "Propose",
+    "signature": [
+      "0x261185ac25062271a1e54801e2858f2be4257a26bb0b4295d44aef98461d6fc",
+      "0x262873e1c630daa5ff0eea9502514d16b38c71b0bb94e731e49044e4cbcae6",
+    ],
+  },
+}
+`;
+
+exports[`StarkNetSig should create update proposal envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
+    "executionStrategy": {
+      "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+      "params": [
+        "0x101",
+      ],
+    },
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "proposal": 1,
+    "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+  },
+  "signatureData": {
+    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "message": {
+      "author": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+      "executionStrategy": {
+        "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+        "params": [
+          "0x101",
+        ],
+      },
+      "metadataURI": [
+        "0x697066733a2f2f516d4e726d36784b75696231544874576b694e35434b7442",
+        "0x4565725143447055746d6744716961553278446d6361",
+      ],
+      "proposalId": {
+        "high": "0x0",
+        "low": "0x1",
+      },
+      "salt": "0x0",
+      "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+    },
+    "primaryType": "UpdateProposal",
+    "signature": [
+      "0x3482725233c904b5a34d1eeb332510ab1f8cd445e2bc80204221caf08014d40",
+      "0x6aa59499052eee39df7bc3e166320b84ba5652a49c0b45372f53d2016fc3744",
+    ],
+  },
+}
+`;
+
+exports[`StarkNetSig should create vote envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
+    "choice": 1,
+    "proposal": 1,
+    "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+    "strategies": [
+      {
+        "address": "0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815",
+        "index": 0,
+      },
+    ],
+  },
+  "signatureData": {
+    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "message": {
+      "choice": "0x1",
+      "metadataURI": [],
+      "proposalId": {
+        "high": "0x0",
+        "low": "0x1",
+      },
+      "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+      "userVotingStrategies": [
+        {
+          "index": 0,
+          "params": [
+            "0x0",
+          ],
+        },
+      ],
+      "voter": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    },
+    "primaryType": "Vote",
+    "signature": [
+      "0x7c3fd2a78a1cb3cd4a621a2f252cc5ef2747815f4c3064245473471bc3af67d",
+      "0x2830e6c5e939cab62ae96d650b7a4af44bf4d9171eda65e12e3e63bb4738074",
+    ],
+  },
+}
+`;

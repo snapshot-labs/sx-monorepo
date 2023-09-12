@@ -1,0 +1,207 @@
+[
+  {
+    "type": "impl",
+    "name": "EthTxAuthenticator",
+    "interface_name": "sx::authenticators::eth_tx::IEthTxAuthenticator"
+  },
+  {
+    "type": "struct",
+    "name": "core::starknet::eth_address::EthAddress",
+    "members": [
+      {
+        "name": "address",
+        "type": "core::felt252"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "sx::types::strategy::Strategy",
+    "members": [
+      {
+        "name": "address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "params",
+        "type": "core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "sx::types::choice::Choice",
+    "variants": [
+      {
+        "name": "Against",
+        "type": "()"
+      },
+      {
+        "name": "For",
+        "type": "()"
+      },
+      {
+        "name": "Abstain",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "sx::types::indexed_strategy::IndexedStrategy",
+    "members": [
+      {
+        "name": "index",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "params",
+        "type": "core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "sx::authenticators::eth_tx::IEthTxAuthenticator",
+    "items": [
+      {
+        "type": "function",
+        "name": "authenticate_propose",
+        "inputs": [
+          {
+            "name": "target",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "author",
+            "type": "core::starknet::eth_address::EthAddress"
+          },
+          {
+            "name": "execution_strategy",
+            "type": "sx::types::strategy::Strategy"
+          },
+          {
+            "name": "user_proposal_validation_params",
+            "type": "core::array::Array::<core::felt252>"
+          },
+          {
+            "name": "metadata_URI",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "authenticate_vote",
+        "inputs": [
+          {
+            "name": "target",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "voter",
+            "type": "core::starknet::eth_address::EthAddress"
+          },
+          {
+            "name": "proposal_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "choice",
+            "type": "sx::types::choice::Choice"
+          },
+          {
+            "name": "user_voting_strategies",
+            "type": "core::array::Array::<sx::types::indexed_strategy::IndexedStrategy>"
+          },
+          {
+            "name": "metadata_URI",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "authenticate_update_proposal",
+        "inputs": [
+          {
+            "name": "target",
+            "type": "core::starknet::contract_address::ContractAddress"
+          },
+          {
+            "name": "author",
+            "type": "core::starknet::eth_address::EthAddress"
+          },
+          {
+            "name": "proposal_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "execution_strategy",
+            "type": "sx::types::strategy::Strategy"
+          },
+          {
+            "name": "metadata_URI",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
+      {
+        "name": "starknet_commit_address",
+        "type": "core::starknet::eth_address::EthAddress"
+      }
+    ]
+  },
+  {
+    "type": "l1_handler",
+    "name": "commit",
+    "inputs": [
+      {
+        "name": "from_address",
+        "type": "core::felt252"
+      },
+      {
+        "name": "sender_address",
+        "type": "core::felt252"
+      },
+      {
+        "name": "hash",
+        "type": "core::felt252"
+      }
+    ],
+    "outputs": [],
+    "state_mutability": "external"
+  },
+  {
+    "type": "event",
+    "name": "sx::authenticators::eth_tx::EthTxAuthenticator::Event",
+    "kind": "enum",
+    "variants": []
+  }
+]

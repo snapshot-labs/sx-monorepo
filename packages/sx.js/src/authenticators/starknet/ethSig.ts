@@ -1,37 +1,127 @@
-import { getRSVFromSig } from '../../utils/encoding';
-import { SplitUint256 } from '../../utils/split-uint256';
-import type { Call } from 'starknet';
-import type { Authenticator, Envelope, EthSigProposeMessage, EthSigVoteMessage } from '../../types';
+import { Call, CallData, shortString } from 'starknet';
+import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
+import { getChoiceEnum } from '../../utils/starknet-enums';
+import {
+  Authenticator,
+  Envelope,
+  Propose,
+  Vote,
+  UpdateProposal,
+  ProposeCallArgs,
+  VoteCallArgs,
+  UpdateProposalCallArgs
+} from '../../types';
+
+const callData = new CallData(EthSigAuthenticatorAbi);
 
 export default function createEthSigAuthenticator(): Authenticator {
   return {
     type: 'ethSig',
-    createCall(
-      envelope: Envelope<EthSigProposeMessage | EthSigVoteMessage>,
-      selector: string,
-      calldata: string[]
-    ): Call {
-      const { sig, data } = envelope;
-      const { space, authenticator, salt } = data.message;
-      const { r, s, v } = getRSVFromSig(sig);
-      const rawSalt = SplitUint256.fromHex(`0x${salt.toString(16)}`);
+    createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call {
+      const { space, authenticator } = envelope.data;
+
+      if (!envelope.signatureData?.signature) {
+        throw new Error('signature is required for this authenticator');
+      }
+
+      if (!envelope.signatureData?.message) {
+        throw new Error('message is required for this authenticator');
+      }
+
+      const [r, s, v] = envelope.signatureData.signature;
+
+      const compiled = callData.compile('authenticate_propose', [
+        r,
+        s,
+        v,
+        space,
+        args.author,
+        {
+          address: args.executionStrategy.address,
+          params: args.executionStrategy.params
+        },
+        args.strategiesParams,
+        shortString.splitLongString(args.metadataUri),
+        envelope.signatureData.message.salt
+      ]);
 
       return {
         contractAddress: authenticator,
-        entrypoint: 'authenticate',
-        calldata: [
-          r.low,
-          r.high,
-          s.low,
-          s.high,
-          v,
-          rawSalt.low,
-          rawSalt.high,
-          space,
-          selector,
-          calldata.length,
-          ...calldata
-        ]
+        entrypoint: 'authenticate_propose',
+        calldata: compiled
+      };
+    },
+    createVoteCall(envelope: Envelope<Vote>, args: VoteCallArgs): Call {
+      const { space, authenticator } = envelope.data;
+
+      if (!envelope.signatureData?.signature) {
+        throw new Error('signature is required for this authenticator');
+      }
+
+      if (!envelope.signatureData?.message) {
+        throw new Error('message is required for this authenticator');
+      }
+
+      const [r, s, v] = envelope.signatureData.signature;
+
+      const compiled = callData.compile('authenticate_vote', [
+        r,
+        s,
+        v,
+        space,
+        args.voter,
+        args.proposalId,
+        getChoiceEnum(args.choice),
+        args.votingStrategies.map(strategy => ({
+          index: strategy.index,
+          params: strategy.params
+        })),
+        shortString.splitLongString(args.metadataUri)
+      ]);
+
+      return {
+        contractAddress: authenticator,
+        entrypoint: 'authenticate_vote',
+        calldata: compiled
+      };
+    },
+    createUpdateProposalCall(
+      envelope: Envelope<UpdateProposal>,
+      args: UpdateProposalCallArgs
+    ): Call {
+      const { space, authenticator } = envelope.data;
+
+      if (!envelope.signatureData?.signature) {
+        throw new Error('signature is required for this authenticator');
+      }
+
+      if (!envelope.signatureData?.message) {
+        throw new Error('message is required for this authenticator');
+      }
+
+      const [r, s, v] = envelope.signatureData.signature;
+
+      const compiled = callData.compile('authenticate_update_proposal', [
+        r,
+        s,
+        v,
+        space,
+        {
+          address: args.author
+        },
+        args.proposalId,
+        {
+          address: args.executionStrategy.address,
+          params: args.executionStrategy.params
+        },
+        shortString.splitLongString(args.metadataUri),
+        envelope.signatureData.message.salt
+      ]);
+
+      return {
+        contractAddress: authenticator,
+        entrypoint: 'authenticate_update_proposal',
+        calldata: compiled
       };
     }
   };

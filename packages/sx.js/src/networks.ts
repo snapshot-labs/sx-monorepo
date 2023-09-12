@@ -79,9 +79,38 @@ export const evmLineaGoerli: EvmNetworkConfig = {
   }
 };
 
+export const goerli1: NetworkConfig = {
+  eip712ChainId: '0x534e5f474f45524c49',
+  spaceFactory: '0x3b04349f509c875827a8f7532b63103cd02d07539f2075783f43acf282114ab',
+  masterSpace: '0x31ba161238220dcca438d4ee5ceba75ea9dd67e410d4dde1b83f57fb43033e1',
+  authenticators: {
+    '0x06c363a572f7f86b58fff89abf6f924cb75e97a92af2b2acbdd0156ddd18761d': {
+      type: 'vanilla'
+    },
+    '0x052a8c751db001ed116d2194521331426910cd800a656d57b575929e1058b35b': {
+      type: 'starkTx'
+    },
+    '0x0256cd338bb24decbfaf05366b540c2b0fb9c504475d4b3baba01e6975cf2a6e': {
+      type: 'starkSig'
+    },
+    '0x002c27791b44910c295e3fadaa4d3a9b095cefb5554f885f2362c40209978555': {
+      type: 'ethTx'
+    }
+  },
+  strategies: {
+    '0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815': {
+      type: 'vanilla'
+    },
+    '0x02581d59cc3961ea2db43e7fca258823c01165b1455e91d4186255e14f7d540a': {
+      type: 'erc20Votes'
+    }
+  }
+};
+
 export const goerli2: NetworkConfig = {
-  eip712ChainId: 5,
+  eip712ChainId: '0x534e5f474f45524c4932',
   spaceFactory: '0x00e1e511e496a72791ab3d591ba7d571a32de4261d84e4d183f26b6325970e20',
+  masterSpace: '',
   authenticators: {
     '0x05e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62': {
       type: 'vanilla'
@@ -103,22 +132,7 @@ export const goerli2: NetworkConfig = {
           '0x2e39818908f0da118fde6b88b52e4dbdf13d2e171e488507f40deb6811bde3f'
       }
     }
-  },
-  executors: {
-    '1': {
-      type: 'starknet'
-    },
-    '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d': {
-      type: 'vanilla'
-    },
-    '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81': {
-      type: 'ethRelayer',
-      params: {
-        destination: '0x196F0548E3140D2C7f6532a206dd54FbC12232a4',
-        chainId: 5
-      }
-    }
   }
 };
 
-export const defaultNetwork = goerli2;
+export const defaultNetwork = goerli1;

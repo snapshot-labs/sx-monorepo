@@ -6,17 +6,17 @@ describe('authenticators', () => {
     it('should return correct authenticator from predefined default addresses', () => {
       expect(
         getAuthenticator(
-          '0x05e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62',
+          '0x06c363a572f7f86b58fff89abf6f924cb75e97a92af2b2acbdd0156ddd18761d',
           defaultNetwork
         )?.type
       ).toBe('vanilla');
 
       expect(
         getAuthenticator(
-          '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
+          '0x2c27791b44910c295e3fadaa4d3a9b095cefb5554f885f2362c40209978555',
           defaultNetwork
         )?.type
-      ).toBe('ethSig');
+      ).toBe('ethTx');
     });
   });
 });

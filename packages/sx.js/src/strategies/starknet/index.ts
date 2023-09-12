@@ -1,5 +1,6 @@
 import createVanillaStrategy from './vanilla';
-import createSingleSlotProofStrategy from './singleSlotProof';
+import createMerkleWhitelistStrategy from './merkleWhitelist';
+import createErc20VotesStrategy from './erc20Votes';
 import { hexPadLeft } from '../../utils/encoding';
 import type { Strategy, NetworkConfig } from '../../types';
 
@@ -11,8 +12,12 @@ export function getStrategy(address: string, networkConfig: NetworkConfig): Stra
     return createVanillaStrategy();
   }
 
-  if (strategy.type === 'singleSlotProof') {
-    return createSingleSlotProofStrategy(strategy.params);
+  if (strategy.type === 'whitelist') {
+    return createMerkleWhitelistStrategy();
+  }
+
+  if (strategy.type === 'erc20Votes') {
+    return createErc20VotesStrategy();
   }
 
   return null;

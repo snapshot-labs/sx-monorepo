@@ -1,31 +1,49 @@
-export const baseDomain = {
-  name: 'snapshot-x',
-  version: '1'
+export const sharedTypes = {
+  Strategy: [
+    { name: 'address', type: 'uint256' },
+    { name: 'params', type: 'uint256[]' }
+  ],
+  IndexedStrategy: [
+    { name: 'index', type: 'uint256' },
+    { name: 'params', type: 'uint256[]' }
+  ]
 };
 
 export const proposeTypes = {
   Propose: [
-    { name: 'authenticator', type: 'bytes32' },
-    { name: 'space', type: 'bytes32' },
+    { name: 'authenticator', type: 'uint256' },
+    { name: 'space', type: 'uint256' },
     { name: 'author', type: 'address' },
-    { name: 'metadata_uri', type: 'string' },
-    { name: 'executor', type: 'bytes32' },
-    { name: 'execution_hash', type: 'bytes32' },
-    { name: 'strategies_hash', type: 'bytes32' },
-    { name: 'strategies_params_hash', type: 'bytes32' },
+    { name: 'executionStrategy', type: 'Strategy' },
+    { name: 'userProposalValidationParams', type: 'uint256[]' },
+    { name: 'metadataURI', type: 'uint256[]' },
     { name: 'salt', type: 'uint256' }
-  ]
+  ],
+  Strategy: sharedTypes.Strategy
 };
 
 export const voteTypes = {
   Vote: [
-    { name: 'authenticator', type: 'bytes32' },
-    { name: 'space', type: 'bytes32' },
+    { name: 'authenticator', type: 'uint256' },
+    { name: 'space', type: 'uint256' },
     { name: 'voter', type: 'address' },
-    { name: 'proposal', type: 'uint256' },
+    { name: 'proposalId', type: 'uint256' },
     { name: 'choice', type: 'uint256' },
-    { name: 'strategies_hash', type: 'bytes32' },
-    { name: 'strategies_params_hash', type: 'bytes32' },
+    { name: 'userVotingStrategies', type: 'IndexedStrategy[]' },
+    { name: 'metadataURI', type: 'uint256[]' }
+  ],
+  IndexedStrategy: sharedTypes.IndexedStrategy
+};
+
+export const updateProposalTypes = {
+  UpdateProposal: [
+    { name: 'authenticator', type: 'uint256' },
+    { name: 'space', type: 'uint256' },
+    { name: 'author', type: 'address' },
+    { name: 'proposalId', type: 'uint256' },
+    { name: 'executionStrategy', type: 'Strategy' },
+    { name: 'metadataURI', type: 'uint256[]' },
     { name: 'salt', type: 'uint256' }
-  ]
+  ],
+  Strategy: sharedTypes.Strategy
 };
