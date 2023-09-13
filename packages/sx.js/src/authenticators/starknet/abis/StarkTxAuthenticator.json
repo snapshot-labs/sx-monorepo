@@ -81,15 +81,15 @@
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {
+            "name": "metadata_uri",
+            "type": "core::array::Array::<core::felt252>"
+          },
+          {
             "name": "execution_strategy",
             "type": "sx::types::strategy::Strategy"
           },
           {
             "name": "user_proposal_validation_params",
-            "type": "core::array::Array::<core::felt252>"
-          },
-          {
-            "name": "metadata_URI",
             "type": "core::array::Array::<core::felt252>"
           }
         ],
@@ -121,7 +121,7 @@
             "type": "core::array::Array::<sx::types::indexed_strategy::IndexedStrategy>"
           },
           {
-            "name": "metadata_URI",
+            "name": "metadata_uri",
             "type": "core::array::Array::<core::felt252>"
           }
         ],
@@ -149,7 +149,7 @@
             "type": "sx::types::strategy::Strategy"
           },
           {
-            "name": "metadata_URI",
+            "name": "metadata_uri",
             "type": "core::array::Array::<core::felt252>"
           }
         ],

@@ -96,15 +96,15 @@ const ENCODE_ABI = [
         type: 'core::starknet::eth_address::EthAddress'
       },
       {
+        name: 'metadata_Uri',
+        type: 'core::array::Array::<core::felt252>'
+      },
+      {
         name: 'execution_strategy',
         type: 'sx::utils::types::Strategy'
       },
       {
         name: 'user_proposal_validation_params',
-        type: 'core::array::Array::<core::felt252>'
-      },
-      {
-        name: 'metadata_URI',
         type: 'core::array::Array::<core::felt252>'
       }
     ],
@@ -140,7 +140,7 @@ const ENCODE_ABI = [
         type: 'core::array::Array::<sx::utils::types::IndexedStrategy>'
       },
       {
-        name: 'metadata_URI',
+        name: 'metadata_Uri',
         type: 'core::array::Array::<core::felt252>'
       }
     ],
@@ -172,7 +172,7 @@ const ENCODE_ABI = [
         type: 'sx::utils::types::Strategy'
       },
       {
-        name: 'metadata_URI',
+        name: 'metadata_Uri',
         type: 'core::array::Array::<core::felt252>'
       }
     ],
@@ -251,6 +251,7 @@ export class EthereumTx {
       data.space,
       PROPOSE_SELECTOR,
       address,
+      shortString.splitLongString(data.metadataUri),
       {
         address: data.executionStrategy.addr,
         params: data.executionStrategy.params
@@ -260,8 +261,7 @@ export class EthereumTx {
           index: strategyConfig.index,
           params: strategiesParams[i]
         }))
-      }),
-      shortString.splitLongString(data.metadataUri)
+      })
     ]);
 
     return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;

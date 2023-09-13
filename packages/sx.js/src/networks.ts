@@ -81,27 +81,30 @@ export const evmLineaGoerli: EvmNetworkConfig = {
 
 export const goerli1: NetworkConfig = {
   eip712ChainId: '0x534e5f474f45524c49',
-  spaceFactory: '0x3b04349f509c875827a8f7532b63103cd02d07539f2075783f43acf282114ab',
-  masterSpace: '0x31ba161238220dcca438d4ee5ceba75ea9dd67e410d4dde1b83f57fb43033e1',
+  spaceFactory: '0x33a57fe2f6e28c2931a246eea567d9af6a036c4f7e0a15625bad5677c7b18f7',
+  masterSpace: '0x2abf4530780a9ff3b22b94d853a24aeadcccd137aa9d553c41197d1c98b2b6f',
   authenticators: {
-    '0x06c363a572f7f86b58fff89abf6f924cb75e97a92af2b2acbdd0156ddd18761d': {
+    '0x007ea118e919c2d693f6c6d4643caae86814e8a7c06a77c33799e8d5f8a544a2': {
       type: 'vanilla'
     },
-    '0x052a8c751db001ed116d2194521331426910cd800a656d57b575929e1058b35b': {
+    '0x053c66d5b61f7b7f8a3871908b16d6e199ed401b706fb042a006d53f97ec2958': {
       type: 'starkTx'
     },
-    '0x0256cd338bb24decbfaf05366b540c2b0fb9c504475d4b3baba01e6975cf2a6e': {
+    '0x00b321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476': {
       type: 'starkSig'
     },
-    '0x002c27791b44910c295e3fadaa4d3a9b095cefb5554f885f2362c40209978555': {
+    '0x0204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': {
       type: 'ethTx'
+    },
+    '0x06584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c': {
+      type: 'ethSig'
     }
   },
   strategies: {
-    '0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815': {
+    '0x0510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee': {
       type: 'vanilla'
     },
-    '0x02581d59cc3961ea2db43e7fca258823c01165b1455e91d4186255e14f7d540a': {
+    '0x0619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7': {
       type: 'erc20Votes'
     }
   }

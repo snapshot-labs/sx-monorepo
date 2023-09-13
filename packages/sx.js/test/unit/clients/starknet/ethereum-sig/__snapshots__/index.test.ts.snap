@@ -14,7 +14,7 @@ exports[`EthereumSig should create propose envelope 1`] = `
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     "strategies": [
       {
-        "address": "0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815",
+        "address": "0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee",
         "index": 0,
       },
     ],
@@ -24,13 +24,14 @@ exports[`EthereumSig should create propose envelope 1`] = `
     "message": {
       "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
       "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "chainId": "0x534e5f474f45524c49",
       "executionStrategy": {
         "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
         "params": [
           "0x101",
         ],
       },
-      "metadataURI": [
+      "metadataUri": [
         "0x697066733a2f2f516d4e726d36784b75696231544874576b694e35434b7442",
         "0x4565725143447055746d6744716961553278446d6361",
       ],
@@ -43,9 +44,10 @@ exports[`EthereumSig should create propose envelope 1`] = `
         "0",
       ],
     },
+    "primaryType": "Propose",
     "signature": [
-      "0x6fe1a75d7fe5f6a9fe7b4d5c6092d636fc1255243f19ae84eb9ac02dbf08ca1a",
-      "0x3e533dfdaf39b0572a96994bf6b3477a78207fca091234d9d36e85b4e38dde66",
+      "0x2f3f31908e99a8a6c37b14cee6cc334096adeae8b327442a0d4fd663ef7221",
+      "0x6d7cb169150067bd1f1b020c4987a3b903ef796d28b6916e4e284401ea381750",
       "0x1c",
     ],
   },
@@ -71,13 +73,14 @@ exports[`EthereumSig should create update proposal envelope 1`] = `
     "message": {
       "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
       "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "chainId": "0x534e5f474f45524c49",
       "executionStrategy": {
         "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
         "params": [
           "0x101",
         ],
       },
-      "metadataURI": [
+      "metadataUri": [
         "0x697066733a2f2f516d4e726d36784b75696231544874576b694e35434b7442",
         "0x4565725143447055746d6744716961553278446d6361",
       ],
@@ -85,9 +88,10 @@ exports[`EthereumSig should create update proposal envelope 1`] = `
       "salt": "0x0",
       "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     },
+    "primaryType": "UpdateProposal",
     "signature": [
-      "0x553bfff496ec68e5629b6541381eed91bfc99a3e599613b31942cc5e7fa1513d",
-      "0x60433bd02700834b763483ec56db07a39de52cfaa5944cafbe54cc857066da59",
+      "0x43e87e09c3cefce1e65fc6d138eddcb390c70cd8f7610eef2f5f702e8a51f1a8",
+      "0x26c2790340ebe733c2b41bb8b6ce98ab78169dff5ee8a57725e25db1219e691d",
       "0x1b",
     ],
   },
@@ -103,7 +107,7 @@ exports[`EthereumSig should create vote envelope 1`] = `
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     "strategies": [
       {
-        "address": "0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815",
+        "address": "0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee",
         "index": 0,
       },
     ],
@@ -112,8 +116,9 @@ exports[`EthereumSig should create vote envelope 1`] = `
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "message": {
       "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
+      "chainId": "0x534e5f474f45524c49",
       "choice": "0x1",
-      "metadataURI": [],
+      "metadataUri": [],
       "proposalId": "0x1",
       "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
       "userVotingStrategies": [
@@ -126,10 +131,11 @@ exports[`EthereumSig should create vote envelope 1`] = `
       ],
       "voter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     },
+    "primaryType": "Vote",
     "signature": [
-      "0xf0ddcfb41a0198cfa50a67223f34f7f1cf35b470be8691de6f6475a2e76f07a6",
-      "0x74d92170c0ae78cb736a313d377a1145f41bb45615580a093c36a3cd2b3231c3",
-      "0x1c",
+      "0x837fe6824e2f2ded7bd811b0db06d02244f4f8255d177bff7e0d4ef0f188b689",
+      "0x3c04f852c3a8ff50f4840883691192f19f1e32531d5578e558e734740b9c1e25",
+      "0x1b",
     ],
   },
 }

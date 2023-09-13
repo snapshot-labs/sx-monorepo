@@ -3,7 +3,6 @@
 import { Contract, type Call } from 'starknet';
 import ERC20VotesTokenAbi from './abis/ERC20VotesToken.json';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
-import { getUserAddressEnum } from '../../utils/starknet-enums';
 
 export default function createErc20VotesStrategy(): Strategy {
   return {

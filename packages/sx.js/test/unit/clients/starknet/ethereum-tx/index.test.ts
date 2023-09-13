@@ -26,7 +26,7 @@ describe('EthereumTx', () => {
       authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
       strategies: [
         {
-          address: '0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815',
+          address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee',
           index: 0
         }
       ],
@@ -38,7 +38,7 @@ describe('EthereumTx', () => {
     };
 
     const result = await ethereumTx.getProposeHash(wallet, data);
-    expect(result).toEqual('0x10120e24e09c13c45028d155fe2befa932618a0afd6b81db8d15cf7e9fe771e');
+    expect(result).toEqual('0x4bb45818cdb46e0a9009760ee866a024724f256865c2b99cb3caabfae15872c');
   });
 
   it('should return vote hash', async () => {
@@ -48,7 +48,7 @@ describe('EthereumTx', () => {
       strategies: [
         {
           index: 0,
-          address: '0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815'
+          address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee'
         }
       ],
       proposal: 32,

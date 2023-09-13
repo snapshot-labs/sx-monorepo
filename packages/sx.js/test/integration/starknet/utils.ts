@@ -32,8 +32,8 @@ import sxEthRelayerExecutionStrategyCasm from './fixtures/sx_EthRelayerExecution
 import sxEthRelayerExecutionStrategySierra from './fixtures/sx_EthRelayerExecutionStrategy.sierra.json';
 import sxVanillaProposalValidationStrategyCasm from './fixtures/sx_VanillaProposalValidationStrategy.casm.json';
 import sxVanillaProposalValidationStrategySierra from './fixtures/sx_VanillaProposalValidationStrategy.sierra.json';
-import sxProposingPowerProposalValidationStrategyCasm from './fixtures/sx_ProposingPowerProposalValidationStrategy.casm.json';
-import sxProposingPowerProposalValidationStrategySierra from './fixtures/sx_ProposingPowerProposalValidationStrategy.sierra.json';
+import sxPropositionPowerProposalValidationStrategyCasm from './fixtures/sx_PropositionPowerProposalValidationStrategy.casm.json';
+import sxPropositionPowerProposalValidationStrategySierra from './fixtures/sx_PropositionPowerProposalValidationStrategy.sierra.json';
 import sxVanillaVotingStrategyCasm from './fixtures/sx_VanillaVotingStrategy.casm.json';
 import sxVanillaVotingStrategySierra from './fixtures/sx_VanillaVotingStrategy.sierra.json';
 import sxMerkleWhitelistVotingStrategyCasm from './fixtures/sx_MerkleWhitelistVotingStrategy.casm.json';
@@ -63,7 +63,7 @@ export type TestConfig = {
   vanillaExecutionStrategy: string;
   ethRelayerExecutionStrategy: string;
   vanillaProposalValidationStrategy: string;
-  proposingPowerProposalValidationStrategy: string;
+  propositionPowerProposalValidationStrategy: string;
   vanillaVotingStrategy: string;
   merkleWhitelistVotingStrategy: string;
   erc20VotesVotingStrategy: string;
@@ -201,10 +201,10 @@ export async function setup({
     sxVanillaProposalValidationStrategyCasm
   );
 
-  const proposingPowerProposalValidationStrategy = await deployDependency(
+  const propositionPowerProposalValidationStrategy = await deployDependency(
     starknetAccount,
-    sxProposingPowerProposalValidationStrategySierra,
-    sxProposingPowerProposalValidationStrategyCasm
+    sxPropositionPowerProposalValidationStrategySierra,
+    sxPropositionPowerProposalValidationStrategyCasm
   );
 
   const vanillaVotingStrategy = await deployDependency(
@@ -288,7 +288,7 @@ export async function setup({
       minVotingDuration: 0,
       maxVotingDuration: 86400,
       proposalValidationStrategy: {
-        addr: proposingPowerProposalValidationStrategy,
+        addr: propositionPowerProposalValidationStrategy,
         params: CallData.compile({
           threshold: uint256.bnToUint256(1),
           allowed_strategies: [
@@ -357,7 +357,7 @@ export async function setup({
     vanillaExecutionStrategy,
     ethRelayerExecutionStrategy,
     vanillaProposalValidationStrategy,
-    proposingPowerProposalValidationStrategy,
+    propositionPowerProposalValidationStrategy,
     vanillaVotingStrategy,
     merkleWhitelistVotingStrategy,
     erc20VotesVotingStrategy,

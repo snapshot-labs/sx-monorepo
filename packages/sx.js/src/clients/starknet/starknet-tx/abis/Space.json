@@ -2,7 +2,7 @@
   {
     "type": "impl",
     "name": "Space",
-    "interface_name": "sx::space::space::ISpace"
+    "interface_name": "sx::interfaces::i_space::ISpace"
   },
   {
     "type": "struct",
@@ -48,18 +48,18 @@
   },
   {
     "type": "enum",
-    "name": "sx::types::finalization_status::FinalizationStatus",
+    "name": "sx::types::choice::Choice",
     "variants": [
       {
-        "name": "Pending",
+        "name": "Against",
         "type": "()"
       },
       {
-        "name": "Executed",
+        "name": "For",
         "type": "()"
       },
       {
-        "name": "Cancelled",
+        "name": "Abstain",
         "type": "()"
       }
     ]
@@ -89,6 +89,24 @@
       {
         "name": "Custom",
         "type": "core::integer::u256"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "sx::types::finalization_status::FinalizationStatus",
+    "variants": [
+      {
+        "name": "Pending",
+        "type": "()"
+      },
+      {
+        "name": "Executed",
+        "type": "()"
+      },
+      {
+        "name": "Cancelled",
+        "type": "()"
       }
     ]
   },
@@ -131,6 +149,40 @@
     ]
   },
   {
+    "type": "enum",
+    "name": "sx::types::proposal_status::ProposalStatus",
+    "variants": [
+      {
+        "name": "VotingDelay",
+        "type": "()"
+      },
+      {
+        "name": "VotingPeriod",
+        "type": "()"
+      },
+      {
+        "name": "VotingPeriodAccepted",
+        "type": "()"
+      },
+      {
+        "name": "Accepted",
+        "type": "()"
+      },
+      {
+        "name": "Executed",
+        "type": "()"
+      },
+      {
+        "name": "Rejected",
+        "type": "()"
+      },
+      {
+        "name": "Cancelled",
+        "type": "()"
+      }
+    ]
+  },
+  {
     "type": "struct",
     "name": "sx::types::update_settings_calldata::UpdateSettingsCalldata",
     "members": [
@@ -147,11 +199,11 @@
         "type": "core::integer::u32"
       },
       {
-        "name": "metadata_URI",
+        "name": "metadata_uri",
         "type": "core::array::Array::<core::felt252>"
       },
       {
-        "name": "dao_URI",
+        "name": "dao_uri",
         "type": "core::array::Array::<core::felt252>"
       },
       {
@@ -159,7 +211,7 @@
         "type": "sx::types::strategy::Strategy"
       },
       {
-        "name": "proposal_validation_strategy_metadata_URI",
+        "name": "proposal_validation_strategy_metadata_uri",
         "type": "core::array::Array::<core::felt252>"
       },
       {
@@ -175,30 +227,12 @@
         "type": "core::array::Array::<sx::types::strategy::Strategy>"
       },
       {
-        "name": "voting_strategies_metadata_URIs_to_add",
+        "name": "voting_strategies_metadata_uris_to_add",
         "type": "core::array::Array::<core::array::Array::<core::felt252>>"
       },
       {
         "name": "voting_strategies_to_remove",
         "type": "core::array::Array::<core::integer::u8>"
-      }
-    ]
-  },
-  {
-    "type": "enum",
-    "name": "sx::types::choice::Choice",
-    "variants": [
-      {
-        "name": "Against",
-        "type": "()"
-      },
-      {
-        "name": "For",
-        "type": "()"
-      },
-      {
-        "name": "Abstain",
-        "type": "()"
       }
     ]
   },
@@ -217,8 +251,22 @@
     ]
   },
   {
+    "type": "enum",
+    "name": "core::result::Result::<(), core::array::Array::<core::felt252>>",
+    "variants": [
+      {
+        "name": "Ok",
+        "type": "()"
+      },
+      {
+        "name": "Err",
+        "type": "core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
     "type": "interface",
-    "name": "sx::space::space::ISpace",
+    "name": "sx::interfaces::i_space::ISpace",
     "items": [
       {
         "type": "function",
@@ -233,7 +281,7 @@
       },
       {
         "type": "function",
-        "name": "max_voting_duration",
+        "name": "voting_delay",
         "inputs": [],
         "outputs": [
           {
@@ -255,22 +303,33 @@
       },
       {
         "type": "function",
-        "name": "next_proposal_id",
+        "name": "max_voting_duration",
         "inputs": [],
         "outputs": [
           {
-            "type": "core::integer::u256"
+            "type": "core::integer::u32"
           }
         ],
         "state_mutability": "view"
       },
       {
         "type": "function",
-        "name": "voting_delay",
+        "name": "dao_uri",
         "inputs": [],
         "outputs": [
           {
-            "type": "core::integer::u32"
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "next_proposal_id",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
           }
         ],
         "state_mutability": "view"
@@ -342,6 +401,46 @@
       },
       {
         "type": "function",
+        "name": "vote_power",
+        "inputs": [
+          {
+            "name": "proposal_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "choice",
+            "type": "sx::types::choice::Choice"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "vote_registry",
+        "inputs": [
+          {
+            "name": "proposal_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "voter",
+            "type": "sx::types::user_address::UserAddress"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "proposals",
         "inputs": [
           {
@@ -352,6 +451,22 @@
         "outputs": [
           {
             "type": "sx::types::proposal::Proposal"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_proposal_status",
+        "inputs": [
+          {
+            "name": "proposal_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "sx::types::proposal_status::ProposalStatus"
           }
         ],
         "state_mutability": "view"
@@ -412,7 +527,7 @@
             "type": "sx::types::strategy::Strategy"
           },
           {
-            "name": "proposal_validation_strategy_metadata_URI",
+            "name": "proposal_validation_strategy_metadata_uri",
             "type": "core::array::Array::<core::felt252>"
           },
           {
@@ -420,7 +535,7 @@
             "type": "core::array::Array::<sx::types::strategy::Strategy>"
           },
           {
-            "name": "voting_strategy_metadata_URIs",
+            "name": "voting_strategy_metadata_uris",
             "type": "core::array::Array::<core::array::Array::<core::felt252>>"
           },
           {
@@ -428,11 +543,11 @@
             "type": "core::array::Array::<core::starknet::contract_address::ContractAddress>"
           },
           {
-            "name": "metadata_URI",
+            "name": "metadata_uri",
             "type": "core::array::Array::<core::felt252>"
           },
           {
-            "name": "dao_URI",
+            "name": "dao_uri",
             "type": "core::array::Array::<core::felt252>"
           }
         ],
@@ -448,15 +563,15 @@
             "type": "sx::types::user_address::UserAddress"
           },
           {
+            "name": "metadata_uri",
+            "type": "core::array::Array::<core::felt252>"
+          },
+          {
             "name": "execution_strategy",
             "type": "sx::types::strategy::Strategy"
           },
           {
             "name": "user_proposal_validation_params",
-            "type": "core::array::Array::<core::felt252>"
-          },
-          {
-            "name": "metadata_URI",
             "type": "core::array::Array::<core::felt252>"
           }
         ],
@@ -484,7 +599,7 @@
             "type": "core::array::Array::<sx::types::indexed_strategy::IndexedStrategy>"
           },
           {
-            "name": "metadata_URI",
+            "name": "metadata_uri",
             "type": "core::array::Array::<core::felt252>"
           }
         ],
@@ -524,7 +639,7 @@
             "type": "sx::types::strategy::Strategy"
           },
           {
-            "name": "metadata_URI",
+            "name": "metadata_uri",
             "type": "core::array::Array::<core::felt252>"
           }
         ],
@@ -533,7 +648,7 @@
       },
       {
         "type": "function",
-        "name": "cancel_proposal",
+        "name": "cancel",
         "inputs": [
           {
             "name": "proposal_id",
@@ -556,7 +671,11 @@
             "type": "core::array::Array::<core::felt252>"
           }
         ],
-        "outputs": [],
+        "outputs": [
+          {
+            "type": "core::result::Result::<(), core::array::Array::<core::felt252>>"
+          }
+        ],
         "state_mutability": "external"
       }
     ]
@@ -637,7 +756,7 @@
         "kind": "data"
       },
       {
-        "name": "proposal_validation_strategy_metadata_URI",
+        "name": "proposal_validation_strategy_metadata_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       },
@@ -647,7 +766,7 @@
         "kind": "data"
       },
       {
-        "name": "voting_strategy_metadata_URIs",
+        "name": "voting_strategy_metadata_uris",
         "type": "core::array::Span::<core::array::Array::<core::felt252>>",
         "kind": "data"
       },
@@ -657,12 +776,12 @@
         "kind": "data"
       },
       {
-        "name": "metadata_URI",
+        "name": "metadata_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       },
       {
-        "name": "dao_URI",
+        "name": "dao_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       }
@@ -689,12 +808,12 @@
         "kind": "data"
       },
       {
-        "name": "payload",
+        "name": "metadata_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       },
       {
-        "name": "metadata_URI",
+        "name": "payload",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       }
@@ -726,7 +845,7 @@
         "kind": "data"
       },
       {
-        "name": "metadata_URI",
+        "name": "metadata_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       }
@@ -760,7 +879,7 @@
         "kind": "data"
       },
       {
-        "name": "metadata_URI",
+        "name": "metadata_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       }
@@ -789,7 +908,7 @@
         "kind": "data"
       },
       {
-        "name": "voting_strategy_metadata_URIs",
+        "name": "voting_strategy_metadata_uris",
         "type": "core::array::Span::<core::array::Array::<core::felt252>>",
         "kind": "data"
       }
@@ -847,7 +966,7 @@
     "kind": "struct",
     "members": [
       {
-        "name": "metadata_URI",
+        "name": "metadata_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       }
@@ -859,7 +978,7 @@
     "kind": "struct",
     "members": [
       {
-        "name": "dao_URI",
+        "name": "dao_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       }
@@ -900,7 +1019,7 @@
         "kind": "data"
       },
       {
-        "name": "proposal_validation_strategy_metadata_URI",
+        "name": "proposal_validation_strategy_metadata_uri",
         "type": "core::array::Span::<core::felt252>",
         "kind": "data"
       }

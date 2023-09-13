@@ -245,20 +245,20 @@ export class StarkNetTx {
         min_voting_duration: settings.minVotingDuration || NO_UPDATE_U32,
         max_voting_duration: settings.maxVotingDuration || NO_UPDATE_U32,
         voting_delay: settings.votingDelay || NO_UPDATE_U32,
-        metadata_URI:
+        metadata_uri:
           (settings.metadataUri && shortString.splitLongString(settings.metadataUri)) || [],
-        dao_URI: (settings.daoUri && shortString.splitLongString(settings.daoUri)) || [],
+        dao_uri: (settings.daoUri && shortString.splitLongString(settings.daoUri)) || [],
         proposal_validation_strategy: settings.proposalValidationStrategy || {
           address: NO_UPDATE_ADDRESS,
           params: []
         },
-        proposal_validation_strategy_metadata_URI:
+        proposal_validation_strategy_metadata_uri:
           settings.proposalValidationStrategyMetadataUri || [],
         authenticators_to_add: settings.authenticatorsToAdd || [],
         authenticators_to_remove: settings.authenticatorsToRemove || [],
         voting_strategies_to_add: settings.votingStrategiesToAdd || [],
         voting_strategies_to_remove: settings.votingStrategiesToRemove || [],
-        voting_strategies_metadata_URIs_to_add:
+        voting_strategies_metadata_uris_to_add:
           (settings.votingStrategyMetadataUrisToAdd &&
             settings.votingStrategyMetadataUrisToAdd.map(str =>
               shortString.splitLongString(str)
@@ -285,8 +285,8 @@ export class StarkNetTx {
   }) {
     return signer.execute({
       contractAddress: space,
-      entrypoint: 'cancel_proposal',
-      calldata: callData.compile('cancel_proposal', [uint256.bnToUint256(proposal)])
+      entrypoint: 'cancel',
+      calldata: callData.compile('cancel', [uint256.bnToUint256(proposal)])
     });
   }
 

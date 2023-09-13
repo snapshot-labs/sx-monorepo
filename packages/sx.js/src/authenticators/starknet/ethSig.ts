@@ -36,12 +36,12 @@ export default function createEthSigAuthenticator(): Authenticator {
         v,
         space,
         args.author,
+        shortString.splitLongString(args.metadataUri),
         {
           address: args.executionStrategy.address,
           params: args.executionStrategy.params
         },
         args.strategiesParams,
-        shortString.splitLongString(args.metadataUri),
         envelope.signatureData.message.salt
       ]);
 

@@ -23,9 +23,9 @@ export default function createVanillaAuthenticator(): Authenticator {
       const addressType = args.author.length === 42 ? 'ETHEREUM' : 'STARKNET';
       const calldata = callData.compile('propose', [
         getUserAddressEnum(addressType, args.author),
+        shortString.splitLongString(args.metadataUri),
         args.executionStrategy,
-        args.strategiesParams,
-        shortString.splitLongString(args.metadataUri)
+        args.strategiesParams
       ]);
 
       return {

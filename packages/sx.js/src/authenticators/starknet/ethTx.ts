@@ -23,12 +23,12 @@ export default function createEthTxAuthenticator(): Authenticator {
       const compiled = callData.compile('authenticate_propose', [
         space,
         args.author,
+        shortString.splitLongString(args.metadataUri),
         {
           address: args.executionStrategy.address,
           params: args.executionStrategy.params
         },
-        args.strategiesParams,
-        shortString.splitLongString(args.metadataUri)
+        args.strategiesParams
       ]);
 
       return {

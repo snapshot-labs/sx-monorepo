@@ -121,7 +121,7 @@ export class StarkNetSig {
           params: strategiesParams[i]
         }))
       }),
-      metadataURI: shortString
+      metadataUri: shortString
         .splitLongString(data.metadataUri)
         .map(str => shortString.encodeShortString(str)),
       salt: this.generateSalt()
@@ -158,7 +158,7 @@ export class StarkNetSig {
         address: data.executionStrategy.addr,
         params: data.executionStrategy.params
       },
-      metadataURI: shortString
+      metadataUri: shortString
         .splitLongString(data.metadataUri)
         .map(str => shortString.encodeShortString(str)),
       salt: this.generateSalt()
@@ -198,7 +198,7 @@ export class StarkNetSig {
         index: strategy.index,
         params: strategiesParams[index]
       })),
-      metadataURI: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
+      metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, voteTypes, 'Vote');

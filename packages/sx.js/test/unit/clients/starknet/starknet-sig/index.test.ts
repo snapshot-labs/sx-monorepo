@@ -35,7 +35,7 @@ describe('StarkNetSig', () => {
         authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
         strategies: [
           {
-            address: '0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815',
+            address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee',
             index: 0
           }
         ],
@@ -76,7 +76,7 @@ describe('StarkNetSig', () => {
         authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
         strategies: [
           {
-            address: '0x04ad4a117a2b047fc3e25bf52791bc8f29a0871ac3c41a3e176f18c8a1087815',
+            address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee',
             index: 0
           }
         ],

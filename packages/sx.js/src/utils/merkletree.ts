@@ -18,9 +18,9 @@ export class Leaf {
   }
 
   public get hash(): string {
-    const votingPoweUint256 = uint256.bnToUint256(this.votingPower);
+    const votingPowerUint256 = uint256.bnToUint256(this.votingPower);
 
-    const values = [this.type, this.address, votingPoweUint256.low, votingPoweUint256.high];
+    const values = [this.type, this.address, votingPowerUint256.low, votingPowerUint256.high];
 
     return hash.computeHashOnElements(values);
   }

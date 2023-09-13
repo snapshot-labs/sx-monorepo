@@ -32,12 +32,12 @@ export default function createStarkSigAuthenticator(): Authenticator {
         envelope.signatureData.signature,
         envelope.data.space,
         envelope.signatureData.address,
+        shortString.splitLongString(args.metadataUri),
         {
           address: args.executionStrategy.address,
           params: args.executionStrategy.params
         },
         args.strategiesParams,
-        shortString.splitLongString(args.metadataUri),
         envelope.signatureData.message.salt,
         shortString.encodeShortString('snake')
       ]);

@@ -32,9 +32,9 @@ export const proposeTypes = {
   Propose: [
     { name: 'space', type: 'ContractAddress' },
     { name: 'author', type: 'ContractAddress' },
+    { name: 'metadataUri', type: 'felt*' },
     { name: 'executionStrategy', type: 'Strategy' },
     { name: 'userProposalValidationParams', type: 'felt*' },
-    { name: 'metadataURI', type: 'felt*' },
     { name: 'salt', type: 'felt252' }
   ],
   Strategy: sharedTypes.Strategy
@@ -48,7 +48,7 @@ export const voteTypes = {
     { name: 'proposalId', type: 'u256' },
     { name: 'choice', type: 'felt252' },
     { name: 'userVotingStrategies', type: 'IndexedStrategy*' },
-    { name: 'metadataURI', type: 'felt*' }
+    { name: 'metadataUri', type: 'felt*' }
   ],
   IndexedStrategy: sharedTypes.IndexedStrategy,
   u256: sharedTypes.u256
@@ -61,7 +61,7 @@ export const updateProposalTypes = {
     { name: 'author', type: 'ContractAddress' },
     { name: 'proposalId', type: 'u256' },
     { name: 'executionStrategy', type: 'Strategy' },
-    { name: 'metadataURI', type: 'felt*' },
+    { name: 'metadataUri', type: 'felt*' },
     { name: 'salt', type: 'felt252' }
   ],
   Strategy: sharedTypes.Strategy,

@@ -157,7 +157,7 @@ export type StarknetEIP712ProposeMessage = {
     params: string[];
   };
   userProposalValidationParams: string[];
-  metadataURI: string[];
+  metadataUri: string[];
   salt: string;
 };
 
@@ -169,7 +169,7 @@ export type StarknetEIP712UpdateProposalMessage = {
     address: string;
     params: string[];
   };
-  metadataURI: string[];
+  metadataUri: string[];
   salt: string;
 };
 
@@ -179,7 +179,7 @@ export type StarknetEIP712VoteMessage = {
   proposalId: { low: BigNumberish; high: BigNumberish };
   choice: string;
   userVotingStrategies: { index: number; params: string[] }[];
-  metadataURI: string[];
+  metadataUri: string[];
 };
 
 export type EIP712ProposeMessage = StarknetEIP712ProposeMessage & {

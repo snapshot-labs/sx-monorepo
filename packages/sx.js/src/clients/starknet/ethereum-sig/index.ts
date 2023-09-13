@@ -37,21 +37,26 @@ export class EthereumSig {
   >(
     signer: Signer & TypedDataSigner,
     message: T,
-    types: Record<string, TypedDataField[]>
+    types: Record<string, TypedDataField[]>,
+    primaryType: string
   ): Promise<SignatureData> {
     const address = await signer.getAddress();
 
-    const domain = {
-      chainId: this.config.networkConfig.eip712ChainId
+    const domain = {};
+
+    const extendedMessage = {
+      chainId: this.config.networkConfig.eip712ChainId,
+      ...message
     };
 
-    const signature = await signer._signTypedData(domain, types, message);
+    const signature = await signer._signTypedData(domain, types, extendedMessage);
     const { r, s, v } = getRSVFromSig(signature);
 
     return {
       address,
       signature: [r.toHex(), s.toHex(), v],
-      message
+      message: extendedMessage,
+      primaryType
     };
   }
 
@@ -86,13 +91,13 @@ export class EthereumSig {
           params: strategiesParams[i]
         }))
       }),
-      metadataURI: shortString
+      metadataUri: shortString
         .splitLongString(data.metadataUri)
         .map(str => shortString.encodeShortString(str)),
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(signer, message, proposeTypes);
+    const signatureData = await this.sign(signer, message, proposeTypes, 'Propose');
 
     return {
       signatureData,
@@ -118,13 +123,13 @@ export class EthereumSig {
         address: data.executionStrategy.addr,
         params: data.executionStrategy.params
       },
-      metadataURI: shortString
+      metadataUri: shortString
         .splitLongString(data.metadataUri)
         .map(str => shortString.encodeShortString(str)),
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(signer, message, updateProposalTypes);
+    const signatureData = await this.sign(signer, message, updateProposalTypes, 'UpdateProposal');
 
     return {
       signatureData,
@@ -159,10 +164,10 @@ export class EthereumSig {
         index: strategy.index,
         params: strategiesParams[index]
       })),
-      metadataURI: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
+      metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
     };
 
-    const signatureData = await this.sign(signer, message, voteTypes);
+    const signatureData = await this.sign(signer, message, voteTypes, 'Vote');
 
     return {
       signatureData,
