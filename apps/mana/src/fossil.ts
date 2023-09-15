@@ -3,9 +3,8 @@ import fetch from 'cross-fetch';
 import { Wallet } from '@ethersproject/wallet';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { Account } from 'starknet';
-import { starkProvider } from './starkProvider';
-import { getProcessBlockInputs } from './starknet/utils';
+import { Provider, Account } from 'starknet';
+import { getProcessBlockInputs } from './stark/utils';
 
 const ethPrivkey = process.env.ETH_PRIVKEY || '';
 const ethRpcUrl = process.env.ETH_RPC_URL || '';
@@ -22,6 +21,11 @@ const abi = ['function sendExactParentHashToL2(uint256)', 'function sendLatestPa
 const starknetPrivkey = process.env.STARKNET_PRIVKEY || '';
 const starknetAddress = process.env.STARKNET_ADDRESS || '';
 
+const starkProvider = new Provider({
+  sequencer: {
+    baseUrl: 'https://alpha4-2.starknet.io'
+  }
+});
 const starknetAccount = new Account(starkProvider, starknetAddress, starknetPrivkey);
 
 async function sendExactParentHashToL2(blockNumber: number) {

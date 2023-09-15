@@ -26,8 +26,6 @@ export const createNetworkHandler = (chainId: number) => {
   const client = new clients.EvmEthereumTx({ networkConfig: networkConfig });
 
   async function send(id, params, res) {
-    console.log('networkConfig', networkConfig);
-
     try {
       const { signatureData, data } = params.envelope;
       const { types } = signatureData;
