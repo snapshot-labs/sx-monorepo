@@ -19,6 +19,7 @@ if (process.env.NETWORK_NODE_URL) {
 
 const checkpoint = new Checkpoint(config, writer, schema, {
   logLevel: LogLevel.Info,
+  resetOnConfigChange: true,
   prettifyLogs: process.env.NODE_ENV !== 'production',
   abis: {
     SpaceFactory: spaceFactoryAbi,

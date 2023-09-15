@@ -3,30 +3,60 @@ scalar Text
 
 type Space {
   id: String!
-  name: String
-  about: String
-  external_url: String
-  github: String
-  twitter: String
-  discord: String
-  wallet: String
+  metadata: SpaceMetadataItem
   controller: String
   voting_delay: Int
   min_voting_period: Int
   max_voting_period: Int
   proposal_threshold: Int
-  quorum: Float
   strategies: [String]
   strategies_params: [String]
   strategies_metadata: [String]
+  strategies_parsed_metadata: [StrategiesParsedMetadataItem]! @derivedFrom(field: "space")
   authenticators: [String]
-  executors: [String]
-  executors_types: [String]
+  validation_strategy: String!
+  validation_strategy_params: String!
+  voting_power_validation_strategy_strategies: [String]
+  voting_power_validation_strategy_strategies_params: [String]
   proposal_count: Int
   vote_count: Int
   created: Int
   tx: String
   proposals: [Proposal]! @derivedFrom(field: "space")
+}
+
+type SpaceMetadataItem {
+  id: String!
+  name: String
+  about: String
+  avatar: String
+  cover: String
+  external_url: String
+  delegation_api_type: String
+  delegation_api_url: String
+  github: String
+  twitter: String
+  discord: String
+  voting_power_symbol: String
+  wallet: String
+  executors: [String]
+  executors_types: [String]
+}
+
+type StrategiesParsedMetadataItem {
+  id: String!
+  space: Space!
+  index: Int!
+  data: StrategiesParsedMetadataDataItem
+}
+
+type StrategiesParsedMetadataDataItem {
+  id: String!
+  name: String!
+  description: String!
+  decimals: Int!
+  symbol: String!
+  token: String
 }
 
 type Proposal {
@@ -35,15 +65,16 @@ type Proposal {
   space: Space
   author: User
   execution_hash: String
-  metadata_uri: String
-  title: Text
-  body: Text
-  discussion: Text
-  execution: Text
+  metadata: ProposalMetadataItem
   start: Int
   min_end: Int
   max_end: Int
   snapshot: Int
+  execution_time: Int!
+  execution_strategy: String!
+  execution_strategy_type: String!
+  timelock_veto_guardian: String
+  timelock_delay: Int
   strategies: [String]
   strategies_params: [String]
   scores_1: Float
@@ -52,9 +83,23 @@ type Proposal {
   scores_total: Float
   quorum: Float
   created: Int
+  edited: Int
   tx: String
+  execution_tx: String
+  veto_tx: String
   vote_count: Int
-  executed: Boolean
+  executed: Boolean!
+  vetoed: Boolean!
+  completed: Boolean!
+  cancelled: Boolean!
+}
+
+type ProposalMetadataItem {
+  id: String!
+  title: Text
+  body: Text
+  discussion: Text
+  execution: Text
 }
 
 type Vote {

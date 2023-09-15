@@ -1,14 +1,14 @@
 {
-  "network_node_url": "https://starknet-goerli2.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
+  "network_node_url": "https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
   "sources": [
     {
-      "contract": "0xe1e511e496a72791ab3d591ba7d571a32de4261d84e4d183f26b6325970e20",
+      "contract": "0x33a57fe2f6e28c2931a246eea567d9af6a036c4f7e0a15625bad5677c7b18f7",
+      "start": 862634,
       "abi": "SpaceFactory",
-      "start": 14808,
       "events": [
         {
-          "name": "space_deployed",
-          "fn": "handleSpaceCreated"
+          "name": "NewContractDeployed",
+          "fn": "handleSpaceDeployed"
         }
       ]
     }
@@ -18,15 +18,31 @@
       "abi": "Space",
       "events": [
         {
-          "name": "proposal_created",
+          "name": "SpaceCreated",
+          "fn": "handleSpaceCreated"
+        },
+        {
+          "name": "ProposalCreated",
           "fn": "handlePropose"
         },
         {
-          "name": "vote_created",
+          "name": "ProposalCancelled",
+          "fn": "handleCancel"
+        },
+        {
+          "name": "ProposalUpdated",
+          "fn": "handleUpdate"
+        },
+        {
+          "name": "ProposalExecuted",
+          "fn": "handleExecute"
+        },
+        {
+          "name": "VoteCast",
           "fn": "handleVote"
         },
         {
-          "name": "metadata_uri_updated",
+          "name": "MetadataUriUpdated",
           "fn": "handleMetadataUriUpdated"
         }
       ]

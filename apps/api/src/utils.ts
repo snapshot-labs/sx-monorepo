@@ -1,8 +1,22 @@
 import fetch from 'node-fetch';
-import { hash } from 'starknet';
+import { Contract, Provider, hash, shortString } from 'starknet';
+import { Contract as EthContract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { faker } from '@faker-js/faker';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
+import { AsyncMySqlPool } from '@snapshot-labs/checkpoint';
+import ExecutionStrategyAbi from './abis/executionStrategy.json';
+import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
+import Config from './config.json';
+import { handleStrategiesParsedMetadata } from './ipfs';
+
+const ethProvider = new JsonRpcProvider('http://127.0.0.1:8545');
+const starkProvider = new Provider({
+  rpc: {
+    nodeUrl: Config.network_node_url
+  }
+});
 
 export function toAddress(bn) {
   try {
@@ -40,11 +54,88 @@ export function getSpaceName(address) {
   return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
 }
 
-export function parseTimestamps(timestamps: string) {
-  const result = timestamps.replace('0x', '').match(/.{8}/g);
-  if (!result) return null;
+export function dropIpfs(metadataUri: string) {
+  return metadataUri.replace('ipfs://', '');
+}
 
-  const [snapshot, start, minEnd, maxEnd] = result.map(timestamp => parseInt(`0x${timestamp}`, 16));
+export function longStringToText(array: string[]): string {
+  return array.reduce((acc, slice) => acc + shortString.decodeShortString(slice), '');
+}
 
-  return { snapshot, start, minEnd, maxEnd };
+export function findVariant(value: { variant: Record<string, any> }) {
+  const result = Object.entries(value.variant).find(([, v]) => typeof v !== 'undefined');
+  if (!result) throw new Error('Invalid variant');
+
+  return {
+    key: result[0],
+    value: result[1]
+  };
+}
+
+export function getVoteValue(label: string) {
+  if (label === 'Against') return 0;
+  if (label === 'For') return 1;
+  if (label === 'Abstain') return 2;
+
+  throw new Error('Invalid vote label');
+}
+
+export async function handleExecutionStrategy(address: string, payload: string[]) {
+  try {
+    const executionContract = new Contract(ExecutionStrategyAbi, address, starkProvider);
+
+    const executionStrategyType = shortString.decodeShortString(
+      await executionContract.get_strategy_type()
+    );
+
+    let quorum = 0n;
+    if (executionStrategyType === 'SimpleQuorumVanilla') {
+      quorum = await executionContract.quorum();
+    } else if (executionStrategyType === 'EthRelayer') {
+      const [l1Destination] = payload;
+
+      const SimpleQuorumExecutionStrategyContract = new EthContract(
+        l1Destination,
+        SimpleQuorumExecutionStrategyAbi,
+        ethProvider
+      );
+
+      quorum = await SimpleQuorumExecutionStrategyContract.quorum();
+    }
+
+    return {
+      executionStrategyType,
+      quorum
+    };
+  } catch (e) {
+    console.log('failed to get execution strategy type', e);
+
+    return null;
+  }
+}
+
+export async function handleStrategiesMetadata(
+  spaceId: string,
+  metadataUris: string[],
+  mysql: AsyncMySqlPool
+) {
+  for (let i = 0; i < metadataUris.length; i++) {
+    const metadataUri = metadataUris[i];
+
+    const item = {
+      id: `${spaceId}/${i}`,
+      space: spaceId,
+      index: i,
+      data: null as string | null
+    };
+
+    if (metadataUri.startsWith('ipfs://')) {
+      item.data = dropIpfs(metadataUri);
+
+      await handleStrategiesParsedMetadata(metadataUri, mysql);
+    }
+
+    const query = `INSERT IGNORE INTO strategiesparsedmetadataitems SET ?;`;
+    await mysql.queryAsync(query, [item]);
+  }
 }

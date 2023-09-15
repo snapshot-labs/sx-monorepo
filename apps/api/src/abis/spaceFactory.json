@@ -1,184 +1,90 @@
 [
   {
-    "name": "Uint256",
-    "size": 2,
+    "type": "impl",
+    "name": "Factory",
+    "interface_name": "sx::factory::factory::IFactory"
+  },
+  {
     "type": "struct",
+    "name": "core::array::Span::<core::felt252>",
     "members": [
       {
-        "name": "low",
-        "type": "felt",
-        "offset": 0
-      },
-      {
-        "name": "high",
-        "type": "felt",
-        "offset": 1
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::felt252>"
       }
     ]
   },
   {
-    "data": [
+    "type": "enum",
+    "name": "core::result::Result::<core::starknet::contract_address::ContractAddress, core::array::Array::<core::felt252>>",
+    "variants": [
       {
-        "name": "deployer_address",
-        "type": "felt"
+        "name": "Ok",
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        "name": "space_address",
-        "type": "felt"
-      },
-      {
-        "name": "voting_delay",
-        "type": "felt"
-      },
-      {
-        "name": "min_voting_duration",
-        "type": "felt"
-      },
-      {
-        "name": "max_voting_duration",
-        "type": "felt"
-      },
-      {
-        "name": "proposal_threshold",
-        "type": "Uint256"
-      },
-      {
-        "name": "controller",
-        "type": "felt"
-      },
-      {
-        "name": "quorum",
-        "type": "Uint256"
-      },
-      {
-        "name": "voting_strategies_len",
-        "type": "felt"
-      },
-      {
-        "name": "voting_strategies",
-        "type": "felt*"
-      },
-      {
-        "name": "voting_strategy_params_flat_len",
-        "type": "felt"
-      },
-      {
-        "name": "voting_strategy_params_flat",
-        "type": "felt*"
-      },
-      {
-        "name": "authenticators_len",
-        "type": "felt"
-      },
-      {
-        "name": "authenticators",
-        "type": "felt*"
-      },
-      {
-        "name": "execution_strategies_len",
-        "type": "felt"
-      },
-      {
-        "name": "execution_strategies",
-        "type": "felt*"
-      },
-      {
-        "name": "metadata_uri_len",
-        "type": "felt"
-      },
-      {
-        "name": "metadata_uri",
-        "type": "felt*"
+        "name": "Err",
+        "type": "core::array::Array::<core::felt252>"
       }
-    ],
-    "keys": [],
-    "name": "space_deployed",
-    "type": "event"
+    ]
   },
   {
-    "name": "constructor",
-    "type": "constructor",
-    "inputs": [
+    "type": "interface",
+    "name": "sx::factory::factory::IFactory",
+    "items": [
       {
-        "name": "space_class_hash",
-        "type": "felt"
+        "type": "function",
+        "name": "deploy",
+        "inputs": [
+          {
+            "name": "class_hash",
+            "type": "core::starknet::class_hash::ClassHash"
+          },
+          {
+            "name": "contract_address_salt",
+            "type": "core::felt252"
+          },
+          {
+            "name": "initialize_calldata",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::result::Result::<core::starknet::contract_address::ContractAddress, core::array::Array::<core::felt252>>"
+          }
+        ],
+        "state_mutability": "external"
       }
-    ],
-    "outputs": []
+    ]
   },
   {
-    "name": "deploySpace",
-    "type": "function",
-    "inputs": [
+    "type": "event",
+    "name": "sx::factory::factory::Factory::NewContractDeployed",
+    "kind": "struct",
+    "members": [
       {
-        "name": "public_key",
-        "type": "felt"
+        "name": "class_hash",
+        "type": "core::starknet::class_hash::ClassHash",
+        "kind": "data"
       },
       {
-        "name": "voting_delay",
-        "type": "felt"
-      },
-      {
-        "name": "min_voting_duration",
-        "type": "felt"
-      },
-      {
-        "name": "max_voting_duration",
-        "type": "felt"
-      },
-      {
-        "name": "proposal_threshold",
-        "type": "Uint256"
-      },
-      {
-        "name": "controller",
-        "type": "felt"
-      },
-      {
-        "name": "quorum",
-        "type": "Uint256"
-      },
-      {
-        "name": "voting_strategies_len",
-        "type": "felt"
-      },
-      {
-        "name": "voting_strategies",
-        "type": "felt*"
-      },
-      {
-        "name": "voting_strategy_params_flat_len",
-        "type": "felt"
-      },
-      {
-        "name": "voting_strategy_params_flat",
-        "type": "felt*"
-      },
-      {
-        "name": "authenticators_len",
-        "type": "felt"
-      },
-      {
-        "name": "authenticators",
-        "type": "felt*"
-      },
-      {
-        "name": "execution_strategies_len",
-        "type": "felt"
-      },
-      {
-        "name": "execution_strategies",
-        "type": "felt*"
-      },
-      {
-        "name": "metadata_uri_len",
-        "type": "felt"
-      },
-      {
-        "name": "metadata_uri",
-        "type": "felt*"
+        "name": "contract_address",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
       }
-    ],
-    "outputs": []
+    ]
+  },
+  {
+    "type": "event",
+    "name": "sx::factory::factory::Factory::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "NewContractDeployed",
+        "type": "sx::factory::factory::Factory::NewContractDeployed",
+        "kind": "nested"
+      }
+    ]
   }
 ]

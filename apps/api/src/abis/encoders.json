@@ -1,0 +1,28 @@
+[
+  {
+    "name": "sx::utils::types::Strategy",
+    "type": "struct",
+    "members": [
+      { "name": "address", "type": "core::starknet::contract_address::ContractAddress" },
+      { "name": "params", "type": "core::array::Array::<core::felt252>" }
+    ]
+  },
+  {
+    "name": "core::integer::u256",
+    "type": "struct",
+    "members": [
+      { "name": "low", "type": "core::integer::u128" },
+      { "name": "high", "type": "core::integer::u128" }
+    ]
+  },
+  {
+    "name": "proposition_power_params",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      { "name": "proposal_threshold", "type": "core::integer::u256" },
+      { "name": "allowed_strategies", "type": "core::array::Array::<sx::utils::types::Strategy>" }
+    ],
+    "state_mutability": "external"
+  }
+]
