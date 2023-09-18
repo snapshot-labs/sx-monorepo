@@ -119,6 +119,58 @@ export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, eve
   }
 };
 
+export const handleMinVotingDurationUpdated: CheckpointWriter = async ({
+  rawEvent,
+  event,
+  mysql
+}) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space min voting duration updated');
+
+  const space = validateAndParseAddress(rawEvent.from_address);
+
+  const query = `UPDATE spaces SET min_voting_period = ? WHERE id = ? LIMIT 1;`;
+  await mysql.queryAsync(query, [BigInt(event.min_voting_duration).toString(), space]);
+};
+
+export const handleMaxVotingDurationUpdated: CheckpointWriter = async ({
+  rawEvent,
+  event,
+  mysql
+}) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space max voting duration updated');
+
+  const space = validateAndParseAddress(rawEvent.from_address);
+
+  const query = `UPDATE spaces SET max_voting_period = ? WHERE id = ? LIMIT 1;`;
+  await mysql.queryAsync(query, [BigInt(event.max_voting_duration).toString(), space]);
+};
+
+export const handleOwnershipTransferred: CheckpointWriter = async ({ rawEvent, event, mysql }) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space ownership transferred');
+
+  const space = validateAndParseAddress(rawEvent.from_address);
+
+  const query = `UPDATE spaces SET controller = ? WHERE id = ? LIMIT 1;`;
+  await mysql.queryAsync(query, [validateAndParseAddress(event.new_owner), space]);
+};
+
+export const handleVotingDelayUpdated: CheckpointWriter = async ({ rawEvent, event, mysql }) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space voting delay updated');
+
+  const space = validateAndParseAddress(rawEvent.from_address);
+
+  const query = `UPDATE spaces SET voting_delay = ? WHERE id = ? LIMIT 1;`;
+  await mysql.queryAsync(query, [BigInt(event.voting_delay).toString(), space]);
+};
+
 export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, event, mysql }) => {
   if (!rawEvent || !event) return;
 

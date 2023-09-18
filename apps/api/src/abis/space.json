@@ -1039,6 +1039,23 @@
   },
   {
     "type": "event",
+    "name": "OwnershipTransferred",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "previous_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
+      },
+      {
+        "name": "new_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
     "name": "sx::space::space::Space::Upgraded",
     "kind": "struct",
     "members": [

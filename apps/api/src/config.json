@@ -45,6 +45,22 @@
         {
           "name": "MetadataUriUpdated",
           "fn": "handleMetadataUriUpdated"
+        },
+        {
+          "name": "MinVotingDurationUpdated",
+          "fn": "handleMinVotingDurationUpdated"
+        },
+        {
+          "name": "MaxVotingDurationUpdated",
+          "fn": "handleMaxVotingDurationUpdated"
+        },
+        {
+          "name": "VotingDelayUpdated",
+          "fn": "handleVotingDelayUpdated"
+        },
+        {
+          "name": "OwnershipTransferred",
+          "fn": "handleOwnershipTransferred"
         }
       ]
     }

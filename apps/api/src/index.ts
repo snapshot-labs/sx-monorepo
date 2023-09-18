@@ -27,7 +27,14 @@ const checkpoint = new Checkpoint(config, writer, schema, {
   }
 });
 
-checkpoint.reset().then(() => checkpoint.start());
+async function run() {
+  await checkpoint.reset();
+  await checkpoint.resetMetadata();
+
+  await checkpoint.start();
+}
+
+run();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
