@@ -4,15 +4,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig, EthereumTx, L1Executor, StarkNetSig, StarkNetTx } from '../../../src/clients';
 import { getExecutionData } from '../../../src/executors';
 import { Choice } from '../../../src/types';
-import {
-  flush,
-  increaseTime,
-  loadL1MessagingContract,
-  postMessageToL2,
-  setTime,
-  setup,
-  TestConfig
-} from './utils';
+import { flush, increaseTime, setTime, setup, TestConfig } from './utils';
 
 describe('sx-starknet', () => {
   const ethUrl = 'http://127.0.0.1:8545';
@@ -26,7 +18,7 @@ describe('sx-starknet', () => {
     }
   });
 
-  const provider = new JsonRpcProvider('http://127.0.0.1:8545');
+  const provider = new JsonRpcProvider(ethUrl);
   const wallet = new Wallet(ethPrivateKey, provider);
   const walletAddress = wallet.address;
   const account = new Account(starkProvider, address, privateKey);
@@ -43,8 +35,10 @@ describe('sx-starknet', () => {
 
     testConfig = await setup({
       starknetAccount: account,
-      ethereumWallet: wallet
+      ethereumWallet: wallet,
+      ethUrl
     });
+
     spaceAddress = testConfig.spaceAddress;
 
     client = new StarkNetTx({
@@ -201,15 +195,8 @@ describe('sx-starknet', () => {
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
       };
 
-      const payload = await ethTxClient.getProposeHash(wallet, data);
-      const fee = await ethTxClient.estimateProposeFee(wallet, data);
-
-      await postMessageToL2(
-        testConfig.ethTxAuthenticator,
-        'commit',
-        [walletAddress, payload],
-        fee.overall_fee
-      );
+      await ethTxClient.initializePropose(wallet, data);
+      await flush();
 
       const receipt = await client.propose(account, {
         signatureData: {
@@ -238,15 +225,8 @@ describe('sx-starknet', () => {
         choice: Choice.For
       };
 
-      const payload = await ethTxClient.getVoteHash(wallet, data);
-      const fee = await ethTxClient.estimateVoteFee(wallet, data);
-
-      await postMessageToL2(
-        testConfig.ethTxAuthenticator,
-        'commit',
-        [walletAddress, payload],
-        fee.overall_fee
-      );
+      await ethTxClient.initializeVote(wallet, data);
+      await flush();
 
       const receipt = await client.vote(account, {
         signatureData: {
@@ -555,7 +535,6 @@ describe('sx-starknet', () => {
 
     it('should execute', async () => {
       await increaseTime(86400);
-      await loadL1MessagingContract(ethUrl, testConfig.starknetCore);
 
       const { executionParams } = getExecutionData(
         'EthRelayer',

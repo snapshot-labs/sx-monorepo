@@ -6,7 +6,11 @@ import StarknetCommitAbi from './abis/StarknetCommit.json';
 import { getStrategiesParams } from '../../../utils/strategies';
 import { getChoiceEnum } from '../../../utils/starknet-enums';
 import { defaultNetwork } from '../../..';
-import { ClientConfig, ClientOpts, Propose, UpdateProposal, Vote } from '../../../types';
+import { ClientConfig, ClientOpts, Envelope, Propose, UpdateProposal, Vote } from '../../../types';
+
+type CallOptions = {
+  noWait?: boolean;
+};
 
 const ENCODE_ABI = [
   {
@@ -181,9 +185,6 @@ const ENCODE_ABI = [
   }
 ];
 
-// TODO: move to config
-const STARKNET_COMMIT_ADDRESS = '0x8bf85537c80becba711447f66a9a4452e3575e29';
-
 const PROPOSE_SELECTOR = '0x1bfd596ae442867ef71ca523061610682af8b00fc2738329422f4ad8d220b81';
 const VOTE_SELECTOR = '0x132bdf85fc8aa10ac3c22f02317f8f53d4b4f52235ed1eabb3a4cbbe08b5c41';
 const UPDATE_PROPOSAL_SELECTOR =
@@ -205,7 +206,7 @@ export class EthereumTx {
     const sequencerProvider = new SequencerProvider({ baseUrl: this.config.sequencerUrl });
 
     const fees = await sequencerProvider.estimateMessageFee({
-      from_address: STARKNET_COMMIT_ADDRESS,
+      from_address: this.config.networkConfig.starknetCommit,
       to_address: l2Address,
       entry_point_selector: 'commit',
       payload
@@ -314,30 +315,87 @@ export class EthereumTx {
     return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;
   }
 
-  async initializePropose(signer: Signer, data: Propose) {
-    const spaceContract = new Contract(STARKNET_COMMIT_ADDRESS, StarknetCommitAbi, signer);
+  async initializePropose(
+    signer: Signer,
+    data: Propose,
+    opts: CallOptions = {}
+  ): Promise<Envelope<Propose>> {
+    const commitContract = new Contract(
+      this.config.networkConfig.starknetCommit,
+      StarknetCommitAbi,
+      signer
+    );
 
     const hash = await this.getProposeHash(signer, data);
     const { overall_fee } = await this.estimateProposeFee(signer, data);
 
-    return spaceContract.commit(data.authenticator, hash, { value: overall_fee });
+    const promise = commitContract.commit(data.authenticator, hash, { value: overall_fee });
+    const res = opts.noWait ? null : await promise;
+
+    return {
+      signatureData: {
+        address: await signer.getAddress(),
+        commitTxId: res?.hash ?? null,
+        commitHash: hash,
+        primaryType: 'Propose'
+      },
+      data
+    };
   }
 
-  async initializeVote(signer: Signer, data: Vote) {
-    const spaceContract = new Contract(STARKNET_COMMIT_ADDRESS, StarknetCommitAbi, signer);
+  async initializeVote(
+    signer: Signer,
+    data: Vote,
+    opts: CallOptions = {}
+  ): Promise<Envelope<Vote>> {
+    const commitContract = new Contract(
+      this.config.networkConfig.starknetCommit,
+      StarknetCommitAbi,
+      signer
+    );
 
     const hash = await this.getVoteHash(signer, data);
     const { overall_fee } = await this.estimateVoteFee(signer, data);
 
-    return spaceContract.commit(data.authenticator, hash, { value: overall_fee });
+    const promise = commitContract.commit(data.authenticator, hash, { value: overall_fee });
+    const res = opts.noWait ? null : await promise;
+
+    return {
+      signatureData: {
+        address: await signer.getAddress(),
+        commitTxId: res?.hash ?? null,
+        commitHash: hash,
+        primaryType: 'Vote'
+      },
+      data
+    };
   }
 
-  async initializeUpdateProposal(signer: Signer, data: UpdateProposal) {
-    const spaceContract = new Contract(STARKNET_COMMIT_ADDRESS, StarknetCommitAbi, signer);
+  async initializeUpdateProposal(
+    signer: Signer,
+    data: UpdateProposal,
+    opts: CallOptions = {}
+  ): Promise<Envelope<UpdateProposal>> {
+    const commitContract = new Contract(
+      this.config.networkConfig.starknetCommit,
+      StarknetCommitAbi,
+      signer
+    );
 
     const hash = await this.getUpdateProposalHash(signer, data);
     const { overall_fee } = await this.estimateUpdateProposalFee(signer, data);
 
-    return spaceContract.commit(data.authenticator, hash, { value: overall_fee });
+    const promise = commitContract.commit(data.authenticator, hash, { value: overall_fee });
+    const res = opts.noWait ? null : await promise;
+
+    return {
+      signatureData: {
+        address: await signer.getAddress(),
+        commitTxId: res?.hash ?? null,
+        commitHash: hash,
+        primaryType: 'UpdateProposal'
+      },
+      data
+    };
   }
 }

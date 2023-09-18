@@ -1,4 +1,4 @@
-import { Account, CallData, hash, uint256 } from 'starknet';
+import { Account, CallData, uint256 } from 'starknet';
 import { Signer } from '@ethersproject/abstract-signer';
 import { Interface, defaultAbiCoder } from '@ethersproject/abi';
 import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
@@ -45,9 +45,8 @@ import GnosisSafeProxyFactoryContract from './fixtures/l1/GnosisSafeProxyFactory
 import ModuleProxyFactoryContract from './fixtures/l1/ModuleProxyFactory.json';
 import L1AvatarExecutionStrategyMockMessagingContract from './fixtures/l1/L1AvatarExecutionStrategyMockMessaging.json';
 import MockStarknetMessaging from './fixtures/l1/MockStarknetMessaging.json';
+import StarkNetCommit from './fixtures/l1/StarkNetCommit.json';
 import { NetworkConfig } from '../../../src/types';
-
-const L1_COMMIT = '0x8bf85537c80becba711447f66a9a4452e3575e29';
 
 export type TestConfig = {
   starknetCore: string;
@@ -108,10 +107,12 @@ async function deployL1Dependency(
 
 export async function setup({
   starknetAccount,
-  ethereumWallet
+  ethereumWallet,
+  ethUrl
 }: {
   starknetAccount: Account;
   ethereumWallet: Wallet;
+  ethUrl: string;
 }): Promise<TestConfig> {
   const masterSpaceResult = await starknetAccount.declareIfNot({
     contract: sxSpaceSierra as any,
@@ -122,6 +123,11 @@ export async function setup({
     contract: sxFactorySierra as any,
     casm: sxFactoryCasm as any
   });
+
+  const starknetCore = await deployL1Dependency(ethereumWallet, MockStarknetMessaging, 5 * 60);
+  await loadL1MessagingContract(ethUrl, starknetCore);
+
+  const starknetCommit = await deployL1Dependency(ethereumWallet, StarkNetCommit, starknetCore);
 
   const erc20VotesToken = await deployDependency(
     starknetAccount,
@@ -161,7 +167,7 @@ export async function setup({
     sxEthTxAuthenticatorCasm,
     CallData.compile({
       starknet_commit_address: {
-        address: L1_COMMIT
+        address: starknetCommit
       }
     })
   );
@@ -244,6 +250,7 @@ export async function setup({
     eip712ChainId: '0x534e5f474f45524c49',
     spaceFactory: factoryAddress,
     masterSpace: masterSpaceClassHash as string,
+    starknetCommit,
     authenticators: {
       [hexPadLeft(vanillaAuthenticator)]: {
         type: 'vanilla'
@@ -336,12 +343,15 @@ export async function setup({
 
   const spaceAddress = address;
 
-  const { l1AvatarExecutionStrategyContract, safeContract, starknetCore } =
-    await setupL1ExecutionStrategy(ethereumWallet, {
+  const { l1AvatarExecutionStrategyContract, safeContract } = await setupL1ExecutionStrategy(
+    ethereumWallet,
+    {
       spaceAddress,
+      starknetCore,
       ethRelayerAddress: ethRelayerExecutionStrategy,
       quorum: 1n
-    });
+    }
+  );
 
   return {
     starknetCore,
@@ -372,10 +382,12 @@ export async function setupL1ExecutionStrategy(
   signer: Wallet,
   {
     spaceAddress,
+    starknetCore,
     ethRelayerAddress,
     quorum
   }: {
     spaceAddress: string;
+    starknetCore: string;
     ethRelayerAddress: string;
     quorum: bigint;
   }
@@ -384,7 +396,6 @@ export async function setupL1ExecutionStrategy(
 
   const singleton = await deployL1Dependency(signer, GnosisSafeL2Contract);
   const factory = await deployL1Dependency(signer, GnosisSafeProxyFactoryContract);
-  const starknetCore = await deployL1Dependency(signer, MockStarknetMessaging, 5 * 60);
 
   const gnosisSafeProxyFactoryContract = new Contract(
     factory,
@@ -477,22 +488,6 @@ export async function postDevnet(path: string, body: Record<string, any>) {
   });
 
   return res.json();
-}
-
-export function postMessageToL2(
-  l2Address: string,
-  selector: string,
-  payload: string[],
-  fee: number
-) {
-  return postDevnet('postman/send_message_to_l2', {
-    l1_contract_address: L1_COMMIT,
-    l2_contract_address: l2Address,
-    entry_point_selector: hash.getSelectorFromName(selector),
-    payload,
-    paid_fee_on_l1: `0x${fee.toString(16)}`,
-    nonce: '0x0'
-  });
 }
 
 export function setTime(time: number) {

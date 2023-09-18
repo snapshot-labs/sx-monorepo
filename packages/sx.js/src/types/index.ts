@@ -139,6 +139,8 @@ export type Message = Propose | Vote | UpdateProposal;
 
 export type SignatureData = {
   address: string;
+  commitTxId?: string;
+  commitHash?: string;
   signature?: string[] | null;
   message?: Record<string, any>;
   primaryType?: any;

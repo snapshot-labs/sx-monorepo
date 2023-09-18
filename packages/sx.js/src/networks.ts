@@ -83,6 +83,7 @@ export const goerli1: NetworkConfig = {
   eip712ChainId: '0x534e5f474f45524c49',
   spaceFactory: '0x33a57fe2f6e28c2931a246eea567d9af6a036c4f7e0a15625bad5677c7b18f7',
   masterSpace: '0x2abf4530780a9ff3b22b94d853a24aeadcccd137aa9d553c41197d1c98b2b6f',
+  starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29',
   authenticators: {
     '0x007ea118e919c2d693f6c6d4643caae86814e8a7c06a77c33799e8d5f8a544a2': {
       type: 'vanilla'
@@ -114,6 +115,7 @@ export const goerli2: NetworkConfig = {
   eip712ChainId: '0x534e5f474f45524c4932',
   spaceFactory: '0x00e1e511e496a72791ab3d591ba7d571a32de4261d84e4d183f26b6325970e20',
   masterSpace: '',
+  starknetCommit: '',
   authenticators: {
     '0x05e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62': {
       type: 'vanilla'
