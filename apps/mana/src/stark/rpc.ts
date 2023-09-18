@@ -1,35 +1,12 @@
-import { Provider, Account, constants } from 'starknet';
-import { clients, goerli1, goerli2 } from '@snapshot-labs/sx';
+import { NETWORKS, getClient } from './networks';
+import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
-
-export const NETWORKS = {
-  [constants.StarknetChainId.SN_GOERLI]: goerli1,
-  [constants.StarknetChainId.SN_GOERLI2]: goerli2
-} as const;
-
-const starknetPrivkey = process.env.STARKNET_PRIVKEY || '';
-const starknetAddress = process.env.STARKNET_ADDRESS || '';
 
 export const createNetworkHandler = (chainId: string) => {
   const networkConfig = NETWORKS[chainId];
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const baseUrl =
-    chainId === constants.StarknetChainId.SN_GOERLI
-      ? 'https://alpha4.starknet.io'
-      : 'https://alpha4-2.starknet.io';
-
-  const starkProvider = new Provider({
-    sequencer: {
-      baseUrl
-    }
-  });
-
-  const client = new clients.StarkNetTx({
-    starkProvider,
-    ethUrl: process.env.ETH_RPC_URL as string
-  });
-  const account = new Account(starkProvider, starknetAddress, starknetPrivkey);
+  const { client, account } = getClient(chainId);
 
   async function send(id, params, res) {
     try {
@@ -63,5 +40,20 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  return { send };
+  async function registerTransaction(id, params, res) {
+    try {
+      const { type, hash, payload } = params;
+
+      console.log('Registering transaction', type, hash, payload);
+
+      await db.registerTransaction(chainId, type, hash, payload);
+
+      return rpcSuccess(res, true, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
+  return { send, registerTransaction };
 };

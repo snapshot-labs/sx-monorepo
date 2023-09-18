@@ -1,5 +1,6 @@
 import express from 'express';
-import { createNetworkHandler, NETWORKS } from './rpc';
+import { createNetworkHandler } from './rpc';
+import { NETWORKS } from './networks';
 
 const router = express.Router();
 

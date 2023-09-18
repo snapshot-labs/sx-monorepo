@@ -5,6 +5,8 @@ import starkRpc from './stark';
 import ethRpc from './eth';
 import fossil from './fossil';
 import pkg from '../package.json';
+import { createTables } from './db';
+import { registeredTransactionsLoop } from './stark/registered';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,4 +30,12 @@ app.get('/', (req, res) =>
   })
 );
 
-app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
+async function start() {
+  await createTables();
+
+  registeredTransactionsLoop();
+
+  app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
+}
+
+start();

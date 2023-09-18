@@ -17,3 +17,5 @@ export function rpcError(res, code, e, id) {
     id
   });
 }
+
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
