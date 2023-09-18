@@ -45,6 +45,7 @@ type UpdateSettingsInput = {
 
 const NO_UPDATE_U32 = '0xf2cda9b1';
 const NO_UPDATE_ADDRESS = '0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048';
+const NO_UPDATE_STRING = 'No update';
 
 const callData = new CallData(SpaceAbi);
 
@@ -242,27 +243,26 @@ export class StarkNetTx {
   }) {
     const settingsData = [
       {
-        min_voting_duration: settings.minVotingDuration || NO_UPDATE_U32,
-        max_voting_duration: settings.maxVotingDuration || NO_UPDATE_U32,
-        voting_delay: settings.votingDelay || NO_UPDATE_U32,
-        metadata_uri:
-          (settings.metadataUri && shortString.splitLongString(settings.metadataUri)) || [],
-        dao_uri: (settings.daoUri && shortString.splitLongString(settings.daoUri)) || [],
-        proposal_validation_strategy: settings.proposalValidationStrategy || {
+        min_voting_duration: settings.minVotingDuration ?? NO_UPDATE_U32,
+        max_voting_duration: settings.maxVotingDuration ?? NO_UPDATE_U32,
+        voting_delay: settings.votingDelay ?? NO_UPDATE_U32,
+        metadata_uri: shortString.splitLongString(settings.metadataUri ?? NO_UPDATE_STRING),
+        dao_uri: shortString.splitLongString(settings.daoUri ?? NO_UPDATE_STRING),
+        proposal_validation_strategy: settings.proposalValidationStrategy ?? {
           address: NO_UPDATE_ADDRESS,
           params: []
         },
         proposal_validation_strategy_metadata_uri:
-          settings.proposalValidationStrategyMetadataUri || [],
-        authenticators_to_add: settings.authenticatorsToAdd || [],
-        authenticators_to_remove: settings.authenticatorsToRemove || [],
-        voting_strategies_to_add: settings.votingStrategiesToAdd || [],
-        voting_strategies_to_remove: settings.votingStrategiesToRemove || [],
+          settings.proposalValidationStrategyMetadataUri ?? [],
+        authenticators_to_add: settings.authenticatorsToAdd ?? [],
+        authenticators_to_remove: settings.authenticatorsToRemove ?? [],
+        voting_strategies_to_add: settings.votingStrategiesToAdd ?? [],
+        voting_strategies_to_remove: settings.votingStrategiesToRemove ?? [],
         voting_strategies_metadata_uris_to_add:
           (settings.votingStrategyMetadataUrisToAdd &&
             settings.votingStrategyMetadataUrisToAdd.map(str =>
               shortString.splitLongString(str)
-            )) ||
+            )) ??
           []
       }
     ];

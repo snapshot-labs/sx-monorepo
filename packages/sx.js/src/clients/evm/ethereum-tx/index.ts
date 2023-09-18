@@ -475,21 +475,21 @@ export class EthereumTx {
   ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
     const promise = spaceContract.updateSettings({
-      minVotingDuration: settings.minVotingDuration || NO_UPDATE_UINT32,
-      maxVotingDuration: settings.maxVotingDuration || NO_UPDATE_UINT32,
-      votingDelay: settings.votingDelay || NO_UPDATE_UINT32,
-      metadataURI: settings.metadataUri || NO_UPDATE_HASH,
-      daoURI: settings.daoUri || NO_UPDATE_HASH,
-      proposalValidationStrategy: settings.proposalValidationStrategy || {
+      minVotingDuration: settings.minVotingDuration ?? NO_UPDATE_UINT32,
+      maxVotingDuration: settings.maxVotingDuration ?? NO_UPDATE_UINT32,
+      votingDelay: settings.votingDelay ?? NO_UPDATE_UINT32,
+      metadataURI: settings.metadataUri ?? NO_UPDATE_HASH,
+      daoURI: settings.daoUri ?? NO_UPDATE_HASH,
+      proposalValidationStrategy: settings.proposalValidationStrategy ?? {
         addr: NO_UPDATE_ADDRESS,
         params: '0x00'
       },
-      proposalValidationStrategyMetadataURI: settings.proposalValidationStrategyMetadataUri || '',
-      authenticatorsToAdd: settings.authenticatorsToAdd || [],
-      authenticatorsToRemove: settings.authenticatorsToRemove || [],
-      votingStrategiesToAdd: settings.votingStrategiesToAdd || [],
-      votingStrategiesToRemove: settings.votingStrategiesToRemove || [],
-      votingStrategyMetadataURIsToAdd: settings.votingStrategyMetadataUrisToAdd || []
+      proposalValidationStrategyMetadataURI: settings.proposalValidationStrategyMetadataUri ?? '',
+      authenticatorsToAdd: settings.authenticatorsToAdd ?? [],
+      authenticatorsToRemove: settings.authenticatorsToRemove ?? [],
+      votingStrategiesToAdd: settings.votingStrategiesToAdd ?? [],
+      votingStrategiesToRemove: settings.votingStrategiesToRemove ?? [],
+      votingStrategyMetadataURIsToAdd: settings.votingStrategyMetadataUrisToAdd ?? []
     });
 
     return opts.noWait ? null : promise;
