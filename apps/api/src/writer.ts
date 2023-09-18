@@ -4,6 +4,7 @@ import EncodersAbi from './abis/encoders.json';
 import { CheckpointWriter } from '@snapshot-labs/checkpoint';
 import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
 import {
+  getCurrentTimestamp,
   dropIpfs,
   findVariant,
   getVoteValue,
@@ -56,7 +57,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event, m
     voting_power_validation_strategy_strategies_params: JSON.stringify([]),
     proposal_count: 0,
     vote_count: 0,
-    created: block?.timestamp ?? Date.now(),
+    created: block?.timestamp ?? getCurrentTimestamp(),
     tx: tx.transaction_hash
   };
 
@@ -131,7 +132,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   const proposal = parseInt(BigInt(event.proposal_id).toString());
   const author = findVariant(event.author).value;
 
-  const created = block?.timestamp ?? Date.now();
+  const created = block?.timestamp ?? getCurrentTimestamp();
 
   const item = {
     id: `${space}/${proposal}`,
@@ -237,7 +238,7 @@ export const handleUpdate: CheckpointWriter = async ({ block, rawEvent, event, m
     const query = `UPDATE proposals SET metadata = ?, edited = ? WHERE id = ? LIMIT 1;`;
     await mysql.queryAsync(query, [
       dropIpfs(metadataUri),
-      block?.timestamp ?? Date.now(),
+      block?.timestamp ?? getCurrentTimestamp(),
       proposalId
     ]);
   } catch (e) {
@@ -281,7 +282,7 @@ export const handleVote: CheckpointWriter = async ({ block, rawEvent, event, mys
   const choice = getVoteValue(findVariant(event.choice).key);
   const vp = BigInt(event.voting_power);
 
-  const created = block?.timestamp ?? Date.now();
+  const created = block?.timestamp ?? getCurrentTimestamp();
 
   const item = {
     id: `${space}/${proposal}/${voter}`,

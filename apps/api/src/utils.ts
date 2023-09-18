@@ -18,6 +18,10 @@ const starkProvider = new Provider({
   }
 });
 
+export function getCurrentTimestamp() {
+  return Math.floor(Date.now() / 1000);
+}
+
 export function toAddress(bn) {
   try {
     return getAddress(BigNumber.from(bn).toHexString());
