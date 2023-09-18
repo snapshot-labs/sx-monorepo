@@ -86,9 +86,7 @@ const settingsForm: SpaceSettings = reactive(
   clone({
     votingDelay: 0,
     minVotingDuration: 0,
-    maxVotingDuration: 86400,
-    proposalThreshold: '1',
-    quorum: '1'
+    maxVotingDuration: 86400
   })
 );
 const controller = ref(web3.value.account);

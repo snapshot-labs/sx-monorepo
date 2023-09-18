@@ -7,7 +7,7 @@ import networks from '@/helpers/networks.json';
 networks['starknet'] = {
   key: 'starknet',
   name: 'Starknet',
-  explorer: 'https://goerli.voyager.online'
+  explorer: 'https://testnet.starkscan.co'
 };
 
 let auth;

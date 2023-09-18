@@ -1,57 +1,22 @@
-import {
-  clients as Clients,
-  getExecutionData,
-  defaultNetwork,
-  clients,
-  getStarknetStrategy
-} from '@snapshot-labs/sx';
-import { SUPPORTED_AUTHENTICATORS, SUPPORTED_EXECUTORS, SUPPORTED_STRATEGIES } from './constants';
+import { defaultNetwork, clients, getStarknetStrategy } from '@snapshot-labs/sx';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
-import { convertToMetaTransactions } from '@/helpers/transactions';
+import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
+import { STARKNET_CONNECTORS } from '@/networks/common/constants';
+import {
+  RELAYER_AUTHENTICATORS,
+  SUPPORTED_AUTHENTICATORS,
+  SUPPORTED_STRATEGIES
+} from './constants';
 import type { Provider } from 'starknet';
-import type { Web3Provider } from '@ethersproject/providers';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import type { NetworkActions, NetworkHelpers, StrategyConfig, VotingPower } from '@/networks/types';
+import type {
+  Connector,
+  NetworkActions,
+  NetworkHelpers,
+  StrategyConfig,
+  VotingPower
+} from '@/networks/types';
 import type { Space, SpaceMetadata, StrategyParsedMetadata, Proposal } from '@/types';
-
-const VANILLA_EXECUTOR = '0x4ecc83848a519cc22b0d0ffb70e65ec8dde85d3d13439eff7145d4063cf6b4d';
-const ZODIAC_EXECUTOR = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
-
-function buildExecution(space: Space, transactions: MetaTransaction[]) {
-  if (space.executors.find(executor => executor === ZODIAC_EXECUTOR)) {
-    return getExecutionData(ZODIAC_EXECUTOR, defaultNetwork, { transactions });
-  }
-
-  if (space.executors.find(executor => executor === VANILLA_EXECUTOR)) {
-    if (transactions.length) {
-      console.warn('transactions will be ignored as vanilla executor is used');
-    }
-
-    return {
-      executor: VANILLA_EXECUTOR,
-      executionParams: []
-    };
-  }
-
-  throw new Error('No supported executor configured for this space');
-}
-
-function pickAuthenticatorAndStrategies(authenticators: string[], strategies: string[]) {
-  const authenticator = authenticators.find(
-    authenticator => SUPPORTED_AUTHENTICATORS[authenticator]
-  );
-
-  const selectedStrategies = strategies
-    .map((strategy, index) => [index, strategy] as const)
-    .filter(([, strategy]) => SUPPORTED_STRATEGIES[strategy])
-    .map(([index]) => index);
-
-  if (!authenticator || selectedStrategies.length === 0) {
-    throw new Error('Unsupported space');
-  }
-
-  return { authenticator, strategies: selectedStrategies };
-}
 
 export function createActions(
   starkProvider: Provider,
@@ -67,11 +32,20 @@ export function createActions(
     ethUrl
   };
 
-  const client = new Clients.EthereumSig(clientConfig);
+  const pickAuthenticatorAndStrategies = createStrategyPicker({
+    supportedAuthenticators: SUPPORTED_AUTHENTICATORS,
+    supportedStrategies: SUPPORTED_STRATEGIES,
+    relayerAuthenticators: RELAYER_AUTHENTICATORS,
+    managerConnectors: STARKNET_CONNECTORS
+  });
+
+  const client = new clients.StarkNetTx(clientConfig);
+  const starkSigClient = new clients.StarkNetSig(clientConfig);
+  const ethSigClient = new clients.EthereumSig(clientConfig);
 
   return {
-    async predictSpaceAddress() {
-      return null;
+    async predictSpaceAddress(web3: any, { salt }) {
+      return client.predictSpaceAddress({ salt });
     },
     async deployDependency() {
       throw new Error('Not implemented');
@@ -84,8 +58,6 @@ export function createActions(
         votingDelay: number;
         minVotingDuration: number;
         maxVotingDuration: number;
-        proposalThreshold: bigint;
-        quorum: bigint;
         authenticators: StrategyConfig[];
         validationStrategy: StrategyConfig;
         votingStrategies: StrategyConfig[];
@@ -93,132 +65,218 @@ export function createActions(
         metadata: SpaceMetadata;
       }
     ) {
-      const spaceManager = new clients.SpaceManager({
-        starkProvider,
+      const pinned = await helpers.pin(
+        createErc1155Metadata(params.metadata, {
+          execution_strategies: params.executionStrategies.map(config => config.address),
+          execution_strategies_types: params.executionStrategies.map(config => config.type)
+        })
+      );
+
+      const metadataUris = await Promise.all(
+        params.votingStrategies.map(async config => {
+          if (!config.generateMetadata) return '';
+
+          const metadata = config.generateMetadata(config.params);
+          const pinned = await helpers.pin(metadata);
+
+          return `ipfs://${pinned.cid}`;
+        })
+      );
+
+      return client.deploySpace({
         account: web3.provider.account,
-        disableEstimation: true
-      });
-
-      const pinned = await helpers.pin(createErc1155Metadata(params.metadata));
-
-      return spaceManager.deploySpace({
-        ...params,
-        authenticators: params.authenticators.map(config => config.address),
-        votingStrategies: params.votingStrategies.map(strategy => strategy.address),
-        votingStrategiesParams: params.votingStrategies.map(strategy =>
-          strategy.generateParams ? strategy.generateParams(strategy.params) : []
-        ),
-        executionStrategies: params.executionStrategies.map(strategy => strategy.address),
-        metadataUri: `ipfs://${pinned.cid}`
+        params: {
+          ...params,
+          proposalValidationStrategy: {
+            addr: params.validationStrategy.address,
+            params: params.validationStrategy.generateParams
+              ? params.validationStrategy.generateParams(params.validationStrategy.params)
+              : []
+          },
+          metadataUri: `ipfs://${pinned.cid}`,
+          daoUri: '',
+          authenticators: params.authenticators.map(config => config.address),
+          votingStrategies: params.votingStrategies.map(config => ({
+            addr: config.address,
+            params: config.generateParams ? config.generateParams(config.params) : []
+          })),
+          votingStrategiesMetadata: metadataUris
+        },
+        salt
       });
     },
     setMetadata: async (web3: any, space: Space, metadata: SpaceMetadata) => {
-      const spaceManager = new clients.SpaceManager({
-        starkProvider,
-        account: web3.provider.account,
-        disableEstimation: true
+      const pinned = await helpers.pin(
+        createErc1155Metadata(metadata, {
+          execution_strategies: space.executors,
+          execution_strategies_types: space.executors_types
+        })
+      );
+
+      return client.setMetadataUri({
+        signer: web3.provider.account,
+        space: space.id,
+        metadataUri: `ipfs://${pinned.cid}`
       });
-
-      const pinned = await helpers.pin(createErc1155Metadata(metadata));
-
-      return spaceManager.setMetadataUri(space.id, `ipfs://${pinned.cid}`);
     },
     propose: async (
-      web3: Web3Provider,
+      web3: any,
+      connectorType: Connector,
       account: string,
       space: Space,
       cid: string,
       executionStrategy: string | null,
       transactions: MetaTransaction[]
     ) => {
-      await verifyNetwork(web3, l1ChainId);
+      const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
+        authenticators: space.authenticators,
+        strategies: space.strategies,
+        connectorType
+      });
 
-      const { authenticator, strategies } = pickAuthenticatorAndStrategies(
-        space.authenticators,
-        space.strategies
-      );
+      if (relayerType === 'evm') await verifyNetwork(web3, l1ChainId);
 
-      const executionData = buildExecution(space, transactions);
+      let selectedExecutionStrategy;
+      if (executionStrategy) {
+        selectedExecutionStrategy = {
+          addr: executionStrategy,
+          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+        };
+      } else {
+        selectedExecutionStrategy = {
+          addr: '0x0000000000000000000000000000000000000000',
+          params: []
+        };
+      }
 
-      return client.propose(web3, account, {
+      const data = {
         space: space.id,
         authenticator,
         strategies,
-        metadataUri: `ipfs://${cid}`,
-        ...executionData
+        executionStrategy: selectedExecutionStrategy,
+        metadataUri: `ipfs://${cid}`
+      };
+
+      if (relayerType === 'starknet') {
+        return starkSigClient.propose({
+          signer: web3.provider.account,
+          data
+        });
+      } else if (relayerType === 'evm') {
+        return ethSigClient.propose({
+          signer: web3.getSigner(),
+          data
+        });
+      }
+
+      return client.propose(web3.provider.account, {
+        data
       });
     },
-    updateProposal: () => {
-      throw new Error('Not implemented');
-    },
-    cancelProposal: () => {
-      throw new Error('Not implemented');
-    },
-    vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
-      await verifyNetwork(web3, l1ChainId);
+    async updateProposal(
+      web3: any,
+      connectorType: Connector,
+      account: string,
+      space: Space,
+      proposalId: number,
+      cid: string,
+      executionStrategy: string | null,
+      transactions: MetaTransaction[]
+    ) {
+      const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
+        authenticators: space.authenticators,
+        strategies: space.voting_power_validation_strategy_strategies,
+        connectorType
+      });
 
-      const { authenticator, strategies } = pickAuthenticatorAndStrategies(
-        proposal.space.authenticators,
-        proposal.strategies
-      );
+      if (relayerType === 'evm') await verifyNetwork(web3, l1ChainId);
 
-      return client.vote(web3, account, {
+      let selectedExecutionStrategy;
+      if (executionStrategy) {
+        selectedExecutionStrategy = {
+          addr: executionStrategy,
+          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+        };
+      } else {
+        selectedExecutionStrategy = {
+          addr: '0x0000000000000000000000000000000000000000',
+          params: []
+        };
+      }
+
+      const data = {
+        space: space.id,
+        proposal: proposalId,
+        authenticator,
+        executionStrategy: selectedExecutionStrategy,
+        metadataUri: `ipfs://${cid}`
+      };
+
+      if (relayerType === 'starknet') {
+        return starkSigClient.updateProposal({
+          signer: web3.provider.account,
+          data
+        });
+      } else if (relayerType === 'evm') {
+        return ethSigClient.updateProposal({
+          signer: web3.getSigner(),
+          data
+        });
+      }
+
+      return client.updateProposal(web3.provider.account, {
+        data
+      });
+    },
+    cancelProposal: (web3: any, proposal: Proposal) => {
+      return client.cancelProposal({
+        signer: web3.provider.account,
+        space: proposal.space.id,
+        proposal: proposal.proposal_id
+      });
+    },
+    vote: async (
+      web3: any,
+      connectorType: Connector,
+      account: string,
+      proposal: Proposal,
+      choice: number
+    ) => {
+      const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
+        authenticators: proposal.space.authenticators,
+        strategies: proposal.strategies,
+        connectorType
+      });
+
+      if (relayerType === 'evm') await verifyNetwork(web3, l1ChainId);
+
+      const data = {
         space: proposal.space.id,
         authenticator,
         strategies,
         proposal: proposal.proposal_id,
         choice
+      };
+
+      if (relayerType === 'starknet') {
+        return starkSigClient.vote({
+          signer: web3.provider.account,
+          data
+        });
+      } else if (relayerType === 'evm') {
+        return ethSigClient.vote({
+          signer: web3.getSigner(),
+          data
+        });
+      }
+
+      return client.vote(web3.provider.account, {
+        data
       });
     },
-    finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
-      const res = await fetch(
-        `${manaUrl}/space/${proposal.space.id}/${proposal.proposal_id}/finalize`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            transactions: convertToMetaTransactions(proposal.execution)
-          })
-        }
-      );
-
-      const { error, receipt } = await res.json();
-      if (error) throw new Error('Finalization failed');
-
-      return receipt;
-    },
-    receiveProposal: async (web3: Web3Provider, proposal: Proposal) => {
-      await verifyNetwork(web3, l1ChainId);
-
-      const zodiac = new Clients.Zodiac({ signer: web3.getSigner() });
-
-      const executor = proposal.space.executors.find(executor => SUPPORTED_EXECUTORS[executor]);
-      if (!executor) throw new Error('Unsupported space');
-
-      return zodiac.receiveProposal(proposal.space.id, executor, {
-        transactions: convertToMetaTransactions(proposal.execution)
-      });
-    },
-    executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
-      await verifyNetwork(web3, l1ChainId);
-
-      // TODO: make it dynamic once we have way to fetch it somehow
-      const proposalIndex = 3;
-
-      const zodiac = new Clients.Zodiac({ signer: web3.getSigner() });
-
-      const executor = proposal.space.executors.find(executor => SUPPORTED_EXECUTORS[executor]);
-      if (!executor) throw new Error('Unsupported space');
-
-      return zodiac.executeProposalTxBatch(
-        proposalIndex,
-        executor,
-        convertToMetaTransactions(proposal.execution)
-      );
-    },
+    finalizeProposal: () => null,
+    receiveProposal: () => null,
+    executeTransactions: () => null,
     executeQueuedProposal: () => null,
     vetoProposal: () => null,
     setVotingDelay: () => null,
@@ -230,34 +288,35 @@ export function createActions(
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
-      block: number
+      timestamp: number | null
     ): Promise<VotingPower[]> => {
-      const offsetsLength = parseInt(strategiesParams[0], 16);
-      const offsets = strategiesParams
-        .slice(1, offsetsLength + 1)
-        .map(offset => parseInt(offset, 16));
-      const elementsLength = strategiesParams.length - offsetsLength - 1;
-      const elements = strategiesParams.slice(offsetsLength + 1);
-      const params2D = offsets.map((offset, index) => {
-        const last = index === offsetsLength - 1 ? elementsLength : offsets[index + 1];
-        return elements.slice(offset, last);
-      });
-
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getStarknetStrategy(address, defaultNetwork);
           if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
-          const value = await strategy.getVotingPower(address, voterAddress, block, params2D[i], {
-            ...clientConfig,
-            networkConfig: defaultNetwork
-          });
+          const value = await strategy.getVotingPower(
+            address,
+            voterAddress,
+            null,
+            timestamp,
+            strategiesParams[i].split(','),
+            {
+              ...clientConfig,
+              networkConfig: defaultNetwork
+            }
+          );
 
-          const token = strategy.type === 'singleSlotProof' ? params2D[i][0] : null;
-          return { address, value, decimals: 0, token, symbol: '' };
+          return {
+            address,
+            value,
+            decimals: strategiesMetadata[i]?.decimals ?? 0,
+            symbol: strategiesMetadata[i]?.symbol ?? '',
+            token: strategiesMetadata[i]?.token ?? null
+          };
         })
       );
     },
-    send: (envelope: any) => client.send(envelope)
+    send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper
   };
 }

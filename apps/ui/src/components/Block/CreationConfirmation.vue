@@ -52,7 +52,9 @@ const steps = computed(() => {
 
 async function deploy() {
   const dependenciesSteps = props.executionStrategies.filter(strategy => strategy.deploy);
-  const executionStrategies = [] as StrategyConfig[];
+  const executionStrategies = props.executionStrategies.filter(
+    strategy => !strategy.deploy
+  ) as StrategyConfig[];
 
   for (let i = 0; i < dependenciesSteps.length; i++) {
     const strategy = dependenciesSteps[i];

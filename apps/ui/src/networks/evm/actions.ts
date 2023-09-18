@@ -11,9 +11,22 @@ import {
 } from '@snapshot-labs/sx';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { executionCall, getExecutionData, pickAuthenticatorAndStrategies } from './helpers';
+import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
+import { EVM_CONNECTORS } from '@/networks/common/constants';
+import { executionCall } from './helpers';
+import {
+  RELAYER_AUTHENTICATORS,
+  SUPPORTED_AUTHENTICATORS,
+  SUPPORTED_STRATEGIES
+} from './constants';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { NetworkActions, NetworkHelpers, StrategyConfig, VotingPower } from '@/networks/types';
+import type {
+  Connector,
+  NetworkActions,
+  NetworkHelpers,
+  StrategyConfig,
+  VotingPower
+} from '@/networks/types';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type { Space, Proposal, SpaceMetadata, StrategyParsedMetadata } from '@/types';
 
@@ -34,6 +47,13 @@ export function createActions(
 ): NetworkActions {
   const networkConfig = CONFIGS[chainId];
   const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
+
+  const pickAuthenticatorAndStrategies = createStrategyPicker({
+    supportedAuthenticators: SUPPORTED_AUTHENTICATORS,
+    supportedStrategies: SUPPORTED_STRATEGIES,
+    relayerAuthenticators: RELAYER_AUTHENTICATORS,
+    managerConnectors: EVM_CONNECTORS
+  });
 
   const client = new clients.EvmEthereumTx({ networkConfig });
   const ethSigClient = new clients.EvmEthereumSig({
@@ -82,8 +102,6 @@ export function createActions(
         votingDelay: number;
         minVotingDuration: number;
         maxVotingDuration: number;
-        proposalThreshold: bigint;
-        quorum: bigint;
         authenticators: StrategyConfig[];
         validationStrategy: StrategyConfig;
         votingStrategies: StrategyConfig[];
@@ -134,7 +152,7 @@ export function createActions(
         }
       });
 
-      return { hash: response.txId };
+      return { txId: response.txId };
     },
     setMetadata: async (web3: Web3Provider, space: Space, metadata: SpaceMetadata) => {
       await verifyNetwork(web3, chainId);
@@ -154,6 +172,7 @@ export function createActions(
     },
     propose: async (
       web3: Web3Provider,
+      connectorType: Connector,
       account: string,
       space: Space,
       cid: string,
@@ -164,11 +183,12 @@ export function createActions(
 
       const isContract = await getIsContract(account);
 
-      const { useRelayer, authenticator, strategies } = pickAuthenticatorAndStrategies(
-        space.authenticators,
-        space.voting_power_validation_strategy_strategies,
+      const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
+        authenticators: space.authenticators,
+        strategies: space.voting_power_validation_strategy_strategies,
+        connectorType,
         isContract
-      );
+      });
 
       let selectedExecutionStrategy;
       if (executionStrategy) {
@@ -191,7 +211,7 @@ export function createActions(
         metadataUri: `ipfs://${cid}`
       };
 
-      if (useRelayer) {
+      if (relayerType === 'evm') {
         return ethSigClient.propose({
           signer: web3.getSigner(),
           data
@@ -212,6 +232,7 @@ export function createActions(
     },
     async updateProposal(
       web3: Web3Provider,
+      connectorType: Connector,
       account: string,
       space: Space,
       proposalId: number,
@@ -223,11 +244,12 @@ export function createActions(
 
       const isContract = await getIsContract(account);
 
-      const { useRelayer, authenticator } = pickAuthenticatorAndStrategies(
-        space.authenticators,
-        space.voting_power_validation_strategy_strategies,
+      const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
+        authenticators: space.authenticators,
+        strategies: space.voting_power_validation_strategy_strategies,
+        connectorType,
         isContract
-      );
+      });
 
       let selectedExecutionStrategy;
       if (executionStrategy) {
@@ -250,7 +272,7 @@ export function createActions(
         metadataUri: `ipfs://${cid}`
       };
 
-      if (useRelayer) {
+      if (relayerType === 'evm') {
         return ethSigClient.updateProposal({
           signer: web3.getSigner(),
           data
@@ -282,18 +304,25 @@ export function createActions(
         { noWait: isContract }
       );
     },
-    vote: async (web3: Web3Provider, account: string, proposal: Proposal, choice: number) => {
+    vote: async (
+      web3: Web3Provider,
+      connectorType: Connector,
+      account: string,
+      proposal: Proposal,
+      choice: number
+    ) => {
       await verifyNetwork(web3, chainId);
 
       if (choice < 1 || choice > 3) throw new Error('Invalid chocie');
 
       const isContract = await getIsContract(account);
 
-      const { useRelayer, authenticator, strategies } = pickAuthenticatorAndStrategies(
-        proposal.space.authenticators,
-        proposal.strategies,
+      const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
+        authenticators: proposal.space.authenticators,
+        strategies: proposal.strategies,
+        connectorType,
         isContract
-      );
+      });
 
       let convertedChoice: Choice = 0;
       if (choice === 1) convertedChoice = 1;
@@ -309,7 +338,7 @@ export function createActions(
         metadataUri: ''
       };
 
-      if (useRelayer) {
+      if (relayerType === 'evm') {
         return ethSigClient.vote({
           signer: web3.getSigner(),
           data
@@ -433,8 +462,10 @@ export function createActions(
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
-      block: number
+      block: number | null
     ): Promise<VotingPower[]> => {
+      if (block === null) throw new Error('EVM requires block number to be defined');
+
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getEvmStrategy(address, networkConfig);

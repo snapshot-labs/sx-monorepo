@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getNetwork } from '@/networks';
+import { getNetwork, supportsNullCurrent } from '@/networks';
 import { getProvider } from '@/helpers/provider';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
@@ -34,6 +34,7 @@ const route = useRoute();
 const router = useRouter();
 const { propose, updateProposal } = useActions();
 const { web3 } = useWeb3();
+const { getCurrent } = useMetaStore();
 const spacesStore = useSpacesStore();
 
 const modalOpen = ref(false);
@@ -167,14 +168,13 @@ async function getVotingPower() {
   fetchingVotingPower.value = true;
   try {
     const network = getNetwork(space.value.network);
-    const currentBlock = await getProvider(network.baseChainId).getBlockNumber();
 
     const votingPowers = await network.actions.getVotingPower(
       space.value.voting_power_validation_strategy_strategies,
       space.value.voting_power_validation_strategy_strategies_params,
       [],
       web3.value.account,
-      currentBlock
+      supportsNullCurrent(space.value.network) ? null : getCurrent(space.value.network) || 0
     );
 
     const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);

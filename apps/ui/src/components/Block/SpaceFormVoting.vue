@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { validateForm } from '@/helpers/validation';
-import { evmNetworks } from '@/networks';
+import { getCurrentName } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import type { NetworkID } from '@/types';
 
 const props = defineProps<{
@@ -12,49 +13,43 @@ const emit = defineEmits<{
   (e: 'errors', value: any);
 }>();
 
-const definition = {
-  type: 'object',
-  title: 'SpaceSettings',
-  additionalProperties: true,
-  required: [
-    'votingDelay',
-    'minVotingDuration',
-    'maxVotingDuration',
-    'proposalThreshold',
-    ...(!evmNetworks.includes(props.selectedNetworkId) ? ['quorum'] : [])
-  ],
-  properties: {
-    votingDelay: {
-      type: 'number',
-      title: 'Voting delay in blocks'
-    },
-    minVotingDuration: {
-      type: 'number',
-      title: 'Min. voting duration in blocks'
-    },
-    maxVotingDuration: {
-      type: 'number',
-      title: 'Max. voting duration in blocks'
-    },
-    ...(!evmNetworks.includes(props.selectedNetworkId) && {
-      proposalThreshold: {
-        type: 'string',
-        format: 'uint256',
-        title: 'Proposal threshold',
-        examples: ['1']
+const definition = computed(() => {
+  const network = getNetwork(props.selectedNetworkId);
+  const useDuration = network.currentUnit === 'second';
+
+  return {
+    type: 'object',
+    title: 'SpaceSettings',
+    additionalProperties: true,
+    required: ['votingDelay', 'minVotingDuration', 'maxVotingDuration'],
+    properties: {
+      votingDelay: {
+        type: 'number',
+        format: useDuration ? 'duration' : undefined,
+        title: useDuration
+          ? 'Voting delay'
+          : `Voting delay in ${getCurrentName(network.currentUnit)}`
       },
-      quorum: {
-        type: 'string',
-        format: 'uint256',
-        title: 'Quorum',
-        examples: ['1']
+      minVotingDuration: {
+        type: 'number',
+        format: useDuration ? 'duration' : undefined,
+        title: useDuration
+          ? 'Min. voting duration'
+          : `Min. voting duration in ${getCurrentName(network.currentUnit)}`
+      },
+      maxVotingDuration: {
+        type: 'number',
+        format: useDuration ? 'duration' : undefined,
+        title: useDuration
+          ? 'Max. voting duration'
+          : `Max. voting duration in ${getCurrentName(network.currentUnit)}`
       }
-    })
-  }
-};
+    }
+  };
+});
 
 const formErrors = computed(() => {
-  const errors = validateForm(definition, props.form);
+  const errors = validateForm(definition.value, props.form);
 
   if (props.form.minVotingDuration > props.form.maxVotingDuration) {
     errors.maxVotingDuration =

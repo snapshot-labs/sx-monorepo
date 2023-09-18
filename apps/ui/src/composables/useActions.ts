@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork, evmNetworks } from '@/networks';
+import { getNetwork } from '@/networks';
 
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -59,7 +59,7 @@ export function useActions() {
       console.log('Receipt', receipt);
       uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);
     } else {
-      uiStore.addPendingTransaction(envelope.hash, networkId);
+      uiStore.addPendingTransaction(envelope.transaction_hash || envelope.hash, networkId);
     }
   }
 
@@ -122,10 +122,6 @@ export function useActions() {
       votingDelay: settings.votingDelay,
       minVotingDuration: settings.minVotingDuration,
       maxVotingDuration: settings.maxVotingDuration,
-      proposalThreshold: BigInt(settings.proposalThreshold),
-      ...(!evmNetworks.includes(networkId) && settings.quorum
-        ? { quorum: BigInt(settings.quorum) }
-        : {}),
       authenticators,
       validationStrategy,
       votingStrategies,
@@ -135,7 +131,7 @@ export function useActions() {
 
     console.log('Receipt', receipt);
 
-    return receipt.transaction_hash || receipt.hash;
+    return receipt.txId;
   }
 
   async function updateMetadata(space: Space, metadata: SpaceMetadata) {
@@ -154,13 +150,18 @@ export function useActions() {
 
   async function vote(proposal: Proposal, choice: Choice) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getNetwork(proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.vote(auth.web3, web3.value.account, proposal, choice)
+      network.actions.vote(
+        auth.web3,
+        web3.value.type as Connector,
+        web3.value.account,
+        proposal,
+        choice
+      )
     );
 
     uiStore.addPendingVote(proposal.id);
@@ -178,7 +179,6 @@ export function useActions() {
       forceLogin();
       return false;
     }
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getNetwork(space.network);
 
@@ -200,6 +200,7 @@ export function useActions() {
       space.network,
       network.actions.propose(
         auth.web3,
+        web3.value.type as Connector,
         web3.value.account,
         space,
         pinned.cid,
@@ -224,7 +225,6 @@ export function useActions() {
       forceLogin();
       return false;
     }
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getNetwork(space.network);
 
@@ -246,6 +246,7 @@ export function useActions() {
       space.network,
       network.actions.updateProposal(
         auth.web3,
+        web3.value.type as Connector,
         web3.value.account,
         space,
         proposalId,
@@ -260,15 +261,18 @@ export function useActions() {
 
   async function cancelProposal(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getNetwork(proposal.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
+
     const receipt = await network.actions.cancelProposal(auth.web3, proposal);
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, proposal.network);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, proposal.network);
   }
 
   async function finalizeProposal(proposal: Proposal) {
@@ -293,7 +297,7 @@ export function useActions() {
     const receipt = await network.actions.receiveProposal(auth.web3, proposal);
     console.log('Receipt', receipt);
 
-    uiStore.addPendingTransaction(receipt.hash, 'gor');
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, 'gor');
   }
 
   async function executeTransactions(proposal: Proposal) {
@@ -306,7 +310,7 @@ export function useActions() {
     console.log('Receipt', receipt);
 
     const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
-    uiStore.addPendingTransaction(receipt.hash, targetNetwork);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, targetNetwork);
   }
 
   async function executeQueuedProposal(proposal: Proposal) {
@@ -319,7 +323,7 @@ export function useActions() {
     console.log('Receipt', receipt);
 
     const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
-    uiStore.addPendingTransaction(receipt.hash, targetNetwork);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, targetNetwork);
   }
 
   async function vetoProposal(proposal: Proposal) {
@@ -332,55 +336,71 @@ export function useActions() {
     console.log('Receipt', receipt);
 
     const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
-    uiStore.addPendingTransaction(receipt.hash, targetNetwork);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, targetNetwork);
   }
 
   async function setVotingDelay(space: Space, votingDelay: number) {
     if (!web3.value.account) return await forceLogin();
 
     const network = getNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
+
     const receipt = await network.actions.setVotingDelay(auth.web3, space, votingDelay);
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, space.network);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
   async function setMinVotingDuration(space: Space, minVotingDuration: number) {
     if (!web3.value.account) return await forceLogin();
 
     const network = getNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
+
     const receipt = await network.actions.setMinVotingDuration(auth.web3, space, minVotingDuration);
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, space.network);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
   async function setMaxVotingDuration(space: Space, maxVotingDuration: number) {
     if (!web3.value.account) return await forceLogin();
 
     const network = getNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
+
     const receipt = await network.actions.setMaxVotingDuration(auth.web3, space, maxVotingDuration);
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, space.network);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
   async function transferOwnership(space: Space, owner: string) {
     if (!web3.value.account) return await forceLogin();
 
     const network = getNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
+
     const receipt = await network.actions.transferOwnership(auth.web3, space, owner);
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;
 
-    uiStore.addPendingTransaction(receipt.hash, space.network);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
   return {

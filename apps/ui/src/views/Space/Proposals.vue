@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { getNetwork } from '@/networks';
-import { getProvider } from '@/helpers/provider';
+import { getNetwork, supportsNullCurrent } from '@/networks';
 import { Space } from '@/types';
 import { VotingPower } from '@/networks/types';
 
@@ -8,6 +7,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
+const { getCurrent } = useMetaStore();
 const proposalsStore = useProposalsStore();
 
 const votingPowers = ref([] as VotingPower[]);
@@ -35,14 +35,12 @@ async function getVotingPower() {
 
   loadingVotingPower.value = true;
   try {
-    const currentBlock = await getProvider(network.baseChainId).getBlockNumber();
-
     votingPowers.value = await network.actions.getVotingPower(
       props.space.strategies,
       props.space.strategies_params,
       props.space.strategies_parsed_metadata,
       web3.value.account,
-      currentBlock
+      supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0
     );
   } catch (e) {
     console.warn('Failed to load voting power', e);

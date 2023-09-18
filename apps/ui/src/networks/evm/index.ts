@@ -1,4 +1,5 @@
 import { createApi } from '../common/graphqlApi';
+import { EVM_CONNECTORS } from '../common/constants';
 import { createActions } from './actions';
 import * as constants from './constants';
 import { pinGraph } from '@/helpers/pin';
@@ -76,10 +77,11 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   return {
     name,
     avatar,
+    currentUnit: 'block',
     baseChainId: chainId,
     hasReceive: false,
     supportsSimulation: ['gor', 'sep', 'matic', 'arb1'].includes(networkId),
-    managerConnectors: ['injected', 'walletconnect', 'walletlink', 'portis', 'gnosis'],
+    managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),
     api,
     constants,

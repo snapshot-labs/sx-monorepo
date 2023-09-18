@@ -1,7 +1,7 @@
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
-export type NetworkID = 'gor' | 'sep' | 'linea-testnet' | 'sn-tn2' | 'matic' | 'arb1';
+export type NetworkID = 'gor' | 'sep' | 'linea-testnet' | 'sn-tn' | 'sn-tn2' | 'matic' | 'arb1';
 export type Choice = 1 | 2 | 3;
 
 export type SelectedStrategy = {
@@ -29,8 +29,6 @@ export type SpaceSettings = {
   votingDelay: number;
   minVotingDuration: number;
   maxVotingDuration: number;
-  proposalThreshold: string;
-  quorum?: string;
 };
 
 export type StrategyParsedMetadata = {

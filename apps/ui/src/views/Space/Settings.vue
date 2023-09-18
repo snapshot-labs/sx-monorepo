@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, _n, compareAddresses } from '@/helpers/utils';
+import { shorten, _n, _d, compareAddresses, getCurrentName } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
@@ -12,6 +12,7 @@ const { setVotingDelay, setMinVotingDuration, setMaxVotingDuration, transferOwne
 
 const network = computed(() => getNetwork(props.space.network));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
+const useDuration = computed(() => network.value.currentUnit === 'second');
 
 const settingsLoading = ref({
   votingDelay: false,
@@ -19,6 +20,14 @@ const settingsLoading = ref({
   maxVotingPeriod: false,
   controller: false
 });
+
+function formatTitle(title: string) {
+  return useDuration.value ? title : `${title} in ${getCurrentName(network.value.currentUnit)}`;
+}
+
+function formatCurrentValue(value: number) {
+  return useDuration.value ? _d(value) : _n(value);
+}
 
 async function handleSave(
   field: 'votingDelay' | 'minVotingPeriod' | 'maxVotingPeriod' | 'controller',
@@ -57,27 +66,34 @@ watchEffect(() => {
       <Label :label="'Voting'" sticky />
       <div class="mx-4 pt-3">
         <div class="mb-3">
-          <div class="s-label !mb-0">Voting delay in blocks</div>
+          <div class="s-label !mb-0">{{ formatTitle('Voting delay') }}</div>
           <UiEditable
             :editable="isController"
             :initial-value="space.voting_delay"
             :loading="settingsLoading.votingDelay"
             :definition="{
-              type: 'integer'
+              type: 'integer',
+              format: useDuration ? 'duration' : undefined
             }"
             @save="value => handleSave('votingDelay', value.toString())"
           >
-            <h4 class="text-skin-link text-md" v-text="_n(space.voting_delay) || 'No delay'" />
+            <h4
+              class="text-skin-link text-md"
+              v-text="formatCurrentValue(space.voting_delay) || 'No delay'"
+            />
           </UiEditable>
         </div>
         <div class="mb-3">
-          <div class="s-label !mb-0">Min. voting period in blocks</div>
+          <div class="s-label !mb-0">
+            {{ formatTitle('Min. voting period') }}
+          </div>
           <UiEditable
             :editable="isController"
             :initial-value="space.min_voting_period"
             :loading="settingsLoading.minVotingPeriod"
             :definition="{
-              type: 'integer'
+              type: 'integer',
+              format: useDuration ? 'duration' : undefined
             }"
             :custom-error-validation="
               value =>
@@ -87,17 +103,23 @@ watchEffect(() => {
             "
             @save="value => handleSave('minVotingPeriod', value.toString())"
           >
-            <h4 class="text-skin-link text-md" v-text="_n(space.min_voting_period) || 'No min.'" />
+            <h4
+              class="text-skin-link text-md"
+              v-text="formatCurrentValue(space.min_voting_period) || 'No min.'"
+            />
           </UiEditable>
         </div>
         <div class="mb-3">
-          <div class="s-label !mb-0">Max. voting period in blocks</div>
+          <div class="s-label !mb-0">
+            {{ formatTitle('Max. voting period') }}
+          </div>
           <UiEditable
             :editable="isController"
             :initial-value="space.max_voting_period"
             :loading="settingsLoading.maxVotingPeriod"
             :definition="{
-              type: 'integer'
+              type: 'integer',
+              format: useDuration ? 'duration' : undefined
             }"
             :custom-error-validation="
               value =>
@@ -107,7 +129,10 @@ watchEffect(() => {
             "
             @save="value => handleSave('maxVotingPeriod', value.toString())"
           >
-            <h4 class="text-skin-link text-md" v-text="_n(space.max_voting_period)" />
+            <h4
+              class="text-skin-link text-md"
+              v-text="formatCurrentValue(space.max_voting_period)"
+            />
           </UiEditable>
         </div>
         <div v-if="space.proposal_threshold !== '0'" class="mb-3">

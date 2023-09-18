@@ -79,8 +79,6 @@ export type NetworkActions = {
       votingDelay: number;
       minVotingDuration: number;
       maxVotingDuration: number;
-      proposalThreshold: bigint;
-      quorum?: bigint;
       authenticators: StrategyConfig[];
       validationStrategy: StrategyConfig;
       votingStrategies: StrategyConfig[];
@@ -91,6 +89,7 @@ export type NetworkActions = {
   setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
   propose(
     web3: Web3Provider,
+    connectorType: Connector,
     account: string,
     space: Space,
     cid: string,
@@ -99,6 +98,7 @@ export type NetworkActions = {
   );
   updateProposal(
     web3: Web3Provider,
+    connectorType: Connector,
     account: string,
     space: Space,
     proposalId: number,
@@ -107,7 +107,13 @@ export type NetworkActions = {
     transactions: MetaTransaction[]
   );
   cancelProposal(web3: Web3Provider, proposal: Proposal);
-  vote(web3: Web3Provider, account: string, proposal: Proposal, choice: Choice);
+  vote(
+    web3: Web3Provider,
+    connectorType: Connector,
+    account: string,
+    proposal: Proposal,
+    choice: Choice
+  );
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
@@ -122,7 +128,7 @@ export type NetworkActions = {
     strategiesParams: any[],
     strategiesMetadata: StrategyParsedMetadata[],
     voterAddress: string,
-    block: number
+    current: number | null
   ): Promise<VotingPower[]>;
   send(envelope: any): Promise<any>;
 };
@@ -154,6 +160,7 @@ export type NetworkHelpers = {
 export type Network = {
   name: string;
   avatar: string;
+  currentUnit: 'block' | 'second';
   baseChainId: number;
   baseNetworkId?: NetworkID;
   hasReceive: boolean;
@@ -165,6 +172,7 @@ export type Network = {
     SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
     SUPPORTED_STRATEGIES: { [key: string]: boolean };
     SUPPORTED_EXECUTORS: { [key: string]: boolean };
+    RELAYER_AUTHENTICATORS: { [key: string]: 'evm' | 'starknet' | undefined };
     AUTHS: { [key: string]: string };
     PROPOSAL_VALIDATIONS: { [key: string]: string };
     STRATEGIES: { [key: string]: string };
