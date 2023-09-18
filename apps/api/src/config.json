@@ -1,5 +1,6 @@
 {
   "network_node_url": "https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
+  "optimistic_indexing": true,
   "sources": [
     {
       "contract": "0x33a57fe2f6e28c2931a246eea567d9af6a036c4f7e0a15625bad5677c7b18f7",
