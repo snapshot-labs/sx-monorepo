@@ -11,7 +11,9 @@ import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStr
 import Config from './config.json';
 import { handleStrategiesParsedMetadata } from './ipfs';
 
-const ethProvider = new JsonRpcProvider('http://127.0.0.1:8545');
+const ethProvider = new JsonRpcProvider(
+  process.env.L1_NETWORK_NODE_URL ?? 'https://rpc.brovider.xyz/5'
+);
 const starkProvider = new Provider({
   rpc: {
     nodeUrl: Config.network_node_url

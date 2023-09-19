@@ -192,7 +192,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     space,
     author,
     metadata: null as string | null,
-    execution_hash: event.proposal.execution_hash,
+    execution_hash: event.proposal.execution_payload_hash,
     start: parseInt(BigInt(event.proposal.start_timestamp).toString()),
     min_end: parseInt(BigInt(event.proposal.min_end_timestamp).toString()),
     max_end: parseInt(BigInt(event.proposal.max_end_timestamp).toString()),
