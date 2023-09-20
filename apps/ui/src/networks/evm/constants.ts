@@ -146,16 +146,16 @@ export const EDITOR_VOTING_STRATEGIES = [
     }
   },
   {
-    address: '0x0c2de612982efd102803161fc7c74cca15db932c',
-    name: 'ERC-20 Votes Comp (EIP-5805)',
+    address: '0x2c8631584474e750cedf2fb6a904f2e84777aefe',
+    name: 'ERC-20 Votes (EIP-5805)',
     about:
-      'A strategy that allows delegated balances of Compound style checkpoint tokens to be used as voting power.',
+      'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
     icon: IHCode,
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.decimals})`,
     generateParams: (params: Record<string, any>) => [params.contractAddress],
     generateMetadata: (params: Record<string, any>) => ({
-      name: 'ERC-20 Votes Comp (EIP-5805)',
+      name: 'ERC-20 Votes (EIP-5805)',
       properties: {
         symbol: params.symbol,
         decimals: parseInt(params.decimals),
@@ -189,16 +189,16 @@ export const EDITOR_VOTING_STRATEGIES = [
     }
   },
   {
-    address: '0x2c8631584474e750cedf2fb6a904f2e84777aefe',
-    name: 'ERC-20 Votes (EIP-5805)',
+    address: '0x0c2de612982efd102803161fc7c74cca15db932c',
+    name: 'ERC-20 Votes Comp (EIP-5805)',
     about:
-      'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
+      'A strategy that allows delegated balances of Compound style checkpoint tokens to be used as voting power.',
     icon: IHCode,
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.decimals})`,
     generateParams: (params: Record<string, any>) => [params.contractAddress],
     generateMetadata: (params: Record<string, any>) => ({
-      name: 'ERC-20 Votes (EIP-5805)',
+      name: 'ERC-20 Votes Comp (EIP-5805)',
       properties: {
         symbol: params.symbol,
         decimals: parseInt(params.decimals),

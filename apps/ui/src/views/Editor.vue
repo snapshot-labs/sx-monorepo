@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getNetwork, supportsNullCurrent } from '@/networks';
-import { getProvider } from '@/helpers/provider';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { SelectedStrategy } from '@/types';
