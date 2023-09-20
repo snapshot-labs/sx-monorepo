@@ -9,11 +9,14 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: number);
 }>();
 
+const dirty = ref(false);
 const days = ref(0);
 const hours = ref(0);
 const minutes = ref(0);
 
 watch([days, hours, minutes], () => {
+  dirty.value = true;
+
   const value = (days.value * 24 * 60 + hours.value * 60 + minutes.value) * 60;
   emit('update:modelValue', value);
 });
@@ -33,15 +36,15 @@ watch(
 
 <template>
   <div>
-    <div :class="{ 'text-red': error }" v-text="definition.title" />
-    <div class="flex !mb-0" :class="{ 's-error': error }">
-      <SBase :definition="{ title: 'Days' }" class="flex-1" :error="error">
+    <div :class="{ 'text-red': error && dirty }" v-text="definition.title" />
+    <div class="flex !mb-0" :class="{ 's-error': error && dirty }">
+      <SBase :definition="{ title: 'Days' }" class="flex-1" :error="error" :dirty="dirty">
         <input v-model="days" class="s-input !rounded-r-none" type="number" min="0" />
       </SBase>
-      <SBase :definition="{ title: 'Hours' }" class="flex-1" :error="error">
+      <SBase :definition="{ title: 'Hours' }" class="flex-1" :error="error" :dirty="dirty">
         <input v-model="hours" class="s-input !rounded-none !border-l-0" type="number" min="0" />
       </SBase>
-      <SBase :definition="{ title: 'Minutes' }" class="flex-1" :error="error">
+      <SBase :definition="{ title: 'Minutes' }" class="flex-1" :error="error" :dirty="dirty">
         <input
           v-model="minutes"
           class="s-input !rounded-l-none !border-l-0"
@@ -50,7 +53,7 @@ watch(
         />
       </SBase>
     </div>
-    <div v-if="error" class="s-base s-error">
+    <div v-if="error && dirty" class="s-base s-error">
       <span class="s-input-error-message">{{ error }}</span>
     </div>
   </div>
