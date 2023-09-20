@@ -24,7 +24,8 @@ export const updateProposalTypes = {
     { name: 'author', type: 'address' },
     { name: 'proposalId', type: 'uint256' },
     { name: 'executionStrategy', type: 'Strategy' },
-    { name: 'metadataURI', type: 'string' }
+    { name: 'metadataURI', type: 'string' },
+    { name: 'salt', type: 'uint256' }
   ],
   Strategy: [
     { name: 'addr', type: 'address' },

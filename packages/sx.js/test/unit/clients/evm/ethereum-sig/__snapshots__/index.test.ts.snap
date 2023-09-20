@@ -107,9 +107,10 @@ exports[`EthereumSig should create update proposal envelope 1`] = `
       },
       "metadataURI": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
       "proposalId": 1,
+      "salt": 0,
       "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
     },
-    "signature": "0xf0dce30188f4db9249e7bcf4c0467ff6f40f0a6778091fddb91500f7007d1f8978733df62b8758ce23bddb1f1f85562de026736839889a7f38fa1fa379eb83751b",
+    "signature": "0xea79e53b3ccc11f5ef14883adda7e6858ee2c3fe9823989c8eddab648ec2916b306448cc9de997fd2fb9028a534fe2508cdf5809db0a02a6ed70dcf205bc6c001b",
     "types": {
       "Strategy": [
         {
@@ -141,6 +142,10 @@ exports[`EthereumSig should create update proposal envelope 1`] = `
         {
           "name": "metadataURI",
           "type": "string",
+        },
+        {
+          "name": "salt",
+          "type": "uint256",
         },
       ],
     },

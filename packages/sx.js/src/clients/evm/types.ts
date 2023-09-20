@@ -109,6 +109,7 @@ export type EIP712UpdateProposalMessage = {
   proposalId: number;
   executionStrategy: AddressConfig;
   metadataURI: string;
+  salt: number;
 };
 
 export type EIP712VoteMessage = {

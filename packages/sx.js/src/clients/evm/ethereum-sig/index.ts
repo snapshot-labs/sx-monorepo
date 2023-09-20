@@ -141,7 +141,8 @@ export class EthereumSig {
       author,
       proposalId: data.proposal,
       executionStrategy: data.executionStrategy,
-      metadataURI: data.metadataUri
+      metadataURI: data.metadataUri,
+      salt: this.generateSalt()
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, updateProposalTypes);
