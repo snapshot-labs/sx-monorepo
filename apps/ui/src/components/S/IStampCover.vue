@@ -59,7 +59,7 @@ async function handleFileChange(e: Event) {
     <img
       v-if="imgUrl"
       :src="imgUrl"
-      class="min-h-full object-cover group-hover:opacity-80"
+      class="h-[100px] w-full object-cover group-hover:opacity-80"
       :class="{
         'opacity-80': isUploadingImage
       }"

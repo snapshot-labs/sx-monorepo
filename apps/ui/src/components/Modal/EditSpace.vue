@@ -56,6 +56,7 @@ watch(
 
     form.name = props.space.name;
     form.avatar = props.space.avatar;
+    form.cover = props.space.cover;
     form.description = props.space.about || '';
     form.externalUrl = props.space.external_url;
     form.github = props.space.github;
