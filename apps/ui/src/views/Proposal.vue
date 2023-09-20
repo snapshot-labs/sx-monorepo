@@ -361,7 +361,7 @@ watchEffect(() => {
             </UiTooltip>
           </div>
         </Vote>
-        <template v-if="!proposal.cancelled">
+        <template v-if="!proposal.cancelled && proposal.has_started">
           <h4 class="block eyebrow mb-2 mt-4">Results</h4>
           <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
         </template>
