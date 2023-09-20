@@ -279,10 +279,34 @@ export function createActions(
     executeTransactions: () => null,
     executeQueuedProposal: () => null,
     vetoProposal: () => null,
-    setVotingDelay: () => null,
-    setMinVotingDuration: () => null,
-    setMaxVotingDuration: () => null,
-    transferOwnership: () => null,
+    setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {
+      return client.setVotingDelay({
+        signer: web3.provider.account,
+        space: space.id,
+        votingDelay
+      });
+    },
+    setMinVotingDuration: async (web3: any, space: Space, minVotingDuration: number) => {
+      return client.setMinVotingDuration({
+        signer: web3.provider.account,
+        space: space.id,
+        minVotingDuration
+      });
+    },
+    setMaxVotingDuration: async (web3: any, space: Space, maxVotingDuration: number) => {
+      return client.setMaxVotingDuration({
+        signer: web3.provider.account,
+        space: space.id,
+        maxVotingDuration
+      });
+    },
+    transferOwnership: async (web3: any, space: Space, owner: string) => {
+      return client.transferOwnership({
+        signer: web3.provider.account,
+        space: space.id,
+        owner
+      });
+    },
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],
