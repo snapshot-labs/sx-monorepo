@@ -130,7 +130,7 @@ export function createActions(
     ) => {
       const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
-        strategies: space.strategies,
+        strategies: space.voting_power_validation_strategy_strategies,
         connectorType
       });
 
