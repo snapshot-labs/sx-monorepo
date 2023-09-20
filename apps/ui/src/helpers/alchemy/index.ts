@@ -106,7 +106,8 @@ export async function getTokensMetadata(
  */
 export async function getBalances(
   address: string,
-  networkId: number
+  networkId: number,
+  baseToken: { name: string; symbol: string; logo?: string }
 ): Promise<GetBalancesResponse> {
   // TODO: Add rates from external provider
 
@@ -120,8 +121,8 @@ export async function getBalances(
 
   return [
     {
-      name: 'Ethereum',
-      symbol: 'ETH',
+      name: baseToken.name,
+      symbol: baseToken.symbol,
       decimals: 18,
       logo: null,
       contractAddress: ETH_CONTRACT,

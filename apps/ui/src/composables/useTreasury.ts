@@ -19,6 +19,7 @@ export function useTreasury(spaceRef: Ref<NullableSpace>) {
     if (!chainId || !wallet) return null;
 
     return {
+      networkId,
       network: chainId,
       wallet
     };

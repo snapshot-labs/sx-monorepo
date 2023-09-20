@@ -34,7 +34,11 @@ const simulationState: Ref<'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FA
 const network = computed(() => (props.space ? getNetwork(props.space.network) : null));
 const currentTreasury = computed(() =>
   props.selectedExecutionStrategy.type === 'SimpleQuorumTimelock' && network.value
-    ? { wallet: props.selectedExecutionStrategy.address, network: network.value.baseChainId }
+    ? {
+        wallet: props.selectedExecutionStrategy.address,
+        network: network.value.baseChainId,
+        networkId: props.space?.network
+      }
     : treasury.value
 );
 const txs = computed({
@@ -174,10 +178,11 @@ watch(txs, () => {
     </div>
     <teleport to="#modal">
       <ModalSendToken
-        v-if="currentTreasury"
+        v-if="currentTreasury && currentTreasury.networkId"
         :open="modalOpen.sendToken"
         :address="currentTreasury.wallet"
         :network="currentTreasury.network"
+        :network-id="currentTreasury.networkId"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"

@@ -1,5 +1,10 @@
 import { formatUnits } from '@ethersproject/units';
 import { getBalances, GetBalancesResponse } from '@/helpers/alchemy';
+import { METADATA } from '@/networks/evm';
+
+const metadataByChainId = new Map(
+  Object.entries(METADATA).map(([, metadata]) => [metadata.chainId, metadata])
+);
 
 export function useBalances() {
   const assets: Ref<GetBalancesResponse> = ref([]);
@@ -7,7 +12,12 @@ export function useBalances() {
   const loaded = ref(false);
 
   async function loadBalances(address: string, networkId: number) {
-    const data = await getBalances(address, networkId);
+    const metadata = metadataByChainId.get(networkId);
+    const baseToken = metadata?.ticker
+      ? { name: metadata.name, symbol: metadata.ticker }
+      : { name: 'Ethereum', symbol: 'ETH' };
+
+    const data = await getBalances(address, networkId, baseToken);
 
     assets.value = data.filter(asset => formatUnits(asset.tokenBalance, asset.decimals) !== '0.0');
     loading.value = false;

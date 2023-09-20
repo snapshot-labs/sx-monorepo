@@ -175,7 +175,12 @@ watchEffect(() => {
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0">
-              <Stamp :id="asset.contractAddress" type="token" :size="32" />
+              <Stamp
+                :id="`${treasury.networkId}:${asset.contractAddress}`"
+                type="token"
+                :size="32"
+                :network="treasury.network"
+              />
               <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
                 <h4 v-text="asset.symbol" />
                 <div class="text-sm truncate" v-text="asset.name" />
@@ -229,6 +234,7 @@ watchEffect(() => {
         :open="modalOpen.tokens"
         :address="treasury.wallet"
         :network="treasury.network"
+        :network-id="treasury.networkId"
         @close="modalOpen.tokens = false"
         @add="addTx"
       />
