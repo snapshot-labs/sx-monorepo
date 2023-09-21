@@ -23,6 +23,7 @@ export function handleSpaceMetadata(content: Bytes): void {
 
     let delegation_api_type = propertiesObj.get('delegation_api_type')
     let delegation_api_url = propertiesObj.get('delegation_api_url')
+    let delegation_contract = propertiesObj.get('delegation_contract')
     let cover = propertiesObj.get('cover')
     let github = propertiesObj.get('github')
     let twitter = propertiesObj.get('twitter')
@@ -44,6 +45,9 @@ export function handleSpaceMetadata(content: Bytes): void {
       spaceMetadata.delegation_api_type = null
       spaceMetadata.delegation_api_url = null
     }
+
+    spaceMetadata.delegation_contract =
+      delegation_contract && !delegation_contract.isNull() ? delegation_contract.toString() : null
 
     spaceMetadata.cover = cover ? cover.toString() : ''
     spaceMetadata.github = github ? github.toString() : ''
