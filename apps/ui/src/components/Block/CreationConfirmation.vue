@@ -155,7 +155,7 @@ onMounted(() => deploy());
             :href="network.helpers.getExplorerUrl(txIds[step.id], 'transaction')"
           >
             {{ shorten(txIds[step.id]) }}
-            <IH-external-link class="inline-block ml-1" />
+            <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </a>
         </div>
       </div>

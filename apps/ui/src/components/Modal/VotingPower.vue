@@ -55,7 +55,7 @@ const baseNetwork = computed(() =>
           >
             <Stamp :id="strategy.token" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(strategy.token) }}
-            <IH-external-link class="ml-1" />
+            <IH-arrow-sm-right class="ml-1 -rotate-45" />
           </a>
           <div v-else />
           <div>

@@ -183,7 +183,7 @@ watchEffect(() => {
               />
               <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
                 <h4 v-text="asset.symbol" />
-                <div class="text-sm truncate" v-text="asset.name" />
+                <div class="text-sm truncate text-skin-text" v-text="asset.name" />
               </div>
             </div>
             <div

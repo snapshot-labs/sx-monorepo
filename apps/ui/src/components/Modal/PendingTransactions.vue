@@ -31,7 +31,7 @@ const uiStore = useUiStore();
           target="_blank"
           class="border rounded-lg px-3 py-2 flex items-center w-full mb-2 last:mb-0"
         >
-          <IH-external-link />
+          <IH-arrow-sm-right class="-rotate-45" />
           <div class="ml-2 truncate text-skin-link">{{ pendingTx.txId }}</div>
         </a>
       </template>

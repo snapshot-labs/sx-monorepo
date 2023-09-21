@@ -246,7 +246,7 @@ watchEffect(() => {
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
                 >
-                  <IS-arrow-top-right-on-square :width="16" />
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
                   View metadata
                 </a>
               </UiDropdownItem>

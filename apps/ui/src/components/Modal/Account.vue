@@ -65,7 +65,7 @@ watch(open, () => (step = null));
           <UiButton class="button-outline w-full flex justify-center items-center">
             <Stamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
             <span v-text="web3.name || shorten(web3.account)" />
-            <IH-external-link class="inline-block ml-1" />
+            <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </UiButton>
         </a>
         <router-link to="/settings" class="block">
