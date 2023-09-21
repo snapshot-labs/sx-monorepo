@@ -29,13 +29,17 @@ export function getExecutionData(
 export function createStrategyPicker({
   supportedAuthenticators,
   supportedStrategies,
+  contractSupportedAuthenticators,
   relayerAuthenticators,
-  managerConnectors
+  managerConnectors,
+  lowPriorityAuthenticators = []
 }: {
   supportedAuthenticators: Record<string, boolean | undefined>;
   supportedStrategies: Record<string, boolean | undefined>;
-  relayerAuthenticators: Record<string, 'evm' | 'starknet' | undefined>;
+  contractSupportedAuthenticators: Record<string, boolean | undefined>;
+  relayerAuthenticators: Record<string, 'evm' | 'evm-tx' | 'starknet' | undefined>;
   managerConnectors: Connector[];
+  lowPriorityAuthenticators?: ('evm' | 'evm-tx' | 'starknet')[];
 }) {
   return function pick({
     authenticators,
@@ -50,13 +54,23 @@ export function createStrategyPicker({
   }) {
     const authenticatorsInfo = [...authenticators]
       .filter(authenticator =>
-        supportedAuthenticators[authenticator] && isContract
-          ? !relayerAuthenticators[authenticator]
-          : true
+        isContract
+          ? contractSupportedAuthenticators[authenticator]
+          : supportedAuthenticators[authenticator]
       )
       .sort((a, b) => {
         const aRelayer = relayerAuthenticators[a];
         const bRelayer = relayerAuthenticators[b];
+        const aLowPriority = aRelayer && lowPriorityAuthenticators.includes(aRelayer);
+        const bLowPriority = bRelayer && lowPriorityAuthenticators.includes(bRelayer);
+
+        if (aLowPriority && !bLowPriority) {
+          return 1;
+        }
+
+        if (!aLowPriority && bLowPriority) {
+          return -1;
+        }
 
         if (aRelayer && bRelayer) {
           return 0;
@@ -76,7 +90,7 @@ export function createStrategyPicker({
         const relayerType = relayerAuthenticators[authenticator];
 
         let connectors: Connector[] = [];
-        if (relayerType === 'evm') connectors = EVM_CONNECTORS;
+        if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) connectors = EVM_CONNECTORS;
         else if (relayerType === 'starknet') connectors = STARKNET_CONNECTORS;
         else connectors = managerConnectors;
 

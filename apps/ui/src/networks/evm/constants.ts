@@ -17,6 +17,10 @@ export const SUPPORTED_AUTHENTICATORS = {
   '0x5f9b7d78c9a37a439d78f801e0e339c6e711e260': true
 };
 
+export const CONTRACT_SUPPORTED_AUTHENTICATORS = {
+  '0xba06e6ccb877c332181a6867c05c8b746a21aed1': true
+};
+
 export const SUPPORTED_STRATEGIES = {
   '0xc1245c5dca7885c73e32294140f1e5d30688c202': true,
   '0x0c2de612982efd102803161fc7c74cca15db932c': true,

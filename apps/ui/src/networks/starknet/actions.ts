@@ -1,8 +1,10 @@
 import { defaultNetwork, clients, getStarknetStrategy } from '@snapshot-labs/sx';
+import { MANA_URL } from '@/helpers/mana';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
-import { STARKNET_CONNECTORS } from '@/networks/common/constants';
+import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '@/networks/common/constants';
 import {
+  CONTRACT_SUPPORTED_AUTHENTICATORS,
   RELAYER_AUTHENTICATORS,
   SUPPORTED_AUTHENTICATORS,
   SUPPORTED_STRATEGIES
@@ -17,31 +19,43 @@ import type {
   VotingPower
 } from '@/networks/types';
 import type { Space, SpaceMetadata, StrategyParsedMetadata, Proposal } from '@/types';
+import { getProvider } from '@/helpers/provider';
 
 export function createActions(
   starkProvider: Provider,
   helpers: NetworkHelpers,
   { l1ChainId }: { l1ChainId: number }
 ): NetworkActions {
-  const manaUrl: string = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
   const ethUrl: string = import.meta.env.VITE_ETH_RPC_URL;
+
+  const l1Provider = getProvider(l1ChainId);
 
   const clientConfig = {
     starkProvider,
-    manaUrl,
+    manaUrl: MANA_URL,
     ethUrl
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
     supportedAuthenticators: SUPPORTED_AUTHENTICATORS,
     supportedStrategies: SUPPORTED_STRATEGIES,
+    contractSupportedAuthenticators: CONTRACT_SUPPORTED_AUTHENTICATORS,
     relayerAuthenticators: RELAYER_AUTHENTICATORS,
-    managerConnectors: STARKNET_CONNECTORS
+    managerConnectors: STARKNET_CONNECTORS,
+    lowPriorityAuthenticators: ['evm-tx']
   });
+
+  const getIsContract = async (connectorType: Connector, address: string) => {
+    if (!EVM_CONNECTORS.includes(connectorType)) return false;
+
+    const code = await l1Provider.getCode(address);
+    return code !== '0x';
+  };
 
   const client = new clients.StarkNetTx(clientConfig);
   const starkSigClient = new clients.StarkNetSig(clientConfig);
   const ethSigClient = new clients.EthereumSig(clientConfig);
+  const ethTxClient = new clients.EthereumTx(clientConfig);
 
   return {
     async predictSpaceAddress(web3: any, { salt }) {
@@ -128,13 +142,18 @@ export function createActions(
       executionStrategy: string | null,
       transactions: MetaTransaction[]
     ) => {
+      const isContract = await getIsContract(connectorType, account);
+
       const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        connectorType
+        connectorType,
+        isContract
       });
 
-      if (relayerType === 'evm') await verifyNetwork(web3, l1ChainId);
+      if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
+        await verifyNetwork(web3, l1ChainId);
+      }
 
       let selectedExecutionStrategy;
       if (executionStrategy) {
@@ -167,6 +186,8 @@ export function createActions(
           signer: web3.getSigner(),
           data
         });
+      } else if (relayerType === 'evm-tx') {
+        return ethTxClient.initializePropose(web3.getSigner(), data, { noWait: isContract });
       }
 
       return client.propose(web3.provider.account, {
@@ -183,13 +204,18 @@ export function createActions(
       executionStrategy: string | null,
       transactions: MetaTransaction[]
     ) {
+      const isContract = await getIsContract(connectorType, account);
+
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        connectorType
+        connectorType,
+        isContract
       });
 
-      if (relayerType === 'evm') await verifyNetwork(web3, l1ChainId);
+      if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
+        await verifyNetwork(web3, l1ChainId);
+      }
 
       let selectedExecutionStrategy;
       if (executionStrategy) {
@@ -222,6 +248,8 @@ export function createActions(
           signer: web3.getSigner(),
           data
         });
+      } else if (relayerType === 'evm-tx') {
+        return ethTxClient.initializeUpdateProposal(web3.getSigner(), data, { noWait: isContract });
       }
 
       return client.updateProposal(web3.provider.account, {
@@ -242,13 +270,18 @@ export function createActions(
       proposal: Proposal,
       choice: number
     ) => {
+      const isContract = await getIsContract(connectorType, account);
+
       const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
         authenticators: proposal.space.authenticators,
         strategies: proposal.strategies,
-        connectorType
+        connectorType,
+        isContract
       });
 
-      if (relayerType === 'evm') await verifyNetwork(web3, l1ChainId);
+      if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
+        await verifyNetwork(web3, l1ChainId);
+      }
 
       const data = {
         space: proposal.space.id,
@@ -268,6 +301,8 @@ export function createActions(
           signer: web3.getSigner(),
           data
         });
+      } else if (relayerType === 'evm-tx') {
+        return ethTxClient.initializeVote(web3.getSigner(), data, { noWait: isContract });
       }
 
       return client.vote(web3.provider.account, {

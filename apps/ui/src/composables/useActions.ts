@@ -1,6 +1,6 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getNetwork } from '@/networks';
-
+import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
   Transaction,
@@ -45,12 +45,39 @@ export function useActions() {
     return true;
   }
 
+  async function handleCommitEnvelope(envelope: any, networkId: NetworkID) {
+    // TODO: it should work with WalletConnect, should be done before L1 transaction is broadcasted
+    const network = getNetwork(networkId);
+
+    if (envelope?.signatureData?.commitHash && network.baseNetworkId) {
+      await registerTransaction(network.chainId, {
+        type: envelope.signatureData.primaryType,
+        hash: envelope.signatureData.commitHash,
+        payload: envelope.data
+      });
+
+      if (envelope.signatureData.commitTxId) {
+        uiStore.addPendingTransaction(envelope.signatureData.commitTxId, network.baseNetworkId);
+      }
+
+      uiStore.addNotification(
+        'success',
+        'Transaction set up. It will be processed once received on L2 network automatically.'
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
   async function wrapPromise(networkId: NetworkID, promise: Promise<any>) {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
 
     if (handleSafeEnvelope(envelope)) return;
+    if (await handleCommitEnvelope(envelope, networkId)) return;
 
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.signatureData || envelope.sig) {

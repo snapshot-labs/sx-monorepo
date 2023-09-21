@@ -1,4 +1,4 @@
-import { TransactionFinalityStatus } from 'starknet';
+import { constants as starknetConstants, TransactionFinalityStatus } from 'starknet';
 import { createApi } from '../common/graphqlApi';
 import { STARKNET_CONNECTORS } from '../common/constants';
 import { createActions } from './actions';
@@ -47,6 +47,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     name: 'Starknet (testnet)',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m',
     currentUnit: 'second',
+    chainId:
+      networkId === 'sn-tn'
+        ? starknetConstants.StarknetChainId.SN_GOERLI
+        : starknetConstants.StarknetChainId.SN_GOERLI2,
     baseChainId: l1ChainId,
     baseNetworkId: 'gor',
     hasReceive: true,
