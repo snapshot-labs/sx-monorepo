@@ -34,6 +34,7 @@ type SpaceMetadataItem {
   external_url: String
   delegation_api_type: String
   delegation_api_url: String
+  delegation_contract: String
   github: String
   twitter: String
   discord: String

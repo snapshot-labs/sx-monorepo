@@ -15,6 +15,7 @@ export async function handleSpaceMetadata(
     external_url: '',
     delegation_api_type: '',
     delegation_api_url: '',
+    delegation_contract: '',
     github: '',
     twitter: '',
     discord: '',
@@ -40,6 +41,11 @@ export async function handleSpaceMetadata(
       metadataItem.delegation_api_type = metadata.properties.delegation_api_type;
       metadataItem.delegation_api_url = metadata.properties.delegation_api_url;
     }
+
+    if (metadata.properties.delegation_contract) {
+      metadataItem.delegation_contract = metadata.properties.delegation_contract;
+    }
+
     if (metadata.properties.github) metadataItem.github = metadata.properties.github;
     if (metadata.properties.twitter) metadataItem.twitter = metadata.properties.twitter;
     if (metadata.properties.discord) metadataItem.discord = metadata.properties.discord;
