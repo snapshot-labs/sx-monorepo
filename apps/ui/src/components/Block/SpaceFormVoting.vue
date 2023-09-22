@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { validateForm } from '@/helpers/validation';
-import { getCurrentName } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
 import type { NetworkID } from '@/types';
 
 const props = defineProps<{
@@ -14,9 +12,6 @@ const emit = defineEmits<{
 }>();
 
 const definition = computed(() => {
-  const network = getNetwork(props.selectedNetworkId);
-  const useDuration = network.currentUnit === 'second';
-
   return {
     type: 'object',
     title: 'SpaceSettings',
@@ -25,24 +20,18 @@ const definition = computed(() => {
     properties: {
       votingDelay: {
         type: 'number',
-        format: useDuration ? 'duration' : undefined,
-        title: useDuration
-          ? 'Voting delay'
-          : `Voting delay in ${getCurrentName(network.currentUnit)}`
+        format: 'duration',
+        title: 'Voting delay'
       },
       minVotingDuration: {
         type: 'number',
-        format: useDuration ? 'duration' : undefined,
-        title: useDuration
-          ? 'Min. voting duration'
-          : `Min. voting duration in ${getCurrentName(network.currentUnit)}`
+        format: 'duration',
+        title: 'Min. voting duration'
       },
       maxVotingDuration: {
         type: 'number',
-        format: useDuration ? 'duration' : undefined,
-        title: useDuration
-          ? 'Max. voting duration'
-          : `Max. voting duration in ${getCurrentName(network.currentUnit)}`
+        format: 'duration',
+        title: 'Max. voting duration'
       }
     }
   };

@@ -16,6 +16,7 @@ import type { Connector, StrategyConfig } from '@/networks/types';
 export function useActions() {
   const uiStore = useUiStore();
   const { web3 } = useWeb3();
+  const { getCurrentFromDuration } = useMetaStore();
   const { modalAccountOpen } = useModal();
   const auth = getInstance();
 
@@ -146,9 +147,9 @@ export function useActions() {
 
     const receipt = await network.actions.createSpace(auth.web3, salt, {
       controller,
-      votingDelay: settings.votingDelay,
-      minVotingDuration: settings.minVotingDuration,
-      maxVotingDuration: settings.maxVotingDuration,
+      votingDelay: getCurrentFromDuration(networkId, settings.votingDelay),
+      minVotingDuration: getCurrentFromDuration(networkId, settings.minVotingDuration),
+      maxVotingDuration: getCurrentFromDuration(networkId, settings.maxVotingDuration),
       authenticators,
       validationStrategy,
       votingStrategies,
@@ -374,7 +375,11 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    const receipt = await network.actions.setVotingDelay(auth.web3, space, votingDelay);
+    const receipt = await network.actions.setVotingDelay(
+      auth.web3,
+      space,
+      getCurrentFromDuration(space.network, votingDelay)
+    );
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;
@@ -390,7 +395,11 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    const receipt = await network.actions.setMinVotingDuration(auth.web3, space, minVotingDuration);
+    const receipt = await network.actions.setMinVotingDuration(
+      auth.web3,
+      space,
+      getCurrentFromDuration(space.network, minVotingDuration)
+    );
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;
@@ -406,7 +415,11 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    const receipt = await network.actions.setMaxVotingDuration(auth.web3, space, maxVotingDuration);
+    const receipt = await network.actions.setMaxVotingDuration(
+      auth.web3,
+      space,
+      getCurrentFromDuration(space.network, maxVotingDuration)
+    );
     console.log('Receipt', receipt);
 
     if (handleSafeEnvelope(receipt)) return;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, _n, _d, compareAddresses, getCurrentName } from '@/helpers/utils';
+import { shorten, _d, compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
@@ -7,12 +7,12 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
+const { getDurationFromCurrent } = useMetaStore();
 const { setVotingDelay, setMinVotingDuration, setMaxVotingDuration, transferOwnership } =
   useActions();
 
 const network = computed(() => getNetwork(props.space.network));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
-const useDuration = computed(() => network.value.currentUnit === 'second');
 
 const settingsLoading = ref({
   votingDelay: false,
@@ -21,12 +21,13 @@ const settingsLoading = ref({
   controller: false
 });
 
-function formatTitle(title: string) {
-  return useDuration.value ? title : `${title} in ${getCurrentName(network.value.currentUnit)}`;
+function currentToMinutesOnly(value: number) {
+  const duration = getDurationFromCurrent(props.space.network, value);
+  return Math.round(duration / 60) * 60;
 }
 
 function formatCurrentValue(value: number) {
-  return useDuration.value ? _d(value) : _n(value);
+  return _d(currentToMinutesOnly(value));
 }
 
 async function handleSave(
@@ -66,14 +67,14 @@ watchEffect(() => {
       <Label :label="'Voting'" sticky />
       <div class="mx-4 pt-3">
         <div class="mb-3">
-          <div class="s-label !mb-0">{{ formatTitle('Voting delay') }}</div>
+          <div class="s-label !mb-0">Voting delay</div>
           <UiEditable
             :editable="isController"
-            :initial-value="space.voting_delay"
+            :initial-value="currentToMinutesOnly(space.voting_delay)"
             :loading="settingsLoading.votingDelay"
             :definition="{
               type: 'integer',
-              format: useDuration ? 'duration' : undefined
+              format: 'duration'
             }"
             @save="value => handleSave('votingDelay', value.toString())"
           >
@@ -84,16 +85,14 @@ watchEffect(() => {
           </UiEditable>
         </div>
         <div class="mb-3">
-          <div class="s-label !mb-0">
-            {{ formatTitle('Min. voting period') }}
-          </div>
+          <div class="s-label !mb-0">Min. voting period</div>
           <UiEditable
             :editable="isController"
-            :initial-value="space.min_voting_period"
+            :initial-value="currentToMinutesOnly(space.min_voting_period)"
             :loading="settingsLoading.minVotingPeriod"
             :definition="{
               type: 'integer',
-              format: useDuration ? 'duration' : undefined
+              format: 'duration'
             }"
             :custom-error-validation="
               value =>
@@ -110,16 +109,14 @@ watchEffect(() => {
           </UiEditable>
         </div>
         <div class="mb-3">
-          <div class="s-label !mb-0">
-            {{ formatTitle('Max. voting period') }}
-          </div>
+          <div class="s-label !mb-0">Max. voting period</div>
           <UiEditable
             :editable="isController"
-            :initial-value="space.max_voting_period"
+            :initial-value="currentToMinutesOnly(space.max_voting_period)"
             :loading="settingsLoading.maxVotingPeriod"
             :definition="{
               type: 'integer',
-              format: useDuration ? 'duration' : undefined
+              format: 'duration'
             }"
             :custom-error-validation="
               value =>

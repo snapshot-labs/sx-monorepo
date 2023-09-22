@@ -27,6 +27,22 @@ export const useMetaStore = defineStore('meta', () => {
     }
   }
 
+  function getCurrentFromDuration(networkId: NetworkID, duration: number) {
+    const network = getNetwork(networkId);
+
+    if (network.currentUnit === 'second') return duration;
+
+    return Math.round(duration / METADATA[networkId].blockTime);
+  }
+
+  function getDurationFromCurrent(networkId: NetworkID, current: number) {
+    const network = getNetwork(networkId);
+
+    if (network.currentUnit === 'second') return current;
+
+    return Math.round(current * METADATA[networkId].blockTime);
+  }
+
   function getTsFromCurrent(networkId: NetworkID, current: number) {
     if (!evmNetworks.includes(networkId)) return current;
 
@@ -39,6 +55,8 @@ export const useMetaStore = defineStore('meta', () => {
   return {
     getCurrent,
     fetchBlock,
+    getCurrentFromDuration,
+    getDurationFromCurrent,
     getTsFromCurrent
   };
 });
