@@ -10,7 +10,6 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 export const API_URL = 'https://api-1.snapshotx.xyz';
 
 export const SUPPORTED_AUTHENTICATORS = {
-  '0x7ea118e919c2d693f6c6d4643caae86814e8a7c06a77c33799e8d5f8a544a2': true,
   '0x6584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c': true,
   '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': true,
   '0xb321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476': true,
@@ -35,7 +34,6 @@ export const RELAYER_AUTHENTICATORS = {
 } as const;
 
 export const AUTHS = {
-  '0x7ea118e919c2d693f6c6d4643caae86814e8a7c06a77c33799e8d5f8a544a2': 'Vanilla',
   '0x6584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c': 'Ethereum signature',
   '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': 'Ethereum transaction',
   '0xb321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476': 'Starknet signature',
@@ -58,11 +56,6 @@ export const EXECUTORS = {
 };
 
 export const EDITOR_AUTHENTICATORS = [
-  {
-    address: '0x7ea118e919c2d693f6c6d4643caae86814e8a7c06a77c33799e8d5f8a544a2',
-    name: 'Vanilla',
-    paramsDefinition: null
-  },
   {
     address: '0x53c66d5b61f7b7f8a3871908b16d6e199ed401b706fb042a006d53f97ec2958',
     name: 'Starknet transaction',
