@@ -18,7 +18,10 @@ describe('utils', () => {
         walletNetwork: 'gor',
         walletAddress: '0x000000000000000000000000000000000000dead',
         delegationApiType: 'governor-subgraph',
-        delegationApiUrl: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2'
+        delegationApiUrl:
+          'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
+        delegationContractNetwork: 'gor',
+        delegationContractAddress: '0x000000000000000000000000000000000000dead'
       });
 
       expect(metadata).toEqual({
@@ -35,7 +38,8 @@ describe('utils', () => {
           wallets: ['gor:0x000000000000000000000000000000000000dead'],
           delegation_api_type: 'governor-subgraph',
           delegation_api_url:
-            'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2'
+            'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
+          delegation_contract: 'gor:0x000000000000000000000000000000000000dead'
         }
       });
     });

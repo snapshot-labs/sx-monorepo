@@ -443,6 +443,17 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
+  async function delegate(space: Space, networkId: NetworkID, delegatee: string) {
+    if (!web3.value.account) return await forceLogin();
+
+    const network = getNetwork(networkId);
+
+    const receipt = await network.actions.delegate(auth.web3, space, networkId, delegatee);
+    console.log('Receipt', receipt);
+
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);
+  }
+
   return {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
@@ -460,6 +471,7 @@ export function useActions() {
     setVotingDelay: wrapWithErrors(setVotingDelay),
     setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
-    transferOwnership: wrapWithErrors(transferOwnership)
+    transferOwnership: wrapWithErrors(transferOwnership),
+    delegate: wrapWithErrors(delegate)
   };
 }

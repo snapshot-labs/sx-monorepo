@@ -74,7 +74,9 @@ const metadataForm: SpaceMetadata = reactive(
     walletNetwork: null,
     walletAddress: null,
     delegationApiType: null,
-    delegationApiUrl: null
+    delegationApiUrl: null,
+    delegationContractNetwork: null,
+    delegationContractAddress: null
   })
 );
 const selectedNetworkId: Ref<NetworkID> = ref(enabledNetworks[0]);

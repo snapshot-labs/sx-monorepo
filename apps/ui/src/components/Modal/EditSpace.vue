@@ -15,7 +15,9 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
   walletNetwork: null,
   walletAddress: null,
   delegationApiType: null,
-  delegationApiUrl: null
+  delegationApiUrl: null,
+  delegationContractAddress: null,
+  delegationContractNetwork: null
 };
 
 const props = defineProps<{
@@ -28,14 +30,22 @@ const emit = defineEmits(['add', 'close']);
 const { updateMetadata } = useActions();
 
 const showPicker = ref(false);
+const pickerField = ref(null as string | null);
 const searchValue = ref('');
 const sending = ref(false);
 const formErrors = ref({} as Record<string, string>);
 const form: SpaceMetadata = reactive(clone(DEFAULT_FORM_STATE));
 
+function handlePick(field: string) {
+  pickerField.value = field;
+  showPicker.value = true;
+}
+
 function handlePickerSelect(value: string) {
+  if (!pickerField.value) return;
+
   showPicker.value = false;
-  form.walletAddress = value;
+  form[pickerField.value] = value;
 }
 
 async function handleSubmit() {
@@ -74,6 +84,19 @@ watch(
       form.walletNetwork = null;
       form.walletAddress = null;
     }
+
+    if (props.space.delegation_contract) {
+      const [delegationContractNetwork, delegationContractAddress] =
+        props.space.delegation_contract.split(':');
+
+      if (delegationContractNetwork && delegationContractAddress) {
+        form.delegationContractNetwork = delegationContractNetwork as NetworkID;
+        form.delegationContractAddress = delegationContractAddress;
+      } else {
+        form.delegationContractNetwork = null;
+        form.delegationContractAddress = null;
+      }
+    }
   }
 );
 </script>
@@ -111,7 +134,7 @@ watch(
       :space="space"
       :show-title="false"
       :form="form"
-      @pick="showPicker = true"
+      @pick="handlePick"
       @no-network="form.walletAddress = null"
       @errors="v => (formErrors = v)"
     />

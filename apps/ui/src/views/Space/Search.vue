@@ -70,7 +70,7 @@ watch(query, () => {
 });
 
 watchEffect(() => {
-  setTitle(`Proposals - ${props.space.name}`);
+  setTitle(`Search - ${props.space.name}`);
 });
 </script>
 

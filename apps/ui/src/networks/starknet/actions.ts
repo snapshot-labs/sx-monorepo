@@ -342,6 +342,9 @@ export function createActions(
         owner
       });
     },
+    delegate: () => {
+      throw new Error('Not implemented');
+    },
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],

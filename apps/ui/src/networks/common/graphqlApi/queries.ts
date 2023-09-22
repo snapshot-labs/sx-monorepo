@@ -16,6 +16,7 @@ const SPACE_FRAGMENT = gql`
       wallet
       delegation_api_type
       delegation_api_url
+      delegation_contract
       executors
       executors_types
     }

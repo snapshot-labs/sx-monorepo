@@ -123,6 +123,7 @@ export type NetworkActions = {
   setMinVotingDuration(web3: Web3Provider, space: Space, minVotingDuration: number);
   setMaxVotingDuration(web3: Web3Provider, space: Space, maxVotingDuration: number);
   transferOwnership(web3: Web3Provider, space: Space, owner: string);
+  delegate(web3: Web3Provider, space: Space, networkId: NetworkID, delegatee: string);
   getVotingPower(
     strategiesAddresses: string[],
     strategiesParams: any[],

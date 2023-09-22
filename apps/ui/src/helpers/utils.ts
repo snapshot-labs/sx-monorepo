@@ -293,6 +293,7 @@ export function createErc1155Metadata(
     properties: {
       delegation_api_type: metadata.delegationApiType,
       delegation_api_url: metadata.delegationApiUrl,
+      delegation_contract: `${metadata.delegationContractNetwork}:${metadata.delegationContractAddress}`,
       voting_power_symbol: metadata.votingPowerSymbol,
       cover: metadata.cover,
       github: metadata.github,

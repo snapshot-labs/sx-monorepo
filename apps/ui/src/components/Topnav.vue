@@ -35,12 +35,12 @@ function handleSearchSubmit(e: Event) {
   if (!searchValue.value) {
     router.push({ name: 'space-proposals' });
   } else {
-    router.push({ name: 'space-search-proposals', query: { q: searchValue.value } });
+    router.push({ name: 'space-search', query: { q: searchValue.value } });
   }
 }
 
 watch(route, to => {
-  if (to.name === 'space-search-proposals') return;
+  if (to.name === 'space-search') return;
   searchValue.value = '';
 });
 </script>

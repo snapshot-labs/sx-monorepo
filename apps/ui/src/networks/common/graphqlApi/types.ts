@@ -23,6 +23,7 @@ export type ApiSpace = {
     executors_types: string[];
     delegation_api_type: string | null;
     delegation_api_url: string | null;
+    delegation_contract: string | null;
   };
   controller: string;
   voting_delay: number;

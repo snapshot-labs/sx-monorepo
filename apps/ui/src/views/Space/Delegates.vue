@@ -5,14 +5,13 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
+const delegateModalOpen = ref(false);
 const { setTitle } = useTitle();
 const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMore } = useDelegates(
   props.space.delegation_api_url as string
 );
 
 const currentNetwork = computed(() => {
-  if (!props.space.wallet) return null;
-
   try {
     return getNetwork(props.space.network);
   } catch (e) {
@@ -46,10 +45,10 @@ watchEffect(() => {
     No delegation API configured.
   </div>
   <template v-else>
-    <div class="p-4 space-x-2 flex">
+    <div v-if="space.delegation_contract" class="p-4 space-x-2 flex">
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]">
+        <UiButton class="!px-0 w-[46px]" @click="delegateModalOpen = true">
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
@@ -99,5 +98,8 @@ watchEffect(() => {
         </BlockInfiniteScroller>
       </div>
     </div>
+    <teleport to="#modal">
+      <ModalDelegate :open="delegateModalOpen" :space="space" @close="delegateModalOpen = false" />
+    </teleport>
   </template>
 </template>

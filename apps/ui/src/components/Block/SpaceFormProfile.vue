@@ -118,7 +118,25 @@ const definition = computed(() => {
               format: 'uri',
               title: 'Delegation API URL',
               examples: ['https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2']
-            }
+            },
+            delegationContractNetwork: {
+              type: 'string',
+              enum: [null, ...enabledNetworks],
+              options: [{ id: null, name: 'No delegation contract' }, ...availableNetworks],
+              title: 'Delegation contract network',
+              nullable: true
+            },
+            ...(props.form.delegationContractNetwork !== null
+              ? {
+                  delegationContractAddress: {
+                    type: 'string',
+                    title: 'Delegation contract address',
+                    examples: ['0x0000…'],
+                    format: 'address',
+                    minLength: 1
+                  }
+                }
+              : {})
           }
         : {})
     }

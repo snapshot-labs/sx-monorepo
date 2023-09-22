@@ -3,7 +3,7 @@ import Home from '@/views/Home.vue';
 import Space from '@/views/Space.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
-import SpaceSearchProposals from '@/views/Space/SearchProposals.vue';
+import SpaceSearch from '@/views/Space/Search.vue';
 import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
@@ -25,7 +25,7 @@ const routes: any[] = [
     children: [
       { path: '', name: 'space-overview', component: SpaceOverview },
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
-      { path: 'search', name: 'space-search-proposals', component: SpaceSearchProposals },
+      { path: 'search', name: 'space-search', component: SpaceSearch },
       { path: 'settings', name: 'space-settings', component: SpaceSettings },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
       { path: 'delegates', name: 'space-delegates', component: SpaceDelegates }

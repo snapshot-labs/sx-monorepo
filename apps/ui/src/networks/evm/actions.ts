@@ -1,4 +1,5 @@
 import { Provider } from '@ethersproject/providers';
+import { Contract } from '@ethersproject/contracts';
 import {
   clients,
   getEvmStrategy,
@@ -10,6 +11,7 @@ import {
   EvmNetworkConfig
 } from '@snapshot-labs/sx';
 import { MANA_URL, executionCall } from '@/helpers/mana';
+import { CHAIN_IDS } from '@/helpers/constants';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
@@ -29,7 +31,7 @@ import type {
   VotingPower
 } from '@/networks/types';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import type { Space, Proposal, SpaceMetadata, StrategyParsedMetadata } from '@/types';
+import type { Space, Proposal, SpaceMetadata, StrategyParsedMetadata, NetworkID } from '@/types';
 
 type Choice = 0 | 1 | 2;
 
@@ -456,6 +458,21 @@ export function createActions(
         },
         { noWait: isContract }
       );
+    },
+    delegate: async (web3: Web3Provider, space: Space, networkId: NetworkID, delegatee: string) => {
+      if (!space.delegation_contract) throw new Error('Delegation contract missing');
+
+      await verifyNetwork(web3, CHAIN_IDS[networkId]);
+
+      const [, contractAddress] = space.delegation_contract.split(':');
+
+      const votesContract = new Contract(
+        contractAddress,
+        ['function delegate(address delegatee)'],
+        web3.getSigner()
+      );
+
+      return votesContract.delegate(delegatee);
     },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (

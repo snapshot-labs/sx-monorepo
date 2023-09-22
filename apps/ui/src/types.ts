@@ -23,6 +23,8 @@ export type SpaceMetadata = {
   walletAddress: string | null;
   delegationApiType: string | null;
   delegationApiUrl: string | null;
+  delegationContractNetwork: NetworkID | null;
+  delegationContractAddress: string | null;
 };
 
 export type SpaceSettings = {
@@ -47,6 +49,7 @@ export type Space = {
   external_url: string;
   delegation_api_type: string | null;
   delegation_api_url: string | null;
+  delegation_contract: string | null;
   twitter: string;
   github: string;
   discord: string;

@@ -43,6 +43,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     wallet: space.metadata.wallet,
     delegation_api_type: space.metadata.delegation_api_type,
     delegation_api_url: space.metadata.delegation_api_url,
+    delegation_contract: space.metadata.delegation_contract,
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
     strategies_parsed_metadata: space.strategies_parsed_metadata.map(
