@@ -54,7 +54,7 @@ export const STRATEGIES = {
 };
 
 export const EXECUTORS = {
-  SimpleQuorumAvatar: 'Avatar',
+  SimpleQuorumAvatar: 'Safe module (Zodiac)',
   SimpleQuorumTimelock: 'Timelock'
 };
 
@@ -241,7 +241,7 @@ export const EDITOR_EXECUTION_STRATEGIES = [
   {
     address: '',
     type: 'SimpleQuorumAvatar',
-    name: 'Safe module (Zodiac)',
+    name: EXECUTORS.SimpleQuorumAvatar,
     about:
       'An execution strategy that allows proposals to execute transactions from a specified target Avatar contract, the most popular one being a Safe.',
     icon: IHUserCircle,
@@ -287,7 +287,7 @@ export const EDITOR_EXECUTION_STRATEGIES = [
   {
     address: '',
     type: 'SimpleQuorumTimelock',
-    name: 'Timelock',
+    name: EXECUTORS.SimpleQuorumTimelock,
     about:
       'Timelock implementation with a specified delay that queues proposal transactions for execution and includes an optional role to veto queued proposals.',
     icon: IHClock,

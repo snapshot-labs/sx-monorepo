@@ -206,7 +206,7 @@ export const EDITOR_EXECUTION_STRATEGIES = [
   {
     address: '0x767ea1ecd66d29468a04518041af4b0835da7c219e3f2e85f68af666acdb162',
     type: 'SimpleQuorumVanilla',
-    name: 'Vanilla',
+    name: EXECUTORS.SimpleQuorumVanilla,
     paramsDefinition: null
   }
 ];
