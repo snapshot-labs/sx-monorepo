@@ -21,7 +21,7 @@ export default defineConfig({
   plugins: [
     vue({ reactivityTransform: true }),
     AutoImport({
-      imports: ['vue', 'vue-router'],
+      imports: ['vue', 'vue-router', '@vueuse/core'],
       dirs: ['./src/composables', './src/stores'],
       eslintrc: {
         enabled: true

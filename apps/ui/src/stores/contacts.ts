@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { useStorage } from '@vueuse/core';
 import type { Contact } from '@/types';
 import pkg from '../../package.json';
 

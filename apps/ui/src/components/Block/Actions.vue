@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
-import { useIntervalFn } from '@vueuse/core';
 import { getNetwork } from '@/networks';
 import { compareAddresses, shorten } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';

@@ -1,6 +1,4 @@
 <script setup>
-import { debouncedWatch } from '@vueuse/core';
-
 const props = defineProps({ url: String });
 const preview = ref(false);
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const el = ref(null);
+
 const route = useRoute();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
@@ -6,6 +8,7 @@ const { userSkin } = useUserSkin();
 const { init, app } = useApp();
 const { web3, web3Account } = useWeb3();
 const { loadVotes, votes } = useAccount();
+const { isSwiping, direction } = useSwipe(el);
 
 provide('web3', web3);
 
@@ -30,10 +33,22 @@ watch(web3Account, async () => {
 watch(route, () => {
   uiStore.sidebarOpen = false;
 });
+
+watch(isSwiping, () => {
+  if (
+    isSwiping.value &&
+    !modalOpen.value &&
+    ((direction.value === 'RIGHT' && !uiStore.sidebarOpen) ||
+      (direction.value === 'LEFT' && uiStore.sidebarOpen))
+  ) {
+    uiStore.toggleSidebar();
+  }
+});
 </script>
 
 <template>
   <div
+    ref="el"
     :class="{ [skin]: true, 'overflow-hidden': scrollDisabled }"
     class="font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
   >

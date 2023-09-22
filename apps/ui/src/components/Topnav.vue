@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useFocus } from '@vueuse/core';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
 
