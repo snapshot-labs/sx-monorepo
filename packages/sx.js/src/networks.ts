@@ -105,6 +105,9 @@ export const goerli1: NetworkConfig = {
     '0x0510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee': {
       type: 'vanilla'
     },
+    '0x0297fb0104d8be6c86f168bf1dcdc28b0625d2b06108c3c46194aa4415f2e2ec': {
+      type: 'whitelist'
+    },
     '0x0619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7': {
       type: 'erc20Votes'
     }
