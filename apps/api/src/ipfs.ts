@@ -96,6 +96,9 @@ export async function handleStrategiesParsedMetadata(metadataUri: string) {
       strategiesParsedMetadataItem.symbol = metadata.properties.symbol;
     }
     if (metadata.properties.token) strategiesParsedMetadataItem.token = metadata.properties.token;
+    if (metadata.properties.payload) {
+      strategiesParsedMetadataItem.payload = metadata.properties.payload;
+    }
   }
 
   await strategiesParsedMetadataItem.save();

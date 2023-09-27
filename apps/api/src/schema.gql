@@ -60,6 +60,7 @@ type StrategiesParsedMetadataDataItem {
   decimals: Int!
   symbol: String!
   token: String
+  payload: String
 }
 
 type Proposal {
