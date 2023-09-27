@@ -5,7 +5,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { faker } from '@faker-js/faker';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
-import { AsyncMySqlPool } from '@snapshot-labs/checkpoint';
+import { StrategiesParsedMetadataItem } from '../.checkpoint/models';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
 import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
 import Config from './config.json';
@@ -106,7 +106,7 @@ export async function handleExecutionStrategy(address: string, payload: string[]
         ethProvider
       );
 
-      quorum = await SimpleQuorumExecutionStrategyContract.quorum();
+      quorum = (await SimpleQuorumExecutionStrategyContract.quorum()).toBigInt();
     }
 
     return {
@@ -120,28 +120,23 @@ export async function handleExecutionStrategy(address: string, payload: string[]
   }
 }
 
-export async function handleStrategiesMetadata(
-  spaceId: string,
-  metadataUris: string[],
-  mysql: AsyncMySqlPool
-) {
+export async function handleStrategiesMetadata(spaceId: string, metadataUris: string[]) {
   for (let i = 0; i < metadataUris.length; i++) {
     const metadataUri = metadataUris[i];
 
-    const item = {
-      id: `${spaceId}/${i}`,
-      space: spaceId,
-      index: i,
-      data: null as string | null
-    };
+    const exists = await StrategiesParsedMetadataItem.loadEntity(dropIpfs(metadataUri));
+    if (exists) continue;
+
+    const strategiesParsedMetadataItem = new StrategiesParsedMetadataItem(dropIpfs(metadataUri));
+    strategiesParsedMetadataItem.space = spaceId;
+    strategiesParsedMetadataItem.index = i;
 
     if (metadataUri.startsWith('ipfs://')) {
-      item.data = dropIpfs(metadataUri);
+      strategiesParsedMetadataItem.data = dropIpfs(metadataUri);
 
-      await handleStrategiesParsedMetadata(metadataUri, mysql);
+      await handleStrategiesParsedMetadata(metadataUri);
     }
 
-    const query = `INSERT IGNORE INTO strategiesparsedmetadataitems SET ?;`;
-    await mysql.queryAsync(query, [item]);
+    await strategiesParsedMetadataItem.save();
   }
 }

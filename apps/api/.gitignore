@@ -9,3 +9,6 @@ coverage
 .idea
 .vscode
 *.log
+
+# Checkpoint
+.checkpoint

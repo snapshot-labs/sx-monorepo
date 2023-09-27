@@ -14,6 +14,7 @@ jobs:
           sudo /etc/init.d/mysql start
           mysql -e 'CREATE DATABASE checkpoint;' -uroot -proot
       - run: yarn install
+      - run: yarn checkpoint generate
       - run: yarn lint
       - run: yarn build
       - run: yarn test

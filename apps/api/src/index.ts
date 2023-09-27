@@ -17,6 +17,10 @@ if (process.env.NETWORK_NODE_URL) {
   config.network_node_url = process.env.NETWORK_NODE_URL;
 }
 
+if (process.env.CA_CERT) {
+  process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
+}
+
 const checkpoint = new Checkpoint(config, writer, schema, {
   logLevel: LogLevel.Info,
   resetOnConfigChange: true,

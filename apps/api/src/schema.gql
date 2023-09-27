@@ -1,47 +1,49 @@
 scalar Id
 scalar Text
+scalar BigInt
+scalar BigDecimalVP
 
 type Space {
   id: String!
   metadata: SpaceMetadataItem
-  controller: String
-  voting_delay: Int
-  min_voting_period: Int
-  max_voting_period: Int
-  proposal_threshold: Int
-  strategies: [String]
-  strategies_params: [String]
-  strategies_metadata: [String]
+  controller: String!
+  voting_delay: Int!
+  min_voting_period: Int!
+  max_voting_period: Int!
+  proposal_threshold: Int!
+  strategies: [String]!
+  strategies_params: [String]!
+  strategies_metadata: [String]!
   strategies_parsed_metadata: [StrategiesParsedMetadataItem]! @derivedFrom(field: "space")
-  authenticators: [String]
+  authenticators: [String]!
   validation_strategy: String!
   validation_strategy_params: String!
-  voting_power_validation_strategy_strategies: [String]
-  voting_power_validation_strategy_strategies_params: [String]
-  proposal_count: Int
-  vote_count: Int
-  created: Int
-  tx: String
+  voting_power_validation_strategy_strategies: [String]!
+  voting_power_validation_strategy_strategies_params: [String]!
+  proposal_count: Int!
+  vote_count: Int!
+  created: Int!
+  tx: String!
   proposals: [Proposal]! @derivedFrom(field: "space")
 }
 
 type SpaceMetadataItem {
   id: String!
-  name: String
-  about: String
-  avatar: String
-  cover: String
-  external_url: String
+  name: String!
+  about: String!
+  avatar: String!
+  cover: String!
+  external_url: String!
   delegation_api_type: String
   delegation_api_url: String
   delegation_contract: String
-  github: String
-  twitter: String
-  discord: String
-  voting_power_symbol: String
-  wallet: String
-  executors: [String]
-  executors_types: [String]
+  github: String!
+  twitter: String!
+  discord: String!
+  voting_power_symbol: String!
+  wallet: String!
+  executors: [String]!
+  executors_types: [String]!
 }
 
 type StrategiesParsedMetadataItem {
@@ -62,33 +64,33 @@ type StrategiesParsedMetadataDataItem {
 
 type Proposal {
   id: String!
-  proposal_id: Int
-  space: Space
-  author: User
-  execution_hash: String
+  proposal_id: Int!
+  space: Space!
+  author: User!
+  execution_hash: String!
   metadata: ProposalMetadataItem
-  start: Int
-  min_end: Int
-  max_end: Int
-  snapshot: Int
+  start: Int!
+  min_end: Int!
+  max_end: Int!
+  snapshot: Int!
   execution_time: Int!
   execution_strategy: String!
   execution_strategy_type: String!
   timelock_veto_guardian: String
   timelock_delay: Int
-  strategies: [String]
-  strategies_params: [String]
-  scores_1: Float
-  scores_2: Float
-  scores_3: Float
-  scores_total: Float
-  quorum: Float
-  created: Int
+  strategies: [String]!
+  strategies_params: [String]!
+  scores_1: BigDecimalVP!
+  scores_2: BigDecimalVP!
+  scores_3: BigDecimalVP!
+  scores_total: BigDecimalVP!
+  quorum: BigInt!
+  created: Int!
   edited: Int
-  tx: String
+  tx: String!
   execution_tx: String
   veto_tx: String
-  vote_count: Int
+  vote_count: Int!
   executed: Boolean!
   vetoed: Boolean!
   completed: Boolean!
@@ -105,19 +107,19 @@ type ProposalMetadataItem {
 
 type Vote {
   id: String!
-  voter: User
-  space: Space
-  proposal: Int
-  choice: Int
-  vp: Float
-  created: Int
+  voter: User!
+  space: Space!
+  proposal: Int!
+  choice: Int!
+  vp: BigDecimalVP!
+  created: Int!
 }
 
 type User {
   id: String!
-  proposal_count: Int
-  vote_count: Int
-  created: Int
+  proposal_count: Int!
+  vote_count: Int!
+  created: Int!
   proposals: [Proposal]! @derivedFrom(field: "author")
   votes: [Vote]! @derivedFrom(field: "voter")
 }
