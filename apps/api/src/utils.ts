@@ -88,6 +88,8 @@ export function getVoteValue(label: string) {
 
 export async function handleExecutionStrategy(address: string, payload: string[]) {
   try {
+    if (address === '0x0') return null;
+
     const executionContract = new Contract(ExecutionStrategyAbi, address, starkProvider);
 
     const executionStrategyType = shortString.decodeShortString(
