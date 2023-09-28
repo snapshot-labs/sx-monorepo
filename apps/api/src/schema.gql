@@ -20,6 +20,9 @@ type Space {
   validation_strategy_params: String!
   voting_power_validation_strategy_strategies: [String]!
   voting_power_validation_strategy_strategies_params: [String]!
+  voting_power_validation_strategy_metadata: String!
+  voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadataItem]!
+    @derivedFrom(field: "space")
   proposal_count: Int!
   vote_count: Int!
   created: Int!
@@ -44,6 +47,13 @@ type SpaceMetadataItem {
   wallet: String!
   executors: [String]!
   executors_types: [String]!
+}
+
+type VotingPowerValidationStrategiesParsedMetadataItem {
+  id: String!
+  space: Space!
+  index: Int!
+  data: StrategiesParsedMetadataDataItem
 }
 
 type StrategiesParsedMetadataItem {

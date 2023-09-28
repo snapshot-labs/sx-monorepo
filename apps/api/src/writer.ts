@@ -11,6 +11,7 @@ import {
   getVoteValue,
   handleExecutionStrategy,
   handleStrategiesMetadata,
+  handleVotingPowerValidationMetadata,
   longStringToText
 } from './utils';
 
@@ -55,6 +56,9 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
   space.validation_strategy_params = event.proposal_validation_strategy.params.join(',');
   space.voting_power_validation_strategy_strategies = [];
   space.voting_power_validation_strategy_strategies_params = [];
+  space.voting_power_validation_strategy_metadata = longStringToText(
+    event.proposal_validation_strategy_metadata_uri
+  );
   space.proposal_count = 0;
   space.vote_count = 0;
   space.created = block?.timestamp ?? getCurrentTimestamp();
@@ -77,6 +81,15 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
       space.voting_power_validation_strategy_strategies_params = parsed.allowed_strategies.map(
         strategy => strategy.params.map(param => `0x${param.toString(16)}`).join(',')
       );
+    }
+
+    try {
+      await handleVotingPowerValidationMetadata(
+        space.id,
+        space.voting_power_validation_strategy_metadata
+      );
+    } catch (e) {
+      console.log('failed to handle voting power strategies metadata', e);
     }
   }
   try {

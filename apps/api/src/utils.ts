@@ -5,7 +5,10 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { faker } from '@faker-js/faker';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
-import { StrategiesParsedMetadataItem } from '../.checkpoint/models';
+import {
+  StrategiesParsedMetadataItem,
+  VotingPowerValidationStrategiesParsedMetadataItem
+} from '../.checkpoint/models';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
 import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
 import Config from './config.json';
@@ -122,14 +125,23 @@ export async function handleExecutionStrategy(address: string, payload: string[]
   }
 }
 
-export async function handleStrategiesMetadata(spaceId: string, metadataUris: string[]) {
+export async function handleStrategiesMetadata(
+  spaceId: string,
+  metadataUris: string[],
+  type:
+    | typeof StrategiesParsedMetadataItem
+    | typeof VotingPowerValidationStrategiesParsedMetadataItem = StrategiesParsedMetadataItem
+) {
   for (let i = 0; i < metadataUris.length; i++) {
     const metadataUri = metadataUris[i];
 
-    const exists = await StrategiesParsedMetadataItem.loadEntity(dropIpfs(metadataUri));
+    // this needs to include space as multiple spaces can reference identical metadata (same CID)
+    const uniqueId = `${spaceId}/${dropIpfs(metadataUri)}`;
+
+    const exists = await type.loadEntity(uniqueId);
     if (exists) continue;
 
-    const strategiesParsedMetadataItem = new StrategiesParsedMetadataItem(dropIpfs(metadataUri));
+    const strategiesParsedMetadataItem = new type(uniqueId);
     strategiesParsedMetadataItem.space = spaceId;
     strategiesParsedMetadataItem.index = i;
 
@@ -141,4 +153,17 @@ export async function handleStrategiesMetadata(spaceId: string, metadataUris: st
 
     await strategiesParsedMetadataItem.save();
   }
+}
+
+export async function handleVotingPowerValidationMetadata(spaceId: string, metadataUri: string) {
+  if (!metadataUri) return;
+
+  const metadata: any = await getJSON(metadataUri);
+  if (!metadata.strategies_metadata) return;
+
+  await handleStrategiesMetadata(
+    spaceId,
+    metadata.strategies_metadata,
+    VotingPowerValidationStrategiesParsedMetadataItem
+  );
 }
