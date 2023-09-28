@@ -16,6 +16,8 @@ type Space @entity {
   validation_strategy_params: String!
   voting_power_validation_strategy_strategies: [Bytes!]!
   voting_power_validation_strategy_strategies_params: [String!]!
+  voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadata!]!
+    @derivedFrom(field: "space")
   proposal_count: Int!
   vote_count: Int!
   created: Int!
@@ -42,6 +44,13 @@ type SpaceMetadata @entity {
 }
 
 type StrategiesParsedMetadata @entity {
+  id: ID!
+  space: Space!
+  index: Int!
+  data: StrategiesParsedMetadataData
+}
+
+type VotingPowerValidationStrategiesParsedMetadata @entity {
   id: ID!
   space: Space!
   index: Int!
