@@ -130,10 +130,12 @@ export function handleStrategiesParsedMetadataData(content: Bytes): void {
     let decimals = propertiesObj.get('decimals')
     let symbol = propertiesObj.get('symbol')
     let token = propertiesObj.get('token')
+    let payload = propertiesObj.get('payload')
 
     if (decimals) strategiesParsedMetadataData.decimals = decimals.toBigInt().toI32()
     if (symbol) strategiesParsedMetadataData.symbol = symbol.toString()
     if (token) strategiesParsedMetadataData.token = token.toString()
+    if (payload) strategiesParsedMetadataData.payload = payload.toString()
   }
 
   strategiesParsedMetadataData.save()

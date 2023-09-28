@@ -55,6 +55,7 @@ type StrategiesParsedMetadataData @entity {
   decimals: Int!
   symbol: String!
   token: String
+  payload: String
 }
 
 type ExecutionStrategy @entity {
