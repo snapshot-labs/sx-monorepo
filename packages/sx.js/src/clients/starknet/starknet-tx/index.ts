@@ -21,6 +21,7 @@ type SpaceParams = {
   minVotingDuration: number;
   maxVotingDuration: number;
   proposalValidationStrategy: AddressConfig;
+  proposalValidationStrategyMetadataUri: string;
   metadataUri: string;
   daoUri: string;
   authenticators: string[];
@@ -69,6 +70,7 @@ export class StarkNetTx {
       metadataUri,
       daoUri,
       proposalValidationStrategy,
+      proposalValidationStrategyMetadataUri,
       authenticators,
       votingStrategies,
       votingStrategiesMetadata
@@ -98,7 +100,7 @@ export class StarkNetTx {
             address: proposalValidationStrategy.addr,
             params: proposalValidationStrategy.params
           },
-          shortString.splitLongString(''),
+          shortString.splitLongString(proposalValidationStrategyMetadataUri),
           votingStrategies.map(strategy => ({
             address: strategy.addr,
             params: strategy.params
