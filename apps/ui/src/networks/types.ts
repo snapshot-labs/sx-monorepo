@@ -18,13 +18,7 @@ export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
 };
-export type Connector =
-  | 'argentx'
-  | 'injected'
-  | 'walletconnect'
-  | 'walletlink'
-  | 'portis'
-  | 'gnosis';
+export type Connector = 'argentx' | 'injected' | 'walletconnect' | 'walletlink' | 'gnosis';
 
 export type StrategyTemplate = {
   address: string;

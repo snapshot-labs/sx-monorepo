@@ -1,6 +1,5 @@
 import injected from '@snapshot-labs/lock/connectors/injected';
 import walletconnect from '@snapshot-labs/lock/connectors/walletconnect';
-import portis from '@snapshot-labs/lock/connectors/portis';
 import connectors from '@/helpers/connectors';
 import walletlink from '@snapshot-labs/lock/connectors/walletlink';
 import gnosis from '@snapshot-labs/lock/connectors/gnosis';
@@ -11,7 +10,6 @@ const lockConnectors = {
   injected,
   walletconnect,
   walletlink,
-  portis,
   gnosis,
   argentx
 };

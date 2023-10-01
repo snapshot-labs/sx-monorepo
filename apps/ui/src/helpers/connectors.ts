@@ -2,7 +2,6 @@ import { getUrl } from '@/helpers/utils';
 import metamaskIcon from '@/assets/connectors/metamask.png';
 import walletconnectIcon from '@/assets/connectors/walletconnect.png';
 import coinbaseIcon from '@/assets/connectors/coinbase.png';
-import portisIcon from '@/assets/connectors/portis.png';
 import gnosisIcon from '@/assets/connectors/gnosis.png';
 import argentxIcon from '@/assets/connectors/argentx.png';
 
@@ -37,16 +36,6 @@ export default {
       darkMode: false,
       chainId: 1,
       ethJsonrpcUrl: 'https://cloudflare-eth.com'
-    }
-  },
-  portis: {
-    id: 'portis',
-    name: 'Portis',
-    network: '1',
-    icon: portisIcon,
-    options: {
-      dappId: '3eb93706-c71d-456b-b4eb-322ea27f7d48',
-      network: 'mainnet'
     }
   },
   gnosis: {
