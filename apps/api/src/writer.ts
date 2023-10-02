@@ -341,7 +341,7 @@ export const handleExecute: CheckpointWriter = async ({ tx, rawEvent, event }) =
   await proposal.save();
 };
 
-export const handleVote: CheckpointWriter = async ({ block, rawEvent, event }) => {
+export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle vote');
@@ -361,6 +361,7 @@ export const handleVote: CheckpointWriter = async ({ block, rawEvent, event }) =
   vote.choice = choice;
   vote.vp = vp.toString();
   vote.created = created;
+  vote.tx = tx.transaction_hash;
   await vote.save();
 
   const existingUser = await User.loadEntity(voter);

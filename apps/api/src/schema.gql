@@ -124,6 +124,7 @@ type Vote {
   choice: Int!
   vp: BigDecimalVP!
   created: Int!
+  tx: String!
 }
 
 type User {
