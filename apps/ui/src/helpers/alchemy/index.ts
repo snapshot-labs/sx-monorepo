@@ -129,12 +129,14 @@ export async function getBalances(
       value: 0,
       change: 0
     },
-    ...tokenBalances.map((balance, i) => ({
-      ...balance,
-      ...metadata[i],
-      price: 0,
-      value: 0,
-      change: 0
-    }))
+    ...tokenBalances
+      .map((balance, i) => ({
+        ...balance,
+        ...metadata[i],
+        price: 0,
+        value: 0,
+        change: 0
+      }))
+      .filter(token => !token.symbol.includes('.'))
   ];
 }
