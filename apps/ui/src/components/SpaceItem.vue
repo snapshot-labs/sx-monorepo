@@ -34,7 +34,7 @@ const spacesStore = useSpacesStore();
         class="border-skin-bg !bg-skin-border rounded-md mb-2 border-[3px]"
       />
       <img
-        :src="getUrl(currentNetwork.avatar) ?? undefined"
+        :src="(currentNetwork && getUrl(currentNetwork.avatar)) ?? undefined"
         class="w-[16px] h-[16px] rounded-lg -right-[6px] bottom-0 absolute border"
       />
     </div>
