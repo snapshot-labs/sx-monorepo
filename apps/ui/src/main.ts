@@ -39,7 +39,7 @@ app.use(
       id: import.meta.env.VITE_GA_MEASUREMENT_ID,
       params: { anonymize_ip: true }
     }
-  },
+  } as any,
   router
 );
 

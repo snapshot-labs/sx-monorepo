@@ -9,7 +9,6 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  disabled?: boolean;
   (e: 'click');
 }>();
 </script>

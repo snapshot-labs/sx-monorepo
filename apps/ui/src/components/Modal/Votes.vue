@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getNetwork } from '@/networks';
 import { shortenAddress } from '@/helpers/utils';
-import choices from '@/helpers/choices.json';
+import { CHOICES } from '@/helpers/constants';
 import { NetworkID, Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
@@ -107,7 +107,7 @@ watch(
             >
               {{ vote.voter.name || shortenAddress(vote.voter.id) }}
             </router-link>
-            <div class="absolute right-4 top-3 text-skin-link" v-text="choices[vote.choice]" />
+            <div class="absolute right-4 top-3 text-skin-link" v-text="CHOICES[vote.choice]" />
           </div>
         </BlockInfiniteScroller>
       </div>

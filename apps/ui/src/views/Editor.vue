@@ -274,7 +274,7 @@ export default defineComponent({
         </div>
       </div>
     </nav>
-    <Container v-if="proposal" class="pt-5 max-w-[630px] mx-0 md:mx-auto s-box">
+    <Container v-if="proposal" class="pt-5 !max-w-[630px] mx-0 md:mx-auto s-box">
       <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>

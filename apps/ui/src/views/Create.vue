@@ -39,7 +39,7 @@ const PAGES = [
   }
 ] as const;
 
-type PageID = typeof PAGES[number]['id'];
+type PageID = (typeof PAGES)[number]['id'];
 
 const { setTitle } = useTitle();
 const { predictSpaceAddress } = useActions();

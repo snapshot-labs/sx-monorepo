@@ -253,7 +253,7 @@ watchEffect(() => {
             </template>
           </UiDropdown>
         </div>
-        <Container class="pt-5 max-w-[630px] mx-0 md:mx-auto">
+        <Container class="pt-5 !max-w-[630px] mx-0 md:mx-auto">
           <div>
             <h1 class="mb-4 text-[36px]">
               {{ proposal.title || `Proposal #${proposal.proposal_id}` }}

@@ -17,3 +17,9 @@ export const COINGECKO_BASE_ASSETS = {
   137: 'matic-network',
   42161: 'ethereum'
 };
+
+export const CHOICES = {
+  1: 'For',
+  2: 'Against',
+  3: 'Abstain'
+};

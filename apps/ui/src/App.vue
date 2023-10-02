@@ -38,8 +38,8 @@ watch(isSwiping, () => {
   if (
     isSwiping.value &&
     !modalOpen.value &&
-    ((direction.value === 'RIGHT' && !uiStore.sidebarOpen) ||
-      (direction.value === 'LEFT' && uiStore.sidebarOpen))
+    ((direction.value === 'right' && !uiStore.sidebarOpen) ||
+      (direction.value === 'left' && uiStore.sidebarOpen))
   ) {
     uiStore.toggleSidebar();
   }

@@ -1,5 +1,4 @@
 module.exports = {
-  plugins: [require('@tailwindcss/line-clamp')],
   content: ['./index.html', './src/**/*.{js,ts,vue}'],
   darkMode: 'class',
   theme: {

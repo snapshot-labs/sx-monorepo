@@ -106,7 +106,7 @@ export function createStrategyPicker({
     );
 
     const selectedStrategies = strategies
-      .map((strategy, index) => ({ address: strategy, index } as const))
+      .map((strategy, index) => ({ address: strategy, index }) as const)
       .filter(({ address }) => supportedStrategies[address]);
 
     if (!authenticatorInfo || (strategies.length !== 0 && selectedStrategies.length === 0)) {
