@@ -98,8 +98,12 @@ export function explorerUrl(network, str: string, type = 'address'): string {
   return `${networks[network].explorer}/${type}/${str}`;
 }
 
-export function _n(value: any, notation: 'standard' | 'compact' = 'standard') {
-  const formatter = new Intl.NumberFormat('en', { notation });
+export function _n(
+  value: any,
+  notation: 'standard' | 'compact' = 'standard',
+  { maximumFractionDigits }: { maximumFractionDigits?: number } = {}
+) {
+  const formatter = new Intl.NumberFormat('en', { notation, maximumFractionDigits });
   return formatter.format(value);
 }
 

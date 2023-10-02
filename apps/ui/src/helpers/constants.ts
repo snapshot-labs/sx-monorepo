@@ -7,3 +7,13 @@ export const CHAIN_IDS = {
   sep: 11155111,
   'linea-testnet': 59140
 };
+
+export const COINGECKO_ASSET_PLATFORMS = {
+  137: 'polygon-pos',
+  42161: 'arbitrum-one'
+};
+
+export const COINGECKO_BASE_ASSETS = {
+  137: 'matic-network',
+  42161: 'ethereum'
+};

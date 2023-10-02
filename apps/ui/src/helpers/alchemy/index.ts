@@ -109,8 +109,6 @@ export async function getBalances(
   networkId: number,
   baseToken: { name: string; symbol: string; logo?: string }
 ): Promise<GetBalancesResponse> {
-  // TODO: Add rates from external provider
-
   const [ethBalance, { tokenBalances }] = await Promise.all([
     getBalance(address, networkId),
     getTokenBalances(address, networkId)

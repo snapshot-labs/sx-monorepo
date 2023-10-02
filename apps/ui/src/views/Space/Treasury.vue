@@ -181,7 +181,7 @@ watchEffect(() => {
                 :network="treasury.network"
               />
               <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
-                <h4 v-text="asset.symbol" />
+                <h4 class="truncate" v-text="asset.symbol" />
                 <div class="text-sm truncate text-skin-text" v-text="asset.name" />
               </div>
             </div>
@@ -189,18 +189,38 @@ watchEffect(() => {
               v-if="asset.price"
               class="flex-col items-end text-right leading-[22px] w-[180px] hidden md:block"
             >
-              <h4 class="text-skin-link" v-text="`$${_n(asset.price)}`" />
+              <h4
+                class="text-skin-link"
+                v-text="`$${_n(asset.price, 'standard', { maximumFractionDigits: 2 })}`"
+              />
               <div v-if="asset.change" class="text-sm">
-                <div v-if="asset.change > 0" class="text-green" v-text="`+${_n(asset.change)}%`" />
-                <div v-if="asset.change < 0" class="text-red" v-text="`${_n(asset.change)}%`" />
+                <div
+                  v-if="asset.change > 0"
+                  class="text-green"
+                  v-text="`+${_n(asset.change, 'standard', { maximumFractionDigits: 2 })}%`"
+                />
+                <div
+                  v-if="asset.change < 0"
+                  class="text-red"
+                  v-text="`${_n(asset.change, 'standard', { maximumFractionDigits: 2 })}%`"
+                />
               </div>
             </div>
             <div class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px]">
               <h4
-                class="text-skin-link"
-                v-text="_c(asset.tokenBalance || 0n, asset.decimals || 0)"
+                class="text-skin-link truncate"
+                v-text="
+                  `${_c(asset.tokenBalance || 0n, asset.decimals || 0)} ${shorten(
+                    asset.symbol,
+                    'symbol'
+                  )}`
+                "
               />
-              <div v-if="asset.price" class="text-sm" v-text="`$${_n(asset.price)}`" />
+              <div
+                v-if="asset.value"
+                class="text-sm text-skin-text"
+                v-text="`$${_n(asset.value, 'standard', { maximumFractionDigits: 2 })}`"
+              />
             </div>
           </a>
         </div>

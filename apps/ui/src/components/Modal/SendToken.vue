@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
+import { METADATA_BY_CHAIN_ID } from '@/composables/useBalances';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
@@ -67,11 +68,13 @@ const currentToken = computed(() => {
   let token = assetsMap.value?.get(form.token);
   if (!token) token = customTokens.value.find(existing => existing.contractAddress === form.token);
 
+  const metadata = METADATA_BY_CHAIN_ID.get(props.network);
+
   if (!token) {
     return {
       decimals: 18,
-      name: 'Ether',
-      symbol: 'ETH',
+      name: metadata?.name ?? 'Ethereum',
+      symbol: metadata?.ticker ?? 'ETH',
       contractAddress: ETH_CONTRACT,
       logo: null,
       tokenBalance: '0x0',
@@ -129,7 +132,7 @@ function handleValueUpdate(value) {
   if (value === '') {
     form.amount = '';
   } else if (currentToken.value) {
-    form.amount = value / currentToken.value.price;
+    form.amount = parseFloat((value / currentToken.value.price).toFixed(6));
   }
 }
 
@@ -175,9 +178,10 @@ watch([() => props.address, () => props.network], ([address, network]) => {
 });
 
 watch(currentToken, token => {
-  if (!token || typeof form.amount === 'string') return;
+  if (!token || form.amount === '') return;
 
-  form.value = parseFloat((form.amount * token.price).toFixed(2));
+  const amount = typeof form.amount === 'string' ? parseFloat(form.amount) : form.amount;
+  form.value = parseFloat((amount * token.price).toFixed(2));
 });
 
 watchEffect(async () => {
