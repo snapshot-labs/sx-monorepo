@@ -318,6 +318,7 @@ export function handleVoteCreated(event: VoteCast): void {
   vote.choice = choice
   vote.vp = vp
   vote.created = event.block.timestamp.toI32()
+  vote.tx = event.transaction.hash
   vote.save()
 
   space.vote_count += 1

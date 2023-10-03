@@ -131,6 +131,7 @@ type Vote @entity {
   choice: Int!
   vp: BigDecimal!
   created: Int!
+  tx: Bytes!
 }
 
 type User @entity {
