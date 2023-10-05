@@ -3,6 +3,7 @@ type StrategyParsedMetadata = {
     decimals: number;
     symbol: string;
     token: string | null;
+    payload: string | null;
   };
 };
 
@@ -33,6 +34,7 @@ export type ApiSpace = {
   validation_strategy: string;
   voting_power_validation_strategy_strategies: string[];
   voting_power_validation_strategy_strategies_params: string[];
+  voting_power_validation_strategies_parsed_metadata: StrategyParsedMetadata[];
   strategies: string[];
   strategies_params: any[];
   strategies_parsed_metadata: StrategyParsedMetadata[];
@@ -62,6 +64,7 @@ export type ApiProposal = {
       executors_types: string[];
     };
     authenticators: string[];
+    voting_power_validation_strategies_parsed_metadata: StrategyParsedMetadata[];
     strategies_parsed_metadata: StrategyParsedMetadata[];
   };
   author: {

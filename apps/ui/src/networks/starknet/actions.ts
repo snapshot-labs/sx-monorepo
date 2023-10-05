@@ -1,6 +1,6 @@
 import { defaultNetwork, clients, getStarknetStrategy } from '@snapshot-labs/sx';
 import { MANA_URL } from '@/helpers/mana';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import { createErc1155Metadata, getUrl, verifyNetwork } from '@/helpers/utils';
 import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '@/networks/common/constants';
 import {
@@ -52,6 +52,17 @@ export function createActions(
     return code !== '0x';
   };
 
+  const parseStrategyMetadata = async (metadata: string | null) => {
+    if (metadata === null) return null;
+    if (!metadata.startsWith('ipfs://')) return JSON.parse(metadata);
+
+    const strategyUrl = getUrl(metadata);
+    if (!strategyUrl) return null;
+
+    const res = await fetch(strategyUrl);
+    return res.json();
+  };
+
   const client = new clients.StarkNetTx(clientConfig);
   const starkSigClient = new clients.StarkNetSig(clientConfig);
   const ethSigClient = new clients.EthereumSig(clientConfig);
@@ -86,16 +97,20 @@ export function createActions(
         })
       );
 
+      const buildMetadata = async (config: StrategyConfig) => {
+        if (!config.generateMetadata) return '';
+
+        const metadata = await config.generateMetadata(config.params);
+        const pinned = await helpers.pin(metadata);
+
+        return `ipfs://${pinned.cid}`;
+      };
+
       const metadataUris = await Promise.all(
-        params.votingStrategies.map(async config => {
-          if (!config.generateMetadata) return '';
-
-          const metadata = config.generateMetadata(config.params);
-          const pinned = await helpers.pin(metadata);
-
-          return `ipfs://${pinned.cid}`;
-        })
+        params.votingStrategies.map(config => buildMetadata(config))
       );
+
+      const proposalValidationStrategyMetadataUri = await buildMetadata(params.validationStrategy);
 
       return client.deploySpace({
         account: web3.provider.account,
@@ -107,6 +122,7 @@ export function createActions(
               ? params.validationStrategy.generateParams(params.validationStrategy.params)
               : []
           },
+          proposalValidationStrategyMetadataUri,
           metadataUri: `ipfs://${pinned.cid}`,
           daoUri: '',
           authenticators: params.authenticators.map(config => config.address),
@@ -168,10 +184,23 @@ export function createActions(
         };
       }
 
+      const strategiesWithMetadata = await Promise.all(
+        strategies.map(async strategy => {
+          const metadata = await parseStrategyMetadata(
+            space.strategies_parsed_metadata[strategy.index].payload
+          );
+
+          return {
+            ...strategy,
+            metadata
+          };
+        })
+      );
+
       const data = {
         space: space.id,
         authenticator,
-        strategies,
+        strategies: strategiesWithMetadata,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${cid}`
       };
@@ -283,10 +312,23 @@ export function createActions(
         await verifyNetwork(web3, l1ChainId);
       }
 
+      const strategiesWithMetadata = await Promise.all(
+        strategies.map(async strategy => {
+          const metadata = await parseStrategyMetadata(
+            proposal.space.strategies_parsed_metadata[strategy.index].payload
+          );
+
+          return {
+            ...strategy,
+            metadata
+          };
+        })
+      );
+
       const data = {
         space: proposal.space.id,
         authenticator,
-        strategies,
+        strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id,
         choice
       };
@@ -357,10 +399,12 @@ export function createActions(
           const strategy = getStarknetStrategy(address, defaultNetwork);
           if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
+          const strategyMetadata = await parseStrategyMetadata(strategiesMetadata[i].payload);
+
           const value = await strategy.getVotingPower(
             address,
             voterAddress,
-            null,
+            strategyMetadata,
             timestamp,
             strategiesParams[i].split(','),
             {

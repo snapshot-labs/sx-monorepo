@@ -171,7 +171,7 @@ async function getVotingPower() {
     const votingPowers = await network.actions.getVotingPower(
       space.value.voting_power_validation_strategy_strategies,
       space.value.voting_power_validation_strategy_strategies_params,
-      [],
+      space.value.voting_power_validation_strategies_parsed_metadata,
       web3.value.account,
       supportsNullCurrent(space.value.network) ? null : getCurrent(space.value.network) || 0
     );

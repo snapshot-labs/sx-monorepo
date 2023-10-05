@@ -116,6 +116,7 @@ async function deploy() {
     currentStep.value = currentStep.value + 1;
   } catch {
     failed.value = true;
+    return;
   }
 
   try {

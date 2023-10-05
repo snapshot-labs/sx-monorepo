@@ -125,7 +125,7 @@ export function createActions(
         params.votingStrategies.map(async config => {
           if (!config.generateMetadata) return '';
 
-          const metadata = config.generateMetadata(config.params);
+          const metadata = await config.generateMetadata(config.params);
           const pinned = await helpers.pin(metadata);
 
           return `ipfs://${pinned.cid}`;

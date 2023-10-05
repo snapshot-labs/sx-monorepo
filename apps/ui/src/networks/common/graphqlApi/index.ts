@@ -46,11 +46,21 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     delegation_contract: space.metadata.delegation_contract,
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
+    voting_power_validation_strategies_parsed_metadata:
+      space.voting_power_validation_strategies_parsed_metadata.map(
+        ({ data: { decimals, symbol, token, payload } }) => ({
+          decimals,
+          symbol,
+          token,
+          payload
+        })
+      ),
     strategies_parsed_metadata: space.strategies_parsed_metadata.map(
-      ({ data: { decimals, symbol, token } }) => ({
+      ({ data: { decimals, symbol, token, payload } }) => ({
         decimals,
         symbol,
-        token
+        token,
+        payload
       })
     )
   };
@@ -67,11 +77,21 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
       voting_power_symbol: proposal.space.metadata.voting_power_symbol,
       executors: proposal.space.metadata.executors,
       executors_types: proposal.space.metadata.executors_types,
+      voting_power_validation_strategies_parsed_metadata:
+        proposal.space.voting_power_validation_strategies_parsed_metadata.map(
+          ({ data: { decimals, symbol, token, payload } }) => ({
+            decimals,
+            symbol,
+            token,
+            payload
+          })
+        ),
       strategies_parsed_metadata: proposal.space.strategies_parsed_metadata.map(
-        ({ data: { decimals, symbol, token } }) => ({
+        ({ data: { decimals, symbol, token, payload } }) => ({
           decimals,
           symbol,
-          token
+          token,
+          payload
         })
       )
     },

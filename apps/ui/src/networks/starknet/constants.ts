@@ -1,5 +1,7 @@
 import { CallData, uint256 } from 'starknet';
+import { utils } from '@snapshot-labs/sx';
 import { shorten } from '@/helpers/utils';
+import { pinPineapple } from '@/helpers/pin';
 import { StrategyConfig } from '../types';
 
 import IHCode from '~icons/heroicons-outline/code';
@@ -22,6 +24,7 @@ export const CONTRACT_SUPPORTED_AUTHENTICATORS = {
 
 export const SUPPORTED_STRATEGIES = {
   '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee': true,
+  '0x297fb0104d8be6c86f168bf1dcdc28b0625d2b06108c3c46194aa4415f2e2ec': true,
   '0x619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7': true
 };
 
@@ -112,6 +115,22 @@ export const EDITOR_PROPOSAL_VALIDATIONS = [
         allowed_strategies: strategies
       });
     },
+    generateMetadata: async (params: Record<string, any>) => {
+      const strategiesMetadata = await Promise.all(
+        params.strategies.map(async (strategy: StrategyConfig) => {
+          if (!strategy.generateMetadata) return;
+
+          const metadata = await strategy.generateMetadata(strategy.params);
+          const pinned = await pinPineapple(metadata);
+
+          return `ipfs://${pinned.cid}`;
+        })
+      );
+
+      return {
+        strategies_metadata: strategiesMetadata
+      };
+    },
     paramsDefinition: {
       type: 'object',
       title: 'Params',
@@ -156,7 +175,73 @@ export const EDITOR_VOTING_STRATEGIES = [
       }
     }
   },
+  {
+    address: '0x297fb0104d8be6c86f168bf1dcdc28b0625d2b06108c3c46194aa4415f2e2ec',
+    name: 'Whitelist',
+    about:
+      'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
+    generateSummary: (params: Record<string, any>) => {
+      const length = params.whitelist.split('\n').length;
 
+      return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
+    },
+    generateParams: (params: Record<string, any>) => {
+      const leaves = params.whitelist.split('\n').map((item: string) => {
+        const [address, votingPower] = item.split(':');
+        const type =
+          address.length === 42
+            ? utils.merkle.AddressType.ETHEREUM
+            : utils.merkle.AddressType.STARKNET;
+
+        return new utils.merkle.Leaf(type, address, BigInt(votingPower));
+      });
+
+      return [utils.merkle.generateMerkleRoot(leaves.map((leaf: utils.merkle.Leaf) => leaf.hash))];
+    },
+    generateMetadata: async (params: Record<string, any>) => {
+      const tree = params.whitelist.split('\n').map((item: string) => {
+        const [address, votingPower] = item.split(':');
+        const type = address.length === 42 ? 1 : 0;
+
+        return {
+          type,
+          address,
+          votingPower: votingPower
+        };
+      });
+
+      const pinned = await pinPineapple({ tree });
+
+      return {
+        name: 'Whitelist',
+        properties: {
+          symbol: params.symbol,
+          decimals: 0,
+          payload: `ipfs://${pinned.cid}`
+        }
+      };
+    },
+    paramsDefinition: {
+      type: 'object',
+      title: 'Params',
+      additionalProperties: false,
+      required: [],
+      properties: {
+        symbol: {
+          type: 'string',
+          maxLength: 6,
+          title: 'Symbol',
+          examples: ['e.g. VP']
+        },
+        whitelist: {
+          type: 'string',
+          format: 'long',
+          title: 'Whitelist',
+          examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
+        }
+      }
+    }
+  },
   {
     address: '0x619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7',
     name: 'ERC-20 Votes (EIP-5805)',
