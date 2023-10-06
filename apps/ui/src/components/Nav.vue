@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import { compareAddresses } from '@/helpers/utils';
 
-// TODO: need to import all icons https://github.com/antfu/unplugin-icons/issues/5
-// move to this when stable to avoid imports https://www.npmjs.com/package/@iconify/tailwind
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHCash from '~icons/heroicons-outline/cash';
