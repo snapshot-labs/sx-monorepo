@@ -3,7 +3,7 @@ import { NotificationType } from '@/types';
 
 defineProps<{
   type: NotificationType;
-  dismissable?: boolean;
+  dismissible?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -13,7 +13,7 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="flex gap-2 justify-between items-center w-full py-2 px-3 rounded border text-sm"
+    class="flex gap-3 justify-between items-center w-full py-2 px-3 rounded border text-sm"
     :class="{
       'bg-rose-100 border-rose-300 text-rose-500 dark:bg-rose-700 dark:border-rose-700 dark:text-neutral-100':
         type === 'error',
@@ -25,7 +25,7 @@ const emit = defineEmits<{
   >
     <slot />
     <a
-      v-if="dismissable"
+      v-if="dismissible"
       class="text-skin-link opacity-50 hover:opacity-100"
       @click="emit('close')"
     >

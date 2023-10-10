@@ -7,9 +7,9 @@ const uiStore = useUiStore();
     <UiAlert
       v-for="notification in uiStore.notifications"
       :key="notification.id"
-      dismissable
+      dismissible
       :type="notification.type"
-      class="w-fit max-w-[90%] mx-auto mb-2 last:mb-0"
+      class="!w-fit max-w-[90%] mx-auto mb-2 last:mb-0"
       @close="uiStore.dismissNotification(notification.id)"
     >
       {{ notification.message }}
