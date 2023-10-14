@@ -3,6 +3,7 @@ import { AbiCoder } from '@ethersproject/abi';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
+import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import ProxyFactoryContract from './fixtures/ProxyFactory.json';
 import SpaceContract from './fixtures/Space.json';
 import AvatarContract from './fixtures/Avatar.json';
@@ -16,7 +17,7 @@ import VotingPowerProposalValidationStrategyContract from './fixtures/VotingPowe
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
 import CompVotingStrategyContract from './fixtures/CompVotingStrategy.json';
 import OzVotesVotingStrategyContract from './fixtures/OzVotesVotingStrategy.json';
-import WhitelistVotingStrategyContract from './fixtures/WhitelistVotingStrategy.json';
+import MerkleWhitelistVotingStrategyContract from './fixtures/MerkleWhitelistVotingStrategy.json';
 import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
 import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
 import TimelockExecutionStrategyContract from './fixtures/TimelockExecutionStrategy.json';
@@ -36,10 +37,16 @@ export type TestConfig = {
   vanillaVotingStrategy: string;
   compVotingStrategy: string;
   ozVotesVotingStrategy: string;
-  whitelistVotingStrategy: string;
+  merkleWhitelistVotingStrategy: string;
   vanillaExecutionStrategy: string;
   avatarExecutionStrategy: string;
   timelockExecutionStrategy: string;
+  merkleWhitelistStrategyMetadata: {
+    tree: {
+      address: string;
+      votingPower: bigint;
+    }[];
+  };
   networkConfig: EvmNetworkConfig;
 };
 
@@ -94,7 +101,10 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
   const vanillaVotingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
   const compVotingStrategy = await deployDependency(signer, CompVotingStrategyContract);
   const ozVotesVotingStrategy = await deployDependency(signer, OzVotesVotingStrategyContract);
-  const whitelistVotingStrategy = await deployDependency(signer, WhitelistVotingStrategyContract);
+  const merkleWhitelistVotingStrategy = await deployDependency(
+    signer,
+    MerkleWhitelistVotingStrategyContract
+  );
 
   const vanillaExecutionStrategy = await deployDependency(
     signer,
@@ -144,7 +154,7 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
       [ozVotesVotingStrategy]: {
         type: 'ozVotes'
       },
-      [whitelistVotingStrategy]: {
+      [merkleWhitelistVotingStrategy]: {
         type: 'whitelist'
       }
     }
@@ -202,20 +212,20 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
   const avatarContract = new Contract(avatar, AvatarContract.abi, signer);
   await avatarContract.enableModule(avatarExecutionStrategy);
 
-  const whitelist = [
-    {
-      addr: controller,
-      vp: 1n
-    }
-  ];
+  const whitelist = [[controller, 1n]] as [string, bigint][];
+  const merkleWhitelistStrategyMetadata = {
+    tree: whitelist.map(([address, votingPower]) => ({
+      address,
+      votingPower
+    }))
+  };
+
+  const tree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
 
   const abiCoder = new AbiCoder();
-  const whitelistVotingStrategyParams = abiCoder.encode(
-    ['tuple(address addr, uint256 vp)[]'],
-    [whitelist]
-  );
+  const whitelistVotingStrategyParams = abiCoder.encode(['bytes32'], [tree.root]);
 
-  const res = await ethTxClient.deploySpace({
+  await ethTxClient.deploySpace({
     signer,
     params: {
       controller,
@@ -242,7 +252,7 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
                 params: erc20VotesToken
               },
               {
-                addr: whitelistVotingStrategy,
+                addr: merkleWhitelistVotingStrategy,
                 params: whitelistVotingStrategyParams
               }
             ]
@@ -267,7 +277,7 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
           params: erc20VotesToken
         },
         {
-          addr: whitelistVotingStrategy,
+          addr: merkleWhitelistVotingStrategy,
           params: whitelistVotingStrategyParams
         }
       ],
@@ -289,10 +299,11 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
     vanillaVotingStrategy,
     compVotingStrategy,
     ozVotesVotingStrategy,
-    whitelistVotingStrategy,
+    merkleWhitelistVotingStrategy,
     vanillaExecutionStrategy,
     avatarExecutionStrategy,
     timelockExecutionStrategy,
+    merkleWhitelistStrategyMetadata,
     networkConfig
   };
 }

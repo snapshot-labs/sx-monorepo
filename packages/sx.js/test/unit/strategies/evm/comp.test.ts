@@ -16,6 +16,7 @@ describe('compStrategy', () => {
       const votingPower = await compStrategy.getVotingPower(
         '0x0c2De612982Efd102803161fc7C74CcA15Db932c',
         '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        null,
         9343895,
         params,
         provider
@@ -28,6 +29,7 @@ describe('compStrategy', () => {
       const votingPower = await compStrategy.getVotingPower(
         '0x0c2De612982Efd102803161fc7C74CcA15Db932c',
         '0x000000000000000000000000000000000000dead',
+        null,
         9343895,
         params,
         provider

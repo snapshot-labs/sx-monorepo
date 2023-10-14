@@ -315,6 +315,8 @@ export async function setup({
         })
       },
       metadataUri: 'ipfs://QmQnbnRF7vsFXYi4ivED2RSmZNC7wi4QKWhFMzSsGjEWp7',
+      proposalValidationStrategyMetadataUri:
+        'ipfs://QmQnbnRF7vsFXYi4ivED2RSmZNC7wi4QKWhFMzSsGjEWp7',
       daoUri: '',
       authenticators: [
         vanillaAuthenticator,

@@ -12,6 +12,7 @@ export default function createCompStrategy(): Strategy {
     async getVotingPower(
       strategyAddress: string,
       voterAddress: string,
+      metadata: Record<string, any> | null,
       block: number,
       params: string,
       provider: Provider

@@ -21,6 +21,7 @@ export type IndexedConfig = {
 export type StrategyConfig = {
   index: number;
   address: string;
+  metadata?: Record<string, any>;
 };
 
 export type Propose = {
@@ -29,7 +30,6 @@ export type Propose = {
   strategies: StrategyConfig[];
   executionStrategy: AddressConfig;
   metadataUri: string;
-  extraProperties?: Record<string, any>;
 };
 
 export type UpdateProposal = {
@@ -47,7 +47,6 @@ export type Vote = {
   proposal: number;
   choice: Choice;
   metadataUri: string;
-  extraProperties?: Record<string, any>;
 };
 
 export type Call = {
@@ -70,11 +69,13 @@ export type Strategy = {
     call: 'propose' | 'vote',
     strategyConfig: StrategyConfig,
     signerAddress: string,
+    metadata: Record<string, any> | null,
     data: Propose | Vote
   ): Promise<string>;
   getVotingPower(
     strategyAddress: string,
     voterAddress: string,
+    metadata: Record<string, any> | null,
     block: number,
     params: string,
     provider: Provider

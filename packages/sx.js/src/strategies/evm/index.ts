@@ -1,7 +1,7 @@
 import createVanillaStrategy from './vanilla';
 import createCompStrategy from './comp';
 import createOzVotesStrategy from './ozVotes';
-import createWhitelistStrategy from './whitelist';
+import createMerkleWhitelist from './merkleWhitelist';
 import type { Propose, Vote, StrategyConfig, Strategy } from '../../clients/evm/types';
 import type { EvmNetworkConfig } from '../../types';
 
@@ -22,7 +22,7 @@ export function getStrategy(address: string, networkConfig: EvmNetworkConfig): S
   }
 
   if (strategy.type === 'whitelist') {
-    return createWhitelistStrategy();
+    return createMerkleWhitelist();
   }
 
   return null;
@@ -40,7 +40,13 @@ export async function getStrategiesParams(
       const strategy = getStrategy(strategyConfig.address, networkConfig);
       if (!strategy) throw new Error('Invalid strategy');
 
-      return strategy.getParams(call, strategyConfig, signerAddress, data);
+      return strategy.getParams(
+        call,
+        strategyConfig,
+        signerAddress,
+        strategyConfig.metadata || null,
+        data
+      );
     })
   );
 }

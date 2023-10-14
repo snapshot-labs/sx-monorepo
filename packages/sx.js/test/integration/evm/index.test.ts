@@ -231,18 +231,21 @@ describe('EthereumTx', () => {
     });
   });
 
-  describe('whitelistVotingStrategy + vanilla authenticator', () => {
+  describe('merkleWhitelistVotingStrategy + vanilla authenticator', () => {
     it('should propose via authenticator', async () => {
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 3, address: testConfig.whitelistVotingStrategy }],
+          strategies: [
+            {
+              index: 3,
+              address: testConfig.merkleWhitelistVotingStrategy,
+              metadata: testConfig.merkleWhitelistStrategyMetadata
+            }
+          ],
           executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
-          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
-          extraProperties: {
-            voterIndex: 0
-          }
+          metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
 
@@ -258,13 +261,16 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 3, address: testConfig.whitelistVotingStrategy }],
+          strategies: [
+            {
+              index: 3,
+              address: testConfig.merkleWhitelistVotingStrategy,
+              metadata: testConfig.merkleWhitelistStrategyMetadata
+            }
+          ],
           proposal: 6,
           choice: 0,
-          metadataUri: '',
-          extraProperties: {
-            voterIndex: 0
-          }
+          metadataUri: ''
         }
       };
 

@@ -16,6 +16,7 @@ describe('ozVotes', () => {
       const votingPower = await ozVotesStrategy.getVotingPower(
         '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe',
         '0x537f1896541d28F4c70116EEa602b1B34Da95163',
+        null,
         9343895,
         params,
         provider
@@ -28,6 +29,7 @@ describe('ozVotes', () => {
       const votingPower = await ozVotesStrategy.getVotingPower(
         '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe',
         '0x000000000000000000000000000000000000dead',
+        null,
         9343895,
         params,
         provider
