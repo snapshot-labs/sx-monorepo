@@ -18,7 +18,8 @@ src
 ├─ voting-strategies
 │  ├─ CompVotingStrategy.sol - "Strategy that uses delegated balances of Comp tokens as voting power"
 │  ├─ OZVotesVotingStrategy.sol - "Strategy that uses delegated balances of OZ Votes tokens as voting power"
-│  ├─ WhitelistVotingStrategy.sol — "Strategy that gives predetermined voting power for members in a whitelist, otherwise zero"
+│  ├─ WhitelistVotingStrategy.sol — "Strategy that gives predetermined voting power for members in a whitelist. Whitelist is stored in a bytes array On-Chain."
+│  ├─ MerkleWhitelistVotingStrategy.sol — "Strategy that gives predetermined voting power for members in a whitelist. Whitelist is stored in a Merkle tree Off-Chain, with only the root being stored On-Chain."
 │  └─ VanillaVotingStrategy.sol — "Vanilla Strategy"
 ├─ execution-strategies
 │  ├─ timelocks
@@ -77,3 +78,28 @@ Get a test coverage report:
 ```sh
 $ forge coverage
 ```
+
+### Deployment
+
+To deploy the protocol to an EVM chain, first set the following environment variables:
+
+```sh
+# The address of the account that the protocol will be deployed from.
+DEPLOYER_ADDRESS=
+# The name of the chain you want to deploy on. The addresses of the deployed contracts will be stored at /deployments/network.json
+NETWORK=
+# An RPC URL for the chain.
+RPC_URL=
+# An API key for a block explorer on the chain (Optional).
+ETHERSCAN_API_KEY=
+```
+
+Following this, a [Foundry Script](https://book.getfoundry.sh/tutorials/solidity-scripting) can be run to deploy the
+entire protocol. Example usage to deploy from a Ledger Hardware Wallet and verify on a block explorer:
+
+```sh
+forge script script/Deployer.s.sol:Deployer --rpc-url $RPC_URL --optimize --broadcast --verify -vvvv --ledger --sender $DEPLOYER_ADDRESS --hd-paths "m/44'/60'/4'/0/0"
+```
+
+The script uses the [Singleton Factory](https://eips.ethereum.org/EIPS/eip-2470) for the deployments which ensures that
+the addresses of the contracts are the same on all chains (so long as the chain is fully EVM equivalent).

@@ -7,3 +7,5 @@ node_modules
 # broadcasts
 /broadcast/
 lcov.info
+
+/deployments/test.json
