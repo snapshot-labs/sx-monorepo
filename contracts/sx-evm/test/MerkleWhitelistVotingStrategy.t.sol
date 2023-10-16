@@ -25,10 +25,10 @@ contract MerkleWhitelistVotingStrategyTest is Test {
         members[3] = MerkleWhitelistVotingStrategy.Member(address(5), 77);
 
         bytes32[] memory leaves = new bytes32[](4);
-        leaves[0] = keccak256(abi.encode(members[0]));
-        leaves[1] = keccak256(abi.encode(members[1]));
-        leaves[2] = keccak256(abi.encode(members[2]));
-        leaves[3] = keccak256(abi.encode(members[3]));
+        leaves[0] = keccak256(bytes.concat(keccak256(abi.encode(members[0]))));
+        leaves[1] = keccak256(bytes.concat(keccak256(abi.encode(members[1]))));
+        leaves[2] = keccak256(bytes.concat(keccak256(abi.encode(members[2]))));
+        leaves[3] = keccak256(bytes.concat(keccak256(abi.encode(members[3]))));
 
         bytes32 root = merkleLib.getRoot(leaves);
 
@@ -78,10 +78,10 @@ contract MerkleWhitelistVotingStrategyTest is Test {
         members[3] = MerkleWhitelistVotingStrategy.Member(address(5), 77);
 
         bytes32[] memory leaves = new bytes32[](4);
-        leaves[0] = keccak256(abi.encode(members[0]));
-        leaves[1] = keccak256(abi.encode(members[1]));
-        leaves[2] = keccak256(abi.encode(members[2]));
-        leaves[3] = keccak256(abi.encode(members[3]));
+        leaves[0] = keccak256(bytes.concat(keccak256(abi.encode(members[0]))));
+        leaves[1] = keccak256(bytes.concat(keccak256(abi.encode(members[1]))));
+        leaves[2] = keccak256(bytes.concat(keccak256(abi.encode(members[2]))));
+        leaves[3] = keccak256(bytes.concat(keccak256(abi.encode(members[3]))));
 
         bytes32 root = merkleLib.getRoot(leaves);
 
@@ -103,10 +103,10 @@ contract MerkleWhitelistVotingStrategyTest is Test {
         members[3] = MerkleWhitelistVotingStrategy.Member(address(5), 77);
 
         bytes32[] memory leaves = new bytes32[](4);
-        leaves[0] = keccak256(abi.encode(members[0]));
-        leaves[1] = keccak256(abi.encode(members[1]));
-        leaves[2] = keccak256(abi.encode(members[2]));
-        leaves[3] = keccak256(abi.encode(members[3]));
+        leaves[0] = keccak256(bytes.concat(keccak256(abi.encode(members[0]))));
+        leaves[1] = keccak256(bytes.concat(keccak256(abi.encode(members[1]))));
+        leaves[2] = keccak256(bytes.concat(keccak256(abi.encode(members[2]))));
+        leaves[3] = keccak256(bytes.concat(keccak256(abi.encode(members[3]))));
 
         bytes32 root = merkleLib.getRoot(leaves);
 
@@ -131,7 +131,7 @@ contract MerkleWhitelistVotingStrategyTest is Test {
 
         bytes32[] memory leaves = new bytes32[](numMembers);
         for (uint256 i = 0; i < numMembers; i++) {
-            leaves[i] = keccak256(abi.encode(members[i]));
+            leaves[i] = keccak256(bytes.concat(keccak256(abi.encode(members[i]))));
         }
 
         bytes32 root = merkleLib.getRoot(leaves);

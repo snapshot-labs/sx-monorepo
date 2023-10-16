@@ -37,7 +37,9 @@ contract MerkleWhitelistVotingStrategy is IVotingStrategy {
         (bytes32[] memory proof, Member memory member) = abi.decode(userParams, (bytes32[], Member));
 
         if (member.addr != voter) revert InvalidMember();
-        if (MerkleProof.verify(proof, root, keccak256(abi.encode(member))) != true) revert InvalidProof();
+
+        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(member))));
+        if (MerkleProof.verify(proof, root, leaf) != true) revert InvalidProof();
 
         return member.vp;
     }
