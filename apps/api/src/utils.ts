@@ -1,14 +1,17 @@
 import fetch from 'node-fetch';
-import { Contract, Provider, hash, shortString } from 'starknet';
+import { CallData, Contract, Provider, hash, shortString } from 'starknet';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { faker } from '@faker-js/faker';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
+import { utils } from '@snapshot-labs/sx';
 import {
+  Space,
   StrategiesParsedMetadataItem,
   VotingPowerValidationStrategiesParsedMetadataItem
 } from '../.checkpoint/models';
+import EncodersAbi from './abis/encoders.json';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
 import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
 import Config from './config.json';
@@ -22,6 +25,10 @@ const starkProvider = new Provider({
     nodeUrl: Config.network_node_url
   }
 });
+
+const PROPOSITION_POWER_PROPOSAL_VALIDATION_STRATEGY =
+  '0x38f034f17941669555fca61c43c67a517263aaaab833b26a1ab877a21c0bb6d';
+const encodersAbi = new CallData(EncodersAbi);
 
 export function getCurrentTimestamp() {
   return Math.floor(Date.now() / 1000);
@@ -125,9 +132,52 @@ export async function handleExecutionStrategy(address: string, payload: string[]
   }
 }
 
+export async function updateProposaValidationStrategy(
+  space: Space,
+  validationStrategyAddress: string,
+  validationStrategyParams: string[],
+  metadataUri: string[]
+) {
+  space.validation_strategy = validationStrategyAddress;
+  space.validation_strategy_params = validationStrategyParams.join(',');
+  space.voting_power_validation_strategy_strategies = [];
+  space.voting_power_validation_strategy_strategies_params = [];
+  space.voting_power_validation_strategy_metadata = longStringToText(metadataUri);
+
+  if (
+    utils.encoding.hexPadLeft(validationStrategyAddress) ===
+    utils.encoding.hexPadLeft(PROPOSITION_POWER_PROPOSAL_VALIDATION_STRATEGY)
+  ) {
+    const parsed = encodersAbi.parse(
+      'proposition_power_params',
+      validationStrategyParams
+    ) as Record<string, any>;
+
+    if (Object.keys(parsed).length !== 0) {
+      space.proposal_threshold = parsed.proposal_threshold;
+      space.voting_power_validation_strategy_strategies = parsed.allowed_strategies.map(
+        strategy => `0x${strategy.address.toString(16)}`
+      );
+      space.voting_power_validation_strategy_strategies_params = parsed.allowed_strategies.map(
+        strategy => strategy.params.map(param => `0x${param.toString(16)}`).join(',')
+      );
+    }
+
+    try {
+      await handleVotingPowerValidationMetadata(
+        space.id,
+        space.voting_power_validation_strategy_metadata
+      );
+    } catch (e) {
+      console.log('failed to handle voting power strategies metadata', e);
+    }
+  }
+}
+
 export async function handleStrategiesMetadata(
   spaceId: string,
   metadataUris: string[],
+  startingIndex: number,
   type:
     | typeof StrategiesParsedMetadataItem
     | typeof VotingPowerValidationStrategiesParsedMetadataItem = StrategiesParsedMetadataItem
@@ -135,15 +185,15 @@ export async function handleStrategiesMetadata(
   for (let i = 0; i < metadataUris.length; i++) {
     const metadataUri = metadataUris[i];
 
-    // this needs to include space as multiple spaces can reference identical metadata (same CID)
-    const uniqueId = `${spaceId}/${dropIpfs(metadataUri)}`;
+    const index = startingIndex + i;
+    const uniqueId = `${spaceId}/${index}/${dropIpfs(metadataUri)}`;
 
     const exists = await type.loadEntity(uniqueId);
     if (exists) continue;
 
     const strategiesParsedMetadataItem = new type(uniqueId);
     strategiesParsedMetadataItem.space = spaceId;
-    strategiesParsedMetadataItem.index = i;
+    strategiesParsedMetadataItem.index = index;
 
     if (metadataUri.startsWith('ipfs://')) {
       strategiesParsedMetadataItem.data = dropIpfs(metadataUri);
@@ -164,6 +214,7 @@ export async function handleVotingPowerValidationMetadata(spaceId: string, metad
   await handleStrategiesMetadata(
     spaceId,
     metadata.strategies_metadata,
+    0,
     VotingPowerValidationStrategiesParsedMetadataItem
   );
 }

@@ -67,6 +67,26 @@
         {
           "name": "OwnershipTransferred",
           "fn": "handleOwnershipTransferred"
+        },
+        {
+          "name": "AuthenticatorsAdded",
+          "fn": "handleAuthenticatorsAdded"
+        },
+        {
+          "name": "AuthenticatorsRemoved",
+          "fn": "handleAuthenticatorsRemoved"
+        },
+        {
+          "name": "VotingStrategiesAdded",
+          "fn": "handleVotingStrategiesAdded"
+        },
+        {
+          "name": "VotingStrategiesRemoved",
+          "fn": "handleVotingStrategiesRemoved"
+        },
+        {
+          "name": "ProposalValidationStrategyUpdated",
+          "fn": "handleProposalValidationStrategyUpdated"
         }
       ]
     }

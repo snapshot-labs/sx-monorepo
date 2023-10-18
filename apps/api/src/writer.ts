@@ -1,6 +1,4 @@
-import { CallData, validateAndParseAddress } from 'starknet';
-import { utils } from '@snapshot-labs/sx';
-import EncodersAbi from './abis/encoders.json';
+import { validateAndParseAddress } from 'starknet';
 import { CheckpointWriter } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal } from '../.checkpoint/models';
 import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
@@ -11,13 +9,9 @@ import {
   getVoteValue,
   handleExecutionStrategy,
   handleStrategiesMetadata,
-  handleVotingPowerValidationMetadata,
-  longStringToText
+  longStringToText,
+  updateProposaValidationStrategy
 } from './utils';
-
-const PROPOSITION_POWER_PROPOSAL_VALIDATION_STRATEGY =
-  '0x38f034f17941669555fca61c43c67a517263aaaab833b26a1ab877a21c0bb6d';
-const encodersAbi = new CallData(EncodersAbi);
 
 export const handleSpaceDeployed: CheckpointWriter = async ({ blockNumber, event, instance }) => {
   console.log('Handle space deployed');
@@ -35,7 +29,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
 
   if (!event || !tx.transaction_hash) return;
 
-  const strategies = event.voting_strategies.map(strategy => strategy.address);
+  const strategies: string[] = event.voting_strategies.map(strategy => strategy.address);
   const strategiesParams = event.voting_strategies.map(strategy => strategy.params.join(',')); // different format than sx-evm
   const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(array =>
     longStringToText(array)
@@ -48,50 +42,24 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
   space.min_voting_period = Number(BigInt(event.min_voting_duration).toString());
   space.max_voting_period = Number(BigInt(event.max_voting_duration).toString());
   space.proposal_threshold = 0;
+  space.strategies_indicies = strategies.map((_, i) => i);
   space.strategies = strategies;
+  space.next_strategy_index = strategies.length;
   space.strategies_params = strategiesParams;
   space.strategies_metadata = strategiesMetadataUris;
   space.authenticators = event.authenticators;
-  space.validation_strategy = event.proposal_validation_strategy.address;
-  space.validation_strategy_params = event.proposal_validation_strategy.params.join(',');
-  space.voting_power_validation_strategy_strategies = [];
-  space.voting_power_validation_strategy_strategies_params = [];
-  space.voting_power_validation_strategy_metadata = longStringToText(
-    event.proposal_validation_strategy_metadata_uri
-  );
   space.proposal_count = 0;
   space.vote_count = 0;
   space.created = block?.timestamp ?? getCurrentTimestamp();
   space.tx = tx.transaction_hash;
 
-  if (
-    utils.encoding.hexPadLeft(event.proposal_validation_strategy.address) ===
-    utils.encoding.hexPadLeft(PROPOSITION_POWER_PROPOSAL_VALIDATION_STRATEGY)
-  ) {
-    const parsed = encodersAbi.parse(
-      'proposition_power_params',
-      event.proposal_validation_strategy.params
-    ) as Record<string, any>;
+  await updateProposaValidationStrategy(
+    space,
+    event.proposal_validation_strategy.address,
+    event.proposal_validation_strategy.params,
+    event.proposal_validation_strategy_metadata_uri
+  );
 
-    if (Object.keys(parsed).length !== 0) {
-      space.proposal_threshold = parsed.proposal_threshold;
-      space.voting_power_validation_strategy_strategies = parsed.allowed_strategies.map(
-        strategy => `0x${strategy.address.toString(16)}`
-      );
-      space.voting_power_validation_strategy_strategies_params = parsed.allowed_strategies.map(
-        strategy => strategy.params.map(param => `0x${param.toString(16)}`).join(',')
-      );
-    }
-
-    try {
-      await handleVotingPowerValidationMetadata(
-        space.id,
-        space.voting_power_validation_strategy_metadata
-      );
-    } catch (e) {
-      console.log('failed to handle voting power strategies metadata', e);
-    }
-  }
   try {
     const metadataUri = longStringToText(event.metadata_uri || []).replaceAll('\x00', '');
     await handleSpaceMetadata(space.id, metadataUri);
@@ -102,7 +70,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
   }
 
   try {
-    await handleStrategiesMetadata(space.id, strategiesMetadataUris);
+    await handleStrategiesMetadata(space.id, strategiesMetadataUris, 0);
   } catch (e) {
     console.log('failed to handle strategies metadata', e);
   }
@@ -191,6 +159,123 @@ export const handleVotingDelayUpdated: CheckpointWriter = async ({ rawEvent, eve
   await space.save();
 };
 
+export const handleAuthenticatorsAdded: CheckpointWriter = async ({ rawEvent, event }) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space authenticators added');
+
+  const spaceId = validateAndParseAddress(rawEvent.from_address);
+
+  const space = await Space.loadEntity(spaceId);
+  if (!space) return;
+
+  space.authenticators = [...new Set([...space.authenticators, ...event.authenticators])];
+
+  await space.save();
+};
+
+export const handleAuthenticatorsRemoved: CheckpointWriter = async ({ rawEvent, event }) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space authenticators removed');
+
+  const spaceId = validateAndParseAddress(rawEvent.from_address);
+
+  const space = await Space.loadEntity(spaceId);
+  if (!space) return;
+
+  space.authenticators = space.authenticators.filter(
+    authenticator => !event.authenticators.includes(authenticator)
+  );
+
+  await space.save();
+};
+
+export const handleVotingStrategiesAdded: CheckpointWriter = async ({ rawEvent, event }) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space voting strategies added');
+
+  const spaceId = validateAndParseAddress(rawEvent.from_address);
+
+  const space = await Space.loadEntity(spaceId);
+  if (!space) return;
+
+  const initialNextStrategy = space.next_strategy_index;
+
+  const strategies = event.voting_strategies.map(strategy => strategy.address);
+  const strategiesParams = event.voting_strategies.map(strategy => strategy.params.join(','));
+  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(array =>
+    longStringToText(array)
+  );
+
+  space.strategies_indicies = [
+    ...space.strategies_indicies,
+    ...strategies.map((_, i) => space.next_strategy_index + i)
+  ];
+  space.strategies = [...space.strategies, ...strategies];
+  space.next_strategy_index += strategies.length;
+  space.strategies_params = [...space.strategies_params, ...strategiesParams];
+  space.strategies_metadata = [...space.strategies_metadata, ...strategiesMetadataUris];
+
+  try {
+    await handleStrategiesMetadata(space.id, strategiesMetadataUris, initialNextStrategy);
+  } catch (e) {
+    console.log('failed to handle strategies metadata', e);
+  }
+
+  await space.save();
+};
+
+export const handleVotingStrategiesRemoved: CheckpointWriter = async ({ rawEvent, event }) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space voting strategies removed');
+
+  const spaceId = validateAndParseAddress(rawEvent.from_address);
+
+  const space = await Space.loadEntity(spaceId);
+  if (!space) return;
+
+  const indiciesToRemove = event.voting_strategy_indices.map((index: string) =>
+    space.strategies_indicies.indexOf(parseInt(index))
+  );
+
+  space.strategies_indicies = space.strategies_indicies.filter(
+    (_, i) => !indiciesToRemove.includes(i)
+  );
+  space.strategies = space.strategies.filter((_, i) => !indiciesToRemove.includes(i));
+  space.strategies_params = space.strategies_params.filter((_, i) => !indiciesToRemove.includes(i));
+  space.strategies_metadata = space.strategies_metadata.filter(
+    (_, i) => !indiciesToRemove.includes(i)
+  );
+
+  await space.save();
+};
+
+export const handleProposalValidationStrategyUpdated: CheckpointWriter = async ({
+  rawEvent,
+  event
+}) => {
+  if (!event || !rawEvent) return;
+
+  console.log('Handle space proposal validation strategy updated');
+
+  const spaceId = validateAndParseAddress(rawEvent.from_address);
+
+  const space = await Space.loadEntity(spaceId);
+  if (!space) return;
+
+  await updateProposaValidationStrategy(
+    space,
+    event.proposal_validation_strategy.address,
+    event.proposal_validation_strategy.params,
+    event.proposal_validation_strategy_metadata_uri
+  );
+
+  await space.save();
+};
+
 export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, event }) => {
   if (!rawEvent || !event || !tx.transaction_hash) return;
 
@@ -224,6 +309,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   proposal.scores_3 = '0';
   proposal.scores_total = '0';
   proposal.quorum = 0n;
+  proposal.strategies_indicies = space.strategies_indicies;
   proposal.strategies = space.strategies;
   proposal.strategies_params = space.strategies_params;
   proposal.created = created;

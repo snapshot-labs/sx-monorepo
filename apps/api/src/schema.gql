@@ -11,6 +11,8 @@ type Space {
   min_voting_period: Int!
   max_voting_period: Int!
   proposal_threshold: Int!
+  next_strategy_index: Int!
+  strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
   strategies_metadata: [String]!
@@ -89,6 +91,7 @@ type Proposal {
   execution_strategy_type: String!
   timelock_veto_guardian: String
   timelock_delay: Int
+  strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
   scores_1: BigDecimalVP!
