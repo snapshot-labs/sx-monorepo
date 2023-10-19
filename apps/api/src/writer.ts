@@ -93,6 +93,8 @@ export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, eve
     if (!space) return;
 
     space.metadata = dropIpfs(metadataUri);
+
+    await space.save();
   } catch (e) {
     console.log('failed to update space metadata', e);
     throw new Error('d');
