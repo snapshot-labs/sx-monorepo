@@ -49,3 +49,19 @@ yarn test
 ```
 
 This will run all tests.
+
+### Using local Checkpoint
+
+Because `graphql` package needs single copy of itself to work properly using Apollo and Checkpoint
+at the same time (which depend on `graphql`) can cause issues when using linked local copy of Checkpoint
+as it brings two copies (one from `sx-api` one from linked `checkpoint`).
+
+To workaround this you need to do this
+
+```sh
+cd checkpoint/node_modules/graphql
+yarn link
+
+cd sx-api
+yarn link graphql
+```
