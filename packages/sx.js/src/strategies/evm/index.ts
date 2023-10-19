@@ -2,7 +2,13 @@ import createVanillaStrategy from './vanilla';
 import createCompStrategy from './comp';
 import createOzVotesStrategy from './ozVotes';
 import createMerkleWhitelist from './merkleWhitelist';
-import type { Propose, Vote, StrategyConfig, Strategy } from '../../clients/evm/types';
+import type {
+  Propose,
+  Vote,
+  StrategyConfig,
+  Strategy,
+  IndexedConfig
+} from '../../clients/evm/types';
 import type { EvmNetworkConfig } from '../../types';
 
 export function getStrategy(address: string, networkConfig: EvmNetworkConfig): Strategy | null {
@@ -28,25 +34,36 @@ export function getStrategy(address: string, networkConfig: EvmNetworkConfig): S
   return null;
 }
 
-export async function getStrategiesParams(
+export async function getStrategiesWithParams(
   call: 'propose' | 'vote',
   strategies: StrategyConfig[],
   signerAddress: string,
   data: Propose | Vote,
   networkConfig: EvmNetworkConfig
 ) {
-  return Promise.all(
-    strategies.map(strategyConfig => {
+  const results = await Promise.all(
+    strategies.map(async strategyConfig => {
       const strategy = getStrategy(strategyConfig.address, networkConfig);
       if (!strategy) throw new Error('Invalid strategy');
 
-      return strategy.getParams(
-        call,
-        strategyConfig,
-        signerAddress,
-        strategyConfig.metadata || null,
-        data
-      );
+      try {
+        const params = await strategy.getParams(
+          call,
+          strategyConfig,
+          signerAddress,
+          strategyConfig.metadata || null,
+          data
+        );
+
+        return {
+          index: strategyConfig.index,
+          params
+        };
+      } catch (e) {
+        return null;
+      }
     })
   );
+
+  return results.filter(Boolean) as IndexedConfig[];
 }

@@ -2,7 +2,7 @@ import randomBytes from 'randombytes';
 import { AbiCoder } from '@ethersproject/abi';
 import { SplitUint256 } from '../../../utils/split-uint256';
 import { bytesToHex } from '../../../utils/bytes';
-import { getStrategiesParams } from '../../../strategies/evm';
+import { getStrategiesWithParams } from '../../../strategies/evm';
 import { evmGoerli } from '../../../networks';
 import { domain as baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
@@ -93,7 +93,7 @@ export class EthereumSig {
   }): Promise<Envelope<Propose>> {
     const author = await signer.getAddress();
 
-    const strategiesParams = await getStrategiesParams(
+    const userStrategies = await getStrategiesWithParams(
       'propose',
       data.strategies,
       author,
@@ -109,12 +109,7 @@ export class EthereumSig {
       executionStrategy: data.executionStrategy,
       userProposalValidationParams: abiCoder.encode(
         ['tuple(int8 index, bytes params)[]'],
-        [
-          data.strategies.map((strategyConfig, i) => ({
-            index: strategyConfig.index,
-            params: strategiesParams[i]
-          }))
-        ]
+        [userStrategies]
       ),
       salt: this.generateSalt()
     };
@@ -162,7 +157,7 @@ export class EthereumSig {
   }): Promise<Envelope<Vote>> {
     const voter = await signer.getAddress();
 
-    const strategiesParams = await getStrategiesParams(
+    const userVotingStrategies = await getStrategiesWithParams(
       'vote',
       data.strategies,
       voter,
@@ -175,10 +170,7 @@ export class EthereumSig {
       voter,
       proposalId: data.proposal,
       choice: data.choice,
-      userVotingStrategies: data.strategies.map((strategyConfig, i) => ({
-        index: strategyConfig.index,
-        params: strategiesParams[i]
-      })),
+      userVotingStrategies,
       voteMetadataURI: data.metadataUri
     };
 

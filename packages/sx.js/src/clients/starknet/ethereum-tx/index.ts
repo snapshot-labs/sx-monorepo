@@ -3,7 +3,7 @@ import { poseidonHashMany } from 'micro-starknet';
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import StarknetCommitAbi from './abis/StarknetCommit.json';
-import { getStrategiesParams } from '../../../utils/strategies';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getChoiceEnum } from '../../../utils/starknet-enums';
 import { defaultNetwork } from '../../..';
 import { ClientConfig, ClientOpts, Envelope, Propose, UpdateProposal, Vote } from '../../../types';
@@ -239,7 +239,7 @@ export class EthereumTx {
   async getProposeHash(signer: Signer, data: Propose) {
     const address = await signer.getAddress();
 
-    const strategiesParams = await getStrategiesParams(
+    const userStrategies = await getStrategiesWithParams(
       'propose',
       data.strategies,
       address,
@@ -258,10 +258,7 @@ export class EthereumTx {
         params: data.executionStrategy.params
       },
       CallData.compile({
-        user_strategies: data.strategies.map((strategyConfig, i) => ({
-          index: strategyConfig.index,
-          params: strategiesParams[i]
-        }))
+        userStrategies
       })
     ]);
 
@@ -271,7 +268,7 @@ export class EthereumTx {
   async getVoteHash(signer: Signer, data: Vote) {
     const address = await signer.getAddress();
 
-    const strategiesParams = await getStrategiesParams(
+    const userVotingStrategies = await getStrategiesWithParams(
       'propose',
       data.strategies,
       address,
@@ -286,10 +283,7 @@ export class EthereumTx {
       address,
       data.proposal,
       getChoiceEnum(data.choice),
-      data.strategies.map((strategy, index) => ({
-        index: strategy.index,
-        params: strategiesParams[index]
-      })),
+      userVotingStrategies,
       shortString.splitLongString('') // metadataUri
     ]);
 

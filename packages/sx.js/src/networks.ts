@@ -26,7 +26,7 @@ export const evmGoerli: EvmNetworkConfig = {
     '0x2c8631584474e750cedf2fb6a904f2e84777aefe': {
       type: 'ozVotes'
     },
-    '0x3cee21a33751a2722413ff62dec3dec48e7748a4': {
+    '0x34f0afff5a739bbf3e285615f50e40ddaaf2a829': {
       type: 'whitelist'
     }
   }

@@ -1,6 +1,6 @@
 import randomBytes from 'randombytes';
 import { Account, CallData, shortString, typedData, uint256 } from 'starknet';
-import { getStrategiesParams } from '../../../utils/strategies';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import { baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
 import {
   ClientConfig,
@@ -100,7 +100,7 @@ export class StarkNetSig {
   }): Promise<Envelope<Propose>> {
     const address = signer.address;
 
-    const strategiesParams = await getStrategiesParams(
+    const userStrategies = await getStrategiesWithParams(
       'propose',
       data.strategies,
       address,
@@ -116,10 +116,7 @@ export class StarkNetSig {
         params: data.executionStrategy.params
       },
       userProposalValidationParams: CallData.compile({
-        user_strategies: data.strategies.map((strategyConfig, i) => ({
-          index: strategyConfig.index,
-          params: strategiesParams[i]
-        }))
+        userStrategies
       }),
       metadataUri: shortString
         .splitLongString(data.metadataUri)
@@ -181,7 +178,7 @@ export class StarkNetSig {
   public async vote({ signer, data }: { signer: Account; data: Vote }): Promise<Envelope<Vote>> {
     const address = signer.address;
 
-    const strategiesParams = await getStrategiesParams(
+    const userVotingStrategies = await getStrategiesWithParams(
       'vote',
       data.strategies,
       address,
@@ -194,10 +191,7 @@ export class StarkNetSig {
       voter: address,
       proposalId: uint256.bnToUint256(data.proposal),
       choice: `0x${data.choice.toString(16)}`,
-      userVotingStrategies: data.strategies.map((strategy, index) => ({
-        index: strategy.index,
-        params: strategiesParams[index]
-      })),
+      userVotingStrategies,
       metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
     };
 

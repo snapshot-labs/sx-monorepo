@@ -1,7 +1,7 @@
 import randomBytes from 'randombytes';
 import { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import { CallData, shortString } from 'starknet';
-import { getStrategiesParams } from '../../../utils/strategies';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import { proposeTypes, updateProposalTypes, voteTypes } from './types';
 import {
   ClientConfig,
@@ -69,7 +69,7 @@ export class EthereumSig {
   }): Promise<Envelope<Propose>> {
     const address = await signer.getAddress();
 
-    const strategiesParams = await getStrategiesParams(
+    const userStrategies = await getStrategiesWithParams(
       'propose',
       data.strategies,
       address,
@@ -86,10 +86,7 @@ export class EthereumSig {
         params: data.executionStrategy.params
       },
       userProposalValidationParams: CallData.compile({
-        user_strategies: data.strategies.map((strategyConfig, i) => ({
-          index: strategyConfig.index,
-          params: strategiesParams[i]
-        }))
+        userStrategies
       }),
       metadataUri: shortString
         .splitLongString(data.metadataUri)
@@ -146,7 +143,7 @@ export class EthereumSig {
   }): Promise<Envelope<Vote>> {
     const address = await signer.getAddress();
 
-    const strategiesParams = await getStrategiesParams(
+    const userVotingStrategies = await getStrategiesWithParams(
       'vote',
       data.strategies,
       address,
@@ -160,10 +157,7 @@ export class EthereumSig {
       voter: address,
       proposalId: `0x${data.proposal.toString(16)}`,
       choice: `0x${data.choice.toString(16)}`,
-      userVotingStrategies: data.strategies.map((strategy, index) => ({
-        index: strategy.index,
-        params: strategiesParams[index]
-      })),
+      userVotingStrategies,
       metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
     };
 

@@ -1,6 +1,6 @@
 import { Account, CallData, shortString, uint256, hash } from 'starknet';
 import randomBytes from 'randombytes';
-import { getStrategiesParams } from '../../../utils/strategies';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getAuthenticator } from '../../../authenticators/starknet';
 import { hexPadLeft } from '../../../utils/encoding';
 import { defaultNetwork } from '../../../networks';
@@ -135,7 +135,7 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const strategiesParams = await getStrategiesParams(
+    const userStrategies = await getStrategiesWithParams(
       'propose',
       envelope.data.strategies,
       authorAddress,
@@ -150,10 +150,7 @@ export class StarkNetTx {
         params: envelope.data.executionStrategy.params
       },
       strategiesParams: CallData.compile({
-        user_strategies: envelope.data.strategies.map((strategyConfig, i) => ({
-          index: strategyConfig.index,
-          params: strategiesParams[i]
-        }))
+        userStrategies
       }),
       metadataUri: envelope.data.metadataUri
     });
@@ -194,7 +191,7 @@ export class StarkNetTx {
       throw new Error('Invalid authenticator');
     }
 
-    const strategiesParams = await getStrategiesParams(
+    const votingStrategies = await getStrategiesWithParams(
       'vote',
       envelope.data.strategies,
       voterAddress,
@@ -206,10 +203,7 @@ export class StarkNetTx {
       voter: voterAddress,
       proposalId: envelope.data.proposal,
       choice: envelope.data.choice,
-      votingStrategies: envelope.data.strategies.map((strategyConfig, i) => ({
-        index: strategyConfig.index,
-        params: strategiesParams[i]
-      })),
+      votingStrategies,
       metadataUri: ''
     });
 
@@ -250,15 +244,25 @@ export class StarkNetTx {
         voting_delay: settings.votingDelay ?? NO_UPDATE_U32,
         metadata_uri: shortString.splitLongString(settings.metadataUri ?? NO_UPDATE_STRING),
         dao_uri: shortString.splitLongString(settings.daoUri ?? NO_UPDATE_STRING),
-        proposal_validation_strategy: settings.proposalValidationStrategy ?? {
-          address: NO_UPDATE_ADDRESS,
-          params: []
-        },
-        proposal_validation_strategy_metadata_uri:
-          settings.proposalValidationStrategyMetadataUri ?? [],
+        proposal_validation_strategy: settings.proposalValidationStrategy
+          ? {
+              address: settings.proposalValidationStrategy.addr,
+              params: settings.proposalValidationStrategy.params
+            }
+          : {
+              address: NO_UPDATE_ADDRESS,
+              params: []
+            },
+        proposal_validation_strategy_metadata_uri: shortString.splitLongString(
+          settings.proposalValidationStrategyMetadataUri ?? NO_UPDATE_STRING
+        ),
         authenticators_to_add: settings.authenticatorsToAdd ?? [],
         authenticators_to_remove: settings.authenticatorsToRemove ?? [],
-        voting_strategies_to_add: settings.votingStrategiesToAdd ?? [],
+        voting_strategies_to_add:
+          settings.votingStrategiesToAdd?.map(config => ({
+            address: config.addr,
+            params: config.params
+          })) ?? [],
         voting_strategies_to_remove: settings.votingStrategiesToRemove ?? [],
         voting_strategies_metadata_uris_to_add:
           (settings.votingStrategyMetadataUrisToAdd &&

@@ -1,6 +1,13 @@
 import { getStrategy } from '../strategies/starknet';
 import { getStorageVarAddress } from '../utils/encoding';
-import type { Propose, Vote, ClientConfig, StrategiesAddresses, StrategyConfig } from '../types';
+import type {
+  Propose,
+  Vote,
+  ClientConfig,
+  StrategiesAddresses,
+  StrategyConfig,
+  IndexedConfig
+} from '../types';
 
 export async function getStrategies(
   data: Propose | Vote,
@@ -22,31 +29,42 @@ export async function getStrategies(
   }));
 }
 
-export async function getStrategiesParams(
+export async function getStrategiesWithParams(
   call: 'propose' | 'vote',
   strategies: StrategyConfig[],
   address: string,
   data: Propose | Vote,
   config: ClientConfig
 ) {
-  return Promise.all(
-    strategies.map(strategyData => {
+  const results = await Promise.all(
+    strategies.map(async strategyData => {
       const strategy = getStrategy(strategyData.address, config.networkConfig);
       if (!strategy) throw new Error('Invalid strategy');
 
-      return strategy.getParams(
-        call,
-        address,
-        strategyData.address,
-        strategyData.index,
-        strategyData.metadata || null,
-        {
-          data
-        },
-        config
-      );
+      try {
+        const params = await strategy.getParams(
+          call,
+          address,
+          strategyData.address,
+          strategyData.index,
+          strategyData.metadata || null,
+          {
+            data
+          },
+          config
+        );
+
+        return {
+          index: strategyData.index,
+          params
+        };
+      } catch (e) {
+        return null;
+      }
     })
   );
+
+  return results.filter(Boolean) as IndexedConfig[];
 }
 
 export async function getExtraProposeCalls(

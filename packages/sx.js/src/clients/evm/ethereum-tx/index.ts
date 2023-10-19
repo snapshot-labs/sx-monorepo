@@ -3,7 +3,7 @@ import { AbiCoder, Interface } from '@ethersproject/abi';
 import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
 import { getAuthenticator } from '../../../authenticators/evm';
-import { getStrategiesParams } from '../../../strategies/evm';
+import { getStrategiesWithParams } from '../../../strategies/evm';
 import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
@@ -61,7 +61,7 @@ type CallOptions = {
   noWait?: boolean;
 };
 
-const NO_UPDATE_HASH = '0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048ba';
+const NO_UPDATE_STRING = 'No update';
 const NO_UPDATE_ADDRESS = '0xf2cda9b13ed04e585461605c0d6e804933ca8281';
 const NO_UPDATE_UINT32 = '0xf2cda9b1';
 
@@ -258,7 +258,7 @@ export class EthereumTx {
   ) {
     const proposerAddress = envelope.signatureData?.address || (await signer.getAddress());
 
-    const strategiesParams = await getStrategiesParams(
+    const userStrategies = await getStrategiesWithParams(
       'propose',
       envelope.data.strategies,
       proposerAddress,
@@ -272,15 +272,7 @@ export class EthereumTx {
       proposerAddress,
       envelope.data.metadataUri,
       envelope.data.executionStrategy,
-      abiCoder.encode(
-        ['tuple(int8 index, bytes params)[]'],
-        [
-          envelope.data.strategies.map((strategyConfig, i) => ({
-            index: strategyConfig.index,
-            params: strategiesParams[i]
-          }))
-        ]
-      )
+      abiCoder.encode(['tuple(int8 index, bytes params)[]'], [userStrategies])
     ]);
 
     const selector = functionData.slice(0, 10);
@@ -339,7 +331,7 @@ export class EthereumTx {
   ) {
     const voterAddress = envelope.signatureData?.address || (await signer.getAddress());
 
-    const strategiesParams = await getStrategiesParams(
+    const userVotingStrategies = await getStrategiesWithParams(
       'propose',
       envelope.data.strategies,
       voterAddress,
@@ -352,10 +344,7 @@ export class EthereumTx {
       voterAddress,
       envelope.data.proposal,
       envelope.data.choice,
-      envelope.data.strategies.map((strategyConfig, i) => ({
-        index: strategyConfig.index,
-        params: strategiesParams[i]
-      })),
+      userVotingStrategies,
       envelope.data.metadataUri
     ]);
 
@@ -478,8 +467,8 @@ export class EthereumTx {
       minVotingDuration: settings.minVotingDuration ?? NO_UPDATE_UINT32,
       maxVotingDuration: settings.maxVotingDuration ?? NO_UPDATE_UINT32,
       votingDelay: settings.votingDelay ?? NO_UPDATE_UINT32,
-      metadataURI: settings.metadataUri ?? NO_UPDATE_HASH,
-      daoURI: settings.daoUri ?? NO_UPDATE_HASH,
+      metadataURI: settings.metadataUri ?? NO_UPDATE_STRING,
+      daoURI: settings.daoUri ?? NO_UPDATE_STRING,
       proposalValidationStrategy: settings.proposalValidationStrategy ?? {
         addr: NO_UPDATE_ADDRESS,
         params: '0x00'
