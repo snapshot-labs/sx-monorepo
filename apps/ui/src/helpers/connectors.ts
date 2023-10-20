@@ -3,7 +3,7 @@ import metamaskIcon from '@/assets/connectors/metamask.png';
 import walletconnectIcon from '@/assets/connectors/walletconnect.png';
 import coinbaseIcon from '@/assets/connectors/coinbase.png';
 import gnosisIcon from '@/assets/connectors/gnosis.png';
-import argentxIcon from '@/assets/connectors/argentx.png';
+import starknetIcon from '@/assets/connectors/starknet.png';
 
 export default {
   injected: {
@@ -46,10 +46,10 @@ export default {
   },
   argentx: {
     id: 'argentx',
-    name: 'Argent X',
+    name: 'Starknet',
     type: 'injected',
     root: 'starknet',
-    icon: argentxIcon
+    icon: starknetIcon
   }
 };
 
