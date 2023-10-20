@@ -170,7 +170,6 @@ watch(
   async ([networkId, spaceAddress, id]) => {
     if (!networkId || !spaceAddress) return;
 
-    await metaStore.fetchBlock(networkId);
     proposalsStore.fetchProposal(spaceAddress, id, networkId);
   },
   { immediate: true }

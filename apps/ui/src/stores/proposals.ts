@@ -47,6 +47,8 @@ export const useProposalsStore = defineStore('proposals', () => {
     networkId: NetworkID,
     filter?: 'any' | 'active' | 'pending' | 'closed'
   ) {
+    await metaStore.fetchBlock(networkId);
+
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 
     if (!proposals.value[uniqueSpaceId]) {
@@ -88,6 +90,8 @@ export const useProposalsStore = defineStore('proposals', () => {
   }
 
   async function fetchMore(spaceId: string, networkId: NetworkID) {
+    await metaStore.fetchBlock(networkId);
+
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 
     if (!proposals.value[uniqueSpaceId]) {
@@ -132,6 +136,8 @@ export const useProposalsStore = defineStore('proposals', () => {
   }
 
   async function fetchSummary(spaceId: string, networkId: NetworkID, limit = 3) {
+    await metaStore.fetchBlock(networkId);
+
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 
     if (!proposals.value[uniqueSpaceId]) {
@@ -164,6 +170,8 @@ export const useProposalsStore = defineStore('proposals', () => {
   }
 
   async function fetchProposal(spaceId: string, proposalId: number, networkId: NetworkID) {
+    await metaStore.fetchBlock(networkId);
+
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
 
     if (!proposals.value[uniqueSpaceId]) {

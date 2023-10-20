@@ -4,6 +4,7 @@ import { NetworkID, Space } from '@/types';
 import pkg from '../../package.json';
 
 export const useSpacesStore = defineStore('spaces', () => {
+  const metaStore = useMetaStore();
   const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
   const starredSpacesData = ref([] as Space[]);
 
@@ -35,6 +36,8 @@ export const useSpacesStore = defineStore('spaces', () => {
   });
 
   async function fetchSpace(spaceId: string, networkId: NetworkID) {
+    await metaStore.fetchBlock(networkId);
+
     const network = getNetwork(networkId);
 
     const space = await network.api.loadSpace(spaceId);

@@ -6,7 +6,6 @@ const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
-const metaStore = useMetaStore();
 
 const space = computed(() => {
   if (!resolved.value) return null;
@@ -19,7 +18,6 @@ watch(
   async ([resolved, networkId, address]) => {
     if (!resolved || !networkId || !address) return;
 
-    await metaStore.fetchBlock(networkId);
     spacesStore.fetchSpace(address, networkId);
   },
   {
