@@ -68,8 +68,8 @@ const definition = computed(() => {
       twitter: {
         type: 'string',
         format: 'twitter-handle',
-        title: 'Twitter',
-        examples: ['Twitter handle']
+        title: 'X (Twitter)',
+        examples: ['X (Twitter) handle']
       },
       discord: {
         type: 'string',

@@ -41,7 +41,7 @@
         <div class="eyebrow">Join the community</div>
         <div class="space-x-2">
           <a href="https://twitter.com/SnapshotLabs" target="_blank">
-            <img src="~@/assets/twitter.svg" class="w-[32px] h-[32px] inline-block" />
+            <img src="~@/assets/x.svg" class="w-[32px] h-[32px] inline-block" />
           </a>
           <a href="https://discord.gg/snapshot" target="_blank">
             <img src="~@/assets/discord.svg" class="w-[32px] h-[32px] inline-block" />
