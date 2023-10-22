@@ -20,7 +20,7 @@ withDefaults(
 <template>
   <img
     :src="getStampUrl(type, id, width && height ? { width, height } : size, cb)"
-    class="rounded-full inline-block bg-[color:var(--border-color)]"
+    class="rounded-full inline-block bg-skin-border"
     :style="
       !width && !height
         ? {

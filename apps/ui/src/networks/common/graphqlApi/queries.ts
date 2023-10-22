@@ -63,6 +63,7 @@ const PROPOSAL_FRAGMENT = gql`
       authenticators
       metadata {
         id
+        name
         avatar
         voting_power_symbol
         executors
@@ -167,13 +168,19 @@ export const PROPOSALS_SUMMARY_QUERY = gql`
 `;
 
 export const VOTES_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $space: String, $proposal: Int) {
+  query (
+    $first: Int!
+    $skip: Int!
+    $orderBy: Vote_orderBy!
+    $orderDirection: OrderDirection!
+    $where: Vote_filter
+  ) {
     votes(
       first: $first
       skip: $skip
-      where: { space: $space, proposal: $proposal }
-      orderBy: vp
-      orderDirection: desc
+      where: $where
+      orderBy: $orderBy
+      orderDirection: $orderDirection
     ) {
       id
       voter {
@@ -186,6 +193,7 @@ export const VOTES_QUERY = gql`
       choice
       vp
       created
+      tx
     }
   }
 `;

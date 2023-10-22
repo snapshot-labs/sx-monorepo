@@ -72,7 +72,7 @@ watch(open, (val, prev) => {
   }
 
   .shell {
-    border: 1px solid var(--border-color);
+    border: 1px solid rgb(var(--border-color));
     background-color: var(--bg-color);
     padding-left: 0 !important;
     padding-right: 0 !important;

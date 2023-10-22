@@ -25,7 +25,7 @@ async function handleVoteClick(choice: Choice) {
       <div class="flex-auto">
         <router-link
           :to="{
-            name: 'proposal',
+            name: 'proposal-overview',
             params: {
               id: proposal.proposal_id,
               space: `${route.params.id}`

@@ -129,7 +129,12 @@ export type NetworkActions = {
 };
 
 export type NetworkApi = {
-  loadProposalVotes(proposal: Proposal, paginationOpts: PaginationOpts): Promise<Vote[]>;
+  loadProposalVotes(
+    proposal: Proposal,
+    paginationOpts: PaginationOpts,
+    filter?: 'any' | 'for' | 'against' | 'abstain',
+    sortBy?: 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
+  ): Promise<Vote[]>;
   loadUserVotes(voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
     spaceId: string,

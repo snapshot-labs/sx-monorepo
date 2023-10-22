@@ -83,6 +83,7 @@ export type Proposal = {
   quorum: number;
   space: {
     id: string;
+    name: string;
     avatar: string;
     controller: string;
     voting_power_symbol: string;
@@ -155,6 +156,7 @@ export type Vote = {
   choice: number;
   vp: number;
   created: number;
+  tx: string;
 };
 
 export type Draft = {

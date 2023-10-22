@@ -155,9 +155,9 @@ export function _d(s: number) {
     .trim();
 }
 
-export function _t(number) {
+export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   try {
-    return dayjs(number * 1e3).format('MMM D, YYYY · h:mm A');
+    return dayjs(number * 1e3).format(format);
   } catch (e) {
     console.log(e);
     return '';

@@ -2,13 +2,12 @@
 import { getNetwork } from '@/networks';
 import { shortenAddress } from '@/helpers/utils';
 import { CHOICES } from '@/helpers/constants';
-import { NetworkID, Proposal as ProposalType, Vote } from '@/types';
+import { Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
 
 const props = defineProps<{
   open: boolean;
-  networkId: NetworkID;
   proposal: ProposalType;
 }>();
 

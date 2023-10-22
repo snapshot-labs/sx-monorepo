@@ -58,6 +58,7 @@ export type ApiProposal = {
     id: string;
     controller: string;
     metadata: {
+      name: string;
       avatar: string;
       voting_power_symbol: string;
       executors: string[];

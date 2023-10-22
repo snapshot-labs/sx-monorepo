@@ -1,20 +1,10 @@
 <script setup lang="ts">
 import { getNetwork } from '@/networks';
-import {
-  _rt,
-  _n,
-  shortenAddress,
-  getUrl,
-  getStampUrl,
-  getCacheHash,
-  sanitizeUrl,
-  compareAddresses
-} from '@/helpers/utils';
+import { getStampUrl, getCacheHash } from '@/helpers/utils';
 import { Choice } from '@/types';
 import { VotingPower } from '@/networks/types';
 
 const route = useRoute();
-const router = useRouter();
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
@@ -22,15 +12,11 @@ const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
 const metaStore = useMetaStore();
 const { web3 } = useWeb3();
-const { vote, cancelProposal } = useActions();
-const { createDraft } = useEditor();
+const { vote } = useActions();
 
-const modalOpenVotes = ref(false);
-const modalOpenTimeline = ref(false);
 const sendingType = ref<null | number>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
-const cancelling = ref(false);
 
 const id = computed(() => parseInt((route.params.id as string) || '0'));
 const proposal = computed(() => {
@@ -45,41 +31,6 @@ const votingPowerDecimals = computed(() => {
   return Math.max(
     ...proposal.value.space.strategies_parsed_metadata.map(metadata => metadata.decimals),
     0
-  );
-});
-
-const discussion = computed(() => {
-  if (!proposal.value?.discussion) return null;
-
-  return sanitizeUrl(proposal.value.discussion);
-});
-
-const proposalMetadataUrl = computed(() => {
-  if (!proposal.value) return null;
-
-  const url = getUrl(proposal.value.metadata_uri);
-  if (!url) return null;
-
-  return sanitizeUrl(url);
-});
-
-const editable = computed(() => {
-  if (!proposal.value) return false;
-
-  return (
-    compareAddresses(proposal.value.author.id, web3.value.account) &&
-    proposal.value.start >
-      (metaStore.getCurrent(proposal.value.network) || Number.POSITIVE_INFINITY)
-  );
-});
-
-const cancellable = computed(() => {
-  if (!proposal.value) return false;
-
-  return (
-    compareAddresses(proposal.value.space.controller, web3.value.account) &&
-    proposal.value.executed === false &&
-    proposal.value.cancelled === false
   );
 });
 
@@ -108,47 +59,6 @@ async function getVotingPower() {
     votingPowers.value = [];
   } finally {
     loadingVotingPower.value = false;
-  }
-}
-
-async function handleEditClick() {
-  if (!proposal.value || !networkId.value || !spaceAddress.value) return;
-
-  const spaceId = `${networkId.value}:${spaceAddress.value}`;
-
-  const draftId = createDraft(spaceId, {
-    proposalId: proposal.value.proposal_id,
-    title: proposal.value.title,
-    body: proposal.value.body,
-    discussion: proposal.value.discussion,
-    executionStrategy:
-      proposal.value.execution_strategy_type === 'none'
-        ? null
-        : {
-            address: proposal.value.execution_strategy,
-            type: proposal.value.execution_strategy_type
-          },
-    execution: proposal.value.execution
-  });
-
-  router.push({
-    name: 'editor',
-    params: {
-      id: spaceId,
-      key: draftId
-    }
-  });
-}
-
-async function handleCancelClick() {
-  if (!proposal.value) return;
-
-  cancelling.value = true;
-
-  try {
-    await cancelProposal(proposal.value);
-  } finally {
-    cancelling.value = false;
   }
 }
 
@@ -195,118 +105,25 @@ watchEffect(() => {
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 md:mr-[340px]">
-        <div class="flex justify-between items-center mx-4 border-b">
+        <div class="flex px-4 bg-skin-bg border-b sticky top-[72px] z-50">
           <router-link
             :to="{
-              name: 'user',
-              params: { id: `${proposal.network}:${proposal.author.id}` }
+              name: 'proposal-overview',
+              params: { id: proposal.proposal_id }
             }"
-            class="flex items-center py-3"
           >
-            <Stamp :id="proposal.author.id" :size="32" class="mr-1" />
-            <div class="flex flex-col ml-2 leading-4 gap-1">
-              {{ shortenAddress(proposal.author.id) }}
-              <span class="text-skin-text text-[16px]" v-text="_rt(proposal.created)" />
-            </div>
+            <Link :is-active="route.name === 'proposal-overview'" text="Overview" class="pr-3" />
           </router-link>
-          <UiDropdown>
-            <template #button>
-              <IH-dots-vertical class="text-skin-link" />
-            </template>
-            <template #items>
-              <UiDropdownItem v-if="editable" v-slot="{ active }">
-                <button
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="handleEditClick"
-                >
-                  <IS-pencil :width="16" />
-                  Edit proposal
-                </button>
-              </UiDropdownItem>
-              <UiDropdownItem
-                v-if="cancellable"
-                v-slot="{ active, disabled }"
-                :disabled="cancelling"
-              >
-                <button
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                  @click="handleCancelClick"
-                >
-                  <IS-x-mark :width="16" />
-                  Cancel proposal
-                </button>
-              </UiDropdownItem>
-              <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
-                <a
-                  :href="proposalMetadataUrl"
-                  target="_blank"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                >
-                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                  View metadata
-                </a>
-              </UiDropdownItem>
-            </template>
-          </UiDropdown>
+          <router-link
+            :to="{
+              name: 'proposal-votes',
+              params: { id: proposal.proposal_id }
+            }"
+          >
+            <Link :is-active="route.name === 'proposal-votes'" text="Votes" />
+          </router-link>
         </div>
-        <Container class="pt-5 !max-w-[630px] mx-0 md:mx-auto">
-          <div>
-            <h1 class="mb-4 text-[36px]">
-              {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
-            </h1>
-            <Markdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
-            <div v-if="discussion">
-              <h4 class="mb-3 eyebrow flex items-center">
-                <IH-chat-alt class="inline-block mr-2" />
-                <span>Discussion</span>
-              </h4>
-              <a :href="discussion" target="_blank" class="block mb-5">
-                <Preview :url="discussion" />
-              </a>
-            </div>
-            <div v-if="proposal.execution && proposal.execution.length > 0">
-              <h4 class="mb-3 eyebrow flex items-center">
-                <IH-play class="inline-block mr-2" />
-                <span>Execution</span>
-              </h4>
-              <div class="mb-4">
-                <BlockExecution :txs="proposal.execution" />
-              </div>
-            </div>
-            <div
-              v-if="
-                proposal.execution &&
-                proposal.execution.length > 0 &&
-                BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
-                BigInt(proposal.scores_1) > BigInt(proposal.scores_2) &&
-                proposal.has_execution_window_opened
-              "
-            >
-              <h4 class="mb-3 eyebrow flex items-center">
-                <IH-play class="inline-block mr-2" />
-                <span>Actions</span>
-              </h4>
-              <div class="mb-4">
-                <BlockActions :proposal="proposal" />
-              </div>
-            </div>
-            <div>
-              <a class="text-skin-text" @click="modalOpenVotes = true">
-                {{ _n(proposal.vote_count) }} votes
-              </a>
-              ·
-              <a
-                class="text-skin-text"
-                @click="modalOpenTimeline = true"
-                v-text="_rt(proposal.created)"
-              />
-              <template v-if="proposal.edited"> · (edited)</template>
-            </div>
-          </div>
-        </Container>
+        <router-view :proposal="proposal" />
       </div>
       <div
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l"
@@ -369,20 +186,5 @@ watchEffect(() => {
         </template>
       </div>
     </template>
-    <teleport to="#modal">
-      <ModalVotes
-        v-if="proposal"
-        :open="modalOpenVotes"
-        :network-id="proposal.network"
-        :proposal="proposal"
-        @close="modalOpenVotes = false"
-      />
-      <ModalTimeline
-        v-if="proposal"
-        :open="modalOpenTimeline"
-        :proposal="proposal"
-        @close="modalOpenTimeline = false"
-      />
-    </teleport>
   </div>
 </template>

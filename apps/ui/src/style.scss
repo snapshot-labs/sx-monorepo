@@ -9,7 +9,7 @@
   --link-color: #faf9fc;
   --content-color: rgba(250, 249, 252, 0.8);
   --heading-color: #faf9fc;
-  --border-color: #333237;
+  --border-color: 51, 50, 55;
   --block-bg: #1c1b20;
   --active-bg: #29282e;
   --hover-bg: #232227;
@@ -23,7 +23,7 @@
   --link-color: #111111;
   --content-color: rgba(17, 17, 17, 0.8);
   --heading-color: #111111;
-  --border-color: #e5e5e6;
+  --border-color: 229, 229, 230;
   --block-bg: white;
   --active-bg: #ededed;
   --hover-bg: #f7f7f7;
@@ -118,13 +118,13 @@ a,
 
 .choice-bg {
   &._1 {
-    @apply bg-green;
+    @apply bg-choice-for;
   }
   &._2 {
-    @apply bg-red;
+    @apply bg-choice-against;
   }
   &._3 {
-    @apply bg-gray-500;
+    @apply bg-choice-abstain;
   }
   &._quorum {
     @apply bg-skin-border;

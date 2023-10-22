@@ -81,6 +81,7 @@ watchEffect(() => {
       <div class="flex flex-row p-4 space-x-2">
         <UiSelect
           v-model="filter"
+          title="Status"
           gap="12px"
           placement="left"
           :items="[

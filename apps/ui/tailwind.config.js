@@ -1,15 +1,28 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const colors = require('tailwindcss/colors');
+
+const withOpacity = variableName => {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `rgba(var(${variableName}), ${opacityValue})`;
+    }
+
+    return `rgb(var(${variableName}))`;
+  };
+};
+
 module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,vue}'],
   darkMode: 'class',
   theme: {
     extend: {
       borderColor: {
-        DEFAULT: 'var(--border-color)',
+        DEFAULT: 'rgb(var(--border-color))',
         red: '#ff3856'
       },
       colors: {
         primary: 'var(--primary-color)',
-        'skin-border': 'var(--border-color)',
+        'skin-border': withOpacity('--border-color'),
         'skin-text': 'var(--text-color)',
         'skin-link': 'var(--link-color)',
         'skin-bg': 'var(--bg-color)',
@@ -19,7 +32,10 @@ module.exports = {
         'skin-heading': 'var(--heading-color)',
         blue: '#384aff',
         green: '#21b66f',
-        red: '#ff3856'
+        red: '#ff3856',
+        'choice-for': '#21b66f',
+        'choice-against': '#ff3856',
+        'choice-abstain': colors.gray['500']
       },
       animation: {
         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'

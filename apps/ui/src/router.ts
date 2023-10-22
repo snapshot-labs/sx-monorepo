@@ -9,6 +9,8 @@ import SpaceTreasury from '@/views/Space/Treasury.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
 import Editor from '@/views/Editor.vue';
 import Proposal from '@/views/Proposal.vue';
+import ProposalOverview from '@/views/Proposal/Overview.vue';
+import ProposalVotes from '@/views/Proposal/Votes.vue';
 import User from '@/views/User.vue';
 import Create from '@/views/Create.vue';
 import Settings from '@/views/Settings.vue';
@@ -36,7 +38,15 @@ const routes: any[] = [
     name: 'editor',
     component: Editor
   },
-  { path: '/:space/proposal/:id?', name: 'proposal', component: Proposal },
+  {
+    path: '/:space/proposal/:id?',
+    name: 'proposal',
+    component: Proposal,
+    children: [
+      { path: '', name: 'proposal-overview', component: ProposalOverview },
+      { path: 'votes', name: 'proposal-votes', component: ProposalVotes }
+    ]
+  },
   { path: '/profile/:id', name: 'user', component: User },
   { path: '/create', name: 'create', component: Create },
   {

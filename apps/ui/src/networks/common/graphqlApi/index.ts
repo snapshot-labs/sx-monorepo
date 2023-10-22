@@ -71,6 +71,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     ...proposal,
     space: {
       id: proposal.space.id,
+      name: proposal.space.metadata.name,
       avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,
       authenticators: proposal.space.authenticators,
@@ -125,15 +126,33 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   return {
     loadProposalVotes: async (
       proposal: Proposal,
-      { limit, skip = 0 }: PaginationOpts
+      { limit, skip = 0 }: PaginationOpts,
+      filter: 'any' | 'for' | 'against' | 'abstain' = 'any',
+      sortBy: 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc' = 'vp-desc'
     ): Promise<Vote[]> => {
+      const filters: Record<string, any> = {};
+      if (filter === 'for') {
+        filters.choice = 1;
+      } else if (filter === 'against') {
+        filters.choice = 2;
+      } else if (filter === 'abstain') {
+        filters.choice = 3;
+      }
+
+      const [orderBy, orderDirection] = sortBy.split('-');
+
       const { data } = await apollo.query({
         query: VOTES_QUERY,
         variables: {
-          space: proposal.space.id,
-          proposal: proposal.proposal_id,
           first: limit,
-          skip
+          skip,
+          orderBy,
+          orderDirection,
+          where: {
+            space: proposal.space.id,
+            proposal: proposal.proposal_id,
+            ...filters
+          }
         }
       });
 
