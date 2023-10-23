@@ -10,7 +10,6 @@ const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
-const metaStore = useMetaStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
 

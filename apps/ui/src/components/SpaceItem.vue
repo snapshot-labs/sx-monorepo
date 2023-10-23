@@ -35,7 +35,7 @@ const spacesStore = useSpacesStore();
       />
       <img
         :src="(currentNetwork && getUrl(currentNetwork.avatar)) ?? undefined"
-        class="w-[16px] h-[16px] rounded-lg -right-[6px] bottom-0 absolute border"
+        class="w-[18px] h-[18px] rounded-full -right-[6px] bottom-0 absolute border-2 border-skin-bg"
       />
     </div>
     <button

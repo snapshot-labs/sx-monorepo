@@ -113,7 +113,7 @@ watchEffect(() => {
             <IH-globe-alt class="w-[26px] h-[26px] inline-block text-[#606060]" />
           </a>
           <a v-if="twitterUrl" :href="twitterUrl" target="_blank">
-            <img src="~@/assets/x.svg" class="w-[22px] h-[22px] inline-block" />
+            <img src="~@/assets/x.svg" class="w-[26px] h-[26px] inline-block" />
           </a>
           <a v-if="discordUrl" :href="discordUrl" target="_blank">
             <img src="~@/assets/discord.svg" class="w-[26px] h-[26px] inline-block" />
