@@ -7,6 +7,8 @@ type Space @entity {
   max_voting_period: Int!
   proposal_threshold: BigDecimal!
   quorum: BigDecimal!
+  next_strategy_index: Int!
+  strategies_indicies: [Int]!
   strategies: [Bytes!]!
   strategies_params: [String!]!
   strategies_metadata: [String!]!
@@ -16,6 +18,7 @@ type Space @entity {
   validation_strategy_params: String!
   voting_power_validation_strategy_strategies: [Bytes!]!
   voting_power_validation_strategy_strategies_params: [String!]!
+  voting_power_validation_strategy_metadata: String!
   voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadata!]!
     @derivedFrom(field: "space")
   proposal_count: Int!
@@ -96,6 +99,7 @@ type Proposal @entity {
   execution_strategy_type: String!
   timelock_veto_guardian: Bytes
   timelock_delay: BigInt!
+  strategies_indicies: [Int]!
   strategies: [Bytes!]!
   strategies_params: [String!]!
   scores_1: BigDecimal!

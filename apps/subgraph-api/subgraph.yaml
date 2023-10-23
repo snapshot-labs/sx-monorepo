@@ -66,6 +66,16 @@ templates:
           handler: handleMaxVotingDurationUpdated
         - event: OwnershipTransferred(indexed address,indexed address)
           handler: handleOwnershipTransferred
+        - event: AuthenticatorsAdded(address[])
+          handler: handleAuthenticatorsAdded
+        - event: AuthenticatorsRemoved(address[])
+          handler: handleAuthenticatorsRemoved
+        - event: VotingStrategiesAdded((address,bytes)[],string[])
+          handler: handleVotingStrategiesAdded
+        - event: VotingStrategiesRemoved(uint8[])
+          handler: handleVotingStrategiesRemoved
+        - event: ProposalValidationStrategyUpdated((address,bytes),string)
+          handler: handleProposalValidationStrategyUpdated
       file: ./src/mapping.ts
   - kind: ethereum
     name: TimelockExecutionStrategy
@@ -122,6 +132,19 @@ templates:
       handler: handleStrategiesParsedMetadataData
       entities:
         - StrategiesParsedMetadataData
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+    network: sepolia
+  - name: VotingPowerValidationStrategyMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleVotingPowerValidationStrategyMetadata
+      entities:
+        - VotingPowerValidationStrategiesParsedMetadata
       abis:
         - name: Space
           file: ./abis/Space.json

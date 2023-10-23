@@ -14,6 +14,11 @@ import {
   MinVotingDurationUpdated,
   MaxVotingDurationUpdated,
   OwnershipTransferred,
+  AuthenticatorsAdded,
+  AuthenticatorsRemoved,
+  VotingStrategiesAdded,
+  VotingStrategiesRemoved,
+  ProposalValidationStrategyUpdated,
 } from '../generated/templates/Space/Space'
 import {
   ProposalExecuted as TimelockProposalExecuted,
@@ -26,21 +31,12 @@ import {
   ProposalMetadata as ProposalMetadataTemplate,
 } from '../generated/templates'
 import { Space, ExecutionStrategy, ExecutionHash, Proposal, Vote, User } from '../generated/schema'
-import {
-  decodeProposalValidationParams,
-  getProposalValidationThreshold,
-  getProposalValidationStrategies,
-  getProposalValidationStrategiesParams,
-  updateStrategiesParsedMetadata,
-} from './helpers'
+import { updateStrategiesParsedMetadata, updateProposalValidationStrategy } from './helpers'
 
 const MASTER_SPACE = Address.fromString('0xd9c46d5420434355d0E5Ca3e3cCb20cE7A533964')
 const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x3813f3d97Aa2F80e3aF625605A31206e067FB2e5')
 const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
   '0x00C5E67e6F7FDf80d7bCA249E38C355FbE62Ba34'
-)
-const VOTING_POWER_VALIDATION_STRATEGY = Address.fromString(
-  '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
 )
 
 export function handleProxyDeployed(event: ProxyDeployed): void {
@@ -90,36 +86,20 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   space.min_voting_period = event.params.input.minVotingDuration.toI32()
   space.max_voting_period = event.params.input.maxVotingDuration.toI32()
   space.quorum = new BigDecimal(new BigInt(0))
+  space.strategies_indicies = event.params.input.votingStrategies.map<i32>((_, i) => i32(i))
+  space.next_strategy_index = event.params.input.votingStrategies.length
   space.strategies = event.params.input.votingStrategies.map<Bytes>((strategy) => strategy.addr)
   space.strategies_params = event.params.input.votingStrategies.map<string>((strategy) =>
     strategy.params.toHexString()
   )
-  space.validation_strategy = event.params.input.proposalValidationStrategy.addr
-  space.validation_strategy_params = event.params.input.proposalValidationStrategy.params.toHexString()
 
-  if (space.validation_strategy.equals(VOTING_POWER_VALIDATION_STRATEGY)) {
-    let params = decodeProposalValidationParams(
-      event.params.input.proposalValidationStrategy.params
-    )
-
-    if (params) {
-      space.proposal_threshold = new BigDecimal(getProposalValidationThreshold(params))
-      space.voting_power_validation_strategy_strategies = getProposalValidationStrategies(
-        params
-      ).map<Bytes>((strategy) => strategy)
-      space.voting_power_validation_strategy_strategies_params = getProposalValidationStrategiesParams(
-        params
-      ).map<string>((params) => params.toHexString())
-    } else {
-      space.proposal_threshold = new BigDecimal(new BigInt(0))
-      space.voting_power_validation_strategy_strategies = []
-      space.voting_power_validation_strategy_strategies_params = []
-    }
-  } else {
-    space.proposal_threshold = new BigDecimal(new BigInt(0))
-    space.voting_power_validation_strategy_strategies = []
-    space.voting_power_validation_strategy_strategies_params = []
-  }
+  updateProposalValidationStrategy(
+    space,
+    event.params.input.proposalValidationStrategy.addr,
+    event.params.input.proposalValidationStrategy.params,
+    event.params.input.proposalValidationStrategyMetadataURI,
+    event.block.number
+  )
 
   space.strategies_metadata = event.params.input.votingStrategyMetadataURIs
   space.authenticators = event.params.input.authenticators.map<Bytes>((address) => address)
@@ -134,7 +114,13 @@ export function handleSpaceCreated(event: SpaceCreated): void {
     SpaceMetadataTemplate.create(hash)
   }
 
-  updateStrategiesParsedMetadata(space.id, space.strategies_metadata)
+  updateStrategiesParsedMetadata(
+    space.id,
+    space.strategies_metadata,
+    0,
+    event.block.number,
+    'StrategiesParsedMetadata'
+  )
 
   space.save()
 }
@@ -155,6 +141,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.min_end = event.params.proposal.minEndBlockNumber.toI32()
   proposal.max_end = event.params.proposal.maxEndBlockNumber.toI32()
   proposal.snapshot = event.params.proposal.startBlockNumber.toI32()
+  proposal.strategies_indicies = space.strategies_indicies
   proposal.strategies = space.strategies
   proposal.strategies_params = space.strategies_params
   proposal.scores_1 = BigDecimal.fromString('0')
@@ -399,6 +386,142 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {
   }
 
   space.controller = event.params.newOwner
+  space.save()
+}
+
+export function handleAuthenticatorsAdded(event: AuthenticatorsAdded): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  let newAuthenticators = space.authenticators
+  for (let i = 0; i < event.params.newAuthenticators.length; i++) {
+    if (!newAuthenticators.includes(event.params.newAuthenticators[i])) {
+      newAuthenticators.push(event.params.newAuthenticators[i])
+    }
+  }
+
+  space.authenticators = newAuthenticators
+  space.save()
+}
+
+export function handleAuthenticatorsRemoved(event: AuthenticatorsRemoved): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  let newAuthenticators = space.authenticators
+  for (let i = 0; i < event.params.authenticators.length; i++) {
+    if (newAuthenticators.includes(event.params.authenticators[i])) {
+      newAuthenticators.splice(newAuthenticators.indexOf(event.params.authenticators[i]), 1)
+    }
+  }
+
+  space.authenticators = newAuthenticators
+  space.save()
+}
+
+export function handleVotingStrategiesAdded(event: VotingStrategiesAdded): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  let initialNextStrategy = space.next_strategy_index
+
+  let strategies = event.params.newVotingStrategies.map<Bytes>((strategy) => strategy.addr)
+  let strategiesParams = event.params.newVotingStrategies.map<string>((strategy) =>
+    strategy.params.toHexString()
+  )
+  let strategiesMetadataUris = event.params.newVotingStrategyMetadataURIs
+
+  let newIndicies = [] as i32[]
+  for (let i = 0; i < strategies.length; i++) {
+    newIndicies.push(i32(initialNextStrategy + i))
+  }
+
+  let newStrategies = space.strategies
+  for (let i = 0; i < strategies.length; i++) {
+    newStrategies.push(strategies[i])
+  }
+
+  let newStrategiesParams = space.strategies_params
+  for (let i = 0; i < strategiesParams.length; i++) {
+    newStrategiesParams.push(strategiesParams[i])
+  }
+
+  let newStrategiesMetadata = space.strategies_metadata
+  for (let i = 0; i < strategiesMetadataUris.length; i++) {
+    newStrategiesMetadata.push(strategiesMetadataUris[i])
+  }
+
+  space.next_strategy_index += strategies.length
+  space.strategies_indicies = space.strategies_indicies.concat(newIndicies)
+  space.strategies = newStrategies
+  space.strategies_params = newStrategiesParams
+  space.strategies_metadata = newStrategiesMetadata
+
+  updateStrategiesParsedMetadata(
+    space.id,
+    strategiesMetadataUris,
+    initialNextStrategy,
+    event.block.number,
+    'StrategiesParsedMetadata'
+  )
+
+  space.save()
+}
+
+export function handleVotingStrategiesRemoved(event: VotingStrategiesRemoved): void {
+  let space = Space.load(event.address.toHexString())
+  if (space == null) {
+    return
+  }
+
+  let indiciesToRemove = [] as i32[]
+  for (let i = 0; i < event.params.votingStrategyIndices.length; i++) {
+    indiciesToRemove.push(space.strategies_indicies.indexOf(event.params.votingStrategyIndices[i]))
+  }
+
+  let newIndicies = [] as i32[]
+  let newStrategies = [] as Bytes[]
+  let newStrategiesParams = [] as string[]
+  let newStrategiesMetadata = [] as string[]
+  for (let i = 0; i < space.strategies_indicies.length; i++) {
+    if (!indiciesToRemove.includes(i)) {
+      newIndicies.push(space.strategies_indicies[i])
+      newStrategies.push(space.strategies[i])
+      newStrategiesParams.push(space.strategies_params[i])
+      newStrategiesMetadata.push(space.strategies_metadata[i])
+    }
+  }
+
+  space.strategies_indicies = newIndicies
+  space.strategies = newStrategies
+  space.strategies_params = newStrategiesParams
+  space.strategies_metadata = newStrategiesMetadata
+
+  space.save()
+}
+
+export function handleProposalValidationStrategyUpdated(
+  event: ProposalValidationStrategyUpdated
+): void {
+  let space = Space.load(event.address.toHexString())
+  if (!space) {
+    return
+  }
+
+  updateProposalValidationStrategy(
+    space,
+    event.params.newProposalValidationStrategy.addr,
+    event.params.newProposalValidationStrategy.params,
+    event.params.newProposalValidationStrategyMetadataURI,
+    event.block.number
+  )
+
   space.save()
 }
 
