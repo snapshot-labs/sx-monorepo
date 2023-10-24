@@ -24,8 +24,14 @@ type Governance = {
 const DELEGATES_LIMIT = 40;
 
 const DELEGATES_QUERY = gql`
-  query ($first: Int!, $skip: Int!) {
-    delegates(first: $first, skip: $skip, orderBy: delegatedVotes, orderDirection: desc) {
+  query ($first: Int!, $skip: Int!, $orderBy: Delegate_orderBy!, $orderDirection: OrderDirection!) {
+    delegates(
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      where: { tokenHoldersRepresentedAmount_gte: 0 }
+    ) {
       id
       delegatedVotes
       delegatedVotesRaw
@@ -74,10 +80,21 @@ export function useDelegates(delegationApiUrl: string) {
     }
   });
 
-  async function _fetch(overwrite: boolean) {
+  async function _fetch(
+    overwrite: boolean,
+    sortBy:
+      | 'delegatedVotes-desc'
+      | 'delegatedVotes-asc'
+      | 'tokenHoldersRepresentedAmount-desc'
+      | 'tokenHoldersRepresentedAmount-asc'
+  ) {
+    const [orderBy, orderDirection] = sortBy.split('-');
+
     const { data } = await apollo.query({
       query: DELEGATES_QUERY,
       variables: {
+        orderBy,
+        orderDirection,
         first: DELEGATES_LIMIT,
         skip: overwrite ? 0 : delegates.value.length
       }
@@ -110,12 +127,18 @@ export function useDelegates(delegationApiUrl: string) {
     hasMore.value = delegatesData.length === DELEGATES_LIMIT;
   }
 
-  async function fetch() {
+  async function fetch(
+    sortBy:
+      | 'delegatedVotes-desc'
+      | 'delegatedVotes-asc'
+      | 'tokenHoldersRepresentedAmount-desc'
+      | 'tokenHoldersRepresentedAmount-asc' = 'delegatedVotes-desc'
+  ) {
     if (loading.value || loaded.value) return;
     loading.value = true;
 
     try {
-      await _fetch(true);
+      await _fetch(true, sortBy);
 
       loaded.value = true;
     } catch (e) {
@@ -125,13 +148,28 @@ export function useDelegates(delegationApiUrl: string) {
     }
   }
 
-  async function fetchMore() {
+  async function fetchMore(
+    sortBy:
+      | 'delegatedVotes-desc'
+      | 'delegatedVotes-asc'
+      | 'tokenHoldersRepresentedAmount-desc'
+      | 'tokenHoldersRepresentedAmount-asc' = 'delegatedVotes-desc'
+  ) {
     if (loading.value || !loaded.value) return;
     loadingMore.value = true;
 
-    await _fetch(false);
+    await _fetch(false, sortBy);
 
     loadingMore.value = false;
+  }
+
+  function reset() {
+    delegates.value = [];
+    loading.value = false;
+    loadingMore.value = false;
+    loaded.value = false;
+    failed.value = false;
+    hasMore.value = false;
   }
 
   return {
@@ -142,6 +180,7 @@ export function useDelegates(delegationApiUrl: string) {
     hasMore,
     delegates,
     fetch,
-    fetchMore
+    fetchMore,
+    reset
   };
 }

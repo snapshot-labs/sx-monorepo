@@ -60,8 +60,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div>
-    <div ref="container">
+  <div class="contents">
+    <div ref="container" class="contents">
       <slot />
     </div>
     <slot v-if="loadingMore" name="loading">

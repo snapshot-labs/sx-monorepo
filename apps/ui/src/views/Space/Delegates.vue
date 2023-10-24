@@ -6,10 +6,16 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const delegateModalOpen = ref(false);
-const { setTitle } = useTitle();
-const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMore } = useDelegates(
-  props.space.delegation_api_url as string
+const sortBy = ref(
+  'delegatedVotes-desc' as
+    | 'delegatedVotes-desc'
+    | 'delegatedVotes-asc'
+    | 'tokenHoldersRepresentedAmount-desc'
+    | 'tokenHoldersRepresentedAmount-asc'
 );
+const { setTitle } = useTitle();
+const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMore, reset } =
+  useDelegates(props.space.delegation_api_url as string);
 
 const currentNetwork = computed(() => {
   try {
@@ -19,16 +25,29 @@ const currentNetwork = computed(() => {
   }
 });
 
+function handleSortChange(type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount') {
+  if (sortBy.value.startsWith(type)) {
+    sortBy.value = sortBy.value.endsWith('desc') ? `${type}-asc` : `${type}-desc`;
+  } else {
+    sortBy.value = `${type}-desc`;
+  }
+}
+
 async function handleEndReached() {
   if (!hasMore.value) return;
 
-  await fetchMore();
+  await fetchMore(sortBy.value);
 }
 
 onMounted(() => {
   if (!props.space.delegation_api_url) return;
 
-  fetch();
+  fetch(sortBy.value);
+});
+
+watch([sortBy], () => {
+  reset();
+  fetch(sortBy.value);
 });
 
 watchEffect(() => {
@@ -56,46 +75,98 @@ watchEffect(() => {
     <div class="space-y-3">
       <div>
         <Label label="Delegates" sticky />
-        <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
-        <div
-          v-else-if="loaded && delegates.length === 0"
-          class="px-4 py-3 flex items-center text-skin-link"
-        >
-          <IH-exclamation-circle class="inline-block mr-2" />
-          There are no delegates.
-        </div>
-        <div v-else-if="failed" class="px-4 py-3 flex items-center text-skin-link">
-          <IH-exclamation-circle class="inline-block mr-2" />
-          Failed to load delegates.
-        </div>
-        <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
-          <a
-            v-for="delegate in delegates"
-            :key="delegate.id"
-            :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')"
-            target="_blank"
-            class="flex justify-between items-center mx-4 py-3 border-b text-skin-text"
+
+        <table class="text-left table-fixed w-full">
+          <colgroup>
+            <col class="w-auto" />
+            <col class="w-auto md:w-[120px]" />
+            <col class="w-0 md:w-[200px]" />
+          </colgroup>
+          <thead
+            class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 after:border-b after:absolute after:w-full"
           >
-            <Stamp :id="delegate.id" type="avatar" :size="32" class="mr-3" />
-            <div class="flex-1 leading-[22px]">
-              <h4 class="text-skin-link" v-text="delegate.name || shorten(delegate.id)" />
-              <div class="text-sm" v-text="shorten(delegate.id)" />
-            </div>
-            <div
-              class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px] hidden md:block"
-            >
-              <h4
-                class="text-skin-link"
-                v-text="`${_n(delegate.tokenHoldersRepresentedAmount)} delegator(s)`"
-              />
-              <div class="text-sm" v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`" />
-            </div>
-            <div class="flex-col items-end text-right leading-[22px] w-auto md:w-[180px]">
-              <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
-              <div class="text-sm" v-text="`${delegate.votesPercentage.toFixed(3)}%`" />
-            </div>
-          </a>
-        </BlockInfiniteScroller>
+            <tr class="bg-skin-border/10">
+              <th class="pl-4 font-medium">
+                <span class="relative bottom-[1px]">Delegatee</span>
+              </th>
+              <th class="hidden md:table-cell">
+                <button
+                  class="relative bottom-[1px] flex items-center justify-end min-w-0 w-full font-medium hover:text-skin-link"
+                  @click="handleSortChange('tokenHoldersRepresentedAmount')"
+                >
+                  <span>Delegators</span>
+                  <IH-arrow-sm-down
+                    v-if="sortBy === 'tokenHoldersRepresentedAmount-desc'"
+                    class="ml-1"
+                  />
+                  <IH-arrow-sm-up
+                    v-else-if="sortBy === 'tokenHoldersRepresentedAmount-asc'"
+                    class="ml-1"
+                  />
+                </button>
+              </th>
+              <th>
+                <button
+                  class="relative bottom-[1px] flex justify-end items-center min-w-0 w-full font-medium hover:text-skin-link pr-4"
+                  @click="handleSortChange('delegatedVotes')"
+                >
+                  <span class="truncate">Voting power</span>
+                  <IH-arrow-sm-down v-if="sortBy === 'delegatedVotes-desc'" class="ml-1" />
+                  <IH-arrow-sm-up v-else-if="sortBy === 'delegatedVotes-asc'" class="ml-1" />
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <td v-if="loading" colspan="3">
+            <UiLoading class="p-4 block text-center" />
+          </td>
+          <template v-else>
+            <tbody>
+              <td v-if="loaded && delegates.length === 0" class="p-4 text-center" colspan="3">
+                <IH-exclamation-circle class="inline-block mr-2" />
+                There are no delegates.
+              </td>
+              <td v-else-if="loaded && failed" class="p-4 text-center" colspan="3">
+                <IH-exclamation-circle class="inline-block mr-2" />
+                Failed to load delegates.
+              </td>
+              <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
+                <tr v-for="(delegate, i) in delegates" :key="i" class="border-b relative">
+                  <td class="text-left flex items-center pl-4 py-3">
+                    <Stamp :id="delegate.id" :size="32" class="mr-3" />
+                    <div class="overflow-hidden">
+                      <a :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')">
+                        <div class="leading-[22px]">
+                          <h4
+                            class="text-skin-link truncate"
+                            v-text="delegate.name || shorten(delegate.id)"
+                          />
+                          <div class="text-sm truncate" v-text="shorten(delegate.id)" />
+                        </div>
+                      </a>
+                    </div>
+                  </td>
+                  <td class="hidden md:table-cell align-middle text-right">
+                    <h4
+                      class="text-skin-link"
+                      v-text="_n(delegate.tokenHoldersRepresentedAmount)"
+                    />
+                    <div class="text-sm" v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`" />
+                  </td>
+                  <td class="text-right pr-4 align-middle">
+                    <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
+                    <div class="text-sm" v-text="`${delegate.votesPercentage.toFixed(3)}%`" />
+                  </td>
+                </tr>
+                <template #loading>
+                  <td colspan="3">
+                    <UiLoading class="p-4 block text-center" />
+                  </td>
+                </template>
+              </BlockInfiniteScroller>
+            </tbody>
+          </template>
+        </table>
       </div>
     </div>
     <teleport to="#modal">
