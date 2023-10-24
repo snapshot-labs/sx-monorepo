@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { _rt, shortenAddress } from '@/helpers/utils';
+import { _rt, _n, shortenAddress } from '@/helpers/utils';
 import type { Proposal as ProposalType, Choice } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
+const { getTsFromCurrent } = useMetaStore();
 const route = useRoute();
 const { vote } = useActions();
 const modalOpenTimeline = ref(false);
@@ -45,11 +46,14 @@ async function handleVoteClick(choice: Choice) {
           {{ shortenAddress(proposal.author.id) }}
         </router-link>
         <span>
+          <template v-if="proposal.vote_count">
+            · {{ _n(proposal.vote_count) }} {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+          </template>
           ·
           <a
             class="text-skin-text"
             @click="modalOpenTimeline = true"
-            v-text="_rt(proposal.created)"
+            v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"
           />
         </span>
       </div>

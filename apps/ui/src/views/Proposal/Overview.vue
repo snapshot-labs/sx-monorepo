@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const metaStore = useMetaStore();
+const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
@@ -19,8 +19,7 @@ const cancelling = ref(false);
 const editable = computed(() => {
   return (
     compareAddresses(props.proposal.author.id, web3.value.account) &&
-    props.proposal.start >
-      (metaStore.getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
+    props.proposal.start > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
 
@@ -192,13 +191,13 @@ async function handleCancelClick() {
       </div>
       <div>
         <a class="text-skin-text" @click="modalOpenVotes = true">
-          {{ _n(proposal.vote_count) }} votes
+          {{ _n(proposal.vote_count) }} {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
         </a>
         ·
         <a
           class="text-skin-text"
           @click="modalOpenTimeline = true"
-          v-text="_rt(proposal.created)"
+          v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"
         />
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
