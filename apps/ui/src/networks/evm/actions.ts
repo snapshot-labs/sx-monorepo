@@ -5,6 +5,7 @@ import {
   getEvmStrategy,
   evmArbitrum,
   evmPolygon,
+  evmMainnet,
   evmGoerli,
   evmSepolia,
   evmLineaGoerli,
@@ -38,6 +39,7 @@ type Choice = 0 | 1 | 2;
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   137: evmPolygon,
   42161: evmArbitrum,
+  1: evmMainnet,
   5: evmGoerli,
   11155111: evmSepolia,
   59140: evmLineaGoerli
@@ -492,6 +494,7 @@ export function createActions(
           const value = await strategy.getVotingPower(
             address,
             voterAddress,
+            null,
             block,
             strategiesParams[i],
             provider
