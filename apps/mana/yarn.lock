@@ -554,10 +554,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@snapshot-labs/sx@^0.1.0-beta.41":
-  version "0.1.0-beta.41"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.41.tgz#c27e24de9abf1891220e26706ffabcd8f38eb88e"
-  integrity sha512-+6UQJRJ3XwiOhU5oOiuO/VRMvx9BLnEBOJI6O/wZeghBJjHc0oIGdTDPVd1zTRN3S877lfz0m8UyjJg6w+mKKA==
+"@snapshot-labs/sx@^0.1.0-beta.42":
+  version "0.1.0-beta.42"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.42.tgz#49d4abc3cdcd23104fa80a20df228e300a48a06d"
+  integrity sha512-NuYdzkpr7Ew304HVnzAY3/8yMxsMx+68OhluW4GCEu12HAX10UgTuDthUGugDBvgYiFFyqtPRztaMm3xI/Ad8Q==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/abstract-signer" "^5.7.0"

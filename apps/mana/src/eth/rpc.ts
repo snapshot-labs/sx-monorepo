@@ -2,6 +2,7 @@ import {
   clients,
   evmPolygon,
   evmArbitrum,
+  evmMainnet,
   evmGoerli,
   evmSepolia,
   evmLineaGoerli
@@ -12,6 +13,7 @@ import { rpcError, rpcSuccess } from '../utils';
 export const NETWORKS = {
   137: evmPolygon,
   42161: evmArbitrum,
+  1: evmMainnet,
   5: evmGoerli,
   11155111: evmSepolia,
   59140: evmLineaGoerli

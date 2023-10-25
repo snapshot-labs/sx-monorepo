@@ -15,7 +15,7 @@
     "@ethersproject/experimental": "5.7.0",
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/wallet": "^5.7.0",
-    "@snapshot-labs/sx": "^0.1.0-beta.41",
+    "@snapshot-labs/sx": "^0.1.0-beta.42",
     "connection-string": "^4.4.0",
     "cors": "^2.8.5",
     "cross-fetch": "^3.1.5",
