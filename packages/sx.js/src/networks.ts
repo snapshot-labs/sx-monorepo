@@ -1,7 +1,7 @@
 import type { NetworkConfig, EvmNetworkConfig } from './types';
 
-export const evmGoerli: EvmNetworkConfig = {
-  eip712ChainId: 5,
+export const evmMainnet: EvmNetworkConfig = {
+  eip712ChainId: 1,
   proxyFactory: '0x4b4f7f64be813ccc66aefc3bfce2baa01188631c',
   masterSpace: '0xd9c46d5420434355d0e5ca3e3ccb20ce7a533964',
   executionStrategiesImplementations: {
@@ -32,18 +32,23 @@ export const evmGoerli: EvmNetworkConfig = {
   }
 };
 
+export const evmGoerli: EvmNetworkConfig = {
+  ...evmMainnet,
+  eip712ChainId: 5
+};
+
 export const evmSepolia: EvmNetworkConfig = {
-  ...evmGoerli,
+  ...evmMainnet,
   eip712ChainId: 11155111
 };
 
 export const evmPolygon: EvmNetworkConfig = {
-  ...evmGoerli,
+  ...evmMainnet,
   eip712ChainId: 137
 };
 
 export const evmArbitrum: EvmNetworkConfig = {
-  ...evmGoerli,
+  ...evmMainnet,
   eip712ChainId: 42161
 };
 
