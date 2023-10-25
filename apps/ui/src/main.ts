@@ -1,6 +1,5 @@
 import { createPinia } from 'pinia';
 import { LockPlugin } from '@snapshot-labs/lock/plugins/vue3';
-import VueGtag from 'vue-gtag';
 import options from '@/helpers/auth';
 import App from '@/App.vue';
 import router from '@/router';
@@ -25,23 +24,6 @@ const app = createApp({ render: () => h(App) })
   .use(LockPlugin, options);
 
 app.use(pinia);
-app.use(
-  VueGtag,
-  {
-    bootstrap: import.meta.env.PROD,
-    pageTrackerSkipSamePath: false,
-    pageTrackerTemplate: to => ({
-      page_title: to.name,
-      page_path: to.path,
-      page_location: window.location.href
-    }),
-    config: {
-      id: import.meta.env.VITE_GA_MEASUREMENT_ID,
-      params: { anonymize_ip: true }
-    }
-  } as any,
-  router
-);
 
 app.mount('#app');
 
