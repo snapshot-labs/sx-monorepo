@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { uint256, type Call } from 'starknet';
+import { uint256, type Call, validateAndParseAddress } from 'starknet';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 import { Leaf, generateMerkleProof } from '../../utils/merkletree';
 
@@ -23,7 +23,7 @@ export default function createMerkleWhitelistStrategy(): Strategy {
       const leaves: Leaf[] = tree.map(leaf => new Leaf(leaf.type, leaf.address, leaf.votingPower));
       const hashes = leaves.map(leaf => leaf.hash);
       const voterIndex = leaves.findIndex(
-        leaf => leaf.address.toLocaleLowerCase() === signerAddress.toLocaleLowerCase()
+        leaf => validateAndParseAddress(leaf.address) === validateAndParseAddress(signerAddress)
       );
 
       if (voterIndex === -1) throw new Error('Signer is not in whitelist');
@@ -63,7 +63,7 @@ export default function createMerkleWhitelistStrategy(): Strategy {
 
       const leaves: Leaf[] = tree.map(leaf => new Leaf(leaf.type, leaf.address, leaf.votingPower));
       const voter = leaves.find(
-        leaf => leaf.address.toLocaleLowerCase() === voterAddress.toLocaleLowerCase()
+        leaf => validateAndParseAddress(leaf.address) === validateAndParseAddress(voterAddress)
       );
 
       return voter ? voter.votingPower : 0n;
