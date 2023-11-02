@@ -471,8 +471,10 @@ export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event 
   const proposal = await Proposal.loadEntity(`${spaceId}/${proposalId}`);
   if (proposal) {
     proposal.vote_count += 1;
-    proposal.scores_total += vote.vp;
-    proposal[`scores_${vote.choice}`] += vote.vp;
+    proposal.scores_total = (BigInt(proposal.scores_total) + BigInt(vote.vp)).toString();
+    proposal[`scores_${vote.choice}`] = (
+      BigInt(proposal[`scores_${vote.choice}`]) + BigInt(vote.vp)
+    ).toString();
     await proposal.save();
   }
 };
