@@ -87,6 +87,7 @@ async function handleCancelClick() {
     <div>
       <h1 class="mb-3 text-[36px]">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
+        <span class="text-skin-text">#{{ proposal.proposal_id.toString().slice(0, 7) }}</span>
       </h1>
       <div class="flex justify-between items-center mb-3">
         <router-link
