@@ -187,7 +187,7 @@ export function createActions(
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
           const metadata = await parseStrategyMetadata(
-            space.strategies_parsed_metadata[strategy.index].payload
+            space.voting_power_validation_strategies_parsed_metadata[strategy.index].payload
           );
 
           return {
