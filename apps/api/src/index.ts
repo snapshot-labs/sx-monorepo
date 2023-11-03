@@ -24,7 +24,7 @@ if (process.env.CA_CERT) {
 }
 
 const checkpoint = new Checkpoint(config, writer, schema, {
-  logLevel: LogLevel.Fatal,
+  logLevel: LogLevel.Error,
   resetOnConfigChange: true,
   prettifyLogs: process.env.NODE_ENV !== 'production',
   abis: {
@@ -35,7 +35,6 @@ const checkpoint = new Checkpoint(config, writer, schema, {
 
 async function run() {
   await checkpoint.reset();
-  await checkpoint.resetMetadata();
 
   checkpoint.start();
 
