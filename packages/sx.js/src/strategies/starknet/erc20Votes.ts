@@ -16,6 +16,9 @@ export default function createErc20VotesStrategy(): Strategy {
       envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig
     ): Promise<string[]> {
+      const isEthereumAddress = signerAddress.length === 42;
+      if (isEthereumAddress) throw new Error('Not supported for Ethereum addresses');
+
       return [];
     },
     async getExtraProposeCalls(

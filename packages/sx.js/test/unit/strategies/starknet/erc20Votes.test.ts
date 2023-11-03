@@ -17,7 +17,7 @@ describe('erc20VotesStrategy', () => {
   it('should return params', async () => {
     const params = await erc20VotesStrategy.getParams(
       'vote',
-      '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      '0x0679a64fb03683f0aea697da37e2b62549f5d527aadd7fa06f7cb4a0dd8f7f58',
       '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
       0,
       null,
@@ -26,6 +26,20 @@ describe('erc20VotesStrategy', () => {
     );
 
     expect(params).toEqual([]);
+  });
+
+  it('should throw for ethereum address', async () => {
+    expect(
+      erc20VotesStrategy.getParams(
+        'vote',
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
+        0,
+        null,
+        proposeEnvelope,
+        config
+      )
+    ).rejects.toThrow('Not supported for Ethereum addresses');
   });
 
   it('should return extra propose calls', async () => {
