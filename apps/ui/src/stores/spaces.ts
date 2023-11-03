@@ -5,6 +5,7 @@ import pkg from '../../package.json';
 
 export const useSpacesStore = defineStore('spaces', () => {
   const metaStore = useMetaStore();
+  const { mixpanel } = useMixpanel();
   const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
   const starredSpacesData = ref([] as Space[]);
 
@@ -50,11 +51,18 @@ export const useSpacesStore = defineStore('spaces', () => {
   }
 
   function toggleSpaceStar(id: string) {
-    if (starredSpacesIds.value.includes(id)) {
+    const alreadyStarred = starredSpacesIds.value.includes(id);
+
+    if (alreadyStarred) {
       starredSpacesIds.value = starredSpacesIds.value.filter((spaceId: string) => spaceId !== id);
     } else {
       starredSpacesIds.value = [id, ...starredSpacesIds.value];
     }
+
+    mixpanel.track('Set space favorite', {
+      space: id,
+      favorite: !alreadyStarred
+    });
   }
 
   watch(

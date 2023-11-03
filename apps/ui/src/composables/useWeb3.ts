@@ -23,11 +23,15 @@ const state = reactive({
 });
 
 export function useWeb3() {
+  const { mixpanel } = useMixpanel();
+
   async function login(connector = 'injected') {
     auth = getInstance();
     state.authLoading = true;
     await auth.login(connector);
     if (auth.provider.value) {
+      mixpanel.track('Connect', { connector });
+
       auth.web3 = new Web3Provider(auth.provider.value, 'any');
       await loadProvider();
     }

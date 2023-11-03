@@ -14,6 +14,7 @@ import type {
 import type { Connector, StrategyConfig } from '@/networks/types';
 
 export function useActions() {
+  const { mixpanel } = useMixpanel();
   const uiStore = useUiStore();
   const { web3 } = useWeb3();
   const { getCurrentFromDuration } = useMetaStore();
@@ -159,6 +160,11 @@ export function useActions() {
 
     console.log('Receipt', receipt);
 
+    mixpanel.track('Create space', {
+      network: networkId,
+      predictedSpaceAddress: predictSpaceAddress(networkId, salt)
+    });
+
     return receipt.txId;
   }
 
@@ -193,6 +199,13 @@ export function useActions() {
     );
 
     uiStore.addPendingVote(proposal.id);
+
+    mixpanel.track('Vote', {
+      network: proposal.network,
+      space: proposal.space,
+      proposalId: proposal.id,
+      choice
+    });
   }
 
   async function propose(
@@ -236,6 +249,11 @@ export function useActions() {
         convertToMetaTransactions(transactions)
       )
     );
+
+    mixpanel.track('Propose', {
+      network: space.network,
+      space: space.id
+    });
 
     return true;
   }
@@ -452,6 +470,12 @@ export function useActions() {
     console.log('Receipt', receipt);
 
     uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);
+
+    mixpanel.track('Delegate', {
+      network: networkId,
+      space: space.id,
+      delegatee
+    });
   }
 
   return {
