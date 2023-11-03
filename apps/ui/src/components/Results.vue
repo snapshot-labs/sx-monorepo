@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _n } from '@/helpers/utils';
+import { _n, _p } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -27,7 +27,7 @@ const showAlternatives = ref(false);
 const progress = computed(() => Math.min(props.proposal.scores_total / props.proposal.quorum, 1));
 
 const adjustedScores = computed(() =>
-  [props.proposal.scores_1, props.proposal.scores_2, props.proposal.scores_3].map(score => {
+  [props.proposal.scores[0], props.proposal.scores[1], props.proposal.scores[2]].map(score => {
     // TODO: sx-api returns number, sx-subgraph returns string
     const parsedTotal = parseFloat(props.proposal.scores_total as unknown as string);
 
@@ -39,7 +39,7 @@ const results = computed(() =>
   adjustedScores.value
     .map((score, i) => ({
       choice: i + 1,
-      score: props.proposal[`scores_${i + 1}`],
+      score: props.proposal.scores[i],
       progress: score
     }))
     .sort((a, b) => b.progress - a.progress)
@@ -50,7 +50,24 @@ const visibleResults = computed(() =>
 </script>
 
 <template>
+  <div v-if="proposal.type !== 'basic'">
+    <div
+      v-for="(choice, id) in proposal.choices"
+      :key="id"
+      class="flex justify-between border rounded-lg p-3 mb-2 last:mb-0 text-skin-link relative overflow-hidden"
+    >
+      <div class="truncate mr-2 z-10">{{ choice }}</div>
+      <div class="z-10">{{ _p(proposal.scores[id] / proposal.scores_total) }}</div>
+      <div
+        class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none"
+        :style="{
+          width: `${((proposal.scores[id] / proposal.scores_total) * 100).toFixed(2)}%`
+        }"
+      />
+    </div>
+  </div>
   <div
+    v-else
     class="h-full"
     :class="{
       'flex items-center': !withDetails
@@ -85,7 +102,9 @@ const visibleResults = computed(() =>
         </div>
         <span
           v-text="
-            `${_n(Number(result.score) / 10 ** decimals)} ${proposal.space.voting_power_symbol}`
+            `${_n(Number(result.score) / 10 ** decimals, 'compact')} ${
+              proposal.space.voting_power_symbol
+            }`
           "
         />
         <span class="text-skin-text" v-text="`${_n(result.progress)}%`" />

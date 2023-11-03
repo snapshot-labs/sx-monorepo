@@ -177,7 +177,7 @@ async function handleCancelClick() {
           proposal.execution &&
           proposal.execution.length > 0 &&
           BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
-          BigInt(proposal.scores_1) > BigInt(proposal.scores_2) &&
+          BigInt(proposal.scores[0]) > BigInt(proposal.scores[1]) &&
           proposal.has_execution_window_opened
         "
       >

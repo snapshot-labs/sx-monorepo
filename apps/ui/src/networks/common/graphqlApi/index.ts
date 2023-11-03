@@ -11,6 +11,7 @@ import {
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/ens';
+import { CHOICES } from '@/helpers/constants';
 import { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/types';
 import { ApiSpace, ApiProposal } from './types';
 
@@ -97,6 +98,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
       )
     },
     metadata_uri: proposal.metadata.id,
+    type: 'basic',
+    choices: CHOICES,
+    scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
     title: proposal.metadata.title,
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,

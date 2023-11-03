@@ -13,25 +13,8 @@ const remarkable = new Remarkable({
   typographer: false,
   linkTarget: '_blank'
 });
-remarkable.core.ruler.disable([
-  'abbr',
-  'abbr2',
-  'footnote_tail',
-  'references',
-  'replacements',
-  'smartquotes'
-]);
-remarkable.block.ruler.disable([
-  'code',
-  'deflist',
-  'fences',
-  'footnote',
-  'hr',
-  'htmlblock',
-  'lheading',
-  'list',
-  'table'
-]);
+remarkable.core.ruler.disable(['abbr', 'abbr2', 'footnote_tail', 'replacements', 'smartquotes']);
+remarkable.block.ruler.disable(['code', 'deflist', 'fences', 'footnote', 'htmlblock', 'lheading']);
 remarkable.inline.ruler.disable([
   'autolink',
   'backticks',
@@ -94,7 +77,12 @@ const parsed = computed(() => {
   }
 
   p,
-  blockquote {
+  blockquote,
+  ul,
+  ol,
+  dl,
+  table,
+  pre {
     margin-top: 0;
     margin-bottom: 16px;
   }
@@ -102,6 +90,14 @@ const parsed = computed(() => {
   p {
     font-size: 1em;
     color: var(--content-color);
+  }
+
+  hr {
+    height: 0.25em;
+    padding: 0;
+    margin: 24px 0;
+    background-color: #e1e4e8;
+    border: 0;
   }
 
   blockquote {
@@ -140,6 +136,92 @@ const parsed = computed(() => {
   h5,
   h6 {
     font-size: 1em;
+  }
+
+  ul,
+  ol {
+    padding-left: 2em;
+  }
+
+  ul.no-list,
+  ol.no-list {
+    padding: 0;
+    list-style-type: none;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul ul,
+  ul ol,
+  ol ol,
+  ol ul {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  li {
+    word-wrap: break-all;
+  }
+
+  li > p {
+    margin-top: 16px;
+  }
+
+  li + li {
+    margin-top: 0.25em;
+  }
+
+  dl {
+    padding: 0;
+  }
+
+  dl dt {
+    padding: 0;
+    margin-top: 16px;
+    font-size: 1em;
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  dl dd {
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+  }
+
+  table th {
+    font-weight: 600;
+  }
+
+  table th,
+  table td {
+    padding: 6px 13px;
+    border: 1px solid rgb(var(--border-color));
+  }
+
+  table thead tr,
+  table tbody tr:nth-child(2n) {
+    background-color: var(--bg-color);
+    border-top: 1px solid #c6cbd1;
+  }
+
+  table tbody tr {
+    background-color: var(--bg-color);
+  }
+
+  table img {
+    background-color: transparent;
   }
 }
 </style>

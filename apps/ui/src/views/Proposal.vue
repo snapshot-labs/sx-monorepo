@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { getStampUrl, getCacheHash } from '@/helpers/utils';
 import { Choice } from '@/types';
 import { VotingPower } from '@/networks/types';
@@ -17,7 +17,8 @@ const sendingType = ref<null | number>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 
-const id = computed(() => parseInt((route.params.id as string) || '0'));
+const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
+const id = computed(() => route.params.id as string);
 const proposal = computed(() => {
   if (!resolved.value || !spaceAddress.value || !networkId.value) {
     return null;
@@ -34,9 +35,7 @@ const votingPowerDecimals = computed(() => {
 });
 
 async function getVotingPower() {
-  if (!networkId.value) return;
-
-  const network = getNetwork(networkId.value);
+  if (!network.value) return;
 
   if (!web3.value.account || !proposal.value) {
     votingPowers.value = [];
@@ -46,7 +45,7 @@ async function getVotingPower() {
 
   loadingVotingPower.value = true;
   try {
-    votingPowers.value = await network.actions.getVotingPower(
+    votingPowers.value = await network.value.actions.getVotingPower(
       proposal.value.strategies,
       proposal.value.strategies_params,
       proposal.value.space.strategies_parsed_metadata,
@@ -88,7 +87,7 @@ watchEffect(() => {
   if (!proposal.value) return;
 
   const faviconUrl = getStampUrl(
-    'space-sx',
+    offchainNetworks.includes(proposal.value.network) ? 'space' : 'space-sx',
     proposal.value.space.id,
     16,
     getCacheHash(proposal.value.space.avatar)
@@ -104,7 +103,7 @@ watchEffect(() => {
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 md:mr-[340px]">
-        <div class="flex px-4 bg-skin-bg border-b sticky top-[72px] z-50">
+        <div class="flex px-4 bg-skin-bg border-b sticky top-[72px] z-40">
           <router-link
             :to="{
               name: 'proposal-overview',
@@ -127,7 +126,7 @@ watchEffect(() => {
       <div
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l"
       >
-        <template v-if="!proposal.cancelled && !proposal.has_ended">
+        <template v-if="!proposal.cancelled && !proposal.has_ended && !network?.readOnly">
           <VotingPowerIndicator
             v-if="web3.account && networkId"
             v-slot="props"

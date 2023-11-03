@@ -6,7 +6,7 @@ type SpaceRecord = {
   loading: boolean;
   loadingMore: boolean;
   loaded: boolean;
-  proposalsIdsList: number[];
+  proposalsIdsList: (string | number)[];
   proposals: Record<number, Proposal>;
   hasMoreProposals: boolean;
   summaryLoading: boolean;
@@ -30,7 +30,7 @@ export const useProposalsStore = defineStore('proposals', () => {
     return record.proposalsIdsList.map(proposalId => record.proposals[proposalId]);
   };
 
-  const getProposal = (spaceId: string, proposalId: number, networkId: NetworkID) => {
+  const getProposal = (spaceId: string, proposalId: number | string, networkId: NetworkID) => {
     const record = proposals.value[getUniqueSpaceId(spaceId, networkId)];
     if (!record) return undefined;
 
@@ -169,7 +169,7 @@ export const useProposalsStore = defineStore('proposals', () => {
     record.value.summaryLoading = false;
   }
 
-  async function fetchProposal(spaceId: string, proposalId: number, networkId: NetworkID) {
+  async function fetchProposal(spaceId: string, proposalId: number | string, networkId: NetworkID) {
     await metaStore.fetchBlock(networkId);
 
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);

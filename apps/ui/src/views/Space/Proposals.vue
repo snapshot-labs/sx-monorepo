@@ -14,6 +14,7 @@ const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
 
+const network = computed(() => getNetwork(props.space.network));
 const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
@@ -25,8 +26,6 @@ async function handleEndReached() {
 }
 
 async function getVotingPower() {
-  const network = getNetwork(props.space.network);
-
   if (!web3.value.account) {
     votingPowers.value = [];
     loadingVotingPower.value = false;
@@ -35,7 +34,7 @@ async function getVotingPower() {
 
   loadingVotingPower.value = true;
   try {
-    votingPowers.value = await network.actions.getVotingPower(
+    votingPowers.value = await network.value.actions.getVotingPower(
       props.space.strategies,
       props.space.strategies_params,
       props.space.strategies_parsed_metadata,
@@ -92,7 +91,7 @@ watchEffect(() => {
           ]"
         />
       </div>
-      <div class="flex flex-row p-4 space-x-2">
+      <div v-if="!network.readOnly" class="flex flex-row p-4 space-x-2">
         <VotingPowerIndicator
           :network-id="space.network"
           :loading="loadingVotingPower"

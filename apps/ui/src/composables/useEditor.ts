@@ -12,7 +12,7 @@ function removeEmpty(proposals: Drafts): Drafts {
       return acc;
     }
 
-    if (typeof proposal.proposalId === 'number') {
+    if (proposal.proposalId !== null) {
       return acc;
     }
 
@@ -29,7 +29,7 @@ function generateId() {
 
 function createDraft(
   spaceId: string,
-  payload?: Partial<Draft> & { proposalId?: number },
+  payload?: Partial<Draft> & { proposalId?: number | string },
   draftKey?: string
 ) {
   const id = draftKey || generateId();

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { getNetwork } from '@/networks';
 import { shortenAddress } from '@/helpers/utils';
-import { CHOICES } from '@/helpers/constants';
 import { Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
@@ -88,14 +87,19 @@ watch(
             :class="{ 'last:border-b-0': !loadingMore }"
           >
             <div
-              class="absolute choice-bg top-0 bottom-0 right-0 opacity-10"
+              class="absolute top-0 bottom-0 right-0"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
               }"
-              :class="`_${vote.choice}`"
+              :class="
+                proposal.type === 'basic'
+                  ? `choice-bg opacity-10 _${vote.choice}`
+                  : 'bg-skin-border opacity-40'
+              "
             />
-            <Stamp :id="vote.voter.id" :size="24" class="mr-2" />
+            <Stamp :id="vote.voter.id" :size="24" class="relative mr-2" />
             <router-link
+              class="relative"
               :to="{
                 name: 'user',
                 params: {
@@ -106,7 +110,10 @@ watch(
             >
               {{ vote.voter.name || shortenAddress(vote.voter.id) }}
             </router-link>
-            <div class="absolute right-4 top-3 text-skin-link" v-text="CHOICES[vote.choice]" />
+            <div
+              class="absolute right-4 top-3 text-skin-link"
+              v-text="proposal.choices[vote.choice - 1]"
+            />
           </div>
         </BlockInfiniteScroller>
       </div>

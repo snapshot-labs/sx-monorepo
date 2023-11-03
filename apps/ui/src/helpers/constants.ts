@@ -18,8 +18,4 @@ export const COINGECKO_BASE_ASSETS = {
   42161: 'ethereum'
 };
 
-export const CHOICES = {
-  1: 'For',
-  2: 'Against',
-  3: 'Abstain'
-};
+export const CHOICES = ['For', 'Against', 'Abstain'];

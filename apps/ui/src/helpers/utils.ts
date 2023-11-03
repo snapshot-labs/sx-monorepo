@@ -121,6 +121,11 @@ export function _c(value: string | bigint, decimals = 18) {
   return formatter.format(parsed);
 }
 
+export function _p(value: number) {
+  const formatter = new Intl.NumberFormat('en', { style: 'percent', maximumFractionDigits: 2 });
+  return formatter.format(value);
+}
+
 export function jsonParse(input, fallback?) {
   if (typeof input !== 'string') {
     return fallback || {};

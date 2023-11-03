@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { enabledNetworks, getNetwork } from '@/networks';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, NetworkID } from '@/types';
 import { SpacesFilter } from '@/networks/types';
 
@@ -77,8 +77,10 @@ export function useSpaces() {
   }
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
+    const exploreNetworks = enabledNetworks.filter(network => !offchainNetworks.includes(network));
+
     const results = await Promise.all(
-      enabledNetworks.map(async id => {
+      exploreNetworks.map(async id => {
         const network = getNetwork(id);
 
         const record = networksMap.value[id];

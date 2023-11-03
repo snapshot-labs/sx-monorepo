@@ -240,7 +240,7 @@ export function createActions(
       connectorType: Connector,
       account: string,
       space: Space,
-      proposalId: number,
+      proposalId: number | string,
       cid: string,
       executionStrategy: string | null,
       transactions: MetaTransaction[]
@@ -271,7 +271,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId,
+        proposal: proposalId as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${cid}`
@@ -304,7 +304,7 @@ export function createActions(
         {
           signer: web3.getSigner(),
           space: proposal.space.id,
-          proposal: proposal.proposal_id
+          proposal: proposal.proposal_id as number
         },
         { noWait: isContract }
       );
@@ -338,7 +338,7 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies,
-        proposal: proposal.proposal_id,
+        proposal: proposal.proposal_id as number,
         choice: convertedChoice,
         metadataUri: ''
       };

@@ -23,7 +23,7 @@ async function handleVoteClick(choice: Choice) {
 <template>
   <div>
     <div class="border-b mx-4 py-3 flex">
-      <div class="flex-auto">
+      <div class="flex-auto mr-4">
         <router-link
           :to="{
             name: 'proposal-overview',
@@ -47,7 +47,8 @@ async function handleVoteClick(choice: Choice) {
         </router-link>
         <span>
           <template v-if="proposal.vote_count">
-            · {{ _n(proposal.vote_count) }} {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+            · {{ _n(proposal.vote_count, 'compact') }}
+            {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
           </template>
           ·
           <a
@@ -64,10 +65,12 @@ async function handleVoteClick(choice: Choice) {
           <template #cancelled><div /></template>
           <template #voted-pending><div /></template>
           <template #voted>
-            <Results :proposal="proposal" />
+            <Results v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <div v-else />
           </template>
           <template #ended>
-            <Results :proposal="proposal" />
+            <Results v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <div v-else />
           </template>
           <div class="flex space-x-2 py-2">
             <UiTooltip title="For">

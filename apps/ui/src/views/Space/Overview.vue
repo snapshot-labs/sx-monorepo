@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Space, Proposal as ProposalType } from '@/types';
 
 const PROPOSALS_LIMIT = 4;
@@ -19,6 +20,7 @@ onMounted(() => {
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
+const network = computed(() => getNetwork(props.space.network));
 const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
@@ -68,7 +70,7 @@ watchEffect(() => {
       </div>
       <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2">
-        <router-link :to="{ name: 'editor' }">
+        <router-link v-if="!network.readOnly" :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />
@@ -94,14 +96,14 @@ watchEffect(() => {
           <SpaceAvatar
             :space="space"
             :size="90"
-            type="space-sx"
+            :type="offchainNetworks.includes(space.network) ? 'space' : 'space-sx'"
             class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-lg left-[-4px]"
           />
         </router-link>
         <h1 v-text="space.name" />
         <div class="mb-3">
           <b class="text-skin-link">{{ _n(space.proposal_count) }}</b> proposals ·
-          <b class="text-skin-link">{{ _n(space.vote_count) }}</b> votes
+          <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b> votes
         </div>
         <div class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3">
           <span v-if="space.about">

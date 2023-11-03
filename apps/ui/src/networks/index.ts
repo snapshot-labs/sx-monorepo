@@ -1,7 +1,11 @@
 import { createStarknetNetwork } from './starknet';
 import { createEvmNetwork } from './evm';
+import { createOffchainNetwork } from './offchain';
 import { NetworkID } from '@/types';
+import { ReadWriteNetwork } from './types';
 
+const snapshotNetwork = createOffchainNetwork('s');
+const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
 const starknetNetwork = createStarknetNetwork('sn-tn');
 const polygonNetwork = createEvmNetwork('matic');
 const arbitrumNetwork = createEvmNetwork('arb1');
@@ -10,13 +14,18 @@ const goerliNetwork = createEvmNetwork('gor');
 const sepoliaNetwork = createEvmNetwork('sep');
 const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
-export const enabledNetworks: NetworkID[] = process.env.VITE_ENABLED_NETWORKS
-  ? (process.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
-  : ['eth', 'matic', 'arb1', 'gor', 'sep', 'sn-tn'];
+export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORKS
+  ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
+  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'gor', 'sep', 'sn-tn'];
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'gor', 'sep', 'linea-testnet'];
+export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 
 export const getNetwork = (id: NetworkID) => {
+  if (!enabledNetworks.includes(id)) throw new Error(`Network ${id} is not enabled`);
+
+  if (id === 's') return snapshotNetwork;
+  if (id === 's-tn') return snapshotTestnetNetwork;
   if (id === 'matic') return polygonNetwork;
   if (id === 'arb1') return arbitrumNetwork;
   if (id === 'eth') return ethereumNetwork;
@@ -26,6 +35,13 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'sn-tn') return starknetNetwork;
 
   throw new Error(`Unknown network ${id}`);
+};
+
+export const getReadWriteNetwork = (id: NetworkID): ReadWriteNetwork => {
+  const network = getNetwork(id);
+  if (network.readOnly) throw new Error(`Network ${id} is read-only`);
+
+  return network;
 };
 
 /**

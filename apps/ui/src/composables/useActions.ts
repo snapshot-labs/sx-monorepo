@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork } from '@/networks';
+import { getReadWriteNetwork } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -49,7 +49,7 @@ export function useActions() {
 
   async function handleCommitEnvelope(envelope: any, networkId: NetworkID) {
     // TODO: it should work with WalletConnect, should be done before L1 transaction is broadcasted
-    const network = getNetwork(networkId);
+    const network = getReadWriteNetwork(networkId);
 
     if (envelope?.signatureData?.commitHash && network.baseNetworkId) {
       await registerTransaction(network.chainId, {
@@ -74,7 +74,7 @@ export function useActions() {
   }
 
   async function wrapPromise(networkId: NetworkID, promise: Promise<any>) {
-    const network = getNetwork(networkId);
+    const network = getReadWriteNetwork(networkId);
 
     const envelope = await promise;
 
@@ -102,7 +102,7 @@ export function useActions() {
       return null;
     }
 
-    const network = getNetwork(networkId);
+    const network = getReadWriteNetwork(networkId);
     return network.actions.predictSpaceAddress(auth.web3, { salt });
   }
 
@@ -117,7 +117,7 @@ export function useActions() {
       return null;
     }
 
-    const network = getNetwork(networkId);
+    const network = getReadWriteNetwork(networkId);
     return network.actions.deployDependency(auth.web3, {
       controller,
       spaceAddress,
@@ -141,7 +141,7 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(networkId);
+    const network = getReadWriteNetwork(networkId);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
@@ -171,7 +171,7 @@ export function useActions() {
   async function updateMetadata(space: Space, metadata: SpaceMetadata) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(space.network);
+    const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
@@ -185,7 +185,7 @@ export function useActions() {
   async function vote(proposal: Proposal, choice: Choice) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(proposal.network);
+    const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(
       proposal.network,
@@ -221,7 +221,7 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(space.network);
+    const network = getReadWriteNetwork(space.network);
 
     const transactions = execution.map((tx: Transaction) => ({
       ...tx,
@@ -260,7 +260,7 @@ export function useActions() {
 
   async function updateProposal(
     space: Space,
-    proposalId: number,
+    proposalId: number | string,
     title: string,
     body: string,
     discussion: string,
@@ -272,7 +272,7 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(space.network);
+    const network = getReadWriteNetwork(space.network);
 
     const transactions = execution.map((tx: Transaction) => ({
       ...tx,
@@ -308,7 +308,7 @@ export function useActions() {
   async function cancelProposal(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(proposal.network);
+    const network = getReadWriteNetwork(proposal.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
@@ -325,7 +325,7 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
-    const network = getNetwork(proposal.network);
+    const network = getReadWriteNetwork(proposal.network);
 
     const receipt = await network.actions.finalizeProposal(auth.web3, proposal);
 
@@ -337,7 +337,7 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
-    const network = getNetwork(proposal.network);
+    const network = getReadWriteNetwork(proposal.network);
     if (!network.hasReceive) throw new Error('Receive on this network is not supported');
 
     const receipt = await network.actions.receiveProposal(auth.web3, proposal);
@@ -350,7 +350,7 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
-    const network = getNetwork(proposal.network);
+    const network = getReadWriteNetwork(proposal.network);
 
     const receipt = await network.actions.executeTransactions(auth.web3, proposal);
     console.log('Receipt', receipt);
@@ -363,7 +363,7 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
-    const network = getNetwork(proposal.network);
+    const network = getReadWriteNetwork(proposal.network);
 
     const receipt = await network.actions.executeQueuedProposal(auth.web3, proposal);
     console.log('Receipt', receipt);
@@ -376,7 +376,7 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
-    const network = getNetwork(proposal.network);
+    const network = getReadWriteNetwork(proposal.network);
 
     const receipt = await network.actions.vetoProposal(auth.web3, proposal);
     console.log('Receipt', receipt);
@@ -388,7 +388,7 @@ export function useActions() {
   async function setVotingDelay(space: Space, votingDelay: number) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(space.network);
+    const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
@@ -408,7 +408,7 @@ export function useActions() {
   async function setMinVotingDuration(space: Space, minVotingDuration: number) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(space.network);
+    const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
@@ -428,7 +428,7 @@ export function useActions() {
   async function setMaxVotingDuration(space: Space, maxVotingDuration: number) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(space.network);
+    const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
@@ -448,7 +448,7 @@ export function useActions() {
   async function transferOwnership(space: Space, owner: string) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(space.network);
+    const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
@@ -464,7 +464,7 @@ export function useActions() {
   async function delegate(space: Space, networkId: NetworkID, delegatee: string) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getNetwork(networkId);
+    const network = getReadWriteNetwork(networkId);
 
     const receipt = await network.actions.delegate(auth.web3, space, networkId, delegatee);
     console.log('Receipt', receipt);
