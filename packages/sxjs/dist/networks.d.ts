@@ -1,0 +1,10 @@
+import type { NetworkConfig, EvmNetworkConfig } from './types';
+export declare const evmMainnet: EvmNetworkConfig;
+export declare const evmGoerli: EvmNetworkConfig;
+export declare const evmSepolia: EvmNetworkConfig;
+export declare const evmPolygon: EvmNetworkConfig;
+export declare const evmArbitrum: EvmNetworkConfig;
+export declare const evmLineaGoerli: EvmNetworkConfig;
+export declare const goerli1: NetworkConfig;
+export declare const goerli2: NetworkConfig;
+export declare const defaultNetwork: NetworkConfig;

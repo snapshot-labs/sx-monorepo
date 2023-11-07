@@ -1,0 +1,1 @@
+["function authenticate(address target, bytes4 functionSelector, bytes data)"]

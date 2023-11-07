@@ -1,0 +1,142 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`transactions > createContractCallTransaction > should create contract call transaction 1`] = `
+{
+  "_form": {
+    "abi": [
+      "function deny(address guy)",
+    ],
+    "amount": undefined,
+    "args": {
+      "guy": "0x000000000000000000000000000000000000dead",
+    },
+    "method": "deny",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  },
+  "_type": "contractCall",
+  "data": "0x9c52a7f1000000000000000000000000000000000000000000000000000000000000dead",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "value": "0",
+}
+`;
+
+exports[`transactions > createContractCallTransaction > should create contract call transaction with ENS domain 1`] = `
+{
+  "_form": {
+    "abi": [
+      "function deny(address guy)",
+    ],
+    "amount": undefined,
+    "args": {
+      "guy": "me.sekhmet.eth",
+    },
+    "method": "deny",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  },
+  "_type": "contractCall",
+  "data": "0x9c52a7f1000000000000000000000000556b14cbda79a36dc33fcd461a04a5bcb5dc2a70",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "value": "0",
+}
+`;
+
+exports[`transactions > createContractCallTransaction > should create contract call transaction with payable 1`] = `
+{
+  "_form": {
+    "abi": [
+      "function deposit() payable",
+    ],
+    "amount": "20",
+    "args": {},
+    "method": "deposit",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  },
+  "_type": "contractCall",
+  "data": "0xd0e30db0",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "value": "20000000000000000000",
+}
+`;
+
+exports[`transactions > createSendNftTransaction > should create erc721 transaction 1`] = `
+{
+  "_form": {
+    "amount": "1",
+    "nft": {
+      "address": "0x9ed9dc8af51d74e638528ececd510dca5fe2a539",
+      "collection": "BekoNekoz VX",
+      "id": "162",
+      "name": undefined,
+    },
+    "recipient": "0x000000000000000000000000000000000000dead",
+  },
+  "_type": "sendNft",
+  "data": "0x42842e0e000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000dead00000000000000000000000000000000000000000000000000000000000000a2",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x9ed9dc8af51d74e638528ececd510dca5fe2a539",
+  "value": "0",
+}
+`;
+
+exports[`transactions > createSendNftTransaction > should create erc1155 transaction 1`] = `
+{
+  "_form": {
+    "amount": "1",
+    "nft": {
+      "address": "0x495f947276749ce646f68ac8c248420045cb7b5e",
+      "collection": "OpenSea Shared Storefront",
+      "id": "90408759670418442924295527194769699607350667425091321551161727238095924887553",
+      "name": undefined,
+    },
+    "recipient": "0x000000000000000000000000000000000000dead",
+  },
+  "_type": "sendNft",
+  "data": "0xf242432a000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000deadc7e18b6a74931ce4f61f1dd0fdd6f4fe77aca49a00000000000d0d0000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x495f947276749ce646f68ac8c248420045cb7b5e",
+  "value": "0",
+}
+`;
+
+exports[`transactions > createSendTokenTransaction > should create erc20 transaction 1`] = `
+{
+  "_form": {
+    "amount": "1000000000000000000",
+    "recipient": "0x000000000000000000000000000000000000dead",
+    "token": {
+      "address": "0xba100000625a3754423978a60c9317c58a424e3d",
+      "decimals": 18,
+      "name": "Balancer",
+      "symbol": "BAL",
+    },
+  },
+  "_type": "sendToken",
+  "data": "0xa9059cbb000000000000000000000000000000000000000000000000000000000000dead0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0xba100000625a3754423978a60c9317c58a424e3d",
+  "value": "0",
+}
+`;
+
+exports[`transactions > createSendTokenTransaction > should create eth transaction 1`] = `
+{
+  "_form": {
+    "amount": "1000000000000000000",
+    "recipient": "0x000000000000000000000000000000000000dead",
+    "token": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "decimals": 18,
+      "name": "Ether",
+      "symbol": "ETH",
+    },
+  },
+  "_type": "sendToken",
+  "data": "0x",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x000000000000000000000000000000000000dead",
+  "value": "1000000000000000000",
+}
+`;

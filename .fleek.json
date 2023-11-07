@@ -1,0 +1,15 @@
+{
+  "site": {
+    "id": "70c42f50-8f72-47bf-b0ca-5181cbff8243",
+    "team": "ac01d3be-8c74-4f06-bfc8-5e5082d83f1a",
+    "platform": "ipfs",
+    "source": "ipfs",
+    "name": "damp-pond-2290"
+  },
+  "build": {
+    "baseDir": "apps/sx-ui",
+    "publicDir": "dist",
+    "command": null,
+    "rootDir": ""
+  }
+}

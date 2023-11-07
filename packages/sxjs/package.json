@@ -1,0 +1,63 @@
+{
+  "name": "@snapshot-labs/sx",
+  "version": "0.1.0-beta.44",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint:nofix": "eslint ./src ./test --ext .ts",
+    "lint": "yarn lint:nofix --fix",
+    "prepare": "yarn build",
+    "prepublishOnly": "yarn run lint",
+    "node:evm": "anvil",
+    "node:starknet": "OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES starknet-devnet --seed 1",
+    "test": "jest -c test/jest.config.unit.js",
+    "test:integration:starknet": "jest -c test/jest.config.integration.js test/integration/starknet",
+    "test:integration:evm": "jest -c test/jest.config.integration.js test/integration/evm"
+  },
+  "eslintConfig": {
+    "extends": "@snapshot-labs"
+  },
+  "prettier": "@snapshot-labs/prettier-config",
+  "dependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/abstract-signer": "^5.7.0",
+    "@ethersproject/address": "^5.7.0",
+    "@ethersproject/bignumber": "^5.7.0",
+    "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/constants": "^5.7.0",
+    "@ethersproject/contracts": "^5.7.0",
+    "@ethersproject/hash": "^5.6.1",
+    "@ethersproject/keccak256": "^5.7.0",
+    "@ethersproject/providers": "^5.7.0",
+    "@ethersproject/solidity": "^5.7.0",
+    "@ethersproject/wallet": "^5.7.0",
+    "@openzeppelin/merkle-tree": "^1.0.5",
+    "bn.js": "^5.2.1",
+    "cross-fetch": "^3.1.5",
+    "micro-starknet": "^0.2.3",
+    "randombytes": "^2.1.0",
+    "snake-case": "^3.0.4",
+    "starknet": "5.19.1"
+  },
+  "devDependencies": {
+    "@ethersproject/units": "^5.7.0",
+    "@snapshot-labs/eslint-config": "^0.1.0-beta.7",
+    "@snapshot-labs/prettier-config": "^0.1.0-beta.7",
+    "@types/bn.js": "^5.1.1",
+    "@types/elliptic": "^6.4.14",
+    "@types/jest": "^29.4.1",
+    "@types/node": "^18.11.9",
+    "eslint": "^8.28.0",
+    "jest": "^29.4.1",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.0.5",
+    "typescript": "^4.9.3"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ]
+}

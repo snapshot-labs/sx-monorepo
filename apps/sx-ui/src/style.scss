@@ -1,0 +1,269 @@
+@tailwind base;
+@tailwind utilities;
+
+[data-color-scheme='dark'] {
+  color-scheme: dark;
+  --primary-color: #384aff;
+  --bg-color: #1c1b20;
+  --text-color: #a09fa5;
+  --link-color: #faf9fc;
+  --content-color: rgba(250, 249, 252, 0.8);
+  --heading-color: #faf9fc;
+  --border-color: 51, 50, 55;
+  --block-bg: #1c1b20;
+  --active-bg: #29282e;
+  --hover-bg: #232227;
+}
+
+[data-color-scheme='light'] {
+  color-scheme: light;
+  --primary-color: #384aff;
+  --bg-color: white;
+  --text-color: #57606a;
+  --link-color: #111111;
+  --content-color: rgba(17, 17, 17, 0.8);
+  --heading-color: #111111;
+  --border-color: 229, 229, 230;
+  --block-bg: white;
+  --active-bg: #ededed;
+  --hover-bg: #f7f7f7;
+}
+
+@font-face {
+  font-family: 'Calibre';
+  src: url('./assets/fonts/Calibre-Medium-Custom.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Calibre';
+  src: url('./assets/fonts/Calibre-Semibold-Custom.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./assets/fonts/SpaceMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./assets/fonts/SpaceMono-Bold.woff2') format('woff2');
+}
+
+body {
+  background-color: var(--bg-color);
+}
+
+.mono {
+  font-size: 44px;
+  font-family: 'Space Mono', Helvetica, Arial, sans-serif;
+  letter-spacing: -1px;
+  font-weight: 700;
+  line-height: 1.1em;
+}
+
+h1 {
+  @apply text-2xl;
+  line-height: 1.3em;
+}
+
+h2 {
+  @apply text-xl;
+  line-height: 1.2em;
+}
+
+h3 {
+  @apply text-lg;
+}
+
+h4 {
+  @apply text-[19px];
+}
+
+h5 {
+  @apply text-sm;
+}
+
+p {
+  @apply text-lg pb-2;
+}
+
+* {
+  outline: none !important;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--heading-color);
+  font-weight: 600;
+}
+
+a,
+.a {
+  color: var(--link-color);
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.choice-bg {
+  &._1 {
+    @apply bg-choice-for;
+  }
+  &._2 {
+    @apply bg-choice-against;
+  }
+  &._3 {
+    @apply bg-choice-abstain;
+  }
+  &._quorum {
+    @apply bg-skin-border;
+  }
+}
+
+.choice-text {
+  &._1 {
+    @apply text-green;
+  }
+  &._2 {
+    @apply text-red;
+  }
+  &._3 {
+    @apply text-gray-500;
+  }
+  &._quorum {
+    @apply text-skin-border;
+  }
+}
+
+#app {
+  height: 100%;
+}
+
+::placeholder {
+  color: var(--text-color) !important;
+  opacity: 0.6 !important;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 16px;
+}
+
+.notification {
+  color: white !important;
+}
+
+.x-block {
+  @apply block border-y border-x-0 sm:border-x sm:rounded-lg;
+}
+
+.lazy-loading {
+  @apply bg-skin-text animate-pulse-fast;
+}
+
+.hero {
+  background-repeat: repeat;
+  background-position: top center;
+}
+
+.dark .hero {
+  background-image: url('@/assets/grid-dark.svg');
+}
+
+.light .hero {
+  background-image: url('@/assets/grid-light.svg');
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+// Shot UI kit
+
+.s-input {
+  @apply text-skin-heading border border-skin-border block rounded-[24px] py-2 px-3 w-full bg-transparent mb-3;
+}
+
+.s-label {
+  @apply block mb-1;
+}
+
+.s-error {
+  @apply mb-2;
+
+  .s-input {
+    @apply border border-red;
+    @apply mb-1 #{!important};
+  }
+
+  .s-label {
+    @apply text-red;
+  }
+
+  .s-input-error-message {
+    @apply text-red;
+  }
+}
+
+.s-box {
+  .s-base {
+    @apply relative;
+  }
+
+  .s-label {
+    @apply absolute left-2 top-[4px] px-2 text-[17px];
+  }
+
+  .s-input {
+    @apply border bg-skin-border rounded-lg pt-[25px] mb-[14px] py-[7px] px-[15px];
+  }
+
+  select {
+    @apply h-[64px];
+  }
+}
+
+.s-compact {
+  .s-base {
+    @apply relative pt-[8px];
+  }
+
+  .s-label {
+    @apply absolute left-2 bg-skin-bg -top-[6px] px-2;
+  }
+
+  .s-input {
+    @apply focus-within:border-skin-link;
+  }
+}
+
+// Styles for get-starknet@v1 to unify overlay and prevent mismatched z-indexes
+.s-overlay {
+  z-index: 40 !important;
+
+  .s-overlay__scrim {
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+  }
+}
+
+.s-dialog {
+  z-index: 41 !important;
+}

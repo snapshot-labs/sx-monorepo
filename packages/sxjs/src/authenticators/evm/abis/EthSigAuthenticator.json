@@ -1,0 +1,7 @@
+[
+  "constructor(string name, string version)",
+  "error InvalidFunctionSelector()",
+  "error InvalidSignature()",
+  "error SaltAlreadyUsed()",
+  "function authenticate(uint8 v, bytes32 r, bytes32 s, uint256 salt, address target, bytes4 functionSelector, bytes data)"
+]

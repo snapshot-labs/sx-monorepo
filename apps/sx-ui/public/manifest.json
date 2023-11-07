@@ -1,0 +1,10 @@
+{
+  "short_name": "Snapshot X",
+  "name": "Snapshot X",
+  "description": "Where decisions get made",
+  "iconPath": "favicon-temp.svg",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
