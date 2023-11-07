@@ -25,7 +25,6 @@
     "@argent/get-starknet": "^6.4.7",
     "@braintree/sanitize-url": "^6.0.4",
     "@ensdomains/eth-ens-namehash": "^2.0.15",
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/address": "^5.7.0",
     "@ethersproject/bignumber": "^5.7.0",
