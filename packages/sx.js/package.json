@@ -2,10 +2,11 @@
   "name": "@snapshot-labs/sx",
   "version": "0.1.0-beta.44",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist.cjs/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.cjs.json",
     "lint:nofix": "eslint ./src ./test --ext .ts",
     "lint": "yarn lint:nofix --fix",
     "prepare": "yarn build",
@@ -56,6 +57,7 @@
   },
   "files": [
     "dist/**/*",
+    "dist.cjs/**/*",
     "src/**/*"
   ]
 }

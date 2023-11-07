@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "moduleResolution": "node16",
+    "target": "es2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "allowJs": true,
     "declaration": true,
     "outDir": "./dist",
