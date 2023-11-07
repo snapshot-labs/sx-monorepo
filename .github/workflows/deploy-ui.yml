@@ -1,0 +1,23 @@
+name: Deploy UI
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy-ui-dev:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18.x"
+          cache: "yarn"
+      - run: yarn --frozen-lockfile
+      - run: yarn build
+      - env:
+          FLEEK_API_KEY: ${{ secrets.FLEEK_API_KEY }}
+        run: yarn deploy:ui
