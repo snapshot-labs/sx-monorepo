@@ -36,7 +36,7 @@ yarn lint
 ### Runs tests
 
 ```
-yarn test:unit
+yarn test
 ```
 
 ### Verifies TypeScript code

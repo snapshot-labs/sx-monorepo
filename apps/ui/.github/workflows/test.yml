@@ -14,4 +14,4 @@ jobs:
       - run: yarn build
       - run: yarn typecheck
       - run: yarn lint:nofix
-      - run: yarn test:unit
+      - run: yarn test

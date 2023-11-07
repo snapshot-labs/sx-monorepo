@@ -9,7 +9,8 @@
     "lint:nofix": "eslint \"./src/**/*.{ts,vue,json}\"",
     "lint": "yarn lint:nofix --fix",
     "typecheck": "vue-tsc --noEmit",
-    "test:unit": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "electron:start": "electron .",
     "electron:build": "ELECTRON=true yarn build"
   },
