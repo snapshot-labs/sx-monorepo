@@ -11,10 +11,12 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: NetworkID);
 }>();
 
-const availableNetworks = enabledNetworks.map(id => {
-  const { name, avatar } = getNetwork(id);
-  return { id, name, avatar };
-});
+const availableNetworks = enabledNetworks
+  .map(id => {
+    const { name, avatar, readOnly } = getNetwork(id);
+    return { id, name, avatar, readOnly };
+  })
+  .filter(network => !network.readOnly);
 </script>
 
 <template>
