@@ -59,7 +59,7 @@ const arrowStyle = computed(() => {
         top: `${y ?? 0}px`,
         left: `${x ?? 0}px`
       }"
-      class="bg-skin-border text-skin-link px-3 py-2 w-max z-50 rounded text-sm leading-5 transition-opacity"
+      class="bg-skin-border text-skin-link px-[14px] py-2 w-max z-50 rounded text-sm leading-5 transition-opacity"
       :class="[visible ? 'opacity-100' : 'scale-0 opacity-0']"
     >
       {{ title }}
