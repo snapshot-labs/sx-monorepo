@@ -48,7 +48,7 @@ export type ApiProposal = {
   choices: string[];
   scores: number[];
   scores_total: number;
-  state: string;
+  state: 'active' | 'pending' | 'closed';
   created: number;
   updated: number | null;
   votes: number;

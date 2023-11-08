@@ -213,7 +213,7 @@ watch([sortBy, choiceFilter], () => {
               </div>
               <UiButton
                 v-else
-                class="!w-[40px] !h-[40px] !px-0 cursor-default"
+                class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
                 :class="{
                   '!text-green !border-green': vote.choice === 1,
                   '!text-red !border-red': vote.choice === 2,

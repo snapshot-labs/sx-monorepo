@@ -3,7 +3,6 @@ import {
   VOTES_QUERY,
   USER_VOTES_QUERY,
   PROPOSALS_QUERY,
-  PROPOSALS_SUMMARY_QUERY,
   PROPOSAL_QUERY,
   SPACES_QUERY,
   SPACE_QUERY,
@@ -12,8 +11,19 @@ import {
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/ens';
 import { CHOICES } from '@/helpers/constants';
-import { Space, Proposal, Vote, User, Transaction, NetworkID } from '@/types';
+import { Space, Proposal, Vote, User, Transaction, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal } from './types';
+
+function getProposalState(proposal: ApiProposal, current: number): ProposalState {
+  if (proposal.executed) return 'executed';
+  if (proposal.max_end <= current) {
+    if (proposal.scores_total < proposal.quorum) return 'rejected';
+    return proposal.scores_1 > proposal.scores_2 ? 'passed' : 'rejected';
+  }
+  if (proposal.start > current) return 'pending';
+
+  return 'active';
+}
 
 function formatExecution(execution: string): Transaction[] {
   if (execution === '') return [];
@@ -105,9 +115,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
     execution: formatExecution(proposal.metadata.execution),
-    has_started: proposal.start <= current,
     has_execution_window_opened: proposal.min_end <= current,
-    has_ended: proposal.max_end <= current,
+    state: getProposalState(proposal, current),
     network: networkId
   };
 }
@@ -212,20 +221,6 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       });
 
       return data.proposals.map(proposal => formatProposal(proposal, networkId, current));
-    },
-    loadProposalsSummary: async (spaceId: string, current: number, limit: number) => {
-      const { data } = await apollo.query({
-        query: PROPOSALS_SUMMARY_QUERY,
-        variables: {
-          first: limit,
-          space: spaceId,
-          threshold: current
-        }
-      });
-
-      return [...data.active, ...data.expired].map(proposal =>
-        formatProposal(proposal, networkId, current)
-      );
     },
     loadProposal: async (
       spaceId: string,

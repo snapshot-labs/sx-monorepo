@@ -146,7 +146,6 @@ export type NetworkApi = {
     filter?: 'any' | 'active' | 'pending' | 'closed',
     searchQuery?: string
   ): Promise<Proposal[]>;
-  loadProposalsSummary(spaceId: string, current: number, limit: number): Promise<Proposal[]>;
   loadProposal(
     spaceId: string,
     proposalId: number | string,

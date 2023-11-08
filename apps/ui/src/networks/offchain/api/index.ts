@@ -4,13 +4,23 @@ import {
   SPACE_QUERY,
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
-  PROPOSALS_SUMMARY_QUERY,
   VOTES_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/ens';
-import { Space, Proposal, Vote, User, NetworkID } from '@/types';
+import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
+
+function getProposalState(proposal: ApiProposal): ProposalState {
+  if (proposal.state === 'closed') {
+    if (proposal.scores_total < proposal.quorum) return 'rejected';
+    return proposal.type !== 'basic' || proposal.scores[0] > proposal.scores[1]
+      ? 'passed'
+      : 'rejected';
+  }
+
+  return proposal.state;
+}
 
 function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   // TODO: convert ChainID to ShortName, we might need external mapping to handle
@@ -79,9 +89,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     scores: proposal.scores,
     scores_total: proposal.scores_total,
     vote_count: proposal.votes,
-    has_ended: proposal.state === 'closed',
-    has_started: proposal.state !== 'pending',
-    executed: false,
+    state: getProposalState(proposal),
     cancelled: false,
     vetoed: false,
     completed: proposal.state === 'closed',
@@ -224,17 +232,6 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       });
 
       return data.proposals.map(proposal => formatProposal(proposal, networkId));
-    },
-    loadProposalsSummary: async (spaceId: string, current: number, limit: number) => {
-      const { data } = await apollo.query({
-        query: PROPOSALS_SUMMARY_QUERY,
-        variables: {
-          first: limit,
-          space: spaceId
-        }
-      });
-
-      return [...data.active, ...data.expired].map(proposal => formatProposal(proposal, networkId));
     },
     loadProposal: async (spaceId: string, proposalId: number): Promise<Proposal | null> => {
       const { data } = await apollo.query({

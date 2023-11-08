@@ -37,11 +37,11 @@ const isSupported = computed(() => {
   <slot v-else-if="uiStore.pendingVotes[proposal.id]" name="voted-pending">
     You have already voted for this proposal
   </slot>
-  <slot v-else-if="!proposal.has_started" name="waiting">
+  <slot v-else-if="proposal.state === 'pending'" name="waiting">
     Voting for this proposal hasn't started yet. Voting will start {{ _t(start) }}.
   </slot>
 
-  <slot v-else-if="proposal.has_ended || proposal.executed" name="ended">
+  <slot v-else-if="['passed', 'rejected', 'executed'].includes(proposal.state)" name="ended">
     Proposal voting window has ended
   </slot>
 

@@ -1,6 +1,8 @@
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
+export type ProposalState = 'pending' | 'active' | 'passed' | 'rejected' | 'executed';
+
 export type NetworkID =
   | 's'
   | 's-tn'
@@ -132,13 +134,11 @@ export type Proposal = {
   execution_tx: string | null;
   veto_tx: string | null;
   vote_count: number;
-  has_started: boolean;
   has_execution_window_opened: boolean;
-  has_ended: boolean;
-  executed: boolean;
   vetoed: boolean;
   completed: boolean;
   cancelled: boolean;
+  state: ProposalState;
 };
 
 export type User = {

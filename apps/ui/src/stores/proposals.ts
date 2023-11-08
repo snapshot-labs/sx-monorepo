@@ -160,10 +160,10 @@ export const useProposalsStore = defineStore('proposals', () => {
     }
 
     record.value.summaryLoading = true;
-    record.value.summaryProposals = await getNetwork(networkId).api.loadProposalsSummary(
+    record.value.summaryProposals = await getNetwork(networkId).api.loadProposals(
       spaceId,
-      metaStore.getCurrent(networkId) || 0,
-      limit
+      { limit },
+      metaStore.getCurrent(networkId) || 0
     );
     record.value.summaryLoaded = true;
     record.value.summaryLoading = false;

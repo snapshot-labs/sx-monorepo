@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { Space, Proposal as ProposalType } from '@/types';
+import { Space } from '@/types';
 
 const PROPOSALS_LIMIT = 4;
 
@@ -36,22 +36,6 @@ const githubUrl = computed(() =>
 );
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
-
-const grouped = computed(() => {
-  const initialValue = {
-    active: [] as ProposalType[],
-    ended: [] as ProposalType[]
-  };
-
-  if (!proposalsRecord.value) return initialValue;
-
-  return proposalsRecord.value.summaryProposals.reduce((v, proposal) => {
-    if (proposal.has_ended) v.ended.push(proposal);
-    else v.active.push(proposal);
-
-    return v;
-  }, initialValue);
-});
 
 watchEffect(() => {
   setTitle(props.space.name);
@@ -128,25 +112,14 @@ watchEffect(() => {
     </div>
     <div>
       <ProposalsList
-        title="Active proposals"
+        title="Proposals"
         :loading="!proposalsRecord?.summaryLoaded"
         :limit="PROPOSALS_LIMIT - 1"
-        :proposals="grouped.active"
+        :proposals="proposalsRecord?.summaryProposals ?? []"
         :route="{
           name: 'space-proposals',
           linkTitle: 'See more'
         }"
-      />
-      <ProposalsList
-        title="Closed proposals"
-        :loading="!proposalsRecord?.summaryLoaded"
-        :limit="PROPOSALS_LIMIT - 1"
-        :proposals="grouped.ended"
-        :route="{
-          name: 'space-proposals',
-          linkTitle: 'See more'
-        }"
-        class="mt-4"
       />
     </div>
   </div>

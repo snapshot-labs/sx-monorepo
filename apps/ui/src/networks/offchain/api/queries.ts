@@ -100,30 +100,6 @@ export const SPACE_QUERY = gql`
   ${SPACE_FRAGMENT}
 `;
 
-export const PROPOSALS_SUMMARY_QUERY = gql`
-  query ($first: Int!, $space: String!) {
-    active: proposals(
-      first: $first
-      where: { space: $space, state: "active", flagged: false }
-      orderBy: "created"
-      orderDirection: desc
-    ) {
-      ...proposalFragment
-    }
-
-    expired: proposals(
-      first: $first
-      where: { space: $space, state: "closed", flagged: false }
-      orderBy: "created"
-      orderDirection: desc
-    ) {
-      ...proposalFragment
-    }
-  }
-
-  ${PROPOSAL_FRAGMENT}
-`;
-
 export const VOTES_QUERY = gql`
   query (
     $first: Int!

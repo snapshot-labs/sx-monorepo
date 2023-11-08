@@ -134,7 +134,7 @@ async function handleVetoProposalClick() {
         Receive proposal
       </UiButton>
       <UiButton
-        v-if="!proposal.executed"
+        v-if="proposal.state !== 'executed'"
         class="mb-2 w-full flex justify-center items-center"
         :loading="executeTransactionsSending"
         @click="handleExecuteTransactionsClick"
@@ -143,7 +143,7 @@ async function handleVetoProposalClick() {
         Execute proposal
       </UiButton>
       <UiButton
-        v-if="proposal.executed && !proposal.completed"
+        v-if="proposal.state === 'executed' && !proposal.completed"
         :disabled="countdown > 0"
         :title="countdown === 0 ? '' : 'Veto period has not ended yet'"
         class="mb-2 w-full flex justify-center items-center"
@@ -158,7 +158,7 @@ async function handleVetoProposalClick() {
       </UiButton>
       <UiButton
         v-if="
-          proposal.executed &&
+          proposal.state === 'executed' &&
           !proposal.completed &&
           !proposal.vetoed &&
           proposal.timelock_veto_guardian &&

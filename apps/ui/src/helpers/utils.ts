@@ -9,7 +9,7 @@ import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
-import type { SpaceMetadata } from '@/types';
+import type { Proposal, SpaceMetadata } from '@/types';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
@@ -96,6 +96,13 @@ export function shorten(str: string, key?: any): string {
 export function explorerUrl(network, str: string, type = 'address'): string {
   if (network === 'starknet') type = 'contract';
   return `${networks[network].explorer}/${type}/${str}`;
+}
+
+export function getProposalId(proposal: Proposal) {
+  const proposalId = proposal.proposal_id.toString();
+
+  if (proposalId.startsWith('0x')) return `#${proposalId.slice(2, 7)}`;
+  return `#${proposalId}`;
 }
 
 export function _n(

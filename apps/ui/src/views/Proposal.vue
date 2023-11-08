@@ -126,7 +126,13 @@ watchEffect(() => {
       <div
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l"
       >
-        <template v-if="!proposal.cancelled && !proposal.has_ended && !network?.readOnly">
+        <template
+          v-if="
+            !proposal.cancelled &&
+            ['pending', 'active'].includes(proposal.state) &&
+            !network?.readOnly
+          "
+        >
           <VotingPowerIndicator
             v-if="web3.account && networkId"
             v-slot="props"
@@ -178,7 +184,7 @@ watchEffect(() => {
           </Vote>
         </template>
 
-        <template v-if="!proposal.cancelled && proposal.has_started">
+        <template v-if="!proposal.cancelled && proposal.state !== 'pending'">
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Results</h4>
           <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
         </template>

@@ -143,30 +143,6 @@ export const PROPOSALS_QUERY = gql`
   ${PROPOSAL_FRAGMENT}
 `;
 
-export const PROPOSALS_SUMMARY_QUERY = gql`
-  query ($first: Int!, $space: String!, $threshold: Int) {
-    active: proposals(
-      first: $first
-      where: { space: $space, metadata_: {}, cancelled: false, max_end_gte: $threshold }
-      orderBy: created
-      orderDirection: desc
-    ) {
-      ...proposalFragment
-    }
-
-    expired: proposals(
-      first: $first
-      where: { space: $space, metadata_: {}, cancelled: false, max_end_lt: $threshold }
-      orderBy: created
-      orderDirection: desc
-    ) {
-      ...proposalFragment
-    }
-  }
-
-  ${PROPOSAL_FRAGMENT}
-`;
-
 export const VOTES_QUERY = gql`
   query (
     $first: Int!
