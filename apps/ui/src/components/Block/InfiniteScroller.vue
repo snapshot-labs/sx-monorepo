@@ -2,7 +2,6 @@
 const props = withDefaults(
   defineProps<{
     enabled?: boolean;
-    subtree?: boolean;
     loadingMore?: boolean;
   }>(),
   { enabled: true, loadingMore: false }
@@ -51,7 +50,7 @@ watch([container, () => props.enabled], ([ref, enabled]) => {
 
   if (!ref) return;
 
-  mutationObserver.observe(ref, { childList: true, subtree: props.subtree });
+  mutationObserver.observe(ref, { childList: true });
   updateIntersectionObserver();
 });
 

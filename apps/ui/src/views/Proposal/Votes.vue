@@ -90,84 +90,85 @@ watch([sortBy, choiceFilter], () => {
 </script>
 
 <template>
-  <BlockInfiniteScroller
-    :subtree="true"
-    :loading-more="loadingMore"
-    @end-reached="handleEndReached"
-  >
-    <table class="text-left w-full table-fixed">
-      <colgroup>
-        <col class="w-[50%] lg:w-[40%]" />
-        <col class="w-[25%] lg:w-[20%]" />
-        <col class="w-[25%] lg:w-[20%]" />
-        <col class="w-[60px] lg:w-[20%]" />
-        <col class="w-[0px] lg:w-[60px]" />
-      </colgroup>
-      <thead
-        class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 after:border-b after:absolute after:w-full"
-      >
-        <tr class="bg-skin-border/10">
-          <th class="pl-4 font-medium">
-            <span class="relative bottom-[1px]">Voter</span>
-          </th>
-          <th class="hidden lg:table-cell">
+  <table class="text-left w-full table-fixed">
+    <colgroup>
+      <col class="w-[50%] lg:w-[40%]" />
+      <col class="w-[25%] lg:w-[20%]" />
+      <col class="w-[25%] lg:w-[20%]" />
+      <col class="w-[60px] lg:w-[20%]" />
+      <col class="w-[0px] lg:w-[60px]" />
+    </colgroup>
+    <thead
+      class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 after:border-b after:absolute after:w-full"
+    >
+      <tr class="bg-skin-border/10">
+        <th class="pl-4 font-medium">
+          <span class="relative bottom-[1px]">Voter</span>
+        </th>
+        <th class="hidden lg:table-cell">
+          <button
+            class="relative bottom-[1px] flex items-center min-w-0 w-full font-medium hover:text-skin-link"
+            @click="handleSortChange('created')"
+          >
+            <span>Date</span>
+            <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="ml-1" />
+            <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="ml-1" />
+          </button>
+        </th>
+        <th class="font-medium">
+          <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
+          <UiSelect
+            v-else
+            v-model="choiceFilter"
+            class="font-normal"
+            title="Choice"
+            gap="12px"
+            placement="left"
+            :items="[
+              { key: 'any', label: 'Any' },
+              { key: 'for', label: 'For', indicator: 'bg-choice-for' },
+              { key: 'against', label: 'Against', indicator: 'bg-choice-against' },
+              { key: 'abstain', label: 'Abstain', indicator: 'bg-choice-abstain' }
+            ]"
+          >
+            <template #button>
+              <div class="relative bottom-[1px] flex items-center min-w-0 hover:text-skin-link">
+                <span class="truncate">Choice</span>
+                <IH-adjustments-vertical class="ml-2" />
+              </div>
+            </template>
+          </UiSelect>
+        </th>
+        <th>
+          <div class="relative bottom-[1px] flex justify-end">
             <button
-              class="relative bottom-[1px] flex items-center min-w-0 w-full font-medium hover:text-skin-link"
-              @click="handleSortChange('created')"
+              class="flex justify-end items-center min-w-0 w-full font-medium hover:text-skin-link"
+              @click="handleSortChange('vp')"
             >
-              <span>Date</span>
-              <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="ml-1" />
-              <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="ml-1" />
+              <span class="truncate">Voting power</span>
+              <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="ml-1" />
+              <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="ml-1" />
             </button>
-          </th>
-          <th class="font-medium">
-            <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
-            <UiSelect
-              v-else
-              v-model="choiceFilter"
-              class="font-normal"
-              title="Choice"
-              gap="12px"
-              placement="left"
-              :items="[
-                { key: 'any', label: 'Any' },
-                { key: 'for', label: 'For', indicator: 'bg-choice-for' },
-                { key: 'against', label: 'Against', indicator: 'bg-choice-against' },
-                { key: 'abstain', label: 'Abstain', indicator: 'bg-choice-abstain' }
-              ]"
-            >
-              <template #button>
-                <div class="relative bottom-[1px] flex items-center min-w-0 hover:text-skin-link">
-                  <span class="truncate">Choice</span>
-                  <IH-adjustments-vertical class="ml-2" />
-                </div>
-              </template>
-            </UiSelect>
-          </th>
-          <th>
-            <div class="relative bottom-[1px] flex justify-end">
-              <button
-                class="flex justify-end items-center min-w-0 w-full font-medium hover:text-skin-link"
-                @click="handleSortChange('vp')"
-              >
-                <span class="truncate">Voting power</span>
-                <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="ml-1" />
-                <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="ml-1" />
-              </button>
-            </div>
-          </th>
-          <th />
-        </tr>
-      </thead>
-      <td v-if="!loaded" colspan="5">
-        <UiLoading class="p-4 block text-center" />
-      </td>
-      <template v-else>
-        <tbody>
-          <td v-if="votes.length === 0" class="p-4 text-center" colspan="5">
-            There isn't any votes yet!
-          </td>
-          <tr v-for="(vote, i) in votes" :key="i" class="border-b relative">
+          </div>
+        </th>
+        <th />
+      </tr>
+    </thead>
+    <td v-if="!loaded" colspan="5">
+      <UiLoading class="p-4 block text-center" />
+    </td>
+    <template v-else>
+      <tbody>
+        <td v-if="votes.length === 0" class="p-4 text-center" colspan="5">
+          There isn't any votes yet!
+        </td>
+        <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
+          <template #loading>
+            <td colspan="5">
+              <UiLoading class="p-4 block text-center" />
+            </td>
+          </template>
+          <tr v-for="(vote, i) in votes" :key="i" class="border-b relative align-middle">
             <div
               class="absolute top-0 bottom-0 right-0 pointer-events-none"
               :style="{
@@ -273,8 +274,8 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </td>
           </tr>
-        </tbody>
-      </template>
-    </table>
-  </BlockInfiniteScroller>
+        </BlockInfiniteScroller>
+      </tbody>
+    </template>
+  </table>
 </template>
