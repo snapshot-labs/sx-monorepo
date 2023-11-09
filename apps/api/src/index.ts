@@ -4,6 +4,7 @@ import fs from 'fs';
 import Checkpoint, { createGetLoader, LogLevel } from '@snapshot-labs/checkpoint';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import config from './config.json';
 import spaceFactoryAbi from './abis/spaceFactory.json';
 import spaceAbi from './abis/space.json';
@@ -38,7 +39,8 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function run() {
   const server = new ApolloServer({
-    schema: checkpoint.getSchema()
+    schema: checkpoint.getSchema(),
+    plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })]
   });
 
   const { url } = await startStandaloneServer(server, {
