@@ -34,7 +34,7 @@ async function handleVoteClick(choice: Choice) {
           }"
           class="max-w-fit flex space-x-2"
         >
-          <IconProposalStatus width="17" height="17" :state="proposal.state" class="top-[7.5px]" />
+          <ProposalStatusIcon width="17" height="17" :state="proposal.state" class="top-[7.5px]" />
           <h3
             class="leading-6 my-1"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"

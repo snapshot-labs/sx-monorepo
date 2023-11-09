@@ -97,6 +97,9 @@ async function handleCancelClick() {
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
         <span class="text-skin-text">{{ getProposalId(proposal) }}</span>
       </h1>
+
+      <ProposalStatus :state="proposal.state" class="top-[7.5px]" />
+
       <div class="flex justify-between items-center mb-3">
         <router-link
           :to="{
