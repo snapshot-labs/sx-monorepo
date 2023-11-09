@@ -13,6 +13,7 @@ const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
 const schema = fs.readFileSync(schemaFile, 'utf8');
 
+const PRODUCTION_INDEXER_DELAY = 60 * 1000;
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 if (process.env.NETWORK_NODE_URL) {
@@ -33,10 +34,10 @@ const checkpoint = new Checkpoint(config, writer, schema, {
   }
 });
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function run() {
   await checkpoint.reset();
-
-  checkpoint.start();
 
   const server = new ApolloServer({
     schema: checkpoint.getSchema()
@@ -54,6 +55,13 @@ async function run() {
   });
 
   console.log(`Listening at ${url}`);
+
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Delaying indexer to prevent multiple processes indexing at the same time.');
+    await sleep(PRODUCTION_INDEXER_DELAY);
+  }
+
+  checkpoint.start();
 }
 
 run();
