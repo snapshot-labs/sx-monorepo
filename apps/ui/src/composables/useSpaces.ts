@@ -108,25 +108,28 @@ export function useSpaces() {
       })
     );
 
-    networksMap.value = Object.fromEntries(
-      results.map(result => {
-        const spacesIds = result.spaces.map(space => space.id);
+    networksMap.value = {
+      ...networksMap.value,
+      ...(Object.fromEntries(
+        results.map(result => {
+          const spacesIds = result.spaces.map(space => space.id);
 
-        return [
-          result.id,
-          {
-            spacesIdsList: overwrite
-              ? spacesIds
-              : [...networksMap.value[result.id].spacesIdsList, ...spacesIds],
-            spaces: {
-              ...networksMap.value[result.id].spaces,
-              ...Object.fromEntries(result.spaces.map(space => [space.id, space]))
-            },
-            hasMoreSpaces: result.hasMoreSpaces
-          }
-        ];
-      })
-    ) as Record<NetworkID, NetworkRecord>;
+          return [
+            result.id,
+            {
+              spacesIdsList: overwrite
+                ? spacesIds
+                : [...networksMap.value[result.id].spacesIdsList, ...spacesIds],
+              spaces: {
+                ...networksMap.value[result.id].spaces,
+                ...Object.fromEntries(result.spaces.map(space => [space.id, space]))
+              },
+              hasMoreSpaces: result.hasMoreSpaces
+            }
+          ];
+        })
+      ) as Record<NetworkID, NetworkRecord>)
+    };
   }
 
   async function fetch(filter?: SpacesFilter) {
