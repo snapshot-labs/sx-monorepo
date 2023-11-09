@@ -37,8 +37,6 @@ const checkpoint = new Checkpoint(config, writer, schema, {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function run() {
-  await checkpoint.reset();
-
   const server = new ApolloServer({
     schema: checkpoint.getSchema()
   });
@@ -61,6 +59,7 @@ async function run() {
     await sleep(PRODUCTION_INDEXER_DELAY);
   }
 
+  await checkpoint.reset();
   checkpoint.start();
 }
 
