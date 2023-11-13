@@ -1,4 +1,10 @@
 {
+  "mainnet": {
+    "ProxyFactory": {
+      "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
+      "startBlock": 18426159
+    }
+  },
   "goerli": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
