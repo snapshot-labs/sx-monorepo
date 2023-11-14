@@ -1,4 +1,0 @@
-[
-    "function getCurrentVotes(address account) view returns (uint96)",
-    "function getPriorVotes(address account, uint256 blockNumber) view returns (uint96)"
-]
