@@ -153,7 +153,7 @@ export type NetworkApi = {
   ): Promise<Proposal | null>;
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
-  loadUser(userId: string): Promise<User>;
+  loadUser(userId: string): Promise<User | null>;
 };
 
 export type NetworkHelpers = {

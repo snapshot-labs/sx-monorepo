@@ -40,7 +40,7 @@ async function loadVotes() {
     choiceFilter.value,
     sortBy.value
   );
-  hasMore.value = votes.value.length === LIMIT;
+  hasMore.value = votes.value.length >= LIMIT;
   loaded.value = true;
 }
 
@@ -65,7 +65,7 @@ async function handleEndReached() {
     choiceFilter.value,
     sortBy.value
   );
-  hasMore.value = newVotes.length === LIMIT;
+  hasMore.value = newVotes.length >= LIMIT;
   votes.value = [...votes.value, ...newVotes];
   loadingMore.value = false;
 }

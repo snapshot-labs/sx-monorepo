@@ -67,7 +67,9 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   const { name, chainId, apiUrl, avatar } = METADATA[networkId];
 
   const provider = getProvider(chainId);
-  const api = createApi(apiUrl, networkId);
+  const api = createApi(apiUrl, networkId, {
+    highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
+  });
 
   const helpers = {
     pin: pinGraph,

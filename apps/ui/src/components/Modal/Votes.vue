@@ -31,7 +31,7 @@ function reset() {
 
 async function loadVotes() {
   votes.value = await network.value.api.loadProposalVotes(props.proposal, { limit: LIMIT });
-  hasMore.value = votes.value.length === LIMIT;
+  hasMore.value = votes.value.length >= LIMIT;
   loaded.value = true;
 }
 
@@ -43,7 +43,7 @@ async function handleEndReached() {
     limit: LIMIT,
     skip: votes.value.length
   });
-  hasMore.value = newVotes.length === LIMIT;
+  hasMore.value = newVotes.length >= LIMIT;
   votes.value = [...votes.value, ...newVotes];
   loadingMore.value = false;
 }

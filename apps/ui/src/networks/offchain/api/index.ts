@@ -269,7 +269,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return formatSpace(data.space, networkId);
     },
-    loadUser: async (id: string): Promise<User> => {
+    loadUser: async (id: string): Promise<User | null> => {
       // NOTE: missing proposal/vote count on offchain
       return {
         id,
