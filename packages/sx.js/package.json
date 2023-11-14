@@ -5,6 +5,13 @@
   "main": "dist.cjs/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist.cjs/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc && tsc -p tsconfig.cjs.json",
     "lint:nofix": "eslint ./src ./test --ext .ts",
