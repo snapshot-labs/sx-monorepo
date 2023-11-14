@@ -1,14 +1,14 @@
 import Common, { Chain, Hardfork } from '@ethereumjs/common';
 import blockFromRpc from '@ethereumjs/block/dist/from-rpc';
-import { IntsSequence } from '@snapshot-labs/sx/dist/utils/ints-sequence';
 import { utils } from '@snapshot-labs/sx';
 
 const { hexToBytes } = utils.bytes;
+const { IntsSequence } = utils.intsSequence;
 
 export interface ProcessBlockInputs {
   blockNumber: number;
   blockOptions: number;
-  headerInts: IntsSequence;
+  headerInts: utils.intsSequence.IntsSequence;
 }
 
 /**
@@ -32,6 +32,6 @@ export function getProcessBlockInputs(
   return {
     blockNumber: block.number as number,
     blockOptions: 8 as number,
-    headerInts: headerInts as IntsSequence
+    headerInts: headerInts as utils.intsSequence.IntsSequence
   };
 }
