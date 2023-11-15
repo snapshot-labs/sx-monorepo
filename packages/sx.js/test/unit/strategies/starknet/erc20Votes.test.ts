@@ -1,10 +1,14 @@
-import { defaultProvider } from 'starknet';
+import { Provider } from 'starknet';
 import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
 import { defaultNetwork } from '../../../../src/networks';
 import { proposeEnvelope } from '../../fixtures';
 
 const ethUrl = process.env.GOERLI_NODE_URL as string;
-const starkProvider = defaultProvider;
+const starkProvider = new Provider({
+  rpc: {
+    nodeUrl: 'https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146'
+  }
+});
 
 describe('erc20VotesStrategy', () => {
   const erc20VotesStrategy = createErc20VotesStrategy();
@@ -54,19 +58,19 @@ describe('erc20VotesStrategy', () => {
   });
 
   describe('getVotingPower', () => {
-    const timestamp = 1692624166;
+    const timestamp = 1699960000;
 
     it('should compute voting power for user', async () => {
       const votingPower = await erc20VotesStrategy.getVotingPower(
-        '0x0448605452b2c8a7c6347215fcfb73678ebe56d01067e664c47d14e6702b2334',
-        '0x06AbD599AB530c5b3bc603111Bdd20d77890Db330402dC870Fc9866f50eD6d2A',
+        '0x0619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7',
+        '0x7ff6b17f07c4d83236e3fc5f94259a19d1ed41bbcf1822397ea17882e9b038d',
         null,
         timestamp,
-        ['0x01c54ddc2339eb359c82ba9c5a988342ee259d31d84e4e3e88d3ade93028a745'],
+        ['0x05936cbb910e8f16a670e26f1ae3d91925be439b597b4e5e5b0c674ddd7149fa'],
         config
       );
 
-      expect(votingPower.toString()).toEqual('1000');
+      expect(votingPower.toString()).toEqual('79228132514264337593543950335');
     });
   });
 });
