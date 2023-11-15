@@ -1,6 +1,6 @@
 {
   "name": "sx-subgraph",
-  "version": "0.0.66",
+  "version": "0.0.67",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
@@ -10,12 +10,12 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 snapshot-labs/sx-subgraph",
     "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ snapshot-labs/sx-subgraph",
     "deploy-linea-testnet": "graph deploy --network linea-testnet --studio sx-linea-testnet",
-    "deploy-studio": "graph deploy --network mainnet --studio -l v${npm_package_version}",
-    "deploy-studio-mainnet": "yarn deploy-studio sx",
-    "deploy-studio-goerli": "yarn deploy-studio sekhmet-sx-goerli",
-    "deploy-studio-sepolia": "yarn deploy-studio sekhmet-sx-sepolia",
-    "deploy-studio-polygon": "yarn deploy-studio sx-polygon",
-    "deploy-studio-arbitrum": "yarn deploy-studio sx-arbitrum"
+    "deploy-studio": "graph deploy --studio -l v${npm_package_version}",
+    "deploy-studio-mainnet": "yarn deploy-studio --network mainnet sx",
+    "deploy-studio-goerli": "yarn deploy-studio --network goerli sekhmet-sx-goerli",
+    "deploy-studio-sepolia": "yarn deploy-studio --network sepolia sekhmet-sx-sepolia",
+    "deploy-studio-polygon": "yarn deploy-studio --network matic sx-polygon",
+    "deploy-studio-arbitrum": "yarn deploy-studio --network arbitrum-one sx-arbitrum"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.50.1",
