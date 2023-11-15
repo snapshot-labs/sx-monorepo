@@ -5,7 +5,7 @@ on:
     branches: [master]
 
 jobs:
-  deploy-ui-dev:
+  deploy-subgraph-sepolia:
     runs-on: ubuntu-latest
     environment: dev
     steps:
