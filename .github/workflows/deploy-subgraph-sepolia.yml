@@ -1,0 +1,23 @@
+name: Deploy Subgraph
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy-ui-dev:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18.x"
+          cache: "yarn"
+      - run: yarn --frozen-lockfile
+      - run: yarn build
+      - run: |
+          yarn graph auth --studio ${{ secrets.GRAPH_ACCESS_TOKEN }}
+          yarn deploy:subgraph-sepolia

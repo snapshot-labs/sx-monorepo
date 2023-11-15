@@ -1,0 +1,151 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ProxyFactory
+    network: mainnet
+    source:
+      abi: ProxyFactory
+      address: "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c"
+      startBlock: 18426159
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - SpaceCreated
+      abis:
+        - name: ProxyFactory
+          file: ./abis/ProxyFactory.json
+        - name: AvatarExecutionStrategy
+          file: ./abis/AvatarExecutionStrategy.json
+        - name: TimelockExecutionStrategy
+          file: ./abis/TimelockExecutionStrategy.json
+      eventHandlers:
+        - event: ProxyDeployed(address,address)
+          handler: handleProxyDeployed
+      file: ./src/mapping.ts
+templates:
+  - kind: ethereum
+    name: Space
+    network: mainnet
+    source:
+      abi: Space
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ProposalCreated
+        - VoteCreated
+        - MetadataUriUpdated
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+      eventHandlers:
+        - event: SpaceCreated(address,(address,uint32,uint32,uint32,(address,bytes),string,string,string,(address,bytes)[],string[],address[]))
+          handler: handleSpaceCreated
+        - event: ProposalCreated(uint256,address,(address,uint32,address,uint32,uint32,uint8,bytes32,uint256),string,bytes)
+          handler: handleProposalCreated
+        - event: ProposalUpdated(uint256,(address,bytes),string)
+          handler: handleProposalUpdated
+        - event: ProposalExecuted(uint256)
+          handler: handleProposalExecuted
+        - event: ProposalCancelled(uint256)
+          handler: handleProposalCancelled
+        - event: VoteCast(uint256,address,uint8,uint256)
+          handler: handleVoteCreated
+        - event: MetadataURIUpdated(string)
+          handler: handleMetadataUriUpdated
+        - event: VotingDelayUpdated(uint32)
+          handler: handleVotingDelayUpdated
+        - event: MinVotingDurationUpdated(uint32)
+          handler: handleMinVotingDurationUpdated
+        - event: MaxVotingDurationUpdated(uint32)
+          handler: handleMaxVotingDurationUpdated
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: AuthenticatorsAdded(address[])
+          handler: handleAuthenticatorsAdded
+        - event: AuthenticatorsRemoved(address[])
+          handler: handleAuthenticatorsRemoved
+        - event: VotingStrategiesAdded((address,bytes)[],string[])
+          handler: handleVotingStrategiesAdded
+        - event: VotingStrategiesRemoved(uint8[])
+          handler: handleVotingStrategiesRemoved
+        - event: ProposalValidationStrategyUpdated((address,bytes),string)
+          handler: handleProposalValidationStrategyUpdated
+      file: ./src/mapping.ts
+  - kind: ethereum
+    name: TimelockExecutionStrategy
+    network: mainnet
+    source:
+      abi: TimelockExecutionStrategy
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ProposalExecuted
+      abis:
+        - name: TimelockExecutionStrategy
+          file: ./abis/TimelockExecutionStrategy.json
+      eventHandlers:
+        - event: ProposalExecuted(bytes32)
+          handler: handleTimelockProposalExecuted
+        - event: ProposalVetoed(bytes32)
+          handler: handleTimelockProposalVetoed
+      file: ./src/mapping.ts
+  - name: SpaceMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleSpaceMetadata
+      entities:
+        - SpaceMetadata
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+    network: mainnet
+  - name: ProposalMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleProposalMetadata
+      entities:
+        - ProposalMetadata
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+    network: mainnet
+  - name: StrategiesParsedMetadataData
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleStrategiesParsedMetadataData
+      entities:
+        - StrategiesParsedMetadataData
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+    network: mainnet
+  - name: VotingPowerValidationStrategyMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleVotingPowerValidationStrategyMetadata
+      entities:
+        - VotingPowerValidationStrategiesParsedMetadata
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+    network: mainnet

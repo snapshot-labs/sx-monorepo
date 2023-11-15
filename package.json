@@ -1,11 +1,13 @@
 {
   "private": true,
   "scripts": {
+    "codegen": "turbo run codegen",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "deploy:ui": "fleek site:deploy"
+    "deploy:ui": "fleek site:deploy",
+    "deploy:subgraph-sepolia": "yarn --cwd apps/sx-subgraph deploy-studio-sepolia"
   },
   "devDependencies": {
     "@fleekhq/fleek-cli": "^0.1.8",
