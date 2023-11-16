@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "tsc && tsc -p tsconfig.cjs.json",
-    "dev": "tsc -w && tsc -p tsconfig.cjs.json -w",
+    "dev": "tsc -w",
     "lint:nofix": "eslint ./src ./test --ext .ts",
     "lint": "yarn lint:nofix --fix",
     "prepare": "yarn build",
