@@ -10,6 +10,7 @@
     "dev": "turbo run dev",
     "test": "turbo run test",
     "lint": "turbo run lint",
+    "publish-packages": "yarn build && changeset version && changeset publish",
     "deploy:ui": "fleek site:deploy",
     "deploy:subgraph-sepolia": "yarn --cwd apps/sx-subgraph deploy-studio-sepolia"
   },

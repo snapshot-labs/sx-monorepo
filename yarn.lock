@@ -2556,6 +2556,30 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.7.tgz#c8e07e7e9baabee245020a72ac05835b65139823"
   integrity sha512-k/FUf4VWhwLFUmKuWs2mNvmPe691hqhvCJuujD4TfbIivWysmL1TqthwfdQUrQEAQUqVQ2ZKEiGkbufp5J27eQ==
 
+"@snapshot-labs/sx@^0.1.0-beta.44":
+  version "0.1.0-beta.44"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/sx/-/sx-0.1.0-beta.44.tgz#ddc26d4987cf56382770ba8d02f438c5da6e5e69"
+  integrity sha512-RI5fcyUHk4QcmEaK4GDIkwQcCh+c7JihhVQ/U6wFqfEcrIP93/4uSZfipKJIKHYSo9sGfHPFQmdJhwPicbVebg==
+  dependencies:
+    "@ethersproject/abi" "^5.7.0"
+    "@ethersproject/abstract-signer" "^5.7.0"
+    "@ethersproject/address" "^5.7.0"
+    "@ethersproject/bignumber" "^5.7.0"
+    "@ethersproject/bytes" "^5.7.0"
+    "@ethersproject/constants" "^5.7.0"
+    "@ethersproject/contracts" "^5.7.0"
+    "@ethersproject/hash" "^5.6.1"
+    "@ethersproject/keccak256" "^5.7.0"
+    "@ethersproject/providers" "^5.7.0"
+    "@ethersproject/solidity" "^5.7.0"
+    "@ethersproject/wallet" "^5.7.0"
+    "@openzeppelin/merkle-tree" "^1.0.5"
+    cross-fetch "^3.1.5"
+    micro-starknet "^0.2.3"
+    randombytes "^2.1.0"
+    snake-case "^3.0.4"
+    starknet "5.19.1"
+
 "@solana/buffer-layout@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@solana/buffer-layout/-/buffer-layout-4.0.1.tgz#b996235eaec15b1e0b5092a8ed6028df77fa6c15"
