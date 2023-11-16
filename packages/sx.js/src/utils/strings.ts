@@ -41,3 +41,7 @@ export function shortStringArrToStr(shortStringArr: Array<bigint>): string {
   }
   return res;
 }
+
+export function returnDummy() {
+  return 'dummy';
+}
