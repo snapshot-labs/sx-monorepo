@@ -73,7 +73,7 @@ const currentToken = computed(() => {
   if (!token) {
     return {
       decimals: 18,
-      name: metadata?.name ?? 'Ethereum',
+      name: metadata?.name ?? 'Ether',
       symbol: metadata?.ticker ?? 'ETH',
       contractAddress: ETH_CONTRACT,
       logo: null,

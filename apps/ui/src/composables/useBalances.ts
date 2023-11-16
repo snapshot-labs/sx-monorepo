@@ -44,7 +44,7 @@ export function useBalances() {
     const metadata = METADATA_BY_CHAIN_ID.get(networkId);
     const baseToken = metadata?.ticker
       ? { name: metadata.name, symbol: metadata.ticker }
-      : { name: 'Ethereum', symbol: 'ETH' };
+      : { name: 'Ether', symbol: 'ETH' };
 
     const data = await getBalances(address, networkId, baseToken);
     const tokensWithBalance = data.filter(
