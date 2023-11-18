@@ -40,7 +40,8 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 async function run() {
   const server = new ApolloServer({
     schema: checkpoint.getSchema(),
-    plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })]
+    plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })],
+    introspection: true
   });
 
   const { url } = await startStandaloneServer(server, {
