@@ -6,7 +6,7 @@ import { NetworkID } from '@/types';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
-  's-tn': 'https://testnet.snapshot.org/graphql'
+  's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
