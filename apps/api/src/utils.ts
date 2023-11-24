@@ -27,7 +27,7 @@ const starkProvider = new Provider({
 });
 
 const PROPOSITION_POWER_PROPOSAL_VALIDATION_STRATEGY =
-  '0x38f034f17941669555fca61c43c67a517263aaaab833b26a1ab877a21c0bb6d';
+  '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631';
 const encodersAbi = new CallData(EncodersAbi);
 
 export function getCurrentTimestamp() {
