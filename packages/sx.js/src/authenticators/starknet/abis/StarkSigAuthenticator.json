@@ -77,7 +77,7 @@
             "type": "core::array::Array::<core::felt252>"
           },
           {
-            "name": "target",
+            "name": "space",
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {
@@ -99,10 +99,6 @@
           {
             "name": "salt",
             "type": "core::felt252"
-          },
-          {
-            "name": "account_type",
-            "type": "core::felt252"
           }
         ],
         "outputs": [],
@@ -117,7 +113,7 @@
             "type": "core::array::Array::<core::felt252>"
           },
           {
-            "name": "target",
+            "name": "space",
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {
@@ -139,10 +135,6 @@
           {
             "name": "metadata_uri",
             "type": "core::array::Array::<core::felt252>"
-          },
-          {
-            "name": "account_type",
-            "type": "core::felt252"
           }
         ],
         "outputs": [],
@@ -157,7 +149,7 @@
             "type": "core::array::Array::<core::felt252>"
           },
           {
-            "name": "target",
+            "name": "space",
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {
@@ -178,10 +170,6 @@
           },
           {
             "name": "salt",
-            "type": "core::felt252"
-          },
-          {
-            "name": "account_type",
             "type": "core::felt252"
           }
         ],

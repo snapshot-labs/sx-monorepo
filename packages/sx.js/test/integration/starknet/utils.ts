@@ -78,7 +78,7 @@ export type TestConfig = {
   networkConfig: NetworkConfig;
 };
 
-async function deployDependency(account: Account, sierra: any, casm: any, args: any[] = []) {
+export async function deployDependency(account: Account, sierra: any, casm: any, args: any[] = []) {
   const {
     deploy: { contract_address }
   } = await account.declareAndDeploy({
@@ -114,6 +114,8 @@ export async function setup({
   ethereumWallet: Wallet;
   ethUrl: string;
 }): Promise<TestConfig> {
+  await mint(starknetAccount.address, 1000000000000000000000);
+
   const masterSpaceResult = await starknetAccount.declareIfNot({
     contract: sxSpaceSierra as any,
     casm: sxSpaceCasm as any
@@ -490,6 +492,13 @@ export async function postDevnet(path: string, body: Record<string, any>) {
   });
 
   return res.json();
+}
+
+export function mint(address: string, amount: number) {
+  return postDevnet('mint', {
+    address,
+    amount
+  });
 }
 
 export function setTime(time: number) {

@@ -1,16 +1,22 @@
 import { Account, Provider, uint256 } from 'starknet';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import ozAccountSierra from './fixtures/openzeppelin_Account.sierra.json';
+import ozAccountCasm from './fixtures/openzeppelin_Account.casm.json';
 import { EthereumSig, EthereumTx, L1Executor, StarkNetSig, StarkNetTx } from '../../../src/clients';
 import { getExecutionData } from '../../../src/executors';
 import { Choice } from '../../../src/types';
-import { flush, increaseTime, setTime, setup, TestConfig } from './utils';
+import { deployDependency, flush, increaseTime, setTime, setup, TestConfig } from './utils';
 
 describe('sx-starknet', () => {
   const ethUrl = 'http://127.0.0.1:8545';
-  const address = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
-  const privateKey = '0xcd613e30d8f16adf91b7584a2265b1f5';
+  const entryAddress = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
+  const entryPrivateKey = '0xcd613e30d8f16adf91b7584a2265b1f5';
   const ethPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+  let address = '';
+  const publicKey = '0x138b5dd1ca094fcaebd669a5d2aa7bb7d13db32d5939939ee66b938ded2f361';
+  const privateKey = '0x9c7d498a8f76dc87564274036988f668';
 
   const starkProvider = new Provider({
     sequencer: {
@@ -21,7 +27,8 @@ describe('sx-starknet', () => {
   const provider = new JsonRpcProvider(ethUrl);
   const wallet = new Wallet(ethPrivateKey, provider);
   const walletAddress = wallet.address;
-  const account = new Account(starkProvider, address, privateKey);
+  const entryAccount = new Account(starkProvider, entryAddress, entryPrivateKey);
+  let account: Account;
 
   let client: StarkNetTx;
   let ethSigClient: EthereumSig;
@@ -32,6 +39,9 @@ describe('sx-starknet', () => {
 
   beforeAll(async () => {
     setTime(Math.floor(Date.now() / 1000));
+
+    address = await deployDependency(entryAccount, ozAccountSierra, ozAccountCasm, [publicKey]);
+    account = new Account(starkProvider, address, privateKey, '1');
 
     testConfig = await setup({
       starknetAccount: account,

@@ -3,7 +3,7 @@
 exports[`StarkNetSig should create propose envelope 1`] = `
 {
   "data": {
-    "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
+    "authenticator": "0x05280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5",
     "executionStrategy": {
       "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
       "params": [
@@ -14,7 +14,7 @@ exports[`StarkNetSig should create propose envelope 1`] = `
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     "strategies": [
       {
-        "address": "0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee",
+        "address": "0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52",
         "index": 0,
       },
     ],
@@ -36,16 +36,13 @@ exports[`StarkNetSig should create propose envelope 1`] = `
       "salt": "0x0",
       "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
       "userProposalValidationParams": [
-        "1",
-        "0",
-        "1",
         "0",
       ],
     },
     "primaryType": "Propose",
     "signature": [
-      "0x34b23e74aaccaed17b38fadb9efed0a2778ccdb01925524e206d60e3d03544f",
-      "0x36eea1b8e8258cb786c5f3f052853bd89e130651d6ab2526394123d840bd763",
+      "0x795274390aa698b85897487695508f9804b8ef26176516ca778aa2d944f5e1e",
+      "0x7a308886ce44e01c1c95bd32b1fcc70a28c2d5921406ca68c0bbd18ea7d4b10",
     ],
   },
 }
@@ -54,7 +51,7 @@ exports[`StarkNetSig should create propose envelope 1`] = `
 exports[`StarkNetSig should create update proposal envelope 1`] = `
 {
   "data": {
-    "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
+    "authenticator": "0x05280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5",
     "executionStrategy": {
       "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
       "params": [
@@ -88,8 +85,8 @@ exports[`StarkNetSig should create update proposal envelope 1`] = `
     },
     "primaryType": "UpdateProposal",
     "signature": [
-      "0x5450f74b8634b40a475612c911d6eb28a344e15e249502b4206cd31d3ba7342",
-      "0x7e8346c6bad7e3ebd46fa7e990e9537feb046ed8a9da6986b6f5e7a64cf952d",
+      "0x17aa8d968a74149cc076ce445f3ce27dc9919eb4130b99e1045a1e789671e8e",
+      "0x53071cdd901b6f2238e23b46dd0d3f8dad5ef12d6043982b4f68e5f65a0e6fc",
     ],
   },
 }
@@ -98,13 +95,13 @@ exports[`StarkNetSig should create update proposal envelope 1`] = `
 exports[`StarkNetSig should create vote envelope 1`] = `
 {
   "data": {
-    "authenticator": "0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a",
+    "authenticator": "0x05280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5",
     "choice": 1,
     "proposal": 1,
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     "strategies": [
       {
-        "address": "0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee",
+        "address": "0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52",
         "index": 0,
       },
     ],
@@ -119,20 +116,13 @@ exports[`StarkNetSig should create vote envelope 1`] = `
         "low": "0x1",
       },
       "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
-      "userVotingStrategies": [
-        {
-          "index": 0,
-          "params": [
-            "0x0",
-          ],
-        },
-      ],
+      "userVotingStrategies": [],
       "voter": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
     },
     "primaryType": "Vote",
     "signature": [
-      "0x6419e7b5a19568e3fd1918a33062c68de03ccac106bfc9a5c0dcb387754749c",
-      "0x158b4fae20a6aa32ee232b7b067385ec2ae59f64e2c3afe30695b2775234dd",
+      "0x1f6ce499ae5142825fc291b954f46429d470036c0eb66db8bb1612cef3a500a",
+      "0x415f73050cb07ef615c64b6d54ff3446b8de62c96895220f5748f5e3d3fbcc7",
     ],
   },
 }

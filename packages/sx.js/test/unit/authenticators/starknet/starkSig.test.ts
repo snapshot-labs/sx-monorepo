@@ -33,8 +33,7 @@ describe('starkSigAuthenticator', () => {
         '1',
         '0',
         '0',
-        '0',
-        '495773117285'
+        '0'
       ],
       contractAddress: '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
       entrypoint: 'authenticate_propose'

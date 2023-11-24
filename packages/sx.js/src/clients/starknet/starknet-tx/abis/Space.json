@@ -677,6 +677,18 @@
           }
         ],
         "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "post_upgrade_initializer",
+        "inputs": [
+          {
+            "name": "initialize_calldata",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       }
     ]
   },

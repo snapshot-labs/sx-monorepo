@@ -23,10 +23,10 @@ describe('EthereumTx', () => {
   it('should return propose hash', async () => {
     const data = {
       space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-      authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
+      authenticator: '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
       strategies: [
         {
-          address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee',
+          address: '0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
           index: 0
         }
       ],
@@ -38,17 +38,17 @@ describe('EthereumTx', () => {
     };
 
     const result = await ethereumTx.getProposeHash(wallet, data);
-    expect(result).toEqual('0x4bb45818cdb46e0a9009760ee866a024724f256865c2b99cb3caabfae15872c');
+    expect(result).toEqual('0x6ad6a7880f1ed8213c56ce9fcc0fc50eaca6fffbbd8546ff211825519bc9032');
   });
 
   it('should return vote hash', async () => {
     const data = {
       space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-      authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
+      authenticator: '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
       strategies: [
         {
           index: 0,
-          address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee'
+          address: '0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52'
         }
       ],
       proposal: 32,
@@ -56,13 +56,13 @@ describe('EthereumTx', () => {
     };
 
     const result = await ethereumTx.getVoteHash(wallet, data);
-    expect(result).toEqual('0x56b96d4c0cc4da80f41f11285486d1a1b8cd500df267d9dff9baca4aefc6da2');
+    expect(result).toEqual('0x4affc1f0108aecdd06a9c2b8402ffe11ba37e27dfcbb98964ff68f83899367b');
   });
 
   it('should return update proposal hash', async () => {
     const data = {
       space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-      authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
+      authenticator: '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
       proposal: 32,
       executionStrategy: {
         addr: '0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe',

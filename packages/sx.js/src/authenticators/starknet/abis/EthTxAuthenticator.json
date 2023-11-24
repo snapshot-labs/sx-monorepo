@@ -83,7 +83,7 @@
         "name": "authenticate_propose",
         "inputs": [
           {
-            "name": "target",
+            "name": "space",
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {
@@ -111,7 +111,7 @@
         "name": "authenticate_vote",
         "inputs": [
           {
-            "name": "target",
+            "name": "space",
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {
@@ -143,7 +143,7 @@
         "name": "authenticate_update_proposal",
         "inputs": [
           {
-            "name": "target",
+            "name": "space",
             "type": "core::starknet::contract_address::ContractAddress"
           },
           {

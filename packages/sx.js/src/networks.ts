@@ -84,68 +84,68 @@ export const evmLineaGoerli: EvmNetworkConfig = {
   }
 };
 
-export const goerli1: NetworkConfig = {
-  eip712ChainId: '0x534e5f474f45524c49',
-  spaceFactory: '0x33a57fe2f6e28c2931a246eea567d9af6a036c4f7e0a15625bad5677c7b18f7',
-  masterSpace: '0x2abf4530780a9ff3b22b94d853a24aeadcccd137aa9d553c41197d1c98b2b6f',
-  starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29',
+export const starknetMainnet: NetworkConfig = {
+  eip712ChainId: '0x534e5f4d41494e',
+  spaceFactory: '0x0250e28c97e729842190c3672f9fcf8db0fc78b8080e87a894831dc69e4f4439',
+  masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
+  starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
   authenticators: {
-    '0x007ea118e919c2d693f6c6d4643caae86814e8a7c06a77c33799e8d5f8a544a2': {
+    '0x00c4b0a7d8626638e7dd410b16ccbc48fe36e68f864dec75b23ef41e3732d5d2': {
       type: 'vanilla'
     },
-    '0x053c66d5b61f7b7f8a3871908b16d6e199ed401b706fb042a006d53f97ec2958': {
+    '0x0687b57bc5459d05d9575483be8ed8e623c379484fdb1aad18b073ffd4602099': {
       type: 'starkTx'
     },
-    '0x00b321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476': {
+    '0x06e9de29d8c3551e7f845888f323e864ff214359b56a137633bf7e191035b442': {
       type: 'starkSig'
     },
-    '0x0204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': {
+    '0x063c89d1c6b938b68e88db2719cf2546a121c23642974c268515238b442b0ea0': {
       type: 'ethTx'
     },
-    '0x06584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c': {
+    '0x00b610082a0f39458e03a96663767ec25d6fb259f32c1e0dd19bf2be7a52532c': {
       type: 'ethSig'
     }
   },
   strategies: {
-    '0x0510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee': {
-      type: 'vanilla'
-    },
-    '0x0297fb0104d8be6c86f168bf1dcdc28b0625d2b06108c3c46194aa4415f2e2ec': {
+    '0x0528b83a6af52c56cb2134fd9190a441e930831af437c1cb0fa6e459ad1435ba': {
       type: 'whitelist'
     },
-    '0x0619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7': {
+    '0x02429becc80a90bbeb38c6566617c584f79c60f684e8e73313af58b109b7d637': {
       type: 'erc20Votes'
     }
   }
 };
 
-export const goerli2: NetworkConfig = {
-  eip712ChainId: '0x534e5f474f45524c4932',
-  spaceFactory: '0x00e1e511e496a72791ab3d591ba7d571a32de4261d84e4d183f26b6325970e20',
-  masterSpace: '',
-  starknetCommit: '',
+export const starknetGoerli1: NetworkConfig = {
+  eip712ChainId: '0x534e5f474f45524c49',
+  spaceFactory: '0x063c62258e1ba4d9ad72eab809ea5c3d1a4545b721bc444d6068ced6246c2f3c',
+  masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
+  starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29',
   authenticators: {
-    '0x05e1f273ca9a11f78bfb291cbe1b49294cf3c76dd48951e7ab7db6d9fb1e7d62': {
+    '0x046ad946f22ac4e14e271f24309f14ac36f0fde92c6831a605813fefa46e0893': {
       type: 'vanilla'
     },
-    '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14': {
+    '0x00573a7fc4d8dd3a860b376741c251772cd4d15508dd94564ff23a645d28042d': {
+      type: 'starkTx'
+    },
+    '0x05280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5': {
+      type: 'starkSig'
+    },
+    '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812': {
+      type: 'ethTx'
+    },
+    '0x048b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e': {
       type: 'ethSig'
     }
   },
   strategies: {
-    '0x058623786b93d9b6ed1f83cec5c6fa6bea5f399d2795ee56a6123bdd83f5aa48': {
-      type: 'vanilla'
+    '0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52': {
+      type: 'whitelist'
     },
-    '0x00d1b81feff3095ca9517fdfc7427e742ce96f7ca8f3b2664a21b2fba552493b': {
-      type: 'singleSlotProof',
-      params: {
-        fossilL1HeadersStoreAddress:
-          '0x69606dd1655fdbbf8189e88566c54890be8f7e4a3650398ac17f6586a4a336d',
-        fossilFactRegistryAddress:
-          '0x2e39818908f0da118fde6b88b52e4dbdf13d2e171e488507f40deb6811bde3f'
-      }
+    '0x030258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29': {
+      type: 'erc20Votes'
     }
   }
 };
 
-export const defaultNetwork = goerli1;
+export const defaultNetwork = starknetGoerli1;

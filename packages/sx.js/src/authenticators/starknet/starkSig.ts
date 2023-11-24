@@ -38,8 +38,7 @@ export default function createStarkSigAuthenticator(): Authenticator {
           params: args.executionStrategy.params
         },
         args.strategiesParams,
-        envelope.signatureData.message.salt,
-        shortString.encodeShortString('snake')
+        envelope.signatureData.message.salt
       ]);
 
       return {
@@ -69,8 +68,7 @@ export default function createStarkSigAuthenticator(): Authenticator {
           index: strategy.index,
           params: strategy.params
         })),
-        shortString.splitLongString(args.metadataUri),
-        shortString.encodeShortString('snake')
+        shortString.splitLongString(args.metadataUri)
       ]);
 
       return {
@@ -103,8 +101,7 @@ export default function createStarkSigAuthenticator(): Authenticator {
           params: args.executionStrategy.params
         },
         shortString.splitLongString(args.metadataUri),
-        envelope.signatureData.message.salt,
-        shortString.encodeShortString('snake')
+        envelope.signatureData.message.salt
       ]);
 
       return {

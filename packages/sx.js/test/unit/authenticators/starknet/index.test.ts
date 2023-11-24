@@ -6,14 +6,14 @@ describe('authenticators', () => {
     it('should return correct authenticator from predefined default addresses', () => {
       expect(
         getAuthenticator(
-          '0x7ea118e919c2d693f6c6d4643caae86814e8a7c06a77c33799e8d5f8a544a2',
+          '0x046ad946f22ac4e14e271f24309f14ac36f0fde92c6831a605813fefa46e0893',
           defaultNetwork
         )?.type
       ).toBe('vanilla');
 
       expect(
         getAuthenticator(
-          '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54',
+          '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
           defaultNetwork
         )?.type
       ).toBe('ethTx');

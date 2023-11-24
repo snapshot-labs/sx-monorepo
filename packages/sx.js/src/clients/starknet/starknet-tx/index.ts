@@ -1,4 +1,5 @@
 import { Account, CallData, shortString, uint256, hash } from 'starknet';
+import { poseidonHashMany } from 'micro-starknet';
 import randomBytes from 'randombytes';
 import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getAuthenticator } from '../../../authenticators/starknet';
@@ -75,23 +76,21 @@ export class StarkNetTx {
       votingStrategies,
       votingStrategiesMetadata
     },
-    salt
+    saltNonce
   }: {
     account: Account;
     params: SpaceParams;
-    salt?: string;
+    saltNonce?: string;
   }): Promise<{ txId: string; address: string }> {
-    salt = salt || `0x${randomBytes(30).toString('hex')}`;
-
-    const address = await this.predictSpaceAddress({ salt });
+    saltNonce = saltNonce || `0x${randomBytes(30).toString('hex')}`;
+    const address = await this.predictSpaceAddress({ account, saltNonce });
 
     const res = await account.execute({
       contractAddress: this.config.networkConfig.spaceFactory,
       entrypoint: 'deploy',
       calldata: CallData.compile({
         class_hash: this.config.networkConfig.masterSpace,
-        contract_address_salt: salt,
-        calldata: callData.compile('initialize', [
+        initialize_calldata: callData.compile('initialize', [
           controller,
           minVotingDuration,
           maxVotingDuration,
@@ -109,14 +108,21 @@ export class StarkNetTx {
           authenticators,
           shortString.splitLongString(metadataUri),
           shortString.splitLongString(daoUri)
-        ])
+        ]),
+        salt_nonce: saltNonce
       })
     });
 
     return { txId: res.transaction_hash, address };
   }
 
-  async predictSpaceAddress({ salt }: { salt: string }) {
+  async getSalt({ sender, saltNonce }: { sender: string; saltNonce: string }) {
+    return poseidonHashMany([BigInt(sender), BigInt(saltNonce)]);
+  }
+
+  async predictSpaceAddress({ account, saltNonce }: { account: Account; saltNonce: string }) {
+    const salt = await this.getSalt({ sender: account.address, saltNonce });
+
     return hexPadLeft(
       hash.calculateContractAddressFromHash(
         salt,

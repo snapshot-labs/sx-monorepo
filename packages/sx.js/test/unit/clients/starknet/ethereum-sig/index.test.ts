@@ -34,10 +34,10 @@ describe('EthereumSig', () => {
       signer,
       data: {
         space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-        authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
+        authenticator: '0x048b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e',
         strategies: [
           {
-            address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee',
+            address: '0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
             index: 0
           }
         ],
@@ -57,7 +57,7 @@ describe('EthereumSig', () => {
       signer,
       data: {
         space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-        authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
+        authenticator: '0x048b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e',
         executionStrategy: {
           addr: '0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe',
           params: ['0x101']
@@ -75,10 +75,10 @@ describe('EthereumSig', () => {
       signer,
       data: {
         space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-        authenticator: '0x00e6533da3322019c3e26bd6942b647a74593af805021003bab707267717952a',
+        authenticator: '0x048b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e',
         strategies: [
           {
-            address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee',
+            address: '0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
             index: 0
           }
         ],
