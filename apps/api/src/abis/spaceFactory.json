@@ -41,12 +41,12 @@
             "type": "core::starknet::class_hash::ClassHash"
           },
           {
-            "name": "contract_address_salt",
-            "type": "core::felt252"
-          },
-          {
             "name": "initialize_calldata",
             "type": "core::array::Span::<core::felt252>"
+          },
+          {
+            "name": "salt_nonce",
+            "type": "core::felt252"
           }
         ],
         "outputs": [

@@ -26,7 +26,7 @@ if (process.env.CA_CERT) {
 }
 
 const checkpoint = new Checkpoint(config, writer, schema, {
-  logLevel: LogLevel.Error,
+  logLevel: LogLevel.Info,
   resetOnConfigChange: true,
   prettifyLogs: process.env.NODE_ENV !== 'production',
   abis: {
