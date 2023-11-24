@@ -1,9 +1,9 @@
 import { Account, constants, Provider } from 'starknet';
-import { clients, goerli1, goerli2 } from '@snapshot-labs/sx';
+import { clients, starknetMainnet, starknetGoerli1 } from '@snapshot-labs/sx';
 
 export const NETWORKS = {
-  [constants.StarknetChainId.SN_GOERLI]: goerli1,
-  [constants.StarknetChainId.SN_GOERLI2]: goerli2
+  [constants.StarknetChainId.SN_MAIN]: starknetMainnet,
+  [constants.StarknetChainId.SN_GOERLI]: starknetGoerli1
 } as const;
 
 const clientsMap = new Map<
@@ -17,9 +17,9 @@ const clientsMap = new Map<
 
 function getProvider(chainId: string) {
   const baseUrl =
-    chainId === constants.StarknetChainId.SN_GOERLI
-      ? 'https://alpha4.starknet.io'
-      : 'https://alpha4-2.starknet.io';
+    chainId === constants.StarknetChainId.SN_MAIN
+      ? 'https://alpha-mainnet.starknet.io'
+      : 'https://alpha4.starknet.io';
 
   return new Provider({
     sequencer: {
