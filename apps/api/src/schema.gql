@@ -19,7 +19,7 @@ type Space {
   strategies_parsed_metadata: [StrategiesParsedMetadataItem]! @derivedFrom(field: "space")
   authenticators: [String]!
   validation_strategy: String!
-  validation_strategy_params: String!
+  validation_strategy_params: Text!
   voting_power_validation_strategy_strategies: [String]!
   voting_power_validation_strategy_strategies_params: [String]!
   voting_power_validation_strategy_metadata: String!
