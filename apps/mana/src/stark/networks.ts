@@ -1,4 +1,4 @@
-import { Account, constants, Provider } from 'starknet';
+import { Account, constants, RpcProvider } from 'starknet';
 import { clients, starknetMainnet, starknetGoerli1 } from '@snapshot-labs/sx';
 
 export const NETWORKS = {
@@ -9,22 +9,17 @@ export const NETWORKS = {
 const clientsMap = new Map<
   string,
   {
-    provider: Provider;
+    provider: RpcProvider;
     client: clients.StarkNetTx;
     account: Account;
   }
 >();
 
 function getProvider(chainId: string) {
-  const baseUrl =
-    chainId === constants.StarknetChainId.SN_MAIN
-      ? 'https://alpha-mainnet.starknet.io'
-      : 'https://alpha4.starknet.io';
+  const networkName = chainId === constants.StarknetChainId.SN_MAIN ? 'SN_MAIN' : 'SN_GOERLI';
 
-  return new Provider({
-    sequencer: {
-      baseUrl
-    }
+  return new RpcProvider({
+    nodeUrl: networkName
   });
 }
 
