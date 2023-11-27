@@ -12,55 +12,53 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 export const API_URL = 'https://api-1.snapshotx.xyz';
 
 export const SUPPORTED_AUTHENTICATORS = {
-  '0x6584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c': true,
-  '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': true,
-  '0xb321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476': true,
-  '0x53c66d5b61f7b7f8a3871908b16d6e199ed401b706fb042a006d53f97ec2958': true
+  '0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e': true,
+  '0xd6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812': true,
+  '0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5': true,
+  '0x573a7fc4d8dd3a860b376741c251772cd4d15508dd94564ff23a645d28042d': true
 };
 
 export const CONTRACT_SUPPORTED_AUTHENTICATORS = {
-  '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': true
+  '0xd6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812': true
 };
 
 export const SUPPORTED_STRATEGIES = {
-  '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee': true,
-  '0x297fb0104d8be6c86f168bf1dcdc28b0625d2b06108c3c46194aa4415f2e2ec': true,
-  '0x619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7': true
+  '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52': true,
+  '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29': true
 };
 
 export const SUPPORTED_EXECUTORS = {};
 
 export const RELAYER_AUTHENTICATORS = {
-  '0xb321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476': 'starknet',
-  '0x6584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c': 'evm',
-  '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': 'evm-tx'
+  '0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5': 'starknet',
+  '0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e': 'evm',
+  '0xd6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812': 'evm-tx'
 } as const;
 
 export const AUTHS = {
-  '0x6584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c': 'Ethereum signature',
-  '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54': 'Ethereum transaction',
-  '0xb321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476': 'Starknet signature',
-  '0x53c66d5b61f7b7f8a3871908b16d6e199ed401b706fb042a006d53f97ec2958': 'Starknet transaction'
+  '0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e': 'Ethereum signature',
+  '0xd6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812': 'Ethereum transaction',
+  '0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5': 'Starknet signature',
+  '0x573a7fc4d8dd3a860b376741c251772cd4d15508dd94564ff23a645d28042d': 'Starknet transaction'
 };
 
 export const PROPOSAL_VALIDATIONS = {
-  '0x38f034f17941669555fca61c43c67a517263aaaab833b26a1ab877a21c0bb6d': 'Voting power'
+  '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631': 'Voting power'
 };
 
 export const STRATEGIES = {
-  '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee': 'Vanilla',
-  '0x297fb0104d8be6c86f168bf1dcdc28b0625d2b06108c3c46194aa4415f2e2ec': 'Merkle whitelist',
-  '0x619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7': 'ERC-20 Votes (EIP-5805)'
+  '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52': 'Merkle whitelist',
+  '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29': 'ERC-20 Votes (EIP-5805)'
 };
 
 export const EXECUTORS = {
-  SimpleQuorumVanilla: 'Vanilla',
+  NoExecutionSimpleMajority: 'No execution simple majority',
   EthRelayer: 'Eth relayer'
 };
 
 export const EDITOR_AUTHENTICATORS = [
   {
-    address: '0x53c66d5b61f7b7f8a3871908b16d6e199ed401b706fb042a006d53f97ec2958',
+    address: '0x573a7fc4d8dd3a860b376741c251772cd4d15508dd94564ff23a645d28042d',
     name: 'Starknet transaction',
     about:
       'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
@@ -68,14 +66,14 @@ export const EDITOR_AUTHENTICATORS = [
     paramsDefinition: null
   },
   {
-    address: '0xb321c09ee9851c125bd4213de71ebd03c07813556bae5d4700968df42ee476',
+    address: '0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5',
     name: 'Starknet signature',
     about: 'Will authenticate a user based on an EIP-712 message signed by a Starknet private key.',
     icon: IHPencil,
     paramsDefinition: null
   },
   {
-    address: '0x204546a6d59f757677506cb6e6b031dd0f4990613ce6e9212a2e76c67a7dc54',
+    address: '0xd6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
     name: 'Ethereum transaction',
     about:
       'Will authenticate a user by checking if the caller address of Ethereum transaction corresponds to the author or voter address.',
@@ -83,7 +81,7 @@ export const EDITOR_AUTHENTICATORS = [
     paramsDefinition: null
   },
   {
-    address: '0x6584c1eacea3c9721242ea4a795cfd4d63be30943d9686a64bfedf04765cd5c',
+    address: '0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e',
     name: 'Ethereum signature',
     about:
       'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
@@ -94,7 +92,7 @@ export const EDITOR_AUTHENTICATORS = [
 
 export const EDITOR_PROPOSAL_VALIDATIONS = [
   {
-    address: '0x38f034f17941669555fca61c43c67a517263aaaab833b26a1ab877a21c0bb6d',
+    address: '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631',
     type: 'VotingPower',
     name: 'Voting power',
     icon: IHLightningBolt,
@@ -149,34 +147,7 @@ export const EDITOR_PROPOSAL_VALIDATIONS = [
 
 export const EDITOR_VOTING_STRATEGIES = [
   {
-    address: '0x510d1e6d386a2adcfc6f2a57f80c4c4268baeccbd4a09334e843b17ce9225ee',
-    name: 'Vanilla',
-    about:
-      'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
-    generateMetadata: (params: Record<string, any>) => ({
-      name: 'Vanilla',
-      properties: {
-        symbol: params.symbol,
-        decimals: 0
-      }
-    }),
-    paramsDefinition: {
-      type: 'object',
-      title: 'Params',
-      additionalProperties: false,
-      required: [],
-      properties: {
-        symbol: {
-          type: 'string',
-          maxLength: 6,
-          title: 'Symbol',
-          examples: ['e.g. VP']
-        }
-      }
-    }
-  },
-  {
-    address: '0x297fb0104d8be6c86f168bf1dcdc28b0625d2b06108c3c46194aa4415f2e2ec',
+    address: '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
     name: 'Whitelist',
     about:
       'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
@@ -243,7 +214,7 @@ export const EDITOR_VOTING_STRATEGIES = [
     }
   },
   {
-    address: '0x619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7',
+    address: '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29',
     name: 'ERC-20 Votes (EIP-5805)',
     about:
       'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
@@ -289,9 +260,9 @@ export const EDITOR_VOTING_STRATEGIES = [
 
 export const EDITOR_EXECUTION_STRATEGIES = [
   {
-    address: '0x767ea1ecd66d29468a04518041af4b0835da7c219e3f2e85f68af666acdb162',
-    type: 'SimpleQuorumVanilla',
-    name: EXECUTORS.SimpleQuorumVanilla,
+    address: '0x4a5658d6b9fe62283147719a8b13d72f96e8959afacc716569b936c91089147',
+    type: 'NoExecutionSimpleMajority',
+    name: EXECUTORS.NoExecutionSimpleMajority,
     paramsDefinition: null
   }
 ];
