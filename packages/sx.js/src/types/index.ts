@@ -1,4 +1,4 @@
-import type { BigNumberish, Provider } from 'starknet';
+import type { BigNumberish, RpcProvider } from 'starknet';
 import type { Call } from 'starknet';
 import type { MetaTransaction } from '../utils/encoding';
 import type { NetworkConfig } from './networkConfig';
@@ -76,13 +76,13 @@ export interface Strategy {
 
 export type ClientOpts = {
   ethUrl: string;
-  starkProvider: Provider;
+  starkProvider: RpcProvider;
   networkConfig?: NetworkConfig;
 };
 
 export type ClientConfig = {
   ethUrl: string;
-  starkProvider: Provider;
+  starkProvider: RpcProvider;
   networkConfig: NetworkConfig;
 };
 

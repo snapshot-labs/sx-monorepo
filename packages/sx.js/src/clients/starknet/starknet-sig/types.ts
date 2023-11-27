@@ -1,5 +1,5 @@
 export const baseDomain = {
-  name: 'sx-sn',
+  name: 'sx-starknet',
   version: '0.1.0'
 };
 

@@ -41,8 +41,8 @@ exports[`StarkNetSig should create propose envelope 1`] = `
     },
     "primaryType": "Propose",
     "signature": [
-      "0x795274390aa698b85897487695508f9804b8ef26176516ca778aa2d944f5e1e",
-      "0x7a308886ce44e01c1c95bd32b1fcc70a28c2d5921406ca68c0bbd18ea7d4b10",
+      "0x4e4372e959a483f0d349748021739c1e095cf5ca63c9952baac9ecee4376884",
+      "0x27989a807da88131a320b0be423f08e4e213490a39b07fd6e46adfa8eefdc74",
     ],
   },
 }
@@ -85,8 +85,8 @@ exports[`StarkNetSig should create update proposal envelope 1`] = `
     },
     "primaryType": "UpdateProposal",
     "signature": [
-      "0x17aa8d968a74149cc076ce445f3ce27dc9919eb4130b99e1045a1e789671e8e",
-      "0x53071cdd901b6f2238e23b46dd0d3f8dad5ef12d6043982b4f68e5f65a0e6fc",
+      "0x3dfe75696fddaa71cf583501b3f393c934579d70683fcae42df12e63f9a2a7d",
+      "0x6cd29ac1b99660f78e060c84a09a8f327dfd5a9bd29415de46b5500a5864016",
     ],
   },
 }
@@ -121,8 +121,8 @@ exports[`StarkNetSig should create vote envelope 1`] = `
     },
     "primaryType": "Vote",
     "signature": [
-      "0x1f6ce499ae5142825fc291b954f46429d470036c0eb66db8bb1612cef3a500a",
-      "0x415f73050cb07ef615c64b6d54ff3446b8de62c96895220f5748f5e3d3fbcc7",
+      "0x6039dac59d4751298cdded41afcfd6e98eac5ecb796874a722b128a2eb4a95a",
+      "0x777cba4f70bcd3f6a53eec2bc11e848d7fe73e0e8f4da63f92703664dcd0362",
     ],
   },
 }

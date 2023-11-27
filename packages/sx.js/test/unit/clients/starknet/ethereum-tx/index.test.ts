@@ -1,18 +1,11 @@
-import { Provider, constants } from 'starknet';
 import { EthereumTx } from '../../../../../src/clients/starknet/ethereum-tx';
+import { starkProvider } from '../../../helpers';
 import { Wallet } from '@ethersproject/wallet';
 
 describe('EthereumTx', () => {
   const ethPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
   const ethUrl = process.env.GOERLI_NODE_URL as string;
-  const starkProvider = new Provider({
-    sequencer: {
-      baseUrl: 'https://alpha4.starknet.io',
-      chainId: constants.StarknetChainId.SN_GOERLI
-    }
-  });
-
   const wallet = new Wallet(ethPrivateKey);
 
   const ethereumTx = new EthereumTx({

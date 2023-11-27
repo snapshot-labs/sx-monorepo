@@ -18,6 +18,7 @@ describe('sx-starknet', () => {
   const publicKey = '0x138b5dd1ca094fcaebd669a5d2aa7bb7d13db32d5939939ee66b938ded2f361';
   const privateKey = '0x9c7d498a8f76dc87564274036988f668';
 
+  // RpcProvider doesn't work with starknet-devnet
   const starkProvider = new Provider({
     sequencer: {
       baseUrl: 'http://127.0.0.1:5050'
@@ -44,6 +45,7 @@ describe('sx-starknet', () => {
     account = new Account(starkProvider, address, privateKey, '1');
 
     testConfig = await setup({
+      starknetProvider: starkProvider as any,
       starknetAccount: account,
       ethereumWallet: wallet,
       ethUrl
@@ -52,23 +54,23 @@ describe('sx-starknet', () => {
     spaceAddress = testConfig.spaceAddress;
 
     client = new StarkNetTx({
-      starkProvider,
+      starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig
     });
     ethSigClient = new EthereumSig({
-      starkProvider,
+      starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig
     });
     ethTxClient = new EthereumTx({
-      starkProvider,
+      starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig,
       sequencerUrl: 'http://127.0.0.1:5050'
     });
     starkSigClient = new StarkNetSig({
-      starkProvider,
+      starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig,
       manaUrl: 'http://localhost:3000'

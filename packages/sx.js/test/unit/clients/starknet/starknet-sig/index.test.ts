@@ -1,15 +1,10 @@
-import { Account, Provider } from 'starknet';
+import { Account } from 'starknet';
+import { starkProvider } from '../../../helpers';
 import { StarkNetSig } from '../../../../../src/clients/starknet/starknet-sig';
 
 describe('StarkNetSig', () => {
   const address = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
   const privateKey = '0xcd613e30d8f16adf91b7584a2265b1f5';
-
-  const starkProvider = new Provider({
-    sequencer: {
-      baseUrl: 'http://127.0.0.1:5050'
-    }
-  });
 
   const account = new Account(starkProvider, address, privateKey);
 

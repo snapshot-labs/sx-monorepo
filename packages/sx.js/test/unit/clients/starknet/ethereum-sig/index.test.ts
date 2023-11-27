@@ -1,15 +1,9 @@
-import { Provider } from 'starknet';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import { starkProvider } from '../../../helpers';
 import { EthereumSig } from '../../../../../src/clients/starknet/ethereum-sig';
 
 describe('EthereumSig', () => {
-  const starkProvider = new Provider({
-    sequencer: {
-      baseUrl: 'http://127.0.0.1:5050'
-    }
-  });
-
   const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
   const signer = new Wallet(
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',

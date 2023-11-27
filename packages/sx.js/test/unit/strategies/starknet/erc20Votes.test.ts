@@ -1,14 +1,9 @@
-import { Provider } from 'starknet';
 import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
 import { defaultNetwork } from '../../../../src/networks';
+import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
 
 const ethUrl = process.env.GOERLI_NODE_URL as string;
-const starkProvider = new Provider({
-  rpc: {
-    nodeUrl: 'https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146'
-  }
-});
 
 describe('erc20VotesStrategy', () => {
   const erc20VotesStrategy = createErc20VotesStrategy();

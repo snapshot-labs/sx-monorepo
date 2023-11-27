@@ -1,4 +1,4 @@
-import { Account, CallData, uint256 } from 'starknet';
+import { Account, CallData, RpcProvider, uint256 } from 'starknet';
 import { Signer } from '@ethersproject/abstract-signer';
 import { Interface, defaultAbiCoder } from '@ethersproject/abi';
 import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
@@ -107,10 +107,12 @@ async function deployL1Dependency(
 
 export async function setup({
   starknetAccount,
+  starknetProvider,
   ethereumWallet,
   ethUrl
 }: {
   starknetAccount: Account;
+  starknetProvider: RpcProvider;
   ethereumWallet: Wallet;
   ethUrl: string;
 }): Promise<TestConfig> {
@@ -179,7 +181,7 @@ export async function setup({
     sxStarkSigAuthenticatorSierra,
     sxStarkSigAuthenticatorCasm,
     CallData.compile({
-      name: 'sx-sn',
+      name: 'sx-starknet',
       version: '0.1.0'
     })
   );
@@ -284,7 +286,7 @@ export async function setup({
   };
 
   const client = new StarkNetTx({
-    starkProvider: starknetAccount,
+    starkProvider: starknetProvider,
     ethUrl: 'https://rpc.brovider.xyz/5',
     networkConfig
   });

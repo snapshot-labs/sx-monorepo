@@ -1,10 +1,9 @@
-import { defaultProvider } from 'starknet';
 import createVanillaStrategy from '../../../../src/strategies/starknet/vanilla';
 import { defaultNetwork } from '../../../../src/networks';
+import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
 
 const ethUrl = process.env.GOERLI_NODE_URL as string;
-const starkProvider = defaultProvider;
 
 describe('vanillaStrategy', () => {
   const vanillaStrategy = createVanillaStrategy();

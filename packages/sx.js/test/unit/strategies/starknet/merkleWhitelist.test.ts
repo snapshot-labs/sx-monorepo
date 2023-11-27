@@ -1,11 +1,10 @@
-import { defaultProvider } from 'starknet';
 import createMerkleWhitelistStrategy from '../../../../src/strategies/starknet/merkleWhitelist';
 import { AddressType, Leaf } from '../../../../src/utils/merkletree';
 import { defaultNetwork } from '../../../../src/networks';
+import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
 
 const ethUrl = process.env.GOERLI_NODE_URL as string;
-const starkProvider = defaultProvider;
 
 describe('merkleWhitelist', () => {
   const leaf = new Leaf(AddressType.ETHEREUM, '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 42n);
