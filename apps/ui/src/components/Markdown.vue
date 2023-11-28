@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
+import { linkify } from 'remarkable/linkify';
 import { getUrl } from '@/helpers/utils';
 
 const props = defineProps<{
@@ -12,12 +13,11 @@ const remarkable = new Remarkable({
   breaks: true,
   typographer: false,
   linkTarget: '_blank'
-});
+}).use(linkify);
 remarkable.core.ruler.disable(['abbr', 'abbr2', 'footnote_tail', 'replacements', 'smartquotes']);
 remarkable.block.ruler.disable(['code', 'deflist', 'fences', 'footnote', 'htmlblock', 'lheading']);
 remarkable.inline.ruler.disable([
   'autolink',
-  'backticks',
   'del',
   'entity',
   'escape',
@@ -163,6 +163,10 @@ const parsed = computed(() => {
   ol ul {
     margin-top: 0;
     margin-bottom: 0;
+  }
+
+  code {
+    @apply bg-skin-border text-[16px] rounded-md px-[6px] py-[2px];
   }
 
   li {

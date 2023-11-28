@@ -23,7 +23,7 @@ async function handleVoteClick(choice: Choice) {
 <template>
   <div>
     <div class="border-b mx-4 py-2.5 flex">
-      <div class="flex-auto mr-4">
+      <div class="flex-auto mr-4 w-0">
         <router-link
           :to="{
             name: 'proposal-overview',
@@ -32,11 +32,11 @@ async function handleVoteClick(choice: Choice) {
               space: `${route.params.id}`
             }
           }"
-          class="max-w-fit flex space-x-2"
+          class="space-x-2 flex"
         >
           <ProposalStatusIcon width="17" height="17" :state="proposal.state" class="top-[7.5px]" />
           <h3
-            class="leading-6 my-1"
+            class="leading-6 my-1 text-[21px] md:truncate md:text-ellipsis"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
         </router-link>

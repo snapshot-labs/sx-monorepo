@@ -111,7 +111,7 @@ export function _n(
   { maximumFractionDigits }: { maximumFractionDigits?: number } = {}
 ) {
   const formatter = new Intl.NumberFormat('en', { notation, maximumFractionDigits });
-  return formatter.format(value);
+  return formatter.format(value).toLowerCase();
 }
 
 export function getCurrentName(currentUnit: 'block' | 'second') {

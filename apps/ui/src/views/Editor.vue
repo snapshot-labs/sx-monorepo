@@ -248,7 +248,10 @@ export default defineComponent({
         <PendingTransactionsIndicator class="mr-2" />
         <UiLoading v-if="!space" class="block p-4" />
         <div v-else class="space-x-2">
-          <UiButton class="float-left leading-3 !px-3 rounded-r-none" @click="modalOpen = true">
+          <UiButton
+            class="float-left leading-3 !pl-3 !pr-[12px] rounded-r-none"
+            @click="modalOpen = true"
+          >
             <IH-collection class="inline-block" />
           </UiButton>
           <UiButton
@@ -266,7 +269,7 @@ export default defineComponent({
         </div>
       </div>
     </nav>
-    <Container v-if="proposal" class="pt-5 !max-w-[630px] mx-0 md:mx-auto s-box">
+    <Container v-if="proposal" class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
       <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>
@@ -276,21 +279,26 @@ export default defineComponent({
         :definition="TITLE_DEFINITION"
         :error="formErrors.title"
       />
-      <div class="flex">
+      <div class="flex space-x-3">
         <Link
           :is-active="!previewEnabled"
           text="Write"
-          class="pr-3"
+          class="border-transparent"
           @click="previewEnabled = false"
         />
-        <Link :is-active="previewEnabled" text="Preview" @click="previewEnabled = true" />
+        <Link
+          :is-active="previewEnabled"
+          text="Preview"
+          class="border-transparent"
+          @click="previewEnabled = true"
+        />
       </div>
       <Markdown
         v-if="previewEnabled"
         class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
         :body="proposal.body"
       />
-      <MarkdownEditor v-else v-model="proposal.body" />
+      <MarkdownEditor v-else v-model="proposal.body" class="" />
       <div class="s-base mb-4">
         <SIString
           :key="proposalKey || ''"

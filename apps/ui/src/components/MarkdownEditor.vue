@@ -18,12 +18,12 @@ const editor = useMarkdownEditor(editorRef, editorFileInputRef, editorContainerR
 <template>
   <div
     ref="editorContainerRef"
-    class="rounded-lg mb-3"
+    class="rounded-lg mb-3 border"
     :class="{
       'ring-2': editor.hovered.value
     }"
   >
-    <div class="flex justify-end gap-1 py-2 px-3 border rounded-t-lg">
+    <div class="flex justify-end gap-1 py-2 px-3">
       <UiTooltip title="Add heading text">
         <button
           class="p-1 w-[26px] h-[26px] leading-[18px] hover:text-skin-link rounded focus-visible:ring-1"

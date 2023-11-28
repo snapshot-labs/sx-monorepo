@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getNetwork, offchainNetworks } from '@/networks';
-import { getStampUrl, getCacheHash } from '@/helpers/utils';
+import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
 import { Choice } from '@/types';
 import { VotingPower } from '@/networks/types';
 
@@ -26,6 +26,11 @@ const proposal = computed(() => {
 
   return proposalsStore.getProposal(spaceAddress.value, id.value, networkId.value);
 });
+
+const discussion = computed(() => {
+  return sanitizeUrl(proposal.value.discussion);
+});
+
 const votingPowerDecimals = computed(() => {
   if (!proposal.value) return 0;
   return Math.max(
@@ -103,23 +108,33 @@ watchEffect(() => {
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 md:mr-[340px]">
-        <div class="flex px-4 bg-skin-bg border-b sticky top-[72px] z-40">
+        <div class="flex px-4 bg-skin-bg border-b sticky top-[72px] z-40 space-x-3">
           <router-link
             :to="{
               name: 'proposal-overview',
               params: { id: proposal.proposal_id }
             }"
           >
-            <Link :is-active="route.name === 'proposal-overview'" text="Overview" class="pr-3" />
+            <Link :is-active="route.name === 'proposal-overview'" text="Overview" />
           </router-link>
           <router-link
             :to="{
               name: 'proposal-votes',
               params: { id: proposal.proposal_id }
             }"
+            class="flex items-center"
           >
-            <Link :is-active="route.name === 'proposal-votes'" text="Votes" />
+            <Link
+              :is-active="route.name === 'proposal-votes'"
+              :count="proposal.vote_count"
+              text="Votes"
+              class="inline-block"
+            />
           </router-link>
+          <a v-if="discussion" :href="discussion" target="_blank" class="flex items-center">
+            <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
+            <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
+          </a>
         </div>
         <router-view :proposal="proposal" />
       </div>
@@ -184,7 +199,7 @@ watchEffect(() => {
           </Vote>
         </template>
 
-        <template v-if="!proposal.cancelled && proposal.state !== 'pending'">
+        <template v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Results</h4>
           <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
         </template>

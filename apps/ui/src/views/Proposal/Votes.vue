@@ -155,17 +155,18 @@ watch([sortBy, choiceFilter], () => {
       </tr>
     </thead>
     <td v-if="!loaded" colspan="5">
-      <UiLoading class="p-4 block text-center" />
+      <UiLoading class="px-4 py-3 block" />
     </td>
     <template v-else>
       <tbody>
-        <td v-if="votes.length === 0" class="p-4 text-center" colspan="5">
-          There isn't any votes yet!
+        <td v-if="votes.length === 0" class="px-4 py-3" colspan="5">
+          <IH-exclamation-circle class="inline-block mr-2" />
+          <span v-text="'There are no votes here.'" />
         </td>
         <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
           <template #loading>
             <td colspan="5">
-              <UiLoading class="p-4 block text-center" />
+              <UiLoading class="px-4 py-3 block" />
             </td>
           </template>
           <tr v-for="(vote, i) in votes" :key="i" class="border-b relative align-middle">

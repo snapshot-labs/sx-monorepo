@@ -91,9 +91,9 @@ async function handleCancelClick() {
 </script>
 
 <template>
-  <Container class="pt-5 !max-w-[630px] mx-0 md:mx-auto">
+  <Container class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
     <div>
-      <h1 class="mb-3 text-[36px]">
+      <h1 class="mb-3 text-[36px] leading-10">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
         <span class="text-skin-text">{{ getProposalId(proposal) }}</span>
       </h1>
