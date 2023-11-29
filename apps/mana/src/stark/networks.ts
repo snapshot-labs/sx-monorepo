@@ -31,7 +31,8 @@ export function getClient(chainId: string) {
 
   const client = new clients.StarkNetTx({
     starkProvider: provider,
-    ethUrl: process.env.ETH_RPC_URL as string
+    ethUrl: process.env.ETH_RPC_URL as string,
+    networkConfig: NETWORKS[chainId]
   });
 
   const account = new Account(
