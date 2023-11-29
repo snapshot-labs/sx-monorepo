@@ -14,7 +14,7 @@ import {
 import EncodersAbi from './abis/encoders.json';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
 import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
-import Config from './config.json';
+import { networkNodeUrl, networkProperties } from './overrrides';
 import { handleStrategiesParsedMetadata } from './ipfs';
 
 const ethProvider = new JsonRpcProvider(
@@ -22,12 +22,10 @@ const ethProvider = new JsonRpcProvider(
 );
 const starkProvider = new Provider({
   rpc: {
-    nodeUrl: Config.network_node_url
+    nodeUrl: networkNodeUrl
   }
 });
 
-const PROPOSITION_POWER_PROPOSAL_VALIDATION_STRATEGY =
-  '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631';
 const encodersAbi = new CallData(EncodersAbi);
 
 export function getCurrentTimestamp() {
@@ -146,7 +144,7 @@ export async function updateProposaValidationStrategy(
 
   if (
     utils.encoding.hexPadLeft(validationStrategyAddress) ===
-    utils.encoding.hexPadLeft(PROPOSITION_POWER_PROPOSAL_VALIDATION_STRATEGY)
+    utils.encoding.hexPadLeft(networkProperties.propositionPowerValidationStrategyAddress)
   ) {
     const parsed = encodersAbi.parse(
       'proposition_power_params',

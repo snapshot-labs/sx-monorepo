@@ -5,7 +5,7 @@ import Checkpoint, { createGetLoader, LogLevel } from '@snapshot-labs/checkpoint
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import config from './config.json';
+import config from './currentConfig';
 import spaceFactoryAbi from './abis/spaceFactory.json';
 import spaceAbi from './abis/space.json';
 import * as writer from './writer';
@@ -16,10 +16,6 @@ const schema = fs.readFileSync(schemaFile, 'utf8');
 
 const PRODUCTION_INDEXER_DELAY = 60 * 1000;
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
-
-if (process.env.NETWORK_NODE_URL) {
-  config.network_node_url = process.env.NETWORK_NODE_URL;
-}
 
 if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
