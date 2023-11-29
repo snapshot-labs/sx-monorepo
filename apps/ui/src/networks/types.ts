@@ -156,6 +156,22 @@ export type NetworkApi = {
   loadUser(userId: string): Promise<User | null>;
 };
 
+export type NetworkConstants = {
+  SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
+  CONTRACT_SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
+  SUPPORTED_STRATEGIES: { [key: string]: boolean };
+  SUPPORTED_EXECUTORS: { [key: string]: boolean };
+  RELAYER_AUTHENTICATORS: { [key: string]: 'evm' | 'evm-tx' | 'starknet' | undefined };
+  AUTHS: { [key: string]: string };
+  PROPOSAL_VALIDATIONS: { [key: string]: string };
+  STRATEGIES: { [key: string]: string };
+  EXECUTORS: { [key: string]: string };
+  EDITOR_AUTHENTICATORS: StrategyTemplate[];
+  EDITOR_PROPOSAL_VALIDATIONS: StrategyTemplate[];
+  EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
+  EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
+};
+
 export type NetworkHelpers = {
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
@@ -174,21 +190,7 @@ type BaseNetwork = {
   supportsSimulation: boolean;
   managerConnectors: Connector[];
   api: NetworkApi;
-  constants: {
-    SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
-    CONTRACT_SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
-    SUPPORTED_STRATEGIES: { [key: string]: boolean };
-    SUPPORTED_EXECUTORS: { [key: string]: boolean };
-    RELAYER_AUTHENTICATORS: { [key: string]: 'evm' | 'evm-tx' | 'starknet' | undefined };
-    AUTHS: { [key: string]: string };
-    PROPOSAL_VALIDATIONS: { [key: string]: string };
-    STRATEGIES: { [key: string]: string };
-    EXECUTORS: { [key: string]: string };
-    EDITOR_AUTHENTICATORS: StrategyTemplate[];
-    EDITOR_PROPOSAL_VALIDATIONS: StrategyTemplate[];
-    EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
-    EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
-  };
+  constants: NetworkConstants;
   helpers: NetworkHelpers;
 };
 

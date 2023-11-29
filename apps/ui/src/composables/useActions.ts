@@ -355,8 +355,7 @@ export function useActions() {
     const receipt = await network.actions.executeTransactions(auth.web3, proposal);
     console.log('Receipt', receipt);
 
-    const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
-    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, targetNetwork);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, proposal.network);
   }
 
   async function executeQueuedProposal(proposal: Proposal) {
@@ -368,8 +367,7 @@ export function useActions() {
     const receipt = await network.actions.executeQueuedProposal(auth.web3, proposal);
     console.log('Receipt', receipt);
 
-    const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
-    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, targetNetwork);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, proposal.network);
   }
 
   async function vetoProposal(proposal: Proposal) {
@@ -381,8 +379,7 @@ export function useActions() {
     const receipt = await network.actions.vetoProposal(auth.web3, proposal);
     console.log('Receipt', receipt);
 
-    const targetNetwork = proposal.network === 'sn-tn2' ? 'gor' : proposal.network;
-    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, targetNetwork);
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, proposal.network);
   }
 
   async function setVotingDelay(space: Space, votingDelay: number) {

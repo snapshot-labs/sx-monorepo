@@ -1,31 +1,42 @@
-import { starknetGoerli1, clients, getStarknetStrategy } from '@snapshot-labs/sx';
+import {
+  starknetMainnet,
+  starknetGoerli1,
+  clients,
+  getStarknetStrategy,
+  NetworkConfig
+} from '@snapshot-labs/sx';
 import { MANA_URL } from '@/helpers/mana';
 import { createErc1155Metadata, getUrl, verifyNetwork } from '@/helpers/utils';
 import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '@/networks/common/constants';
-import {
-  CONTRACT_SUPPORTED_AUTHENTICATORS,
-  RELAYER_AUTHENTICATORS,
-  SUPPORTED_AUTHENTICATORS,
-  SUPPORTED_STRATEGIES
-} from './constants';
 import type { RpcProvider } from 'starknet';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type {
   Connector,
   NetworkActions,
+  NetworkConstants,
   NetworkHelpers,
   StrategyConfig,
   VotingPower
 } from '@/networks/types';
-import type { Space, SpaceMetadata, StrategyParsedMetadata, Proposal } from '@/types';
+import type { Space, SpaceMetadata, StrategyParsedMetadata, Proposal, NetworkID } from '@/types';
 import { getProvider } from '@/helpers/provider';
 
+const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
+  sn: starknetMainnet,
+  'sn-tn': starknetGoerli1
+};
+
 export function createActions(
+  networkId: NetworkID,
   starkProvider: RpcProvider,
+  constants: NetworkConstants,
   helpers: NetworkHelpers,
   { l1ChainId }: { l1ChainId: number }
 ): NetworkActions {
+  const networkConfig = CONFIGS[networkId];
+  if (!networkConfig) throw new Error(`Unsupported network ${networkId}`);
+
   const ethUrl: string = import.meta.env.VITE_ETH_RPC_URL;
 
   const l1Provider = getProvider(l1ChainId);
@@ -34,14 +45,14 @@ export function createActions(
     starkProvider,
     manaUrl: MANA_URL,
     ethUrl,
-    networkConfig: starknetGoerli1
+    networkConfig
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    supportedAuthenticators: SUPPORTED_AUTHENTICATORS,
-    supportedStrategies: SUPPORTED_STRATEGIES,
-    contractSupportedAuthenticators: CONTRACT_SUPPORTED_AUTHENTICATORS,
-    relayerAuthenticators: RELAYER_AUTHENTICATORS,
+    supportedAuthenticators: constants.SUPPORTED_AUTHENTICATORS,
+    supportedStrategies: constants.SUPPORTED_STRATEGIES,
+    contractSupportedAuthenticators: constants.CONTRACT_SUPPORTED_AUTHENTICATORS,
+    relayerAuthenticators: constants.RELAYER_AUTHENTICATORS,
     managerConnectors: STARKNET_CONNECTORS,
     lowPriorityAuthenticators: ['evm-tx']
   });
@@ -397,7 +408,7 @@ export function createActions(
     ): Promise<VotingPower[]> => {
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
-          const strategy = getStarknetStrategy(address, starknetGoerli1);
+          const strategy = getStarknetStrategy(address, networkConfig);
           if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
           const strategyMetadata = await parseStrategyMetadata(strategiesMetadata[i].payload);
@@ -410,7 +421,7 @@ export function createActions(
             strategiesParams[i].split(','),
             {
               ...clientConfig,
-              networkConfig: starknetGoerli1
+              networkConfig
             }
           );
 

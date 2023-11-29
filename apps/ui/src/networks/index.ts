@@ -6,7 +6,8 @@ import { ReadWriteNetwork } from './types';
 
 const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
-const starknetNetwork = createStarknetNetwork('sn-tn');
+const starknetNetwork = createStarknetNetwork('sn');
+const starknetTestnetNetwork = createStarknetNetwork('sn-tn');
 const polygonNetwork = createEvmNetwork('matic');
 const arbitrumNetwork = createEvmNetwork('arb1');
 const ethereumNetwork = createEvmNetwork('eth');
@@ -16,7 +17,7 @@ const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
-  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'gor', 'sep', 'sn-tn'];
+  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'gor', 'sep', 'sn', 'sn-tn'];
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'gor', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
@@ -32,7 +33,8 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'gor') return goerliNetwork;
   if (id === 'sep') return sepoliaNetwork;
   if (id === 'linea-testnet') return lineaTestnetNetwork;
-  if (id === 'sn-tn') return starknetNetwork;
+  if (id === 'sn') return starknetNetwork;
+  if (id === 'sn-tn') return starknetTestnetNetwork;
 
   throw new Error(`Unknown network ${id}`);
 };
