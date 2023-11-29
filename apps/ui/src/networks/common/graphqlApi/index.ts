@@ -21,7 +21,7 @@ import {
   joinHighlightUser
 } from './highlight';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
-import { getNames } from '@/helpers/ens';
+import { getNames } from '@/helpers/stamp';
 import { CHOICES } from '@/helpers/constants';
 import { Space, Proposal, Vote, User, Transaction, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal } from './types';

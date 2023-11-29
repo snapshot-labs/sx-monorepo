@@ -1,6 +1,6 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import gql from 'graphql-tag';
-import { getNames } from '@/helpers/ens';
+import { getNames } from '@/helpers/stamp';
 
 type ApiDelegate = {
   id: string;

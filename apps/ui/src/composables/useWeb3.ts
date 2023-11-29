@@ -1,7 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { formatUnits } from '@ethersproject/units';
-import { getNames } from '@/helpers/ens';
+import { getNames } from '@/helpers/stamp';
 import networks from '@/helpers/networks.json';
 
 networks['starknet'] = {

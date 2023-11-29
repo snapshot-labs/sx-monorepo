@@ -7,7 +7,7 @@ import {
   VOTES_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
-import { getNames } from '@/helpers/ens';
+import { getNames } from '@/helpers/stamp';
 import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 
@@ -192,8 +192,8 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return data.votes.map(vote => {
         const formattedVote = formatVote(vote);
+        formattedVote.voter.name = names[vote.voter] || undefined;
 
-        formattedVote.voter.name = names[vote.voter] || null;
         return formattedVote;
       });
     },
