@@ -6,7 +6,7 @@ import { keccak256 } from '@ethersproject/keccak256';
 import { keccak256 as solidityKeccak256 } from '@ethersproject/solidity';
 import { getCreate2Address } from '@ethersproject/address';
 import { Wallet } from '@ethersproject/wallet';
-import { StarkNetTx } from '../../../src/clients';
+import { StarknetTx } from '../../../src/clients';
 import { executeContractCallWithSigners } from './safeUtils';
 import { hexPadLeft } from '../../../src/utils/encoding';
 import { AddressType, Leaf, generateMerkleRoot } from '../../../src/utils/merkletree';
@@ -45,7 +45,7 @@ import GnosisSafeProxyFactoryContract from './fixtures/l1/GnosisSafeProxyFactory
 import ModuleProxyFactoryContract from './fixtures/l1/ModuleProxyFactory.json';
 import L1AvatarExecutionStrategyMockMessagingContract from './fixtures/l1/L1AvatarExecutionStrategyMockMessaging.json';
 import MockStarknetMessaging from './fixtures/l1/MockStarknetMessaging.json';
-import StarkNetCommit from './fixtures/l1/StarkNetCommit.json';
+import StarknetCommit from './fixtures/l1/StarknetCommit.json';
 import { NetworkConfig } from '../../../src/types';
 
 export type TestConfig = {
@@ -131,7 +131,7 @@ export async function setup({
   const starknetCore = await deployL1Dependency(ethereumWallet, MockStarknetMessaging, 5 * 60);
   await loadL1MessagingContract(ethUrl, starknetCore);
 
-  const starknetCommit = await deployL1Dependency(ethereumWallet, StarkNetCommit, starknetCore);
+  const starknetCommit = await deployL1Dependency(ethereumWallet, StarknetCommit, starknetCore);
 
   const erc20VotesToken = await deployDependency(
     starknetAccount,
@@ -285,7 +285,7 @@ export async function setup({
     }
   };
 
-  const client = new StarkNetTx({
+  const client = new StarknetTx({
     starkProvider: starknetProvider,
     ethUrl: 'https://rpc.brovider.xyz/5',
     networkConfig

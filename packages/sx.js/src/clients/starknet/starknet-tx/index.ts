@@ -51,7 +51,7 @@ const NO_UPDATE_STRING = 'No update';
 
 const callData = new CallData(SpaceAbi);
 
-export class StarkNetTx {
+export class StarknetTx {
   config: ClientConfig;
 
   constructor(opts: ClientOpts) {

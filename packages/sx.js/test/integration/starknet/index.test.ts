@@ -3,7 +3,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import ozAccountSierra from './fixtures/openzeppelin_Account.sierra.json';
 import ozAccountCasm from './fixtures/openzeppelin_Account.casm.json';
-import { EthereumSig, EthereumTx, L1Executor, StarkNetSig, StarkNetTx } from '../../../src/clients';
+import { EthereumSig, EthereumTx, L1Executor, StarknetSig, StarknetTx } from '../../../src/clients';
 import { getExecutionData } from '../../../src/executors';
 import { Choice } from '../../../src/types';
 import { deployDependency, flush, increaseTime, setTime, setup, TestConfig } from './utils';
@@ -31,10 +31,10 @@ describe('sx-starknet', () => {
   const entryAccount = new Account(starkProvider, entryAddress, entryPrivateKey);
   let account: Account;
 
-  let client: StarkNetTx;
+  let client: StarknetTx;
   let ethSigClient: EthereumSig;
   let ethTxClient: EthereumTx;
-  let starkSigClient: StarkNetSig;
+  let starkSigClient: StarknetSig;
   let testConfig: TestConfig;
   let spaceAddress = '';
 
@@ -53,7 +53,7 @@ describe('sx-starknet', () => {
 
     spaceAddress = testConfig.spaceAddress;
 
-    client = new StarkNetTx({
+    client = new StarknetTx({
       starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig
@@ -69,7 +69,7 @@ describe('sx-starknet', () => {
       networkConfig: testConfig.networkConfig,
       sequencerUrl: 'http://127.0.0.1:5050'
     });
-    starkSigClient = new StarkNetSig({
+    starkSigClient = new StarknetSig({
       starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig,
@@ -78,7 +78,7 @@ describe('sx-starknet', () => {
   }, 300_000);
 
   describe('vanilla authenticator', () => {
-    it('StarkNetTx.propose()', async () => {
+    it('StarknetTx.propose()', async () => {
       const envelope = {
         signatureData: {
           address: walletAddress
@@ -108,7 +108,7 @@ describe('sx-starknet', () => {
       expect(receipt.transaction_hash).toBeDefined();
     }, 60_000);
 
-    it('StarkNetTx.vote()', async () => {
+    it('StarknetTx.vote()', async () => {
       const envelope = {
         signatureData: {
           address: walletAddress
@@ -137,7 +137,7 @@ describe('sx-starknet', () => {
   });
 
   describe('ethSig authenticator', () => {
-    it('StarkNetTx.propose()', async () => {
+    it('StarknetTx.propose()', async () => {
       const data = {
         space: spaceAddress,
         authenticator: testConfig.ethSigAuthenticator,
@@ -164,7 +164,7 @@ describe('sx-starknet', () => {
       expect(receipt.transaction_hash).toBeDefined();
     }, 60_000);
 
-    it('StarkNetTx.vote()', async () => {
+    it('StarknetTx.vote()', async () => {
       const data = {
         space: spaceAddress,
         authenticator: testConfig.ethSigAuthenticator,
@@ -190,7 +190,7 @@ describe('sx-starknet', () => {
   });
 
   describe('ethTx authenticator', () => {
-    it('StarkNetTx.propose()', async () => {
+    it('StarknetTx.propose()', async () => {
       const data = {
         space: spaceAddress,
         authenticator: testConfig.ethTxAuthenticator,
@@ -223,7 +223,7 @@ describe('sx-starknet', () => {
       expect(receipt.transaction_hash).toBeDefined();
     }, 60_000);
 
-    it('StarkNetTx.vote()', async () => {
+    it('StarknetTx.vote()', async () => {
       const data = {
         space: spaceAddress,
         authenticator: testConfig.ethTxAuthenticator,
@@ -255,7 +255,7 @@ describe('sx-starknet', () => {
   });
 
   describe('starkSig authenticator', () => {
-    it('StarkNetTx.propose()', async () => {
+    it('StarknetTx.propose()', async () => {
       const data = {
         space: spaceAddress,
         authenticator: testConfig.starkSigAuthenticator,
@@ -282,7 +282,7 @@ describe('sx-starknet', () => {
       expect(receipt.transaction_hash).toBeDefined();
     }, 60_000);
 
-    it('StarkNetTx.vote()', async () => {
+    it('StarknetTx.vote()', async () => {
       const data = {
         space: spaceAddress,
         authenticator: testConfig.starkSigAuthenticator,
@@ -308,7 +308,7 @@ describe('sx-starknet', () => {
   });
 
   describe('starkTx authenticator', () => {
-    it('StarkNetTx.propose()', async () => {
+    it('StarknetTx.propose()', async () => {
       const envelope = {
         signatureData: {
           address
@@ -338,7 +338,7 @@ describe('sx-starknet', () => {
       expect(receipt.transaction_hash).toBeDefined();
     }, 60_000);
 
-    it('StarkNetTx.vote()', async () => {
+    it('StarknetTx.vote()', async () => {
       const envelope = {
         signatureData: {
           address
@@ -367,7 +367,7 @@ describe('sx-starknet', () => {
   });
 
   describe('vanilla authenticator + merkle tree strategy', () => {
-    it('StarkNetTx.propose()', async () => {
+    it('StarknetTx.propose()', async () => {
       const envelope = {
         signatureData: {
           address: walletAddress
@@ -398,7 +398,7 @@ describe('sx-starknet', () => {
       expect(receipt.transaction_hash).toBeDefined();
     }, 60_000);
 
-    it('StarkNetTx.vote()', async () => {
+    it('StarknetTx.vote()', async () => {
       const envelope = {
         signatureData: {
           address: walletAddress
@@ -428,7 +428,7 @@ describe('sx-starknet', () => {
   });
 
   describe('vanilla authenticator + erc20Votes strategy', () => {
-    it('StarkNetTx.propose()', async () => {
+    it('StarknetTx.propose()', async () => {
       const envelope = {
         signatureData: {
           address
@@ -458,7 +458,7 @@ describe('sx-starknet', () => {
       expect(receipt.transaction_hash).toBeDefined();
     }, 60_000);
 
-    it('StarkNetTx.vote()', async () => {
+    it('StarknetTx.vote()', async () => {
       const envelope = {
         signatureData: {
           address
