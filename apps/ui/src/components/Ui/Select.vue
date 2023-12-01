@@ -1,8 +1,12 @@
 <script setup lang="ts" generic="T extends string | number, U extends readonly Item<T>[]">
+import type { Component } from 'vue';
+
 export type Item<T extends string | number> = {
   key: T;
   label: string;
   indicator?: string;
+  component?: Component;
+  componentProps?: Record<string, unknown>;
 };
 
 const props = defineProps<{
@@ -37,6 +41,11 @@ const items = computed(() => props.items);
               class="w-[8px] h-[8px] rounded-full"
               :class="currentItem.indicator"
             />
+            <component
+              :is="currentItem.component"
+              v-else-if="currentItem.component"
+              v-bind="currentItem.componentProps"
+            />
             {{ currentItem.label }}
           </template>
         </button>
@@ -50,6 +59,7 @@ const items = computed(() => props.items);
           @click="() => emit('update:modelValue', item.key)"
         >
           <div v-if="item.indicator" class="w-[8px] h-[8px] rounded-full" :class="item.indicator" />
+          <component :is="item.component" v-else-if="item.component" v-bind="item.componentProps" />
           {{ item.label }}
         </button>
       </UiDropdownItem>

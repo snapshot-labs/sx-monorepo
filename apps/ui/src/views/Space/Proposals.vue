@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ProposalStatusIcon from '@/components/ProposalStatusIcon.vue';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { Space } from '@/types';
 import { VotingPower } from '@/networks/types';
@@ -13,6 +14,11 @@ const proposalsStore = useProposalsStore();
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
+
+const selectIconBaseProps = {
+  width: 16,
+  height: 16
+};
 
 const network = computed(() => getNetwork(props.space.network));
 const proposalsRecord = computed(
@@ -84,10 +90,28 @@ watchEffect(() => {
           gap="12px"
           placement="left"
           :items="[
-            { key: 'any', label: 'Any' },
-            { key: 'pending', label: 'Pending', indicator: 'bg-yellow-500' },
-            { key: 'active', label: 'Active', indicator: 'bg-green' },
-            { key: 'closed', label: 'Closed', indicator: 'bg-red' }
+            {
+              key: 'any',
+              label: 'Any'
+            },
+            {
+              key: 'pending',
+              label: 'Pending',
+              component: ProposalStatusIcon,
+              componentProps: { ...selectIconBaseProps, state: 'pending' }
+            },
+            {
+              key: 'active',
+              label: 'Active',
+              component: ProposalStatusIcon,
+              componentProps: { ...selectIconBaseProps, state: 'active' }
+            },
+            {
+              key: 'closed',
+              label: 'Closed',
+              component: ProposalStatusIcon,
+              componentProps: { ...selectIconBaseProps, state: 'passed' }
+            }
           ]"
         />
       </div>
