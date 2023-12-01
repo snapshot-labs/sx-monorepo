@@ -252,11 +252,13 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         variables: {
           first: Math.min(limit, 20),
           skip,
-          ...filter
+          where: {
+            ...filter
+          }
         }
       });
 
-      return data.ranking.items.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({

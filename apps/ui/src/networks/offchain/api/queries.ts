@@ -77,15 +77,9 @@ export const PROPOSALS_QUERY = gql`
 `;
 
 export const SPACES_RANKING_QUERY = gql`
-  query Ranking($first: Int, $skip: Int, $search: String, $network: String, $category: String) {
-    ranking(
-      first: $first
-      skip: $skip
-      where: { search: $search, network: $network, category: $category }
-    ) {
-      items {
-        ...spaceFragment
-      }
+  query ($first: Int, $skip: Int, $where: SpaceWhere) {
+    spaces(first: $first, skip: $skip, where: $where) {
+      ...spaceFragment
     }
   }
   ${SPACE_FRAGMENT}
