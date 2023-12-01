@@ -86,6 +86,7 @@ export function updateProposalValidationStrategy(
     space.proposal_threshold = new BigDecimal(new BigInt(0))
     space.voting_power_validation_strategy_strategies = []
     space.voting_power_validation_strategy_strategies_params = []
+    space.voting_power_validation_strategy_metadata = ''
   }
 }
 
