@@ -23,10 +23,17 @@ const emit = defineEmits<{
   (e: 'no-network');
 }>();
 
-const availableNetworks = enabledNetworks.map(id => ({
-  id,
-  name: getNetwork(id).name
-}));
+const availableNetworks = enabledNetworks
+  .map(id => {
+    const { name, readOnly } = getNetwork(id);
+
+    return {
+      id,
+      name,
+      readOnly
+    };
+  })
+  .filter(network => !network.readOnly);
 
 const definition = computed(() => {
   return {
@@ -85,7 +92,7 @@ const definition = computed(() => {
       },
       walletNetwork: {
         type: ['string', 'null'],
-        enum: [null, ...enabledNetworks],
+        enum: [null, ...availableNetworks.map(network => network.id)],
         options: [{ id: null, name: 'No treasury' }, ...availableNetworks],
         title: 'Treasury network',
         nullable: true
@@ -121,7 +128,7 @@ const definition = computed(() => {
             },
             delegationContractNetwork: {
               type: 'string',
-              enum: [null, ...enabledNetworks],
+              enum: [null, ...availableNetworks.map(network => network.id)],
               options: [{ id: null, name: 'No delegation contract' }, ...availableNetworks],
               title: 'Delegation contract network',
               nullable: true
