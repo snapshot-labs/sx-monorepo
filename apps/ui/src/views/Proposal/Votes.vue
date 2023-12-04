@@ -159,7 +159,7 @@ watch([sortBy, choiceFilter], () => {
     </td>
     <template v-else>
       <tbody>
-        <td v-if="votes.length === 0" class="px-4 py-3" colspan="5">
+        <td v-if="votes.length === 0" class="px-4 py-3 flex items-center" colspan="5">
           <IH-exclamation-circle class="inline-block mr-2" />
           <span v-text="'There are no votes here.'" />
         </td>
