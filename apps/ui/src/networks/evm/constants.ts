@@ -11,6 +11,7 @@ import IHPencil from '~icons/heroicons-outline/pencil';
 import IHClock from '~icons/heroicons-outline/clock';
 import IHUserCircle from '~icons/heroicons-outline/user-circle';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
+import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 
 export const SUPPORTED_AUTHENTICATORS = {
   '0xba06e6ccb877c332181a6867c05c8b746a21aed1': true,
@@ -142,7 +143,7 @@ export const EDITOR_VOTING_STRATEGIES = [
       properties: {
         symbol: {
           type: 'string',
-          maxLength: 6,
+          maxLength: MAX_SYMBOL_LENGTH,
           title: 'Symbol',
           examples: ['e.g. VP']
         }
@@ -185,7 +186,7 @@ export const EDITOR_VOTING_STRATEGIES = [
         },
         symbol: {
           type: 'string',
-          maxLength: 6,
+          maxLength: MAX_SYMBOL_LENGTH,
           title: 'Symbol',
           examples: ['e.g. COMP']
         }
@@ -228,7 +229,7 @@ export const EDITOR_VOTING_STRATEGIES = [
         },
         symbol: {
           type: 'string',
-          maxLength: 6,
+          maxLength: MAX_SYMBOL_LENGTH,
           title: 'Symbol',
           examples: ['e.g. COMP']
         }

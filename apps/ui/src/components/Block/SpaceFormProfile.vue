@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, enabledNetworks } from '@/networks';
 
@@ -86,7 +87,7 @@ const definition = computed(() => {
       },
       votingPowerSymbol: {
         type: 'string',
-        maxLength: 6,
+        maxLength: MAX_SYMBOL_LENGTH,
         title: 'Voting power symbol',
         examples: ['e.g. VP']
       },

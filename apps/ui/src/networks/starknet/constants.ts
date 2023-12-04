@@ -9,6 +9,7 @@ import IHCube from '~icons/heroicons-outline/cube';
 import IHPencil from '~icons/heroicons-outline/pencil';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import { NetworkID } from '@/types';
+import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 
 // TODO: We should have something like this in sx.js as base for this constants file as well as networkConfig
 const CONFIGS = {
@@ -246,7 +247,7 @@ export function createConstants(networkId: NetworkID) {
         properties: {
           symbol: {
             type: 'string',
-            maxLength: 6,
+            maxLength: MAX_SYMBOL_LENGTH,
             title: 'Symbol',
             examples: ['e.g. VP']
           },
@@ -295,7 +296,7 @@ export function createConstants(networkId: NetworkID) {
           },
           symbol: {
             type: 'string',
-            maxLength: 6,
+            maxLength: MAX_SYMBOL_LENGTH,
             title: 'Symbol',
             examples: ['e.g. COMP']
           }

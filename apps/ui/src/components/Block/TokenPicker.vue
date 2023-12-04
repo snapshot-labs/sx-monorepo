@@ -128,7 +128,7 @@ watch(
       <div class="flex items-center min-w-0 pr-2">
         <Stamp :id="`${networkId}:${asset.contractAddress}`" type="token" :size="32" />
         <div class="flex flex-col ml-3 leading-[20px] min-w-0">
-          <div class="text-skin-link" v-text="shorten(asset.symbol, 12)" />
+          <div class="text-skin-link" v-text="shorten(asset.symbol, 'symbol')" />
           <div class="text-sm truncate" v-text="shorten(asset.name, 24)" />
         </div>
       </div>
