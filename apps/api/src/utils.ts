@@ -87,9 +87,9 @@ export function findVariant(value: { variant: Record<string, any> }) {
 }
 
 export function getVoteValue(label: string) {
-  if (label === 'Against') return 0;
+  if (label === 'Against') return 2;
   if (label === 'For') return 1;
-  if (label === 'Abstain') return 2;
+  if (label === 'Abstain') return 3;
 
   throw new Error('Invalid vote label');
 }
