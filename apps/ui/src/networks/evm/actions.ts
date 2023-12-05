@@ -15,7 +15,12 @@ import { MANA_URL, executionCall } from '@/helpers/mana';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
+import {
+  getExecutionData,
+  buildMetadata,
+  parseStrategyMetadata,
+  createStrategyPicker
+} from '@/networks/common/helpers';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import {
   CONTRACT_SUPPORTED_AUTHENTICATORS,
@@ -124,14 +129,12 @@ export function createActions(
       );
 
       const metadataUris = await Promise.all(
-        params.votingStrategies.map(async config => {
-          if (!config.generateMetadata) return '';
+        params.votingStrategies.map(config => buildMetadata(helpers, config))
+      );
 
-          const metadata = await config.generateMetadata(config.params);
-          const pinned = await helpers.pin(metadata);
-
-          return `ipfs://${pinned.cid}`;
-        })
+      const proposalValidationStrategyMetadataUri = await buildMetadata(
+        helpers,
+        params.validationStrategy
       );
 
       const response = await client.deploySpace({
@@ -152,7 +155,7 @@ export function createActions(
               : '0x'
           },
           metadataUri: `ipfs://${pinned.cid}`,
-          proposalValidationStrategyMetadataUri: '',
+          proposalValidationStrategyMetadataUri,
           daoUri: ''
         }
       });
@@ -191,6 +194,7 @@ export function createActions(
       const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
+        strategiesIndicies: space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract
       });
@@ -208,10 +212,23 @@ export function createActions(
         };
       }
 
+      const strategiesWithMetadata = await Promise.all(
+        strategies.map(async strategy => {
+          const metadata = await parseStrategyMetadata(
+            space.voting_power_validation_strategies_parsed_metadata[strategy.index].payload
+          );
+
+          return {
+            ...strategy,
+            metadata
+          };
+        })
+      );
+
       const data = {
         space: space.id,
         authenticator,
-        strategies,
+        strategies: strategiesWithMetadata,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${cid}`
       };
@@ -252,6 +269,7 @@ export function createActions(
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
+        strategiesIndicies: space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract
       });
@@ -325,6 +343,7 @@ export function createActions(
       const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
         authenticators: proposal.space.authenticators,
         strategies: proposal.strategies,
+        strategiesIndicies: proposal.strategies_indicies,
         connectorType,
         isContract
       });
@@ -334,10 +353,25 @@ export function createActions(
       if (choice === 2) convertedChoice = 0;
       if (choice === 3) convertedChoice = 2;
 
+      const strategiesWithMetadata = await Promise.all(
+        strategies.map(async strategy => {
+          const metadataIndex = proposal.strategies_indicies.indexOf(strategy.index);
+
+          const metadata = await parseStrategyMetadata(
+            proposal.space.strategies_parsed_metadata[metadataIndex].payload
+          );
+
+          return {
+            ...strategy,
+            metadata
+          };
+        })
+      );
+
       const data = {
         space: proposal.space.id,
         authenticator,
-        strategies,
+        strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: convertedChoice,
         metadataUri: ''
@@ -476,6 +510,52 @@ export function createActions(
 
       return votesContract.delegate(delegatee);
     },
+    updateStrategies: async (
+      web3: any,
+      space: Space,
+      authenticatorsToAdd: StrategyConfig[],
+      authenticatorsToRemove: number[],
+      votingStrategiesToAdd: StrategyConfig[],
+      votingStrategiesToRemove: number[],
+      validationStrategy: StrategyConfig
+    ) => {
+      await verifyNetwork(web3, chainId);
+
+      const metadataUris = await Promise.all(
+        votingStrategiesToAdd.map(config => buildMetadata(helpers, config))
+      );
+
+      const proposalValidationStrategyMetadataUri = await buildMetadata(
+        helpers,
+        validationStrategy
+      );
+
+      return client.updateSettings({
+        signer: web3.getSigner(),
+        space: space.id,
+        settings: {
+          authenticatorsToAdd: authenticatorsToAdd.map(config => config.address),
+          authenticatorsToRemove: space.authenticators.filter((authenticator, index) =>
+            authenticatorsToRemove.includes(index)
+          ),
+          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
+            addr: config.address,
+            params: config.generateParams ? config.generateParams(config.params)[0] : '0x'
+          })),
+          votingStrategiesToRemove: votingStrategiesToRemove.map(
+            index => space.strategies_indicies[index]
+          ),
+          votingStrategyMetadataUrisToAdd: metadataUris,
+          proposalValidationStrategy: {
+            addr: validationStrategy.address,
+            params: validationStrategy.generateParams
+              ? validationStrategy.generateParams(validationStrategy.params)[0]
+              : '0x'
+          },
+          proposalValidationStrategyMetadataUri
+        }
+      });
+    },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (
       strategiesAddresses: string[],
@@ -491,10 +571,12 @@ export function createActions(
           const strategy = getEvmStrategy(address, networkConfig);
           if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
+          const strategyMetadata = await parseStrategyMetadata(strategiesMetadata[i].payload);
+
           const value = await strategy.getVotingPower(
             address,
             voterAddress,
-            null,
+            strategyMetadata,
             block,
             strategiesParams[i],
             provider

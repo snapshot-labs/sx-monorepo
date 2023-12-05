@@ -458,6 +458,37 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
+  async function updateStrategies(
+    space: Space,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig
+  ) {
+    if (!web3.value.account) return await forceLogin();
+
+    const network = getReadWriteNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
+
+    const receipt = await network.actions.updateStrategies(
+      auth.web3,
+      space,
+      authenticatorsToAdd,
+      authenticatorsToRemove,
+      votingStrategiesToAdd,
+      votingStrategiesToRemove,
+      validationStrategy
+    );
+    console.log('Receipt', receipt);
+
+    if (handleSafeEnvelope(receipt)) return;
+
+    uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
+  }
+
   async function delegate(space: Space, networkId: NetworkID, delegatee: string) {
     if (!web3.value.account) return await forceLogin();
 
@@ -493,6 +524,7 @@ export function useActions() {
     setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
+    updateStrategies: wrapWithErrors(updateStrategies),
     delegate: wrapWithErrors(delegate)
   };
 }

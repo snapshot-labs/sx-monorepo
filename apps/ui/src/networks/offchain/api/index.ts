@@ -56,9 +56,11 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     executors: [],
     executors_types: [],
     strategies: [],
+    strategies_indicies: [],
     strategies_params: [],
     strategies_parsed_metadata: [],
     validation_strategy: '',
+    validation_strategy_params: '',
     voting_power_validation_strategy_strategies: [],
     voting_power_validation_strategy_strategies_params: [],
     voting_power_validation_strategies_parsed_metadata: []
@@ -102,7 +104,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       authenticators: [],
       executors: [],
       executors_types: [],
-      voting_power_validation_strategies_parsed_metadata: [],
       strategies_parsed_metadata: []
     },
     // NOTE: ignored
@@ -113,6 +114,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     execution_strategy_type: '',
     timelock_veto_guardian: null,
     strategies: [],
+    strategies_indicies: [],
     strategies_params: [],
     tx: '',
     execution_tx: null,

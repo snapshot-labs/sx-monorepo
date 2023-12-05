@@ -19,6 +19,20 @@ export type SpacesFilter = {
   id_in?: string[];
 };
 export type Connector = 'argentx' | 'injected' | 'walletconnect' | 'walletlink' | 'gnosis';
+export type GeneratedMetadata =
+  | {
+      name: string;
+      description?: string;
+      properties: {
+        symbol?: string;
+        decimals: number;
+        token?: string;
+        payload?: string;
+      };
+    }
+  | {
+      strategies_metadata: string[];
+    };
 
 export type StrategyTemplate = {
   address: string;
@@ -30,7 +44,11 @@ export type StrategyTemplate = {
   validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
   generateParams?: (params: Record<string, any>) => any[];
-  generateMetadata?: (params: Record<string, any>) => any;
+  generateMetadata?: (params: Record<string, any>) => Promise<GeneratedMetadata>;
+  parseParams?: (
+    params: string,
+    metadata: StrategyParsedMetadata | null
+  ) => Promise<Record<string, any>>;
   deploy?: (
     client: any,
     signer: Signer,
@@ -127,6 +145,15 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   setMinVotingDuration(web3: Web3Provider, space: Space, minVotingDuration: number);
   setMaxVotingDuration(web3: Web3Provider, space: Space, maxVotingDuration: number);
   transferOwnership(web3: Web3Provider, space: Space, owner: string);
+  updateStrategies(
+    web3: Web3Provider,
+    space: Space,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig
+  );
   delegate(web3: Web3Provider, space: Space, networkId: NetworkID, delegatee: string);
   send(envelope: any): Promise<any>;
 };

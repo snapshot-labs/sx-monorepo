@@ -1,6 +1,6 @@
 import { CallData, uint256 } from 'starknet';
 import { utils } from '@snapshot-labs/sx';
-import { shorten } from '@/helpers/utils';
+import { getUrl, shorten } from '@/helpers/utils';
 import { pinPineapple } from '@/helpers/pin';
 import { StrategyConfig } from '../types';
 
@@ -8,8 +8,8 @@ import IHCode from '~icons/heroicons-outline/code';
 import IHCube from '~icons/heroicons-outline/cube';
 import IHPencil from '~icons/heroicons-outline/pencil';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
-import { NetworkID } from '@/types';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import { NetworkID, StrategyParsedMetadata } from '@/types';
 
 // TODO: We should have something like this in sx.js as base for this constants file as well as networkConfig
 const CONFIGS = {
@@ -174,6 +174,13 @@ export function createConstants(networkId: NetworkID) {
           strategies_metadata: strategiesMetadata
         };
       },
+      parseParams: async (params: string) => {
+        const [low, high] = params.split(',');
+
+        return {
+          threshold: uint256.uint256ToBN({ low, high }).toString(10)
+        };
+      },
       paramsDefinition: {
         type: 'object',
         title: 'Params',
@@ -197,7 +204,8 @@ export function createConstants(networkId: NetworkID) {
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
       generateSummary: (params: Record<string, any>) => {
-        const length = params.whitelist.split('\n').length;
+        const length =
+          params.whitelist.trim().length === 0 ? 0 : params.whitelist.split('\n').length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
@@ -239,6 +247,24 @@ export function createConstants(networkId: NetworkID) {
           }
         };
       },
+      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+        if (!metadata) throw new Error('Missing metadata');
+
+        const getWhitelist = async (payload: string) => {
+          const metadataUrl = getUrl(payload);
+
+          if (!metadataUrl) return '';
+
+          const res = await fetch(metadataUrl);
+          const { tree } = await res.json();
+          return tree.map((item: any) => `${item.address}:${item.votingPower}`).join('\n');
+        };
+
+        return {
+          symbol: metadata.symbol,
+          whitelist: metadata.payload ? await getWhitelist(metadata.payload) : ''
+        };
+      },
       paramsDefinition: {
         type: 'object',
         title: 'Params',
@@ -269,7 +295,7 @@ export function createConstants(networkId: NetworkID) {
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
       generateParams: (params: Record<string, any>) => [params.contractAddress],
-      generateMetadata: (params: Record<string, any>) => ({
+      generateMetadata: async (params: Record<string, any>) => ({
         name: 'ERC-20 Votes (EIP-5805)',
         properties: {
           symbol: params.symbol,
@@ -277,6 +303,71 @@ export function createConstants(networkId: NetworkID) {
           token: params.contractAddress
         }
       }),
+      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+        if (!metadata) throw new Error('Missing metadata');
+
+        const getWhitelist = async (payload: string) => {
+          const metadataUrl = getUrl(payload);
+
+          if (!metadataUrl) return '';
+
+          const res = await fetch(metadataUrl);
+          const { tree } = await res.json();
+          return tree.map((item: any) => `${item.address}:${item.votingPower}`).join('\n');
+        };
+
+        return {
+          symbol: metadata.symbol,
+          whitelist: metadata.payload ? await getWhitelist(metadata.payload) : ''
+        };
+      },
+      paramsDefinition: {
+        type: 'object',
+        title: 'Params',
+        additionalProperties: false,
+        required: [],
+        properties: {
+          symbol: {
+            type: 'string',
+            maxLength: 6,
+            title: 'Symbol',
+            examples: ['e.g. VP']
+          },
+          whitelist: {
+            type: 'string',
+            format: 'long',
+            title: 'Whitelist',
+            examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
+          }
+        }
+      }
+    },
+    {
+      address: config.Strategies.ERC20Votes,
+      name: 'ERC-20 Votes (EIP-5805)',
+      about:
+        'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
+      icon: IHCode,
+      generateSummary: (params: Record<string, any>) =>
+        `(${shorten(params.contractAddress)}, ${params.decimals})`,
+      generateParams: (params: Record<string, any>) => [params.contractAddress],
+      generateMetadata: async (params: Record<string, any>) => ({
+        name: 'ERC-20 Votes (EIP-5805)',
+        properties: {
+          symbol: params.symbol,
+          decimals: parseInt(params.decimals),
+          token: params.contractAddress
+        }
+      }),
+      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+        if (!metadata) throw new Error('Missing metadata');
+
+        return {
+          contractAddress: metadata.token,
+          decimals: metadata.decimals,
+          symbol: metadata.symbol
+        };
+      },
       paramsDefinition: {
         type: 'object',
         title: 'Params',

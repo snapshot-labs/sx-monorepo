@@ -1,5 +1,8 @@
-type StrategyParsedMetadata = {
+export type ApiStrategyParsedMetadata = {
+  index: number;
   data: {
+    name: string;
+    description: string;
     decimals: number;
     symbol: string;
     token: string | null;
@@ -32,12 +35,14 @@ export type ApiSpace = {
   max_voting_period: number;
   proposal_threshold: string;
   validation_strategy: string;
+  validation_strategy_params: string;
   voting_power_validation_strategy_strategies: string[];
   voting_power_validation_strategy_strategies_params: string[];
-  voting_power_validation_strategies_parsed_metadata: StrategyParsedMetadata[];
+  voting_power_validation_strategies_parsed_metadata: ApiStrategyParsedMetadata[];
+  strategies_indicies: number[];
   strategies: string[];
   strategies_params: any[];
-  strategies_parsed_metadata: StrategyParsedMetadata[];
+  strategies_parsed_metadata: ApiStrategyParsedMetadata[];
   authenticators: string[];
   proposal_count: number;
   vote_count: number;
@@ -65,8 +70,7 @@ export type ApiProposal = {
       executors_types: string[];
     };
     authenticators: string[];
-    voting_power_validation_strategies_parsed_metadata: StrategyParsedMetadata[];
-    strategies_parsed_metadata: StrategyParsedMetadata[];
+    strategies_parsed_metadata: ApiStrategyParsedMetadata[];
   };
   author: {
     id: string;
@@ -86,6 +90,7 @@ export type ApiProposal = {
   execution_strategy: string;
   execution_strategy_type: string;
   timelock_veto_guardian: string | null;
+  strategies_indicies: number[];
   strategies: string[];
   strategies_params: any[];
   created: number;

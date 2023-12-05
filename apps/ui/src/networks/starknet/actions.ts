@@ -6,8 +6,13 @@ import {
   NetworkConfig
 } from '@snapshot-labs/sx';
 import { MANA_URL } from '@/helpers/mana';
-import { createErc1155Metadata, getUrl, verifyNetwork } from '@/helpers/utils';
-import { getExecutionData, createStrategyPicker } from '@/networks/common/helpers';
+import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import {
+  getExecutionData,
+  buildMetadata,
+  parseStrategyMetadata,
+  createStrategyPicker
+} from '@/networks/common/helpers';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '@/networks/common/constants';
 import type { RpcProvider } from 'starknet';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
@@ -66,17 +71,6 @@ export function createActions(
     return code !== '0x';
   };
 
-  const parseStrategyMetadata = async (metadata: string | null) => {
-    if (metadata === null) return null;
-    if (!metadata.startsWith('ipfs://')) return JSON.parse(metadata);
-
-    const strategyUrl = getUrl(metadata);
-    if (!strategyUrl) return null;
-
-    const res = await fetch(strategyUrl);
-    return res.json();
-  };
-
   const client = new clients.StarkNetTx(clientConfig);
   const starkSigClient = new clients.StarkNetSig(clientConfig);
   const ethSigClient = new clients.EthereumSig(clientConfig);
@@ -111,20 +105,14 @@ export function createActions(
         })
       );
 
-      const buildMetadata = async (config: StrategyConfig) => {
-        if (!config.generateMetadata) return '';
-
-        const metadata = await config.generateMetadata(config.params);
-        const pinned = await helpers.pin(metadata);
-
-        return `ipfs://${pinned.cid}`;
-      };
-
       const metadataUris = await Promise.all(
-        params.votingStrategies.map(config => buildMetadata(config))
+        params.votingStrategies.map(config => buildMetadata(helpers, config))
       );
 
-      const proposalValidationStrategyMetadataUri = await buildMetadata(params.validationStrategy);
+      const proposalValidationStrategyMetadataUri = await buildMetadata(
+        helpers,
+        params.validationStrategy
+      );
 
       return client.deploySpace({
         account: web3.provider.account,
@@ -177,6 +165,7 @@ export function createActions(
       const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
+        strategiesIndicies: space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract
       });
@@ -252,6 +241,7 @@ export function createActions(
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
+        strategiesIndicies: space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract
       });
@@ -318,6 +308,7 @@ export function createActions(
       const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
         authenticators: proposal.space.authenticators,
         strategies: proposal.strategies,
+        strategiesIndicies: proposal.strategies_indicies,
         connectorType,
         isContract
       });
@@ -328,8 +319,10 @@ export function createActions(
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
+          const metadataIndex = proposal.strategies_indicies.indexOf(strategy.index);
+
           const metadata = await parseStrategyMetadata(
-            proposal.space.strategies_parsed_metadata[strategy.index].payload
+            proposal.space.strategies_parsed_metadata[metadataIndex].payload
           );
 
           return {
@@ -401,6 +394,50 @@ export function createActions(
         signer: web3.provider.account,
         space: space.id,
         owner
+      });
+    },
+    updateStrategies: async (
+      web3: any,
+      space: Space,
+      authenticatorsToAdd: StrategyConfig[],
+      authenticatorsToRemove: number[],
+      votingStrategiesToAdd: StrategyConfig[],
+      votingStrategiesToRemove: number[],
+      validationStrategy: StrategyConfig
+    ) => {
+      const metadataUris = await Promise.all(
+        votingStrategiesToAdd.map(config => buildMetadata(helpers, config))
+      );
+
+      const proposalValidationStrategyMetadataUri = await buildMetadata(
+        helpers,
+        validationStrategy
+      );
+
+      return client.updateSettings({
+        signer: web3.provider.account,
+        space: space.id,
+        settings: {
+          authenticatorsToAdd: authenticatorsToAdd.map(config => config.address),
+          authenticatorsToRemove: space.authenticators.filter((authenticator, index) =>
+            authenticatorsToRemove.includes(index)
+          ),
+          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
+            addr: config.address,
+            params: config.generateParams ? config.generateParams(config.params) : []
+          })),
+          votingStrategiesToRemove: votingStrategiesToRemove.map(
+            index => space.strategies_indicies[index]
+          ),
+          votingStrategyMetadataUrisToAdd: metadataUris,
+          proposalValidationStrategy: {
+            addr: validationStrategy.address,
+            params: validationStrategy.generateParams
+              ? validationStrategy.generateParams(validationStrategy.params)
+              : []
+          },
+          proposalValidationStrategyMetadataUri
+        }
       });
     },
     delegate: () => {

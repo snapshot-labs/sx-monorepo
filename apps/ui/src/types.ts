@@ -46,6 +46,8 @@ export type SpaceSettings = {
 };
 
 export type StrategyParsedMetadata = {
+  name: string;
+  description: string;
   decimals: number;
   symbol: string;
   token: string | null;
@@ -74,9 +76,11 @@ export type Space = {
   max_voting_period: number;
   proposal_threshold: string;
   validation_strategy: string;
+  validation_strategy_params: string;
   voting_power_validation_strategy_strategies: string[];
   voting_power_validation_strategy_strategies_params: string[];
   voting_power_validation_strategies_parsed_metadata: StrategyParsedMetadata[];
+  strategies_indicies: number[];
   strategies: string[];
   strategies_params: any[];
   strategies_parsed_metadata: StrategyParsedMetadata[];
@@ -103,7 +107,6 @@ export type Proposal = {
     authenticators: string[];
     executors: string[];
     executors_types: string[];
-    voting_power_validation_strategies_parsed_metadata: StrategyParsedMetadata[];
     strategies_parsed_metadata: StrategyParsedMetadata[];
   };
   author: {
@@ -126,6 +129,7 @@ export type Proposal = {
   execution_strategy: string;
   execution_strategy_type: string;
   timelock_veto_guardian: string | null;
+  strategies_indicies: number[];
   strategies: string[];
   strategies_params: any[];
   created: number;
