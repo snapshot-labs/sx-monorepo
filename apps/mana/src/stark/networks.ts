@@ -16,11 +16,12 @@ const clientsMap = new Map<
 >();
 
 function getProvider(chainId: string) {
-  const networkName = chainId === constants.StarknetChainId.SN_MAIN ? 'SN_MAIN' : 'SN_GOERLI';
+  const nodeUrl =
+    chainId === constants.StarknetChainId.SN_MAIN
+      ? process.env.STARKNET_MAINNET_RPC_URL
+      : process.env.STARKNET_GOERLI_RPC_URL;
 
-  return new RpcProvider({
-    nodeUrl: networkName
-  });
+  return new RpcProvider({ nodeUrl });
 }
 
 export function getClient(chainId: string) {
