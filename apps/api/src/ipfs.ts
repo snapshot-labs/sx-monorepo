@@ -22,6 +22,7 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
   spaceMetadataItem.wallet = '';
   spaceMetadataItem.executors = [];
   spaceMetadataItem.executors_types = [];
+  spaceMetadataItem.delegations = [];
 
   const metadata: any = metadataUri ? await getJSON(metadataUri) : {};
 
@@ -32,15 +33,11 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
 
   if (metadata.properties) {
     if (metadata.properties.cover) spaceMetadataItem.cover = metadata.properties.cover;
-    if (
-      metadata.properties.delegation_api_type === 'governor-subgraph' &&
-      metadata.properties.delegation_api_url
-    ) {
-      spaceMetadataItem.delegation_api_type = metadata.properties.delegation_api_type;
-      spaceMetadataItem.delegation_api_url = metadata.properties.delegation_api_url;
-    }
-    if (metadata.properties.delegation_contract) {
-      spaceMetadataItem.delegation_contract = metadata.properties.delegation_contract;
+
+    if (metadata.properties.delegations) {
+      spaceMetadataItem.delegations = metadata.properties.delegations.map((delegation: any) =>
+        JSON.stringify(delegation)
+      );
     }
     if (metadata.properties.github) spaceMetadataItem.github = metadata.properties.github;
     if (metadata.properties.twitter) spaceMetadataItem.twitter = metadata.properties.twitter;
