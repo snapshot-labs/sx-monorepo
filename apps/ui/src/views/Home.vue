@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { version, repository } from '@/../package.json';
+
+const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
+</script>
+
 <template>
   <div>
     <div class="py-8 mb-6 border-b hero">
@@ -35,6 +41,15 @@
               SX.js <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
+          <div>
+            <a
+              :href="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
+              target="_blank"
+            >
+              Version {{ version }}<span v-if="COMMIT_SHA" v-text="`#${COMMIT_SHA.slice(0, 7)}`" />
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </a>
+          </div>
         </div>
       </div>
       <div class="space-y-2">
@@ -51,6 +66,7 @@
           </a>
         </div>
       </div>
+      <div>© {{ new Date().getFullYear() }} Snapshot Labs</div>
     </Container>
   </div>
 </template>

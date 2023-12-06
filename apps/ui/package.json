@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "main": "main.js",
+  "repository": "snapshot-labs/sx-ui",
   "scripts": {
     "dev": "vite --port=8080",
     "build": "vite build",
