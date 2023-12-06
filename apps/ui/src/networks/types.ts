@@ -154,7 +154,13 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     votingStrategiesToRemove: number[],
     validationStrategy: StrategyConfig
   );
-  delegate(web3: Web3Provider, space: Space, networkId: NetworkID, delegatee: string);
+  delegate(
+    web3: Web3Provider,
+    space: Space,
+    networkId: NetworkID,
+    delegatee: string,
+    delegationContract: string
+  );
   send(envelope: any): Promise<any>;
 };
 

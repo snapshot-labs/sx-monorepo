@@ -14,10 +14,7 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
   votingPowerSymbol: '',
   walletNetwork: null,
   walletAddress: null,
-  delegationApiType: null,
-  delegationApiUrl: null,
-  delegationContractAddress: null,
-  delegationContractNetwork: null
+  delegations: []
 };
 
 const props = defineProps<{
@@ -73,8 +70,7 @@ watch(
     form.discord = props.space.discord;
     form.twitter = props.space.twitter;
     form.votingPowerSymbol = props.space.voting_power_symbol;
-    form.delegationApiType = props.space.delegation_api_type;
-    form.delegationApiUrl = props.space.delegation_api_url;
+    form.delegations = props.space.delegations;
 
     const [walletNetwork, walletAddress] = props.space.wallet.split(':');
     if (walletNetwork && walletAddress) {
@@ -83,19 +79,6 @@ watch(
     } else {
       form.walletNetwork = null;
       form.walletAddress = null;
-    }
-
-    if (props.space.delegation_contract) {
-      const [delegationContractNetwork, delegationContractAddress] =
-        props.space.delegation_contract.split(':');
-
-      if (delegationContractNetwork && delegationContractAddress) {
-        form.delegationContractNetwork = delegationContractNetwork as NetworkID;
-        form.delegationContractAddress = delegationContractAddress;
-      } else {
-        form.delegationContractNetwork = null;
-        form.delegationContractAddress = null;
-      }
     }
   }
 );
@@ -134,6 +117,8 @@ watch(
       :space="space"
       :show-title="false"
       :form="form"
+      :delegations-value="form.delegations"
+      @delegations="v => (form.delegations = v)"
       @pick="handlePick"
       @no-network="form.walletAddress = null"
       @errors="v => (formErrors = v)"

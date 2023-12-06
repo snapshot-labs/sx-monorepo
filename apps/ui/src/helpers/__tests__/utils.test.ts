@@ -17,11 +17,15 @@ describe('utils', () => {
         votingPowerSymbol: 'VOTE',
         walletNetwork: 'gor',
         walletAddress: '0x000000000000000000000000000000000000dead',
-        delegationApiType: 'governor-subgraph',
-        delegationApiUrl:
-          'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-        delegationContractNetwork: 'gor',
-        delegationContractAddress: '0x000000000000000000000000000000000000dead'
+        delegations: [
+          {
+            name: 'sample',
+            apiType: 'governor-subgraph',
+            apiUrl: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
+            contractNetwork: 'gor',
+            contractAddress: '0x000000000000000000000000000000000000dead'
+          }
+        ]
       });
 
       expect(metadata).toEqual({
@@ -36,10 +40,14 @@ describe('utils', () => {
           twitter: 'SnapshotLabs',
           discord: 'snapshot',
           wallets: ['gor:0x000000000000000000000000000000000000dead'],
-          delegation_api_type: 'governor-subgraph',
-          delegation_api_url:
-            'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-          delegation_contract: 'gor:0x000000000000000000000000000000000000dead'
+          delegations: [
+            {
+              name: 'sample',
+              api_type: 'governor-subgraph',
+              api_url: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
+              contract: 'gor:0x000000000000000000000000000000000000dead'
+            }
+          ]
         }
       });
     });

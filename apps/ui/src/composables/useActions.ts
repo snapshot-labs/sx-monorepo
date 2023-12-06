@@ -489,12 +489,23 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
-  async function delegate(space: Space, networkId: NetworkID, delegatee: string) {
+  async function delegate(
+    space: Space,
+    networkId: NetworkID,
+    delegatee: string,
+    delegationContract: string
+  ) {
     if (!web3.value.account) return await forceLogin();
 
     const network = getReadWriteNetwork(networkId);
 
-    const receipt = await network.actions.delegate(auth.web3, space, networkId, delegatee);
+    const receipt = await network.actions.delegate(
+      auth.web3,
+      space,
+      networkId,
+      delegatee,
+      delegationContract
+    );
     console.log('Receipt', receipt);
 
     uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);

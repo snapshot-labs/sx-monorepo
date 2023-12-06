@@ -308,15 +308,18 @@ export function createErc1155Metadata(
     description: metadata.description,
     external_url: metadata.externalUrl,
     properties: {
-      delegation_api_type: metadata.delegationApiType,
-      delegation_api_url: metadata.delegationApiUrl,
-      delegation_contract: `${metadata.delegationContractNetwork}:${metadata.delegationContractAddress}`,
       voting_power_symbol: metadata.votingPowerSymbol,
       cover: metadata.cover,
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
       wallets,
+      delegations: metadata.delegations.map(delegation => ({
+        name: delegation.name,
+        api_type: delegation.apiType,
+        api_url: delegation.apiUrl,
+        contract: `${delegation.contractNetwork}:${delegation.contractAddress}`
+      })),
       ...extraProperties
     }
   };

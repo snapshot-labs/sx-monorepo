@@ -29,7 +29,7 @@ export const METADATA: Record<string, Metadata> = {
   arb1: {
     name: 'Arbitrum One',
     chainId: 42161,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/v0.0.17', // TODO: change to use latest, it's stuck syncing right now, hardcoding so we have working UI
     avatar: 'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
     blockTime: 0.26082
   },

@@ -39,7 +39,7 @@ const navigationConfig = computed(() => ({
       name: 'Proposals',
       icon: IHNewspaper
     },
-    ...(space.value?.delegation_api_url
+    ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
           delegates: {
             name: 'Delegates',

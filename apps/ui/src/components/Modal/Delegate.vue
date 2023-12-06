@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { NetworkID, Space } from '@/types';
+import { NetworkID, Space, SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   delegatee: ''
@@ -10,6 +10,7 @@ const DEFAULT_FORM_STATE = {
 const props = defineProps<{
   open: boolean;
   space: Space;
+  delegation: SpaceMetadataDelegation;
   initialState?: any;
 }>();
 
@@ -46,13 +47,16 @@ const sending = ref(false);
 const formErrors = ref({} as Record<string, any>);
 
 async function handleSubmit() {
-  if (!props.space.delegation_contract) return;
+  if (!props.delegation.contractAddress) return;
   sending.value = true;
 
   try {
-    const [networkId] = props.space.delegation_contract.split(':');
-
-    await delegate(props.space, networkId as NetworkID, form.delegatee);
+    await delegate(
+      props.space,
+      props.delegation.contractNetwork as NetworkID,
+      form.delegatee,
+      `${props.delegation.contractNetwork}:${props.delegation.contractAddress}`
+    );
     emit('close');
   } catch (e) {
     console.log('delegation failed', e);

@@ -21,6 +21,14 @@ export type SelectedStrategy = {
   type: string;
 };
 
+export type SpaceMetadataDelegation = {
+  name: string | null;
+  apiType: string | null;
+  apiUrl: string | null;
+  contractNetwork: NetworkID | null;
+  contractAddress: string | null;
+};
+
 export type SpaceMetadata = {
   name: string;
   avatar: string;
@@ -33,10 +41,7 @@ export type SpaceMetadata = {
   votingPowerSymbol: string;
   walletNetwork: NetworkID | null;
   walletAddress: string | null;
-  delegationApiType: string | null;
-  delegationApiUrl: string | null;
-  delegationContractNetwork: NetworkID | null;
-  delegationContractAddress: string | null;
+  delegations: SpaceMetadataDelegation[];
 };
 
 export type SpaceSettings = {
@@ -62,9 +67,7 @@ export type Space = {
   cover: string;
   about?: string;
   external_url: string;
-  delegation_api_type: string | null;
-  delegation_api_url: string | null;
-  delegation_contract: string | null;
+  delegations: SpaceMetadataDelegation[];
   twitter: string;
   github: string;
   discord: string;

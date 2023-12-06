@@ -73,10 +73,7 @@ const metadataForm: SpaceMetadata = reactive(
     votingPowerSymbol: '',
     walletNetwork: null,
     walletAddress: null,
-    delegationApiType: null,
-    delegationApiUrl: null,
-    delegationContractNetwork: null,
-    delegationContractAddress: null
+    delegations: []
   })
 );
 const selectedNetworkId: Ref<NetworkID> = ref(enabledNetworks[0]);
@@ -219,7 +216,9 @@ watchEffect(() => {
           <BlockSpaceFormProfile
             v-if="currentPage === 'profile'"
             :form="metadataForm"
+            :delegations-value="metadataForm.delegations"
             @pick="showPicker = true"
+            @delegations="v => (metadataForm.delegations = v)"
             @no-network="metadataForm.walletAddress = null"
             @errors="v => handleErrors('profile', v)"
           />

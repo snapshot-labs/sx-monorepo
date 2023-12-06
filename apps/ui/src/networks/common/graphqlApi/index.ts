@@ -94,9 +94,19 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     discord: space.metadata.discord,
     voting_power_symbol: space.metadata.voting_power_symbol,
     wallet: space.metadata.wallet,
-    delegation_api_type: space.metadata.delegation_api_type,
-    delegation_api_url: space.metadata.delegation_api_url,
-    delegation_contract: space.metadata.delegation_contract,
+    delegations: space.metadata.delegations.map(delegation => {
+      const { name, api_type, api_url, contract } = JSON.parse(delegation);
+
+      const [network, address] = contract.split(':');
+
+      return {
+        name: name,
+        apiType: api_type,
+        apiUrl: api_url,
+        contractNetwork: network === 'null' ? null : network,
+        contractAddress: address === 'null' ? null : address
+      };
+    }),
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
     voting_power_validation_strategies_parsed_metadata: processStrategiesMetadata(

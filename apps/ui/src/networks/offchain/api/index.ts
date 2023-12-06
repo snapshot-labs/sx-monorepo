@@ -47,9 +47,17 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     max_voting_period: space.voting.period ?? 0,
     proposal_threshold: space.voting.quorum?.toString() ?? '0',
     wallet,
-    delegation_api_type: space.delegationPortal?.delegationType ?? null,
-    delegation_api_url: space.delegationPortal?.delegationApi ?? null,
-    delegation_contract: space.delegationPortal?.delegationContract ?? null,
+    delegations: space.delegationPortal
+      ? [
+          {
+            name: null,
+            apiType: space.delegationPortal?.delegationType ?? null,
+            apiUrl: space.delegationPortal?.delegationApi ?? null,
+            contractNetwork: null,
+            contractAddress: space.delegationPortal?.delegationContract ?? null
+          }
+        ]
+      : [],
     // NOTE: ignored
     created: 0,
     authenticators: [],

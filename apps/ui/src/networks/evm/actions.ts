@@ -495,12 +495,16 @@ export function createActions(
         { noWait: isContract }
       );
     },
-    delegate: async (web3: Web3Provider, space: Space, networkId: NetworkID, delegatee: string) => {
-      if (!space.delegation_contract) throw new Error('Delegation contract missing');
-
+    delegate: async (
+      web3: Web3Provider,
+      space: Space,
+      networkId: NetworkID,
+      delegatee: string,
+      delegationContract: string
+    ) => {
       await verifyNetwork(web3, CHAIN_IDS[networkId]);
 
-      const [, contractAddress] = space.delegation_contract.split(':');
+      const [, contractAddress] = delegationContract.split(':');
 
       const votesContract = new Contract(
         contractAddress,
