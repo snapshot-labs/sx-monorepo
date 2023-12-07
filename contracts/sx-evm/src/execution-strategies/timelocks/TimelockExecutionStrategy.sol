@@ -109,6 +109,7 @@ contract TimelockExecutionStrategy is SimpleQuorumExecutionStrategy, IERC1155Rec
     /// @param votesAbstain The number of abstaining votes for the proposal.
     /// @param payload The proposal execution payload.
     function execute(
+        uint256 /* proposalId */,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,

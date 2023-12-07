@@ -285,6 +285,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         proposal.finalizationStatus = FinalizationStatus.Executed;
 
         proposal.executionStrategy.execute(
+            proposalId,
             cachedProposal,
             votePower[proposalId][Choice.For],
             votePower[proposalId][Choice.Against],

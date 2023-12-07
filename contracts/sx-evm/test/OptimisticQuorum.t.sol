@@ -22,6 +22,7 @@ contract OptimisticExec is OptimisticQuorumExecutionStrategy {
     uint256 internal numExecuted;
 
     function execute(
+        uint256 proposalId,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,

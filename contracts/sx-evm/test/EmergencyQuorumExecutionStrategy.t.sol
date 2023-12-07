@@ -24,6 +24,7 @@ contract EmergencyQuorumExec is EmergencyQuorumExecutionStrategy {
     }
 
     function execute(
+        uint256 proposalId,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,

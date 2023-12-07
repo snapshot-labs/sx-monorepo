@@ -63,6 +63,7 @@ contract AvatarExecutionStrategy is SimpleQuorumExecutionStrategy {
     /// @param votesAbstain The number of abstaining votes.
     /// @param payload The encoded transactions to execute.
     function execute(
+        uint256 /* proposalId */,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,

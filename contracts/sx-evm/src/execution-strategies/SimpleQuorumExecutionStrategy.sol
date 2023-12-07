@@ -25,6 +25,7 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceMana
     }
 
     function execute(
+        uint256 proposalId,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,

@@ -8,6 +8,7 @@ import { IExecutionStrategyErrors } from "./execution-strategies/IExecutionStrat
 /// @title Execution Strategy Interface
 interface IExecutionStrategy is IExecutionStrategyErrors {
     function execute(
+        uint256 proposalId,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,

@@ -25,6 +25,7 @@ abstract contract OptimisticQuorumExecutionStrategy is IExecutionStrategy, Space
     }
 
     function execute(
+        uint256 proposalId,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,
