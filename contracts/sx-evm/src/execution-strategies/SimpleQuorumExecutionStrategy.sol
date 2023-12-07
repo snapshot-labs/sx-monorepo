@@ -34,7 +34,7 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceMana
 
     /// @notice Returns the status of a proposal that uses a simple quorum.
     ///        A proposal is accepted if the for votes exceeds the against votes
-    ///        and a quorum of total votes (for + against + abstain) is reached.
+    ///        and a quorum of (for + abstain) votes is reached.
     /// @param proposal The proposal struct.
     /// @param votesFor The number of votes for the proposal.
     /// @param votesAgainst The number of votes against the proposal.
@@ -68,8 +68,8 @@ abstract contract SimpleQuorumExecutionStrategy is IExecutionStrategy, SpaceMana
     }
 
     function _quorumReached(uint256 _quorum, uint256 _votesFor, uint256 _votesAbstain) internal pure returns (bool) {
-        uint256 totalVotes = _votesFor + _votesAbstain;
-        return totalVotes >= _quorum;
+        uint256 forAndAbstainVotesTotal = _votesFor + _votesAbstain;
+        return forAndAbstainVotesTotal >= _quorum;
     }
 
     function _supported(uint256 _votesFor, uint256 _votesAgainst) internal pure returns (bool) {
