@@ -73,6 +73,7 @@ export type Strategy = {
     data: Propose | Vote
   ): Promise<string>;
   getVotingPower(
+    spaceAddress: string,
     strategyAddress: string,
     voterAddress: string,
     metadata: Record<string, any> | null,

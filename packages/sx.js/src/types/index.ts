@@ -58,13 +58,8 @@ export interface Strategy {
     envelope: Envelope<Message>,
     clientConfig: ClientConfig
   ): Promise<string[]>;
-  getExtraProposeCalls(
-    address: string,
-    index: number,
-    envelope: Envelope<Message>,
-    clientConfig: ClientConfig
-  ): Promise<Call[]>;
   getVotingPower: (
+    spaceAddress: string,
     strategyAddress: string,
     voterAddress: string,
     metadata: Record<string, any> | null,

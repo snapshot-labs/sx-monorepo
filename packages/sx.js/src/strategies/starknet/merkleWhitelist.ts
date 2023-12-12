@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { uint256, type Call, validateAndParseAddress } from 'starknet';
+import { uint256, validateAndParseAddress } from 'starknet';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 import { Leaf, generateMerkleProof } from '../../utils/merkletree';
 
@@ -41,15 +41,8 @@ export default function createMerkleWhitelistStrategy(): Strategy {
         ...proof
       ];
     },
-    async getExtraProposeCalls(
-      address: string,
-      index: number,
-      envelope: Envelope<Propose | Vote>,
-      clientConfig: ClientConfig
-    ): Promise<Call[]> {
-      return [];
-    },
     async getVotingPower(
+      spaceAddress: string,
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null,

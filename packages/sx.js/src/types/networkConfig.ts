@@ -44,11 +44,10 @@ export type WhitelistStrategyConfig = {
   type: 'whitelist';
 };
 
-export type SingleSlotProofStrategyConfig = {
-  type: 'singleSlotProof';
+export type EvmSlotValueStrategyConfig = {
+  type: 'evmSlotValue';
   params: {
-    fossilL1HeadersStoreAddress: string;
-    fossilFactRegistryAddress: string;
+    deployedOnChain: string;
   };
 };
 
@@ -73,7 +72,7 @@ export type NetworkConfig = {
       | OzVotesStrategyConfig
       | Erc20VotesStrategyConfig
       | WhitelistStrategyConfig
-      | SingleSlotProofStrategyConfig
+      | EvmSlotValueStrategyConfig
       | undefined;
   };
 };

@@ -10,6 +10,7 @@ export default function createOzVotesStrategy(): Strategy {
       return '0x00';
     },
     async getVotingPower(
+      spaceAddress: string,
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null,

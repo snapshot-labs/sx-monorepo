@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Contract, type Call } from 'starknet';
+import { Contract } from 'starknet';
 import ERC20VotesTokenAbi from './abis/ERC20VotesToken.json';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
@@ -21,15 +21,8 @@ export default function createErc20VotesStrategy(): Strategy {
 
       return [];
     },
-    async getExtraProposeCalls(
-      address: string,
-      index: number,
-      envelope: Envelope<Propose | Vote>,
-      clientConfig: ClientConfig
-    ): Promise<Call[]> {
-      return [];
-    },
     async getVotingPower(
+      spaceAddress: string,
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null,

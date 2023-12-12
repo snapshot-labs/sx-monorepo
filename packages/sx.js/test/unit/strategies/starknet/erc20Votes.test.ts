@@ -41,22 +41,12 @@ describe('erc20VotesStrategy', () => {
     ).rejects.toThrow('Not supported for Ethereum addresses');
   });
 
-  it('should return extra propose calls', async () => {
-    const params = await erc20VotesStrategy.getExtraProposeCalls(
-      '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
-      0,
-      proposeEnvelope,
-      config
-    );
-
-    expect(params).toEqual([]);
-  });
-
   describe('getVotingPower', () => {
     const timestamp = 1699960000;
 
     it('should compute voting power for user', async () => {
       const votingPower = await erc20VotesStrategy.getVotingPower(
+        '0x0',
         '0x0619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7',
         '0x7ff6b17f07c4d83236e3fc5f94259a19d1ed41bbcf1822397ea17882e9b038d',
         null,

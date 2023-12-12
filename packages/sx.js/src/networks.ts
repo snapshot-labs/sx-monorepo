@@ -144,6 +144,12 @@ export const starknetGoerli1: NetworkConfig = {
     },
     '0x030258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29': {
       type: 'erc20Votes'
+    },
+    '0x035dbd4e4f46a059557e1b299d17f4568b49488bad5da9a003b171d90052139e': {
+      type: 'evmSlotValue',
+      params: {
+        deployedOnChain: 'SN_GOERLI'
+      }
     }
   }
 };
