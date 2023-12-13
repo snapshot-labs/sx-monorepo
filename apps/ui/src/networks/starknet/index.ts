@@ -116,6 +116,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     currentUnit: 'second',
     chainId,
     baseChainId,
+    currentChainId: baseChainId,
     baseNetworkId,
     hasReceive: true,
     supportsSimulation: true,

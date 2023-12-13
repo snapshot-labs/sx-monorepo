@@ -41,6 +41,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     currentUnit: 'second',
     chainId: l1ChainId,
     baseChainId: l1ChainId,
+    currentChainId: l1ChainId,
     hasReceive: false,
     supportsSimulation: false,
     managerConnectors: [],

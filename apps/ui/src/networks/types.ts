@@ -218,6 +218,7 @@ type BaseNetwork = {
   currentUnit: 'block' | 'second';
   chainId: number | string;
   baseChainId: number;
+  currentChainId: number;
   baseNetworkId?: NetworkID;
   hasReceive: boolean;
   supportsSimulation: boolean;

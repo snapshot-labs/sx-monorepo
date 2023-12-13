@@ -12,10 +12,14 @@ type Metadata = {
   name: string;
   ticker?: string;
   chainId: number;
+  currentChainId?: number;
   apiUrl: string;
   avatar: string;
   blockTime: number;
 };
+
+// shared for both ETH mainnet and ARB1
+const ETH_MAINNET_BLOCK_TIME = 12.09;
 
 export const METADATA: Record<string, Metadata> = {
   matic: {
@@ -29,16 +33,17 @@ export const METADATA: Record<string, Metadata> = {
   arb1: {
     name: 'Arbitrum One',
     chainId: 42161,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/v0.0.17', // TODO: change to use latest, it's stuck syncing right now, hardcoding so we have working UI
+    currentChainId: 1,
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
     avatar: 'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
-    blockTime: 0.26082
+    blockTime: ETH_MAINNET_BLOCK_TIME
   },
   eth: {
     name: 'Ethereum',
     chainId: 1,
     apiUrl: 'https://api.studio.thegraph.com/query/23545/sx/version/latest',
     avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
-    blockTime: 12.09
+    blockTime: ETH_MAINNET_BLOCK_TIME
   },
   gor: {
     name: 'Ethereum Goerli',
@@ -64,7 +69,7 @@ export const METADATA: Record<string, Metadata> = {
 };
 
 export function createEvmNetwork(networkId: NetworkID): Network {
-  const { name, chainId, apiUrl, avatar } = METADATA[networkId];
+  const { name, chainId, currentChainId, apiUrl, avatar } = METADATA[networkId];
 
   const provider = getProvider(chainId);
   const api = createApi(apiUrl, networkId, {
@@ -99,6 +104,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     currentUnit: 'block',
     chainId,
     baseChainId: chainId,
+    currentChainId: currentChainId ?? chainId,
     hasReceive: false,
     supportsSimulation: ['eth', 'gor', 'sep', 'matic', 'arb1'].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
