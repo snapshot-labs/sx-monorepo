@@ -50,6 +50,19 @@ const proposalMetadataUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
+const votingTime = computed(() => {
+  if (!props.proposal) return null;
+
+  const current = getCurrent(props.proposal.network);
+  if (!current) return null;
+
+  const time = _rt(getTsFromCurrent(props.proposal.network, props.proposal.max_end));
+
+  const hasEnded = props.proposal.max_end <= current;
+
+  return hasEnded ? `Ended ${time}` : time;
+});
+
 async function handleEditClick() {
   if (!props.proposal) return;
 
@@ -206,11 +219,7 @@ async function handleCancelClick() {
           {{ _n(proposal.vote_count) }} {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
         </a>
         ·
-        <a
-          class="text-skin-text"
-          @click="modalOpenTimeline = true"
-          v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"
-        />
+        <a class="text-skin-text" @click="modalOpenTimeline = true" v-text="votingTime" />
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
     </div>
