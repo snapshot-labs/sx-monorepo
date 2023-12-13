@@ -345,6 +345,11 @@
   {
     "inputs": [
       {
+        "name": "proposalId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "components": [
           {
             "internalType": "address",

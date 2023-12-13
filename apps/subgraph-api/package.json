@@ -1,6 +1,6 @@
 {
   "name": "sx-subgraph",
-  "version": "0.0.17",
+  "version": "0.0.20",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",

@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import {Address, BigDecimal, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
 import { TimelockExecutionStrategy } from '../generated/ProxyFactory/TimelockExecutionStrategy'
@@ -33,11 +33,15 @@ import {
 import { Space, ExecutionStrategy, ExecutionHash, Proposal, Vote, User } from '../generated/schema'
 import { updateStrategiesParsedMetadata, updateProposalValidationStrategy } from './helpers'
 
-const MASTER_SPACE = Address.fromString('0xd9c46d5420434355d0E5Ca3e3cCb20cE7A533964')
-const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x3813f3d97Aa2F80e3aF625605A31206e067FB2e5')
-const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
-  '0x00C5E67e6F7FDf80d7bCA249E38C355FbE62Ba34'
-)
+let MASTER_SPACE = Address.fromString('0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D')
+let MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42')
+let MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString('0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4')
+
+if (dataSource.network() == 'mainnet') {
+  MASTER_SPACE = Address.fromString('0xd9c46d5420434355d0E5Ca3e3cCb20cE7A533964')
+  MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0x3813f3d97Aa2F80e3aF625605A31206e067FB2e5')
+  MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString('0x3813f3d97Aa2F80e3aF625605A31206e067FB2e5')
+}
 
 export function handleProxyDeployed(event: ProxyDeployed): void {
   if (event.params.implementation.equals(MASTER_SPACE)) {
