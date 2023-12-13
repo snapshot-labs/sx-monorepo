@@ -18,13 +18,12 @@ export function handleSpaceMetadata(content: Bytes): void {
   spaceMetadata.about = description ? description.toString() : ''
   spaceMetadata.avatar = avatar ? avatar.toString() : ''
   spaceMetadata.external_url = externalUrl ? externalUrl.toString() : ''
+  spaceMetadata.delegations = []
 
   if (properties) {
     const propertiesObj = properties.toObject()
 
-    let delegation_api_type = propertiesObj.get('delegation_api_type')
-    let delegation_api_url = propertiesObj.get('delegation_api_url')
-    let delegation_contract = propertiesObj.get('delegation_contract')
+    let delegations = propertiesObj.get('delegations')
     let cover = propertiesObj.get('cover')
     let github = propertiesObj.get('github')
     let twitter = propertiesObj.get('twitter')
@@ -34,21 +33,18 @@ export function handleSpaceMetadata(content: Bytes): void {
     let executionStrategies = propertiesObj.get('execution_strategies')
     let executionStrategiesTypes = propertiesObj.get('execution_strategies_types')
 
-    let delegation_api_type_value =
-      delegation_api_type && !delegation_api_type.isNull() ? delegation_api_type.toString() : null
-    let delegation_api_url_value =
-      delegation_api_url && !delegation_api_url.isNull() ? delegation_api_url.toString() : null
-
-    if (delegation_api_type_value == 'governor-subgraph' && delegation_api_url_value) {
-      spaceMetadata.delegation_api_type = delegation_api_type_value
-      spaceMetadata.delegation_api_url = delegation_api_url_value
-    } else {
-      spaceMetadata.delegation_api_type = null
-      spaceMetadata.delegation_api_url = null
+    if (delegations) {
+      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
+      let jsonPropertiesObj = jsonObj.getObj('properties')
+      if (jsonPropertiesObj) {
+        let jsonDelegationsArr = jsonPropertiesObj.getArr('delegations')
+        if (jsonDelegationsArr) {
+          spaceMetadata.delegations = jsonDelegationsArr._arr.map<string>((delegation) =>
+            delegation.toString()
+          )
+        }
+      }
     }
-
-    spaceMetadata.delegation_contract =
-      delegation_contract && !delegation_contract.isNull() ? delegation_contract.toString() : null
 
     spaceMetadata.cover = cover ? cover.toString() : ''
     spaceMetadata.github = github ? github.toString() : ''
@@ -70,8 +66,6 @@ export function handleSpaceMetadata(content: Bytes): void {
       spaceMetadata.executors_types = []
     }
   } else {
-    spaceMetadata.delegation_api_type = null
-    spaceMetadata.delegation_api_url = null
     spaceMetadata.cover = ''
     spaceMetadata.github = ''
     spaceMetadata.twitter = ''
