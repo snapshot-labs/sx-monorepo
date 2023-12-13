@@ -34,21 +34,26 @@ export const evmMainnet: EvmNetworkConfig = {
 
 export const evmGoerli: EvmNetworkConfig = {
   ...evmMainnet,
-  eip712ChainId: 5
+  eip712ChainId: 5,
+  masterSpace: '0xc3031a7d3326e47d49bff9d374d74f364b29ce4d',
+  executionStrategiesImplementations: {
+    SimpleQuorumAvatar: '0xece4f6b01a2d7ff5a9765ca44162d453fc455e42',
+    SimpleQuorumTimelock: '0xf2a1c2f2098161af98b2cc7e382ab7f3ba86ebc4'
+  }
 };
 
 export const evmSepolia: EvmNetworkConfig = {
-  ...evmMainnet,
+  ...evmGoerli,
   eip712ChainId: 11155111
 };
 
 export const evmPolygon: EvmNetworkConfig = {
-  ...evmMainnet,
+  ...evmGoerli,
   eip712ChainId: 137
 };
 
 export const evmArbitrum: EvmNetworkConfig = {
-  ...evmMainnet,
+  ...evmGoerli,
   eip712ChainId: 42161
 };
 

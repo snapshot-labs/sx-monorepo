@@ -12,7 +12,7 @@
   "event TargetSet(address indexed newTarget)",
   "function disableSpace(address space)",
   "function enableSpace(address space)",
-  "function execute(tuple(address author, uint32 startBlockNumber, address executionStrategy, uint32 minEndBlockNumber, uint32 maxEndBlockNumber, uint8 finalizationStatus, bytes32 executionPayloadHash, uint256 activeVotingStrategies) proposal, uint256 votesFor, uint256 votesAgainst, uint256 votesAbstain, bytes payload)",
+  "function execute(uint256 proposalId, tuple(address author, uint32 startBlockNumber, address executionStrategy, uint32 minEndBlockNumber, uint32 maxEndBlockNumber, uint8 finalizationStatus, bytes32 executionPayloadHash, uint256 activeVotingStrategies) proposal, uint256 votesFor, uint256 votesAgainst, uint256 votesAbstain, bytes payload)",
   "function getProposalStatus(tuple(address author, uint32 startBlockNumber, address executionStrategy, uint32 minEndBlockNumber, uint32 maxEndBlockNumber, uint8 finalizationStatus, bytes32 executionPayloadHash, uint256 activeVotingStrategies) proposal, uint256 votesFor, uint256 votesAgainst, uint256 votesAbstain) view returns (uint8)",
   "function getStrategyType() pure returns (string)",
   "function isSpaceEnabled(address space) view returns (uint256)",
