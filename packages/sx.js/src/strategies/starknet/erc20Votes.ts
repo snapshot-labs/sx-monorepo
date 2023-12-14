@@ -22,7 +22,6 @@ export default function createErc20VotesStrategy(): Strategy {
       return [];
     },
     async getVotingPower(
-      spaceAddress: string,
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null,

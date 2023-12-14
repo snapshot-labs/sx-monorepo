@@ -14,7 +14,6 @@ describe('compStrategy', () => {
   describe('getVotingPower', () => {
     it('should compute voting power for user with delegated tokens at specific timestamp', async () => {
       const votingPower = await compStrategy.getVotingPower(
-        '0x0',
         '0x0c2De612982Efd102803161fc7C74CcA15Db932c',
         '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
         null,
@@ -28,7 +27,6 @@ describe('compStrategy', () => {
 
     it('should compute voting power for user without delegated tokens', async () => {
       const votingPower = await compStrategy.getVotingPower(
-        '0x0',
         '0x0c2De612982Efd102803161fc7C74CcA15Db932c',
         '0x000000000000000000000000000000000000dead',
         null,

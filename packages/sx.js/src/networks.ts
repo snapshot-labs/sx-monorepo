@@ -91,6 +91,7 @@ export const evmLineaGoerli: EvmNetworkConfig = {
 
 export const starknetMainnet: NetworkConfig = {
   eip712ChainId: '0x534e5f4d41494e',
+  herodotusAccumulatesChainId: 1,
   spaceFactory: '0x0250e28c97e729842190c3672f9fcf8db0fc78b8080e87a894831dc69e4f4439',
   masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
   starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
@@ -123,6 +124,7 @@ export const starknetMainnet: NetworkConfig = {
 
 export const starknetGoerli1: NetworkConfig = {
   eip712ChainId: '0x534e5f474f45524c49',
+  herodotusAccumulatesChainId: 5,
   spaceFactory: '0x063c62258e1ba4d9ad72eab809ea5c3d1a4545b721bc444d6068ced6246c2f3c',
   masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
   starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29',

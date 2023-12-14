@@ -38,7 +38,6 @@ export default function createMerkleWhitelist(): Strategy {
       );
     },
     async getVotingPower(
-      spaceAddress: string,
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null

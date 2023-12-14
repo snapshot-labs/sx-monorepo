@@ -45,7 +45,6 @@ describe('merkleWhitelist', () => {
 
     it('should compute voting power for user', async () => {
       const votingPower = await merkleWhitelist.getVotingPower(
-        '0x0',
         '0x058623786b93d9b6ed1f83cec5c6fa6bea5f399d2795ee56a6123bdd83f5aa48',
         '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
         metadata,

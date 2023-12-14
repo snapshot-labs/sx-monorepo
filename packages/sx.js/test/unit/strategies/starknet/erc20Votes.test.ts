@@ -46,7 +46,6 @@ describe('erc20VotesStrategy', () => {
 
     it('should compute voting power for user', async () => {
       const votingPower = await erc20VotesStrategy.getVotingPower(
-        '0x0',
         '0x0619040eb54857252396d0bf337dc7a7f98182fa015c11578201105038106cb7',
         '0x7ff6b17f07c4d83236e3fc5f94259a19d1ed41bbcf1822397ea17882e9b038d',
         null,

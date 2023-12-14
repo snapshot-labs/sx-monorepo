@@ -108,7 +108,8 @@ export default function createEvmSlotValueStrategy({
       ])) as any;
       const startTimestamp = proposalStruct.start_timestamp;
 
-      const { chainId, contractAddress, slotIndex } = metadata;
+      const { herodotusAccumulatesChainId: chainId } = clientConfig.networkConfig;
+      const { contractAddress, slotIndex } = metadata;
 
       const tree = await getBinaryTree(startTimestamp, chainId);
       const l1BlockNumber = tree.path[1].blockNumber;
@@ -126,7 +127,6 @@ export default function createEvmSlotValueStrategy({
       });
     },
     async getVotingPower(
-      spaceAddress: string,
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null,
@@ -139,13 +139,10 @@ export default function createEvmSlotValueStrategy({
 
       const contract = new Contract(EVMSlotValue, strategyAddress, clientConfig.starkProvider);
 
-      const spaceContract = new Contract(SpaceAbi, spaceAddress, clientConfig.starkProvider);
-      const proposalStruct = (await spaceContract.call('proposals', [3])) as any;
-      const startTimestamp = proposalStruct.start_timestamp;
+      const { herodotusAccumulatesChainId: chainId } = clientConfig.networkConfig;
+      const { contractAddress, slotIndex } = metadata;
 
-      const { chainId, contractAddress, slotIndex } = metadata;
-
-      const tree = await getBinaryTree(startTimestamp, chainId);
+      const tree = await getBinaryTree(timestamp, chainId);
       const l1BlockNumber = tree.path[1].blockNumber;
 
       const storageProof = await getProof(

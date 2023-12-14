@@ -59,7 +59,6 @@ export interface Strategy {
     clientConfig: ClientConfig
   ): Promise<string[]>;
   getVotingPower: (
-    spaceAddress: string,
     strategyAddress: string,
     voterAddress: string,
     metadata: Record<string, any> | null,

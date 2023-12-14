@@ -56,6 +56,7 @@ export type NetworkConfig = {
   spaceFactory: string;
   masterSpace: string;
   starknetCommit: string;
+  herodotusAccumulatesChainId: number;
   authenticators: {
     [key: string]:
       | VanillaAuthenticatorConfig
@@ -79,7 +80,7 @@ export type NetworkConfig = {
 
 export type EvmNetworkConfig = Omit<
   NetworkConfig,
-  'eip712ChainId' | 'spaceFactory' | 'starknetCommit'
+  'eip712ChainId' | 'spaceFactory' | 'starknetCommit' | 'herodotusAccumulatesChainId'
 > & {
   eip712ChainId: number;
   proxyFactory: string;
