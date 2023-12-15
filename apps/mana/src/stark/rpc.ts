@@ -1,5 +1,6 @@
 import { NETWORKS, getClient } from './networks';
 import * as db from '../db';
+import * as herodotus from './herodotus';
 import { rpcError, rpcSuccess } from '../utils';
 
 export const createNetworkHandler = (chainId: string) => {
@@ -57,5 +58,42 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  return { send, registerTransaction };
+  async function registerProposal(id, params, res) {
+    try {
+      const { l1TokenAddress, strategyAddress, snapshotTimestamp } = params;
+
+      const alreadyRegistered = await db.getProposal(
+        `${chainId}-${l1TokenAddress}-${strategyAddress}-${snapshotTimestamp}`
+      );
+      if (alreadyRegistered) {
+        return rpcSuccess(
+          res,
+          {
+            alreadyRegistered: true
+          },
+          id
+        );
+      }
+
+      console.log('Registering proposal', l1TokenAddress, strategyAddress, snapshotTimestamp);
+
+      const result = await herodotus.registerProposal({
+        chainId,
+        l1TokenAddress,
+        strategyAddress,
+        snapshotTimestamp
+      });
+
+      await db.registerProposal(
+        `${chainId}-${l1TokenAddress}-${strategyAddress}-${snapshotTimestamp}`
+      );
+
+      return rpcSuccess(res, result, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
+  return { send, registerTransaction, registerProposal, getAccount };
 };

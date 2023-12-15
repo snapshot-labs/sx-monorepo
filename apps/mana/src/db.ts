@@ -1,12 +1,16 @@
 import knex from './knex';
 
 export const REGISTERED_TRANSACTIONS = 'registered_transactions';
+export const REGISTERED_PROPOSALS = 'registered_proposals';
 
 export async function createTables() {
-  const tableExists = await knex.schema.hasTable(REGISTERED_TRANSACTIONS);
-  if (tableExists) await knex.schema.dropTable(REGISTERED_TRANSACTIONS);
+  const registeredTransactionsTableExists = await knex.schema.hasTable(REGISTERED_TRANSACTIONS);
+  const registeredProposalsTableExists = await knex.schema.hasTable(REGISTERED_PROPOSALS);
 
-  return knex.schema.createTable(REGISTERED_TRANSACTIONS, t => {
+  if (registeredTransactionsTableExists) await knex.schema.dropTable(REGISTERED_TRANSACTIONS);
+  if (registeredProposalsTableExists) await knex.schema.dropTable(REGISTERED_PROPOSALS);
+
+  await knex.schema.createTable(REGISTERED_TRANSACTIONS, t => {
     t.increments('id').primary();
     t.timestamps(true, true);
     t.boolean('processed').defaultTo(false).index();
@@ -15,6 +19,11 @@ export async function createTables() {
     t.string('type').index();
     t.string('hash');
     t.json('data');
+  });
+
+  await knex.schema.createTable(REGISTERED_PROPOSALS, t => {
+    t.string('id').primary();
+    t.timestamps(true, true);
   });
 }
 
@@ -41,4 +50,12 @@ export async function markOldTransactionsAsProcessed() {
   return knex(REGISTERED_TRANSACTIONS)
     .update({ updated_at: knex.fn.now(), processed: true, failed: true })
     .whereRaw("created_at < now() - interval '1 day'");
+}
+
+export async function registerProposal(id: string) {
+  return knex(REGISTERED_PROPOSALS).insert({ id });
+}
+
+export async function getProposal(id: string) {
+  return knex(REGISTERED_PROPOSALS).select('*').where({ id }).first();
 }

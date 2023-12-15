@@ -11,7 +11,7 @@ const clientsMap = new Map<
   string,
   {
     provider: RpcProvider;
-    client: clients.StarkNetTx;
+    client: clients.StarknetTx;
     getAccount: (spaceAddress) => Account;
   }
 >();
@@ -23,7 +23,7 @@ export function getClient(chainId: string) {
   const provider = getProvider(chainId);
   const getAccount = createAccountProxy(process.env.STARKNET_MNEMONIC || '', provider);
 
-  const client = new clients.StarkNetTx({
+  const client = new clients.StarknetTx({
     starkProvider: provider,
     ethUrl: process.env.ETH_RPC_URL as string,
     networkConfig: NETWORKS[chainId]
