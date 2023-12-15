@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { Contract, CallData } from 'starknet';
+import { keccak256 } from '@ethersproject/keccak256';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import fetch from 'cross-fetch';
 import EVMSlotValue from './abis/EVMSlotValue.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
-import { keccak256 } from '@ethersproject/keccak256';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 
 export default function createEvmSlotValueStrategy({
@@ -13,7 +14,7 @@ export default function createEvmSlotValueStrategy({
 }: {
   deployedOnChain: string;
 }): Strategy {
-  function getEthRpc(chainId: number) {
+  function getEthRpcUrl(chainId: number) {
     const apiKey = '46a5dd9727bf48d4a132672d3f376146';
 
     // TODO: ideally we would use rpc.snapshotx.xyz here but those don't support eth_getProof with past lookup
@@ -24,6 +25,16 @@ export default function createEvmSlotValueStrategy({
     if (chainId === 42161) return `https://arbitrum-mainnet.infura.io/v3/${apiKey}`;
 
     throw new Error(`Unsupported chainId ${chainId}`);
+  }
+
+  function getEthProvider(chainId: number) {
+    return new StaticJsonRpcProvider(getEthRpcUrl(chainId), chainId);
+  }
+
+  function getSlotKey(voterAddress: string, slotIndex: number) {
+    return keccak256(
+      `0x${voterAddress.slice(2).padStart(64, '0')}${slotIndex.toString(16).padStart(64, '0')}`
+    );
   }
 
   async function getBinaryTree(snapshotTimestamp: number, chainId: number) {
@@ -46,27 +57,15 @@ export default function createEvmSlotValueStrategy({
     blockNumber: number,
     chainId: number
   ) {
-    const rpcUrl = getEthRpc(chainId);
-    const slotKey = keccak256(
-      `0x${voterAddress.slice(2).padStart(64, '0')}${slotIndex.toString(16).padStart(64, '0')}`
-    );
+    const provider = getEthProvider(chainId);
 
-    const res = await fetch(rpcUrl, {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'eth_getProof',
-        params: [l1TokenAddress, [slotKey], `0x${blockNumber.toString(16)}`]
-      })
-    });
+    const proof = await provider.send('eth_getProof', [
+      l1TokenAddress,
+      [getSlotKey(voterAddress, slotIndex)],
+      `0x${blockNumber.toString(16)}`
+    ]);
 
-    const { result } = await res.json();
-
-    return result.storageProof[0].proof.map(
+    return proof.storageProof[0].proof.map(
       (node: string) =>
         node
           .slice(2)
@@ -134,13 +133,22 @@ export default function createEvmSlotValueStrategy({
       params: string[],
       clientConfig: ClientConfig
     ): Promise<bigint> {
-      if (!timestamp) return 0n;
       if (!metadata) return 0n;
-
-      const contract = new Contract(EVMSlotValue, strategyAddress, clientConfig.starkProvider);
 
       const { herodotusAccumulatesChainId: chainId } = clientConfig.networkConfig;
       const { contractAddress, slotIndex } = metadata;
+
+      if (!timestamp) {
+        const provider = getEthProvider(chainId);
+        const storage = await provider.getStorageAt(
+          contractAddress,
+          getSlotKey(voterAddress, slotIndex)
+        );
+
+        return BigInt(storage);
+      }
+
+      const contract = new Contract(EVMSlotValue, strategyAddress, clientConfig.starkProvider);
 
       const tree = await getBinaryTree(timestamp, chainId);
       const l1BlockNumber = tree.path[1].blockNumber;
