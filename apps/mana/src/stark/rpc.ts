@@ -6,13 +6,15 @@ export const createNetworkHandler = (chainId: string) => {
   const networkConfig = NETWORKS[chainId];
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const { client, account } = getClient(chainId);
+  const { client, getAccount } = getClient(chainId);
 
   async function send(id, params, res) {
     try {
-      const { signatureData } = params.envelope;
+      const { signatureData, data } = params.envelope;
       const { address, primaryType, message } = signatureData;
       let receipt;
+
+      const account = getAccount(data.space);
 
       console.time('Send');
       console.log('Type', primaryType);

@@ -18,7 +18,7 @@ const failedCounter: Record<string, number | undefined> = {};
 async function processTransaction(transaction: Transaction) {
   const storageAddress = utils.encoding.getStorageVarAddress('_commits', transaction.hash);
 
-  const { provider, account, client } = getClient(transaction.network);
+  const { provider, getAccount, client } = getClient(transaction.network);
   const value = await provider.getStorageAt(transaction.data.authenticator, storageAddress);
   if (value === '0x0') return;
 
@@ -28,6 +28,8 @@ async function processTransaction(transaction: Transaction) {
     },
     data: transaction.data
   };
+
+  const account = getAccount(payload.data.space);
 
   let receipt;
   try {

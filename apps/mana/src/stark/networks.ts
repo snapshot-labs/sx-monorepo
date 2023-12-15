@@ -1,5 +1,6 @@
-import { Account, constants, RpcProvider } from 'starknet';
+import { Account, RpcProvider, constants } from 'starknet';
 import { clients, starknetMainnet, starknetGoerli1 } from '@snapshot-labs/sx';
+import { getProvider, createAccountProxy } from './dependencies';
 
 export const NETWORKS = {
   [constants.StarknetChainId.SN_MAIN]: starknetMainnet,
@@ -11,24 +12,16 @@ const clientsMap = new Map<
   {
     provider: RpcProvider;
     client: clients.StarkNetTx;
-    account: Account;
+    getAccount: (spaceAddress) => Account;
   }
 >();
-
-function getProvider(chainId: string) {
-  const nodeUrl =
-    chainId === constants.StarknetChainId.SN_MAIN
-      ? process.env.STARKNET_MAINNET_RPC_URL
-      : process.env.STARKNET_GOERLI_RPC_URL;
-
-  return new RpcProvider({ nodeUrl });
-}
 
 export function getClient(chainId: string) {
   const cached = clientsMap.get(chainId);
   if (cached) return cached;
 
   const provider = getProvider(chainId);
+  const getAccount = createAccountProxy(process.env.STARKNET_MNEMONIC || '', provider);
 
   const client = new clients.StarkNetTx({
     starkProvider: provider,
@@ -36,13 +29,7 @@ export function getClient(chainId: string) {
     networkConfig: NETWORKS[chainId]
   });
 
-  const account = new Account(
-    provider,
-    process.env.STARKNET_ADDRESS || '',
-    process.env.STARKNET_PRIVKEY || ''
-  );
+  clientsMap.set(chainId, { provider, client, getAccount });
 
-  clientsMap.set(chainId, { provider, client, account });
-
-  return { provider, client, account };
+  return { provider, client, getAccount };
 }
