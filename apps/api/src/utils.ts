@@ -216,3 +216,32 @@ export async function handleVotingPowerValidationMetadata(spaceId: string, metad
     VotingPowerValidationStrategiesParsedMetadataItem
   );
 }
+
+export async function registerProposal({
+  l1TokenAddress,
+  strategyAddress,
+  snapshotTimestamp
+}: {
+  l1TokenAddress: string;
+  strategyAddress: string;
+  snapshotTimestamp: number;
+}) {
+  const res = await fetch(networkProperties.manaRpcUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 0,
+      method: 'registerProposal',
+      params: {
+        l1TokenAddress,
+        strategyAddress,
+        snapshotTimestamp
+      }
+    })
+  });
+
+  return res.json();
+}

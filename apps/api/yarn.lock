@@ -1403,10 +1403,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@snapshot-labs/checkpoint@^0.1.0-beta.24":
-  version "0.1.0-beta.24"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.24.tgz#2abc6f5aa9a9ffa7bdb0fbfb738d1cfe840e1a40"
-  integrity sha512-9YAkyHhUm/W/zNpLttmUS+0V155YMhM9/qexmue6NnFeV9UvXNi5jWDbVGfc5RJCumMjom2KCRxMgMTtFJF+bQ==
+"@snapshot-labs/checkpoint@^0.1.0-beta.26":
+  version "0.1.0-beta.26"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.26.tgz#e4a5f21222768c1aa7ae5cf3b9dbb4267dc562d8"
+  integrity sha512-Y4IkP+eIZDuWe/JcjIhM2oOZMWxziRjodaY1edYbpOuQQOb4eppNCq9kZJUw7jUkm91LEvMEVLrIzxDiFX7l9Q==
   dependencies:
     "@graphql-tools/schema" "^8.5.1"
     bluebird "^3.7.2"

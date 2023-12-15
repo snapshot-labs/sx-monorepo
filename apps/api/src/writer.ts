@@ -2,6 +2,7 @@ import { validateAndParseAddress } from 'starknet';
 import { CheckpointWriter } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal } from '../.checkpoint/models';
 import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
+import { networkProperties } from './overrrides';
 import {
   getCurrentTimestamp,
   dropIpfs,
@@ -10,7 +11,8 @@ import {
   handleExecutionStrategy,
   handleStrategiesMetadata,
   longStringToText,
-  updateProposaValidationStrategy
+  updateProposaValidationStrategy,
+  registerProposal
 } from './utils';
 
 export const handleSpaceDeployed: CheckpointWriter = async ({ blockNumber, event, instance }) => {
@@ -352,6 +354,26 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     const user = new User(author);
     user.created = created;
     await user.save();
+  }
+
+  const evmSlotValueStrategyIndex = space.strategies.findIndex(
+    strategy =>
+      validateAndParseAddress(strategy) ===
+      validateAndParseAddress(networkProperties.evmSlotValueStrategyAddress)
+  );
+
+  if (evmSlotValueStrategyIndex !== -1) {
+    const [l1TokenAddress] = space.strategies_params[evmSlotValueStrategyIndex].split(',');
+
+    try {
+      await registerProposal({
+        l1TokenAddress,
+        strategyAddress: networkProperties.evmSlotValueStrategyAddress,
+        snapshotTimestamp: proposal.snapshot
+      });
+    } catch (e) {
+      console.log('failed to register proposal');
+    }
   }
 
   await Promise.all([proposal.save(), space.save()]);
