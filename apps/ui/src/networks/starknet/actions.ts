@@ -71,8 +71,8 @@ export function createActions(
     return code !== '0x';
   };
 
-  const client = new clients.StarkNetTx(clientConfig);
-  const starkSigClient = new clients.StarkNetSig(clientConfig);
+  const client = new clients.StarknetTx(clientConfig);
+  const starkSigClient = new clients.StarknetSig(clientConfig);
   const ethSigClient = new clients.EthereumSig(clientConfig);
   const ethTxClient = new clients.EthereumTx(clientConfig);
 

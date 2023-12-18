@@ -202,6 +202,7 @@ export type NetworkConstants = {
   EDITOR_AUTHENTICATORS: StrategyTemplate[];
   EDITOR_PROPOSAL_VALIDATIONS: StrategyTemplate[];
   EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
+  EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
 };
 

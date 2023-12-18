@@ -10,4 +10,5 @@ export const EXECUTORS = {};
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];
 export const EDITOR_VOTING_STRATEGIES = [];
+export const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = [];
 export const EDITOR_EXECUTION_STRATEGIES = [];

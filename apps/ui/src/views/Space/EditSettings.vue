@@ -85,7 +85,7 @@ async function getInitialValidationStrategy(
   const resolvedParams = strategy.parseParams ? await strategy.parseParams(params, null) : {};
   const strategies = await getInitialStrategiesConfig(
     nestedStrategies,
-    network.value.constants.EDITOR_VOTING_STRATEGIES,
+    network.value.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
     nestedStrategiesParams,
     nestedStrategiesMetadata
   );
@@ -269,7 +269,7 @@ watchEffect(async () => {
       />
       <BlockSpaceFormStrategies
         v-model="votingStrategies"
-        :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
+        :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES"
         title="Voting strategies"
         description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
       />

@@ -22,7 +22,8 @@ const CONFIGS = {
     },
     Strategies: {
       MerkleWhitelist: '0x528b83a6af52c56cb2134fd9190a441e930831af437c1cb0fa6e459ad1435ba',
-      ERC20Votes: '0x2429becc80a90bbeb38c6566617c584f79c60f684e8e73313af58b109b7d637'
+      ERC20Votes: '0x2429becc80a90bbeb38c6566617c584f79c60f684e8e73313af58b109b7d637',
+      EVMSlotValue: null
     },
     ProposalValidations: {
       VotingPower: '0x1b28f95cbc5bcbe52014ef974d609f14497517f31d3c9e079a2464edf988751'
@@ -40,7 +41,8 @@ const CONFIGS = {
     },
     Strategies: {
       MerkleWhitelist: '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
-      ERC20Votes: '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29'
+      ERC20Votes: '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29',
+      EVMSlotValue: '0x35dbd4e4f46a059557e1b299d17f4568b49488bad5da9a003b171d90052139e'
     },
     ProposalValidations: {
       VotingPower: '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631'
@@ -68,7 +70,8 @@ export function createConstants(networkId: NetworkID) {
 
   const SUPPORTED_STRATEGIES = {
     [config.Strategies.MerkleWhitelist]: true,
-    [config.Strategies.ERC20Votes]: true
+    [config.Strategies.ERC20Votes]: true,
+    [config.Strategies.EVMSlotValue]: true
   };
 
   const SUPPORTED_EXECUTORS = {};
@@ -92,7 +95,8 @@ export function createConstants(networkId: NetworkID) {
 
   const STRATEGIES = {
     [config.Strategies.MerkleWhitelist]: 'Merkle whitelist',
-    [config.Strategies.ERC20Votes]: 'ERC-20 Votes (EIP-5805)'
+    [config.Strategies.ERC20Votes]: 'ERC-20 Votes (EIP-5805)',
+    [config.Strategies.EVMSlotValue]: 'EVM slot value'
   };
 
   const EXECUTORS = {
@@ -306,62 +310,6 @@ export function createConstants(networkId: NetworkID) {
       parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
         if (!metadata) throw new Error('Missing metadata');
 
-        const getWhitelist = async (payload: string) => {
-          const metadataUrl = getUrl(payload);
-
-          if (!metadataUrl) return '';
-
-          const res = await fetch(metadataUrl);
-          const { tree } = await res.json();
-          return tree.map((item: any) => `${item.address}:${item.votingPower}`).join('\n');
-        };
-
-        return {
-          symbol: metadata.symbol,
-          whitelist: metadata.payload ? await getWhitelist(metadata.payload) : ''
-        };
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: [],
-        properties: {
-          symbol: {
-            type: 'string',
-            maxLength: 6,
-            title: 'Symbol',
-            examples: ['e.g. VP']
-          },
-          whitelist: {
-            type: 'string',
-            format: 'long',
-            title: 'Whitelist',
-            examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
-          }
-        }
-      }
-    },
-    {
-      address: config.Strategies.ERC20Votes,
-      name: 'ERC-20 Votes (EIP-5805)',
-      about:
-        'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
-      icon: IHCode,
-      generateSummary: (params: Record<string, any>) =>
-        `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: (params: Record<string, any>) => [params.contractAddress],
-      generateMetadata: async (params: Record<string, any>) => ({
-        name: 'ERC-20 Votes (EIP-5805)',
-        properties: {
-          symbol: params.symbol,
-          decimals: parseInt(params.decimals),
-          token: params.contractAddress
-        }
-      }),
-      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
-        if (!metadata) throw new Error('Missing metadata');
-
         return {
           contractAddress: metadata.token,
           decimals: metadata.decimals,
@@ -393,8 +341,86 @@ export function createConstants(networkId: NetworkID) {
           }
         }
       }
-    }
+    },
+    ...(config.Strategies.EVMSlotValue
+      ? [
+          {
+            address: config.Strategies.EVMSlotValue,
+            name: 'EVM slot value',
+            about:
+              'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power.',
+            icon: IHCode,
+            generateSummary: (params: Record<string, any>) =>
+              `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
+            generateParams: (params: Record<string, any>) => {
+              return CallData.compile({
+                contract_address: params.contractAddress,
+                slot_index: uint256.bnToUint256(params.slotIndex)
+              });
+            },
+            generateMetadata: async (params: Record<string, any>) => ({
+              name: 'EVM slot value',
+              properties: {
+                symbol: params.symbol,
+                decimals: parseInt(params.decimals),
+                token: params.contractAddress,
+                payload: JSON.stringify({
+                  contractAddress: params.contractAddress,
+                  slotIndex: params.slotIndex
+                })
+              }
+            }),
+            parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+              if (!metadata || !metadata.payload) throw new Error('Missing metadata');
+
+              const [contractAddress] = params.split(',');
+              const { slotIndex } = JSON.parse(metadata.payload);
+
+              return {
+                contractAddress,
+                decimals: metadata.decimals,
+                symbol: metadata.symbol,
+                slotIndex
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['contractAddress', 'slotIndex'],
+              properties: {
+                contractAddress: {
+                  type: 'string',
+                  format: 'address',
+                  title: 'Contract address',
+                  examples: ['0x0000…']
+                },
+                slotIndex: {
+                  type: 'integer',
+                  title: 'Slot index',
+                  examples: ['0']
+                },
+                decimals: {
+                  type: 'integer',
+                  title: 'Decimals',
+                  examples: ['18']
+                },
+                symbol: {
+                  type: 'string',
+                  maxLength: MAX_SYMBOL_LENGTH,
+                  title: 'Symbol',
+                  examples: ['e.g. COMP']
+                }
+              }
+            }
+          }
+        ]
+      : [])
   ];
+
+  const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = EDITOR_VOTING_STRATEGIES.filter(
+    strategy => strategy.address !== config.Strategies.EVMSlotValue
+  );
 
   const EDITOR_EXECUTION_STRATEGIES = [
     {
@@ -418,6 +444,7 @@ export function createConstants(networkId: NetworkID) {
     EDITOR_AUTHENTICATORS,
     EDITOR_PROPOSAL_VALIDATIONS,
     EDITOR_VOTING_STRATEGIES,
+    EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
     EDITOR_EXECUTION_STRATEGIES
   };
 }

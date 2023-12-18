@@ -245,7 +245,9 @@ watchEffect(() => {
             v-else-if="currentPage === 'validations'"
             v-model="validationStrategy"
             :available-strategies="selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS"
-            :available-voting-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
+            :available-voting-strategies="
+              selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
+            "
             title="Proposal validation"
             description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
           />
