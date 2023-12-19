@@ -18,16 +18,16 @@ const PAGES = [
     title: 'Strategies'
   },
   {
-    id: 'auths',
-    title: 'Auths'
-  },
-  {
     id: 'validations',
     title: 'Proposal validation'
   },
   {
     id: 'executions',
     title: 'Executions'
+  },
+  {
+    id: 'auths',
+    title: 'Auths'
   },
   {
     id: 'voting',
@@ -94,30 +94,18 @@ const salt: Ref<string | null> = ref(null);
 const predictedSpaceAddress: Ref<string | null> = ref(null);
 
 const selectedNetwork = computed(() => getNetwork(selectedNetworkId.value));
-const activePages = computed(() =>
-  PAGES.filter(page => {
-    const proposalValidations = selectedNetwork.value.constants.EDITOR_PROPOSAL_VALIDATIONS;
-
-    return !(page.id === 'validations' && proposalValidations.length === 0);
-  })
-);
 const accessiblePages = computed(() => {
-  const invalidPageIndex = activePages.value.findIndex(page => !validatePage(page.id));
+  const invalidPageIndex = PAGES.findIndex(page => !validatePage(page.id));
 
   return Object.fromEntries(
-    activePages.value.map((page, i) => [
-      page.id,
-      invalidPageIndex === -1 ? true : i <= invalidPageIndex
-    ])
+    PAGES.map((page, i) => [page.id, invalidPageIndex === -1 ? true : i <= invalidPageIndex])
   );
 });
 const showCreate = computed(
-  () =>
-    activePages.value.findIndex(page => page.id === currentPage.value) ===
-    activePages.value.length - 1
+  () => PAGES.findIndex(page => page.id === currentPage.value) === PAGES.length - 1
 );
 const nextDisabled = computed(() => !validatePage(currentPage.value));
-const submitDisabled = computed(() => activePages.value.some(page => !validatePage(page.id)));
+const submitDisabled = computed(() => PAGES.some(page => !validatePage(page.id)));
 
 function validatePage(page: PageID) {
   if (page === 'strategies') return votingStrategies.value.length > 0;
@@ -138,10 +126,10 @@ function handleErrors(page: PageID, errors: any) {
 }
 
 function handleNextClick() {
-  const currentIndex = activePages.value.findIndex(page => page.id === currentPage.value);
-  if (currentIndex === activePages.value.length - 1) return;
+  const currentIndex = PAGES.findIndex(page => page.id === currentPage.value);
+  if (currentIndex === PAGES.length - 1) return;
 
-  currentPage.value = activePages.value[currentIndex + 1].id;
+  currentPage.value = PAGES[currentIndex + 1].id;
   pagesRefs.value[currentIndex + 1].scrollIntoView();
 }
 
@@ -172,9 +160,7 @@ watch(selectedNetworkId, () => {
   executionStrategies.value = [];
 });
 
-watchEffect(() => {
-  setTitle('Create space');
-});
+watchEffect(() => setTitle('Create space'));
 </script>
 
 <template>
@@ -197,14 +183,15 @@ watchEffect(() => {
         class="flex fixed lg:sticky top-[72px] inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
       >
         <button
-          v-for="page in activePages"
+          v-for="page in PAGES"
           ref="pagesRefs"
           :key="page.id"
           :disabled="!accessiblePages[page.id]"
           class="px-3 py-1 block lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap"
           :class="{
             'bg-skin-active': page.id === currentPage,
-            'hover:bg-skin-hover': page.id !== currentPage
+            'hover:bg-skin-hover': page.id !== currentPage,
+            'text-skin-link': accessiblePages[page.id]
           }"
           @click="currentPage = page.id"
         >

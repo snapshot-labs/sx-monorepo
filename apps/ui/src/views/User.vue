@@ -19,9 +19,7 @@ watch(
   }
 );
 
-watchEffect(() => {
-  setTitle(`${address.value} user profile`);
-});
+watchEffect(() => setTitle(`${address.value} user profile`));
 </script>
 
 <template>

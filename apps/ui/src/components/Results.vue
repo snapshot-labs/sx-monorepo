@@ -22,8 +22,6 @@ const labels = {
   2: 'Abstain'
 };
 
-const showAlternatives = ref(false);
-
 const progress = computed(() => Math.min(props.proposal.scores_total / props.proposal.quorum, 1));
 
 const adjustedScores = computed(() =>
@@ -43,9 +41,6 @@ const results = computed(() =>
       progress: score
     }))
     .sort((a, b) => b.progress - a.progress)
-);
-const visibleResults = computed(() =>
-  showAlternatives.value ? results.value : results.value.slice(0, 1)
 );
 </script>
 
@@ -75,16 +70,8 @@ const visibleResults = computed(() =>
       'flex items-center': !withDetails
     }"
   >
-    <div
-      v-if="withDetails"
-      class="inline-block text-skin-link mb-2 cursor-pointer hover:opacity-80 space-y-1"
-      @click="showAlternatives = !showAlternatives"
-    >
-      <div
-        v-for="result in visibleResults"
-        :key="result.choice"
-        class="flex items-center space-x-2"
-      >
+    <div v-if="withDetails" class="text-skin-link mb-2 mb-3">
+      <div v-for="result in results" :key="result.choice" class="flex items-center space-x-2 mb-1">
         <div
           class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
           :class="`_${result.choice}`"
@@ -109,7 +96,10 @@ const visibleResults = computed(() =>
             }`
           "
         />
-        <span class="text-skin-text" v-text="`${_n(result.progress)}%`" />
+        <span
+          class="text-skin-text"
+          v-text="`${_n(result.progress, 'compact', { maximumFractionDigits: 1 })}%`"
+        />
       </div>
     </div>
     <div

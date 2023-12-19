@@ -69,9 +69,7 @@ watch(query, () => {
   fetch();
 });
 
-watchEffect(() => {
-  setTitle(`Search - ${props.space.name}`);
-});
+watchEffect(() => setTitle(`Search - ${props.space.name}`));
 </script>
 
 <template>

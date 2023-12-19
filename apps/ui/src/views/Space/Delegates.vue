@@ -8,9 +8,7 @@ const { setTitle } = useTitle();
 const activeDelegationId = ref(0);
 const delegateData = computed(() => props.space.delegations[activeDelegationId.value]);
 
-watchEffect(() => {
-  setTitle(`Delegates - ${props.space.name}`);
-});
+watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>

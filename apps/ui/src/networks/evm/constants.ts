@@ -250,17 +250,17 @@ export const EDITOR_VOTING_STRATEGIES = [
       additionalProperties: false,
       required: [],
       properties: {
-        symbol: {
-          type: 'string',
-          maxLength: 6,
-          title: 'Symbol',
-          examples: ['e.g. VP']
-        },
         whitelist: {
           type: 'string',
           format: 'long',
           title: 'Whitelist',
           examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
+        },
+        symbol: {
+          type: 'string',
+          maxLength: 6,
+          title: 'Symbol',
+          examples: ['e.g. VP']
         }
       }
     }
@@ -312,7 +312,7 @@ export const EDITOR_VOTING_STRATEGIES = [
           type: 'string',
           maxLength: MAX_SYMBOL_LENGTH,
           title: 'Symbol',
-          examples: ['e.g. COMP']
+          examples: ['e.g. UNI']
         }
       }
     }
@@ -364,7 +364,7 @@ export const EDITOR_VOTING_STRATEGIES = [
           type: 'string',
           maxLength: MAX_SYMBOL_LENGTH,
           title: 'Symbol',
-          examples: ['e.g. COMP']
+          examples: ['e.g. UNI']
         }
       }
     }

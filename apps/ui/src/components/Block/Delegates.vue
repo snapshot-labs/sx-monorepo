@@ -50,9 +50,7 @@ watch([sortBy], () => {
   fetch(sortBy.value);
 });
 
-watchEffect(() => {
-  setTitle(`Delegates - ${props.space.name}`);
-});
+watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>
@@ -82,7 +80,7 @@ watchEffect(() => {
           <thead
             class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 after:border-b after:absolute after:w-full"
           >
-            <tr class="bg-skin-border/10">
+            <tr>
               <th class="pl-4 font-medium">
                 <span class="relative bottom-[1px]">Delegatee</span>
               </th>
@@ -142,7 +140,10 @@ watchEffect(() => {
                             class="text-skin-link truncate"
                             v-text="delegate.name || shorten(delegate.id)"
                           />
-                          <div class="text-sm truncate" v-text="shorten(delegate.id)" />
+                          <div
+                            class="text-sm text-skin-text truncate"
+                            v-text="shorten(delegate.id)"
+                          />
                         </div>
                       </a>
                     </div>

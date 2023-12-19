@@ -79,7 +79,7 @@ const now = parseInt((Date.now() / 1e3).toFixed());
         <div v-for="(state, i) in states" :key="state.id" class="flex relative h-[60px]">
           <div
             class="absolute w-[15px] h-[15px] inline-block rounded-full -left-[7px] border-[4px] border-skin-bg"
-            :class="state.value <= now ? 'bg-skin-heading' : 'bg-gray-600'"
+            :class="state.value <= now ? 'bg-skin-heading' : 'bg-skin-border'"
           />
           <div
             v-if="states[i + 1]"

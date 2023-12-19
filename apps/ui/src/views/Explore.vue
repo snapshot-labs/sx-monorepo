@@ -4,9 +4,7 @@ const spacesStore = useSpacesStore();
 
 onMounted(() => spacesStore.fetch());
 
-watchEffect(() => {
-  setTitle('Explore');
-});
+watchEffect(() => setTitle('Explore'));
 </script>
 
 <template>

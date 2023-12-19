@@ -56,9 +56,7 @@ async function handleSave(
   }
 }
 
-watchEffect(() => {
-  setTitle(`Settings - ${props.space.name}`);
-});
+watchEffect(() => setTitle(`Settings - ${props.space.name}`));
 </script>
 
 <template>

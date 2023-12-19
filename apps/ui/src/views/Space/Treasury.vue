@@ -97,9 +97,7 @@ onMounted(() => {
   loadNfts(treasury.value.wallet);
 });
 
-watchEffect(() => {
-  setTitle(`Treasury - ${props.space.name}`);
-});
+watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>

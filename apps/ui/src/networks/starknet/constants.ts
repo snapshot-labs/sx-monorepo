@@ -275,17 +275,17 @@ export function createConstants(networkId: NetworkID) {
         additionalProperties: false,
         required: [],
         properties: {
-          symbol: {
-            type: 'string',
-            maxLength: MAX_SYMBOL_LENGTH,
-            title: 'Symbol',
-            examples: ['e.g. VP']
-          },
           whitelist: {
             type: 'string',
             format: 'long',
             title: 'Whitelist',
             examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
+          },
+          symbol: {
+            type: 'string',
+            maxLength: MAX_SYMBOL_LENGTH,
+            title: 'Symbol',
+            examples: ['e.g. VP']
           }
         }
       }
@@ -337,7 +337,7 @@ export function createConstants(networkId: NetworkID) {
             type: 'string',
             maxLength: MAX_SYMBOL_LENGTH,
             title: 'Symbol',
-            examples: ['e.g. COMP']
+            examples: ['e.g. UNI']
           }
         }
       }

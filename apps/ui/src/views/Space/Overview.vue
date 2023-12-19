@@ -37,9 +37,7 @@ const githubUrl = computed(() =>
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
 
-watchEffect(() => {
-  setTitle(props.space.name);
-});
+watchEffect(() => setTitle(props.space.name));
 </script>
 
 <template>

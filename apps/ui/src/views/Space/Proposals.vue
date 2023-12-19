@@ -75,9 +75,7 @@ watch(
   () => getVotingPower()
 );
 
-watchEffect(() => {
-  setTitle(`Proposals - ${props.space.name}`);
-});
+watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
 </script>
 
 <template>
