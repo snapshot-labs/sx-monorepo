@@ -6,7 +6,7 @@ import ethRpc from './eth';
 import fossil from './fossil';
 import pkg from '../package.json';
 import { createTables } from './db';
-import { registeredTransactionsLoop } from './stark/registered';
+import { registeredProposalsLoop, registeredTransactionsLoop } from './stark/registered';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +34,7 @@ async function start() {
   await createTables();
 
   registeredTransactionsLoop();
+  registeredProposalsLoop();
 
   app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
 }

@@ -2,6 +2,7 @@ import { utils } from '@snapshot-labs/sx';
 import * as db from '../db';
 import { sleep } from '../utils';
 import { getClient } from './networks';
+import { processProposal } from './herodotus';
 
 const INTERVAL = 15_000;
 
@@ -69,6 +70,24 @@ export async function registeredTransactionsLoop() {
     }
 
     await db.markOldTransactionsAsProcessed();
+    await sleep(INTERVAL);
+  }
+}
+
+export async function registeredProposalsLoop() {
+  while (true) {
+    const proposals = await db.getProposalsToProcess();
+
+    console.log('processing', proposals.length, 'proposals');
+
+    for (const proposal of proposals) {
+      try {
+        await processProposal(proposal);
+      } catch (e) {
+        console.log('error', e);
+      }
+    }
+
     await sleep(INTERVAL);
   }
 }

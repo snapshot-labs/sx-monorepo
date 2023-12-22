@@ -77,18 +77,14 @@ export const createNetworkHandler = (chainId: string) => {
 
       console.log('Registering proposal', l1TokenAddress, strategyAddress, snapshotTimestamp);
 
-      const result = await herodotus.registerProposal({
+      await herodotus.registerProposal({
         chainId,
         l1TokenAddress,
         strategyAddress,
-        snapshotTimestamp
+        timestamp: snapshotTimestamp
       });
 
-      await db.registerProposal(
-        `${chainId}-${l1TokenAddress}-${strategyAddress}-${snapshotTimestamp}`
-      );
-
-      return rpcSuccess(res, result, id);
+      return rpcSuccess(res, { success: true }, id);
     } catch (e) {
       console.log('Failed', e);
       return rpcError(res, 500, e, id);
