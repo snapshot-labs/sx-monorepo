@@ -4,7 +4,6 @@ dist
 build
 .env
 coverage
-.checkpoint
 
 # Remove some common IDE working directories
 .idea
