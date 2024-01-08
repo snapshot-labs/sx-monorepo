@@ -6,19 +6,26 @@ type ProofElement = {
   proof: string[];
 };
 
+type Opts = {
+  nonce?: string;
+};
+
 export class HerodotusController {
-  async cacheTimestamp({
-    signer,
-    contractAddress,
-    timestamp,
-    binaryTree
-  }: {
-    signer: Account;
-    contractAddress: string;
-    timestamp: number;
-    binaryTree: any;
-  }) {
-    return signer.execute({
+  async cacheTimestamp(
+    {
+      signer,
+      contractAddress,
+      timestamp,
+      binaryTree
+    }: {
+      signer: Account;
+      contractAddress: string;
+      timestamp: number;
+      binaryTree: any;
+    },
+    opts?: Opts
+  ) {
+    const call = {
       contractAddress,
       entrypoint: 'cache_timestamp',
       calldata: CallData.compile({
@@ -37,6 +44,9 @@ export class HerodotusController {
           left_neighbor: new CairoOption<ProofElement>(CairoOptionVariant.None)
         }
       })
-    });
+    };
+
+    const fee = await signer.estimateFee(call);
+    return signer.execute(call, undefined, { ...opts, maxFee: fee.suggestedMaxFee });
   }
 }
