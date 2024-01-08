@@ -45,6 +45,10 @@ type UpdateSettingsInput = {
   votingStrategyMetadataUrisToAdd?: string[];
 };
 
+type Opts = {
+  nonce?: string;
+};
+
 const NO_UPDATE_U32 = '0xf2cda9b1';
 const NO_UPDATE_ADDRESS = '0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048';
 const NO_UPDATE_STRING = 'No update';
@@ -133,7 +137,7 @@ export class StarknetTx {
     );
   }
 
-  async propose(account: Account, envelope: Envelope<Propose>) {
+  async propose(account: Account, envelope: Envelope<Propose>, opts?: Opts) {
     const authorAddress = envelope.signatureData?.address || account.address;
 
     const authenticator = getAuthenticator(envelope.data.authenticator, this.config.networkConfig);
@@ -163,10 +167,11 @@ export class StarknetTx {
 
     const calls = [call];
 
-    return account.execute(calls);
+    const fee = await account.estimateFee(calls);
+    return account.execute(calls, undefined, { ...opts, maxFee: fee.suggestedMaxFee });
   }
 
-  async updateProposal(account: Account, envelope: Envelope<UpdateProposal>) {
+  async updateProposal(account: Account, envelope: Envelope<UpdateProposal>, opts?: Opts) {
     const authorAddress = envelope.signatureData?.address || account.address;
 
     const authenticator = getAuthenticator(envelope.data.authenticator, this.config.networkConfig);
@@ -186,10 +191,11 @@ export class StarknetTx {
 
     const calls = [call];
 
-    return account.execute(calls);
+    const fee = await account.estimateFee(calls);
+    return account.execute(calls, undefined, { ...opts, maxFee: fee.suggestedMaxFee });
   }
 
-  async vote(account: Account, envelope: Envelope<Vote>) {
+  async vote(account: Account, envelope: Envelope<Vote>, opts?: Opts) {
     const voterAddress = envelope.signatureData?.address || account.address;
 
     const authenticator = getAuthenticator(envelope.data.authenticator, this.config.networkConfig);
@@ -213,7 +219,8 @@ export class StarknetTx {
       metadataUri: ''
     });
 
-    return account.execute(call);
+    const fee = await account.estimateFee(call);
+    return account.execute(call, undefined, { ...opts, maxFee: fee.suggestedMaxFee });
   }
 
   execute({
