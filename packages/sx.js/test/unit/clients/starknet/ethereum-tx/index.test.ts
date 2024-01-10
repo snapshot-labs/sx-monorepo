@@ -1,6 +1,7 @@
+import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../../../src/clients/starknet/ethereum-tx';
 import { starkProvider } from '../../../helpers';
-import { Wallet } from '@ethersproject/wallet';
+import { starknetNetworks, starknetGoerli } from '../../../../../src/networks';
 
 describe('EthereumTx', () => {
   const ethPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -10,16 +11,20 @@ describe('EthereumTx', () => {
 
   const ethereumTx = new EthereumTx({
     ethUrl,
-    starkProvider
+    starkProvider,
+    networkConfig: starknetGoerli
   });
+
+  const { EthTx } = starknetNetworks['sn-tn'].Authenticators;
+  const { MerkleWhitelist } = starknetNetworks['sn-tn'].Strategies;
 
   it('should return propose hash', async () => {
     const data = {
       space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-      authenticator: '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
+      authenticator: EthTx,
       strategies: [
         {
-          address: '0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
+          address: MerkleWhitelist,
           index: 0
         }
       ],
@@ -37,11 +42,11 @@ describe('EthereumTx', () => {
   it('should return vote hash', async () => {
     const data = {
       space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-      authenticator: '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
+      authenticator: EthTx,
       strategies: [
         {
           index: 0,
-          address: '0x00e3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52'
+          address: MerkleWhitelist
         }
       ],
       proposal: 32,
@@ -55,7 +60,7 @@ describe('EthereumTx', () => {
   it('should return update proposal hash', async () => {
     const data = {
       space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
-      authenticator: '0x00d6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
+      authenticator: EthTx,
       proposal: 32,
       executionStrategy: {
         addr: '0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe',
