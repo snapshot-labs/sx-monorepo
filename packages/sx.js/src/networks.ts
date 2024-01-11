@@ -4,10 +4,10 @@ import { NetworkConfig, EvmNetworkConfig } from './types';
 export const evmMainnet: EvmNetworkConfig = {
   eip712ChainId: 1,
   proxyFactory: '0x4b4f7f64be813ccc66aefc3bfce2baa01188631c',
-  masterSpace: '0xd9c46d5420434355d0e5ca3e3ccb20ce7a533964',
+  masterSpace: '0xc3031a7d3326e47d49bff9d374d74f364b29ce4d',
   executionStrategiesImplementations: {
-    SimpleQuorumAvatar: '0x3813f3d97aa2f80e3af625605a31206e067fb2e5',
-    SimpleQuorumTimelock: '0x00c5e67e6f7fdf80d7bca249e38c355fbe62ba34'
+    SimpleQuorumAvatar: '0xece4f6b01a2d7ff5a9765ca44162d453fc455e42',
+    SimpleQuorumTimelock: '0xf2a1c2f2098161af98b2cc7e382ab7f3ba86ebc4'
   },
   authenticators: {
     '0x5f9b7d78c9a37a439d78f801e0e339c6e711e260': {
@@ -35,12 +35,7 @@ export const evmMainnet: EvmNetworkConfig = {
 
 export const evmGoerli: EvmNetworkConfig = {
   ...evmMainnet,
-  eip712ChainId: 5,
-  masterSpace: '0xc3031a7d3326e47d49bff9d374d74f364b29ce4d',
-  executionStrategiesImplementations: {
-    SimpleQuorumAvatar: '0xece4f6b01a2d7ff5a9765ca44162d453fc455e42',
-    SimpleQuorumTimelock: '0xf2a1c2f2098161af98b2cc7e382ab7f3ba86ebc4'
-  }
+  eip712ChainId: 5
 };
 
 export const evmSepolia: EvmNetworkConfig = {
