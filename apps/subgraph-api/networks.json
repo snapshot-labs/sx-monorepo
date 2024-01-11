@@ -2,31 +2,31 @@
   "mainnet": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
-      "startBlock": 18426159
+      "startBlock": 18962278
     }
   },
   "goerli": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
-      "startBlock": 9405311
+      "startBlock": 9893638
     }
   },
   "sepolia": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
-      "startBlock": 3961351
+      "startBlock": 4519171
     }
   },
   "matic": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
-      "startBlock": 45499032
+      "startBlock": 50858232
     }
   },
   "arbitrum-one": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
-      "startBlock": 114776723
+      "startBlock": 157825417
     }
   },
   "linea-testnet": {
