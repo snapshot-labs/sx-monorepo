@@ -116,7 +116,7 @@ export async function processProposal(proposal: DbProposal) {
   }
 
   const { getAccount } = getClient(proposal.chainId);
-  const account = getAccount('0x0');
+  const { account, nonceManager } = getAccount('0x0');
 
   const res = await fetch(
     `https://ds-indexer.api.herodotus.cloud/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=SN_GOERLI&accumulates_chain=5`,
@@ -129,14 +129,24 @@ export async function processProposal(proposal: DbProposal) {
 
   const tree = await res.json();
 
-  const receipt = await controller.cacheTimestamp({
-    signer: account,
-    contractAddress: proposal.strategyAddress,
-    timestamp: proposal.timestamp,
-    binaryTree: tree
-  });
+  try {
+    await nonceManager.acquire();
+    const nonce = await nonceManager.getNonce();
 
-  console.log('cached proposal', receipt);
+    const receipt = await controller.cacheTimestamp(
+      {
+        signer: account,
+        contractAddress: proposal.strategyAddress,
+        timestamp: proposal.timestamp,
+        binaryTree: tree
+      },
+      { nonce }
+    );
 
-  await db.markProposalProcessed(proposal.id);
+    console.log('cached proposal', receipt);
+
+    await db.markProposalProcessed(proposal.id);
+  } finally {
+    nonceManager.release();
+  }
 }

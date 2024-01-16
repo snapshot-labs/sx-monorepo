@@ -30,7 +30,7 @@ async function processTransaction(transaction: Transaction) {
     data: transaction.data
   };
 
-  const account = getAccount(payload.data.space);
+  const account = getAccount(payload.data.space).account;
 
   let receipt;
   try {

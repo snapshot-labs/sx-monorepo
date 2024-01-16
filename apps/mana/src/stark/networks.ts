@@ -1,6 +1,7 @@
 import { Account, RpcProvider, constants } from 'starknet';
 import { clients, starknetMainnet, starknetGoerli1 } from '@snapshot-labs/sx';
 import { getProvider, createAccountProxy } from './dependencies';
+import { NonceManager } from './nonce-manager';
 
 export const NETWORKS = {
   [constants.StarknetChainId.SN_MAIN]: starknetMainnet,
@@ -12,7 +13,7 @@ const clientsMap = new Map<
   {
     provider: RpcProvider;
     client: clients.StarknetTx;
-    getAccount: (spaceAddress) => Account;
+    getAccount: (spaceAddress) => { account: Account; nonceManager: NonceManager };
   }
 >();
 

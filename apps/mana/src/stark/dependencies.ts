@@ -1,6 +1,7 @@
 import { Account, RpcProvider, ec, hash, constants, validateAndParseAddress } from 'starknet';
 import * as bip32 from '@scure/bip32';
 import * as bip39 from '@scure/bip39';
+import { NonceManager } from './nonce-manager';
 
 const basePath = "m/44'/9004'/0'/0";
 const contractAXclassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
@@ -41,17 +42,21 @@ export const SPACES_INDICIES = {
 };
 
 export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
-  const accounts = new Map<string, Account>();
+  const accounts = new Map<number, { account: Account; nonceManager: NonceManager }>();
 
   return (spaceAddress: string) => {
     const normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
-    if (!accounts.has(normalizedSpaceAddress)) {
-      const index = SPACES_INDICIES[normalizedSpaceAddress] || DEFAULT_INDEX;
+    const index = SPACES_INDICIES[normalizedSpaceAddress] || DEFAULT_INDEX;
+
+    if (!accounts.has(index)) {
       const { address, privateKey } = getStarknetAccount(mnemonic, index);
 
-      accounts.set(normalizedSpaceAddress, new Account(provider, address, privateKey));
+      const account = new Account(provider, address, privateKey);
+      const nonceManager = new NonceManager(account);
+
+      accounts.set(index, { account, nonceManager });
     }
 
-    return accounts.get(normalizedSpaceAddress) as Account;
+    return accounts.get(index)!;
   };
 }

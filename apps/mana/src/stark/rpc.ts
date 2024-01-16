@@ -15,22 +15,31 @@ export const createNetworkHandler = (chainId: string) => {
       const { address, primaryType, message } = signatureData;
       let receipt;
 
-      const account = getAccount(data.space);
+      const { account, nonceManager } = getAccount(data.space);
 
       console.time('Send');
       console.log('Type', primaryType);
       console.log('Address', address);
       console.log('Message', message);
 
-      if (primaryType === 'Propose') {
-        console.log('Propose');
-        receipt = await client.propose(account, params.envelope);
-      } else if (primaryType === 'UpdateProposal') {
-        console.log('Propose');
-        receipt = await client.propose(account, params.envelope);
-      } else if (primaryType === 'Vote') {
-        console.log('Vote');
-        receipt = await client.vote(account, params.envelope);
+      try {
+        await nonceManager.acquire();
+        const nonce = await nonceManager.getNonce();
+
+        if (primaryType === 'Propose') {
+          console.log('Propose');
+          receipt = await client.propose(account, params.envelope, { nonce });
+        } else if (primaryType === 'UpdateProposal') {
+          console.log('Propose');
+          receipt = await client.propose(account, params.envelope, { nonce });
+        } else if (primaryType === 'Vote') {
+          console.log('Vote');
+          receipt = await client.vote(account, params.envelope, { nonce });
+        }
+
+        nonceManager.increaseNonce();
+      } finally {
+        nonceManager.release();
       }
 
       console.timeEnd('Send');
