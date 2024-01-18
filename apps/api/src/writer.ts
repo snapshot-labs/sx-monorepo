@@ -376,8 +376,12 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     }
   }
 
-  console.log('saving proposal', proposal.id);
-  await Promise.all([proposal.save(), space.save()]);
+  try {
+    console.log('saving proposal', proposal.id);
+    await Promise.all([proposal.save(), space.save()]);
+  } catch (e) {
+    console.log('failed to save proposal', e);
+  }
 };
 
 export const handleCancel: CheckpointWriter = async ({ rawEvent, event }) => {
