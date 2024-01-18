@@ -377,7 +377,8 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   }
 
   try {
-    console.log('saving proposal', proposal.id);
+    const existingProposal = await Proposal.loadEntity(proposal.id);
+    console.log('saving proposal', proposal.id, existingProposal);
     await Promise.all([proposal.save(), space.save()]);
   } catch (e) {
     console.log('failed to save proposal', e);
