@@ -376,6 +376,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     }
   }
 
+  console.log('saving proposal', proposal.id);
   await Promise.all([proposal.save(), space.save()]);
 };
 
