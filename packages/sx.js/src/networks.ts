@@ -40,7 +40,11 @@ export const evmGoerli: EvmNetworkConfig = {
 
 export const evmSepolia: EvmNetworkConfig = {
   ...evmGoerli,
-  eip712ChainId: 11155111
+  eip712ChainId: 11155111,
+  executionStrategiesImplementations: {
+    ...evmGoerli.executionStrategiesImplementations,
+    Axiom: '0xeaF78F64d136CBAef1eF18854f6465e9CbadA42c'
+  }
 };
 
 export const evmPolygon: EvmNetworkConfig = {

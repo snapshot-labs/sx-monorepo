@@ -9,6 +9,7 @@ import SpaceAbi from './abis/Space.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
 import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
+import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy.json';
 import type { Signer } from '@ethersproject/abstract-signer';
 import type { Propose, UpdateProposal, Vote, Envelope, AddressConfig } from '../types';
 import type { EvmNetworkConfig } from '../../../types';
@@ -40,6 +41,15 @@ type TimelockExecutionStrategyParams = {
   spaces: string[];
   timelockDelay: bigint;
   quorum: bigint;
+};
+
+type AxiomExecutionStrategyParams = {
+  controller: string;
+  quorum: bigint;
+  contractAddress: string;
+  slotIndex: bigint;
+  space: string;
+  querySchema: string;
 };
 
 type UpdateSettingsInput = {
@@ -152,6 +162,52 @@ export class EthereumTx {
     const functionData = timelockExecutionStrategyInterface.encodeFunctionData('setUp', [
       initParams
     ]);
+
+    const sender = await signer.getAddress();
+    const salt = await this.getSalt({
+      sender,
+      saltNonce
+    });
+    const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
+    const response = await proxyFactoryContract.deployProxy(
+      implementationAddress,
+      functionData,
+      saltNonce
+    );
+
+    return { address, txId: response.hash };
+  }
+
+  async deployAxiomExecution({
+    signer,
+    params: { controller, quorum, contractAddress, slotIndex, space, querySchema },
+    saltNonce
+  }: {
+    signer: Signer;
+    params: AxiomExecutionStrategyParams;
+    saltNonce?: string;
+  }): Promise<{ txId: string; address: string }> {
+    saltNonce = saltNonce || `0x${randomBytes(32).toString('hex')}`;
+
+    const implementationAddress = this.networkConfig.executionStrategiesImplementations['Axiom'];
+
+    if (!implementationAddress) {
+      throw new Error('Missing Axiom implementation address');
+    }
+
+    const abiCoder = new AbiCoder();
+    const axiomExecutionStrategyInterface = new Interface(AxiomExecutionStrategyAbi);
+    const proxyFactoryContract = new Contract(
+      this.networkConfig.proxyFactory,
+      ProxyFactoryAbi,
+      signer
+    );
+
+    const initParams = abiCoder.encode(
+      ['address', 'uint256', 'address', 'uint256', 'address', 'bytes32'],
+      [controller, quorum, contractAddress, slotIndex, space, querySchema]
+    );
+    const functionData = axiomExecutionStrategyInterface.encodeFunctionData('setUp', [initParams]);
 
     const sender = await signer.getAddress();
     const salt = await this.getSalt({

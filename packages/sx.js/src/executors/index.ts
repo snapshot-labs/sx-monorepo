@@ -1,6 +1,7 @@
 import createVanillaExecutor from './vanilla';
 import createEthRelayerExecutor from './ethRelayer';
 import createAvatarExecutor from './avatar';
+import createAxiomExecutor from './axiom';
 import { ExecutorType, ExecutionInput } from '../types';
 
 export function getExecutionData(
@@ -20,6 +21,10 @@ export function getExecutionData(
     return createEthRelayerExecutor({
       destination: input.destination
     }).getExecutionData(executorAddress, input.transactions);
+  }
+
+  if (type === 'Axiom' && input?.transactions) {
+    return createAxiomExecutor().getExecutionData(executorAddress, input.transactions);
   }
 
   throw new Error(`Not enough data to create execution for executor ${executorAddress}`);
