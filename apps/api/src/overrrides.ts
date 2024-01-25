@@ -20,4 +20,17 @@ const goerliConfig = {
   startBlock: 907731
 };
 
-export const networkProperties = process.env.NETWORK === 'SN_MAIN' ? mainnetConfig : goerliConfig;
+const sepoliaConfig = {
+  manaRpcUrl: 'http://localhost:3001/stark_rpc/0x534e5f5345504f4c4941',
+  factoryAddress: '0x0302d332e9aceb184e5f301cb62c85181e7fc3b30559935c5736e987de579f6e',
+  propositionPowerValidationStrategyAddress:
+    '0x296e1a5ad28c9bf32b9570d6e1bedae77917866cd5d92aea4ef9271905ef549',
+  evmSlotValueStrategyAddress: '0x1f8544918b5d9b4833fb2ba2d0c7ceb0d699ae7f2b8b23ea129c9a10fe8046c',
+  startBlock: 17960
+};
+
+let networkProperties = goerliConfig;
+if (process.env.NETWORK === 'SN_MAIN') networkProperties = mainnetConfig;
+if (process.env.NETWORK === 'SN_SEPOLIA') networkProperties = sepoliaConfig;
+
+export { networkProperties };
