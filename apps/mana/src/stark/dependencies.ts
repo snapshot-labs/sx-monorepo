@@ -6,13 +6,14 @@ import { NonceManager } from './nonce-manager';
 const basePath = "m/44'/9004'/0'/0";
 const contractAXclassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
-export function getProvider(chainId: string) {
-  const nodeUrl =
-    chainId === constants.StarknetChainId.SN_MAIN
-      ? process.env.STARKNET_MAINNET_RPC_URL
-      : process.env.STARKNET_GOERLI_RPC_URL;
+const NODE_URLS = {
+  [constants.StarknetChainId.SN_MAIN]: process.env.STARKNET_MAINNET_RPC_URL,
+  [constants.StarknetChainId.SN_GOERLI]: process.env.STARKNET_GOERLI_RPC_URL,
+  [constants.StarknetChainId.SN_SEPOLIA]: process.env.STARKNET_SEPOLIA_RPC_URL
+};
 
-  return new RpcProvider({ nodeUrl });
+export function getProvider(chainId: string) {
+  return new RpcProvider({ nodeUrl: NODE_URLS[chainId] });
 }
 
 export function getStarknetAccount(mnemonic: string, index: number) {

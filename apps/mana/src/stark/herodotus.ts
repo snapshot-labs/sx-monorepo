@@ -5,6 +5,16 @@ import * as db from '../db';
 import { getClient } from './networks';
 
 const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
+const HERODOTUS_MAPPING = {
+  [constants.StarknetChainId.SN_GOERLI]: {
+    DESTINATION_CHAIN_ID: 'SN_GOERLI',
+    ACCUMULATES_CHAIN_ID: '5'
+  },
+  [constants.StarknetChainId.SN_SEPOLIA]: {
+    DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
+    ACCUMULATES_CHAIN_ID: '11155111'
+  }
+};
 
 const controller = new clients.HerodotusController();
 
@@ -38,11 +48,16 @@ async function getStatus(id: string) {
 }
 
 async function submitBatch(proposal: ApiProposal) {
+  const mapping = HERODOTUS_MAPPING[proposal.chainId];
+  if (!mapping) throw new Error('Invalid chainId');
+
+  const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
+
   const body: any = {
-    destinationChainId: 'SN_GOERLI',
+    destinationChainId: DESTINATION_CHAIN_ID,
     fee: '0',
     data: {
-      '5': {
+      [ACCUMULATES_CHAIN_ID]: {
         [`timestamp:${proposal.timestamp}`]: {
           accounts: {
             [proposal.l1TokenAddress]: {
@@ -79,8 +94,11 @@ async function submitBatch(proposal: ApiProposal) {
 }
 
 export async function registerProposal(proposal: ApiProposal) {
-  if (proposal.chainId !== constants.StarknetChainId.SN_GOERLI) {
-    throw new Error('Only Starknet goerli is supported');
+  if (
+    proposal.chainId !== constants.StarknetChainId.SN_GOERLI &&
+    proposal.chainId !== constants.StarknetChainId.SN_SEPOLIA
+  ) {
+    throw new Error('Only Starknet goerli and sepolia are supported');
   }
 
   await db.registerProposal(getId(proposal), {
@@ -117,9 +135,13 @@ export async function processProposal(proposal: DbProposal) {
 
   const { getAccount } = getClient(proposal.chainId);
   const { account, nonceManager } = getAccount('0x0');
+  const mapping = HERODOTUS_MAPPING[proposal.chainId];
+  if (!mapping) throw new Error('Invalid chainId');
+
+  const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
 
   const res = await fetch(
-    `https://ds-indexer.api.herodotus.cloud/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=SN_GOERLI&accumulates_chain=5`,
+    `https://ds-indexer.api.herodotus.cloud/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,
     {
       headers: {
         accept: 'application/json'

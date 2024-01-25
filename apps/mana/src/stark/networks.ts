@@ -1,11 +1,12 @@
 import { Account, RpcProvider, constants } from 'starknet';
-import { clients, starknetMainnet, starknetGoerli1 } from '@snapshot-labs/sx';
+import { clients, starknetMainnet, starknetGoerli, starknetSepolia } from '@snapshot-labs/sx';
 import { getProvider, createAccountProxy } from './dependencies';
 import { NonceManager } from './nonce-manager';
 
 export const NETWORKS = {
   [constants.StarknetChainId.SN_MAIN]: starknetMainnet,
-  [constants.StarknetChainId.SN_GOERLI]: starknetGoerli1
+  [constants.StarknetChainId.SN_GOERLI]: starknetGoerli,
+  [constants.StarknetChainId.SN_SEPOLIA]: starknetSepolia
 } as const;
 
 const clientsMap = new Map<
