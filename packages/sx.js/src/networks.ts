@@ -94,7 +94,7 @@ export const starknetNetworks = {
     Meta: {
       eip712ChainId: '0x534e5f4d41494e',
       herodotusAccumulatesChainId: 1,
-      herodotusDeployedOnChain: 'SN',
+      herodotusDeployedOnChain: 'STARKNET',
       spaceFactory: '0x0250e28c97e729842190c3672f9fcf8db0fc78b8080e87a894831dc69e4f4439',
       masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
       starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9'
@@ -109,7 +109,7 @@ export const starknetNetworks = {
     Strategies: {
       MerkleWhitelist: '0x528b83a6af52c56cb2134fd9190a441e930831af437c1cb0fa6e459ad1435ba',
       ERC20Votes: '0x2429becc80a90bbeb38c6566617c584f79c60f684e8e73313af58b109b7d637',
-      EVMSlotValue: null
+      EVMSlotValue: '0x699e53f4b40e19d96b8020386dbeeb156f40172d7bbb78b2a4204cf64ae75f'
     },
     ProposalValidations: {
       VotingPower: '0x1b28f95cbc5bcbe52014ef974d609f14497517f31d3c9e079a2464edf988751'
