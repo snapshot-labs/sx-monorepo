@@ -6,13 +6,20 @@ import { getClient } from './networks';
 
 const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
 const HERODOTUS_MAPPING = {
+  [constants.StarknetChainId.SN_MAIN]: {
+    DESTINATION_CHAIN_ID: 'STARKNET',
+    ACCUMULATES_CHAIN_ID: '1',
+    FEE: '100000'
+  },
   [constants.StarknetChainId.SN_GOERLI]: {
     DESTINATION_CHAIN_ID: 'SN_GOERLI',
-    ACCUMULATES_CHAIN_ID: '5'
+    ACCUMULATES_CHAIN_ID: '5',
+    FEE: '0'
   },
   [constants.StarknetChainId.SN_SEPOLIA]: {
     DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
-    ACCUMULATES_CHAIN_ID: '11155111'
+    ACCUMULATES_CHAIN_ID: '11155111',
+    FEE: '0'
   }
 };
 
@@ -51,11 +58,11 @@ async function submitBatch(proposal: ApiProposal) {
   const mapping = HERODOTUS_MAPPING[proposal.chainId];
   if (!mapping) throw new Error('Invalid chainId');
 
-  const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
+  const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID, FEE } = mapping;
 
   const body: any = {
     destinationChainId: DESTINATION_CHAIN_ID,
-    fee: '0',
+    fee: FEE,
     data: {
       [ACCUMULATES_CHAIN_ID]: {
         [`timestamp:${proposal.timestamp}`]: {
@@ -95,10 +102,11 @@ async function submitBatch(proposal: ApiProposal) {
 
 export async function registerProposal(proposal: ApiProposal) {
   if (
+    proposal.chainId !== constants.StarknetChainId.SN_MAIN &&
     proposal.chainId !== constants.StarknetChainId.SN_GOERLI &&
     proposal.chainId !== constants.StarknetChainId.SN_SEPOLIA
   ) {
-    throw new Error('Only Starknet goerli and sepolia are supported');
+    throw new Error('Only Starknet mainnet, goerli and sepolia are supported');
   }
 
   await db.registerProposal(getId(proposal), {
