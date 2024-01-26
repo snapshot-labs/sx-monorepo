@@ -43,7 +43,7 @@ export const evmSepolia: EvmNetworkConfig = {
   eip712ChainId: 11155111,
   executionStrategiesImplementations: {
     ...evmGoerli.executionStrategiesImplementations,
-    Axiom: '0xeaF78F64d136CBAef1eF18854f6465e9CbadA42c'
+    Axiom: '0xD5BCAD508683D3D36953Fff258609eE911BC9C54'
   }
 };
 
