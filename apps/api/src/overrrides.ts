@@ -7,7 +7,7 @@ const mainnetConfig = {
   factoryAddress: '0x250e28c97e729842190c3672f9fcf8db0fc78b8080e87a894831dc69e4f4439',
   propositionPowerValidationStrategyAddress:
     '0x1b28f95cbc5bcbe52014ef974d609f14497517f31d3c9e079a2464edf988751',
-  evmSlotValueStrategyAddress: '',
+  evmSlotValueStrategyAddress: '0x699e53f4b40e19d96b8020386dbeeb156f40172d7bbb78b2a4204cf64ae75f',
   startBlock: 445498
 };
 
