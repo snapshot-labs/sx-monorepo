@@ -1,5 +1,5 @@
 import { CallData, uint256 } from 'starknet';
-import { utils } from '@snapshot-labs/sx';
+import { utils, starknetNetworks } from '@snapshot-labs/sx';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinPineapple } from '@/helpers/pin';
 import { StrategyConfig } from '../types';
@@ -11,50 +11,8 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
 
-// TODO: We should have something like this in sx.js as base for this constants file as well as networkConfig
-const CONFIGS = {
-  sn: {
-    Authenticators: {
-      EthSig: '0xb610082a0f39458e03a96663767ec25d6fb259f32c1e0dd19bf2be7a52532c',
-      EthTx: '0x63c89d1c6b938b68e88db2719cf2546a121c23642974c268515238b442b0ea0',
-      StarkSig: '0x6e9de29d8c3551e7f845888f323e864ff214359b56a137633bf7e191035b442',
-      StarkTx: '0x687b57bc5459d05d9575483be8ed8e623c379484fdb1aad18b073ffd4602099'
-    },
-    Strategies: {
-      MerkleWhitelist: '0x528b83a6af52c56cb2134fd9190a441e930831af437c1cb0fa6e459ad1435ba',
-      ERC20Votes: '0x2429becc80a90bbeb38c6566617c584f79c60f684e8e73313af58b109b7d637',
-      EVMSlotValue: null
-    },
-    ProposalValidations: {
-      VotingPower: '0x1b28f95cbc5bcbe52014ef974d609f14497517f31d3c9e079a2464edf988751'
-    },
-    ExecutionStrategies: {
-      NoExecutionSimpleMajority: '0x180e1f4fcd875b35690b6771b30197867d39c893d5ba6e32c36616733ee37c4'
-    }
-  },
-  'sn-tn': {
-    Authenticators: {
-      EthSig: '0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e',
-      EthTx: '0xd6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
-      StarkSig: '0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5',
-      StarkTx: '0x573a7fc4d8dd3a860b376741c251772cd4d15508dd94564ff23a645d28042d'
-    },
-    Strategies: {
-      MerkleWhitelist: '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
-      ERC20Votes: '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29',
-      EVMSlotValue: '0x35dbd4e4f46a059557e1b299d17f4568b49488bad5da9a003b171d90052139e'
-    },
-    ProposalValidations: {
-      VotingPower: '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631'
-    },
-    ExecutionStrategies: {
-      NoExecutionSimpleMajority: '0x4a5658d6b9fe62283147719a8b13d72f96e8959afacc716569b936c91089147'
-    }
-  }
-};
-
 export function createConstants(networkId: NetworkID) {
-  const config = CONFIGS[networkId];
+  const config = starknetNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
   const SUPPORTED_AUTHENTICATORS = {

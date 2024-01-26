@@ -8,6 +8,7 @@ const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
 const starknetNetwork = createStarknetNetwork('sn');
 const starknetTestnetNetwork = createStarknetNetwork('sn-tn');
+const starknetSepoliaNetwork = createStarknetNetwork('sn-sep');
 const polygonNetwork = createEvmNetwork('matic');
 const arbitrumNetwork = createEvmNetwork('arb1');
 const ethereumNetwork = createEvmNetwork('eth');
@@ -17,7 +18,7 @@ const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
-  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'gor', 'sep', 'sn', 'sn-tn'];
+  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'gor', 'sep', 'sn', 'sn-sep'];
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'gor', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
@@ -35,6 +36,7 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'linea-testnet') return lineaTestnetNetwork;
   if (id === 'sn') return starknetNetwork;
   if (id === 'sn-tn') return starknetTestnetNetwork;
+  if (id === 'sn-sep') return starknetSepoliaNetwork;
 
   throw new Error(`Unknown network ${id}`);
 };

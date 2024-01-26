@@ -1,6 +1,7 @@
 import {
   starknetMainnet,
   starknetGoerli,
+  starknetSepolia,
   clients,
   getStarknetStrategy,
   NetworkConfig
@@ -31,7 +32,8 @@ type Choice = 0 | 1 | 2;
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
-  'sn-tn': starknetGoerli
+  'sn-tn': starknetGoerli,
+  'sn-sep': starknetSepolia
 };
 
 export function createActions(

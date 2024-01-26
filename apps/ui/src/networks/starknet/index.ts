@@ -33,13 +33,22 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     explorerUrl: 'https://starkscan.co'
   },
   'sn-tn': {
-    name: 'Starknet (testnet)',
+    name: 'Starknet (Goerli)',
     chainId: starknetConstants.StarknetChainId.SN_GOERLI,
     baseChainId: 5,
     baseNetworkId: 'gor',
     rpcUrl: `https://starknet-goerli.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     apiUrl: 'https://testnet-api-1.snapshotx.xyz',
     explorerUrl: 'https://testnet.starkscan.co'
+  },
+  'sn-sep': {
+    name: 'Starknet (Sepolia)',
+    chainId: starknetConstants.StarknetChainId.SN_SEPOLIA,
+    baseChainId: 11155111,
+    baseNetworkId: 'sep',
+    rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    apiUrl: 'http://localhost:3000',
+    explorerUrl: 'https://sepolia.starkscan.co'
   }
 };
 
