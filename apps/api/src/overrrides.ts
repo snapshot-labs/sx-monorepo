@@ -21,7 +21,7 @@ const goerliConfig = {
 };
 
 const sepoliaConfig = {
-  manaRpcUrl: 'http://localhost:3001/stark_rpc/0x534e5f5345504f4c4941',
+  manaRpcUrl: 'https://mana.pizza/stark_rpc/0x534e5f5345504f4c4941',
   factoryAddress: '0x0302d332e9aceb184e5f301cb62c85181e7fc3b30559935c5736e987de579f6e',
   propositionPowerValidationStrategyAddress:
     '0x296e1a5ad28c9bf32b9570d6e1bedae77917866cd5d92aea4ef9271905ef549',
