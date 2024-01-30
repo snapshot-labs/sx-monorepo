@@ -33,10 +33,11 @@ export function useUserSkin() {
   watch(
     userSkin,
     () => {
-      document.documentElement.setAttribute(
-        'data-color-scheme',
-        userSkin.value === LIGHT_MODE ? 'light' : 'dark'
-      );
+      if (userSkin.value === LIGHT_MODE) {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
     },
     { immediate: true }
   );

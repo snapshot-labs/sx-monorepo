@@ -4,7 +4,6 @@ const el = ref(null);
 const route = useRoute();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
-const { userSkin } = useUserSkin();
 const { init, app } = useApp();
 const { web3, web3Account } = useWeb3();
 const { loadVotes, votes } = useAccount();
@@ -12,7 +11,6 @@ const { isSwiping, direction } = useSwipe(el);
 
 provide('web3', web3);
 
-const skin = computed(() => userSkin.value);
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
 onMounted(async () => {
@@ -49,7 +47,7 @@ watch(isSwiping, () => {
 <template>
   <div
     ref="el"
-    :class="{ [skin]: true, 'overflow-hidden': scrollDisabled }"
+    :class="{ 'overflow-hidden': scrollDisabled }"
     class="font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
