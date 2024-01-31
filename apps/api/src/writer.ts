@@ -356,19 +356,20 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     await user.save();
   }
 
-  const evmSlotValueStrategyIndex = space.strategies.findIndex(
-    strategy =>
-      validateAndParseAddress(strategy) ===
-      validateAndParseAddress(networkProperties.evmSlotValueStrategyAddress)
-  );
+  const herodotusStrategiesIndicies = space.strategies
+    .map((strategy, i) => [strategy, i] as const)
+    .filter(([strategy]) =>
+      networkProperties.herodotusStrategies.includes(validateAndParseAddress(strategy))
+    );
 
-  if (evmSlotValueStrategyIndex !== -1) {
-    const [l1TokenAddress] = space.strategies_params[evmSlotValueStrategyIndex].split(',');
+  for (const herodotusStrategy of herodotusStrategiesIndicies) {
+    const [strategy, i] = herodotusStrategy;
+    const [l1TokenAddress] = space.strategies_params[i].split(',');
 
     try {
       await registerProposal({
         l1TokenAddress,
-        strategyAddress: networkProperties.evmSlotValueStrategyAddress,
+        strategyAddress: strategy,
         snapshotTimestamp: proposal.snapshot
       });
     } catch (e) {
