@@ -109,7 +109,8 @@ export const starknetNetworks = {
     Strategies: {
       MerkleWhitelist: '0x528b83a6af52c56cb2134fd9190a441e930831af437c1cb0fa6e459ad1435ba',
       ERC20Votes: '0x2429becc80a90bbeb38c6566617c584f79c60f684e8e73313af58b109b7d637',
-      EVMSlotValue: '0x699e53f4b40e19d96b8020386dbeeb156f40172d7bbb78b2a4204cf64ae75f'
+      EVMSlotValue: '0x699e53f4b40e19d96b8020386dbeeb156f40172d7bbb78b2a4204cf64ae75f',
+      OZVotesStorageProof: '0x7ee3cf64f1072fe21570356eb57d4e9f78169ea9235ba610f60a8b33c36cc6e'
     },
     ProposalValidations: {
       VotingPower: '0x1b28f95cbc5bcbe52014ef974d609f14497517f31d3c9e079a2464edf988751'
@@ -137,7 +138,8 @@ export const starknetNetworks = {
     Strategies: {
       MerkleWhitelist: '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
       ERC20Votes: '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29',
-      EVMSlotValue: '0x35dbd4e4f46a059557e1b299d17f4568b49488bad5da9a003b171d90052139e'
+      EVMSlotValue: '0x35dbd4e4f46a059557e1b299d17f4568b49488bad5da9a003b171d90052139e',
+      OZVotesStorageProof: '0x1b3cbb267de6d0f30ddf521cd385a2e11836f0c5ba6f7b2224cf77a6ed86acf'
     },
     ProposalValidations: {
       VotingPower: '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631'
@@ -165,7 +167,8 @@ export const starknetNetworks = {
     Strategies: {
       MerkleWhitelist: '0x13bcbe7318fb8aa219d264dcf5916feb873e596389ba93d923f9a23378cb743',
       ERC20Votes: '0x72067addfebbaf2d20ed07303a2c9b8e19154e8797e6e9d6819b37fea2a2963',
-      EVMSlotValue: '0x1f8544918b5d9b4833fb2ba2d0c7ceb0d699ae7f2b8b23ea129c9a10fe8046c'
+      EVMSlotValue: '0x1f8544918b5d9b4833fb2ba2d0c7ceb0d699ae7f2b8b23ea129c9a10fe8046c',
+      OZVotesStorageProof: '0x6df976878be613837f120529c6f630374f1fd65a9bd4ffdbc2b0f135b5edd2e'
     },
     ProposalValidations: {
       VotingPower: '0x296e1a5ad28c9bf32b9570d6e1bedae77917866cd5d92aea4ef9271905ef549'
@@ -208,6 +211,16 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
       ? ({
           [validateAndParseAddress(network.Strategies.EVMSlotValue)]: {
             type: 'evmSlotValue',
+            params: {
+              deployedOnChain: network.Meta.herodotusDeployedOnChain
+            }
+          }
+        } as const)
+      : {}),
+    ...(network.Strategies.OZVotesStorageProof
+      ? ({
+          [validateAndParseAddress(network.Strategies.OZVotesStorageProof)]: {
+            type: 'ozVotesStorageProof',
             params: {
               deployedOnChain: network.Meta.herodotusDeployedOnChain
             }
