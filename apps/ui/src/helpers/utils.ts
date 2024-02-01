@@ -379,3 +379,8 @@ export async function imageUpload(file: File) {
     console.error(e);
   }
 }
+
+export function simplifyURL(fullURL: string): string {
+  const url = new URL(fullURL);
+  return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+}

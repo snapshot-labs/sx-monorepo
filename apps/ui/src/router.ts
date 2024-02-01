@@ -18,6 +18,8 @@ import Settings from '@/views/Settings.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import Explore from '@/views/Explore.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
+import Apps from '@/views/Apps.vue';
+import App from '@/views/App.vue';
 
 const { mixpanel } = useMixpanel();
 
@@ -62,7 +64,9 @@ const routes: any[] = [
       { path: 'contacts', name: 'settings-contacts', component: Contacts }
     ]
   },
-  { path: '/explore', name: 'explore', component: Explore }
+  { path: '/explore', name: 'explore', component: Explore },
+  { path: '/apps', name: 'apps', component: Apps },
+  { path: '/apps/:id', name: 'app', component: App }
 ];
 
 const router = createRouter({

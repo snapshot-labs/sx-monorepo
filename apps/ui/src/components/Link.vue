@@ -3,7 +3,7 @@ import { _n } from '@/helpers/utils';
 
 defineProps<{
   text: string;
-  isActive: boolean;
+  isActive?: boolean;
   count?: number;
 }>();
 </script>
