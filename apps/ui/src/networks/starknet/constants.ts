@@ -2,7 +2,7 @@ import { CallData, uint256 } from 'starknet';
 import { utils, starknetNetworks } from '@snapshot-labs/sx';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinPineapple } from '@/helpers/pin';
-import { StrategyConfig } from '../types';
+import { StrategyConfig, StrategyTemplate } from '../types';
 
 import IHCode from '~icons/heroicons-outline/code';
 import IHCube from '~icons/heroicons-outline/cube';
@@ -29,7 +29,8 @@ export function createConstants(networkId: NetworkID) {
   const SUPPORTED_STRATEGIES = {
     [config.Strategies.MerkleWhitelist]: true,
     [config.Strategies.ERC20Votes]: true,
-    [config.Strategies.EVMSlotValue]: true
+    [config.Strategies.EVMSlotValue]: true,
+    [config.Strategies.OZVotesStorageProof]: true
   };
 
   const SUPPORTED_EXECUTORS = {};
@@ -54,13 +55,88 @@ export function createConstants(networkId: NetworkID) {
   const STRATEGIES = {
     [config.Strategies.MerkleWhitelist]: 'Merkle whitelist',
     [config.Strategies.ERC20Votes]: 'ERC-20 Votes (EIP-5805)',
-    [config.Strategies.EVMSlotValue]: 'EVM slot value'
+    [config.Strategies.EVMSlotValue]: 'EVM slot value',
+    [config.Strategies.OZVotesStorageProof]: 'OZ Votes storage proof'
   };
 
   const EXECUTORS = {
     NoExecutionSimpleMajority: 'No execution simple majority',
     EthRelayer: 'Eth relayer'
   };
+
+  const createSlotValueStrategyConfig = (
+    address: string,
+    name: string,
+    about: string
+  ): StrategyTemplate => ({
+    address,
+    name,
+    about,
+    icon: IHCode,
+    generateSummary: (params: Record<string, any>) =>
+      `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
+    generateParams: (params: Record<string, any>) => {
+      return CallData.compile({
+        contract_address: params.contractAddress,
+        slot_index: uint256.bnToUint256(params.slotIndex)
+      });
+    },
+    generateMetadata: async (params: Record<string, any>) => ({
+      name,
+      properties: {
+        symbol: params.symbol,
+        decimals: parseInt(params.decimals),
+        token: params.contractAddress,
+        payload: JSON.stringify({
+          contractAddress: params.contractAddress,
+          slotIndex: params.slotIndex
+        })
+      }
+    }),
+    parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+      if (!metadata || !metadata.payload) throw new Error('Missing metadata');
+
+      const [contractAddress] = params.split(',');
+      const { slotIndex } = JSON.parse(metadata.payload);
+
+      return {
+        contractAddress,
+        decimals: metadata.decimals,
+        symbol: metadata.symbol,
+        slotIndex
+      };
+    },
+    paramsDefinition: {
+      type: 'object',
+      title: 'Params',
+      additionalProperties: false,
+      required: ['contractAddress', 'slotIndex'],
+      properties: {
+        contractAddress: {
+          type: 'string',
+          format: 'address',
+          title: 'Contract address',
+          examples: ['0x0000…']
+        },
+        slotIndex: {
+          type: 'integer',
+          title: 'Slot index',
+          examples: ['0']
+        },
+        decimals: {
+          type: 'integer',
+          title: 'Decimals',
+          examples: ['18']
+        },
+        symbol: {
+          type: 'string',
+          maxLength: MAX_SYMBOL_LENGTH,
+          title: 'Symbol',
+          examples: ['e.g. COMP']
+        }
+      }
+    }
+  });
 
   const EDITOR_AUTHENTICATORS = [
     {
@@ -302,82 +378,29 @@ export function createConstants(networkId: NetworkID) {
     },
     ...(config.Strategies.EVMSlotValue
       ? [
-          {
-            address: config.Strategies.EVMSlotValue,
-            name: 'EVM slot value',
-            about:
-              'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power.',
-            icon: IHCode,
-            generateSummary: (params: Record<string, any>) =>
-              `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
-            generateParams: (params: Record<string, any>) => {
-              return CallData.compile({
-                contract_address: params.contractAddress,
-                slot_index: uint256.bnToUint256(params.slotIndex)
-              });
-            },
-            generateMetadata: async (params: Record<string, any>) => ({
-              name: 'EVM slot value',
-              properties: {
-                symbol: params.symbol,
-                decimals: parseInt(params.decimals),
-                token: params.contractAddress,
-                payload: JSON.stringify({
-                  contractAddress: params.contractAddress,
-                  slotIndex: params.slotIndex
-                })
-              }
-            }),
-            parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
-              if (!metadata || !metadata.payload) throw new Error('Missing metadata');
-
-              const [contractAddress] = params.split(',');
-              const { slotIndex } = JSON.parse(metadata.payload);
-
-              return {
-                contractAddress,
-                decimals: metadata.decimals,
-                symbol: metadata.symbol,
-                slotIndex
-              };
-            },
-            paramsDefinition: {
-              type: 'object',
-              title: 'Params',
-              additionalProperties: false,
-              required: ['contractAddress', 'slotIndex'],
-              properties: {
-                contractAddress: {
-                  type: 'string',
-                  format: 'address',
-                  title: 'Contract address',
-                  examples: ['0x0000…']
-                },
-                slotIndex: {
-                  type: 'integer',
-                  title: 'Slot index',
-                  examples: ['0']
-                },
-                decimals: {
-                  type: 'integer',
-                  title: 'Decimals',
-                  examples: ['18']
-                },
-                symbol: {
-                  type: 'string',
-                  maxLength: MAX_SYMBOL_LENGTH,
-                  title: 'Symbol',
-                  examples: ['e.g. COMP']
-                }
-              }
-            }
-          }
+          createSlotValueStrategyConfig(
+            config.Strategies.EVMSlotValue,
+            'EVM slot value',
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power.'
+          )
+        ]
+      : []),
+    ...(config.Strategies.OZVotesStorageProof
+      ? [
+          createSlotValueStrategyConfig(
+            config.Strategies.OZVotesStorageProof,
+            'OZ Votes storage proof',
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances.'
+          )
         ]
       : [])
   ];
 
   const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = EDITOR_VOTING_STRATEGIES.filter(
-    strategy => strategy.address !== config.Strategies.EVMSlotValue
+    strategy =>
+      ![config.Strategies.EVMSlotValue, config.Strategies.OZVotesStorageProof].includes(
+        strategy.address
+      )
   );
 
   const EDITOR_EXECUTION_STRATEGIES = [

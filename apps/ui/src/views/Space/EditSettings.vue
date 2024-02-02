@@ -263,13 +263,15 @@ watchEffect(async () => {
       <BlockSpaceFormValidation
         v-model="validationStrategy"
         :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
-        :available-voting-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
+        :available-voting-strategies="
+          network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
+        "
         title="Proposal validation"
         description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
       />
       <BlockSpaceFormStrategies
         v-model="votingStrategies"
-        :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES"
+        :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
         title="Voting strategies"
         description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
       />
