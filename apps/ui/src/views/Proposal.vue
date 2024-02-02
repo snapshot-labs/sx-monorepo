@@ -13,7 +13,7 @@ const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
 
-const sendingType = ref<null | number>(null);
+const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 
@@ -171,8 +171,8 @@ watchEffect(() => {
               <UiTooltip title="For">
                 <UiButton
                   class="!text-green !border-green !w-[48px] !h-[48px] !px-0"
-                  :loading="sendingType === 1"
-                  @click="handleVoteClick(1)"
+                  :loading="sendingType === 'for'"
+                  @click="handleVoteClick('for')"
                 >
                   <IH-check class="inline-block" />
                 </UiButton>
@@ -180,8 +180,8 @@ watchEffect(() => {
               <UiTooltip title="Against">
                 <UiButton
                   class="!text-red !border-red !w-[48px] !h-[48px] !px-0"
-                  :loading="sendingType === 2"
-                  @click="handleVoteClick(2)"
+                  :loading="sendingType === 'against'"
+                  @click="handleVoteClick('against')"
                 >
                   <IH-x class="inline-block" />
                 </UiButton>
@@ -189,8 +189,8 @@ watchEffect(() => {
               <UiTooltip title="Abstain">
                 <UiButton
                   class="!text-gray-500 !border-gray-500 !w-[48px] !h-[48px] !px-0"
-                  :loading="sendingType === 3"
-                  @click="handleVoteClick(3)"
+                  :loading="sendingType === 'abstain'"
+                  @click="handleVoteClick('abstain')"
                 >
                   <IH-minus-sm class="inline-block" />
                 </UiButton>

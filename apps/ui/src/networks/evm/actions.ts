@@ -17,6 +17,7 @@ import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import {
   getExecutionData,
+  getSdkChoice,
   buildMetadata,
   parseStrategyMetadata,
   createStrategyPicker
@@ -37,9 +38,14 @@ import type {
   VotingPower
 } from '@/networks/types';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import type { Space, Proposal, SpaceMetadata, StrategyParsedMetadata, NetworkID } from '@/types';
-
-type Choice = 0 | 1 | 2;
+import type {
+  Space,
+  Proposal,
+  SpaceMetadata,
+  StrategyParsedMetadata,
+  Choice,
+  NetworkID
+} from '@/types';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   137: evmPolygon,
@@ -332,11 +338,9 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: number
+      choice: Choice
     ) => {
       await verifyNetwork(web3, chainId);
-
-      if (choice < 1 || choice > 3) throw new Error('Invalid chocie');
 
       const isContract = await getIsContract(account);
 
@@ -347,11 +351,6 @@ export function createActions(
         connectorType,
         isContract
       });
-
-      let convertedChoice: Choice = 0;
-      if (choice === 1) convertedChoice = 1;
-      if (choice === 2) convertedChoice = 0;
-      if (choice === 3) convertedChoice = 2;
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
@@ -373,7 +372,7 @@ export function createActions(
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
-        choice: convertedChoice,
+        choice: getSdkChoice(choice),
         metadataUri: ''
       };
 

@@ -8,7 +8,7 @@ const { getTsFromCurrent } = useMetaStore();
 const route = useRoute();
 const { vote } = useActions();
 const modalOpenTimeline = ref(false);
-const sendingType = ref<null | number>(null);
+const sendingType = ref<Choice | null>(null);
 
 async function handleVoteClick(choice: Choice) {
   sendingType.value = choice;
@@ -83,27 +83,27 @@ async function handleVoteClick(choice: Choice) {
           <div class="flex space-x-2 py-2">
             <UiTooltip title="For">
               <UiButton
-                class="w-full !text-green !border-green !w-[40px] !h-[40px] !px-0"
-                :loading="sendingType === 1"
-                @click="handleVoteClick(1)"
+                class="w-[40px] !text-green !border-green !h-[40px] !px-0"
+                :loading="sendingType === 'for'"
+                @click="handleVoteClick('for')"
               >
                 <IH-check class="inline-block" />
               </UiButton>
             </UiTooltip>
             <UiTooltip title="Against">
               <UiButton
-                class="w-full !text-red !border-red !w-[40px] !h-[40px] !px-0"
-                :loading="sendingType === 2"
-                @click="handleVoteClick(2)"
+                class="w-[40px] !text-red !border-red !h-[40px] !px-0"
+                :loading="sendingType === 'against'"
+                @click="handleVoteClick('against')"
               >
                 <IH-x class="inline-block" />
               </UiButton>
             </UiTooltip>
             <UiTooltip title="Abstain">
               <UiButton
-                class="w-full !text-gray-500 !border-gray-500 !w-[40px] !h-[40px] !px-0"
-                :loading="sendingType === 3"
-                @click="handleVoteClick(3)"
+                class="w-[40px] !text-gray-500 !border-gray-500 !h-[40px] !px-0"
+                :loading="sendingType === 'abstain'"
+                @click="handleVoteClick('abstain')"
               >
                 <IH-minus-sm class="inline-block" />
               </UiButton>

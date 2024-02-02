@@ -10,6 +10,7 @@ import { MANA_URL } from '@/helpers/mana';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import {
   getExecutionData,
+  getSdkChoice,
   buildMetadata,
   parseStrategyMetadata,
   createStrategyPicker
@@ -25,10 +26,15 @@ import type {
   StrategyConfig,
   VotingPower
 } from '@/networks/types';
-import type { Space, SpaceMetadata, StrategyParsedMetadata, Proposal, NetworkID } from '@/types';
+import type {
+  Space,
+  SpaceMetadata,
+  StrategyParsedMetadata,
+  Proposal,
+  Choice,
+  NetworkID
+} from '@/types';
 import { getProvider } from '@/helpers/provider';
-
-type Choice = 0 | 1 | 2;
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
@@ -303,7 +309,7 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: number
+      choice: Choice
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -334,17 +340,12 @@ export function createActions(
         })
       );
 
-      let convertedChoice: Choice = 0;
-      if (choice === 1) convertedChoice = 1;
-      if (choice === 2) convertedChoice = 0;
-      if (choice === 3) convertedChoice = 2;
-
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
-        choice: convertedChoice
+        choice: getSdkChoice(choice)
       };
 
       if (relayerType === 'starknet') {

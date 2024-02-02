@@ -1,12 +1,18 @@
-import { getExecutionData as _getExecutionData } from '@snapshot-labs/sx';
+import { getExecutionData as _getExecutionData, Choice as SdkChoice } from '@snapshot-labs/sx';
 import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from './constants';
 import { getUrl } from '@/helpers/utils';
 import { Connector, NetworkHelpers, StrategyConfig } from '@/networks/types';
-import { Space } from '@/types';
+import { Choice, Space } from '@/types';
 
 type SpaceExecutionData = Pick<Space, 'executors' | 'executors_types'>;
 type ExecutorType = Parameters<typeof _getExecutionData>[0];
+
+export function getSdkChoice(choice: Choice): SdkChoice {
+  if (choice === 'for') return SdkChoice.For;
+  if (choice === 'against') return SdkChoice.Against;
+  return SdkChoice.Abstain;
+}
 
 export function getExecutionData(
   space: SpaceExecutionData,
