@@ -4,14 +4,13 @@ import { getNetwork } from '@/networks';
 import { simulate } from '@/helpers/tenderly';
 import { Transaction as TransactionType, Space, SelectedStrategy } from '@/types';
 
+const model = defineModel<TransactionType[]>({
+  required: true
+});
+
 const props = defineProps<{
-  modelValue: TransactionType[];
   space?: Space;
   selectedExecutionStrategy: SelectedStrategy;
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: TransactionType[]): void;
 }>();
 
 const uiStore = useUiStore();
@@ -41,15 +40,9 @@ const currentTreasury = computed(() =>
       }
     : treasury.value
 );
-const txs = computed({
-  get: () => props.modelValue,
-  set: newValue => {
-    emit('update:modelValue', newValue);
-  }
-});
 
 function addTx(tx: TransactionType) {
-  const newValue = [...props.modelValue];
+  const newValue = [...model.value];
 
   if (editedTx.value !== null) {
     newValue[editedTx.value] = tx;
@@ -57,14 +50,11 @@ function addTx(tx: TransactionType) {
     newValue.push(tx);
   }
 
-  emit('update:modelValue', newValue);
+  model.value = newValue;
 }
 
 function removeTx(index: number) {
-  emit('update:modelValue', [
-    ...props.modelValue.slice(0, index),
-    ...props.modelValue.slice(index + 1)
-  ]);
+  model.value = [...model.value.slice(0, index), ...model.value.slice(index + 1)];
 }
 
 function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
@@ -74,7 +64,7 @@ function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
 }
 
 function editTx(index: number) {
-  const tx = props.modelValue[index];
+  const tx = model.value[index];
 
   editedTx.value = index;
   modalState.value[tx._type] = tx._form;
@@ -89,7 +79,7 @@ async function handleSimulateClick() {
   const valid = await simulate(
     currentTreasury.value.network,
     currentTreasury.value.wallet,
-    txs.value
+    model.value
   );
 
   if (valid) {
@@ -101,7 +91,7 @@ async function handleSimulateClick() {
   }
 }
 
-watch(txs, () => {
+watch(model.value, () => {
   simulationState.value = null;
 });
 </script>
@@ -121,13 +111,13 @@ watch(txs, () => {
         <span>Contract call</span>
       </ExecutionButton>
     </div>
-    <div v-if="txs.length > 0" class="x-block !border-x rounded-lg">
-      <Draggable v-model="txs" handle=".handle" :item-key="() => undefined">
+    <div v-if="model.length > 0" class="x-block !border-x rounded-lg">
+      <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
         <template #item="{ element: tx, index: i }">
           <Transaction :tx="tx">
             <template #left>
               <div
-                v-if="txs.length > 1"
+                v-if="model.length > 1"
                 class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
               >
                 <IH-switch-vertical />
@@ -148,7 +138,7 @@ watch(txs, () => {
       </Draggable>
       <div class="border-t px-4 py-2 space-x-2 flex items-center justify-between">
         <div class="flex items-center max-w-[70%]">
-          {{ txs.length }} {{ txs.length === 1 ? 'transaction' : 'transactions' }}
+          {{ model.length }} {{ model.length === 1 ? 'transaction' : 'transactions' }}
         </div>
         <UiTooltip
           v-if="!network?.supportsSimulation"

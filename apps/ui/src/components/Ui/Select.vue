@@ -9,19 +9,16 @@ export type Item<T extends string | number> = {
   componentProps?: Record<string, unknown>;
 };
 
+const model = defineModel<U[number]['key']>({ required: true });
+
 const props = defineProps<{
-  modelValue: U[number]['key'];
   title: string;
   items: U;
   gap?: string;
   placement?: 'left' | 'right';
 }>();
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: U[number]['key']): void;
-}>();
-
-const currentItem = computed(() => props.items.find(item => item.key === props.modelValue));
+const currentItem = computed(() => props.items.find(item => item.key === model.value));
 const items = computed(() => props.items);
 </script>
 
@@ -56,7 +53,7 @@ const items = computed(() => props.items);
         <button
           class="flex items-center gap-2"
           :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-          @click="() => emit('update:modelValue', item.key)"
+          @click="model = item.key"
         >
           <div v-if="item.indicator" class="w-[8px] h-[8px] rounded-full" :class="item.indicator" />
           <component :is="item.component" v-else-if="item.component" v-bind="item.componentProps" />

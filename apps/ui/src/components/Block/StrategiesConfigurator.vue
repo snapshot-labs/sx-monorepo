@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
+const model = defineModel<StrategyConfig[]>({ required: true });
+
 const props = withDefaults(
   defineProps<{
-    modelValue: StrategyConfig[];
     limit?: number;
     unique?: boolean;
     availableStrategies: StrategyTemplate[];
@@ -14,21 +15,12 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: StrategyConfig[]);
-}>();
-
-const activeStrategies = computed({
-  get: () => props.modelValue,
-  set: newValue => emit('update:modelValue', newValue)
-});
-
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
 const editStrategyModalOpen = ref(false);
 
-const limitReached = computed(() => activeStrategies.value.length >= props.limit);
+const limitReached = computed(() => model.value.length >= props.limit);
 const activeStrategiesMap = computed(() =>
-  Object.fromEntries(activeStrategies.value.map(strategy => [strategy.name, strategy]))
+  Object.fromEntries(model.value.map(strategy => [strategy.name, strategy]))
 );
 
 function addStrategy(strategy: StrategyTemplate) {
@@ -43,7 +35,7 @@ function addStrategy(strategy: StrategyTemplate) {
   if (strategy.paramsDefinition) {
     editStrategy(strategyConfig);
   } else {
-    activeStrategies.value = [...activeStrategies.value, strategyConfig];
+    model.value = [...model.value, strategyConfig];
   }
 }
 
@@ -53,18 +45,18 @@ function editStrategy(strategy: StrategyConfig) {
 }
 
 function removeStrategy(strategy: StrategyConfig) {
-  activeStrategies.value = activeStrategies.value.filter(s => s.id !== strategy.id);
+  model.value = model.value.filter(s => s.id !== strategy.id);
 }
 
 function handleStrategySave(value: Record<string, any>) {
   editStrategyModalOpen.value = false;
 
-  let allStrategies = [...activeStrategies.value];
+  let allStrategies = [...model.value];
   if (editedStrategy.value && !allStrategies.find(s => s.id === editedStrategy.value?.id)) {
     allStrategies.push(editedStrategy.value);
   }
 
-  activeStrategies.value = allStrategies.map(strategy => {
+  model.value = allStrategies.map(strategy => {
     if (strategy.id !== editedStrategy.value?.id) return strategy;
 
     return {
@@ -79,9 +71,9 @@ function handleStrategySave(value: Record<string, any>) {
   <div>
     <h4 class="eyebrow mb-2">Active</h4>
     <div class="mb-3">
-      <div v-if="activeStrategies.length === 0">No strategies selected</div>
+      <div v-if="model.length === 0">No strategies selected</div>
       <div
-        v-for="strategy in activeStrategies"
+        v-for="strategy in model"
         v-else
         :key="strategy.id"
         class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"

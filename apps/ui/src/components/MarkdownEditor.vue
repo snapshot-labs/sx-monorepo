@@ -1,18 +1,15 @@
 <script setup lang="ts">
-defineProps<{
-  modelValue: string;
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string);
-}>();
+const model = defineModel<string>({ required: true });
 
 const editorContainerRef = ref<HTMLDivElement | null>(null);
 const editorFileInputRef = ref<HTMLInputElement | null>(null);
 const editorRef = ref<HTMLTextAreaElement | null>(null);
-const editor = useMarkdownEditor(editorRef, editorFileInputRef, editorContainerRef, value => {
-  emit('update:modelValue', value);
-});
+const editor = useMarkdownEditor(
+  editorRef,
+  editorFileInputRef,
+  editorContainerRef,
+  value => (model.value = value)
+);
 </script>
 
 <template>
@@ -75,10 +72,10 @@ const editor = useMarkdownEditor(editorRef, editorFileInputRef, editorContainerR
     <div class="s-base">
       <textarea
         ref="editorRef"
-        :value="modelValue"
+        :value="model"
         maxlength="9600"
         class="s-input h-[200px] !rounded-t-none !mb-0 !pt-[15px]"
-        @input="event => emit('update:modelValue', (event.target as HTMLInputElement).value)"
+        @input="event => (model = (event.target as HTMLInputElement).value)"
       />
     </div>
   </div>

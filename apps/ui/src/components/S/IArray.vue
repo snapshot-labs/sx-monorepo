@@ -1,16 +1,13 @@
-<script setup>
-const props = defineProps({
-  modelValue: Array,
-  definition: Object
-});
+<script setup lang="ts">
+const model = defineModel<string[]>({ required: true });
 
-const emit = defineEmits(['update:modelValue']);
+const props = defineProps<{
+  definition: any;
+}>();
 
-const input = ref(props.modelValue || props.definition.default || []);
+const input = ref(model.value || props.definition.default || []);
 
-onMounted(() => emit('update:modelValue', input.value));
-
-watch(input, () => emit('update:modelValue', input.value));
+watchImmediate(input, () => (model.value = input.value));
 
 function addItem() {
   input.value.push('');

@@ -3,13 +3,9 @@ import { enabledNetworks, getNetwork } from '@/networks';
 import { getUrl } from '@/helpers/utils';
 import type { NetworkID } from '@/types';
 
-defineProps<{
-  modelValue: NetworkID;
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: NetworkID);
-}>();
+const model = defineModel<NetworkID>({
+  required: true
+});
 
 const availableNetworks = enabledNetworks
   .map(id => {
@@ -26,9 +22,9 @@ const availableNetworks = enabledNetworks
       <div
         v-for="network in availableNetworks"
         :key="network.id"
-        :class="{ 'border-skin-link': network.id === modelValue }"
+        :class="{ 'border-skin-link': network.id === model }"
         class="flex items-center rounded-lg border px-4 py-3 text-skin-link cursor-pointer"
-        @click="emit('update:modelValue', network.id)"
+        @click="model = network.id"
       >
         <img :src="getUrl(network.avatar) ?? undefined" class="w-[32px] h-[32px] mr-3 rounded-lg" />
         {{ network.name }}

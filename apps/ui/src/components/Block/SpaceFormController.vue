@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { validateForm } from '@/helpers/validation';
 
-const props = defineProps<{
-  modelValue: string;
-}>();
+const model = defineModel<string>({ required: true });
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string);
   (e: 'errors', value: any);
 }>();
 
@@ -29,7 +26,7 @@ const formErrors = computed(() =>
       }
     },
     {
-      controller: props.modelValue
+      controller: model.value
     }
   )
 );
@@ -41,10 +38,10 @@ watch(formErrors, value => emit('errors', value));
   <h3>Controller</h3>
   <div class="s-box pt-4">
     <SIString
-      :model-value="modelValue"
+      :model-value="model"
       :error="formErrors.controller"
       :definition="definition"
-      @update:model-value="(v: string) => emit('update:modelValue', v)"
+      @update:model-value="v => (model = v)"
     />
   </div>
 </template>

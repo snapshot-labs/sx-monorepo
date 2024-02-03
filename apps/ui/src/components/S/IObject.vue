@@ -16,31 +16,27 @@ import IBoolean from './IBoolean.vue';
 import ISelect from './ISelect.vue';
 import IStamp from './IStamp.vue';
 
+const model = defineModel<any>({ required: true });
+
 const props = defineProps<{
-  modelValue: any;
   error: any;
   definition: any;
   path?: string;
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: any);
 }>();
 
 const dirty = ref(false);
 
 const inputValue = computed({
   get() {
-    if (!props.modelValue && !dirty.value && props.definition.default) {
+    if (!model.value && !dirty.value && props.definition.default) {
       return props.definition.default;
     }
 
-    return props.modelValue;
+    return model.value;
   },
   set(newValue) {
     dirty.value = true;
-
-    emit('update:modelValue', newValue);
+    model.value = newValue;
   }
 });
 

@@ -1,37 +1,30 @@
 <script setup lang="ts">
+const model = defineModel<string | number>();
+
 const props = defineProps<{
-  modelValue?: string | number;
   error?: string;
   definition: any;
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string);
 }>();
 
 const dirty = ref(false);
 
 const inputValue = computed({
   get() {
-    if (!props.modelValue && !dirty.value && props.definition.default) {
+    if (!model.value && !dirty.value && props.definition.default) {
       return props.definition.default;
     }
 
-    return props.modelValue;
+    return model.value;
   },
   set(newValue: string) {
     dirty.value = true;
-
-    emit('update:modelValue', newValue);
+    model.value = newValue;
   }
 });
 
-watch(
-  () => props.modelValue,
-  () => {
-    dirty.value = true;
-  }
-);
+watch(model, () => {
+  dirty.value = true;
+});
 </script>
 
 <template>

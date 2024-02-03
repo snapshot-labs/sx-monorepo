@@ -18,7 +18,7 @@ export default defineConfig({
     'process.env': process.env
   },
   plugins: [
-    vue({ reactivityTransform: true }),
+    vue(),
     AutoImport({
       imports: ['vue', 'vue-router', '@vueuse/core'],
       dirs: ['./src/composables', './src/stores'],

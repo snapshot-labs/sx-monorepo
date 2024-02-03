@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
+const model = defineModel<StrategyConfig[]>({ required: true });
+
 withDefaults(
   defineProps<{
-    modelValue: StrategyConfig[];
     limit?: number;
     unique?: boolean;
     title: string;
@@ -15,10 +16,6 @@ withDefaults(
     unique: false
   }
 );
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: StrategyConfig[]);
-}>();
 </script>
 
 <template>
@@ -28,10 +25,10 @@ const emit = defineEmits<{
       {{ description }}
     </span>
     <BlockStrategiesConfigurator
-      :model-value="modelValue"
+      :model-value="model"
       :unique="unique"
       :available-strategies="availableStrategies"
-      @update:model-value="value => emit('update:modelValue', value)"
+      @update:model-value="value => (model = value)"
     />
   </div>
 </template>

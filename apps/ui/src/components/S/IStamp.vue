@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { getUrl, imageUpload } from '@/helpers/utils';
 
-const props = defineProps<{
-  modelValue?: string;
+const model = defineModel<string>();
+
+defineProps<{
   error?: string;
   definition: any;
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string);
 }>();
 
 const uiStore = useUiStore();
@@ -17,9 +14,9 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const isUploadingImage = ref(false);
 
 const imgUrl = computed(() => {
-  if (!props.modelValue) return undefined;
-  if (props.modelValue.startsWith('ipfs://')) return getUrl(props.modelValue);
-  return props.modelValue;
+  if (!model.value) return undefined;
+  if (model.value.startsWith('ipfs://')) return getUrl(model.value);
+  return model.value;
 });
 
 function openFilePicker() {
@@ -36,7 +33,7 @@ async function handleFileChange(e: Event) {
     const image = await imageUpload(file);
     if (!image) throw new Error('Image not uploaded');
 
-    emit('update:modelValue', image.url);
+    model.value = image.url;
     isUploadingImage.value = false;
   } catch (e) {
     uiStore.addNotification('error', 'Failed to upload image.');

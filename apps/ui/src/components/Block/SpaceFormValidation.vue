@@ -1,26 +1,18 @@
 <script setup lang="ts">
 import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
-const props = defineProps<{
-  modelValue: StrategyConfig | null;
+const model = defineModel<StrategyConfig | null>({ required: true });
+
+defineProps<{
   title: string;
   description: string;
   availableStrategies: StrategyTemplate[];
   availableVotingStrategies: StrategyTemplate[];
 }>();
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: StrategyConfig | null);
-}>();
-
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
 const editStrategyModalOpen = ref(false);
 const votingStrategies = ref([] as StrategyConfig[]);
-
-const activeStrategy = computed({
-  get: () => props.modelValue,
-  set: newValue => emit('update:modelValue', newValue)
-});
 
 function addStrategy(strategy: StrategyTemplate) {
   const strategyConfig = {
@@ -32,7 +24,7 @@ function addStrategy(strategy: StrategyTemplate) {
   if (strategy.paramsDefinition) {
     editStrategy(strategyConfig);
   } else {
-    activeStrategy.value = strategyConfig;
+    model.value = strategyConfig;
   }
 }
 
@@ -42,7 +34,7 @@ function editStrategy(strategy: StrategyConfig) {
 }
 
 function removeStrategy() {
-  activeStrategy.value = null;
+  model.value = null;
 }
 
 function handleStrategySave(value: Record<string, any>) {
@@ -50,25 +42,25 @@ function handleStrategySave(value: Record<string, any>) {
 
   if (!editedStrategy.value) return;
 
-  activeStrategy.value = {
+  model.value = {
     ...editedStrategy.value,
     params: value
   };
 }
 
 onMounted(() => {
-  votingStrategies.value = activeStrategy.value?.params?.strategies || [];
+  votingStrategies.value = model.value?.params?.strategies || [];
 });
 
 watch(
   () => votingStrategies.value,
   to => {
-    if (!activeStrategy.value) return;
+    if (!model.value) return;
 
-    activeStrategy.value = {
-      ...activeStrategy.value,
+    model.value = {
+      ...model.value,
       params: {
-        ...activeStrategy.value?.params,
+        ...model.value?.params,
         strategies: to
       }
     };
@@ -84,19 +76,19 @@ watch(
         {{ description }}
       </span>
       <div class="mb-3">
-        <div v-if="!activeStrategy">No strategy selected</div>
+        <div v-if="!model">No strategy selected</div>
         <div
           v-else
           class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
         >
           <div class="flex min-w-0">
-            <div class="whitespace-nowrap">{{ activeStrategy.name }}</div>
-            <div v-if="activeStrategy.generateSummary" class="ml-2 pr-2 text-skin-text truncate">
-              {{ activeStrategy.generateSummary(activeStrategy.params) }}
+            <div class="whitespace-nowrap">{{ model.name }}</div>
+            <div v-if="model.generateSummary" class="ml-2 pr-2 text-skin-text truncate">
+              {{ model.generateSummary(model.params) }}
             </div>
           </div>
           <div class="flex gap-3">
-            <a v-if="activeStrategy.paramsDefinition" @click="editStrategy(activeStrategy)">
+            <a v-if="model.paramsDefinition" @click="editStrategy(model)">
               <IH-pencil />
             </a>
             <a @click="removeStrategy()">
@@ -105,7 +97,7 @@ watch(
           </div>
         </div>
       </div>
-      <div v-if="!activeStrategy" class="flex flex-wrap gap-2">
+      <div v-if="!model" class="flex flex-wrap gap-2">
         <StrategyButton
           v-for="strategy in availableStrategies"
           :key="strategy.address"
@@ -113,7 +105,7 @@ watch(
           @click="addStrategy(strategy)"
         />
       </div>
-      <div v-if="activeStrategy?.type === 'VotingPower'">
+      <div v-else-if="model.type === 'VotingPower'">
         <h3 class="eyebrow mb-2">Included strategies</h3>
         <span class="mb-3 inline-block">
           Select strategies that will be used to compute proposal

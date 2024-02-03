@@ -1,12 +1,9 @@
 <script setup lang="ts">
-const props = defineProps<{
-  modelValue?: number;
+const model = defineModel<number>();
+
+defineProps<{
   error?: string;
   definition: any;
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: number);
 }>();
 
 const dirty = ref(false);
@@ -16,13 +13,11 @@ const minutes = ref(0);
 
 watch([days, hours, minutes], () => {
   dirty.value = true;
-
-  const value = (days.value * 24 * 60 + hours.value * 60 + minutes.value) * 60;
-  emit('update:modelValue', value);
+  model.value = (days.value * 24 * 60 + hours.value * 60 + minutes.value) * 60;
 });
 
 watch(
-  () => props.modelValue,
+  model,
   value => {
     if (!value) return;
 
