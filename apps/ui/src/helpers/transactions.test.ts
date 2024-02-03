@@ -4,7 +4,7 @@ import {
   createSendTokenTransaction,
   createSendNftTransaction,
   createContractCallTransaction
-} from '../transactions';
+} from './transactions';
 
 describe('transactions', () => {
   beforeAll(() => {

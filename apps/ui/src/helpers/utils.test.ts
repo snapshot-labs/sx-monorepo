@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { createErc1155Metadata } from '../utils';
+import { createErc1155Metadata } from './utils';
 
 describe('utils', () => {
   describe('createErc1155Metadata', () => {
