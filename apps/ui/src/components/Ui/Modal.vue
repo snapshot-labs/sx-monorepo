@@ -20,6 +20,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keyup', handleKeyboardEvent);
+  modalOpen.value = false;
 });
 
 watch(open, (val, prev) => {

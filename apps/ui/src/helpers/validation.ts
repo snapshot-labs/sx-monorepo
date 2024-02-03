@@ -13,16 +13,85 @@ type Opts = { skipEmptyOptionalFields: boolean };
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 
-ajv.addFormat('address', {
-  validate: (value: string) => {
-    if (!value) return false;
-
-    try {
-      return !!validateAndParseAddress(value);
-    } catch (e) {
-      return isAddress(value);
-    }
+const addressValidator = (value: string) => {
+  try {
+    return !!validateAndParseAddress(value);
+  } catch (e) {
+    return isAddress(value);
   }
+};
+
+const bytesValidator = (value: string) => !!value.match(/^0x([0-9a-fA-F][0-9a-fA-F])+$/);
+
+const uint256Validator = (value: string) => {
+  if (!value.match(/^([0-9]|[1-9][0-9]+)$/)) return false;
+
+  try {
+    const number = BigNumber.from(value);
+    return number.gte(Zero) && number.lte(MaxUint256);
+  } catch {
+    return false;
+  }
+};
+
+const int256Validator = (value: string) => {
+  if (!value.match(/^-?([0-9]|[1-9][0-9]+)$/)) return false;
+
+  try {
+    const number = BigNumber.from(value);
+    return number.gte(MinInt256) && number.lte(MaxInt256);
+  } catch {
+    return false;
+  }
+};
+
+const getArrayValidator = (valueValidator: (value: string) => boolean) => (value: string) => {
+  if (!value) return false;
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return false;
+
+    return parsed.every((value: string) => valueValidator(value));
+  } catch {
+    return false;
+  }
+};
+
+ajv.addFormat('address', {
+  validate: addressValidator
+});
+
+ajv.addFormat('uint256', {
+  validate: uint256Validator
+});
+
+ajv.addFormat('int256', {
+  validate: int256Validator
+});
+
+ajv.addFormat('bytes', {
+  validate: bytesValidator
+});
+
+ajv.addFormat('address[]', {
+  validate: getArrayValidator(addressValidator)
+});
+
+ajv.addFormat('uint256[]', {
+  validate: getArrayValidator(uint256Validator)
+});
+
+ajv.addFormat('int256[]', {
+  validate: getArrayValidator(int256Validator)
+});
+
+ajv.addFormat('bytes[]', {
+  validate: getArrayValidator(bytesValidator)
+});
+
+ajv.addFormat('long', {
+  validate: () => true
 });
 
 ajv.addFormat('ens-or-address', {
@@ -85,23 +154,6 @@ ajv.addFormat('discord-handle', {
   }
 });
 
-ajv.addFormat('long', {
-  validate: () => true
-});
-
-ajv.addFormat('uint256', {
-  validate: value => {
-    if (!value.match(/^([0-9]|[1-9][0-9]+)$/)) return false;
-
-    try {
-      const number = BigNumber.from(value);
-      return number.gte(Zero) && number.lte(MaxUint256);
-    } catch {
-      return false;
-    }
-  }
-});
-
 ajv.addFormat('ethValue', {
   validate: value => {
     if (!value.match(/^([0-9]|[1-9][0-9]+)(\.[0-9]+)?$/)) return false;
@@ -109,19 +161,6 @@ ajv.addFormat('ethValue', {
     try {
       parseUnits(value, 18);
       return true;
-    } catch {
-      return false;
-    }
-  }
-});
-
-ajv.addFormat('int256', {
-  validate: value => {
-    if (!value.match(/^-?([0-9]|[1-9][0-9]+)$/)) return false;
-
-    try {
-      const number = BigNumber.from(value);
-      return number.gte(MinInt256) && number.lte(MaxInt256);
     } catch {
       return false;
     }

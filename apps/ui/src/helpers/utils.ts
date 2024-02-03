@@ -212,6 +212,10 @@ export function abiToDefinition(abi) {
       definition.properties[input.name].format = 'ens-or-address';
       definition.properties[input.name].examples = ['0x0000…'];
     }
+    if (input.type.endsWith('[]')) {
+      definition.properties[input.name].format = input.type;
+      definition.properties[input.name].examples = ['0x0, 0x1'];
+    }
     definition.properties[input.name].type = type;
     definition.properties[input.name].title = `${input.name} (${input.type})`;
   });

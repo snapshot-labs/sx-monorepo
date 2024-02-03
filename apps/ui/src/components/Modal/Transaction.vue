@@ -16,10 +16,11 @@ const DEFAULT_FORM_STATE = {
   amount: ''
 };
 
-const props = defineProps({
-  open: Boolean,
-  initialState: Object
-});
+const props = defineProps<{
+  open: boolean;
+  network: number;
+  initialState?: any;
+}>();
 
 const emit = defineEmits(['add', 'close']);
 
@@ -38,21 +39,20 @@ const argsErrors = ref({} as Record<string, any>);
 
 const form = reactive(clone(DEFAULT_FORM_STATE));
 
-const methods = computed(() => {
-  const methods = form.abi
-    .filter(i => ['function'].includes(i.type) && i.stateMutability !== 'view')
-    .map(i => i.name);
+const iface = computed(() => {
+  return new Interface(form.abi);
+});
 
-  return methods;
+const methods = computed(() => {
+  return Object.entries(iface.value.functions)
+    .filter(([, value]) => value.type === 'function' && value.stateMutability !== 'view')
+    .map(([name]) => name);
 });
 
 const currentMethod = computed(() => {
   if (!form.method) return null;
 
-  const method = form.abi.find(item => item.name === form.method);
-  if (!method) return null;
-
-  return method as Fragment & JsonFragment;
+  return iface.value.getFunction(form.method);
 });
 
 const definition = computed(() => {
@@ -151,7 +151,7 @@ async function handleToChange(to: string) {
   }
 
   loading.value = true;
-  const provider = getProvider(5);
+  const provider = getProvider(props.network);
 
   try {
     const code = await provider.getCode(contractAddress);
@@ -160,7 +160,7 @@ async function handleToChange(to: string) {
       return;
     }
 
-    form.abi = await getABI(contractAddress);
+    form.abi = await getABI(props.network, contractAddress);
   } catch (e) {
     console.log(e);
     showAbiInput.value = true;
@@ -202,9 +202,11 @@ watch(abiStr, value => {
   }
 });
 
-watch(
+watchImmediate(
   () => props.open,
-  () => {
+  open => {
+    if (!open) return;
+
     showPicker.value = false;
 
     if (props.initialState) {

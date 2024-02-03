@@ -111,7 +111,7 @@ describe('transactions', () => {
         form: {
           to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
           abi: ['function deny(address guy)'],
-          method: 'deny',
+          method: 'deny(address)',
           args: {
             guy: '0x000000000000000000000000000000000000dead'
           }
@@ -126,7 +126,7 @@ describe('transactions', () => {
         form: {
           to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
           abi: ['function deposit() payable'],
-          method: 'deposit',
+          method: 'deposit()',
           args: {},
           amount: '20'
         }
@@ -140,9 +140,24 @@ describe('transactions', () => {
         form: {
           to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
           abi: ['function deny(address guy)'],
-          method: 'deny',
+          method: 'deny(address)',
           args: {
             guy: 'me.sekhmet.eth'
+          }
+        }
+      });
+
+      expect(tx).toMatchSnapshot();
+    });
+
+    it('should create contract call transaction with array domain', async () => {
+      const tx = await createContractCallTransaction({
+        form: {
+          to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
+          abi: ['function deny(address[] guys)'],
+          method: 'deny(address[])',
+          args: {
+            guys: '0x000000000000000000000000000000000000dead,0x000000000000000000000000000000000000dead'
           }
         }
       });

@@ -10,7 +10,7 @@ exports[`transactions > createContractCallTransaction > should create contract c
     "args": {
       "guy": "0x000000000000000000000000000000000000dead",
     },
-    "method": "deny",
+    "method": "deny(address)",
     "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
   },
   "_type": "contractCall",
@@ -31,11 +31,32 @@ exports[`transactions > createContractCallTransaction > should create contract c
     "args": {
       "guy": "me.sekhmet.eth",
     },
-    "method": "deny",
+    "method": "deny(address)",
     "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
   },
   "_type": "contractCall",
   "data": "0x9c52a7f1000000000000000000000000556b14cbda79a36dc33fcd461a04a5bcb5dc2a70",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "value": "0",
+}
+`;
+
+exports[`transactions > createContractCallTransaction > should create contract call transaction with array domain 1`] = `
+{
+  "_form": {
+    "abi": [
+      "function deny(address[] guys)",
+    ],
+    "amount": undefined,
+    "args": {
+      "guys": "0x000000000000000000000000000000000000dead,0x000000000000000000000000000000000000dead",
+    },
+    "method": "deny(address[])",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  },
+  "_type": "contractCall",
+  "data": "0xc9892a5f00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000dead",
   "salt": "0x000000000000000000000000000000000000000000000000000000000000",
   "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
   "value": "0",
@@ -50,7 +71,7 @@ exports[`transactions > createContractCallTransaction > should create contract c
     ],
     "amount": "20",
     "args": {},
-    "method": "deposit",
+    "method": "deposit()",
     "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
   },
   "_type": "contractCall",

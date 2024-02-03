@@ -109,15 +109,17 @@ export async function createContractCallTransaction({ form }): Promise<ContractC
 
   const iface = new Interface(form.abi);
 
-  const methodAbi = Object.values(iface.functions).find(fn => fn.name === form.method);
+  const methodAbi = iface.functions[form.method];
 
   if (methodAbi) {
     await Promise.all(
       methodAbi.inputs.map(async (input, i) => {
-        if (input.type !== 'address') return;
-
-        const resolved = await resolver.resolveName(args[i]);
-        if (resolved?.address) args[i] = resolved.address;
+        if (input.type === 'address') {
+          const resolved = await resolver.resolveName(args[i]);
+          if (resolved?.address) args[i] = resolved.address;
+        } else if (input.type.endsWith('[]')) {
+          args[i] = args[i].split(',').map(value => value.trim());
+        }
       })
     );
   }

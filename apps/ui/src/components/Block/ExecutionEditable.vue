@@ -186,7 +186,9 @@ watch(model.value, () => {
         @add="addTx"
       />
       <ModalTransaction
+        v-if="currentTreasury"
         :open="modalOpen.contractCall"
+        :network="currentTreasury.network"
         :initial-state="modalState.contractCall"
         @close="modalOpen.contractCall = false"
         @add="addTx"
