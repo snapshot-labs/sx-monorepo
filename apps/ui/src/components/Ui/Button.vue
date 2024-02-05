@@ -20,7 +20,7 @@ withDefaults(
     :type="type"
     :disabled="disabled || loading"
     :class="primary && 'primary'"
-    class="rounded-full leading-[100%] border button px-[20px] h-[46px] outline-0 text-skin-link focus-within:border-skin-link bg-skin-bg"
+    class="rounded-full leading-[100%] border button px-[20px] h-[46px] text-skin-link bg-skin-bg"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />

@@ -294,18 +294,12 @@ export default defineComponent({
         :error="formErrors.title"
       />
       <div class="flex space-x-3">
-        <Link
-          :is-active="!previewEnabled"
-          text="Write"
-          class="border-transparent"
-          @click="previewEnabled = false"
-        />
-        <Link
-          :is-active="previewEnabled"
-          text="Preview"
-          class="border-transparent"
-          @click="previewEnabled = true"
-        />
+        <button type="button" @click="previewEnabled = false">
+          <Link :is-active="!previewEnabled" text="Write" class="border-transparent" />
+        </button>
+        <button type="button" @click="previewEnabled = true">
+          <Link :is-active="previewEnabled" text="Preview" class="border-transparent" />
+        </button>
       </div>
       <Markdown
         v-if="previewEnabled"

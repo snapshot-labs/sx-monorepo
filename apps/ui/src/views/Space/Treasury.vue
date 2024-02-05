@@ -162,8 +162,12 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </div>
       <div>
         <div class="flex pl-4 border-b space-x-3">
-          <Link :is-active="page === 'tokens'" text="Tokens" @click="page = 'tokens'" />
-          <Link :is-active="page === 'nfts'" text="NFTs" @click="page = 'nfts'" />
+          <button type="button" @click="page = 'tokens'">
+            <Link :is-active="page === 'tokens'" text="Tokens" />
+          </button>
+          <button type="button" @click="page = 'nfts'">
+            <Link :is-active="page === 'nfts'" text="NFTs" />
+          </button>
         </div>
         <div v-if="page === 'tokens'">
           <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
