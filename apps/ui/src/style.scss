@@ -176,14 +176,11 @@ a,
 .hero {
   background-repeat: repeat;
   background-position: top center;
+  background-image: url('@/assets/grid-light.svg');
 }
 
 .dark .hero {
   background-image: url('@/assets/grid-dark.svg');
-}
-
-.light .hero {
-  background-image: url('@/assets/grid-light.svg');
 }
 
 .no-scrollbar::-webkit-scrollbar {
