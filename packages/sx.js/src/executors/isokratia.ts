@@ -1,9 +1,9 @@
 import { AbiCoder } from '@ethersproject/abi';
 import type { MetaTransaction } from '../utils/encoding';
 
-export default function createAxiomExecutor() {
+export default function createIsokratiaExecutor() {
   return {
-    type: 'axiom',
+    type: 'isokratia',
     getExecutionData(executorAddress: string, transactions: MetaTransaction[]) {
       const abiCoder = new AbiCoder();
 
