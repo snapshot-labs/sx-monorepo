@@ -2,7 +2,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git@github.com:snapshot-labs/sx.git"
+    "url": "git@github.com:snapshot-labs/sx-monorepo.git"
   },
   "scripts": {
     "codegen": "turbo run codegen",
