@@ -16,10 +16,10 @@ defineProps<{ state: ProposalState }>();
   <div
     :class="{
       'bg-gray-400': state === 'pending',
-      'bg-green': state === 'active',
+      'bg-skin-success': state === 'active',
       'bg-skin-link': state === 'passed',
       'bg-purple-500': state === 'executed',
-      'bg-red': state === 'rejected',
+      'bg-skin-danger': state === 'rejected',
       '!text-skin-bg': state === 'passed'
     }"
     class="inline-block rounded-full pl-2 pr-[10px] pb-[2px] text-white mb-2"

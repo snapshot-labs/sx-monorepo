@@ -73,8 +73,8 @@ watch(open, (val, prev) => {
   }
 
   .shell {
-    border: 1px solid rgb(var(--border-color));
-    background-color: var(--bg-color);
+    border: 1px solid rgba(var(--border));
+    background-color: rgba(var(--bg));
     padding-left: 0 !important;
     padding-right: 0 !important;
     max-width: 440px;

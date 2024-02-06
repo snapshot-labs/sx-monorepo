@@ -170,7 +170,7 @@ watchEffect(() => {
             <div class="flex space-x-2 py-2">
               <UiTooltip title="For">
                 <UiButton
-                  class="!text-green !border-green !w-[48px] !h-[48px] !px-0"
+                  class="!text-skin-success !border-skin-success !w-[48px] !h-[48px] !px-0"
                   :loading="sendingType === 'for'"
                   @click="handleVoteClick('for')"
                 >
@@ -179,7 +179,7 @@ watchEffect(() => {
               </UiTooltip>
               <UiTooltip title="Against">
                 <UiButton
-                  class="!text-red !border-red !w-[48px] !h-[48px] !px-0"
+                  class="!text-skin-danger !border-skin-danger !w-[48px] !h-[48px] !px-0"
                   :loading="sendingType === 'against'"
                   @click="handleVoteClick('against')"
                 >

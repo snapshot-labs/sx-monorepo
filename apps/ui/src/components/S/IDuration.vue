@@ -31,7 +31,7 @@ watch(
 
 <template>
   <div>
-    <div :class="{ 'text-red': error && dirty }" v-text="definition.title" />
+    <div :class="{ 'text-skin-danger': error && dirty }" v-text="definition.title" />
     <div class="flex !mb-0" :class="{ 's-error': error && dirty }">
       <SBase :definition="{ title: 'Days' }" class="flex-1" :error="error" :dirty="dirty">
         <input v-model="days" class="s-input !rounded-r-none" type="number" min="0" />

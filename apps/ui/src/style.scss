@@ -3,30 +3,68 @@
 
 :root {
   color-scheme: light;
-  --primary-color: #384aff;
-  --bg-color: white;
-  --text-color: #57606a;
-  --link-color: #111111;
-  --content-color: rgba(17, 17, 17, 0.8);
-  --heading-color: #111111;
-  --border-color: 229, 229, 230;
-  --block-bg: white;
-  --active-bg: #ededed;
-  --hover-bg: #f7f7f7;
+
+  // backgrounds
+  --bg: 255, 255, 255;
+  --block-bg: 255, 255, 255;
+  --input-bg: 251, 251, 251;
+  --hover-bg: 247, 247, 247;
+  --active-bg: 237, 237, 237;
+  --border: 229, 229, 230;
+
+  // text
+  --heading: 17, 17, 17;
+  --link: 17, 17, 17;
+  --text: 87, 96, 106;
+  --content: rgba(17, 17, 17, 0.8);
+
+  // accents
+  --primary: 17, 17, 17;
+  --accent-foreground: 251, 251, 251;
+  --danger: 235, 76, 91;
+  --success: 87, 179, 117;
+
+  --accent-hover: rgba(250, 249, 252, 0.12);
+  --accent-active: rgba(250, 249, 252, 0.32);
+  --danger-border: rgba(235, 76, 91, 0.4);
+  --danger-hover: rgba(235, 76, 91, 0.04);
+  --danger-active: rgba(235, 76, 91, 0.12);
+  --success-border: rgba(87, 179, 117, 0.4);
+  --success-hover: rgba(87, 179, 117, 0.04);
+  --success-active: rgba(87, 179, 117, 0.12);
 }
 
 .dark {
   color-scheme: dark;
-  --primary-color: #384aff;
-  --bg-color: #1c1b20;
-  --text-color: #a09fa5;
-  --link-color: #faf9fc;
-  --content-color: rgba(250, 249, 252, 0.8);
-  --heading-color: #faf9fc;
-  --border-color: 51, 50, 55;
-  --block-bg: #1c1b20;
-  --active-bg: #29282e;
-  --hover-bg: #232227;
+
+  // backgrounds
+  --bg: 28, 27, 32;
+  --block-bg: 28, 27, 32;
+  --input-bg: 35, 34, 39;
+  --hover-bg: 37, 36, 41;
+  --active-bg: 41, 40, 46;
+  --border: 51, 50, 55;
+
+  // text
+  --heading: 251, 251, 251;
+  --link: 251, 251, 251;
+  --text: 160, 159, 164;
+  --content: rgba(250, 249, 252, 0.8);
+
+  // accents
+  --primary: 251, 251, 251;
+  --accent-foreground: 17, 17, 17;
+  --danger: 235, 76, 91;
+  --success: 87, 179, 117;
+
+  --accent-hover: rgba(28, 27, 32, 0.12);
+  --accent-active: rgba(28, 27, 32, 0.32);
+  --danger-border: rgba(235, 76, 91, 0.4);
+  --danger-hover: rgba(235, 76, 91, 0.04);
+  --danger-active: rgba(235, 76, 91, 0.12);
+  --success-border: rgba(87, 179, 117, 0.4);
+  --success-hover: rgba(87, 179, 117, 0.04);
+  --success-active: rgba(87, 179, 117, 0.12);
 }
 
 @font-face {
@@ -58,7 +96,7 @@
 }
 
 body {
-  background-color: var(--bg-color);
+  background-color: rgba(var(--bg));
 }
 
 .mono {
@@ -99,13 +137,13 @@ h1,
 h2,
 h3,
 h4 {
-  color: var(--heading-color);
+  color: rgba(var(--heading));
   font-weight: 600;
 }
 
 a,
 .a {
-  color: var(--link-color);
+  color: rgba(var(--link));
 
   &:hover {
     cursor: pointer;
@@ -118,13 +156,13 @@ input {
 
 .choice-bg {
   &._1 {
-    @apply bg-choice-for;
+    @apply bg-skin-success;
   }
   &._2 {
-    @apply bg-choice-against;
+    @apply bg-skin-danger;
   }
   &._3 {
-    @apply bg-choice-abstain;
+    @apply bg-skin-text;
   }
   &._quorum {
     @apply bg-skin-border;
@@ -133,13 +171,13 @@ input {
 
 .choice-text {
   &._1 {
-    @apply text-green;
+    @apply text-skin-success;
   }
   &._2 {
-    @apply text-red;
+    @apply text-skin-danger;
   }
   &._3 {
-    @apply text-gray-500;
+    @apply text-skin-text;
   }
   &._quorum {
     @apply text-skin-border;
@@ -151,7 +189,7 @@ input {
 }
 
 ::placeholder {
-  color: var(--text-color) !important;
+  color: rgba(var(--text)) !important;
   opacity: 0.6 !important;
 }
 
@@ -206,16 +244,16 @@ input {
   @apply mb-2;
 
   .s-input {
-    @apply border border-red;
+    @apply border border-skin-danger;
     @apply mb-1 #{!important};
   }
 
   .s-label {
-    @apply text-red;
+    @apply text-skin-danger;
   }
 
   .s-input-error-message {
-    @apply text-red;
+    @apply text-skin-danger;
   }
 }
 

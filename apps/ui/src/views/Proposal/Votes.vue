@@ -126,9 +126,9 @@ watch([sortBy, choiceFilter], () => {
             placement="left"
             :items="[
               { key: 'any', label: 'Any' },
-              { key: 'for', label: 'For', indicator: 'bg-choice-for' },
-              { key: 'against', label: 'Against', indicator: 'bg-choice-against' },
-              { key: 'abstain', label: 'Abstain', indicator: 'bg-choice-abstain' }
+              { key: 'for', label: 'For', indicator: 'bg-skin-success' },
+              { key: 'against', label: 'Against', indicator: 'bg-skin-danger' },
+              { key: 'abstain', label: 'Abstain', indicator: 'bg-skin-text' }
             ]"
           >
             <template #button>
@@ -217,8 +217,8 @@ watch([sortBy, choiceFilter], () => {
                 v-else
                 class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
                 :class="{
-                  '!text-green !border-green': vote.choice === 1,
-                  '!text-red !border-red': vote.choice === 2,
+                  '!text-skin-success !border-skin-success': vote.choice === 1,
+                  '!text-skin-danger !border-skin-danger': vote.choice === 2,
                   '!text-gray-500 !border-gray-500': vote.choice === 3
                 }"
               >

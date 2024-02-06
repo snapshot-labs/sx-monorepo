@@ -189,8 +189,8 @@ watchEffect(() => setTitle('Create space'));
           :disabled="!accessiblePages[page.id]"
           class="px-3 py-1 block lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap"
           :class="{
-            'bg-skin-active': page.id === currentPage,
-            'hover:bg-skin-hover': page.id !== currentPage,
+            'bg-skin-active-bg': page.id === currentPage,
+            'hover:bg-skin-hover-bg': page.id !== currentPage,
             'text-skin-link': accessiblePages[page.id]
           }"
           @click="currentPage = page.id"

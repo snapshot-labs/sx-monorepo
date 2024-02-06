@@ -30,7 +30,7 @@ withDefaults(
 <style scoped lang="scss">
 .button {
   &:disabled {
-    color: var(--border-color) !important;
+    color: rgba(var(--border)) !important;
     cursor: not-allowed;
   }
 

@@ -46,9 +46,9 @@ withDefaults(
     vertical-align: middle;
 
     path {
-      fill: var(--link-color);
+      fill: rgba(var(--link));
       &.inverse {
-        fill: var(--bg-color);
+        fill: rgba(var(--bg));
       }
     }
   }

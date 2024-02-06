@@ -27,7 +27,7 @@ const emit = defineEmits<{
 <style scoped lang="scss">
 .button {
   &:disabled {
-    color: rgb(var(--border-color)) !important;
+    color: rgba(var(--border)) !important;
     cursor: not-allowed;
   }
 }

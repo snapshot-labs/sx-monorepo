@@ -140,11 +140,11 @@ onMounted(() => deploy());
     <div class="flex flex-col mt-4">
       <div v-for="(step, i) in steps" :key="step.id" class="flex items-center gap-4 mb-3 last:mb-0">
         <div>
-          <IH-check v-if="i < currentStep" class="text-green" />
+          <IH-check v-if="i < currentStep" class="text-skin-success" />
           <IH-clock v-else-if="i > currentStep" />
           <template v-else>
             <UiLoading v-if="!failed" />
-            <IH-exclamation-circle v-else class="text-red" />
+            <IH-exclamation-circle v-else class="text-skin-danger" />
           </template>
         </div>
         <div>

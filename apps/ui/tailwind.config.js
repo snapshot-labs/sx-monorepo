@@ -1,15 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const colors = require('tailwindcss/colors');
-
-const withOpacity = variableName => {
-  return ({ opacityValue }) => {
-    if (opacityValue !== undefined) {
-      return `rgba(var(${variableName}), ${opacityValue})`;
-    }
-
-    return `rgb(var(${variableName}))`;
-  };
-};
 
 module.exports = {
   future: {
@@ -20,25 +9,42 @@ module.exports = {
   theme: {
     extend: {
       borderColor: {
-        DEFAULT: 'rgb(var(--border-color))',
-        red: '#ff3856'
+        DEFAULT: 'rgba(var(--border), <alpha-value>)'
       },
       colors: {
-        primary: 'var(--primary-color)',
-        'skin-border': withOpacity('--border-color'),
-        'skin-text': 'var(--text-color)',
-        'skin-link': 'var(--link-color)',
-        'skin-bg': 'var(--bg-color)',
-        'skin-block-bg': 'var(--block-bg)',
-        'skin-active': 'var(--active-bg)',
-        'skin-hover': 'var(--hover-bg)',
-        'skin-heading': 'var(--heading-color)',
-        blue: '#384aff',
-        green: '#21b66f',
-        red: '#ff3856',
-        'choice-for': '#21b66f',
-        'choice-against': '#ff3856',
-        'choice-abstain': colors.gray['500']
+        // IMPORTANT: Color variables that require opacity modifiers must be defined
+        // without space function and opacity value. They can be recognized by the
+        // <alpha-value> placeholder. See: https://tailwindcss.com/docs/customizing-colors#using-css-variables
+        transparent: 'transparent',
+
+        // backgrounds
+        'skin-bg': 'rgba(var(--bg), <alpha-value>)',
+        'skin-block-bg': 'rgba(var(--block-bg), <alpha-value>)',
+        'skin-input-bg': 'rgba(var(--input-bg), <alpha-value>)',
+        'skin-hover-bg': 'rgba(var(--hover-bg), <alpha-value>)',
+        'skin-active-bg': 'rgba(var(--active-bg), <alpha-value>)',
+        'skin-border': 'rgba(var(--border), <alpha-value>)',
+
+        // text
+        'skin-heading': 'rgba(var(--heading), <alpha-value>)',
+        'skin-link': 'rgba(var(--link), <alpha-value>)',
+        'skin-text': 'rgba(var(--text), <alpha-value>)',
+        'skin-content': 'var(--content)',
+
+        // accents
+        'skin-primary': 'rgba(var(--primary), <alpha-value>)',
+        'skin-accent-foreground': 'rgba(var(--accent-foreground), <alpha-value>)',
+        'skin-danger': 'rgba(var(--danger), <alpha-value>)',
+        'skin-success': 'rgba(var(--success), <alpha-value>)',
+
+        'skin-accent-hover': 'var(--accent-hover)',
+        'skin-accent-active': 'var(--accent-active)',
+        'skin-danger-border': 'var(--danger-border)',
+        'skin-danger-hover': 'var(--danger-hover)',
+        'skin-danger-active': 'var(--danger-active)',
+        'skin-success-border': 'var(--success-border)',
+        'skin-success-hover': 'var(--success-hover)',
+        'skin-success-active': 'var(--success-active)'
       },
       animation: {
         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'

@@ -89,7 +89,7 @@ const parsed = computed(() => {
 
   p {
     font-size: 1em;
-    color: var(--content-color);
+    color: rgba(var(--content));
   }
 
   hr {
@@ -102,8 +102,8 @@ const parsed = computed(() => {
 
   blockquote {
     padding: 0 1em;
-    color: var(--text-color);
-    border-left: 0.25em solid var(--text-color);
+    color: rgba(var(--text));
+    border-left: 0.25em solid rgba(var(--text));
 
     > :last-child {
       margin-bottom: 0;
@@ -211,17 +211,17 @@ const parsed = computed(() => {
   table th,
   table td {
     padding: 6px 13px;
-    border: 1px solid rgb(var(--border-color));
+    border: 1px solid rgba(var(--border));
   }
 
   table thead tr,
   table tbody tr:nth-child(2n) {
-    background-color: var(--bg-color);
+    background-color: rgba(var(--bg));
     border-top: 1px solid #c6cbd1;
   }
 
   table tbody tr {
-    background-color: var(--bg-color);
+    background-color: rgba(var(--bg));
   }
 
   table img {

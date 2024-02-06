@@ -79,7 +79,9 @@ watch(open, () => (step = null));
         <UiButton class="button-outline w-full" @click="step = 'connect'">
           Connect wallet
         </UiButton>
-        <UiButton class="button-outline w-full !text-red" @click="handleLogout"> Log out </UiButton>
+        <UiButton class="button-outline w-full !text-skin-danger" @click="handleLogout">
+          Log out
+        </UiButton>
       </div>
     </div>
   </UiModal>
