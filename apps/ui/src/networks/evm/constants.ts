@@ -497,7 +497,7 @@ export function createConstants(networkId: NetworkID) {
       type: 'Axiom',
       name: EXECUTORS.Axiom,
       about:
-        'This strategy enables offchain votes on the space.  The validity of votes and voting power is verified onchain in bulk using a zkSNARK of storage proofs, which then triggers the execution of transactions.',
+        'This strategy enables offchain votes on the space. The validity of votes and voting power is verified onchain in bulk using a zkSNARK of storage proofs, which then triggers the execution of transactions.',
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
