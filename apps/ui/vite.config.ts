@@ -80,10 +80,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       // polyfills
-      stream: path.resolve(__dirname, 'node_modules/stream-browserify'),
-      events: path.resolve(__dirname, 'node_modules/events'),
-      util: path.resolve(__dirname, 'node_modules/util'),
-      buffer: path.resolve(__dirname, 'node_modules/buffer')
+      stream: path.resolve('../../node_modules/stream-browserify'),
+      events: path.resolve('../../node_modules/events'),
+      util: path.resolve('../../node_modules/util'),
+      buffer: path.resolve('../../node_modules/buffer')
     },
     dedupe: ['@popperjs/core']
   }
