@@ -40,7 +40,8 @@ export function createConstants(networkId: NetworkID) {
   const SUPPORTED_EXECUTORS = {
     SimpleQuorumAvatar: true,
     SimpleQuorumTimelock: true,
-    Axiom: true
+    Axiom: true,
+    Isokratia: true
   };
 
   const RELAYER_AUTHENTICATORS = {
@@ -66,7 +67,8 @@ export function createConstants(networkId: NetworkID) {
   const EXECUTORS = {
     SimpleQuorumAvatar: 'Safe module (Zodiac)',
     SimpleQuorumTimelock: 'Timelock',
-    Axiom: 'Axiom'
+    Axiom: 'Axiom',
+    Isokratia: 'Isokratia'
   };
 
   const EDITOR_AUTHENTICATORS = [
@@ -536,6 +538,75 @@ export function createConstants(networkId: NetworkID) {
             type: 'integer',
             title: 'Quorum',
             examples: ['1']
+          },
+          contractAddress: {
+            type: 'string',
+            format: 'address',
+            title: 'Contract address',
+            examples: ['0x0000…']
+          },
+          slotIndex: {
+            type: 'integer',
+            title: 'Slot index',
+            examples: ['0']
+          }
+        }
+      }
+    },
+    {
+      address: '',
+      type: 'Isokratia',
+      name: EXECUTORS.Isokratia,
+      about:
+        'This strategy enables offchain votes on the space. The validity of votes and voting power is verified onchain in bulk using a zkSNARK, which then triggers the execution of transactions.',
+      icon: IHCode,
+      generateSummary: (params: Record<string, any>) =>
+        `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
+      deploy: async (
+        client: clients.EvmEthereumTx,
+        signer: Signer,
+        _controller: string,
+        _spaceAddress: string,
+        params: Record<string, any>
+      ): Promise<{ address: string; txId: string }> => {
+        return client.deployIsokratiaExecution({
+          signer,
+          params: {
+            provingTimeAllowance: params.provingTimeAllowance,
+            quorum: BigInt(params.quorum),
+            queryAddress: params.queryAddress || '0x0000000000000000000000000000000000000000',
+            contractAddress: params.contractAddress || '0x0000000000000000000000000000000000000000',
+            slotIndex: BigInt(params.slotIndex)
+          }
+        });
+      },
+      paramsDefinition: {
+        type: 'object',
+        title: 'Params',
+        additionalProperties: false,
+        required: [
+          'provingTimeAllowance',
+          'quorum',
+          'queryAddress',
+          'contractAddress',
+          'slotIndex'
+        ],
+        properties: {
+          provingTimeAllowance: {
+            type: 'integer',
+            title: 'Proving time allowance',
+            examples: ['3600']
+          },
+          quorum: {
+            type: 'integer',
+            title: 'Quorum',
+            examples: ['1']
+          },
+          queryAddress: {
+            type: 'string',
+            format: 'address',
+            title: 'Query address',
+            examples: ['0x0000…']
           },
           contractAddress: {
             type: 'string',
