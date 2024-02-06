@@ -558,7 +558,7 @@ export function createConstants(networkId: NetworkID) {
       type: 'Isokratia',
       name: EXECUTORS.Isokratia,
       about:
-        'This strategy enables offchain votes on the space. The validity of votes and voting power is verified onchain in bulk using a zkSNARK, which then triggers the execution of transactions.',
+        'This strategy enables offchain votes on the space. The validity of votes is verified onchain in bulk using a zkSNARK, which then triggers the execution of transactions.',
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
