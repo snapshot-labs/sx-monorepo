@@ -3,10 +3,10 @@
   "globalDependencies": ["**/.env.*local"],
   "pipeline": {
     "build": {
-      "dependsOn": ["codegen", "^build"]
+      "dependsOn": ["^build"]
     },
     "lint": {},
-    "codegen": {},
+    "typecheck": {},
     "test": {},
     "dev": {
       "cache": false,
