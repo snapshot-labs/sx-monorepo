@@ -1,5 +1,6 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
+import { formatBytes32String } from '@ethersproject/strings';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinGraph } from '@/helpers/pin';
@@ -38,7 +39,8 @@ export function createConstants(networkId: NetworkID) {
 
   const SUPPORTED_EXECUTORS = {
     SimpleQuorumAvatar: true,
-    SimpleQuorumTimelock: true
+    SimpleQuorumTimelock: true,
+    Axiom: true
   };
 
   const RELAYER_AUTHENTICATORS = {
@@ -63,7 +65,8 @@ export function createConstants(networkId: NetworkID) {
 
   const EXECUTORS = {
     SimpleQuorumAvatar: 'Safe module (Zodiac)',
-    SimpleQuorumTimelock: 'Timelock'
+    SimpleQuorumTimelock: 'Timelock',
+    Axiom: 'Axiom'
   };
 
   const EDITOR_AUTHENTICATORS = [
@@ -485,6 +488,65 @@ export function createConstants(networkId: NetworkID) {
             type: 'integer',
             format: 'duration',
             title: 'Timelock delay'
+          }
+        }
+      }
+    },
+    {
+      address: '',
+      type: 'Axiom',
+      name: EXECUTORS.Axiom,
+      about:
+        'This strategy enables offchain votes on the space.  The validity of votes and voting power is verified onchain in bulk using a zkSNARK of storage proofs, which then triggers the execution of transactions.',
+      icon: IHCode,
+      generateSummary: (params: Record<string, any>) =>
+        `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
+      deploy: async (
+        client: clients.EvmEthereumTx,
+        signer: Signer,
+        _controller: string,
+        spaceAddress: string,
+        params: Record<string, any>
+      ): Promise<{ address: string; txId: string }> => {
+        return client.deployAxiomExecution({
+          signer,
+          params: {
+            controller: params.controller || '0x0000000000000000000000000000000000000000',
+            quorum: BigInt(params.quorum),
+            contractAddress: params.contractAddress || '0x0000000000000000000000000000000000000000',
+            slotIndex: BigInt(params.slotIndex),
+            space: spaceAddress,
+            querySchema: formatBytes32String('0')
+          }
+        });
+      },
+      paramsDefinition: {
+        type: 'object',
+        title: 'Params',
+        additionalProperties: false,
+        required: ['controller', 'quorum', 'contractAddress', 'slotIndex'],
+        properties: {
+          controller: {
+            type: 'string',
+            format: 'address',
+            title: 'Controller address',
+            examples: ['0x0000…']
+          },
+          quorum: {
+            type: 'integer',
+            title: 'Quorum',
+            examples: ['1']
+          },
+          contractAddress: {
+            type: 'string',
+            format: 'address',
+            title: 'Contract address',
+            examples: ['0x0000…']
+          },
+          slotIndex: {
+            type: 'integer',
+            title: 'Slot index',
+            examples: ['0']
           }
         }
       }
