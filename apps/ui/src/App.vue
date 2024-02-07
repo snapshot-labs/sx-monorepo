@@ -72,7 +72,7 @@ watch(isSwiping, () => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
       <AppSidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />
-      <AppTopnav @toggle="uiStore.toggleSidebar" />
+      <AppTopnav />
       <AppNav />
       <div
         v-if="uiStore.sidebarOpen"
