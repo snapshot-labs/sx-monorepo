@@ -121,7 +121,7 @@ async function handleCancelClick() {
           }"
           class="flex items-center py-3"
         >
-          <Stamp :id="proposal.author.id" :size="32" class="mr-1" />
+          <UiStamp :id="proposal.author.id" :size="32" class="mr-1" />
           <div class="flex flex-col ml-2 leading-4 gap-1">
             {{ shortenAddress(proposal.author.id) }}
             <span class="text-skin-text text-[16px]">

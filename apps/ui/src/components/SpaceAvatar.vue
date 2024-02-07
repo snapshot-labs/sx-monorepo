@@ -17,7 +17,7 @@ const cb = computed(() => getCacheHash(props.space.avatar));
 </script>
 
 <template>
-  <Stamp
+  <UiStamp
     :id="space.id"
     :size="size"
     :cb="cb"

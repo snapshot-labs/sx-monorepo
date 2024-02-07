@@ -152,7 +152,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             'pointer-events-none': !treasuryExplorerUrl
           }"
         >
-          <Stamp :id="treasury.wallet" type="avatar" :size="32" class="mr-3" />
+          <UiStamp :id="treasury.wallet" type="avatar" :size="32" class="mr-3" />
           <div class="flex-1 leading-[22px]">
             <h4 class="text-skin-link" v-text="shorten(treasury.wallet)" />
             <div class="text-skin-text text-sm" v-text="shorten(treasury.wallet)" />
@@ -192,7 +192,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0">
-              <Stamp
+              <UiStamp
                 :id="`${treasury.networkId}:${asset.contractAddress}`"
                 type="token"
                 :size="32"

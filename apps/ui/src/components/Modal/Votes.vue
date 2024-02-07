@@ -97,7 +97,7 @@ watch(
                   : 'bg-skin-border opacity-40'
               "
             />
-            <Stamp :id="vote.voter.id" :size="24" class="relative mr-2" />
+            <UiStamp :id="vote.voter.id" :size="24" class="relative mr-2" />
             <router-link
               class="relative"
               :to="{

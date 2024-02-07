@@ -58,7 +58,7 @@ async function handleFileChange(e: Event) {
         'opacity-80': isUploadingImage
       }"
     />
-    <Stamp
+    <UiStamp
       v-else
       :id="definition.default"
       :size="80"

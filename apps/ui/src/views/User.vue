@@ -31,7 +31,11 @@ watchEffect(() => setTitle(`${address.value} user profile`));
     </div>
     <UiContainer slim>
       <div class="text-center mb-4 relative">
-        <Stamp :id="user.id" :size="90" class="mb-2 border-[4px] border-skin-bg !bg-skin-border" />
+        <UiStamp
+          :id="user.id"
+          :size="90"
+          class="mb-2 border-[4px] border-skin-bg !bg-skin-border"
+        />
         <h1>{{ shortenAddress(user.id) }}</h1>
         <div>
           <b class="text-skin-link">{{ _n(user.proposal_count) }}</b> proposals ·

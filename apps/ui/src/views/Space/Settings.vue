@@ -152,7 +152,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
           @save="value => handleSave('controller', value.toString())"
         >
           <a :href="network.helpers.getExplorerUrl(space.controller, 'contract')" target="_blank">
-            <Stamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(space.controller) }}
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </a>
@@ -166,7 +166,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
         <a :href="network.helpers.getExplorerUrl(auth, 'contract')" target="_blank" class="flex">
           <h4 class="flex-auto" v-text="network.constants.AUTHS[auth]" />
           <div>
-            <Stamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(auth) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>
@@ -186,7 +186,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             v-text="network.constants.PROPOSAL_VALIDATIONS[space.validation_strategy]"
           />
           <div>
-            <Stamp
+            <UiStamp
               :id="space.validation_strategy"
               type="avatar"
               :size="18"
@@ -209,7 +209,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
         >
           <h4 class="flex-auto" v-text="network.constants.STRATEGIES[strategy]" />
           <div>
-            <Stamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(strategy) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>
@@ -233,7 +233,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             "
           />
           <div>
-            <Stamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(executor) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>

@@ -182,7 +182,7 @@ watch([sortBy, choiceFilter], () => {
               "
             />
             <td class="relative text-left flex items-center pl-4 py-3">
-              <Stamp :id="vote.voter.id" :size="32" class="mr-3" />
+              <UiStamp :id="vote.voter.id" :size="32" class="mr-3" />
               <div class="truncate">
                 <router-link
                   :to="{

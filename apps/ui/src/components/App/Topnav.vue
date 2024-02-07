@@ -87,7 +87,7 @@ watch(route, to => {
           @click="modalAccountOpen = true"
         >
           <span v-if="auth.isAuthenticated.value" class="sm:flex items-center space-x-2">
-            <Stamp :id="web3.account" :size="18" />
+            <UiStamp :id="web3.account" :size="18" />
             <span class="hidden sm:block" v-text="web3.name || shorten(web3.account)" />
           </span>
           <template v-else>
