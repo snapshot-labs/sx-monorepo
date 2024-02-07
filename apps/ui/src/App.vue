@@ -71,9 +71,9 @@ watch(isSwiping, () => {
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
-      <Sidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />
-      <Topnav @toggle="uiStore.toggleSidebar" />
-      <Nav />
+      <AppSidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />
+      <AppTopnav @toggle="uiStore.toggleSidebar" />
+      <AppNav />
       <div
         v-if="uiStore.sidebarOpen"
         class="backdrop lg:hidden"
@@ -91,7 +91,7 @@ watch(isSwiping, () => {
         <router-view class="flex-auto mt-[72px] ml-0 lg:ml-[72px]" />
       </div>
     </div>
-    <Notifications />
+    <AppNotifications />
     <ModalTransaction
       v-if="route.name !== 'editor' && transaction && network"
       :open="!!transaction"
