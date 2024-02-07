@@ -10,11 +10,13 @@ export const CHAIN_IDS = {
 };
 
 export const COINGECKO_ASSET_PLATFORMS = {
+  1: 'ethereum',
   137: 'polygon-pos',
   42161: 'arbitrum-one'
 };
 
 export const COINGECKO_BASE_ASSETS = {
+  1: 'ethereum',
   137: 'matic-network',
   42161: 'ethereum'
 };
