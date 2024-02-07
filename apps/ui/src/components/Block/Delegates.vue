@@ -69,7 +69,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </div>
     <div class="space-y-3">
       <div>
-        <Label label="Delegates" sticky />
+        <UiLabel label="Delegates" sticky />
 
         <table class="text-left table-fixed w-full">
           <colgroup>
