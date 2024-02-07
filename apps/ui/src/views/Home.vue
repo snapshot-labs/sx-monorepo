@@ -1,7 +1,25 @@
 <script setup lang="ts">
 import { version, repository } from '@/../package.json';
+import ICX from '~icons/c/x';
+import ICDiscord from '~icons/c/discord';
+import ICGithub from '~icons/c/github';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
+
+const SOCIALS = [
+  {
+    href: 'https://twitter.com/SnapshotLabs',
+    icon: ICX
+  },
+  {
+    href: 'https://discord.gg/snapshot',
+    icon: ICDiscord
+  },
+  {
+    href: 'https://github.com/snapshot-labs',
+    icon: ICGithub
+  }
+];
 </script>
 
 <template>
@@ -54,15 +72,15 @@ const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
       </div>
       <div class="space-y-2">
         <div class="eyebrow">Join the community</div>
-        <div class="space-x-2">
-          <a href="https://twitter.com/SnapshotLabs" target="_blank">
-            <img src="~@/assets/x.svg" class="w-[32px] h-[32px] inline-block" />
-          </a>
-          <a href="https://discord.gg/snapshot" target="_blank">
-            <img src="~@/assets/discord.svg" class="w-[32px] h-[32px] inline-block" />
-          </a>
-          <a href="https://github.com/snapshot-labs" target="_blank">
-            <img src="~@/assets/github.svg" class="w-[32px] h-[32px] inline-block" />
+        <div class="flex space-x-2">
+          <a
+            v-for="social in SOCIALS"
+            :key="social.href"
+            :href="social.href"
+            target="_blank"
+            class="text-[#606060] hover:text-skin-link"
+          >
+            <component :is="social.icon" class="w-[32px] h-[32px]" />
           </a>
         </div>
       </div>
