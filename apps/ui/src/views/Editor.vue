@@ -314,7 +314,7 @@ export default defineComponent({
           :definition="DISCUSSION_DEFINITION"
           :error="formErrors.discussion"
         />
-        <Preview :key="proposalKey || ''" :url="proposal.discussion" />
+        <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
       <div
         v-if="
