@@ -6,7 +6,7 @@ defineProps<{ txs: TransactionType[] }>();
 
 <template>
   <div v-if="txs.length > 0" class="x-block !border-x rounded-lg">
-    <Transaction
+    <TransactionItem
       v-for="(tx, i) in txs"
       :key="i"
       :tx="tx"
