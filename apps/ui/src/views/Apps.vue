@@ -31,7 +31,7 @@ watch(
     <UiContainer class="!max-w-screen-lg space-y-4">
       <UiLoading v-if="loading && !loaded" class="block" />
       <div v-else-if="q">
-        <Link :count="results.length" text="Result(s)" class="inline-block" />
+        <UiLink :count="results.length" text="Result(s)" class="inline-block" />
         <div
           v-if="results.length"
           class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
@@ -44,12 +44,12 @@ watch(
         </div>
       </div>
       <div v-else>
-        <Link text="Featured" class="inline-block" />
+        <UiLink text="Featured" class="inline-block" />
         <div class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <App v-for="(app, i) in apps.filter(({ featured }) => featured)" :key="i" :app="app" />
         </div>
         <div v-for="(category, i) in categories" :key="i">
-          <Link
+          <UiLink
             :count="apps.filter(app => category === app.category).length"
             :text="category"
             class="inline-block"

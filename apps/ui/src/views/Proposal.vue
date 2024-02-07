@@ -115,7 +115,7 @@ watchEffect(() => {
               params: { id: proposal.proposal_id }
             }"
           >
-            <Link :is-active="route.name === 'proposal-overview'" text="Overview" />
+            <UiLink :is-active="route.name === 'proposal-overview'" text="Overview" />
           </router-link>
           <router-link
             :to="{
@@ -124,7 +124,7 @@ watchEffect(() => {
             }"
             class="flex items-center"
           >
-            <Link
+            <UiLink
               :is-active="route.name === 'proposal-votes'"
               :count="proposal.vote_count"
               text="Votes"

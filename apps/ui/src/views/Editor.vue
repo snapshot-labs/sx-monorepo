@@ -295,10 +295,10 @@ export default defineComponent({
       />
       <div class="flex space-x-3">
         <button type="button" @click="previewEnabled = false">
-          <Link :is-active="!previewEnabled" text="Write" class="border-transparent" />
+          <UiLink :is-active="!previewEnabled" text="Write" class="border-transparent" />
         </button>
         <button type="button" @click="previewEnabled = true">
-          <Link :is-active="previewEnabled" text="Preview" class="border-transparent" />
+          <UiLink :is-active="previewEnabled" text="Preview" class="border-transparent" />
         </button>
       </div>
       <Markdown
