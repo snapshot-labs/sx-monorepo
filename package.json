@@ -1,4 +1,5 @@
 {
+  "name": "sx-monorepo",
   "private": true,
   "repository": {
     "type": "git",
@@ -12,14 +13,8 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.26.2",
-    "@fleekhq/fleek-cli": "^0.1.8",
-    "eslint": "^8.48.0",
-    "prettier": "^3.0.3",
-    "tsconfig": "*",
-    "turbo": "^1.12.2"
+    "turbo": "^1.12.3"
   },
-  "name": "sx-repo",
   "packageManager": "yarn@1.22.19",
   "workspaces": [
     "apps/*",
