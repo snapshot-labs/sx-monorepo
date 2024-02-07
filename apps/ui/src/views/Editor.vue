@@ -301,7 +301,7 @@ export default defineComponent({
           <UiLink :is-active="previewEnabled" text="Preview" class="border-transparent" />
         </button>
       </div>
-      <Markdown
+      <UiMarkdown
         v-if="previewEnabled"
         class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
         :body="proposal.body"
