@@ -2,8 +2,6 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
 
-const emit = defineEmits(['toggle']);
-
 const route = useRoute();
 const router = useRouter();
 const auth = getInstance();
@@ -63,7 +61,7 @@ watch(route, to => {
       <div class="flex flex-grow items-center h-full">
         <IH-menu-alt-2
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
-          @click="emit('toggle')"
+          @click="uiStore.toggleSidebar"
         />
         <div v-if="currentRouteName === 'space'" class="flex items-center flex-1 px-2 py-3 h-full">
           <IH-search class="mr-[12px] flex-shrink-0" :class="{ 'text-skin-link': focused }" />
