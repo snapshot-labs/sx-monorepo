@@ -166,7 +166,7 @@ watchEffect(() => {
             </div>
           </VotingPowerIndicator>
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
-          <Vote v-if="proposal" :proposal="proposal">
+          <ProposalVote v-if="proposal" :proposal="proposal">
             <div class="flex space-x-2 py-2">
               <UiTooltip title="For">
                 <UiButton
@@ -196,7 +196,7 @@ watchEffect(() => {
                 </UiButton>
               </UiTooltip>
             </div>
-          </Vote>
+          </ProposalVote>
         </template>
 
         <template v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">

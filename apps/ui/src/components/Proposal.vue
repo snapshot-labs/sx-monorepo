@@ -67,7 +67,7 @@ async function handleVoteClick(choice: Choice) {
         </span>
       </div>
       <div class="hidden md:block">
-        <Vote :proposal="proposal">
+        <ProposalVote :proposal="proposal">
           <template #unsupported><div /></template>
           <template #waiting><div /></template>
           <template #cancelled><div /></template>
@@ -109,7 +109,7 @@ async function handleVoteClick(choice: Choice) {
               </UiButton>
             </UiTooltip>
           </div>
-        </Vote>
+        </ProposalVote>
       </div>
     </div>
     <teleport to="#modal">
