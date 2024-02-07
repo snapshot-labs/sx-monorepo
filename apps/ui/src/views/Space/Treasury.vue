@@ -96,7 +96,7 @@ onMounted(() => {
   if (!treasury.value) return;
 
   loadBalances(treasury.value.wallet, treasury.value.network);
-  loadNfts(treasury.value.wallet);
+  loadNfts(treasury.value.wallet, treasury.value.network);
 });
 
 watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
