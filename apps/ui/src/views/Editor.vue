@@ -306,7 +306,7 @@ export default defineComponent({
         class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
         :body="proposal.body"
       />
-      <MarkdownEditor v-else v-model="proposal.body" class="" />
+      <UiComposer v-else v-model="proposal.body" class="" />
       <div class="s-base mb-4">
         <SIString
           :key="proposalKey || ''"
