@@ -24,6 +24,7 @@ import {
   createStrategyPicker
 } from '@/networks/common/helpers';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
+import { vote as highlightVote } from '@/helpers/highlight';
 import type { Web3Provider } from '@ethersproject/providers';
 import type {
   Connector,
@@ -368,7 +369,8 @@ export function createActions(
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: getSdkChoice(choice),
-        metadataUri: ''
+        metadataUri: '',
+        chainId
       };
 
       if (relayerType === 'evm') {
@@ -376,6 +378,11 @@ export function createActions(
           signer: web3.getSigner(),
           data
         });
+      }
+
+      // @TODO Trigger Highlight vote only if space has Axiom or Isokratia execution strategy
+      if (!isContract) {
+        return highlightVote({ signer: web3.getSigner(), data });
       }
 
       return client.vote(
