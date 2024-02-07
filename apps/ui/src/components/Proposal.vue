@@ -73,11 +73,11 @@ async function handleVoteClick(choice: Choice) {
           <template #cancelled><div /></template>
           <template #voted-pending><div /></template>
           <template #voted>
-            <Results v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
             <div v-else />
           </template>
           <template #ended>
-            <Results v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
             <div v-else />
           </template>
           <div class="flex space-x-2 py-2">

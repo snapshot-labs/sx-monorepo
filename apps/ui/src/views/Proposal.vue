@@ -201,7 +201,7 @@ watchEffect(() => {
 
         <template v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Results</h4>
-          <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
+          <ProposalResults with-details :proposal="proposal" :decimals="votingPowerDecimals" />
         </template>
       </div>
     </template>
