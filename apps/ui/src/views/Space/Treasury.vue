@@ -259,7 +259,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               target="_blank"
               class="block max-w-[120px]"
             >
-              <UiNft :item="nft" class="w-full" />
+              <UiNftImage :item="nft" class="w-full" />
               <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
             </a>
           </div>

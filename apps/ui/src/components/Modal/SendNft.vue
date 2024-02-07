@@ -170,7 +170,7 @@ watchEffect(async () => {
         <div class="s-label" v-text="'NFT'" />
         <button class="s-input text-left h-[61px]" @click="handlePickerClick('nft')">
           <div class="flex items-center">
-            <UiNft v-if="currentNft" :item="currentNft" class="mr-2" :size="20" />
+            <UiNftImage v-if="currentNft" :item="currentNft" class="mr-2" :size="20" />
             <div class="truncate">
               {{ currentNft?.displayTitle || 'Select NFT' }}
             </div>
