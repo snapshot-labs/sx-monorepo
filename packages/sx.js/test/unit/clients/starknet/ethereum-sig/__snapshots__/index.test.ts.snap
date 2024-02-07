@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EthereumSig should create propose envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+    "executionStrategy": {
+      "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+      "params": [
+        "0x101",
+      ],
+    },
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+    "strategies": [
+      {
+        "address": "0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52",
+        "index": 0,
+      },
+    ],
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "message": {
+      "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+      "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "chainId": "0x534e5f474f45524c49",
+      "executionStrategy": {
+        "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+        "params": [
+          "0x101",
+        ],
+      },
+      "metadataUri": [
+        "0x697066733a2f2f516d4e726d36784b75696231544874576b694e35434b7442",
+        "0x4565725143447055746d6744716961553278446d6361",
+      ],
+      "salt": "0x0",
+      "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+      "userProposalValidationParams": [
+        "0",
+      ],
+    },
+    "primaryType": "Propose",
+    "signature": [
+      "0xd4fd6517cc6e7d2bd4a447d819b06afa59ae31c10213548225ed196a73cb471b",
+      "0x5d261a51abd3874720974de7d3b77e5be2f07d7ee3021b234436e875f63e5c0",
+      "0x1b",
+    ],
+  },
+}
+`;
+
+exports[`EthereumSig should create update proposal envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+    "executionStrategy": {
+      "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+      "params": [
+        "0x101",
+      ],
+    },
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "proposal": 1,
+    "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "message": {
+      "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+      "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "chainId": "0x534e5f474f45524c49",
+      "executionStrategy": {
+        "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
+        "params": [
+          "0x101",
+        ],
+      },
+      "metadataUri": [
+        "0x697066733a2f2f516d4e726d36784b75696231544874576b694e35434b7442",
+        "0x4565725143447055746d6744716961553278446d6361",
+      ],
+      "proposalId": "0x1",
+      "salt": "0x0",
+      "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+    },
+    "primaryType": "UpdateProposal",
+    "signature": [
+      "0x5f1bf0de83618d9a09d6ab5d312b1f9ac73d90692437c3b0013e437152f6ddca",
+      "0x391d4b5105fb27c294454fc242ed39716e766fb5b5ebb27a22259fd22cdee296",
+      "0x1c",
+    ],
+  },
+}
+`;
+
+exports[`EthereumSig should create vote envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+    "choice": 1,
+    "proposal": 1,
+    "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+    "strategies": [
+      {
+        "address": "0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52",
+        "index": 0,
+      },
+    ],
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "message": {
+      "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+      "chainId": "0x534e5f474f45524c49",
+      "choice": "0x1",
+      "metadataUri": [],
+      "proposalId": "0x1",
+      "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
+      "userVotingStrategies": [],
+      "voter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    },
+    "primaryType": "Vote",
+    "signature": [
+      "0x2b36d3788b74f2cbe37f4b2c548d71c685205bdec0944b72392d08b2ec2e6c08",
+      "0x5663003e085cb88bb0e7071cb54b134856ef6c6f23d60ee6c2ebd07c23b0ad24",
+      "0x1b",
+    ],
+  },
+}
+`;

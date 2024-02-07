@@ -1,0 +1,233 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EthereumSig should create propose envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+    "executionStrategy": {
+      "addr": "0x6241b5c89350bb3c465179706cf26050ea32444f",
+      "params": "0x00",
+    },
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+    "strategies": [
+      {
+        "address": "0xc1245c5dca7885c73e32294140f1e5d30688c202",
+        "index": 0,
+      },
+    ],
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "domain": {
+      "chainId": 5,
+      "name": "snapshot-x",
+      "verifyingContract": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+      "version": "1.0.0",
+    },
+    "message": {
+      "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "executionStrategy": {
+        "addr": "0x6241b5c89350bb3c465179706cf26050ea32444f",
+        "params": "0x00",
+      },
+      "metadataURI": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+      "salt": 0,
+      "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+      "userProposalValidationParams": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+    },
+    "signature": "0x8802f584d5c929c781ea06deefe9d4e9d91dd30386ef8b250850df76044111e167fabb5e5e58ccfffa15ec93f586bfb0acfddbdf6a89d16ba4ede94770eb1f561c",
+    "types": {
+      "Propose": [
+        {
+          "name": "space",
+          "type": "address",
+        },
+        {
+          "name": "author",
+          "type": "address",
+        },
+        {
+          "name": "metadataURI",
+          "type": "string",
+        },
+        {
+          "name": "executionStrategy",
+          "type": "Strategy",
+        },
+        {
+          "name": "userProposalValidationParams",
+          "type": "bytes",
+        },
+        {
+          "name": "salt",
+          "type": "uint256",
+        },
+      ],
+      "Strategy": [
+        {
+          "name": "addr",
+          "type": "address",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`EthereumSig should create update proposal envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+    "executionStrategy": {
+      "addr": "0x6241b5c89350bb3c465179706cf26050ea32444f",
+      "params": "0x00",
+    },
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+    "proposal": 1,
+    "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "domain": {
+      "chainId": 5,
+      "name": "snapshot-x",
+      "verifyingContract": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+      "version": "1.0.0",
+    },
+    "message": {
+      "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "executionStrategy": {
+        "addr": "0x6241b5c89350bb3c465179706cf26050ea32444f",
+        "params": "0x00",
+      },
+      "metadataURI": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
+      "proposalId": 1,
+      "salt": 0,
+      "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+    },
+    "signature": "0xea79e53b3ccc11f5ef14883adda7e6858ee2c3fe9823989c8eddab648ec2916b306448cc9de997fd2fb9028a534fe2508cdf5809db0a02a6ed70dcf205bc6c001b",
+    "types": {
+      "Strategy": [
+        {
+          "name": "addr",
+          "type": "address",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+        },
+      ],
+      "updateProposal": [
+        {
+          "name": "space",
+          "type": "address",
+        },
+        {
+          "name": "author",
+          "type": "address",
+        },
+        {
+          "name": "proposalId",
+          "type": "uint256",
+        },
+        {
+          "name": "executionStrategy",
+          "type": "Strategy",
+        },
+        {
+          "name": "metadataURI",
+          "type": "string",
+        },
+        {
+          "name": "salt",
+          "type": "uint256",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`EthereumSig should create vote envelope 1`] = `
+{
+  "data": {
+    "authenticator": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+    "choice": 1,
+    "metadataUri": "",
+    "proposal": 1,
+    "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+    "strategies": [
+      {
+        "address": "0xc1245c5dca7885c73e32294140f1e5d30688c202",
+        "index": 0,
+      },
+    ],
+  },
+  "signatureData": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "domain": {
+      "chainId": 5,
+      "name": "snapshot-x",
+      "verifyingContract": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+      "version": "1.0.0",
+    },
+    "message": {
+      "choice": 1,
+      "proposalId": 1,
+      "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
+      "userVotingStrategies": [
+        {
+          "index": 0,
+          "params": "0x00",
+        },
+      ],
+      "voteMetadataURI": "",
+      "voter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    },
+    "signature": "0xc59afc1cad9abae8416f9b62e2fb51b204a121fbddce31d88e52765b97e307bb22a2f6c396e16da72df77e66b6f1a0052bc2a403c9ad5295f979a5268ce9433f1c",
+    "types": {
+      "IndexedStrategy": [
+        {
+          "name": "index",
+          "type": "uint8",
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+        },
+      ],
+      "Vote": [
+        {
+          "name": "space",
+          "type": "address",
+        },
+        {
+          "name": "voter",
+          "type": "address",
+        },
+        {
+          "name": "proposalId",
+          "type": "uint256",
+        },
+        {
+          "name": "choice",
+          "type": "uint8",
+        },
+        {
+          "name": "userVotingStrategies",
+          "type": "IndexedStrategy[]",
+        },
+        {
+          "name": "voteMetadataURI",
+          "type": "string",
+        },
+      ],
+    },
+  },
+}
+`;

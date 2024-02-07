@@ -96,7 +96,7 @@
 }
 
 body {
-  background-color: rgba(var(--bg));
+  @apply font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
 }
 
 .mono {

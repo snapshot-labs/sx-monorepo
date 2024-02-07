@@ -1,0 +1,6 @@
+[
+  "constructor(address _starknetCore)",
+  "event Commit(uint256 starknetAuthenticator, uint256 _hash, bytes32 msgHash, uint256 msgNonce)",
+  "function commit(uint256 starknetAuthenticator, uint256 _hash) payable",
+  "function starknetCore() view returns (address)"
+]

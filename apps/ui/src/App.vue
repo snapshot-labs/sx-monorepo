@@ -64,11 +64,7 @@ watch(isSwiping, () => {
 </script>
 
 <template>
-  <div
-    ref="el"
-    :class="{ 'overflow-hidden': scrollDisabled }"
-    class="font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased"
-  >
+  <div ref="el" :class="{ 'overflow-hidden': scrollDisabled }">
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
       <AppSidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />
@@ -100,7 +96,6 @@ watch(isSwiping, () => {
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
     />
-    <div id="modal" />
   </div>
 </template>
 
