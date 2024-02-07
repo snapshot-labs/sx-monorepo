@@ -18,7 +18,7 @@ watch(
 <template>
   <div>
     <div class="border-b mb-4">
-      <Container class="!max-w-screen-lg flex items-center space-x-3">
+      <UiContainer class="!max-w-screen-lg flex items-center space-x-3">
         <IH-search />
         <input
           v-model="q"
@@ -26,9 +26,9 @@ watch(
           placeholder="Search for apps"
           class="py-3 bg-transparent flex-auto text-skin-link"
         />
-      </Container>
+      </UiContainer>
     </div>
-    <Container class="!max-w-screen-lg space-y-4">
+    <UiContainer class="!max-w-screen-lg space-y-4">
       <UiLoading v-if="loading && !loaded" class="block" />
       <div v-else-if="q">
         <Link :count="results.length" text="Result(s)" class="inline-block" />
@@ -63,6 +63,6 @@ watch(
           </div>
         </div>
       </div>
-    </Container>
+    </UiContainer>
   </div>
 </template>
