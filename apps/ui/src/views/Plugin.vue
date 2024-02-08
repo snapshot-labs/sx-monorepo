@@ -16,7 +16,7 @@ onMounted(() => load());
       <UiLoading v-if="loading && !loaded" class="block" />
       <div v-else>
         <div class="flex space-x-1 items-center text-sm mb-4">
-          <router-link :to="{ name: 'apps' }" class="flex items-center">
+          <router-link :to="{ name: 'plugins' }" class="flex items-center">
             <IH-view-grid class="mr-1" />
             Apps
           </router-link>
