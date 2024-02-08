@@ -12,7 +12,7 @@ import Textarea from './Textarea.vue';
 import InputAddress from './InputAddress.vue';
 import InputDuration from './InputDuration.vue';
 import InputNumber from './InputNumber.vue';
-import Checkbox from './Checkbox.vue';
+import InputCheckbox from './InputCheckbox.vue';
 import Select from './Select.vue';
 import InputStamp from './InputStamp.vue';
 
@@ -62,7 +62,7 @@ const getComponent = (property: { type: string; format: string; enum?: string[] 
       if (property.format === 'duration') return InputDuration;
       return InputNumber;
     case 'boolean':
-      return Checkbox;
+      return InputCheckbox;
     default:
       return null;
   }
