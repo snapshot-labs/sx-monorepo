@@ -326,7 +326,7 @@ export default defineComponent({
       >
         <h4 class="eyebrow mb-2">Execution</h4>
         <div class="border rounded-lg mb-3">
-          <ExecutionButton
+          <ButtonExecution
             v-for="(executor, i) in supportedExecutionStrategies"
             :key="executor"
             class="flex-auto flex items-center gap-2"
@@ -344,7 +344,7 @@ export default defineComponent({
               <span class="hidden sm:inline-block">({{ shortenAddress(executor) }})</span>
             </span>
             <IH-check v-if="executionStrategy?.address === executor" />
-          </ExecutionButton>
+          </ButtonExecution>
         </div>
         <BlockExecutionEditable
           v-if="executionStrategy"

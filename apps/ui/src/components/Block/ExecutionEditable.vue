@@ -98,18 +98,18 @@ watch(model.value, () => {
 <template>
   <div class="space-y-3">
     <div class="overflow-hidden border rounded-lg">
-      <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendToken')">
+      <ButtonExecution :disabled="!currentTreasury" @click="openModal('sendToken')">
         <IH-cash class="inline-block" />
         <span>Send token</span>
-      </ExecutionButton>
-      <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendNft')">
+      </ButtonExecution>
+      <ButtonExecution :disabled="!currentTreasury" @click="openModal('sendNft')">
         <IH-photograph class="inline-block" />
         <span>Send NFT</span>
-      </ExecutionButton>
-      <ExecutionButton @click="openModal('contractCall')">
+      </ButtonExecution>
+      <ButtonExecution @click="openModal('contractCall')">
         <IH-code class="inline-block" />
         <span>Contract call</span>
-      </ExecutionButton>
+      </ButtonExecution>
     </div>
     <div v-if="model.length > 0" class="x-block !border-x rounded-lg">
       <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
