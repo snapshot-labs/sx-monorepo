@@ -23,6 +23,7 @@ export type ApiSpace = {
     period: number | null;
     quorum: number | null;
   };
+  strategies: { network: string; params: any; name: string }[];
   proposalsCount: number;
   votesCount: number;
 };
@@ -36,7 +37,7 @@ export type ApiProposal = {
     admins: string[];
     symbol: string;
   };
-  type: 'basic' | 'single-choice' | string;
+  type: string;
   title: string;
   body: string;
   discussion: string;
@@ -49,6 +50,7 @@ export type ApiProposal = {
   scores: number[];
   scores_total: number;
   state: 'active' | 'pending' | 'closed';
+  strategies: { network: string; params: any; name: string }[];
   created: number;
   updated: number | null;
   votes: number;

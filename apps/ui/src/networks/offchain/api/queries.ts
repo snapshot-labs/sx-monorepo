@@ -24,6 +24,11 @@ const SPACE_FRAGMENT = gql`
       period
       quorum
     }
+    strategies {
+      name
+      params
+      network
+    }
     proposalsCount
     votesCount
   }
@@ -52,6 +57,11 @@ const PROPOSAL_FRAGMENT = gql`
     scores
     scores_total
     state
+    strategies {
+      name
+      params
+      network
+    }
     created
     updated
     votes

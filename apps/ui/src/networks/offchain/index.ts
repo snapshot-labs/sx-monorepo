@@ -1,12 +1,17 @@
 import { createApi } from './api';
 import * as constants from './constants';
 import { pinPineapple } from '@/helpers/pin';
-import { Network } from '@/networks/types';
-import { NetworkID } from '@/types';
+import { Network, VotingPower } from '@/networks/types';
+import { NetworkID, StrategyParsedMetadata } from '@/types';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
+};
+
+const SCORE_URLS: Partial<Record<NetworkID, string | undefined>> = {
+  s: 'https://score.snapshot.org',
+  's-tn': 'https://score.snapshot.org'
 };
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
@@ -30,6 +35,10 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         return `https://signator.io/view?ipfs=${id}`;
       }
 
+      if (type === 'contract' && !id.startsWith('0x')) {
+        return;
+      }
+
       throw new Error('Not implemented');
     }
   };
@@ -49,7 +58,42 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     constants,
     helpers,
     actions: {
-      getVotingPower: () => Promise.resolve([])
+      getVotingPower: async (
+        strategiesAddresses: string[],
+        strategiesParams: any[],
+        strategiesMetadata: StrategyParsedMetadata[],
+        voterAddress: string,
+        block: number | null
+      ): Promise<VotingPower[]> => {
+        const result = await fetch(`${SCORE_URLS[networkId]}`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'get_vp',
+            params: {
+              address: voterAddress,
+              strategies: strategiesParams,
+              snapshot: block || 'latest'
+            }
+          })
+        });
+        const body = await result.json();
+
+        return body.result.vp_by_strategy.map((vp: number, index: number) => {
+          const strategy = strategiesParams[index];
+
+          return {
+            address: strategy.name,
+            value: BigInt(vp),
+            decimals: strategy.params.decimals || 0,
+            symbol: strategy.params.symbol,
+            token: ''
+          };
+        });
+      }
     }
   };
 }
