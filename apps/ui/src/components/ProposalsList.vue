@@ -26,11 +26,11 @@ const currentLimit = computed(() => {
 
 <template>
   <div>
-    <Label :label="title" sticky />
+    <UiLabel :label="title" sticky />
     <UiLoading v-if="loading" class="block px-4 py-3" />
     <div v-else>
       <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="emit('endReached')">
-        <Proposal
+        <ProposalListItem
           v-for="(proposal, i) in proposals.slice(0, currentLimit)"
           :key="i"
           :proposal="proposal"

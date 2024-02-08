@@ -115,7 +115,7 @@ watchEffect(async () => {
       />
     </template>
     <div v-else class="s-box p-4">
-      <SIAddress
+      <UiInputAddress
         v-model="form.delegatee"
         :definition="DELEGATEE_DEFINITION"
         :error="formErrors.delegatee"

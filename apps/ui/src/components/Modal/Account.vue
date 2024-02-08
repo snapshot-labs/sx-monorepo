@@ -63,7 +63,7 @@ watch(open, () => (step = null));
       <div v-if="$auth.isAuthenticated.value" class="m-4 space-y-2">
         <a :href="explorerUrl(web3.network.key, web3.account)" target="_blank" class="block">
           <UiButton class="button-outline w-full flex justify-center items-center">
-            <Stamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
+            <UiStamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
             <span v-text="web3.name || shorten(web3.account)" />
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </UiButton>

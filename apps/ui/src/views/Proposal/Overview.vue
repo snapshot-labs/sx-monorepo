@@ -104,7 +104,7 @@ async function handleCancelClick() {
 </script>
 
 <template>
-  <Container class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
     <div>
       <h1 class="mb-3 text-[36px] leading-10">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
@@ -121,7 +121,7 @@ async function handleCancelClick() {
           }"
           class="flex items-center py-3"
         >
-          <Stamp :id="proposal.author.id" :size="32" class="mr-1" />
+          <UiStamp :id="proposal.author.id" :size="32" class="mr-1" />
           <div class="flex flex-col ml-2 leading-4 gap-1">
             {{ shortenAddress(proposal.author.id) }}
             <span class="text-skin-text text-[16px]">
@@ -178,14 +178,14 @@ async function handleCancelClick() {
           </template>
         </UiDropdown>
       </div>
-      <Markdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
+      <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
       <div v-if="discussion">
         <h4 class="mb-3 eyebrow flex items-center">
           <IH-chat-alt class="inline-block mr-2" />
           <span>Discussion</span>
         </h4>
         <a :href="discussion" target="_blank" class="block mb-5">
-          <Preview :url="discussion" />
+          <UiLinkPreview :url="discussion" />
         </a>
       </div>
       <div v-if="proposal.execution && proposal.execution.length > 0">
@@ -223,7 +223,7 @@ async function handleCancelClick() {
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
     </div>
-  </Container>
+  </UiContainer>
   <teleport to="#modal">
     <ModalVotes
       v-if="proposal"

@@ -240,7 +240,7 @@ watchEffect(async () => {
       />
     </template>
     <div v-if="!showPicker" class="s-box p-4">
-      <SIAddress
+      <UiInputAddress
         v-model="form.to"
         :definition="RECIPIENT_DEFINITION"
         :error="formErrors.to"
@@ -250,7 +250,7 @@ watchEffect(async () => {
         <div class="s-label" v-text="'Token'" />
         <button class="s-input text-left h-[61px]" @click="handlePickerClick('token')">
           <div class="flex items-center">
-            <Stamp
+            <UiStamp
               v-if="currentToken"
               :id="`${networkId}:${currentToken.contractAddress}`"
               type="token"
@@ -265,7 +265,7 @@ watchEffect(async () => {
       </div>
       <div class="grid grid-cols-2 gap-[12px]">
         <div class="relative">
-          <SINumber
+          <UiInputNumber
             :model-value="form.amount"
             :definition="{
               type: 'number',
@@ -276,7 +276,7 @@ watchEffect(async () => {
           />
           <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick" v-text="'max'" />
         </div>
-        <SINumber
+        <UiInputNumber
           :model-value="form.value"
           :definition="{ type: 'number', title: 'USD', examples: ['0'] }"
           @update:model-value="handleValueUpdate"

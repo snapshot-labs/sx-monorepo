@@ -125,7 +125,7 @@ watch(
       <h3 v-text="'Add delegation'" />
     </template>
     <div class="s-box p-4">
-      <SIObject :model-value="form" :error="formErrors" :definition="definition" />
+      <UiForm :model-value="form" :error="formErrors" :definition="definition" />
     </div>
     <template #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">Confirm</UiButton>

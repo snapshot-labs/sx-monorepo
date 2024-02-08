@@ -53,7 +53,7 @@ const baseNetwork = computed(() =>
             target="_blank"
             class="flex items-center text-skin-text"
           >
-            <Stamp :id="strategy.token" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="strategy.token" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(strategy.token) }}
             <IH-arrow-sm-right class="ml-1 -rotate-45" />
           </a>

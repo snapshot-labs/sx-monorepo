@@ -117,7 +117,7 @@ watch([sortBy, choiceFilter], () => {
         </th>
         <th class="font-medium">
           <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
-          <UiSelect
+          <UiSelectDropdown
             v-else
             v-model="choiceFilter"
             class="font-normal"
@@ -137,7 +137,7 @@ watch([sortBy, choiceFilter], () => {
                 <IH-adjustments-vertical class="ml-2" />
               </div>
             </template>
-          </UiSelect>
+          </UiSelectDropdown>
         </th>
         <th>
           <div class="relative bottom-[1px] flex justify-end">
@@ -182,7 +182,7 @@ watch([sortBy, choiceFilter], () => {
               "
             />
             <td class="relative text-left flex items-center pl-4 py-3">
-              <Stamp :id="vote.voter.id" :size="32" class="mr-3" />
+              <UiStamp :id="vote.voter.id" :size="32" class="mr-3" />
               <div class="truncate">
                 <router-link
                   :to="{

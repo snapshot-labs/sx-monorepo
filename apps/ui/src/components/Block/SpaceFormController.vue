@@ -37,7 +37,7 @@ watch(formErrors, value => emit('errors', value));
 <template>
   <h3>Controller</h3>
   <div class="s-box pt-4">
-    <SIString
+    <UiInputString
       :model-value="model"
       :error="formErrors.controller"
       :definition="definition"
