@@ -114,7 +114,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         />
       </div>
       <div v-if="!network.readOnly" class="flex flex-row p-4 space-x-2">
-        <VotingPowerIndicator
+        <SpaceIndicatorVotingPower
           :network-id="space.network"
           :loading="loadingVotingPower"
           :voting-power-symbol="space.voting_power_symbol"
