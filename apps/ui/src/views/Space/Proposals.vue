@@ -82,7 +82,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
   <div>
     <div class="flex justify-between">
       <div class="flex flex-row p-4 space-x-2">
-        <UiDropdownSelect
+        <UiSelectDropdown
           v-model="filter"
           title="Status"
           gap="12px"
