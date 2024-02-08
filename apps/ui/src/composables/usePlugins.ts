@@ -1,7 +1,7 @@
 // URL: https://docs.google.com/spreadsheets/d/1R1qmDuKTp8WYiy-QWG0WQpu-pfoi-4TTUQKz1XdFZ1o
-const APPS_SHEET_ID =
+const PLUGINS_SHEET_ID =
   '2PACX-1vSyMqd0Ql198UtPMWO1RQmnzx-rfggEIT3Yieg8mOSf8tyNksUSLKXMpBkO1DLC8yoLqx0stynSk1Us';
-const APPS_SHEET_GID = '0';
+const PLUGINS_SHEET_GID = '0';
 
 async function getSpreadsheet(id: string, gid: string = '0'): Promise<any[]> {
   const res = await fetch(
@@ -24,38 +24,38 @@ function csvToJson(csv: string): any[] {
     .map(line => Object.fromEntries(header.map((key, i) => [key, line[i] || ''])));
 }
 
-const apps: Ref<any[]> = ref([]);
+const plugins: Ref<any[]> = ref([]);
 const categories: Ref<string[]> = ref([]);
 const loading: Ref<boolean> = ref(false);
 const loaded: Ref<boolean> = ref(false);
 
-export function useApps() {
+export function usePlugins() {
   async function load() {
     if (loading.value || loaded.value) return;
 
     loading.value = true;
 
-    apps.value = await getSpreadsheet(APPS_SHEET_ID, APPS_SHEET_GID);
-    categories.value = [...new Set(apps.value.map(({ category }) => category))];
+    plugins.value = await getSpreadsheet(PLUGINS_SHEET_ID, PLUGINS_SHEET_GID);
+    categories.value = [...new Set(plugins.value.map(({ category }) => category))];
 
     loading.value = false;
     loaded.value = true;
   }
 
   function get(id: string) {
-    return apps.value.find(app => app.id === id) || {};
+    return plugins.value.find(plugin => plugin.id === id) || {};
   }
 
   function search(q: string) {
-    return apps.value.filter(app => {
+    return plugins.value.filter(plugin => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { overview, ...appWithoutOverview } = app;
+      const { overview, ...appWithoutOverview } = plugin;
       return JSON.stringify(appWithoutOverview).toLowerCase().includes(q.toLowerCase());
     });
   }
 
   return {
-    apps,
+    plugins,
     categories,
     loading,
     loaded,
