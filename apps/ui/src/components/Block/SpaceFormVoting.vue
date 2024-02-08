@@ -54,6 +54,6 @@ const formErrors = computed(() => {
 <template>
   <h3>Voting settings</h3>
   <div class="s-box pt-4">
-    <SIObject :model-value="form" :error="formErrors" :definition="definition" />
+    <UiForm :model-value="form" :error="formErrors" :definition="definition" />
   </div>
 </template>

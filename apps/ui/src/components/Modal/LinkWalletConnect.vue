@@ -108,7 +108,7 @@ watch(loading, () => {
           <span>You can start interacting with the app.</span>
         </div>
       </template>
-      <SIObject
+      <UiForm
         v-else-if="step === 'INIT'"
         :model-value="form"
         :error="formErrors"

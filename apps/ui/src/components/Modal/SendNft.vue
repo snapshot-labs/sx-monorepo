@@ -160,7 +160,7 @@ watchEffect(async () => {
       />
     </template>
     <div v-if="!showPicker" class="s-box p-4">
-      <SIAddress
+      <UiInputAddress
         v-model="form.to"
         :definition="RECIPIENT_DEFINITION"
         :error="formErrors.to"
@@ -177,7 +177,7 @@ watchEffect(async () => {
           </div>
         </button>
       </div>
-      <SINumber
+      <UiInputNumber
         v-if="currentNft?.type === 'erc1155'"
         v-model="form.amount"
         :definition="{

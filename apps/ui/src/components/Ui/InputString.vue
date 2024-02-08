@@ -34,16 +34,13 @@ watch(model, () => {
 </script>
 
 <template>
-  <SBase :definition="definition" :error="error" :dirty="dirty">
-    <select v-model="inputValue" class="s-input">
-      <option disabled value="">Please select one</option>
-      <option
-        v-for="option in definition.options || definition.enum"
-        :key="option.id === undefined ? option : option.id"
-        :value="option.id === undefined ? option : option.id"
-      >
-        {{ option.name ?? option }}
-      </option>
-    </select>
-  </SBase>
+  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
+    <input
+      v-model="inputValue"
+      type="text"
+      class="s-input"
+      v-bind="$attrs"
+      :placeholder="definition.examples && definition.examples[0]"
+    />
+  </UiWrapperInput>
 </template>

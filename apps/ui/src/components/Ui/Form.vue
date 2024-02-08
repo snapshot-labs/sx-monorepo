@@ -5,16 +5,16 @@ export default {
 </script>
 
 <script setup lang="ts">
-import IObject from './IObject.vue';
-import IArray from './IArray.vue';
-import IString from './IString.vue';
-import IText from './IText.vue';
-import IAddress from './IAddress.vue';
-import IDuration from './IDuration.vue';
-import INumber from './INumber.vue';
-import IBoolean from './IBoolean.vue';
-import ISelect from './ISelect.vue';
-import IStamp from './IStamp.vue';
+import Form from './Form.vue';
+import InputArray from './InputArray.vue';
+import InputString from './InputString.vue';
+import Textarea from './Textarea.vue';
+import InputAddress from './InputAddress.vue';
+import InputDuration from './InputDuration.vue';
+import InputNumber from './InputNumber.vue';
+import Checkbox from './Checkbox.vue';
+import Select from './Select.vue';
+import InputStamp from './InputStamp.vue';
 
 const model = defineModel<any>({ required: true });
 
@@ -47,22 +47,22 @@ const getComponent = (property: { type: string; format: string; enum?: string[] 
   }
   switch (type) {
     case 'object':
-      return IObject;
+      return Form;
     case 'array':
-      return IArray;
+      return InputArray;
     case 'string':
-      if (property.format === 'long') return IText;
-      if (property.format === 'address') return IAddress;
-      if (property.format === 'ens-or-address') return IAddress;
-      if (property.format === 'stamp') return IStamp;
-      if (property.enum) return ISelect;
-      return IString;
+      if (property.format === 'long') return Textarea;
+      if (property.format === 'address') return InputAddress;
+      if (property.format === 'ens-or-address') return InputAddress;
+      if (property.format === 'stamp') return InputStamp;
+      if (property.enum) return Select;
+      return InputString;
     case 'number':
     case 'integer':
-      if (property.format === 'duration') return IDuration;
-      return INumber;
+      if (property.format === 'duration') return InputDuration;
+      return InputNumber;
     case 'boolean':
-      return IBoolean;
+      return Checkbox;
     default:
       return null;
   }

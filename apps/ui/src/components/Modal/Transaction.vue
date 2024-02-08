@@ -279,7 +279,7 @@ watchEffect(async () => {
     >
       <div class="relative">
         <UiLoading v-if="loading" class="absolute top-[14px] right-3 z-10" />
-        <SIAddress
+        <UiInputAddress
           v-model="form.to"
           :error="errors.to"
           :show-picker="!loading"
@@ -291,7 +291,7 @@ watchEffect(async () => {
           @pick="handlePickerClick('to')"
         />
       </div>
-      <SIText
+      <UiTextarea
         v-if="showAbiInput"
         v-model="abiStr"
         :error="errors.abi"
@@ -307,7 +307,7 @@ watchEffect(async () => {
           <option v-for="(method, i) in methods" :key="i" v-text="method" />
         </select>
       </div>
-      <SIString
+      <UiInputString
         v-if="currentMethod?.payable"
         v-model="form.amount"
         :error="errors.amount"
@@ -318,7 +318,7 @@ watchEffect(async () => {
         }"
       />
       <div v-if="definition">
-        <SIObject
+        <UiForm
           v-model="form.args"
           :error="argsErrors"
           :definition="definition"

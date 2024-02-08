@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import SIDuration from '@/components/S/IDuration.vue';
-import SINumber from '@/components/S/INumber.vue';
-import SIString from '@/components/S/IString.vue';
+import InputDuration from '@/components/Ui/InputDuration.vue';
+import InputNumber from '@/components/Ui/InputNumber.vue';
+import InputString from '@/components/Ui/InputString.vue';
 import { validateForm } from '@/helpers/validation';
 
 type Definition = {
@@ -32,11 +32,11 @@ const Component = computed(() => {
   switch (props.definition.type) {
     case 'integer':
     case 'number':
-      if (props.definition.format === 'duration') return SIDuration;
+      if (props.definition.format === 'duration') return InputDuration;
 
-      return SINumber;
+      return InputNumber;
     default:
-      return SIString;
+      return InputString;
   }
 });
 const formErrors = computed(() => {

@@ -28,7 +28,7 @@ watch(model, () => {
 </script>
 
 <template>
-  <SBase :definition="definition" :error="error" :dirty="dirty">
+  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
     <input v-model="inputValue" type="checkbox" />
-  </SBase>
+  </UiWrapperInput>
 </template>

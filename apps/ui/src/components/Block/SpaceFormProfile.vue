@@ -174,9 +174,9 @@ onMounted(() => {
 
 <template>
   <h3 v-if="showTitle" class="mb-4">Space profile</h3>
-  <SIStampCover v-model="(form as any).cover" :space="space" />
+  <UiInputStampCover v-model="(form as any).cover" :space="space" />
   <div class="s-box p-4 -mt-[80px]">
-    <SIObject
+    <UiForm
       :model-value="form"
       :error="formErrors"
       :definition="definition"
