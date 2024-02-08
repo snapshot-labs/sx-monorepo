@@ -1,6 +1,7 @@
 {
   "name": "ui",
   "version": "0.1.0",
+  "private": true,
   "license": "MIT",
   "main": "main.js",
   "repository": "snapshot-labs/sx-monorepo",
