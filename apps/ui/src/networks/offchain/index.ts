@@ -75,6 +75,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             method: 'get_vp',
             params: {
               address: voterAddress,
+              space: '',
               strategies: strategiesParams,
               snapshot: block || 'latest'
             }
