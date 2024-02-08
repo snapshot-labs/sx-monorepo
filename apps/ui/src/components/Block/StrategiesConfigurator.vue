@@ -97,7 +97,7 @@ function handleStrategySave(value: Record<string, any>) {
     <h4 class="eyebrow mb-2">Available</h4>
     <div v-if="availableStrategies.length === 0">No strategies available</div>
     <div v-else class="space-y-3">
-      <StrategyButton
+      <ButtonStrategy
         v-for="strategy in availableStrategies"
         :key="strategy.address"
         :disabled="limitReached || (unique && !!activeStrategiesMap[strategy.name])"
