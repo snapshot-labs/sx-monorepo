@@ -114,7 +114,7 @@ watch(model.value, () => {
     <div v-if="model.length > 0" class="x-block !border-x rounded-lg">
       <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
         <template #item="{ element: tx, index: i }">
-          <TransactionItem :tx="tx">
+          <TransactionListItem :tx="tx">
             <template #left>
               <div
                 v-if="model.length > 1"
@@ -133,7 +133,7 @@ watch(model.value, () => {
                 </a>
               </div>
             </template>
-          </TransactionItem>
+          </TransactionListItem>
         </template>
       </Draggable>
       <div class="border-t px-4 py-2 space-x-2 flex items-center justify-between">
