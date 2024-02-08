@@ -23,7 +23,7 @@ export type ApiSpace = {
     period: number | null;
     quorum: number | null;
   };
-  strategies: { network: string; params: any; name: string }[];
+  strategies: { network: string; params: Record<string, any>; name: string }[];
   proposalsCount: number;
   votesCount: number;
 };
@@ -50,7 +50,7 @@ export type ApiProposal = {
   scores: number[];
   scores_total: number;
   state: 'active' | 'pending' | 'closed';
-  strategies: { network: string; params: any; name: string }[];
+  strategies: { network: string; params: Record<string, any>; name: string }[];
   created: number;
   updated: number | null;
   votes: number;
