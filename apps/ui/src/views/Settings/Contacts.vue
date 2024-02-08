@@ -34,14 +34,14 @@ function handleContactEdit(contact) {
         </a>
       </div>
     </div>
-    <Label label="Contacts" />
+    <UiLabel label="Contacts" />
     <div
       v-for="contact in contactsStore.contacts"
       :key="contact.address"
       class="mx-4 py-3 border-b flex group"
     >
       <div class="flex-auto flex items-center min-w-0">
-        <Stamp :id="contact.address" type="avatar" :size="32" />
+        <UiStamp :id="contact.address" type="avatar" :size="32" />
         <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
           <h4 class="text-skin-link" v-text="shorten(contact.name, 24)" />
           <div class="text-sm truncate" v-text="shortenAddress(contact.address)" />

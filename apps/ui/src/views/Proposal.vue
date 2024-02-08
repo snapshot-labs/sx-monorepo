@@ -115,7 +115,7 @@ watchEffect(() => {
               params: { id: proposal.proposal_id }
             }"
           >
-            <Link :is-active="route.name === 'proposal-overview'" text="Overview" />
+            <UiLink :is-active="route.name === 'proposal-overview'" text="Overview" />
           </router-link>
           <router-link
             :to="{
@@ -124,7 +124,7 @@ watchEffect(() => {
             }"
             class="flex items-center"
           >
-            <Link
+            <UiLink
               :is-active="route.name === 'proposal-votes'"
               :count="proposal.vote_count"
               text="Votes"
@@ -166,7 +166,7 @@ watchEffect(() => {
             </div>
           </VotingPowerIndicator>
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
-          <Vote v-if="proposal" :proposal="proposal">
+          <ProposalVote v-if="proposal" :proposal="proposal">
             <div class="flex space-x-2 py-2">
               <UiTooltip title="For">
                 <UiButton
@@ -196,12 +196,12 @@ watchEffect(() => {
                 </UiButton>
               </UiTooltip>
             </div>
-          </Vote>
+          </ProposalVote>
         </template>
 
         <template v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Results</h4>
-          <Results with-details :proposal="proposal" :decimals="votingPowerDecimals" />
+          <ProposalResults with-details :proposal="proposal" :decimals="votingPowerDecimals" />
         </template>
       </div>
     </template>

@@ -62,7 +62,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
 <template>
   <div class="space-y-3">
     <div>
-      <Label :label="'Voting'" sticky />
+      <UiLabel :label="'Voting'" sticky />
       <div class="mx-4 pt-3">
         <div class="mb-3">
           <div class="s-label !mb-0">Voting delay</div>
@@ -138,7 +138,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
     </div>
 
     <div>
-      <Label :label="'Controller'" sticky />
+      <UiLabel :label="'Controller'" sticky />
       <div class="py-3 mx-4">
         <UiEditable
           :editable="isController"
@@ -152,7 +152,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
           @save="value => handleSave('controller', value.toString())"
         >
           <a :href="network.helpers.getExplorerUrl(space.controller, 'contract')" target="_blank">
-            <Stamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(space.controller) }}
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </a>
@@ -161,12 +161,12 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
     </div>
 
     <div>
-      <Label :label="'Auth(s)'" sticky />
+      <UiLabel :label="'Auth(s)'" sticky />
       <div v-for="(auth, i) in space.authenticators" :key="i" class="mx-4 py-3 border-b">
         <a :href="network.helpers.getExplorerUrl(auth, 'contract')" target="_blank" class="flex">
           <h4 class="flex-auto" v-text="network.constants.AUTHS[auth]" />
           <div>
-            <Stamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(auth) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>
@@ -174,7 +174,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
     </div>
 
     <div>
-      <Label :label="'Proposal validation'" sticky />
+      <UiLabel :label="'Proposal validation'" sticky />
       <div class="mx-4 py-3 border-b">
         <a
           :href="network.helpers.getExplorerUrl(space.validation_strategy, 'contract')"
@@ -186,7 +186,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             v-text="network.constants.PROPOSAL_VALIDATIONS[space.validation_strategy]"
           />
           <div>
-            <Stamp
+            <UiStamp
               :id="space.validation_strategy"
               type="avatar"
               :size="18"
@@ -200,7 +200,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
     </div>
 
     <div>
-      <Label :label="'Strategie(s)'" sticky />
+      <UiLabel :label="'Strategie(s)'" sticky />
       <div v-for="(strategy, i) in space.strategies" :key="i" class="mx-4 py-3 border-b">
         <a
           :href="network.helpers.getExplorerUrl(strategy, 'contract')"
@@ -209,7 +209,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
         >
           <h4 class="flex-auto" v-text="network.constants.STRATEGIES[strategy]" />
           <div>
-            <Stamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(strategy) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>
@@ -217,7 +217,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
     </div>
 
     <div>
-      <Label :label="'Execution(s)'" sticky />
+      <UiLabel :label="'Execution(s)'" sticky />
       <div v-for="(executor, i) in space.executors" :key="i" class="mx-4 py-3 border-b">
         <a
           :href="network.helpers.getExplorerUrl(executor, 'contract')"
@@ -233,7 +233,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             "
           />
           <div>
-            <Stamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
+            <UiStamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(executor) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>

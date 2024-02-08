@@ -250,7 +250,7 @@ watchEffect(async () => {
         <div class="s-label" v-text="'Token'" />
         <button class="s-input text-left h-[61px]" @click="handlePickerClick('token')">
           <div class="flex items-center">
-            <Stamp
+            <UiStamp
               v-if="currentToken"
               :id="`${networkId}:${currentToken.contractAddress}`"
               type="token"

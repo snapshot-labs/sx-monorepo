@@ -69,7 +69,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </div>
     <div class="space-y-3">
       <div>
-        <Label label="Delegates" sticky />
+        <UiLabel label="Delegates" sticky />
 
         <table class="text-left table-fixed w-full">
           <colgroup>
@@ -132,7 +132,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
                 <tr v-for="(delegate, i) in delegates" :key="i" class="border-b relative">
                   <td class="text-left flex items-center pl-4 py-3">
-                    <Stamp :id="delegate.id" :size="32" class="mr-3" />
+                    <UiStamp :id="delegate.id" :size="32" class="mr-3" />
                     <div class="overflow-hidden">
                       <a :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')">
                         <div class="leading-[22px]">
