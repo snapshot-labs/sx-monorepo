@@ -15,10 +15,10 @@ function addItem() {
 </script>
 
 <template>
-  <SBase :definition="definition">
+  <UiWrapperInput :definition="definition">
     <div v-for="(item, i) in input" :key="i">
       <SString v-model="input[i]" :definition="{ title: '' }" />
     </div>
     <a @click="addItem">Add</a>
-  </SBase>
+  </UiWrapperInput>
 </template>

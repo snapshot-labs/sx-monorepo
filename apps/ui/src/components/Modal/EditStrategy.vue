@@ -75,7 +75,7 @@ watch(
       @pick="handlePickerSelect"
     />
     <div v-else class="s-box p-4">
-      <SIObject
+      <UiForm
         v-model="form"
         :error="formErrors"
         :definition="definition"

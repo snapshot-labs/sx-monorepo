@@ -1,5 +1,11 @@
+<script lang="ts">
+export default {
+  inheritAttrs: false
+};
+</script>
+
 <script setup lang="ts">
-const model = defineModel<string | number>();
+const model = defineModel<string>();
 
 const props = defineProps<{
   error?: string;
@@ -28,13 +34,12 @@ watch(model, () => {
 </script>
 
 <template>
-  <SBase :definition="definition" :error="error" :dirty="dirty">
-    <input
+  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
+    <textarea
       v-model="inputValue"
-      type="number"
       class="s-input"
       v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
     />
-  </SBase>
+  </UiWrapperInput>
 </template>

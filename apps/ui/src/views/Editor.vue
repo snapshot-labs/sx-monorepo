@@ -287,7 +287,7 @@ export default defineComponent({
       <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>
-      <SIString
+      <UiInputString
         :key="proposalKey || ''"
         v-model="proposal.title"
         :definition="TITLE_DEFINITION"
@@ -308,7 +308,7 @@ export default defineComponent({
       />
       <UiComposer v-else v-model="proposal.body" class="" />
       <div class="s-base mb-4">
-        <SIString
+        <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.discussion"
           :definition="DISCUSSION_DEFINITION"
