@@ -53,7 +53,7 @@ const filteredContacts = computed(() =>
         @click="emit('pick', contact.address)"
       >
         <div class="flex items-center max-w-full">
-          <Stamp :id="contact.address" type="avatar" :size="32" />
+          <UiStamp :id="contact.address" type="avatar" :size="32" />
           <div class="flex flex-col ml-3 leading-[20px] overflow-hidden">
             <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
             <div

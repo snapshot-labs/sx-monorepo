@@ -12,7 +12,7 @@ onMounted(() => load());
 
 <template>
   <div class="pt-4">
-    <Container class="!max-w-screen-lg">
+    <UiContainer class="!max-w-screen-lg">
       <UiLoading v-if="loading && !loaded" class="block" />
       <div v-else>
         <div class="flex space-x-1 items-center text-sm mb-4">
@@ -79,6 +79,6 @@ onMounted(() => load());
           </div>
         </div>
       </div>
-    </Container>
+    </UiContainer>
   </div>
 </template>

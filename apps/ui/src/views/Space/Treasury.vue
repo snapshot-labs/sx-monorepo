@@ -143,7 +143,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     </div>
     <div class="space-y-3">
       <div>
-        <Label label="Treasury" sticky />
+        <UiLabel label="Treasury" sticky />
         <a
           :href="treasuryExplorerUrl || '#'"
           target="_blank"
@@ -152,7 +152,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             'pointer-events-none': !treasuryExplorerUrl
           }"
         >
-          <Stamp :id="treasury.wallet" type="avatar" :size="32" class="mr-3" />
+          <UiStamp :id="treasury.wallet" type="avatar" :size="32" class="mr-3" />
           <div class="flex-1 leading-[22px]">
             <h4 class="text-skin-link" v-text="shorten(treasury.wallet)" />
             <div class="text-skin-text text-sm" v-text="shorten(treasury.wallet)" />
@@ -163,10 +163,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <div>
         <div class="flex pl-4 border-b space-x-3">
           <button type="button" @click="page = 'tokens'">
-            <Link :is-active="page === 'tokens'" text="Tokens" />
+            <UiLink :is-active="page === 'tokens'" text="Tokens" />
           </button>
           <button type="button" @click="page = 'nfts'">
-            <Link :is-active="page === 'nfts'" text="NFTs" />
+            <UiLink :is-active="page === 'nfts'" text="NFTs" />
           </button>
         </div>
         <div v-if="page === 'tokens'">
@@ -192,7 +192,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0">
-              <Stamp
+              <UiStamp
                 :id="`${treasury.networkId}:${asset.contractAddress}`"
                 type="token"
                 :size="32"
@@ -259,7 +259,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               target="_blank"
               class="block max-w-[120px]"
             >
-              <NftPreview :item="nft" class="w-full" />
+              <UiNftImage :item="nft" class="w-full" />
               <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
             </a>
           </div>

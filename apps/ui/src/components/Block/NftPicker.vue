@@ -30,7 +30,7 @@ const filteredNfts = computed(() =>
         class="block hover:opacity-80 transition-opacity"
         @click="emit('pick', nft.id)"
       >
-        <NftPreview :item="nft" class="w-full" />
+        <UiNftImage :item="nft" class="w-full" />
         <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
       </a>
     </div>

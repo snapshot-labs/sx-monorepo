@@ -29,15 +29,19 @@ watchEffect(() => setTitle(`${address.value} user profile`));
       <div class="bg-skin-border h-full top-[-1px]" />
       <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
     </div>
-    <Container slim>
+    <UiContainer slim>
       <div class="text-center mb-4 relative">
-        <Stamp :id="user.id" :size="90" class="mb-2 border-[4px] border-skin-bg !bg-skin-border" />
+        <UiStamp
+          :id="user.id"
+          :size="90"
+          class="mb-2 border-[4px] border-skin-bg !bg-skin-border"
+        />
         <h1>{{ shortenAddress(user.id) }}</h1>
         <div>
           <b class="text-skin-link">{{ _n(user.proposal_count) }}</b> proposals ·
           <b class="text-skin-link">{{ _n(user.vote_count) }}</b> votes
         </div>
       </div>
-    </Container>
+    </UiContainer>
   </div>
 </template>

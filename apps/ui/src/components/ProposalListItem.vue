@@ -67,17 +67,17 @@ async function handleVoteClick(choice: Choice) {
         </span>
       </div>
       <div class="hidden md:block">
-        <Vote :proposal="proposal">
+        <ProposalVote :proposal="proposal">
           <template #unsupported><div /></template>
           <template #waiting><div /></template>
           <template #cancelled><div /></template>
           <template #voted-pending><div /></template>
           <template #voted>
-            <Results v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
             <div v-else />
           </template>
           <template #ended>
-            <Results v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
             <div v-else />
           </template>
           <div class="flex space-x-2 py-2">
@@ -109,7 +109,7 @@ async function handleVoteClick(choice: Choice) {
               </UiButton>
             </UiTooltip>
           </div>
-        </Vote>
+        </ProposalVote>
       </div>
     </div>
     <teleport to="#modal">

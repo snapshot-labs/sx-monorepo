@@ -283,7 +283,7 @@ export default defineComponent({
         </div>
       </div>
     </nav>
-    <Container v-if="proposal" class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
+    <UiContainer v-if="proposal" class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
       <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>
@@ -295,18 +295,18 @@ export default defineComponent({
       />
       <div class="flex space-x-3">
         <button type="button" @click="previewEnabled = false">
-          <Link :is-active="!previewEnabled" text="Write" class="border-transparent" />
+          <UiLink :is-active="!previewEnabled" text="Write" class="border-transparent" />
         </button>
         <button type="button" @click="previewEnabled = true">
-          <Link :is-active="previewEnabled" text="Preview" class="border-transparent" />
+          <UiLink :is-active="previewEnabled" text="Preview" class="border-transparent" />
         </button>
       </div>
-      <Markdown
+      <UiMarkdown
         v-if="previewEnabled"
         class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
         :body="proposal.body"
       />
-      <MarkdownEditor v-else v-model="proposal.body" class="" />
+      <UiComposer v-else v-model="proposal.body" class="" />
       <div class="s-base mb-4">
         <UiInputString
           :key="proposalKey || ''"
@@ -314,7 +314,7 @@ export default defineComponent({
           :definition="DISCUSSION_DEFINITION"
           :error="formErrors.discussion"
         />
-        <Preview :key="proposalKey || ''" :url="proposal.discussion" />
+        <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
       <div
         v-if="
@@ -354,7 +354,7 @@ export default defineComponent({
           class="mb-4"
         />
       </div>
-    </Container>
+    </UiContainer>
     <teleport to="#modal">
       <ModalDrafts
         v-if="networkId && address"
