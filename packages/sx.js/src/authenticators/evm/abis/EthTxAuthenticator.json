@@ -1,0 +1,5 @@
+[
+  "error InvalidFunctionSelector()",
+  "error InvalidMessageSender()",
+  "function authenticate(address target, bytes4 functionSelector, bytes data)"
+]

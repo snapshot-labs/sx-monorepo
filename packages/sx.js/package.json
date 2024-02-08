@@ -1,0 +1,72 @@
+{
+  "name": "@snapshot-labs/sx",
+  "version": "0.1.0-beta.60",
+  "license": "MIT",
+  "main": "dist.cjs/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist.cjs/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "lint:nofix": "eslint ./src ./test --ext .ts",
+    "lint": "yarn lint:nofix --fix",
+    "prepare": "yarn build",
+    "prepublishOnly": "yarn run lint",
+    "node:evm": "anvil",
+    "node:starknet": "OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES starknet-devnet --seed 1",
+    "test": "jest -c test/jest.config.unit.js",
+    "test:integration:starknet": "jest -c test/jest.config.integration.js test/integration/starknet",
+    "test:integration:evm": "jest -c test/jest.config.integration.js test/integration/evm"
+  },
+  "eslintConfig": {
+    "extends": "@snapshot-labs"
+  },
+  "prettier": "@snapshot-labs/prettier-config",
+  "dependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/abstract-signer": "^5.7.0",
+    "@ethersproject/address": "^5.7.0",
+    "@ethersproject/bignumber": "^5.7.0",
+    "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/constants": "^5.7.0",
+    "@ethersproject/contracts": "^5.7.0",
+    "@ethersproject/hash": "^5.6.1",
+    "@ethersproject/keccak256": "^5.7.0",
+    "@ethersproject/providers": "^5.7.0",
+    "@ethersproject/solidity": "^5.7.0",
+    "@ethersproject/wallet": "^5.7.0",
+    "@openzeppelin/merkle-tree": "^1.0.5",
+    "bn.js": "^5.2.1",
+    "cross-fetch": "^3.1.5",
+    "micro-starknet": "^0.2.3",
+    "randombytes": "^2.1.0",
+    "snake-case": "^3.0.4",
+    "starknet": "5.25.0"
+  },
+  "devDependencies": {
+    "@ethersproject/units": "^5.7.0",
+    "@snapshot-labs/eslint-config": "^0.1.0-beta.13",
+    "@snapshot-labs/prettier-config": "0.1.0-beta.11",
+    "@types/bn.js": "^5.1.1",
+    "@types/elliptic": "^6.4.14",
+    "@types/jest": "^29.4.1",
+    "@types/node": "^18.11.9",
+    "eslint": "^8.53.0",
+    "jest": "^29.4.1",
+    "prettier": "^3.1.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist/**/*",
+    "dist.cjs/**/*",
+    "src/**/*"
+  ]
+}

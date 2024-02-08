@@ -1,0 +1,1529 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "InvalidMember",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProof",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "address",
+          "name": "voter",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "params",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "userParams",
+          "type": "bytes"
+        }
+      ],
+      "name": "getVotingPower",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "votingPower",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x608080604052346100165761045c908161001c8239f35b600080fdfe608060409080825260048036101561001657600080fd5b600090813560e01c63871d81b71461002d57600080fd5b346104185760807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261041857803563ffffffff8116036104185760249384359373ffffffffffffffffffffffffffffffffffffffff908186168096036104145767ffffffffffffffff604435818111610410576100b0903690870161041c565b909760643583811161040c57906100ce8a9594939236908a0161041c565b90926020968791810103126103905782019282840393606085126104085783358281116104045784019481601f87011215610404578535918383116103d95760059683881b907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe09485603f8401168b018b8110888211176103ab578e528a528a808b01928201019283116103a757908a808e9695949301915b838310610394575050505001126103905787519188830183811083821117610365578952868401359388851694858103610361578452890135976bffffffffffffffffffffffff94858a168a0361036157888501998a528a5190898201908152868b51168c8301528b82526060820190828210868311176103355760a090828e528351902092608081019384528b835201948186109086111761030a57848c52519020935116036102e357509488955b84518710156102a25786841b85018601519081811015610295578a5285528689205b957fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff811461026a5760010195610217565b8b8a60118b7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b908a528552868920610239565b91879189600188958e3514036102bc575051169051908152f35b83517f09bde339000000000000000000000000000000000000000000000000000000008152fd5b807f73d8c982000000000000000000000000000000000000000000000000000000008a9252fd5b8f8e60418f7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b508f8e60418f7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8c80fd5b8d8c60418d7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8980fd5b823581528e9650918101918c9101610167565b8e80fd5b5050508f8e60418f7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8e8d60418e7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8b80fd5b8a80fd5b8880fd5b8680fd5b8480fd5b5080fd5b9181601f8401121561044a5782359167ffffffffffffffff831161044a576020838186019501011161044a57565b600080fdfea164736f6c6343000812000a",
+    "sourceMap": "419:1556:18:-:0;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x608060409080825260048036101561001657600080fd5b600090813560e01c63871d81b71461002d57600080fd5b346104185760807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261041857803563ffffffff8116036104185760249384359373ffffffffffffffffffffffffffffffffffffffff908186168096036104145767ffffffffffffffff604435818111610410576100b0903690870161041c565b909760643583811161040c57906100ce8a9594939236908a0161041c565b90926020968791810103126103905782019282840393606085126104085783358281116104045784019481601f87011215610404578535918383116103d95760059683881b907fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe09485603f8401168b018b8110888211176103ab578e528a528a808b01928201019283116103a757908a808e9695949301915b838310610394575050505001126103905787519188830183811083821117610365578952868401359388851694858103610361578452890135976bffffffffffffffffffffffff94858a168a0361036157888501998a528a5190898201908152868b51168c8301528b82526060820190828210868311176103355760a090828e528351902092608081019384528b835201948186109086111761030a57848c52519020935116036102e357509488955b84518710156102a25786841b85018601519081811015610295578a5285528689205b957fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff811461026a5760010195610217565b8b8a60118b7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b908a528552868920610239565b91879189600188958e3514036102bc575051169051908152f35b83517f09bde339000000000000000000000000000000000000000000000000000000008152fd5b807f73d8c982000000000000000000000000000000000000000000000000000000008a9252fd5b8f8e60418f7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b508f8e60418f7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8c80fd5b8d8c60418d7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8980fd5b823581528e9650918101918c9101610167565b8e80fd5b5050508f8e60418f7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8e8d60418e7f4e487b7100000000000000000000000000000000000000000000000000000000835252fd5b8b80fd5b8a80fd5b8880fd5b8680fd5b8480fd5b5080fd5b9181601f8401121561044a5782359167ffffffffffffffff831161044a576020838186019501011161044a57565b600080fdfea164736f6c6343000812000a",
+    "sourceMap": "419:1556:18:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;1587:29;;;;;419:1556;;;;1675:43;;419:1556;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1777:18;;;;419:1556;;;;;;;;;;;1777:18;;;419:1556;;;;;;;;;;;;;;;;;;;;1767:29;;419:1556;;;;;;;;;;;;;;;;;;;;;;;;;1744:54;;419:1556;;;1813:20;1809:48;;2096:27:16;2138:13;;2133:116;2171:3;419:1556:18;;2153:16:16;;;;;419:1556:18;;;;;;;;;9038:5:16;;;;;;9238:119;;;;;;;9038:51;2171:3;419:1556:18;;;;;;;2138:13:16;;;419:1556:18;;;;;;;;;;9038:51:16;9238:119;;;;;;;;9038:51;;2153:16;;;;;419:1556:18;2153:16:16;;;419:1556:18;1300:33:16;1871:45:18;1867:72;;419:1556;;;;;;;;;1867:72;419:1556;;1925:14;;;;1809:48;1842:15;;;;;;419:1556;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;419:1556:18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;:::-;;;",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "getVotingPower(uint32,address,bytes,bytes)": "871d81b7"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.18+commit.87f61d96\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"InvalidMember\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"address\",\"name\":\"voter\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"params\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"userParams\",\"type\":\"bytes\"}],\"name\":\"getVotingPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"votingPower\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getVotingPower(uint32,address,bytes,bytes)\":{\"params\":{\"params\":\"Parameter array containing the root the merkle tree containing the whitelist.\",\"userParams\":\"Parameter array containing the desired member of the whitelist and its associated merkle proof.\",\"voter\":\"The address to get the voting power of.\"},\"returns\":{\"votingPower\":\"The voting power of the address if it exists in the whitelist, otherwise reverts.\"}}},\"title\":\"Whitelist Voting Strategy\",\"version\":1},\"userdoc\":{\"errors\":{\"InvalidMember()\":[{\"notice\":\"Error thrown when the proof submitted does not correspond to the `voter` address.\"}],\"InvalidProof()\":[{\"notice\":\"Error thrown when the proof submitted is invalid.\"}]},\"kind\":\"user\",\"methods\":{\"getVotingPower(uint32,address,bytes,bytes)\":{\"notice\":\"Returns the voting power of an address.\"}},\"notice\":\"Allows a variable voting power whitelist that is stored in a merkle tree to be used for voting power.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/voting-strategies/MerkleWhitelistVotingStrategy.sol\":\"MerkleWhitelistVotingStrategy\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\"},\"optimizer\":{\"enabled\":true,\"runs\":10000},\"remappings\":[\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@murky/=lib/murky/src/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@prb/test/=lib/prb-test/src/\",\":@zodiac/=lib/zodiac/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/\",\":forge-gas-snapshot/=lib/forge-gas-snapshot/src/\",\":forge-std/=lib/forge-std/src/\",\":murky/=lib/murky/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":prb-test/=lib/prb-test/src/\",\":safe-contracts/=lib/safe-contracts/contracts/\",\":zodiac/=lib/zodiac/contracts/\"],\"viaIR\":true},\"sources\":{\"lib/forge-std/src/console.sol\":{\"keccak256\":\"0x91d5413c2434ca58fd278b6e1e79fd98d10c83931cc2596a6038eee4daeb34ba\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://91ccea707361e48b9b7a161fe81f496b9932bc471e9c4e4e1e9c283f2453cc70\",\"dweb:/ipfs/QmcB66sZhQ6Kz7MUHcLE78YXRUZxoZnnxZjN6yATsbB2ec\"]},\"lib/openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol\":{\"keccak256\":\"0x9e66713e52d066cf16815737806b6c33028c793a58d140495b5aacb2ae83e4a7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5640abe77c36f9d59a613c5ffdc230503f39c14ece9f3ae89d1e95058de287ec\",\"dweb:/ipfs/QmZjFYTJEXfEwX2A36fcqSWpom2nwzm1rx8f1FVEBLYtWB\"]},\"src/interfaces/IVotingStrategy.sol\":{\"keccak256\":\"0xb97999d3a8b99bbd2d2ab6af81c713e58712c8f64a8b5fd05650ea8402ac4e3e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://58fdfe331e3da03708393ab00678ae33f2fe2b9bca780484c8e5aec1577733f4\",\"dweb:/ipfs/QmQG3vMGucyfhucH4e4Myikn41bntXH5QpsDSYS8kCbtF5\"]},\"src/voting-strategies/MerkleWhitelistVotingStrategy.sol\":{\"keccak256\":\"0x7dfe38b8b0daa35acad3c691b44479abd56a1a6342c3ad29be8167004ff286b3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8f10115f077492a28efbd2c504d52dc7e373b0fa7f6a8177b62ed146e64fbdc7\",\"dweb:/ipfs/QmUJy7bftP26FWgw7K7qJUkyPgmvRA1Voyi8NSNqnqkpmk\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.18+commit.87f61d96"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "InvalidMember"
+        },
+        {
+          "inputs": [],
+          "type": "error",
+          "name": "InvalidProof"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "voter",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "params",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "userParams",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getVotingPower",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "votingPower",
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "getVotingPower(uint32,address,bytes,bytes)": {
+            "params": {
+              "params": "Parameter array containing the root the merkle tree containing the whitelist.",
+              "userParams": "Parameter array containing the desired member of the whitelist and its associated merkle proof.",
+              "voter": "The address to get the voting power of."
+            },
+            "returns": {
+              "votingPower": "The voting power of the address if it exists in the whitelist, otherwise reverts."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "getVotingPower(uint32,address,bytes,bytes)": {
+            "notice": "Returns the voting power of an address."
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        "@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        "@murky/=lib/murky/src/",
+        "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        "@prb/test/=lib/prb-test/src/",
+        "@zodiac/=lib/zodiac/contracts/",
+        "ds-test/=lib/forge-std/lib/ds-test/src/",
+        "erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+        "forge-gas-snapshot/=lib/forge-gas-snapshot/src/",
+        "forge-std/=lib/forge-std/src/",
+        "murky/=lib/murky/",
+        "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+        "prb-test/=lib/prb-test/src/",
+        "safe-contracts/=lib/safe-contracts/contracts/",
+        "zodiac/=lib/zodiac/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 10000
+      },
+      "metadata": {
+        "bytecodeHash": "none"
+      },
+      "compilationTarget": {
+        "src/voting-strategies/MerkleWhitelistVotingStrategy.sol": "MerkleWhitelistVotingStrategy"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "lib/forge-std/src/console.sol": {
+        "keccak256": "0x91d5413c2434ca58fd278b6e1e79fd98d10c83931cc2596a6038eee4daeb34ba",
+        "urls": [
+          "bzz-raw://91ccea707361e48b9b7a161fe81f496b9932bc471e9c4e4e1e9c283f2453cc70",
+          "dweb:/ipfs/QmcB66sZhQ6Kz7MUHcLE78YXRUZxoZnnxZjN6yATsbB2ec"
+        ],
+        "license": "MIT"
+      },
+      "lib/openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol": {
+        "keccak256": "0x9e66713e52d066cf16815737806b6c33028c793a58d140495b5aacb2ae83e4a7",
+        "urls": [
+          "bzz-raw://5640abe77c36f9d59a613c5ffdc230503f39c14ece9f3ae89d1e95058de287ec",
+          "dweb:/ipfs/QmZjFYTJEXfEwX2A36fcqSWpom2nwzm1rx8f1FVEBLYtWB"
+        ],
+        "license": "MIT"
+      },
+      "src/interfaces/IVotingStrategy.sol": {
+        "keccak256": "0xb97999d3a8b99bbd2d2ab6af81c713e58712c8f64a8b5fd05650ea8402ac4e3e",
+        "urls": [
+          "bzz-raw://58fdfe331e3da03708393ab00678ae33f2fe2b9bca780484c8e5aec1577733f4",
+          "dweb:/ipfs/QmQG3vMGucyfhucH4e4Myikn41bntXH5QpsDSYS8kCbtF5"
+        ],
+        "license": "MIT"
+      },
+      "src/voting-strategies/MerkleWhitelistVotingStrategy.sol": {
+        "keccak256": "0x7dfe38b8b0daa35acad3c691b44479abd56a1a6342c3ad29be8167004ff286b3",
+        "urls": [
+          "bzz-raw://8f10115f077492a28efbd2c504d52dc7e373b0fa7f6a8177b62ed146e64fbdc7",
+          "dweb:/ipfs/QmUJy7bftP26FWgw7K7qJUkyPgmvRA1Voyi8NSNqnqkpmk"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "src/voting-strategies/MerkleWhitelistVotingStrategy.sol",
+    "id": 25824,
+    "exportedSymbols": {
+      "IVotingStrategy": [25718],
+      "MerkleProof": [25700],
+      "MerkleWhitelistVotingStrategy": [25823],
+      "console": [16594]
+    },
+    "nodeType": "SourceUnit",
+    "src": "33:1943:18",
+    "nodes": [
+      {
+        "id": 25720,
+        "nodeType": "PragmaDirective",
+        "src": "33:24:18",
+        "nodes": [],
+        "literals": ["solidity", "^", "0.8", ".18"]
+      },
+      {
+        "id": 25722,
+        "nodeType": "ImportDirective",
+        "src": "59:89:18",
+        "nodes": [],
+        "absolutePath": "lib/openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol",
+        "file": "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 25824,
+        "sourceUnit": 25701,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 25721,
+              "name": "MerkleProof",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 25700,
+              "src": "68:11:18",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 25724,
+        "nodeType": "ImportDirective",
+        "src": "149:68:18",
+        "nodes": [],
+        "absolutePath": "src/interfaces/IVotingStrategy.sol",
+        "file": "../interfaces/IVotingStrategy.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 25824,
+        "sourceUnit": 25719,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 25723,
+              "name": "IVotingStrategy",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 25718,
+              "src": "158:15:18",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 25726,
+        "nodeType": "ImportDirective",
+        "src": "218:48:18",
+        "nodes": [],
+        "absolutePath": "lib/forge-std/src/console.sol",
+        "file": "forge-std/console.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 25824,
+        "sourceUnit": 16595,
+        "symbolAliases": [
+          {
+            "foreign": {
+              "id": 25725,
+              "name": "console",
+              "nodeType": "Identifier",
+              "overloadedDeclarations": [],
+              "referencedDeclaration": 16594,
+              "src": "227:7:18",
+              "typeDescriptions": {}
+            },
+            "nameLocation": "-1:-1:-1"
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "id": 25823,
+        "nodeType": "ContractDefinition",
+        "src": "419:1556:18",
+        "nodes": [
+          {
+            "id": 25732,
+            "nodeType": "ErrorDefinition",
+            "src": "549:21:18",
+            "nodes": [],
+            "documentation": {
+              "id": 25730,
+              "nodeType": "StructuredDocumentation",
+              "src": "483:61:18",
+              "text": "@notice Error thrown when the proof submitted is invalid."
+            },
+            "errorSelector": "09bde339",
+            "name": "InvalidProof",
+            "nameLocation": "555:12:18",
+            "parameters": {
+              "id": 25731,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "567:2:18"
+            }
+          },
+          {
+            "id": 25735,
+            "nodeType": "ErrorDefinition",
+            "src": "674:22:18",
+            "nodes": [],
+            "documentation": {
+              "id": 25733,
+              "nodeType": "StructuredDocumentation",
+              "src": "576:93:18",
+              "text": "@notice Error thrown when the proof submitted does not correspond to the `voter` address."
+            },
+            "errorSelector": "73d8c982",
+            "name": "InvalidMember",
+            "nameLocation": "680:13:18",
+            "parameters": {
+              "id": 25734,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "693:2:18"
+            }
+          },
+          {
+            "id": 25740,
+            "nodeType": "StructDefinition",
+            "src": "758:143:18",
+            "nodes": [],
+            "canonicalName": "MerkleWhitelistVotingStrategy.Member",
+            "members": [
+              {
+                "constant": false,
+                "id": 25737,
+                "mutability": "mutable",
+                "name": "addr",
+                "nameLocation": "828:4:18",
+                "nodeType": "VariableDeclaration",
+                "scope": 25740,
+                "src": "820:12:18",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 25736,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "820:7:18",
+                  "stateMutability": "nonpayable",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 25739,
+                "mutability": "mutable",
+                "name": "vp",
+                "nameLocation": "892:2:18",
+                "nodeType": "VariableDeclaration",
+                "scope": 25740,
+                "src": "885:9:18",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint96",
+                  "typeString": "uint96"
+                },
+                "typeName": {
+                  "id": 25738,
+                  "name": "uint96",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "885:6:18",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint96",
+                    "typeString": "uint96"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Member",
+            "nameLocation": "765:6:18",
+            "scope": 25823,
+            "visibility": "public"
+          },
+          {
+            "id": 25822,
+            "nodeType": "FunctionDefinition",
+            "src": "1356:617:18",
+            "nodes": [],
+            "body": {
+              "id": 25821,
+              "nodeType": "Block",
+              "src": "1562:411:18",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [25756],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 25756,
+                      "mutability": "mutable",
+                      "name": "root",
+                      "nameLocation": "1580:4:18",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 25821,
+                      "src": "1572:12:18",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 25755,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1572:7:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 25764,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 25759,
+                        "name": "params",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 25747,
+                        "src": "1598:6:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_calldata_ptr",
+                          "typeString": "bytes calldata"
+                        }
+                      },
+                      {
+                        "components": [
+                          {
+                            "id": 25761,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1607:7:18",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_bytes32_$",
+                              "typeString": "type(bytes32)"
+                            },
+                            "typeName": {
+                              "id": 25760,
+                              "name": "bytes32",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1607:7:18",
+                              "typeDescriptions": {}
+                            }
+                          }
+                        ],
+                        "id": 25762,
+                        "isConstant": false,
+                        "isInlineArray": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "TupleExpression",
+                        "src": "1606:9:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_bytes32_$",
+                          "typeString": "type(bytes32)"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_calldata_ptr",
+                          "typeString": "bytes calldata"
+                        },
+                        {
+                          "typeIdentifier": "t_type$_t_bytes32_$",
+                          "typeString": "type(bytes32)"
+                        }
+                      ],
+                      "expression": {
+                        "id": 25757,
+                        "name": "abi",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": -1,
+                        "src": "1587:3:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_abi",
+                          "typeString": "abi"
+                        }
+                      },
+                      "id": 25758,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberLocation": "1591:6:18",
+                      "memberName": "decode",
+                      "nodeType": "MemberAccess",
+                      "src": "1587:10:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_abidecode_pure$__$returns$__$",
+                        "typeString": "function () pure"
+                      }
+                    },
+                    "id": 25763,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1587:29:18",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1572:44:18"
+                },
+                {
+                  "assignments": [25769, 25772],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 25769,
+                      "mutability": "mutable",
+                      "name": "proof",
+                      "nameLocation": "1644:5:18",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 25821,
+                      "src": "1627:22:18",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_bytes32_$dyn_memory_ptr",
+                        "typeString": "bytes32[]"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 25767,
+                          "name": "bytes32",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1627:7:18",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "id": 25768,
+                        "nodeType": "ArrayTypeName",
+                        "src": "1627:9:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                          "typeString": "bytes32[]"
+                        }
+                      },
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 25772,
+                      "mutability": "mutable",
+                      "name": "member",
+                      "nameLocation": "1665:6:18",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 25821,
+                      "src": "1651:20:18",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Member_$25740_memory_ptr",
+                        "typeString": "struct MerkleWhitelistVotingStrategy.Member"
+                      },
+                      "typeName": {
+                        "id": 25771,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 25770,
+                          "name": "Member",
+                          "nameLocations": ["1651:6:18"],
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 25740,
+                          "src": "1651:6:18"
+                        },
+                        "referencedDeclaration": 25740,
+                        "src": "1651:6:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Member_$25740_storage_ptr",
+                          "typeString": "struct MerkleWhitelistVotingStrategy.Member"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 25782,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 25775,
+                        "name": "userParams",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 25749,
+                        "src": "1686:10:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_calldata_ptr",
+                          "typeString": "bytes calldata"
+                        }
+                      },
+                      {
+                        "components": [
+                          {
+                            "baseExpression": {
+                              "id": 25777,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "nodeType": "ElementaryTypeNameExpression",
+                              "src": "1699:7:18",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_bytes32_$",
+                                "typeString": "type(bytes32)"
+                              },
+                              "typeName": {
+                                "id": 25776,
+                                "name": "bytes32",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "1699:7:18",
+                                "typeDescriptions": {}
+                              }
+                            },
+                            "id": 25778,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "IndexAccess",
+                            "src": "1699:9:18",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_array$_t_bytes32_$dyn_memory_ptr_$",
+                              "typeString": "type(bytes32[] memory)"
+                            }
+                          },
+                          {
+                            "id": 25779,
+                            "name": "Member",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 25740,
+                            "src": "1710:6:18",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_struct$_Member_$25740_storage_ptr_$",
+                              "typeString": "type(struct MerkleWhitelistVotingStrategy.Member storage pointer)"
+                            }
+                          }
+                        ],
+                        "id": 25780,
+                        "isConstant": false,
+                        "isInlineArray": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "TupleExpression",
+                        "src": "1698:19:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_tuple$_t_type$_t_array$_t_bytes32_$dyn_memory_ptr_$_$_t_type$_t_struct$_Member_$25740_storage_ptr_$_$",
+                          "typeString": "tuple(type(bytes32[] memory),type(struct MerkleWhitelistVotingStrategy.Member storage pointer))"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_calldata_ptr",
+                          "typeString": "bytes calldata"
+                        },
+                        {
+                          "typeIdentifier": "t_tuple$_t_type$_t_array$_t_bytes32_$dyn_memory_ptr_$_$_t_type$_t_struct$_Member_$25740_storage_ptr_$_$",
+                          "typeString": "tuple(type(bytes32[] memory),type(struct MerkleWhitelistVotingStrategy.Member storage pointer))"
+                        }
+                      ],
+                      "expression": {
+                        "id": 25773,
+                        "name": "abi",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": -1,
+                        "src": "1675:3:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_abi",
+                          "typeString": "abi"
+                        }
+                      },
+                      "id": 25774,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "memberLocation": "1679:6:18",
+                      "memberName": "decode",
+                      "nodeType": "MemberAccess",
+                      "src": "1675:10:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_abidecode_pure$__$returns$__$",
+                        "typeString": "function () pure"
+                      }
+                    },
+                    "id": 25781,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1675:43:18",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$_t_array$_t_bytes32_$dyn_memory_ptr_$_t_struct$_Member_$25740_memory_ptr_$",
+                      "typeString": "tuple(bytes32[] memory,struct MerkleWhitelistVotingStrategy.Member memory)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1626:92:18"
+                },
+                {
+                  "assignments": [25784],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 25784,
+                      "mutability": "mutable",
+                      "name": "leaf",
+                      "nameLocation": "1737:4:18",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 25821,
+                      "src": "1729:12:18",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 25783,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1729:7:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 25797,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "arguments": [
+                                  {
+                                    "id": 25792,
+                                    "name": "member",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 25772,
+                                    "src": "1788:6:18",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Member_$25740_memory_ptr",
+                                      "typeString": "struct MerkleWhitelistVotingStrategy.Member memory"
+                                    }
+                                  }
+                                ],
+                                "expression": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_struct$_Member_$25740_memory_ptr",
+                                      "typeString": "struct MerkleWhitelistVotingStrategy.Member memory"
+                                    }
+                                  ],
+                                  "expression": {
+                                    "id": 25790,
+                                    "name": "abi",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": -1,
+                                    "src": "1777:3:18",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_magic_abi",
+                                      "typeString": "abi"
+                                    }
+                                  },
+                                  "id": 25791,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1781:6:18",
+                                  "memberName": "encode",
+                                  "nodeType": "MemberAccess",
+                                  "src": "1777:10:18",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_function_abiencode_pure$__$returns$_t_bytes_memory_ptr_$",
+                                    "typeString": "function () pure returns (bytes memory)"
+                                  }
+                                },
+                                "id": 25793,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": false,
+                                "kind": "functionCall",
+                                "lValueRequested": false,
+                                "nameLocations": [],
+                                "names": [],
+                                "nodeType": "FunctionCall",
+                                "src": "1777:18:18",
+                                "tryCall": false,
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_bytes_memory_ptr",
+                                  "typeString": "bytes memory"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bytes_memory_ptr",
+                                  "typeString": "bytes memory"
+                                }
+                              ],
+                              "id": 25789,
+                              "name": "keccak256",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": -8,
+                              "src": "1767:9:18",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                                "typeString": "function (bytes memory) pure returns (bytes32)"
+                              }
+                            },
+                            "id": 25794,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "nameLocations": [],
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "1767:29:18",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes32",
+                              "typeString": "bytes32"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes32",
+                              "typeString": "bytes32"
+                            }
+                          ],
+                          "expression": {
+                            "id": 25787,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "1754:5:18",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_bytes_storage_ptr_$",
+                              "typeString": "type(bytes storage pointer)"
+                            },
+                            "typeName": {
+                              "id": 25786,
+                              "name": "bytes",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "1754:5:18",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 25788,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "1760:6:18",
+                          "memberName": "concat",
+                          "nodeType": "MemberAccess",
+                          "src": "1754:12:18",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_bytesconcat_pure$__$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function () pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 25795,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1754:43:18",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "id": 25785,
+                      "name": "keccak256",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": -8,
+                      "src": "1744:9:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (bytes memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 25796,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1744:54:18",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1729:69:18"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    },
+                    "id": 25801,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "expression": {
+                        "id": 25798,
+                        "name": "member",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 25772,
+                        "src": "1813:6:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Member_$25740_memory_ptr",
+                          "typeString": "struct MerkleWhitelistVotingStrategy.Member memory"
+                        }
+                      },
+                      "id": 25799,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberLocation": "1820:4:18",
+                      "memberName": "addr",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 25737,
+                      "src": "1813:11:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "id": 25800,
+                      "name": "voter",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 25745,
+                      "src": "1828:5:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "1813:20:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 25805,
+                  "nodeType": "IfStatement",
+                  "src": "1809:48:18",
+                  "trueBody": {
+                    "errorCall": {
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "id": 25802,
+                        "name": "InvalidMember",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 25735,
+                        "src": "1842:13:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_error_pure$__$returns$__$",
+                          "typeString": "function () pure"
+                        }
+                      },
+                      "id": 25803,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1842:15:18",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_tuple$__$",
+                        "typeString": "tuple()"
+                      }
+                    },
+                    "id": 25804,
+                    "nodeType": "RevertStatement",
+                    "src": "1835:22:18"
+                  }
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "id": 25813,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "arguments": [
+                        {
+                          "id": 25808,
+                          "name": "proof",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 25769,
+                          "src": "1890:5:18",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_bytes32_$dyn_memory_ptr",
+                            "typeString": "bytes32[] memory"
+                          }
+                        },
+                        {
+                          "id": 25809,
+                          "name": "root",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 25756,
+                          "src": "1897:4:18",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        {
+                          "id": 25810,
+                          "name": "leaf",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 25784,
+                          "src": "1903:4:18",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_array$_t_bytes32_$dyn_memory_ptr",
+                            "typeString": "bytes32[] memory"
+                          },
+                          {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          },
+                          {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        ],
+                        "expression": {
+                          "id": 25806,
+                          "name": "MerkleProof",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 25700,
+                          "src": "1871:11:18",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_contract$_MerkleProof_$25700_$",
+                            "typeString": "type(library MerkleProof)"
+                          }
+                        },
+                        "id": 25807,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberLocation": "1883:6:18",
+                        "memberName": "verify",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 25220,
+                        "src": "1871:18:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_internal_pure$_t_array$_t_bytes32_$dyn_memory_ptr_$_t_bytes32_$_t_bytes32_$returns$_t_bool_$",
+                          "typeString": "function (bytes32[] memory,bytes32,bytes32) pure returns (bool)"
+                        }
+                      },
+                      "id": 25811,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1871:37:18",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "hexValue": "74727565",
+                      "id": 25812,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "bool",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1912:4:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      },
+                      "value": "true"
+                    },
+                    "src": "1871:45:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 25817,
+                  "nodeType": "IfStatement",
+                  "src": "1867:72:18",
+                  "trueBody": {
+                    "errorCall": {
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "id": 25814,
+                        "name": "InvalidProof",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 25732,
+                        "src": "1925:12:18",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_error_pure$__$returns$__$",
+                          "typeString": "function () pure"
+                        }
+                      },
+                      "id": 25815,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1925:14:18",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_tuple$__$",
+                        "typeString": "tuple()"
+                      }
+                    },
+                    "id": 25816,
+                    "nodeType": "RevertStatement",
+                    "src": "1918:21:18"
+                  }
+                },
+                {
+                  "expression": {
+                    "expression": {
+                      "id": 25818,
+                      "name": "member",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 25772,
+                      "src": "1957:6:18",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Member_$25740_memory_ptr",
+                        "typeString": "struct MerkleWhitelistVotingStrategy.Member memory"
+                      }
+                    },
+                    "id": 25819,
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberLocation": "1964:2:18",
+                    "memberName": "vp",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 25739,
+                    "src": "1957:9:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint96",
+                      "typeString": "uint96"
+                    }
+                  },
+                  "functionReturnParameters": 25754,
+                  "id": 25820,
+                  "nodeType": "Return",
+                  "src": "1950:16:18"
+                }
+              ]
+            },
+            "baseFunctions": [25717],
+            "documentation": {
+              "id": 25741,
+              "nodeType": "StructuredDocumentation",
+              "src": "907:444:18",
+              "text": "@notice Returns the voting power of an address.\n @param voter The address to get the voting power of.\n @param params Parameter array containing the root the merkle tree containing the whitelist.\n @param userParams Parameter array containing the desired member of the whitelist and its associated merkle proof.\n @return votingPower The voting power of the address if it exists in the whitelist, otherwise reverts."
+            },
+            "functionSelector": "871d81b7",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getVotingPower",
+            "nameLocation": "1365:14:18",
+            "overrides": {
+              "id": 25751,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1523:8:18"
+            },
+            "parameters": {
+              "id": 25750,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 25743,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 25822,
+                  "src": "1389:6:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 25742,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1389:6:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 25745,
+                  "mutability": "mutable",
+                  "name": "voter",
+                  "nameLocation": "1431:5:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 25822,
+                  "src": "1423:13:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 25744,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1423:7:18",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 25747,
+                  "mutability": "mutable",
+                  "name": "params",
+                  "nameLocation": "1461:6:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 25822,
+                  "src": "1446:21:18",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 25746,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1446:5:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 25749,
+                  "mutability": "mutable",
+                  "name": "userParams",
+                  "nameLocation": "1492:10:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 25822,
+                  "src": "1477:25:18",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 25748,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1477:5:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1379:129:18"
+            },
+            "returnParameters": {
+              "id": 25754,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 25753,
+                  "mutability": "mutable",
+                  "name": "votingPower",
+                  "nameLocation": "1549:11:18",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 25822,
+                  "src": "1541:19:18",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 25752,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1541:7:18",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1540:21:18"
+            },
+            "scope": 25823,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 25728,
+              "name": "IVotingStrategy",
+              "nameLocations": ["461:15:18"],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 25718,
+              "src": "461:15:18"
+            },
+            "id": 25729,
+            "nodeType": "InheritanceSpecifier",
+            "src": "461:15:18"
+          }
+        ],
+        "canonicalName": "MerkleWhitelistVotingStrategy",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 25727,
+          "nodeType": "StructuredDocumentation",
+          "src": "268:151:18",
+          "text": "@title Whitelist Voting Strategy\n @notice Allows a variable voting power whitelist that is stored in a merkle tree to be used for voting power."
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [25823, 25718],
+        "name": "MerkleWhitelistVotingStrategy",
+        "nameLocation": "428:29:18",
+        "scope": 25824,
+        "usedErrors": [25732, 25735]
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 18
+}
