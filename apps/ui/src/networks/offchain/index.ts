@@ -92,7 +92,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             decimals: parseInt(strategy.params.decimals || 0),
             symbol: strategy.params.symbol,
             token: ''
-          };
+          } as VotingPower;
         });
       }
     }
