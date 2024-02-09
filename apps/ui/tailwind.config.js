@@ -78,8 +78,8 @@ module.exports = {
       lg: ['22px'],
       md: ['20px'],
       base: ['18px'],
-      sm: ['17px'],
-      xs: ['13px']
+      sm: ['16px'],
+      xs: ['14px']
     }
   }
 };

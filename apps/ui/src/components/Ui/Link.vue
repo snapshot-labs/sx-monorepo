@@ -17,7 +17,7 @@ defineProps<{
     />
     <span
       v-if="count"
-      class="inline-block bg-skin-border text-skin-link text-xs rounded-full px-[6px] ml-2"
+      class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-[6px] ml-2"
       v-text="_n(count, 'compact')"
     />
   </div>

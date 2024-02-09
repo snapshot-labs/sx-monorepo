@@ -166,7 +166,7 @@ const parsed = computed(() => {
   }
 
   code {
-    @apply bg-skin-border text-[16px] rounded-md px-[6px] py-[2px];
+    @apply bg-skin-border text-sm rounded-md px-[6px] py-[2px];
   }
 
   li {
