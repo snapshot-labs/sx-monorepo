@@ -83,11 +83,12 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
 
         return body.result.vp_by_strategy.map((vp: number, index: number) => {
           const strategy = strategiesParams[index];
+          const decimals = parseInt(strategy.params.decimals || 0);
 
           return {
             address: strategy.name,
-            value: BigInt(vp),
-            decimals: parseInt(strategy.params.decimals || 0),
+            value: BigInt(vp * 10 ** decimals),
+            decimals,
             symbol: strategy.params.symbol,
             token: strategy.params.address
           } as VotingPower;
