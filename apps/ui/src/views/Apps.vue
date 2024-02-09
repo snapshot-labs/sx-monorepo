@@ -36,7 +36,7 @@ watch(
           v-if="results.length"
           class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
         >
-          <App v-for="(app, i) in results" :key="i" :app="app" />
+          <AppsListItem v-for="(app, i) in results" :key="i" :app="app" />
         </div>
         <div v-else class="flex items-center text-skin-link">
           <IH-exclamation-circle class="inline-block mr-2" />
@@ -46,7 +46,11 @@ watch(
       <div v-else>
         <UiLink text="Featured" class="inline-block" />
         <div class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-          <App v-for="(app, i) in apps.filter(({ featured }) => featured)" :key="i" :app="app" />
+          <AppsListItem
+            v-for="(app, i) in apps.filter(({ featured }) => featured)"
+            :key="i"
+            :app="app"
+          />
         </div>
         <div v-for="(category, i) in categories" :key="i">
           <UiLink
@@ -55,7 +59,7 @@ watch(
             class="inline-block"
           />
           <div class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-            <App
+            <AppsListItem
               v-for="(app, j) in apps.filter(app => category === app.category)"
               :key="j"
               :app="app"
