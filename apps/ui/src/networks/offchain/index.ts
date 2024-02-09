@@ -77,7 +77,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
               address: voterAddress,
               space: '',
               strategies: strategiesParams,
-              snapshot: block || 'latest'
+              snapshot: block ?? 'latest'
             }
           })
         });
