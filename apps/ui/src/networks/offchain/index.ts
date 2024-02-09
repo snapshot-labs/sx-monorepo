@@ -9,10 +9,7 @@ const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
 
-const SCORE_URLS: Partial<Record<NetworkID, string | undefined>> = {
-  s: 'https://score.snapshot.org',
-  's-tn': 'https://score.snapshot.org'
-};
+const SCORE_URL = 'https://score.snapshot.org';
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
   const l1ChainId = 1;
@@ -65,7 +62,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         voterAddress: string,
         block: number | null
       ): Promise<VotingPower[]> => {
-        const result = await fetch(`${SCORE_URLS[networkId]}`, {
+        const result = await fetch(SCORE_URL, {
           method: 'POST',
           headers: {
             Accept: 'application/json',
