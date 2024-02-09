@@ -45,7 +45,7 @@ async function getVotingPower() {
       props.space.strategies_params,
       props.space.strategies_parsed_metadata,
       web3.value.account,
-      supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0
+      { at: supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0 }
     );
   } catch (e) {
     console.warn('Failed to load voting power', e);

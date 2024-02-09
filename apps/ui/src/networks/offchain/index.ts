@@ -1,7 +1,7 @@
 import { createApi } from './api';
 import * as constants from './constants';
 import { pinPineapple } from '@/helpers/pin';
-import { Network, VotingPower } from '@/networks/types';
+import { Network, VotingPower, SnapshotInfo } from '@/networks/types';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
@@ -60,7 +60,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         strategiesParams: any[],
         strategiesMetadata: StrategyParsedMetadata[],
         voterAddress: string,
-        block: number | null
+        snapshotInfo: SnapshotInfo
       ): Promise<VotingPower[]> => {
         const result = await fetch(SCORE_URL, {
           method: 'POST',
@@ -74,7 +74,8 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
               address: voterAddress,
               space: '',
               strategies: strategiesParams,
-              snapshot: block ?? 'latest'
+              network: snapshotInfo.network ?? l1ChainId,
+              snapshot: snapshotInfo.at ?? 'latest'
             }
           })
         });

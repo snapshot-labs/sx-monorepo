@@ -63,6 +63,11 @@ export type StrategyConfig = StrategyTemplate & {
   params: Record<string, any>;
 };
 
+export type SnapshotInfo = {
+  at: number | null;
+  network?: string;
+};
+
 export type VotingPower = {
   address: string;
   value: bigint;
@@ -79,7 +84,7 @@ type ReadOnlyNetworkActions = {
     strategiesParams: any[],
     strategiesMetadata: StrategyParsedMetadata[],
     voterAddress: string,
-    current: number | null
+    snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
 };
 
