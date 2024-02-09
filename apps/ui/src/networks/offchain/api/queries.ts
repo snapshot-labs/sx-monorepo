@@ -5,6 +5,7 @@ const SPACE_FRAGMENT = gql`
     id
     admins
     name
+    network
     about
     website
     twitter
@@ -41,6 +42,7 @@ const PROPOSAL_FRAGMENT = gql`
     space {
       id
       name
+      network
       admins
       symbol
     }

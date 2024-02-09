@@ -2,6 +2,7 @@ export type ApiSpace = {
   id: string;
   admins: string[];
   name: string;
+  network: string;
   about: string;
   website: string;
   twitter: string;
@@ -34,6 +35,7 @@ export type ApiProposal = {
   space: {
     id: string;
     name: string;
+    network: string;
     admins: string[];
     symbol: string;
   };
