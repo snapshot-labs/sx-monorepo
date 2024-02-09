@@ -37,7 +37,14 @@ export type ApiProposal = {
     admins: string[];
     symbol: string;
   };
-  type: string;
+  type:
+    | 'basic'
+    | 'single-choice'
+    | 'approval'
+    | 'ranked-choice'
+    | 'quadratic'
+    | 'weighted'
+    | 'custom';
   title: string;
   body: string;
   discussion: string;
