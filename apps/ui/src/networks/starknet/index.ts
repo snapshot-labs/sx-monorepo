@@ -113,7 +113,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     getExplorerUrl: (id, type) => {
       let dataType: 'tx' | 'contract' | 'token' = 'tx';
       if (type === 'token') dataType = 'token';
-      else if (['address', 'contract'].includes(type)) dataType = 'contract';
+      else if (['address', 'contract', 'strategy'].includes(type)) dataType = 'contract';
 
       return `${explorerUrl}/${dataType}/${id}`;
     }

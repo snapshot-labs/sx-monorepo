@@ -74,6 +74,7 @@ export type VotingPower = {
   decimals: number;
   token: string | null;
   symbol: string;
+  chain_id?: number;
 };
 
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
@@ -215,7 +216,11 @@ export type NetworkHelpers = {
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
-  getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract' | 'token'): string;
+  getExplorerUrl(
+    id: string,
+    type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
+    chain_id?: number
+  ): string;
 };
 
 type BaseNetwork = {

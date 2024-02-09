@@ -3,12 +3,12 @@ import * as constants from './constants';
 import { pinPineapple } from '@/helpers/pin';
 import { Network, VotingPower, SnapshotInfo } from '@/networks/types';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
+import networks from '@/helpers/networks.json';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
-
 const SCORE_URL = 'https://score.snapshot.org';
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
@@ -27,16 +27,21 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     waitForSpace: () => {
       throw new Error('Not implemented');
     },
-    getExplorerUrl: (id: string, type: 'transaction' | 'address' | 'contract' | 'token') => {
-      if (type === 'transaction') {
-        return `https://signator.io/view?ipfs=${id}`;
+    getExplorerUrl: (
+      id: string,
+      type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
+      chain_id: number
+    ) => {
+      switch (type) {
+        case 'transaction':
+          return `https://signator.io/view?ipfs=${id}`;
+        case 'strategy':
+          return `https://snapshot.org/#/strategy/${id}`;
+        case 'contract':
+          return `${networks[chain_id.toString()].explorer}/address/${id}`;
+        default:
+          throw new Error('Not implemented');
       }
-
-      if (type === 'contract') {
-        return '';
-      }
-
-      throw new Error('Not implemented');
     }
   };
 
@@ -90,7 +95,8 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             value: BigInt(vp * 10 ** decimals),
             decimals,
             symbol: strategy.params.symbol,
-            token: strategy.params.address
+            token: strategy.params.address,
+            chain_id: strategy.params.network
           } as VotingPower;
         });
       }
