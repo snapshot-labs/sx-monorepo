@@ -35,7 +35,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         return `https://signator.io/view?ipfs=${id}`;
       }
 
-      if (type === 'contract' && !id.startsWith('0x')) {
+      if (type === 'contract') {
         return '';
       }
 
@@ -91,7 +91,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             value: BigInt(vp),
             decimals: parseInt(strategy.params.decimals || 0),
             symbol: strategy.params.symbol,
-            token: ''
+            token: strategy.params.address
           } as VotingPower;
         });
       }
