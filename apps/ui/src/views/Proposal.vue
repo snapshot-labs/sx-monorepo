@@ -148,7 +148,7 @@ watchEffect(() => {
             !network?.readOnly
           "
         >
-          <SpaceIndicatorVotingPower
+          <IndicatorVotingPower
             v-if="web3.account && networkId"
             v-slot="props"
             :network-id="networkId"
@@ -164,7 +164,7 @@ watchEffect(() => {
                 {{ props.formattedVotingPower }}
               </button>
             </div>
-          </SpaceIndicatorVotingPower>
+          </IndicatorVotingPower>
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
           <ProposalVote v-if="proposal" :proposal="proposal">
             <div class="flex space-x-2 py-2">
