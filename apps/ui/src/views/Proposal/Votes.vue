@@ -194,7 +194,10 @@ watch([sortBy, choiceFilter], () => {
                 >
                   <div class="leading-[22px]">
                     <h4 v-text="vote.voter.name || shortenAddress(vote.voter.id)" />
-                    <div class="text-sm text-skin-text" v-text="shortenAddress(vote.voter.id)" />
+                    <div
+                      class="text-[17px] text-skin-text"
+                      v-text="shortenAddress(vote.voter.id)"
+                    />
                   </div>
                 </router-link>
               </div>
@@ -202,7 +205,7 @@ watch([sortBy, choiceFilter], () => {
             <td class="relative hidden lg:table-cell">
               <div class="leading-[22px]">
                 <h4>{{ _rt(vote.created) }}</h4>
-                <div class="text-sm">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
+                <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
               </div>
             </td>
             <td class="relative">
@@ -234,7 +237,7 @@ watch([sortBy, choiceFilter], () => {
                   {{ proposal.space.voting_power_symbol }}
                 </h4>
               </div>
-              <div class="text-sm">{{ _n((vote.vp / proposal.scores_total) * 100) }}%</div>
+              <div class="text-[17px]">{{ _n((vote.vp / proposal.scores_total) * 100) }}%</div>
             </td>
             <td class="relative">
               <div class="flex justify-center">

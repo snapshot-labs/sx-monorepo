@@ -141,7 +141,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                             v-text="delegate.name || shorten(delegate.id)"
                           />
                           <div
-                            class="text-sm text-skin-text truncate"
+                            class="text-[17px] text-skin-text truncate"
                             v-text="shorten(delegate.id)"
                           />
                         </div>
@@ -153,11 +153,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       class="text-skin-link"
                       v-text="_n(delegate.tokenHoldersRepresentedAmount)"
                     />
-                    <div class="text-sm" v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`" />
+                    <div
+                      class="text-[17px]"
+                      v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`"
+                    />
                   </td>
                   <td class="text-right pr-4 align-middle">
                     <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
-                    <div class="text-sm" v-text="`${delegate.votesPercentage.toFixed(3)}%`" />
+                    <div class="text-[17px]" v-text="`${delegate.votesPercentage.toFixed(3)}%`" />
                   </td>
                 </tr>
                 <template #loading>

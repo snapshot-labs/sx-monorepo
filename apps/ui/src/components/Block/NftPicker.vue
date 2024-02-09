@@ -31,7 +31,7 @@ const filteredNfts = computed(() =>
         @click="emit('pick', nft.id)"
       >
         <UiNftImage :item="nft" class="w-full" />
-        <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
+        <div class="mt-2 text-[17px] truncate">{{ nft.displayTitle }}</div>
       </a>
     </div>
   </template>

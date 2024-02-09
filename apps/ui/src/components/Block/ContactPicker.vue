@@ -57,7 +57,7 @@ const filteredContacts = computed(() =>
           <div class="flex flex-col ml-3 leading-5 overflow-hidden">
             <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
             <div
-              class="text-sm text-ellipsis overflow-hidden"
+              class="text-[17px] text-ellipsis overflow-hidden"
               v-text="shortenAddress(contact.address)"
             />
           </div>

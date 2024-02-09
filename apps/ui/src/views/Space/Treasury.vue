@@ -155,7 +155,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <UiStamp :id="treasury.wallet" type="avatar" :size="32" class="mr-3" />
           <div class="flex-1 leading-[22px]">
             <h4 class="text-skin-link" v-text="shorten(treasury.wallet)" />
-            <div class="text-skin-text text-sm" v-text="shorten(treasury.wallet)" />
+            <div class="text-skin-text text-[17px]" v-text="shorten(treasury.wallet)" />
           </div>
           <h3 v-text="`$${_n(totalQuote.toFixed())}`" />
         </a>
@@ -200,7 +200,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               />
               <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
                 <h4 class="truncate" v-text="asset.symbol" />
-                <div class="text-sm truncate text-skin-text" v-text="asset.name" />
+                <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
               </div>
             </div>
             <div
@@ -211,7 +211,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 class="text-skin-link"
                 v-text="`$${_n(asset.price, 'standard', { maximumFractionDigits: 2 })}`"
               />
-              <div v-if="asset.change" class="text-sm">
+              <div v-if="asset.change" class="text-[17px]">
                 <div
                   v-if="asset.change > 0"
                   class="text-skin-success"
@@ -236,7 +236,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               />
               <div
                 v-if="asset.value"
-                class="text-sm text-skin-text"
+                class="text-[17px] text-skin-text"
                 v-text="`$${_n(asset.value, 'standard', { maximumFractionDigits: 2 })}`"
               />
             </div>
@@ -260,7 +260,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               class="block max-w-[120px]"
             >
               <UiNftImage :item="nft" class="w-full" />
-              <div class="mt-2 text-sm truncate">{{ nft.displayTitle }}</div>
+              <div class="mt-2 text-[17px] truncate">{{ nft.displayTitle }}</div>
             </a>
           </div>
         </div>

@@ -13,7 +13,7 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="flex gap-3 justify-between items-center w-full py-2 px-3 rounded border text-sm"
+    class="flex gap-3 justify-between items-center w-full py-2 px-3 rounded border text-[17px]"
     :class="{
       'bg-rose-100 border-rose-300 text-rose-500 dark:bg-rose-700 dark:border-rose-700 dark:text-neutral-100':
         type === 'error',

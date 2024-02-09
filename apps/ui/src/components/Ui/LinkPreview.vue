@@ -37,7 +37,7 @@ debouncedWatch(
       <div class="text-skin-link truncate" v-text="preview.meta.title" />
       <div
         v-if="preview.meta.description"
-        class="text-sm text-skin-text truncate"
+        class="text-[17px] text-skin-text truncate"
         v-text="preview.meta.description"
       />
     </div>

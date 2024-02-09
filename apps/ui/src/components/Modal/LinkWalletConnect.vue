@@ -120,7 +120,7 @@ watch(loading, () => {
           <strong class="text-skin-link">{{ proposal.proposer.metadata.name }}</strong>
           <span> wants to connect</span>
         </span>
-        <div class="text-sm font-bold text-skin-link">{{ proposal.proposer.metadata.url }}</div>
+        <div class="text-[17px] font-bold text-skin-link">{{ proposal.proposer.metadata.url }}</div>
       </div>
     </div>
     <template #footer>

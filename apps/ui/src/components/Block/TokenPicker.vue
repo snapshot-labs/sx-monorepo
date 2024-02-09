@@ -129,7 +129,7 @@ watch(
         <UiStamp :id="`${networkId}:${asset.contractAddress}`" type="token" :size="32" />
         <div class="flex flex-col ml-3 leading-5 min-w-0">
           <div class="text-skin-link" v-text="shorten(asset.symbol, 'symbol')" />
-          <div class="text-sm truncate" v-text="shorten(asset.name, 24)" />
+          <div class="text-[17px] truncate" v-text="shorten(asset.name, 24)" />
         </div>
       </div>
       <div class="flex flex-col items-end leading-5">
@@ -137,7 +137,7 @@ watch(
           class="text-skin-link"
           v-text="_n(formatUnits(asset.tokenBalance || 0, asset.decimals || 0))"
         />
-        <div class="text-sm" v-text="`$${_n(asset.price)}`" />
+        <div class="text-[17px]" v-text="`$${_n(asset.price)}`" />
       </div>
     </div>
   </template>
