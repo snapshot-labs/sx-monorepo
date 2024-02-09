@@ -89,7 +89,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
           return {
             address: strategy.name,
             value: BigInt(vp),
-            decimals: strategy.params.decimals || 0,
+            decimals: parseInt(strategy.params.decimals || 0),
             symbol: strategy.params.symbol,
             token: ''
           };
