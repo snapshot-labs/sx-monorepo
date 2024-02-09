@@ -142,7 +142,7 @@ watchEffect(() => {
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l"
       >
         <template v-if="!proposal.cancelled && ['pending', 'active'].includes(proposal.state)">
-          <VotingPowerIndicator
+          <IndicatorVotingPower
             v-if="web3.account && networkId"
             v-slot="props"
             :network-id="networkId"
@@ -158,8 +158,7 @@ watchEffect(() => {
                 {{ props.formattedVotingPower }}
               </button>
             </div>
-          </VotingPowerIndicator>
-
+          </IndicatorVotingPower>
           <template v-if="!network?.readOnly">
             <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
             <ProposalVote v-if="proposal" :proposal="proposal">

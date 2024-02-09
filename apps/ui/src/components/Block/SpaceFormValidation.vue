@@ -98,7 +98,7 @@ watch(
         </div>
       </div>
       <div v-if="!model" class="flex flex-wrap gap-2">
-        <StrategyButton
+        <ButtonStrategy
           v-for="strategy in availableStrategies"
           :key="strategy.address"
           :strategy="strategy"

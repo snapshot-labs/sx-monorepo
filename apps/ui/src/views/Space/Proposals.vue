@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ProposalStatusIcon from '@/components/ProposalStatusIcon.vue';
+import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { Space } from '@/types';
 import { VotingPower } from '@/networks/types';
@@ -98,26 +98,26 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
             {
               key: 'pending',
               label: 'Pending',
-              component: ProposalStatusIcon,
+              component: ProposalIconStatus,
               componentProps: { ...selectIconBaseProps, state: 'pending' }
             },
             {
               key: 'active',
               label: 'Active',
-              component: ProposalStatusIcon,
+              component: ProposalIconStatus,
               componentProps: { ...selectIconBaseProps, state: 'active' }
             },
             {
               key: 'closed',
               label: 'Closed',
-              component: ProposalStatusIcon,
+              component: ProposalIconStatus,
               componentProps: { ...selectIconBaseProps, state: 'passed' }
             }
           ]"
         />
       </div>
       <div class="flex flex-row p-4 space-x-2">
-        <VotingPowerIndicator
+        <IndicatorVotingPower
           :network-id="space.network"
           :loading="loadingVotingPower"
           :voting-power-symbol="space.voting_power_symbol"

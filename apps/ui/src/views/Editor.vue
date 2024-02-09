@@ -262,7 +262,7 @@ export default defineComponent({
           </router-link>
           <h4 class="py-2 inline-block">New proposal</h4>
         </div>
-        <PendingTransactionsIndicator class="mr-2" />
+        <IndicatorPendingTransactions class="mr-2" />
         <UiLoading v-if="!space" class="block p-4" />
         <div v-else class="space-x-2">
           <UiButton

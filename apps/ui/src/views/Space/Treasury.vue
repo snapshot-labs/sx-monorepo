@@ -2,7 +2,7 @@
 import { _n, _c, shorten, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork, evmNetworks } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { NetworkID, Space, Transaction, SelectedStrategy } from '@/types';
+import { NetworkID, Space, Transaction } from '@/types';
 import type { Token } from '@/helpers/alchemy';
 
 const props = defineProps<{ space: Space }>();
