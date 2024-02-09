@@ -22,7 +22,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="relative">
-    <div v-if="showPicker" class="absolute top-[20px] right-3 z-10">
+    <div v-if="showPicker" class="absolute top-3.5 right-3 z-10">
       <a @click="emit('pick', path || '')"><IH-identification /></a>
     </div>
     <UiInputString v-bind="$attrs as any" class="!pr-7" />

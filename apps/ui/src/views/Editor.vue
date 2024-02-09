@@ -263,7 +263,7 @@ export default defineComponent({
         <UiLoading v-if="!space" class="block p-4" />
         <div v-else class="space-x-2">
           <UiButton
-            class="float-left leading-3 !pl-3 !pr-[12px] rounded-r-none"
+            class="float-left leading-3 !pl-3 !pr-2.5 rounded-r-none"
             @click="modalOpen = true"
           >
             <IH-collection class="inline-block" />

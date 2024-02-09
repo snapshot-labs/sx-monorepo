@@ -49,12 +49,12 @@ const filteredContacts = computed(() =>
         v-for="contact in filteredContacts"
         :key="contact.address"
         role="button"
-        class="px-3 py-[12px] border-b last:border-0 flex justify-between"
+        class="px-3 py-2.5 border-b last:border-0 flex justify-between"
         @click="emit('pick', contact.address)"
       >
         <div class="flex items-center max-w-full">
           <UiStamp :id="contact.address" type="avatar" :size="32" />
-          <div class="flex flex-col ml-3 leading-[20px] overflow-hidden">
+          <div class="flex flex-col ml-3 leading-5 overflow-hidden">
             <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
             <div
               class="text-sm text-ellipsis overflow-hidden"

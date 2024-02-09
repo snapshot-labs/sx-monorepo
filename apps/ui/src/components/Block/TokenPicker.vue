@@ -122,17 +122,17 @@ watch(
       v-for="(asset, i) in filteredAssets"
       :key="i"
       role="button"
-      class="px-3 py-[12px] border-b last:border-0 flex justify-between"
+      class="px-3 py-2.5 border-b last:border-0 flex justify-between"
       @click="handlePick(asset)"
     >
       <div class="flex items-center min-w-0 pr-2">
         <UiStamp :id="`${networkId}:${asset.contractAddress}`" type="token" :size="32" />
-        <div class="flex flex-col ml-3 leading-[20px] min-w-0">
+        <div class="flex flex-col ml-3 leading-5 min-w-0">
           <div class="text-skin-link" v-text="shorten(asset.symbol, 'symbol')" />
           <div class="text-sm truncate" v-text="shorten(asset.name, 24)" />
         </div>
       </div>
-      <div class="flex flex-col items-end leading-[20px]">
+      <div class="flex flex-col items-end leading-5">
         <div
           class="text-skin-link"
           v-text="_n(formatUnits(asset.tokenBalance || 0, asset.decimals || 0))"

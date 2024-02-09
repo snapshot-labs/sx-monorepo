@@ -76,17 +76,14 @@ const results = computed(() =>
           class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
           :class="`_${result.choice}`"
         >
-          <IH-check
-            v-if="result.choice === 1"
-            class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
-          />
+          <IH-check v-if="result.choice === 1" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
           <IH-x
             v-else-if="result.choice === 2"
-            class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
+            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
           />
           <IH-minus-sm
             v-else-if="result.choice === 3"
-            class="text-white w-[14px] h-[14px] mt-[2px] ml-[2px]"
+            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
           />
         </div>
         <span
@@ -103,7 +100,7 @@ const results = computed(() =>
       </div>
     </div>
     <div
-      class="rounded-full h-[6px] overflow-hidden"
+      class="rounded-full h-1.5 overflow-hidden"
       :style="{
         width: withDetails ? '100%' : `${width}px`
       }"

@@ -22,7 +22,7 @@ defineProps<{ state: ProposalState }>();
       'bg-skin-danger': state === 'rejected',
       '!text-skin-bg': state === 'passed'
     }"
-    class="inline-block rounded-full pl-2 pr-[10px] pb-[2px] text-white mb-2"
+    class="inline-block rounded-full pl-2 pr-[10px] pb-0.5 text-white mb-2"
   >
     <IS-clock
       v-if="state === 'pending'"
