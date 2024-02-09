@@ -65,7 +65,7 @@ export type StrategyConfig = StrategyTemplate & {
 
 export type SnapshotInfo = {
   at: number | null;
-  network?: string;
+  chain_id?: number;
 };
 
 export type VotingPower = {

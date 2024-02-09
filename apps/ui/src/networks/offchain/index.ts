@@ -74,7 +74,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
               address: voterAddress,
               space: '',
               strategies: strategiesParams,
-              network: snapshotInfo.network ?? l1ChainId,
+              network: snapshotInfo.chain_id ?? l1ChainId,
               snapshot: snapshotInfo.at ?? 'latest'
             }
           })
