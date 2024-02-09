@@ -36,7 +36,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
       }
 
       if (type === 'contract' && !id.startsWith('0x')) {
-        return;
+        return '';
       }
 
       throw new Error('Not implemented');
