@@ -38,7 +38,8 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         case 'strategy':
           return `https://snapshot.org/#/strategy/${id}`;
         case 'contract':
-          return `${networks[chain_id.toString()].explorer}/address/${id}`;
+          const network = networks[chain_id.toString()];
+          return network ? `${network.explorer}/address/${id}` : '';
         default:
           throw new Error('Not implemented');
       }
