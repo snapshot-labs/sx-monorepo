@@ -19,7 +19,7 @@ onMounted(() => fetch({ controller: web3Account.value }));
       </div>
       <div v-else-if="loaded" class="max-w-screen-md">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-          <SpaceListItem v-for="space in spaces" :key="space.id" :space="space" />
+          <SpacesListItem v-for="space in spaces" :key="space.id" :space="space" />
         </div>
       </div>
     </UiContainer>
