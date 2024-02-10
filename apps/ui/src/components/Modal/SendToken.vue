@@ -229,7 +229,7 @@ watchEffect(async () => {
         "
         @add="handleAddCustomToken"
       />
-      <BlockContactPicker
+      <PickerContact
         v-else-if="pickerType === 'contact'"
         :loading="false"
         :search-value="searchValue"

@@ -105,7 +105,7 @@ watchEffect(async () => {
       </template>
     </template>
     <template v-if="showPicker">
-      <BlockContactPicker
+      <PickerContact
         :loading="false"
         :search-value="searchValue"
         @pick="

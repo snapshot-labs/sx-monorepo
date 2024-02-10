@@ -105,7 +105,7 @@ watch(
         </div>
       </template>
     </template>
-    <BlockContactPicker
+    <PickerContact
       v-if="showPicker"
       :loading="false"
       :search-value="searchValue"

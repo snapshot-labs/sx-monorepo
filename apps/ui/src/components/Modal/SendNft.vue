@@ -149,7 +149,7 @@ watchEffect(async () => {
           showPicker = false;
         "
       />
-      <BlockContactPicker
+      <PickerContact
         v-else-if="pickerType === 'contact'"
         :loading="false"
         :search-value="searchValue"

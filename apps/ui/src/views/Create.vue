@@ -290,11 +290,7 @@ watchEffect(() => setTitle('Create space'));
             />
           </div>
         </template>
-        <BlockContactPicker
-          :loading="false"
-          :search-value="searchValue"
-          @pick="handlePickerSelect"
-        />
+        <PickerContact :loading="false" :search-value="searchValue" @pick="handlePickerSelect" />
       </UiModal>
     </teleport>
   </div>
