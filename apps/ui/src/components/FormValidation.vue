@@ -110,7 +110,7 @@ watch(
         <span class="mb-3 inline-block">
           Select strategies that will be used to compute proposal
         </span>
-        <BlockStrategiesConfigurator
+        <StrategiesConfigurator
           v-model="votingStrategies"
           :available-strategies="availableVotingStrategies"
         />
