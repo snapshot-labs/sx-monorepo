@@ -55,7 +55,7 @@ async function getVotingPower() {
       proposal.value.strategies_params,
       proposal.value.space.strategies_parsed_metadata,
       web3.value.account,
-      { at: proposal.value.snapshot, chain_id: proposal.value.space.chain_id }
+      { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
     );
   } catch (e) {
     console.warn('Failed to load voting power', e);

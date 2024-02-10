@@ -181,7 +181,7 @@ async function getVotingPower() {
       web3.value.account,
       {
         at: supportsNullCurrent(space.value.network) ? null : getCurrent(space.value.network) || 0,
-        chain_id: space.value.chain_id
+        chainId: space.value.snapshot_chain_id
       }
     );
 

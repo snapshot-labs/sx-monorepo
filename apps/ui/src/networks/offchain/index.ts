@@ -30,7 +30,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     getExplorerUrl: (
       id: string,
       type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-      chain_id: number
+      chainId: number
     ) => {
       switch (type) {
         case 'transaction':
@@ -38,7 +38,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         case 'strategy':
           return `https://snapshot.org/#/strategy/${id}`;
         case 'contract':
-          const network = networks[chain_id.toString()];
+          const network = networks[chainId.toString()];
           return network ? `${network.explorer}/address/${id}` : '';
         default:
           throw new Error('Not implemented');
@@ -80,7 +80,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
               address: voterAddress,
               space: '',
               strategies: strategiesParams,
-              network: snapshotInfo.chain_id ?? l1ChainId,
+              network: snapshotInfo.chainId ?? l1ChainId,
               snapshot: snapshotInfo.at ?? 'latest'
             }
           })
@@ -97,7 +97,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             decimals,
             symbol: strategy.params.symbol,
             token: strategy.params.address,
-            chain_id: strategy.params.network
+            chainId: strategy.params.network
           } as VotingPower;
         });
       }

@@ -84,7 +84,6 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   return {
     ...space,
     network: networkId,
-    chain_id: CHAIN_IDS[networkId],
     name: space.metadata.name,
     avatar: space.metadata.avatar,
     cover: space.metadata.cover,
@@ -126,7 +125,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,
-      chain_id: CHAIN_IDS[networkId],
       avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,
       authenticators: proposal.space.authenticators,

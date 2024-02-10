@@ -47,7 +47,7 @@ async function getVotingPower() {
       web3.value.account,
       {
         at: supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0,
-        chain_id: props.space.chain_id
+        chainId: props.space.snapshot_chain_id
       }
     );
   } catch (e) {

@@ -31,7 +31,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     id: space.id,
     controller: space.admins[0] ?? '',
     network: networkId,
-    chain_id: parseInt(space.network),
+    snapshot_chain_id: parseInt(space.network),
     name: space.name,
     avatar: '',
     cover: '',
@@ -107,7 +107,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     space: {
       id: proposal.space.id,
       name: proposal.space.name,
-      chain_id: parseInt(proposal.space.network),
+      snapshot_chain_id: parseInt(proposal.space.network),
       avatar: '',
       controller: proposal.space.admins[0] ?? '',
       voting_power_symbol: proposal.space.symbol,

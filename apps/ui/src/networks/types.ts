@@ -65,7 +65,7 @@ export type StrategyConfig = StrategyTemplate & {
 
 export type SnapshotInfo = {
   at: number | null;
-  chain_id?: number;
+  chainId?: number;
 };
 
 export type VotingPower = {
@@ -74,7 +74,7 @@ export type VotingPower = {
   decimals: number;
   token: string | null;
   symbol: string;
-  chain_id?: number;
+  chainId?: number;
 };
 
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
@@ -219,7 +219,7 @@ export type NetworkHelpers = {
   getExplorerUrl(
     id: string,
     type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-    chain_id?: number
+    chainId?: number
   ): string;
 };
 
