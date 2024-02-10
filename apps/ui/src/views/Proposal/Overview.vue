@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ProposalExecutionActions from '@/components/ProposalExecutionActions.vue';
 import {
   _rt,
   _n,
@@ -211,7 +212,7 @@ async function handleCancelClick() {
           <span>Actions</span>
         </h4>
         <div class="mb-4">
-          <BlockActions :proposal="proposal" />
+          <ProposalExecutionActions :proposal="proposal" />
         </div>
       </div>
       <div>
