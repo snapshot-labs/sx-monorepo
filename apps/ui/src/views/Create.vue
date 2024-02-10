@@ -165,7 +165,7 @@ watchEffect(() => setTitle('Create space'));
 
 <template>
   <div>
-    <BlockCreationConfirmation
+    <CreateDeploymentProgress
       v-if="confirming && salt && predictedSpaceAddress && validationStrategy"
       :network-id="selectedNetworkId"
       :salt="salt"
