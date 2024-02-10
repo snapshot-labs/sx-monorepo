@@ -200,7 +200,7 @@ watchEffect(() => setTitle('Create space'));
       </div>
       <div class="flex-1">
         <div class="mt-8 lg:mt-0">
-          <BlockSpaceFormProfile
+          <FormProfile
             v-if="currentPage === 'profile'"
             :form="metadataForm"
             :delegations-value="metadataForm.delegations"
@@ -209,18 +209,15 @@ watchEffect(() => setTitle('Create space'));
             @no-network="metadataForm.walletAddress = null"
             @errors="v => handleErrors('profile', v)"
           />
-          <BlockSpaceFormNetwork
-            v-else-if="currentPage === 'network'"
-            v-model="selectedNetworkId"
-          />
-          <BlockSpaceFormStrategies
+          <FormNetwork v-else-if="currentPage === 'network'" v-model="selectedNetworkId" />
+          <FormStrategies
             v-else-if="currentPage === 'strategies'"
             v-model="votingStrategies"
             :available-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
             title="Voting strategies"
             description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
           />
-          <BlockSpaceFormStrategies
+          <FormStrategies
             v-else-if="currentPage === 'auths'"
             v-model="authenticators"
             unique
@@ -228,7 +225,7 @@ watchEffect(() => setTitle('Create space'));
             title="Authenticators"
             description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
           />
-          <BlockSpaceFormValidation
+          <FormValidation
             v-else-if="currentPage === 'validations'"
             v-model="validationStrategy"
             :available-strategies="selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS"
@@ -238,20 +235,20 @@ watchEffect(() => setTitle('Create space'));
             title="Proposal validation"
             description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
           />
-          <BlockSpaceFormStrategies
+          <FormStrategies
             v-else-if="currentPage === 'executions'"
             v-model="executionStrategies"
             :available-strategies="selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES"
             title="Execution strategies"
             description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."
           />
-          <BlockSpaceFormVoting
+          <FormVoting
             v-else-if="currentPage === 'voting'"
             :form="settingsForm"
             :selected-network-id="selectedNetworkId"
             @errors="v => handleErrors('voting', v)"
           />
-          <BlockSpaceFormController
+          <FormController
             v-else-if="currentPage === 'controller'"
             v-model="controller"
             @errors="v => handleErrors('controller', v)"

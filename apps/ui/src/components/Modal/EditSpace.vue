@@ -111,7 +111,7 @@ watch(
       :search-value="searchValue"
       @pick="handlePickerSelect"
     />
-    <BlockSpaceFormProfile
+    <FormProfile
       v-else
       :id="space.id"
       :space="space"
