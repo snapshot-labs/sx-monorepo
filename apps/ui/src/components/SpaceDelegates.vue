@@ -129,7 +129,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 <IH-exclamation-circle class="inline-block mr-2" />
                 Failed to load delegates.
               </td>
-              <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
+              <UiContainerInfiniteScroll
+                :loading-more="loadingMore"
+                @end-reached="handleEndReached"
+              >
                 <tr v-for="(delegate, i) in delegates" :key="i" class="border-b relative">
                   <td class="text-left flex items-center pl-4 py-3">
                     <UiStamp :id="delegate.id" :size="32" class="mr-3" />
@@ -168,7 +171,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     <UiLoading class="p-4 block" />
                   </td>
                 </template>
-              </BlockInfiniteScroller>
+              </UiContainerInfiniteScroll>
             </tbody>
           </template>
         </table>

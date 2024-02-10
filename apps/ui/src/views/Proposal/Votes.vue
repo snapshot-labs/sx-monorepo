@@ -163,7 +163,7 @@ watch([sortBy, choiceFilter], () => {
           <IH-exclamation-circle class="inline-block mr-2" />
           <span v-text="'There are no votes here.'" />
         </td>
-        <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
+        <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
           <template #loading>
             <td colspan="5">
               <UiLoading class="px-4 py-3 block" />
@@ -278,7 +278,7 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </td>
           </tr>
-        </BlockInfiniteScroller>
+        </UiContainerInfiniteScroll>
       </tbody>
     </template>
   </table>
