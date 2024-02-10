@@ -49,9 +49,7 @@ const baseNetwork = computed(() =>
         <div class="flex justify-between">
           <a
             v-if="strategy.token"
-            :href="
-              baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chain_id)
-            "
+            :href="baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)"
             target="_blank"
             class="flex items-center text-skin-text"
           >
