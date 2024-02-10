@@ -215,7 +215,7 @@ watchEffect(async () => {
       </template>
     </template>
     <template v-if="showPicker">
-      <BlockTokenPicker
+      <PickerToken
         v-if="pickerType === 'token'"
         :assets="allAssets"
         :address="address"
