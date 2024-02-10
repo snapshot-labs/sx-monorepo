@@ -10,6 +10,10 @@ const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
 const SCORE_URL = 'https://score.snapshot.org';
+const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
+  s: 'https://snapshot.org',
+  's-tn': 'https://testnet.snapshot.org'
+};
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
   const l1ChainId = 1;
@@ -36,7 +40,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         case 'transaction':
           return `https://signator.io/view?ipfs=${id}`;
         case 'strategy':
-          return `https://snapshot.org/#/strategy/${id}`;
+          return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
         case 'contract': {
           const network = chainId && networks[chainId.toString()];
           return network ? `${network.explorer}/address/${id}` : '';
@@ -98,7 +102,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             decimals,
             symbol: strategy.params.symbol,
             token: strategy.params.address,
-            chainId: strategy.network
+            chainId: strategy.network ? parseInt(strategy.network) : undefined
           } as VotingPower;
         });
       }
