@@ -23,7 +23,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       />
     </a>
   </div>
-  <BlockDelegates
+  <SpaceDelegates
     v-if="delegateData"
     :key="activeDelegationId"
     :space="space"
