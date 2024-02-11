@@ -1,12 +1,18 @@
 import { createApi } from './api';
 import * as constants from './constants';
 import { pinPineapple } from '@/helpers/pin';
-import { Network } from '@/networks/types';
-import { NetworkID } from '@/types';
+import { Network, VotingPower, SnapshotInfo } from '@/networks/types';
+import { NetworkID, StrategyParsedMetadata } from '@/types';
+import networks from '@/helpers/networks.json';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
+};
+const SCORE_URL = 'https://score.snapshot.org';
+const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
+  s: 'https://snapshot.org',
+  's-tn': 'https://testnet.snapshot.org'
 };
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
@@ -25,12 +31,23 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     waitForSpace: () => {
       throw new Error('Not implemented');
     },
-    getExplorerUrl: (id: string, type: 'transaction' | 'address' | 'contract' | 'token') => {
-      if (type === 'transaction') {
-        return `https://signator.io/view?ipfs=${id}`;
+    getExplorerUrl: (
+      id: string,
+      type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
+      chainId?: number
+    ) => {
+      switch (type) {
+        case 'transaction':
+          return `https://signator.io/view?ipfs=${id}`;
+        case 'strategy':
+          return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
+        case 'contract': {
+          const network = chainId && networks[chainId.toString()];
+          return network ? `${network.explorer}/address/${id}` : '';
+        }
+        default:
+          throw new Error('Not implemented');
       }
-
-      throw new Error('Not implemented');
     }
   };
 
@@ -49,7 +66,46 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     constants,
     helpers,
     actions: {
-      getVotingPower: () => Promise.resolve([])
+      getVotingPower: async (
+        strategiesAddresses: string[],
+        strategiesParams: any[],
+        strategiesMetadata: StrategyParsedMetadata[],
+        voterAddress: string,
+        snapshotInfo: SnapshotInfo
+      ): Promise<VotingPower[]> => {
+        const result = await fetch(SCORE_URL, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'get_vp',
+            params: {
+              address: voterAddress,
+              space: '',
+              strategies: strategiesParams,
+              network: snapshotInfo.chainId ?? l1ChainId,
+              snapshot: snapshotInfo.at ?? 'latest'
+            }
+          })
+        });
+        const body = await result.json();
+
+        return body.result.vp_by_strategy.map((vp: number, index: number) => {
+          const strategy = strategiesParams[index];
+          const decimals = parseInt(strategy.params.decimals || 0);
+
+          return {
+            address: strategy.name,
+            value: BigInt(vp * 10 ** decimals),
+            decimals,
+            symbol: strategy.params.symbol,
+            token: strategy.params.address,
+            chainId: strategy.network ? parseInt(strategy.network) : undefined
+          } as VotingPower;
+        });
+      }
     }
   };
 }

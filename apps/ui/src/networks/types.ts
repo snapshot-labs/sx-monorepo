@@ -63,12 +63,18 @@ export type StrategyConfig = StrategyTemplate & {
   params: Record<string, any>;
 };
 
+export type SnapshotInfo = {
+  at: number | null;
+  chainId?: number;
+};
+
 export type VotingPower = {
   address: string;
   value: bigint;
   decimals: number;
   token: string | null;
   symbol: string;
+  chainId?: number;
 };
 
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
@@ -79,7 +85,7 @@ type ReadOnlyNetworkActions = {
     strategiesParams: any[],
     strategiesMetadata: StrategyParsedMetadata[],
     voterAddress: string,
-    current: number | null
+    snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
 };
 
@@ -210,7 +216,11 @@ export type NetworkHelpers = {
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
-  getExplorerUrl(id: string, type: 'transaction' | 'address' | 'contract' | 'token'): string;
+  getExplorerUrl(
+    id: string,
+    type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
+    chainId?: number
+  ): string;
 };
 
 type BaseNetwork = {

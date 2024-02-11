@@ -45,7 +45,10 @@ async function getVotingPower() {
       props.space.strategies_params,
       props.space.strategies_parsed_metadata,
       web3.value.account,
-      supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0
+      {
+        at: supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0,
+        chainId: props.space.snapshot_chain_id
+      }
     );
   } catch (e) {
     console.warn('Failed to load voting power', e);
@@ -113,14 +116,14 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           ]"
         />
       </div>
-      <div v-if="!network.readOnly" class="flex flex-row p-4 space-x-2">
+      <div class="flex flex-row p-4 space-x-2">
         <IndicatorVotingPower
           :network-id="space.network"
           :loading="loadingVotingPower"
           :voting-power-symbol="space.voting_power_symbol"
           :voting-powers="votingPowers"
         />
-        <router-link :to="{ name: 'editor' }">
+        <router-link v-if="!network.readOnly" :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />

@@ -5,6 +5,7 @@ const SPACE_FRAGMENT = gql`
     id
     admins
     name
+    network
     about
     website
     twitter
@@ -24,6 +25,11 @@ const SPACE_FRAGMENT = gql`
       period
       quorum
     }
+    strategies {
+      name
+      params
+      network
+    }
     proposalsCount
     votesCount
   }
@@ -36,6 +42,7 @@ const PROPOSAL_FRAGMENT = gql`
     space {
       id
       name
+      network
       admins
       symbol
     }
@@ -52,6 +59,11 @@ const PROPOSAL_FRAGMENT = gql`
     scores
     scores_total
     state
+    strategies {
+      name
+      params
+      network
+    }
     created
     updated
     votes

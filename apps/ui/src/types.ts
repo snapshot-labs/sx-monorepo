@@ -64,6 +64,7 @@ export type StrategyParsedMetadata = {
 export type Space = {
   id: string;
   network: NetworkID;
+  snapshot_chain_id?: number;
   name: string;
   avatar: string;
   cover: string;
@@ -106,6 +107,7 @@ export type Proposal = {
   space: {
     id: string;
     name: string;
+    snapshot_chain_id?: number;
     avatar: string;
     controller: string;
     voting_power_symbol: string;
