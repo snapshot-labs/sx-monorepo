@@ -35,7 +35,7 @@ const spacesStore = useSpacesStore();
       />
       <img
         :src="(currentNetwork && getUrl(currentNetwork.avatar)) ?? undefined"
-        class="w-[18px] h-[18px] rounded-full -right-[6px] bottom-0 absolute border-2 border-skin-bg"
+        class="w-[18px] h-[18px] rounded-full -right-1.5 bottom-0 absolute border-2 border-skin-bg"
       />
     </div>
     <button
@@ -52,7 +52,7 @@ const spacesStore = useSpacesStore();
       <h3 class="truncate mb-1" v-text="space.name" />
       <h5 class="line-clamp-2 leading-6" v-text="space.about" />
     </div>
-    <h5 class="absolute bottom-4 px-4 text-sm">
+    <h5 class="absolute bottom-4 px-4 text-[17px]">
       <b class="text-skin-link" v-text="_n(space.proposal_count)" /> proposals ·
       <b class="text-skin-link" v-text="_n(space.vote_count)" /> votes
     </h5>

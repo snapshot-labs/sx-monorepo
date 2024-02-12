@@ -59,10 +59,13 @@ module.exports = {
     },
     spacing: {
       0: '0px',
+      0.5: '2px',
       1: '4px',
+      1.5: '6px',
       2: '8px',
-      2.5: '14px',
+      2.5: '12px',
       3: '16px',
+      3.5: '20px',
       4: '24px',
       5: '32px',
       6: '40px',
@@ -78,8 +81,8 @@ module.exports = {
       lg: ['22px'],
       md: ['20px'],
       base: ['18px'],
-      sm: ['17px'],
-      xs: ['13px']
+      sm: ['16px'],
+      xs: ['14px']
     }
   }
 };

@@ -263,7 +263,7 @@ watchEffect(async () => {
           </div>
         </button>
       </div>
-      <div class="grid grid-cols-2 gap-[12px]">
+      <div class="grid grid-cols-2 gap-2.5">
         <div class="relative">
           <UiInputNumber
             :model-value="form.amount"

@@ -64,7 +64,7 @@ watch(route, to => {
           @click="uiStore.toggleSidebar"
         />
         <div v-if="currentRouteName === 'space'" class="flex items-center flex-1 px-2 py-3 h-full">
-          <IH-search class="mr-[12px] flex-shrink-0" :class="{ 'text-skin-link': focused }" />
+          <IH-search class="mr-2.5 flex-shrink-0" :class="{ 'text-skin-link': focused }" />
           <form class="flex flex-grow" @submit="handleSearchSubmit">
             <input
               ref="searchInput"

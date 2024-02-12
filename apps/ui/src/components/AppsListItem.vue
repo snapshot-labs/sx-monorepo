@@ -9,6 +9,6 @@ defineProps<{ app: any }>();
   >
     <img :src="app.avatar" class="w-[32px] h-[32px] rounded-lg mb-2" />
     <h4 v-text="app.name" />
-    <div class="text-skin-text text-sm" v-text="app.category" />
+    <div class="text-skin-text text-[17px]" v-text="app.category" />
   </router-link>
 </template>
