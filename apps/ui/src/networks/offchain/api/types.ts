@@ -2,6 +2,7 @@ export type ApiSpace = {
   id: string;
   admins: string[];
   name: string;
+  network: string;
   about: string;
   website: string;
   twitter: string;
@@ -23,6 +24,7 @@ export type ApiSpace = {
     period: number | null;
     quorum: number | null;
   };
+  strategies: { network: string; params: Record<string, any>; name: string }[];
   proposalsCount: number;
   votesCount: number;
 };
@@ -33,10 +35,18 @@ export type ApiProposal = {
   space: {
     id: string;
     name: string;
+    network: string;
     admins: string[];
     symbol: string;
   };
-  type: 'basic' | 'single-choice' | string;
+  type:
+    | 'basic'
+    | 'single-choice'
+    | 'approval'
+    | 'ranked-choice'
+    | 'quadratic'
+    | 'weighted'
+    | 'custom';
   title: string;
   body: string;
   discussion: string;
@@ -49,6 +59,7 @@ export type ApiProposal = {
   scores: number[];
   scores_total: number;
   state: 'active' | 'pending' | 'closed';
+  strategies: { network: string; params: Record<string, any>; name: string }[];
   created: number;
   updated: number | null;
   votes: number;

@@ -23,6 +23,7 @@ import type {
   NetworkActions,
   NetworkConstants,
   NetworkHelpers,
+  SnapshotInfo,
   StrategyConfig,
   VotingPower
 } from '@/networks/types';
@@ -451,7 +452,7 @@ export function createActions(
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
-      timestamp: number | null
+      snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
@@ -464,7 +465,7 @@ export function createActions(
             address,
             voterAddress,
             strategyMetadata,
-            timestamp,
+            snapshotInfo.at,
             strategiesParams[i].split(','),
             {
               ...clientConfig,
