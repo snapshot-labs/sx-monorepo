@@ -79,7 +79,7 @@ export type VotingPower = {
 
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
 
-type ReadOnlyNetworkActions = {
+export type ReadOnlyNetworkActions = {
   getVotingPower(
     strategiesAddresses: string[],
     strategiesParams: any[],
