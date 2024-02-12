@@ -34,6 +34,7 @@ import type {
   Connector,
   NetworkActions,
   NetworkHelpers,
+  SnapshotInfo,
   StrategyConfig,
   VotingPower
 } from '@/networks/types';
@@ -565,9 +566,9 @@ export function createActions(
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
-      block: number | null
+      snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
-      if (block === null) throw new Error('EVM requires block number to be defined');
+      if (snapshotInfo.at === null) throw new Error('EVM requires block number to be defined');
 
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
@@ -580,7 +581,7 @@ export function createActions(
             address,
             voterAddress,
             strategyMetadata,
-            block,
+            snapshotInfo.at!,
             strategiesParams[i],
             provider
           );

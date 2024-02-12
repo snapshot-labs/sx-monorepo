@@ -179,7 +179,10 @@ async function getVotingPower() {
       space.value.voting_power_validation_strategy_strategies_params,
       space.value.voting_power_validation_strategies_parsed_metadata,
       web3.value.account,
-      supportsNullCurrent(space.value.network) ? null : getCurrent(space.value.network) || 0
+      {
+        at: supportsNullCurrent(space.value.network) ? null : getCurrent(space.value.network) || 0,
+        chainId: space.value.snapshot_chain_id
+      }
     );
 
     const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);
