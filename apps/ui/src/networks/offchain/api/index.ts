@@ -10,6 +10,7 @@ import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
+import { DEFAULT_AUTHENTICATOR } from '../constants';
 
 function getProposalState(proposal: ApiProposal): ProposalState {
   if (proposal.state === 'closed') {
@@ -61,7 +62,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
       : [],
     // NOTE: ignored
     created: 0,
-    authenticators: [],
+    authenticators: [DEFAULT_AUTHENTICATOR],
     executors: [],
     executors_types: [],
     strategies: space.strategies.map(strategy => strategy.name),
@@ -111,7 +112,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       avatar: '',
       controller: proposal.space.admins[0] ?? '',
       voting_power_symbol: proposal.space.symbol,
-      authenticators: [],
+      authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
       executors_types: [],
       strategies_parsed_metadata: []
