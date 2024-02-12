@@ -1,7 +1,7 @@
 import { createApi } from '../common/graphqlApi';
 import { EVM_CONNECTORS } from '../common/constants';
 import { createActions } from './actions';
-import * as constants from './constants';
+import { createConstants } from './constants';
 import { pinGraph } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import networks from '@/helpers/networks.json';
@@ -75,6 +75,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   const api = createApi(apiUrl, networkId, {
     highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
   });
+  const constants = createConstants(networkId);
 
   const helpers = {
     pin: pinGraph,
@@ -108,7 +109,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     hasReceive: false,
     supportsSimulation: ['eth', 'gor', 'sep', 'matic', 'arb1'].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
-    actions: createActions(provider, helpers, chainId),
+    actions: createActions(provider, constants, helpers, chainId),
     api,
     constants,
     helpers
