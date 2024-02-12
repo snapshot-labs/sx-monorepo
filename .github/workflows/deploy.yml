@@ -14,6 +14,10 @@ jobs:
       cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Check for changes
+        run: git diff-tree --no-commit-id --name-only HEAD -r | grep ^apps/mana || gh run cancel ${{ github.run_id }}
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
