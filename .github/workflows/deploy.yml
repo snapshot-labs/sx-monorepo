@@ -1,0 +1,22 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy_mana_prod:
+    name: Deploy mana to production
+    environment: mana_prod
+    concurrency:
+      group: mana_prod
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy
+        run: doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }}
