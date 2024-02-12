@@ -16,13 +16,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
-      - name: Check for changes
-        run: git diff-tree --no-commit-id --name-only HEAD -r | grep ^apps/mana || gh run cancel ${{ github.run_id }}
-        env:
-          GH_TOKEN: ${{ github.token }}
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Deploy
-        run: doctl apps create-deployment ${{ vars.DIGITALOCEAN_APP_ID }}
+      - name: Deploy if files changed
+        run: git diff-tree --no-commit-id --name-only HEAD -r | grep ^apps/mana && doctl apps create-deployment ${{ vars.DIGITALOCEAN_APP_ID }} || echo "No changes to mana"
