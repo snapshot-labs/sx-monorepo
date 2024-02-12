@@ -19,8 +19,11 @@ yarn
 
 ### Compiles and hot-reloads for development
 
-```
-yarn dev
+```sh
+yarnh dev
+
+# if you want to run full stack (including backend services)
+yarn dev:full
 ```
 
 ### Compiles and minifies for production
