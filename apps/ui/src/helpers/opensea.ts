@@ -38,7 +38,7 @@ export async function getNfts(address: string, chainId: number): Promise<ApiNft[
 
   const res = await fetch(url, {
     headers: {
-      'x-api-key': import.meta.env.VITE_ALCHEMY_API_KEY
+      'x-api-key': import.meta.env.VITE_OPENSEA_API_KEY
     }
   });
 
