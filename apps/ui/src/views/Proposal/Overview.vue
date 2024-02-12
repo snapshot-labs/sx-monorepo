@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ProposalExecutionActions from '@/components/ProposalExecutionActions.vue';
 import {
   _rt,
   _n,
