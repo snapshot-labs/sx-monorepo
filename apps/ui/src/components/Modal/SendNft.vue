@@ -139,7 +139,7 @@ watchEffect(async () => {
       </template>
     </template>
     <template v-if="showPicker">
-      <BlockNftPicker
+      <PickerNft
         v-if="pickerType === 'nft'"
         :nfts="nfts"
         :loading="loading"
@@ -149,7 +149,7 @@ watchEffect(async () => {
           showPicker = false;
         "
       />
-      <BlockContactPicker
+      <PickerContact
         v-else-if="pickerType === 'contact'"
         :loading="false"
         :search-value="searchValue"

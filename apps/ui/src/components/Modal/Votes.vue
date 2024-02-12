@@ -79,7 +79,7 @@ watch(
     <UiLoading v-if="!loaded" class="p-4 block text-center" />
     <div v-else>
       <div v-if="votes.length > 0">
-        <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="handleEndReached">
+        <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
           <div
             v-for="(vote, i) in votes"
             :key="i"
@@ -115,7 +115,7 @@ watch(
               v-text="proposal.choices[vote.choice - 1]"
             />
           </div>
-        </BlockInfiniteScroller>
+        </UiContainerInfiniteScroll>
       </div>
       <div v-else class="p-4 text-center">There isn't any votes yet!</div>
     </div>

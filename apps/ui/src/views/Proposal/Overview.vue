@@ -194,7 +194,7 @@ async function handleCancelClick() {
           <span>Execution</span>
         </h4>
         <div class="mb-4">
-          <BlockExecution :txs="proposal.execution" />
+          <ProposalExecutionsList :txs="proposal.execution" />
         </div>
       </div>
       <div
@@ -211,7 +211,7 @@ async function handleCancelClick() {
           <span>Actions</span>
         </h4>
         <div class="mb-4">
-          <BlockActions :proposal="proposal" />
+          <ProposalExecutionActions :proposal="proposal" />
         </div>
       </div>
       <div>

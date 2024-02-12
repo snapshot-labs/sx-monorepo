@@ -349,7 +349,7 @@ export default defineComponent({
             <IH-check v-if="executionStrategy?.address === executor" />
           </ExecutionButton>
         </div>
-        <BlockExecutionEditable
+        <EditorExecution
           v-if="executionStrategy"
           v-model="proposal.execution"
           :selected-execution-strategy="executionStrategy"

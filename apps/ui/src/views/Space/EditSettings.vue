@@ -253,14 +253,14 @@ watchEffect(async () => {
   <div class="space-y-4 mx-4 pt-4">
     <UiLoading v-if="loading" />
     <template v-else>
-      <BlockSpaceFormStrategies
+      <FormStrategies
         v-model="authenticators"
         unique
         :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
         title="Authenticators"
         description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
       />
-      <BlockSpaceFormValidation
+      <FormValidation
         v-model="validationStrategy"
         :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
         :available-voting-strategies="
@@ -269,7 +269,7 @@ watchEffect(async () => {
         title="Proposal validation"
         description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
       />
-      <BlockSpaceFormStrategies
+      <FormStrategies
         v-model="votingStrategies"
         :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
         title="Voting strategies"

@@ -24,7 +24,7 @@ withDefaults(
     <span class="mb-3 inline-block">
       {{ description }}
     </span>
-    <BlockStrategiesConfigurator
+    <StrategiesConfigurator
       :model-value="model"
       :unique="unique"
       :available-strategies="availableStrategies"

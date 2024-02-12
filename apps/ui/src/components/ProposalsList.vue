@@ -29,13 +29,13 @@ const currentLimit = computed(() => {
     <UiLabel :label="title" sticky />
     <UiLoading v-if="loading" class="block px-4 py-3" />
     <div v-else>
-      <BlockInfiniteScroller :loading-more="loadingMore" @end-reached="emit('endReached')">
+      <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="emit('endReached')">
         <ProposalsListItem
           v-for="(proposal, i) in proposals.slice(0, currentLimit)"
           :key="i"
           :proposal="proposal"
         />
-      </BlockInfiniteScroller>
+      </UiContainerInfiniteScroll>
       <div v-if="!proposals.length" class="px-4 py-3 flex items-center text-skin-link">
         <IH-exclamation-circle class="inline-block mr-2" />
         <span v-text="'There are no proposals here.'" />
