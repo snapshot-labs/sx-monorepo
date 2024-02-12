@@ -20,7 +20,7 @@ yarn
 ### Compiles and hot-reloads for development
 
 ```sh
-yarnh dev
+yarn dev
 
 # if you want to run full stack (including backend services)
 yarn dev:full
