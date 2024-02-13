@@ -1,6 +1,9 @@
 {
   "name": "@snapshot-labs/sx",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "main": "dist.cjs/index.js",
   "module": "dist/index.js",
