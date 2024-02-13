@@ -190,7 +190,7 @@ input {
 
 ::placeholder {
   color: rgba(var(--text)) !important;
-  opacity: 0.6 !important;
+  opacity: 0.4 !important;
 }
 
 .eyebrow {
@@ -241,11 +241,11 @@ input {
 }
 
 .s-error {
-  @apply mb-2;
+  @apply mb-3;
 
   .s-input {
     @apply border border-skin-danger;
-    @apply mb-1 #{!important};
+    @apply mb-2;
   }
 
   .s-label {
@@ -253,7 +253,7 @@ input {
   }
 
   .s-input-error-message {
-    @apply text-skin-danger;
+    @apply text-skin-danger leading-5;
   }
 }
 
@@ -263,11 +263,11 @@ input {
   }
 
   .s-label {
-    @apply absolute left-2 top-[4px] px-2 text-[17px];
+    @apply absolute left-[13px] top-1.5 text-sm leading-5 mb-0;
   }
 
   .s-input {
-    @apply border bg-skin-border rounded-lg pt-[25px] mb-[14px] py-[7px] px-[15px];
+    @apply hover:bg-skin-hover-bg focus:bg-skin-active-bg border bg-skin-input-bg text-base leading-5 rounded-lg pt-[30px] pb-[10px] px-2.5;
   }
 
   select {
