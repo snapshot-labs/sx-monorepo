@@ -35,7 +35,7 @@ watch(model, () => {
 
 <template>
   <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
-    <select v-model="inputValue" class="s-input">
+    <select v-model="inputValue" class="s-input appearance-none">
       <option disabled value="">Please select one</option>
       <option
         v-for="option in definition.options || definition.enum"
@@ -45,5 +45,8 @@ watch(model, () => {
         {{ option.name ?? option }}
       </option>
     </select>
+    <div class="absolute top-5 right-3">
+      <IHChevronDown />
+    </div>
   </UiWrapperInput>
 </template>
