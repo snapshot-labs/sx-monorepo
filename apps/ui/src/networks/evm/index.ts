@@ -78,6 +78,14 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   const constants = createConstants(networkId);
 
   const helpers = {
+    isAuthenticatorSupported: (authenticator: string) =>
+      constants.SUPPORTED_AUTHENTICATORS[authenticator],
+    isAuthenticatorContractSupported: (authenticator: string) =>
+      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
+    getRelayerAuthenticatorType: (authenticator: string) =>
+      constants.RELAYER_AUTHENTICATORS[authenticator],
+    isStrategySupported: (strategy: string) => constants.SUPPORTED_STRATEGIES[strategy],
+    isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
     pin: pinGraph,
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
@@ -109,7 +117,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     hasReceive: false,
     supportsSimulation: ['eth', 'gor', 'sep', 'matic', 'arb1'].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
-    actions: createActions(provider, constants, helpers, chainId),
+    actions: createActions(provider, helpers, chainId),
     api,
     constants,
     helpers

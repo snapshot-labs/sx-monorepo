@@ -21,7 +21,6 @@ import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/exec
 import type {
   Connector,
   NetworkActions,
-  NetworkConstants,
   NetworkHelpers,
   SnapshotInfo,
   StrategyConfig,
@@ -46,7 +45,6 @@ const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
 export function createActions(
   networkId: NetworkID,
   starkProvider: RpcProvider,
-  constants: NetworkConstants,
   helpers: NetworkHelpers,
   { l1ChainId }: { l1ChainId: number }
 ): NetworkActions {
@@ -65,10 +63,7 @@ export function createActions(
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    supportedAuthenticators: constants.SUPPORTED_AUTHENTICATORS,
-    supportedStrategies: constants.SUPPORTED_STRATEGIES,
-    contractSupportedAuthenticators: constants.CONTRACT_SUPPORTED_AUTHENTICATORS,
-    relayerAuthenticators: constants.RELAYER_AUTHENTICATORS,
+    helpers,
     managerConnectors: STARKNET_CONNECTORS,
     lowPriorityAuthenticators: ['evm-tx']
   });

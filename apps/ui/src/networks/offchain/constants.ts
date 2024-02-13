@@ -1,8 +1,3 @@
-export const SUPPORTED_AUTHENTICATORS = {};
-export const CONTRACT_SUPPORTED_AUTHENTICATORS = {};
-export const SUPPORTED_STRATEGIES = {};
-export const SUPPORTED_EXECUTORS = {};
-export const RELAYER_AUTHENTICATORS = {};
 export const AUTHS = {};
 export const PROPOSAL_VALIDATIONS = {};
 export const STRATEGIES = {};
