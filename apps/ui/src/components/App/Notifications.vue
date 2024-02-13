@@ -4,7 +4,7 @@ const uiStore = useUiStore();
 
 <template>
   <div class="fixed bottom-4 left-0 right-0 z-[52]">
-    <UiAlert
+    <UiNotification
       v-for="notification in uiStore.notifications"
       :key="notification.id"
       dismissible
@@ -13,6 +13,6 @@ const uiStore = useUiStore();
       @close="uiStore.dismissNotification(notification.id)"
     >
       {{ notification.message }}
-    </UiAlert>
+    </UiNotification>
   </div>
 </template>
