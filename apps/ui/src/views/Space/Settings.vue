@@ -203,11 +203,11 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
       <UiLabel :label="'Strategie(s)'" sticky />
       <div v-for="(strategy, i) in space.strategies" :key="i" class="mx-4 py-3 border-b">
         <a
-          :href="network.helpers.getExplorerUrl(strategy, 'contract')"
+          :href="network.helpers.getExplorerUrl(strategy, 'strategy')"
           target="_blank"
           class="flex"
         >
-          <h4 class="flex-auto" v-text="network.constants.STRATEGIES[strategy]" />
+          <h4 class="flex-auto" v-text="network.constants.STRATEGIES[strategy] || strategy" />
           <div>
             <UiStamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
             {{ shorten(strategy) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
