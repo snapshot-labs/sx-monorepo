@@ -302,10 +302,14 @@ watchEffect(async () => {
         }"
       />
       <div v-if="methods.length > 0" class="s-base">
-        <div class="s-label" v-text="'Method'" />
-        <select v-model="form.method" class="s-input h-[45px]">
-          <option v-for="(method, i) in methods" :key="i" v-text="method" />
-        </select>
+        <UiSelect
+          v-model="form.method"
+          :definition="{
+            type: 'string',
+            title: 'Method',
+            options: methods
+          }"
+        />
       </div>
       <UiInputString
         v-if="currentMethod?.payable"
