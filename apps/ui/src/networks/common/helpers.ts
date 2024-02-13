@@ -54,17 +54,11 @@ export async function buildMetadata(helpers: NetworkHelpers, config: StrategyCon
 }
 
 export function createStrategyPicker({
-  supportedAuthenticators,
-  supportedStrategies,
-  contractSupportedAuthenticators,
-  relayerAuthenticators,
+  helpers,
   managerConnectors,
   lowPriorityAuthenticators = []
 }: {
-  supportedAuthenticators: Record<string, boolean | undefined>;
-  supportedStrategies: Record<string, boolean | undefined>;
-  contractSupportedAuthenticators: Record<string, boolean | undefined>;
-  relayerAuthenticators: Record<string, 'evm' | 'evm-tx' | 'starknet' | undefined>;
+  helpers: NetworkHelpers;
   managerConnectors: Connector[];
   lowPriorityAuthenticators?: ('evm' | 'evm-tx' | 'starknet')[];
 }) {
@@ -84,12 +78,12 @@ export function createStrategyPicker({
     const authenticatorsInfo = [...authenticators]
       .filter(authenticator =>
         isContract
-          ? contractSupportedAuthenticators[authenticator]
-          : supportedAuthenticators[authenticator]
+          ? helpers.isAuthenticatorContractSupported(authenticator)
+          : helpers.isAuthenticatorSupported(authenticator)
       )
       .sort((a, b) => {
-        const aRelayer = relayerAuthenticators[a];
-        const bRelayer = relayerAuthenticators[b];
+        const aRelayer = helpers.getRelayerAuthenticatorType(a);
+        const bRelayer = helpers.getRelayerAuthenticatorType(b);
         const aLowPriority = aRelayer && lowPriorityAuthenticators.includes(aRelayer);
         const bLowPriority = bRelayer && lowPriorityAuthenticators.includes(bRelayer);
 
@@ -116,7 +110,7 @@ export function createStrategyPicker({
         return 0;
       })
       .map(authenticator => {
-        const relayerType = relayerAuthenticators[authenticator];
+        const relayerType = helpers.getRelayerAuthenticatorType(authenticator);
 
         let connectors: Connector[] = [];
         if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) connectors = EVM_CONNECTORS;
@@ -136,7 +130,7 @@ export function createStrategyPicker({
 
     const selectedStrategies = strategies
       .map((strategy, index) => ({ address: strategy, index: strategiesIndicies[index] }) as const)
-      .filter(({ address }) => supportedStrategies[address]);
+      .filter(({ address }) => helpers.isStrategySupported(address));
 
     if (!authenticatorInfo || (strategies.length !== 0 && selectedStrategies.length === 0)) {
       throw new Error('Unsupported space');

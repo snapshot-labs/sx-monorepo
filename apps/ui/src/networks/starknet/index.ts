@@ -63,6 +63,14 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   const constants = createConstants(networkId);
 
   const helpers = {
+    isAuthenticatorSupported: (authenticator: string) =>
+      constants.SUPPORTED_AUTHENTICATORS[authenticator],
+    isAuthenticatorContractSupported: (authenticator: string) =>
+      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
+    getRelayerAuthenticatorType: (authenticator: string) =>
+      constants.RELAYER_AUTHENTICATORS[authenticator],
+    isStrategySupported: (strategy: string) => constants.SUPPORTED_STRATEGIES[strategy],
+    isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
     pin: pinPineapple,
     waitForTransaction: txId => {
       let retries = 0;
@@ -130,7 +138,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     hasReceive: true,
     supportsSimulation: true,
     managerConnectors: STARKNET_CONNECTORS,
-    actions: createActions(networkId, provider, constants, helpers, { l1ChainId: baseChainId }),
+    actions: createActions(networkId, provider, helpers, { l1ChainId: baseChainId }),
     api,
     constants,
     helpers
