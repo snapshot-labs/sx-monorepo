@@ -278,6 +278,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <ModalSendNft
         :open="modalOpen.nfts"
         :address="treasury.wallet"
+        :network="treasury.network"
         @close="modalOpen.nfts = false"
         @add="addTx"
       />

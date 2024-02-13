@@ -16,14 +16,12 @@ const RECIPIENT_DEFINITION = {
   examples: ['Address or ENS']
 };
 
-const props = defineProps({
-  open: Boolean,
-  address: {
-    type: String,
-    required: true
-  },
-  initialState: Object
-});
+const props = defineProps<{
+  open: boolean;
+  address: string;
+  network: number;
+  initialState?: any;
+}>();
 
 const formValidator = getValidator({
   $async: true,
@@ -63,7 +61,7 @@ const formValid = computed(
 
 function handlePickerClick(type: 'nft' | 'contact') {
   if (type === 'nft' && !loaded.value) {
-    loadNfts(props.address);
+    loadNfts(props.address, props.network);
   }
 
   showPicker.value = true;
@@ -98,7 +96,7 @@ watch(
       form.amount = props.initialState.amount;
 
       if (!loaded.value) {
-        loadNfts(props.address);
+        loadNfts(props.address, props.network);
       }
     } else {
       form.to = DEFAULT_FORM_STATE.to;
