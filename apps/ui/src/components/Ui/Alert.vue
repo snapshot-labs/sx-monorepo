@@ -3,7 +3,6 @@ import { NotificationType } from '@/types';
 
 defineProps<{
   type: NotificationType;
-  dismissible?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -13,23 +12,39 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="flex gap-3 justify-between items-center w-full py-2 px-3 rounded border text-[17px]"
+    class="flex items-center w-full rounded-lg border relative"
     :class="{
-      'bg-rose-100 border-rose-300 text-rose-500 dark:bg-rose-700 dark:border-rose-700 dark:text-neutral-100':
-        type === 'error',
-      'bg-yellow-100 border-yellow-300 text-yellow-600 dark:bg-amber-500 dark:border-amber-500 dark:text-neutral-100':
-        type === 'warning',
-      'bg-lime-100 border-lime-300 text-lime-600 dark:bg-emerald-500 dark:border-emerald-500 dark:text-neutral-100':
-        type === 'success'
+      'border-skin-danger-border': type === 'error',
+      'border-skin-border': type === 'warning',
+      'border-skin-success-border': type === 'success'
     }"
   >
-    <slot />
-    <a
-      v-if="dismissible"
-      class="text-skin-link opacity-50 hover:opacity-100"
-      @click="emit('close')"
+    <div
+      class="w-[56px] flex justify-center items-center rounded-l-lg absolute top-0 bottom-0"
+      :class="[
+        {
+          'bg-skin-danger-active': type === 'error',
+          'bg-skin-active-bg': type === 'warning',
+          'bg-skin-success-active': type === 'success'
+        }
+      ]"
     >
-      <IH-x />
-    </a>
+      <div
+        :class="[
+          {
+            'text-skin-danger': type === 'error',
+            'text-skin-heading': type === 'warning',
+            'text-skin-success': type === 'success'
+          }
+        ]"
+      >
+        <IH-exclamation v-if="type === 'error'" />
+        <IH-exclamation-circle v-else-if="type === 'warning'" />
+        <IH-sparkles v-else-if="type === 'success'" />
+      </div>
+    </div>
+    <div class="text-skin-heading pr-3.5 pl-[76px] py-3 leading-6">
+      <slot />
+    </div>
   </div>
 </template>
