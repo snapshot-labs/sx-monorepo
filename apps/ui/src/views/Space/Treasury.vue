@@ -96,7 +96,7 @@ onMounted(() => {
   if (!treasury.value) return;
 
   loadBalances(treasury.value.wallet, treasury.value.network);
-  loadNfts(treasury.value.wallet);
+  loadNfts(treasury.value.wallet, treasury.value.network);
 });
 
 watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
@@ -278,6 +278,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <ModalSendNft
         :open="modalOpen.nfts"
         :address="treasury.wallet"
+        :network="treasury.network"
         @close="modalOpen.nfts = false"
         @add="addTx"
       />

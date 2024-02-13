@@ -196,11 +196,6 @@ export type NetworkApi = {
 };
 
 export type NetworkConstants = {
-  SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
-  CONTRACT_SUPPORTED_AUTHENTICATORS: { [key: string]: boolean };
-  SUPPORTED_STRATEGIES: { [key: string]: boolean };
-  SUPPORTED_EXECUTORS: { [key: string]: boolean };
-  RELAYER_AUTHENTICATORS: { [key: string]: 'evm' | 'evm-tx' | 'starknet' | undefined };
   AUTHS: { [key: string]: string };
   PROPOSAL_VALIDATIONS: { [key: string]: string };
   STRATEGIES: { [key: string]: string };
@@ -213,6 +208,11 @@ export type NetworkConstants = {
 };
 
 export type NetworkHelpers = {
+  isAuthenticatorSupported(authenticator: string): boolean;
+  isAuthenticatorContractSupported(authenticator: string): boolean;
+  getRelayerAuthenticatorType(authenticator: string): 'evm' | 'evm-tx' | 'starknet' | null;
+  isStrategySupported(strategy: string): boolean;
+  isExecutorSupported(executor: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;

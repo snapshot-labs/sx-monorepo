@@ -14,11 +14,11 @@ const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 const isSupported = computed(() => {
   const network = getNetwork(props.proposal.network);
 
-  const hasSupportedAuthenticator = props.proposal.space.authenticators.find(
-    authenticator => network.constants.SUPPORTED_AUTHENTICATORS[authenticator]
+  const hasSupportedAuthenticator = props.proposal.space.authenticators.find(authenticator =>
+    network.helpers.isAuthenticatorSupported(authenticator)
   );
-  const hasSupportedStrategies = props.proposal.strategies.find(
-    strategy => network.constants.SUPPORTED_STRATEGIES[strategy]
+  const hasSupportedStrategies = props.proposal.strategies.find(strategy =>
+    network.helpers.isStrategySupported(strategy)
   );
 
   return hasSupportedAuthenticator && hasSupportedStrategies;

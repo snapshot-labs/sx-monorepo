@@ -24,6 +24,11 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const api = createApi(hubUrl, networkId);
 
   const helpers = {
+    isAuthenticatorSupported: () => false,
+    isAuthenticatorContractSupported: () => false,
+    getRelayerAuthenticatorType: () => null,
+    isStrategySupported: () => false,
+    isExecutorSupported: () => false,
     pin: pinPineapple,
     waitForTransaction: () => {
       throw new Error('Not implemented');

@@ -181,6 +181,7 @@ watch(model.value, () => {
         v-if="currentTreasury"
         :open="modalOpen.sendNft"
         :address="currentTreasury.wallet"
+        :network="currentTreasury.network"
         :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"

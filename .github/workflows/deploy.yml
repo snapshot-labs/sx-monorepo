@@ -1,0 +1,24 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy_mana_prod:
+    name: Deploy mana to production
+    environment: mana_prod
+    concurrency:
+      group: mana_prod
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy if files changed
+        run: git diff-tree --no-commit-id --name-only HEAD -r | grep ^apps/mana && doctl apps create-deployment ${{ vars.DIGITALOCEAN_APP_ID }} || echo "No changes to mana"

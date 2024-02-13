@@ -27,7 +27,6 @@ import type { Web3Provider } from '@ethersproject/providers';
 import type {
   Connector,
   NetworkActions,
-  NetworkConstants,
   NetworkHelpers,
   SnapshotInfo,
   StrategyConfig,
@@ -54,17 +53,13 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
 
 export function createActions(
   provider: Provider,
-  constants: NetworkConstants,
   helpers: NetworkHelpers,
   chainId: number
 ): NetworkActions {
   const networkConfig = CONFIGS[chainId];
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    supportedAuthenticators: constants.SUPPORTED_AUTHENTICATORS,
-    supportedStrategies: constants.SUPPORTED_STRATEGIES,
-    contractSupportedAuthenticators: constants.CONTRACT_SUPPORTED_AUTHENTICATORS,
-    relayerAuthenticators: constants.RELAYER_AUTHENTICATORS,
+    helpers,
     managerConnectors: EVM_CONNECTORS
   });
 

@@ -83,8 +83,8 @@ const supportedExecutionStrategies = computed(() => {
   const networkValue = network.value;
   if (!spaceValue || !networkValue) return null;
 
-  return spaceValue.executors.filter(
-    (_, i) => networkValue.constants.SUPPORTED_EXECUTORS[spaceValue.executors_types[i]]
+  return spaceValue.executors.filter((_, i) =>
+    networkValue.helpers.isExecutorSupported(spaceValue.executors_types[i])
   );
 });
 const formErrors = computed(() => {

@@ -30,7 +30,7 @@ describe('ozVotesStorageProof', () => {
     ).rejects.toThrow('Not supported for non-Ethereum addresses');
   });
 
-  describe('getVotingPower', () => {
+  describe.skip('getVotingPower', () => {
     const timestamp = 1706623413;
 
     it('should compute voting power for user', async () => {

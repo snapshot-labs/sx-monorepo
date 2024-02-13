@@ -19,7 +19,7 @@
     "turbo": "^1.12.3"
   },
   "engines": {
-    "node": "18.x"
+    "node": ">=18.x"
   },
   "packageManager": "yarn@1.22.19",
   "workspaces": [
