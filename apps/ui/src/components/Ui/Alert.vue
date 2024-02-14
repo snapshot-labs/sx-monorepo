@@ -4,10 +4,6 @@ import { NotificationType } from '@/types';
 defineProps<{
   type: NotificationType;
 }>();
-
-const emit = defineEmits<{
-  (e: 'close');
-}>();
 </script>
 
 <template>
