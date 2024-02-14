@@ -26,7 +26,8 @@
     "node:starknet": "OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES starknet-devnet --seed 1",
     "test": "jest -c test/jest.config.unit.js",
     "test:integration:starknet": "jest -c test/jest.config.integration.js test/integration/starknet",
-    "test:integration:evm": "jest -c test/jest.config.integration.js test/integration/evm"
+    "test:integration:evm": "jest -c test/jest.config.integration.js test/integration/evm",
+    "test:integration:offchain": "jest -c test/jest.config.integration.js test/integration/offchain"
   },
   "eslintConfig": {
     "extends": "@snapshot-labs"
