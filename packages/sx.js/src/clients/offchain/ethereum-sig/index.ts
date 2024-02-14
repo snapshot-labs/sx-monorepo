@@ -1,6 +1,6 @@
 import { offchainGoerli } from '../../../offchainNetworks';
+import { domain, voteTypes } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
-import type { domain, voteTypes } from './types';
 import type { Vote, Envelope, SignatureData, EIP712VoteMessage, EIP712Message } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
