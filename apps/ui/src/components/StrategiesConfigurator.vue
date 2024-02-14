@@ -8,10 +8,12 @@ const props = withDefaults(
     limit?: number;
     unique?: boolean;
     availableStrategies: StrategyTemplate[];
+    defaultParams?: Record<string, any>;
   }>(),
   {
     limit: Infinity,
-    unique: false
+    unique: false,
+    defaultParams: () => ({})
   }
 );
 
@@ -28,7 +30,9 @@ function addStrategy(strategy: StrategyTemplate) {
 
   const strategyConfig = {
     id: crypto.randomUUID(),
-    params: {},
+    params: {
+      ...props.defaultParams
+    },
     ...strategy
   };
 

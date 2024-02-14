@@ -398,7 +398,7 @@ export function createConstants(networkId: NetworkID) {
         return client.deployAvatarExecution({
           signer,
           params: {
-            controller,
+            controller: params.controller,
             target: params.contractAddress,
             spaces: [spaceAddress],
             quorum: BigInt(params.quorum)
@@ -409,8 +409,14 @@ export function createConstants(networkId: NetworkID) {
         type: 'object',
         title: 'Params',
         additionalProperties: false,
-        required: ['quorum', 'contractAddress'],
+        required: ['controller', 'quorum', 'contractAddress'],
         properties: {
+          controller: {
+            type: 'string',
+            format: 'address',
+            title: 'Controller address',
+            examples: ['0x0000…']
+          },
           quorum: {
             type: 'integer',
             title: 'Quorum',
@@ -444,7 +450,7 @@ export function createConstants(networkId: NetworkID) {
         return client.deployTimelockExecution({
           signer,
           params: {
-            controller,
+            controller: params.controller,
             vetoGuardian: params.vetoGuardian || '0x0000000000000000000000000000000000000000',
             spaces: [spaceAddress],
             timelockDelay: BigInt(params.timelockDelay),
@@ -456,8 +462,14 @@ export function createConstants(networkId: NetworkID) {
         type: 'object',
         title: 'Params',
         additionalProperties: false,
-        required: ['quorum', 'timelockDelay'],
+        required: ['controller', 'quorum', 'timelockDelay'],
         properties: {
+          controller: {
+            type: 'string',
+            format: 'address',
+            title: 'Controller address',
+            examples: ['0x0000…']
+          },
           quorum: {
             type: 'integer',
             title: 'Quorum',

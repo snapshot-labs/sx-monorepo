@@ -239,6 +239,7 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'executions'"
             v-model="executionStrategies"
             :available-strategies="selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES"
+            :default-params="{ controller }"
             title="Execution strategies"
             description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."
           />
