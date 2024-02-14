@@ -32,7 +32,7 @@ onMounted(() => load());
             </div>
           </div>
           <a v-if="app.link" :href="app.link" target="_blank">
-            <UiButton class="primary w-full">Use integration</UiButton>
+            <UiButton variant="primary" class="w-full">Use integration</UiButton>
           </a>
         </div>
         <div class="md:flex md:space-x-4">

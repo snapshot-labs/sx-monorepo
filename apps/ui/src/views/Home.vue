@@ -28,7 +28,7 @@ const SOCIALS = [
       <UiContainer class="!max-w-screen-md my-1">
         <h1 class="mb-4 mono max-w-[580px]">The governance stack for your organization.</h1>
         <a href="https://tally.so/r/wA2D2o" target="_blank">
-          <UiButton class="primary">
+          <UiButton variant="primary">
             Sign up for beta
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </UiButton>

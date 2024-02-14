@@ -145,7 +145,12 @@ watch(loading, () => {
       </UiButton>
       <div v-else-if="step === 'APPROVE' && approveFn" class="flex space-x-3">
         <UiButton class="w-full" @click="handleApprove(false)">Reject</UiButton>
-        <UiButton :primary="true" :loading="approving" class="w-full" @click="handleApprove(true)">
+        <UiButton
+          variant="primary"
+          :loading="approving"
+          class="w-full"
+          @click="handleApprove(true)"
+        >
           Approve
         </UiButton>
       </div>

@@ -125,7 +125,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         />
         <router-link v-if="!network.readOnly" :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">
-            <UiButton class="!px-0 w-[46px]">
+            <UiButton circle>
               <IH-pencil-alt class="inline-block" />
             </UiButton>
           </UiTooltip>
