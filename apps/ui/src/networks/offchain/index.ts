@@ -14,12 +14,15 @@ const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://snapshot.org',
   's-tn': 'https://testnet.snapshot.org'
 };
+const CHAIN_IDS: Partial<Record<NetworkID, number>> = {
+  s: 1,
+  's-tn': 5
+};
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
-  const l1ChainId = 1;
-
+  const l1ChainId = CHAIN_IDS[networkId];
   const hubUrl = HUB_URLS[networkId];
-  if (!hubUrl) throw new Error(`Unknown network ${networkId}`);
+  if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);
 
   const api = createApi(hubUrl, networkId);
 

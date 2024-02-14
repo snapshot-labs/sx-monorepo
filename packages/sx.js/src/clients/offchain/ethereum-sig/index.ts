@@ -4,6 +4,11 @@ import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abs
 import type { Vote, Envelope, SignatureData, EIP712VoteMessage, EIP712Message } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
+const SEQUENCER_URLS = {
+  1: 'https://seq.snapshot.org',
+  5: 'https://testnet.seq.snapshot.org'
+};
+
 type EthereumSigClientOpts = {
   networkConfig?: OffchainNetworkConfig;
   sequencerUrl?: string;
@@ -15,7 +20,7 @@ export class EthereumSig {
 
   constructor(opts?: EthereumSigClientOpts) {
     this.networkConfig = opts?.networkConfig || offchainGoerli;
-    this.sequencerUrl = opts?.sequencerUrl || 'https://seq.snapshot.org';
+    this.sequencerUrl = opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
   }
 
   public async sign<T extends EIP712VoteMessage>(

@@ -12,7 +12,6 @@ import type {
 } from '../types';
 
 const SCORE_URL = 'https://score.snapshot.org';
-const SEQUENCER_URL = 'https://seq.snapshot.org';
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
   1: offchainMainnet,
   5: offchainGoerli
@@ -26,8 +25,7 @@ export function createActions(
   const networkConfig = CONFIGS[chainId];
 
   const client = new clients.OffchainEthereumSig({
-    networkConfig,
-    sequencerUrl: SEQUENCER_URL
+    networkConfig
   });
 
   return {
