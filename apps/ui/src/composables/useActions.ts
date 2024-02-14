@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getReadWriteNetwork } from '@/networks';
+import { getNetwork, getReadWriteNetwork } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -49,7 +49,7 @@ export function useActions() {
 
   async function handleCommitEnvelope(envelope: any, networkId: NetworkID) {
     // TODO: it should work with WalletConnect, should be done before L1 transaction is broadcasted
-    const network = getReadWriteNetwork(networkId);
+    const network = getNetwork(networkId);
 
     if (envelope?.signatureData?.commitHash && network.baseNetworkId) {
       await registerTransaction(network.chainId, {
@@ -74,7 +74,7 @@ export function useActions() {
   }
 
   async function wrapPromise(networkId: NetworkID, promise: Promise<any>) {
-    const network = getReadWriteNetwork(networkId);
+    const network = getNetwork(networkId);
 
     const envelope = await promise;
 
@@ -185,7 +185,7 @@ export function useActions() {
   async function vote(proposal: Proposal, choice: Choice) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getReadWriteNetwork(proposal.network);
+    const network = getNetwork(proposal.network);
 
     await wrapPromise(
       proposal.network,

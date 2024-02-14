@@ -87,6 +87,14 @@ export type ReadOnlyNetworkActions = {
     voterAddress: string,
     snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
+  vote(
+    web3: Web3Provider,
+    connectorType: Connector,
+    account: string,
+    proposal: Proposal,
+    choice: Choice
+  ): Promise<any>;
+  send(envelope: any): Promise<any>;
 };
 
 export type NetworkActions = ReadOnlyNetworkActions & {
@@ -135,13 +143,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     transactions: MetaTransaction[]
   );
   cancelProposal(web3: Web3Provider, proposal: Proposal);
-  vote(
-    web3: Web3Provider,
-    connectorType: Connector,
-    account: string,
-    proposal: Proposal,
-    choice: Choice
-  );
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
@@ -167,7 +168,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     delegatee: string,
     delegationContract: string
   );
-  send(envelope: any): Promise<any>;
 };
 
 export type NetworkApi = {

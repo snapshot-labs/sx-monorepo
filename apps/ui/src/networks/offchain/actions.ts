@@ -1,19 +1,35 @@
-import { StrategyParsedMetadata } from '@/types';
-import {
+import { OffchainNetworkConfig, clients, offchainGoerli, offchainMainnet } from '@snapshot-labs/sx';
+import { getSdkChoice } from './helpers';
+import type { Web3Provider } from '@ethersproject/providers';
+import type { StrategyParsedMetadata, Choice, Proposal } from '@/types';
+import type {
   ReadOnlyNetworkActions,
   NetworkConstants,
   NetworkHelpers,
   SnapshotInfo,
-  VotingPower
+  VotingPower,
+  Connector
 } from '../types';
 
 const SCORE_URL = 'https://score.snapshot.org';
+const SEQUENCER_URL = 'https://seq.snapshot.org';
+const CONFIGS: Record<number, OffchainNetworkConfig> = {
+  1: offchainMainnet,
+  5: offchainGoerli
+};
 
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
   chainId: number
 ): ReadOnlyNetworkActions {
+  const networkConfig = CONFIGS[chainId];
+
+  const client = new clients.OffchainEthereumSig({
+    networkConfig,
+    sequencerUrl: SEQUENCER_URL
+  });
+
   return {
     getVotingPower: async (
       strategiesAddresses: string[],
@@ -54,6 +70,28 @@ export function createActions(
           chainId: strategy.network ? parseInt(strategy.network) : undefined
         } as VotingPower;
       });
-    }
+    },
+    vote(
+      web3: Web3Provider,
+      connectorType: Connector,
+      account: string,
+      proposal: Proposal,
+      choice: Choice
+    ): Promise<any> {
+      const data = {
+        space: proposal.space.id,
+        proposal: proposal.proposal_id as number,
+        choice: getSdkChoice(choice),
+        authenticator: '',
+        strategies: [],
+        metadataUri: ''
+      };
+
+      return client.vote({
+        signer: web3.getSigner(),
+        data
+      });
+    },
+    send: (envelope: any) => client.send(envelope)
   };
 }

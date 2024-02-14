@@ -24,10 +24,10 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const api = createApi(hubUrl, networkId);
 
   const helpers = {
-    isAuthenticatorSupported: () => false,
+    isAuthenticatorSupported: () => true,
     isAuthenticatorContractSupported: () => false,
     getRelayerAuthenticatorType: () => null,
-    isStrategySupported: () => false,
+    isStrategySupported: () => true,
     isExecutorSupported: () => false,
     pin: pinPineapple,
     waitForTransaction: () => {

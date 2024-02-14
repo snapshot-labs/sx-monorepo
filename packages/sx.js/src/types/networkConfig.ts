@@ -98,3 +98,7 @@ export type EvmNetworkConfig = Omit<
     [key in ExecutorType]?: string;
   };
 };
+
+export type OffchainNetworkConfig = {
+  eip712ChainId: number;
+};

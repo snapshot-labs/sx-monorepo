@@ -10,7 +10,8 @@ import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
-import { DEFAULT_AUTHENTICATOR } from '../constants';
+
+const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
 function getProposalState(proposal: ApiProposal): ProposalState {
   if (proposal.state === 'closed') {
