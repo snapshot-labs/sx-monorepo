@@ -9,13 +9,25 @@ const signer = new Wallet(TEST_PK);
 const client = new EthereumSig({ networkConfig: offchainGoerli });
 
 describe('vote', () => {
-  it('should vote', async () => {
-    const envelope = await client.vote({
-      signer,
-      // @ts-ignore
-      data: vote
-    });
+  describe('when valid', () => {
+    it('should vote', async () => {
+      const envelope = await client.vote({
+        signer,
+        data: vote
+      });
 
-    return expect(client.send(envelope)).resolves.toHaveProperty('id');
+      return expect(client.send(envelope)).resolves.toHaveProperty('id');
+    });
+  });
+
+  describe('when invalid', () => {
+    it('should thrown an error', async () => {
+      const envelope = await client.vote({
+        signer,
+        data: { ...vote, proposal: 'unknown-proposal' }
+      });
+
+      return expect(client.send(envelope)).rejects.toThrowError(/unknown proposal/);
+    });
   });
 });
