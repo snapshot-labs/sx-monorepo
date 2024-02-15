@@ -6,6 +6,44 @@ on:
       - master
 
 jobs:
+  deploy_api_mainnet:
+    name: Deploy API to mainnet
+    environment: api_mainnet
+    concurrency:
+      group: api_mainnet
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy if files have changed
+        run: ./scripts/deploy-changed.sh apps/api ${{ vars.DIGITALOCEAN_APP_ID }}
+
+  deploy_api_testnet:
+    name: Deploy API to testnet
+    environment: api_testnet
+    concurrency:
+      group: api_testnet
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Deploy if files have changed
+        run: ./scripts/deploy-changed.sh apps/api ${{ vars.DIGITALOCEAN_APP_ID }}
+
   deploy_mana_prod:
     name: Deploy mana to production
     environment: mana_prod
@@ -22,5 +60,5 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Deploy if files changed
-        run: git diff-tree --no-commit-id --name-only HEAD -r | grep ^apps/mana && doctl apps create-deployment ${{ vars.DIGITALOCEAN_APP_ID }} || echo "No changes to mana"
+      - name: Deploy if files have changed
+        run: ./scripts/deploy-changed.sh apps/api ${{ vars.DIGITALOCEAN_APP_ID }}

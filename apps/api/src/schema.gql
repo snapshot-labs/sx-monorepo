@@ -1,0 +1,138 @@
+scalar Id
+scalar Text
+scalar BigInt
+scalar BigDecimalVP
+
+type Space {
+  id: String!
+  metadata: SpaceMetadataItem
+  controller: String!
+  voting_delay: Int!
+  min_voting_period: Int!
+  max_voting_period: Int!
+  proposal_threshold: Int!
+  next_strategy_index: Int!
+  strategies_indicies: [Int]!
+  strategies: [String]!
+  strategies_params: [String]!
+  strategies_metadata: [String]!
+  strategies_parsed_metadata: [StrategiesParsedMetadataItem]! @derivedFrom(field: "space")
+  authenticators: [String]!
+  validation_strategy: String!
+  validation_strategy_params: Text!
+  voting_power_validation_strategy_strategies: [String]!
+  voting_power_validation_strategy_strategies_params: [String]!
+  voting_power_validation_strategy_metadata: String!
+  voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadataItem]!
+    @derivedFrom(field: "space")
+  proposal_count: Int!
+  vote_count: Int!
+  created: Int!
+  tx: String!
+  proposals: [Proposal]! @derivedFrom(field: "space")
+}
+
+type SpaceMetadataItem {
+  id: String!
+  name: String!
+  about: String!
+  avatar: String!
+  cover: String!
+  external_url: String!
+  delegations: [String]!
+  github: String!
+  twitter: String!
+  discord: String!
+  voting_power_symbol: String!
+  wallet: String!
+  executors: [String]!
+  executors_types: [String]!
+}
+
+type VotingPowerValidationStrategiesParsedMetadataItem {
+  id: String!
+  space: Space!
+  index: Int!
+  data: StrategiesParsedMetadataDataItem
+}
+
+type StrategiesParsedMetadataItem {
+  id: String!
+  space: Space!
+  index: Int!
+  data: StrategiesParsedMetadataDataItem
+}
+
+type StrategiesParsedMetadataDataItem {
+  id: String!
+  name: String!
+  description: String!
+  decimals: Int!
+  symbol: String!
+  token: String
+  payload: String
+}
+
+type Proposal {
+  id: String!
+  proposal_id: Int!
+  space: Space!
+  author: User!
+  execution_hash: String!
+  metadata: ProposalMetadataItem
+  start: Int!
+  min_end: Int!
+  max_end: Int!
+  snapshot: Int!
+  execution_time: Int!
+  execution_strategy: String!
+  execution_strategy_type: String!
+  timelock_veto_guardian: String
+  timelock_delay: Int
+  strategies_indicies: [Int]!
+  strategies: [String]!
+  strategies_params: [String]!
+  scores_1: BigDecimalVP!
+  scores_2: BigDecimalVP!
+  scores_3: BigDecimalVP!
+  scores_total: BigDecimalVP!
+  quorum: BigInt!
+  created: Int!
+  edited: Int
+  tx: String!
+  execution_tx: String
+  veto_tx: String
+  vote_count: Int!
+  executed: Boolean!
+  vetoed: Boolean!
+  completed: Boolean!
+  cancelled: Boolean!
+}
+
+type ProposalMetadataItem {
+  id: String!
+  title: Text
+  body: Text
+  discussion: Text
+  execution: Text
+}
+
+type Vote {
+  id: String!
+  voter: User!
+  space: Space!
+  proposal: Int!
+  choice: Int!
+  vp: BigDecimalVP!
+  created: Int!
+  tx: String!
+}
+
+type User {
+  id: String!
+  proposal_count: Int!
+  vote_count: Int!
+  created: Int!
+  proposals: [Proposal]! @derivedFrom(field: "author")
+  votes: [Vote]! @derivedFrom(field: "voter")
+}

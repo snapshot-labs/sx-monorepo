@@ -1,0 +1,94 @@
+{
+  "network_node_url": "https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
+  "optimistic_indexing": true,
+  "decimal_types": {
+    "BigDecimalVP": {
+      "p": 60,
+      "d": 0
+    }
+  },
+  "sources": [
+    {
+      "contract": "0x63c62258e1ba4d9ad72eab809ea5c3d1a4545b721bc444d6068ced6246c2f3c",
+      "start": 907731,
+      "abi": "SpaceFactory",
+      "events": [
+        {
+          "name": "NewContractDeployed",
+          "fn": "handleSpaceDeployed"
+        }
+      ]
+    }
+  ],
+  "templates": {
+    "Space": {
+      "abi": "Space",
+      "events": [
+        {
+          "name": "SpaceCreated",
+          "fn": "handleSpaceCreated"
+        },
+        {
+          "name": "ProposalCreated",
+          "fn": "handlePropose"
+        },
+        {
+          "name": "ProposalCancelled",
+          "fn": "handleCancel"
+        },
+        {
+          "name": "ProposalUpdated",
+          "fn": "handleUpdate"
+        },
+        {
+          "name": "ProposalExecuted",
+          "fn": "handleExecute"
+        },
+        {
+          "name": "VoteCast",
+          "fn": "handleVote"
+        },
+        {
+          "name": "MetadataUriUpdated",
+          "fn": "handleMetadataUriUpdated"
+        },
+        {
+          "name": "MinVotingDurationUpdated",
+          "fn": "handleMinVotingDurationUpdated"
+        },
+        {
+          "name": "MaxVotingDurationUpdated",
+          "fn": "handleMaxVotingDurationUpdated"
+        },
+        {
+          "name": "VotingDelayUpdated",
+          "fn": "handleVotingDelayUpdated"
+        },
+        {
+          "name": "OwnershipTransferred",
+          "fn": "handleOwnershipTransferred"
+        },
+        {
+          "name": "AuthenticatorsAdded",
+          "fn": "handleAuthenticatorsAdded"
+        },
+        {
+          "name": "AuthenticatorsRemoved",
+          "fn": "handleAuthenticatorsRemoved"
+        },
+        {
+          "name": "VotingStrategiesAdded",
+          "fn": "handleVotingStrategiesAdded"
+        },
+        {
+          "name": "VotingStrategiesRemoved",
+          "fn": "handleVotingStrategiesRemoved"
+        },
+        {
+          "name": "ProposalValidationStrategyUpdated",
+          "fn": "handleProposalValidationStrategyUpdated"
+        }
+      ]
+    }
+  }
+}
