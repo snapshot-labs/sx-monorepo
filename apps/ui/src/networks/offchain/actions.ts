@@ -29,6 +29,28 @@ export function createActions(
   });
 
   return {
+    vote(
+      web3: Web3Provider,
+      connectorType: Connector,
+      account: string,
+      proposal: Proposal,
+      choice: Choice
+    ): Promise<any> {
+      const data = {
+        space: proposal.space.id,
+        proposal: proposal.proposal_id as number,
+        choice: getSdkChoice(choice),
+        authenticator: '',
+        strategies: [],
+        metadataUri: ''
+      };
+
+      return client.vote({
+        signer: web3.getSigner(),
+        data
+      });
+    },
+    send: (envelope: any) => client.send(envelope),
     getVotingPower: async (
       strategiesAddresses: string[],
       strategiesParams: any[],
@@ -68,28 +90,6 @@ export function createActions(
           chainId: strategy.network ? parseInt(strategy.network) : undefined
         } as VotingPower;
       });
-    },
-    vote(
-      web3: Web3Provider,
-      connectorType: Connector,
-      account: string,
-      proposal: Proposal,
-      choice: Choice
-    ): Promise<any> {
-      const data = {
-        space: proposal.space.id,
-        proposal: proposal.proposal_id as number,
-        choice: getSdkChoice(choice),
-        authenticator: '',
-        strategies: [],
-        metadataUri: ''
-      };
-
-      return client.vote({
-        signer: web3.getSigner(),
-        data
-      });
-    },
-    send: (envelope: any) => client.send(envelope)
+    }
   };
 }
