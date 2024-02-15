@@ -21,7 +21,7 @@ const isSupported = computed(() => {
     network.helpers.isStrategySupported(strategy)
   );
 
-  return hasSupportedAuthenticator && hasSupportedStrategies;
+  return hasSupportedAuthenticator && hasSupportedStrategies && props.proposal.type === 'basic';
 });
 </script>
 
