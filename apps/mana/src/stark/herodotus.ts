@@ -4,24 +4,39 @@ import { clients } from '@snapshot-labs/sx';
 import * as db from '../db';
 import { getClient } from './networks';
 
-const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
-const HERODOTUS_MAPPING = {
-  [constants.StarknetChainId.SN_MAIN]: {
-    DESTINATION_CHAIN_ID: 'STARKNET',
-    ACCUMULATES_CHAIN_ID: '1',
-    FEE: '100000'
-  },
-  [constants.StarknetChainId.SN_GOERLI]: {
-    DESTINATION_CHAIN_ID: 'SN_GOERLI',
-    ACCUMULATES_CHAIN_ID: '5',
-    FEE: '0'
-  },
-  [constants.StarknetChainId.SN_SEPOLIA]: {
-    DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
-    ACCUMULATES_CHAIN_ID: '11155111',
-    FEE: '0'
-  }
+type HerodotusConfig = {
+  DESTINATION_CHAIN_ID: string;
+  ACCUMULATES_CHAIN_ID: string;
+  FEE: string;
 };
+
+const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
+const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
+  [
+    constants.StarknetChainId.SN_MAIN,
+    {
+      DESTINATION_CHAIN_ID: 'STARKNET',
+      ACCUMULATES_CHAIN_ID: '1',
+      FEE: '100000'
+    }
+  ],
+  [
+    constants.StarknetChainId.SN_GOERLI,
+    {
+      DESTINATION_CHAIN_ID: 'SN_GOERLI',
+      ACCUMULATES_CHAIN_ID: '5',
+      FEE: '0'
+    }
+  ],
+  [
+    constants.StarknetChainId.SN_SEPOLIA,
+    {
+      DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
+      ACCUMULATES_CHAIN_ID: '11155111',
+      FEE: '0'
+    }
+  ]
+]);
 
 const controller = new clients.HerodotusController();
 
@@ -55,7 +70,7 @@ async function getStatus(id: string) {
 }
 
 async function submitBatch(proposal: ApiProposal) {
-  const mapping = HERODOTUS_MAPPING[proposal.chainId];
+  const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
 
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID, FEE } = mapping;
@@ -126,6 +141,7 @@ export async function registerProposal(proposal: ApiProposal) {
 export async function processProposal(proposal: DbProposal) {
   if (!proposal.herodotusId) {
     const [, l1TokenAddress] = proposal.id.split('-');
+    if (!l1TokenAddress) throw new Error('Invalid proposal id');
 
     await submitBatch({
       ...proposal,
@@ -143,7 +159,7 @@ export async function processProposal(proposal: DbProposal) {
 
   const { getAccount } = getClient(proposal.chainId);
   const { account, nonceManager } = getAccount('0x0');
-  const mapping = HERODOTUS_MAPPING[proposal.chainId];
+  const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
 
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
