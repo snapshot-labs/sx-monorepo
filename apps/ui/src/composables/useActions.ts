@@ -84,9 +84,11 @@ export function useActions() {
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
+      const hash = receipt.transaction_hash || receipt.hash;
 
       console.log('Receipt', receipt);
-      uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, networkId);
+
+      hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
       uiStore.addPendingTransaction(envelope.transaction_hash || envelope.hash, networkId);
     }
