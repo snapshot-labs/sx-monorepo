@@ -1,6 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../../../src/offchainNetworks';
+import { voteTypes, domain } from '../../../../../src/clients/offchain/ethereum-sig/types';
 
 describe('EthereumSig', () => {
   // Test address: 0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90
@@ -13,18 +14,39 @@ describe('EthereumSig', () => {
   });
 
   it('should create vote envelope', async () => {
+    const payload = {
+      space: 'wan-test.eth',
+      authenticator: '',
+      strategies: [],
+      proposal: '0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801',
+      choice: 1,
+      metadataUri: ''
+    };
+    const address = await signer.getAddress();
+
     const envelope = await client.vote({
       signer,
-      data: {
-        space: 'wan-test.eth',
-        authenticator: '',
-        strategies: [],
-        proposal: '0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801',
-        choice: 1,
-        metadataUri: ''
-      }
+      data: payload
     });
 
-    expect(envelope).toMatchSnapshot();
+    expect(envelope).toEqual({
+      data: payload,
+      signatureData: {
+        signature: expect.any(String),
+        address,
+        types: voteTypes,
+        domain,
+        message: {
+          app: '',
+          choice: payload.choice,
+          from: address,
+          metadata: '',
+          proposal: payload.proposal,
+          reason: '',
+          space: payload.space,
+          timestamp: expect.any(Number)
+        }
+      }
+    });
   });
 });
