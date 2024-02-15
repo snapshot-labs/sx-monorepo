@@ -38,7 +38,7 @@ export function createActions(
     ): Promise<any> {
       const data = {
         space: proposal.space.id,
-        proposal: proposal.proposal_id as number,
+        proposal: proposal.proposal_id as string,
         choice: getSdkChoice(choice),
         authenticator: '',
         strategies: [],

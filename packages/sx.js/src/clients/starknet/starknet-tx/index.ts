@@ -211,7 +211,7 @@ export class StarknetTx {
 
     const call = authenticator.createVoteCall(envelope, {
       voter: voterAddress,
-      proposalId: envelope.data.proposal,
+      proposalId: envelope.data.proposal as number,
       choice: envelope.data.choice,
       votingStrategies,
       metadataUri: ''

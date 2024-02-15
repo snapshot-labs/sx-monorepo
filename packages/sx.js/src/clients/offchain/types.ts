@@ -40,7 +40,7 @@ export type Vote = {
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];
-  proposal: number;
+  proposal: string;
   choice: Choice;
   metadataUri: string;
 };
