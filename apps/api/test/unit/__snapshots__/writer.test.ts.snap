@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handleDeploy should create space with correct parameters 1`] = `
+Array [
+  Array [
+    "INSERT IGNORE INTO spaces SET ?;",
+    Array [
+      Object {
+        "created": 1652650963200,
+        "id": "0x00625dc1290b6e936be5f1a3e963cf629326b1f4dfd5a56738dea98e1ad31b7f",
+        "name": "Pistachio DAO",
+        "proposal_count": 0,
+        "proposal_threshold": 1,
+        "tx": "0xabbb5161c49978ffc76369df76cdb40683e33c09145a9681553fe8e9c9a96a46",
+        "vote_count": 0,
+        "voting_delay": 3600,
+        "voting_period": 86400,
+      },
+    ],
+  ],
+]
+`;

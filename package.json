@@ -6,7 +6,7 @@
     "url": "git@github.com:snapshot-labs/sx-monorepo.git"
   },
   "scripts": {
-    "dev": "turbo run dev --filter=!mana",
+    "dev": "turbo run dev --filter=!mana --filter=!api",
     "dev:full": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",

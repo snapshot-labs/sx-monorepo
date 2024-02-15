@@ -1,0 +1,90 @@
+[
+  {
+    "type": "impl",
+    "name": "Factory",
+    "interface_name": "sx::factory::factory::IFactory"
+  },
+  {
+    "type": "struct",
+    "name": "core::array::Span::<core::felt252>",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "core::result::Result::<core::starknet::contract_address::ContractAddress, core::array::Array::<core::felt252>>",
+    "variants": [
+      {
+        "name": "Ok",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "Err",
+        "type": "core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "sx::factory::factory::IFactory",
+    "items": [
+      {
+        "type": "function",
+        "name": "deploy",
+        "inputs": [
+          {
+            "name": "class_hash",
+            "type": "core::starknet::class_hash::ClassHash"
+          },
+          {
+            "name": "initialize_calldata",
+            "type": "core::array::Span::<core::felt252>"
+          },
+          {
+            "name": "salt_nonce",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::result::Result::<core::starknet::contract_address::ContractAddress, core::array::Array::<core::felt252>>"
+          }
+        ],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "sx::factory::factory::Factory::NewContractDeployed",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "class_hash",
+        "type": "core::starknet::class_hash::ClassHash",
+        "kind": "data"
+      },
+      {
+        "name": "contract_address",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "sx::factory::factory::Factory::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "NewContractDeployed",
+        "type": "sx::factory::factory::Factory::NewContractDeployed",
+        "kind": "nested"
+      }
+    ]
+  }
+]

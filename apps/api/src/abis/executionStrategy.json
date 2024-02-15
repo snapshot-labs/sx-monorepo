@@ -1,0 +1,188 @@
+[
+  {
+    "type": "impl",
+    "name": "QuorumImpl",
+    "interface_name": "sx::interfaces::i_quorum::IQuorum"
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "sx::interfaces::i_quorum::IQuorum",
+    "items": [
+      {
+        "type": "function",
+        "name": "quorum",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "VanillaExecutionStrategy",
+    "interface_name": "sx::interfaces::i_execution_strategy::IExecutionStrategy"
+  },
+  {
+    "type": "enum",
+    "name": "sx::types::finalization_status::FinalizationStatus",
+    "variants": [
+      {
+        "name": "Pending",
+        "type": "()"
+      },
+      {
+        "name": "Executed",
+        "type": "()"
+      },
+      {
+        "name": "Cancelled",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::starknet::eth_address::EthAddress",
+    "members": [
+      {
+        "name": "address",
+        "type": "core::felt252"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "sx::types::user_address::UserAddress",
+    "variants": [
+      {
+        "name": "Starknet",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "Ethereum",
+        "type": "core::starknet::eth_address::EthAddress"
+      },
+      {
+        "name": "Custom",
+        "type": "core::integer::u256"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "sx::types::proposal::Proposal",
+    "members": [
+      {
+        "name": "start_timestamp",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "min_end_timestamp",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "max_end_timestamp",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "finalization_status",
+        "type": "sx::types::finalization_status::FinalizationStatus"
+      },
+      {
+        "name": "execution_payload_hash",
+        "type": "core::felt252"
+      },
+      {
+        "name": "execution_strategy",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "author",
+        "type": "sx::types::user_address::UserAddress"
+      },
+      {
+        "name": "active_voting_strategies",
+        "type": "core::integer::u256"
+      }
+    ]
+  },
+  {
+    "type": "interface",
+    "name": "sx::interfaces::i_execution_strategy::IExecutionStrategy",
+    "items": [
+      {
+        "type": "function",
+        "name": "execute",
+        "inputs": [
+          {
+            "name": "proposal",
+            "type": "sx::types::proposal::Proposal"
+          },
+          {
+            "name": "votes_for",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "votes_against",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "votes_abstain",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "payload",
+            "type": "core::array::Array::<core::felt252>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_strategy_type",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::felt252"
+          }
+        ],
+        "state_mutability": "view"
+      }
+    ]
+  },
+  {
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
+      {
+        "name": "quorum",
+        "type": "core::integer::u256"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "sx::execution_strategies::vanilla::VanillaExecutionStrategy::Event",
+    "kind": "enum",
+    "variants": []
+  }
+]
