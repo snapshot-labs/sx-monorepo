@@ -69,7 +69,7 @@ export class EthereumSig {
 
     const res = await fetch(this.sequencerUrl, body);
 
-    return await res.json();
+    return res.json();
   }
 
   public async vote({
