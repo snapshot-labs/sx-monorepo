@@ -28,9 +28,9 @@ export function useBalances() {
     const [baseTokenData, tokenData] = await Promise.all([
       callCoinGecko(`${COINGECKO_API_URL}/price?ids=${baseToken}${COINGECKO_PARAMS}`),
       callCoinGecko(
-        `${COINGECKO_API_URL}/token_price/${assetPlatform}?contract_addresses=${contractAddresses.join(
-          ','
-        )}${COINGECKO_PARAMS}`
+        `${COINGECKO_API_URL}/token_price/${assetPlatform}?contract_addresses=${contractAddresses
+          .slice(0, 10)
+          .join(',')}${COINGECKO_PARAMS}`
       )
     ]);
 
