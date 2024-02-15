@@ -6,9 +6,18 @@ import {
   PROPOSAL_QUERY,
   VOTES_QUERY
 } from './queries';
+import { enabledNetworks } from '@/networks';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
-import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
+import {
+  Space,
+  Proposal,
+  Vote,
+  User,
+  NetworkID,
+  ProposalState,
+  SpaceMetadataTreasury
+} from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
 
@@ -28,7 +37,10 @@ function getProposalState(proposal: ApiProposal): ProposalState {
 function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   // TODO: convert ChainID to ShortName, we might need external mapping to handle
   // all of those - or just have simple map with limited support
-  const wallet = space.treasuries[0] ? `eth:${space.treasuries[0].address}` : '';
+  const treasuries = space.treasuries.filter(treasury =>
+    enabledNetworks.includes(treasury.network as NetworkID)
+  ) as SpaceMetadataTreasury[];
+
   let validationName = space.validation.name;
   const validationParams = space.validation.params || {};
   if (space.validation.name === 'basic') {
@@ -61,7 +73,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
-    wallet,
+    treasuries,
     delegations: space.delegationPortal
       ? [
           {

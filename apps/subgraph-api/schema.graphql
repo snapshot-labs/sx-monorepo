@@ -34,6 +34,7 @@ type SpaceMetadata @entity {
   avatar: String!
   cover: String!
   external_url: String!
+  treasuries: [String!]!
   delegations: [String!]!
   github: String!
   twitter: String!

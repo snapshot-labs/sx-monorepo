@@ -13,7 +13,7 @@ const SPACE_FRAGMENT = gql`
       twitter
       discord
       voting_power_symbol
-      wallet
+      treasuries
       delegations
       executors
       executors_types

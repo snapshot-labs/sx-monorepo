@@ -2,7 +2,7 @@
 import { _n, _c, shorten, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork, evmNetworks } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { NetworkID, Space, Transaction } from '@/types';
+import { Space, Transaction } from '@/types';
 import type { Token } from '@/helpers/alchemy';
 
 const props = defineProps<{ space: Space }>();
@@ -23,10 +23,8 @@ const modalOpen = ref({
 });
 
 const currentNetworkId = computed(() => {
-  if (!props.space.wallet) return null;
-
   try {
-    return props.space.wallet.split(':')[0] as NetworkID;
+    return treasury.value?.networkId;
   } catch (e) {
     return null;
   }

@@ -13,6 +13,7 @@ const SPACE_FRAGMENT = gql`
     github
     symbol
     treasuries {
+      name
       network
       address
     }

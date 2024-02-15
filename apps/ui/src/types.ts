@@ -32,6 +32,12 @@ export type SelectedStrategy = {
   type: string;
 };
 
+export type SpaceMetadataTreasury = {
+  name: string | null;
+  network: NetworkID | null;
+  address: string | null;
+};
+
 export type SpaceMetadataDelegation = {
   name: string | null;
   apiType: string | null;
@@ -50,8 +56,7 @@ export type SpaceMetadata = {
   github: string;
   discord: string;
   votingPowerSymbol: string;
-  walletNetwork: NetworkID | null;
-  walletAddress: string | null;
+  treasuries: SpaceMetadataTreasury[];
   delegations: SpaceMetadataDelegation[];
 };
 
@@ -79,12 +84,12 @@ export type Space = {
   cover: string;
   about?: string;
   external_url: string;
+  treasuries: SpaceMetadataTreasury[];
   delegations: SpaceMetadataDelegation[];
   twitter: string;
   github: string;
   discord: string;
   voting_power_symbol: string;
-  wallet: string;
   controller: string;
   voting_delay: number;
   min_voting_period: number;

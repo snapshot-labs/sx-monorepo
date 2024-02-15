@@ -18,20 +18,35 @@ export function handleSpaceMetadata(content: Bytes): void {
   spaceMetadata.about = description ? description.toString() : ''
   spaceMetadata.avatar = avatar ? avatar.toString() : ''
   spaceMetadata.external_url = externalUrl ? externalUrl.toString() : ''
+  spaceMetadata.wallet = ''
+  spaceMetadata.treasuries = []
   spaceMetadata.delegations = []
 
   if (properties) {
     const propertiesObj = properties.toObject()
 
+    let treasuries = propertiesObj.get('treasuries')
     let delegations = propertiesObj.get('delegations')
     let cover = propertiesObj.get('cover')
     let github = propertiesObj.get('github')
     let twitter = propertiesObj.get('twitter')
     let discord = propertiesObj.get('discord')
     let votingPowerSymbol = propertiesObj.get('voting_power_symbol')
-    let wallets = propertiesObj.get('wallets')
     let executionStrategies = propertiesObj.get('execution_strategies')
     let executionStrategiesTypes = propertiesObj.get('execution_strategies_types')
+
+    if (treasuries) {
+      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
+      let jsonPropertiesObj = jsonObj.getObj('properties')
+      if (jsonPropertiesObj) {
+        let jsonTreasuriesArr = jsonPropertiesObj.getArr('treasuries')
+        if (jsonTreasuriesArr) {
+          spaceMetadata.treasuries = jsonTreasuriesArr._arr.map<string>((treasury) =>
+            treasury.toString()
+          )
+        }
+      }
+    }
 
     if (delegations) {
       let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
@@ -51,8 +66,6 @@ export function handleSpaceMetadata(content: Bytes): void {
     spaceMetadata.twitter = twitter ? twitter.toString() : ''
     spaceMetadata.discord = discord ? discord.toString() : ''
     spaceMetadata.voting_power_symbol = votingPowerSymbol ? votingPowerSymbol.toString() : 'VP'
-    spaceMetadata.wallet =
-      wallets && wallets.toArray().length > 0 ? wallets.toArray()[0].toString() : ''
 
     if (executionStrategies && executionStrategiesTypes) {
       spaceMetadata.executors = executionStrategies
@@ -70,7 +83,6 @@ export function handleSpaceMetadata(content: Bytes): void {
     spaceMetadata.github = ''
     spaceMetadata.twitter = ''
     spaceMetadata.discord = ''
-    spaceMetadata.wallet = ''
     spaceMetadata.executors = []
     spaceMetadata.executors_types = []
   }

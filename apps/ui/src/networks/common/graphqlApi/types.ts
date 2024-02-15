@@ -25,6 +25,7 @@ export type ApiSpace = {
     wallet: string;
     executors: string[];
     executors_types: string[];
+    treasuries: string[];
     delegations: string[];
   };
   controller: string;
