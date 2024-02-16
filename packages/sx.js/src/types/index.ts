@@ -125,7 +125,7 @@ export type Vote = {
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];
-  proposal: number | string;
+  proposal: number;
   choice: Choice;
 };
 
