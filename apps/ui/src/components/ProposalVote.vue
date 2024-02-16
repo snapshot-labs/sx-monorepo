@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { _t } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
@@ -24,7 +25,7 @@ const isSupported = computed(() => {
   return (
     hasSupportedAuthenticator &&
     hasSupportedStrategies &&
-    ['basic', 'single-choice', 'approval'].includes(props.proposal.type)
+    SUPPORTED_VOTING_TYPES.includes(props.proposal.type)
   );
 });
 </script>
