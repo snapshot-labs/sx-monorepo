@@ -9,6 +9,7 @@ exports[`EthereumSig should create vote envelope 1`] = `
     "proposal": "0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801",
     "space": "wan-test.eth",
     "strategies": [],
+    "type": "basic",
   },
   "signatureData": {
     "address": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
