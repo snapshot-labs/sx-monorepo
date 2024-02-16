@@ -10,7 +10,6 @@ import type {
   VotingPower,
   Connector
 } from '../types';
-import { verifyNetwork } from '@/helpers/utils';
 
 const SCORE_URL = 'https://score.snapshot.org';
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
