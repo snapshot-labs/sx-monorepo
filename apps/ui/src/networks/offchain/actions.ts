@@ -30,15 +30,13 @@ export function createActions(
   });
 
   return {
-    async vote(
+    vote(
       web3: Web3Provider,
       connectorType: Connector,
       account: string,
       proposal: Proposal,
       choice: Choice
     ): Promise<any> {
-      await verifyNetwork(web3, proposal.space.snapshot_chain_id as number);
-
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,
