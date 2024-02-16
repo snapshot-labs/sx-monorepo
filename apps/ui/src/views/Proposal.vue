@@ -192,15 +192,15 @@ watchEffect(() => {
               </UiTooltip>
             </div>
             <div v-else-if="proposal.type === 'single-choice'" class="flex flex-col space-y-2 py-2">
-              <UiTooltip v-for="(choice, index) in proposal.choices" :key="index" :title="choice">
-                <UiButton
-                  class="!h-[48px] w-full"
-                  :loading="sendingType === index + 1"
-                  @click="handleVoteClick(index + 1)"
-                >
-                  {{ choice }}
-                </UiButton>
-              </UiTooltip>
+              <UiButton
+                v-for="(choice, index) in proposal.choices"
+                :key="index"
+                class="!h-[48px] w-full"
+                :loading="sendingType === index + 1"
+                @click="handleVoteClick(index + 1)"
+              >
+                {{ choice }}
+              </UiButton>
             </div>
           </ProposalVote>
         </template>
