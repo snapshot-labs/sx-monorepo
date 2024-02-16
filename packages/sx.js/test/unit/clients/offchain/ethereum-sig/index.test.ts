@@ -1,13 +1,18 @@
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../../../src/offchainNetworks';
-import { voteTypes, domain } from '../../../../../src/clients/offchain/ethereum-sig/types';
 
 describe('EthereumSig', () => {
   // Test address: 0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90
   const TEST_PK = 'ef4bcf36b5d026b703b86a311031fe2291b979620f01443f795fa213f9105e35';
   const signer = new Wallet(TEST_PK);
   const client = new EthereumSig({ networkConfig: offchainGoerli });
+
+  beforeAll(() => {
+    jest.useFakeTimers({
+      now: new Date('2024-01-21').getTime()
+    });
+  });
 
   afterAll(() => {
     jest.restoreAllMocks();
@@ -22,31 +27,12 @@ describe('EthereumSig', () => {
       choice: 1,
       metadataUri: ''
     };
-    const address = await signer.getAddress();
 
     const envelope = await client.vote({
       signer,
       data: payload
     });
 
-    expect(envelope).toEqual({
-      data: payload,
-      signatureData: {
-        signature: expect.any(String),
-        address,
-        types: voteTypes,
-        domain,
-        message: {
-          app: '',
-          choice: payload.choice,
-          from: address,
-          metadata: '',
-          proposal: payload.proposal,
-          reason: '',
-          space: payload.space,
-          timestamp: expect.any(Number)
-        }
-      }
-    });
+    expect(envelope).toMatchSnapshot();
   });
 });
