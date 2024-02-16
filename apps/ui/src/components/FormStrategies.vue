@@ -10,6 +10,7 @@ withDefaults(
     title: string;
     description: string;
     availableStrategies: StrategyTemplate[];
+    defaultParams?: Record<string, any>;
   }>(),
   {
     limit: Infinity,
@@ -28,6 +29,7 @@ withDefaults(
       :model-value="model"
       :unique="unique"
       :available-strategies="availableStrategies"
+      :default-params="defaultParams"
       @update:model-value="value => (model = value)"
     />
   </div>
