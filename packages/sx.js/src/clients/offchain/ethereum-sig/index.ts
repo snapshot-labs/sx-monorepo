@@ -1,5 +1,5 @@
 import { offchainGoerli } from '../../../offchainNetworks';
-import { domain, BasicVoteTypes } from './types';
+import { domain, SingleChoiceVoteTypes } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type { Vote, Envelope, SignatureData, EIP712VoteMessage, EIP712Message } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
@@ -93,7 +93,7 @@ export class EthereumSig {
       metadata: ''
     };
 
-    const signatureData = await this.sign(signer, message, BasicVoteTypes);
+    const signatureData = await this.sign(signer, message, SingleChoiceVoteTypes);
 
     return {
       signatureData,

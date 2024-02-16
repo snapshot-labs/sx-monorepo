@@ -3,7 +3,7 @@ export const domain = {
   version: '0.1.4'
 };
 
-export const BasicVoteTypes = {
+export const SingleChoiceVoteTypes = {
   Vote: [
     { name: 'from', type: 'address' },
     { name: 'space', type: 'string' },
