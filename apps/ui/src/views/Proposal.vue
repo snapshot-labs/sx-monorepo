@@ -13,7 +13,7 @@ const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
 
-const sendingType = ref<Choice | null>(null);
+const sendingType = ref<Choice | number | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 
@@ -65,7 +65,7 @@ async function getVotingPower() {
   }
 }
 
-async function handleVoteClick(choice: Choice) {
+async function handleVoteClick(choice: Choice | number) {
   if (!proposal.value) return;
 
   sendingType.value = choice;
@@ -162,7 +162,7 @@ watchEffect(() => {
 
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
           <ProposalVote v-if="proposal" :proposal="proposal">
-            <div class="flex space-x-2 py-2">
+            <div v-if="proposal.type === 'basic'" class="flex space-x-2 py-2">
               <UiTooltip title="For">
                 <UiButton
                   class="!text-skin-success !border-skin-success !w-[48px] !h-[48px] !px-0"
@@ -188,6 +188,17 @@ watchEffect(() => {
                   @click="handleVoteClick('abstain')"
                 >
                   <IH-minus-sm class="inline-block" />
+                </UiButton>
+              </UiTooltip>
+            </div>
+            <div v-else-if="proposal.type === 'single-choice'" class="flex flex-col space-y-2 py-2">
+              <UiTooltip v-for="(choice, index) in proposal.choices" :key="index" :title="choice">
+                <UiButton
+                  class="!h-[48px] w-full"
+                  :loading="sendingType === index + 1"
+                  @click="handleVoteClick(index + 1)"
+                >
+                  {{ choice }}
                 </UiButton>
               </UiTooltip>
             </div>

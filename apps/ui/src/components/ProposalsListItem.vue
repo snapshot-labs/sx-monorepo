@@ -80,7 +80,7 @@ async function handleVoteClick(choice: Choice) {
             <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
             <div v-else />
           </template>
-          <div class="flex space-x-2 py-2">
+          <div v-if="proposal.type === 'basic'" class="flex space-x-2 py-2">
             <UiTooltip title="For">
               <UiButton
                 class="w-[40px] !text-skin-success !border-skin-success !h-[40px] !px-0"
