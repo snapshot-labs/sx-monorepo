@@ -7,12 +7,13 @@
   },
   "scripts": {
     "dev": "turbo run dev --filter=!mana --filter=!api",
-    "dev:full": "turbo run dev",
+    "dev:full": "yarn prepare-services && VITE_MANA_URL=http://localhost:3001 VITE_STARKNET_SEPOLIA_API=http://localhost:3000 NETWORK=SN_SEPOLIA NETWORK_NODE_URL=https://starknet-sepolia.infura.io/v3/46a5dd9727bf48d4a132672d3f376146 turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "release": "yarn build && changeset publish"
+    "release": "yarn build && changeset publish",
+    "prepare-services": "./scripts/prepare-services.sh"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",

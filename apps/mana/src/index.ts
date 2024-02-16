@@ -9,7 +9,7 @@ import { createTables } from './db';
 import { registeredProposalsLoop, registeredTransactionsLoop } from './stark/registered';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const commit = process.env.COMMIT_HASH || '';
 const version = commit ? `${pkg.version}#${commit.substr(0, 7)}` : pkg.version;
 
