@@ -13,9 +13,10 @@ const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
 
-const sendingType = ref<Choice | number | null>(null);
+const sendingType = ref<Choice | number | number[] | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
+const selectedChoices = ref<number[]>([]);
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -65,7 +66,7 @@ async function getVotingPower() {
   }
 }
 
-async function handleVoteClick(choice: Choice | number) {
+async function handleVoteClick(choice: Choice | number | number[]) {
   if (!proposal.value) return;
 
   sendingType.value = choice;
@@ -74,6 +75,14 @@ async function handleVoteClick(choice: Choice | number) {
     await vote(proposal.value, choice);
   } finally {
     sendingType.value = null;
+  }
+}
+
+function toggleSelectedChoice(choice: number) {
+  if (selectedChoices.value.includes(choice)) {
+    selectedChoices.value = selectedChoices.value.filter(c => c !== choice);
+  } else {
+    selectedChoices.value = [...selectedChoices.value, choice];
   }
 }
 
@@ -195,11 +204,36 @@ watchEffect(() => {
               <UiButton
                 v-for="(choice, index) in proposal.choices"
                 :key="index"
-                class="!h-[48px] w-full"
+                class="!h-[48px] text-left w-full"
                 :loading="sendingType === index + 1"
                 @click="handleVoteClick(index + 1)"
               >
                 {{ choice }}
+              </UiButton>
+            </div>
+            <div v-else-if="proposal.type === 'approval'" class="flex flex-col space-y-2 py-2">
+              <UiButton
+                v-for="(choice, index) in proposal.choices"
+                :key="index"
+                class="!h-[48px] text-left w-full flex align-middle"
+                :class="{ 'border-skin-text': selectedChoices.includes(index + 1) }"
+                @click="toggleSelectedChoice(index + 1)"
+              >
+                <div class="flex-grow leading-[46px] !h-[48px]">
+                  {{ choice }}
+                </div>
+                <IH-check
+                  v-if="selectedChoices.includes(index + 1)"
+                  class="leading-[48px] !h-[46px]"
+                />
+              </UiButton>
+              <UiButton
+                primary
+                class="!h-[48px] w-full"
+                :loading="!!sendingType"
+                @click="handleVoteClick(selectedChoices)"
+              >
+                Vote
               </UiButton>
             </div>
           </ProposalVote>

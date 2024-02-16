@@ -39,6 +39,7 @@ export function createActions(
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,
+        type: proposal.type,
         choice: getSdkChoice(proposal.type, choice),
         authenticator: '',
         strategies: [],

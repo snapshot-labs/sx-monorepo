@@ -184,7 +184,7 @@ export function useActions() {
     uiStore.addPendingTransaction(receipt.transaction_hash || receipt.hash, space.network);
   }
 
-  async function vote(proposal: Proposal, choice: Choice | number) {
+  async function vote(proposal: Proposal, choice: Choice | number | number[]) {
     if (!web3.value.account) return await forceLogin();
 
     const network = getNetwork(proposal.network);

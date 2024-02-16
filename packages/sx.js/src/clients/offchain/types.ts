@@ -41,6 +41,7 @@ export type Vote = {
   authenticator: string;
   strategies: StrategyConfig[];
   proposal: string;
-  choice: Choice;
+  choice: Choice | number | number[];
   metadataUri: string;
+  type: string;
 };

@@ -24,7 +24,7 @@ const isSupported = computed(() => {
   return (
     hasSupportedAuthenticator &&
     hasSupportedStrategies &&
-    ['basic', 'single-choice'].includes(props.proposal.type)
+    ['basic', 'single-choice', 'approval'].includes(props.proposal.type)
   );
 });
 </script>
