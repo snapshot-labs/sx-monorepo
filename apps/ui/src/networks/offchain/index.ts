@@ -1,33 +1,36 @@
 import { createApi } from './api';
 import * as constants from './constants';
+import { createActions } from './actions';
 import { pinPineapple } from '@/helpers/pin';
-import { Network, VotingPower, SnapshotInfo } from '@/networks/types';
-import { NetworkID, StrategyParsedMetadata } from '@/types';
+import { Network } from '@/networks/types';
+import { NetworkID } from '@/types';
 import networks from '@/helpers/networks.json';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
-const SCORE_URL = 'https://score.snapshot.org';
 const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://snapshot.org',
   's-tn': 'https://testnet.snapshot.org'
 };
+const CHAIN_IDS: Partial<Record<NetworkID, number>> = {
+  s: 1,
+  's-tn': 5
+};
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
-  const l1ChainId = 1;
-
+  const l1ChainId = CHAIN_IDS[networkId];
   const hubUrl = HUB_URLS[networkId];
-  if (!hubUrl) throw new Error(`Unknown network ${networkId}`);
+  if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);
 
   const api = createApi(hubUrl, networkId);
 
   const helpers = {
-    isAuthenticatorSupported: () => false,
+    isAuthenticatorSupported: () => true,
     isAuthenticatorContractSupported: () => false,
     getRelayerAuthenticatorType: () => null,
-    isStrategySupported: () => false,
+    isStrategySupported: () => true,
     isExecutorSupported: () => false,
     pin: pinPineapple,
     waitForTransaction: () => {
@@ -70,47 +73,6 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     api,
     constants,
     helpers,
-    actions: {
-      getVotingPower: async (
-        strategiesAddresses: string[],
-        strategiesParams: any[],
-        strategiesMetadata: StrategyParsedMetadata[],
-        voterAddress: string,
-        snapshotInfo: SnapshotInfo
-      ): Promise<VotingPower[]> => {
-        const result = await fetch(SCORE_URL, {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            method: 'get_vp',
-            params: {
-              address: voterAddress,
-              space: '',
-              strategies: strategiesParams,
-              network: snapshotInfo.chainId ?? l1ChainId,
-              snapshot: snapshotInfo.at ?? 'latest'
-            }
-          })
-        });
-        const body = await result.json();
-
-        return body.result.vp_by_strategy.map((vp: number, index: number) => {
-          const strategy = strategiesParams[index];
-          const decimals = parseInt(strategy.params.decimals || 0);
-
-          return {
-            address: strategy.name,
-            value: BigInt(vp * 10 ** decimals),
-            decimals,
-            symbol: strategy.params.symbol,
-            token: strategy.params.address,
-            chainId: strategy.network ? parseInt(strategy.network) : undefined
-          } as VotingPower;
-        });
-      }
-    }
+    actions: createActions(constants, helpers, l1ChainId)
   };
 }

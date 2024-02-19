@@ -159,40 +159,39 @@ watchEffect(() => {
               </button>
             </div>
           </IndicatorVotingPower>
-          <template v-if="!network?.readOnly">
-            <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
-            <ProposalVote v-if="proposal" :proposal="proposal">
-              <div class="flex space-x-2 py-2">
-                <UiTooltip title="For">
-                  <UiButton
-                    class="!text-skin-success !border-skin-success !w-[48px] !h-[48px] !px-0"
-                    :loading="sendingType === 'for'"
-                    @click="handleVoteClick('for')"
-                  >
-                    <IH-check class="inline-block" />
-                  </UiButton>
-                </UiTooltip>
-                <UiTooltip title="Against">
-                  <UiButton
-                    class="!text-skin-danger !border-skin-danger !w-[48px] !h-[48px] !px-0"
-                    :loading="sendingType === 'against'"
-                    @click="handleVoteClick('against')"
-                  >
-                    <IH-x class="inline-block" />
-                  </UiButton>
-                </UiTooltip>
-                <UiTooltip title="Abstain">
-                  <UiButton
-                    class="!text-gray-500 !border-gray-500 !w-[48px] !h-[48px] !px-0"
-                    :loading="sendingType === 'abstain'"
-                    @click="handleVoteClick('abstain')"
-                  >
-                    <IH-minus-sm class="inline-block" />
-                  </UiButton>
-                </UiTooltip>
-              </div>
-            </ProposalVote>
-          </template>
+
+          <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
+          <ProposalVote v-if="proposal" :proposal="proposal">
+            <div class="flex space-x-2 py-2">
+              <UiTooltip title="For">
+                <UiButton
+                  class="!text-skin-success !border-skin-success !w-[48px] !h-[48px] !px-0"
+                  :loading="sendingType === 'for'"
+                  @click="handleVoteClick('for')"
+                >
+                  <IH-check class="inline-block" />
+                </UiButton>
+              </UiTooltip>
+              <UiTooltip title="Against">
+                <UiButton
+                  class="!text-skin-danger !border-skin-danger !w-[48px] !h-[48px] !px-0"
+                  :loading="sendingType === 'against'"
+                  @click="handleVoteClick('against')"
+                >
+                  <IH-x class="inline-block" />
+                </UiButton>
+              </UiTooltip>
+              <UiTooltip title="Abstain">
+                <UiButton
+                  class="!text-gray-500 !border-gray-500 !w-[48px] !h-[48px] !px-0"
+                  :loading="sendingType === 'abstain'"
+                  @click="handleVoteClick('abstain')"
+                >
+                  <IH-minus-sm class="inline-block" />
+                </UiButton>
+              </UiTooltip>
+            </div>
+          </ProposalVote>
         </template>
 
         <template v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">

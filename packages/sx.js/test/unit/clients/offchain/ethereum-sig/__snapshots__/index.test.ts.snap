@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EthereumSig should create vote envelope 1`] = `
+{
+  "data": {
+    "authenticator": "",
+    "choice": 1,
+    "metadataUri": "",
+    "proposal": "0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801",
+    "space": "wan-test.eth",
+    "strategies": [],
+  },
+  "signatureData": {
+    "address": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+    "domain": {
+      "name": "snapshot",
+      "version": "0.1.4",
+    },
+    "message": {
+      "app": "",
+      "choice": 1,
+      "from": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+      "metadata": "",
+      "proposal": "0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801",
+      "reason": "",
+      "space": "wan-test.eth",
+      "timestamp": 1705795200,
+    },
+    "signature": "0x08dc521d9d8334fecb2f35f56db4536420865e35749425c2ed88219bdb230cd96e6302baf1881eb00e66631cbed3ed53bd237598a88b51980067ef7a090db35b1c",
+    "types": {
+      "Vote": [
+        {
+          "name": "from",
+          "type": "address",
+        },
+        {
+          "name": "space",
+          "type": "string",
+        },
+        {
+          "name": "timestamp",
+          "type": "uint64",
+        },
+        {
+          "name": "proposal",
+          "type": "string",
+        },
+        {
+          "name": "choice",
+          "type": "uint32",
+        },
+        {
+          "name": "reason",
+          "type": "string",
+        },
+        {
+          "name": "app",
+          "type": "string",
+        },
+        {
+          "name": "metadata",
+          "type": "string",
+        },
+      ],
+    },
+  },
+}
+`;
