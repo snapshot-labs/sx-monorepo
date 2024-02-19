@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StarknetSig should create propose envelope 1`] = `
+exports[`StarknetSig > should create propose envelope 1`] = `
 {
   "data": {
     "authenticator": "0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5",
@@ -48,7 +48,7 @@ exports[`StarknetSig should create propose envelope 1`] = `
 }
 `;
 
-exports[`StarknetSig should create update proposal envelope 1`] = `
+exports[`StarknetSig > should create update proposal envelope 1`] = `
 {
   "data": {
     "authenticator": "0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5",
@@ -92,7 +92,7 @@ exports[`StarknetSig should create update proposal envelope 1`] = `
 }
 `;
 
-exports[`StarknetSig should create vote envelope 1`] = `
+exports[`StarknetSig > should create vote envelope 1`] = `
 {
   "data": {
     "authenticator": "0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5",

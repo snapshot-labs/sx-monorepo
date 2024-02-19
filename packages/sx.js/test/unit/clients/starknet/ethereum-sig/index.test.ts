@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { starkProvider } from '../../../helpers';
@@ -18,11 +19,11 @@ describe('EthereumSig', () => {
   });
 
   beforeAll(() => {
-    jest.spyOn(client, 'generateSalt').mockImplementation(() => '0x0');
+    vi.spyOn(client, 'generateSalt').mockImplementation(() => '0x0');
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const { EthSig } = starknetNetworks['sn-tn'].Authenticators;

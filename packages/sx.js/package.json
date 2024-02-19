@@ -24,10 +24,10 @@
     "prepublishOnly": "yarn run lint",
     "node:evm": "anvil",
     "node:starknet": "OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES starknet-devnet --seed 1",
-    "test": "jest -c test/jest.config.unit.js",
-    "test:integration:starknet": "jest -c test/jest.config.integration.js test/integration/starknet",
-    "test:integration:evm": "jest -c test/jest.config.integration.js test/integration/evm",
-    "test:integration:offchain": "jest -c test/jest.config.integration.js test/integration/offchain"
+    "test": "vitest run test/unit",
+    "test:integration:starknet": "vitest run test/integration/starknet",
+    "test:integration:evm": "vitest run test/integration/evm",
+    "test:integration:offchain": "vitest run test/integration/offchain"
   },
   "eslintConfig": {
     "extends": "@snapshot-labs"
@@ -60,13 +60,11 @@
     "@snapshot-labs/prettier-config": "0.1.0-beta.11",
     "@types/bn.js": "^5.1.1",
     "@types/elliptic": "^6.4.14",
-    "@types/jest": "^29.4.1",
     "@types/node": "^18.11.9",
     "eslint": "^8.53.0",
-    "jest": "^29.4.1",
     "prettier": "^3.1.0",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^1.2.2"
   },
   "files": [
     "dist/**/*",

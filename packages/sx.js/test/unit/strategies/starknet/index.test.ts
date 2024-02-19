@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { getStrategy } from '../../../../src/strategies/starknet';
 import { starknetNetworks, starknetGoerli } from '../../../../src/networks';
 

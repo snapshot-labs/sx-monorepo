@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import createMerkleWhitelistStrategy from '../../../../src/strategies/starknet/merkleWhitelist';
 import { AddressType, Leaf } from '../../../../src/utils/merkletree';
 import { defaultNetwork } from '../../../../src/networks';

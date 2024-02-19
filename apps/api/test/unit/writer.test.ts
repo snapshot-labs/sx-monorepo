@@ -1,4 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
+import { describe, it, expect } from 'vitest';
+import { mockDeep } from 'vitest-mock-extended';
 import { AsyncMySqlPool } from '@snapshot-labs/checkpoint';
 import { validateAndParseAddress } from 'starknet';
 

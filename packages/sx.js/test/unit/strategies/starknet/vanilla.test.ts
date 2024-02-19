@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import createVanillaStrategy from '../../../../src/strategies/starknet/vanilla';
 import { defaultNetwork } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';
