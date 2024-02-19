@@ -46,7 +46,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     vote_count: space.votesCount,
     voting_power_symbol: space.symbol,
     voting_delay: space.voting.delay ?? 0,
-    min_voting_period: space.voting.period ?? 0,
+    min_voting_period: space.voting.period ?? 60 * 60 * 24 * 7,
     max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
     wallet,

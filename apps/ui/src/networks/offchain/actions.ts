@@ -40,7 +40,7 @@ export function createActions(
     ) {
       const response = fetch(getUrl(cid) as string);
       const payload = await (await response).json();
-      const startDate = Math.floor(+new Date() / 1000);
+      const startDate = Math.floor(+new Date() / 1000) + space.voting_delay;
 
       const data = {
         space: space.id,
@@ -50,10 +50,10 @@ export function createActions(
         discussion: '',
         choices: ['For', 'Against', 'Abstain'],
         start: startDate,
-        end: startDate + 60 * 60 * 24 * 7,
+        end: startDate + space.min_voting_period,
         snapshot: 19263799,
         plugins: '{}',
-        app: 'snapshot-x'
+        app: 'snapshot-v2'
       };
 
       return client.propose({ signer: web3.getSigner(), data });
