@@ -1,0 +1,144 @@
+type Space @entity {
+  id: ID!
+  metadata: SpaceMetadata
+  controller: Bytes!
+  voting_delay: Int!
+  min_voting_period: Int!
+  max_voting_period: Int!
+  proposal_threshold: BigDecimal!
+  quorum: BigDecimal!
+  next_strategy_index: Int!
+  strategies_indicies: [Int]!
+  strategies: [Bytes!]!
+  strategies_params: [String!]!
+  strategies_metadata: [String!]!
+  strategies_parsed_metadata: [StrategiesParsedMetadata!]! @derivedFrom(field: "space")
+  authenticators: [Bytes!]!
+  validation_strategy: Bytes!
+  validation_strategy_params: String!
+  voting_power_validation_strategy_strategies: [Bytes!]!
+  voting_power_validation_strategy_strategies_params: [String!]!
+  voting_power_validation_strategy_metadata: String!
+  voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadata!]!
+    @derivedFrom(field: "space")
+  proposal_count: Int!
+  vote_count: Int!
+  created: Int!
+  tx: Bytes!
+}
+
+type SpaceMetadata @entity {
+  id: ID!
+  name: String!
+  about: String!
+  avatar: String!
+  cover: String!
+  external_url: String!
+  delegations: [String!]!
+  github: String!
+  twitter: String!
+  discord: String!
+  voting_power_symbol: String!
+  wallet: String!
+  executors: [Bytes!]!
+  executors_types: [String!]!
+}
+
+type StrategiesParsedMetadata @entity {
+  id: ID!
+  space: Space!
+  index: Int!
+  data: StrategiesParsedMetadataData
+}
+
+type VotingPowerValidationStrategiesParsedMetadata @entity {
+  id: ID!
+  space: Space!
+  index: Int!
+  data: StrategiesParsedMetadataData
+}
+
+type StrategiesParsedMetadataData @entity {
+  id: ID!
+  name: String!
+  description: String!
+  decimals: Int!
+  symbol: String!
+  token: String
+  payload: String
+}
+
+type ExecutionStrategy @entity {
+  id: ID!
+  type: String!
+  quorum: BigDecimal!
+  timelock_veto_guardian: Bytes
+  timelock_delay: BigInt!
+}
+
+type ExecutionHash @entity {
+  id: ID!
+  proposal_id: ID!
+}
+
+type Proposal @entity {
+  id: ID!
+  proposal_id: Int!
+  space: Space!
+  author: User!
+  execution_hash: String!
+  metadata: ProposalMetadata
+  start: Int!
+  min_end: Int!
+  max_end: Int!
+  snapshot: Int!
+  execution_time: Int!
+  execution_strategy: Bytes!
+  execution_strategy_type: String!
+  timelock_veto_guardian: Bytes
+  timelock_delay: BigInt!
+  strategies_indicies: [Int]!
+  strategies: [Bytes!]!
+  strategies_params: [String!]!
+  scores_1: BigDecimal!
+  scores_2: BigDecimal!
+  scores_3: BigDecimal!
+  scores_total: BigDecimal!
+  quorum: BigDecimal!
+  created: Int!
+  edited: Int
+  tx: Bytes!
+  execution_tx: Bytes
+  veto_tx: Bytes
+  vote_count: Int!
+  executed: Boolean!
+  vetoed: Boolean!
+  completed: Boolean!
+  cancelled: Boolean!
+}
+
+type ProposalMetadata @entity {
+  id: ID!
+  title: String!
+  body: String!
+  discussion: String!
+  execution: String!
+}
+
+type Vote @entity {
+  id: ID!
+  voter: User!
+  space: Space!
+  proposal: Int!
+  choice: Int!
+  vp: BigDecimal!
+  created: Int!
+  tx: Bytes!
+}
+
+type User @entity {
+  id: ID!
+  proposal_count: Int!
+  vote_count: Int!
+  created: Int!
+}
