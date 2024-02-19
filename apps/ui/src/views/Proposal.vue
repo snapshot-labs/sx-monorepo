@@ -204,29 +204,31 @@ watchEffect(() => {
               <UiButton
                 v-for="(choice, index) in proposal.choices"
                 :key="index"
-                class="!h-[48px] text-left w-full"
+                class="!h-[48px] text-left w-full truncate"
                 :loading="sendingType === index + 1"
                 @click="handleVoteClick(index + 1)"
               >
                 {{ choice }}
               </UiButton>
             </div>
-            <div v-else-if="proposal.type === 'approval'" class="flex flex-col space-y-2 py-2">
-              <UiButton
-                v-for="(choice, index) in proposal.choices"
-                :key="index"
-                class="!h-[48px] text-left w-full flex align-middle"
-                :class="{ 'border-skin-text': selectedChoices.includes(index + 1) }"
-                @click="toggleSelectedChoice(index + 1)"
-              >
-                <div class="flex-grow leading-[46px] !h-[48px]">
-                  {{ choice }}
-                </div>
-                <IH-check
-                  v-if="selectedChoices.includes(index + 1)"
-                  class="leading-[48px] !h-[46px]"
-                />
-              </UiButton>
+            <div v-else-if="proposal.type === 'approval'" class="flex flex-col space-y-3 py-2">
+              <div class="flex flex-col space-y-2">
+                <UiButton
+                  v-for="(choice, index) in proposal.choices"
+                  :key="index"
+                  class="!h-[48px] text-left w-full flex align-middle"
+                  :class="{ 'border-skin-text': selectedChoices.includes(index + 1) }"
+                  @click="toggleSelectedChoice(index + 1)"
+                >
+                  <div class="flex-grow leading-[46px] !h-[48px] truncate">
+                    {{ choice }}
+                  </div>
+                  <IH-check
+                    v-if="selectedChoices.includes(index + 1)"
+                    class="leading-[48px] !h-[46px] shrink-0"
+                  />
+                </UiButton>
+              </div>
               <UiButton
                 primary
                 class="!h-[48px] w-full"
