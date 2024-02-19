@@ -1,7 +1,15 @@
 import { offchainGoerli } from '../../../offchainNetworks';
-import { domain, voteTypes } from './types';
+import { createProposalTypes, domain, voteTypes } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
-import type { Vote, Envelope, SignatureData, EIP712VoteMessage, EIP712Message } from '../types';
+import type {
+  Vote,
+  Propose,
+  Envelope,
+  SignatureData,
+  EIP712VoteMessage,
+  EIP712Message,
+  EIP712ProposeMessage
+} from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
 const SEQUENCER_URLS = {
@@ -23,7 +31,7 @@ export class EthereumSig {
     this.sequencerUrl = opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
   }
 
-  public async sign<T extends EIP712VoteMessage>(
+  public async sign<T extends EIP712VoteMessage | EIP712ProposeMessage>(
     signer: Signer & TypedDataSigner,
     message: T,
     types: Record<string, TypedDataField[]>
@@ -71,10 +79,27 @@ export class EthereumSig {
     const result = await res.json();
 
     if (result.error) {
-      throw new Error(result.error_description);
+      throw new Error(
+        typeof result.error_description === 'string' ? result.error_description : result.error
+      );
     }
 
     return result;
+  }
+
+  public async propose({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: Propose;
+  }): Promise<Envelope<Propose>> {
+    const signatureData = await this.sign(signer, data, createProposalTypes);
+
+    return {
+      signatureData,
+      data
+    };
   }
 
   public async vote({

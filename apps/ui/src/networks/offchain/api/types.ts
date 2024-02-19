@@ -25,6 +25,10 @@ export type ApiSpace = {
     quorum: number | null;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];
+  validation: {
+    name: string;
+    params?: any;
+  };
   proposalsCount: number;
   votesCount: number;
 };

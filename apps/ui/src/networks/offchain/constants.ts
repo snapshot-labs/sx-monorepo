@@ -1,5 +1,11 @@
 export const AUTHS = {};
-export const PROPOSAL_VALIDATIONS = {};
+export const PROPOSAL_VALIDATIONS = {
+  any: 'Any',
+  basic: 'Basic',
+  'passport-gated': 'Passport gated',
+  arbitrum: 'Arbitrum',
+  'karma-eas-attestation': 'Karma EAS Attestation'
+};
 export const STRATEGIES = {};
 export const EXECUTORS = {};
 export const EDITOR_AUTHENTICATORS = [];

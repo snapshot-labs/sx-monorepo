@@ -48,7 +48,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     voting_delay: space.voting.delay ?? 0,
     min_voting_period: space.voting.period ?? 0,
     max_voting_period: space.voting.period ?? 0,
-    proposal_threshold: space.voting.quorum?.toString() ?? '0',
+    proposal_threshold: '1',
     wallet,
     delegations: space.delegationPortal
       ? [
@@ -72,8 +72,8 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     strategies_parsed_metadata: [],
     validation_strategy: '',
     validation_strategy_params: '',
-    voting_power_validation_strategy_strategies: [],
-    voting_power_validation_strategy_strategies_params: [],
+    voting_power_validation_strategy_strategies: [space.validation?.name || 'basic'],
+    voting_power_validation_strategy_strategies_params: [space.validation?.params || {}],
     voting_power_validation_strategies_parsed_metadata: []
   };
 }

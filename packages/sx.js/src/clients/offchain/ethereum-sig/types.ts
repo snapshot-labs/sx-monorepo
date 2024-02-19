@@ -15,3 +15,21 @@ export const voteTypes = {
     { name: 'metadata', type: 'string' }
   ]
 };
+
+export const createProposalTypes = {
+  Proposal: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'type', type: 'string' },
+    { name: 'title', type: 'string' },
+    { name: 'body', type: 'string' },
+    { name: 'discussion', type: 'string' },
+    { name: 'choices', type: 'string[]' },
+    { name: 'start', type: 'uint64' },
+    { name: 'end', type: 'uint64' },
+    { name: 'snapshot', type: 'uint64' },
+    { name: 'plugins', type: 'string' },
+    { name: 'app', type: 'string' }
+  ]
+};
