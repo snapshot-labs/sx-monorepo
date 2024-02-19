@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { Contract, CallData } from 'starknet';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import EVMSlotValue from './abis/EVMSlotValue.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
-import { getEthProvider, getSlotKey, getBinaryTree } from './utils';
+import { getSlotKey, getBinaryTree } from './utils';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
 export default function createEvmSlotValueStrategy({
@@ -17,9 +18,10 @@ export default function createEvmSlotValueStrategy({
     voterAddress: string,
     slotIndex: number,
     blockNumber: number,
+    ethUrl: string,
     chainId: number
   ) {
-    const provider = getEthProvider(chainId);
+    const provider = new StaticJsonRpcProvider(ethUrl, chainId);
 
     const proof = await provider.send('eth_getProof', [
       l1TokenAddress,
@@ -59,17 +61,15 @@ export default function createEvmSlotValueStrategy({
 
       const voteEnvelope = envelope as Envelope<Vote>;
 
-      const spaceContract = new Contract(
-        SpaceAbi,
-        voteEnvelope.data.space,
-        clientConfig.starkProvider
-      );
+      const { starkProvider, ethUrl, networkConfig } = clientConfig;
+
+      const spaceContract = new Contract(SpaceAbi, voteEnvelope.data.space, starkProvider);
       const proposalStruct = (await spaceContract.call('proposals', [
         voteEnvelope.data.proposal
       ])) as any;
       const startTimestamp = proposalStruct.start_timestamp;
 
-      const { herodotusAccumulatesChainId: chainId } = clientConfig.networkConfig;
+      const { herodotusAccumulatesChainId: chainId } = networkConfig;
       const { contractAddress, slotIndex } = metadata;
 
       const tree = await getBinaryTree(deployedOnChain, startTimestamp, chainId);
@@ -80,6 +80,7 @@ export default function createEvmSlotValueStrategy({
         signerAddress,
         slotIndex,
         l1BlockNumber,
+        ethUrl,
         chainId
       );
 
@@ -100,11 +101,12 @@ export default function createEvmSlotValueStrategy({
       const isEthereumAddress = voterAddress.length === 42;
       if (!isEthereumAddress) return 0n;
 
-      const { herodotusAccumulatesChainId: chainId } = clientConfig.networkConfig;
+      const { ethUrl, networkConfig } = clientConfig;
+      const { herodotusAccumulatesChainId: chainId } = networkConfig;
       const { contractAddress, slotIndex } = metadata;
 
       if (!timestamp) {
-        const provider = getEthProvider(chainId);
+        const provider = new StaticJsonRpcProvider(clientConfig.ethUrl, chainId);
         const storage = await provider.getStorageAt(
           contractAddress,
           getSlotKey(voterAddress, slotIndex)
@@ -123,6 +125,7 @@ export default function createEvmSlotValueStrategy({
         voterAddress,
         slotIndex,
         l1BlockNumber,
+        ethUrl,
         chainId
       );
 
