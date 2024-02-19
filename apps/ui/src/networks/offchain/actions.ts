@@ -47,7 +47,7 @@ export function createActions(
         title: payload.title,
         body: payload.body,
         type: 'basic',
-        discussion: '',
+        discussion: payload.discussion,
         choices: ['For', 'Against', 'Abstain'],
         start: startDate,
         end: startDate + space.min_voting_period,
