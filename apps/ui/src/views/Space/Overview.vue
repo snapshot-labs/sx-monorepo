@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 import ICX from '~icons/c/x';
 import ICDiscord from '~icons/c/discord';
@@ -24,7 +24,6 @@ onMounted(() => {
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
-const network = computed(() => getNetwork(props.space.network));
 const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 

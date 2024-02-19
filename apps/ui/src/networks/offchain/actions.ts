@@ -88,6 +88,7 @@ export function createActions(
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
       if (Object.keys(PROPOSAL_VALIDATIONS).includes(strategiesAddresses[0])) {
+        console.log(strategiesAddresses, strategiesParams);
         return [
           {
             address: '',
