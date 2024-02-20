@@ -18,6 +18,7 @@ type Metadata = {
   baseChainId: number;
   baseNetworkId: NetworkID;
   rpcUrl: string;
+  ethRpcUrl: string;
   explorerUrl: string;
   apiUrl: string;
 };
@@ -29,6 +30,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseChainId: 1,
     baseNetworkId: 'eth',
     rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     apiUrl: 'https://api-1.snapshotx.xyz',
     explorerUrl: 'https://starkscan.co'
   },
@@ -38,6 +40,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseChainId: 5,
     baseNetworkId: 'gor',
     rpcUrl: `https://starknet-goerli.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    ethRpcUrl: `https://goerli.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     apiUrl: 'https://testnet-api-1.snapshotx.xyz',
     explorerUrl: 'https://testnet.starkscan.co'
   },
@@ -47,7 +50,8 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseChainId: 11155111,
     baseNetworkId: 'sep',
     rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl: 'https://testnet-api-1.snapshotx.xyz',
+    ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    apiUrl: import.meta.env.VITE_STARKNET_SEPOLIA_API ?? 'https://testnet-api-1.snapshotx.xyz',
     explorerUrl: 'https://sepolia.starkscan.co'
   }
 };
@@ -56,7 +60,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   const metadata = METADATA[networkId];
   if (!metadata) throw new Error(`Unsupported network ${networkId}`);
 
-  const { name, chainId, baseChainId, baseNetworkId, rpcUrl, apiUrl, explorerUrl } = metadata;
+  const { name, chainId, baseChainId, baseNetworkId, rpcUrl, ethRpcUrl, apiUrl, explorerUrl } =
+    metadata;
 
   const provider = createProvider(rpcUrl);
   const api = createApi(apiUrl, networkId);
@@ -138,7 +143,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     hasReceive: true,
     supportsSimulation: true,
     managerConnectors: STARKNET_CONNECTORS,
-    actions: createActions(networkId, provider, helpers, { l1ChainId: baseChainId }),
+    actions: createActions(networkId, provider, helpers, {
+      l1ChainId: baseChainId,
+      ethUrl: ethRpcUrl
+    }),
     api,
     constants,
     helpers

@@ -2,12 +2,13 @@
 
 import { Contract, CallData } from 'starknet';
 import { Contract as EvmContract } from '@ethersproject/contracts';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { keccak256 } from '@ethersproject/keccak256';
 import OzVotesToken from './abis/OzVotesToken.json';
 import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
-import { getEthProvider, getSlotKey, getBinaryTree } from './utils';
+import { getSlotKey, getBinaryTree } from './utils';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
 export default function createOzVotesStorageProofStrategy({
@@ -21,9 +22,10 @@ export default function createOzVotesStorageProofStrategy({
     numCheckpoints: number,
     slotIndex: number,
     blockNumber: number,
+    ethUrl: string,
     chainId: number
   ) {
-    const provider = getEthProvider(chainId);
+    const provider = new StaticJsonRpcProvider(ethUrl, chainId);
 
     const checkpointSlotKey =
       BigInt(keccak256(getSlotKey(voterAddress, slotIndex))) + BigInt(numCheckpoints) - BigInt(1);
@@ -72,21 +74,18 @@ export default function createOzVotesStorageProofStrategy({
       if (signerAddress.length !== 42) throw new Error('Not supported for non-Ethereum addresses');
       if (!metadata) throw new Error('Invalid metadata');
 
-      const { herodotusAccumulatesChainId: chainId } = clientConfig.networkConfig;
+      const { starkProvider, ethUrl, networkConfig } = clientConfig;
+      const { herodotusAccumulatesChainId: chainId } = networkConfig;
       const { contractAddress, slotIndex } = metadata;
 
-      const provider = getEthProvider(chainId);
+      const provider = new StaticJsonRpcProvider(ethUrl, chainId);
       const tokenContract = new EvmContract(contractAddress, OzVotesToken, provider);
       const numCheckpoints: number = await tokenContract.numCheckpoints(signerAddress);
       if (numCheckpoints === 0) throw new Error('No checkpoints found');
 
       const voteEnvelope = envelope as Envelope<Vote>;
 
-      const spaceContract = new Contract(
-        SpaceAbi,
-        voteEnvelope.data.space,
-        clientConfig.starkProvider
-      );
+      const spaceContract = new Contract(SpaceAbi, voteEnvelope.data.space, starkProvider);
       const proposalStruct = (await spaceContract.call('proposals', [
         voteEnvelope.data.proposal
       ])) as any;
@@ -101,6 +100,7 @@ export default function createOzVotesStorageProofStrategy({
         numCheckpoints,
         slotIndex,
         l1BlockNumber,
+        ethUrl,
         chainId
       );
 
@@ -123,9 +123,10 @@ export default function createOzVotesStorageProofStrategy({
       const isEthereumAddress = voterAddress.length === 42;
       if (!isEthereumAddress) return 0n;
 
-      const { herodotusAccumulatesChainId: chainId } = clientConfig.networkConfig;
+      const { starkProvider, ethUrl, networkConfig } = clientConfig;
+      const { herodotusAccumulatesChainId: chainId } = networkConfig;
       const { contractAddress, slotIndex } = metadata;
-      const provider = getEthProvider(chainId);
+      const provider = new StaticJsonRpcProvider(ethUrl, chainId);
 
       const tokenContract = new EvmContract(contractAddress, OzVotesToken, provider);
       if (!timestamp) return tokenContract.getVotes(voterAddress);
@@ -133,11 +134,7 @@ export default function createOzVotesStorageProofStrategy({
       const numCheckpoints: number = await tokenContract.numCheckpoints(voterAddress);
       if (numCheckpoints === 0) return 0n;
 
-      const contract = new Contract(
-        OZVotesStorageProof,
-        strategyAddress,
-        clientConfig.starkProvider
-      );
+      const contract = new Contract(OZVotesStorageProof, strategyAddress, starkProvider);
 
       const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
       const l1BlockNumber = tree.path[1].blockNumber;
@@ -148,6 +145,7 @@ export default function createOzVotesStorageProofStrategy({
         numCheckpoints,
         slotIndex,
         l1BlockNumber,
+        ethUrl,
         chainId
       );
 
