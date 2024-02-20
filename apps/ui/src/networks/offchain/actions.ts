@@ -10,8 +10,9 @@ import type {
   VotingPower,
   Connector
 } from '../types';
-import { PROPOSAL_VALIDATIONS } from './constants';
+import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET, PROPOSAL_VALIDATIONS } from './constants';
 import { getUrl } from '@/helpers/utils';
+import { getProvider } from '@/helpers/provider';
 
 const SCORE_URL = 'https://score.snapshot.org';
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
@@ -41,6 +42,7 @@ export function createActions(
       const response = fetch(getUrl(cid) as string);
       const payload = await (await response).json();
       const startDate = Math.floor(+new Date() / 1000) + space.voting_delay;
+      const provider = getProvider(space.snapshot_chain_id as number);
 
       const data = {
         space: space.id,
@@ -51,9 +53,9 @@ export function createActions(
         choices: ['For', 'Against', 'Abstain'],
         start: startDate,
         end: startDate + space.min_voting_period,
-        snapshot: 19263799,
+        snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: '{}',
-        app: 'snapshot-v2'
+        app: EDITOR_APP_NAME
       };
 
       return client.propose({ signer: web3.getSigner(), data });
