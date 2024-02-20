@@ -74,7 +74,7 @@ const editor = useMarkdownEditor(
         ref="editorRef"
         :value="model"
         maxlength="9600"
-        class="s-input h-[200px] !rounded-t-none !mb-0 !pt-[15px]"
+        class="s-input !border-t !border-0 h-[200px] !rounded-t-none !mb-0 !pt-[15px]"
         @input="event => (model = (event.target as HTMLInputElement).value)"
       />
     </div>

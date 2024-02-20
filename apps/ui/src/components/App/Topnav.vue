@@ -80,10 +80,11 @@ watch(route, to => {
         </router-link>
       </div>
       <div :key="web3.account" class="flex">
-        <UiButton v-if="loading || web3.authLoading" loading class="!px-0 w-[46px]" />
+        <UiButton v-if="loading || web3.authLoading" loading circle />
         <UiButton
           v-else
-          class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+          class="float-left sm:w-auto sm:!px-3 text-center"
+          circle
           @click="modalAccountOpen = true"
         >
           <span v-if="auth.isAuthenticated.value" class="sm:flex items-center space-x-2">
@@ -96,7 +97,7 @@ watch(route, to => {
           </template>
         </UiButton>
         <IndicatorPendingTransactions class="ml-2" />
-        <UiButton class="!px-0 w-[46px] ml-2" @click="toggleSkin">
+        <UiButton class="ml-2" circle @click="toggleSkin">
           <IH-light-bulb v-if="getMode() === 'dark'" class="inline-block" />
           <IH-moon v-else class="inline-block" />
         </UiButton>

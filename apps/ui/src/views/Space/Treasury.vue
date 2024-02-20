@@ -114,7 +114,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         v-if="currentNetworkId && evmNetworks.includes(currentNetworkId)"
         title="Connect to apps"
       >
-        <UiButton class="!px-0 w-[46px]" @click="modalOpen.walletConnectLink = true">
+        <UiButton circle @click="modalOpen.walletConnectLink = true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="480"
@@ -130,13 +130,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Copy address">
-        <UiButton class="!px-0 w-[46px]" @click="copy(treasury.wallet)">
+        <UiButton circle @click="copy(treasury.wallet)">
           <IH-duplicate v-if="!copied" class="inline-block" />
           <IH-check v-else class="inline-block" />
         </UiButton>
       </UiTooltip>
       <UiTooltip :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
-        <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
+        <UiButton circle @click="openModal(page)">
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </UiButton>
       </UiTooltip>

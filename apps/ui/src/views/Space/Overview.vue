@@ -65,18 +65,18 @@ watchEffect(() => setTitle(props.space.name));
       <div class="absolute right-4 top-4 space-x-2">
         <router-link v-if="!network.readOnly" :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">
-            <UiButton class="!px-0 w-[46px]">
+            <UiButton circle>
               <IH-pencil-alt class="inline-block" />
             </UiButton>
           </UiTooltip>
         </router-link>
         <UiTooltip v-if="isController" title="Edit profile">
-          <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
+          <UiButton circle @click="editSpaceModalOpen = true">
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
         <UiTooltip :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'">
-          <UiButton class="w-[46px] !px-0" @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
+          <UiButton circle @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
             <IS-star v-if="spaceStarred" class="inline-block" />
             <IH-star v-else class="inline-block" />
           </UiButton>
