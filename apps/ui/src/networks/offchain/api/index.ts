@@ -29,6 +29,17 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   // TODO: convert ChainID to ShortName, we might need external mapping to handle
   // all of those - or just have simple map with limited support
   const wallet = space.treasuries[0] ? `eth:${space.treasuries[0].address}` : '';
+  let validationName = space.validation.name;
+  const validationParams = space.validation.params || {};
+  if (space.validation.name === 'basic') {
+    validationParams.minScore = space.validation?.params?.minScore || space.filters.minScore;
+    validationParams.strategies = space.validation?.params?.strategies || space.strategies;
+  }
+
+  if (space.filters.onlyMembers) {
+    validationName = 'only-members';
+    validationParams.addresses = space.members.concat(space.admins);
+  }
 
   return {
     id: space.id,
@@ -73,8 +84,8 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     strategies_parsed_metadata: [],
     validation_strategy: '',
     validation_strategy_params: '',
-    voting_power_validation_strategy_strategies: [space.validation?.name || 'basic'],
-    voting_power_validation_strategy_strategies_params: [space.validation?.params || {}],
+    voting_power_validation_strategy_strategies: [validationName],
+    voting_power_validation_strategy_strategies_params: [validationParams],
     voting_power_validation_strategies_parsed_metadata: []
   };
 }

@@ -90,11 +90,26 @@ export function createActions(
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
       if (Object.keys(PROPOSAL_VALIDATIONS).includes(strategiesAddresses[0])) {
-        console.log(strategiesAddresses, strategiesParams);
+        const strategyName = strategiesAddresses[0];
+        const strategyParams = strategiesParams[0];
+
+        if (strategyName === 'only-members') {
+          return [
+            {
+              address: '',
+              value: strategyParams.addresses.includes(voterAddress.toLowerCase()) ? 1n : 0n,
+              decimals: 0,
+              symbol: '',
+              token: '',
+              chainId: undefined
+            } as VotingPower
+          ];
+        }
+
         return [
           {
             address: '',
-            value: 1n,
+            value: 0n,
             decimals: 0,
             symbol: '',
             token: '',

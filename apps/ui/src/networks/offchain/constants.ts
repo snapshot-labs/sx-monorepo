@@ -4,7 +4,8 @@ export const PROPOSAL_VALIDATIONS = {
   basic: 'Basic',
   'passport-gated': 'Passport gated',
   arbitrum: 'Arbitrum',
-  'karma-eas-attestation': 'Karma EAS Attestation'
+  'karma-eas-attestation': 'Karma EAS Attestation',
+  'only-members': 'Only members'
 };
 export const STRATEGIES = {};
 export const EXECUTORS = {};

@@ -4,6 +4,7 @@ const SPACE_FRAGMENT = gql`
   fragment spaceFragment on Space {
     id
     admins
+    members
     name
     network
     about
@@ -29,6 +30,14 @@ const SPACE_FRAGMENT = gql`
       name
       params
       network
+    }
+    validation {
+      name
+      params
+    }
+    filters {
+      minScore
+      onlyMembers
     }
     proposalsCount
     votesCount
