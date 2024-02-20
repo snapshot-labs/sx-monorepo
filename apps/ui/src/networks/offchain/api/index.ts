@@ -10,6 +10,7 @@ import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
+import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -46,7 +47,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     vote_count: space.votesCount,
     voting_power_symbol: space.symbol,
     voting_delay: space.voting.delay ?? 0,
-    min_voting_period: space.voting.period ?? 60 * 60 * 24 * 7,
+    min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
     wallet,
