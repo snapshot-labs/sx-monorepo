@@ -92,28 +92,48 @@ export function createActions(
       if (Object.keys(PROPOSAL_VALIDATIONS).includes(strategiesAddresses[0])) {
         const strategyName = strategiesAddresses[0];
         const strategyParams = strategiesParams[0];
+        const baseVotingPower = {
+          address: strategyName,
+          decimals: 0,
+          symbol: '',
+          token: '',
+          chainId: snapshotInfo.chainId
+        };
 
         if (strategyName === 'only-members') {
           return [
             {
-              address: '',
-              value: strategyParams.addresses.includes(voterAddress.toLowerCase()) ? 1n : 0n,
-              decimals: 0,
-              symbol: '',
-              token: '',
-              chainId: undefined
+              ...baseVotingPower,
+              value: strategyParams.addresses.includes(voterAddress.toLowerCase()) ? 1n : 0n
             } as VotingPower
           ];
         }
 
+        const result = await fetch(SCORE_URL, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'validate',
+            params: {
+              validation: strategyName,
+              author: voterAddress,
+              space: '',
+              network: snapshotInfo.chainId,
+              snapshot: 'latest',
+              params: strategyParams
+            }
+          })
+        });
+        const body = await result.json();
+
         return [
           {
-            address: '',
-            value: 0n,
-            decimals: 0,
-            symbol: '',
-            token: '',
-            chainId: undefined
+            ...baseVotingPower,
+            value: body.result ? 1n : 0n
           } as VotingPower
         ];
       } else {
