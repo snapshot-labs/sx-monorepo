@@ -1,5 +1,5 @@
 import { OffchainNetworkConfig, clients, offchainGoerli, offchainMainnet } from '@snapshot-labs/sx';
-import { getSdkChoice } from './helpers';
+import { fetchScoreApi, getSdkChoice } from './helpers';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { StrategyParsedMetadata, Choice, Proposal, Space } from '@/types';
 import type {
@@ -14,7 +14,6 @@ import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET, PROPOSAL_VALIDATIONS } from '.
 import { getUrl } from '@/helpers/utils';
 import { getProvider } from '@/helpers/provider';
 
-const SCORE_URL = 'https://score.snapshot.org';
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
   1: offchainMainnet,
   5: offchainGoerli
@@ -109,54 +108,31 @@ export function createActions(
           ];
         }
 
-        const result = await fetch(SCORE_URL, {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'validate',
-            params: {
-              validation: strategyName,
-              author: voterAddress,
-              space: '',
-              network: snapshotInfo.chainId,
-              snapshot: 'latest',
-              params: strategyParams
-            }
-          })
+        const result = await fetchScoreApi('validate', {
+          validation: strategyName,
+          author: voterAddress,
+          space: '',
+          network: snapshotInfo.chainId,
+          snapshot: snapshotInfo.at ?? 'latest',
+          params: strategyParams
         });
-        const body = await result.json();
 
         return [
           {
             ...baseVotingPower,
-            value: body.result ? 1n : 0n
+            value: result ? 1n : 0n
           } as VotingPower
         ];
       } else {
-        const result = await fetch(SCORE_URL, {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            method: 'get_vp',
-            params: {
-              address: voterAddress,
-              space: '',
-              strategies: strategiesParams,
-              network: snapshotInfo.chainId ?? chainId,
-              snapshot: snapshotInfo.at ?? 'latest'
-            }
-          })
+        const result = await fetchScoreApi('get_vp', {
+          address: voterAddress,
+          space: '',
+          strategies: strategiesParams,
+          network: snapshotInfo.chainId ?? chainId,
+          snapshot: snapshotInfo.at ?? 'latest'
         });
-        const body = await result.json();
 
-        return body.result.vp_by_strategy.map((vp: number, index: number) => {
+        return result.vp_by_strategy.map((vp: number, index: number) => {
           const strategy = strategiesParams[index];
           const decimals = parseInt(strategy.params.decimals || 0);
 
