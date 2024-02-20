@@ -1,14 +1,14 @@
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: postgres:15.4
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=mana
     volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
       - pg:/var/lib/postgresql/data
 volumes:
   pg:
