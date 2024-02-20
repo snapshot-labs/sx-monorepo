@@ -46,12 +46,10 @@ export function createActions(
   networkId: NetworkID,
   starkProvider: RpcProvider,
   helpers: NetworkHelpers,
-  { l1ChainId }: { l1ChainId: number }
+  { l1ChainId, ethUrl }: { l1ChainId: number; ethUrl: string }
 ): NetworkActions {
   const networkConfig = CONFIGS[networkId];
   if (!networkConfig) throw new Error(`Unsupported network ${networkId}`);
-
-  const ethUrl: string = import.meta.env.VITE_ETH_RPC_URL;
 
   const l1Provider = getProvider(l1ChainId);
 
