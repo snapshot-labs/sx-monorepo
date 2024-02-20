@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import createOzVotesStorageProofStrategy from '../../../../src/strategies/starknet/ozVotesStorageProof';
 import { defaultNetwork } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';

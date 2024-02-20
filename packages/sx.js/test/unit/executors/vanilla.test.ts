@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import createVanillaExecutor from '../../../src/executors/vanilla';
 
 describe('vanillaExecutor', () => {

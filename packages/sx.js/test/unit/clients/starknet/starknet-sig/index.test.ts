@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { Account } from 'starknet';
 import { starkProvider } from '../../../helpers';
 import { StarknetSig } from '../../../../../src/clients/starknet/starknet-sig';
@@ -17,11 +18,11 @@ describe('StarknetSig', () => {
   });
 
   beforeAll(() => {
-    jest.spyOn(client, 'generateSalt').mockImplementation(() => '0x0');
+    vi.spyOn(client, 'generateSalt').mockImplementation(() => '0x0');
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const { StarkSig } = starknetNetworks['sn-tn'].Authenticators;

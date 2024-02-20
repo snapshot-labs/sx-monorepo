@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../src/offchainNetworks';
