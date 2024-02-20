@@ -5,9 +5,12 @@ export function getSdkChoice(type: string, choice: Choice | number | number[]): 
     if (choice === 'for') return 1;
     if (choice === 'against') return 2;
     return 3;
-  } else if (type === 'single-choice') {
+  
+  if (type === 'single-choice') {
     return choice as number;
-  } else if (type === 'approval') {
+  }
+  
+  if (type === 'approval') {
     return choice as number[];
   }
 
