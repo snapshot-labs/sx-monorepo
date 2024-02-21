@@ -17,7 +17,7 @@ export async function fetchScoreApi(method: string, params: Record<string, any>)
     },
     body: JSON.stringify({
       jsonrpc: '2.0',
-      method: 'ad',
+      method,
       params
     })
   });
