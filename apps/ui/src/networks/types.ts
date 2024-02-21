@@ -92,7 +92,7 @@ export type ReadOnlyNetworkActions = {
     connectorType: Connector,
     account: string,
     proposal: Proposal,
-    choice: Choice | number | number[]
+    choice: Choice
   ): Promise<any>;
   send(envelope: any): Promise<any>;
 };

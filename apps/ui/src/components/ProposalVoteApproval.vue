@@ -2,12 +2,12 @@
 import { Choice, Proposal } from '@/types';
 
 defineProps<{
-  sendingType: Choice | number | number[] | null;
+  sendingType: Choice | null;
   proposal: Proposal;
 }>();
 
 const emit = defineEmits<{
-  (e: 'handleVoteClick', value: number[]);
+  (e: 'handleVoteClick', value: Choice);
 }>();
 
 const selectedChoices = ref<number[]>([]);

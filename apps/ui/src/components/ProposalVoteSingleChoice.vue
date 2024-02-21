@@ -2,7 +2,7 @@
 import { Choice, Proposal } from '@/types';
 
 defineProps<{
-  sendingType: Choice | number | number[] | null;
+  sendingType: Choice | null;
   proposal: Proposal;
 }>();
 

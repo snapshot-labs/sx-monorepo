@@ -13,7 +13,7 @@ const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { vote } = useActions();
 
-const sendingType = ref<Choice | number | number[] | null>(null);
+const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
 
@@ -65,7 +65,7 @@ async function getVotingPower() {
   }
 }
 
-async function handleVoteClick(choice: Choice | number | number[]) {
+async function handleVoteClick(choice: Choice) {
   if (!proposal.value) return;
 
   sendingType.value = choice;

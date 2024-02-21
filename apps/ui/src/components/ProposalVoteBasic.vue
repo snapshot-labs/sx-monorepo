@@ -3,7 +3,7 @@ import { Choice } from '@/types';
 
 withDefaults(
   defineProps<{
-    sendingType: Choice | number | number[] | null;
+    sendingType: Choice | null;
     size: number;
   }>(),
   { size: 48 }

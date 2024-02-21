@@ -16,7 +16,7 @@ export type NetworkID =
   | 'matic'
   | 'arb1';
 
-export type Choice = 'for' | 'against' | 'abstain';
+export type Choice = 'for' | 'against' | 'abstain' | string | number | number[];
 
 export type SelectedStrategy = {
   address: string;

@@ -1,6 +1,6 @@
 import { Choice } from '@/types';
 
-export function getSdkChoice(type: string, choice: Choice | number | number[]): number | number[] {
+export function getSdkChoice(type: string, choice: Choice): number | number[] {
   if (type === 'basic') {
     if (choice === 'for') return 1;
     if (choice === 'against') return 2;
