@@ -10,7 +10,7 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'voteClick', value: Choice);
+  (e: 'vote', value: Choice);
 }>();
 </script>
 
@@ -21,7 +21,7 @@ const emit = defineEmits<{
         class="!text-skin-success !border-skin-success !px-0"
         :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
         :loading="sendingType === 'for'"
-        @click="emit('voteClick', 'for')"
+        @click="emit('vote', 'for')"
       >
         <IH-check class="inline-block" />
       </UiButton>
@@ -31,7 +31,7 @@ const emit = defineEmits<{
         class="!text-skin-danger !border-skin-danger !px-0"
         :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
         :loading="sendingType === 'against'"
-        @click="emit('voteClick', 'against')"
+        @click="emit('vote', 'against')"
       >
         <IH-x class="inline-block" />
       </UiButton>
@@ -41,7 +41,7 @@ const emit = defineEmits<{
         class="!text-gray-500 !border-gray-500 !px-0"
         :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
         :loading="sendingType === 'abstain'"
-        @click="emit('voteClick', 'abstain')"
+        @click="emit('vote', 'abstain')"
       >
         <IH-minus-sm class="inline-block" />
       </UiButton>

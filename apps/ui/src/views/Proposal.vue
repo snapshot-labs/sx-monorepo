@@ -165,19 +165,19 @@ watchEffect(() => {
             <ProposalVoteBasic
               v-if="proposal.type === 'basic'"
               :sending-type="sendingType"
-              @vote-click="handleVoteClick"
+              @vote="handleVoteClick"
             />
             <ProposalVoteSingleChoice
               v-else-if="proposal.type === 'single-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
-              @vote-click="handleVoteClick"
+              @vote="handleVoteClick"
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
               :proposal="proposal"
               :sending-type="sendingType"
-              @vote-click="handleVoteClick"
+              @vote="handleVoteClick"
             />
           </ProposalVote>
         </template>
