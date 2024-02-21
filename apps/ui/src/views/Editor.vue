@@ -321,7 +321,7 @@ export default defineComponent({
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
       <div>
-        <h4 class="eyebrow mb-2">Choice type</h4>
+        <h4 class="eyebrow mb-2">Voting type</h4>
         <UiSelectDropdown
           v-model="proposal.type"
           title=""
@@ -342,6 +342,11 @@ export default defineComponent({
             }
           ]"
         />
+
+        <div v-if="proposal.type === 'single-choice' || proposal.type === 'approval'">
+          <h4 class="eyebrow mb-2">Choices</h4>
+          <UiInputArray v-model="proposal.choices" definition="" />
+        </div>
       </div>
       <div
         v-if="

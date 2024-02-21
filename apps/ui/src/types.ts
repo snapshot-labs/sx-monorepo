@@ -195,6 +195,7 @@ export type Draft = {
   body: string;
   discussion: string;
   type: VoteType;
+  choices: string[];
   executionStrategy: SelectedStrategy | null;
   execution: Transaction[];
   updatedAt: number;

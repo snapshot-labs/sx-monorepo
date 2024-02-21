@@ -40,6 +40,7 @@ function createDraft(
     body: '',
     discussion: '',
     type: 'basic',
+    choices: ['For', 'Against', 'Abstain'],
     executionStrategy: null,
     execution: [],
     updatedAt: Date.now(),
