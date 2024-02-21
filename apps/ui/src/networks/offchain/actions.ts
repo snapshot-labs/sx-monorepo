@@ -68,6 +68,12 @@ export function createActions(
 
       return client.propose({ signer: web3.getSigner(), data });
     },
+    cancelProposal(web3: Web3Provider, proposal: Proposal) {
+      return client.cancel({
+        signer: web3.getSigner(),
+        data: { proposal: proposal.proposal_id as string, space: proposal.space.id }
+      });
+    },
     vote(
       web3: Web3Provider,
       connectorType: Connector,

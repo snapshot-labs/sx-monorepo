@@ -96,6 +96,7 @@ export type ReadOnlyNetworkActions = {
     executionStrategy: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
+  cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(
     web3: Web3Provider,
     connectorType: Connector,
@@ -142,7 +143,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     executionStrategy: string | null,
     transactions: MetaTransaction[]
   );
-  cancelProposal(web3: Web3Provider, proposal: Proposal);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);

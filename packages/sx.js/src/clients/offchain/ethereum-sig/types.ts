@@ -40,3 +40,12 @@ export const proposeTypes = {
     { name: 'app', type: 'string' }
   ]
 };
+
+export const cancelProposalTypes = {
+  CancelProposal: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'proposal', type: 'bytes32' }
+  ]
+};
