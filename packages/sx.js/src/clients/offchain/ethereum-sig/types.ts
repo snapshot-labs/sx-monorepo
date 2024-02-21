@@ -3,30 +3,25 @@ export const domain = {
   version: '0.1.4'
 };
 
-export const singleChoiceVoteTypes = {
-  Vote: [
-    { name: 'from', type: 'address' },
-    { name: 'space', type: 'string' },
-    { name: 'timestamp', type: 'uint64' },
-    { name: 'proposal', type: 'string' },
-    { name: 'choice', type: 'uint32' },
-    { name: 'reason', type: 'string' },
-    { name: 'app', type: 'string' },
-    { name: 'metadata', type: 'string' }
-  ]
+const baseVoteTypes = [
+  { name: 'from', type: 'address' },
+  { name: 'space', type: 'string' },
+  { name: 'timestamp', type: 'uint64' },
+  { name: 'proposal', type: 'string' },
+  { name: 'choice', type: 'uint32' },
+  { name: 'reason', type: 'string' },
+  { name: 'app', type: 'string' },
+  { name: 'metadata', type: 'string' }
+];
+
+export const basicVoteTypes = {
+  Vote: [...baseVoteTypes, { name: 'choice', type: 'uint32' }]
 };
 
-export const multipleChoiceVoteTypes = {
-  Vote: [
-    { name: 'from', type: 'address' },
-    { name: 'space', type: 'string' },
-    { name: 'timestamp', type: 'uint64' },
-    { name: 'proposal', type: 'string' },
-    { name: 'choice', type: 'uint32[]' },
-    { name: 'reason', type: 'string' },
-    { name: 'app', type: 'string' },
-    { name: 'metadata', type: 'string' }
-  ]
+export const singleChoiceVoteTypes = basicVoteTypes;
+
+export const approvalVoteTypes = {
+  Vote: [...baseVoteTypes, { name: 'choice', type: 'uint32[]' }]
 };
 
 export const proposeTypes = {

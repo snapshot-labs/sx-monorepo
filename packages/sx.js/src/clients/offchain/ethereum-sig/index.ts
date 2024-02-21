@@ -1,5 +1,11 @@
 import { offchainGoerli } from '../../../offchainNetworks';
-import { domain, proposeTypes, singleChoiceVoteTypes, multipleChoiceVoteTypes } from './types';
+import {
+  domain,
+  proposeTypes,
+  basicVoteTypes,
+  singleChoiceVoteTypes,
+  approvalVoteTypes
+} from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
   Vote,
@@ -118,10 +124,9 @@ export class EthereumSig {
       metadata: ''
     };
 
-    let voteType = singleChoiceVoteTypes;
-    if (data.type === 'approval') {
-      voteType = multipleChoiceVoteTypes;
-    }
+    let voteType = basicVoteTypes;
+    if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
+    if (data.type === 'approval') voteType = approvalVoteTypes;
 
     const signatureData = await this.sign(signer, message, voteType);
 
