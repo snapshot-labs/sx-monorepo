@@ -162,23 +162,23 @@ watchEffect(() => {
 
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
           <ProposalVote v-if="proposal" :proposal="proposal">
-            <div v-if="proposal.type === 'basic'" class="flex space-x-2 py-2">
-              <ProposalVoteBasic :sending-type="sendingType" @handle-vote-click="handleVoteClick" />
-            </div>
-            <div v-else-if="proposal.type === 'single-choice'" class="flex flex-col space-y-2 py-2">
-              <ProposalVoteSingleChoice
-                :proposal="proposal"
-                :sending-type="sendingType"
-                @handle-vote-click="handleVoteClick"
-              />
-            </div>
-            <div v-else-if="proposal.type === 'approval'" class="flex flex-col space-y-3 py-2">
-              <ProposalVoteApproval
-                :proposal="proposal"
-                :sending-type="sendingType"
-                @handle-vote-click="handleVoteClick"
-              />
-            </div>
+            <ProposalVoteBasic
+              v-if="proposal.type === 'basic'"
+              :sending-type="sendingType"
+              @handle-vote-click="handleVoteClick"
+            />
+            <ProposalVoteSingleChoice
+              v-else-if="proposal.type === 'single-choice'"
+              :proposal="proposal"
+              :sending-type="sendingType"
+              @handle-vote-click="handleVoteClick"
+            />
+            <ProposalVoteApproval
+              v-else-if="proposal.type === 'approval'"
+              :proposal="proposal"
+              :sending-type="sendingType"
+              @handle-vote-click="handleVoteClick"
+            />
           </ProposalVote>
         </template>
 

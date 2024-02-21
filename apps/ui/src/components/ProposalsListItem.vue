@@ -80,13 +80,12 @@ async function handleVoteClick(choice: Choice) {
             <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
             <div v-else />
           </template>
-          <div v-if="proposal.type === 'basic'" class="flex space-x-2 py-2">
-            <ProposalVoteBasic
-              :sending-type="sendingType"
-              :size="40"
-              @handle-vote-click="handleVoteClick"
-            />
-          </div>
+          <ProposalVoteBasic
+            v-if="proposal.type === 'basic'"
+            :sending-type="sendingType"
+            :size="40"
+            @handle-vote-click="handleVoteClick"
+          />
         </ProposalVote>
       </div>
     </div>

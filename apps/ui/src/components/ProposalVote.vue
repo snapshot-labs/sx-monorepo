@@ -55,5 +55,7 @@ const isSupported = computed(() => {
   <slot v-else-if="!isSupported" name="unsupported">
     Voting for this proposal is not supported
   </slot>
-  <slot v-else></slot>
+  <div v-else class="py-2">
+    <slot />
+  </div>
 </template>

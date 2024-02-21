@@ -12,13 +12,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <UiButton
-    v-for="(choice, index) in proposal.choices"
-    :key="index"
-    class="!h-[48px] text-left w-full truncate"
-    :loading="sendingType === index + 1"
-    @click="emit('handleVoteClick', index + 1)"
-  >
-    {{ choice }}
-  </UiButton>
+  <div class="flex flex-col space-y-2">
+    <UiButton
+      v-for="(choice, index) in proposal.choices"
+      :key="index"
+      class="!h-[48px] text-left w-full truncate"
+      :loading="sendingType === index + 1"
+      @click="emit('handleVoteClick', index + 1)"
+    >
+      {{ choice }}
+    </UiButton>
+  </div>
 </template>
