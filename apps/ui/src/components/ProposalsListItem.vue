@@ -81,33 +81,11 @@ async function handleVoteClick(choice: Choice) {
             <div v-else />
           </template>
           <div v-if="proposal.type === 'basic'" class="flex space-x-2 py-2">
-            <UiTooltip title="For">
-              <UiButton
-                class="w-[40px] !text-skin-success !border-skin-success !h-[40px] !px-0"
-                :loading="sendingType === 'for'"
-                @click="handleVoteClick('for')"
-              >
-                <IH-check class="inline-block" />
-              </UiButton>
-            </UiTooltip>
-            <UiTooltip title="Against">
-              <UiButton
-                class="w-[40px] !text-skin-danger !border-skin-danger !h-[40px] !px-0"
-                :loading="sendingType === 'against'"
-                @click="handleVoteClick('against')"
-              >
-                <IH-x class="inline-block" />
-              </UiButton>
-            </UiTooltip>
-            <UiTooltip title="Abstain">
-              <UiButton
-                class="w-[40px] !text-gray-500 !border-gray-500 !h-[40px] !px-0"
-                :loading="sendingType === 'abstain'"
-                @click="handleVoteClick('abstain')"
-              >
-                <IH-minus-sm class="inline-block" />
-              </UiButton>
-            </UiTooltip>
+            <ProposalVoteBasic
+              :sending-type="sendingType"
+              :size="40"
+              @handle-vote-click="handleVoteClick"
+            />
           </div>
         </ProposalVote>
       </div>

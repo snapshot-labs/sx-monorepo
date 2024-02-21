@@ -16,7 +16,6 @@ const { vote } = useActions();
 const sendingType = ref<Choice | number | number[] | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const loadingVotingPower = ref(true);
-const selectedChoices = ref<number[]>([]);
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -75,14 +74,6 @@ async function handleVoteClick(choice: Choice | number | number[]) {
     await vote(proposal.value, choice);
   } finally {
     sendingType.value = null;
-  }
-}
-
-function toggleSelectedChoice(choice: number) {
-  if (selectedChoices.value.includes(choice)) {
-    selectedChoices.value = selectedChoices.value.filter(c => c !== choice);
-  } else {
-    selectedChoices.value = [...selectedChoices.value, choice];
   }
 }
 
@@ -172,71 +163,21 @@ watchEffect(() => {
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
           <ProposalVote v-if="proposal" :proposal="proposal">
             <div v-if="proposal.type === 'basic'" class="flex space-x-2 py-2">
-              <UiTooltip title="For">
-                <UiButton
-                  class="!text-skin-success !border-skin-success !w-[48px] !h-[48px] !px-0"
-                  :loading="sendingType === 'for'"
-                  @click="handleVoteClick('for')"
-                >
-                  <IH-check class="inline-block" />
-                </UiButton>
-              </UiTooltip>
-              <UiTooltip title="Against">
-                <UiButton
-                  class="!text-skin-danger !border-skin-danger !w-[48px] !h-[48px] !px-0"
-                  :loading="sendingType === 'against'"
-                  @click="handleVoteClick('against')"
-                >
-                  <IH-x class="inline-block" />
-                </UiButton>
-              </UiTooltip>
-              <UiTooltip title="Abstain">
-                <UiButton
-                  class="!text-gray-500 !border-gray-500 !w-[48px] !h-[48px] !px-0"
-                  :loading="sendingType === 'abstain'"
-                  @click="handleVoteClick('abstain')"
-                >
-                  <IH-minus-sm class="inline-block" />
-                </UiButton>
-              </UiTooltip>
+              <ProposalVoteBasic :sending-type="sendingType" @handle-vote-click="handleVoteClick" />
             </div>
             <div v-else-if="proposal.type === 'single-choice'" class="flex flex-col space-y-2 py-2">
-              <UiButton
-                v-for="(choice, index) in proposal.choices"
-                :key="index"
-                class="!h-[48px] text-left w-full truncate"
-                :loading="sendingType === index + 1"
-                @click="handleVoteClick(index + 1)"
-              >
-                {{ choice }}
-              </UiButton>
+              <ProposalVoteSingleChoice
+                :proposal="proposal"
+                :sending-type="sendingType"
+                @handle-vote-click="handleVoteClick"
+              />
             </div>
             <div v-else-if="proposal.type === 'approval'" class="flex flex-col space-y-3 py-2">
-              <div class="flex flex-col space-y-2">
-                <UiButton
-                  v-for="(choice, index) in proposal.choices"
-                  :key="index"
-                  class="!h-[48px] text-left w-full flex align-middle"
-                  :class="{ 'border-skin-text': selectedChoices.includes(index + 1) }"
-                  @click="toggleSelectedChoice(index + 1)"
-                >
-                  <div class="flex-grow leading-[46px] !h-[48px] truncate">
-                    {{ choice }}
-                  </div>
-                  <IH-check
-                    v-if="selectedChoices.includes(index + 1)"
-                    class="leading-[48px] !h-[46px] shrink-0"
-                  />
-                </UiButton>
-              </div>
-              <UiButton
-                primary
-                class="!h-[48px] w-full"
-                :loading="!!sendingType"
-                @click="handleVoteClick(selectedChoices)"
-              >
-                Vote
-              </UiButton>
+              <ProposalVoteApproval
+                :proposal="proposal"
+                :sending-type="sendingType"
+                @handle-vote-click="handleVoteClick"
+              />
             </div>
           </ProposalVote>
         </template>
