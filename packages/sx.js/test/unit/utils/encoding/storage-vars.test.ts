@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { getStorageVarAddress } from '../../../../src/utils/encoding';
 
 describe('storageVars', () => {

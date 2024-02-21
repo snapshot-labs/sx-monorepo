@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../../../src/clients/starknet/ethereum-tx';
 import { starkProvider } from '../../../helpers';

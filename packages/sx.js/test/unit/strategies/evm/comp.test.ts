@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import createCompStrategy from '../../../../src/strategies/evm/comp';
 

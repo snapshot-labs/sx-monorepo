@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../../../src/clients/evm/ethereum-sig';
@@ -15,11 +16,11 @@ describe('EthereumSig', () => {
   const ethSigClient = new EthereumSig();
 
   beforeAll(() => {
-    jest.spyOn(ethSigClient, 'generateSalt').mockImplementation(() => 0);
+    vi.spyOn(ethSigClient, 'generateSalt').mockImplementation(() => 0);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should create propose envelope', async () => {

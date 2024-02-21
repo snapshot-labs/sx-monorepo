@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
 import { defaultNetwork } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';
