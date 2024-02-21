@@ -38,8 +38,15 @@ export function createActions(
       space: Space,
       cid: string
     ) {
-      const response = fetch(getUrl(cid) as string);
-      const payload = await (await response).json();
+      let payload: { title: string; body: string; discussion: string };
+
+      try {
+        const response = fetch(getUrl(cid) as string);
+        payload = await (await response).json();
+      } catch (e) {
+        throw new Error('Failed to fetch proposal metadata');
+      }
+
       const currentTime = Math.floor(+new Date() / 1e3);
       const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
