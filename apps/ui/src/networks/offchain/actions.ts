@@ -1,5 +1,8 @@
 import { OffchainNetworkConfig, clients, offchainGoerli, offchainMainnet } from '@snapshot-labs/sx';
 import { fetchScoreApi, getSdkChoice } from './helpers';
+import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET, PROPOSAL_VALIDATIONS } from './constants';
+import { getUrl } from '@/helpers/utils';
+import { getProvider } from '@/helpers/provider';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { StrategyParsedMetadata, Choice, Proposal, Space } from '@/types';
 import type {
@@ -10,9 +13,6 @@ import type {
   VotingPower,
   Connector
 } from '../types';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET, PROPOSAL_VALIDATIONS } from './constants';
-import { getUrl } from '@/helpers/utils';
-import { getProvider } from '@/helpers/provider';
 
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
   1: offchainMainnet,
