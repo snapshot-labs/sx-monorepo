@@ -1,10 +1,6 @@
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
 
-enum Choice {
-  Against = 2,
-  For = 1,
-  Abstain = 3
-}
+type Choice = number | number[];
 
 export type SignatureData = {
   address: string;
@@ -43,4 +39,5 @@ export type Vote = {
   proposal: string;
   choice: Choice;
   metadataUri: string;
+  type: string;
 };

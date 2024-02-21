@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { _t } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
@@ -21,7 +22,11 @@ const isSupported = computed(() => {
     network.helpers.isStrategySupported(strategy)
   );
 
-  return hasSupportedAuthenticator && hasSupportedStrategies && props.proposal.type === 'basic';
+  return (
+    hasSupportedAuthenticator &&
+    hasSupportedStrategies &&
+    SUPPORTED_VOTING_TYPES.includes(props.proposal.type)
+  );
 });
 </script>
 
@@ -50,5 +55,7 @@ const isSupported = computed(() => {
   <slot v-else-if="!isSupported" name="unsupported">
     Voting for this proposal is not supported
   </slot>
-  <slot v-else></slot>
+  <div v-else class="py-2">
+    <slot />
+  </div>
 </template>
