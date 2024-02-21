@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { getAuthenticator } from '../../../../src/authenticators/starknet';
 import { starknetNetworks, starknetGoerli } from '../../../../src/networks';
 

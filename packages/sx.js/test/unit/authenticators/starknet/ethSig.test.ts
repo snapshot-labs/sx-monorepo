@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import createEthSigAuthenticator from '../../../../src/authenticators/starknet/ethSig';
 import { proposeEthSigEnvelope } from '../../fixtures';
 

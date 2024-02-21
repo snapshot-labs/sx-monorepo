@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../../../src/offchainNetworks';
@@ -9,13 +10,13 @@ describe('EthereumSig', () => {
   const client = new EthereumSig({ networkConfig: offchainGoerli });
 
   beforeAll(() => {
-    jest.useFakeTimers({
+    vi.useFakeTimers({
       now: new Date('2024-01-21').getTime()
     });
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should create vote envelope', async () => {

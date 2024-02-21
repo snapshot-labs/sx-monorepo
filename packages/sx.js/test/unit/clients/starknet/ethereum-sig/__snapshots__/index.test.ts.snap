@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EthereumSig should create propose envelope 1`] = `
+exports[`EthereumSig > should create propose envelope 1`] = `
 {
   "data": {
     "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
@@ -51,7 +51,7 @@ exports[`EthereumSig should create propose envelope 1`] = `
 }
 `;
 
-exports[`EthereumSig should create update proposal envelope 1`] = `
+exports[`EthereumSig > should create update proposal envelope 1`] = `
 {
   "data": {
     "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
@@ -95,7 +95,7 @@ exports[`EthereumSig should create update proposal envelope 1`] = `
 }
 `;
 
-exports[`EthereumSig should create vote envelope 1`] = `
+exports[`EthereumSig > should create vote envelope 1`] = `
 {
   "data": {
     "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
