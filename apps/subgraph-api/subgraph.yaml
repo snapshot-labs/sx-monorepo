@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ProxyFactory
-    network: sepolia
+    network: goerli
     source:
       abi: ProxyFactory
       address: "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c"
-      startBlock: 3961351
+      startBlock: 9893638
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -29,7 +29,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: Space
-    network: sepolia
+    network: goerli
     source:
       abi: Space
     mapping:
@@ -79,7 +79,7 @@ templates:
       file: ./src/mapping.ts
   - kind: ethereum
     name: TimelockExecutionStrategy
-    network: sepolia
+    network: goerli
     source:
       abi: TimelockExecutionStrategy
     mapping:
@@ -109,7 +109,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: goerli
   - name: ProposalMetadata
     kind: file/ipfs
     mapping:
@@ -122,7 +122,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: goerli
   - name: StrategiesParsedMetadataData
     kind: file/ipfs
     mapping:
@@ -135,7 +135,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: goerli
   - name: VotingPowerValidationStrategyMetadata
     kind: file/ipfs
     mapping:
@@ -148,4 +148,4 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: goerli

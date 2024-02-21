@@ -1,12 +1,37 @@
 version: "3.8"
 services:
+  graph-node:
+    image: graphprotocol/graph-node
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8020:8020"
+      - "8030:8030"
+      - "8040:8040"
+    depends_on:
+      - postgres
+    environment:
+      postgres_host: postgres
+      postgres_user: postgres
+      postgres_pass: password
+      postgres_db: graph
+      ipfs: "https://api.thegraph.com/ipfs/"
+      ethereum: "goerli:https://goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146"
+      GRAPH_LOG: info
   postgres:
     image: postgres:15.4
     ports:
       - "5432:5432"
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements",
+        "-cmax_connections=200",
+      ]
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
       - ./initdb.d:/docker-entrypoint-initdb.d
       - pg:/var/lib/postgresql/data
