@@ -9,7 +9,8 @@ import type {
   SpaceSettings,
   Space,
   Choice,
-  NetworkID
+  NetworkID,
+  VoteType
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
 
@@ -215,6 +216,7 @@ export function useActions() {
     title: string,
     body: string,
     discussion: string,
+    type: VoteType,
     executionStrategy: string | null,
     execution: Transaction[]
   ) {
@@ -234,6 +236,7 @@ export function useActions() {
       title,
       body,
       discussion,
+      type,
       execution: transactions
     });
     if (!pinned || !pinned.cid) return false;

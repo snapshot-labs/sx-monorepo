@@ -18,6 +18,15 @@ export type NetworkID =
 
 export type Choice = 'for' | 'against' | 'abstain' | number | number[];
 
+export type VoteType =
+  | 'basic'
+  | 'single-choice'
+  | 'approval'
+  | 'ranked-choice'
+  | 'quadratic'
+  | 'weighted'
+  | 'custom';
+
 export type SelectedStrategy = {
   address: string;
   type: string;
@@ -102,7 +111,7 @@ export type Proposal = {
   id: string;
   proposal_id: number | string;
   network: NetworkID;
-  type: 'basic' | 'single-choice' | string;
+  type: VoteType;
   quorum: number;
   space: {
     id: string;
@@ -185,6 +194,7 @@ export type Draft = {
   title: string;
   body: string;
   discussion: string;
+  type: VoteType;
   executionStrategy: SelectedStrategy | null;
   execution: Transaction[];
   updatedAt: number;

@@ -2,7 +2,7 @@
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { SelectedStrategy } from '@/types';
+import { SelectedStrategy, VoteType } from '@/types';
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -141,6 +141,7 @@ async function handleProposeClick() {
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
+        proposal.value.type,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
@@ -318,6 +319,29 @@ export default defineComponent({
           :error="formErrors.discussion"
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
+      </div>
+      <div>
+        <h4 class="eyebrow mb-2">Choice type</h4>
+        <UiSelectDropdown
+          v-model="proposal.type"
+          title=""
+          gap="12px"
+          placement="left"
+          :items="[
+            {
+              key: 'basic' as VoteType,
+              label: 'Basic'
+            },
+            {
+              key: 'single-choice' as VoteType,
+              label: 'Single choice'
+            },
+            {
+              key: 'approval' as VoteType,
+              label: 'Approval'
+            }
+          ]"
+        />
       </div>
       <div
         v-if="

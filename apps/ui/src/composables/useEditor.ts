@@ -39,6 +39,7 @@ function createDraft(
     title: '',
     body: '',
     discussion: '',
+    type: 'basic',
     executionStrategy: null,
     execution: [],
     updatedAt: Date.now(),
