@@ -7,7 +7,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'handleVoteClick', value: Choice);
+  (e: 'voteClick', value: Choice);
 }>();
 
 const selectedChoices = ref<number[]>([]);
@@ -41,7 +41,7 @@ function toggleSelectedChoice(choice: number) {
       primary
       class="!h-[48px] w-full"
       :loading="!!sendingType"
-      @click="emit('handleVoteClick', selectedChoices)"
+      @click="emit('voteClick', selectedChoices)"
     >
       Vote
     </UiButton>

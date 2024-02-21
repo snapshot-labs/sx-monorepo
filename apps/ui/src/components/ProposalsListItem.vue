@@ -84,7 +84,7 @@ async function handleVoteClick(choice: Choice) {
             v-if="proposal.type === 'basic'"
             :sending-type="sendingType"
             :size="40"
-            @handle-vote-click="handleVoteClick"
+            @vote-click="handleVoteClick"
           />
         </ProposalVote>
       </div>

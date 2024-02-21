@@ -7,7 +7,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'handleVoteClick', value: number);
+  (e: 'voteClick', value: number);
 }>();
 </script>
 
@@ -18,7 +18,7 @@ const emit = defineEmits<{
       :key="index"
       class="!h-[48px] text-left w-full truncate"
       :loading="sendingType === index + 1"
-      @click="emit('handleVoteClick', index + 1)"
+      @click="emit('voteClick', index + 1)"
     >
       {{ choice }}
     </UiButton>
