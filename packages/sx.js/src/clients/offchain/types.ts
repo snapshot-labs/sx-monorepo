@@ -32,6 +32,8 @@ export type EIP712VoteMessage = {
   reason: string;
   app: string;
   metadata: string;
+  timestamp?: number;
+  from?: string;
 };
 
 export type EIP712ProposeMessage = {
@@ -46,12 +48,11 @@ export type EIP712ProposeMessage = {
   snapshot: number;
   plugins: string;
   app: string;
+  timestamp?: number;
+  from?: string;
 };
 
-export type EIP712Message = (EIP712VoteMessage | EIP712ProposeMessage) & {
-  timestamp: number;
-  from: string;
-};
+export type EIP712Message = Required<EIP712VoteMessage | EIP712ProposeMessage>;
 
 export type Vote = {
   space: string;
@@ -60,6 +61,7 @@ export type Vote = {
   proposal: string;
   choice: Choice;
   metadataUri: string;
+  timestamp?: number;
 };
 
 export type Propose = {
@@ -74,4 +76,5 @@ export type Propose = {
   snapshot: number;
   plugins: string;
   app: string;
+  timestamp?: number;
 };

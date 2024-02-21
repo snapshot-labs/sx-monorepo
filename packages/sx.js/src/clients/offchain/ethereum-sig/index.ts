@@ -38,9 +38,9 @@ export class EthereumSig {
   ): Promise<SignatureData> {
     const address = await signer.getAddress();
     const EIP712Message: EIP712Message = {
-      ...message,
       from: address,
-      timestamp: parseInt((Date.now() / 1e3).toFixed())
+      timestamp: parseInt((Date.now() / 1e3).toFixed()),
+      ...message
     };
 
     const signature = await signer._signTypedData(domain, types, EIP712Message);

@@ -40,7 +40,8 @@ export function createActions(
     ) {
       const response = fetch(getUrl(cid) as string);
       const payload = await (await response).json();
-      const startDate = Math.floor(+new Date() / 1000) + space.voting_delay;
+      const currentTime = Math.floor(+new Date() / 1e3);
+      const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
 
       const data = {
@@ -50,11 +51,12 @@ export function createActions(
         type: 'basic',
         discussion: payload.discussion,
         choices: ['For', 'Against', 'Abstain'],
-        start: startDate,
-        end: startDate + space.min_voting_period,
+        start: startTime,
+        end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: '{}',
-        app: EDITOR_APP_NAME
+        app: EDITOR_APP_NAME,
+        timestamp: currentTime
       };
 
       return client.propose({ signer: web3.getSigner(), data });
