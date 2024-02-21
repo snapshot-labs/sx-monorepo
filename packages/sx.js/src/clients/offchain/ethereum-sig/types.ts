@@ -29,7 +29,7 @@ export const multipleChoiceVoteTypes = {
   ]
 };
 
-export const createProposalTypes = {
+export const proposeTypes = {
   Proposal: [
     { name: 'from', type: 'address' },
     { name: 'space', type: 'string' },

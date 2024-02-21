@@ -1,10 +1,5 @@
 import { offchainGoerli } from '../../../offchainNetworks';
-import {
-  domain,
-  createProposalTypes,
-  singleChoiceVoteTypes,
-  multipleChoiceVoteTypes
-} from './types';
+import { domain, proposeTypes, singleChoiceVoteTypes, multipleChoiceVoteTypes } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
   Vote,
@@ -99,7 +94,7 @@ export class EthereumSig {
     signer: Signer & TypedDataSigner;
     data: Propose;
   }): Promise<Envelope<Propose>> {
-    const signatureData = await this.sign(signer, data, createProposalTypes);
+    const signatureData = await this.sign(signer, data, proposeTypes);
 
     return {
       signatureData,
