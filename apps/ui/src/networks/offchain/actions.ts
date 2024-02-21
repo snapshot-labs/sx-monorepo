@@ -96,7 +96,9 @@ export function createActions(
         let isValid = false;
 
         if (strategyName === 'only-members') {
-          isValid = strategyParams.addresses.includes(voterAddress.toLowerCase());
+          isValid = strategyParams.addresses
+            .map((address: string) => address.toLowerCase())
+            .includes(voterAddress.toLowerCase());
         } else {
           isValid = await fetchScoreApi('validate', {
             validation: strategyName,
