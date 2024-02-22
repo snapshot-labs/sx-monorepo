@@ -16,7 +16,7 @@ services:
       postgres_pass: password
       postgres_db: graph
       ipfs: "https://api.thegraph.com/ipfs/"
-      ethereum: "goerli:https://goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146"
+      ethereum: "sepolia:https://sepolia.infura.io/v3/46a5dd9727bf48d4a132672d3f376146"
       GRAPH_LOG: info
   postgres:
     image: postgres:15.4

@@ -48,16 +48,16 @@ export const METADATA: Record<string, Metadata> = {
   gor: {
     name: 'Ethereum Goerli',
     chainId: 5,
-    apiUrl:
-      import.meta.env.VITE_EVM_GOERLI_API ??
-      'https://api.studio.thegraph.com/query/23545/sx-goerli/version/latest',
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-goerli/version/latest',
     avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 15.52512
   },
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest',
+    apiUrl:
+      import.meta.env.VITE_EVM_SEPOLIA_API ??
+      'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest',
     avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816
   },
