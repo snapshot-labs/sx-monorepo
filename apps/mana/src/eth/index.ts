@@ -5,7 +5,7 @@ import { rpcError } from '../utils';
 import { getEthereumWallet, DEFAULT_INDEX, SPACES_INDICIES } from './dependencies';
 
 const jsonRpcRequestSchema = z.object({
-  id: z.number(),
+  id: z.any(),
   method: z.enum(['send', 'execute', 'executeQueuedProposal']),
   params: z.any()
 });
