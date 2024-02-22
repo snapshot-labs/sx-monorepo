@@ -63,7 +63,7 @@ export class EthereumSig {
     };
   }
 
-  public async send(envelope) {
+  public async send(envelope: Envelope<Propose | UpdateProposal | Vote>) {
     const body = {
       method: 'POST',
       headers: {

@@ -2,6 +2,11 @@ import { AbiCoder } from '@ethersproject/abi';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { Strategy, StrategyConfig } from '../../clients/evm/types';
 
+type Entry = {
+  address: string;
+  votingPower: bigint;
+};
+
 function getProofForVoter(tree: StandardMerkleTree<[string, bigint]>, voter: string) {
   for (const [i, v] of tree.entries()) {
     if ((v[0] as string).toLowerCase() === voter.toLowerCase()) {
@@ -25,7 +30,10 @@ export default function createMerkleWhitelist(): Strategy {
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
-      const whitelist: [string, bigint][] = tree.map(entry => [entry.address, entry.votingPower]);
+      const whitelist: [string, bigint][] = tree.map((entry: Entry) => [
+        entry.address,
+        entry.votingPower
+      ]);
       const merkleTree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
       const proof = getProofForVoter(merkleTree, signerAddress);
 
@@ -46,7 +54,9 @@ export default function createMerkleWhitelist(): Strategy {
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
-      const match = tree.find(entry => entry.address.toLowerCase() === voterAddress.toLowerCase());
+      const match = tree.find(
+        (entry: Entry) => entry.address.toLowerCase() === voterAddress.toLowerCase()
+      );
 
       if (match) {
         return BigInt(match.votingPower.toString());

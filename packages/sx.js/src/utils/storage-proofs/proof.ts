@@ -33,7 +33,10 @@ export function encodeParams(
  * @returns Decoded parameters
  */
 export function decodeParams(params: string[]): string[][] {
-  const slot: string[] = [params[0], params[1], params[2], params[3]];
+  const [v0, v1, v2, v3] = params;
+  if (!v0 || !v1 || !v2 || !v3) throw new Error('Invalid storage proof parameters');
+
+  const slot: string[] = [v0, v1, v2, v3];
   const numNodes = Number(params[4]);
   const proofSizesBytes = params.slice(5, 5 + numNodes);
   const proofSizesWords = params.slice(5 + numNodes, 5 + 2 * numNodes);
