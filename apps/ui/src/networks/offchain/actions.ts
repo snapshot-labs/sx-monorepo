@@ -148,16 +148,15 @@ export function createActions(
         const strategy = strategiesParams[index];
         const decimals = parseInt(strategy.params.decimals || 0);
 
-          return {
-            address: strategy.name,
-            value: BigInt(vp * 10 ** decimals),
-            decimals,
-            symbol: strategy.params.symbol,
-            token: strategy.params.address,
-            chainId: strategy.network ? parseInt(strategy.network) : undefined
-          } as VotingPower;
-        });
-      }
+        return {
+          address: strategy.name,
+          value: BigInt(vp * 10 ** decimals),
+          decimals,
+          symbol: strategy.params.symbol,
+          token: strategy.params.address,
+          chainId: strategy.network ? parseInt(strategy.network) : undefined
+        } as VotingPower;
+      });
     }
   };
 }
