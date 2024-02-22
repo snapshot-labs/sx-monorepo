@@ -7,7 +7,7 @@
     "codegen": "checkpoint generate",
     "lint": "eslint src/ test/ --ext .ts --fix",
     "prebuild": "yarn codegen",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc",
     "dev": "nodemon src/index.ts",
     "start": "node dist/src/index.js",
     "test": "vitest run"

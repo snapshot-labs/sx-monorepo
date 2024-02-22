@@ -6,14 +6,13 @@ import { NonceManager } from './nonce-manager';
 const basePath = "m/44'/9004'/0'/0";
 const contractAXclassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
-const NODE_URLS = {
-  [constants.StarknetChainId.SN_MAIN]: process.env.STARKNET_MAINNET_RPC_URL,
-  [constants.StarknetChainId.SN_GOERLI]: process.env.STARKNET_GOERLI_RPC_URL,
-  [constants.StarknetChainId.SN_SEPOLIA]: process.env.STARKNET_SEPOLIA_RPC_URL
-};
-
+const NODE_URLS = new Map<string, string | undefined>([
+  [constants.StarknetChainId.SN_MAIN, process.env.STARKNET_MAINNET_RPC_URL],
+  [constants.StarknetChainId.SN_GOERLI, process.env.STARKNET_GOERLI_RPC_URL],
+  [constants.StarknetChainId.SN_SEPOLIA, process.env.STARKNET_SEPOLIA_RPC_URL]
+]);
 export function getProvider(chainId: string) {
-  return new RpcProvider({ nodeUrl: NODE_URLS[chainId] });
+  return new RpcProvider({ nodeUrl: NODE_URLS.get(chainId) });
 }
 
 export function getStarknetAccount(mnemonic: string, index: number) {
@@ -38,16 +37,16 @@ export function getStarknetAccount(mnemonic: string, index: number) {
 }
 
 export const DEFAULT_INDEX = 1;
-export const SPACES_INDICIES = {
-  '0x040e337fb53973b08343ce983369c1d9e6249ba011e929347288e4d8b590d048': 2
-};
+export const SPACES_INDICIES = new Map([
+  ['0x040e337fb53973b08343ce983369c1d9e6249ba011e929347288e4d8b590d048', 2]
+]);
 
 export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
   const accounts = new Map<number, { account: Account; nonceManager: NonceManager }>();
 
   return (spaceAddress: string) => {
     const normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
-    const index = SPACES_INDICIES[normalizedSpaceAddress] || DEFAULT_INDEX;
+    const index = SPACES_INDICIES.get(normalizedSpaceAddress) || DEFAULT_INDEX;
 
     if (!accounts.has(index)) {
       const { address, privateKey } = getStarknetAccount(mnemonic, index);
