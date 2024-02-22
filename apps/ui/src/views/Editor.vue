@@ -3,6 +3,7 @@ import { getNetwork, supportsNullCurrent } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { SelectedStrategy, VoteType } from '@/types';
+import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -142,6 +143,7 @@ async function handleProposeClick() {
         proposal.value.body,
         proposal.value.discussion,
         proposal.value.type,
+        proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
@@ -166,6 +168,12 @@ function handleTransactionAccept() {
   proposal.value.execution.push(transaction.value);
 
   reset();
+}
+
+function handleVoteTypeSelected(type: VoteType) {
+  if (!proposal.value) return;
+
+  proposal.value.type = type;
 }
 
 async function getVotingPower() {
@@ -322,31 +330,30 @@ export default defineComponent({
       </div>
       <div>
         <h4 class="eyebrow mb-2">Voting type</h4>
-        <UiSelectDropdown
-          v-model="proposal.type"
-          title=""
-          gap="12px"
-          placement="left"
-          :items="[
-            {
-              key: 'basic' as VoteType,
-              label: 'Basic'
-            },
-            {
-              key: 'single-choice' as VoteType,
-              label: 'Single choice'
-            },
-            {
-              key: 'approval' as VoteType,
-              label: 'Approval'
-            }
-          ]"
-        />
-
-        <div v-if="proposal.type === 'single-choice' || proposal.type === 'approval'">
-          <h4 class="eyebrow mb-2">Choices</h4>
-          <UiInputArray v-model="proposal.choices" definition="" />
+        <div class="flex flex-col space-y-2">
+          <div
+            v-for="(type, index) in SUPPORTED_VOTING_TYPES as VoteType[]"
+            :key="index"
+            class="border rounded-lg p-3"
+            @click="handleVoteTypeSelected(type)"
+          >
+            {{ type }}
+            <div>
+              Mouth ipsum bacon pesto marinara pepperoni ham party party lovers lot spinach hand
+              pan.
+            </div>
+          </div>
         </div>
+
+        <h4 class="eyebrow mb-2">Choices</h4>
+        <div v-for="(choice, index) in proposal.choices" :key="index">
+          <UiInputString
+            v-model="proposal.choices[index]"
+            definition="{}"
+            :disabled="proposal.type === 'basic'"
+          />
+        </div>
+        <UiButton class="mt-3" @click="proposal.choices.push('')">Add choice</UiButton>
       </div>
       <div
         v-if="

@@ -217,6 +217,7 @@ export function useActions() {
     body: string,
     discussion: string,
     type: VoteType,
+    choices: string[],
     executionStrategy: string | null,
     execution: Transaction[]
   ) {
@@ -237,6 +238,7 @@ export function useActions() {
       body,
       discussion,
       type,
+      choices,
       execution: transactions
     });
     if (!pinned || !pinned.cid) return false;

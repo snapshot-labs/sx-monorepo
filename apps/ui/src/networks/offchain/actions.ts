@@ -38,7 +38,13 @@ export function createActions(
       space: Space,
       cid: string
     ) {
-      let payload: { title: string; body: string; discussion: string; type: VoteType };
+      let payload: {
+        title: string;
+        body: string;
+        discussion: string;
+        type: VoteType;
+        choices: string[];
+      };
 
       try {
         const response = fetch(getUrl(cid) as string);
@@ -57,7 +63,7 @@ export function createActions(
         body: payload.body,
         type: payload.type,
         discussion: payload.discussion,
-        choices: ['For', 'Against', 'Abstain'],
+        choices: payload.choices,
         start: startTime,
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,

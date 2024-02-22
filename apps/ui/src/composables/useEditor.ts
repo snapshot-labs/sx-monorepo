@@ -1,3 +1,4 @@
+import { CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
 import { Draft, Drafts } from '@/types';
 
@@ -40,7 +41,7 @@ function createDraft(
     body: '',
     discussion: '',
     type: 'basic',
-    choices: ['For', 'Against', 'Abstain'],
+    choices: CHOICES,
     executionStrategy: null,
     execution: [],
     updatedAt: Date.now(),
