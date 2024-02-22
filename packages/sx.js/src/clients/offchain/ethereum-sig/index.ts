@@ -1,9 +1,10 @@
 import { offchainGoerli } from '../../../offchainNetworks';
 import {
   domain,
-  createProposalTypes,
-  SingleChoiceVoteTypes,
-  MultipleChoiceVoteTypes
+  proposeTypes,
+  basicVoteTypes,
+  singleChoiceVoteTypes,
+  approvalVoteTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
@@ -17,7 +18,7 @@ import type {
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
-const SEQUENCER_URLS = {
+const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
   5: 'https://testnet.seq.snapshot.org'
 };
@@ -99,7 +100,7 @@ export class EthereumSig {
     signer: Signer & TypedDataSigner;
     data: Propose;
   }): Promise<Envelope<Propose>> {
-    const signatureData = await this.sign(signer, data, createProposalTypes);
+    const signatureData = await this.sign(signer, data, proposeTypes);
 
     return {
       signatureData,
@@ -123,10 +124,9 @@ export class EthereumSig {
       metadata: ''
     };
 
-    let voteType = SingleChoiceVoteTypes;
-    if (data.type === 'approval') {
-      voteType = MultipleChoiceVoteTypes;
-    }
+    let voteType = basicVoteTypes;
+    if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
+    if (data.type === 'approval') voteType = approvalVoteTypes;
 
     const signatureData = await this.sign(signer, message, voteType);
 

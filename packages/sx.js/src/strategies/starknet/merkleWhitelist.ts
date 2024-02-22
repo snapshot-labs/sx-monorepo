@@ -2,7 +2,13 @@
 
 import { uint256, validateAndParseAddress } from 'starknet';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
-import { Leaf, generateMerkleProof } from '../../utils/merkletree';
+import { AddressType, Leaf, generateMerkleProof } from '../../utils/merkletree';
+
+type Entry = {
+  type: AddressType;
+  address: string;
+  votingPower: bigint;
+};
 
 export default function createMerkleWhitelistStrategy(): Strategy {
   return {
@@ -20,24 +26,27 @@ export default function createMerkleWhitelistStrategy(): Strategy {
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
-      const leaves: Leaf[] = tree.map(leaf => new Leaf(leaf.type, leaf.address, leaf.votingPower));
+      const leaves: Leaf[] = tree.map(
+        (entry: Entry) => new Leaf(entry.type, entry.address, entry.votingPower)
+      );
       const hashes = leaves.map(leaf => leaf.hash);
       const voterIndex = leaves.findIndex(
         leaf => validateAndParseAddress(leaf.address) === validateAndParseAddress(signerAddress)
       );
 
-      if (voterIndex === -1) throw new Error('Signer is not in whitelist');
+      const leaf = leaves[voterIndex];
+      if (voterIndex === -1 || !leaf) throw new Error('Signer is not in whitelist');
 
-      const votingPowerUint256 = uint256.bnToUint256(leaves[voterIndex].votingPower);
+      const votingPowerUint256 = uint256.bnToUint256(leaf.votingPower);
 
       const proof = generateMerkleProof(hashes, voterIndex);
 
       return [
-        leaves[voterIndex].type,
-        leaves[voterIndex].address,
-        votingPowerUint256.low,
-        votingPowerUint256.high,
-        proof.length,
+        leaf.type.toString(),
+        leaf.address,
+        votingPowerUint256.low.toString(),
+        votingPowerUint256.high.toString(),
+        proof.length.toString(),
         ...proof
       ];
     },
@@ -53,7 +62,9 @@ export default function createMerkleWhitelistStrategy(): Strategy {
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
-      const leaves: Leaf[] = tree.map(leaf => new Leaf(leaf.type, leaf.address, leaf.votingPower));
+      const leaves: Leaf[] = tree.map(
+        (entry: Entry) => new Leaf(entry.type, entry.address, entry.votingPower)
+      );
       const voter = leaves.find(
         leaf => validateAndParseAddress(leaf.address) === validateAndParseAddress(voterAddress)
       );

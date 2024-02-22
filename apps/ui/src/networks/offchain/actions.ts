@@ -134,18 +134,19 @@ export function createActions(
             value: isValid ? 1n : 0n
           }
         ];
-      } else {
-        const result = await fetchScoreApi('get_vp', {
-          address: voterAddress,
-          space: '',
-          strategies: strategiesParams,
-          network: snapshotInfo.chainId ?? chainId,
-          snapshot: snapshotInfo.at ?? 'latest'
-        });
+      }
 
-        return result.vp_by_strategy.map((vp: number, index: number) => {
-          const strategy = strategiesParams[index];
-          const decimals = parseInt(strategy.params.decimals || 0);
+      const result = await fetchScoreApi('get_vp', {
+        address: voterAddress,
+        space: '',
+        strategies: strategiesParams,
+        network: snapshotInfo.chainId ?? chainId,
+        snapshot: snapshotInfo.at ?? 'latest'
+      });
+
+      return result.vp_by_strategy.map((vp: number, index: number) => {
+        const strategy = strategiesParams[index];
+        const decimals = parseInt(strategy.params.decimals || 0);
 
           return {
             address: strategy.name,

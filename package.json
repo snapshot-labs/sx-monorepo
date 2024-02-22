@@ -6,14 +6,13 @@
     "url": "git@github.com:snapshot-labs/sx-monorepo.git"
   },
   "scripts": {
-    "dev": "turbo run dev --filter=!mana --filter=!api",
-    "dev:full": "yarn prepare-services && VITE_MANA_URL=http://localhost:3001 VITE_STARKNET_SEPOLIA_API=http://localhost:3000 NETWORK=SN_SEPOLIA NETWORK_NODE_URL=https://starknet-sepolia.infura.io/v3/46a5dd9727bf48d4a132672d3f376146 turbo run dev",
+    "dev": "turbo run dev --filter=!mana --filter=!api --filter=!subgraph-api",
+    "dev:full": "./scripts/dev-full.sh",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "release": "yarn build && changeset publish",
-    "prepare-services": "./scripts/prepare-services.sh"
+    "release": "yarn build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",

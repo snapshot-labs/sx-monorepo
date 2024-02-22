@@ -14,18 +14,17 @@ export async function getStrategies(
   config: ClientConfig
 ): Promise<StrategiesAddresses> {
   const addresses = await Promise.all(
-    data.strategies.map(
-      id =>
-        config.starkProvider.getStorageAt(
-          data.space,
-          getStorageVarAddress('Voting_voting_strategies_store', id.index.toString(16))
-        ) as Promise<string>
+    data.strategies.map(id =>
+      config.starkProvider.getStorageAt(
+        data.space,
+        getStorageVarAddress('Voting_voting_strategies_store', id.index.toString(16))
+      )
     )
   );
 
   return data.strategies.map((v, i) => ({
     index: v.index,
-    address: addresses[i]
+    address: addresses[i] as string
   }));
 }
 

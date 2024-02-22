@@ -3,7 +3,7 @@ export const domain = {
   version: '0.1.4'
 };
 
-export const SingleChoiceVoteTypes = {
+export const basicVoteTypes = {
   Vote: [
     { name: 'from', type: 'address' },
     { name: 'space', type: 'string' },
@@ -16,7 +16,9 @@ export const SingleChoiceVoteTypes = {
   ]
 };
 
-export const MultipleChoiceVoteTypes = {
+export const singleChoiceVoteTypes = basicVoteTypes;
+
+export const approvalVoteTypes = {
   Vote: [
     { name: 'from', type: 'address' },
     { name: 'space', type: 'string' },
@@ -29,7 +31,7 @@ export const MultipleChoiceVoteTypes = {
   ]
 };
 
-export const createProposalTypes = {
+export const proposeTypes = {
   Proposal: [
     { name: 'from', type: 'address' },
     { name: 'space', type: 'string' },
