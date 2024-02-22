@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Draggable from 'vuedraggable';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
@@ -358,30 +359,33 @@ export default defineComponent({
 
         <h4 class="eyebrow mb-2">Choices</h4>
         <div class="flex flex-col gap-2">
-          <div
-            v-for="(choice, index) in proposal.choices"
-            :key="index"
-            class="flex border rounded-lg bg-[#FBFBFB] h-[40px]"
-          >
-            <div class="grow">
-              <input
-                v-model.trim="proposal.choices[index]"
-                type="text"
-                class="w-full rounded-lg h-[40px] p-1 px-3 bg-transparent"
-                :class="{ '!cursor-not-allowed': proposal.type === 'basic' }"
-                placeholder="(optional)"
-                :disabled="proposal.type === 'basic'"
-              />
-            </div>
-            <UiButton
-              v-if="proposal.choices.length > 1"
-              class="border-0 rounded-l-none border-l bg-transparent h-[40px] w-[40px] !px-0 text-center"
-              :disabled="proposal.type === 'basic'"
-              @click="proposal.choices.splice(index, 1)"
-            >
-              <IH-trash class="inline-block" />
-            </UiButton>
-          </div>
+          <Draggable v-model="proposal.choices" handle=".handle" class="flex flex-col gap-2">
+            <template #item="{ index: index }">
+              <div class="flex border items-center rounded-lg bg-[#FBFBFB] h-[40px]">
+                <div class="handle ml-3 text-skin-link cursor-pointer opacity-50 hover:opacity-100">
+                  <IH-switch-vertical />
+                </div>
+                <div class="grow">
+                  <input
+                    v-model.trim="proposal.choices[index]"
+                    type="text"
+                    class="w-full rounded-lg h-[40px] p-1 px-3 bg-transparent"
+                    :class="{ '!cursor-not-allowed': proposal.type === 'basic' }"
+                    placeholder="(optional)"
+                    :disabled="proposal.type === 'basic'"
+                  />
+                </div>
+                <UiButton
+                  v-if="proposal.choices.length > 1"
+                  class="border-0 rounded-l-none border-l bg-transparent h-[40px] w-[40px] !px-0 text-center"
+                  :disabled="proposal.type === 'basic'"
+                  @click="proposal.choices.splice(index, 1)"
+                >
+                  <IH-trash class="inline-block" />
+                </UiButton>
+              </div>
+            </template>
+          </Draggable>
           <UiButton
             class="w-full border-dashed !rounded-lg flex items-center justify-center space-x-1"
             :disabled="proposal.type === 'basic'"
