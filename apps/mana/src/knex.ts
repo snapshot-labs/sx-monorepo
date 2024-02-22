@@ -30,8 +30,8 @@ export default knex({
     database: connectionConfig.path[0],
     user: connectionConfig.user,
     password: connectionConfig.password,
-    host: connectionConfig.hosts[0].name,
-    port: connectionConfig.hosts[0].port,
+    host: connectionConfig?.hosts[0]?.name,
+    port: connectionConfig?.hosts[0]?.port,
     ssl: Object.keys(sslConfig).length > 0 ? sslConfig : undefined
   }
 });

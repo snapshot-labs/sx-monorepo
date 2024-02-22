@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { NETWORKS, getClient } from './networks';
 import * as db from '../db';
 import * as herodotus from './herodotus';
@@ -9,7 +10,7 @@ export const createNetworkHandler = (chainId: string) => {
 
   const { client, getAccount } = getClient(chainId);
 
-  async function send(id, params, res) {
+  async function send(id: number, params: any, res: Response) {
     try {
       const { signatureData, data } = params.envelope;
       const { address, primaryType, message } = signatureData;
@@ -52,7 +53,7 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  async function registerTransaction(id, params, res) {
+  async function registerTransaction(id: number, params: any, res: Response) {
     try {
       const { type, hash, payload } = params;
 
@@ -67,7 +68,7 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  async function registerProposal(id, params, res) {
+  async function registerProposal(id: number, params: any, res: Response) {
     try {
       const { l1TokenAddress, strategyAddress, snapshotTimestamp } = params;
 
