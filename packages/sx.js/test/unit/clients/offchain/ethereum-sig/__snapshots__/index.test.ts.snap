@@ -27,7 +27,7 @@ exports[`EthereumSig > should create vote envelope 1`] = `
       "space": "wan-test.eth",
       "timestamp": 1705795200,
     },
-    "signature": "0xe08dafad62d541cdbca8a8133d4e9fc5b2a82eb3587bd76de14f58e8729a48491f466a9ebac8b8e6d54c30622305b68768936670eabf3ccdcfa68faa5957f18c1c",
+    "signature": "0x08dc521d9d8334fecb2f35f56db4536420865e35749425c2ed88219bdb230cd96e6302baf1881eb00e66631cbed3ed53bd237598a88b51980067ef7a090db35b1c",
     "types": {
       "Vote": [
         {
@@ -47,6 +47,10 @@ exports[`EthereumSig > should create vote envelope 1`] = `
           "type": "string",
         },
         {
+          "name": "choice",
+          "type": "uint32",
+        },
+        {
           "name": "reason",
           "type": "string",
         },
@@ -57,10 +61,6 @@ exports[`EthereumSig > should create vote envelope 1`] = `
         {
           "name": "metadata",
           "type": "string",
-        },
-        {
-          "name": "choice",
-          "type": "uint32",
         },
       ],
     },
