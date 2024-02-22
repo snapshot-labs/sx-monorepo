@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import {
   clients,
   evmPolygon,
@@ -5,29 +6,30 @@ import {
   evmMainnet,
   evmGoerli,
   evmSepolia,
-  evmLineaGoerli
+  evmLineaGoerli,
+  EvmNetworkConfig
 } from '@snapshot-labs/sx';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
-export const NETWORKS = {
-  137: evmPolygon,
-  42161: evmArbitrum,
-  1: evmMainnet,
-  5: evmGoerli,
-  11155111: evmSepolia,
-  59140: evmLineaGoerli
-} as const;
+export const NETWORKS = new Map<number, EvmNetworkConfig>([
+  [137, evmPolygon],
+  [42161, evmArbitrum],
+  [1, evmMainnet],
+  [5, evmGoerli],
+  [11155111, evmSepolia],
+  [59140, evmLineaGoerli]
+]);
 
 export const createNetworkHandler = (chainId: number) => {
-  const networkConfig = NETWORKS[chainId];
+  const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
   const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
 
-  const client = new clients.EvmEthereumTx({ networkConfig: networkConfig });
+  const client = new clients.EvmEthereumTx({ networkConfig });
 
-  async function send(id, params, res) {
+  async function send(id: number, params: any, res: Response) {
     try {
       const { signatureData, data } = params.envelope;
       const { types } = signatureData;
@@ -67,7 +69,7 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
-  async function execute(id, params, res) {
+  async function execute(id: number, params: any, res: Response) {
     try {
       const { space, proposalId, executionParams } = params;
       const signer = getWallet(space);
@@ -85,7 +87,7 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
-  async function executeQueuedProposal(id, params, res) {
+  async function executeQueuedProposal(id: number, params: any, res: Response) {
     try {
       const { space, executionStrategy, executionParams } = params;
       const signer = getWallet(space);

@@ -4,24 +4,39 @@ import { clients } from '@snapshot-labs/sx';
 import * as db from '../db';
 import { getClient } from './networks';
 
-const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
-const HERODOTUS_MAPPING = {
-  [constants.StarknetChainId.SN_MAIN]: {
-    DESTINATION_CHAIN_ID: 'STARKNET',
-    ACCUMULATES_CHAIN_ID: '1',
-    FEE: '100000'
-  },
-  [constants.StarknetChainId.SN_GOERLI]: {
-    DESTINATION_CHAIN_ID: 'SN_GOERLI',
-    ACCUMULATES_CHAIN_ID: '5',
-    FEE: '0'
-  },
-  [constants.StarknetChainId.SN_SEPOLIA]: {
-    DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
-    ACCUMULATES_CHAIN_ID: '11155111',
-    FEE: '0'
-  }
+type HerodotusConfig = {
+  DESTINATION_CHAIN_ID: string;
+  ACCUMULATES_CHAIN_ID: string;
+  FEE: string;
 };
+
+const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
+const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
+  [
+    constants.StarknetChainId.SN_MAIN,
+    {
+      DESTINATION_CHAIN_ID: 'STARKNET',
+      ACCUMULATES_CHAIN_ID: '1',
+      FEE: '100000'
+    }
+  ],
+  [
+    constants.StarknetChainId.SN_GOERLI,
+    {
+      DESTINATION_CHAIN_ID: 'SN_GOERLI',
+      ACCUMULATES_CHAIN_ID: '5',
+      FEE: '0'
+    }
+  ],
+  [
+    constants.StarknetChainId.SN_SEPOLIA,
+    {
+      DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
+      ACCUMULATES_CHAIN_ID: '11155111',
+      FEE: '0'
+    }
+  ]
+]);
 
 const controller = new clients.HerodotusController();
 
@@ -49,13 +64,14 @@ async function getStatus(id: string) {
     `https://api.herodotus.cloud/batch-query-status?apiKey=${HERODOTUS_API_KEY}&batchQueryId=${id}`
   );
 
-  const { queryStatus } = await res.json();
+  const { queryStatus, error } = await res.json();
+  if (error) throw new Error(error);
 
   return queryStatus;
 }
 
 async function submitBatch(proposal: ApiProposal) {
-  const mapping = HERODOTUS_MAPPING[proposal.chainId];
+  const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
 
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID, FEE } = mapping;
@@ -89,8 +105,13 @@ async function submitBatch(proposal: ApiProposal) {
 
   const result = await res.json();
 
-  if (!result.internalId) {
-    throw new Error('registration failed');
+  if (result.error) {
+    if (result.error.startsWith('Invalid account address or ENS')) {
+      console.log('invalid herodotus batch', result.error);
+      return db.markProposalProcessed(getId(proposal));
+    }
+
+    throw new Error(result.error);
   }
 
   console.log('herodotus internalId', result.internalId);
@@ -126,24 +147,30 @@ export async function registerProposal(proposal: ApiProposal) {
 export async function processProposal(proposal: DbProposal) {
   if (!proposal.herodotusId) {
     const [, l1TokenAddress] = proposal.id.split('-');
+    if (!l1TokenAddress) throw new Error('Invalid proposal id');
 
-    await submitBatch({
+    return submitBatch({
       ...proposal,
       l1TokenAddress
     });
-
-    return;
   }
 
-  const status = await getStatus(proposal.herodotusId);
-  if (status !== 'DONE') {
-    console.log('proposal is not ready yet', proposal.herodotusId, status);
-    return;
+  try {
+    const status = await getStatus(proposal.herodotusId);
+    if (status !== 'DONE') {
+      console.log('proposal is not ready yet', proposal.herodotusId, status);
+      return;
+    }
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === 'No query found') {
+      console.log('query does not exist', proposal.herodotusId);
+      return db.markProposalProcessed(proposal.id);
+    }
   }
 
   const { getAccount } = getClient(proposal.chainId);
   const { account, nonceManager } = getAccount('0x0');
-  const mapping = HERODOTUS_MAPPING[proposal.chainId];
+  const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
 
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
