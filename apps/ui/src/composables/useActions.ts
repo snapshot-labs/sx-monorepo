@@ -238,7 +238,7 @@ export function useActions() {
       body,
       discussion,
       type,
-      choices,
+      choices: choices.filter(c => !!c),
       execution: transactions
     });
     if (!pinned || !pinned.cid) return false;

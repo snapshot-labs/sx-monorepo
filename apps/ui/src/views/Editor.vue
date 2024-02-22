@@ -3,7 +3,7 @@ import { getNetwork, supportsNullCurrent } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { SelectedStrategy, VoteType } from '@/types';
-import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
+import { CHOICES, SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -174,6 +174,10 @@ function handleVoteTypeSelected(type: VoteType) {
   if (!proposal.value) return;
 
   proposal.value.type = type;
+
+  if (proposal.value.type === 'basic') {
+    proposal.value.choices = [...CHOICES];
+  }
 }
 
 async function getVotingPower() {
@@ -328,32 +332,65 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <div>
+      <div class="s-base mb-4">
         <h4 class="eyebrow mb-2">Voting type</h4>
-        <div class="flex flex-col space-y-2">
+        <div class="flex flex-col space-y-2 mb-4">
           <div
             v-for="(type, index) in SUPPORTED_VOTING_TYPES as VoteType[]"
             :key="index"
-            class="border rounded-lg p-3"
+            class="border rounded-lg p-[12px] flex gap-4 cursor-pointer"
+            :class="{ 'border-[#111111] bg-[#FBFBFB]': proposal.type === type }"
             @click="handleVoteTypeSelected(type)"
           >
-            {{ type }}
+            <div class="h-[82px] w-[122px] block rounded-lg shrink-0 bg-[#EDEDED]"></div>
             <div>
-              Mouth ipsum bacon pesto marinara pepperoni ham party party lovers lot spinach hand
-              pan.
+              {{ type }}
+              <div>
+                Mouth ipsum bacon pesto marinara pepperoni ham party party lovers lot spinach hand
+                pan.
+              </div>
+            </div>
+            <div class="w-[36px]">
+              <IH-check v-if="proposal.type === type" />
             </div>
           </div>
         </div>
 
         <h4 class="eyebrow mb-2">Choices</h4>
-        <div v-for="(choice, index) in proposal.choices" :key="index">
-          <UiInputString
-            v-model="proposal.choices[index]"
-            definition="{}"
+        <div class="flex flex-col gap-2">
+          <div
+            v-for="(choice, index) in proposal.choices"
+            :key="index"
+            class="flex border rounded-lg bg-[#FBFBFB] h-[40px]"
+          >
+            <div class="grow">
+              <input
+                v-model.trim="proposal.choices[index]"
+                type="text"
+                class="w-full rounded-lg h-[40px] p-1 px-3 bg-transparent"
+                :class="{ '!cursor-not-allowed': proposal.type === 'basic' }"
+                placeholder="(optional)"
+                :disabled="proposal.type === 'basic'"
+              />
+            </div>
+            <UiButton
+              v-if="proposal.choices.length > 1"
+              class="border-0 rounded-l-none border-l bg-transparent h-[40px] w-[40px] !px-0 text-center"
+              :disabled="proposal.type === 'basic'"
+              @click="proposal.choices.splice(index, 1)"
+            >
+              <IH-trash class="inline-block" />
+            </UiButton>
+          </div>
+          <UiButton
+            class="w-full border-dashed !rounded-lg flex items-center justify-center space-x-1"
             :disabled="proposal.type === 'basic'"
-          />
+            @click="proposal.choices.push('')"
+          >
+            <IH-plus-sm />
+            <span>New choice</span>
+          </UiButton>
         </div>
-        <UiButton class="mt-3" @click="proposal.choices.push('')">Add choice</UiButton>
       </div>
       <div
         v-if="
