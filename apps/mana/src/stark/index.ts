@@ -6,7 +6,7 @@ import { NETWORKS } from './networks';
 import { DEFAULT_INDEX, SPACES_INDICIES, getStarknetAccount } from './dependencies';
 
 const jsonRpcRequestSchema = z.object({
-  id: z.number(),
+  id: z.any(),
   method: z.enum(['send', 'registerTransaction', 'registerProposal']),
   params: z.any()
 });
