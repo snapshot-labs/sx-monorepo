@@ -30,7 +30,7 @@ export class StarknetSig {
     return `0x${randomBytes(4).toString('hex')}`;
   }
 
-  public async send(envelope) {
+  public async send(envelope: Envelope<Propose | UpdateProposal | Vote>) {
     const body = {
       method: 'POST',
       headers: {

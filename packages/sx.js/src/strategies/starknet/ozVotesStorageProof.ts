@@ -37,7 +37,7 @@ export default function createOzVotesStorageProofStrategy({
       `0x${blockNumber.toString(16)}`
     ]);
 
-    const proofs = proof.storageProof.map(({ proof }) =>
+    const proofs = proof.storageProof.map(({ proof }: { proof: string[] }) =>
       proof.map((node: string) =>
         node
           .slice(2)
@@ -104,10 +104,13 @@ export default function createOzVotesStorageProofStrategy({
         chainId
       );
 
+      const [checkpointMptProof, exclusionMptProof] = proofs;
+      if (!checkpointMptProof || !exclusionMptProof) throw new Error('Invalid proofs');
+
       return CallData.compile({
         checkpointIndex,
-        checkpointMptProof: proofs[0],
-        exclusionMpt: proofs[1]
+        checkpointMptProof,
+        exclusionMptProof
       });
     },
     async getVotingPower(
@@ -149,14 +152,17 @@ export default function createOzVotesStorageProofStrategy({
         chainId
       );
 
+      const [checkpointMptProof, exclusionMptProof] = proofs;
+      if (!checkpointMptProof || !exclusionMptProof) throw new Error('Invalid proofs');
+
       return contract.get_voting_power(
         timestamp,
         getUserAddressEnum('ETHEREUM', voterAddress),
         params,
         CallData.compile({
           checkpointIndex,
-          checkpointMptProof: proofs[0],
-          exclusionMptProof: proofs[1]
+          checkpointMptProof,
+          exclusionMptProof
         })
       );
     }

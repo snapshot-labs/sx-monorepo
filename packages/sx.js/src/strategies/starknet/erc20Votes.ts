@@ -32,7 +32,10 @@ export default function createErc20VotesStrategy(): Strategy {
       const isEthereumAddress = voterAddress.length === 42;
       if (isEthereumAddress) return 0n;
 
-      const contract = new Contract(ERC20VotesTokenAbi, params[0], clientConfig.starkProvider);
+      const [tokenAddress] = params;
+      if (!tokenAddress) throw new Error('Missing token address');
+
+      const contract = new Contract(ERC20VotesTokenAbi, tokenAddress, clientConfig.starkProvider);
 
       if (timestamp) {
         return contract.get_past_votes(voterAddress, timestamp);

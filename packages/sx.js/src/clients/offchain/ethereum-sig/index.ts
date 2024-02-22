@@ -4,7 +4,7 @@ import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abs
 import type { Vote, Envelope, SignatureData, EIP712VoteMessage, EIP712Message } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
-const SEQUENCER_URLS = {
+const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
   5: 'https://testnet.seq.snapshot.org'
 };
