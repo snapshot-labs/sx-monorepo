@@ -87,6 +87,15 @@ export type ReadOnlyNetworkActions = {
     voterAddress: string,
     snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
+  propose(
+    web3: Web3Provider,
+    connectorType: Connector,
+    account: string,
+    space: Space,
+    cid: string,
+    executionStrategy: string | null,
+    transactions: MetaTransaction[]
+  ): Promise<any>;
   vote(
     web3: Web3Provider,
     connectorType: Connector,
@@ -123,15 +132,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     }
   );
   setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
-  propose(
-    web3: Web3Provider,
-    connectorType: Connector,
-    account: string,
-    space: Space,
-    cid: string,
-    executionStrategy: string | null,
-    transactions: MetaTransaction[]
-  );
   updateProposal(
     web3: Web3Provider,
     connectorType: Connector,

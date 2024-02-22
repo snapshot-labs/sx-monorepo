@@ -1,6 +1,7 @@
 export type ApiSpace = {
   id: string;
   admins: string[];
+  members: string[];
   name: string;
   network: string;
   about: string;
@@ -25,6 +26,14 @@ export type ApiSpace = {
     quorum: number | null;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];
+  validation: {
+    name: string;
+    params?: any;
+  };
+  filters: {
+    minScore: number;
+    onlyMembers: boolean;
+  };
   proposalsCount: number;
   votesCount: number;
 };

@@ -10,6 +10,7 @@ import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
+import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -28,6 +29,17 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   // TODO: convert ChainID to ShortName, we might need external mapping to handle
   // all of those - or just have simple map with limited support
   const wallet = space.treasuries[0] ? `eth:${space.treasuries[0].address}` : '';
+  let validationName = space.validation.name;
+  const validationParams = space.validation.params || {};
+  if (space.validation.name === 'basic') {
+    validationParams.minScore = space.validation?.params?.minScore || space.filters.minScore;
+    validationParams.strategies = space.validation?.params?.strategies || space.strategies;
+  }
+
+  if (space.filters.onlyMembers) {
+    validationName = 'only-members';
+    validationParams.addresses = space.members.concat(space.admins);
+  }
 
   return {
     id: space.id,
@@ -46,9 +58,9 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     vote_count: space.votesCount,
     voting_power_symbol: space.symbol,
     voting_delay: space.voting.delay ?? 0,
-    min_voting_period: space.voting.period ?? 0,
+    min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     max_voting_period: space.voting.period ?? 0,
-    proposal_threshold: space.voting.quorum?.toString() ?? '0',
+    proposal_threshold: '1',
     wallet,
     delegations: space.delegationPortal
       ? [
@@ -72,8 +84,8 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     strategies_parsed_metadata: [],
     validation_strategy: '',
     validation_strategy_params: '',
-    voting_power_validation_strategy_strategies: [],
-    voting_power_validation_strategy_strategies_params: [],
+    voting_power_validation_strategy_strategies: [validationName],
+    voting_power_validation_strategy_strategies_params: [validationParams],
     voting_power_validation_strategies_parsed_metadata: []
   };
 }
