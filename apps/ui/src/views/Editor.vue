@@ -2,7 +2,7 @@
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { SelectedStrategy } from '@/types';
+import { SelectedStrategy, VoteType } from '@/types';
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -92,6 +92,12 @@ const supportedExecutionStrategies = computed(() => {
   return spaceValue.executors.filter((_, i) =>
     networkValue.helpers.isExecutorSupported(spaceValue.executors_types[i])
   );
+});
+const votingTypes = computed(() => {
+  const networkValue = network.value;
+  if (!networkValue) return null;
+
+  return SUPPORTED_VOTING_TYPES.filter(type => networkValue.helpers.isVotingTypeSupported(type));
 });
 const formErrors = computed(() => {
   if (!proposal.value) return {};
@@ -232,6 +238,7 @@ watchEffect(() => {
 <script lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
+import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 
 const { createDraft } = useEditor();
 
@@ -329,7 +336,11 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <EditorVote v-model="proposal" :error="formErrors.choices" />
+      <EditorVote
+        v-model="proposal"
+        :error="formErrors.choices"
+        :voting-types="votingTypes as VoteType[]"
+      />
       <div
         v-if="
           space &&

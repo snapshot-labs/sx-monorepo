@@ -213,6 +213,7 @@ export type NetworkHelpers = {
   getRelayerAuthenticatorType(authenticator: string): 'evm' | 'evm-tx' | 'starknet' | null;
   isStrategySupported(strategy: string): boolean;
   isExecutorSupported(executor: string): boolean;
+  isVotingTypeSupported(type: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
