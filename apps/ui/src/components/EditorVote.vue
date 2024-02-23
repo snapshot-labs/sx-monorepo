@@ -13,7 +13,7 @@ defineProps<{
 const VOTING_TYPES_INFO = {
   basic: {
     label: 'Basic voting',
-    description: 'Single choice voting with three choices: For, Against or Abstain'
+    description: 'Single choice voting with three choices: For, Against or Abstain.'
   },
   'single-choice': {
     label: 'Single choice voting',
