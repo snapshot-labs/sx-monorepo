@@ -48,7 +48,9 @@ function handleVoteTypeSelected(type: VoteType) {
           :class="{ 'border-skin-text bg-skin-input-bg': proposal.type === type }"
           @click="handleVoteTypeSelected(type as VoteType)"
         >
-          <div class="h-[82px] w-[122px] block rounded-lg shrink-0 bg-skin-active-bg"></div>
+          <div
+            class="h-[82px] w-[122px] hidden sm:block rounded-lg shrink-0 bg-skin-active-bg"
+          ></div>
           <div class="grow">
             <span class="text-skin-heading">{{ VOTING_TYPES_INFO[type].label }}</span>
             <div>
@@ -95,7 +97,7 @@ function handleVoteTypeSelected(type: VoteType) {
                 </div>
                 <UiButton
                   v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
-                  class="border-0 rounded-l-none rounded-r-lg border-l bg-transparent h-[40px] w-[40px] !px-0 text-center text-skin-text"
+                  class="border-0 rounded-l-none rounded-r-lg border-l bg-transparent h-[40px] w-[40px] !px-0 text-center text-skin-text shrink-0"
                   @click="proposal.choices.splice(index, 1)"
                 >
                   <IH-trash class="inline-block" />
