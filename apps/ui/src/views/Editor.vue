@@ -111,7 +111,6 @@ const formErrors = computed(() => {
     {
       title: proposal.value.title,
       discussion: proposal.value.discussion,
-      type: proposal.value.type,
       choices: proposal.value.choices
     },
     {
