@@ -4,7 +4,6 @@
   "version": "0.0.21",
   "scripts": {
     "codegen": "graph codegen",
-    "prebuild": "yarn codegen",
     "build": "graph build",
     "dev": "yarn deploy-local",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ snapshot-labs/sx-subgraph",
