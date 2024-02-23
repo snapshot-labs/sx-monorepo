@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "declaration": true,
+    "declarationMap": true,
     "outDir": "./dist"
   },
   "include": ["src/**/*"],
