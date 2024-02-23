@@ -47,8 +47,8 @@ export function createActions(
       };
 
       try {
-        const response = fetch(getUrl(cid) as string);
-        payload = await (await response).json();
+        const res = await fetch(getUrl(cid) as string);
+        payload = await res.json();
       } catch (e) {
         throw new Error('Failed to fetch proposal metadata');
       }
