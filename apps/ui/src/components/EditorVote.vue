@@ -29,6 +29,10 @@ function handleVoteTypeSelected(type: VoteType) {
     proposal.value.choices = [...CHOICES];
   }
 }
+
+const areAllChoicesEmpty = computed(
+  () => proposal.value.choices.filter(choice => choice !== '').length === 0
+);
 </script>
 
 <template>
@@ -61,34 +65,46 @@ function handleVoteTypeSelected(type: VoteType) {
     <div class="flex flex-col gap-[10px]">
       <Draggable v-model="proposal.choices" handle=".handle" class="flex flex-col gap-[10px]">
         <template #item="{ index: index }">
-          <div class="flex border items-center rounded-lg bg-[#FBFBFB] h-[40px] gap-[12px] pl-2.5">
+          <div>
             <div
-              class="text-skin-link opacity-50"
-              :class="{
-                'handle hover:opacity-100 cursor-grab': proposal.type !== 'basic',
-                'cursor-not-allowed': proposal.type === 'basic'
-              }"
+              class="flex border items-center rounded-lg bg-[#FBFBFB] h-[40px] gap-[12px] pl-2.5"
+              :class="{ 'border-skin-danger': areAllChoicesEmpty && index === 0 }"
             >
-              <IH-switch-vertical />
-            </div>
-            <div class="grow">
-              <input
-                v-model.trim="proposal.choices[index]"
-                type="text"
-                class="w-full rounded-lg h-[40px] py-[10px] bg-transparent"
-                :class="{ '!cursor-not-allowed': proposal.type === 'basic' }"
-                placeholder="(optional)"
+              <div
+                class="text-skin-link opacity-50"
+                :class="{
+                  'handle hover:opacity-100 cursor-grab': proposal.type !== 'basic',
+                  'cursor-not-allowed': proposal.type === 'basic'
+                }"
+              >
+                <IH-switch-vertical />
+              </div>
+              <div class="grow">
+                <input
+                  v-model.trim="proposal.choices[index]"
+                  type="text"
+                  class="w-full rounded-lg h-[40px] py-[10px] bg-transparent"
+                  :class="{
+                    '!cursor-not-allowed': proposal.type === 'basic'
+                  }"
+                  :placeholder="
+                    areAllChoicesEmpty && index === 0 ? 'Please type a choice' : '(optional)'
+                  "
+                  :disabled="proposal.type === 'basic'"
+                />
+              </div>
+              <UiButton
+                v-if="proposal.choices.length > 1"
+                class="border-0 rounded-l-none rounded-r-lg border-l bg-transparent h-[40px] w-[40px] !px-0 text-center text-skin-text"
                 :disabled="proposal.type === 'basic'"
-              />
+                @click="proposal.choices.splice(index, 1)"
+              >
+                <IH-trash class="inline-block" />
+              </UiButton>
             </div>
-            <UiButton
-              v-if="proposal.choices.length > 1"
-              class="border-0 rounded-l-none rounded-r-lg border-l bg-transparent h-[40px] w-[40px] !px-0 text-center text-skin-text"
-              :disabled="proposal.type === 'basic'"
-              @click="proposal.choices.splice(index, 1)"
-            >
-              <IH-trash class="inline-block" />
-            </UiButton>
+            <span v-if="areAllChoicesEmpty && index === 0" class="text-skin-danger">
+              At least one choice is needed
+            </span>
           </div>
         </template>
       </Draggable>
