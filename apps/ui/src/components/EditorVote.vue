@@ -5,6 +5,10 @@ import { Draft, VoteType } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
 
+defineProps<{
+  error?: Record<number, string>;
+}>();
+
 const VOTE_TYPES = {
   basic: {
     label: 'Basic voting',
@@ -29,10 +33,6 @@ function handleVoteTypeSelected(type: VoteType) {
     proposal.value.choices = [...CHOICES];
   }
 }
-
-const areAllChoicesEmpty = computed(
-  () => proposal.value.choices.filter(choice => choice !== '').length === 0
-);
 </script>
 
 <template>
@@ -68,7 +68,7 @@ const areAllChoicesEmpty = computed(
           <div>
             <div
               class="flex border items-center rounded-lg bg-[#FBFBFB] h-[40px] gap-[12px] pl-2.5"
-              :class="{ 'border-skin-danger': areAllChoicesEmpty && index === 0 }"
+              :class="{ 'border-skin-danger': error && index === 0 }"
             >
               <div
                 class="text-skin-link opacity-50"
@@ -87,9 +87,7 @@ const areAllChoicesEmpty = computed(
                   :class="{
                     '!cursor-not-allowed': proposal.type === 'basic'
                   }"
-                  :placeholder="
-                    areAllChoicesEmpty && index === 0 ? 'Please type a choice' : '(optional)'
-                  "
+                  :placeholder="error && index === 0 ? 'Please type a choice' : '(optional)'"
                   :disabled="proposal.type === 'basic'"
                 />
               </div>
@@ -102,8 +100,8 @@ const areAllChoicesEmpty = computed(
                 <IH-trash class="inline-block" />
               </UiButton>
             </div>
-            <span v-if="areAllChoicesEmpty && index === 0" class="text-skin-danger">
-              At least one choice is needed
+            <span v-if="error && index === 0" class="text-skin-danger">
+              {{ error[0] }}
             </span>
           </div>
         </template>

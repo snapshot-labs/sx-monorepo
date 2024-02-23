@@ -17,6 +17,12 @@ const DISCUSSION_DEFINITION = {
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
+const CHOICES_DEFINITION = {
+  type: 'array',
+  title: 'Choices',
+  items: [{ type: 'string', minLength: 1 }]
+};
+
 const { setTitle } = useTitle();
 const { proposals, createDraft } = useEditor();
 const { param } = useRouteParser('id');
@@ -95,15 +101,18 @@ const formErrors = computed(() => {
       type: 'object',
       title: 'Proposal',
       additionalProperties: false,
-      required: ['title'],
+      required: ['title', 'choices'],
       properties: {
         title: TITLE_DEFINITION,
-        discussion: DISCUSSION_DEFINITION
+        discussion: DISCUSSION_DEFINITION,
+        choices: CHOICES_DEFINITION
       }
     },
     {
       title: proposal.value.title,
-      discussion: proposal.value.discussion
+      discussion: proposal.value.discussion,
+      type: proposal.value.type,
+      choices: proposal.value.choices
     },
     {
       skipEmptyOptionalFields: true
@@ -321,7 +330,7 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <EditorVote v-model="proposal" />
+      <EditorVote v-model="proposal" :error="formErrors.choices" />
       <div
         v-if="
           space &&
