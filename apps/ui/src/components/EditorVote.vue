@@ -40,11 +40,11 @@ function handleVoteTypeSelected(type: VoteType) {
     <h4 class="eyebrow mb-2.5">Voting type</h4>
     <div class="flex flex-col gap-[12px]">
       <button
-        v-for="(type, index) in SUPPORTED_VOTING_TYPES as VoteType[]"
+        v-for="(type, index) in SUPPORTED_VOTING_TYPES"
         :key="index"
-        class="border rounded-lg p-2.5 flex gap-3 cursor-pointer text-left"
+        class="border rounded-lg p-2.5 flex gap-3 text-left"
         :class="{ 'border-skin-text bg-skin-input-bg': proposal.type === type }"
-        @click="handleVoteTypeSelected(type)"
+        @click="handleVoteTypeSelected(type as VoteType)"
       >
         <div class="h-[82px] w-[122px] block rounded-lg shrink-0 bg-skin-active-bg"></div>
         <div class="grow">
@@ -83,7 +83,7 @@ function handleVoteTypeSelected(type: VoteType) {
                 <input
                   v-model.trim="proposal.choices[index]"
                   type="text"
-                  class="w-full rounded-lg h-[40px] py-[10px] bg-transparent text-skin-heading"
+                  class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
                   :class="{
                     '!cursor-not-allowed opacity-40': proposal.type === 'basic'
                   }"
@@ -107,7 +107,7 @@ function handleVoteTypeSelected(type: VoteType) {
       </Draggable>
       <UiButton
         v-if="proposal.type !== 'basic'"
-        class="w-full border-dashed !rounded-lg flex items-center justify-center space-x-1"
+        class="w-full border-dashed rounded-lg flex items-center justify-center space-x-1"
         @click="proposal.choices.push('')"
       >
         <IH-plus-sm />
