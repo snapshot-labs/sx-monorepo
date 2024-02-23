@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { CHOICES, SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
+import { BASIC_CHOICES, SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { Draft, VoteType } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
@@ -30,7 +30,7 @@ function handleVoteTypeSelected(type: VoteType) {
   proposal.value.type = type;
 
   if (proposal.value.type === 'basic') {
-    proposal.value.choices = [...CHOICES];
+    proposal.value.choices = [...BASIC_CHOICES];
   }
 }
 </script>
