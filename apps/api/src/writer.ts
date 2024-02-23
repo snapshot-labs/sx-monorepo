@@ -15,6 +15,11 @@ import {
   registerProposal
 } from './utils';
 
+type Strategy = {
+  address: string;
+  params: string[];
+};
+
 export const handleSpaceDeployed: CheckpointWriter = async ({ blockNumber, event, instance }) => {
   console.log('Handle space deployed');
 
@@ -31,9 +36,13 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
 
   if (!event || !tx.transaction_hash) return;
 
-  const strategies: string[] = event.voting_strategies.map(strategy => strategy.address);
-  const strategiesParams = event.voting_strategies.map(strategy => strategy.params.join(',')); // different format than sx-evm
-  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(array =>
+  const strategies: string[] = event.voting_strategies.map(
+    (strategy: Strategy) => strategy.address
+  );
+  const strategiesParams = event.voting_strategies.map((strategy: Strategy) =>
+    strategy.params.join(',')
+  ); // different format than sx-evm
+  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map((array: string[]) =>
     longStringToText(array)
   );
 
@@ -207,9 +216,13 @@ export const handleVotingStrategiesAdded: CheckpointWriter = async ({ rawEvent, 
 
   const initialNextStrategy = space.next_strategy_index;
 
-  const strategies = event.voting_strategies.map(strategy => strategy.address);
-  const strategiesParams = event.voting_strategies.map(strategy => strategy.params.join(','));
-  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(array =>
+  const strategies: string[] = event.voting_strategies.map(
+    (strategy: Strategy) => strategy.address
+  );
+  const strategiesParams = event.voting_strategies.map((strategy: Strategy) =>
+    strategy.params.join(',')
+  );
+  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map((array: string[]) =>
     longStringToText(array)
   );
 
@@ -364,7 +377,11 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
 
   for (const herodotusStrategy of herodotusStrategiesIndicies) {
     const [strategy, i] = herodotusStrategy;
-    const [l1TokenAddress] = space.strategies_params[i].split(',');
+    const params = space.strategies_params[i];
+    if (!params) continue;
+
+    const [l1TokenAddress] = params.split(',');
+    if (!l1TokenAddress) continue;
 
     try {
       await registerProposal({
@@ -495,8 +512,8 @@ export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event 
   if (proposal) {
     proposal.vote_count += 1;
     proposal.scores_total = (BigInt(proposal.scores_total) + BigInt(vote.vp)).toString();
-    proposal[`scores_${vote.choice}`] = (
-      BigInt(proposal[`scores_${vote.choice}`]) + BigInt(vote.vp)
+    proposal[`scores_${choice}`] = (
+      BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
     ).toString();
     await proposal.save();
   }
