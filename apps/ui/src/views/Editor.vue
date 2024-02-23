@@ -312,7 +312,7 @@ export default defineComponent({
         :body="proposal.body"
       />
       <UiComposer v-else v-model="proposal.body" class="" />
-      <div class="s-base mb-4">
+      <div class="s-base mb-5">
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.discussion"
