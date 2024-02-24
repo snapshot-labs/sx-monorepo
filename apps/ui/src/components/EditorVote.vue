@@ -71,9 +71,9 @@ function handleVoteTypeSelected(type: VoteType) {
           v-model="proposal.choices"
           handle=".handle"
           class="flex flex-col gap-[10px]"
-          item-key="id"
+          item-key="index"
         >
-          <template #item="{ index: index }">
+          <template #item="{ index }">
             <div>
               <div
                 class="flex border items-center rounded-lg bg-skin-input-bg h-[40px] gap-[12px] pl-2.5"
