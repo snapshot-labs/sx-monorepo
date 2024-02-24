@@ -117,6 +117,16 @@ const canSubmit = computed(() => {
     Object.keys(formErrors.value).length === 0
   );
 });
+const proposalStart = computed(() => {
+  if (!space.value) return null;
+
+  return new Date().getTime() / 1e3 + space.value.voting_delay;
+});
+const proposalEnd = computed(() => {
+  if (!space.value || !proposalStart.value) return null;
+
+  return proposalStart.value + space.value.min_voting_period;
+});
 
 async function handleProposeClick() {
   if (!space.value || !proposal.value) return;
@@ -222,6 +232,7 @@ watchEffect(() => {
 <script lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
+import { _t } from '@/helpers/utils';
 
 const { createDraft } = useEditor();
 
@@ -356,6 +367,30 @@ export default defineComponent({
           :space="space"
           class="mb-4"
         />
+      </div>
+      <div class="s-base mb-5">
+        <h4 class="eyebrow mb-2.5">Voting period</h4>
+        <div class="border rounded-lg">
+          <div class="p-2.5 grid sm:grid-cols-2 justify-stretch gap-2.5">
+            <div>
+              <h5 class="uppercase font-bold mb-1 flex items-center gap-2"><IH-clock /> Start</h5>
+              <div v-if="proposalStart" class="text-skin-heading">
+                {{ _t(proposalStart) }}
+              </div>
+            </div>
+            <div>
+              <h5 class="uppercase font-bold mb-1 flex items-center gap-2"><IH-clock /> End</h5>
+              <div v-if="proposalEnd" class="text-skin-heading">{{ _t(proposalEnd) }}</div>
+            </div>
+          </div>
+          <div class="border-t py-2 p-2.5 gap-2 flex items-center">
+            <IH-exclamation-circle class="shrink-0" />
+            <div>
+              You can edit the period in your
+              <router-link :to="{ name: 'space-settings' }">space settings</router-link>
+            </div>
+          </div>
+        </div>
       </div>
     </UiContainer>
     <teleport to="#modal">
