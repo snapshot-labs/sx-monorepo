@@ -67,7 +67,12 @@ function handleVoteTypeSelected(type: VoteType) {
     <div class="s-base">
       <h4 class="eyebrow mb-2.5">Choices</h4>
       <div class="flex flex-col gap-[10px]">
-        <Draggable v-model="proposal.choices" handle=".handle" class="flex flex-col gap-[10px]">
+        <Draggable
+          v-model="proposal.choices"
+          handle=".handle"
+          class="flex flex-col gap-[10px]"
+          item-key="id"
+        >
           <template #item="{ index: index }">
             <div>
               <div
