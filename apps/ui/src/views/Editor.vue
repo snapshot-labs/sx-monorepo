@@ -20,7 +20,7 @@ const DISCUSSION_DEFINITION = {
 const CHOICES_DEFINITION = {
   type: 'array',
   title: 'Choices',
-  items: [{ type: 'string', minLength: 1 }]
+  contains: { type: 'string', minLength: 1 }
 };
 
 const { setTitle } = useTitle();

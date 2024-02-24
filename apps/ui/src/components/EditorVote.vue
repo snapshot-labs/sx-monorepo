@@ -6,7 +6,7 @@ import { Draft, VoteType } from '@/types';
 const proposal = defineModel<Draft>({ required: true });
 
 defineProps<{
-  error?: Record<number, string>;
+  error?: string;
   votingTypes: VoteType[];
 }>();
 
@@ -109,7 +109,7 @@ function handleVoteTypeSelected(type: VoteType) {
                 </UiButton>
               </div>
               <span v-if="error && index === 0" class="text-skin-danger">
-                {{ error[0] }}
+                {{ error }}
               </span>
             </div>
           </template>
