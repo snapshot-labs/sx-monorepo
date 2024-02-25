@@ -3,10 +3,6 @@ import Draggable from 'vuedraggable';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
-
-defineProps<{
-  error?: string;
-}>();
 </script>
 
 <template>
@@ -23,7 +19,6 @@ defineProps<{
           <div>
             <div
               class="flex border items-center rounded-lg bg-skin-input-bg h-[40px] gap-[12px] pl-2.5"
-              :class="{ 'border-skin-danger': error && index === 0 }"
             >
               <div
                 class="text-skin-text"
@@ -49,15 +44,11 @@ defineProps<{
               <UiButton
                 v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
                 class="border-0 rounded-l-none rounded-r-lg border-l bg-transparent !h-[40px] w-[40px] !px-0 text-center text-skin-text shrink-0"
-                :class="{ 'border-skin-danger': error && index === 0 }"
                 @click="proposal.choices.splice(index, 1)"
               >
                 <IH-trash class="inline-block" />
               </UiButton>
             </div>
-            <span v-if="error && index === 0" class="text-skin-danger">
-              {{ error }}
-            </span>
           </div>
         </template>
       </Draggable>
