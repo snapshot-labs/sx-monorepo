@@ -5,7 +5,6 @@ import { Draft } from '@/types';
 const proposal = defineModel<Draft>({ required: true });
 
 defineProps<{
-  error?: string;
   definition: any;
 }>();
 </script>
