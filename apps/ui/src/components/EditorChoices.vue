@@ -11,6 +11,7 @@ const proposal = defineModel<Draft>({ required: true });
     <div class="flex flex-col gap-[10px]">
       <Draggable
         v-model="proposal.choices"
+        v-bind="{ animation: 200 }"
         handle=".handle"
         class="flex flex-col gap-[10px]"
         item-key="index"
