@@ -2,7 +2,6 @@
 import Draggable from 'vuedraggable';
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { Draft, VoteType } from '@/types';
-import ICDrag from '~icons/c/drag';
 
 const proposal = defineModel<Draft>({ required: true });
 
