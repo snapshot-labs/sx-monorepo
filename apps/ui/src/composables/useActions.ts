@@ -271,6 +271,8 @@ export function useActions() {
     title: string,
     body: string,
     discussion: string,
+    type: VoteType,
+    choices: string[],
     executionStrategy: string | null,
     execution: Transaction[]
   ) {
@@ -279,7 +281,7 @@ export function useActions() {
       return false;
     }
 
-    const network = getReadWriteNetwork(space.network);
+    const network = getNetwork(space.network);
 
     const transactions = execution.map((tx: Transaction) => ({
       ...tx,
@@ -290,6 +292,8 @@ export function useActions() {
       title,
       body,
       discussion,
+      type,
+      choices: choices.filter(c => !!c),
       execution: transactions
     });
     if (!pinned || !pinned.cid) return false;

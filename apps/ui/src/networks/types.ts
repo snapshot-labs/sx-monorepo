@@ -96,6 +96,16 @@ export type ReadOnlyNetworkActions = {
     executionStrategy: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
+  updateProposal(
+    web3: Web3Provider,
+    connectorType: Connector,
+    account: string,
+    space: Space,
+    proposalId: number | string,
+    cid: string,
+    executionStrategy: string | null,
+    transactions: MetaTransaction[]
+  ): Promise<any>;
   vote(
     web3: Web3Provider,
     connectorType: Connector,
@@ -132,16 +142,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     }
   );
   setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
-  updateProposal(
-    web3: Web3Provider,
-    connectorType: Connector,
-    account: string,
-    space: Space,
-    proposalId: number | string,
-    cid: string,
-    executionStrategy: string | null,
-    transactions: MetaTransaction[]
-  );
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);

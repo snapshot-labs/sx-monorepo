@@ -4,17 +4,20 @@ import {
   proposeTypes,
   basicVoteTypes,
   singleChoiceVoteTypes,
-  approvalVoteTypes
+  approvalVoteTypes,
+  updateProposalTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
   Vote,
   Propose,
+  UpdateProposal,
   Envelope,
   SignatureData,
   EIP712VoteMessage,
   EIP712Message,
-  EIP712ProposeMessage
+  EIP712ProposeMessage,
+  EIP712UpdateProposal
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
@@ -37,7 +40,7 @@ export class EthereumSig {
     this.sequencerUrl = opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
   }
 
-  public async sign<T extends EIP712VoteMessage | EIP712ProposeMessage>(
+  public async sign<T extends EIP712VoteMessage | EIP712ProposeMessage | EIP712UpdateProposal>(
     signer: Signer & TypedDataSigner,
     message: T,
     types: Record<string, TypedDataField[]>
@@ -60,7 +63,7 @@ export class EthereumSig {
     };
   }
 
-  public async send(envelope: Envelope<Vote>) {
+  public async send(envelope: Envelope<Vote | Propose | UpdateProposal>) {
     const { address, signature: sig, domain, types, message } = envelope.signatureData!;
     const payload = {
       address,
@@ -101,6 +104,21 @@ export class EthereumSig {
     data: Propose;
   }): Promise<Envelope<Propose>> {
     const signatureData = await this.sign(signer, data, proposeTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async updateProposal({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateProposal;
+  }): Promise<Envelope<UpdateProposal>> {
+    const signatureData = await this.sign(signer, data, updateProposalTypes);
 
     return {
       signatureData,

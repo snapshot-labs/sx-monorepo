@@ -148,6 +148,8 @@ async function handleProposeClick() {
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
+        proposal.value.type,
+        proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
