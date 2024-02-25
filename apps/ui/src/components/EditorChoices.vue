@@ -42,9 +42,7 @@ defineProps<{
                   :class="{
                     '!cursor-not-allowed': proposal.type === 'basic'
                   }"
-                  :placeholder="
-                    error && index === 0 ? 'Please type a choice' : `(Choice ${index + 1})`
-                  "
+                  :placeholder="`Choice ${index + 1}`"
                   :disabled="proposal.type === 'basic'"
                 />
               </div>
