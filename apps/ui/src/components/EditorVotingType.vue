@@ -43,12 +43,10 @@ function handleVoteTypeSelected(type: VoteType) {
     <div class="s-base mb-5">
       <h4 class="eyebrow mb-2.5">Voting type</h4>
       <div class="flex flex-col gap-[12px]">
-        <button
+        <UiSelector
           v-for="(type, index) in votingTypes"
           :key="index"
-          type="button"
-          class="border rounded-lg p-2.5 flex gap-3 text-left"
-          :class="{ 'border-skin-content bg-skin-input-bg': proposal.type === type }"
+          :is-active="proposal.type === type"
           @click="handleVoteTypeSelected(type as VoteType)"
         >
           <div
@@ -60,10 +58,7 @@ function handleVoteTypeSelected(type: VoteType) {
               {{ VOTING_TYPES_INFO[type].description }}
             </div>
           </div>
-          <div class="w-[20px] text-right text-skin-link">
-            <IH-check v-if="proposal.type === type" />
-          </div>
-        </button>
+        </UiSelector>
       </div>
     </div>
   </template>
