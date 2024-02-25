@@ -27,7 +27,7 @@ function handleVoteTypeSelected(type: VoteType) {
   if (!proposal.value) return;
 
   if (proposal.value.type === 'basic') {
-    proposal.value.choices = [''];
+    proposal.value.choices = Array(3).fill('');
   }
 
   proposal.value.type = type;
