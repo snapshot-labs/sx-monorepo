@@ -7,7 +7,7 @@ defineProps<{
 <template>
   <button
     type="button"
-    class="border rounded-lg p-2.5 flex gap-3 text-left"
+    class="border rounded-xl p-2.5 flex gap-3 text-left"
     :class="{ 'border-skin-content bg-skin-input-bg': isActive }"
   >
     <slot />
