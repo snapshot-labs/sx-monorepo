@@ -2,6 +2,7 @@
 import Draggable from 'vuedraggable';
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { Draft, VoteType } from '@/types';
+import ICDrag from '~icons/c/drag';
 
 const proposal = defineModel<Draft>({ required: true });
 
@@ -44,8 +45,9 @@ function handleVoteTypeSelected(type: VoteType) {
         <button
           v-for="(type, index) in votingTypes"
           :key="index"
+          type="button"
           class="border rounded-lg p-2.5 flex gap-3 text-left"
-          :class="{ 'border-skin-text bg-skin-input-bg': proposal.type === type }"
+          :class="{ 'border-skin-content bg-skin-input-bg': proposal.type === type }"
           @click="handleVoteTypeSelected(type as VoteType)"
         >
           <div
@@ -57,7 +59,7 @@ function handleVoteTypeSelected(type: VoteType) {
               {{ VOTING_TYPES_INFO[type].description }}
             </div>
           </div>
-          <div class="w-[20px] text-right">
+          <div class="w-[20px] text-right text-skin-link">
             <IH-check v-if="proposal.type === type" />
           </div>
         </button>
@@ -80,13 +82,13 @@ function handleVoteTypeSelected(type: VoteType) {
                 :class="{ 'border-skin-danger': error && index === 0 }"
               >
                 <div
-                  class="text-skin-link opacity-50"
+                  class="text-skin-text"
                   :class="{
-                    'handle hover:opacity-100 cursor-grab': proposal.type !== 'basic',
+                    'handle cursor-grab': proposal.type !== 'basic',
                     'cursor-not-allowed': proposal.type === 'basic'
                   }"
                 >
-                  <IH-switch-vertical />
+                  <ICDrag />
                 </div>
                 <div class="grow">
                   <input
@@ -94,15 +96,18 @@ function handleVoteTypeSelected(type: VoteType) {
                     type="text"
                     class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
                     :class="{
-                      '!cursor-not-allowed opacity-40': proposal.type === 'basic'
+                      '!cursor-not-allowed': proposal.type === 'basic'
                     }"
-                    :placeholder="error && index === 0 ? 'Please type a choice' : '(optional)'"
+                    :placeholder="
+                      error && index === 0 ? 'Please type a choice' : `(Choice ${index + 1})`
+                    "
                     :disabled="proposal.type === 'basic'"
                   />
                 </div>
                 <UiButton
                   v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
-                  class="border-0 rounded-l-none rounded-r-lg border-l bg-transparent h-[40px] w-[40px] !px-0 text-center text-skin-text shrink-0"
+                  class="border-0 rounded-l-none rounded-r-lg border-l bg-transparent !h-[40px] w-[40px] !px-0 text-center text-skin-text shrink-0"
+                  :class="{ 'border-skin-danger': error && index === 0 }"
                   @click="proposal.choices.splice(index, 1)"
                 >
                   <IH-trash class="inline-block" />
@@ -116,7 +121,7 @@ function handleVoteTypeSelected(type: VoteType) {
         </Draggable>
         <UiButton
           v-if="proposal.type !== 'basic'"
-          class="w-full border-dashed rounded-lg flex items-center justify-center space-x-1"
+          class="w-full border-dashed rounded-lg flex items-center justify-center space-x-1 !h-[40px]"
           @click="proposal.choices.push('')"
         >
           <IH-plus-sm />
