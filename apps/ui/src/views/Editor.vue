@@ -20,7 +20,9 @@ const DISCUSSION_DEFINITION = {
 const CHOICES_DEFINITION = {
   type: 'array',
   title: 'Choices',
-  contains: { type: 'string', minLength: 1 }
+  minItems: 1,
+  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
+  additionalItems: { type: 'string', maxLength: 32 }
 };
 
 const { setTitle } = useTitle();
@@ -337,7 +339,11 @@ export default defineComponent({
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
       <EditorVotingType v-model="proposal" :voting-types="votingTypes as VoteType[]" />
-      <EditorChoices v-model="proposal" />
+      <EditorChoices
+        v-model="proposal"
+        :error="formErrors.choices"
+        :definition="CHOICES_DEFINITION"
+      />
       <div
         v-if="
           space &&

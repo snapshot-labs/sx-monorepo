@@ -3,6 +3,11 @@ import Draggable from 'vuedraggable';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
+
+defineProps<{
+  error?: string;
+  definition: any;
+}>();
 </script>
 
 <template>
@@ -34,6 +39,7 @@ const proposal = defineModel<Draft>({ required: true });
                 <input
                   v-model.trim="proposal.choices[index]"
                   type="text"
+                  :maxLength="definition.items[0].maxLength"
                   class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
                   :class="{
                     '!cursor-not-allowed': proposal.type === 'basic'
