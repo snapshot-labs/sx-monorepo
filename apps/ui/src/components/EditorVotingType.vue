@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { Draft, VoteType } from '@/types';
+import voteBasicIllustration from '@/assets/images/vote-basic.svg';
+import voteSingleChoiceIllustration from '@/assets/images/vote-single-choice.svg';
+import voteApprovalIllustration from '@/assets/images/vote-approval.svg';
 
 const proposal = defineModel<Draft>({ required: true });
 
@@ -11,15 +14,18 @@ defineProps<{
 const VOTING_TYPES_INFO = {
   basic: {
     label: 'Basic voting',
-    description: 'Single choice voting with three choices: For, Against or Abstain.'
+    description: 'Single choice voting with three choices: For, Against or Abstain.',
+    image: voteBasicIllustration
   },
   'single-choice': {
     label: 'Single choice voting',
-    description: 'Each voter may select only one choice.'
+    description: 'Each voter may select only one choice.',
+    image: voteSingleChoiceIllustration
   },
   approval: {
     label: 'Approval voting',
-    description: 'Each voter may select any number of choices.'
+    description: 'Each voter may select any number of choices.',
+    image: voteApprovalIllustration
   }
 };
 
@@ -49,9 +55,11 @@ function handleVoteTypeSelected(type: VoteType) {
           :is-active="proposal.type === type"
           @click="handleVoteTypeSelected(type as VoteType)"
         >
-          <div
-            class="h-[82px] w-[122px] hidden sm:block rounded-lg shrink-0 bg-skin-active-bg"
-          ></div>
+          <img
+            :src="VOTING_TYPES_INFO[type].image"
+            :alt="VOTING_TYPES_INFO[type].label"
+            class="w-[122px] hidden sm:block shrink-0"
+          />
           <div class="grow">
             <span class="text-skin-heading">{{ VOTING_TYPES_INFO[type].label }}</span>
             <div>
