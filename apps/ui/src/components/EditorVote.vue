@@ -28,9 +28,13 @@ const VOTING_TYPES_INFO = {
 function handleVoteTypeSelected(type: VoteType) {
   if (!proposal.value) return;
 
+  if (proposal.value.type === 'basic') {
+    proposal.value.choices = [''];
+  }
+
   proposal.value.type = type;
 
-  if (proposal.value.type === 'basic') {
+  if (type === 'basic') {
     proposal.value.choices = [...BASIC_CHOICES];
   }
 }
