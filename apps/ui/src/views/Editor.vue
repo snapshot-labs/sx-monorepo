@@ -336,11 +336,8 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <EditorVote
-        v-model="proposal"
-        :error="formErrors.choices"
-        :voting-types="votingTypes as VoteType[]"
-      />
+      <EditorVotingType v-model="proposal" :voting-types="votingTypes as VoteType[]" />
+      <EditorChoices v-model="proposal" :error="formErrors.choices" />
       <div
         v-if="
           space &&
