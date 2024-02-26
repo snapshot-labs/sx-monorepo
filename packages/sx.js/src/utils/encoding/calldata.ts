@@ -14,7 +14,10 @@ export function flatten2DArray(array2D: string[][]): string[] {
   let offset = 0;
   flatArray.push('0x0'); // offset of first array
   for (let i = 0; i < array2D.length - 1; i++) {
-    offset += array2D[i].length;
+    const subarray = array2D[i];
+    if (!subarray) throw new Error('Sparse arrays not supported');
+
+    offset += subarray.length;
     flatArray.push(`0x${offset.toString(16)}`);
   }
   const elements = array2D.reduce((accumulator, value) => accumulator.concat(value), []);

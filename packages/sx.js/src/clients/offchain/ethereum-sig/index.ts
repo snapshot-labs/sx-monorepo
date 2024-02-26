@@ -1,10 +1,24 @@
 import { offchainGoerli } from '../../../offchainNetworks';
-import { domain, SingleChoiceVoteTypes, MultipleChoiceVoteTypes } from './types';
+import {
+  domain,
+  proposeTypes,
+  basicVoteTypes,
+  singleChoiceVoteTypes,
+  approvalVoteTypes
+} from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
-import type { Vote, Envelope, SignatureData, EIP712VoteMessage, EIP712Message } from '../types';
+import type {
+  Vote,
+  Propose,
+  Envelope,
+  SignatureData,
+  EIP712VoteMessage,
+  EIP712Message,
+  EIP712ProposeMessage
+} from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
-const SEQUENCER_URLS = {
+const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
   5: 'https://testnet.seq.snapshot.org'
 };
@@ -23,16 +37,16 @@ export class EthereumSig {
     this.sequencerUrl = opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
   }
 
-  public async sign<T extends EIP712VoteMessage>(
+  public async sign<T extends EIP712VoteMessage | EIP712ProposeMessage>(
     signer: Signer & TypedDataSigner,
     message: T,
     types: Record<string, TypedDataField[]>
   ): Promise<SignatureData> {
     const address = await signer.getAddress();
     const EIP712Message: EIP712Message = {
-      ...message,
       from: address,
-      timestamp: parseInt((Date.now() / 1e3).toFixed())
+      timestamp: parseInt((Date.now() / 1e3).toFixed()),
+      ...message
     };
 
     const signature = await signer._signTypedData(domain, types, EIP712Message);
@@ -71,10 +85,27 @@ export class EthereumSig {
     const result = await res.json();
 
     if (result.error) {
-      throw new Error(result.error_description);
+      throw new Error(
+        typeof result.error_description === 'string' ? result.error_description : result.error
+      );
     }
 
     return result;
+  }
+
+  public async propose({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: Propose;
+  }): Promise<Envelope<Propose>> {
+    const signatureData = await this.sign(signer, data, proposeTypes);
+
+    return {
+      signatureData,
+      data
+    };
   }
 
   public async vote({
@@ -93,10 +124,9 @@ export class EthereumSig {
       metadata: ''
     };
 
-    let voteType = SingleChoiceVoteTypes;
-    if (data.type === 'approval') {
-      voteType = MultipleChoiceVoteTypes;
-    }
+    let voteType = basicVoteTypes;
+    if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
+    if (data.type === 'approval') voteType = approvalVoteTypes;
 
     const signatureData = await this.sign(signer, message, voteType);
 

@@ -1,20 +1,26 @@
 import { Account, RpcProvider, constants } from 'starknet';
-import { clients, starknetMainnet, starknetGoerli, starknetSepolia } from '@snapshot-labs/sx';
+import {
+  clients,
+  starknetMainnet,
+  starknetGoerli,
+  starknetSepolia,
+  NetworkConfig
+} from '@snapshot-labs/sx';
 import { getProvider, createAccountProxy } from './dependencies';
 import { NonceManager } from './nonce-manager';
 
-export const NETWORKS = {
-  [constants.StarknetChainId.SN_MAIN]: starknetMainnet,
-  [constants.StarknetChainId.SN_GOERLI]: starknetGoerli,
-  [constants.StarknetChainId.SN_SEPOLIA]: starknetSepolia
-} as const;
+export const NETWORKS = new Map<string, NetworkConfig>([
+  [constants.StarknetChainId.SN_MAIN, starknetMainnet],
+  [constants.StarknetChainId.SN_GOERLI, starknetGoerli],
+  [constants.StarknetChainId.SN_SEPOLIA, starknetSepolia]
+]);
 
 const clientsMap = new Map<
   string,
   {
     provider: RpcProvider;
     client: clients.StarknetTx;
-    getAccount: (spaceAddress) => { account: Account; nonceManager: NonceManager };
+    getAccount: (spaceAddress: string) => { account: Account; nonceManager: NonceManager };
   }
 >();
 
@@ -28,7 +34,7 @@ export function getClient(chainId: string) {
   const client = new clients.StarknetTx({
     starkProvider: provider,
     ethUrl: process.env.ETH_RPC_URL as string,
-    networkConfig: NETWORKS[chainId]
+    networkConfig: NETWORKS.get(chainId)
   });
 
   clientsMap.set(chainId, { provider, client, getAccount });

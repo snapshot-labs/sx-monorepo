@@ -37,4 +37,27 @@ describe('EthereumSig', () => {
 
     expect(envelope).toMatchSnapshot();
   });
+
+  it('should create propose envelope', async () => {
+    const payload = {
+      space: 'wan-test.eth',
+      title: 'Creation test',
+      body: 'Dummy body',
+      type: 'basic',
+      discussion: 'https://snapshot.org',
+      choices: ['For', 'Against', 'Abstain'],
+      start: Math.floor(Date.now() / 1e3),
+      end: Math.floor(Date.now() / 1e3) + 60 * 60,
+      snapshot: 19283932,
+      plugins: '{}',
+      app: 'snapshot-v2'
+    };
+
+    const envelope = await client.propose({
+      signer,
+      data: payload
+    });
+
+    expect(envelope).toMatchSnapshot();
+  });
 });

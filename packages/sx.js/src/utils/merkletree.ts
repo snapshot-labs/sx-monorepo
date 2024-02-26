@@ -40,21 +40,26 @@ export function generateMerkleRoot(hashes: string[]) {
   for (let i = 0; i < hashes.length; i += 2) {
     let left: string;
     let right: string;
-    if (BigInt(hashes[i]) > BigInt(hashes[i + 1])) {
-      left = hashes[i];
-      right = hashes[i + 1];
-    } else {
-      left = hashes[i + 1];
-      right = hashes[i];
-    }
 
+    const firstValue = hashes[i];
+    const secondValue = hashes[i + 1];
+
+    if (!firstValue || !secondValue) throw new Error('Invalid hash');
+
+    if (BigInt(firstValue) > BigInt(secondValue)) {
+      left = firstValue;
+      right = secondValue;
+    } else {
+      left = secondValue;
+      right = firstValue;
+    }
     newHashes.push(ec.starkCurve.pedersen(left, right));
   }
 
   return generateMerkleRoot(newHashes);
 }
 
-export function generateMerkleProof(hashes: string[], index: number) {
+export function generateMerkleProof(hashes: string[], index: number): string[] {
   if (hashes.length === 1) {
     return [];
   }
@@ -68,12 +73,18 @@ export function generateMerkleProof(hashes: string[], index: number) {
   for (let i = 0; i < hashes.length; i += 2) {
     let left: string;
     let right: string;
-    if (BigInt(hashes[i]) > BigInt(hashes[i + 1])) {
-      left = hashes[i];
-      right = hashes[i + 1];
+
+    const firstValue = hashes[i];
+    const secondValue = hashes[i + 1];
+
+    if (!firstValue || !secondValue) throw new Error('Invalid hash');
+
+    if (BigInt(firstValue) > BigInt(secondValue)) {
+      left = firstValue;
+      right = secondValue;
     } else {
-      left = hashes[i + 1];
-      right = hashes[i];
+      left = secondValue;
+      right = firstValue;
     }
 
     newHashes.push(ec.starkCurve.pedersen(left, right));
@@ -81,9 +92,9 @@ export function generateMerkleProof(hashes: string[], index: number) {
 
   const proof = generateMerkleProof(newHashes, Math.floor(index / 2));
 
-  if (index % 2 === 0) {
-    return [hashes[index + 1], ...proof];
-  } else {
-    return [hashes[index - 1], ...proof];
-  }
+  const prefixIndex = index % 2 === 0 ? index + 1 : index - 1;
+  const prefix = hashes[prefixIndex];
+  if (!prefix) throw new Error('Invalid hash');
+
+  return [prefix, ...proof];
 }

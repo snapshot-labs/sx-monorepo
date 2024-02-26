@@ -3,6 +3,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { EthereumSig } from '../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../src/offchainNetworks';
 import vote from './fixtures/vote.json';
+import proposal from './fixtures/proposal.json';
 
 // Test address: 0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90
 const TEST_PK = 'ef4bcf36b5d026b703b86a311031fe2291b979620f01443f795fa213f9105e35';
@@ -26,5 +27,17 @@ describe('vote', () => {
     });
 
     return expect(client.send(envelope)).rejects.toThrowError(/unknown proposal/);
+  });
+});
+
+describe('propose', () => {
+  it('should thrown an error when user does not have enough voting power', async () => {
+    const currentTime = Math.floor(Date.now() / 1e3);
+    const envelope = await client.propose({
+      signer,
+      data: { ...proposal, start: currentTime, end: currentTime + 60 }
+    });
+
+    return expect(client.send(envelope)).rejects.toThrowError(/invalid voting power/);
   });
 });

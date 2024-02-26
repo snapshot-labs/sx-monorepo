@@ -38,7 +38,7 @@ describe('merkleWhitelist', () => {
       config
     );
 
-    expect(params).toEqual([1, '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', '0x2a', '0x0', 0]);
+    expect(params).toEqual(['1', '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', '0x2a', '0x0', '0']);
   });
 
   describe('getVotingPower', () => {

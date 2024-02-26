@@ -223,7 +223,7 @@ export function useActions() {
       return false;
     }
 
-    const network = getReadWriteNetwork(space.network);
+    const network = getNetwork(space.network);
 
     const transactions = execution.map((tx: Transaction) => ({
       ...tx,

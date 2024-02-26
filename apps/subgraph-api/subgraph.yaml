@@ -8,7 +8,7 @@ dataSources:
     source:
       abi: ProxyFactory
       address: "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c"
-      startBlock: 3961351
+      startBlock: 4519171
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

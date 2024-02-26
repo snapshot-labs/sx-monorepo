@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 import ICX from '~icons/c/x';
 import ICDiscord from '~icons/c/discord';
@@ -24,7 +24,6 @@ onMounted(() => {
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
-const network = computed(() => getNetwork(props.space.network));
 const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
@@ -63,7 +62,7 @@ watchEffect(() => setTitle(props.space.name));
       </div>
       <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2">
-        <router-link v-if="!network.readOnly" :to="{ name: 'editor' }">
+        <router-link :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />

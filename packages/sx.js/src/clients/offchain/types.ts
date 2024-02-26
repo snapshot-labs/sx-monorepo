@@ -10,7 +10,7 @@ export type SignatureData = {
   message: Record<string, any>;
 };
 
-export type Envelope<T extends Vote> = {
+export type Envelope<T extends Vote | Propose> = {
   signatureData?: SignatureData;
   data: T;
 };
@@ -28,9 +28,27 @@ export type EIP712VoteMessage = {
   reason: string;
   app: string;
   metadata: string;
+  timestamp?: number;
+  from?: string;
 };
 
-export type EIP712Message = EIP712VoteMessage & { timestamp: number; from: string };
+export type EIP712ProposeMessage = {
+  space: string;
+  type: string;
+  title: string;
+  body: string;
+  discussion: string;
+  choices: string[];
+  start: number;
+  end: number;
+  snapshot: number;
+  plugins: string;
+  app: string;
+  timestamp?: number;
+  from?: string;
+};
+
+export type EIP712Message = Required<EIP712VoteMessage | EIP712ProposeMessage>;
 
 export type Vote = {
   space: string;
@@ -40,4 +58,20 @@ export type Vote = {
   choice: Choice;
   metadataUri: string;
   type: string;
+  timestamp?: number;
+};
+
+export type Propose = {
+  space: string;
+  type: string;
+  title: string;
+  body: string;
+  discussion: string;
+  choices: string[];
+  start: number;
+  end: number;
+  snapshot: number;
+  plugins: string;
+  app: string;
+  timestamp?: number;
 };

@@ -61,6 +61,7 @@
     "@types/bn.js": "^5.1.1",
     "@types/elliptic": "^6.4.14",
     "@types/node": "^18.11.9",
+    "@types/randombytes": "^2.0.3",
     "eslint": "^8.53.0",
     "prettier": "^3.1.0",
     "typescript": "^5.2.2",
