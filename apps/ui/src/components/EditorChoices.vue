@@ -10,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="s-base">
+  <div class="s-base mb-5">
     <h4 class="eyebrow mb-2.5">Choices</h4>
     <div class="flex flex-col gap-[10px]">
       <Draggable
