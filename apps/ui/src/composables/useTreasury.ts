@@ -1,20 +1,17 @@
 import { CHAIN_IDS } from '@/helpers/constants';
-import { Space } from '@/types';
+import { SpaceMetadataTreasury } from '@/types';
 
-type NullableSpace = Space | undefined | null;
-
-export function useTreasury(spaceRef: Ref<NullableSpace>) {
+export function useTreasury(treasuryData: SpaceMetadataTreasury) {
   const treasury = computed(() => {
-    const wallet = spaceRef.value?.treasuries?.[0];
-    if (!wallet || !wallet.network || !wallet.address) return null;
+    if (!treasuryData || !treasuryData.network || !treasuryData.address) return null;
 
-    const chainId = CHAIN_IDS[wallet.network];
-    if (!chainId || !wallet) return null;
+    const chainId = CHAIN_IDS[treasuryData.network];
+    if (!chainId || !treasuryData) return null;
 
     return {
-      networkId: wallet.network,
+      networkId: treasuryData.network,
       network: chainId,
-      wallet: wallet.address
+      wallet: treasuryData.address
     };
   });
 
