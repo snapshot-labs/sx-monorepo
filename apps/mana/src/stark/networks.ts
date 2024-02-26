@@ -9,11 +9,11 @@ import {
 import { getProvider, createAccountProxy } from './dependencies';
 import { NonceManager } from './nonce-manager';
 
-export const NETWORKS: Record<string, NetworkConfig> = {
-  [constants.StarknetChainId.SN_MAIN]: starknetMainnet,
-  [constants.StarknetChainId.SN_GOERLI]: starknetGoerli,
-  [constants.StarknetChainId.SN_SEPOLIA]: starknetSepolia
-};
+export const NETWORKS = new Map<string, NetworkConfig>([
+  [constants.StarknetChainId.SN_MAIN, starknetMainnet],
+  [constants.StarknetChainId.SN_GOERLI, starknetGoerli],
+  [constants.StarknetChainId.SN_SEPOLIA, starknetSepolia]
+]);
 
 const clientsMap = new Map<
   string,
@@ -34,7 +34,7 @@ export function getClient(chainId: string) {
   const client = new clients.StarknetTx({
     starkProvider: provider,
     ethUrl: process.env.ETH_RPC_URL as string,
-    networkConfig: NETWORKS[chainId]
+    networkConfig: NETWORKS.get(chainId)
   });
 
   clientsMap.set(chainId, { provider, client, getAccount });
