@@ -1,13 +1,15 @@
-<script setup>
-const props = defineProps({ url: String });
-const preview = ref(false);
+<script setup lang="ts">
+const props = withDefaults(defineProps<{ url: string; showDefault?: boolean }>(), {
+  showDefault: false
+});
+const preview = ref<Record<string, any>>({});
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
 
 async function update(val) {
   try {
-    preview.value = false;
+    preview.value = {};
     new URL(val);
     const url = `https://cdn.iframe.ly/api/iframely?url=${encodeURI(
       val
@@ -27,8 +29,8 @@ debouncedWatch(
 </script>
 
 <template>
-  <div class="!flex items-center border rounded-lg">
-    <div v-if="preview?.meta?.title">
+  <div v-if="preview?.meta || showDefault" class="!flex items-center border rounded-lg">
+    <template v-if="preview?.meta?.title">
       <div v-if="preview?.links?.icon?.[0]?.href" class="px-4 pr-0">
         <div class="w-[32px]">
           <img :src="preview.links.icon[0].href" width="32" height="32" class="bg-white rounded" />
@@ -42,8 +44,8 @@ debouncedWatch(
           v-text="preview.meta.description"
         />
       </div>
-    </div>
-    <div v-else class="px-4 py-3 flex gap-3 items-center w-full">
+    </template>
+    <div v-else-if="showDefault" class="p-3 py-2 flex gap-2 items-center w-full">
       <IH-link class="shrink-0" />
       <div class="truncate">{{ props.url }}</div>
     </div>
