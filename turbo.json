@@ -18,7 +18,7 @@
       "dependsOn": ["codegen"]
     },
     "codegen": {
-      "outputs": [".checkpoint", "generated"],
+      "outputs": [".checkpoint/**", "generated/**"],
       "inputs": ["**/*.graphql", "**/*.gql"]
     }
   }
