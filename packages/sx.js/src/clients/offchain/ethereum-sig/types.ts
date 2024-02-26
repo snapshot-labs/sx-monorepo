@@ -3,24 +3,32 @@ export const domain = {
   version: '0.1.4'
 };
 
-const baseVoteTypes = [
-  { name: 'from', type: 'address' },
-  { name: 'space', type: 'string' },
-  { name: 'timestamp', type: 'uint64' },
-  { name: 'proposal', type: 'string' },
-  { name: 'reason', type: 'string' },
-  { name: 'app', type: 'string' },
-  { name: 'metadata', type: 'string' }
-];
-
 export const basicVoteTypes = {
-  Vote: [...baseVoteTypes, { name: 'choice', type: 'uint32' }]
+  Vote: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'proposal', type: 'string' },
+    { name: 'choice', type: 'uint32' },
+    { name: 'reason', type: 'string' },
+    { name: 'app', type: 'string' },
+    { name: 'metadata', type: 'string' }
+  ]
 };
 
 export const singleChoiceVoteTypes = basicVoteTypes;
 
 export const approvalVoteTypes = {
-  Vote: [...baseVoteTypes, { name: 'choice', type: 'uint32[]' }]
+  Vote: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'proposal', type: 'string' },
+    { name: 'choice', type: 'uint32[]' },
+    { name: 'reason', type: 'string' },
+    { name: 'app', type: 'string' },
+    { name: 'metadata', type: 'string' }
+  ]
 };
 
 export const proposeTypes = {

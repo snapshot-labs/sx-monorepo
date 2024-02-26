@@ -4,7 +4,7 @@ import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET, PROPOSAL_VALIDATIONS } from '.
 import { getUrl } from '@/helpers/utils';
 import { getProvider } from '@/helpers/provider';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { StrategyParsedMetadata, Choice, Proposal, Space } from '@/types';
+import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType } from '@/types';
 import type {
   ReadOnlyNetworkActions,
   NetworkConstants,
@@ -38,7 +38,13 @@ export function createActions(
       space: Space,
       cid: string
     ) {
-      let payload: { title: string; body: string; discussion: string };
+      let payload: {
+        title: string;
+        body: string;
+        discussion: string;
+        type: VoteType;
+        choices: string[];
+      };
 
       try {
         const res = await fetch(getUrl(cid) as string);
@@ -55,9 +61,9 @@ export function createActions(
         space: space.id,
         title: payload.title,
         body: payload.body,
-        type: 'basic',
+        type: payload.type,
         discussion: payload.discussion,
-        choices: ['For', 'Against', 'Abstain'],
+        choices: payload.choices,
         start: startTime,
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,

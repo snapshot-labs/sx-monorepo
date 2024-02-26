@@ -21,7 +21,7 @@ import type {
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
-const SEQUENCER_URLS = {
+const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
   5: 'https://testnet.seq.snapshot.org'
 };

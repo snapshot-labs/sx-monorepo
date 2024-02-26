@@ -412,6 +412,8 @@ export function createConstants(networkId: NetworkID) {
     }
   ];
 
+  const EDITOR_VOTING_TYPES = ['basic'];
+
   return {
     SUPPORTED_AUTHENTICATORS,
     CONTRACT_SUPPORTED_AUTHENTICATORS,
@@ -426,6 +428,7 @@ export function createConstants(networkId: NetworkID) {
     EDITOR_PROPOSAL_VALIDATIONS,
     EDITOR_VOTING_STRATEGIES,
     EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
-    EDITOR_EXECUTION_STRATEGIES
+    EDITOR_EXECUTION_STRATEGIES,
+    EDITOR_VOTING_TYPES
   };
 }

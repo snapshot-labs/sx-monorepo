@@ -12,7 +12,10 @@ export class IntsSequence {
 
   toSplitUint256(): SplitUint256 {
     const rem = this.bytesLength % 8;
-    let uint = BigInt(this.values[this.values.length - 1]);
+    const value = this.values[this.values.length - 1];
+    if (!value) throw new Error('Missing value');
+
+    let uint = BigInt(value);
     let shift = BigInt(0);
     if (rem == 0) {
       shift += BigInt(64);
@@ -20,7 +23,10 @@ export class IntsSequence {
       shift += BigInt(rem * 8);
     }
     for (let i = 0; i < this.values.length - 1; i++) {
-      uint += BigInt(this.values[this.values.length - 2 - i]) << BigInt(shift);
+      const value = this.values[this.values.length - 2 - i];
+      if (!value) throw new Error('Missing value');
+
+      uint += BigInt(value) << BigInt(shift);
       shift += BigInt(64);
     }
     return SplitUint256.fromUint(uint);

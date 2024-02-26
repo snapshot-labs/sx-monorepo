@@ -32,6 +32,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     getRelayerAuthenticatorType: () => null,
     isStrategySupported: () => true,
     isExecutorSupported: () => false,
+    isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
     waitForTransaction: () => {
       throw new Error('Not implemented');

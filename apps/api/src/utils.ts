@@ -1,5 +1,5 @@
 import fetch from 'cross-fetch';
-import { CallData, Contract, Provider, hash, shortString } from 'starknet';
+import { BigNumberish, CallData, Contract, Provider, hash, shortString } from 'starknet';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { faker } from '@faker-js/faker';
@@ -17,6 +17,11 @@ import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStr
 import { networkNodeUrl, networkProperties } from './overrrides';
 import { handleStrategiesParsedMetadata } from './ipfs';
 
+type StrategyConfig = {
+  address: BigNumberish;
+  params: BigNumberish[];
+};
+
 const ethProvider = new JsonRpcProvider(
   process.env.L1_NETWORK_NODE_URL ?? 'https://rpc.brovider.xyz/5'
 );
@@ -32,7 +37,7 @@ export function getCurrentTimestamp() {
   return Math.floor(Date.now() / 1000);
 }
 
-export function toAddress(bn) {
+export function toAddress(bn: any) {
   try {
     return getAddress(BigNumber.from(bn).toHexString());
   } catch (e) {
@@ -40,7 +45,7 @@ export function toAddress(bn) {
   }
 }
 
-export function getUrl(uri, gateway = 'pineapple.fyi') {
+export function getUrl(uri: string, gateway = 'pineapple.fyi') {
   const ipfsGateway = `https://${gateway}`;
   if (!uri) return null;
   if (
@@ -56,12 +61,14 @@ export function getUrl(uri, gateway = 'pineapple.fyi') {
   return uri;
 }
 
-export async function getJSON(uri) {
+export async function getJSON(uri: string) {
   const url = getUrl(uri);
+  if (!url) throw new Error('Invalid URI');
+
   return fetch(url).then(res => res.json());
 }
 
-export function getSpaceName(address) {
+export function getSpaceName(address: string) {
   const seed = parseInt(hash.getSelectorFromName(address).toString().slice(0, 12));
   faker.seed(seed);
   const noun = faker.word.noun(6);
@@ -109,6 +116,7 @@ export async function handleExecutionStrategy(address: string, payload: string[]
       quorum = await executionContract.quorum();
     } else if (executionStrategyType === 'EthRelayer') {
       const [l1Destination] = payload;
+      if (!l1Destination) throw new Error('Invalid payload for EthRelayer execution strategy');
 
       const SimpleQuorumExecutionStrategyContract = new EthContract(
         l1Destination,
@@ -154,10 +162,11 @@ export async function updateProposaValidationStrategy(
     if (Object.keys(parsed).length !== 0) {
       space.proposal_threshold = parsed.proposal_threshold;
       space.voting_power_validation_strategy_strategies = parsed.allowed_strategies.map(
-        strategy => `0x${strategy.address.toString(16)}`
+        (strategy: StrategyConfig) => `0x${strategy.address.toString(16)}`
       );
       space.voting_power_validation_strategy_strategies_params = parsed.allowed_strategies.map(
-        strategy => strategy.params.map(param => `0x${param.toString(16)}`).join(',')
+        (strategy: StrategyConfig) =>
+          strategy.params.map(param => `0x${param.toString(16)}`).join(',')
       );
     }
 
@@ -182,6 +191,7 @@ export async function handleStrategiesMetadata(
 ) {
   for (let i = 0; i < metadataUris.length; i++) {
     const metadataUri = metadataUris[i];
+    if (!metadataUri) continue;
 
     const index = startingIndex + i;
     const uniqueId = `${spaceId}/${index}/${dropIpfs(metadataUri)}`;
