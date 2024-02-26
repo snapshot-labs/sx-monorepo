@@ -7,8 +7,6 @@ const props = withDefaults(
   defineProps<{
     id: string;
     size?: number;
-    width?: number;
-    height?: number;
     cb?: string;
   }>(),
   {

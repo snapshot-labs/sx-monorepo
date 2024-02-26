@@ -192,7 +192,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0">
-              <UiTokenStamp
+              <UiStampToken
                 :id="`${treasury.networkId}:${asset.contractAddress}`"
                 type="token"
                 :size="32"
