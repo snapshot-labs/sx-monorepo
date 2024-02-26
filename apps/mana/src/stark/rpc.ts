@@ -5,7 +5,7 @@ import * as herodotus from './herodotus';
 import { rpcError, rpcSuccess } from '../utils';
 
 export const createNetworkHandler = (chainId: string) => {
-  const networkConfig = NETWORKS[chainId];
+  const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
   const { client, getAccount } = getClient(chainId);
