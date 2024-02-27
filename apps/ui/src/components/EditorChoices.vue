@@ -24,13 +24,7 @@ defineProps<{
         <template #item="{ index }">
           <div>
             <div class="flex items-center rounded-lg bg-skin-border h-[40px] gap-[12px] pl-2.5">
-              <div
-                class="text-skin-text"
-                :class="{
-                  'handle cursor-grab': proposal.type !== 'basic',
-                  'cursor-not-allowed': proposal.type === 'basic'
-                }"
-              >
+              <div v-if="proposal.type !== 'basic'" class="text-skin-text handle cursor-grab">
                 <IC-drag />
               </div>
               <div class="grow">
