@@ -76,6 +76,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.RELAYER_AUTHENTICATORS[authenticator],
     isStrategySupported: (strategy: string) => constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
+    isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
     waitForTransaction: txId => {
       let retries = 0;
