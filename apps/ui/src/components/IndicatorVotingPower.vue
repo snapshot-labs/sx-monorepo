@@ -53,12 +53,12 @@ function handleModalOpen() {
           :loading="loading"
           class="flex flex-row items-center justify-center"
           :class="{
-            '!px-0 w-[46px]': loading,
-            'border-skin-danger !text-skin-danger': error
+            '!px-0 w-[46px]': loading
           }"
           @click="handleModalOpen"
         >
-          <IH-lightning-bolt class="inline-block -ml-1" />
+          <IH-exclamation-circle v-if="error" class="inline-block -ml-1" />
+          <IH-lightning-bolt v-else class="inline-block -ml-1" />
           <span class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
       </UiTooltip>

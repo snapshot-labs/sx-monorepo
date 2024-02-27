@@ -155,15 +155,11 @@ watchEffect(() => {
             <h4 class="block eyebrow">Your voting power</h4>
             <div class="pt-2">
               <UiLoading v-if="votingPowerStatus === VotingPowerStatus.LOADING" />
-              <button
-                v-else
-                class="text-skin-link text-lg"
-                :class="{
-                  'border-skin-danger !text-skin-danger':
-                    votingPowerStatus === VotingPowerStatus.ERROR
-                }"
-                @click="props.onClick"
-              >
+              <button v-else class="text-skin-link text-lg" @click="props.onClick">
+                <IH-exclamation-circle
+                  v-if="votingPowerStatus === VotingPowerStatus.ERROR"
+                  class="inline-block mr-1"
+                />
                 {{ props.formattedVotingPower }}
               </button>
             </div>
