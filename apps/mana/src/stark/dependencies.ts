@@ -11,6 +11,13 @@ const NODE_URLS = new Map<string, string | undefined>([
   [constants.StarknetChainId.SN_GOERLI, process.env.STARKNET_GOERLI_RPC_URL],
   [constants.StarknetChainId.SN_SEPOLIA, process.env.STARKNET_SEPOLIA_RPC_URL]
 ]);
+
+export const ETH_NODE_URLS = new Map<string, string | undefined>([
+  [constants.StarknetChainId.SN_MAIN, process.env.ETH_MAINNET_RPC_URL],
+  [constants.StarknetChainId.SN_GOERLI, process.env.ETH_GOERLI_RPC_URL],
+  [constants.StarknetChainId.SN_SEPOLIA, process.env.ETH_SEPOLIA_RPC_URL]
+]);
+
 export function getProvider(chainId: string) {
   return new RpcProvider({ nodeUrl: NODE_URLS.get(chainId) });
 }
