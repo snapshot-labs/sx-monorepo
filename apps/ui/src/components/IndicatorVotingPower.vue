@@ -11,6 +11,10 @@ const props = defineProps<{
   votingPowers: VotingPower[];
 }>();
 
+defineEmits<{
+  (e: 'getVotingPower');
+}>();
+
 const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
@@ -63,8 +67,10 @@ function handleModalOpen() {
         :network-id="networkId"
         :voting-power-symbol="votingPowerSymbol"
         :voting-powers="props.votingPowers"
+        :voting-power-status="status"
         :final-decimals="decimals"
         @close="modalOpen = false"
+        @get-voting-power="$emit('getVotingPower')"
       />
     </teleport>
   </div>

@@ -2,18 +2,20 @@
 import { getNetwork } from '@/networks';
 import { _n, shorten } from '@/helpers/utils';
 import { NetworkID } from '@/types';
-import { VotingPower } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
   votingPowerSymbol: string;
   votingPowers: VotingPower[];
+  votingPowerStatus: VotingPowerStatus;
   finalDecimals: number;
 }>();
 
 defineEmits<{
   (e: 'close');
+  (e: 'getVotingPower');
 }>();
 
 const loaded = ref(true);
@@ -31,6 +33,12 @@ const baseNetwork = computed(() =>
     </template>
     <UiLoading v-if="!loaded" class="p-4 block text-center" />
     <div v-else>
+      <div v-if="votingPowerStatus === VotingPowerStatus.ERROR" class="p-4 text-skin-danger">
+        There was an error fetching your voting power.
+        <UiButton type="button" class="flex items-center gap-2" @click="$emit('getVotingPower')">
+          <IH-refresh />Retry
+        </UiButton>
+      </div>
       <div
         v-for="(strategy, i) in votingPowers"
         :key="i"

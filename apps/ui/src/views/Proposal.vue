@@ -150,6 +150,7 @@ watchEffect(() => {
             :voting-power-symbol="proposal.space.voting_power_symbol"
             :voting-powers="votingPowers"
             class="mb-2 mt-4 first:mt-1"
+            @get-voting-power="getVotingPower"
           >
             <h4 class="block eyebrow">Your voting power</h4>
             <div class="pt-2">
