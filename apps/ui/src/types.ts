@@ -107,6 +107,11 @@ export type Space = {
   authenticators: string[];
   executors: string[];
   executors_types: string[];
+  executors_strategies: {
+    id: string;
+    treasury: string | null;
+    treasury_chain: number | null;
+  }[];
   proposal_count: number;
   vote_count: number;
   created: number;

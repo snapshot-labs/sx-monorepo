@@ -17,6 +17,11 @@ const SPACE_FRAGMENT = gql`
       delegations
       executors
       executors_types
+      executors_strategies {
+        id
+        treasury_chain
+        treasury
+      }
     }
     controller
     voting_delay

@@ -90,6 +90,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     authenticators: [DEFAULT_AUTHENTICATOR],
     executors: [],
     executors_types: [],
+    executors_strategies: [],
     strategies: space.strategies.map(strategy => strategy.name),
     strategies_indicies: [],
     strategies_params: space.strategies.map(strategy => strategy),

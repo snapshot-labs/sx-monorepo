@@ -74,9 +74,13 @@ export function handleSpaceMetadata(content: Bytes): void {
       spaceMetadata.executors_types = executionStrategiesTypes
         .toArray()
         .map<string>((type) => type.toString())
+      spaceMetadata.executors_strategies = executionStrategies
+        .toArray()
+        .map<string>((strategy) => strategy.toString())
     } else {
       spaceMetadata.executors = []
       spaceMetadata.executors_types = []
+      spaceMetadata.executors_strategies = []
     }
   } else {
     spaceMetadata.cover = ''
@@ -85,6 +89,7 @@ export function handleSpaceMetadata(content: Bytes): void {
     spaceMetadata.discord = ''
     spaceMetadata.executors = []
     spaceMetadata.executors_types = []
+    spaceMetadata.executors_strategies = []
   }
 
   spaceMetadata.save()

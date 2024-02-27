@@ -25,6 +25,11 @@ export type ApiSpace = {
     wallet: string;
     executors: string[];
     executors_types: string[];
+    executors_strategies: {
+      id: string;
+      treasury: string | null;
+      treasury_chain: number | null;
+    }[];
     treasuries: string[];
     delegations: string[];
   };

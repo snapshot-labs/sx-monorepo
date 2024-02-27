@@ -48,6 +48,7 @@ type SpaceMetadataItem {
   wallet: String!
   executors: [String]!
   executors_types: [String]!
+  executors_strategies: [ExecutionStrategy]!
 }
 
 type VotingPowerValidationStrategiesParsedMetadataItem {
@@ -72,6 +73,16 @@ type StrategiesParsedMetadataDataItem {
   symbol: String!
   token: String
   payload: String
+}
+
+type ExecutionStrategy {
+  id: String!
+  type: String!
+  quorum: BigDecimalVP!
+  treasury: String
+  treasury_chain: String
+  timelock_veto_guardian: String
+  timelock_delay: BigInt!
 }
 
 type Proposal {
