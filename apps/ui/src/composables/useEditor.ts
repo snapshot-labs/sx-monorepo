@@ -1,3 +1,4 @@
+import { BASIC_CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
 import { Draft, Drafts } from '@/types';
 
@@ -39,6 +40,8 @@ function createDraft(
     title: '',
     body: '',
     discussion: '',
+    type: 'basic',
+    choices: BASIC_CHOICES,
     executionStrategy: null,
     execution: [],
     updatedAt: Date.now(),

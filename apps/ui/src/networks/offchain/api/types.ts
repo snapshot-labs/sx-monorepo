@@ -1,3 +1,5 @@
+import { VoteType } from '@/types';
+
 export type ApiSpace = {
   id: string;
   admins: string[];
@@ -48,14 +50,7 @@ export type ApiProposal = {
     admins: string[];
     symbol: string;
   };
-  type:
-    | 'basic'
-    | 'single-choice'
-    | 'approval'
-    | 'ranked-choice'
-    | 'quadratic'
-    | 'weighted'
-    | 'custom';
+  type: VoteType;
   title: string;
   body: string;
   discussion: string;

@@ -2,7 +2,7 @@
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { SelectedStrategy } from '@/types';
+import { SelectedStrategy, VoteType } from '@/types';
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -15,6 +15,14 @@ const DISCUSSION_DEFINITION = {
   format: 'uri',
   title: 'Discussion',
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
+};
+
+const CHOICES_DEFINITION = {
+  type: 'array',
+  title: 'Choices',
+  minItems: 1,
+  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
+  additionalItems: { type: 'string', maxLength: 32 }
 };
 
 const { setTitle } = useTitle();
@@ -87,6 +95,12 @@ const supportedExecutionStrategies = computed(() => {
     networkValue.helpers.isExecutorSupported(spaceValue.executors_types[i])
   );
 });
+const votingTypes = computed(() => {
+  const networkValue = network.value;
+  if (!networkValue) return null;
+
+  return SUPPORTED_VOTING_TYPES.filter(type => networkValue.helpers.isVotingTypeSupported(type));
+});
 const formErrors = computed(() => {
   if (!proposal.value) return {};
 
@@ -95,15 +109,17 @@ const formErrors = computed(() => {
       type: 'object',
       title: 'Proposal',
       additionalProperties: false,
-      required: ['title'],
+      required: ['title', 'choices'],
       properties: {
         title: TITLE_DEFINITION,
-        discussion: DISCUSSION_DEFINITION
+        discussion: DISCUSSION_DEFINITION,
+        choices: CHOICES_DEFINITION
       }
     },
     {
       title: proposal.value.title,
-      discussion: proposal.value.discussion
+      discussion: proposal.value.discussion,
+      choices: proposal.value.choices
     },
     {
       skipEmptyOptionalFields: true
@@ -141,6 +157,8 @@ async function handleProposeClick() {
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
+        proposal.value.type,
+        proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
@@ -222,6 +240,7 @@ watchEffect(() => {
 <script lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
+import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 
 const { createDraft } = useEditor();
 
@@ -310,7 +329,7 @@ export default defineComponent({
         :body="proposal.body"
       />
       <UiComposer v-else v-model="proposal.body" class="" />
-      <div class="s-base mb-4">
+      <div class="s-base mb-5">
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.discussion"
@@ -319,6 +338,8 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
+      <EditorVotingType v-model="proposal" :voting-types="votingTypes as VoteType[]" />
+      <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
       <div
         v-if="
           space &&
