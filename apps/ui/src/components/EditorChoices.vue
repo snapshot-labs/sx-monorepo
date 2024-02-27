@@ -5,13 +5,12 @@ import { Draft } from '@/types';
 const proposal = defineModel<Draft>({ required: true });
 
 defineProps<{
-  error?: string;
   definition: any;
 }>();
 </script>
 
 <template>
-  <div class="s-base">
+  <div class="s-base mb-5">
     <h4 class="eyebrow mb-2.5">Choices</h4>
     <div class="flex flex-col gap-[10px]">
       <Draggable
@@ -31,7 +30,7 @@ defineProps<{
                   'cursor-not-allowed': proposal.type === 'basic'
                 }"
               >
-                <ICDrag />
+                <IC-drag />
               </div>
               <div class="grow">
                 <input

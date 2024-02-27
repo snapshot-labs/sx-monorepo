@@ -12,7 +12,7 @@ const jsonRpcRequestSchema = z.object({
 });
 
 const handlers = Object.fromEntries(
-  Object.keys(NETWORKS).map(chainId => [chainId, createNetworkHandler(chainId)])
+  Array.from(NETWORKS.keys()).map(chainId => [chainId, createNetworkHandler(chainId)])
 );
 
 const router = express.Router();
