@@ -32,6 +32,8 @@ const formattedVotingPower = computed(() => {
 
   return value;
 });
+const loading = computed(() => props.status === VotingPowerStatus.LOADING);
+const error = computed(() => props.status === VotingPowerStatus.ERROR);
 
 function handleModalOpen() {
   modalOpen.value = true;
@@ -48,11 +50,11 @@ function handleModalOpen() {
       <UiTooltip title="Your voting power">
         <UiButton
           v-if="web3.account && !(evmNetworks.includes(networkId) && web3.type === 'argentx')"
-          :loading="status === VotingPowerStatus.LOADING"
+          :loading="loading"
           class="flex flex-row items-center justify-center"
           :class="{
-            '!px-0 w-[46px]': status === VotingPowerStatus.LOADING,
-            'border-skin-danger !text-skin-danger': status === VotingPowerStatus.ERROR
+            '!px-0 w-[46px]': loading,
+            'border-skin-danger !text-skin-danger': error
           }"
           @click="handleModalOpen"
         >
