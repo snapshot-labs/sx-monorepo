@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { _c } from '@/helpers/utils';
 import { NetworkID } from '@/types';
-import { VotingPower } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { evmNetworks } from '@/networks';
 
 const props = defineProps<{
   networkId: NetworkID;
-  loading: boolean;
+  status: VotingPowerStatus;
   votingPowerSymbol: string;
   votingPowers: VotingPower[];
 }>();
@@ -44,11 +44,12 @@ function handleModalOpen() {
       <UiTooltip title="Your voting power">
         <UiButton
           v-if="web3.account && !(evmNetworks.includes(networkId) && web3.type === 'argentx')"
-          :loading="loading"
-          :class="{
-            '!px-0 w-[46px]': loading
-          }"
+          :loading="status === VotingPowerStatus.LOADING"
           class="flex flex-row items-center justify-center"
+          :class="{
+            '!px-0 w-[46px]': status === VotingPowerStatus.LOADING,
+            'border-skin-danger !text-skin-danger': status === VotingPowerStatus.ERROR
+          }"
           @click="handleModalOpen"
         >
           <IH-lightning-bolt class="inline-block -ml-1" />

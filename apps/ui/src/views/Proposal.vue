@@ -2,7 +2,7 @@
 import { getNetwork, offchainNetworks } from '@/networks';
 import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
 import { Choice } from '@/types';
-import { VotingPower } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const route = useRoute();
 const { setFavicon } = useFavicon();
@@ -15,7 +15,7 @@ const { vote } = useActions();
 
 const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
-const loadingVotingPower = ref(true);
+const votingPowerStatus = ref<VotingPowerStatus>(VotingPowerStatus.LOADING);
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -44,11 +44,11 @@ async function getVotingPower() {
 
   if (!web3.value.account || !proposal.value) {
     votingPowers.value = [];
-    loadingVotingPower.value = false;
+    votingPowerStatus.value = VotingPowerStatus.SUCCESS;
     return;
   }
 
-  loadingVotingPower.value = true;
+  votingPowerStatus.value = VotingPowerStatus.LOADING;
   try {
     votingPowers.value = await network.value.actions.getVotingPower(
       proposal.value.strategies,
@@ -57,11 +57,11 @@ async function getVotingPower() {
       web3.value.account,
       { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
     );
+    votingPowerStatus.value = VotingPowerStatus.SUCCESS;
   } catch (e) {
     console.warn('Failed to load voting power', e);
     votingPowers.value = [];
-  } finally {
-    loadingVotingPower.value = false;
+    votingPowerStatus.value = VotingPowerStatus.ERROR;
   }
 }
 
@@ -146,15 +146,23 @@ watchEffect(() => {
             v-if="web3.account && networkId"
             v-slot="props"
             :network-id="networkId"
-            :loading="loadingVotingPower"
+            :status="votingPowerStatus"
             :voting-power-symbol="proposal.space.voting_power_symbol"
             :voting-powers="votingPowers"
             class="mb-2 mt-4 first:mt-1"
           >
             <h4 class="block eyebrow">Your voting power</h4>
             <div class="pt-2">
-              <UiLoading v-if="loadingVotingPower" />
-              <button v-else class="text-skin-link text-lg" @click="props.onClick">
+              <UiLoading v-if="votingPowerStatus === VotingPowerStatus.LOADING" />
+              <button
+                v-else
+                class="text-skin-link text-lg"
+                :class="{
+                  'border-skin-danger !text-skin-danger':
+                    votingPowerStatus === VotingPowerStatus.ERROR
+                }"
+                @click="props.onClick"
+              >
                 {{ props.formattedVotingPower }}
               </button>
             </div>
