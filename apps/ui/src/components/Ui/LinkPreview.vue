@@ -14,6 +14,7 @@ type Preview = {
 };
 
 const preview = ref<Preview | null>(null);
+const previewLoading = ref<boolean>(true);
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
@@ -21,6 +22,7 @@ onMounted(async () => await update(props.url));
 async function update(val: string) {
   try {
     preview.value = null;
+    previewLoading.value = true;
     new URL(val);
     const url = `https://cdn.iframe.ly/api/iframely?url=${encodeURI(
       val
@@ -28,7 +30,8 @@ async function update(val: string) {
     const result = await fetch(url);
     preview.value = await result.json();
   } catch (e) {
-    // console.log(e);
+  } finally {
+    previewLoading.value = false;
   }
 }
 
@@ -40,11 +43,20 @@ debouncedWatch(
 </script>
 
 <template>
-  <div v-if="preview?.meta || showDefault" class="!flex items-center border rounded-lg">
+  <div
+    v-if="preview?.meta || (showDefault && !previewLoading)"
+    class="!flex items-center border rounded-lg"
+  >
     <template v-if="preview?.meta?.title">
       <div v-if="preview?.links?.icon?.[0]?.href" class="px-4 pr-0">
         <div class="w-[32px]">
-          <img :src="preview.links.icon[0].href" width="32" height="32" class="bg-white rounded" />
+          <img
+            :src="preview.links.icon[0].href"
+            width="32"
+            height="32"
+            class="bg-white rounded"
+            :alt="preview.meta.title"
+          />
         </div>
       </div>
       <div class="px-4 py-3 overflow-hidden">
