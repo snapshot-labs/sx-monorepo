@@ -2,14 +2,25 @@
 const props = withDefaults(defineProps<{ url: string; showDefault?: boolean }>(), {
   showDefault: false
 });
-const preview = ref<Record<string, any> | null>({});
+
+type Preview = {
+  meta: {
+    title: string;
+    description: string;
+  };
+  links: {
+    icon: { href: string }[];
+  };
+};
+
+const preview = ref<Preview | null>(null);
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
 
-async function update(val) {
+async function update(val: string) {
   try {
-    preview.value = {};
+    preview.value = null;
     new URL(val);
     const url = `https://cdn.iframe.ly/api/iframely?url=${encodeURI(
       val
