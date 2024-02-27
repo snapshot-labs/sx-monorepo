@@ -22,7 +22,7 @@ import {
 } from './highlight';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
-import { CHOICES } from '@/helpers/constants';
+import { BASIC_CHOICES } from '@/helpers/constants';
 import { Space, Proposal, Vote, User, Transaction, NetworkID, ProposalState } from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
 
@@ -138,7 +138,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',
-    choices: CHOICES,
+    choices: BASIC_CHOICES,
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
     title: proposal.metadata.title,
     body: proposal.metadata.body,
