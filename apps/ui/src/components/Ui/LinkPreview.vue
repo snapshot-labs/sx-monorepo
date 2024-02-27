@@ -2,7 +2,7 @@
 const props = withDefaults(defineProps<{ url: string; showDefault?: boolean }>(), {
   showDefault: false
 });
-const preview = ref<Record<string, any>>({});
+const preview = ref<Record<string, any> | null>({});
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
