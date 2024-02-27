@@ -18,12 +18,12 @@ defineEmits<{
   (e: 'getVotingPower');
 }>();
 
-const loaded = ref(true);
-
 const network = computed(() => getNetwork(props.networkId));
 const baseNetwork = computed(() =>
   network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
 );
+const loading = computed(() => props.votingPowerStatus === VotingPowerStatus.LOADING);
+const error = computed(() => props.votingPowerStatus === VotingPowerStatus.ERROR);
 </script>
 
 <template>
@@ -31,9 +31,9 @@ const baseNetwork = computed(() =>
     <template #header>
       <h3>Your voting power</h3>
     </template>
-    <UiLoading v-if="!loaded" class="p-4 block text-center" />
+    <UiLoading v-if="loading" class="p-4 block text-center" />
     <div v-else>
-      <div v-if="votingPowerStatus === VotingPowerStatus.ERROR" class="p-4 text-skin-danger">
+      <div v-if="error" class="p-4 text-skin-danger">
         There was an error fetching your voting power.
         <UiButton type="button" class="flex items-center gap-2" @click="$emit('getVotingPower')">
           <IH-refresh />Retry
