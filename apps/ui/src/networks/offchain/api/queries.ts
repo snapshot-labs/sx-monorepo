@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
 const SPACE_FRAGMENT = gql`
-  fragment spaceFragment on Space {
+  fragment offchainSpaceFragment on Space {
     id
     admins
     members
@@ -45,7 +45,7 @@ const SPACE_FRAGMENT = gql`
 `;
 
 const PROPOSAL_FRAGMENT = gql`
-  fragment proposalFragment on Proposal {
+  fragment offchainProposalFragment on Proposal {
     id
     ipfs
     space {
@@ -82,7 +82,7 @@ const PROPOSAL_FRAGMENT = gql`
 export const PROPOSAL_QUERY = gql`
   query ($id: String!) {
     proposal(id: $id) {
-      ...proposalFragment
+      ...offchainProposalFragment
     }
   }
   ${PROPOSAL_FRAGMENT}
@@ -91,7 +91,7 @@ export const PROPOSAL_QUERY = gql`
 export const PROPOSALS_QUERY = gql`
   query ($first: Int!, $skip: Int!, $where: ProposalWhere) {
     proposals(first: $first, skip: $skip, where: $where, orderBy: "created", orderDirection: desc) {
-      ...proposalFragment
+      ...offchainProposalFragment
     }
   }
   ${PROPOSAL_FRAGMENT}
@@ -100,7 +100,7 @@ export const PROPOSALS_QUERY = gql`
 export const SPACES_RANKING_QUERY = gql`
   query ($first: Int, $skip: Int, $where: SpaceWhere) {
     spaces(first: $first, skip: $skip, where: $where) {
-      ...spaceFragment
+      ...offchainSpaceFragment
     }
   }
   ${SPACE_FRAGMENT}
@@ -109,7 +109,7 @@ export const SPACES_RANKING_QUERY = gql`
 export const SPACE_QUERY = gql`
   query ($id: String!) {
     space(id: $id) {
-      ...spaceFragment
+      ...offchainSpaceFragment
     }
   }
   ${SPACE_FRAGMENT}
