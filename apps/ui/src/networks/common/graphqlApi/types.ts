@@ -27,6 +27,7 @@ export type ApiSpace = {
     executors_types: string[];
     executors_strategies: {
       id: string;
+      type: string;
       treasury: string | null;
       treasury_chain: number | null;
     }[];

@@ -47,8 +47,8 @@ describe('utils', () => {
           treasuries: [
             {
               name: 'treasury 1',
-              wallet_network: 'gor',
-              wallet_address: '0x000000000000000000000000000000000000dead'
+              network: 'gor',
+              address: '0x000000000000000000000000000000000000dead'
             }
           ],
           delegations: [

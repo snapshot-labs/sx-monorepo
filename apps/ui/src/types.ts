@@ -109,6 +109,7 @@ export type Space = {
   executors_types: string[];
   executors_strategies: {
     id: string;
+    type: string;
     treasury: string | null;
     treasury_chain: number | null;
   }[];
@@ -267,3 +268,6 @@ export type ContractCallTransaction = BaseTransaction & {
 };
 
 export type Transaction = SendTokenTransaction | SendNftTransaction | ContractCallTransaction;
+
+// Utils
+export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };

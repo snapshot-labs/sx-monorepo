@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { Space, SpaceMetadataTreasury } from '@/types';
-
-type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };
+import { Space, SpaceMetadataTreasury, RequiredProperty } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 

@@ -19,6 +19,7 @@ const SPACE_FRAGMENT = gql`
       executors_types
       executors_strategies {
         id
+        type
         treasury_chain
         treasury
       }
