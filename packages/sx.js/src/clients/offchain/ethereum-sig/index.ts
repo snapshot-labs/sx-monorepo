@@ -122,10 +122,10 @@ export class EthereumSig {
   }): Promise<Envelope<CancelProposal>> {
     const signatureData = await this.sign(signer, data, cancelProposalTypes);
 
-    return this.send({
+    return {
       signatureData,
       data
-    });
+    };
   }
 
   public async vote({
