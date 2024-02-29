@@ -35,6 +35,7 @@ const spacesStore = useSpacesStore();
       />
       <img
         :src="(currentNetwork && getUrl(currentNetwork.avatar)) ?? undefined"
+        :title="(currentNetwork && currentNetwork.name) ?? undefined"
         class="w-[18px] h-[18px] rounded-full -right-1.5 bottom-0 absolute border-2 border-skin-bg"
       />
     </div>

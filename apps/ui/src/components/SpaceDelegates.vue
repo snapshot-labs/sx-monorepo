@@ -75,7 +75,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <colgroup>
             <col class="w-auto" />
             <col class="w-auto md:w-[120px]" />
-            <col class="w-0 md:w-[200px]" />
+            <col class="w-0 md:w-[240px]" />
           </colgroup>
           <thead
             class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 after:border-b after:absolute after:w-full"

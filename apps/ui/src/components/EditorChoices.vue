@@ -30,7 +30,7 @@ defineProps<{
                   'cursor-not-allowed': proposal.type === 'basic'
                 }"
               >
-                <ICDrag />
+                <IC-drag />
               </div>
               <div class="grow">
                 <input

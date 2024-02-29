@@ -15,8 +15,11 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["codegen"]
+      "dependsOn": ["codegen", "^build"]
     },
-    "codegen": {}
+    "codegen": {
+      "outputs": [".checkpoint/**", "generated/**"],
+      "inputs": ["**/*.graphql", "**/*.gql"]
+    }
   }
 }
