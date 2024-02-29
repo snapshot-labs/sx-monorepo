@@ -33,7 +33,6 @@ const formattedVotingPower = computed(() => {
   return value;
 });
 const loading = computed(() => props.status === 'loading');
-const error = computed(() => props.status === 'error');
 
 function handleModalOpen() {
   modalOpen.value = true;
@@ -57,7 +56,7 @@ function handleModalOpen() {
           }"
           @click="handleModalOpen"
         >
-          <IH-exclamation v-if="error" class="inline-block -ml-1" />
+          <IH-exclamation v-if="props.status === 'error'" class="inline-block -ml-1" />
           <IH-lightning-bolt v-else class="inline-block -ml-1" />
           <span class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
