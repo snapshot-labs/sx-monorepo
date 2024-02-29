@@ -2,7 +2,7 @@ import { createStarknetNetwork } from './starknet';
 import { createEvmNetwork } from './evm';
 import { createOffchainNetwork } from './offchain';
 import { NetworkID } from '@/types';
-import { ReadWriteNetwork, Network } from './types';
+import { ReadWriteNetwork } from './types';
 
 const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
@@ -48,14 +48,8 @@ export const getReadWriteNetwork = (id: NetworkID): ReadWriteNetwork => {
   return network;
 };
 
-export const enabledReadWriteNetworks: Record<NetworkID, Network> = Object.fromEntries(
-  enabledNetworks
-    .map(id => {
-      return [id, getNetwork(id)];
-    })
-    .filter(([id, network]) => {
-      return !(network as Network).readOnly;
-    })
+export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
+  id => !getNetwork(id).readOnly
 );
 
 /**
