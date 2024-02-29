@@ -9,7 +9,7 @@ const currentSkin = lsGet('skin', NOT_SET);
 const osSkin = DARK_MODE;
 
 const userSkin = ref(currentSkin === NOT_SET ? osSkin : currentSkin);
-const getMode = () => (userSkin.value === LIGHT_MODE ? LIGHT_MODE : DARK_MODE);
+const currentMode = computed(() => (userSkin.value === LIGHT_MODE ? LIGHT_MODE : DARK_MODE));
 const _toggleSkin = skin => {
   if (skin === LIGHT_MODE) {
     lsSet('skin', DARK_MODE);
@@ -44,7 +44,7 @@ export function useUserSkin() {
 
   return {
     userSkin,
-    getMode,
+    currentMode,
     toggleSkin
   };
 }

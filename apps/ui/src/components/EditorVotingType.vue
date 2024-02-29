@@ -14,25 +14,26 @@ defineProps<{
   votingTypes: VoteType[];
 }>();
 
-const { getMode } = useUserSkin();
+const { currentMode } = useUserSkin();
 
-const VOTING_TYPES_INFO = {
+const VOTING_TYPES_INFO = computed(() => ({
   basic: {
     label: 'Basic voting',
     description: 'Single choice voting with three choices: For, Against or Abstain.',
-    image: getMode() === 'dark' ? voteBasicDarkIllustration : voteBasicIllustration
+    image: currentMode.value === 'dark' ? voteBasicDarkIllustration : voteBasicIllustration
   },
   'single-choice': {
     label: 'Single choice voting',
     description: 'Each voter may select only one choice.',
-    image: getMode() === 'dark' ? voteSingleChoiceDarkIllustration : voteSingleChoiceIllustration
+    image:
+      currentMode.value === 'dark' ? voteSingleChoiceDarkIllustration : voteSingleChoiceIllustration
   },
   approval: {
     label: 'Approval voting',
     description: 'Each voter may select any number of choices.',
-    image: getMode() === 'dark' ? voteApprovalDarkIllustration : voteApprovalIllustration
+    image: currentMode.value === 'dark' ? voteApprovalDarkIllustration : voteApprovalIllustration
   }
-};
+}));
 
 function handleVoteTypeSelected(type: VoteType) {
   if (!proposal.value) return;
