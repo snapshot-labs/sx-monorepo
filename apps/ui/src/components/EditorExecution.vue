@@ -85,7 +85,6 @@ async function handleSimulateClick() {
   if (valid) {
     simulationState.value = 'SIMULATION_SUCCEDED';
     uiStore.addNotification('success', 'Execution simulation succeeded');
-    uiStore.addNotification('success'
   } else {
     simulationState.value = 'SIMULATION_FAILED';
     uiStore.addNotification('error', 'Execution simulation failed');
