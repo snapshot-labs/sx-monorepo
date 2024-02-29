@@ -23,6 +23,10 @@ export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORK
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'gor', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 
+export const enabledSpaceNetworks: NetworkID[] = enabledNetworks.filter(
+  n => !offchainNetworks.includes(n)
+);
+
 export const getNetwork = (id: NetworkID) => {
   if (!enabledNetworks.includes(id)) throw new Error(`Network ${id} is not enabled`);
 
