@@ -79,8 +79,6 @@ export function useActions() {
 
     const envelope = await promise;
 
-    console.log(envelope);
-
     if (handleSafeEnvelope(envelope)) return;
     if (await handleCommitEnvelope(envelope, networkId)) return;
 
