@@ -48,7 +48,8 @@ type SpaceMetadataItem {
   wallet: String!
   executors: [String]!
   executors_types: [String]!
-  executors_strategies: [ExecutionStrategy]!
+  # this is dummy field, we should add support for many-to-many in the future
+  executors_strategies: [ExecutionStrategy]! @derivedFrom(field: "id")
 }
 
 type VotingPowerValidationStrategiesParsedMetadataItem {
