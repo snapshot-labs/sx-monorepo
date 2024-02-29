@@ -156,7 +156,7 @@ watchEffect(() => {
             <div class="pt-2">
               <UiLoading v-if="votingPowerStatus === VotingPowerStatus.LOADING" />
               <button v-else class="text-skin-link text-lg" @click="props.onClick">
-                <IH-exclamation-circle
+                <IH-exclamation
                   v-if="votingPowerStatus === VotingPowerStatus.ERROR"
                   class="inline-block mr-1"
                 />

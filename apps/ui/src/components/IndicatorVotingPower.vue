@@ -57,7 +57,7 @@ function handleModalOpen() {
           }"
           @click="handleModalOpen"
         >
-          <IH-exclamation-circle v-if="error" class="inline-block -ml-1" />
+          <IH-exclamation v-if="error" class="inline-block -ml-1" />
           <IH-lightning-bolt v-else class="inline-block -ml-1" />
           <span class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
