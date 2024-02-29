@@ -79,6 +79,8 @@ export function useActions() {
 
     const envelope = await promise;
 
+    console.log(envelope);
+
     if (handleSafeEnvelope(envelope)) return;
     if (await handleCommitEnvelope(envelope, networkId)) return;
 
@@ -312,7 +314,10 @@ export function useActions() {
   }
 
   async function cancelProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
 
     const network = getNetwork(proposal.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
@@ -320,6 +325,8 @@ export function useActions() {
     }
 
     await wrapPromise(proposal.network, network.actions.cancelProposal(auth.web3, proposal));
+
+    return true;
   }
 
   async function finalizeProposal(proposal: Proposal) {
