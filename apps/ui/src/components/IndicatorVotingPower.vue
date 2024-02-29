@@ -72,7 +72,7 @@ function handleModalOpen() {
         :voting-power-status="status"
         :final-decimals="decimals"
         @close="modalOpen = false"
-        @get-voting-power="$emit('getVotingPower')"
+        @get-voting-power="emit('getVotingPower')"
       />
     </teleport>
   </div>
