@@ -22,8 +22,8 @@ const network = computed(() => getNetwork(props.networkId));
 const baseNetwork = computed(() =>
   network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
 );
-const loading = computed(() => props.votingPowerStatus === VotingPowerStatus.LOADING);
-const error = computed(() => props.votingPowerStatus === VotingPowerStatus.ERROR);
+const loading = computed(() => props.votingPowerStatus === 'loading');
+const error = computed(() => props.votingPowerStatus === 'error');
 </script>
 
 <template>

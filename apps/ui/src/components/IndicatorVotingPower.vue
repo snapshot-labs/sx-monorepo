@@ -32,8 +32,8 @@ const formattedVotingPower = computed(() => {
 
   return value;
 });
-const loading = computed(() => props.status === VotingPowerStatus.LOADING);
-const error = computed(() => props.status === VotingPowerStatus.ERROR);
+const loading = computed(() => props.status === 'loading');
+const error = computed(() => props.status === 'error');
 
 function handleModalOpen() {
   modalOpen.value = true;

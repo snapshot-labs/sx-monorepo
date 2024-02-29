@@ -15,7 +15,7 @@ const { vote } = useActions();
 
 const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
-const votingPowerStatus = ref<VotingPowerStatus>(VotingPowerStatus.LOADING);
+const votingPowerStatus = ref<VotingPowerStatus>('loading');
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -44,11 +44,11 @@ async function getVotingPower() {
 
   if (!web3.value.account || !proposal.value) {
     votingPowers.value = [];
-    votingPowerStatus.value = VotingPowerStatus.SUCCESS;
+    votingPowerStatus.value = 'success';
     return;
   }
 
-  votingPowerStatus.value = VotingPowerStatus.LOADING;
+  votingPowerStatus.value = 'loading';
   try {
     votingPowers.value = await network.value.actions.getVotingPower(
       proposal.value.strategies,
@@ -57,11 +57,11 @@ async function getVotingPower() {
       web3.value.account,
       { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
     );
-    votingPowerStatus.value = VotingPowerStatus.SUCCESS;
+    votingPowerStatus.value = 'success';
   } catch (e) {
     console.warn('Failed to load voting power', e);
     votingPowers.value = [];
-    votingPowerStatus.value = VotingPowerStatus.ERROR;
+    votingPowerStatus.value = 'error';
   }
 }
 
@@ -154,12 +154,9 @@ watchEffect(() => {
           >
             <h4 class="block eyebrow">Your voting power</h4>
             <div class="pt-2">
-              <UiLoading v-if="votingPowerStatus === VotingPowerStatus.LOADING" />
+              <UiLoading v-if="votingPowerStatus === 'loading'" />
               <button v-else class="text-skin-link text-lg" @click="props.onClick">
-                <IH-exclamation
-                  v-if="votingPowerStatus === VotingPowerStatus.ERROR"
-                  class="inline-block mr-1"
-                />
+                <IH-exclamation v-if="votingPowerStatus === 'error'" class="inline-block mr-1" />
                 {{ props.formattedVotingPower }}
               </button>
             </div>

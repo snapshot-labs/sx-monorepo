@@ -12,7 +12,7 @@ const { getCurrent } = useMetaStore();
 const proposalsStore = useProposalsStore();
 
 const votingPowers = ref([] as VotingPower[]);
-const votingPowerStatus = ref<VotingPowerStatus>(VotingPowerStatus.LOADING);
+const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
 
 const selectIconBaseProps = {
@@ -34,11 +34,11 @@ async function handleEndReached() {
 async function getVotingPower() {
   if (!web3.value.account) {
     votingPowers.value = [];
-    votingPowerStatus.value = VotingPowerStatus.SUCCESS;
+    votingPowerStatus.value = 'success';
     return;
   }
 
-  votingPowerStatus.value = VotingPowerStatus.LOADING;
+  votingPowerStatus.value = 'loading';
   try {
     votingPowers.value = await network.value.actions.getVotingPower(
       props.space.strategies,
@@ -50,11 +50,11 @@ async function getVotingPower() {
         chainId: props.space.snapshot_chain_id
       }
     );
-    votingPowerStatus.value = VotingPowerStatus.SUCCESS;
+    votingPowerStatus.value = 'success';
   } catch (e) {
     console.warn('Failed to load voting power', e);
     votingPowers.value = [];
-    votingPowerStatus.value = VotingPowerStatus.ERROR;
+    votingPowerStatus.value = 'error';
   }
 }
 
