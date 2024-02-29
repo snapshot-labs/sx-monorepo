@@ -2,7 +2,7 @@ import { createStarknetNetwork } from './starknet';
 import { createEvmNetwork } from './evm';
 import { createOffchainNetwork } from './offchain';
 import { NetworkID } from '@/types';
-import { ReadWriteNetwork } from './types';
+import { ReadWriteNetwork, Network } from './types';
 
 const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
@@ -22,10 +22,6 @@ export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORK
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'gor', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
-
-export const enabledSpaceNetworks: NetworkID[] = enabledNetworks.filter(
-  n => !offchainNetworks.includes(n)
-);
 
 export const getNetwork = (id: NetworkID) => {
   if (!enabledNetworks.includes(id)) throw new Error(`Network ${id} is not enabled`);
@@ -51,6 +47,16 @@ export const getReadWriteNetwork = (id: NetworkID): ReadWriteNetwork => {
 
   return network;
 };
+
+export const enabledReadWriteNetworks: Record<NetworkID, Network> = Object.fromEntries(
+  enabledNetworks
+    .map(id => {
+      return [id, getNetwork(id)];
+    })
+    .filter(([id, network]) => {
+      return !(network as Network).readOnly;
+    })
+);
 
 /**
  * supportsNullCurrent return true if the network supports null current to be used for computing current voting power

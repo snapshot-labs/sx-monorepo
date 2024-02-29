@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone, getSalt } from '@/helpers/utils';
-import { getNetwork, enabledSpaceNetworks } from '@/networks';
+import { enabledReadWriteNetworks } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
@@ -76,7 +76,9 @@ const metadataForm: SpaceMetadata = reactive(
     delegations: []
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref(enabledSpaceNetworks[0]);
+const selectedNetworkId: Ref<NetworkID> = ref(
+  Object.keys(enabledReadWriteNetworks)[0] as NetworkID
+);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
@@ -93,7 +95,7 @@ const confirming = ref(false);
 const salt: Ref<string | null> = ref(null);
 const predictedSpaceAddress: Ref<string | null> = ref(null);
 
-const selectedNetwork = computed(() => getNetwork(selectedNetworkId.value));
+const selectedNetwork = computed(() => enabledReadWriteNetworks[selectedNetworkId.value]);
 const accessiblePages = computed(() => {
   const invalidPageIndex = PAGES.findIndex(page => !validatePage(page.id));
 
@@ -209,7 +211,11 @@ watchEffect(() => setTitle('Create space'));
             @no-network="metadataForm.walletAddress = null"
             @errors="v => handleErrors('profile', v)"
           />
-          <FormNetwork v-else-if="currentPage === 'network'" v-model="selectedNetworkId" />
+          <FormNetwork
+            v-else-if="currentPage === 'network'"
+            v-model="selectedNetworkId"
+            :networks="enabledReadWriteNetworks"
+          />
           <FormStrategies
             v-else-if="currentPage === 'strategies'"
             v-model="votingStrategies"
