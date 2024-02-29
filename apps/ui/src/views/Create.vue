@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone, getSalt } from '@/helpers/utils';
-import { enabledReadWriteNetworks, getNetwork } from '@/networks';
+import { getNetwork, enabledReadWriteNetworks } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
