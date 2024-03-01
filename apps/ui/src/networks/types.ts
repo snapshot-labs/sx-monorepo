@@ -77,6 +77,8 @@ export type VotingPower = {
   chainId?: number;
 };
 
+export type VotingPowerStatus = 'loading' | 'success' | 'error';
+
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
 
 export type ReadOnlyNetworkActions = {
