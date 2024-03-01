@@ -48,6 +48,10 @@ export const getReadWriteNetwork = (id: NetworkID): ReadWriteNetwork => {
   return network;
 };
 
+export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
+  id => !getNetwork(id).readOnly
+);
+
 /**
  * supportsNullCurrent return true if the network supports null current to be used for computing current voting power
  * @param networkId Network ID

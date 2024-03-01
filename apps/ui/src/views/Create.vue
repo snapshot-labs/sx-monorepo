@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone, getSalt } from '@/helpers/utils';
-import { getNetwork, enabledNetworks } from '@/networks';
+import { getNetwork, enabledReadWriteNetworks } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
@@ -76,7 +76,7 @@ const metadataForm: SpaceMetadata = reactive(
     delegations: []
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref(enabledNetworks[0]);
+const selectedNetworkId: Ref<NetworkID> = ref(enabledReadWriteNetworks[0]);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
