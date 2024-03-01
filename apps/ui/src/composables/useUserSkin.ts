@@ -4,12 +4,12 @@ const NOT_SET = 'none';
 const DARK_MODE = 'dark';
 const LIGHT_MODE = 'light';
 
-const currenSkin = lsGet('skin', NOT_SET);
+const currentSkin = lsGet('skin', NOT_SET);
 // const osSkin = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? LIGHT_MODE : DARK_MODE;
 const osSkin = DARK_MODE;
 
-const userSkin = ref(currenSkin === NOT_SET ? osSkin : currenSkin);
-const getMode = () => (userSkin.value === LIGHT_MODE ? LIGHT_MODE : DARK_MODE);
+const userSkin = ref(currentSkin === NOT_SET ? osSkin : currentSkin);
+const currentMode = computed(() => (userSkin.value === LIGHT_MODE ? LIGHT_MODE : DARK_MODE));
 const _toggleSkin = skin => {
   if (skin === LIGHT_MODE) {
     lsSet('skin', DARK_MODE);
@@ -44,7 +44,7 @@ export function useUserSkin() {
 
   return {
     userSkin,
-    getMode,
+    currentMode,
     toggleSkin
   };
 }

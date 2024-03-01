@@ -8,7 +8,7 @@ const auth = getInstance();
 const uiStore = useUiStore();
 const { modalAccountOpen } = useModal();
 const { login, web3 } = useWeb3();
-const { toggleSkin, getMode } = useUserSkin();
+const { toggleSkin, currentMode } = useUserSkin();
 
 const loading = ref(false);
 const searchInput = ref();
@@ -97,7 +97,7 @@ watch(route, to => {
         </UiButton>
         <IndicatorPendingTransactions class="ml-2" />
         <UiButton class="!px-0 w-[46px] ml-2" @click="toggleSkin">
-          <IH-light-bulb v-if="getMode() === 'dark'" class="inline-block" />
+          <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
           <IH-moon v-else class="inline-block" />
         </UiButton>
       </div>
