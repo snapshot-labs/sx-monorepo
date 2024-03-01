@@ -15,8 +15,13 @@ describe('utils', () => {
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
         votingPowerSymbol: 'VOTE',
-        walletNetwork: 'gor',
-        walletAddress: '0x000000000000000000000000000000000000dead',
+        treasuries: [
+          {
+            name: 'treasury 1',
+            network: 'gor',
+            address: '0x000000000000000000000000000000000000dead'
+          }
+        ],
         delegations: [
           {
             name: 'sample',
@@ -39,7 +44,13 @@ describe('utils', () => {
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
           discord: 'snapshot',
-          wallets: ['gor:0x000000000000000000000000000000000000dead'],
+          treasuries: [
+            {
+              name: 'treasury 1',
+              network: 'gor',
+              address: '0x000000000000000000000000000000000000dead'
+            }
+          ],
           delegations: [
             {
               name: 'sample',

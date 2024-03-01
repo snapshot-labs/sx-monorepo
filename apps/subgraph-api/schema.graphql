@@ -34,6 +34,7 @@ type SpaceMetadata @entity {
   avatar: String!
   cover: String!
   external_url: String!
+  treasuries: [String!]!
   delegations: [String!]!
   github: String!
   twitter: String!
@@ -42,6 +43,7 @@ type SpaceMetadata @entity {
   wallet: String!
   executors: [Bytes!]!
   executors_types: [String!]!
+  executors_strategies: [ExecutionStrategy!]!
 }
 
 type StrategiesParsedMetadata @entity {
@@ -72,6 +74,8 @@ type ExecutionStrategy @entity {
   id: ID!
   type: String!
   quorum: BigDecimal!
+  treasury: Bytes
+  treasury_chain: Int
   timelock_veto_guardian: Bytes
   timelock_delay: BigInt!
 }

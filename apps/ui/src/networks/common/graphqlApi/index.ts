@@ -93,7 +93,15 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     voting_power_symbol: space.metadata.voting_power_symbol,
-    wallet: space.metadata.wallet,
+    treasuries: space.metadata.treasuries.map(treasury => {
+      const { name, network, address } = JSON.parse(treasury);
+
+      return {
+        name,
+        network,
+        address
+      };
+    }),
     delegations: space.metadata.delegations.map(delegation => {
       const { name, api_type, api_url, contract } = JSON.parse(delegation);
 
@@ -109,6 +117,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     }),
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
+    executors_strategies: space.metadata.executors_strategies,
     voting_power_validation_strategies_parsed_metadata: processStrategiesMetadata(
       space.voting_power_validation_strategies_parsed_metadata
     ),
