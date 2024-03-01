@@ -32,6 +32,12 @@ export type SelectedStrategy = {
   type: string;
 };
 
+export type SpaceMetadataTreasury = {
+  name: string | null;
+  network: NetworkID | null;
+  address: string | null;
+};
+
 export type SpaceMetadataDelegation = {
   name: string | null;
   apiType: string | null;
@@ -50,8 +56,7 @@ export type SpaceMetadata = {
   github: string;
   discord: string;
   votingPowerSymbol: string;
-  walletNetwork: NetworkID | null;
-  walletAddress: string | null;
+  treasuries: SpaceMetadataTreasury[];
   delegations: SpaceMetadataDelegation[];
 };
 
@@ -79,12 +84,12 @@ export type Space = {
   cover: string;
   about?: string;
   external_url: string;
+  treasuries: SpaceMetadataTreasury[];
   delegations: SpaceMetadataDelegation[];
   twitter: string;
   github: string;
   discord: string;
   voting_power_symbol: string;
-  wallet: string;
   controller: string;
   voting_delay: number;
   min_voting_period: number;
@@ -102,6 +107,12 @@ export type Space = {
   authenticators: string[];
   executors: string[];
   executors_types: string[];
+  executors_strategies: {
+    id: string;
+    type: string;
+    treasury: string | null;
+    treasury_chain: number | null;
+  }[];
   proposal_count: number;
   vote_count: number;
   created: number;
@@ -257,3 +268,6 @@ export type ContractCallTransaction = BaseTransaction & {
 };
 
 export type Transaction = SendTokenTransaction | SendNftTransaction | ContractCallTransaction;
+
+// Utils
+export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };

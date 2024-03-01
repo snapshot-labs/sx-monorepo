@@ -24,8 +24,6 @@ const space = computed(() =>
     : null
 );
 
-const { treasury } = useTreasury(space);
-
 const isController = computed(() =>
   space.value ? compareAddresses(space.value.controller, web3.value.account) : false
 );
@@ -47,7 +45,7 @@ const navigationConfig = computed(() => ({
           }
         }
       : undefined),
-    ...(treasury.value
+    ...(space.value?.treasuries?.length
       ? {
           treasury: {
             name: 'Treasury',

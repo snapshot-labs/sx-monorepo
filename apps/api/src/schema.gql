@@ -39,6 +39,7 @@ type SpaceMetadataItem {
   avatar: String!
   cover: String!
   external_url: String!
+  treasuries: [String]!
   delegations: [String]!
   github: String!
   twitter: String!
@@ -47,6 +48,8 @@ type SpaceMetadataItem {
   wallet: String!
   executors: [String]!
   executors_types: [String]!
+  # this is dummy field, we should add support for many-to-many in the future
+  executors_strategies: [ExecutionStrategy]! @derivedFrom(field: "id")
 }
 
 type VotingPowerValidationStrategiesParsedMetadataItem {
@@ -71,6 +74,16 @@ type StrategiesParsedMetadataDataItem {
   symbol: String!
   token: String
   payload: String
+}
+
+type ExecutionStrategy {
+  id: String!
+  type: String!
+  quorum: BigDecimalVP!
+  treasury: String
+  treasury_chain: String
+  timelock_veto_guardian: String
+  timelock_delay: BigInt!
 }
 
 type Proposal {
