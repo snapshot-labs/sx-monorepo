@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { Draft, VoteType } from '@/types';
+import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
 
 defineProps<{
-  votingTypes: VoteType[];
   definition: any;
 }>();
 </script>
 
 <template>
-  <div v-if="votingTypes.length > 1 || votingTypes[0] !== 'basic'" class="s-base mb-5">
+  <div class="s-base mb-5">
     <h4 class="eyebrow mb-2.5">Choices</h4>
     <div class="flex flex-col gap-[10px]">
       <Draggable

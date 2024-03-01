@@ -2,7 +2,7 @@
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { omit, shortenAddress } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { SelectedStrategy, VoteType } from '@/types';
+import { SelectedStrategy } from '@/types';
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -340,12 +340,10 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <EditorVotingType v-model="proposal" :voting-types="votingTypes as VoteType[]" />
-      <EditorChoices
-        v-model="proposal"
-        :voting-types="votingTypes as VoteType[]"
-        :definition="CHOICES_DEFINITION"
-      />
+      <template v-if="votingTypes && (votingTypes.length > 1 || votingTypes[0] !== 'basic')">
+        <EditorVotingType v-model="proposal" :voting-types="votingTypes" />
+        <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      </template>
       <div
         v-if="
           space &&
