@@ -74,6 +74,42 @@ export function createActions(
 
       return client.propose({ signer: web3.getSigner(), data });
     },
+    async updateProposal(
+      web3: Web3Provider,
+      connectorType: Connector,
+      account: string,
+      space: Space,
+      proposalId: number | string,
+      cid: string
+    ) {
+      let payload: {
+        title: string;
+        body: string;
+        discussion: string;
+        type: VoteType;
+        choices: string[];
+      };
+
+      try {
+        const res = await fetch(getUrl(cid) as string);
+        payload = await res.json();
+      } catch (e) {
+        throw new Error('Failed to fetch proposal metadata');
+      }
+
+      const data = {
+        proposal: proposalId as string,
+        space: space.id,
+        title: payload.title,
+        body: payload.body,
+        type: payload.type,
+        discussion: payload.discussion,
+        choices: payload.choices,
+        plugins: '{}'
+      };
+
+      return client.updateProposal({ signer: web3.getSigner(), data });
+    },
     vote(
       web3: Web3Provider,
       connectorType: Connector,
