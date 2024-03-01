@@ -187,7 +187,7 @@ async function handleCancelClick() {
           <span>Discussion</span>
         </h4>
         <a :href="discussion" target="_blank" class="block mb-5">
-          <UiLinkPreview :url="discussion" />
+          <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
       <div v-if="proposal.execution && proposal.execution.length > 0">
