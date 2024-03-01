@@ -1,29 +1,27 @@
 <script setup lang="ts">
 import { getNetwork, enabledNetworks } from '@/networks';
 import { validateForm } from '@/helpers/validation';
-import { SpaceMetadataDelegation } from '@/types';
+import { SpaceMetadataTreasury } from '@/types';
 import { clone } from '@/helpers/utils';
 
 const DEFAULT_FORM_STATE = {
   name: '',
-  apiType: null,
-  apiUrl: null,
-  contractNetwork: null,
-  contractAddress: null
+  network: null,
+  address: null
 };
 
 const props = defineProps<{
   open: boolean;
-  initialState?: SpaceMetadataDelegation;
+  initialState?: SpaceMetadataTreasury;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataDelegation);
+  (e: 'add', config: SpaceMetadataTreasury);
   (e: 'close'): void;
 }>();
 
 const showPicker = ref(false);
 const searchValue = ref('');
-const form: Ref<SpaceMetadataDelegation> = ref(clone(DEFAULT_FORM_STATE));
+const form: Ref<SpaceMetadataTreasury> = ref(clone(DEFAULT_FORM_STATE));
 
 const availableNetworks = enabledNetworks
   .map(id => {
@@ -42,50 +40,30 @@ const definition = computed(() => {
     type: 'object',
     title: 'Space',
     additionalProperties: true,
-    required: ['name', 'apiType', 'apiUrl'],
+    required: ['name', 'network', 'address'],
     properties: {
       name: {
         type: 'string',
         title: 'Name',
         minLength: 1,
-        examples: ['Delegation API name']
+        examples: ['Treasury name']
       },
-      apiType: {
+      network: {
         type: ['string', 'null'],
-        enum: [null, 'governor-subgraph'],
-        options: [
-          { id: null, name: 'No delegation API' },
-          { id: 'governor-subgraph', name: 'Governor subgraph' }
-        ],
-        title: 'Delegation API type',
+        enum: [null, ...availableNetworks.map(network => network.id)],
+        options: [{ id: null, name: 'No treasury' }, ...availableNetworks],
+        title: 'Treasury network',
         nullable: true
       },
-      ...(form.value.apiType !== null
+      ...(form.value.network !== null
         ? {
-            apiUrl: {
+            address: {
               type: 'string',
-              format: 'uri',
-              title: 'Delegation API URL',
-              examples: ['https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2']
-            },
-            contractNetwork: {
-              type: 'string',
-              enum: [null, ...availableNetworks.map(network => network.id)],
-              options: [{ id: null, name: 'No delegation contract' }, ...availableNetworks],
-              title: 'Delegation contract network',
-              nullable: true
-            },
-            ...(form.value.contractNetwork !== null
-              ? {
-                  contractAddress: {
-                    type: 'string',
-                    title: 'Delegation contract address',
-                    examples: ['0x0000…'],
-                    format: 'address',
-                    minLength: 1
-                  }
-                }
-              : {})
+              title: 'Treasury address',
+              examples: ['0x0000…'],
+              format: 'address',
+              minLength: 1
+            }
           }
         : {})
     }
@@ -99,8 +77,8 @@ const formErrors = computed(() =>
 const formValid = computed(() => {
   return (
     Object.keys(formErrors.value).length === 0 &&
-    form.value.apiType !== null &&
-    form.value.apiUrl !== ''
+    form.value.network !== null &&
+    form.value.address !== ''
   );
 });
 
@@ -124,7 +102,7 @@ watch(
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="'Add delegation'" />
+      <h3 v-text="'Add treasury'" />
       <template v-if="showPicker">
         <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
           <IH-arrow-narrow-left class="mr-2" />
@@ -147,13 +125,18 @@ watch(
       :search-value="searchValue"
       @pick="
         value => {
-          form.contractAddress = value;
+          form.address = value;
           showPicker = false;
         }
       "
     />
     <div v-else class="s-box p-4">
-      <UiForm :model-value="form" :error="formErrors" :definition="definition" />
+      <UiForm
+        :model-value="form"
+        :error="formErrors"
+        :definition="definition"
+        @pick="showPicker = true"
+      />
     </div>
     <template #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">Confirm</UiButton>

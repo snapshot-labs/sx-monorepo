@@ -1,4 +1,11 @@
-import { Address, BigDecimal, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts'
+import {
+  Address,
+  BigDecimal,
+  BigInt,
+  Bytes,
+  DataSourceContext,
+  dataSource,
+} from '@graphprotocol/graph-ts'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
 import { TimelockExecutionStrategy } from '../generated/ProxyFactory/TimelockExecutionStrategy'
@@ -39,18 +46,31 @@ const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
   '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4'
 )
 
+const CHAIN_IDS = new Map<string, i32>()
+CHAIN_IDS.set('mainnet', 1)
+CHAIN_IDS.set('goerli', 5)
+CHAIN_IDS.set('sepolia', 11155111)
+CHAIN_IDS.set('matic', 137)
+CHAIN_IDS.set('arbitrum-one', 42161)
+CHAIN_IDS.set('linea-testnet', 59140)
+
 export function handleProxyDeployed(event: ProxyDeployed): void {
+  let network = dataSource.network()
+
   if (event.params.implementation.equals(MASTER_SPACE)) {
     SpaceTemplate.create(event.params.proxy)
   } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_AVATAR)) {
     let executionStrategyContract = AvatarExecutionStrategy.bind(event.params.proxy)
     let typeResult = executionStrategyContract.try_getStrategyType()
     let quorumResult = executionStrategyContract.try_quorum()
-    if (typeResult.reverted || quorumResult.reverted) return
+    let targetAddress = executionStrategyContract.try_target()
+    if (typeResult.reverted || quorumResult.reverted || targetAddress.reverted) return
 
     let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
+    if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
+    executionStrategy.treasury = targetAddress.value
     executionStrategy.timelock_delay = new BigInt(0)
     executionStrategy.save()
   } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_TIMELOCK)) {
@@ -71,6 +91,8 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
+    if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
+    executionStrategy.treasury = event.params.proxy
     executionStrategy.timelock_veto_guardian = timelockVetoGuardianResult.value
     executionStrategy.timelock_delay = timelockDelayResult.value
     executionStrategy.save()

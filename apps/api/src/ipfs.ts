@@ -22,6 +22,7 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
   spaceMetadataItem.wallet = '';
   spaceMetadataItem.executors = [];
   spaceMetadataItem.executors_types = [];
+  spaceMetadataItem.treasuries = [];
   spaceMetadataItem.delegations = [];
 
   const metadata: any = metadataUri ? await getJSON(metadataUri) : {};
@@ -34,6 +35,11 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
   if (metadata.properties) {
     if (metadata.properties.cover) spaceMetadataItem.cover = metadata.properties.cover;
 
+    if (metadata.properties.treasuries) {
+      spaceMetadataItem.treasuries = metadata.properties.treasuries.map((treasury: any) =>
+        JSON.stringify(treasury)
+      );
+    }
     if (metadata.properties.delegations) {
       spaceMetadataItem.delegations = metadata.properties.delegations.map((delegation: any) =>
         JSON.stringify(delegation)
@@ -44,9 +50,6 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
     if (metadata.properties.discord) spaceMetadataItem.discord = metadata.properties.discord;
     if (metadata.properties.voting_power_symbol) {
       spaceMetadataItem.voting_power_symbol = metadata.properties.voting_power_symbol;
-    }
-    if (metadata.properties.wallets && metadata.properties.wallets.length > 0) {
-      spaceMetadataItem.wallet = metadata.properties.wallets[0];
     }
     if (
       metadata.properties.execution_strategies &&

@@ -4,6 +4,9 @@ import { Draft, VoteType } from '@/types';
 import voteBasicIllustration from '@/assets/images/vote-basic.svg';
 import voteSingleChoiceIllustration from '@/assets/images/vote-single-choice.svg';
 import voteApprovalIllustration from '@/assets/images/vote-approval.svg';
+import voteBasicDarkIllustration from '@/assets/images/vote-basic-dark.svg';
+import voteSingleChoiceDarkIllustration from '@/assets/images/vote-single-choice-dark.svg';
+import voteApprovalDarkIllustration from '@/assets/images/vote-approval-dark.svg';
 
 const proposal = defineModel<Draft>({ required: true });
 
@@ -11,23 +14,26 @@ defineProps<{
   votingTypes: VoteType[];
 }>();
 
-const VOTING_TYPES_INFO = {
+const { currentMode } = useUserSkin();
+
+const VOTING_TYPES_INFO = computed(() => ({
   basic: {
     label: 'Basic voting',
     description: 'Single choice voting with three choices: For, Against or Abstain.',
-    image: voteBasicIllustration
+    image: currentMode.value === 'dark' ? voteBasicDarkIllustration : voteBasicIllustration
   },
   'single-choice': {
     label: 'Single choice voting',
     description: 'Each voter may select only one choice.',
-    image: voteSingleChoiceIllustration
+    image:
+      currentMode.value === 'dark' ? voteSingleChoiceDarkIllustration : voteSingleChoiceIllustration
   },
   approval: {
     label: 'Approval voting',
     description: 'Each voter may select any number of choices.',
-    image: voteApprovalIllustration
+    image: currentMode.value === 'dark' ? voteApprovalDarkIllustration : voteApprovalIllustration
   }
-};
+}));
 
 function handleVoteTypeSelected(type: VoteType) {
   if (!proposal.value) return;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
-import type { Space, SpaceMetadata, NetworkID } from '@/types';
+import type { Space, SpaceMetadata } from '@/types';
 
 const DEFAULT_FORM_STATE: SpaceMetadata = {
   name: '',
@@ -12,8 +12,7 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
   github: '',
   discord: '',
   votingPowerSymbol: '',
-  walletNetwork: null,
-  walletAddress: null,
+  treasuries: [],
   delegations: []
 };
 
@@ -70,16 +69,8 @@ watch(
     form.discord = props.space.discord;
     form.twitter = props.space.twitter;
     form.votingPowerSymbol = props.space.voting_power_symbol;
+    form.treasuries = props.space.treasuries;
     form.delegations = props.space.delegations;
-
-    const [walletNetwork, walletAddress] = props.space.wallet.split(':');
-    if (walletNetwork && walletAddress) {
-      form.walletNetwork = walletNetwork as NetworkID;
-      form.walletAddress = walletAddress;
-    } else {
-      form.walletNetwork = null;
-      form.walletAddress = null;
-    }
   }
 );
 </script>
@@ -117,10 +108,11 @@ watch(
       :space="space"
       :show-title="false"
       :form="form"
+      :treasuries-value="form.treasuries"
       :delegations-value="form.delegations"
+      @treasuries="v => (form.treasuries = v)"
       @delegations="v => (form.delegations = v)"
       @pick="handlePick"
-      @no-network="form.walletAddress = null"
       @errors="v => (formErrors = v)"
     />
     <template v-if="!showPicker" #footer>

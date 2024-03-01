@@ -301,11 +301,6 @@ export function createErc1155Metadata(
   metadata: SpaceMetadata,
   extraProperties?: Record<string, any>
 ) {
-  const wallets: string[] = [];
-  if (metadata.walletNetwork && metadata.walletAddress) {
-    wallets.push(`${metadata.walletNetwork}:${metadata.walletAddress}`);
-  }
-
   return {
     name: metadata.name,
     avatar: metadata.avatar,
@@ -317,7 +312,11 @@ export function createErc1155Metadata(
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
-      wallets,
+      treasuries: metadata.treasuries.map(treasury => ({
+        name: treasury.name,
+        network: treasury.network,
+        address: treasury.address
+      })),
       delegations: metadata.delegations.map(delegation => ({
         name: delegation.name,
         api_type: delegation.apiType,

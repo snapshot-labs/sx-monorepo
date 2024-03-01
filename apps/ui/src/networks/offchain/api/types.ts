@@ -13,6 +13,7 @@ export type ApiSpace = {
   symbol: string;
   treasuries: [
     {
+      name: string;
       network: string;
       address: string;
     }
