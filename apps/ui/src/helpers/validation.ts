@@ -10,7 +10,11 @@ import { resolver } from '@/helpers/resolver';
 
 type Opts = { skipEmptyOptionalFields: boolean };
 
-const ajv = new Ajv({ allErrors: true });
+const ajv = new Ajv({
+  allErrors: true,
+  // https://github.com/ajv-validator/ajv/issues/1417
+  strictTuples: false
+});
 addFormats(ajv);
 
 const addressValidator = (value: string) => {
