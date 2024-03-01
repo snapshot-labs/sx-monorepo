@@ -10,27 +10,31 @@ import { getABI } from '@/helpers/etherscan';
 import { SelectedStrategy } from '@/types';
 
 type ApproveCallback = () => Promise<boolean>;
-
-const projectId = import.meta.env.VITE_WC_PROJECT_ID;
-const core = new Core({
-  projectId
-});
-const connector = await Web3Wallet.init({
-  core,
-  metadata: {
-    name: 'Snapshot X',
-    description: 'Snapshot X',
-    url: 'https://snapshotx.org/',
-    icons: []
-  }
-});
-
 type ConnectionData = {
   logged: boolean;
   loading: boolean;
   session: SessionTypes.Struct | null;
   proposal: ProposalTypes.Struct | null;
 };
+
+let connector: Awaited<ReturnType<(typeof Web3Wallet)['init']>> | null = null;
+async function getConnector() {
+  if (connector) return connector;
+
+  connector = await Web3Wallet.init({
+    core: new Core({
+      projectId: import.meta.env.VITE_WC_PROJECT_ID
+    }),
+    metadata: {
+      name: 'Snapshot X',
+      description: 'Snapshot X',
+      url: 'https://snapshotx.org/',
+      icons: []
+    }
+  });
+
+  return connector;
+}
 
 const connections: Ref<Record<string, ConnectionData | undefined>> = ref({});
 
@@ -130,6 +134,7 @@ export function useWalletConnect(
   async function logout() {
     if (!session.value) return;
 
+    const connector = await getConnector();
     await connector.disconnectSession({
       topic: session.value.topic,
       reason: getSdkError('USER_DISCONNECTED')
@@ -164,6 +169,7 @@ export function useWalletConnect(
     loading.value = true;
 
     if (logged.value) await logout();
+    const connector = await getConnector();
     await connector.core.pairing.pair({ uri });
 
     connector.on('session_proposal', async ({ id, params }) => {
