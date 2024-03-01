@@ -2,19 +2,19 @@
 import Draggable from 'vuedraggable';
 import { getNetwork } from '@/networks';
 import { simulate } from '@/helpers/tenderly';
-import { Transaction as TransactionType, Space, SelectedStrategy } from '@/types';
+import { Transaction as TransactionType, Space, SpaceMetadataTreasury } from '@/types';
 
 const model = defineModel<TransactionType[]>({
   required: true
 });
 
 const props = defineProps<{
-  space?: Space;
-  selectedExecutionStrategy: SelectedStrategy;
+  space: Space;
+  treasuryData: SpaceMetadataTreasury;
 }>();
 
 const uiStore = useUiStore();
-const { treasury } = useTreasury(toRef(props, 'space'));
+const { treasury } = useTreasury(props.treasuryData);
 
 const editedTx: Ref<number | null> = ref(null);
 const modalState: Ref<{
@@ -31,15 +31,6 @@ const simulationState: Ref<'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FA
   ref(null);
 
 const network = computed(() => (props.space ? getNetwork(props.space.network) : null));
-const currentTreasury = computed(() =>
-  props.selectedExecutionStrategy.type === 'SimpleQuorumTimelock' && network.value
-    ? {
-        wallet: props.selectedExecutionStrategy.address,
-        network: network.value.baseChainId,
-        networkId: props.space?.network
-      }
-    : treasury.value
-);
 
 function addTx(tx: TransactionType) {
   const newValue = [...model.value];
@@ -72,15 +63,11 @@ function editTx(index: number) {
 }
 
 async function handleSimulateClick() {
-  if (simulationState.value !== null || !currentTreasury.value) return;
+  if (simulationState.value !== null || !treasury.value) return;
 
   simulationState.value = 'SIMULATING';
 
-  const valid = await simulate(
-    currentTreasury.value.network,
-    currentTreasury.value.wallet,
-    model.value
-  );
+  const valid = await simulate(treasury.value.network, treasury.value.wallet, model.value);
 
   if (valid) {
     simulationState.value = 'SIMULATION_SUCCEDED';
@@ -98,11 +85,11 @@ watch(model.value, () => {
 <template>
   <div class="space-y-3">
     <div class="overflow-hidden border rounded-lg">
-      <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendToken')">
+      <ExecutionButton :disabled="!treasury" @click="openModal('sendToken')">
         <IH-cash class="inline-block" />
         <span>Send token</span>
       </ExecutionButton>
-      <ExecutionButton :disabled="!currentTreasury" @click="openModal('sendNft')">
+      <ExecutionButton :disabled="!treasury" @click="openModal('sendNft')">
         <IH-photograph class="inline-block" />
         <span>Send NFT</span>
       </ExecutionButton>
@@ -168,28 +155,28 @@ watch(model.value, () => {
     </div>
     <teleport to="#modal">
       <ModalSendToken
-        v-if="currentTreasury && currentTreasury.networkId"
+        v-if="treasury && treasury.networkId"
         :open="modalOpen.sendToken"
-        :address="currentTreasury.wallet"
-        :network="currentTreasury.network"
-        :network-id="currentTreasury.networkId"
+        :address="treasury.wallet"
+        :network="treasury.network"
+        :network-id="treasury.networkId"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
       />
       <ModalSendNft
-        v-if="currentTreasury"
+        v-if="treasury"
         :open="modalOpen.sendNft"
-        :address="currentTreasury.wallet"
-        :network="currentTreasury.network"
+        :address="treasury.wallet"
+        :network="treasury.network"
         :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"
       />
       <ModalTransaction
-        v-if="currentTreasury"
+        v-if="treasury"
         :open="modalOpen.contractCall"
-        :network="currentTreasury.network"
+        :network="treasury.network"
         :initial-state="modalState.contractCall"
         @close="modalOpen.contractCall = false"
         @add="addTx"
