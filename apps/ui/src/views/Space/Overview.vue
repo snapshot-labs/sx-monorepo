@@ -27,25 +27,20 @@ const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
-const externalUrl = computed(() => sanitizeUrl(props.space.external_url));
-const twitterUrl = computed(() =>
-  props.space.twitter ? sanitizeUrl(`https://twitter.com/${props.space.twitter}`) : null
-);
-const discordUrl = computed(() =>
-  props.space.discord ? sanitizeUrl(`https://discord.gg/${props.space.discord}`) : null
-);
-const githubUrl = computed(() =>
-  props.space.github ? sanitizeUrl(`https://github.com/${props.space.github}`) : null
-);
+const socials = computed(() =>
+  [
+    { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
+    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
+    { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
+    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
+  ]
+    .map(({ key, icon, urlFormat }) => {
+      const value = props.space[key];
+      const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
 
-const socials = computed(
-  () =>
-    [
-      { href: externalUrl.value, icon: IHGlobeAlt },
-      { href: twitterUrl.value, icon: ICX },
-      { href: discordUrl.value, icon: ICDiscord },
-      { href: githubUrl.value, icon: ICGithub }
-    ].find(social => social.href) || []
+      return href ? { icon, href } : {};
+    })
+    .filter(social => social.href)
 );
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
