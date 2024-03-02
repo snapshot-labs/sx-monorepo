@@ -36,8 +36,8 @@ const cancellable = computed(() => {
   if (offchainNetworks.includes(props.proposal.network)) {
     const addresses = [
       props.proposal.author.id,
-      props.proposal.space.admins,
-      props.proposal.space.moderators
+      props.proposal.space.admins || [],
+      props.proposal.space.moderators || []
     ].flat();
 
     return addresses.some(address => compareAddresses(address, web3.value.account));

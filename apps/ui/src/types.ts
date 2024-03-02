@@ -130,8 +130,8 @@ export type Proposal = {
     snapshot_chain_id?: number;
     avatar: string;
     controller: string;
-    admins: string[];
-    moderators: string[];
+    admins?: string[];
+    moderators?: string[];
     voting_power_symbol: string;
     authenticators: string[];
     executors: string[];
