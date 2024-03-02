@@ -10,7 +10,7 @@ export type SignatureData = {
   message: Record<string, any>;
 };
 
-export type Envelope<T extends Vote | Propose | CancelProposal> = {
+export type Envelope<T extends Vote | Propose | UpdateProposal | CancelProposal> = {
   signatureData?: SignatureData;
   data: T;
 };
@@ -48,6 +48,19 @@ export type EIP712ProposeMessage = {
   from?: string;
 };
 
+export type EIP712UpdateProposal = {
+  proposal: string;
+  space: string;
+  type: string;
+  title: string;
+  body: string;
+  discussion: string;
+  choices: string[];
+  plugins: string;
+  timestamp?: number;
+  from?: string;
+};
+
 export type EIP712CancelProposalMessage = {
   space: string;
   proposal: string;
@@ -55,9 +68,9 @@ export type EIP712CancelProposalMessage = {
   timestamp?: number;
 };
 
-export type EIP712Message =
-  | Required<EIP712VoteMessage | EIP712ProposeMessage>
-  | EIP712CancelProposalMessage;
+export type EIP712Message = Required<
+  EIP712VoteMessage | EIP712ProposeMessage | EIP712UpdateProposal | EIP712CancelProposalMessage
+>;
 
 export type Vote = {
   space: string;
@@ -83,6 +96,17 @@ export type Propose = {
   plugins: string;
   app: string;
   timestamp?: number;
+};
+
+export type UpdateProposal = {
+  proposal: string;
+  space: string;
+  type: string;
+  title: string;
+  body: string;
+  discussion: string;
+  choices: string[];
+  plugins: string;
 };
 
 export type CancelProposal = {

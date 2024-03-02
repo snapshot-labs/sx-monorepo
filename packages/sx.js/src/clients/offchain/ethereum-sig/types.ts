@@ -49,6 +49,21 @@ export const proposeTypes = {
   ]
 };
 
+export const updateProposalTypes = {
+  UpdateProposal: [
+    { name: 'proposal', type: 'string' },
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'type', type: 'string' },
+    { name: 'title', type: 'string' },
+    { name: 'body', type: 'string' },
+    { name: 'discussion', type: 'string' },
+    { name: 'choices', type: 'string[]' },
+    { name: 'plugins', type: 'string' }
+  ]
+};
+
 export const cancelProposalTypes = {
   CancelProposal: [
     { name: 'from', type: 'address' },
