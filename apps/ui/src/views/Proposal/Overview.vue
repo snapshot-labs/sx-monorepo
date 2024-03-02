@@ -73,6 +73,8 @@ async function handleEditClick() {
     title: props.proposal.title,
     body: props.proposal.body,
     discussion: props.proposal.discussion,
+    type: props.proposal.type,
+    choices: props.proposal.choices,
     executionStrategy:
       props.proposal.execution_strategy_type === 'none'
         ? null

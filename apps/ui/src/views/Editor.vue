@@ -3,7 +3,7 @@ import { getNetwork, supportsNullCurrent } from '@/networks';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
-import { RequiredProperty, SelectedStrategy, VoteType, SpaceMetadataTreasury } from '@/types';
+import { RequiredProperty, SelectedStrategy, SpaceMetadataTreasury } from '@/types';
 
 type StrategyWithTreasury = SelectedStrategy & {
   treasury: RequiredProperty<SpaceMetadataTreasury>;
@@ -181,6 +181,8 @@ async function handleProposeClick() {
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
+        proposal.value.type,
+        proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
@@ -371,8 +373,10 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
-      <EditorVotingType v-model="proposal" :voting-types="votingTypes as VoteType[]" />
-      <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      <template v-if="votingTypes && (votingTypes.length > 1 || votingTypes[0] !== 'basic')">
+        <EditorVotingType v-model="proposal" :voting-types="votingTypes" />
+        <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      </template>
       <div
         v-if="
           space &&

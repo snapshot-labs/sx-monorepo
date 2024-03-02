@@ -39,22 +39,20 @@ function handleVoteTypeSelected(type: VoteType) {
 </script>
 
 <template>
-  <template v-if="votingTypes.length > 1 || votingTypes[0] !== 'basic'">
-    <div class="s-base mb-4">
-      <h4 class="eyebrow mb-2.5">Voting type</h4>
-      <div class="flex flex-col gap-[12px]">
-        <UiSelector
-          v-for="(type, index) in votingTypes"
-          :key="index"
-          :is-active="proposal.type === type"
-          @click="handleVoteTypeSelected(type as VoteType)"
-        >
-          <div>
-            <h4 class="text-skin-link" v-text="VOTING_TYPES_INFO[type].label" />
-            <div v-text="VOTING_TYPES_INFO[type].description" />
-          </div>
-        </UiSelector>
-      </div>
+  <div class="s-base mb-4">
+    <h4 class="eyebrow mb-2.5">Voting type</h4>
+    <div class="flex flex-col gap-[12px]">
+      <UiSelector
+        v-for="(type, index) in votingTypes"
+        :key="index"
+        :is-active="proposal.type === type"
+        @click="handleVoteTypeSelected(type as VoteType)"
+      >
+        <div>
+          <h4 class="text-skin-link" v-text="VOTING_TYPES_INFO[type].label" />
+          <div v-text="VOTING_TYPES_INFO[type].description" />
+        </div>
+      </UiSelector>
     </div>
-  </template>
+  </div>
 </template>
