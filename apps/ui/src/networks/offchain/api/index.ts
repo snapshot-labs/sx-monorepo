@@ -68,6 +68,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     discord: '',
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
+    follower_count: space.followersCount,
     voting_power_symbol: space.symbol,
     voting_delay: space.voting.delay ?? 0,
     min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,

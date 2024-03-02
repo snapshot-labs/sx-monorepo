@@ -39,6 +39,7 @@ export type ApiSpace = {
   };
   proposalsCount: number;
   votesCount: number;
+  followersCount: number;
 };
 
 export type ApiProposal = {

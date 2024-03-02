@@ -38,12 +38,15 @@ const githubUrl = computed(() =>
   props.space.github ? sanitizeUrl(`https://github.com/${props.space.github}`) : null
 );
 
-const socials = computed(() => [
-  { href: externalUrl.value, icon: IHGlobeAlt },
-  { href: twitterUrl.value, icon: ICX },
-  { href: discordUrl.value, icon: ICDiscord },
-  { href: githubUrl.value, icon: ICGithub }
-]);
+const socials = computed(
+  () =>
+    [
+      { href: externalUrl.value, icon: IHGlobeAlt },
+      { href: twitterUrl.value, icon: ICX },
+      { href: discordUrl.value, icon: ICDiscord },
+      { href: githubUrl.value, icon: ICGithub }
+    ].find(social => social.href) || []
+);
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
 
@@ -96,23 +99,21 @@ watchEffect(() => setTitle(props.space.name));
         <div class="mb-3">
           <b class="text-skin-link">{{ _n(space.proposal_count) }}</b> proposals ·
           <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b> votes
-        </div>
-        <div class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3">
-          <span v-if="space.about">
-            {{ space.about }}
+          <span v-if="offchainNetworks.includes(space.network)">
+            · <b class="text-skin-link">{{ _n(space.follower_count, 'compact') }}</b> followers
           </span>
         </div>
-        <div class="space-x-2 flex">
-          <span v-for="(social, i) in socials" :key="i">
-            <a
-              v-if="social.href"
-              :href="social.href"
-              target="_blank"
-              class="text-[#606060] hover:text-skin-link"
-            >
+        <div
+          v-if="space.about"
+          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
+          v-text="space.about"
+        />
+        <div v-if="socials.length > 0" class="space-x-2 flex">
+          <template v-for="(social, i) in socials" :key="i">
+            <a :href="social.href" target="_blank" class="text-[#606060] hover:text-skin-link">
               <component :is="social.icon" class="w-[26px] h-[26px]" />
             </a>
-          </span>
+          </template>
         </div>
       </div>
     </div>

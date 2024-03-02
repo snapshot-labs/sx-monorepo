@@ -42,6 +42,7 @@ const SPACE_FRAGMENT = gql`
     }
     proposalsCount
     votesCount
+    followersCount
   }
 `;
 
