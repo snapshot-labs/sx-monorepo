@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Space, SpaceMetadataTreasury, RequiredProperty } from '@/types';
+import { shorten } from '@/helpers/utils';
 
 const props = defineProps<{ space: Space }>();
 
@@ -23,7 +24,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     class="flex px-4 bg-skin-bg border-b sticky top-[71px] lg:top-[72px] z-40 space-x-3"
   >
     <a v-for="(treasury, i) in filteredTreasuries" :key="i" @click="activeTreasuryId = i">
-      <UiLink :is-active="activeTreasuryId === i" :text="treasury.name || 'Unnamed treasury'" />
+      <UiLink
+        :is-active="activeTreasuryId === i"
+        :text="treasury.name || shorten(treasury.address)"
+      />
     </a>
   </div>
   <SpaceTreasury :key="activeTreasuryId" :space="space" :treasury-data="treasuryData" />

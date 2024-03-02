@@ -11,7 +11,8 @@ export function useTreasury(treasuryData: SpaceMetadataTreasury) {
     return {
       networkId: treasuryData.network,
       network: chainId,
-      wallet: treasuryData.address
+      wallet: treasuryData.address,
+      name: treasuryData.name
     };
   });
 
