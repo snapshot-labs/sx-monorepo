@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork } from '@/networks';
 import { SpaceMetadataTreasury, SpaceMetadataDelegation } from '@/types';
 
 const props = withDefaults(
