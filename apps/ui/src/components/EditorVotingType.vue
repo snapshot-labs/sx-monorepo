@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { Draft, VoteType } from '@/types';
-import voteBasicIllustration from '@/assets/images/vote-basic.svg';
-import voteSingleChoiceIllustration from '@/assets/images/vote-single-choice.svg';
-import voteApprovalIllustration from '@/assets/images/vote-approval.svg';
-import voteBasicDarkIllustration from '@/assets/images/vote-basic-dark.svg';
-import voteSingleChoiceDarkIllustration from '@/assets/images/vote-single-choice-dark.svg';
-import voteApprovalDarkIllustration from '@/assets/images/vote-approval-dark.svg';
 
 const proposal = defineModel<Draft>({ required: true });
 
@@ -14,24 +8,18 @@ defineProps<{
   votingTypes: VoteType[];
 }>();
 
-const { currentMode } = useUserSkin();
-
 const VOTING_TYPES_INFO = computed(() => ({
   basic: {
     label: 'Basic voting',
-    description: 'Single choice voting with three choices: For, Against or Abstain.',
-    image: currentMode.value === 'dark' ? voteBasicDarkIllustration : voteBasicIllustration
+    description: 'Voters have three choices: they can vote "For", "Against" or "Abstain".'
   },
   'single-choice': {
     label: 'Single choice voting',
-    description: 'Each voter may select only one choice.',
-    image:
-      currentMode.value === 'dark' ? voteSingleChoiceDarkIllustration : voteSingleChoiceIllustration
+    description: 'Voters can select only one choice from a predefined list.'
   },
   approval: {
     label: 'Approval voting',
-    description: 'Each voter may select any number of choices.',
-    image: currentMode.value === 'dark' ? voteApprovalDarkIllustration : voteApprovalIllustration
+    description: 'Voters can select multiple choices, each choice receiving full voting power.'
   }
 }));
 
@@ -52,7 +40,7 @@ function handleVoteTypeSelected(type: VoteType) {
 
 <template>
   <template v-if="votingTypes.length > 1 || votingTypes[0] !== 'basic'">
-    <div class="s-base mb-5">
+    <div class="s-base mb-4">
       <h4 class="eyebrow mb-2.5">Voting type</h4>
       <div class="flex flex-col gap-[12px]">
         <UiSelector
@@ -61,16 +49,9 @@ function handleVoteTypeSelected(type: VoteType) {
           :is-active="proposal.type === type"
           @click="handleVoteTypeSelected(type as VoteType)"
         >
-          <img
-            :src="VOTING_TYPES_INFO[type].image"
-            :alt="VOTING_TYPES_INFO[type].label"
-            class="w-[122px] hidden sm:block shrink-0"
-          />
-          <div class="grow">
-            <span class="text-skin-heading">{{ VOTING_TYPES_INFO[type].label }}</span>
-            <div>
-              {{ VOTING_TYPES_INFO[type].description }}
-            </div>
+          <div>
+            <h4 class="text-skin-link" v-text="VOTING_TYPES_INFO[type].label" />
+            <div v-text="VOTING_TYPES_INFO[type].description" />
           </div>
         </UiSelector>
       </div>
