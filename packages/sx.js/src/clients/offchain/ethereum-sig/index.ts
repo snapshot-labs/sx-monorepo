@@ -5,8 +5,8 @@ import {
   basicVoteTypes,
   singleChoiceVoteTypes,
   approvalVoteTypes,
-  cancelProposalTypes,
-  updateProposalTypes
+  updateProposalTypes,
+  cancelProposalTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
