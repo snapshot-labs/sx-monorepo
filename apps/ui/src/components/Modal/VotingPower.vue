@@ -33,7 +33,7 @@ const error = computed(() => props.votingPowerStatus === 'error');
     </template>
     <UiLoading v-if="loading" class="p-4 block text-center" />
     <div v-else>
-      <div v-if="error" class="py-3 px-4 flex flex-col gap-3 items-start">
+      <div v-if="error" class="p-4 flex flex-col gap-3 items-start">
         <UiAlert type="error">There was an error fetching your voting power.</UiAlert>
         <UiButton type="button" class="flex items-center gap-2" @click="$emit('getVotingPower')">
           <IH-refresh />Retry

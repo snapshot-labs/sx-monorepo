@@ -156,8 +156,12 @@ watchEffect(() => {
             <div class="pt-2">
               <UiLoading v-if="votingPowerStatus === 'loading'" />
               <button v-else class="text-skin-link text-lg" @click="props.onClick">
-                <IH-exclamation v-if="votingPowerStatus === 'error'" class="inline-block mr-1" />
-                {{ props.formattedVotingPower }}
+                <IH-lightning-bolt class="inline-block" />
+                <IH-exclamation
+                  v-if="votingPowerStatus === 'error'"
+                  class="inline-block ml-1 text-rose-500"
+                />
+                <span v-else class="ml-2" v-text="props.formattedVotingPower" />
               </button>
             </div>
           </IndicatorVotingPower>
