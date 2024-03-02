@@ -3,6 +3,18 @@ import Draggable from 'vuedraggable';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
+const choices: Ref<any[]> = ref([]);
+
+function handleAddChoice() {
+  proposal.value.choices.push('');
+  nextTick(() => choices.value[proposal.value.choices.length - 1].focus());
+}
+
+function handlePressEnter(index) {
+  if (!choices.value[index + 1]) return handleAddChoice();
+
+  nextTick(() => choices.value[index + 1].focus());
+}
 
 defineProps<{
   definition: any;
@@ -12,12 +24,12 @@ defineProps<{
 <template>
   <div class="s-base mb-5">
     <h4 class="eyebrow mb-2.5">Choices</h4>
-    <div class="flex flex-col gap-[10px]">
+    <div class="flex flex-col">
       <Draggable
         v-model="proposal.choices"
         v-bind="{ animation: 200 }"
         handle=".handle"
-        class="flex flex-col gap-[10px]"
+        class="flex flex-col gap-2 mb-3"
         item-key="index"
       >
         <template #item="{ index }">
@@ -34,6 +46,7 @@ defineProps<{
               </div>
               <div class="grow">
                 <input
+                  :ref="el => (choices[index] = el)"
                   v-model.trim="proposal.choices[index]"
                   type="text"
                   :maxLength="definition.items[0].maxLength"
@@ -43,6 +56,7 @@ defineProps<{
                   }"
                   :placeholder="`Choice ${index + 1}`"
                   :disabled="proposal.type === 'basic'"
+                  @keyup.enter="handlePressEnter(index)"
                 />
               </div>
               <UiButton
@@ -58,11 +72,11 @@ defineProps<{
       </Draggable>
       <UiButton
         v-if="proposal.type !== 'basic'"
-        class="w-full border-dashed rounded-lg flex items-center justify-center space-x-1 !h-[40px]"
-        @click="proposal.choices.push('')"
+        class="w-full flex items-center justify-center space-x-1"
+        @click="handleAddChoice"
       >
         <IH-plus-sm />
-        <span>New choice</span>
+        <span>Add choice</span>
       </UiButton>
     </div>
   </div>
