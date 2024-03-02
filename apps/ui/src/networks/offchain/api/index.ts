@@ -137,6 +137,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       snapshot_chain_id: parseInt(proposal.space.network),
       avatar: '',
       controller: proposal.space.admins[0] ?? '',
+      admins: proposal.space.admins,
+      moderators: proposal.space.moderators,
       voting_power_symbol: proposal.space.symbol,
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
