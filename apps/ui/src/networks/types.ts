@@ -75,6 +75,7 @@ export type VotingPower = {
   token: string | null;
   symbol: string;
   chainId?: number;
+  swapLink?: string;
 };
 
 export type VotingPowerStatus = 'loading' | 'success' | 'error';
