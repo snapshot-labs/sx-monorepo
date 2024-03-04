@@ -4,6 +4,7 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
+import { getAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
@@ -80,7 +81,9 @@ export function sanitizeUrl(url: string): string | null {
 }
 
 export function shortenAddress(str = '') {
-  return `${str.slice(0, 6)}...${str.slice(str.length - 4)}`;
+  const formatted = formatAddress(str);
+
+  return `${formatted.slice(0, 6)}...${formatted.slice(formatted.length - 4)}`;
 }
 
 export function shorten(str: string, key?: number | 'symbol' | 'name' | 'choice'): string {
@@ -92,6 +95,15 @@ export function shorten(str: string, key?: number | 'symbol' | 'name' | 'choice'
   if (key === 'choice') limit = 12;
   if (limit) return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
   return shortenAddress(str);
+}
+
+export function formatAddress(address: string) {
+  if (address.length === 42) return getAddress(address);
+  try {
+    return validateAndParseAddress(address);
+  } catch {
+    return address;
+  }
 }
 
 export function explorerUrl(network, str: string, type = 'address'): string {
