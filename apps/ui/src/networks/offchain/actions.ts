@@ -3,6 +3,7 @@ import { fetchScoreApi, getSdkChoice } from './helpers';
 import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET, PROPOSAL_VALIDATIONS } from './constants';
 import { getUrl } from '@/helpers/utils';
 import { getProvider } from '@/helpers/provider';
+import { getSwapLink } from '@/helpers/link';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType } from '@/types';
 import type {
@@ -190,7 +191,8 @@ export function createActions(
           decimals,
           symbol: strategy.params.symbol,
           token: strategy.params.address,
-          chainId: strategy.network ? parseInt(strategy.network) : undefined
+          chainId: strategy.network ? parseInt(strategy.network) : undefined,
+          swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
         } as VotingPower;
       });
     }
