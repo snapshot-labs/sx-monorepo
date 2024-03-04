@@ -55,16 +55,28 @@ const error = computed(() => props.votingPowerStatus === 'error');
           </div>
         </div>
         <div class="flex justify-between">
-          <a
-            v-if="strategy.token"
-            :href="baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)"
-            target="_blank"
-            class="flex items-center text-skin-text"
-          >
-            <UiStamp :id="strategy.token" type="avatar" :size="18" class="mr-2 rounded-sm" />
-            {{ shorten(strategy.token) }}
-            <IH-arrow-sm-right class="ml-1 -rotate-45" />
-          </a>
+          <div v-if="strategy.token" class="flex items-center gap-2">
+            <a
+              :href="
+                baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)
+              "
+              target="_blank"
+              class="flex items-center text-skin-text"
+            >
+              <UiStamp :id="strategy.token" type="avatar" :size="18" class="mr-2 rounded-sm" />
+              {{ shorten(strategy.token) }}
+              <IH-arrow-sm-right class="ml-1 -rotate-45" />
+            </a>
+            <a
+              v-if="strategy.swapLink"
+              :href="strategy.swapLink"
+              target="_blank"
+              class="flex items-center text-skin-text"
+            >
+              Buy
+              <IH-arrow-sm-right class="ml-1 -rotate-45" />
+            </a>
+          </div>
           <div v-else />
           <div>
             {{ _n(Number(strategy.value) / 10 ** strategy.decimals) }}
