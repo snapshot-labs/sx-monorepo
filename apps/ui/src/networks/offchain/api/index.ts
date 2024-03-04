@@ -55,7 +55,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
 
   return {
     id: space.id,
-    controller: space.admins[0] ?? '',
+    controller: '',
     network: networkId,
     snapshot_chain_id: parseInt(space.network),
     name: space.name,
@@ -136,7 +136,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       name: proposal.space.name,
       snapshot_chain_id: parseInt(proposal.space.network),
       avatar: '',
-      controller: proposal.space.admins[0] ?? '',
+      controller: '',
+      admins: proposal.space.admins,
+      moderators: proposal.space.moderators,
       voting_power_symbol: proposal.space.symbol,
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],

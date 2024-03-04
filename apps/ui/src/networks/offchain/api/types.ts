@@ -49,6 +49,7 @@ export type ApiProposal = {
     name: string;
     network: string;
     admins: string[];
+    moderators: string[];
     symbol: string;
   };
   type: VoteType;

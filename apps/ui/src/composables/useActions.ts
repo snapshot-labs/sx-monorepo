@@ -316,14 +316,19 @@ export function useActions() {
   }
 
   async function cancelProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
 
-    const network = getReadWriteNetwork(proposal.network);
+    const network = getNetwork(proposal.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
     await wrapPromise(proposal.network, network.actions.cancelProposal(auth.web3, proposal));
+
+    return true;
   }
 
   async function finalizeProposal(proposal: Proposal) {

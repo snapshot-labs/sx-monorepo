@@ -70,7 +70,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     currentChainId: l1ChainId,
     hasReceive: false,
     supportsSimulation: false,
-    managerConnectors: [],
+    managerConnectors: constants.CONNECTORS,
     api,
     constants,
     helpers,
