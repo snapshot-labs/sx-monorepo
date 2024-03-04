@@ -25,7 +25,7 @@ async function handleLogout() {
   emit('close');
 }
 
-watch(open, () => (step = null));
+watch(open, () => (step.value = null));
 </script>
 
 <template>
