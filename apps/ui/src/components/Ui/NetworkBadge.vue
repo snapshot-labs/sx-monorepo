@@ -7,10 +7,9 @@ const props = withDefaults(
   defineProps<{
     id: string;
     size?: number;
-    cb?: string;
   }>(),
   {
-    size: 22
+    size: 16
   }
 );
 
@@ -30,8 +29,12 @@ const currentNetwork = computed(() => {
     <img
       :src="(currentNetwork && getUrl(currentNetwork.avatar)) ?? undefined"
       :title="(currentNetwork && currentNetwork.name) ?? undefined"
-      class="absolute rounded-full w-[16px] h-[16px] -bottom-1 -right-1 border border-skin-bg"
+      :style="{
+        width: `${size}px`,
+        height: `${size}px`
+      }"
+      class="absolute rounded-full -bottom-1 -right-1 border-2 bg-skin-border border-skin-bg"
     />
-    <UiStamp :id="id" type="token" :size="size" />
+    <slot />
   </div>
 </template>

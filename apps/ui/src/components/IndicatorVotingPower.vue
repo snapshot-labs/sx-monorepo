@@ -56,9 +56,9 @@ function handleModalOpen() {
           }"
           @click="handleModalOpen"
         >
-          <IH-exclamation v-if="props.status === 'error'" class="inline-block -ml-1" />
-          <IH-lightning-bolt v-else class="inline-block -ml-1" />
-          <span class="ml-1">{{ formattedVotingPower }}</span>
+          <IH-lightning-bolt class="inline-block -ml-1" />
+          <IH-exclamation v-if="props.status === 'error'" class="inline-block ml-1 text-rose-500" />
+          <span v-else class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
       </UiTooltip>
     </slot>

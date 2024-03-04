@@ -115,6 +115,7 @@ export type Space = {
   }[];
   proposal_count: number;
   vote_count: number;
+  follower_count?: number;
   created: number;
 };
 

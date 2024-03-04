@@ -162,9 +162,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             'pointer-events-none': !treasuryExplorerUrl
           }"
         >
-          <UiStamp :id="treasury.wallet" type="avatar" :size="32" class="mr-3" />
+          <UiNetworkBadge :id="treasury.networkId" class="mr-3">
+            <UiStamp :id="treasury.wallet" type="avatar" :size="32" class="rounded-md" />
+          </UiNetworkBadge>
           <div class="flex-1 leading-[22px]">
-            <h4 class="text-skin-link" v-text="shorten(treasury.wallet)" />
+            <h4 class="text-skin-link" v-text="treasury.name || shorten(treasury.wallet)" />
             <div class="text-skin-text text-[17px]" v-text="shorten(treasury.wallet)" />
           </div>
           <h3 v-text="`$${_n(totalQuote.toFixed())}`" />
@@ -202,11 +204,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0">
-              <UiStampToken
-                :id="`${treasury.networkId}:${asset.contractAddress}`"
-                type="token"
-                :size="32"
-              />
+              <UiNetworkBadge :id="treasury.networkId" class="mr-3">
+                <UiStamp
+                  :id="`${treasury.networkId}:${asset.contractAddress}`"
+                  type="token"
+                  :size="32"
+                />
+              </UiNetworkBadge>
               <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
                 <h4 class="truncate" v-text="asset.symbol" />
                 <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
