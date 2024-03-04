@@ -1,6 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { formatUnits } from '@ethersproject/units';
+import { formatAddress } from '@/helpers/utils';
 import { getNames } from '@/helpers/stamp';
 import networks from '@/helpers/networks.json';
 
@@ -82,9 +83,11 @@ export function useWeb3() {
       }
       handleChainChanged(network.chainId);
       const acc = accounts.length > 0 ? accounts[0] : null;
-      const names = await getNames([acc]);
-      state.account = acc;
-      state.name = names[acc];
+      const formattedAddress = formatAddress(acc);
+
+      const names = await getNames([formattedAddress]);
+      state.account = formattedAddress;
+      state.name = names[formattedAddress];
       state.type = connector;
 
       if (typeof connector === 'undefined') {
