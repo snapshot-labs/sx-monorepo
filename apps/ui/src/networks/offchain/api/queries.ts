@@ -55,6 +55,7 @@ const PROPOSAL_FRAGMENT = gql`
       name
       network
       admins
+      moderators
       symbol
     }
     type

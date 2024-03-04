@@ -60,4 +60,18 @@ describe('EthereumSig', () => {
 
     expect(envelope).toMatchSnapshot();
   });
+
+  it('should create cancelProposal envelope', async () => {
+    const payload = {
+      space: 'test.eth',
+      proposal: '0x56b857b02d573b0ba747333b57cb3dd11df57cc0d1bcc41c3c990466b477c5e8'
+    };
+
+    const envelope = await client.cancel({
+      signer,
+      data: payload
+    });
+
+    expect(envelope).toMatchSnapshot();
+  });
 });
