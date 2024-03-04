@@ -263,8 +263,8 @@ watchEffect(async () => {
           </div>
         </button>
       </div>
-      <div class="grid grid-cols-2 gap-2.5">
-        <div class="relative">
+      <div class="flex gap-2.5">
+        <div class="relative w-full">
           <UiInputNumber
             :model-value="form.amount"
             :definition="{
@@ -277,6 +277,8 @@ watchEffect(async () => {
           <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick" v-text="'max'" />
         </div>
         <UiInputNumber
+          v-if="currentToken.price !== 0"
+          class="w-full"
           :model-value="form.value"
           :definition="{ type: 'number', title: 'USD', examples: ['0'] }"
           @update:model-value="handleValueUpdate"
