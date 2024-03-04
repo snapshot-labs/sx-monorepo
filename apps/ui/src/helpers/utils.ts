@@ -375,7 +375,11 @@ export function getStampUrl(
 
   const cacheParam = hash ? `&cb=${hash}` : '';
 
-  return `https://cdn.stamp.fyi/${type}/${id}${sizeParam}${cacheParam}`;
+  const formattedId = ['avatar', 'space-sx', 'space-cover-sx'].includes(type)
+    ? formatAddress(id)
+    : id;
+
+  return `https://cdn.stamp.fyi/${type}/${formattedId}${sizeParam}${cacheParam}`;
 }
 
 export async function imageUpload(file: File) {
