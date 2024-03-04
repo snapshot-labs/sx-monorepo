@@ -155,7 +155,11 @@ watchEffect(() => {
             <h4 class="block eyebrow">Your voting power</h4>
             <div class="pt-2">
               <UiLoading v-if="votingPowerStatus === 'loading'" />
-              <button v-else class="text-skin-link text-lg" @click="props.onClick">
+              <button
+                v-else
+                class="text-skin-link text-lg flex items-center"
+                @click="props.onClick"
+              >
                 <IH-lightning-bolt class="inline-block" />
                 <IH-exclamation
                   v-if="votingPowerStatus === 'error'"

@@ -38,7 +38,7 @@ const socials = computed(() =>
       const value = props.space[key];
       const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
 
-      return href ? { icon, href } : {};
+      return href ? { key, icon, href } : {};
     })
     .filter(social => social.href)
 );
@@ -104,7 +104,7 @@ watchEffect(() => setTitle(props.space.name));
           v-text="space.about"
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">
-          <template v-for="(social, i) in socials" :key="i">
+          <template v-for="social in socials" :key="social.key">
             <a :href="social.href" target="_blank" class="text-[#606060] hover:text-skin-link">
               <component :is="social.icon" class="w-[26px] h-[26px]" />
             </a>

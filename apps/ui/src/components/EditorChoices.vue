@@ -3,6 +3,9 @@ import Draggable from 'vuedraggable';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
+
+defineProps<{ definition: any }>();
+
 const choices: Ref<any[]> = ref([]);
 
 function handleAddChoice() {
@@ -15,10 +18,6 @@ function handlePressEnter(index) {
 
   nextTick(() => choices.value[index + 1].focus());
 }
-
-defineProps<{
-  definition: any;
-}>();
 </script>
 
 <template>
@@ -46,7 +45,7 @@ defineProps<{
                   :maxLength="definition.items[0].maxLength"
                   class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
                   :class="{
-                    '!cursor-not-allowed': proposal.type === 'basic'
+                    '!cursor-not-allowed ml-1': proposal.type === 'basic'
                   }"
                   :placeholder="`Choice ${index + 1}`"
                   :disabled="proposal.type === 'basic'"
