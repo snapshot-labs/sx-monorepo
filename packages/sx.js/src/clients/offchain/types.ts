@@ -21,6 +21,16 @@ export type StrategyConfig = {
   metadata?: Record<string, any>;
 };
 
+export type SnapshotInfo = {
+  at: number | null;
+  chainId?: number;
+};
+
+export type Strategy = {
+  type: string;
+  getVotingPower(voterAddress: string, params: any, snapshotInfo: SnapshotInfo): Promise<bigint[]>;
+};
+
 export type EIP712VoteMessage = {
   space: string;
   proposal: string;
