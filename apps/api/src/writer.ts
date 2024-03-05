@@ -1,4 +1,5 @@
 import { validateAndParseAddress } from 'starknet';
+import { getAddress } from '@ethersproject/address';
 import { CheckpointWriter } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal } from '../.checkpoint/models';
 import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
@@ -476,11 +477,17 @@ export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event 
 
   const spaceId = validateAndParseAddress(rawEvent.from_address);
   const proposalId = parseInt(event.proposal_id);
-  const voter = findVariant(event.voter).value;
+  const voterVariant = findVariant(event.voter);
   const choice = getVoteValue(findVariant(event.choice).key);
   const vp = BigInt(event.voting_power);
 
   const created = block?.timestamp ?? getCurrentTimestamp();
+  const voter =
+    voterVariant.key === 'Starknet'
+      ? validateAndParseAddress(voterVariant.value)
+      : voterVariant.key === 'Ethereum'
+        ? getAddress(voterVariant.value)
+        : voterVariant.value;
 
   const vote = new Vote(`${spaceId}/${proposalId}/${voter}`);
   vote.space = spaceId;
