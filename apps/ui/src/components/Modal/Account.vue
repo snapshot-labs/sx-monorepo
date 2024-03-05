@@ -18,14 +18,14 @@ const win = window;
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
-let step = ref(null);
+const step = ref(null);
 
 async function handleLogout() {
   await logout();
   emit('close');
 }
 
-watch(open, () => (step = null));
+watch(open, () => (step.value = null));
 </script>
 
 <template>
