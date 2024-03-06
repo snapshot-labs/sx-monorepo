@@ -20,6 +20,8 @@ dataSources:
           file: ./abis/ProxyFactory.json
         - name: AvatarExecutionStrategy
           file: ./abis/AvatarExecutionStrategy.json
+        - name: AxiomExecutionStrategy
+          file: ./abis/AxiomExecutionStrategy.json
         - name: TimelockExecutionStrategy
           file: ./abis/TimelockExecutionStrategy.json
       eventHandlers:

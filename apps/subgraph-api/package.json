@@ -1,7 +1,7 @@
 {
   "name": "api-subgraph",
   "private": true,
-  "version": "0.0.22",
+  "version": "0.0.23",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
