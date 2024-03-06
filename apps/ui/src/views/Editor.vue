@@ -120,7 +120,7 @@ const canSubmit = computed(() => {
 const proposalStart = computed(() => {
   if (!space.value) return null;
 
-  return new Date().getTime() / 1e3 + space.value.voting_delay;
+  return Date.now() / 1e3 + space.value.voting_delay;
 });
 const proposalEnd = computed(() => {
   if (!space.value || !proposalStart.value) return null;
