@@ -8,6 +8,7 @@ import {
 } from '@graphprotocol/graph-ts'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
+import { AxiomExecutionStrategy } from '../generated/ProxyFactory/AxiomExecutionStrategy'
 import { TimelockExecutionStrategy } from '../generated/ProxyFactory/TimelockExecutionStrategy'
 import {
   SpaceCreated,
@@ -42,6 +43,7 @@ import { updateStrategiesParsedMetadata, updateProposalValidationStrategy } from
 
 const MASTER_SPACE = Address.fromString('0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D')
 const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42')
+const MASTER_AXIOM = Address.fromString('0xE59405D7d40df064E85FD02a4F2F2C527172a9c1')
 const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
   '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4'
 )
@@ -71,6 +73,19 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
     executionStrategy.treasury = targetAddress.value
+    executionStrategy.timelock_delay = new BigInt(0)
+    executionStrategy.save()
+  } else if (event.params.implementation.equals(MASTER_AXIOM)) {
+    let executionStrategyContract = AxiomExecutionStrategy.bind(event.params.proxy)
+    let typeResult = executionStrategyContract.try_getStrategyType()
+    let quorumResult = executionStrategyContract.try_quorum()
+    if (typeResult.reverted || quorumResult.reverted) return
+
+    let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
+    executionStrategy.type = 'Axiom' // override because contract returns AxiomExecutionStrategyMock
+    executionStrategy.quorum = new BigDecimal(quorumResult.value)
+    if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
+    executionStrategy.treasury = event.params.proxy
     executionStrategy.timelock_delay = new BigInt(0)
     executionStrategy.save()
   } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_TIMELOCK)) {
@@ -275,7 +290,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   if (executionStrategy !== null) {
     if (
       executionStrategy.type == 'SimpleQuorumVanilla' ||
-      executionStrategy.type == 'SimpleQuorumAvatar'
+      executionStrategy.type == 'SimpleQuorumAvatar' ||
+      executionStrategy.type == 'Axiom'
     ) {
       proposal.completed = true
       proposal.execution_tx = event.transaction.hash
