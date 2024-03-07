@@ -49,7 +49,7 @@ const definition = computed(() => {
         type: 'string',
         format: 'stamp',
         title: 'Avatar',
-        default: props.id
+        default: props.id || '0x2121212121212121212121212121212121212121212121212121212121212121'
       },
       name: {
         type: 'string',
