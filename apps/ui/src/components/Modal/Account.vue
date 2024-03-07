@@ -93,7 +93,7 @@ watch(open, () => (step.value = null));
           </UiButton>
         </router-link>
         <UiButton class="button-outline w-full" @click="step = 'connect'">
-          Connect wallet
+          {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>
         <UiButton class="button-outline w-full !text-skin-danger" @click="handleLogout">
           Log out
