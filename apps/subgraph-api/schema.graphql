@@ -23,6 +23,8 @@ type Space @entity {
     @derivedFrom(field: "space")
   proposal_count: Int!
   vote_count: Int!
+  proposer_count: Int!
+  voter_count: Int!
   created: Int!
   tx: Bytes!
 }
@@ -145,4 +147,12 @@ type User @entity {
   proposal_count: Int!
   vote_count: Int!
   created: Int!
+}
+
+type LeaderboardItem @entity {
+  id: String!
+  space: Space!
+  user: User!
+  proposal_count: Int!
+  vote_count: Int!
 }
