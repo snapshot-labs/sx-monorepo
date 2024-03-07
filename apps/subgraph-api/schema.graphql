@@ -149,7 +149,7 @@ type User @entity {
   created: Int!
 }
 
-type LeaderboardItem @entity {
+type Leaderboard @entity {
   id: String!
   space: Space!
   user: User!

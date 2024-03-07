@@ -152,7 +152,7 @@ type User {
   votes: [Vote]! @derivedFrom(field: "voter")
 }
 
-type LeaderboardItem {
+type Leaderboard {
   id: String!
   space: Space!
   user: User!

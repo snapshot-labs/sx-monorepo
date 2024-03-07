@@ -1,6 +1,6 @@
 import { validateAndParseAddress } from 'starknet';
 import { CheckpointWriter } from '@snapshot-labs/checkpoint';
-import { Space, Vote, User, Proposal, LeaderboardItem } from '../.checkpoint/models';
+import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
 import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
 import {
@@ -370,9 +370,9 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     await user.save();
   }
 
-  let leaderboardItem = await LeaderboardItem.loadEntity(`${spaceId}/${author}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author}`);
   if (!leaderboardItem) {
-    leaderboardItem = new LeaderboardItem(`${spaceId}/${author}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${author}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = author;
     leaderboardItem.vote_count = 0;
@@ -518,9 +518,9 @@ export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event 
     await user.save();
   }
 
-  let leaderboardItem = await LeaderboardItem.loadEntity(`${spaceId}/${voter}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter}`);
   if (!leaderboardItem) {
-    leaderboardItem = new LeaderboardItem(`${spaceId}/${voter}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${voter}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = voter;
     leaderboardItem.vote_count = 0;

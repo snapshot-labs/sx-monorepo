@@ -38,7 +38,7 @@ import {
   Proposal,
   Vote,
   User,
-  LeaderboardItem,
+  Leaderboard,
 } from '../generated/schema'
 import { updateStrategiesParsedMetadata, updateProposalValidationStrategy } from './helpers'
 
@@ -236,9 +236,9 @@ export function handleProposalCreated(event: ProposalCreated): void {
   user.proposal_count += 1
   user.save()
 
-  let leaderboardItem = LeaderboardItem.load(`${space.id}/${user.id}`)
+  let leaderboardItem = Leaderboard.load(`${space.id}/${user.id}`)
   if (!leaderboardItem) {
-    leaderboardItem = new LeaderboardItem(`${space.id}/${user.id}`)
+    leaderboardItem = new Leaderboard(`${space.id}/${user.id}`)
     leaderboardItem.space = space.id
     leaderboardItem.user = user.id
     leaderboardItem.proposal_count = 0
@@ -383,9 +383,9 @@ export function handleVoteCreated(event: VoteCast): void {
   user.vote_count += 1
   user.save()
 
-  let leaderboardItem = LeaderboardItem.load(`${space.id}/${vote.voter}`)
+  let leaderboardItem = Leaderboard.load(`${space.id}/${vote.voter}`)
   if (!leaderboardItem) {
-    leaderboardItem = new LeaderboardItem(`${space.id}/${vote.voter}`)
+    leaderboardItem = new Leaderboard(`${space.id}/${vote.voter}`)
     leaderboardItem.space = space.id
     leaderboardItem.user = vote.voter
     leaderboardItem.proposal_count = 0
