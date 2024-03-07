@@ -4,10 +4,15 @@ import { Strategy, SnapshotInfo } from '../../clients/offchain/types';
 export default function createRemoteVpStrategy(): Strategy {
   return {
     type: 'remote-vp',
-    async getVotingPower(voterAddress: string, params: any, snapshotInfo: SnapshotInfo) {
+    async getVotingPower(
+      spaceId: string,
+      voterAddress: string,
+      params: any,
+      snapshotInfo: SnapshotInfo
+    ) {
       const result = await fetchScoreApi('get_vp', {
         address: voterAddress,
-        space: '',
+        space: spaceId,
         strategies: params,
         network: snapshotInfo.chainId,
         snapshot: snapshotInfo.at ?? 'latest'

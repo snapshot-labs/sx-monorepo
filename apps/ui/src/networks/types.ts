@@ -84,6 +84,7 @@ export type VotingPowerStatus = 'loading' | 'success' | 'error';
 
 export type ReadOnlyNetworkActions = {
   getVotingPower(
+    spaceId: string,
     strategiesAddresses: string[],
     strategiesParams: any[],
     strategiesMetadata: StrategyParsedMetadata[],

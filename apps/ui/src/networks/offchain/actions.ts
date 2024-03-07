@@ -147,6 +147,7 @@ export function createActions(
     },
     send: (envelope: any) => client.send(envelope),
     getVotingPower: async (
+      spaceId: string,
       strategiesNames: string[],
       strategiesOrValidationParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
@@ -162,6 +163,7 @@ export function createActions(
       if (!strategy) return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
 
       const result = await strategy.getVotingPower(
+        spaceId,
         voterAddress,
         strategiesOrValidationParams,
         snapshotInfo

@@ -554,6 +554,7 @@ export function createActions(
     },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (
+      spaceId: string,
       strategiesAddresses: string[],
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
