@@ -1,5 +1,13 @@
 import fetch from 'cross-fetch';
-import { BigNumberish, CallData, Contract, Provider, hash, shortString } from 'starknet';
+import {
+  BigNumberish,
+  CallData,
+  Contract,
+  Provider,
+  hash,
+  shortString,
+  validateAndParseAddress
+} from 'starknet';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { faker } from '@faker-js/faker';
@@ -91,6 +99,14 @@ export function findVariant(value: { variant: Record<string, any> }) {
     key: result[0],
     value: result[1]
   };
+}
+
+export function formatAddressVariant({ key, value }: { key: string; value: string }) {
+  return key === 'Starknet'
+    ? validateAndParseAddress(value)
+    : key === 'Ethereum'
+      ? getAddress(value)
+      : value;
 }
 
 export function getVoteValue(label: string) {

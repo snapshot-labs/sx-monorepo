@@ -27,6 +27,8 @@ type Space {
     @derivedFrom(field: "space")
   proposal_count: Int!
   vote_count: Int!
+  proposer_count: Int!
+  voter_count: Int!
   created: Int!
   tx: String!
   proposals: [Proposal]! @derivedFrom(field: "space")
@@ -148,4 +150,12 @@ type User {
   created: Int!
   proposals: [Proposal]! @derivedFrom(field: "author")
   votes: [Vote]! @derivedFrom(field: "voter")
+}
+
+type Leaderboard {
+  id: String!
+  space: Space!
+  user: User!
+  proposal_count: Int!
+  vote_count: Int!
 }

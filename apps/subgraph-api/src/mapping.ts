@@ -1,11 +1,4 @@
-import {
-  Address,
-  BigDecimal,
-  BigInt,
-  Bytes,
-  DataSourceContext,
-  dataSource,
-} from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
 import { AxiomExecutionStrategy } from '../generated/ProxyFactory/AxiomExecutionStrategy'
@@ -38,7 +31,15 @@ import {
   SpaceMetadata as SpaceMetadataTemplate,
   ProposalMetadata as ProposalMetadataTemplate,
 } from '../generated/templates'
-import { Space, ExecutionStrategy, ExecutionHash, Proposal, Vote, User } from '../generated/schema'
+import {
+  Space,
+  ExecutionStrategy,
+  ExecutionHash,
+  Proposal,
+  Vote,
+  User,
+  Leaderboard,
+} from '../generated/schema'
 import { updateStrategiesParsedMetadata, updateProposalValidationStrategy } from './helpers'
 
 const MASTER_SPACE = Address.fromString('0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D')
@@ -142,6 +143,8 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   space.authenticators = event.params.input.authenticators.map<Bytes>((address) => address)
   space.proposal_count = 0
   space.vote_count = 0
+  space.proposer_count = 0
+  space.voter_count = 0
   space.created = event.block.timestamp.toI32()
   space.tx = event.transaction.hash
 
@@ -223,19 +226,31 @@ export function handleProposalCreated(event: ProposalCreated): void {
 
   proposal.save()
 
-  space.proposal_count += 1
-  space.save()
-
   let user = User.load(event.params.author.toHexString())
   if (user == null) {
     user = new User(event.params.author.toHexString())
     user.proposal_count = 0
     user.vote_count = 0
     user.created = event.block.timestamp.toI32()
-    user.save()
   }
   user.proposal_count += 1
   user.save()
+
+  let leaderboardItem = Leaderboard.load(`${space.id}/${user.id}`)
+  if (!leaderboardItem) {
+    leaderboardItem = new Leaderboard(`${space.id}/${user.id}`)
+    leaderboardItem.space = space.id
+    leaderboardItem.user = user.id
+    leaderboardItem.proposal_count = 0
+    leaderboardItem.vote_count = 0
+  }
+
+  leaderboardItem.proposal_count += 1
+  leaderboardItem.save()
+
+  if (leaderboardItem.proposal_count === 1) space.proposer_count += 1
+  space.proposal_count += 1
+  space.save()
 }
 
 export function handleProposalUpdated(event: ProposalUpdated): void {
@@ -346,9 +361,6 @@ export function handleVoteCreated(event: VoteCast): void {
   vote.tx = event.transaction.hash
   vote.save()
 
-  space.vote_count += 1
-  space.save()
-
   let proposal = Proposal.load(`${space.id}/${event.params.proposalId}`)
   if (proposal !== null) {
     proposal.setBigDecimal(
@@ -366,10 +378,26 @@ export function handleVoteCreated(event: VoteCast): void {
     user.proposal_count = 0
     user.vote_count = 0
     user.created = event.block.timestamp.toI32()
-    user.save()
   }
+
   user.vote_count += 1
   user.save()
+
+  let leaderboardItem = Leaderboard.load(`${space.id}/${vote.voter}`)
+  if (!leaderboardItem) {
+    leaderboardItem = new Leaderboard(`${space.id}/${vote.voter}`)
+    leaderboardItem.space = space.id
+    leaderboardItem.user = vote.voter
+    leaderboardItem.proposal_count = 0
+    leaderboardItem.vote_count = 0
+  }
+
+  leaderboardItem.vote_count += 1
+  leaderboardItem.save()
+
+  if (leaderboardItem.vote_count === 1) space.voter_count += 1
+  space.vote_count += 1
+  space.save()
 }
 
 export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {
