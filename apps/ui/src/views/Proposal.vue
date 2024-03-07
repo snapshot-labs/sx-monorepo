@@ -51,6 +51,7 @@ async function getVotingPower() {
   votingPowerStatus.value = 'loading';
   try {
     votingPowers.value = await network.value.actions.getVotingPower(
+      proposal.value.space.id,
       proposal.value.strategies,
       proposal.value.strategies_params,
       proposal.value.space.strategies_parsed_metadata,

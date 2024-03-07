@@ -28,7 +28,12 @@ export type SnapshotInfo = {
 
 export type Strategy = {
   type: string;
-  getVotingPower(voterAddress: string, params: any, snapshotInfo: SnapshotInfo): Promise<bigint[]>;
+  getVotingPower(
+    spaceId: string,
+    voterAddress: string,
+    params: any,
+    snapshotInfo: SnapshotInfo
+  ): Promise<bigint[]>;
 };
 
 export type EIP712VoteMessage = {
