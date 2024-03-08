@@ -50,11 +50,11 @@ const shutterActive = computed(
 </script>
 
 <template>
-  <div v-if="proposal.type !== 'basic'">
+  <div v-if="proposal.type !== 'basic'" class="flex flex-col gap-2">
     <div
       v-for="(choice, id) in proposal.choices"
       :key="id"
-      class="flex justify-between border rounded-lg p-3 mb-2 last:mb-0 text-skin-link relative overflow-hidden"
+      class="flex justify-between border rounded-lg p-3 last:mb-0 text-skin-link relative overflow-hidden"
     >
       <div class="truncate mr-2 z-10">{{ choice }}</div>
       <div class="z-10">
@@ -103,10 +103,13 @@ const shutterActive = computed(
 
         <UiTooltip
           v-if="shutterActive"
-          class="cursor-help py-1"
+          class="cursor-help"
           title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
         >
-          <i-h-lock-closed />
+          <div class="flex items-center gap-1">
+            <i-h-lock-closed />
+            <span>Encrypted</span>
+          </div>
         </UiTooltip>
         <template v-else>
           <span
