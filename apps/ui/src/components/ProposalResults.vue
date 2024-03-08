@@ -44,8 +44,7 @@ const results = computed(() =>
 );
 
 const shutterActive = computed(
-  () =>
-    props.proposal.privacy === 'shutter' && !['passed', 'rejected'].includes(props.proposal.state)
+  () => props.proposal.privacy === 'shutter' && !props.proposal.completed
 );
 </script>
 
