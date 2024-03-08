@@ -1,6 +1,7 @@
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
+import type { Privacy } from '../../types';
 
-type Choice = number | number[];
+export type Choice = number | number[] | string;
 
 export type SignatureData = {
   address: string;
@@ -95,6 +96,7 @@ export type Vote = {
   choice: Choice;
   metadataUri: string;
   type: string;
+  privacy: Privacy;
   timestamp?: number;
 };
 

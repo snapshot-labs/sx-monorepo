@@ -9,6 +9,7 @@ import type {
   Vote,
   User,
   Choice,
+  Privacy,
   NetworkID,
   StrategyParsedMetadata
 } from '@/types';
@@ -116,7 +117,8 @@ export type ReadOnlyNetworkActions = {
     connectorType: Connector,
     account: string,
     proposal: Proposal,
-    choice: Choice
+    choice: Choice,
+    privacy: Privacy
   ): Promise<any>;
   send(envelope: any): Promise<any>;
 };
