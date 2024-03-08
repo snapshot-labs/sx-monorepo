@@ -25,9 +25,7 @@ const votingPowerDecimals = computed(() => {
     0
   );
 });
-const shutterActive = computed(
-  () => props.proposal.privacy === 'shutter' && !props.proposal.completed
-);
+const isEncrypted = computed(() => props.proposal.privacy && !props.proposal.completed);
 
 function reset() {
   votes.value = [];
@@ -213,7 +211,7 @@ watch([sortBy, choiceFilter], () => {
             </td>
             <td class="relative">
               <UiTooltip
-                v-if="shutterActive"
+                v-if="isEncrypted"
                 class="cursor-help"
                 title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
               >

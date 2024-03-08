@@ -43,9 +43,7 @@ const results = computed(() =>
     .sort((a, b) => b.progress - a.progress)
 );
 
-const shutterActive = computed(
-  () => props.proposal.privacy === 'shutter' && !props.proposal.completed
-);
+const isEncrypted = computed(() => props.proposal.privacy && !props.proposal.completed);
 </script>
 
 <template>
@@ -57,7 +55,7 @@ const shutterActive = computed(
     >
       <div class="truncate mr-2 z-10">{{ choice }}</div>
       <div class="z-10">
-        <span v-if="shutterActive">
+        <span v-if="isEncrypted">
           <UiTooltip
             class="cursor-help"
             title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
@@ -101,7 +99,7 @@ const shutterActive = computed(
         </div>
 
         <UiTooltip
-          v-if="shutterActive"
+          v-if="isEncrypted"
           class="cursor-help"
           title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
         >
@@ -126,7 +124,7 @@ const shutterActive = computed(
       </div>
     </div>
     <div
-      v-if="!shutterActive"
+      v-if="!isEncrypted"
       class="rounded-full h-1.5 overflow-hidden"
       :style="{
         width: withDetails ? '100%' : `${width}px`
