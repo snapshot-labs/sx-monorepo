@@ -196,20 +196,6 @@ watchEffect(() => {
         <template v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">
           <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Results</h4>
           <ProposalResults with-details :proposal="proposal" :decimals="votingPowerDecimals" />
-          <div v-if="proposal.privacy === 'shutter'" class="flex flex-col mt-2">
-            <div class="text-xs">Powered by</div>
-
-            <div class="flex items-center">
-              <UiTooltip
-                title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
-                ><a
-                  href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
-                >
-                  <IC-Shutter class="w-[80px]" />
-                </a>
-              </UiTooltip>
-            </div>
-          </div>
         </template>
       </div>
     </template>
