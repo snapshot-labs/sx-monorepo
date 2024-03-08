@@ -1,3 +1,4 @@
+import { isAddress } from '@ethersproject/address';
 import {
   OffchainNetworkConfig,
   clients,
@@ -160,26 +161,17 @@ export function createActions(
 
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
-      if (!strategy) return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+      let result: bigint[] = [];
 
-      const result = await strategy.getVotingPower(
-        spaceId,
-        voterAddress,
-        strategiesOrValidationParams,
-        snapshotInfo
-      );
-
-      if (strategy.type !== 'remote-vp') {
-        return [
-          {
-            address: strategiesNames[0],
-            decimals: 0,
-            symbol: '',
-            token: '',
-            chainId: snapshotInfo.chainId,
-            value: result[0]
-          }
-        ];
+      if (!strategy || !isAddress(voterAddress)) {
+        result = Array(strategiesNames.length).fill(0n);
+      } else {
+        result = await strategy.getVotingPower(
+          spaceId,
+          voterAddress,
+          strategiesOrValidationParams,
+          snapshotInfo
+        );
       }
 
       return result.map((value: bigint, index: number) => {
@@ -190,9 +182,9 @@ export function createActions(
           address: strategy.name,
           value,
           decimals,
-          symbol: strategy.params.symbol,
-          token: strategy.params.address,
-          chainId: strategy.network ? parseInt(strategy.network) : undefined,
+          symbol: strategy.params.symbol || '',
+          token: strategy.params.address || '',
+          chainId: strategy.network ? parseInt(strategy.network) : snapshotInfo.chainId,
           swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
         };
       });
