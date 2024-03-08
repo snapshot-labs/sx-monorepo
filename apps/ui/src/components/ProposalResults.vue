@@ -100,26 +100,27 @@ const shutterActive = computed(
             class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
           />
         </div>
-        <span
-          v-text="
-            `${_n(Number(result.score) / 10 ** decimals, 'compact')} ${
-              proposal.space.voting_power_symbol
-            }`
-          "
-        />
-        <span v-if="shutterActive">
-          <UiTooltip
-            class="cursor-help"
-            title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
-          >
-            <i-h-lock-closed />
-          </UiTooltip>
-        </span>
-        <span
-          v-else
-          class="text-skin-text"
-          v-text="`${_n(result.progress, 'compact', { maximumFractionDigits: 1 })}%`"
-        />
+
+        <UiTooltip
+          v-if="shutterActive"
+          class="cursor-help py-1"
+          title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
+        >
+          <i-h-lock-closed />
+        </UiTooltip>
+        <template v-else>
+          <span
+            v-text="
+              `${_n(Number(result.score) / 10 ** decimals, 'compact')} ${
+                proposal.space.voting_power_symbol
+              }`
+            "
+          />
+          <span
+            class="text-skin-text"
+            v-text="`${_n(result.progress, 'compact', { maximumFractionDigits: 1 })}%`"
+          />
+        </template>
       </div>
     </div>
     <div
