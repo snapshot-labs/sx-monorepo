@@ -25,6 +25,10 @@ const votingPowerDecimals = computed(() => {
     0
   );
 });
+const shutterActive = computed(
+  () =>
+    props.proposal.privacy === 'shutter' && !['passed', 'rejected'].includes(props.proposal.state)
+);
 
 function reset() {
   votes.value = [];
@@ -209,26 +213,38 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </td>
             <td class="relative">
-              <div
-                v-if="proposal.type !== 'basic'"
-                class="truncate"
-                :title="proposal.choices[vote.choice - 1]"
+              <UiTooltip
+                v-if="shutterActive"
+                class="cursor-help"
+                title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
               >
-                {{ proposal.choices[vote.choice - 1] }}
-              </div>
-              <UiButton
-                v-else
-                class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
-                :class="{
-                  '!text-skin-success !border-skin-success': vote.choice === 1,
-                  '!text-skin-danger !border-skin-danger': vote.choice === 2,
-                  '!text-gray-500 !border-gray-500': vote.choice === 3
-                }"
-              >
-                <IH-check v-if="vote.choice === 1" class="inline-block" />
-                <IH-x v-else-if="vote.choice === 2" class="inline-block" />
-                <IH-minus-sm v-else class="inline-block" />
-              </UiButton>
+                <div class="flex items-center gap-1">
+                  <i-h-lock-closed />
+                  <span>Encrypted</span>
+                </div>
+              </UiTooltip>
+              <template v-else>
+                <div
+                  v-if="proposal.type !== 'basic'"
+                  class="truncate"
+                  :title="proposal.choices[vote.choice - 1]"
+                >
+                  {{ proposal.choices[vote.choice - 1] }}
+                </div>
+                <UiButton
+                  v-else
+                  class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
+                  :class="{
+                    '!text-skin-success !border-skin-success': vote.choice === 1,
+                    '!text-skin-danger !border-skin-danger': vote.choice === 2,
+                    '!text-gray-500 !border-gray-500': vote.choice === 3
+                  }"
+                >
+                  <IH-check v-if="vote.choice === 1" class="inline-block" />
+                  <IH-x v-else-if="vote.choice === 2" class="inline-block" />
+                  <IH-minus-sm v-else class="inline-block" />
+                </UiButton>
+              </template>
             </td>
             <td class="relative pr-2 text-right">
               <div class="text-skin-link leading-[22px]">
