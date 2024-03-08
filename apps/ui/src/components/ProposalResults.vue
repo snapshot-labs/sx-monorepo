@@ -84,7 +84,7 @@ const shutterActive = computed(
       'flex items-center': !withDetails
     }"
   >
-    <div v-if="withDetails" class="text-skin-link mb-2 mb-3">
+    <div v-if="withDetails" class="text-skin-link mb-3">
       <div v-for="result in results" :key="result.choice" class="flex items-center space-x-2 mb-1">
         <div
           class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
