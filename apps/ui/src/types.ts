@@ -173,6 +173,7 @@ export type Proposal = {
   completed: boolean;
   cancelled: boolean;
   state: ProposalState;
+  privacy: 'shutter' | null;
 };
 
 export type User = {

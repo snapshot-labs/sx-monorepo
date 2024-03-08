@@ -70,6 +70,7 @@ export type ApiProposal = {
   created: number;
   updated: number | null;
   votes: number;
+  privacy: 'shutter' | null;
 };
 
 export type ApiVote = {
