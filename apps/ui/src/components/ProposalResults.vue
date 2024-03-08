@@ -42,6 +42,11 @@ const results = computed(() =>
     }))
     .sort((a, b) => b.progress - a.progress)
 );
+
+const shutterActive = computed(
+  () =>
+    props.proposal.privacy === 'shutter' && !['passed', 'rejected'].includes(props.proposal.state)
+);
 </script>
 
 <template>
@@ -52,7 +57,17 @@ const results = computed(() =>
       class="flex justify-between border rounded-lg p-3 mb-2 last:mb-0 text-skin-link relative overflow-hidden"
     >
       <div class="truncate mr-2 z-10">{{ choice }}</div>
-      <div class="z-10">{{ _p(proposal.scores[id] / (proposal.scores_total || Infinity)) }}</div>
+      <div class="z-10">
+        <span v-if="shutterActive">
+          <UiTooltip
+            class="cursor-help"
+            title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
+          >
+            <i-h-lock-closed />
+          </UiTooltip>
+        </span>
+        <span v-else>{{ _p(proposal.scores[id] / (proposal.scores_total || Infinity)) }}</span>
+      </div>
       <div
         class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none"
         :style="{
@@ -65,7 +80,6 @@ const results = computed(() =>
   </div>
   <div
     v-else
-    class="h-full"
     :class="{
       'flex items-center': !withDetails
     }"
@@ -93,13 +107,23 @@ const results = computed(() =>
             }`
           "
         />
+        <span v-if="shutterActive">
+          <UiTooltip
+            class="cursor-help"
+            title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
+          >
+            <i-h-lock-closed />
+          </UiTooltip>
+        </span>
         <span
+          v-else
           class="text-skin-text"
           v-text="`${_n(result.progress, 'compact', { maximumFractionDigits: 1 })}%`"
         />
       </div>
     </div>
     <div
+      v-if="!shutterActive"
       class="rounded-full h-1.5 overflow-hidden"
       :style="{
         width: withDetails ? '100%' : `${width}px`
@@ -126,11 +150,11 @@ const results = computed(() =>
   </div>
   <div v-if="proposal.privacy === 'shutter'" class="flex flex-col mt-2">
     <div class="text-xs">Powered by</div>
-
     <div class="flex items-center">
       <UiTooltip
         title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
-        ><a
+      >
+        <a
           href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
         >
           <IC-Shutter class="w-[80px]" />
