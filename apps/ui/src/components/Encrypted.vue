@@ -9,16 +9,18 @@ withDefaults(
 </script>
 
 <template>
-  <UiTooltip
+  <div
     v-if="encrypted"
-    class="cursor-help"
-    title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
+    v-tippy="{
+      content:
+        'This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score calculated'
+    }"
+    class="cursor-help flex items-center gap-1"
   >
-    <div class="flex items-center gap-1">
-      <i-h-lock-closed />
-      <span v-if="!iconOnly">Encrypted</span>
-    </div>
-  </UiTooltip>
+    <i-h-lock-closed />
+    <span v-if="!iconOnly">Encrypted</span>
+  </div>
+
   <template v-else>
     <slot />
   </template>
