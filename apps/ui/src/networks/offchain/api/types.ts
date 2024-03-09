@@ -1,4 +1,4 @@
-import { VoteType } from '@/types';
+import { Privacy, VoteType } from '@/types';
 
 export type ApiSpace = {
   id: string;
@@ -70,7 +70,7 @@ export type ApiProposal = {
   created: number;
   updated: number | null;
   votes: number;
-  privacy: 'shutter' | null;
+  privacy: Privacy;
 };
 
 export type ApiVote = {

@@ -25,7 +25,7 @@ const votingPowerDecimals = computed(() => {
     0
   );
 });
-const isEncrypted = computed(() => props.proposal.privacy && !props.proposal.completed);
+const isEncrypted = computed(() => !!props.proposal.privacy && !props.proposal.completed);
 
 function reset() {
   votes.value = [];
@@ -210,17 +210,7 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </td>
             <td class="relative">
-              <UiTooltip
-                v-if="isEncrypted"
-                class="cursor-help"
-                title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
-              >
-                <div class="flex items-center gap-1">
-                  <i-h-lock-closed />
-                  <span>Encrypted</span>
-                </div>
-              </UiTooltip>
-              <template v-else>
+              <Encrypted :encrypted="isEncrypted">
                 <div
                   v-if="proposal.type !== 'basic'"
                   class="truncate"
@@ -241,7 +231,7 @@ watch([sortBy, choiceFilter], () => {
                   <IH-x v-else-if="vote.choice === 2" class="inline-block" />
                   <IH-minus-sm v-else class="inline-block" />
                 </UiButton>
-              </template>
+              </Encrypted>
             </td>
             <td class="relative pr-2 text-right">
               <div class="text-skin-link leading-[22px]">

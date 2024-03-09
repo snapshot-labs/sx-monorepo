@@ -43,7 +43,7 @@ const results = computed(() =>
     .sort((a, b) => b.progress - a.progress)
 );
 
-const isEncrypted = computed(() => props.proposal.privacy && !props.proposal.completed);
+const isEncrypted = computed(() => !!props.proposal.privacy && !props.proposal.completed);
 </script>
 
 <template>
@@ -55,15 +55,9 @@ const isEncrypted = computed(() => props.proposal.privacy && !props.proposal.com
     >
       <div class="truncate mr-2 z-10">{{ choice }}</div>
       <div class="z-10">
-        <span v-if="isEncrypted">
-          <UiTooltip
-            class="cursor-help"
-            title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
-          >
-            <i-h-lock-closed />
-          </UiTooltip>
-        </span>
-        <span v-else>{{ _p(proposal.scores[id] / (proposal.scores_total || Infinity)) }}</span>
+        <Encrypted :encrypted="isEncrypted" icon-only>
+          {{ _p(proposal.scores[id] / (proposal.scores_total || Infinity)) }}
+        </Encrypted>
       </div>
       <div
         class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none"
@@ -98,17 +92,7 @@ const isEncrypted = computed(() => props.proposal.privacy && !props.proposal.com
           />
         </div>
 
-        <UiTooltip
-          v-if="isEncrypted"
-          class="cursor-help"
-          title="This proposal has Shutter privacy enabled. All votes will be encrypted until the voting period has ended and the final score is calculated"
-        >
-          <div class="flex items-center gap-1">
-            <i-h-lock-closed />
-            <span>Encrypted</span>
-          </div>
-        </UiTooltip>
-        <template v-else>
+        <Encrypted :encrypted="isEncrypted">
           <span
             v-text="
               `${_n(Number(result.score) / 10 ** decimals, 'compact')} ${
@@ -120,7 +104,7 @@ const isEncrypted = computed(() => props.proposal.privacy && !props.proposal.com
             class="text-skin-text"
             v-text="`${_n(result.progress, 'compact', { maximumFractionDigits: 1 })}%`"
           />
-        </template>
+        </Encrypted>
       </div>
     </div>
     <div
