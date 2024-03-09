@@ -9,7 +9,6 @@ import type {
   Vote,
   User,
   Choice,
-  Privacy,
   NetworkID,
   StrategyParsedMetadata
 } from '@/types';
