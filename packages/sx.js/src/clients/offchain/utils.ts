@@ -6,11 +6,25 @@ import { toUtf8Bytes, formatBytes32String } from '@ethersproject/strings';
 import shutterWasm from '@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url';
 // @ts-ignore
 import { init, encrypt } from '@shutter-network/shutter-crypto';
+import type { Choice } from './types';
+import type { Privacy } from '../../types';
 
 const SHUTTER_EON_PUBKEY =
   '0x0e6493bbb4ee8b19aa9b70367685049ff01dc9382c46aed83f8bc07d2a5ba3e6030bd83b942c1fd3dff5b79bef3b40bf6b666e51e7f0be14ed62daaffad47435265f5c9403b1a801921981f7d8659a9bd91fe92fb1cf9afdb16178a532adfaf51a237103874bb03afafe9cab2118dae1be5f08a0a28bf488c1581e9db4bc23ca';
 
-export async function encryptShutterChoice(choice: string, id: string): Promise<string> {
+export async function encryptChoices(
+  privacy: Privacy,
+  proposalId: string,
+  choice: Choice
+): Promise<string> {
+  if (privacy === 'shutter') {
+    return encryptShutterChoice(JSON.stringify(choice), proposalId);
+  }
+
+  throw new Error('Encryption type not supported');
+}
+
+async function encryptShutterChoice(choice: string, id: string): Promise<string> {
   await init(shutterWasm);
 
   const bytesChoice = toUtf8Bytes(choice);

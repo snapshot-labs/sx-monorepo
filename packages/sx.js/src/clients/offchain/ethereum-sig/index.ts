@@ -1,4 +1,5 @@
 import { offchainGoerli } from '../../../offchainNetworks';
+import { encryptChoices } from '../utils';
 import {
   domain,
   proposeTypes,
@@ -15,7 +16,6 @@ import type {
   Envelope,
   Vote,
   Propose,
-  Choice,
   UpdateProposal,
   CancelProposal,
   EIP712Message,
@@ -24,8 +24,7 @@ import type {
   EIP712UpdateProposal,
   EIP712CancelProposalMessage
 } from '../types';
-import type { OffchainNetworkConfig, Privacy } from '../../../types';
-import { encryptShutterChoice } from '../utils';
+import type { OffchainNetworkConfig } from '../../../types';
 
 const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
@@ -36,14 +35,6 @@ type EthereumSigClientOpts = {
   networkConfig?: OffchainNetworkConfig;
   sequencerUrl?: string;
 };
-
-async function encryptChoices(privacy: Privacy, proposalId: string, choice: Choice) {
-  if (privacy === 'shutter') {
-    return encryptShutterChoice(JSON.stringify(choice), proposalId);
-  }
-
-  throw new Error('Encryption type not supported');
-}
 
 export class EthereumSig {
   sequencerUrl: string;
@@ -181,7 +172,7 @@ export class EthereumSig {
     let voteType = basicVoteTypes;
     if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
     if (data.type === 'approval') voteType = approvalVoteTypes;
-    if (data.privacy === 'shutter') {
+    if (data.privacy) {
       voteType = encryptedVoteTypes;
       message.choice = await encryptChoices(message.privacy, message.proposal, message.choice);
     }
