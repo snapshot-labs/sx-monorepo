@@ -1,9 +1,9 @@
 import { createPinia } from 'pinia';
 import { LockPlugin } from '@snapshot-labs/lock/plugins/vue3';
+import VueTippy from 'vue-tippy';
 import options from '@/helpers/auth';
 import App from '@/App.vue';
 import router from '@/router';
-import VueTippy from 'vue-tippy';
 import '@/helpers/auth';
 import '@/style.scss';
 
