@@ -310,7 +310,7 @@ input {
 @import 'tippy.js/dist/svg-arrow.css';
 
 .tippy-box[data-theme~='sx'] {
-  @apply border border-solid border-skin-border bg-skin-input-bg text-skin-heading px-[12px] py-2 w-max z-50 rounded-[10px] text-[16px] leading-5 transition-opacity;
+  @apply border border-solid border-skin-border bg-skin-input-bg text-skin-heading px-[12px] py-2 w-max z-50 rounded-[10px] text-[16px] leading-5;
 
   .tippy-content {
     @apply p-0;

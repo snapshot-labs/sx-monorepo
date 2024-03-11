@@ -25,7 +25,9 @@ const app = createApp({ render: () => h(App) })
   .use(LockPlugin, options)
   .use(VueTippy, {
     defaultProps: {
-      theme: 'sx'
+      delay: [0, null],
+      theme: 'sx',
+      animation: false
     }
   });
 
