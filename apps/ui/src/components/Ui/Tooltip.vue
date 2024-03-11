@@ -5,7 +5,7 @@ defineProps<{
 </script>
 
 <template>
-  <div v-tippy="{ content: title }">
+  <div v-tippy="{ content: title }" class="inline-block relative">
     <slot />
   </div>
 </template>
