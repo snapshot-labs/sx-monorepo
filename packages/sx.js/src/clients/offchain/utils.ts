@@ -2,9 +2,7 @@ import { randomBytes } from '@ethersproject/random';
 import { BigNumber } from '@ethersproject/bignumber';
 import { arrayify, hexlify } from '@ethersproject/bytes';
 import { toUtf8Bytes, formatBytes32String } from '@ethersproject/strings';
-// @ts-ignore
 import shutterWasm from '@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url';
-// @ts-ignore
 import { init, encrypt } from '@shutter-network/shutter-crypto';
 import type { Choice } from './types';
 import type { Privacy } from '../../types';
