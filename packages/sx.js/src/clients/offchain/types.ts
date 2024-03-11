@@ -44,6 +44,7 @@ export type EIP712VoteMessage = {
   reason: string;
   app: string;
   metadata: string;
+  privacy?: Privacy;
   timestamp?: number;
   from?: string;
 };

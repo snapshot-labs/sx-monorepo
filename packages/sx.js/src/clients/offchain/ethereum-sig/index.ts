@@ -159,14 +159,13 @@ export class EthereumSig {
     signer: Signer & TypedDataSigner;
     data: Vote;
   }): Promise<Envelope<Vote>> {
-    const message = {
+    const message: EIP712VoteMessage = {
       space: data.space,
-      proposal: data.proposal.toString(),
+      proposal: data.proposal,
       choice: data.choice,
       reason: '',
       app: '',
-      metadata: '',
-      privacy: data.privacy
+      metadata: ''
     };
 
     let voteType = basicVoteTypes;
@@ -174,7 +173,8 @@ export class EthereumSig {
     if (data.type === 'approval') voteType = approvalVoteTypes;
     if (data.privacy) {
       voteType = encryptedVoteTypes;
-      message.choice = await encryptChoices(message.privacy, message.proposal, message.choice);
+      message.choice = await encryptChoices(data.privacy, data.proposal, data.choice);
+      message.privacy = data.privacy;
     }
 
     const signatureData = await this.sign(signer, message, voteType);
