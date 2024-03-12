@@ -2,4 +2,4 @@
 "@snapshot-labs/sx": patch
 ---
 
-fix issue with decimal voting power for offchain proposals
+change default decimals for remote-vp strategy to 18
