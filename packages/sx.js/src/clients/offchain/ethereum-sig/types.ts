@@ -31,6 +31,8 @@ export const approvalVoteTypes = {
   ]
 };
 
+export const rankedChoiceVoteTypes = approvalVoteTypes;
+
 export const proposeTypes = {
   Proposal: [
     { name: 'from', type: 'address' },
