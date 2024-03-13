@@ -184,7 +184,7 @@ export function createActions(
 
       return result.map((value: bigint, index: number) => {
         const strategy = strategiesOrValidationParams[index];
-        const decimals = parseInt(strategy.params.decimals || 0);
+        const decimals = parseInt(strategy.params.decimals || 18);
 
         return {
           address: strategy.name,
