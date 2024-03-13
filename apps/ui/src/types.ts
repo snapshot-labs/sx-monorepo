@@ -141,6 +141,7 @@ export type Proposal = {
   };
   author: {
     id: string;
+    name?: string;
   };
   execution_hash: string;
   metadata_uri: string;
