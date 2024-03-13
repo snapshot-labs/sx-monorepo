@@ -1,6 +1,6 @@
 import { formatAddress } from './utils';
 
-const resolvedAddresses = new Map<string, string>();
+const resolvedAddresses = new Map<string, string | null>();
 
 export async function getNames(addresses: string[]): Promise<Record<string, string>> {
   try {
@@ -26,8 +26,8 @@ export async function getNames(addresses: string[]): Promise<Record<string, stri
       });
       data = (await res.json()).result;
 
-      Object.keys(data).forEach((key: string) => {
-        resolvedAddresses.set(key, data[key]);
+      Object.values(inputMapping).forEach((formatted: string) => {
+        resolvedAddresses.set(formatted, data[formatted]);
       });
     }
 
