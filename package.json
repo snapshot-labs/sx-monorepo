@@ -1,6 +1,6 @@
 {
   "name": "sx-monorepo",
-  "private": true,
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:snapshot-labs/sx-monorepo.git"
