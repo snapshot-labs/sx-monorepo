@@ -5,6 +5,7 @@ import {
   basicVoteTypes,
   singleChoiceVoteTypes,
   approvalVoteTypes,
+  weightedVoteTypes,
   updateProposalTypes,
   cancelProposalTypes
 } from './types';
@@ -157,18 +158,26 @@ export class EthereumSig {
     signer: Signer & TypedDataSigner;
     data: Vote;
   }): Promise<Envelope<Vote>> {
-    const message = {
+    let choice: EIP712VoteMessage['choice'];
+    let voteType = basicVoteTypes;
+
+    if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
+    if (data.type === 'approval') voteType = approvalVoteTypes;
+    if (['weighted', 'quadratic'].includes(data.type)) {
+      choice = JSON.stringify(data.choice);
+      voteType = weightedVoteTypes;
+    } else {
+      choice = data.choice as number | number[];
+    }
+
+    const message: EIP712VoteMessage = {
       space: data.space,
       proposal: data.proposal.toString(),
-      choice: data.choice,
+      choice,
       reason: '',
       app: '',
       metadata: ''
     };
-
-    let voteType = basicVoteTypes;
-    if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
-    if (data.type === 'approval') voteType = approvalVoteTypes;
 
     const signatureData = await this.sign(signer, message, voteType);
 

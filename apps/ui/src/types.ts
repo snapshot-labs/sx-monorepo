@@ -16,7 +16,7 @@ export type NetworkID =
   | 'matic'
   | 'arb1';
 
-export type Choice = 'for' | 'against' | 'abstain' | number | number[];
+export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
 
 export type VoteType =
   | 'basic'
