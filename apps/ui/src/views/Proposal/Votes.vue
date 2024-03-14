@@ -25,7 +25,6 @@ const votingPowerDecimals = computed(() => {
     0
   );
 });
-const isEncrypted = computed(() => !!props.proposal.privacy && !props.proposal.completed);
 
 function reset() {
   votes.value = [];
@@ -210,7 +209,11 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </td>
             <td class="relative">
-              <Encrypted :encrypted="isEncrypted">
+              <div v-if="!!props.proposal.privacy && !props.proposal.completed">
+                <span class="text-skin-heading">Encrypted choice</span>
+                <i-h-lock-closed class="inline-block ml-1" />
+              </div>
+              <div v-else>
                 <div
                   v-if="proposal.type !== 'basic'"
                   class="truncate"
@@ -231,7 +234,7 @@ watch([sortBy, choiceFilter], () => {
                   <IH-x v-else-if="vote.choice === 2" class="inline-block" />
                   <IH-minus-sm v-else class="inline-block" />
                 </UiButton>
-              </Encrypted>
+              </div>
             </td>
             <td class="relative pr-2 text-right">
               <div class="text-skin-link leading-[22px]">
