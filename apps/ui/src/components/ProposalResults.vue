@@ -64,6 +64,7 @@ const results = computed(() =>
     <div class="mt-2.5 text-center">
       <a
         href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
+        target="_blank"
       >
         <IC-Shutter class="w-[80px] text-skin-text inline-block" />
       </a>
@@ -162,6 +163,7 @@ const results = computed(() =>
       <div class="flex items-center">
         <a
           href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
+          target="_blank"
         >
           <IC-Shutter class="w-[80px] text-skin-text" />
         </a>
