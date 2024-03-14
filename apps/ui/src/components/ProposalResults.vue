@@ -47,7 +47,7 @@ const results = computed(() =>
 <template>
   <div
     v-if="!!props.proposal.privacy && !props.proposal.completed"
-    class="text-center p-3.5 leading-5"
+    class="text-center py-3.5 leading-5"
   >
     <div
       class="p-1.5 border text-skin-heading rounded-full mb-3 w-[40px] h-[40px] inline-block bg-skin-input-bg"
