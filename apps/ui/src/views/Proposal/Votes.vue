@@ -210,8 +210,15 @@ watch([sortBy, choiceFilter], () => {
             </td>
             <td class="relative">
               <template v-if="!!props.proposal.privacy && !props.proposal.completed">
-                <span class="text-skin-heading">Encrypted choice</span>
-                <i-h-lock-closed class="inline-block ml-1 mt-[-3px] w-[16px] h-[16px]" />
+                <div class="hidden md:block">
+                  <div class="flex gap-1 items-center">
+                    <span class="text-skin-heading">Encrypted choice</span>
+                    <i-h-lock-closed class="w-[16px] h-[16px] shrink-0" />
+                  </div>
+                </div>
+                <UiTooltip title="Encrypted choice" class="cursor-help md:hidden">
+                  <i-h-lock-closed class="w-[16px] h-[16px]" />
+                </UiTooltip>
               </template>
               <div v-else>
                 <div
