@@ -209,10 +209,10 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </td>
             <td class="relative">
-              <div v-if="!!props.proposal.privacy && !props.proposal.completed">
+              <template v-if="!!props.proposal.privacy && !props.proposal.completed">
                 <span class="text-skin-heading">Encrypted choice</span>
-                <i-h-lock-closed class="inline-block ml-1 w-[16px] h-[16px]" />
-              </div>
+                <i-h-lock-closed class="inline-block ml-1 mt-[-3px] w-[16px] h-[16px]" />
+              </template>
               <div v-else>
                 <div
                   v-if="proposal.type !== 'basic'"
