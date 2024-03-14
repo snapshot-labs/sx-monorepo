@@ -25,4 +25,9 @@ export const COINGECKO_BASE_ASSETS = {
 
 export const MAX_SYMBOL_LENGTH = 12;
 export const BASIC_CHOICES = ['For', 'Against', 'Abstain'];
-export const SUPPORTED_VOTING_TYPES: VoteType[] = ['basic', 'single-choice', 'approval'] as const;
+export const SUPPORTED_VOTING_TYPES: VoteType[] = [
+  'basic',
+  'single-choice',
+  'approval',
+  'weighted'
+] as const;
