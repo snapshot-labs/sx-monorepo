@@ -3,7 +3,8 @@
   "globalDependencies": ["**/.env.*local"],
   "pipeline": {
     "build": {
-      "dependsOn": ["^build", "codegen"]
+      "dependsOn": ["^build", "codegen"],
+      "outputs": ["dist/**", "dist.cjs/**"]
     },
     "lint": {},
     "typecheck": {
