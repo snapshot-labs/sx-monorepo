@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getNetwork, offchainNetworks } from '@/networks';
 import { shortenAddress, _t, _rt, _n } from '@/helpers/utils';
-import { Proposal as ProposalType, Vote } from '@/types';
+import { Choice, Proposal as ProposalType, Vote, VoteType } from '@/types';
 
 const LIMIT = 20;
 
@@ -68,6 +68,14 @@ async function handleEndReached() {
   hasMore.value = newVotes.length >= LIMIT;
   votes.value = [...votes.value, ...newVotes];
   loadingMore.value = false;
+}
+
+function getChoiceText(proposalType: VoteType, choice: Choice) {
+  if (Array.isArray(choice)) {
+    return choice.map(index => props.proposal.choices[index - 1]).join(', ');
+  }
+
+  return props.proposal.choices[(choice as number) - 1];
 }
 
 onMounted(() => {
@@ -212,9 +220,9 @@ watch([sortBy, choiceFilter], () => {
               <div
                 v-if="proposal.type !== 'basic'"
                 class="truncate"
-                :title="proposal.choices[vote.choice - 1]"
+                :title="getChoiceText(proposal.type, vote.choice)"
               >
-                {{ proposal.choices[vote.choice - 1] }}
+                {{ getChoiceText(proposal.type, vote.choice) }}
               </div>
               <UiButton
                 v-else
