@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getNetwork } from '@/networks';
 import { shortenAddress } from '@/helpers/utils';
-import { Proposal as ProposalType, Vote } from '@/types';
+import { Choice, Proposal as ProposalType, Vote, VoteType } from '@/types';
 
 const LIMIT = 20;
 
@@ -48,6 +48,14 @@ async function handleEndReached() {
   loadingMore.value = false;
 }
 
+function getChoiceText(proposalType: VoteType, choice: Choice) {
+  if (Array.isArray(choice)) {
+    return choice.map(index => props.proposal.choices[index - 1]).join(', ');
+  }
+
+  return props.proposal.choices[(choice as number) - 1];
+}
+
 watch([open, () => props.proposal.id], ([toOpen, toId], [, fromId]) => {
   if (toOpen === false) return;
   if (loaded.value && toId === fromId) return;
@@ -83,11 +91,11 @@ watch(
           <div
             v-for="(vote, i) in votes"
             :key="i"
-            class="py-3 px-4 border-b relative"
+            class="py-3 px-4 border-b relative flex gap-2"
             :class="{ 'last:border-b-0': !loadingMore }"
           >
             <div
-              class="absolute top-0 bottom-0 right-0"
+              class="absolute top-0 bottom-0 right-0 z-[-1]"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
               }"
@@ -97,23 +105,26 @@ watch(
                   : 'bg-skin-border opacity-40'
               "
             />
-            <UiStamp :id="vote.voter.id" :size="24" class="relative mr-2" />
+            <UiStamp :id="vote.voter.id" :size="24" />
             <router-link
-              class="relative"
               :to="{
                 name: 'user',
                 params: {
                   id: `${proposal.network}:${vote.voter.id}`
                 }
               }"
+              class="grow"
               @click="$emit('close')"
             >
               {{ vote.voter.name || shortenAddress(vote.voter.id) }}
             </router-link>
-            <div
-              class="absolute right-4 top-3 text-skin-link"
-              v-text="proposal.choices[(vote.choice as number) - 1]"
-            />
+
+            <UiTooltip
+              class="text-skin-link truncate"
+              :title="getChoiceText(proposal.type, vote.choice)"
+            >
+              {{ getChoiceText(proposal.type, vote.choice) }}
+            </UiTooltip>
           </div>
         </UiContainerInfiniteScroll>
       </div>
