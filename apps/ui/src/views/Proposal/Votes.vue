@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getNetwork, offchainNetworks } from '@/networks';
-import { shortenAddress, _t, _rt, _n } from '@/helpers/utils';
+import { shortenAddress, _t, _rt, _n, getChoiceText } from '@/helpers/utils';
 import { Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
@@ -221,13 +221,13 @@ watch([sortBy, choiceFilter], () => {
                 </UiTooltip>
               </template>
               <div v-else>
-                <div
+                <UiTooltip
                   v-if="proposal.type !== 'basic'"
                   class="truncate"
-                  :title="proposal.choices[vote.choice - 1]"
+                  :title="getChoiceText(proposal.choices, vote.choice)"
                 >
-                  {{ proposal.choices[vote.choice - 1] }}
-                </div>
+                  {{ getChoiceText(proposal.choices, vote.choice) }}
+                </UiTooltip>
                 <UiButton
                   v-else
                   class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"

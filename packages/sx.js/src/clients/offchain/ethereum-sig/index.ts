@@ -7,6 +7,7 @@ import {
   singleChoiceVoteTypes,
   approvalVoteTypes,
   encryptedVoteTypes,
+  rankedChoiceVoteTypes,
   updateProposalTypes,
   cancelProposalTypes
 } from './types';
@@ -171,6 +172,7 @@ export class EthereumSig {
     let voteType = basicVoteTypes;
     if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
     if (data.type === 'approval') voteType = approvalVoteTypes;
+    if (data.type === 'ranked-choice') voteType = rankedChoiceVoteTypes;
     if (data.privacy) {
       voteType = encryptedVoteTypes;
       message.choice = await encryptChoices(data.privacy, data.proposal, data.choice);

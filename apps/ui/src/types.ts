@@ -200,7 +200,7 @@ export type Vote = {
     id: string;
   };
   proposal: number | string;
-  choice: number;
+  choice: number | number[];
   vp: number;
   created: number;
   tx: string;

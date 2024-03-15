@@ -31,6 +31,8 @@ export const approvalVoteTypes = {
   ]
 };
 
+export const rankedChoiceVoteTypes = approvalVoteTypes;
+
 export const encryptedVoteTypes = {
   Vote: [
     { name: 'from', type: 'address' },

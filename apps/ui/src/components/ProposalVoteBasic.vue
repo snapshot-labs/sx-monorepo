@@ -4,7 +4,7 @@ import { Choice } from '@/types';
 withDefaults(
   defineProps<{
     sendingType: Choice | null;
-    size: number;
+    size?: number;
   }>(),
   { size: 48 }
 );

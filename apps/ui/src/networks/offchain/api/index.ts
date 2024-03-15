@@ -174,8 +174,7 @@ function formatVote(vote: ApiVote): Vote {
       id: vote.space.id
     },
     proposal: vote.proposal.id,
-    // TODO: handle multiple choices
-    choice: Array.isArray(vote.choice) ? vote.choice[0] : vote.choice,
+    choice: vote.choice,
     vp: vote.vp,
     created: vote.created,
     tx: vote.ipfs
