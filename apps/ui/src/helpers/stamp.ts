@@ -34,7 +34,7 @@ export async function getNames(addresses: string[]): Promise<Record<string, stri
     const entries: any = Object.entries(inputMapping)
       .map(([address, formatted]) => [
         address,
-        data[formatted] || resolvedAddresses.get(formatted) || null
+        resolvedAddresses.get(formatted) || null
       ])
       .filter(([, name]) => name);
 
