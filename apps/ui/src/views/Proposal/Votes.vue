@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getNetwork, offchainNetworks } from '@/networks';
-import { shortenAddress, _t, _rt, _n } from '@/helpers/utils';
-import { Choice, Proposal as ProposalType, Vote, VoteType } from '@/types';
+import { shortenAddress, _t, _rt, _n, getChoiceText } from '@/helpers/utils';
+import { Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
 
@@ -68,14 +68,6 @@ async function handleEndReached() {
   hasMore.value = newVotes.length >= LIMIT;
   votes.value = [...votes.value, ...newVotes];
   loadingMore.value = false;
-}
-
-function getChoiceText(proposalType: VoteType, choice: Choice) {
-  if (Array.isArray(choice)) {
-    return choice.map(index => props.proposal.choices[index - 1]).join(', ');
-  }
-
-  return props.proposal.choices[(choice as number) - 1];
 }
 
 onMounted(() => {
@@ -220,9 +212,9 @@ watch([sortBy, choiceFilter], () => {
               <UiTooltip
                 v-if="proposal.type !== 'basic'"
                 class="truncate"
-                :title="getChoiceText(proposal.type, vote.choice)"
+                :title="getChoiceText(proposal.choices, vote.choice)"
               >
-                {{ getChoiceText(proposal.type, vote.choice) }}
+                {{ getChoiceText(proposal.choices, vote.choice) }}
               </UiTooltip>
               <UiButton
                 v-else
