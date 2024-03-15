@@ -5,7 +5,6 @@ import {
   basicVoteTypes,
   singleChoiceVoteTypes,
   approvalVoteTypes,
-  rankedChoiceVoteTypes,
   updateProposalTypes,
   cancelProposalTypes
 } from './types';
@@ -170,7 +169,6 @@ export class EthereumSig {
     let voteType = basicVoteTypes;
     if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
     if (data.type === 'approval') voteType = approvalVoteTypes;
-    if (data.type === 'ranked-choice') voteType = rankedChoiceVoteTypes;
 
     const signatureData = await this.sign(signer, message, voteType);
 
