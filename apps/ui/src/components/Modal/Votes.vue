@@ -48,6 +48,10 @@ async function handleEndReached() {
   loadingMore.value = false;
 }
 
+const isEncrypted = computed(() => {
+  return !!props.proposal.privacy && !props.proposal.completed;
+});
+
 watch([open, () => props.proposal.id], ([toOpen, toId], [, fromId]) => {
   if (toOpen === false) return;
   if (loaded.value && toId === fromId) return;
@@ -87,6 +91,7 @@ watch(
             :class="{ 'last:border-b-0': !loadingMore }"
           >
             <div
+              v-if="!isEncrypted"
               class="absolute top-0 bottom-0 right-0 z-[-1]"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
@@ -111,7 +116,7 @@ watch(
               {{ vote.voter.name || shortenAddress(vote.voter.id) }}
             </router-link>
 
-            <template v-if="!!props.proposal.privacy && !props.proposal.completed">
+            <template v-if="isEncrypted">
               <div class="flex gap-1 items-center">
                 <span class="text-skin-heading">Encrypted choice</span>
                 <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
