@@ -111,7 +111,14 @@ watch(
               {{ vote.voter.name || shortenAddress(vote.voter.id) }}
             </router-link>
 
+            <template v-if="!!props.proposal.privacy && !props.proposal.completed">
+              <div class="flex gap-1 items-center">
+                <span class="text-skin-heading">Encrypted choice</span>
+                <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
+              </div>
+            </template>
             <UiTooltip
+              v-else
               class="text-skin-link truncate"
               :title="getChoiceText(proposal.choices, vote.choice)"
             >
