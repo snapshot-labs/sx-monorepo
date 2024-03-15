@@ -213,11 +213,11 @@ watch([sortBy, choiceFilter], () => {
                 <div class="hidden md:block">
                   <div class="flex gap-1 items-center">
                     <span class="text-skin-heading">Encrypted choice</span>
-                    <i-h-lock-closed class="w-[16px] h-[16px] shrink-0" />
+                    <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
                   </div>
                 </div>
                 <UiTooltip title="Encrypted choice" class="cursor-help md:hidden">
-                  <i-h-lock-closed class="w-[16px] h-[16px]" />
+                  <IH-lock-closed class="w-[16px] h-[16px]" />
                 </UiTooltip>
               </template>
               <div v-else>
