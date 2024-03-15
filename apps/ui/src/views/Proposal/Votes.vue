@@ -217,13 +217,13 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </td>
             <td class="relative">
-              <div
+              <UiTooltip
                 v-if="proposal.type !== 'basic'"
                 class="truncate"
                 :title="getChoiceText(proposal.type, vote.choice)"
               >
                 {{ getChoiceText(proposal.type, vote.choice) }}
-              </div>
+              </UiTooltip>
               <UiButton
                 v-else
                 class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
