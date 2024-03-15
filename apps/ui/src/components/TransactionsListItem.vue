@@ -22,7 +22,7 @@ if (props.tx._type === 'contractCall') {
   title.value = `Contract call to <b>_NAME_</b>`;
 }
 
-const getParsedTitle = computedAsync(
+const parsedTitle = computedAsync(
   async () => {
     const { recipient } = props.tx._form;
     const names = await getNames([recipient]);
@@ -41,7 +41,7 @@ const getParsedTitle = computedAsync(
       <IH-cash v-if="tx._type === 'sendToken'" />
       <IH-photograph v-else-if="tx._type === 'sendNft'" />
       <IH-code v-else />
-      <div class="ml-2 truncate text-skin-link" v-html="getParsedTitle" />
+      <div class="ml-2 truncate text-skin-link" v-html="parsedTitle" />
     </div>
     <slot name="right" />
   </div>
