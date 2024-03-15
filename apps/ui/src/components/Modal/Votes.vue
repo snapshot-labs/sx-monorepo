@@ -105,12 +105,11 @@ watch(
                   id: `${proposal.network}:${vote.voter.id}`
                 }
               }"
-              class="grow"
               @click="$emit('close')"
             >
               {{ vote.voter.name || shortenAddress(vote.voter.id) }}
             </router-link>
-
+            <div class="grow"></div>
             <UiTooltip
               class="text-skin-link truncate"
               :title="getChoiceText(proposal.choices, vote.choice)"
