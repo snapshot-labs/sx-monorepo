@@ -21,6 +21,11 @@ const VOTING_TYPES_INFO = computed(() => ({
     label: 'Approval voting',
     description: 'Voters can select multiple choices, each choice receiving full voting power.'
   },
+  'ranked-choice': {
+    label: 'Ranked choice voting',
+    description:
+      'Each voter may select and rank any number of choices. Results are calculated by instant-runoff counting method.'
+  },
   weighted: {
     label: 'Weighted voting',
     description: 'Each voter may spread voting power across any number of choices.'

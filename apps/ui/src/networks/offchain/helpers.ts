@@ -14,7 +14,7 @@ export function getSdkChoice(
     return choice as number;
   }
 
-  if (type === 'approval') {
+  if (type === 'approval' || type === 'ranked-choice') {
     return choice as number[];
   }
 

@@ -31,6 +31,8 @@ export const approvalVoteTypes = {
   ]
 };
 
+export const rankedChoiceVoteTypes = approvalVoteTypes;
+
 export const weightedVoteTypes = {
   Vote: [
     { name: 'from', type: 'address' },

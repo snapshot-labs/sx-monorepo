@@ -5,6 +5,7 @@ import {
   basicVoteTypes,
   singleChoiceVoteTypes,
   approvalVoteTypes,
+  rankedChoiceVoteTypes,
   weightedVoteTypes,
   updateProposalTypes,
   cancelProposalTypes
@@ -163,6 +164,7 @@ export class EthereumSig {
 
     if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
     if (data.type === 'approval') voteType = approvalVoteTypes;
+    if (data.type === 'ranked-choice') voteType = rankedChoiceVoteTypes;
     if (['weighted', 'quadratic'].includes(data.type)) {
       choice = JSON.stringify(data.choice);
       voteType = weightedVoteTypes;
