@@ -409,5 +409,5 @@ export function getChoiceText(availableChoices: string[], choice: number | numbe
     return choice.map(index => availableChoices[index - 1]).join(', ');
   }
 
-  return availableChoices[(choice as number) - 1];
+  return availableChoices[choice - 1];
 }
