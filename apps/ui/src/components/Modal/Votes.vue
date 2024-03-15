@@ -112,7 +112,7 @@ watch(
             </router-link>
             <div
               class="absolute right-4 top-3 text-skin-link"
-              v-text="proposal.choices[vote.choice - 1]"
+              v-text="proposal.choices[(vote.choice as number) - 1]"
             />
           </div>
         </UiContainerInfiniteScroll>
