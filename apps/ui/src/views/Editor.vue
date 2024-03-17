@@ -171,10 +171,15 @@ const proposalStart = computed(() => {
 
   return Date.now() / 1e3 + space.value.voting_delay;
 });
-const proposalEnd = computed(() => {
+const proposalMinEnd = computed(() => {
   if (!space.value || !proposalStart.value) return null;
 
   return proposalStart.value + space.value.min_voting_period;
+});
+const proposalMaxEnd = computed(() => {
+  if (!space.value || !proposalStart.value) return null;
+
+  return proposalStart.value + space.value.max_voting_period;
 });
 
 async function handleProposeClick() {
@@ -356,6 +361,36 @@ export default defineComponent({
       <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>
+      <div class="mb-4">
+        <div class="grid sm:grid-cols-3 justify-stretch gap-1 leading-5">
+          <div>
+            <div class="flex mb-2.5 gap-1 items-center">
+              <div class="w-2 h-2 bg-skin-heading rounded-full"></div>
+              <hr class="border-dashed border-skin-heading/40 w-full" />
+            </div>
+            <h5 class="text-skin-heading text-base">Start</h5>
+            <div v-if="proposalStart">
+              {{ _t(proposalStart) }}
+            </div>
+          </div>
+          <div>
+            <div class="flex mb-2.5 gap-1 items-center">
+              <div class="w-2 h-2 border border-skin-heading/40 rounded-full"></div>
+              <hr class="border-dashed border-skin-heading/40 w-full" />
+            </div>
+            <h5 class="text-skin-heading text-base">Min end</h5>
+            <div v-if="proposalMinEnd">{{ _t(proposalMinEnd) }}</div>
+          </div>
+          <div>
+            <div class="flex mb-2.5 gap-1 items-center">
+              <div class="w-2 h-2 border border-skin-heading/40 rounded-full"></div>
+              <hr class="border-dashed border-skin-heading/40 w-full" />
+            </div>
+            <h5 class="text-skin-heading text-base">End</h5>
+            <div v-if="proposalMaxEnd">{{ _t(proposalMaxEnd) }}</div>
+          </div>
+        </div>
+      </div>
       <UiInputString
         :key="proposalKey || ''"
         v-model="proposal.title"
@@ -423,30 +458,6 @@ export default defineComponent({
           :treasury-data="selectedExecutionWithTreasury.treasury"
           class="mb-4"
         />
-      </div>
-      <div class="s-base mb-5">
-        <h4 class="eyebrow mb-2.5">Voting period</h4>
-        <div class="border rounded-lg">
-          <div class="p-2.5 grid sm:grid-cols-2 justify-stretch gap-2.5">
-            <div>
-              <h5 class="uppercase font-bold mb-1 flex items-center gap-2"><IH-clock /> Start</h5>
-              <div v-if="proposalStart" class="text-skin-heading">
-                {{ _t(proposalStart) }}
-              </div>
-            </div>
-            <div>
-              <h5 class="uppercase font-bold mb-1 flex items-center gap-2"><IH-clock /> End</h5>
-              <div v-if="proposalEnd" class="text-skin-heading">{{ _t(proposalEnd) }}</div>
-            </div>
-          </div>
-          <div class="border-t py-2 p-2.5 gap-2 flex items-center">
-            <IH-exclamation-circle class="shrink-0" />
-            <div>
-              You can edit the period in your
-              <router-link :to="{ name: 'space-settings' }">space settings</router-link>
-            </div>
-          </div>
-        </div>
       </div>
     </UiContainer>
     <teleport to="#modal">
