@@ -176,16 +176,16 @@ export function createActions(
 
       return result.map((value: bigint, index: number) => {
         const strategy = strategiesOrValidationParams[index];
-        const decimals = parseInt(strategy.params.decimals || 18);
+        const decimals = parseInt(strategy.params?.decimals || 18);
 
         return {
           address: strategy.name,
           value,
           decimals,
-          symbol: strategy.params.symbol || '',
-          token: strategy.params.address || '',
+          symbol: strategy.params?.symbol || '',
+          token: strategy.params?.address || '',
           chainId: strategy.network ? parseInt(strategy.network) : snapshotInfo.chainId,
-          swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
+          swapLink: getSwapLink(strategy.name, strategy.params?.address, strategy.network)
         };
       });
     }
