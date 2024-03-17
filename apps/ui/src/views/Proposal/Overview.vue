@@ -8,6 +8,7 @@ import {
   getUrl,
   getProposalId
 } from '@/helpers/utils';
+import { offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
@@ -32,11 +33,21 @@ const editable = computed(() => {
 });
 
 const cancellable = computed(() => {
-  return (
-    compareAddresses(props.proposal.space.controller, web3.value.account) &&
-    props.proposal.state !== 'executed' &&
-    props.proposal.cancelled === false
-  );
+  if (offchainNetworks.includes(props.proposal.network)) {
+    const addresses = [
+      props.proposal.author.id,
+      props.proposal.space.admins || [],
+      props.proposal.space.moderators || []
+    ].flat();
+
+    return addresses.some(address => compareAddresses(address, web3.value.account));
+  } else {
+    return (
+      compareAddresses(props.proposal.space.controller, web3.value.account) &&
+      props.proposal.state !== 'executed' &&
+      props.proposal.cancelled === false
+    );
+  }
 });
 
 const discussion = computed(() => {
@@ -73,6 +84,8 @@ async function handleEditClick() {
     title: props.proposal.title,
     body: props.proposal.body,
     discussion: props.proposal.discussion,
+    type: props.proposal.type,
+    choices: props.proposal.choices,
     executionStrategy:
       props.proposal.execution_strategy_type === 'none'
         ? null
@@ -185,7 +198,7 @@ async function handleCancelClick() {
           <span>Discussion</span>
         </h4>
         <a :href="discussion" target="_blank" class="block mb-5">
-          <UiLinkPreview :url="discussion" />
+          <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
       <div v-if="proposal.execution && proposal.execution.length > 0">

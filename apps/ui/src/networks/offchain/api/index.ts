@@ -6,9 +6,18 @@ import {
   PROPOSAL_QUERY,
   VOTES_QUERY
 } from './queries';
+import { enabledNetworks } from '@/networks';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
-import { Space, Proposal, Vote, User, NetworkID, ProposalState } from '@/types';
+import {
+  Space,
+  Proposal,
+  Vote,
+  User,
+  NetworkID,
+  ProposalState,
+  SpaceMetadataTreasury
+} from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
 
@@ -28,7 +37,10 @@ function getProposalState(proposal: ApiProposal): ProposalState {
 function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   // TODO: convert ChainID to ShortName, we might need external mapping to handle
   // all of those - or just have simple map with limited support
-  const wallet = space.treasuries[0] ? `eth:${space.treasuries[0].address}` : '';
+  const treasuries = space.treasuries.filter(treasury =>
+    enabledNetworks.includes(treasury.network as NetworkID)
+  ) as SpaceMetadataTreasury[];
+
   let validationName = space.validation.name;
   const validationParams = space.validation.params || {};
   if (space.validation.name === 'basic') {
@@ -43,7 +55,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
 
   return {
     id: space.id,
-    controller: space.admins[0] ?? '',
+    controller: '',
     network: networkId,
     snapshot_chain_id: parseInt(space.network),
     name: space.name,
@@ -56,12 +68,13 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     discord: '',
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
+    follower_count: space.followersCount,
     voting_power_symbol: space.symbol,
     voting_delay: space.voting.delay ?? 0,
     min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
-    wallet,
+    treasuries,
     delegations: space.delegationPortal
       ? [
           {
@@ -78,6 +91,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     authenticators: [DEFAULT_AUTHENTICATOR],
     executors: [],
     executors_types: [],
+    executors_strategies: [],
     strategies: space.strategies.map(strategy => strategy.name),
     strategies_indicies: [],
     strategies_params: space.strategies.map(strategy => strategy),
@@ -123,7 +137,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       name: proposal.space.name,
       snapshot_chain_id: parseInt(proposal.space.network),
       avatar: '',
-      controller: proposal.space.admins[0] ?? '',
+      controller: '',
+      admins: proposal.space.admins,
+      moderators: proposal.space.moderators,
       voting_power_symbol: proposal.space.symbol,
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
@@ -157,8 +173,7 @@ function formatVote(vote: ApiVote): Vote {
       id: vote.space.id
     },
     proposal: vote.proposal.id,
-    // TODO: handle multiple choices
-    choice: Array.isArray(vote.choice) ? vote.choice[0] : vote.choice,
+    choice: vote.choice,
     vp: vote.vp,
     created: vote.created,
     tx: vote.ipfs

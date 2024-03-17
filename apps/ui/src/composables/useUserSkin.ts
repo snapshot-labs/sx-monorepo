@@ -1,50 +1,23 @@
-import { lsGet, lsSet } from '@/helpers/utils';
-
-const NOT_SET = 'none';
-const DARK_MODE = 'dark';
-const LIGHT_MODE = 'light';
-
-const currenSkin = lsGet('skin', NOT_SET);
-// const osSkin = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? LIGHT_MODE : DARK_MODE;
-const osSkin = DARK_MODE;
-
-const userSkin = ref(currenSkin === NOT_SET ? osSkin : currenSkin);
-const getMode = () => (userSkin.value === LIGHT_MODE ? LIGHT_MODE : DARK_MODE);
-const _toggleSkin = skin => {
-  if (skin === LIGHT_MODE) {
-    lsSet('skin', DARK_MODE);
-    userSkin.value = DARK_MODE;
-  } else {
-    lsSet('skin', LIGHT_MODE);
-    userSkin.value = LIGHT_MODE;
-  }
-};
+type Skin = 'dark' | 'light' | 'none';
 
 export function useUserSkin() {
+  const store = useStorage<Skin>('skin', 'none');
+  const currentMode = computed(() => (store.value === 'light' ? 'light' : 'dark'));
+
   function toggleSkin() {
-    const currentSkin = lsGet('skin', NOT_SET);
-    if (currentSkin === NOT_SET) {
-      _toggleSkin(osSkin);
-    } else {
-      _toggleSkin(currentSkin);
-    }
+    store.value = store.value === 'light' ? 'dark' : 'light';
   }
 
-  watch(
-    userSkin,
-    () => {
-      if (userSkin.value === LIGHT_MODE) {
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-      }
-    },
-    { immediate: true }
-  );
+  watchEffect(() => {
+    if (currentMode.value === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  });
 
   return {
-    userSkin,
-    getMode,
+    currentMode,
     toggleSkin
   };
 }

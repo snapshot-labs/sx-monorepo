@@ -2,7 +2,7 @@
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { Space } from '@/types';
-import { VotingPower } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -12,7 +12,7 @@ const { getCurrent } = useMetaStore();
 const proposalsStore = useProposalsStore();
 
 const votingPowers = ref([] as VotingPower[]);
-const loadingVotingPower = ref(true);
+const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
 
 const selectIconBaseProps = {
@@ -34,13 +34,14 @@ async function handleEndReached() {
 async function getVotingPower() {
   if (!web3.value.account) {
     votingPowers.value = [];
-    loadingVotingPower.value = false;
+    votingPowerStatus.value = 'success';
     return;
   }
 
-  loadingVotingPower.value = true;
+  votingPowerStatus.value = 'loading';
   try {
     votingPowers.value = await network.value.actions.getVotingPower(
+      props.space.id,
       props.space.strategies,
       props.space.strategies_params,
       props.space.strategies_parsed_metadata,
@@ -50,11 +51,11 @@ async function getVotingPower() {
         chainId: props.space.snapshot_chain_id
       }
     );
+    votingPowerStatus.value = 'success';
   } catch (e) {
     console.warn('Failed to load voting power', e);
     votingPowers.value = [];
-  } finally {
-    loadingVotingPower.value = false;
+    votingPowerStatus.value = 'error';
   }
 }
 
@@ -119,11 +120,12 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
       <div class="flex flex-row p-4 space-x-2">
         <IndicatorVotingPower
           :network-id="space.network"
-          :loading="loadingVotingPower"
+          :status="votingPowerStatus"
           :voting-power-symbol="space.voting_power_symbol"
           :voting-powers="votingPowers"
+          @get-voting-power="getVotingPower"
         />
-        <router-link v-if="!network.readOnly" :to="{ name: 'editor' }">
+        <router-link :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />

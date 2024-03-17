@@ -6,7 +6,7 @@ import {
   starknetSepolia,
   NetworkConfig
 } from '@snapshot-labs/sx';
-import { getProvider, createAccountProxy } from './dependencies';
+import { ETH_NODE_URLS, getProvider, createAccountProxy } from './dependencies';
 import { NonceManager } from './nonce-manager';
 
 export const NETWORKS = new Map<string, NetworkConfig>([
@@ -31,9 +31,12 @@ export function getClient(chainId: string) {
   const provider = getProvider(chainId);
   const getAccount = createAccountProxy(process.env.STARKNET_MNEMONIC || '', provider);
 
+  const ethUrl = ETH_NODE_URLS.get(chainId);
+  if (!ethUrl) throw new Error(`Missing ethereum node url for chainId ${chainId}`);
+
   const client = new clients.StarknetTx({
     starkProvider: provider,
-    ethUrl: process.env.ETH_RPC_URL as string,
+    ethUrl,
     networkConfig: NETWORKS.get(chainId)
   });
 

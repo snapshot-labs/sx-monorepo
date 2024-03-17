@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, enabledNetworks } from '@/networks';
-import { SpaceMetadataDelegation } from '@/types';
+import { SpaceMetadataTreasury, SpaceMetadataDelegation } from '@/types';
 
 const props = withDefaults(
   defineProps<{
     showTitle?: boolean;
     form: any;
+    treasuriesValue: SpaceMetadataTreasury[];
     delegationsValue: SpaceMetadataDelegation[];
     id?: string;
     space?: {
@@ -22,39 +22,34 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'errors', value: any);
+  (e: 'treasuries', value: SpaceMetadataTreasury[]);
   (e: 'delegations', value: SpaceMetadataDelegation[]);
   (e: 'pick', field: any);
-  (e: 'no-network');
 }>();
 
-const delegationsModalOpen = ref(false);
+const modalOpen = ref({
+  treasury: false,
+  delegation: false
+});
+
+const editedTreasury = ref<number | null>(null);
+const treasuryInitialState = ref<any | null>(null);
+
 const editedDelegation = ref<number | null>(null);
 const delegationInitialState = ref<SpaceMetadataDelegation | null>(null);
-
-const availableNetworks = enabledNetworks
-  .map(id => {
-    const { name, readOnly } = getNetwork(id);
-
-    return {
-      id,
-      name,
-      readOnly
-    };
-  })
-  .filter(network => !network.readOnly);
 
 const definition = computed(() => {
   return {
     type: 'object',
     title: 'Space',
     additionalProperties: true,
-    required: ['name', 'walletNetwork', 'walletAddress'],
+    required: ['name'],
     properties: {
       avatar: {
         type: 'string',
         format: 'stamp',
         title: 'Avatar',
-        default: props.id
+        default: props.id || '0x2121212121212121212121212121212121212121212121212121212121212121'
       },
       name: {
         type: 'string',
@@ -97,25 +92,7 @@ const definition = computed(() => {
         maxLength: MAX_SYMBOL_LENGTH,
         title: 'Voting power symbol',
         examples: ['e.g. VP']
-      },
-      walletNetwork: {
-        type: ['string', 'null'],
-        enum: [null, ...availableNetworks.map(network => network.id)],
-        options: [{ id: null, name: 'No treasury' }, ...availableNetworks],
-        title: 'Treasury network',
-        nullable: true
-      },
-      ...(props.form.walletNetwork !== null
-        ? {
-            walletAddress: {
-              type: 'string',
-              title: 'Treasury address',
-              examples: ['0x0000…'],
-              format: 'address',
-              minLength: 1
-            }
-          }
-        : {})
+      }
     }
   };
 });
@@ -123,6 +100,19 @@ const definition = computed(() => {
 const formErrors = computed(() =>
   validateForm(definition.value, props.form, { skipEmptyOptionalFields: true })
 );
+
+function addTreasuryConfig(config: SpaceMetadataTreasury) {
+  const newValue = [...props.treasuriesValue];
+
+  if (editedTreasury.value !== null) {
+    newValue[editedTreasury.value] = config;
+    editedTreasury.value = null;
+  } else {
+    newValue.push(config);
+  }
+
+  emit('treasuries', newValue);
+}
 
 function addDelegationConfig(config: SpaceMetadataDelegation) {
   const newValue = [...props.delegationsValue];
@@ -137,17 +127,40 @@ function addDelegationConfig(config: SpaceMetadataDelegation) {
   emit('delegations', newValue);
 }
 
+function addTreasury() {
+  editedTreasury.value = null;
+  treasuryInitialState.value = null;
+
+  modalOpen.value.treasury = true;
+}
+
 function addDelegation() {
   editedDelegation.value = null;
   delegationInitialState.value = null;
-  delegationsModalOpen.value = true;
+
+  modalOpen.value.delegation = true;
+}
+
+function editTreasury(index: number) {
+  editedTreasury.value = index;
+  treasuryInitialState.value = props.treasuriesValue[index];
+
+  modalOpen.value.treasury = true;
 }
 
 function editDelegation(index: number) {
   editedDelegation.value = index;
   delegationInitialState.value = props.delegationsValue[index];
 
-  delegationsModalOpen.value = true;
+  modalOpen.value.delegation = true;
+}
+
+function deleteTreasury(index: number) {
+  const newValue = [
+    ...props.treasuriesValue.slice(0, index),
+    ...props.treasuriesValue.slice(index + 1)
+  ];
+  emit('treasuries', newValue);
 }
 
 function deleteDelegation(index: number) {
@@ -159,13 +172,6 @@ function deleteDelegation(index: number) {
 }
 
 watch(formErrors, value => emit('errors', value));
-
-watch(
-  () => props.form.walletNetwork,
-  to => {
-    if (to === null) emit('no-network');
-  }
-);
 
 onMounted(() => {
   emit('errors', formErrors.value);
@@ -182,7 +188,26 @@ onMounted(() => {
       :definition="definition"
       @pick="field => emit('pick', field)"
     />
-    <h4 class="eyebrow mb-2">Delegations</h4>
+    <h4 class="eyebrow mb-2">Treasuries</h4>
+    <div
+      v-for="(treasury, i) in props.treasuriesValue"
+      :key="i"
+      class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
+    >
+      <div class="flex min-w-0">
+        <div class="whitespace-nowrap">{{ treasury.name }}</div>
+      </div>
+      <div class="flex gap-3">
+        <a @click="editTreasury(i)">
+          <IH-pencil />
+        </a>
+        <a @click="deleteTreasury(i)">
+          <IH-trash />
+        </a>
+      </div>
+    </div>
+    <UiButton class="w-full" @click="addTreasury">Add treasury</UiButton>
+    <h4 class="eyebrow my-2">Delegations</h4>
     <div
       v-for="(delegation, i) in props.delegationsValue"
       :key="i"
@@ -203,10 +228,16 @@ onMounted(() => {
     <UiButton class="w-full" @click="addDelegation">Add delegation</UiButton>
   </div>
   <teleport to="#modal">
+    <ModalTreasuryConfig
+      :open="modalOpen.treasury"
+      :initial-state="treasuryInitialState ?? undefined"
+      @close="modalOpen.treasury = false"
+      @add="addTreasuryConfig"
+    />
     <ModalDelegationConfig
-      :open="delegationsModalOpen"
+      :open="modalOpen.delegation"
       :initial-state="delegationInitialState ?? undefined"
-      @close="delegationsModalOpen = false"
+      @close="modalOpen.delegation = false"
       @add="addDelegationConfig"
     />
   </teleport>

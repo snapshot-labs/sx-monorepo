@@ -4,17 +4,24 @@ import {
   proposeTypes,
   basicVoteTypes,
   singleChoiceVoteTypes,
-  approvalVoteTypes
+  approvalVoteTypes,
+  rankedChoiceVoteTypes,
+  updateProposalTypes,
+  cancelProposalTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
+  SignatureData,
+  Envelope,
   Vote,
   Propose,
-  Envelope,
-  SignatureData,
-  EIP712VoteMessage,
+  UpdateProposal,
+  CancelProposal,
   EIP712Message,
-  EIP712ProposeMessage
+  EIP712VoteMessage,
+  EIP712ProposeMessage,
+  EIP712UpdateProposal,
+  EIP712CancelProposalMessage
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
@@ -37,7 +44,13 @@ export class EthereumSig {
     this.sequencerUrl = opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
   }
 
-  public async sign<T extends EIP712VoteMessage | EIP712ProposeMessage>(
+  public async sign<
+    T extends
+      | EIP712VoteMessage
+      | EIP712ProposeMessage
+      | EIP712UpdateProposal
+      | EIP712CancelProposalMessage
+  >(
     signer: Signer & TypedDataSigner,
     message: T,
     types: Record<string, TypedDataField[]>
@@ -60,7 +73,7 @@ export class EthereumSig {
     };
   }
 
-  public async send(envelope: Envelope<Vote>) {
+  public async send(envelope: Envelope<Vote | Propose | UpdateProposal | CancelProposal>) {
     const { address, signature: sig, domain, types, message } = envelope.signatureData!;
     const payload = {
       address,
@@ -108,6 +121,36 @@ export class EthereumSig {
     };
   }
 
+  public async updateProposal({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateProposal;
+  }): Promise<Envelope<UpdateProposal>> {
+    const signatureData = await this.sign(signer, data, updateProposalTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async cancel({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: CancelProposal;
+  }): Promise<Envelope<CancelProposal>> {
+    const signatureData = await this.sign(signer, data, cancelProposalTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
   public async vote({
     signer,
     data
@@ -127,6 +170,7 @@ export class EthereumSig {
     let voteType = basicVoteTypes;
     if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
     if (data.type === 'approval') voteType = approvalVoteTypes;
+    if (data.type === 'ranked-choice') voteType = rankedChoiceVoteTypes;
 
     const signatureData = await this.sign(signer, message, voteType);
 

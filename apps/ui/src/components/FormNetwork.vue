@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { enabledNetworks, getNetwork } from '@/networks';
+import { enabledReadWriteNetworks, getNetwork } from '@/networks';
 import { getUrl } from '@/helpers/utils';
 import type { NetworkID } from '@/types';
 
@@ -7,12 +7,10 @@ const model = defineModel<NetworkID>({
   required: true
 });
 
-const availableNetworks = enabledNetworks
-  .map(id => {
-    const { name, avatar, readOnly } = getNetwork(id);
-    return { id, name, avatar, readOnly };
-  })
-  .filter(network => !network.readOnly);
+const availableNetworks = enabledReadWriteNetworks.map(id => {
+  const { name, avatar, readOnly } = getNetwork(id);
+  return { id, name, avatar, readOnly };
+});
 </script>
 
 <template>

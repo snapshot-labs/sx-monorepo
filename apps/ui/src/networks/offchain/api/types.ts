@@ -1,3 +1,5 @@
+import { VoteType } from '@/types';
+
 export type ApiSpace = {
   id: string;
   admins: string[];
@@ -11,6 +13,7 @@ export type ApiSpace = {
   symbol: string;
   treasuries: [
     {
+      name: string;
       network: string;
       address: string;
     }
@@ -36,6 +39,7 @@ export type ApiSpace = {
   };
   proposalsCount: number;
   votesCount: number;
+  followersCount: number;
 };
 
 export type ApiProposal = {
@@ -46,16 +50,10 @@ export type ApiProposal = {
     name: string;
     network: string;
     admins: string[];
+    moderators: string[];
     symbol: string;
   };
-  type:
-    | 'basic'
-    | 'single-choice'
-    | 'approval'
-    | 'ranked-choice'
-    | 'quadratic'
-    | 'weighted'
-    | 'custom';
+  type: VoteType;
   title: string;
   body: string;
   discussion: string;

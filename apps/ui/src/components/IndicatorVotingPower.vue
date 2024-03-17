@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { _c } from '@/helpers/utils';
 import { NetworkID } from '@/types';
-import { VotingPower } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { evmNetworks } from '@/networks';
 
 const props = defineProps<{
   networkId: NetworkID;
-  loading: boolean;
+  status: VotingPowerStatus;
   votingPowerSymbol: string;
   votingPowers: VotingPower[];
+}>();
+
+defineEmits<{
+  (e: 'getVotingPower');
 }>();
 
 const { web3 } = useWeb3();
@@ -28,6 +32,7 @@ const formattedVotingPower = computed(() => {
 
   return value;
 });
+const loading = computed(() => props.status === 'loading');
 
 function handleModalOpen() {
   modalOpen.value = true;
@@ -45,14 +50,15 @@ function handleModalOpen() {
         <UiButton
           v-if="web3.account && !(evmNetworks.includes(networkId) && web3.type === 'argentx')"
           :loading="loading"
+          class="flex flex-row items-center justify-center"
           :class="{
             '!px-0 w-[46px]': loading
           }"
-          class="flex flex-row items-center justify-center"
           @click="handleModalOpen"
         >
           <IH-lightning-bolt class="inline-block -ml-1" />
-          <span class="ml-1">{{ formattedVotingPower }}</span>
+          <IH-exclamation v-if="props.status === 'error'" class="inline-block ml-1 text-rose-500" />
+          <span v-else class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
       </UiTooltip>
     </slot>
@@ -62,8 +68,10 @@ function handleModalOpen() {
         :network-id="networkId"
         :voting-power-symbol="votingPowerSymbol"
         :voting-powers="props.votingPowers"
+        :voting-power-status="status"
         :final-decimals="decimals"
         @close="modalOpen = false"
+        @get-voting-power="$emit('getVotingPower')"
       />
     </teleport>
   </div>

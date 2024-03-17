@@ -18,9 +18,24 @@ export type NetworkID =
 
 export type Choice = 'for' | 'against' | 'abstain' | number | number[];
 
+export type VoteType =
+  | 'basic'
+  | 'single-choice'
+  | 'approval'
+  | 'ranked-choice'
+  | 'quadratic'
+  | 'weighted'
+  | 'custom';
+
 export type SelectedStrategy = {
   address: string;
   type: string;
+};
+
+export type SpaceMetadataTreasury = {
+  name: string | null;
+  network: NetworkID | null;
+  address: string | null;
 };
 
 export type SpaceMetadataDelegation = {
@@ -41,8 +56,7 @@ export type SpaceMetadata = {
   github: string;
   discord: string;
   votingPowerSymbol: string;
-  walletNetwork: NetworkID | null;
-  walletAddress: string | null;
+  treasuries: SpaceMetadataTreasury[];
   delegations: SpaceMetadataDelegation[];
 };
 
@@ -70,12 +84,12 @@ export type Space = {
   cover: string;
   about?: string;
   external_url: string;
+  treasuries: SpaceMetadataTreasury[];
   delegations: SpaceMetadataDelegation[];
   twitter: string;
   github: string;
   discord: string;
   voting_power_symbol: string;
-  wallet: string;
   controller: string;
   voting_delay: number;
   min_voting_period: number;
@@ -93,8 +107,15 @@ export type Space = {
   authenticators: string[];
   executors: string[];
   executors_types: string[];
+  executors_strategies: {
+    id: string;
+    type: string;
+    treasury: string | null;
+    treasury_chain: number | null;
+  }[];
   proposal_count: number;
   vote_count: number;
+  follower_count?: number;
   created: number;
 };
 
@@ -102,7 +123,7 @@ export type Proposal = {
   id: string;
   proposal_id: number | string;
   network: NetworkID;
-  type: 'basic' | 'single-choice' | string;
+  type: VoteType;
   quorum: number;
   space: {
     id: string;
@@ -110,6 +131,8 @@ export type Proposal = {
     snapshot_chain_id?: number;
     avatar: string;
     controller: string;
+    admins?: string[];
+    moderators?: string[];
     voting_power_symbol: string;
     authenticators: string[];
     executors: string[];
@@ -174,7 +197,7 @@ export type Vote = {
     id: string;
   };
   proposal: number | string;
-  choice: number;
+  choice: number | number[];
   vp: number;
   created: number;
   tx: string;
@@ -185,6 +208,8 @@ export type Draft = {
   title: string;
   body: string;
   discussion: string;
+  type: VoteType;
+  choices: string[];
   executionStrategy: SelectedStrategy | null;
   execution: Transaction[];
   updatedAt: number;
@@ -246,3 +271,6 @@ export type ContractCallTransaction = BaseTransaction & {
 };
 
 export type Transaction = SendTokenTransaction | SendNftTransaction | ContractCallTransaction;
+
+// Utils
+export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };

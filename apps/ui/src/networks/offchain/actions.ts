@@ -1,10 +1,17 @@
-import { OffchainNetworkConfig, clients, offchainGoerli, offchainMainnet } from '@snapshot-labs/sx';
-import { fetchScoreApi, getSdkChoice } from './helpers';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET, PROPOSAL_VALIDATIONS } from './constants';
+import {
+  OffchainNetworkConfig,
+  clients,
+  getOffchainStrategy,
+  offchainGoerli,
+  offchainMainnet
+} from '@snapshot-labs/sx';
+import { getSdkChoice } from './helpers';
+import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getUrl } from '@/helpers/utils';
 import { getProvider } from '@/helpers/provider';
+import { getSwapLink } from '@/helpers/link';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { StrategyParsedMetadata, Choice, Proposal, Space } from '@/types';
+import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType } from '@/types';
 import type {
   ReadOnlyNetworkActions,
   NetworkConstants,
@@ -38,7 +45,13 @@ export function createActions(
       space: Space,
       cid: string
     ) {
-      let payload: { title: string; body: string; discussion: string };
+      let payload: {
+        title: string;
+        body: string;
+        discussion: string;
+        type: VoteType;
+        choices: string[];
+      };
 
       try {
         const res = await fetch(getUrl(cid) as string);
@@ -55,9 +68,9 @@ export function createActions(
         space: space.id,
         title: payload.title,
         body: payload.body,
-        type: 'basic',
+        type: payload.type,
         discussion: payload.discussion,
-        choices: ['For', 'Against', 'Abstain'],
+        choices: payload.choices,
         start: startTime,
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
@@ -67,6 +80,48 @@ export function createActions(
       };
 
       return client.propose({ signer: web3.getSigner(), data });
+    },
+    async updateProposal(
+      web3: Web3Provider,
+      connectorType: Connector,
+      account: string,
+      space: Space,
+      proposalId: number | string,
+      cid: string
+    ) {
+      let payload: {
+        title: string;
+        body: string;
+        discussion: string;
+        type: VoteType;
+        choices: string[];
+      };
+
+      try {
+        const res = await fetch(getUrl(cid) as string);
+        payload = await res.json();
+      } catch (e) {
+        throw new Error('Failed to fetch proposal metadata');
+      }
+
+      const data = {
+        proposal: proposalId as string,
+        space: space.id,
+        title: payload.title,
+        body: payload.body,
+        type: payload.type,
+        discussion: payload.discussion,
+        choices: payload.choices,
+        plugins: '{}'
+      };
+
+      return client.updateProposal({ signer: web3.getSigner(), data });
+    },
+    cancelProposal(web3: Web3Provider, proposal: Proposal) {
+      return client.cancel({
+        signer: web3.getSigner(),
+        data: { proposal: proposal.proposal_id as string, space: proposal.space.id }
+      });
     },
     vote(
       web3: Web3Provider,
@@ -92,64 +147,54 @@ export function createActions(
     },
     send: (envelope: any) => client.send(envelope),
     getVotingPower: async (
-      strategiesAddresses: string[],
-      strategiesParams: any[],
+      spaceId: string,
+      strategiesNames: string[],
+      strategiesOrValidationParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
-      if (Object.keys(PROPOSAL_VALIDATIONS).includes(strategiesAddresses[0])) {
-        const strategyName = strategiesAddresses[0];
-        const strategyParams = strategiesParams[0];
-        let isValid = false;
+      // This is bit hacky at the moment as for offchain spaces we validate all strategies at once instead of per-strategy validation.
+      // Additionally there is only one proposal validation strategy where on SX there could be multiple (underlying) strategies.
+      // This means this function will be a bit of mess until getVotingPower function become more generic (can it?).
 
-        if (strategyName === 'only-members') {
-          isValid = strategyParams.addresses
-            .map((address: string) => address.toLowerCase())
-            .includes(voterAddress.toLowerCase());
-        } else {
-          isValid = await fetchScoreApi('validate', {
-            validation: strategyName,
-            author: voterAddress,
-            space: '',
-            network: snapshotInfo.chainId,
-            snapshot: snapshotInfo.at ?? 'latest',
-            params: strategyParams
-          });
-        }
+      const name = strategiesNames[0];
+      const strategy = getOffchainStrategy(name);
+      if (!strategy) return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
 
+      const result = await strategy.getVotingPower(
+        spaceId,
+        voterAddress,
+        strategiesOrValidationParams,
+        snapshotInfo
+      );
+
+      if (strategy.type !== 'remote-vp') {
         return [
           {
-            address: strategyName,
+            address: strategiesNames[0],
             decimals: 0,
             symbol: '',
             token: '',
             chainId: snapshotInfo.chainId,
-            value: isValid ? 1n : 0n
+            value: result[0]
           }
         ];
       }
 
-      const result = await fetchScoreApi('get_vp', {
-        address: voterAddress,
-        space: '',
-        strategies: strategiesParams,
-        network: snapshotInfo.chainId ?? chainId,
-        snapshot: snapshotInfo.at ?? 'latest'
-      });
-
-      return result.vp_by_strategy.map((vp: number, index: number) => {
-        const strategy = strategiesParams[index];
-        const decimals = parseInt(strategy.params.decimals || 0);
+      return result.map((value: bigint, index: number) => {
+        const strategy = strategiesOrValidationParams[index];
+        const decimals = parseInt(strategy.params.decimals || 18);
 
         return {
           address: strategy.name,
-          value: BigInt(vp * 10 ** decimals),
+          value,
           decimals,
           symbol: strategy.params.symbol,
           token: strategy.params.address,
-          chainId: strategy.network ? parseInt(strategy.network) : undefined
-        } as VotingPower;
+          chainId: strategy.network ? parseInt(strategy.network) : undefined,
+          swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
+        };
       });
     }
   };

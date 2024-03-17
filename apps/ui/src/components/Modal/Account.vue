@@ -1,31 +1,50 @@
-<script setup>
+<script setup lang="ts">
 import { getInjected } from '@snapshot-labs/lock/src/utils';
 import { shorten, explorerUrl } from '@/helpers/utils';
 import connectors, { mapConnectorId, getConnectorIconUrl } from '@/helpers/connectors';
+
+const win = window;
 
 const injected = getInjected();
 if (injected)
   connectors['injected'] = {
     ...connectors['injected'],
     ...injected,
-    ...{ id: 'injected' },
+    id: 'injected',
     icon: connectors[mapConnectorId(injected.id)]?.icon ?? injected.icon
   };
 
-const props = defineProps({ open: Boolean });
-const emit = defineEmits(['login', 'close']);
-const win = window;
+const props = defineProps<{
+  open: boolean;
+}>();
+const emit = defineEmits<{
+  (e: 'login', connector: string): void;
+  (e: 'close'): void;
+}>();
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
-let step = ref(null);
+const step: Ref<'connect' | null> = ref(null);
+
+const availableConnectors = computed(() => {
+  return Object.values(connectors).filter(connector => {
+    const hasNoType = !('type' in connector) || !connector.type;
+    const isActive =
+      'type' in connector &&
+      'root' in connector &&
+      connector.type === 'injected' &&
+      win[connector.root];
+
+    return hasNoType || isActive;
+  });
+});
 
 async function handleLogout() {
   await logout();
   emit('close');
 }
 
-watch(open, () => (step = null));
+watch(open, () => (step.value = null));
 </script>
 
 <template>
@@ -37,16 +56,13 @@ watch(open, () => (step = null));
     <div v-if="!web3.account || step === 'connect'">
       <div class="m-4 space-y-2">
         <a
-          v-for="(connector, id, i) in connectors"
-          :key="i"
+          v-for="connector in availableConnectors"
+          :key="connector.id"
           target="_blank"
           class="block"
           @click="$emit('login', connector.id)"
         >
-          <UiButton
-            v-if="(connector.type === 'injected' && win[connector.root]) || !connector.type"
-            class="button-outline w-full flex justify-center items-center"
-          >
+          <UiButton class="button-outline w-full flex justify-center items-center">
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
@@ -60,7 +76,7 @@ watch(open, () => (step = null));
       </div>
     </div>
     <div v-else>
-      <div v-if="$auth.isAuthenticated.value" class="m-4 space-y-2">
+      <div class="m-4 space-y-2">
         <a :href="explorerUrl(web3.network.key, web3.account)" target="_blank" class="block">
           <UiButton class="button-outline w-full flex justify-center items-center">
             <UiStamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
@@ -77,7 +93,7 @@ watch(open, () => (step = null));
           </UiButton>
         </router-link>
         <UiButton class="button-outline w-full" @click="step = 'connect'">
-          Connect wallet
+          {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>
         <UiButton class="button-outline w-full !text-skin-danger" @click="handleLogout">
           Log out

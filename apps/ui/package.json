@@ -26,7 +26,7 @@
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
-    "@apollo/client": "^3.8.4",
+    "@apollo/client": "^3.9.5",
     "@argent/get-starknet": "^6.4.7",
     "@braintree/sanitize-url": "^6.0.4",
     "@ensdomains/eth-ens-namehash": "^2.0.15",
@@ -38,7 +38,6 @@
     "@ethersproject/hash": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/units": "^5.7.0",
-    "@floating-ui/vue": "^1.0.2",
     "@headlessui/vue": "^1.7.16",
     "@openzeppelin/merkle-tree": "^1.0.5",
     "@snapshot-labs/eslint-config-vue": "^0.1.0-beta.13",
@@ -73,6 +72,7 @@
     "util": "^0.12.5",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
+    "vue-tippy": "^6.4.1",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {

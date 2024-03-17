@@ -12,8 +12,6 @@ const DEFAULT_FORM_STATE = {
   contractAddress: null
 };
 
-const form: Ref<SpaceMetadataDelegation> = ref(clone(DEFAULT_FORM_STATE));
-
 const props = defineProps<{
   open: boolean;
   initialState?: SpaceMetadataDelegation;
@@ -22,6 +20,10 @@ const emit = defineEmits<{
   (e: 'add', config: SpaceMetadataDelegation);
   (e: 'close'): void;
 }>();
+
+const showPicker = ref(false);
+const searchValue = ref('');
+const form: Ref<SpaceMetadataDelegation> = ref(clone(DEFAULT_FORM_STATE));
 
 const availableNetworks = enabledNetworks
   .map(id => {
@@ -120,11 +122,37 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Add delegation'" />
+      <template v-if="showPicker">
+        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+          <IH-arrow-narrow-left class="mr-2" />
+        </a>
+        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+          <IH-search class="mx-2" />
+          <input
+            ref="searchInput"
+            v-model="searchValue"
+            type="text"
+            placeholder="Search name or paste address"
+            class="flex-auto bg-transparent text-skin-link"
+          />
+        </div>
+      </template>
     </template>
-    <div class="s-box p-4">
+    <PickerContact
+      v-if="showPicker"
+      :loading="false"
+      :search-value="searchValue"
+      @pick="
+        value => {
+          form.contractAddress = value;
+          showPicker = false;
+        }
+      "
+    />
+    <div v-else class="s-box p-4">
       <UiForm :model-value="form" :error="formErrors" :definition="definition" />
     </div>
     <template #footer>

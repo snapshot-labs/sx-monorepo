@@ -1,5 +1,48 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`EthereumSig > should create cancelProposal envelope 1`] = `
+{
+  "data": {
+    "proposal": "0x56b857b02d573b0ba747333b57cb3dd11df57cc0d1bcc41c3c990466b477c5e8",
+    "space": "test.eth",
+  },
+  "signatureData": {
+    "address": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+    "domain": {
+      "name": "snapshot",
+      "version": "0.1.4",
+    },
+    "message": {
+      "from": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+      "proposal": "0x56b857b02d573b0ba747333b57cb3dd11df57cc0d1bcc41c3c990466b477c5e8",
+      "space": "test.eth",
+      "timestamp": 1705795200,
+    },
+    "signature": "0xe358de8e39c6c0cc9df929892e61806371e6539199a2b0781b9100700760067334024ca8cd5f86f1cb16fc93e76602989618eeacebf1fafbc1acad882d14b4d61c",
+    "types": {
+      "CancelProposal": [
+        {
+          "name": "from",
+          "type": "address",
+        },
+        {
+          "name": "space",
+          "type": "string",
+        },
+        {
+          "name": "timestamp",
+          "type": "uint64",
+        },
+        {
+          "name": "proposal",
+          "type": "bytes32",
+        },
+      ],
+    },
+  },
+}
+`;
+
 exports[`EthereumSig > should create propose envelope 1`] = `
 {
   "data": {

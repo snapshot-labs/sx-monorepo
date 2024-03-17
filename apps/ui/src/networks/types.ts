@@ -75,12 +75,16 @@ export type VotingPower = {
   token: string | null;
   symbol: string;
   chainId?: number;
+  swapLink?: string;
 };
+
+export type VotingPowerStatus = 'loading' | 'success' | 'error';
 
 // TODO: make sx.js accept Signer instead of Web3Provider | Wallet
 
 export type ReadOnlyNetworkActions = {
   getVotingPower(
+    spaceId: string,
     strategiesAddresses: string[],
     strategiesParams: any[],
     strategiesMetadata: StrategyParsedMetadata[],
@@ -96,6 +100,17 @@ export type ReadOnlyNetworkActions = {
     executionStrategy: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
+  updateProposal(
+    web3: Web3Provider,
+    connectorType: Connector,
+    account: string,
+    space: Space,
+    proposalId: number | string,
+    cid: string,
+    executionStrategy: string | null,
+    transactions: MetaTransaction[]
+  ): Promise<any>;
+  cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(
     web3: Web3Provider,
     connectorType: Connector,
@@ -132,17 +147,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     }
   );
   setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
-  updateProposal(
-    web3: Web3Provider,
-    connectorType: Connector,
-    account: string,
-    space: Space,
-    proposalId: number | string,
-    cid: string,
-    executionStrategy: string | null,
-    transactions: MetaTransaction[]
-  );
-  cancelProposal(web3: Web3Provider, proposal: Proposal);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
@@ -213,6 +217,7 @@ export type NetworkHelpers = {
   getRelayerAuthenticatorType(authenticator: string): 'evm' | 'evm-tx' | 'starknet' | null;
   isStrategySupported(strategy: string): boolean;
   isExecutorSupported(executor: string): boolean;
+  isVotingTypeSupported(type: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;

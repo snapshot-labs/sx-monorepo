@@ -23,6 +23,8 @@ type Space @entity {
     @derivedFrom(field: "space")
   proposal_count: Int!
   vote_count: Int!
+  proposer_count: Int!
+  voter_count: Int!
   created: Int!
   tx: Bytes!
 }
@@ -34,6 +36,7 @@ type SpaceMetadata @entity {
   avatar: String!
   cover: String!
   external_url: String!
+  treasuries: [String!]!
   delegations: [String!]!
   github: String!
   twitter: String!
@@ -42,6 +45,7 @@ type SpaceMetadata @entity {
   wallet: String!
   executors: [Bytes!]!
   executors_types: [String!]!
+  executors_strategies: [ExecutionStrategy!]!
 }
 
 type StrategiesParsedMetadata @entity {
@@ -72,6 +76,8 @@ type ExecutionStrategy @entity {
   id: ID!
   type: String!
   quorum: BigDecimal!
+  treasury: Bytes
+  treasury_chain: Int
   timelock_veto_guardian: Bytes
   timelock_delay: BigInt!
 }
@@ -141,4 +147,12 @@ type User @entity {
   proposal_count: Int!
   vote_count: Int!
   created: Int!
+}
+
+type Leaderboard @entity {
+  id: String!
+  space: Space!
+  user: User!
+  proposal_count: Int!
+  vote_count: Int!
 }

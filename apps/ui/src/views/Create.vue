@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone, getSalt } from '@/helpers/utils';
-import { getNetwork, enabledNetworks } from '@/networks';
+import { getNetwork, enabledReadWriteNetworks } from '@/networks';
 import type { StrategyConfig } from '@/networks/types';
 import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
@@ -46,8 +46,6 @@ const { predictSpaceAddress } = useActions();
 const { web3 } = useWeb3();
 
 const pagesRefs = ref([] as HTMLElement[]);
-const showPicker = ref(false);
-const searchValue = ref('');
 const sending = ref(false);
 const currentPage: Ref<PageID> = ref('profile');
 const pagesErrors: Ref<Record<PageID, Record<string, string>>> = ref({
@@ -71,12 +69,11 @@ const metadataForm: SpaceMetadata = reactive(
     github: '',
     discord: '',
     votingPowerSymbol: '',
-    walletNetwork: null,
-    walletAddress: null,
+    treasuries: [],
     delegations: []
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref(enabledNetworks[0]);
+const selectedNetworkId: Ref<NetworkID> = ref(enabledReadWriteNetworks[0]);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
@@ -131,11 +128,6 @@ function handleNextClick() {
 
   currentPage.value = PAGES[currentIndex + 1].id;
   pagesRefs.value[currentIndex + 1].scrollIntoView();
-}
-
-function handlePickerSelect(value: string) {
-  showPicker.value = false;
-  metadataForm.walletAddress = value;
 }
 
 async function handleSubmit() {
@@ -203,10 +195,10 @@ watchEffect(() => setTitle('Create space'));
           <FormProfile
             v-if="currentPage === 'profile'"
             :form="metadataForm"
+            :treasuries-value="metadataForm.treasuries"
             :delegations-value="metadataForm.delegations"
-            @pick="showPicker = true"
+            @treasuries="v => (metadataForm.treasuries = v)"
             @delegations="v => (metadataForm.delegations = v)"
-            @no-network="metadataForm.walletAddress = null"
             @errors="v => handleErrors('profile', v)"
           />
           <FormNetwork v-else-if="currentPage === 'network'" v-model="selectedNetworkId" />
@@ -270,26 +262,5 @@ watchEffect(() => setTitle('Create space'));
         </UiButton>
       </div>
     </div>
-    <teleport to="#modal">
-      <UiModal :open="showPicker" @close="showPicker = false">
-        <template #header>
-          <h3>Select contact</h3>
-          <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
-            <IH-arrow-narrow-left class="mr-2" />
-          </a>
-          <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-            <IH-search class="mx-2" />
-            <input
-              ref="searchInput"
-              v-model="searchValue"
-              type="text"
-              placeholder="Search"
-              class="flex-auto bg-transparent text-skin-link"
-            />
-          </div>
-        </template>
-        <PickerContact :loading="false" :search-value="searchValue" @pick="handlePickerSelect" />
-      </UiModal>
-    </teleport>
   </div>
 </template>

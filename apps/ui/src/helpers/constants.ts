@@ -1,3 +1,5 @@
+import { VoteType } from '@/types';
+
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const CHAIN_IDS = {
@@ -22,5 +24,10 @@ export const COINGECKO_BASE_ASSETS = {
 };
 
 export const MAX_SYMBOL_LENGTH = 12;
-export const CHOICES = ['For', 'Against', 'Abstain'];
-export const SUPPORTED_VOTING_TYPES = ['basic', 'single-choice', 'approval'];
+export const BASIC_CHOICES = ['For', 'Against', 'Abstain'];
+export const SUPPORTED_VOTING_TYPES: VoteType[] = [
+  'basic',
+  'single-choice',
+  'approval',
+  'ranked-choice'
+] as const;

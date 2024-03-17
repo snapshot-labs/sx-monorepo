@@ -1,6 +1,6 @@
 import { validateAndParseAddress } from 'starknet';
 import { CheckpointWriter } from '@snapshot-labs/checkpoint';
-import { Space, Vote, User, Proposal } from '../.checkpoint/models';
+import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
 import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
 import {
@@ -12,7 +12,8 @@ import {
   handleStrategiesMetadata,
   longStringToText,
   updateProposaValidationStrategy,
-  registerProposal
+  registerProposal,
+  formatAddressVariant
 } from './utils';
 
 type Strategy = {
@@ -61,6 +62,8 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
   space.authenticators = event.authenticators;
   space.proposal_count = 0;
   space.vote_count = 0;
+  space.proposer_count = 0;
+  space.voter_count = 0;
   space.created = block?.timestamp ?? getCurrentTimestamp();
   space.tx = tx.transaction_hash;
 
@@ -304,7 +307,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   if (!space) return;
 
   const proposalId = parseInt(BigInt(event.proposal_id).toString());
-  const author = findVariant(event.author).value;
+  const author = formatAddressVariant(findVariant(event.author));
 
   const created = block?.timestamp ?? getCurrentTimestamp();
 
@@ -357,8 +360,6 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     console.log(JSON.stringify(e).slice(0, 256));
   }
 
-  space.proposal_count += 1;
-
   const existingUser = await User.loadEntity(author);
   if (existingUser) {
     existingUser.proposal_count += 1;
@@ -368,6 +369,21 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     user.created = created;
     await user.save();
   }
+
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author}`);
+  if (!leaderboardItem) {
+    leaderboardItem = new Leaderboard(`${spaceId}/${author}`);
+    leaderboardItem.space = spaceId;
+    leaderboardItem.user = author;
+    leaderboardItem.vote_count = 0;
+    leaderboardItem.proposal_count = 0;
+  }
+
+  leaderboardItem.proposal_count += 1;
+  await leaderboardItem.save();
+
+  if (leaderboardItem.proposal_count === 1) space.proposer_count += 1;
+  space.proposal_count += 1;
 
   const herodotusStrategiesIndicies = space.strategies
     .map((strategy, i) => [strategy, i] as const)
@@ -476,11 +492,11 @@ export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event 
 
   const spaceId = validateAndParseAddress(rawEvent.from_address);
   const proposalId = parseInt(event.proposal_id);
-  const voter = findVariant(event.voter).value;
   const choice = getVoteValue(findVariant(event.choice).key);
   const vp = BigInt(event.voting_power);
 
   const created = block?.timestamp ?? getCurrentTimestamp();
+  const voter = formatAddressVariant(findVariant(event.voter));
 
   const vote = new Vote(`${spaceId}/${proposalId}/${voter}`);
   vote.space = spaceId;
@@ -502,9 +518,23 @@ export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event 
     await user.save();
   }
 
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter}`);
+  if (!leaderboardItem) {
+    leaderboardItem = new Leaderboard(`${spaceId}/${voter}`);
+    leaderboardItem.space = spaceId;
+    leaderboardItem.user = voter;
+    leaderboardItem.vote_count = 0;
+    leaderboardItem.proposal_count = 0;
+  }
+
+  leaderboardItem.vote_count += 1;
+  await leaderboardItem.save();
+
   const space = await Space.loadEntity(spaceId);
   if (space) {
     space.vote_count += 1;
+    if (leaderboardItem.vote_count === 1) space.voter_count += 1;
+
     await space.save();
   }
 

@@ -7,7 +7,8 @@ import {
   COINGECKO_BASE_ASSETS
 } from '@/helpers/constants';
 
-const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3/simple';
+const COINGECKO_API_KEY = 'CG-1z19sMoCC6LoqR4b6avyLi3U';
+const COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3/simple';
 const COINGECKO_PARAMS = '&vs_currencies=usd&include_24hr_change=true';
 
 export const METADATA_BY_CHAIN_ID = new Map(
@@ -26,11 +27,13 @@ export function useBalances() {
 
   async function getCoins(assetPlatform: string, baseToken: string, contractAddresses: string[]) {
     const [baseTokenData, tokenData] = await Promise.all([
-      callCoinGecko(`${COINGECKO_API_URL}/price?ids=${baseToken}${COINGECKO_PARAMS}`),
+      callCoinGecko(
+        `${COINGECKO_API_URL}/price?ids=${baseToken}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
+      ),
       callCoinGecko(
         `${COINGECKO_API_URL}/token_price/${assetPlatform}?contract_addresses=${contractAddresses
-          .slice(0, 10)
-          .join(',')}${COINGECKO_PARAMS}`
+          .slice(0, 100)
+          .join(',')}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
       )
     ]);
 
@@ -65,20 +68,22 @@ export function useBalances() {
           )
         : [];
 
-    assets.value = tokensWithBalance.map(asset => {
-      if (!coins[asset.contractAddress]) return asset;
+    assets.value = tokensWithBalance
+      .map(asset => {
+        if (!coins[asset.contractAddress]) return asset;
 
-      const price = coins[asset.contractAddress]?.usd || 0;
-      const change = coins[asset.contractAddress]?.usd_24h_change || 0;
-      const value = parseFloat(formatUnits(asset.tokenBalance, asset.decimals)) * price;
+        const price = coins[asset.contractAddress]?.usd || 0;
+        const change = coins[asset.contractAddress]?.usd_24h_change || 0;
+        const value = parseFloat(formatUnits(asset.tokenBalance, asset.decimals)) * price;
 
-      return {
-        ...asset,
-        price,
-        change,
-        value
-      };
-    });
+        return {
+          ...asset,
+          price,
+          change,
+          value
+        };
+      })
+      .sort((a, b) => b.value - a.value);
 
     loading.value = false;
     loaded.value = true;

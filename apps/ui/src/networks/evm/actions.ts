@@ -41,6 +41,7 @@ import type {
   Choice,
   NetworkID
 } from '@/types';
+import { getSwapLink } from '@/helpers/link';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   137: evmPolygon,
@@ -553,6 +554,7 @@ export function createActions(
     },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (
+      spaceId: string,
       strategiesAddresses: string[],
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
@@ -585,7 +587,8 @@ export function createActions(
             value,
             decimals: strategiesMetadata[i]?.decimals ?? 0,
             symbol: strategiesMetadata[i]?.symbol ?? '',
-            token
+            token,
+            swapLink: getSwapLink(strategy.type, address, chainId)
           };
         })
       );

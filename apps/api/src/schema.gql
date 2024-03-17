@@ -27,6 +27,8 @@ type Space {
     @derivedFrom(field: "space")
   proposal_count: Int!
   vote_count: Int!
+  proposer_count: Int!
+  voter_count: Int!
   created: Int!
   tx: String!
   proposals: [Proposal]! @derivedFrom(field: "space")
@@ -39,6 +41,7 @@ type SpaceMetadataItem {
   avatar: String!
   cover: String!
   external_url: String!
+  treasuries: [String]!
   delegations: [String]!
   github: String!
   twitter: String!
@@ -47,6 +50,8 @@ type SpaceMetadataItem {
   wallet: String!
   executors: [String]!
   executors_types: [String]!
+  # this is dummy field, we should add support for many-to-many in the future
+  executors_strategies: [ExecutionStrategy]! @derivedFrom(field: "id")
 }
 
 type VotingPowerValidationStrategiesParsedMetadataItem {
@@ -71,6 +76,16 @@ type StrategiesParsedMetadataDataItem {
   symbol: String!
   token: String
   payload: String
+}
+
+type ExecutionStrategy {
+  id: String!
+  type: String!
+  quorum: BigDecimalVP!
+  treasury: String
+  treasury_chain: String
+  timelock_veto_guardian: String
+  timelock_delay: BigInt!
 }
 
 type Proposal {
@@ -135,4 +150,12 @@ type User {
   created: Int!
   proposals: [Proposal]! @derivedFrom(field: "author")
   votes: [Vote]! @derivedFrom(field: "voter")
+}
+
+type Leaderboard {
+  id: String!
+  space: Space!
+  user: User!
+  proposal_count: Int!
+  vote_count: Int!
 }

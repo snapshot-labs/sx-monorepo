@@ -2,7 +2,7 @@
 import { getNetwork, offchainNetworks } from '@/networks';
 import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
 import { Choice } from '@/types';
-import { VotingPower } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const route = useRoute();
 const { setFavicon } = useFavicon();
@@ -15,7 +15,7 @@ const { vote } = useActions();
 
 const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
-const loadingVotingPower = ref(true);
+const votingPowerStatus = ref<VotingPowerStatus>('loading');
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -44,24 +44,25 @@ async function getVotingPower() {
 
   if (!web3.value.account || !proposal.value) {
     votingPowers.value = [];
-    loadingVotingPower.value = false;
+    votingPowerStatus.value = 'success';
     return;
   }
 
-  loadingVotingPower.value = true;
+  votingPowerStatus.value = 'loading';
   try {
     votingPowers.value = await network.value.actions.getVotingPower(
+      proposal.value.space.id,
       proposal.value.strategies,
       proposal.value.strategies_params,
       proposal.value.space.strategies_parsed_metadata,
       web3.value.account,
       { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
     );
+    votingPowerStatus.value = 'success';
   } catch (e) {
     console.warn('Failed to load voting power', e);
     votingPowers.value = [];
-  } finally {
-    loadingVotingPower.value = false;
+    votingPowerStatus.value = 'error';
   }
 }
 
@@ -146,16 +147,26 @@ watchEffect(() => {
             v-if="web3.account && networkId"
             v-slot="props"
             :network-id="networkId"
-            :loading="loadingVotingPower"
+            :status="votingPowerStatus"
             :voting-power-symbol="proposal.space.voting_power_symbol"
             :voting-powers="votingPowers"
             class="mb-2 mt-4 first:mt-1"
+            @get-voting-power="getVotingPower"
           >
             <h4 class="block eyebrow">Your voting power</h4>
             <div class="pt-2">
-              <UiLoading v-if="loadingVotingPower" />
-              <button v-else class="text-skin-link text-lg" @click="props.onClick">
-                {{ props.formattedVotingPower }}
+              <UiLoading v-if="votingPowerStatus === 'loading'" />
+              <button
+                v-else
+                class="text-skin-link text-lg flex items-center"
+                @click="props.onClick"
+              >
+                <IH-lightning-bolt class="inline-block" />
+                <IH-exclamation
+                  v-if="votingPowerStatus === 'error'"
+                  class="inline-block ml-1 text-rose-500"
+                />
+                <span v-else class="ml-2" v-text="props.formattedVotingPower" />
               </button>
             </div>
           </IndicatorVotingPower>
@@ -175,6 +186,12 @@ watchEffect(() => {
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
+              :proposal="proposal"
+              :sending-type="sendingType"
+              @vote="handleVoteClick"
+            />
+            <ProposalVoteRankedChoice
+              v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
               @vote="handleVoteClick"

@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { getNetwork, supportsNullCurrent } from '@/networks';
-import { omit, shortenAddress } from '@/helpers/utils';
+import { compareAddresses, omit } from '@/helpers/utils';
+import { CHAIN_IDS } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
-import { SelectedStrategy } from '@/types';
+import { RequiredProperty, SelectedStrategy, SpaceMetadataTreasury } from '@/types';
+
+type StrategyWithTreasury = SelectedStrategy & {
+  treasury: RequiredProperty<SpaceMetadataTreasury>;
+};
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -15,6 +20,14 @@ const DISCUSSION_DEFINITION = {
   format: 'uri',
   title: 'Discussion',
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
+};
+
+const CHOICES_DEFINITION = {
+  type: 'array',
+  title: 'Choices',
+  minItems: 1,
+  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
+  additionalItems: { type: 'string', maxLength: 32 }
 };
 
 const { setTitle } = useTitle();
@@ -83,9 +96,43 @@ const supportedExecutionStrategies = computed(() => {
   const networkValue = network.value;
   if (!spaceValue || !networkValue) return null;
 
-  return spaceValue.executors.filter((_, i) =>
-    networkValue.helpers.isExecutorSupported(spaceValue.executors_types[i])
+  return spaceValue.treasuries
+    .map(treasury => {
+      const strategy = spaceValue.executors_strategies.find(strategy => {
+        return (
+          strategy.treasury &&
+          strategy.treasury_chain &&
+          treasury.address &&
+          treasury.network &&
+          compareAddresses(strategy.treasury, treasury.address) &&
+          CHAIN_IDS[treasury.network] === strategy.treasury_chain
+        );
+      });
+
+      if (!strategy) return null;
+
+      return {
+        address: strategy.id,
+        type: strategy.type,
+        treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+      };
+    })
+    .filter(
+      strategy => strategy && networkValue.helpers.isExecutorSupported(strategy.type)
+    ) as StrategyWithTreasury[];
+});
+const selectedExecutionWithTreasury = computed(() => {
+  if (!executionStrategy.value || !supportedExecutionStrategies.value) return null;
+
+  return supportedExecutionStrategies.value.find(
+    strategy => strategy.address === executionStrategy.value?.address
   );
+});
+const votingTypes = computed(() => {
+  const networkValue = network.value;
+  if (!networkValue) return null;
+
+  return SUPPORTED_VOTING_TYPES.filter(type => networkValue.helpers.isVotingTypeSupported(type));
 });
 const formErrors = computed(() => {
   if (!proposal.value) return {};
@@ -95,15 +142,17 @@ const formErrors = computed(() => {
       type: 'object',
       title: 'Proposal',
       additionalProperties: false,
-      required: ['title'],
+      required: ['title', 'choices'],
       properties: {
         title: TITLE_DEFINITION,
-        discussion: DISCUSSION_DEFINITION
+        discussion: DISCUSSION_DEFINITION,
+        choices: CHOICES_DEFINITION
       }
     },
     {
       title: proposal.value.title,
-      discussion: proposal.value.discussion
+      discussion: proposal.value.discussion,
+      choices: proposal.value.choices
     },
     {
       skipEmptyOptionalFields: true
@@ -142,6 +191,8 @@ async function handleProposeClick() {
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
+        proposal.value.type,
+        proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
@@ -151,6 +202,8 @@ async function handleProposeClick() {
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
+        proposal.value.type,
+        proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
@@ -185,6 +238,7 @@ async function getVotingPower() {
     const network = getNetwork(space.value.network);
 
     const votingPowers = await network.actions.getVotingPower(
+      space.value.id,
       space.value.voting_power_validation_strategy_strategies,
       space.value.voting_power_validation_strategy_strategies_params,
       space.value.voting_power_validation_strategies_parsed_metadata,
@@ -233,6 +287,7 @@ watchEffect(() => {
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
 import { _t } from '@/helpers/utils';
+import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 
 const { createDraft } = useEditor();
 
@@ -321,7 +376,7 @@ export default defineComponent({
         :body="proposal.body"
       />
       <UiComposer v-else v-model="proposal.body" class="" />
-      <div class="s-base mb-4">
+      <div class="s-base mb-5">
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.discussion"
@@ -330,6 +385,10 @@ export default defineComponent({
         />
         <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
       </div>
+      <template v-if="votingTypes && (votingTypes.length > 1 || votingTypes[0] !== 'basic')">
+        <EditorVotingType v-model="proposal" :voting-types="votingTypes" />
+        <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      </template>
       <div
         v-if="
           space &&
@@ -341,30 +400,27 @@ export default defineComponent({
         <h4 class="eyebrow mb-2">Execution</h4>
         <div class="border rounded-lg mb-3">
           <ExecutionButton
-            v-for="(executor, i) in supportedExecutionStrategies"
-            :key="executor"
+            v-for="strategy in supportedExecutionStrategies"
+            :key="strategy.address"
             class="flex-auto flex items-center gap-2"
-            @click="
-              handleExecutionStrategySelected({
-                address: executor,
-                type: space.executors_types[i]
-              })
-            "
+            @click="handleExecutionStrategySelected(strategy)"
           >
             <IH-chip />
             <span class="flex-1">
-              {{ network.constants.EXECUTORS[space.executors_types[i]] }}
-              execution strategy
-              <span class="hidden sm:inline-block">({{ shortenAddress(executor) }})</span>
+              {{ strategy.treasury.name }}
+              <span class="hidden sm:inline-block">
+                ({{ network.constants.EXECUTORS[strategy.type] }} execution strategy)
+              </span>
             </span>
-            <IH-check v-if="executionStrategy?.address === executor" />
+            <IH-check v-if="executionStrategy?.address === strategy.address" />
           </ExecutionButton>
         </div>
         <EditorExecution
-          v-if="executionStrategy"
+          v-if="selectedExecutionWithTreasury"
+          :key="selectedExecutionWithTreasury.address"
           v-model="proposal.execution"
-          :selected-execution-strategy="executionStrategy"
           :space="space"
+          :treasury-data="selectedExecutionWithTreasury.treasury"
           class="mb-4"
         />
       </div>

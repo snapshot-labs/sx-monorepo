@@ -4,6 +4,7 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
+import { getAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
@@ -80,7 +81,9 @@ export function sanitizeUrl(url: string): string | null {
 }
 
 export function shortenAddress(str = '') {
-  return `${str.slice(0, 6)}...${str.slice(str.length - 4)}`;
+  const formatted = formatAddress(str);
+
+  return `${formatted.slice(0, 6)}...${formatted.slice(formatted.length - 4)}`;
 }
 
 export function shorten(str: string, key?: number | 'symbol' | 'name' | 'choice'): string {
@@ -92,6 +95,15 @@ export function shorten(str: string, key?: number | 'symbol' | 'name' | 'choice'
   if (key === 'choice') limit = 12;
   if (limit) return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
   return shortenAddress(str);
+}
+
+export function formatAddress(address: string) {
+  if (address.length === 42) return getAddress(address);
+  try {
+    return validateAndParseAddress(address);
+  } catch {
+    return address;
+  }
 }
 
 export function explorerUrl(network, str: string, type = 'address'): string {
@@ -301,11 +313,6 @@ export function createErc1155Metadata(
   metadata: SpaceMetadata,
   extraProperties?: Record<string, any>
 ) {
-  const wallets: string[] = [];
-  if (metadata.walletNetwork && metadata.walletAddress) {
-    wallets.push(`${metadata.walletNetwork}:${metadata.walletAddress}`);
-  }
-
   return {
     name: metadata.name,
     avatar: metadata.avatar,
@@ -317,7 +324,11 @@ export function createErc1155Metadata(
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
-      wallets,
+      treasuries: metadata.treasuries.map(treasury => ({
+        name: treasury.name,
+        network: treasury.network,
+        address: treasury.address
+      })),
       delegations: metadata.delegations.map(delegation => ({
         name: delegation.name,
         api_type: delegation.apiType,
@@ -364,7 +375,11 @@ export function getStampUrl(
 
   const cacheParam = hash ? `&cb=${hash}` : '';
 
-  return `https://cdn.stamp.fyi/${type}/${id}${sizeParam}${cacheParam}`;
+  const formattedId = ['avatar', 'space-sx', 'space-cover-sx'].includes(type)
+    ? formatAddress(id)
+    : id;
+
+  return `https://cdn.stamp.fyi/${type}/${formattedId}${sizeParam}${cacheParam}`;
 }
 
 export async function imageUpload(file: File) {
@@ -387,4 +402,12 @@ export async function imageUpload(file: File) {
 export function simplifyURL(fullURL: string): string {
   const url = new URL(fullURL);
   return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+}
+
+export function getChoiceText(availableChoices: string[], choice: number | number[]) {
+  if (Array.isArray(choice)) {
+    return choice.map(index => availableChoices[index - 1]).join(', ');
+  }
+
+  return availableChoices[choice - 1];
 }

@@ -441,6 +441,7 @@ export function createActions(
       throw new Error('Not implemented');
     },
     getVotingPower: async (
+      spaceId: string,
       strategiesAddresses: string[],
       strategiesParams: any[],
       strategiesMetadata: StrategyParsedMetadata[],
