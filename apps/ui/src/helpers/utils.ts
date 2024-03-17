@@ -404,9 +404,26 @@ export function simplifyURL(fullURL: string): string {
   return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
 }
 
-export function getChoiceText(availableChoices: string[], choice: number | number[]) {
+export function getChoiceWeight(selectedChoices: Record<string, number>, index: number) {
+  const whole = Object.values(selectedChoices).reduce((a, b) => a + b, 0);
+  const percent = selectedChoices[index + 1] / whole;
+
+  return isNaN(percent) ? 0 : percent;
+}
+
+export function getChoiceText(
+  availableChoices: string[],
+  choice: number | number[] | Record<string, number>
+) {
   if (Array.isArray(choice)) {
     return choice.map(index => availableChoices[index - 1]).join(', ');
+  } else if (typeof choice === 'object') {
+    return Object.keys(choice)
+      .map(index => {
+        const i = parseInt(index);
+        return `${_p(getChoiceWeight(choice, i - 1))} for ${availableChoices[i - 1]}`;
+      })
+      .join(', ');
   }
 
   return availableChoices[choice - 1];

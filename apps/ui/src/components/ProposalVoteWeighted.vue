@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _p } from '@/helpers/utils';
+import { _p, getChoiceWeight } from '@/helpers/utils';
 import { Choice, Proposal } from '@/types';
 
 defineProps<{
@@ -20,13 +20,6 @@ function decreaseChoice(index: number) {
   if (selectedChoices.value[index] === 0) {
     delete selectedChoices.value[index];
   }
-}
-
-function percentage(index: number) {
-  const whole = Object.values(selectedChoices.value).reduce((a, b) => a + b, 0);
-  const percent = selectedChoices.value[index + 1] / whole;
-
-  return isNaN(percent) ? 0 : percent;
 }
 
 defineEmits<{
@@ -76,7 +69,9 @@ watch(
         <UiButton class="rounded-none border-y-0 shrink-0" @click="increaseChoice(i + 1)">
           +
         </UiButton>
-        <div class="w-[50px] text-right shrink-0">{{ _p(percentage(i)) }}</div>
+        <div class="w-[50px] text-right shrink-0">
+          {{ _p(getChoiceWeight(selectedChoices, i)) }}
+        </div>
       </div>
     </div>
     <UiButton
