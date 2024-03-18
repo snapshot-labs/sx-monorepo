@@ -1,10 +1,12 @@
 import { offchainGoerli } from '../../../offchainNetworks';
+import { encryptChoices } from '../utils';
 import {
   domain,
   proposeTypes,
   basicVoteTypes,
   singleChoiceVoteTypes,
   approvalVoteTypes,
+  encryptedVoteTypes,
   rankedChoiceVoteTypes,
   updateProposalTypes,
   cancelProposalTypes
@@ -158,9 +160,9 @@ export class EthereumSig {
     signer: Signer & TypedDataSigner;
     data: Vote;
   }): Promise<Envelope<Vote>> {
-    const message = {
+    const message: EIP712VoteMessage = {
       space: data.space,
-      proposal: data.proposal.toString(),
+      proposal: data.proposal,
       choice: data.choice,
       reason: '',
       app: '',
@@ -171,6 +173,11 @@ export class EthereumSig {
     if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
     if (data.type === 'approval') voteType = approvalVoteTypes;
     if (data.type === 'ranked-choice') voteType = rankedChoiceVoteTypes;
+    if (data.privacy) {
+      voteType = encryptedVoteTypes;
+      message.choice = await encryptChoices(data.privacy, data.proposal, data.choice);
+      message.privacy = data.privacy;
+    }
 
     const signatureData = await this.sign(signer, message, voteType);
 

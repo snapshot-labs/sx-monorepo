@@ -155,7 +155,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     execution: formatExecution(proposal.metadata.execution),
     has_execution_window_opened: proposal.min_end <= current,
     state: getProposalState(proposal, current),
-    network: networkId
+    network: networkId,
+    privacy: null
   };
 }
 
