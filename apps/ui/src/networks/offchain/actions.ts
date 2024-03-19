@@ -180,7 +180,7 @@ export function createActions(
         const decimals = parseInt(strategy.params?.decimals || 18);
 
         return {
-          address: strategy.name,
+          address: strategy.name || strategiesNames[index],
           value,
           decimals,
           symbol: strategy.params?.symbol || '',
