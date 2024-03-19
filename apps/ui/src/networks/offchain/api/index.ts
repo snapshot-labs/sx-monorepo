@@ -159,7 +159,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     tx: '',
     execution_tx: null,
     veto_tx: null,
-    has_execution_window_opened: false
+    has_execution_window_opened: false,
+    privacy: proposal.privacy
   };
 }
 
