@@ -363,30 +363,44 @@ export default defineComponent({
       </UiAlert>
       <div class="mb-4">
         <div class="grid sm:grid-cols-3 justify-stretch gap-1 leading-5">
-          <div>
-            <div class="flex mb-2.5 gap-1 items-center">
-              <div class="w-2 h-2 bg-skin-heading rounded-full"></div>
-              <hr class="border-dashed border-skin-heading/40 w-full" />
+          <div class="flex sm:flex-col gap-2.5">
+            <div
+              class="flex flex-col sm:flex-row gap-1 items-center relative top-[6px] sm:top-0 sm:mt-0"
+            >
+              <div class="w-2 h-2 bg-skin-heading rounded-full shrink-0"></div>
+              <div
+                class="border-t border-l border-dashed border-skin-heading/40 sm:w-full h-full sm:h-[1px]"
+              ></div>
             </div>
-            <h5 class="text-skin-heading text-base">Start</h5>
-            <div v-if="proposalStart">
-              {{ _t(proposalStart) }}
+            <div>
+              <h5 class="text-skin-heading text-base">Start</h5>
+              <div v-if="proposalStart">
+                {{ _t(proposalStart) }}
+              </div>
             </div>
           </div>
-          <div>
-            <div class="flex mb-2.5 gap-1 items-center">
-              <div class="w-2 h-2 border border-skin-heading/40 rounded-full"></div>
-              <hr class="border-dashed border-skin-heading/40 w-full" />
+          <div class="flex sm:flex-col gap-2.5">
+            <div
+              class="flex flex-col sm:flex-row gap-1 items-center relative top-[6px] sm:top-0 sm:mt-0"
+            >
+              <div class="w-2 h-2 border border-skin-heading/40 rounded-full shrink-0"></div>
+              <div
+                class="border-t border-l border-dashed border-skin-heading/40 sm:w-full h-full sm:h-[1px]"
+              ></div>
             </div>
-            <h5 class="text-skin-heading text-base">Min end</h5>
-            <div v-if="proposalMinEnd">{{ _t(proposalMinEnd) }}</div>
+            <div>
+              <h5 class="text-skin-heading text-base">Min end</h5>
+              <div v-if="proposalMinEnd">{{ _t(proposalMinEnd) }}</div>
+            </div>
           </div>
-          <div>
-            <div class="flex mb-2.5 gap-1 items-center">
-              <div class="w-2 h-2 border border-skin-heading/40 rounded-full"></div>
+          <div class="flex sm:flex-col gap-2.5">
+            <div class="flex flex-col sm:flex-row items-center relative top-[6px] sm:top-0 sm:mt-0">
+              <div class="w-2 h-2 border border-skin-heading/40 rounded-full shrink-0"></div>
             </div>
-            <h5 class="text-skin-heading text-base">End</h5>
-            <div v-if="proposalMaxEnd">{{ _t(proposalMaxEnd) }}</div>
+            <div>
+              <h5 class="text-skin-heading text-base">End</h5>
+              <div v-if="proposalMaxEnd">{{ _t(proposalMaxEnd) }}</div>
+            </div>
           </div>
         </div>
       </div>
