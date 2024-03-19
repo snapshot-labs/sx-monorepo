@@ -384,7 +384,6 @@ export default defineComponent({
           <div>
             <div class="flex mb-2.5 gap-1 items-center">
               <div class="w-2 h-2 border border-skin-heading/40 rounded-full"></div>
-              <hr class="border-dashed border-skin-heading/40 w-full" />
             </div>
             <h5 class="text-skin-heading text-base">End</h5>
             <div v-if="proposalMaxEnd">{{ _t(proposalMaxEnd) }}</div>
