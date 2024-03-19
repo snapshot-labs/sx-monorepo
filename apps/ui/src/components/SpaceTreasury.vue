@@ -55,6 +55,17 @@ const totalQuote = computed(() =>
   }, 0)
 );
 
+const totalPreviousQuote = computed(() =>
+  assets.value.reduce((acc, asset) => {
+    return acc + asset.value / (1 + asset.change / 100);
+  }, 0)
+);
+
+const totalChange = computed(() => {
+  if (totalPreviousQuote.value === 0) return 0;
+  return ((totalQuote.value - totalPreviousQuote.value) / totalPreviousQuote.value) * 100;
+});
+
 const sortedAssets = computed(() =>
   (assets || []).value.sort((a, b) => {
     const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
@@ -169,7 +180,21 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <h4 class="text-skin-link" v-text="treasury.name || shorten(treasury.wallet)" />
             <div class="text-skin-text text-[17px]" v-text="shorten(treasury.wallet)" />
           </div>
-          <h3 v-text="`$${_n(totalQuote.toFixed())}`" />
+          <div class="flex-col items-end text-right">
+            <h3 v-text="`$${_n(totalQuote.toFixed())}`" />
+            <div v-if="Math.abs(totalChange) > 0.01" class="text-[17px]">
+              <div
+                v-if="totalChange > 0"
+                class="text-skin-success"
+                v-text="`+${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`"
+              />
+              <div
+                v-if="totalChange < 0"
+                class="text-skin-danger"
+                v-text="`${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`"
+              />
+            </div>
+          </div>
         </a>
       </div>
       <div>
