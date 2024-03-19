@@ -7,6 +7,10 @@ defineProps<{
   proposal: Proposal;
 }>();
 
+defineEmits<{
+  (e: 'vote', value: Choice);
+}>();
+
 const selectedChoices = ref<Record<string, number>>({});
 
 function increaseChoice(index: number) {
@@ -21,10 +25,6 @@ function decreaseChoice(index: number) {
     delete selectedChoices.value[index];
   }
 }
-
-defineEmits<{
-  (e: 'vote', value: Choice);
-}>();
 
 // Delete choice if empty string or 0
 watch(
