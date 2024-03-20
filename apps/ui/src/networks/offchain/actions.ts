@@ -162,31 +162,43 @@ export function createActions(
 
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
-      let result: bigint[] = [];
 
       if (!strategy || !isAddress(voterAddress)) {
-        result = Array(strategiesNames.length).fill(0n);
-      } else {
-        result = await strategy.getVotingPower(
-          spaceId,
-          voterAddress,
-          strategiesOrValidationParams,
-          snapshotInfo
-        );
+        return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+      }
+
+      const result = await strategy.getVotingPower(
+        spaceId,
+        voterAddress,
+        strategiesOrValidationParams,
+        snapshotInfo
+      );
+
+      if (strategy.type !== 'remote-vp') {
+        return [
+          {
+            address: strategiesNames[0],
+            decimals: 0,
+            symbol: '',
+            token: '',
+            chainId: snapshotInfo.chainId,
+            value: result[0]
+          }
+        ];
       }
 
       return result.map((value: bigint, index: number) => {
         const strategy = strategiesOrValidationParams[index];
-        const decimals = parseInt(strategy.params?.decimals || 18);
+        const decimals = parseInt(strategy.params.decimals || 18);
 
         return {
-          address: strategy.name || strategiesNames[index],
+          address: strategy.name,
           value,
           decimals,
-          symbol: strategy.params?.symbol || '',
-          token: strategy.params?.address || '',
-          chainId: strategy.network ? parseInt(strategy.network) : snapshotInfo.chainId,
-          swapLink: getSwapLink(strategy.name, strategy.params?.address, strategy.network)
+          symbol: strategy.params.symbol,
+          token: strategy.params.address,
+          chainId: strategy.network ? parseInt(strategy.network) : undefined,
+          swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
         };
       });
     }
