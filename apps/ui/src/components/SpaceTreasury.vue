@@ -180,8 +180,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <h4 class="text-skin-link" v-text="treasury.name || shorten(treasury.wallet)" />
             <div class="text-skin-text text-[17px]" v-text="shorten(treasury.wallet)" />
           </div>
-          <div class="flex-col items-end text-right">
-            <h3 v-text="`$${_n(totalQuote.toFixed())}`" />
+          <div v-if="loaded" class="flex-col items-end text-right leading-[22px]">
+            <h4
+              class="text-skin-link"
+              v-text="`$${_n(totalQuote, 'standard', { maximumFractionDigits: 2 })}`"
+            />
             <div v-if="Math.abs(totalChange) > 0.01" class="text-[17px]">
               <div
                 v-if="totalChange > 0"
