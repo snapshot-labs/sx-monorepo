@@ -24,11 +24,10 @@ describe('offchain network', () => {
           {
             address: 'only-members',
             value: 1n,
-            decimals: 18,
+            decimals: 0,
             symbol: '',
             token: '',
-            chainId: undefined,
-            swapLink: undefined
+            chainId: undefined
           }
         ]);
       });
@@ -49,11 +48,10 @@ describe('offchain network', () => {
           {
             address: 'only-members',
             value: 0n,
-            decimals: 18,
+            decimals: 0,
             symbol: '',
             token: '',
-            chainId: undefined,
-            swapLink: undefined
+            chainId: undefined
           }
         ]);
       });
