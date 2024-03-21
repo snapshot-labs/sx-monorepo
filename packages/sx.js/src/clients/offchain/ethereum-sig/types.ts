@@ -33,6 +33,19 @@ export const approvalVoteTypes = {
 
 export const rankedChoiceVoteTypes = approvalVoteTypes;
 
+export const encryptedVoteTypes = {
+  Vote: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'proposal', type: 'bytes32' },
+    { name: 'choice', type: 'string' },
+    { name: 'reason', type: 'string' },
+    { name: 'app', type: 'string' },
+    { name: 'metadata', type: 'string' }
+  ]
+};
+
 export const weightedVoteTypes = {
   Vote: [
     { name: 'from', type: 'address' },

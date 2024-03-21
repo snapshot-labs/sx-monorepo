@@ -1,10 +1,12 @@
 import { offchainGoerli } from '../../../offchainNetworks';
+import { encryptChoices } from '../utils';
 import {
   domain,
   proposeTypes,
   basicVoteTypes,
   singleChoiceVoteTypes,
   approvalVoteTypes,
+  encryptedVoteTypes,
   rankedChoiceVoteTypes,
   weightedVoteTypes,
   updateProposalTypes,
@@ -160,25 +162,45 @@ export class EthereumSig {
     data: Vote;
   }): Promise<Envelope<Vote>> {
     let choice: EIP712VoteMessage['choice'];
-    let voteType = basicVoteTypes;
+    let voteType: { Vote: { name: string; type: string }[] };
 
-    if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
-    if (data.type === 'approval') voteType = approvalVoteTypes;
-    if (data.type === 'ranked-choice') voteType = rankedChoiceVoteTypes;
-    if (['weighted', 'quadratic'].includes(data.type)) {
-      choice = JSON.stringify(data.choice);
-      voteType = weightedVoteTypes;
-    } else {
-      choice = data.choice as number | number[];
+    switch (data.type) {
+      case 'single-choice':
+        voteType = singleChoiceVoteTypes;
+        break;
+      case 'approval':
+        voteType = approvalVoteTypes;
+        break;
+      case 'ranked-choice':
+        voteType = rankedChoiceVoteTypes;
+        break;
+      case 'weighted':
+      case 'quadratic':
+        voteType = weightedVoteTypes;
+        choice = JSON.stringify(data.choice);
+        break;
+      default:
+        voteType = basicVoteTypes;
+        choice = data.choice as number | number[];
+    }
+
+    if (data.privacy) {
+      voteType = encryptedVoteTypes;
+      choice = await encryptChoices(
+        data.privacy,
+        data.proposal,
+        typeof choice! === 'string' ? choice : JSON.stringify(choice!)
+      );
     }
 
     const message: EIP712VoteMessage = {
       space: data.space,
       proposal: data.proposal.toString(),
-      choice,
+      choice: choice!,
       reason: '',
       app: '',
-      metadata: ''
+      metadata: '',
+      privacy: data.privacy
     };
 
     const signatureData = await this.sign(signer, message, voteType);

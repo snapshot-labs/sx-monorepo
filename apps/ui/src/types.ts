@@ -18,6 +18,8 @@ export type NetworkID =
 
 export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
 
+export type Privacy = 'shutter' | null;
+
 export type VoteType =
   | 'basic'
   | 'single-choice'
@@ -173,6 +175,7 @@ export type Proposal = {
   completed: boolean;
   cancelled: boolean;
   state: ProposalState;
+  privacy: Privacy;
 };
 
 export type User = {

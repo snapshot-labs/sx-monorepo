@@ -6,9 +6,9 @@ import {
   PROPOSAL_QUERY,
   VOTES_QUERY
 } from './queries';
-import { enabledNetworks } from '@/networks';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
+import { CHAIN_IDS } from '@/helpers/constants';
 import {
   Space,
   Proposal,
@@ -23,6 +23,10 @@ import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
+const TREASURY_NETWORKS = new Map(
+  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [chainId, networkId as NetworkID])
+);
+
 function getProposalState(proposal: ApiProposal): ProposalState {
   if (proposal.state === 'closed') {
     if (proposal.scores_total < proposal.quorum) return 'rejected';
@@ -35,11 +39,15 @@ function getProposalState(proposal: ApiProposal): ProposalState {
 }
 
 function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
-  // TODO: convert ChainID to ShortName, we might need external mapping to handle
-  // all of those - or just have simple map with limited support
-  const treasuries = space.treasuries.filter(treasury =>
-    enabledNetworks.includes(treasury.network as NetworkID)
-  ) as SpaceMetadataTreasury[];
+  const treasuries = space.treasuries
+    .map(treasury => {
+      return {
+        name: treasury.name,
+        network: TREASURY_NETWORKS.get(parseInt(treasury.network, 10)),
+        address: treasury.address
+      };
+    })
+    .filter(treasury => !!treasury.network) as SpaceMetadataTreasury[];
 
   let validationName = space.validation.name;
   const validationParams = space.validation.params || {};
@@ -159,7 +167,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     tx: '',
     execution_tx: null,
     veto_tx: null,
-    has_execution_window_opened: false
+    has_execution_window_opened: false,
+    privacy: proposal.privacy
   };
 }
 

@@ -79,6 +79,7 @@ const PROPOSAL_FRAGMENT = gql`
     created
     updated
     votes
+    privacy
   }
 `;
 
