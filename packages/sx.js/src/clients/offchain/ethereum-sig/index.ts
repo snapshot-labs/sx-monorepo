@@ -184,24 +184,24 @@ export class EthereumSig {
         choice = data.choice as number | number[];
     }
 
-    if (data.privacy) {
-      voteType = encryptedVoteTypes;
-      choice = await encryptChoices(
-        data.privacy,
-        data.proposal,
-        typeof choice! === 'string' ? choice : JSON.stringify(choice!)
-      );
-    }
-
     const message: EIP712VoteMessage = {
       space: data.space,
       proposal: data.proposal.toString(),
       choice: choice!,
       reason: '',
       app: '',
-      metadata: '',
-      privacy: data.privacy
+      metadata: ''
     };
+
+    if (data.privacy) {
+      message.privacy = data.privacy;
+      voteType = encryptedVoteTypes;
+      message.choice = await encryptChoices(
+        data.privacy,
+        data.proposal,
+        typeof message.choice === 'string' ? message.choice : JSON.stringify(message.choice)
+      );
+    }
 
     const signatureData = await this.sign(signer, message, voteType);
 
