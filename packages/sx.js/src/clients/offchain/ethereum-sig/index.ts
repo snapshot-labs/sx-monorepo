@@ -205,7 +205,6 @@ export class EthereumSig {
         typeof message.choice === 'string' ? message.choice : JSON.stringify(message.choice)
       );
     }
-
     const signatureData = await this.sign(signer, message, voteType);
 
     return {
