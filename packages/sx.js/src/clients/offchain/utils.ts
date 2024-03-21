@@ -13,10 +13,10 @@ const SHUTTER_EON_PUBKEY =
 export async function encryptChoices(
   privacy: Privacy,
   proposalId: string,
-  choice: Choice
+  choice: string
 ): Promise<string> {
   if (privacy === 'shutter') {
-    return encryptShutterChoice(JSON.stringify(choice), proposalId);
+    return encryptShutterChoice(choice, proposalId);
   }
 
   throw new Error('Encryption type not supported');
