@@ -4,7 +4,6 @@ import { arrayify, hexlify } from '@ethersproject/bytes';
 import { toUtf8Bytes, formatBytes32String } from '@ethersproject/strings';
 import shutterWasm from '@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url';
 import { init, encrypt } from '@shutter-network/shutter-crypto';
-import type { Choice } from './types';
 import type { Privacy } from '../../types';
 
 const SHUTTER_EON_PUBKEY =
