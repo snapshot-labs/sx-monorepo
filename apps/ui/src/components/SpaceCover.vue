@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import sha3 from 'js-sha3';
+import { offchainNetworks } from '@/networks';
+import { getCacheHash, getStampUrl } from '@/helpers/utils';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
-  space: { id: string; cover: string };
+  space: { id: string; cover: string; avatar: string; network: NetworkID };
 }>();
 
 const cb = computed(() =>
@@ -11,5 +14,34 @@ const cb = computed(() =>
 </script>
 
 <template>
-  <UiStamp :id="space.id" :width="1500" :height="156" :cb="cb" type="space-cover-sx" />
+  <UiStamp
+    v-if="space.cover"
+    :id="space.id"
+    :width="1500"
+    :height="156"
+    :cb="cb"
+    type="space-cover-sx"
+  />
+  <div
+    v-else
+    class="space-fallback-cover"
+    :style="{
+      'background-image': `url(${getStampUrl(
+        offchainNetworks.includes(space.network) ? 'space' : 'space-sx',
+        space.id,
+        { width: 500, height: 156 },
+        getCacheHash(space.avatar)
+      )}`,
+      color: 'white'
+    }"
+  ></div>
 </template>
+
+<style scoped>
+.space-fallback-cover {
+  background-size: cover;
+  background-position: center;
+  filter: blur(50px) contrast(0.9) saturate(1.3);
+  transform: scale(1.5);
+}
+</style>
