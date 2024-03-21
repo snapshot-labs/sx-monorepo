@@ -20,7 +20,7 @@ const showError = computed(() => props.error && props.dirty);
         v-if="inputLength >= 0 && definition.maxLength"
         class="text-sm hidden s-label-char-count"
       >
-        {{ inputLength }}/{{ definition.maxLength }}
+        {{ inputLength }} / {{ definition.maxLength }}
       </div>
     </div>
     <slot />
