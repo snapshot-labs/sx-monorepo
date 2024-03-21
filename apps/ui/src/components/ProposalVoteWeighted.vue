@@ -46,7 +46,7 @@ watch(
       <div
         v-for="(choice, i) in proposal.choices"
         :key="i"
-        class="!h-[48px] flex items-center border rounded-full px-3.5 gap-2"
+        class="!h-[48px] flex items-center border rounded-full px-3.5 gap-2 relative overflow-hidden"
         :class="{ '!border-skin-link': selectedChoices[i + 1] > 0 }"
       >
         <div class="grow truncate">
@@ -55,7 +55,7 @@ watch(
 
         <UiButton
           :disabled="!selectedChoices[i + 1]"
-          class="rounded-none border-y-0 shrink-0"
+          class="rounded-full !p-0 h-[20px] w-[20px] text-[13px]"
           @click="decreaseChoice(i + 1)"
         >
           -
@@ -66,12 +66,16 @@ watch(
           min="0"
           class="w-[40px] !px-0 !m-0 text-right !rounded-none !border-0 shrink-0"
         />
-        <UiButton class="rounded-none border-y-0 shrink-0" @click="increaseChoice(i + 1)">
+        <UiButton
+          class="rounded-full !p-0 h-[20px] w-[20px] text-[13px]"
+          @click="increaseChoice(i + 1)"
+        >
           +
         </UiButton>
-        <div class="w-[50px] text-right shrink-0">
-          {{ _p(getChoiceWeight(selectedChoices, i)) }}
-        </div>
+        <div
+          class="top-0 left-0 bottom-0 absolute bg-skin-border opacity-40 -z-10"
+          :style="{ width: _p(getChoiceWeight(selectedChoices, i)) }"
+        ></div>
       </div>
     </div>
     <UiButton
