@@ -137,7 +137,8 @@ export function createActions(
         choice: getSdkChoice(proposal.type, choice),
         authenticator: '',
         strategies: [],
-        metadataUri: ''
+        metadataUri: '',
+        privacy: proposal.privacy
       };
 
       return client.vote({
