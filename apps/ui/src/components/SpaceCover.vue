@@ -41,7 +41,14 @@ const cb = computed(() =>
 .space-fallback-cover {
   background-size: cover;
   background-position: center;
-  filter: blur(50px) contrast(0.9) saturate(1.3);
-  transform: scale(1.5);
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
+    pointer-events: none;
+  }
 }
 </style>
