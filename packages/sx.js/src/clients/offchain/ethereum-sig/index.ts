@@ -167,12 +167,15 @@ export class EthereumSig {
     switch (data.type) {
       case 'single-choice':
         voteType = singleChoiceVoteTypes;
+        choice = data.choice as number;
         break;
       case 'approval':
         voteType = approvalVoteTypes;
+        choice = data.choice as number[];
         break;
       case 'ranked-choice':
         voteType = rankedChoiceVoteTypes;
+        choice = data.choice as number[];
         break;
       case 'weighted':
       case 'quadratic':
@@ -181,13 +184,13 @@ export class EthereumSig {
         break;
       default:
         voteType = basicVoteTypes;
-        choice = data.choice as number | number[];
+        choice = data.choice as number;
     }
 
     const message: EIP712VoteMessage = {
       space: data.space,
       proposal: data.proposal.toString(),
-      choice: choice!,
+      choice,
       reason: '',
       app: '',
       metadata: ''
