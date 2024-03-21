@@ -166,6 +166,21 @@ const canSubmit = computed(() => {
     Object.keys(formErrors.value).length === 0
   );
 });
+const proposalStart = computed(() => {
+  if (!space.value) return null;
+
+  return Date.now() / 1e3 + space.value.voting_delay;
+});
+const proposalMinEnd = computed(() => {
+  if (!space.value || !proposalStart.value) return null;
+
+  return proposalStart.value + space.value.min_voting_period;
+});
+const proposalMaxEnd = computed(() => {
+  if (!space.value || !proposalStart.value) return null;
+
+  return proposalStart.value + space.value.max_voting_period;
+});
 
 async function handleProposeClick() {
   if (!space.value || !proposal.value) return;
@@ -276,6 +291,7 @@ watchEffect(() => {
 <script lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
+import { _t } from '@/helpers/utils';
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 
 const { createDraft } = useEditor();
@@ -345,6 +361,49 @@ export default defineComponent({
       <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
         You do not have enough voting power to create proposal in this space.
       </UiAlert>
+      <div class="mb-4">
+        <div class="grid sm:grid-cols-3 justify-stretch gap-1 leading-5">
+          <div class="flex sm:flex-col gap-2.5">
+            <div
+              class="flex flex-col sm:flex-row gap-1 items-center relative top-[6px] sm:top-0 sm:mt-0"
+            >
+              <div class="w-2 h-2 bg-skin-heading rounded-full shrink-0"></div>
+              <div
+                class="border-t border-l border-dashed border-skin-heading/40 sm:w-full h-full sm:h-[1px]"
+              ></div>
+            </div>
+            <div>
+              <h5 class="text-skin-heading text-base">Start</h5>
+              <div v-if="proposalStart">
+                {{ _t(proposalStart) }}
+              </div>
+            </div>
+          </div>
+          <div class="flex sm:flex-col gap-2.5">
+            <div
+              class="flex flex-col sm:flex-row gap-1 items-center relative top-[6px] sm:top-0 sm:mt-0"
+            >
+              <div class="w-2 h-2 border border-skin-heading/40 rounded-full shrink-0"></div>
+              <div
+                class="border-t border-l border-dashed border-skin-heading/40 sm:w-full h-full sm:h-[1px]"
+              ></div>
+            </div>
+            <div>
+              <h5 class="text-skin-heading text-base">Min end</h5>
+              <div v-if="proposalMinEnd">{{ _t(proposalMinEnd) }}</div>
+            </div>
+          </div>
+          <div class="flex sm:flex-col gap-2.5">
+            <div class="flex flex-col sm:flex-row items-center relative top-[6px] sm:top-0 sm:mt-0">
+              <div class="w-2 h-2 border border-skin-heading/40 rounded-full shrink-0"></div>
+            </div>
+            <div>
+              <h5 class="text-skin-heading text-base">End</h5>
+              <div v-if="proposalMaxEnd">{{ _t(proposalMaxEnd) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <UiInputString
         :key="proposalKey || ''"
         v-model="proposal.title"
