@@ -223,7 +223,7 @@ watch([sortBy, choiceFilter], () => {
               <div v-else>
                 <UiTooltip
                   v-if="proposal.type !== 'basic'"
-                  class="truncate"
+                  class="truncate !block"
                   :title="getChoiceText(proposal.choices, vote.choice)"
                 >
                   {{ getChoiceText(proposal.choices, vote.choice) }}
