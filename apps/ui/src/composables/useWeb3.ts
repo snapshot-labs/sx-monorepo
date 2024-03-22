@@ -81,7 +81,7 @@ export function useWeb3() {
         console.log(e);
       }
       handleChainChanged(network.chainId);
-      const acc = accounts.length > 0 ? accounts[0] : null;
+      const acc = accounts.length > 0 ? accounts[0] : '';
       const names = await getNames([acc]);
       state.account = acc;
       state.name = names[acc];
