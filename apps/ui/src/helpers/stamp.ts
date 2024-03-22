@@ -3,7 +3,7 @@ import { formatAddress } from './utils';
 export async function getNames(addresses: string[]): Promise<Record<string, string>> {
   try {
     const inputMapping = Object.fromEntries(
-      addresses.map(address => [address, formatAddress(address)])
+      addresses.filter(a => !!a).map(address => [address, formatAddress(address)])
     );
 
     const res = await fetch('https://stamp.fyi', {
