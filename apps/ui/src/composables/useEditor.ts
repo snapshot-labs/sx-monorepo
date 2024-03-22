@@ -8,7 +8,7 @@ function removeEmpty(proposals: Drafts): Drafts {
   return Object.entries(proposals).reduce((acc, [id, proposal]) => {
     const { execution, type, choices, ...rest } = omit(proposal, ['updatedAt']);
     const hasFormValues = Object.values(rest).some(val => !!val);
-    const hasFormChoices = type !== 'basic' && choices.some(val => !!val);
+    const hasFormChoices = type !== 'basic' && (choices || []).some(val => !!val);
 
     if (execution.length === 0 && !hasFormValues && !hasFormChoices) {
       return acc;
