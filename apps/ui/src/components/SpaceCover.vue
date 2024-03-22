@@ -37,7 +37,7 @@ const cb = computed(() =>
   ></div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .space-fallback-cover {
   background-size: cover;
   background-position: center;
