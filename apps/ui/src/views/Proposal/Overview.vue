@@ -20,6 +20,7 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
+const { state: aiState, body: aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -114,6 +115,11 @@ async function handleCancelClick() {
     cancelling.value = false;
   }
 }
+
+function handleAiSummaryClick() {
+  aiState.value.open = !aiState.value.open;
+  fetchAiSummary();
+}
 </script>
 
 <template>
@@ -190,6 +196,32 @@ async function handleCancelClick() {
             </UiDropdownItem>
           </template>
         </UiDropdown>
+      </div>
+      <div v-if="proposal.body.length > 500" class="mb-3">
+        <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
+          <IS-sparkles class="text-[#FFC700]" /> AI Summary
+        </UiButton>
+        <div v-if="aiState.open" class="border rounded-lg mt-3">
+          <div class="p-3">
+            <UiLoading v-if="aiState.loading" />
+            <div v-else-if="aiState.error">
+              <UiAlert type="error">
+                There was an error fetching the AI summary.
+                <UiButton
+                  class="flex items-center gap-2 !p-3 !h-[28px] text-sm bg-transparent"
+                  @click="fetchAiSummary"
+                >
+                  <IH-refresh class="h-[16px] w-[16px]" /> Retry
+                </UiButton>
+              </UiAlert>
+            </div>
+            <div v-else>{{ aiSummary }}</div>
+          </div>
+          <div class="bg-skin-border p-3 py-2 flex gap-2 items-center text-sm">
+            <IH-exclamation />
+            AI responses can be inaccurate or misleading.
+          </div>
+        </div>
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
       <div v-if="discussion">
