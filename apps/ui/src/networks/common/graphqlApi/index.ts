@@ -267,10 +267,11 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         return vote;
       });
     },
-    loadUserVotes: async (voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceId: string, voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
+          spaceId,
           voter: voter.toLowerCase()
         }
       });
