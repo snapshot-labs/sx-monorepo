@@ -70,7 +70,7 @@ const results = computed(() =>
       </a>
     </div>
   </div>
-  <div v-else>
+  <template v-else>
     <div v-if="proposal.type !== 'basic'" class="flex flex-col gap-2">
       <div
         v-for="(choice, id) in proposal.choices"
@@ -94,7 +94,7 @@ const results = computed(() =>
     <div
       v-else
       :class="{
-        'flex items-center': !withDetails
+        'h-full flex items-center': !withDetails
       }"
     >
       <div v-if="withDetails" class="text-skin-link mb-3">
@@ -169,5 +169,5 @@ const results = computed(() =>
         </a>
       </div>
     </div>
-  </div>
+  </template>
 </template>

@@ -142,7 +142,7 @@ function handleAiSummaryClick() {
         >
           <UiStamp :id="proposal.author.id" :size="32" class="mr-1" />
           <div class="flex flex-col ml-2 leading-4 gap-1">
-            {{ shortenAddress(proposal.author.id) }}
+            {{ proposal.author.name || shortenAddress(proposal.author.id) }}
             <span class="text-skin-text text-sm">
               In
               <router-link
