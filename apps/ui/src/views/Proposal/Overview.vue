@@ -197,7 +197,10 @@ function handleAiSummaryClick() {
           </template>
         </UiDropdown>
       </div>
-      <div v-if="proposal.body.length > 500" class="mb-3">
+      <div
+        v-if="proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)"
+        class="mb-3"
+      >
         <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
           <IS-sparkles class="text-[#FFC700]" /> AI Summary
         </UiButton>
