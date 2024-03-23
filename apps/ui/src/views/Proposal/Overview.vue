@@ -205,7 +205,7 @@ function handleAiSummaryClick() {
           <IS-sparkles class="text-[#FFC700]" /> AI Summary
         </UiButton>
         <div v-if="aiState.open" class="border rounded-lg mt-3">
-          <div class="p-3">
+          <div class="p-4">
             <UiLoading v-if="aiState.loading" />
             <div v-else-if="aiState.error">
               <UiAlert type="error">
@@ -218,9 +218,9 @@ function handleAiSummaryClick() {
                 </UiButton>
               </UiAlert>
             </div>
-            <div v-else>{{ aiSummary }}</div>
+            <div v-else class="text-md text-skin-link">{{ aiSummary }}</div>
           </div>
-          <div class="bg-skin-border p-3 py-2 flex gap-2 items-center text-sm">
+          <div v-if="aiSummary" class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
             <IH-exclamation />
             AI responses can be inaccurate or misleading.
           </div>
