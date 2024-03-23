@@ -272,7 +272,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         query: USER_VOTES_QUERY,
         variables: {
           spaceId,
-          voter: voter.toLowerCase()
+          voter
         }
       });
 
