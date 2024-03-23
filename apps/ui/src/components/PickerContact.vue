@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { shorten, shortenAddress } from '@/helpers/utils';
+import { Contact } from '@/types';
 
-const props = defineProps<{
-  searchValue: string;
-  loading: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    searchValue: string;
+    loading: boolean;
+    extraContacts?: Contact[];
+  }>(),
+  {
+    extraContacts: () => []
+  }
+);
 
 const emit = defineEmits<{
   (e: 'pick', value: string);
@@ -14,9 +21,11 @@ const { account } = useAccount();
 const contactsStore = useContactsStore();
 
 const allContacts = computed(() => {
-  if (!account) return contactsStore.contacts;
+  const contactsList = [...contactsStore.contacts, ...props.extraContacts];
+
+  if (!account) return contactsList;
   if (contactsStore.contacts.find(contact => contact.address === account)) {
-    return contactsStore.contacts;
+    return contactsList;
   }
 
   return [
@@ -24,7 +33,7 @@ const allContacts = computed(() => {
       name: 'You',
       address: account
     },
-    ...contactsStore.contacts
+    ...contactsList
   ];
 });
 

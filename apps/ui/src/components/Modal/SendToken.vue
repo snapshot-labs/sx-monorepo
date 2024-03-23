@@ -6,7 +6,7 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Token } from '@/helpers/alchemy';
-import { Transaction } from '@/types';
+import { Contact, Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -38,6 +38,7 @@ const props = defineProps<{
   address: string;
   network: number;
   networkId: string;
+  extraContacts?: Contact[];
   initialState?: any;
 }>();
 
@@ -233,6 +234,7 @@ watchEffect(async () => {
         v-else-if="pickerType === 'contact'"
         :loading="false"
         :search-value="searchValue"
+        :extra-contacts="extraContacts"
         @pick="
           form.to = $event;
           showPicker = false;
