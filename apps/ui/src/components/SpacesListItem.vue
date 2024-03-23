@@ -12,7 +12,7 @@ const spacesStore = useSpacesStore();
     :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
-    <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] object-cover absolute" />
+    <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] absolute" />
     <div class="relative inline-block mx-4 mt-[34px]">
       <UiNetworkBadge :id="space.network" class="mb-2">
         <SpaceAvatar

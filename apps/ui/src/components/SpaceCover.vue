@@ -38,8 +38,7 @@ const cb = computed(() =>
 
 <style lang="scss" scoped>
 .space-fallback-cover {
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
 
   &::after {
     content: '';
