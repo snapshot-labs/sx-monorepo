@@ -29,7 +29,7 @@ const cb = computed(() =>
       'background-image': `url(${getStampUrl(
         offchainNetworks.includes(space.network) ? 'space' : 'space-sx',
         space.id,
-        { width: 500, height: 156 },
+        50,
         getCacheHash(space.avatar)
       )}`
     }"
