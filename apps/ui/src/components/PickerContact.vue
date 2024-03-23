@@ -21,9 +21,11 @@ const { account } = useAccount();
 const contactsStore = useContactsStore();
 
 const allContacts = computed(() => {
-  if (!account) return contactsStore.contacts;
+  const contactsList = [...contactsStore.contacts, ...props.extraContacts];
+
+  if (!account) return contactsList;
   if (contactsStore.contacts.find(contact => contact.address === account)) {
-    return contactsStore.contacts;
+    return contactsList;
   }
 
   return [
@@ -31,8 +33,7 @@ const allContacts = computed(() => {
       name: 'You',
       address: account
     },
-    ...contactsStore.contacts,
-    ...props.extraContacts
+    ...contactsList
   ];
 });
 
