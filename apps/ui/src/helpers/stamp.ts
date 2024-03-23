@@ -26,7 +26,7 @@ export async function getNames(addresses: string[]): Promise<Record<string, stri
       });
       data = (await res.json()).result;
 
-      Object.values(inputMapping).forEach((formatted: string) => {
+      unresolvedAddresses.forEach((formatted: string) => {
         resolvedAddresses.set(formatted, data[formatted]);
       });
     }
