@@ -31,8 +31,7 @@ const cb = computed(() =>
         space.id,
         { width: 500, height: 156 },
         getCacheHash(space.avatar)
-      )}`,
-      color: 'white'
+      )}`
     }"
   ></div>
 </template>
