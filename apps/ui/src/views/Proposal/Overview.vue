@@ -199,7 +199,7 @@ function handleAiSummaryClick() {
       </div>
       <div
         v-if="proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)"
-        class="mb-3"
+        class="mb-4"
       >
         <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
           <IS-sparkles class="text-[#FFC700]" /> AI Summary
