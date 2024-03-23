@@ -20,7 +20,15 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const { state: aiState, body: aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
+const { state: aiSummaryState, body: aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
+const {
+  state: aiTtsState,
+  playing,
+  paused,
+  play,
+  pause,
+  fetchAiTextToSpeech
+} = useAiTextToSpeech(props.proposal.id);
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -117,8 +125,18 @@ async function handleCancelClick() {
 }
 
 function handleAiSummaryClick() {
-  aiState.value.open = !aiState.value.open;
+  aiSummaryState.value.open = !aiSummaryState.value.open;
   fetchAiSummary();
+}
+
+async function handleAiTtsClick() {
+  await fetchAiTextToSpeech();
+
+  if (playing.value) {
+    await pause();
+  } else {
+    await play();
+  }
 }
 </script>
 
@@ -198,13 +216,20 @@ function handleAiSummaryClick() {
         </UiDropdown>
       </div>
       <div v-if="proposal.body.length > 500" class="mb-3">
-        <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
-          <IS-sparkles class="text-[#FFC700]" /> AI Summary
-        </UiButton>
-        <div v-if="aiState.open" class="border rounded-lg mt-3">
+        <div class="flex gap-2">
+          <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
+            <IS-sparkles class="text-[#FFC700]" /> AI Summary
+          </UiButton>
+          <UiButton class="leading-[100%] !px-0 rounded-full w-[46px]" @click="handleAiTtsClick">
+            <UiLoading v-if="aiTtsState.loading" />
+            <IS-pause v-else-if="playing" class="inline-block" />
+            <IS-play v-else class="inline-block" />
+          </UiButton>
+        </div>
+        <div v-if="aiSummaryState.open" class="border rounded-lg mt-3">
           <div class="p-3">
-            <UiLoading v-if="aiState.loading" />
-            <div v-else-if="aiState.error">
+            <UiLoading v-if="aiSummaryState.loading" />
+            <div v-else-if="aiSummaryState.error">
               <UiAlert type="error">
                 There was an error fetching the AI summary.
                 <UiButton
