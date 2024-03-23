@@ -32,10 +32,7 @@ export async function getNames(addresses: string[]): Promise<Record<string, stri
     }
 
     const entries: any = Object.entries(inputMapping)
-      .map(([address, formatted]) => [
-        address,
-        resolvedAddresses.get(formatted) || null
-      ])
+      .map(([address, formatted]) => [address, resolvedAddresses.get(formatted) || null])
       .filter(([, name]) => name);
 
     return Object.fromEntries(entries);

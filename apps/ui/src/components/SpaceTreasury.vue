@@ -2,10 +2,14 @@
 import { _n, _c, shorten, sanitizeUrl, compareAddresses } from '@/helpers/utils';
 import { getNetwork, evmNetworks } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { Space, SpaceMetadataTreasury, Transaction } from '@/types';
+import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 import type { Token } from '@/helpers/alchemy';
 
-const props = defineProps<{ space: Space; treasuryData: SpaceMetadataTreasury }>();
+const props = defineProps<{
+  space: Space;
+  treasuryData: SpaceMetadataTreasury;
+  extraContacts?: Contact[];
+}>();
 
 const { setTitle } = useTitle();
 const router = useRouter();
@@ -313,6 +317,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :address="treasury.wallet"
         :network="treasury.network"
         :network-id="treasury.networkId"
+        :extra-contacts="extraContacts"
         @close="modalOpen.tokens = false"
         @add="addTx"
       />
@@ -320,6 +325,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :open="modalOpen.nfts"
         :address="treasury.wallet"
         :network="treasury.network"
+        :extra-contacts="extraContacts"
         @close="modalOpen.nfts = false"
         @add="addTx"
       />

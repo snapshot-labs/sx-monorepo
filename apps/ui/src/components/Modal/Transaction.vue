@@ -7,6 +7,7 @@ import { abiToDefinition, clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getProvider } from '@/helpers/provider';
 import { resolver } from '@/helpers/resolver';
+import { Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -19,6 +20,7 @@ const DEFAULT_FORM_STATE = {
 const props = defineProps<{
   open: boolean;
   network: number;
+  extraContacts?: Contact[];
   initialState?: any;
 }>();
 
@@ -269,7 +271,12 @@ watchEffect(async () => {
       </template>
     </template>
     <template v-if="showPicker">
-      <PickerContact :loading="false" :search-value="searchValue" @pick="handlePickerSelect" />
+      <PickerContact
+        :loading="false"
+        :search-value="searchValue"
+        :extra-contacts="extraContacts"
+        @pick="handlePickerSelect"
+      />
     </template>
     <div
       v-show="
