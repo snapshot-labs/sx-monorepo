@@ -20,11 +20,11 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
+const uiStore = useUiStore();
 const { state: aiSummaryState, body: aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
 const {
   state: aiTtsState,
   playing,
-  paused,
   play,
   pause,
   fetchAiTextToSpeech
@@ -131,6 +131,11 @@ function handleAiSummaryClick() {
 
 async function handleAiTtsClick() {
   await fetchAiTextToSpeech();
+
+  if (aiTtsState.value.error) {
+    uiStore.addNotification('error', 'Fail to play AI Speech. Please try again later.');
+    return;
+  }
 
   if (playing.value) {
     await pause();
