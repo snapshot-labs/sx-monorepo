@@ -158,72 +158,80 @@ function handleAiSummaryClick() {
             >
           </div>
         </router-link>
-        <UiDropdown>
-          <template #button>
-            <IH-dots-vertical class="text-skin-link" />
-          </template>
-          <template #items>
-            <UiDropdownItem v-if="editable" v-slot="{ active }">
-              <button
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                @click="handleEditClick"
-              >
-                <IS-pencil :width="16" />
-                Edit proposal
-              </button>
-            </UiDropdownItem>
-            <UiDropdownItem v-if="cancellable" v-slot="{ active, disabled }" :disabled="cancelling">
-              <button
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                @click="handleCancelClick"
-              >
-                <IS-x-mark :width="16" />
-                Cancel proposal
-              </button>
-            </UiDropdownItem>
-            <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
-              <a
-                :href="proposalMetadataUrl"
-                target="_blank"
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-              >
-                <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                View metadata
-              </a>
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
-      </div>
-      <div
-        v-if="proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)"
-        class="mb-4"
-      >
-        <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
-          <IS-sparkles class="text-[#FFC700]" /> AI Summary
-        </UiButton>
-        <div v-if="aiState.open" class="border rounded-lg mt-3">
-          <div class="p-4">
-            <UiLoading v-if="aiState.loading" />
-            <div v-else-if="aiState.error">
-              <UiAlert type="error">
-                There was an error fetching the AI summary.
-                <UiButton
-                  class="flex items-center gap-2 !p-3 !h-[28px] text-sm bg-transparent"
-                  @click="fetchAiSummary"
+        <div class="flex gap-2 items-center">
+          <UiTooltip
+            v-if="
+              props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
+            "
+            :title="aiState.open ? 'Hide AI Summary' : 'Show AI Summary'"
+          >
+            <UiButton class="border-0 !p-0 leading-0" @click="handleAiSummaryClick">
+              <IH-sparkles class="text-skin-text" />
+            </UiButton>
+          </UiTooltip>
+          <UiDropdown>
+            <template #button>
+              <IH-dots-vertical class="text-skin-link" />
+            </template>
+            <template #items>
+              <UiDropdownItem v-if="editable" v-slot="{ active }">
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleEditClick"
                 >
-                  <IH-refresh class="h-[16px] w-[16px]" /> Retry
-                </UiButton>
-              </UiAlert>
-            </div>
-            <div v-else class="text-md text-skin-link">{{ aiSummary }}</div>
+                  <IS-pencil :width="16" />
+                  Edit proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="cancellable"
+                v-slot="{ active, disabled }"
+                :disabled="cancelling"
+              >
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleCancelClick"
+                >
+                  <IS-x-mark :width="16" />
+                  Cancel proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
+                <a
+                  :href="proposalMetadataUrl"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  View metadata
+                </a>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+        </div>
+      </div>
+      <div v-if="aiState.open" class="mb-4 border rounded-lg">
+        <div class="p-4">
+          <UiLoading v-if="aiState.loading" />
+          <div v-else-if="aiState.error">
+            <UiAlert type="error">
+              There was an error fetching the AI summary.
+              <UiButton
+                class="flex items-center gap-2 !p-3 !h-[28px] text-sm bg-transparent"
+                @click="fetchAiSummary"
+              >
+                <IH-refresh class="h-[16px] w-[16px]" /> Retry
+              </UiButton>
+            </UiAlert>
           </div>
-          <div v-if="aiSummary" class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
-            <IH-exclamation />
-            AI responses can be inaccurate or misleading.
-          </div>
+          <div v-else class="text-md text-skin-link">{{ aiSummary }}</div>
+        </div>
+        <div v-if="aiSummary" class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
+          <IH-exclamation />
+          AI responses can be inaccurate or misleading.
         </div>
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
