@@ -116,9 +116,12 @@ async function handleCancelClick() {
   }
 }
 
-function handleAiSummaryClick() {
-  aiState.value.open = !aiState.value.open;
-  fetchAiSummary();
+async function handleAiSummaryClick() {
+  await fetchAiSummary();
+
+  if (!aiState.value.error) {
+    aiState.value.open = !aiState.value.open;
+  }
 }
 </script>
 
@@ -166,7 +169,8 @@ function handleAiSummaryClick() {
             :title="aiState.open ? 'Hide AI Summary' : 'Show AI Summary'"
           >
             <UiButton class="border-0 !p-0 leading-0" @click="handleAiSummaryClick">
-              <IH-sparkles class="text-skin-text" />
+              <UiLoading v-if="aiState.loading" />
+              <IH-sparkles v-else class="text-skin-text" />
             </UiButton>
           </UiTooltip>
           <UiDropdown>
@@ -215,8 +219,7 @@ function handleAiSummaryClick() {
       </div>
       <div v-if="aiState.open" class="mb-4 border rounded-lg">
         <div class="p-4">
-          <UiLoading v-if="aiState.loading" />
-          <div v-else-if="aiState.error">
+          <div v-if="aiState.error">
             <UiAlert type="error">
               There was an error fetching the AI summary.
               <UiButton
