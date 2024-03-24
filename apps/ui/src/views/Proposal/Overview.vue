@@ -225,11 +225,13 @@ async function handleAiTtsClick() {
           <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
             <IS-sparkles class="text-[#FFC700]" /> AI Summary
           </UiButton>
-          <UiButton class="leading-[100%] !px-0 rounded-full w-[46px]" @click="handleAiTtsClick">
-            <UiLoading v-if="aiTtsState.loading" />
-            <IS-pause v-else-if="playing" class="inline-block" />
-            <IS-play v-else class="inline-block" />
-          </UiButton>
+          <UiTooltip title="Listen to the proposal">
+            <UiButton class="leading-[100%] !px-0 rounded-full w-[46px]" @click="handleAiTtsClick">
+              <UiLoading v-if="aiTtsState.loading" />
+              <IS-pause v-else-if="playing" class="inline-block" />
+              <IS-play v-else class="inline-block" />
+            </UiButton>
+          </UiTooltip>
         </div>
         <div v-if="aiSummaryState.open" class="border rounded-lg mt-3">
           <div class="p-3">
