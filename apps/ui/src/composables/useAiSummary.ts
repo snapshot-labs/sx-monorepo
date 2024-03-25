@@ -1,7 +1,7 @@
 const SIDEKICK_URL = 'https://sh5.co';
 
 export function useAiSummary(proposalId: string) {
-  const body = ref<string>('');
+  const aiSummary = ref<string>('');
   const state = ref({
     loading: false,
     error: null,
@@ -9,7 +9,7 @@ export function useAiSummary(proposalId: string) {
   });
 
   async function fetchAiSummary() {
-    if (!body.value) {
+    if (!aiSummary.value) {
       try {
         state.value.loading = true;
         const response = await fetch(`${SIDEKICK_URL}/api/ai/summary/${proposalId}`, {
@@ -21,7 +21,7 @@ export function useAiSummary(proposalId: string) {
           throw new Error(data.error.message);
         }
 
-        body.value = data.result;
+        aiSummary.value = data.result;
       } catch (e) {
         state.value.error = e;
       } finally {
@@ -30,5 +30,5 @@ export function useAiSummary(proposalId: string) {
     }
   }
 
-  return { state, body, fetchAiSummary };
+  return { state, aiSummary, fetchAiSummary };
 }

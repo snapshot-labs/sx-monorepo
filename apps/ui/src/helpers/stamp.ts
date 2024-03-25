@@ -5,7 +5,7 @@ const resolvedAddresses = new Map<string, string | null>();
 export async function getNames(addresses: string[]): Promise<Record<string, string>> {
   try {
     const inputMapping = Object.fromEntries(
-      addresses.filter(a => !!a).map(address => [address, formatAddress(address)])
+      addresses.map(address => [address, formatAddress(address)])
     );
     const resolvedAddressesKeys = Array.from(resolvedAddresses.keys());
     const unresolvedAddresses = Object.values(inputMapping).filter(
@@ -26,7 +26,7 @@ export async function getNames(addresses: string[]): Promise<Record<string, stri
       });
       data = (await res.json()).result;
 
-      Object.values(inputMapping).forEach((formatted: string) => {
+      unresolvedAddresses.forEach((formatted: string) => {
         resolvedAddresses.set(formatted, data[formatted]);
       });
     }

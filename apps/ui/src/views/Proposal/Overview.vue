@@ -16,12 +16,12 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const uiStore = useUiStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const uiStore = useUiStore();
-const { state: aiSummaryState, body: aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
+const { state: aiSummaryState, aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
 const {
   state: aiTtsState,
   playing,
@@ -124,9 +124,14 @@ async function handleCancelClick() {
   }
 }
 
-function handleAiSummaryClick() {
-  aiSummaryState.value.open = !aiSummaryState.value.open;
-  fetchAiSummary();
+async function handleAiSummaryClick() {
+  await fetchAiSummary();
+
+  if (!aiSummaryState.value.error) {
+    aiSummaryState.value.open = !aiSummaryState.value.open;
+  } else {
+    uiStore.addNotification('error', 'There was an error fetching the AI summary.');
+  }
 }
 
 async function handleAiTtsClick() {
@@ -181,78 +186,83 @@ async function handleAiTtsClick() {
             >
           </div>
         </router-link>
-        <UiDropdown>
-          <template #button>
-            <IH-dots-vertical class="text-skin-link" />
-          </template>
-          <template #items>
-            <UiDropdownItem v-if="editable" v-slot="{ active }">
-              <button
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                @click="handleEditClick"
-              >
-                <IS-pencil :width="16" />
-                Edit proposal
-              </button>
-            </UiDropdownItem>
-            <UiDropdownItem v-if="cancellable" v-slot="{ active, disabled }" :disabled="cancelling">
-              <button
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                @click="handleCancelClick"
-              >
-                <IS-x-mark :width="16" />
-                Cancel proposal
-              </button>
-            </UiDropdownItem>
-            <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
-              <a
-                :href="proposalMetadataUrl"
-                target="_blank"
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-              >
-                <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                View metadata
-              </a>
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
-      </div>
-      <div v-if="proposal.body.length > 500" class="mb-3">
-        <div class="flex gap-2">
-          <UiButton class="flex items-center gap-2" @click="handleAiSummaryClick">
-            <IS-sparkles class="text-[#FFC700]" /> AI Summary
-          </UiButton>
-          <UiTooltip title="Listen to the proposal">
+        <div class="flex gap-2 items-center">
+          <UiTooltip
+            v-if="
+              props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
+            "
+            :title="aiSummaryState.open ? 'Hide AI summary' : 'Show AI summary'"
+          >
+            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
+              <UiLoading v-if="aiSummaryState.loading" />
+              <IH-sparkles v-else class="text-skin-text inline-block" />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip
+            v-if="
+              props.proposal.body.length > 500 &&
+              props.proposal.body.length < 4096 &&
+              offchainNetworks.includes(props.proposal.network)
+            "
+            title="Listen to the proposal"
+          >
             <UiButton class="leading-[100%] !px-0 rounded-full w-[46px]" @click="handleAiTtsClick">
               <UiLoading v-if="aiTtsState.loading" />
               <IS-pause v-else-if="playing" class="inline-block" />
               <IS-play v-else class="inline-block" />
             </UiButton>
           </UiTooltip>
-        </div>
-        <div v-if="aiSummaryState.open" class="border rounded-lg mt-3">
-          <div class="p-3">
-            <UiLoading v-if="aiSummaryState.loading" />
-            <div v-else-if="aiSummaryState.error">
-              <UiAlert type="error">
-                There was an error fetching the AI summary.
-                <UiButton
-                  class="flex items-center gap-2 !p-3 !h-[28px] text-sm bg-transparent"
-                  @click="fetchAiSummary"
+          <UiDropdown>
+            <template #button>
+              <UiButton class="!p-0 border-0 !h-[auto]">
+                <IH-dots-vertical class="text-skin-text inline-block" />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem v-if="editable" v-slot="{ active }">
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleEditClick"
                 >
-                  <IH-refresh class="h-[16px] w-[16px]" /> Retry
-                </UiButton>
-              </UiAlert>
-            </div>
-            <div v-else>{{ aiSummary }}</div>
-          </div>
-          <div class="bg-skin-border p-3 py-2 flex gap-2 items-center text-sm">
-            <IH-exclamation />
-            AI responses can be inaccurate or misleading.
-          </div>
+                  <IS-pencil :width="16" />
+                  Edit proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="cancellable"
+                v-slot="{ active, disabled }"
+                :disabled="cancelling"
+              >
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleCancelClick"
+                >
+                  <IS-x-mark :width="16" />
+                  Cancel proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
+                <a
+                  :href="proposalMetadataUrl"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  View metadata
+                </a>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+        </div>
+      </div>
+      <div v-if="aiSummaryState.open" class="mb-4 border rounded-lg">
+        <div class="p-4 text-md text-skin-link">{{ aiSummary }}</div>
+        <div class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
+          <IH-exclamation />
+          AI summary can be inaccurate or misleading.
         </div>
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
