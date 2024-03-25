@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getUrl, imageUpload } from '@/helpers/utils';
+import { NetworkID } from '@/types';
 
 const model = defineModel<string | null>();
 
@@ -7,6 +8,8 @@ const props = defineProps<{
   space?: {
     id: string;
     cover: string;
+    avatar: string;
+    network: NetworkID;
   };
   error?: string;
 }>();
