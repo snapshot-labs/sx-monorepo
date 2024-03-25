@@ -18,8 +18,10 @@ const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMo
   useDelegates(props.delegation.apiUrl as string);
 
 const currentNetwork = computed(() => {
+  if (!props.delegation.contractNetwork) return null;
+
   try {
-    return getNetwork(props.space.network);
+    return getNetwork(props.delegation.contractNetwork);
   } catch (e) {
     return null;
   }
