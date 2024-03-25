@@ -189,7 +189,7 @@ export class EthereumSig {
 
     const message: EIP712VoteMessage = {
       space: data.space,
-      proposal: data.proposal.toString(),
+      proposal: data.proposal,
       choice,
       reason: '',
       app: '',
