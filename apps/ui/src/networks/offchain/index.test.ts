@@ -1,22 +1,12 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
+import * as sx from '@snapshot-labs/sx';
 import { getNetwork } from '../index';
 
 const network = getNetwork('s-tn');
 const voter = '0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90';
 
-vi.mock('@snapshot-labs/sx');
-const sx = await import('@snapshot-labs/sx');
-const originalGetOffchainStrategy = (
-  await vi.importActual<typeof import('@snapshot-labs/sx')>('@snapshot-labs/sx')
-).getOffchainStrategy;
-sx.getOffchainStrategy = originalGetOffchainStrategy;
-
 describe('offchain network', () => {
   describe('getVotingPower', () => {
-    beforeEach(() => {
-      vi.restoreAllMocks();
-    });
-
     describe('vote validation', () => {
       it.each([
         ['invalid address', 'invalid-address'],
@@ -53,13 +43,13 @@ describe('offchain network', () => {
         BigInt(Math.floor(2 * 10 ** 18)),
         BigInt(Math.floor(3 * 10 ** 18))
       ];
-      const getOffchainStrategy = vi.fn(originalGetOffchainStrategy).mockReturnValue({
+
+      const getOffchainStrategyFn = vi.spyOn(sx, 'getOffchainStrategy').mockReturnValueOnce({
         type: 'remote-vp',
         getVotingPower: async () => {
           return result;
         }
       });
-      sx.getOffchainStrategy = getOffchainStrategy;
 
       await expect(
         network.actions.getVotingPower(
@@ -108,7 +98,7 @@ describe('offchain network', () => {
           swapLink: undefined
         }
       ]);
-      expect(getOffchainStrategy).toHaveBeenCalledOnce();
+      expect(getOffchainStrategyFn).toHaveBeenCalledOnce();
     });
 
     describe('proposal validation', () => {
