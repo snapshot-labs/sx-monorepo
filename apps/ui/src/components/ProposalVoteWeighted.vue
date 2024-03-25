@@ -26,6 +26,12 @@ function decreaseChoice(index: number) {
   }
 }
 
+function handleChoiceClick(index: number) {
+  if (!selectedChoices.value[index + 1]) {
+    selectedChoices.value[index + 1] = 1;
+  }
+}
+
 // Delete choice if empty string or 0
 watch(
   () => selectedChoices.value,
@@ -47,31 +53,37 @@ watch(
         v-for="(choice, i) in proposal.choices"
         :key="i"
         class="!h-[48px] flex items-center border rounded-full px-3.5 pr-2.5 gap-2 relative overflow-hidden"
-        :class="{ '!border-skin-link': selectedChoices[i + 1] > 0 }"
+        :class="{
+          '!border-skin-link': selectedChoices[i + 1] > 0,
+          'cursor-pointer': !selectedChoices[i + 1]
+        }"
+        @click="handleChoiceClick(i)"
       >
         <div class="grow truncate">
           {{ choice }}
         </div>
 
-        <UiButton
-          :disabled="!selectedChoices[i + 1]"
-          class="rounded-full !p-0 !h-[28px] !w-[28px] text-[13px] shrink-0"
-          @click="decreaseChoice(i + 1)"
-        >
-          -
-        </UiButton>
-        <UiInputNumber
-          v-model.number="selectedChoices[i + 1]"
-          :definition="{ examples: [0] }"
-          min="0"
-          class="!w-[18px] !px-0 !m-0 text-center !rounded-none !border-0 shrink-0"
-        />
-        <UiButton
-          class="rounded-full !p-0 !h-[28px] !w-[28px] text-[13px] shrink-0"
-          @click="increaseChoice(i + 1)"
-        >
-          +
-        </UiButton>
+        <div class="flex gap-1 items-center">
+          <UiButton
+            :disabled="!selectedChoices[i + 1]"
+            class="rounded-full !p-0 !h-[28px] !w-[28px] text-sm shrink-0"
+            @click.stop="decreaseChoice(i + 1)"
+          >
+            -
+          </UiButton>
+          <UiInputNumber
+            v-model.number="selectedChoices[i + 1]"
+            :definition="{ examples: [0] }"
+            min="0"
+            class="!w-[18px] !px-0 !m-0 text-center !rounded-none !border-0 shrink-0"
+          />
+          <UiButton
+            class="rounded-full !p-0 !h-[28px] !w-[28px] text-sm shrink-0"
+            @click.stop="increaseChoice(i + 1)"
+          >
+            +
+          </UiButton>
+        </div>
         <div
           class="top-0 left-0 bottom-0 absolute bg-skin-border opacity-40 -z-10"
           :style="{ width: _p(getChoiceWeight(selectedChoices, i)) }"
