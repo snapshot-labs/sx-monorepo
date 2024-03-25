@@ -5,6 +5,8 @@ import {
   Address,
   DataSourceContext,
   BigDecimal,
+  crypto,
+  ByteArray,
 } from '@graphprotocol/graph-ts'
 import {
   StrategiesParsedMetadataData as StrategiesParsedMetadataDataTemplate,
@@ -21,6 +23,22 @@ const VOTING_POWER_VALIDATION_STRATEGY = Address.fromString(
   '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
 )
 const VOTING_POWER_VALIDATION_STRATEGY_PARAMS_SIGNATURE = '(uint256, (address,bytes)[])'
+
+export function toChecksumAddress(address: string): string {
+  const rawAddress = address.toLowerCase().replace('0x', '')
+  const hash = crypto.keccak256(ByteArray.fromUTF8(rawAddress)).toHexString().replace('0x', '')
+
+  let ret = '0x'
+  for (let i = 0; i < rawAddress.length; i++) {
+    if (parseInt(hash.charAt(i), 16) >= 8) {
+      ret += rawAddress.charAt(i).toUpperCase()
+    } else {
+      ret += rawAddress.charAt(i)
+    }
+  }
+
+  return ret
+}
 
 export function decodeProposalValidationParams(params: Bytes): ethereum.Value | null {
   let paramsBytes = Bytes.fromByteArray(
