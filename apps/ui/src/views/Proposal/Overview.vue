@@ -171,14 +171,14 @@ async function handleAiSummaryClick() {
             "
             :title="aiState.open ? 'Hide AI summary' : 'Show AI summary'"
           >
-            <UiButton class="!p-0 border-0" @click="handleAiSummaryClick">
+            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
               <UiLoading v-if="aiState.loading" />
               <IH-sparkles v-else class="text-skin-text inline-block" />
             </UiButton>
           </UiTooltip>
           <UiDropdown>
             <template #button>
-              <UiButton class="!p-0 border-0">
+              <UiButton class="!p-0 border-0 !h-[auto]">
                 <IH-dots-vertical class="text-skin-text inline-block" />
               </UiButton>
             </template>
