@@ -226,7 +226,7 @@ async function handleAiSummaryClick() {
         <div class="p-4 text-md text-skin-link">{{ aiSummary }}</div>
         <div class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
           <IH-exclamation />
-          AI responses can be inaccurate or misleading.
+          AI summary can be inaccurate or misleading.
         </div>
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
