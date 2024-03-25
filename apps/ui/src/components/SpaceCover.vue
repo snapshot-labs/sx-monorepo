@@ -21,6 +21,7 @@ const cb = computed(() =>
     :height="156"
     :cb="cb"
     type="space-cover-sx"
+    class="object-cover"
   />
   <div
     v-else

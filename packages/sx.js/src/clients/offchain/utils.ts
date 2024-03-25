@@ -2,7 +2,6 @@ import { randomBytes } from '@ethersproject/random';
 import { BigNumber } from '@ethersproject/bignumber';
 import { arrayify, hexlify } from '@ethersproject/bytes';
 import { toUtf8Bytes, formatBytes32String } from '@ethersproject/strings';
-import shutterWasm from '@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url';
 import { init, encrypt } from '@shutter-network/shutter-crypto';
 import type { Privacy } from '../../types';
 
@@ -22,7 +21,12 @@ export async function encryptChoices(
 }
 
 async function encryptShutterChoice(choice: string, id: string): Promise<string> {
-  await init(shutterWasm);
+  const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+  const shutterWasm = isBrowser
+    ? (await import('@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url')).default
+    : undefined;
+
+  if (window) await init(shutterWasm);
 
   const bytesChoice = toUtf8Bytes(choice);
   const message = arrayify(bytesChoice);
