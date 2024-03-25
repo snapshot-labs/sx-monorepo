@@ -21,7 +21,7 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const { state: aiState, body: aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
+const { state: aiState, aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
