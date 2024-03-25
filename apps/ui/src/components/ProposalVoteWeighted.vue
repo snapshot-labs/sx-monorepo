@@ -46,7 +46,7 @@ watch(
       <div
         v-for="(choice, i) in proposal.choices"
         :key="i"
-        class="!h-[48px] flex items-center border rounded-full px-3.5 gap-2 relative overflow-hidden"
+        class="!h-[48px] flex items-center border rounded-full px-3.5 pr-2.5 gap-2 relative overflow-hidden"
         :class="{ '!border-skin-link': selectedChoices[i + 1] > 0 }"
       >
         <div class="grow truncate">
@@ -55,7 +55,7 @@ watch(
 
         <UiButton
           :disabled="!selectedChoices[i + 1]"
-          class="rounded-full !p-0 h-[20px] w-[20px] text-[13px]"
+          class="rounded-full !p-0 !h-[28px] !w-[28px] text-[13px] shrink-0"
           @click="decreaseChoice(i + 1)"
         >
           -
@@ -64,10 +64,10 @@ watch(
           v-model.number="selectedChoices[i + 1]"
           :definition="{ examples: [0] }"
           min="0"
-          class="w-[40px] !px-0 !m-0 text-right !rounded-none !border-0 shrink-0"
+          class="!w-[18px] !px-0 !m-0 text-center !rounded-none !border-0 shrink-0"
         />
         <UiButton
-          class="rounded-full !p-0 h-[20px] w-[20px] text-[13px]"
+          class="rounded-full !p-0 !h-[28px] !w-[28px] text-[13px] shrink-0"
           @click="increaseChoice(i + 1)"
         >
           +
