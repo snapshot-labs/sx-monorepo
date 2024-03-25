@@ -16,6 +16,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const uiStore = useUiStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
@@ -121,6 +122,8 @@ async function handleAiSummaryClick() {
 
   if (!aiState.value.error) {
     aiState.value.open = !aiState.value.open;
+  } else {
+    uiStore.addNotification('error', 'There was an error fetching the AI summary.');
   }
 }
 </script>
@@ -220,21 +223,8 @@ async function handleAiSummaryClick() {
         </div>
       </div>
       <div v-if="aiState.open" class="mb-4 border rounded-lg">
-        <div class="p-4">
-          <div v-if="aiState.error">
-            <UiAlert type="error">
-              There was an error fetching the AI summary.
-              <UiButton
-                class="flex items-center gap-2 !p-3 !h-[28px] text-sm bg-transparent"
-                @click="fetchAiSummary"
-              >
-                <IH-refresh class="h-[16px] w-[16px]" /> Retry
-              </UiButton>
-            </UiAlert>
-          </div>
-          <div v-else class="text-md text-skin-link">{{ aiSummary }}</div>
-        </div>
-        <div v-if="aiSummary" class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
+        <div class="p-4 text-md text-skin-link">{{ aiSummary }}</div>
+        <div class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
           <IH-exclamation />
           AI responses can be inaccurate or misleading.
         </div>
