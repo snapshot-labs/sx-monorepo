@@ -50,7 +50,7 @@ async function handleVoteClick(choice: Choice) {
               params: { id: `${proposal.network}:${proposal.author.id}` }
             }"
           >
-            {{ shortenAddress(proposal.author.id) }}
+            {{ proposal.author.name || shortenAddress(proposal.author.id) }}
           </router-link>
         </div>
         <span>
