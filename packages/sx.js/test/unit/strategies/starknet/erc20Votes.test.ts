@@ -9,7 +9,7 @@ const ethUrl = process.env.GOERLI_NODE_URL as string;
 describe('erc20VotesStrategy', () => {
   beforeAll(() => {
     vi.mock('starknet', async importOriginal => {
-      const actual: any = await importOriginal();
+      const actual = await importOriginal<typeof import('starknet')>();
 
       return {
         ...actual,
