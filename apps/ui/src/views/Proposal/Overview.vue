@@ -164,21 +164,21 @@ async function handleAiSummaryClick() {
             >
           </div>
         </router-link>
-        <div class="flex items-center">
+        <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
               props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
             "
             :title="aiState.open ? 'Hide AI summary' : 'Show AI summary'"
           >
-            <UiButton class="w-[46px] !px-0 border-0" @click="handleAiSummaryClick">
+            <UiButton class="!p-0 border-0" @click="handleAiSummaryClick">
               <UiLoading v-if="aiState.loading" />
               <IH-sparkles v-else class="text-skin-text inline-block" />
             </UiButton>
           </UiTooltip>
           <UiDropdown>
             <template #button>
-              <UiButton class="w-[46px] !px-0 border-0">
+              <UiButton class="!p-0 border-0">
                 <IH-dots-vertical class="text-skin-text inline-block" />
               </UiButton>
             </template>
