@@ -166,7 +166,7 @@ async function handleAiSummaryClick() {
             v-if="
               props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
             "
-            :title="aiState.open ? 'Hide AI Summary' : 'Show AI Summary'"
+            :title="aiState.open ? 'Hide AI summary' : 'Show AI summary'"
           >
             <UiButton class="w-[46px] !px-0 border-0" @click="handleAiSummaryClick">
               <UiLoading v-if="aiState.loading" />
