@@ -83,6 +83,10 @@ const votingTime = computed(() => {
   return hasEnded ? `Ended ${time}` : time;
 });
 
+const aiEnabled = computed(() => {
+  return props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network);
+});
+
 async function handleEditClick() {
   if (!props.proposal) return;
 
@@ -188,9 +192,7 @@ async function handleAiTtsClick() {
         </router-link>
         <div class="flex gap-2 items-center">
           <UiTooltip
-            v-if="
-              props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
-            "
+            v-if="aiEnabled"
             :title="aiSummaryState.open ? 'Hide AI summary' : 'Show AI summary'"
           >
             <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
@@ -199,11 +201,7 @@ async function handleAiTtsClick() {
             </UiButton>
           </UiTooltip>
           <UiTooltip
-            v-if="
-              props.proposal.body.length > 500 &&
-              props.proposal.body.length < 4096 &&
-              offchainNetworks.includes(props.proposal.network)
-            "
+            v-if="aiEnabled && props.proposal.body.length < 4096"
             title="Listen to the proposal"
           >
             <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiTtsClick">
