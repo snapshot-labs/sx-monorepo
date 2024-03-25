@@ -193,7 +193,7 @@ async function handleAiTtsClick() {
             "
             :title="aiSummaryState.open ? 'Hide AI summary' : 'Show AI summary'"
           >
-            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
+            <UiButton class="!p-0 border-0" @click="handleAiSummaryClick">
               <UiLoading v-if="aiSummaryState.loading" />
               <IH-sparkles v-else class="text-skin-text inline-block" />
             </UiButton>
@@ -206,15 +206,15 @@ async function handleAiTtsClick() {
             "
             title="Listen to the proposal"
           >
-            <UiButton class="leading-[100%] !px-0 rounded-full w-[46px]" @click="handleAiTtsClick">
+            <UiButton class="!p-0 border-0" @click="handleAiTtsClick">
               <UiLoading v-if="aiTtsState.loading" />
-              <IS-pause v-else-if="playing" class="inline-block" />
-              <IS-play v-else class="inline-block" />
+              <IH-pause v-else-if="playing" class="inline-block text-skin-text" />
+              <IH-play v-else class="inline-block text-skin-text" />
             </UiButton>
           </UiTooltip>
           <UiDropdown>
             <template #button>
-              <UiButton class="!p-0 border-0 !h-[auto]">
+              <UiButton class="!p-0 border-0">
                 <IH-dots-vertical class="text-skin-text inline-block" />
               </UiButton>
             </template>
