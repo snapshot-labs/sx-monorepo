@@ -120,28 +120,28 @@ async function handleCancelClick() {
 }
 
 async function handleAiSummaryClick() {
-  if (!aiSummaryBody.value) {
-    try {
-      aiSummaryLoading.value = true;
-      const response = await fetch(`https://sh5.co/api/ai/summary/${props.proposal.id}`, {
-        method: 'POST'
-      });
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error.message);
-      }
-
-      aiSummaryBody.value = data.result;
-    } catch (e) {
-      uiStore.addNotification('error', 'There was an error fetching the AI summary.');
-    } finally {
-      aiSummaryLoading.value = false;
-    }
-  }
-
   if (aiSummaryBody.value) {
     aiSummaryOpen.value = !aiSummaryOpen.value;
+    return;
+  }
+
+  try {
+    aiSummaryLoading.value = true;
+    const response = await fetch(`https://sh5.co/api/ai/summary/${props.proposal.id}`, {
+      method: 'POST'
+    });
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    aiSummaryBody.value = data.result;
+    aiSummaryOpen.value = true;
+  } catch (e) {
+    uiStore.addNotification('error', 'There was an error fetching the AI summary.');
+  } finally {
+    aiSummaryLoading.value = false;
   }
 }
 </script>
