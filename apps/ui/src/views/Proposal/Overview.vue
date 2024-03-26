@@ -26,7 +26,6 @@ const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
 const aiSummaryBody = ref<string>('');
-const aiSummaryError = ref<any>(null);
 const aiSummaryLoading = ref(false);
 const aiSummaryOpen = ref(false);
 
@@ -135,15 +134,13 @@ async function handleAiSummaryClick() {
 
       aiSummaryBody.value = data.result;
     } catch (e) {
-      aiSummaryError.value = e;
+      uiStore.addNotification('error', 'There was an error fetching the AI summary.');
     } finally {
       aiSummaryLoading.value = false;
     }
   }
 
-  if (aiSummaryError.value) {
-    uiStore.addNotification('error', 'There was an error fetching the AI summary.');
-  } else {
+  if (aiSummaryBody.value) {
     aiSummaryOpen.value = !aiSummaryOpen.value;
   }
 }
