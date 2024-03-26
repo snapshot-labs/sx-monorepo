@@ -21,11 +21,14 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const { state: aiState, aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
+const aiSummaryBody = ref<string>('');
+const aiSummaryError = ref<any>(null);
+const aiSummaryLoading = ref(false);
+const aiSummaryOpen = ref(false);
 
 const editable = computed(() => {
   return (
@@ -118,12 +121,30 @@ async function handleCancelClick() {
 }
 
 async function handleAiSummaryClick() {
-  await fetchAiSummary();
+  if (!aiSummaryBody.value) {
+    try {
+      aiSummaryLoading.value = true;
+      const response = await fetch(`https://sh5.co/api/ai/summary/${props.proposal.id}`, {
+        method: 'POST'
+      });
+      const data = await response.json();
 
-  if (!aiState.value.error) {
-    aiState.value.open = !aiState.value.open;
-  } else {
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+
+      aiSummaryBody.value = data.result;
+    } catch (e) {
+      aiSummaryError.value = e;
+    } finally {
+      aiSummaryLoading.value = false;
+    }
+  }
+
+  if (aiSummaryError.value) {
     uiStore.addNotification('error', 'There was an error fetching the AI summary.');
+  } else {
+    aiSummaryOpen.value = !aiSummaryOpen.value;
   }
 }
 </script>
@@ -169,10 +190,10 @@ async function handleAiSummaryClick() {
             v-if="
               props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
             "
-            :title="aiState.open ? 'Hide AI summary' : 'Show AI summary'"
+            :title="aiSummaryOpen ? 'Hide AI summary' : 'Show AI summary'"
           >
             <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
-              <UiLoading v-if="aiState.loading" />
+              <UiLoading v-if="aiSummaryLoading" />
               <IH-sparkles v-else class="text-skin-text inline-block" />
             </UiButton>
           </UiTooltip>
@@ -222,8 +243,8 @@ async function handleAiSummaryClick() {
           </UiDropdown>
         </div>
       </div>
-      <div v-if="aiState.open" class="mb-4 border rounded-lg">
-        <div class="p-4 text-md text-skin-link">{{ aiSummary }}</div>
+      <div v-if="aiSummaryOpen" class="mb-4 border rounded-lg">
+        <div class="p-4 text-md text-skin-link">{{ aiSummaryBody }}</div>
         <div class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
           <IH-exclamation />
           AI summary can be inaccurate or misleading.
