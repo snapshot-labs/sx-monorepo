@@ -171,7 +171,7 @@ watch([sortBy, choiceFilter], () => {
           </template>
           <tr v-for="(vote, i) in votes" :key="i" class="border-b relative align-middle">
             <div
-              class="absolute top-0 -bottom-[1px] right-0 pointer-events-none"
+              class="absolute top-0 -bottom-[1px] left-0 pointer-events-none"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
               }"
