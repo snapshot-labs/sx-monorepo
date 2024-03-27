@@ -73,7 +73,7 @@ export default function createEvmSlotValueStrategy({
       const { contractAddress, slotIndex } = metadata;
 
       const tree = await getBinaryTree(deployedOnChain, startTimestamp, chainId);
-      const l1BlockNumber = tree.path[1].blockNumber;
+      const l1BlockNumber = tree.path[1].block_number;
 
       const storageProof = await getProof(
         contractAddress,
@@ -118,7 +118,7 @@ export default function createEvmSlotValueStrategy({
       const contract = new Contract(EVMSlotValue, strategyAddress, clientConfig.starkProvider);
 
       const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
-      const l1BlockNumber = tree.path[1].blockNumber;
+      const l1BlockNumber = tree.path[1].block_number;
 
       const storageProof = await getProof(
         contractAddress,
