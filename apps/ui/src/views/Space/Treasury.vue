@@ -30,5 +30,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       />
     </a>
   </div>
-  <SpaceTreasury :key="activeTreasuryId" :space="space" :treasury-data="treasuryData" />
+  <SpaceTreasury
+    :key="activeTreasuryId"
+    :space="space"
+    :treasury-data="treasuryData"
+    :extra-contacts="filteredTreasuries"
+  />
 </template>

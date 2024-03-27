@@ -16,6 +16,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const uiStore = useUiStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
@@ -24,6 +25,9 @@ const { createDraft } = useEditor();
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
+const aiSummaryBody = ref<string>('');
+const aiSummaryLoading = ref(false);
+const aiSummaryOpen = ref(false);
 
 const editable = computed(() => {
   return (
@@ -114,6 +118,32 @@ async function handleCancelClick() {
     cancelling.value = false;
   }
 }
+
+async function handleAiSummaryClick() {
+  if (aiSummaryBody.value) {
+    aiSummaryOpen.value = !aiSummaryOpen.value;
+    return;
+  }
+
+  try {
+    aiSummaryLoading.value = true;
+    const response = await fetch(`https://sh5.co/api/ai/summary/${props.proposal.id}`, {
+      method: 'POST'
+    });
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    aiSummaryBody.value = data.result;
+    aiSummaryOpen.value = true;
+  } catch (e) {
+    uiStore.addNotification('error', 'There was an error fetching the AI summary.');
+  } finally {
+    aiSummaryLoading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -136,7 +166,7 @@ async function handleCancelClick() {
         >
           <UiStamp :id="proposal.author.id" :size="32" class="mr-1" />
           <div class="flex flex-col ml-2 leading-4 gap-1">
-            {{ shortenAddress(proposal.author.id) }}
+            {{ proposal.author.name || shortenAddress(proposal.author.id) }}
             <span class="text-skin-text text-sm">
               In
               <router-link
@@ -152,44 +182,70 @@ async function handleCancelClick() {
             >
           </div>
         </router-link>
-        <UiDropdown>
-          <template #button>
-            <IH-dots-vertical class="text-skin-link" />
-          </template>
-          <template #items>
-            <UiDropdownItem v-if="editable" v-slot="{ active }">
-              <button
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                @click="handleEditClick"
+        <div class="flex gap-2 items-center">
+          <UiTooltip
+            v-if="
+              props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
+            "
+            :title="aiSummaryOpen ? 'Hide AI summary' : 'Show AI summary'"
+          >
+            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
+              <UiLoading v-if="aiSummaryLoading" />
+              <IH-sparkles v-else class="text-skin-text inline-block" />
+            </UiButton>
+          </UiTooltip>
+          <UiDropdown>
+            <template #button>
+              <UiButton class="!p-0 border-0 !h-[auto]">
+                <IH-dots-vertical class="text-skin-text inline-block" />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem v-if="editable" v-slot="{ active }">
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleEditClick"
+                >
+                  <IS-pencil :width="16" />
+                  Edit proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="cancellable"
+                v-slot="{ active, disabled }"
+                :disabled="cancelling"
               >
-                <IS-pencil :width="16" />
-                Edit proposal
-              </button>
-            </UiDropdownItem>
-            <UiDropdownItem v-if="cancellable" v-slot="{ active, disabled }" :disabled="cancelling">
-              <button
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                @click="handleCancelClick"
-              >
-                <IS-x-mark :width="16" />
-                Cancel proposal
-              </button>
-            </UiDropdownItem>
-            <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
-              <a
-                :href="proposalMetadataUrl"
-                target="_blank"
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-              >
-                <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                View metadata
-              </a>
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
+                <button
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleCancelClick"
+                >
+                  <IS-x-mark :width="16" />
+                  Cancel proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
+                <a
+                  :href="proposalMetadataUrl"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  View metadata
+                </a>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+        </div>
+      </div>
+      <div v-if="aiSummaryOpen" class="mb-4 border rounded-lg">
+        <div class="p-4 text-md text-skin-link">{{ aiSummaryBody }}</div>
+        <div class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
+          <IH-exclamation />
+          AI summary can be inaccurate or misleading.
+        </div>
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
       <div v-if="discussion">
