@@ -92,7 +92,7 @@ export default function createOzVotesStorageProofStrategy({
       const startTimestamp = proposalStruct.start_timestamp;
 
       const tree = await getBinaryTree(deployedOnChain, startTimestamp, chainId);
-      const l1BlockNumber = tree.path[1].blockNumber;
+      const l1BlockNumber = tree.path[1].block_number;
 
       const { proofs, checkpointIndex } = await getProofs(
         contractAddress,
@@ -140,7 +140,7 @@ export default function createOzVotesStorageProofStrategy({
       const contract = new Contract(OZVotesStorageProof, strategyAddress, starkProvider);
 
       const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
-      const l1BlockNumber = tree.path[1].blockNumber;
+      const l1BlockNumber = tree.path[1].block_number;
 
       const { proofs, checkpointIndex } = await getProofs(
         contractAddress,

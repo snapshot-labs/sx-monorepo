@@ -13,7 +13,7 @@ export async function getBinaryTree(
   chainId: number
 ) {
   const res = await fetch(
-    `https://ds-indexer.api.herodotus.cloud/binsearch-path?timestamp=${snapshotTimestamp}&deployed_on_chain=${deployedOnChain}&accumulates_chain=${chainId}`,
+    `https://rs-indexer.api.herodotus.cloud/remappers/binsearch-path?timestamp=${snapshotTimestamp}&deployed_on_chain=${deployedOnChain}&accumulates_chain=${chainId}`,
     {
       headers: {
         accept: 'application/json'
