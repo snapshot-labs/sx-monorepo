@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
-import { SpaceMetadataTreasury, SpaceMetadataDelegation } from '@/types';
+import { SpaceMetadataTreasury, SpaceMetadataDelegation, NetworkID } from '@/types';
 
 const props = withDefaults(
   defineProps<{
@@ -13,6 +13,8 @@ const props = withDefaults(
     space?: {
       id: string;
       cover: string;
+      avatar: string;
+      network: NetworkID;
     };
   }>(),
   {

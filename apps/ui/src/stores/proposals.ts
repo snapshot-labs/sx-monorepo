@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
+import { getNames } from '@/helpers/stamp';
 import type { NetworkID, Proposal } from '@/types';
 
 type SpaceRecord = {
@@ -22,6 +23,16 @@ const getUniqueSpaceId = (spaceId: string, networkId: NetworkID) => `${networkId
 export const useProposalsStore = defineStore('proposals', () => {
   const metaStore = useMetaStore();
   const proposals = ref({} as Partial<Record<string, SpaceRecord>>);
+
+  async function withAuthorNames(proposals: Proposal[]) {
+    const names = await getNames(proposals.map(proposal => proposal.author.id));
+
+    return proposals.map(proposal => {
+      proposal.author.name = names[proposal.author.id];
+
+      return proposal;
+    });
+  }
 
   const getSpaceProposals = (spaceId: string, networkId: NetworkID) => {
     const record = proposals.value[getUniqueSpaceId(spaceId, networkId)];
@@ -70,13 +81,15 @@ export const useProposalsStore = defineStore('proposals', () => {
 
     record.value.loading = true;
 
-    const fetchedProposals = await getNetwork(networkId).api.loadProposals(
-      spaceId,
-      {
-        limit: PROPOSALS_LIMIT
-      },
-      metaStore.getCurrent(networkId) || 0,
-      filter
+    const fetchedProposals = await withAuthorNames(
+      await getNetwork(networkId).api.loadProposals(
+        spaceId,
+        {
+          limit: PROPOSALS_LIMIT
+        },
+        metaStore.getCurrent(networkId) || 0,
+        filter
+      )
     );
 
     record.value.proposalsIdsList = fetchedProposals.map(proposal => proposal.proposal_id);
@@ -113,13 +126,15 @@ export const useProposalsStore = defineStore('proposals', () => {
 
     record.value.loadingMore = true;
 
-    const fetchedProposals = await getNetwork(networkId).api.loadProposals(
-      spaceId,
-      {
-        limit: PROPOSALS_LIMIT,
-        skip: record.value.proposalsIdsList.length
-      },
-      metaStore.getCurrent(networkId) || 0
+    const fetchedProposals = await withAuthorNames(
+      await getNetwork(networkId).api.loadProposals(
+        spaceId,
+        {
+          limit: PROPOSALS_LIMIT,
+          skip: record.value.proposalsIdsList.length
+        },
+        metaStore.getCurrent(networkId) || 0
+      )
     );
 
     record.value.proposalsIdsList = [
@@ -160,10 +175,12 @@ export const useProposalsStore = defineStore('proposals', () => {
     }
 
     record.value.summaryLoading = true;
-    record.value.summaryProposals = await getNetwork(networkId).api.loadProposals(
-      spaceId,
-      { limit },
-      metaStore.getCurrent(networkId) || 0
+    record.value.summaryProposals = await withAuthorNames(
+      await getNetwork(networkId).api.loadProposals(
+        spaceId,
+        { limit },
+        metaStore.getCurrent(networkId) || 0
+      )
     );
     record.value.summaryLoaded = true;
     record.value.summaryLoading = false;
@@ -199,7 +216,7 @@ export const useProposalsStore = defineStore('proposals', () => {
 
     record.value.proposals = {
       ...record.value.proposals,
-      [proposalId]: proposal
+      [proposalId]: (await withAuthorNames([proposal]))[0]
     };
   }
 

@@ -3,8 +3,8 @@ import { resolveName as resolveEnsName } from '@/helpers/ens';
 import { NetworkID } from '@/types';
 import { offchainNetworks } from '@/networks';
 
-const ENS_CHAIN_ID = 5;
-const ENS_NETWORK_ID = 'gor';
+const ENS_CHAIN_ID = 1;
+const ENS_NETWORK_ID = 'eth';
 
 type ResolvedName = {
   networkId: NetworkID;

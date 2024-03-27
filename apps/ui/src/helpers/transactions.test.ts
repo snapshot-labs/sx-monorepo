@@ -142,7 +142,7 @@ describe('transactions', () => {
           abi: ['function deny(address guy)'],
           method: 'deny(address)',
           args: {
-            guy: 'me.sekhmet.eth'
+            guy: '0cf5e.eth'
           }
         }
       });

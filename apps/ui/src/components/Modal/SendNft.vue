@@ -2,6 +2,7 @@
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -20,6 +21,7 @@ const props = defineProps<{
   open: boolean;
   address: string;
   network: number;
+  extraContacts?: Contact[];
   initialState?: any;
 }>();
 
@@ -151,6 +153,7 @@ watchEffect(async () => {
         v-else-if="pickerType === 'contact'"
         :loading="false"
         :search-value="searchValue"
+        :extra-contacts="extraContacts"
         @pick="
           form.to = $event;
           showPicker = false;

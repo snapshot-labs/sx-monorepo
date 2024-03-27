@@ -403,3 +403,11 @@ export function simplifyURL(fullURL: string): string {
   const url = new URL(fullURL);
   return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
 }
+
+export function getChoiceText(availableChoices: string[], choice: number | number[]) {
+  if (Array.isArray(choice)) {
+    return choice.map(index => availableChoices[index - 1]).join(', ');
+  }
+
+  return availableChoices[choice - 1];
+}

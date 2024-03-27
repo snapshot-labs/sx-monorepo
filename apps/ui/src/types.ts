@@ -18,6 +18,8 @@ export type NetworkID =
 
 export type Choice = 'for' | 'against' | 'abstain' | number | number[];
 
+export type Privacy = 'shutter' | null;
+
 export type VoteType =
   | 'basic'
   | 'single-choice'
@@ -141,6 +143,7 @@ export type Proposal = {
   };
   author: {
     id: string;
+    name?: string;
   };
   execution_hash: string;
   metadata_uri: string;
@@ -173,6 +176,7 @@ export type Proposal = {
   completed: boolean;
   cancelled: boolean;
   state: ProposalState;
+  privacy: Privacy;
 };
 
 export type User = {
@@ -197,7 +201,7 @@ export type Vote = {
     id: string;
   };
   proposal: number | string;
-  choice: number;
+  choice: number | number[];
   vp: number;
   created: number;
   tx: string;

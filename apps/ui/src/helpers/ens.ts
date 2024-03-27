@@ -5,8 +5,9 @@ import { call } from '@/helpers/call';
 const abi = ['function addr(bytes32 node) view returns (address r)'];
 
 const ensPublicResolvers = {
-  1: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
-  5: '0xd7a4F6473f32aC2Af804B3686AE8F1932bC35750'
+  1: '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63',
+  5: '0xd7a4F6473f32aC2Af804B3686AE8F1932bC35750',
+  11155111: '0x8fade66b79cc9f707ab26799354482eb93a5b7dd'
 };
 
 export async function resolveName(name: string, chainId: number) {

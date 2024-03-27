@@ -16,7 +16,7 @@ import {
   createStrategyPicker
 } from '@/networks/common/helpers';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '@/networks/common/constants';
-import type { RpcProvider } from 'starknet';
+import { CallData, type Account, type RpcProvider } from 'starknet';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type {
   Connector,
@@ -437,8 +437,24 @@ export function createActions(
         }
       });
     },
-    delegate: () => {
-      throw new Error('Not implemented');
+    delegate: async (
+      web3: any,
+      space: Space,
+      networkId: NetworkID,
+      delegatee: string,
+      delegationContract: string
+    ) => {
+      const [, contractAddress] = delegationContract.split(':');
+
+      const { account }: { account: Account } = web3.provider;
+
+      return account.execute({
+        contractAddress,
+        entrypoint: 'delegate',
+        calldata: CallData.compile({
+          delegatee
+        })
+      });
     },
     getVotingPower: async (
       spaceId: string,

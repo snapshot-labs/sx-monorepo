@@ -2,7 +2,7 @@
 import Draggable from 'vuedraggable';
 import { getNetwork } from '@/networks';
 import { simulate } from '@/helpers/tenderly';
-import { Transaction as TransactionType, Space, SpaceMetadataTreasury } from '@/types';
+import { Transaction as TransactionType, Space, SpaceMetadataTreasury, Contact } from '@/types';
 
 const model = defineModel<TransactionType[]>({
   required: true
@@ -11,6 +11,7 @@ const model = defineModel<TransactionType[]>({
 const props = defineProps<{
   space: Space;
   treasuryData: SpaceMetadataTreasury;
+  extraContacts?: Contact[];
 }>();
 
 const uiStore = useUiStore();
@@ -160,6 +161,7 @@ watch(model.value, () => {
         :address="treasury.wallet"
         :network="treasury.network"
         :network-id="treasury.networkId"
+        :extra-contacts="extraContacts"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
@@ -169,6 +171,7 @@ watch(model.value, () => {
         :open="modalOpen.sendNft"
         :address="treasury.wallet"
         :network="treasury.network"
+        :extra-contacts="extraContacts"
         :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
         @add="addTx"
@@ -177,6 +180,7 @@ watch(model.value, () => {
         v-if="treasury"
         :open="modalOpen.contractCall"
         :network="treasury.network"
+        :extra-contacts="extraContacts"
         :initial-state="modalState.contractCall"
         @close="modalOpen.contractCall = false"
         @add="addTx"

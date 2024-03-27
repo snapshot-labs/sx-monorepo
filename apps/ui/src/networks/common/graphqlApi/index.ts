@@ -155,7 +155,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     execution: formatExecution(proposal.metadata.execution),
     has_execution_window_opened: proposal.min_end <= current,
     state: getProposalState(proposal, current),
-    network: networkId
+    network: networkId,
+    privacy: null
   };
 }
 
@@ -266,11 +267,12 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         return vote;
       });
     },
-    loadUserVotes: async (voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceId: string, voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
-          voter: voter.toLowerCase()
+          spaceId,
+          voter
         }
       });
 

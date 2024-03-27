@@ -1,8 +1,9 @@
 {
   "name": "api-subgraph",
   "private": true,
-  "version": "0.0.23",
+  "version": "0.0.24",
   "scripts": {
+    "test": "graph test",
     "codegen": "graph codegen",
     "build": "graph build",
     "dev": "yarn deploy-local",
@@ -23,5 +24,8 @@
     "@graphprotocol/graph-cli": "0.68.0",
     "@graphprotocol/graph-ts": "0.33.0",
     "assemblyscript-json": "^1.1.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "^0.6.0"
   }
 }

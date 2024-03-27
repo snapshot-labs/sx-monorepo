@@ -20,9 +20,9 @@ export default function createRemoteVpStrategy(): Strategy {
 
       return result.vp_by_strategy.map((vp: number, i: number) => {
         const strategy = params[i];
-        const decimals = parseInt(strategy.params.decimals || 0);
+        const decimals = parseInt(strategy.params.decimals || 18);
 
-        return BigInt(vp * 10 ** decimals);
+        return BigInt(Math.floor(vp * 10 ** decimals));
       });
     }
   };

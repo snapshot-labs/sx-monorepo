@@ -1,3 +1,4 @@
+import { isAddress } from '@ethersproject/address';
 import {
   OffchainNetworkConfig,
   clients,
@@ -137,7 +138,8 @@ export function createActions(
         choice: getSdkChoice(proposal.type, choice),
         authenticator: '',
         strategies: [],
-        metadataUri: ''
+        metadataUri: '',
+        privacy: proposal.privacy
       };
 
       return client.vote({
@@ -160,7 +162,10 @@ export function createActions(
 
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
-      if (!strategy) return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+
+      if (!strategy || !isAddress(voterAddress)) {
+        return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+      }
 
       const result = await strategy.getVotingPower(
         spaceId,
@@ -184,7 +189,7 @@ export function createActions(
 
       return result.map((value: bigint, index: number) => {
         const strategy = strategiesOrValidationParams[index];
-        const decimals = parseInt(strategy.params.decimals || 0);
+        const decimals = parseInt(strategy.params.decimals || 18);
 
         return {
           address: strategy.name,

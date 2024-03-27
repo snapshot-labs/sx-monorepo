@@ -11,6 +11,7 @@ const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
+const { loadVotes } = useAccount();
 const { vote } = useActions();
 
 const sendingType = ref<Choice | null>(null);
@@ -88,6 +89,12 @@ watch(
   },
   { immediate: true }
 );
+
+watchEffect(() => {
+  if (!resolved.value || !networkId.value || !spaceAddress.value) return;
+
+  loadVotes(networkId.value, spaceAddress.value);
+});
 
 watchEffect(() => {
   if (!proposal.value) return;
@@ -186,6 +193,12 @@ watchEffect(() => {
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
+              :proposal="proposal"
+              :sending-type="sendingType"
+              @vote="handleVoteClick"
+            />
+            <ProposalVoteRankedChoice
+              v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
               @vote="handleVoteClick"

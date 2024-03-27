@@ -11,6 +11,8 @@ export enum Choice {
   Abstain = 2
 }
 
+export type Privacy = 'shutter' | null;
+
 export type ProposeCallArgs = {
   author: string;
   executionStrategy: {

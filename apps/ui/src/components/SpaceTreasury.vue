@@ -2,10 +2,14 @@
 import { _n, _c, shorten, sanitizeUrl, compareAddresses } from '@/helpers/utils';
 import { getNetwork, evmNetworks } from '@/networks';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { Space, SpaceMetadataTreasury, Transaction } from '@/types';
+import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 import type { Token } from '@/helpers/alchemy';
 
-const props = defineProps<{ space: Space; treasuryData: SpaceMetadataTreasury }>();
+const props = defineProps<{
+  space: Space;
+  treasuryData: SpaceMetadataTreasury;
+  extraContacts?: Contact[];
+}>();
 
 const { setTitle } = useTitle();
 const router = useRouter();
@@ -54,6 +58,17 @@ const totalQuote = computed(() =>
     return acc + asset.value;
   }, 0)
 );
+
+const totalPreviousQuote = computed(() =>
+  assets.value.reduce((acc, asset) => {
+    return acc + asset.value / (1 + asset.change / 100);
+  }, 0)
+);
+
+const totalChange = computed(() => {
+  if (totalPreviousQuote.value === 0) return 0;
+  return ((totalQuote.value - totalPreviousQuote.value) / totalPreviousQuote.value) * 100;
+});
 
 const sortedAssets = computed(() =>
   (assets || []).value.sort((a, b) => {
@@ -169,7 +184,24 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <h4 class="text-skin-link" v-text="treasury.name || shorten(treasury.wallet)" />
             <div class="text-skin-text text-[17px]" v-text="shorten(treasury.wallet)" />
           </div>
-          <h3 v-text="`$${_n(totalQuote.toFixed())}`" />
+          <div v-if="loaded" class="flex-col items-end text-right leading-[22px]">
+            <h4
+              class="text-skin-link"
+              v-text="`$${_n(totalQuote, 'standard', { maximumFractionDigits: 2 })}`"
+            />
+            <div v-if="Math.abs(totalChange) > 0.01" class="text-[17px]">
+              <div
+                v-if="totalChange > 0"
+                class="text-skin-success"
+                v-text="`+${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`"
+              />
+              <div
+                v-if="totalChange < 0"
+                class="text-skin-danger"
+                v-text="`${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`"
+              />
+            </div>
+          </div>
         </a>
       </div>
       <div>
@@ -285,6 +317,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :address="treasury.wallet"
         :network="treasury.network"
         :network-id="treasury.networkId"
+        :extra-contacts="extraContacts"
         @close="modalOpen.tokens = false"
         @add="addTx"
       />
@@ -292,6 +325,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :open="modalOpen.nfts"
         :address="treasury.wallet"
         :network="treasury.network"
+        :extra-contacts="extraContacts"
         @close="modalOpen.nfts = false"
         @add="addTx"
       />

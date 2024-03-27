@@ -79,6 +79,7 @@ const PROPOSAL_FRAGMENT = gql`
     created
     updated
     votes
+    privacy
   }
 `;
 
@@ -116,6 +117,24 @@ export const SPACE_QUERY = gql`
     }
   }
   ${SPACE_FRAGMENT}
+`;
+
+export const USER_VOTES_QUERY = gql`
+  query ($spaceId: String, $voter: String) {
+    votes(where: { space: $spaceId, voter: $voter }) {
+      id
+      voter
+      space {
+        id
+      }
+      proposal {
+        id
+      }
+      choice
+      vp
+      created
+    }
+  }
 `;
 
 export const VOTES_QUERY = gql`

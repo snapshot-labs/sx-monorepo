@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
 import { defaultNetwork } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';
@@ -7,6 +7,30 @@ import { proposeEnvelope } from '../../fixtures';
 const ethUrl = process.env.GOERLI_NODE_URL as string;
 
 describe('erc20VotesStrategy', () => {
+  beforeAll(() => {
+    vi.mock('starknet', async importOriginal => {
+      const actual = await importOriginal<typeof import('starknet')>();
+
+      return {
+        ...actual,
+        Contract: class {
+          async get_past_votes(voterAddress: string) {
+            if (
+              voterAddress === '0x7ff6b17f07c4d83236e3fc5f94259a19d1ed41bbcf1822397ea17882e9b038d'
+            ) {
+              return '79228132514264337593543950335';
+            }
+            return '0';
+          }
+        }
+      };
+    });
+  });
+
+  afterAll(() => {
+    vi.resetAllMocks();
+  });
+
   const erc20VotesStrategy = createErc20VotesStrategy();
   const config = { starkProvider, ethUrl, networkConfig: defaultNetwork };
 

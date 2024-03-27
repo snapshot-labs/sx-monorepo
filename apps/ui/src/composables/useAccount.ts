@@ -1,22 +1,23 @@
-import { enabledNetworks, getNetwork } from '@/networks';
-import type { Vote } from '@/types';
+import { getNetwork } from '@/networks';
+import type { NetworkID, Vote } from '@/types';
 
 const votes: Ref<Record<string, Vote>> = ref({});
 
 export function useAccount() {
-  const { web3 } = useWeb3();
+  const { web3, web3Account } = useWeb3();
 
-  async function loadVotes() {
+  watchEffect(() => {
+    if (!web3Account.value) votes.value = {};
+  });
+
+  async function loadVotes(networkId: NetworkID, spaceId: string) {
     const account = web3.value.account;
+    if (!account) return;
 
-    const allNetworkVotes = await Promise.all(
-      enabledNetworks.map(networkId => {
-        const network = getNetwork(networkId);
-        return network.api.loadUserVotes(account);
-      })
-    );
+    const network = getNetwork(networkId);
+    const userVotes = await network.api.loadUserVotes(spaceId, account);
 
-    votes.value = allNetworkVotes.reduce((acc, b) => ({ ...acc, ...b }));
+    votes.value = { ...votes.value, ...userVotes };
   }
 
   return { account: web3.value.account, loadVotes, votes };
