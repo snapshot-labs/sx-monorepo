@@ -9,6 +9,7 @@ import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 import { getSlotKey, getBinaryTree } from './utils';
+import { VotingPowerDetailsError } from '../../utils/errors';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
 export default function createOzVotesStorageProofStrategy({
@@ -16,6 +17,8 @@ export default function createOzVotesStorageProofStrategy({
 }: {
   deployedOnChain: string;
 }): Strategy {
+  const type = 'ozVotesStorageProof';
+
   async function getProofs(
     l1TokenAddress: string,
     voterAddress: string,
@@ -60,7 +63,7 @@ export default function createOzVotesStorageProofStrategy({
   }
 
   return {
-    type: 'ozVotesStorageProof',
+    type,
     async getParams(
       call: 'propose' | 'vote',
       signerAddress: string,
@@ -139,7 +142,12 @@ export default function createOzVotesStorageProofStrategy({
 
       const contract = new Contract(OZVotesStorageProof, strategyAddress, starkProvider);
 
-      const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
+      let tree;
+      try {
+        tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
+      } catch (e: unknown) {
+        throw new VotingPowerDetailsError('Failed to get binary tree', type, 'NOT_READY_YET');
+      }
       const l1BlockNumber = tree.path[1].block_number;
 
       const { proofs, checkpointIndex } = await getProofs(
