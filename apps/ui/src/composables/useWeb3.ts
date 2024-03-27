@@ -57,7 +57,7 @@ export function useWeb3() {
         });
         auth.provider.value.on('accountsChanged', async accounts => {
           if (accounts.length !== 0) {
-            state.account = formatAddress(state.account);
+            state.account = formatAddress(accounts[0]);
             await login();
           }
         });
