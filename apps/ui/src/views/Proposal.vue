@@ -173,16 +173,15 @@ watchEffect(() => {
             class="mb-2 flex items-center"
             @get-voting-power="getVotingPower"
           >
-            <UiAlert
+            <div
               v-if="
                 votingPowerDetailsError?.details === 'NOT_READY_YET' &&
                 ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPowerDetailsError.source)
               "
               class="mt-2"
-              type="warning"
             >
               Please allow few minutes for the voting power to be collected from Ethereum.
-            </UiAlert>
+            </div>
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
               <a @click="props.onClick">
