@@ -1,5 +1,6 @@
 {
   "name": "sx-monorepo",
+  "license": "MIT",
   "private": true,
   "repository": {
     "type": "git",
