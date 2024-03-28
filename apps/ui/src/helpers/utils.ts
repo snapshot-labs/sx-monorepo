@@ -415,16 +415,18 @@ export function getChoiceText(
   availableChoices: string[],
   choice: number | number[] | Record<string, number>
 ) {
-  if (Array.isArray(choice)) {
-    return choice.map(index => availableChoices[index - 1]).join(', ');
-  } else if (typeof choice === 'object') {
-    return Object.keys(choice)
-      .map(index => {
-        const i = parseInt(index);
-        return `${_p(getChoiceWeight(choice, i - 1))} for ${availableChoices[i - 1]}`;
-      })
-      .join(', ');
+  if (typeof choice === 'number') {
+    return availableChoices[choice - 1];
   }
 
-  return availableChoices[choice - 1];
+  if (Array.isArray(choice)) {
+    return choice.map(index => availableChoices[index - 1]).join(', ');
+  }
+
+  const total = Object.values(choice).reduce((acc, weight) => acc + weight, 0);
+
+  return Object.entries(choice)
+    .filter(([, weight]) => weight > 0)
+    .map(([index, weight]) => `${_p(weight / total)} for ${availableChoices[Number(index) - 1]}`)
+    .join(', ');
 }
