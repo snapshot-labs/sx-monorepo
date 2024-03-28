@@ -21,7 +21,6 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const { state: aiSummaryState, aiSummary, fetchAiSummary } = useAiSummary(props.proposal.id);
 const {
   state: aiTtsState,
   playing,
