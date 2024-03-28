@@ -170,7 +170,7 @@ export function useActions() {
       predictedSpaceAddress: predictSpaceAddress(networkId, salt)
     });
 
-    return receipt.txId;
+    return receipt;
   }
 
   async function updateMetadata(space: Space, metadata: SpaceMetadata) {

@@ -4,6 +4,24 @@ import { getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
+type DeployingDependencyStep = {
+  id: `DEPLOYING_DEPS_${number}`;
+  title: string;
+  strategy: StrategyConfig;
+};
+
+type DeployingSpaceStep = {
+  id: 'DEPLOYING_SPACE';
+  title: string;
+};
+
+type IndexingSpaceStep = {
+  id: 'INDEXING_SPACE';
+  title: string;
+};
+
+type Step = DeployingDependencyStep | DeployingSpaceStep | IndexingSpaceStep;
+
 const props = defineProps<{
   networkId: NetworkID;
   salt: string;
@@ -23,9 +41,10 @@ const currentStep = ref(0);
 const completed = ref(false);
 const failed = ref(false);
 const txIds = ref({});
+const deployedExecutionStrategies = ref([] as StrategyConfig[]);
 
 const network = computed(() => getNetwork(props.networkId));
-const steps = computed(() => {
+const steps = computed<Step[]>(() => {
   const dependenciesSteps = props.executionStrategies.filter(strategy => strategy.deploy);
 
   return [
@@ -35,8 +54,9 @@ const steps = computed(() => {
         : 'Deploying dependency';
 
       return {
-        id: `DEPLOYING_DEPS_${i}`,
-        title
+        id: `DEPLOYING_DEPS_${i}` as const,
+        title,
+        strategy: config
       };
     }),
     {
@@ -50,48 +70,15 @@ const steps = computed(() => {
   ];
 });
 
-async function deploy() {
-  const dependenciesSteps = props.executionStrategies.filter(strategy => strategy.deploy);
-  const executionStrategies = props.executionStrategies.filter(
-    strategy => !strategy.deploy
-  ) as StrategyConfig[];
+async function deployStep(step: DeployingDependencyStep | DeployingSpaceStep) {
+  let result;
+  if (step.id === 'DEPLOYING_SPACE') {
+    const executionStrategies = [
+      ...props.executionStrategies.filter(strategy => !strategy.deploy),
+      ...deployedExecutionStrategies.value
+    ];
 
-  for (let i = 0; i < dependenciesSteps.length; i++) {
-    const strategy = dependenciesSteps[i];
-
-    try {
-      const result = await deployDependency(
-        props.networkId,
-        props.controller,
-        props.predictedSpaceAddress,
-        strategy
-      );
-
-      if (!result) {
-        failed.value = true;
-        return;
-      }
-
-      const { address, txId } = result;
-
-      txIds.value[`DEPLOYING_DEPS_${i}`] = txId;
-      const confirmedReceipt = await network.value.helpers.waitForTransaction(txId);
-      if (confirmedReceipt.status === 0) throw new Error('Transaction failed');
-
-      executionStrategies.push({
-        ...strategy,
-        deploy: undefined,
-        address
-      });
-      currentStep.value = currentStep.value + 1;
-    } catch {
-      failed.value = true;
-      return;
-    }
-  }
-
-  try {
-    const result = await createSpace(
+    result = await createSpace(
       props.networkId,
       props.salt,
       props.metadata,
@@ -102,25 +89,55 @@ async function deploy() {
       executionStrategies,
       props.controller
     );
+  } else {
+    result = await deployDependency(
+      props.networkId,
+      props.controller,
+      props.predictedSpaceAddress,
+      step.strategy
+    );
+  }
 
-    if (!result) {
-      failed.value = true;
-      return;
-    }
-
-    txIds.value['DEPLOYING_SPACE'] = result;
-
-    const confirmedReceipt = await network.value.helpers.waitForTransaction(result);
-    if (confirmedReceipt.status === 0) throw new Error('Transaction failed');
-
-    currentStep.value = currentStep.value + 1;
-  } catch {
+  if (!result) {
     failed.value = true;
     return;
   }
 
+  const { address, txId } = result;
+
+  txIds.value[step.id] = txId;
+  const confirmedReceipt = await network.value.helpers.waitForTransaction(txId);
+  if (confirmedReceipt.status === 0) throw new Error('Transaction failed');
+
+  if (step.id !== 'DEPLOYING_SPACE') {
+    deployedExecutionStrategies.value.push({
+      ...step.strategy,
+      deploy: undefined,
+      address
+    });
+  }
+
+  currentStep.value = currentStep.value + 1;
+}
+
+async function deploy(startIndex: number = 0) {
+  failed.value = false;
+
+  const stepsToProcess = steps.value.slice(startIndex);
+
+  for (const step of stepsToProcess) {
+    if (step.id === 'INDEXING_SPACE') continue;
+
+    try {
+      await deployStep(step);
+    } catch (e: unknown) {
+      failed.value = true;
+      return;
+    }
+  }
+
   try {
-    await network.value.helpers.waitForSpace(props.predictedSpaceAddress.toLowerCase());
+    await network.value.helpers.waitForSpace(props.predictedSpaceAddress);
 
     completed.value = true;
     currentStep.value = currentStep.value + 1;
@@ -149,6 +166,9 @@ onMounted(() => deploy());
         </div>
         <div>
           <h4 v-text="step.title" />
+          <a v-if="failed && i === currentStep" class="text-skin-text" @click="deploy(currentStep)">
+            Retry
+          </a>
           <a
             v-if="txIds[step.id]"
             class="inline-flex items-center"
