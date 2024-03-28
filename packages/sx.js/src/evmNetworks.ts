@@ -96,7 +96,7 @@ export const evmNetworks = {
   gor: createStandardConfig(5),
   sep: createStandardConfig(11155111, {
     strategies: {
-      Axiom: '0xE59405D7d40df064E85FD02a4F2F2C527172a9c1',
+      Axiom: '0xaC6dbd42Ed254E9407fe0D2798784d0110979DC2',
       Isokratia: '0xc674eCf233920aa3052738BFCDbDd0812AEE5A83'
     }
   }),
