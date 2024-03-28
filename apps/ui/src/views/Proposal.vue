@@ -168,12 +168,11 @@ watchEffect(() => {
                 class="text-skin-link text-lg flex items-center"
                 @click="props.onClick"
               >
-                <IH-lightning-bolt class="inline-block" />
                 <IH-exclamation
                   v-if="votingPowerStatus === 'error'"
-                  class="inline-block ml-1 text-rose-500"
+                  class="inline-block text-rose-500"
                 />
-                <span v-else class="ml-2" v-text="props.formattedVotingPower" />
+                <span v-else v-text="props.formattedVotingPower" />
               </button>
             </div>
           </IndicatorVotingPower>

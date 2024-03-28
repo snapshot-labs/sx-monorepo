@@ -185,9 +185,9 @@ async function handleAiSummaryClick() {
         <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
-              props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network)
+              offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500
             "
-            :title="aiSummaryOpen ? 'Hide AI summary' : 'Show AI summary'"
+            :title="'AI summary'"
           >
             <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
               <UiLoading v-if="aiSummaryLoading" />
@@ -240,11 +240,15 @@ async function handleAiSummaryClick() {
           </UiDropdown>
         </div>
       </div>
-      <div v-if="aiSummaryOpen" class="mb-4 border rounded-lg">
-        <div class="p-4 text-md text-skin-link">{{ aiSummaryBody }}</div>
-        <div class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
+      <div v-if="aiSummaryOpen" class="mb-6">
+        <h4 class="mb-2 eyebrow flex items-center">
+          <IH-sparkles class="inline-block mr-2" />
+          <span>AI summary</span>
+        </h4>
+        <div class="text-md text-skin-link mb-2">{{ aiSummaryBody }}</div>
+        <div class="flex gap-2 items-center text-sm">
           <IH-exclamation />
-          AI summary can be inaccurate or misleading.
+          AI can be inaccurate or misleading.
         </div>
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
