@@ -21,6 +21,13 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
+const {
+  state: aiTtsState,
+  playing,
+  play,
+  pause,
+  fetchAiTextToSpeech
+} = useAiTextToSpeech(props.proposal.id);
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -76,6 +83,10 @@ const votingTime = computed(() => {
   const hasEnded = props.proposal.max_end <= current;
 
   return hasEnded ? `Ended ${time}` : time;
+});
+
+const aiEnabled = computed(() => {
+  return offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500;
 });
 
 async function handleEditClick() {
@@ -144,6 +155,21 @@ async function handleAiSummaryClick() {
     aiSummaryLoading.value = false;
   }
 }
+
+async function handleAiTtsClick() {
+  await fetchAiTextToSpeech();
+
+  if (aiTtsState.value.error) {
+    uiStore.addNotification('error', 'Fail to play AI Speech. Please try again later.');
+    return;
+  }
+
+  if (playing.value) {
+    await pause();
+  } else {
+    await play();
+  }
+}
 </script>
 
 <template>
@@ -183,17 +209,21 @@ async function handleAiSummaryClick() {
           </div>
         </router-link>
         <div class="flex gap-2 items-center">
-          <UiTooltip
-            v-if="
-              offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500
-            "
-            :title="'AI summary'"
-          >
-            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
-              <UiLoading v-if="aiSummaryLoading" />
-              <IH-sparkles v-else class="text-skin-text inline-block" />
-            </UiButton>
-          </UiTooltip>
+          <template v-if="aiEnabled">
+            <UiTooltip :title="'AI summary'">
+              <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
+                <UiLoading v-if="aiSummaryLoading" />
+                <IH-sparkles v-else class="text-skin-text inline-block" />
+              </UiButton>
+            </UiTooltip>
+            <UiTooltip v-if="props.proposal.body.length < 4096" title="Listen to the proposal">
+              <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiTtsClick">
+                <UiLoading v-if="aiTtsState.loading" />
+                <IH-pause v-else-if="playing" class="inline-block text-skin-text" />
+                <IH-play v-else class="inline-block text-skin-text" />
+              </UiButton>
+            </UiTooltip>
+          </template>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
