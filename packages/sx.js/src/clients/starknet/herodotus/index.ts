@@ -31,14 +31,14 @@ export class HerodotusController {
       calldata: CallData.compile({
         timestamp,
         tree: {
-          mapped_id: binaryTree.remapper.onchainRemapperId,
+          mapped_id: binaryTree.remapper.onchain_remapper_id,
           last_pos: 3,
-          peaks: binaryTree.proofs[0].peaksHashes,
+          peaks: binaryTree.proofs[0].peaks_hashes,
           proofs: binaryTree.proofs.map((proof: any) => {
             return {
-              index: proof.elementIndex,
-              value: cairo.uint256(proof.elementHash),
-              proof: proof.siblingsHashes
+              index: proof.element_index,
+              value: cairo.uint256(proof.element_hash),
+              proof: proof.siblings_hashes
             };
           }),
           left_neighbor: new CairoOption<ProofElement>(CairoOptionVariant.None)

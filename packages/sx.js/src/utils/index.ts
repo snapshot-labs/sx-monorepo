@@ -1,4 +1,5 @@
 export * as bytes from './bytes';
+export * as errors from './errors';
 export * as intsSequence from './ints-sequence';
 export * as merkle from './merkletree';
 export * as splitUint256 from './split-uint256';

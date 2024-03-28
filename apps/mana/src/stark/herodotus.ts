@@ -176,7 +176,7 @@ export async function processProposal(proposal: DbProposal) {
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
 
   const res = await fetch(
-    `https://ds-indexer.api.herodotus.cloud/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,
+    `https://rs-indexer.api.herodotus.cloud/remappers/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,
     {
       headers: {
         accept: 'application/json'

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { utils } from '@snapshot-labs/sx';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
 import { Choice } from '@/types';
@@ -17,6 +18,7 @@ const { vote } = useActions();
 const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -43,6 +45,8 @@ const votingPowerDecimals = computed(() => {
 async function getVotingPower() {
   if (!network.value) return;
 
+  votingPowerDetailsError.value = null;
+
   if (!web3.value.account || !proposal.value) {
     votingPowers.value = [];
     votingPowerStatus.value = 'success';
@@ -60,8 +64,13 @@ async function getVotingPower() {
       { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
     );
     votingPowerStatus.value = 'success';
-  } catch (e) {
-    console.warn('Failed to load voting power', e);
+  } catch (e: unknown) {
+    if (e instanceof utils.errors.VotingPowerDetailsError) {
+      votingPowerDetailsError.value = e;
+    } else {
+      console.warn('Failed to load voting power', e);
+    }
+
     votingPowers.value = [];
     votingPowerStatus.value = 'error';
   }
@@ -161,7 +170,16 @@ watchEffect(() => {
             @get-voting-power="getVotingPower"
           >
             <h4 class="block eyebrow">Your voting power</h4>
-            <div class="pt-2">
+            <div
+              v-if="
+                votingPowerDetailsError?.details === 'NOT_READY_YET' &&
+                ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPowerDetailsError.source)
+              "
+              class="mt-2"
+            >
+              Please allow few minutes for the voting power to be collected from Ethereum.
+            </div>
+            <div v-else class="pt-2">
               <UiLoading v-if="votingPowerStatus === 'loading'" />
               <button
                 v-else
