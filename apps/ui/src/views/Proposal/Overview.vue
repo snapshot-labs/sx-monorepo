@@ -33,6 +33,9 @@ const {
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
+const aiSummaryBody = ref<string>('');
+const aiSummaryLoading = ref(false);
+const aiSummaryOpen = ref(false);
 
 const editable = computed(() => {
   return (
@@ -84,7 +87,7 @@ const votingTime = computed(() => {
 });
 
 const aiEnabled = computed(() => {
-  return props.proposal.body.length > 500 && offchainNetworks.includes(props.proposal.network);
+  return offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500;
 });
 
 async function handleEditClick() {
@@ -129,12 +132,28 @@ async function handleCancelClick() {
 }
 
 async function handleAiSummaryClick() {
-  await fetchAiSummary();
+  if (aiSummaryBody.value) {
+    aiSummaryOpen.value = !aiSummaryOpen.value;
+    return;
+  }
 
-  if (!aiSummaryState.value.error) {
-    aiSummaryState.value.open = !aiSummaryState.value.open;
-  } else {
+  try {
+    aiSummaryLoading.value = true;
+    const response = await fetch(`https://sh5.co/api/ai/summary/${props.proposal.id}`, {
+      method: 'POST'
+    });
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    aiSummaryBody.value = data.result;
+    aiSummaryOpen.value = true;
+  } catch (e) {
     uiStore.addNotification('error', 'There was an error fetching the AI summary.');
+  } finally {
+    aiSummaryLoading.value = false;
   }
 }
 
@@ -191,25 +210,21 @@ async function handleAiTtsClick() {
           </div>
         </router-link>
         <div class="flex gap-2 items-center">
-          <UiTooltip
-            v-if="aiEnabled"
-            :title="aiSummaryState.open ? 'Hide AI summary' : 'Show AI summary'"
-          >
-            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
-              <UiLoading v-if="aiSummaryState.loading" />
-              <IH-sparkles v-else class="text-skin-text inline-block" />
-            </UiButton>
-          </UiTooltip>
-          <UiTooltip
-            v-if="aiEnabled && props.proposal.body.length < 4096"
-            title="Listen to the proposal"
-          >
-            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiTtsClick">
-              <UiLoading v-if="aiTtsState.loading" />
-              <IH-pause v-else-if="playing" class="inline-block text-skin-text" />
-              <IH-play v-else class="inline-block text-skin-text" />
-            </UiButton>
-          </UiTooltip>
+          <template v-if="aiEnabled">
+            <UiTooltip :title="'AI summary'">
+              <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
+                <UiLoading v-if="aiSummaryLoading" />
+                <IH-sparkles v-else class="text-skin-text inline-block" />
+              </UiButton>
+            </UiTooltip>
+            <UiTooltip v-if="props.proposal.body.length < 4096" title="Listen to the proposal">
+              <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiTtsClick">
+                <UiLoading v-if="aiTtsState.loading" />
+                <IH-pause v-else-if="playing" class="inline-block text-skin-text" />
+                <IH-play v-else class="inline-block text-skin-text" />
+              </UiButton>
+            </UiTooltip>
+          </template>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
@@ -256,11 +271,15 @@ async function handleAiTtsClick() {
           </UiDropdown>
         </div>
       </div>
-      <div v-if="aiSummaryState.open" class="mb-4 border rounded-lg">
-        <div class="p-4 text-md text-skin-link">{{ aiSummary }}</div>
-        <div class="bg-skin-border p-4 py-2 flex gap-2 items-center text-sm">
+      <div v-if="aiSummaryOpen" class="mb-6">
+        <h4 class="mb-2 eyebrow flex items-center">
+          <IH-sparkles class="inline-block mr-2" />
+          <span>AI summary</span>
+        </h4>
+        <div class="text-md text-skin-link mb-2">{{ aiSummaryBody }}</div>
+        <div class="flex gap-2 items-center text-sm">
           <IH-exclamation />
-          AI summary can be inaccurate or misleading.
+          AI can be inaccurate or misleading.
         </div>
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />

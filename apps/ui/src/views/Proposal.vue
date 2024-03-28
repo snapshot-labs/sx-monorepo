@@ -11,6 +11,7 @@ const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
+const { loadVotes } = useAccount();
 const { vote } = useActions();
 
 const sendingType = ref<Choice | null>(null);
@@ -90,6 +91,12 @@ watch(
 );
 
 watchEffect(() => {
+  if (!resolved.value || !networkId.value || !spaceAddress.value) return;
+
+  loadVotes(networkId.value, spaceAddress.value);
+});
+
+watchEffect(() => {
   if (!proposal.value) return;
 
   const faviconUrl = getStampUrl(
@@ -161,12 +168,11 @@ watchEffect(() => {
                 class="text-skin-link text-lg flex items-center"
                 @click="props.onClick"
               >
-                <IH-lightning-bolt class="inline-block" />
                 <IH-exclamation
                   v-if="votingPowerStatus === 'error'"
-                  class="inline-block ml-1 text-rose-500"
+                  class="inline-block text-rose-500"
                 />
-                <span v-else class="ml-2" v-text="props.formattedVotingPower" />
+                <span v-else v-text="props.formattedVotingPower" />
               </button>
             </div>
           </IndicatorVotingPower>

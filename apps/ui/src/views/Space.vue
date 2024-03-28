@@ -7,6 +7,7 @@ const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
+const { loadVotes } = useAccount();
 
 const space = computed(() => {
   if (!resolved.value) return null;
@@ -25,6 +26,12 @@ watch(
     immediate: true
   }
 );
+
+watchEffect(() => {
+  if (!resolved.value || !networkId.value || !address.value) return;
+
+  loadVotes(networkId.value, address.value);
+});
 
 watchEffect(() => {
   if (!space.value) return setFavicon(null);
