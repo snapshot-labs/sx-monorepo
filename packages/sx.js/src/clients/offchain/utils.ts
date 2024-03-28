@@ -3,7 +3,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { arrayify, hexlify } from '@ethersproject/bytes';
 import { toUtf8Bytes, formatBytes32String } from '@ethersproject/strings';
 import { init, encrypt } from '@shutter-network/shutter-crypto';
-import type { Choice } from './types';
 import type { Privacy } from '../../types';
 
 const SHUTTER_EON_PUBKEY =
@@ -12,10 +11,10 @@ const SHUTTER_EON_PUBKEY =
 export async function encryptChoices(
   privacy: Privacy,
   proposalId: string,
-  choice: Choice
+  choice: string
 ): Promise<string> {
   if (privacy === 'shutter') {
-    return encryptShutterChoice(JSON.stringify(choice), proposalId);
+    return encryptShutterChoice(choice, proposalId);
   }
 
   throw new Error('Encryption type not supported');

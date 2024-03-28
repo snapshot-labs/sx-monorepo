@@ -202,6 +202,12 @@ watchEffect(() => {
               :sending-type="sendingType"
               @vote="handleVoteClick"
             />
+            <ProposalVoteWeighted
+              v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
+              :proposal="proposal"
+              :sending-type="sendingType"
+              @vote="handleVoteClick"
+            />
           </ProposalVote>
         </template>
 

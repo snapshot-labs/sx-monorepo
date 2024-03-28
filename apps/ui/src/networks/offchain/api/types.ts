@@ -83,7 +83,7 @@ export type ApiVote = {
   proposal: {
     id: string;
   };
-  choice: number | number[];
+  choice: number | number[] | Record<string, number>;
   vp: number;
   created: number;
 };

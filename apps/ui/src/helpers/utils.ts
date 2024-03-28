@@ -404,10 +404,29 @@ export function simplifyURL(fullURL: string): string {
   return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
 }
 
-export function getChoiceText(availableChoices: string[], choice: number | number[]) {
+export function getChoiceWeight(selectedChoices: Record<string, number>, index: number) {
+  const whole = Object.values(selectedChoices).reduce((a, b) => a + b, 0);
+  const percent = selectedChoices[index + 1] / whole;
+
+  return isNaN(percent) ? 0 : percent;
+}
+
+export function getChoiceText(
+  availableChoices: string[],
+  choice: number | number[] | Record<string, number>
+) {
+  if (typeof choice === 'number') {
+    return availableChoices[choice - 1];
+  }
+
   if (Array.isArray(choice)) {
     return choice.map(index => availableChoices[index - 1]).join(', ');
   }
 
-  return availableChoices[choice - 1];
+  const total = Object.values(choice).reduce((acc, weight) => acc + weight, 0);
+
+  return Object.entries(choice)
+    .filter(([, weight]) => weight > 0)
+    .map(([index, weight]) => `${_p(weight / total)} for ${availableChoices[Number(index) - 1]}`)
+    .join(', ');
 }

@@ -19,6 +19,13 @@ export const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = [];
 export const EDITOR_EXECUTION_STRATEGIES = [];
 export const EDITOR_SNAPSHOT_OFFSET = 4;
 export const EDITOR_APP_NAME = 'snapshot-v2';
-export const EDITOR_VOTING_TYPES = ['basic', 'single-choice', 'approval', 'ranked-choice'];
+export const EDITOR_VOTING_TYPES = [
+  'basic',
+  'single-choice',
+  'approval',
+  'ranked-choice',
+  'weighted',
+  'quadratic'
+];
 
 export const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 7;
