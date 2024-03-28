@@ -40,7 +40,11 @@ import {
   User,
   Leaderboard,
 } from '../generated/schema'
-import { updateStrategiesParsedMetadata, updateProposalValidationStrategy } from './helpers'
+import {
+  updateStrategiesParsedMetadata,
+  updateProposalValidationStrategy,
+  toChecksumAddress,
+} from './helpers'
 
 const MASTER_SPACE = Address.fromString('0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D')
 const MASTER_SIMPLE_QUORUM_AVATAR = Address.fromString('0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42')
@@ -69,7 +73,9 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     let targetAddress = executionStrategyContract.try_target()
     if (typeResult.reverted || quorumResult.reverted || targetAddress.reverted) return
 
-    let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
+    let executionStrategy = new ExecutionStrategy(
+      toChecksumAddress(event.params.proxy.toHexString())
+    )
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
@@ -82,7 +88,9 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     let quorumResult = executionStrategyContract.try_quorum()
     if (typeResult.reverted || quorumResult.reverted) return
 
-    let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
+    let executionStrategy = new ExecutionStrategy(
+      toChecksumAddress(event.params.proxy.toHexString())
+    )
     executionStrategy.type = 'Axiom' // override because contract returns AxiomExecutionStrategyMock
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
@@ -104,7 +112,9 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
       return
     }
 
-    let executionStrategy = new ExecutionStrategy(event.params.proxy.toHexString())
+    let executionStrategy = new ExecutionStrategy(
+      toChecksumAddress(event.params.proxy.toHexString())
+    )
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
@@ -118,7 +128,7 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
 }
 
 export function handleSpaceCreated(event: SpaceCreated): void {
-  let space = new Space(event.params.space.toHexString())
+  let space = new Space(toChecksumAddress(event.params.space.toHexString()))
   space.controller = event.params.input.owner
   space.voting_delay = event.params.input.votingDelay.toI32()
   space.min_voting_period = event.params.input.minVotingDuration.toI32()
@@ -166,7 +176,7 @@ export function handleSpaceCreated(event: SpaceCreated): void {
 }
 
 export function handleProposalCreated(event: ProposalCreated): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -175,7 +185,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
   let proposal = new Proposal(proposalId)
   proposal.proposal_id = event.params.proposalId.toI32()
   proposal.space = space.id
-  proposal.author = event.params.author.toHexString()
+  proposal.author = toChecksumAddress(event.params.author.toHexString())
   proposal.execution_hash = event.params.proposal.executionPayloadHash.toHexString()
   proposal.start = event.params.proposal.startBlockNumber.toI32()
   proposal.min_end = event.params.proposal.minEndBlockNumber.toI32()
@@ -199,7 +209,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.cancelled = false
 
   let executionStrategy = ExecutionStrategy.load(
-    event.params.proposal.executionStrategy.toHexString()
+    toChecksumAddress(event.params.proposal.executionStrategy.toHexString())
   )
   if (executionStrategy !== null) {
     proposal.quorum = executionStrategy.quorum
@@ -226,9 +236,10 @@ export function handleProposalCreated(event: ProposalCreated): void {
 
   proposal.save()
 
-  let user = User.load(event.params.author.toHexString())
+  let userAddress = toChecksumAddress(event.params.author.toHexString())
+  let user = User.load(userAddress)
   if (user == null) {
-    user = new User(event.params.author.toHexString())
+    user = new User(userAddress)
     user.proposal_count = 0
     user.vote_count = 0
     user.created = event.block.timestamp.toI32()
@@ -254,7 +265,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
 }
 
 export function handleProposalUpdated(event: ProposalUpdated): void {
-  let proposalId = `${event.address.toHexString()}/${event.params.proposalId}`
+  let proposalId = `${toChecksumAddress(event.address.toHexString())}/${event.params.proposalId}`
 
   let proposal = Proposal.load(proposalId)
   if (proposal == null) {
@@ -266,7 +277,7 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
   proposal.execution_hash = event.params.newExecutionStrategy.params.toHexString()
 
   let executionStrategy = ExecutionStrategy.load(
-    event.params.newExecutionStrategy.addr.toHexString()
+    toChecksumAddress(event.params.newExecutionStrategy.addr.toHexString())
   )
   if (executionStrategy !== null) {
     proposal.quorum = executionStrategy.quorum
@@ -293,14 +304,18 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposal = Proposal.load(`${event.address.toHexString()}/${event.params.proposalId}`)
+  let proposal = Proposal.load(
+    `${toChecksumAddress(event.address.toHexString())}/${event.params.proposalId}`
+  )
   if (proposal == null) {
     return
   }
 
   proposal.executed = true
 
-  let executionStrategy = ExecutionStrategy.load(proposal.execution_strategy.toHexString())
+  let executionStrategy = ExecutionStrategy.load(
+    toChecksumAddress(proposal.execution_strategy.toHexString())
+  )
 
   if (executionStrategy !== null) {
     if (
@@ -322,8 +337,9 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 }
 
 export function handleProposalCancelled(event: ProposalCancelled): void {
-  let proposal = Proposal.load(`${event.address.toHexString()}/${event.params.proposalId}`)
-  let space = Space.load(event.address.toHexString())
+  let spaceId = toChecksumAddress(event.address.toHexString())
+  let proposal = Proposal.load(`${spaceId}/${event.params.proposalId}`)
+  let space = Space.load(spaceId)
 
   if (space == null || proposal == null) {
     return
@@ -338,7 +354,7 @@ export function handleProposalCancelled(event: ProposalCancelled): void {
 }
 
 export function handleVoteCreated(event: VoteCast): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -351,8 +367,9 @@ export function handleVoteCreated(event: VoteCast): void {
 
   let vp = event.params.votingPower.toBigDecimal()
 
-  let vote = new Vote(`${space.id}/${event.params.proposalId}/${event.params.voter.toHexString()}`)
-  vote.voter = event.params.voter.toHexString()
+  let voterAddress = toChecksumAddress(event.params.voter.toHexString())
+  let vote = new Vote(`${space.id}/${event.params.proposalId}/${voterAddress}`)
+  vote.voter = voterAddress
   vote.space = space.id
   vote.proposal = event.params.proposalId.toI32()
   vote.choice = choice
@@ -372,9 +389,9 @@ export function handleVoteCreated(event: VoteCast): void {
     proposal.save()
   }
 
-  let user = User.load(event.params.voter.toHexString())
+  let user = User.load(voterAddress)
   if (user == null) {
-    user = new User(event.params.voter.toHexString())
+    user = new User(voterAddress)
     user.proposal_count = 0
     user.vote_count = 0
     user.created = event.block.timestamp.toI32()
@@ -401,7 +418,7 @@ export function handleVoteCreated(event: VoteCast): void {
 }
 
 export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -416,7 +433,7 @@ export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {
 }
 
 export function handleVotingDelayUpdated(event: VotingDelayUpdated): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -426,7 +443,7 @@ export function handleVotingDelayUpdated(event: VotingDelayUpdated): void {
 }
 
 export function handleMinVotingDurationUpdated(event: MinVotingDurationUpdated): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -436,7 +453,7 @@ export function handleMinVotingDurationUpdated(event: MinVotingDurationUpdated):
 }
 
 export function handleMaxVotingDurationUpdated(event: MaxVotingDurationUpdated): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -446,7 +463,7 @@ export function handleMaxVotingDurationUpdated(event: MaxVotingDurationUpdated):
 }
 
 export function handleOwnershipTransferred(event: OwnershipTransferred): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -456,7 +473,7 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {
 }
 
 export function handleAuthenticatorsAdded(event: AuthenticatorsAdded): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -473,7 +490,7 @@ export function handleAuthenticatorsAdded(event: AuthenticatorsAdded): void {
 }
 
 export function handleAuthenticatorsRemoved(event: AuthenticatorsRemoved): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -490,7 +507,7 @@ export function handleAuthenticatorsRemoved(event: AuthenticatorsRemoved): void 
 }
 
 export function handleVotingStrategiesAdded(event: VotingStrategiesAdded): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -541,7 +558,7 @@ export function handleVotingStrategiesAdded(event: VotingStrategiesAdded): void 
 }
 
 export function handleVotingStrategiesRemoved(event: VotingStrategiesRemoved): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
@@ -575,7 +592,7 @@ export function handleVotingStrategiesRemoved(event: VotingStrategiesRemoved): v
 export function handleProposalValidationStrategyUpdated(
   event: ProposalValidationStrategyUpdated
 ): void {
-  let space = Space.load(event.address.toHexString())
+  let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (!space) {
     return
   }

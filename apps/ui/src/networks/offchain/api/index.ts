@@ -4,6 +4,7 @@ import {
   SPACE_QUERY,
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
+  USER_VOTES_QUERY,
   VOTES_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
@@ -247,8 +248,18 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         return formattedVote;
       });
     },
-    loadUserVotes: async (): Promise<{ [key: string]: Vote }> => {
-      return {};
+    loadUserVotes: async (spaceId: string, voter: string): Promise<{ [key: string]: Vote }> => {
+      const { data } = await apollo.query({
+        query: USER_VOTES_QUERY,
+        variables: {
+          spaceId,
+          voter
+        }
+      });
+
+      return Object.fromEntries(
+        data.votes.map(vote => [`${networkId}:${vote.proposal.id}`, formatVote(vote)])
+      );
     },
     loadProposals: async (
       spaceId: string,
