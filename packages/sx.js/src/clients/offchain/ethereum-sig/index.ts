@@ -8,6 +8,7 @@ import {
   approvalVoteTypes,
   encryptedVoteTypes,
   rankedChoiceVoteTypes,
+  weightedVoteTypes,
   updateProposalTypes,
   cancelProposalTypes
 } from './types';
@@ -160,25 +161,50 @@ export class EthereumSig {
     signer: Signer & TypedDataSigner;
     data: Vote;
   }): Promise<Envelope<Vote>> {
+    let choice: EIP712VoteMessage['choice'];
+    let voteType: { Vote: { name: string; type: string }[] };
+
+    switch (data.type) {
+      case 'single-choice':
+        voteType = singleChoiceVoteTypes;
+        choice = data.choice as number;
+        break;
+      case 'approval':
+        voteType = approvalVoteTypes;
+        choice = data.choice as number[];
+        break;
+      case 'ranked-choice':
+        voteType = rankedChoiceVoteTypes;
+        choice = data.choice as number[];
+        break;
+      case 'weighted':
+      case 'quadratic':
+        voteType = weightedVoteTypes;
+        choice = JSON.stringify(data.choice);
+        break;
+      default:
+        voteType = basicVoteTypes;
+        choice = data.choice as number;
+    }
+
     const message: EIP712VoteMessage = {
       space: data.space,
       proposal: data.proposal,
-      choice: data.choice,
+      choice,
       reason: '',
       app: '',
       metadata: ''
     };
 
-    let voteType = basicVoteTypes;
-    if (data.type === 'single-choice') voteType = singleChoiceVoteTypes;
-    if (data.type === 'approval') voteType = approvalVoteTypes;
-    if (data.type === 'ranked-choice') voteType = rankedChoiceVoteTypes;
     if (data.privacy) {
-      voteType = encryptedVoteTypes;
-      message.choice = await encryptChoices(data.privacy, data.proposal, data.choice);
       message.privacy = data.privacy;
+      voteType = encryptedVoteTypes;
+      message.choice = await encryptChoices(
+        data.privacy,
+        data.proposal,
+        typeof message.choice === 'string' ? message.choice : JSON.stringify(message.choice)
+      );
     }
-
     const signatureData = await this.sign(signer, message, voteType);
 
     return {
