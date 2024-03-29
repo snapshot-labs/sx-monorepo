@@ -10,9 +10,6 @@ import {
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
-import ICX from '~icons/c/x';
-import ICFarcaster from '~icons/c/farcaster';
-import ICLens from '~icons/c/lens';
 
 const props = defineProps<{
   proposal: Proposal;
@@ -217,7 +214,7 @@ async function handleAiSummaryClick() {
                   :href="`https://twitter.com/intent/post?text=${shareMsg}`"
                   target="_blank"
                 >
-                  <ICX />
+                  <IC-x />
                   Share on X
                 </a>
               </UiDropdownItem>
@@ -228,7 +225,7 @@ async function handleAiSummaryClick() {
                   :href="`https://hey.xyz/?hashtags=Snapshot&text=${shareMsg}`"
                   target="_blank"
                 >
-                  <ICLens class="h-[20px] max-w-[20px]" />
+                  <IC-lens />
                   Share on Lens
                 </a>
               </UiDropdownItem>
@@ -239,7 +236,7 @@ async function handleAiSummaryClick() {
                   :href="`https://warpcast.com/~/compose?text=${shareMsg}`"
                   target="_blank"
                 >
-                  <ICFarcaster class="h-[20px] max-w-[20px]" />
+                  <IC-farcaster />
                   Share on Farcaster
                 </a>
               </UiDropdownItem>
