@@ -82,8 +82,25 @@ export function createActions(
     async predictSpaceAddress(web3: any, { salt }) {
       return client.predictSpaceAddress({ account: web3.provider.account, saltNonce: salt });
     },
-    async deployDependency() {
-      throw new Error('Not implemented');
+    async deployDependency(
+      web3: any,
+      params: {
+        controller: string;
+        spaceAddress: string;
+        strategy: StrategyConfig;
+      }
+    ) {
+      if (!params.strategy.deploy) {
+        throw new Error('This strategy is not deployable');
+      }
+
+      return params.strategy.deploy(
+        client,
+        web3.getSigner(),
+        params.controller,
+        params.spaceAddress,
+        params.strategy.params
+      );
     },
     async createSpace(
       web3: any,

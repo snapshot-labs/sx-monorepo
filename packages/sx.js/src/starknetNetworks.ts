@@ -57,6 +57,7 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
     spaceFactory: network.Meta.spaceFactory,
     masterSpace: network.Meta.masterSpace,
     starknetCommit: network.Meta.starknetCommit,
+    starknetCore: network.Meta.starknetCore,
     authenticators,
     strategies
   };
@@ -70,7 +71,8 @@ export const starknetNetworks = {
       herodotusDeployedOnChain: 'STARKNET',
       spaceFactory: '0x0250e28c97e729842190c3672f9fcf8db0fc78b8080e87a894831dc69e4f4439',
       masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
-      starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9'
+      starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
+      starknetCore: '0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4'
     },
     Authenticators: {
       Vanilla: '0xc4b0a7d8626638e7dd410b16ccbc48fe36e68f864dec75b23ef41e3732d5d2',
@@ -89,6 +91,7 @@ export const starknetNetworks = {
       VotingPower: '0x1b28f95cbc5bcbe52014ef974d609f14497517f31d3c9e079a2464edf988751'
     },
     ExecutionStrategies: {
+      EthRelayer: '0x041c679daa4de984c72e2671405294b6064da964d1cee9db2fb26ba974f99fed',
       NoExecutionSimpleMajority: '0x180e1f4fcd875b35690b6771b30197867d39c893d5ba6e32c36616733ee37c4'
     }
   },
@@ -99,7 +102,8 @@ export const starknetNetworks = {
       herodotusDeployedOnChain: 'SN_GOERLI',
       spaceFactory: '0x063c62258e1ba4d9ad72eab809ea5c3d1a4545b721bc444d6068ced6246c2f3c',
       masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
-      starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29'
+      starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29',
+      starknetCore: '0xde29d060D45901Fb19ED6C6e959EB22d8626708e'
     },
     Authenticators: {
       Vanilla: '0x46ad946f22ac4e14e271f24309f14ac36f0fde92c6831a605813fefa46e0893',
@@ -118,6 +122,7 @@ export const starknetNetworks = {
       VotingPower: '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631'
     },
     ExecutionStrategies: {
+      EthRelayer: '0xa0a4bcf464e29f46dfb103521f33807271b4300ac5cd3118b15f31f89ecd94',
       NoExecutionSimpleMajority: '0x4a5658d6b9fe62283147719a8b13d72f96e8959afacc716569b936c91089147'
     }
   },
@@ -128,7 +133,8 @@ export const starknetNetworks = {
       herodotusDeployedOnChain: 'SN_SEPOLIA',
       spaceFactory: '0x302d332e9aceb184e5f301cb62c85181e7fc3b30559935c5736e987de579f6e',
       masterSpace: '0x04b61126a7def0956cb4ff342ba72d850ea6b78b0ddb3e0b45f3a99bc9eb5995',
-      starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9'
+      starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
+      starknetCore: '0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057'
     },
     Authenticators: {
       Vanilla: '0x51a4a1eb5ce28fc95edf408a847efccfb030d27314d9fbe82d82cb998ec1a0b',
@@ -147,6 +153,7 @@ export const starknetNetworks = {
       VotingPower: '0x296e1a5ad28c9bf32b9570d6e1bedae77917866cd5d92aea4ef9271905ef549'
     },
     ExecutionStrategies: {
+      EthRelayer: '0x72a0e53450c9c297225042d26b05ad62bf417c33ea30775e663538c0a29143a',
       NoExecutionSimpleMajority: '0x5327bdc6522d531b7770cd51aa641fb91c280a30cdece29edbf9edd970167f6'
     }
   }

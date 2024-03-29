@@ -49,6 +49,8 @@ export type StrategyTemplate = {
     params: string,
     metadata: StrategyParsedMetadata | null
   ) => Promise<Record<string, any>>;
+  deployConnectors?: Connector[];
+  deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
     signer: Signer,

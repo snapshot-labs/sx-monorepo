@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { StrategyConfig } from '@/networks/types';
+import { StrategyConfig, Connector } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
 type DeployingDependencyStep = {
@@ -36,10 +36,14 @@ const props = defineProps<{
 }>();
 
 const { deployDependency, createSpace } = useActions();
+const { web3, login } = useWeb3();
 
 const currentStep = ref(0);
 const completed = ref(false);
 const failed = ref(false);
+const connectorModalOpen = ref(false);
+const connectorModalConnectors = ref([] as string[]);
+const connectorCallbackFn: Ref<((value: string | false) => void) | null> = ref(null);
 const txIds = ref({});
 const deployedExecutionStrategies = ref([] as StrategyConfig[]);
 
@@ -70,11 +74,42 @@ const steps = computed<Step[]>(() => {
   ];
 });
 
+function getConnector(supportedConnectors: string[]) {
+  connectorModalOpen.value = true;
+  connectorModalConnectors.value = supportedConnectors;
+
+  return new Promise<string | false>(resolve => {
+    connectorCallbackFn.value = resolve;
+  });
+}
+
+function handleConnectorPick(connector: string) {
+  connectorCallbackFn.value?.(connector);
+  connectorModalOpen.value = false;
+}
+
+function handleConnectorClose() {
+  connectorCallbackFn.value?.(false);
+  connectorModalOpen.value = false;
+}
+
 async function deployStep(step: DeployingDependencyStep | DeployingSpaceStep) {
+  const supportedConnectors =
+    'strategy' in step && step.strategy.deployConnectors
+      ? step.strategy.deployConnectors
+      : network.value.managerConnectors;
+
+  if (!supportedConnectors.includes(web3.value.type as Connector)) {
+    const connector = await getConnector(supportedConnectors);
+    if (!connector) throw new Error('No connector selected');
+
+    await login(connector);
+  }
+
   let result;
   if (step.id === 'DEPLOYING_SPACE') {
     const executionStrategies = [
-      ...props.executionStrategies.filter(strategy => !strategy.deploy),
+      ...props.executionStrategies.filter(strategy => strategy.address !== ''),
       ...deployedExecutionStrategies.value
     ];
 
@@ -106,10 +141,11 @@ async function deployStep(step: DeployingDependencyStep | DeployingSpaceStep) {
   const { address, txId } = result;
 
   txIds.value[step.id] = txId;
-  const confirmedReceipt = await network.value.helpers.waitForTransaction(txId);
+  const stepNetwork = getStepNetwork(step);
+  const confirmedReceipt = await stepNetwork.helpers.waitForTransaction(txId);
   if (confirmedReceipt.status === 0) throw new Error('Transaction failed');
 
-  if (step.id !== 'DEPLOYING_SPACE') {
+  if (step.id !== 'DEPLOYING_SPACE' && step.strategy.address === '') {
     deployedExecutionStrategies.value.push({
       ...step.strategy,
       deploy: undefined,
@@ -131,6 +167,7 @@ async function deploy(startIndex: number = 0) {
     try {
       await deployStep(step);
     } catch (e: unknown) {
+      console.log('e', e);
       failed.value = true;
       return;
     }
@@ -144,6 +181,14 @@ async function deploy(startIndex: number = 0) {
   } catch {
     failed.value = true;
   }
+}
+
+function getStepNetwork(step: Step) {
+  if ('strategy' in step && step.strategy.deployNetworkId) {
+    return getNetwork(step.strategy.deployNetworkId);
+  }
+
+  return network.value;
 }
 
 onMounted(() => deploy());
@@ -173,7 +218,7 @@ onMounted(() => deploy());
             v-if="txIds[step.id]"
             class="inline-flex items-center"
             target="_blank"
-            :href="network.helpers.getExplorerUrl(txIds[step.id], 'transaction')"
+            :href="getStepNetwork(step).helpers.getExplorerUrl(txIds[step.id], 'transaction')"
           >
             {{ shorten(txIds[step.id]) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -192,4 +237,10 @@ onMounted(() => deploy());
       />.
     </div>
   </div>
+  <ModalConnector
+    :open="connectorModalOpen"
+    :supported-connectors="connectorModalConnectors"
+    @close="handleConnectorClose"
+    @pick="handleConnectorPick"
+  />
 </template>
