@@ -154,9 +154,7 @@ async function handleAiSummaryClick() {
 
 async function handleAiSpeechClick() {
   if (aiSpeechAudio.value) {
-    if (audioState.value === 'playing') return pause();
-
-    return play();
+    return audioState.value === 'playing' ? pause() : play();
   }
 
   try {
@@ -166,11 +164,7 @@ async function handleAiSpeechClick() {
     });
 
     if (!response.ok) {
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error.message);
-      }
+      throw new Error('There was an error fetching the AI speech.');
     }
 
     aiSpeechAudio.value = await response.arrayBuffer();
@@ -186,7 +180,6 @@ async function handleAiSpeechClick() {
 
 <template>
   <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
-    {{ audioState }}
     <div>
       <h1 class="mb-3 text-[36px] leading-10">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
@@ -229,7 +222,10 @@ async function handleAiSpeechClick() {
                 <IH-sparkles v-else class="text-skin-text inline-block" />
               </UiButton>
             </UiTooltip>
-            <UiTooltip v-if="props.proposal.body.length < 4096" title="Listen to the proposal">
+            <UiTooltip
+              v-if="props.proposal.body.length < 4096"
+              :title="audioState === 'playing' ? 'Pause' : 'Listen'"
+            >
               <UiButton
                 class="!p-0 border-0 !h-[auto]"
                 :disabled="aiSpeechLoading"
