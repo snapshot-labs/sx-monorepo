@@ -163,12 +163,9 @@ async function handleAiSpeechClick() {
       method: 'POST'
     });
 
-    if (!response.ok) {
-      throw new Error('There was an error fetching the AI speech.');
-    }
-
-    aiSpeechAudio.value = await response.arrayBuffer();
-    await init(aiSpeechAudio.value);
+    const audioBuffer = await response.arrayBuffer();
+    await init(audioBuffer);
+    aiSpeechAudio.value = audioBuffer;
     play();
   } catch (e) {
     uiStore.addNotification('error', 'Fail to play AI Speech. Please try again later.');
