@@ -21,13 +21,7 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const {
-  state: aiTtsState,
-  playing,
-  play,
-  pause,
-  fetchAiTextToSpeech
-} = useAiTextToSpeech(props.proposal.id);
+const { state: audioState, init, play, pause } = useAudio();
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -35,6 +29,8 @@ const cancelling = ref(false);
 const aiSummaryBody = ref<string>('');
 const aiSummaryLoading = ref(false);
 const aiSummaryOpen = ref(false);
+const aiSpeechAudio = ref<ArrayBuffer | null>(null);
+const aiSpeechLoading = ref(false);
 
 const editable = computed(() => {
   return (
@@ -156,24 +152,41 @@ async function handleAiSummaryClick() {
   }
 }
 
-async function handleAiTtsClick() {
-  await fetchAiTextToSpeech();
+async function handleAiSpeechClick() {
+  if (aiSpeechAudio.value) {
+    if (audioState.value === 'playing') return pause();
 
-  if (aiTtsState.value.error) {
-    uiStore.addNotification('error', 'Fail to play AI Speech. Please try again later.');
-    return;
+    return play();
   }
 
-  if (playing.value) {
-    await pause();
-  } else {
-    await play();
+  try {
+    aiSpeechLoading.value = true;
+    const response = await fetch(`https://sh5.co/api/ai/tts/${props.proposal.id}`, {
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+    }
+
+    aiSpeechAudio.value = await response.arrayBuffer();
+    await init(aiSpeechAudio.value);
+    play();
+  } catch (e) {
+    uiStore.addNotification('error', 'Fail to play AI Speech. Please try again later.');
+  } finally {
+    aiSpeechLoading.value = false;
   }
 }
 </script>
 
 <template>
   <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
+    {{ audioState }}
     <div>
       <h1 class="mb-3 text-[36px] leading-10">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
@@ -217,9 +230,16 @@ async function handleAiTtsClick() {
               </UiButton>
             </UiTooltip>
             <UiTooltip v-if="props.proposal.body.length < 4096" title="Listen to the proposal">
-              <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiTtsClick">
-                <UiLoading v-if="aiTtsState.loading" />
-                <IH-pause v-else-if="playing" class="inline-block text-skin-text" />
+              <UiButton
+                class="!p-0 border-0 !h-[auto]"
+                :disabled="aiSpeechLoading"
+                @click="handleAiSpeechClick"
+              >
+                <UiLoading v-if="aiSpeechLoading" />
+                <IH-pause
+                  v-else-if="audioState === 'playing'"
+                  class="inline-block text-skin-text"
+                />
                 <IH-play v-else class="inline-block text-skin-text" />
               </UiButton>
             </UiTooltip>
