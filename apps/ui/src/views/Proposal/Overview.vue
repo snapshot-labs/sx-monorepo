@@ -222,7 +222,11 @@ async function handleAiSpeechClick() {
             <UiTooltip :title="'AI summary'">
               <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
                 <UiLoading v-if="aiSummaryLoading" class="inline-block !w-[22px] !h-[22px]" />
-                <IH-sparkles v-else class="text-skin-text inline-block w-[22px] h-[22px]" />
+                <IH-sparkles
+                  v-else
+                  class="inline-block w-[22px] h-[22px]"
+                  :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
+                />
               </UiButton>
             </UiTooltip>
             <UiTooltip
@@ -237,7 +241,8 @@ async function handleAiSpeechClick() {
                 <UiLoading v-if="aiSpeechLoading" class="inline-block !w-[22px] !h-[22px]" />
                 <IH-pause
                   v-else-if="audioState === 'playing'"
-                  class="inline-block text-skin-text w-[22px] h-[22px]"
+                  class="inline-block w-[22px] h-[22px]"
+                  :class="audioState === 'playing' ? 'text-skin-link' : 'text-skin-text'"
                 />
                 <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
               </UiButton>
