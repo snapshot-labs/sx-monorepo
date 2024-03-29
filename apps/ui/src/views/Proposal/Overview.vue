@@ -211,7 +211,7 @@ async function handleAiSummaryClick() {
                 <a
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
-                  :href="`https://twitter.com/intent/post?text=${shareMsg}`"
+                  :href="`https://twitter.com/intent/tweet/?text=${shareMsg}`"
                   target="_blank"
                 >
                   <IC-x />
