@@ -47,6 +47,7 @@ const parsed = computed(() => {
   font-size: 22px;
   line-height: 1.3;
   word-wrap: break-word;
+  color: var(--content);
 
   &::before {
     display: table;
@@ -89,7 +90,6 @@ const parsed = computed(() => {
 
   p {
     font-size: 1em;
-    color: rgba(var(--content));
   }
 
   hr {
