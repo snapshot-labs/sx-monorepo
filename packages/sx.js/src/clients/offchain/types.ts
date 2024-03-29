@@ -1,7 +1,7 @@
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
 import type { Privacy } from '../../types';
 
-export type Choice = number | number[] | string;
+export type Choice = number | number[] | string | Record<string, number>;
 
 export type SignatureData = {
   address: string;
@@ -40,7 +40,7 @@ export type Strategy = {
 export type EIP712VoteMessage = {
   space: string;
   proposal: string;
-  choice: number | number[] | string | { [key: string]: number };
+  choice: number | number[] | string;
   reason: string;
   app: string;
   metadata: string;

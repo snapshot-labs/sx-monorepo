@@ -158,7 +158,7 @@ const results = computed(() =>
         />
       </div>
     </div>
-    <div v-if="proposal.privacy === 'shutter'" class="flex flex-col mt-2.5">
+    <div v-if="proposal.privacy === 'shutter' && withDetails" class="flex flex-col mt-2.5">
       <div class="text-xs">Powered by</div>
       <div class="flex items-center">
         <a

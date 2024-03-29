@@ -1,3 +1,4 @@
+import { isAddress } from '@ethersproject/address';
 import {
   OffchainNetworkConfig,
   clients,
@@ -161,7 +162,10 @@ export function createActions(
 
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
-      if (!strategy) return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+
+      if (!strategy || !isAddress(voterAddress)) {
+        return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+      }
 
       const result = await strategy.getVotingPower(
         spaceId,

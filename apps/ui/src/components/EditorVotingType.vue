@@ -25,6 +25,15 @@ const VOTING_TYPES_INFO = computed(() => ({
     label: 'Ranked choice voting',
     description:
       'Each voter may select and rank any number of choices. Results are calculated by instant-runoff counting method.'
+  },
+  weighted: {
+    label: 'Weighted voting',
+    description: 'Each voter may spread voting power across any number of choices.'
+  },
+  quadratic: {
+    label: 'Quadratic voting',
+    description:
+      'Each voter may spread voting power across any number of choices. Results are calculated quadratically.'
   }
 }));
 

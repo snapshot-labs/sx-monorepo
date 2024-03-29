@@ -67,7 +67,7 @@ async function handleFileChange(e: Event) {
     <SpaceCover
       v-else-if="props.space?.cover"
       :space="props.space"
-      class="pointer-events-none !rounded-none min-h-full object-cover group-hover:opacity-80"
+      class="pointer-events-none !rounded-none min-h-full group-hover:opacity-80"
     />
 
     <div

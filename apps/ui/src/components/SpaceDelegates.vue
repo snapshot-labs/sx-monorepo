@@ -139,7 +139,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   <td class="text-left flex items-center pl-4 py-3">
                     <UiStamp :id="delegate.id" :size="32" class="mr-3" />
                     <div class="overflow-hidden">
-                      <a :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')">
+                      <a
+                        :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')"
+                        target="_blank"
+                      >
                         <div class="leading-[22px]">
                           <h4
                             class="text-skin-link truncate"
