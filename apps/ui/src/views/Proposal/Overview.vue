@@ -87,10 +87,6 @@ const votingTime = computed(() => {
   return hasEnded ? `Ended ${time}` : time;
 });
 
-const aiEnabled = computed(() => {
-  return offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500;
-});
-
 async function handleEditClick() {
   if (!props.proposal) return;
 
@@ -218,36 +214,44 @@ async function handleAiSpeechClick() {
           </div>
         </router-link>
         <div class="flex gap-2 items-center">
-          <template v-if="aiEnabled">
-            <UiTooltip :title="'AI summary'">
-              <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
-                <UiLoading v-if="aiSummaryLoading" class="inline-block !w-[22px] !h-[22px]" />
-                <IH-sparkles
-                  v-else
-                  class="inline-block w-[22px] h-[22px]"
-                  :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
-                />
-              </UiButton>
-            </UiTooltip>
-            <UiTooltip
-              v-if="props.proposal.body.length < 4096"
-              :title="audioState === 'playing' ? 'Pause' : 'Listen'"
+          <UiTooltip
+            v-if="
+              offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500
+            "
+            :title="'AI summary'"
+          >
+            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
+              <UiLoading v-if="aiSummaryLoading" class="inline-block !w-[22px] !h-[22px]" />
+              <IH-sparkles
+                v-else
+                class="inline-block w-[22px] h-[22px]"
+                :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
+              />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip
+            v-if="
+              offchainNetworks.includes(props.proposal.network) &&
+              props.proposal.body.length > 0 &&
+              props.proposal.body.length < 4096
+            "
+            :title="audioState === 'playing' ? 'Pause' : 'Listen'"
+          >
+            <UiButton
+              class="!p-0 border-0 !h-[auto]"
+              :disabled="aiSpeechLoading"
+              @click="handleAiSpeechClick"
             >
-              <UiButton
-                class="!p-0 border-0 !h-[auto]"
-                :disabled="aiSpeechLoading"
-                @click="handleAiSpeechClick"
-              >
-                <UiLoading v-if="aiSpeechLoading" class="inline-block !w-[22px] !h-[22px]" />
-                <IH-pause
-                  v-else-if="audioState === 'playing'"
-                  class="inline-block w-[22px] h-[22px]"
-                  :class="audioState === 'playing' ? 'text-skin-link' : 'text-skin-text'"
-                />
-                <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
-              </UiButton>
-            </UiTooltip>
-          </template>
+              <UiLoading v-if="aiSpeechLoading" class="inline-block !w-[22px] !h-[22px]" />
+              <IH-pause
+                v-else-if="audioState === 'playing'"
+                class="inline-block w-[22px] h-[22px]"
+                :class="audioState === 'playing' ? 'text-skin-link' : 'text-skin-text'"
+              />
+              <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
+            </UiButton>
+          </UiTooltip>
+
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
