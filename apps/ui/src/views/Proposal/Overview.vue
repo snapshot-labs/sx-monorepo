@@ -16,6 +16,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const route = useRoute();
 const uiStore = useUiStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
@@ -28,6 +29,11 @@ const cancelling = ref(false);
 const aiSummaryBody = ref<string>('');
 const aiSummaryLoading = ref(false);
 const aiSummaryOpen = ref(false);
+
+const currentUrl = `${window.location.origin}/#${route.path}`;
+const shareMsg = encodeURIComponent(
+  `${props.proposal.space.name}: ${props.proposal.title} ${currentUrl}`
+);
 
 const editable = computed(() => {
   return (
@@ -191,13 +197,55 @@ async function handleAiSummaryClick() {
           >
             <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
               <UiLoading v-if="aiSummaryLoading" />
-              <IH-sparkles v-else class="text-skin-text inline-block" />
+              <IH-sparkles v-else class="text-skin-text inline-block w-[22px] h-[22px]" />
             </UiButton>
           </UiTooltip>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
-                <IH-dots-vertical class="text-skin-text inline-block" />
+                <IH-share class="text-skin-text inline-block w-[22px] h-[22px]" />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <a
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  :href="`https://twitter.com/intent/post?text=${shareMsg}`"
+                  target="_blank"
+                >
+                  <IC-x />
+                  Share on X
+                </a>
+              </UiDropdownItem>
+              <UiDropdownItem v-slot="{ active }">
+                <a
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  :href="`https://hey.xyz/?hashtags=Snapshot&text=${shareMsg}`"
+                  target="_blank"
+                >
+                  <IC-lens />
+                  Share on Lens
+                </a>
+              </UiDropdownItem>
+              <UiDropdownItem v-slot="{ active }">
+                <a
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  :href="`https://warpcast.com/~/compose?text=${shareMsg}`"
+                  target="_blank"
+                >
+                  <IC-farcaster />
+                  Share on Farcaster
+                </a>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+          <UiDropdown>
+            <template #button>
+              <UiButton class="!p-0 border-0 !h-[auto]">
+                <IH-dots-vertical class="text-skin-text inline-block w-[22px] h-[22px]" />
               </UiButton>
             </template>
             <template #items>
