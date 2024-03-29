@@ -180,6 +180,9 @@ watchEffect(() => {
               "
               class="mt-2"
             >
+              <span class="inline-flex align-top h-[27px] items-center">
+                <IH-exclamation-circle class="mr-1" />
+              </span>
               Please allow few minutes for the voting power to be collected from Ethereum.
             </div>
             <template v-else>
