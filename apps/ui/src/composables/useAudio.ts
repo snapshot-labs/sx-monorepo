@@ -35,5 +35,12 @@ export function useAudio() {
     state.value = 'paused';
   }
 
-  return { state, play, pause, init };
+  async function stop() {
+    if (state.value === 'stopped') return;
+
+    playback.stop();
+    state.value = 'stopped';
+  }
+
+  return { state, play, pause, stop, init };
 }

@@ -22,7 +22,7 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const { state: audioState, init, play, pause } = useAudio();
+const { state: audioState, init, play, pause, stop } = useAudio();
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -175,6 +175,10 @@ async function handleAiSpeechClick() {
     aiSpeechLoading.value = false;
   }
 }
+
+onBeforeUnmount(() => {
+  stop();
+});
 </script>
 
 <template>
