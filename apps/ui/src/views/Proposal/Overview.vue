@@ -170,7 +170,7 @@ async function handleAiSpeechClick() {
     aiSpeechAudio.value = audioBuffer;
     play();
   } catch (e) {
-    uiStore.addNotification('error', 'Fail to play AI Speech. Please try again later.');
+    uiStore.addNotification('error', 'Failed to listen proposal, please try again later.');
   } finally {
     aiSpeechLoading.value = false;
   }
