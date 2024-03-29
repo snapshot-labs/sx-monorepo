@@ -26,12 +26,6 @@ function decreaseChoice(index: number) {
   }
 }
 
-function handleChoiceClick(index: number) {
-  if (!selectedChoices.value[index + 1]) {
-    selectedChoices.value[index + 1] = 1;
-  }
-}
-
 // Delete choice if empty string or 0
 watch(
   () => selectedChoices.value,
@@ -54,10 +48,8 @@ watch(
         :key="i"
         class="!h-[48px] flex items-center border rounded-full px-3.5 pr-2.5 gap-2 relative overflow-hidden"
         :class="{
-          '!border-skin-link': selectedChoices[i + 1] > 0,
-          'cursor-pointer': !selectedChoices[i + 1]
+          '!border-skin-link': selectedChoices[i + 1] > 0
         }"
-        @click="handleChoiceClick(i)"
       >
         <div class="grow truncate">
           {{ choice }}
