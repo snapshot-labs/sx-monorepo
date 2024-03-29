@@ -21,14 +21,21 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 <template>
   <div
     v-if="filteredTreasuries.length !== 1"
-    class="flex px-4 bg-skin-bg border-b sticky top-[71px] lg:top-[72px] z-40 space-x-3"
+    class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
   >
-    <a v-for="(treasury, i) in filteredTreasuries" :key="i" @click="activeTreasuryId = i">
-      <UiLink
-        :is-active="activeTreasuryId === i"
-        :text="treasury.name || shorten(treasury.address)"
-      />
-    </a>
+    <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+      <a v-for="(treasury, i) in filteredTreasuries" :key="i" @click="activeTreasuryId = i">
+        <UiLink
+          :is-active="activeTreasuryId === i"
+          :text="treasury.name || shorten(treasury.address)"
+        />
+      </a>
+    </div>
   </div>
-  <SpaceTreasury :key="activeTreasuryId" :space="space" :treasury-data="treasuryData" />
+  <SpaceTreasury
+    :key="activeTreasuryId"
+    :space="space"
+    :treasury-data="treasuryData"
+    :extra-contacts="filteredTreasuries"
+  />
 </template>

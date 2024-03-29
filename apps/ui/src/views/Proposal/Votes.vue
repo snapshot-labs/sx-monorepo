@@ -171,7 +171,7 @@ watch([sortBy, choiceFilter], () => {
           </template>
           <tr v-for="(vote, i) in votes" :key="i" class="border-b relative align-middle">
             <div
-              class="absolute top-0 -bottom-[1px] right-0 pointer-events-none"
+              class="absolute top-0 -bottom-[1px] left-0 pointer-events-none"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
               }"
@@ -212,7 +212,7 @@ watch([sortBy, choiceFilter], () => {
               <template v-if="!!props.proposal.privacy && !props.proposal.completed">
                 <div class="hidden md:block">
                   <div class="flex gap-1 items-center">
-                    <span class="text-skin-heading">Encrypted choice</span>
+                    <span class="text-skin-heading leading-6">Encrypted choice</span>
                     <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
                   </div>
                 </div>
@@ -223,7 +223,7 @@ watch([sortBy, choiceFilter], () => {
               <div v-else>
                 <UiTooltip
                   v-if="proposal.type !== 'basic'"
-                  class="truncate"
+                  class="truncate !block"
                   :title="getChoiceText(proposal.choices, vote.choice)"
                 >
                   {{ getChoiceText(proposal.choices, vote.choice) }}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getUrl, imageUpload } from '@/helpers/utils';
+import { NetworkID } from '@/types';
 
 const model = defineModel<string | null>();
 
@@ -7,6 +8,8 @@ const props = defineProps<{
   space?: {
     id: string;
     cover: string;
+    avatar: string;
+    network: NetworkID;
   };
   error?: string;
 }>();
@@ -64,7 +67,7 @@ async function handleFileChange(e: Event) {
     <SpaceCover
       v-else-if="props.space?.cover"
       :space="props.space"
-      class="pointer-events-none !rounded-none min-h-full object-cover group-hover:opacity-80"
+      class="pointer-events-none !rounded-none min-h-full group-hover:opacity-80"
     />
 
     <div

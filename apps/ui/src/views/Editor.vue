@@ -3,7 +3,7 @@ import { getNetwork, supportsNullCurrent } from '@/networks';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
-import { RequiredProperty, SelectedStrategy, SpaceMetadataTreasury } from '@/types';
+import { Contact, RequiredProperty, SelectedStrategy, SpaceMetadataTreasury } from '@/types';
 
 type StrategyWithTreasury = SelectedStrategy & {
   treasury: RequiredProperty<SpaceMetadataTreasury>;
@@ -127,6 +127,11 @@ const selectedExecutionWithTreasury = computed(() => {
   return supportedExecutionStrategies.value.find(
     strategy => strategy.address === executionStrategy.value?.address
   );
+});
+const extraContacts = computed(() => {
+  if (!space.value) return [];
+
+  return space.value.treasuries as Contact[];
 });
 const votingTypes = computed(() => {
   const networkValue = network.value;
@@ -410,6 +415,7 @@ export default defineComponent({
           v-model="proposal.execution"
           :space="space"
           :treasury-data="selectedExecutionWithTreasury.treasury"
+          :extra-contacts="extraContacts"
           class="mb-4"
         />
       </div>

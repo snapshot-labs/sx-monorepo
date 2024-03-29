@@ -183,8 +183,8 @@ export const VOTES_QUERY = gql`
 `;
 
 export const USER_VOTES_QUERY = gql`
-  query ($voter: String) {
-    votes(where: { voter: $voter }) {
+  query ($spaceId: String, $voter: String) {
+    votes(where: { space: $spaceId, voter: $voter }) {
       id
       voter {
         id
