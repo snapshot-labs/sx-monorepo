@@ -16,7 +16,7 @@ export type NetworkID =
   | 'matic'
   | 'arb1';
 
-export type Choice = 'for' | 'against' | 'abstain' | number | number[];
+export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
 
 export type Privacy = 'shutter' | null;
 
@@ -201,7 +201,7 @@ export type Vote = {
     id: string;
   };
   proposal: number | string;
-  choice: number | number[];
+  choice: number | number[] | Record<string, number>;
   vp: number;
   created: number;
   tx: string;
