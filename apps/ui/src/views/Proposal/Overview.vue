@@ -221,7 +221,7 @@ async function handleAiSpeechClick() {
           <template v-if="aiEnabled">
             <UiTooltip :title="'AI summary'">
               <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
-                <UiLoading v-if="aiSummaryLoading" />
+                <UiLoading v-if="aiSummaryLoading" class="inline-block !w-[22px] !h-[22px]" />
                 <IH-sparkles v-else class="text-skin-text inline-block w-[22px] h-[22px]" />
               </UiButton>
             </UiTooltip>
@@ -234,7 +234,7 @@ async function handleAiSpeechClick() {
                 :disabled="aiSpeechLoading"
                 @click="handleAiSpeechClick"
               >
-                <UiLoading v-if="aiSpeechLoading" />
+                <UiLoading v-if="aiSpeechLoading" class="inline-block !w-[22px] !h-[22px]" />
                 <IH-pause
                   v-else-if="audioState === 'playing'"
                   class="inline-block text-skin-text w-[22px] h-[22px]"
