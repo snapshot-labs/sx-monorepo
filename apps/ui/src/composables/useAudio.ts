@@ -3,7 +3,7 @@ export function useAudio() {
   let playback: AudioBufferSourceNode;
 
   const audio = ref<AudioBuffer | null>(null);
-  const state = ref<'playing' | 'paused' | 'stopped'>('stopped');
+  const state = ref<'playing' | 'paused' | 'stopped' | 'destroyed'>('stopped');
 
   async function init(input: ArrayBuffer) {
     ctx = new AudioContext();
@@ -35,12 +35,10 @@ export function useAudio() {
     state.value = 'paused';
   }
 
-  async function stop() {
-    if (state.value === 'stopped') return;
-
-    playback.stop();
-    state.value = 'stopped';
+  async function destroy() {
+    playback?.stop();
+    state.value = 'destroyed';
   }
 
-  return { state, play, pause, stop, init };
+  return { state, play, pause, init, destroy };
 }
