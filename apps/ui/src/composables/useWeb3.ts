@@ -36,7 +36,12 @@ export function useWeb3() {
       auth.web3 = new Web3Provider(auth.provider.value, 'any');
       await loadProvider();
     }
-    state.authLoading = false;
+
+    // NOTE: Handle case where metamask stays locked after user ignored
+    // the unlock request on subsequent page loads
+    if (state.type !== 'injected' || auth.provider?.value?._state?.isUnlocked) {
+      state.authLoading = false;
+    }
   }
 
   function logout() {
