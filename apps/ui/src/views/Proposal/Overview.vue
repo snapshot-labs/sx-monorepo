@@ -22,15 +22,28 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
-const { state: aiSummaryState, content: aiSummaryBody, fetch: fetchAiSummary } = useAiSummary();
-const { state: audioState, play, pause, init, destroy } = useAudio();
+const {
+  state: aiSummaryState,
+  content: aiSummaryContent,
+  fetch: fetchAiSummary
+} = useAi('summary', props.proposal.id);
+const {
+  state: aiSpeechState,
+  content: aiSpeechContent,
+  fetch: fetchAiSpeech
+} = useAi('speech', props.proposal.id);
+const {
+  state: audioState,
+  play: playAudio,
+  pause: pauseAudio,
+  init: initAudio,
+  destroy: destroyAudio
+} = useAudio();
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
-const aiSpeechAudio = ref<ArrayBuffer | null>(null);
-const aiSpeechLoading = ref(false);
 
 const currentUrl = `${window.location.origin}/#${route.path}`;
 const shareMsg = encodeURIComponent(
@@ -128,12 +141,12 @@ async function handleCancelClick() {
 }
 
 async function handleAiSummaryClick() {
-  if (aiSummaryBody.value) {
+  if (aiSummaryContent.value) {
     aiSummaryOpen.value = !aiSummaryOpen.value;
     return;
   }
 
-  await fetchAiSummary(props.proposal.id);
+  await fetchAiSummary();
 
   if (aiSummaryState.value.errored) {
     return uiStore.addNotification('error', 'There was an error fetching the AI summary.');
@@ -143,29 +156,25 @@ async function handleAiSummaryClick() {
 }
 
 async function handleAiSpeechClick() {
-  if (aiSpeechAudio.value) {
-    return audioState.value === 'playing' ? pause() : play();
+  if (['playing', 'paused'].includes(audioState.value)) {
+    return audioState.value === 'playing' ? pauseAudio() : playAudio();
   }
 
   try {
-    aiSpeechLoading.value = true;
-    const response = await fetch(`https://sh5.co/api/ai/tts/${props.proposal.id}`, {
-      method: 'POST'
-    });
+    await fetchAiSpeech();
 
-    const audioBuffer = await response.arrayBuffer();
-    await init(audioBuffer);
-    aiSpeechAudio.value = audioBuffer;
-    play();
+    if (aiSpeechState.value.errored) throw new Error();
+
+    const audioBuffer = aiSpeechContent.value;
+    await initAudio(audioBuffer);
+    playAudio();
   } catch (e) {
     uiStore.addNotification('error', 'Failed to listen proposal, please try again later.');
-  } finally {
-    aiSpeechLoading.value = false;
   }
 }
 
 onBeforeUnmount(() => {
-  destroy();
+  destroyAudio();
 });
 </script>
 
@@ -231,10 +240,10 @@ onBeforeUnmount(() => {
           >
             <UiButton
               class="!p-0 border-0 !h-[auto]"
-              :disabled="aiSpeechLoading"
+              :disabled="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading v-if="aiSpeechLoading" class="inline-block !w-[22px] !h-[22px]" />
+              <UiLoading v-if="aiSpeechState.loading" class="inline-block !w-[22px] !h-[22px]" />
               <IH-pause
                 v-else-if="audioState === 'playing'"
                 class="inline-block w-[22px] h-[22px]"
@@ -337,7 +346,7 @@ onBeforeUnmount(() => {
           <IH-sparkles class="inline-block mr-2" />
           <span>AI summary</span>
         </h4>
-        <div class="text-md text-skin-link mb-2">{{ aiSummaryBody }}</div>
+        <div class="text-md text-skin-link mb-2">{{ aiSummaryContent }}</div>
         <div class="flex gap-2 items-center text-sm">
           <IH-exclamation />
           AI can be inaccurate or misleading.

@@ -11,6 +11,8 @@ export function useAudio() {
   }
 
   async function play() {
+    if (state.value === 'destroyed') return;
+
     switch (state.value) {
       case 'playing':
         return;
@@ -36,6 +38,7 @@ export function useAudio() {
   }
 
   async function destroy() {
+    console.log('destroy');
     playback?.stop();
     state.value = 'destroyed';
   }
