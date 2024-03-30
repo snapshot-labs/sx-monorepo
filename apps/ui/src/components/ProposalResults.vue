@@ -46,7 +46,7 @@ const results = computed(() =>
 
 <template>
   <div
-    v-if="!!props.proposal.privacy && !props.proposal.completed"
+    v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails"
     class="text-center py-3.5 leading-5"
   >
     <div
