@@ -75,12 +75,10 @@ const results = computed(() =>
       <div
         v-for="(choice, id) in proposal.choices"
         :key="id"
-        class="flex justify-between border rounded-lg p-3 last:mb-0 text-skin-link relative overflow-hidden"
+        class="flex justify-between border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden"
       >
-        <div class="truncate mr-2 z-10">{{ choice }}</div>
-        <div class="z-10">
-          {{ _p(proposal.scores[id] / (proposal.scores_total || Infinity)) }}
-        </div>
+        <div class="truncate mr-2 z-10" v-text="choice" />
+        <div class="z-10" v-text="_p(proposal.scores[id] / (proposal.scores_total || Infinity))" />
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none"
           :style="{
