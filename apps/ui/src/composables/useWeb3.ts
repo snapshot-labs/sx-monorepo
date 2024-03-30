@@ -82,17 +82,16 @@ export function useWeb3() {
         console.log(e);
       }
       handleChainChanged(network.chainId);
-      const acc = accounts.length > 0 ? accounts[0] : '';
-      const names = await getNames([acc]);
-      state.account = formatAddress(acc);
-      state.name = names[acc];
-      state.type = connector;
+      const acc = accounts.length > 0 ? accounts[0] : null;
 
-      if (typeof connector === 'undefined') {
-        // NOTE: metamask doesn't return connectorName
-        state.type = 'injected';
+      if (acc) {
+        const names = await getNames([acc]);
+        state.account = formatAddress(acc);
+        state.name = names[acc];
       }
 
+      // NOTE: metamask doesn't return connectorName
+      state.type = connector ?? 'injected';
       state.walletconnect = auth.provider.value?.wc?.peerMeta?.name || '';
     } catch (e) {
       state.account = '';
