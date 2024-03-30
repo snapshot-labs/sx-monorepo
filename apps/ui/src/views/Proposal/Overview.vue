@@ -247,8 +247,7 @@ onBeforeUnmount(() => destroyAudio());
               <UiLoading v-if="aiSpeechState.loading" class="inline-block !w-[22px] !h-[22px]" />
               <IH-pause
                 v-else-if="audioState === 'playing'"
-                class="inline-block w-[22px] h-[22px]"
-                :class="audioState === 'playing' ? 'text-skin-link' : 'text-skin-text'"
+                class="inline-block w-[22px] h-[22px] text-skin-link"
               />
               <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
             </UiButton>
