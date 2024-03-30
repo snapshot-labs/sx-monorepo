@@ -22,13 +22,12 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
+const { state: aiSummaryState, content: aiSummaryBody, fetch: fetchAiSummary } = useAiSummary();
 const { state: audioState, play, pause, init, destroy } = useAudio();
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
-const aiSummaryBody = ref<string>('');
-const aiSummaryLoading = ref(false);
 const aiSummaryOpen = ref(false);
 const aiSpeechAudio = ref<ArrayBuffer | null>(null);
 const aiSpeechLoading = ref(false);
@@ -134,24 +133,13 @@ async function handleAiSummaryClick() {
     return;
   }
 
-  try {
-    aiSummaryLoading.value = true;
-    const response = await fetch(`https://sh5.co/api/ai/summary/${props.proposal.id}`, {
-      method: 'POST'
-    });
-    const data = await response.json();
+  await fetchAiSummary(props.proposal.id);
 
-    if (data.error) {
-      throw new Error(data.error.message);
-    }
-
-    aiSummaryBody.value = data.result;
-    aiSummaryOpen.value = true;
-  } catch (e) {
-    uiStore.addNotification('error', 'There was an error fetching the AI summary.');
-  } finally {
-    aiSummaryLoading.value = false;
+  if (aiSummaryState.value.errored) {
+    return uiStore.addNotification('error', 'There was an error fetching the AI summary.');
   }
+
+  aiSummaryOpen.value = true;
 }
 
 async function handleAiSpeechClick() {
@@ -225,7 +213,7 @@ onBeforeUnmount(() => {
             :title="'AI summary'"
           >
             <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
-              <UiLoading v-if="aiSummaryLoading" class="inline-block !w-[22px] !h-[22px]" />
+              <UiLoading v-if="aiSummaryState.loading" class="inline-block !w-[22px] !h-[22px]" />
               <IH-sparkles
                 v-else
                 class="inline-block w-[22px] h-[22px]"
