@@ -218,7 +218,11 @@ onBeforeUnmount(() => destroyAudio());
             "
             :title="'AI summary'"
           >
-            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
+            <UiButton
+              class="!p-0 border-0 !h-[auto]"
+              :disabled="aiSummaryState.loading"
+              @click="handleAiSummaryClick"
+            >
               <UiLoading v-if="aiSummaryState.loading" class="inline-block !w-[22px] !h-[22px]" />
               <IH-sparkles
                 v-else
