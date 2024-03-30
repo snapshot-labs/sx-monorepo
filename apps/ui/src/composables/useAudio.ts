@@ -13,18 +13,14 @@ export function useAudio() {
   async function play() {
     if (state.value === 'destroyed') return;
 
-    switch (state.value) {
-      case 'playing':
-        return;
-      case 'paused':
-        ctx.resume();
-        break;
-      case 'stopped':
-        playback = ctx.createBufferSource();
-        playback.buffer = audio.value;
-        playback.connect(ctx.destination);
-        playback.start(ctx.currentTime);
-        playback.onended = () => (state.value = 'stopped');
+    if (state.value === 'paused') {
+      ctx.resume();
+    } else if (state.value === 'stopped') {
+      playback = ctx.createBufferSource();
+      playback.buffer = audio.value;
+      playback.connect(ctx.destination);
+      playback.start(ctx.currentTime);
+      playback.onended = () => (state.value = 'stopped');
     }
 
     state.value = 'playing';
@@ -38,7 +34,6 @@ export function useAudio() {
   }
 
   async function destroy() {
-    console.log('destroy');
     playback?.stop();
     state.value = 'destroyed';
   }

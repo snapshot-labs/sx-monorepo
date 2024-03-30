@@ -165,17 +165,14 @@ async function handleAiSpeechClick() {
 
     if (aiSpeechState.value.errored) throw new Error();
 
-    const audioBuffer = aiSpeechContent.value;
-    await initAudio(audioBuffer);
+    await initAudio(aiSpeechContent.value);
     playAudio();
   } catch (e) {
     uiStore.addNotification('error', 'Failed to listen proposal, please try again later.');
   }
 }
 
-onBeforeUnmount(() => {
-  destroyAudio();
-});
+onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
