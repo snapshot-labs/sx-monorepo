@@ -76,6 +76,7 @@ const results = computed(() =>
         v-for="(choice, id) in proposal.choices"
         :key="id"
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
+        :class="{ [`_${id + 1} choice-border`]: proposal.type === 'basic' }"
       >
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
