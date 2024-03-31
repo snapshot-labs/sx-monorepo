@@ -114,7 +114,10 @@ export function explorerUrl(network, str: string, type = 'address'): string {
 export function getProposalId(proposal: Proposal) {
   const proposalId = proposal.proposal_id.toString();
 
-  if (proposalId.startsWith('0x')) return `#${proposalId.slice(2, 7)}`;
+  if (proposalId.startsWith('0x') || [46, 59].includes(proposalId.length)) {
+    return `#${proposalId.slice(2, 7)}`;
+  }
+
   return `#${proposalId}`;
 }
 
