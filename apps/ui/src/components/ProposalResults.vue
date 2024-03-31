@@ -79,7 +79,7 @@ const results = computed(() =>
       >
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
-          :class="{ [`_${id + 1} choice-bg opacity-20`]: proposal.type === 'basic' }"
+          :class="{ [`_${id + 1} choice-bg opacity-10`]: proposal.type === 'basic' }"
           :style="{
             width: `${((proposal.scores[id] / (proposal.scores_total || Infinity)) * 100).toFixed(
               2
