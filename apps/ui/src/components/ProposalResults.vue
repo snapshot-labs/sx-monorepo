@@ -76,11 +76,11 @@ const results = computed(() =>
         v-for="result in results"
         :key="result.choice"
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
-        :class="{ [`_${result.choice + 1} choice-border`]: proposal.type === 'basic' }"
+        :class="{ [`_${result.choice} choice-border`]: proposal.type === 'basic' }"
       >
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
-          :class="{ [`_${result.choice + 1} choice-bg opacity-10`]: proposal.type === 'basic' }"
+          :class="{ [`_${result.choice} choice-bg opacity-10`]: proposal.type === 'basic' }"
           :style="{
             width: `${result.progress.toFixed(2)}%`
           }"
