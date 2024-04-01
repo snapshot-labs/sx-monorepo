@@ -25,7 +25,7 @@ const labels = {
 const progress = computed(() => Math.min(props.proposal.scores_total / props.proposal.quorum, 1));
 
 const adjustedScores = computed(() =>
-  [props.proposal.scores[0], props.proposal.scores[1], props.proposal.scores[2]].map(score => {
+  props.proposal.scores.map(score => {
     // TODO: sx-api returns number, sx-subgraph returns string
     const parsedTotal = parseFloat(props.proposal.scores_total as unknown as string);
 
@@ -40,7 +40,7 @@ const results = computed(() =>
       score: props.proposal.scores[i],
       progress: score
     }))
-    .sort((a, b) => b.progress - a.progress)
+    .sort((a, b) => (props.proposal.type === 'basic' ? 0 : b.progress - a.progress))
 );
 </script>
 
@@ -73,31 +73,35 @@ const results = computed(() =>
   <template v-else>
     <div v-if="withDetails" class="flex flex-col gap-2">
       <div
-        v-for="(choice, id) in proposal.choices"
-        :key="id"
+        v-for="result in results"
+        :key="result.choice"
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
-        :class="{ [`_${id + 1} choice-border`]: proposal.type === 'basic' }"
+        :class="{ [`_${result.choice + 1} choice-border`]: proposal.type === 'basic' }"
       >
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
-          :class="{ [`_${id + 1} choice-bg opacity-10`]: proposal.type === 'basic' }"
+          :class="{ [`_${result.choice + 1} choice-bg opacity-10`]: proposal.type === 'basic' }"
           :style="{
-            width: `${((proposal.scores[id] / (proposal.scores_total || Infinity)) * 100).toFixed(
-              2
-            )}%`
+            width: `${result.progress.toFixed(2)}%`
           }"
         />
         <div
           v-if="proposal.type === 'basic'"
           class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
-          :class="`_${id + 1}`"
+          :class="`_${result.choice + 1}`"
         >
-          <IH-check v-if="id === 0" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
-          <IH-x v-else-if="id === 1" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
-          <IH-minus-sm v-else-if="id === 2" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
+          <IH-check v-if="result.choice === 0" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
+          <IH-x
+            v-else-if="result.choice === 1"
+            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+          />
+          <IH-minus-sm
+            v-else-if="result.choice === 2"
+            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+          />
         </div>
-        <div class="truncate grow" v-text="choice" />
-        <div v-text="_p(proposal.scores[id] / (proposal.scores_total || Infinity))" />
+        <div class="truncate grow" v-text="proposal.choices[result.choice - 1]" />
+        <div v-text="_p(result.progress / 100)" />
       </div>
       <div v-if="proposal.privacy === 'shutter'" class="flex flex-col mt-2.5">
         <div class="text-xs">Powered by</div>
