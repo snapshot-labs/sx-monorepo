@@ -40,7 +40,7 @@ const results = computed(() =>
       score: props.proposal.scores[i],
       progress: score
     }))
-    .sort((a, b) => (props.proposal.type === 'basic' ? 0 : b.progress - a.progress))
+    .sort((a, b) => b.progress - a.progress)
 );
 </script>
 
@@ -88,15 +88,15 @@ const results = computed(() =>
         <div
           v-if="proposal.type === 'basic'"
           class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
-          :class="`_${result.choice + 1}`"
+          :class="`_${result.choice}`"
         >
-          <IH-check v-if="result.choice === 0" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
+          <IH-check v-if="result.choice === 1" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
           <IH-x
-            v-else-if="result.choice === 1"
+            v-else-if="result.choice === 2"
             class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
           />
           <IH-minus-sm
-            v-else-if="result.choice === 2"
+            v-else-if="result.choice === 3"
             class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
           />
         </div>
