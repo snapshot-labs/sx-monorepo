@@ -184,6 +184,21 @@ input {
   }
 }
 
+.choice-border {
+  &._1 {
+    @apply border-skin-success;
+  }
+  &._2 {
+    @apply border-skin-danger;
+  }
+  &._3 {
+    @apply border-skin-text;
+  }
+  &._quorum {
+    @apply border-skin-text;
+  }
+}
+
 #app {
   height: 100%;
 }
