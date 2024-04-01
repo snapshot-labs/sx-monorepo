@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _n, _p } from '@/helpers/utils';
+import { _p } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
