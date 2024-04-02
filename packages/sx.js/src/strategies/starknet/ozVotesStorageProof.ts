@@ -142,12 +142,11 @@ export default function createOzVotesStorageProofStrategy({
 
       const contract = new Contract(OZVotesStorageProof, strategyAddress, starkProvider);
 
-      let tree;
-      try {
-        tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
-      } catch (e: unknown) {
+      const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
+      if (tree.message === 'No blocks found for binsearch') {
         throw new VotingPowerDetailsError('Failed to get binary tree', type, 'NOT_READY_YET');
       }
+
       const l1BlockNumber = tree.path[1].block_number;
 
       const { proofs, checkpointIndex } = await getProofs(
