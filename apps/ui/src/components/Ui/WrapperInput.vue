@@ -14,11 +14,11 @@ const showError = computed(() => props.error && props.dirty);
 
 <template>
   <div class="s-base" :class="showError ? 's-error' : ''">
-    <div class="!flex s-label w-full">
-      <label v-if="definition.title" class="grow" v-text="definition.title" />
+    <div class="!flex s-label w-full gap-1">
+      <label v-if="definition.title" class="truncate" v-text="definition.title" />
       <div
         v-if="inputValueLength >= 0 && definition.maxLength"
-        class="text-sm hidden s-label-char-count"
+        class="text-sm hidden grow text-right s-label-char-count whitespace-nowrap"
       >
         {{ inputValueLength }} / {{ definition.maxLength }}
       </div>
