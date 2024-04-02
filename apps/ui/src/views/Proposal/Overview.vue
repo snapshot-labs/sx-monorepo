@@ -156,7 +156,7 @@ async function handleAiSummaryClick() {
 }
 
 async function handleAiSpeechClick() {
-  if (['playing', 'paused'].includes(audioState.value)) {
+  if (['playing', 'paused', 'stopped'].includes(audioState.value)) {
     return audioState.value === 'playing' ? pauseAudio() : playAudio();
   }
 
