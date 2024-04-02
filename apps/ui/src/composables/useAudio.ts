@@ -3,7 +3,7 @@ export function useAudio() {
   let playback: AudioBufferSourceNode;
 
   const audio = ref<AudioBuffer | null>(null);
-  const state = ref<null | 'playing' | 'paused' | 'stopped' | 'destroyed'>(null);
+  const state = ref<'pending' | 'playing' | 'paused' | 'stopped' | 'destroyed'>('pending');
 
   async function init(input: ArrayBuffer) {
     ctx = new AudioContext();
