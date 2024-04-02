@@ -147,9 +147,13 @@ watchEffect(() => {
         <router-view :proposal="proposal" />
       </div>
       <div
-        class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l"
+        class="static md:fixed md:top-[72px] md:right-0 w-full md:h-screen md:max-w-[340px] p-4 border-l space-y-4"
       >
-        <template v-if="!proposal.cancelled && ['pending', 'active'].includes(proposal.state)">
+        <div v-if="!proposal.cancelled && ['pending', 'active'].includes(proposal.state)">
+          <h4 class="mb-2 eyebrow flex items-center">
+            <IH-cursor-click class="inline-block mr-2" />
+            <span>Cast your vote</span>
+          </h4>
           <IndicatorVotingPower
             v-if="web3.account && networkId"
             v-slot="props"
@@ -157,27 +161,19 @@ watchEffect(() => {
             :status="votingPowerStatus"
             :voting-power-symbol="proposal.space.voting_power_symbol"
             :voting-powers="votingPowers"
-            class="mb-2 mt-4 first:mt-1"
+            class="mb-2 flex items-center"
             @get-voting-power="getVotingPower"
           >
-            <h4 class="block eyebrow">Your voting power</h4>
-            <div class="pt-2">
+            <span class="mr-1.5">Voting power:</span>
+            <a @click="props.onClick">
               <UiLoading v-if="votingPowerStatus === 'loading'" />
-              <button
-                v-else
-                class="text-skin-link text-lg flex items-center"
-                @click="props.onClick"
-              >
-                <IH-exclamation
-                  v-if="votingPowerStatus === 'error'"
-                  class="inline-block text-rose-500"
-                />
-                <span v-else v-text="props.formattedVotingPower" />
-              </button>
-            </div>
+              <IH-exclamation
+                v-else-if="votingPowerStatus === 'error'"
+                class="inline-block text-rose-500"
+              />
+              <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
+            </a>
           </IndicatorVotingPower>
-
-          <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Cast your vote</h4>
           <ProposalVote v-if="proposal" :proposal="proposal">
             <ProposalVoteBasic
               v-if="proposal.type === 'basic'"
@@ -209,12 +205,15 @@ watchEffect(() => {
               @vote="handleVoteClick"
             />
           </ProposalVote>
-        </template>
+        </div>
 
-        <template v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">
-          <h4 class="block eyebrow mb-2 mt-4 first:mt-1">Results</h4>
+        <div v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">
+          <h4 class="mb-2.5 eyebrow flex items-center">
+            <IH-chart-square-bar class="inline-block mr-2" />
+            <span>Results</span>
+          </h4>
           <ProposalResults with-details :proposal="proposal" :decimals="votingPowerDecimals" />
-        </template>
+        </div>
       </div>
     </template>
   </div>
