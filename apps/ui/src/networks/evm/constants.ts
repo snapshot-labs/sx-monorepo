@@ -1,6 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
-import { formatBytes32String } from '@ethersproject/strings';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinGraph } from '@/helpers/pin';
@@ -518,7 +517,7 @@ export function createConstants(networkId: NetworkID) {
             contractAddress: params.contractAddress || '0x0000000000000000000000000000000000000000',
             slotIndex: BigInt(params.slotIndex),
             space: spaceAddress,
-            querySchema: formatBytes32String('0')
+            querySchema: '0xa09cc16ccaa32b96ca5c404c1b4be60d7883a7178f432e8f9f3c22157fc0f873'
           }
         });
       },
