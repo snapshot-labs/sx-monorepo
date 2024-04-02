@@ -2,11 +2,11 @@
 const props = withDefaults(
   defineProps<{
     definition: any;
-    inputLength?: number;
+    inputValueLength?: number;
     error?: string;
     dirty?: boolean;
   }>(),
-  { inputLength: 0 }
+  { inputValueLength: 0 }
 );
 
 const showError = computed(() => props.error && props.dirty);
@@ -17,10 +17,10 @@ const showError = computed(() => props.error && props.dirty);
     <div class="!flex s-label w-full">
       <label v-if="definition.title" class="grow" v-text="definition.title" />
       <div
-        v-if="inputLength >= 0 && definition.maxLength"
+        v-if="inputValueLength >= 0 && definition.maxLength"
         class="text-sm hidden s-label-char-count"
       >
-        {{ inputLength }} / {{ definition.maxLength }}
+        {{ inputValueLength }} / {{ definition.maxLength }}
       </div>
     </div>
     <slot />
