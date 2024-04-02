@@ -1,7 +1,9 @@
 const SIDEKICK_URL = 'https://sh5.co';
 
-export function useAi(type: 'summary' | 'speech', proposalId: string) {
-  const content = ref<string | ArrayBuffer | null>(null);
+export function useAi<T extends 'summary' | 'speech'>(type: T, proposalId: string) {
+  type ContentType = T extends 'summary' ? string : ArrayBuffer;
+
+  const content = ref(null) as Ref<ContentType | null>;
   const state = ref({
     loading: false,
     errored: false
@@ -12,7 +14,7 @@ export function useAi(type: 'summary' | 'speech', proposalId: string) {
 
     try {
       state.value.loading = true;
-      content.value = await (type === 'summary' ? fetchSummary() : fetchSpeech());
+      content.value = (await (type === 'summary' ? fetchSummary() : fetchSpeech())) as ContentType;
       state.value.errored = false;
     } catch (e) {
       state.value.errored = true;
