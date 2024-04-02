@@ -38,7 +38,7 @@ watch(model, () => {
     :definition="definition"
     :error="error"
     :dirty="dirty"
-    :input-length="inputValue?.length"
+    :input-value-length="inputValue?.length"
   >
     <input
       v-model="inputValue"
