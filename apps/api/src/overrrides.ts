@@ -5,6 +5,8 @@ export const networkNodeUrl =
   process.env.NETWORK_NODE_URL ||
   'https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146';
 
+export const manaRpcUrl = process.env.VITE_MANA_URL || 'https://mana.pizza';
+
 const createConfig = (
   networkId: keyof typeof starknetNetworks,
   { startBlock }: { startBlock: number }
@@ -12,7 +14,7 @@ const createConfig = (
   const config = starknetNetworks[networkId];
 
   return {
-    manaRpcUrl: `https://mana.pizza/stark_rpc/${config.Meta.eip712ChainId}`,
+    manaRpcUrl: `${manaRpcUrl}/stark_rpc/${config.Meta.eip712ChainId}`,
     factoryAddress: config.Meta.spaceFactory,
     propositionPowerValidationStrategyAddress: config.ProposalValidations.VotingPower,
     herodotusStrategies: [

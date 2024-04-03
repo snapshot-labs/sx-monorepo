@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { utils } from '@snapshot-labs/sx';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
 import { Choice } from '@/types';
@@ -17,6 +18,7 @@ const { vote } = useActions();
 const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -43,6 +45,8 @@ const votingPowerDecimals = computed(() => {
 async function getVotingPower() {
   if (!network.value) return;
 
+  votingPowerDetailsError.value = null;
+
   if (!web3.value.account || !proposal.value) {
     votingPowers.value = [];
     votingPowerStatus.value = 'success';
@@ -60,8 +64,13 @@ async function getVotingPower() {
       { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
     );
     votingPowerStatus.value = 'success';
-  } catch (e) {
-    console.warn('Failed to load voting power', e);
+  } catch (e: unknown) {
+    if (e instanceof utils.errors.VotingPowerDetailsError) {
+      votingPowerDetailsError.value = e;
+    } else {
+      console.warn('Failed to load voting power', e);
+    }
+
     votingPowers.value = [];
     votingPowerStatus.value = 'error';
   }
@@ -164,15 +173,29 @@ watchEffect(() => {
             class="mb-2 flex items-center"
             @get-voting-power="getVotingPower"
           >
-            <span class="mr-1.5">Voting power:</span>
-            <a @click="props.onClick">
-              <UiLoading v-if="votingPowerStatus === 'loading'" />
-              <IH-exclamation
-                v-else-if="votingPowerStatus === 'error'"
-                class="inline-block text-rose-500"
-              />
-              <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
-            </a>
+            <div
+              v-if="
+                votingPowerDetailsError?.details === 'NOT_READY_YET' &&
+                ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPowerDetailsError.source)
+              "
+              class="mt-2"
+            >
+              <span class="inline-flex align-top h-[27px] items-center">
+                <IH-exclamation-circle class="mr-1" />
+              </span>
+              Please allow few minutes for the voting power to be collected from Ethereum.
+            </div>
+            <template v-else>
+              <span class="mr-1.5">Voting power:</span>
+              <a @click="props.onClick">
+                <UiLoading v-if="votingPowerStatus === 'loading'" />
+                <IH-exclamation
+                  v-else-if="votingPowerStatus === 'error'"
+                  class="inline-block text-rose-500"
+                />
+                <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
+              </a>
+            </template>
           </IndicatorVotingPower>
           <ProposalVote v-if="proposal" :proposal="proposal">
             <ProposalVoteBasic

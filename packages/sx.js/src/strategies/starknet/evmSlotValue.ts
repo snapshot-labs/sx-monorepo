@@ -6,6 +6,7 @@ import EVMSlotValue from './abis/EVMSlotValue.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 import { getSlotKey, getBinaryTree } from './utils';
+import { VotingPowerDetailsError } from '../../utils/errors';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
 export default function createEvmSlotValueStrategy({
@@ -13,6 +14,8 @@ export default function createEvmSlotValueStrategy({
 }: {
   deployedOnChain: string;
 }): Strategy {
+  const type = 'evmSlotValue';
+
   async function getProof(
     l1TokenAddress: string,
     voterAddress: string,
@@ -45,7 +48,7 @@ export default function createEvmSlotValueStrategy({
   }
 
   return {
-    type: 'evmSlotValue',
+    type,
     async getParams(
       call: 'propose' | 'vote',
       signerAddress: string,
@@ -73,7 +76,7 @@ export default function createEvmSlotValueStrategy({
       const { contractAddress, slotIndex } = metadata;
 
       const tree = await getBinaryTree(deployedOnChain, startTimestamp, chainId);
-      const l1BlockNumber = tree.path[1].blockNumber;
+      const l1BlockNumber = tree.path[1].block_number;
 
       const storageProof = await getProof(
         contractAddress,
@@ -118,7 +121,11 @@ export default function createEvmSlotValueStrategy({
       const contract = new Contract(EVMSlotValue, strategyAddress, clientConfig.starkProvider);
 
       const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
-      const l1BlockNumber = tree.path[1].blockNumber;
+      if (tree.message === 'No blocks found for binsearch') {
+        throw new VotingPowerDetailsError('Failed to get binary tree', type, 'NOT_READY_YET');
+      }
+
+      const l1BlockNumber = tree.path[1].block_number;
 
       const storageProof = await getProof(
         contractAddress,
