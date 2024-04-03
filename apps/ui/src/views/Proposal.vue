@@ -83,6 +83,7 @@ async function handleVoteClick(choice: Choice) {
 
   try {
     await vote(proposal.value, choice);
+    proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
   } finally {
     sendingType.value = null;
   }
