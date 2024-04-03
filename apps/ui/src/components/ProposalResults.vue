@@ -22,26 +22,26 @@ const labels = {
   2: 'Abstain'
 };
 
-const progress = computed(() => Math.min(props.proposal.scores_total / props.proposal.quorum, 1));
-
-const adjustedScores = computed(() =>
-  props.proposal.scores.map(score => {
-    // TODO: sx-api returns number, sx-subgraph returns string
-    const parsedTotal = parseFloat(props.proposal.scores_total as unknown as string);
-
-    return parsedTotal !== 0 ? (score / parsedTotal) * 100 * progress.value : 0;
-  })
+const totalProgress = computed(() =>
+  Math.min(props.proposal.scores_total / props.proposal.quorum, 1)
 );
 
-const results = computed(() =>
-  adjustedScores.value
-    .map((score, i) => ({
-      choice: i + 1,
-      score: props.proposal.scores[i],
-      progress: score
-    }))
-    .sort((a, b) => b.progress - a.progress)
-);
+const results = computed(() => {
+  const parsedTotal = parseFloat(props.proposal.scores_total as unknown as string);
+
+  return props.proposal.scores
+    .map((score, i) => {
+      const progress = parsedTotal !== 0 ? (score / parsedTotal) * 100 : 0;
+
+      return {
+        choice: i + 1,
+        score,
+        progress,
+        adjustedProgress: progress * totalProgress.value
+      };
+    })
+    .sort((a, b) => b.progress - a.progress);
+});
 </script>
 
 <template>
@@ -136,7 +136,7 @@ const results = computed(() =>
           title="Quorum left"
           class="choice-bg _quorum float-left h-full"
           :style="{
-            width: `${(100 * (1 - progress)).toFixed(3)}%`
+            width: `${(100 * (1 - totalProgress)).toFixed(3)}%`
           }"
         />
       </div>
