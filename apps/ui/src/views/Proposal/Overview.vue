@@ -22,12 +22,27 @@ const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
 const { createDraft } = useEditor();
+const {
+  state: aiSummaryState,
+  content: aiSummaryContent,
+  fetch: fetchAiSummary
+} = useAi('summary', props.proposal.id);
+const {
+  state: aiSpeechState,
+  content: aiSpeechContent,
+  fetch: fetchAiSpeech
+} = useAi('speech', props.proposal.id);
+const {
+  state: audioState,
+  play: playAudio,
+  pause: pauseAudio,
+  init: initAudio,
+  destroy: destroyAudio
+} = useAudio();
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
-const aiSummaryBody = ref<string>('');
-const aiSummaryLoading = ref(false);
 const aiSummaryOpen = ref(false);
 
 const currentUrl = `${window.location.origin}/#${route.path}`;
@@ -126,30 +141,38 @@ async function handleCancelClick() {
 }
 
 async function handleAiSummaryClick() {
-  if (aiSummaryBody.value) {
+  if (aiSummaryContent.value) {
     aiSummaryOpen.value = !aiSummaryOpen.value;
     return;
   }
 
+  await fetchAiSummary();
+
+  if (aiSummaryState.value.errored) {
+    return uiStore.addNotification('error', 'There was an error fetching the AI summary.');
+  }
+
+  aiSummaryOpen.value = true;
+}
+
+async function handleAiSpeechClick() {
+  if (['playing', 'paused', 'stopped'].includes(audioState.value)) {
+    return audioState.value === 'playing' ? pauseAudio() : playAudio();
+  }
+
   try {
-    aiSummaryLoading.value = true;
-    const response = await fetch(`https://sh5.co/api/ai/summary/${props.proposal.id}`, {
-      method: 'POST'
-    });
-    const data = await response.json();
+    await fetchAiSpeech();
 
-    if (data.error) {
-      throw new Error(data.error.message);
-    }
+    if (aiSpeechState.value.errored || aiSpeechContent.value === null) throw new Error();
 
-    aiSummaryBody.value = data.result;
-    aiSummaryOpen.value = true;
+    await initAudio(aiSpeechContent.value);
+    playAudio();
   } catch (e) {
-    uiStore.addNotification('error', 'There was an error fetching the AI summary.');
-  } finally {
-    aiSummaryLoading.value = false;
+    uiStore.addNotification('error', 'Failed to listen proposal, please try again later.');
   }
 }
+
+onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
@@ -195,11 +218,41 @@ async function handleAiSummaryClick() {
             "
             :title="'AI summary'"
           >
-            <UiButton class="!p-0 border-0 !h-[auto]" @click="handleAiSummaryClick">
-              <UiLoading v-if="aiSummaryLoading" />
-              <IH-sparkles v-else class="text-skin-text inline-block w-[22px] h-[22px]" />
+            <UiButton
+              class="!p-0 border-0 !h-[auto]"
+              :disabled="aiSummaryState.loading"
+              @click="handleAiSummaryClick"
+            >
+              <UiLoading v-if="aiSummaryState.loading" class="inline-block !w-[22px] !h-[22px]" />
+              <IH-sparkles
+                v-else
+                class="inline-block w-[22px] h-[22px]"
+                :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
+              />
             </UiButton>
           </UiTooltip>
+          <UiTooltip
+            v-if="
+              offchainNetworks.includes(props.proposal.network) &&
+              props.proposal.body.length > 0 &&
+              props.proposal.body.length < 4096
+            "
+            :title="audioState === 'playing' ? 'Pause' : 'Listen'"
+          >
+            <UiButton
+              class="!p-0 border-0 !h-[auto]"
+              :disabled="aiSpeechState.loading"
+              @click="handleAiSpeechClick"
+            >
+              <UiLoading v-if="aiSpeechState.loading" class="inline-block !w-[22px] !h-[22px]" />
+              <IH-pause
+                v-else-if="audioState === 'playing'"
+                class="inline-block w-[22px] h-[22px] text-skin-link"
+              />
+              <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
+            </UiButton>
+          </UiTooltip>
+
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
@@ -293,7 +346,7 @@ async function handleAiSummaryClick() {
           <IH-sparkles class="inline-block mr-2" />
           <span>AI summary</span>
         </h4>
-        <div class="text-md text-skin-link mb-2">{{ aiSummaryBody }}</div>
+        <div class="text-md text-skin-link mb-2">{{ aiSummaryContent }}</div>
         <div class="flex gap-2 items-center text-sm">
           <IH-exclamation />
           AI can be inaccurate or misleading.
