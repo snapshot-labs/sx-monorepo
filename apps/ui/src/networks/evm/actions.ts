@@ -373,16 +373,16 @@ export function createActions(
         chainId
       };
 
+      // @TODO Trigger Highlight vote only if space has Axiom or Isokratia execution strategy
+      if (!isContract) {
+        return highlightVote({ signer: web3.getSigner(), data });
+      }
+
       if (relayerType === 'evm') {
         return ethSigClient.vote({
           signer: web3.getSigner(),
           data
         });
-      }
-
-      // @TODO Trigger Highlight vote only if space has Axiom or Isokratia execution strategy
-      if (!isContract) {
-        return highlightVote({ signer: web3.getSigner(), data });
       }
 
       return client.vote(
