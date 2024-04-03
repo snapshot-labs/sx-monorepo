@@ -27,6 +27,7 @@ const totalProgress = computed(() =>
 );
 
 const results = computed(() => {
+  // TODO: sx-api returns number, sx-subgraph returns string
   const parsedTotal = parseFloat(props.proposal.scores_total as unknown as string);
 
   return props.proposal.scores
