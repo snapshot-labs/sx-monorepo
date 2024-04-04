@@ -11,6 +11,7 @@ const SPACE_FRAGMENT = gql`
     website
     twitter
     github
+    coingecko
     symbol
     treasuries {
       name

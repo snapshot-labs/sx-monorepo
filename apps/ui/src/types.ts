@@ -91,6 +91,7 @@ export type Space = {
   twitter: string;
   github: string;
   discord: string;
+  coingecko?: string;
   voting_power_symbol: string;
   controller: string;
   voting_delay: number;
