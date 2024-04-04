@@ -88,7 +88,7 @@ watchEffect(() => setTitle(props.space.name));
         </router-link>
         <div class="flex items-center">
           <h1 v-text="space.name" />
-          <UiBadgeVerified class="top-[2px]" :verified="space.verified" :turbo="space.turbo" />
+          <UiBadgeVerified class="ml-1 top-[2px]" :verified="space.verified" :turbo="space.turbo" />
         </div>
         <div class="mb-3">
           <b class="text-skin-link">{{ _n(space.proposal_count) }}</b> proposals ·
