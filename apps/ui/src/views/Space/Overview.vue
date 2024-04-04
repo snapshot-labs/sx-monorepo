@@ -88,7 +88,10 @@ watchEffect(() => setTitle(props.space.name));
             class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-lg left-[-4px]"
           />
         </router-link>
-        <h1 v-text="space.name" />
+        <div class="flex items-center">
+          <h1 v-text="space.name" />
+          <UiBadgeVerified class="ml-1 top-[2px]" :verified="space.verified" :turbo="space.turbo" />
+        </div>
         <div class="mb-3">
           <b class="text-skin-link">{{ _n(space.proposal_count) }}</b> proposals ·
           <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b> votes
