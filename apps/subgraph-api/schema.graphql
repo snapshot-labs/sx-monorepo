@@ -1,7 +1,7 @@
 type Space @entity {
   id: ID!
   metadata: SpaceMetadata
-  controller: Bytes!
+  controller: String!
   voting_delay: Int!
   min_voting_period: Int!
   max_voting_period: Int!
@@ -9,7 +9,7 @@ type Space @entity {
   quorum: BigDecimal!
   next_strategy_index: Int!
   strategies_indicies: [Int]!
-  strategies: [Bytes!]!
+  strategies: [String!]!
   strategies_params: [String!]!
   strategies_metadata: [String!]!
   strategies_parsed_metadata: [StrategiesParsedMetadata!]! @derivedFrom(field: "space")
@@ -43,7 +43,7 @@ type SpaceMetadata @entity {
   discord: String!
   voting_power_symbol: String!
   wallet: String!
-  executors: [Bytes!]!
+  executors: [String!]!
   executors_types: [String!]!
   executors_strategies: [ExecutionStrategy!]!
 }
@@ -76,9 +76,9 @@ type ExecutionStrategy @entity {
   id: ID!
   type: String!
   quorum: BigDecimal!
-  treasury: Bytes
+  treasury: String
   treasury_chain: Int
-  timelock_veto_guardian: Bytes
+  timelock_veto_guardian: String
   timelock_delay: BigInt!
 }
 
@@ -99,12 +99,12 @@ type Proposal @entity {
   max_end: Int!
   snapshot: Int!
   execution_time: Int!
-  execution_strategy: Bytes!
+  execution_strategy: String!
   execution_strategy_type: String!
-  timelock_veto_guardian: Bytes
+  timelock_veto_guardian: String
   timelock_delay: BigInt!
   strategies_indicies: [Int]!
-  strategies: [Bytes!]!
+  strategies: [String!]!
   strategies_params: [String!]!
   scores_1: BigDecimal!
   scores_2: BigDecimal!
