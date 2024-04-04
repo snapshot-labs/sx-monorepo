@@ -1,7 +1,7 @@
 import { Bytes, dataSource, json } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
 import { SpaceMetadata, ProposalMetadata, StrategiesParsedMetadataData } from '../generated/schema'
-import { updateStrategiesParsedMetadata } from './helpers'
+import { toChecksumAddress, updateStrategiesParsedMetadata } from './helpers'
 
 export function handleSpaceMetadata(content: Bytes): void {
   let spaceMetadata = new SpaceMetadata(dataSource.stringParam())
@@ -76,7 +76,7 @@ export function handleSpaceMetadata(content: Bytes): void {
         .map<string>((type) => type.toString())
       spaceMetadata.executors_strategies = executionStrategies
         .toArray()
-        .map<string>((strategy) => strategy.toString())
+        .map<string>((strategy) => toChecksumAddress(strategy.toString()))
     } else {
       spaceMetadata.executors = []
       spaceMetadata.executors_types = []
