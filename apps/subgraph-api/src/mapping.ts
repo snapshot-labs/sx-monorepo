@@ -79,7 +79,7 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
-    executionStrategy.treasury = targetAddress.value
+    executionStrategy.treasury = toChecksumAddress(targetAddress.value.toHexString())
     executionStrategy.timelock_delay = new BigInt(0)
     executionStrategy.save()
   } else if (event.params.implementation.equals(MASTER_AXIOM)) {
@@ -94,7 +94,7 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     executionStrategy.type = 'Axiom' // override because contract returns AxiomExecutionStrategyMock
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
-    executionStrategy.treasury = event.params.proxy
+    executionStrategy.treasury = toChecksumAddress(event.params.proxy.toHexString())
     executionStrategy.timelock_delay = new BigInt(0)
     executionStrategy.save()
   } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_TIMELOCK)) {
@@ -118,8 +118,10 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
-    executionStrategy.treasury = event.params.proxy
-    executionStrategy.timelock_veto_guardian = timelockVetoGuardianResult.value
+    executionStrategy.treasury = toChecksumAddress(event.params.proxy.toHexString())
+    executionStrategy.timelock_veto_guardian = toChecksumAddress(
+      timelockVetoGuardianResult.value.toHexString()
+    )
     executionStrategy.timelock_delay = timelockDelayResult.value
     executionStrategy.save()
 
@@ -129,14 +131,16 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
 
 export function handleSpaceCreated(event: SpaceCreated): void {
   let space = new Space(toChecksumAddress(event.params.space.toHexString()))
-  space.controller = event.params.input.owner
+  space.controller = toChecksumAddress(event.params.input.owner.toHexString())
   space.voting_delay = event.params.input.votingDelay.toI32()
   space.min_voting_period = event.params.input.minVotingDuration.toI32()
   space.max_voting_period = event.params.input.maxVotingDuration.toI32()
   space.quorum = new BigDecimal(new BigInt(0))
   space.strategies_indicies = event.params.input.votingStrategies.map<i32>((_, i) => i32(i))
   space.next_strategy_index = event.params.input.votingStrategies.length
-  space.strategies = event.params.input.votingStrategies.map<Bytes>((strategy) => strategy.addr)
+  space.strategies = event.params.input.votingStrategies.map<string>((strategy) =>
+    toChecksumAddress(strategy.addr.toHexString())
+  )
   space.strategies_params = event.params.input.votingStrategies.map<string>((strategy) =>
     strategy.params.toHexString()
   )
@@ -201,7 +205,9 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.created = event.block.timestamp.toI32()
   proposal.tx = event.transaction.hash
   proposal.vote_count = 0
-  proposal.execution_strategy = event.params.proposal.executionStrategy
+  proposal.execution_strategy = toChecksumAddress(
+    event.params.proposal.executionStrategy.toHexString()
+  )
   proposal.execution_time = 0
   proposal.executed = false
   proposal.vetoed = false
@@ -273,7 +279,9 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
   }
 
   proposal.edited = event.block.timestamp.toI32()
-  proposal.execution_strategy = event.params.newExecutionStrategy.addr
+  proposal.execution_strategy = toChecksumAddress(
+    event.params.newExecutionStrategy.addr.toHexString()
+  )
   proposal.execution_hash = event.params.newExecutionStrategy.params.toHexString()
 
   let executionStrategy = ExecutionStrategy.load(
@@ -313,9 +321,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 
   proposal.executed = true
 
-  let executionStrategy = ExecutionStrategy.load(
-    toChecksumAddress(proposal.execution_strategy.toHexString())
-  )
+  let executionStrategy = ExecutionStrategy.load(proposal.execution_strategy)
 
   if (executionStrategy !== null) {
     if (
@@ -468,7 +474,7 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {
     return
   }
 
-  space.controller = event.params.newOwner
+  space.controller = toChecksumAddress(event.params.newOwner.toHexString())
   space.save()
 }
 
@@ -514,7 +520,9 @@ export function handleVotingStrategiesAdded(event: VotingStrategiesAdded): void 
 
   let initialNextStrategy = space.next_strategy_index
 
-  let strategies = event.params.newVotingStrategies.map<Bytes>((strategy) => strategy.addr)
+  let strategies = event.params.newVotingStrategies.map<string>((strategy) =>
+    toChecksumAddress(strategy.addr.toHexString())
+  )
   let strategiesParams = event.params.newVotingStrategies.map<string>((strategy) =>
     strategy.params.toHexString()
   )
@@ -569,7 +577,7 @@ export function handleVotingStrategiesRemoved(event: VotingStrategiesRemoved): v
   }
 
   let newIndicies = [] as i32[]
-  let newStrategies = [] as Bytes[]
+  let newStrategies = [] as string[]
   let newStrategiesParams = [] as string[]
   let newStrategiesMetadata = [] as string[]
   for (let i = 0; i < space.strategies_indicies.length; i++) {
