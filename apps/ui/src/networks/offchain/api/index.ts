@@ -75,6 +75,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     github: space.github,
     twitter: space.twitter,
     discord: '',
+    coingecko: space.coingecko,
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,

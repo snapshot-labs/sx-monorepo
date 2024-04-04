@@ -10,6 +10,7 @@ export type ApiSpace = {
   website: string;
   twitter: string;
   github: string;
+  coingecko: string;
   symbol: string;
   treasuries: [
     {

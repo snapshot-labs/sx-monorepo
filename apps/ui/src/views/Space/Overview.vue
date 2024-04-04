@@ -5,6 +5,7 @@ import { Space } from '@/types';
 import ICX from '~icons/c/x';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
+import ICCoingecko from '~icons/c/coingecko';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
 const PROPOSALS_LIMIT = 4;
@@ -32,6 +33,7 @@ const socials = computed(() =>
     { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
     { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
+    { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
     { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
   ]
     .map(({ key, icon, urlFormat }) => {
