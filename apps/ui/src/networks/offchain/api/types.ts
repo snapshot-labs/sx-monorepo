@@ -2,6 +2,8 @@ import { Privacy, VoteType } from '@/types';
 
 export type ApiSpace = {
   id: string;
+  verified: boolean;
+  turbo: boolean;
   admins: string[];
   members: string[];
   name: string;

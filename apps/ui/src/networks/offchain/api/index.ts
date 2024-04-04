@@ -64,8 +64,10 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
 
   return {
     id: space.id,
-    controller: '',
     network: networkId,
+    verified: space.verified,
+    turbo: space.turbo,
+    controller: '',
     snapshot_chain_id: parseInt(space.network),
     name: space.name,
     avatar: '',
