@@ -14,13 +14,13 @@ const spacesStore = useSpacesStore();
   >
     <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] absolute" />
     <div class="relative inline-block mx-4 mt-[34px]">
-      <UiNetworkBadge :id="space.network" class="mb-2">
+      <UiBadgeNetwork :id="space.network" class="mb-2">
         <SpaceAvatar
           :space="space"
           :size="50"
           class="border-skin-bg !bg-skin-border rounded-md border-[3px]"
         />
-      </UiNetworkBadge>
+      </UiBadgeNetwork>
     </div>
     <button
       class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
