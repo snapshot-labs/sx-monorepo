@@ -120,7 +120,7 @@ async function deploy() {
   }
 
   try {
-    await network.value.helpers.waitForSpace(props.predictedSpaceAddress.toLowerCase());
+    await network.value.helpers.waitForSpace(props.predictedSpaceAddress);
 
     completed.value = true;
     currentStep.value = currentStep.value + 1;

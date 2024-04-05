@@ -7,14 +7,15 @@ export type NetworkID =
   | 's'
   | 's-tn'
   | 'eth'
+  | 'matic'
+  | 'arb1'
+  | 'oeth'
   | 'gor'
   | 'sep'
   | 'linea-testnet'
   | 'sn'
   | 'sn-tn'
-  | 'sn-sep'
-  | 'matic'
-  | 'arb1';
+  | 'sn-sep';
 
 export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
 
@@ -80,6 +81,8 @@ export type StrategyParsedMetadata = {
 export type Space = {
   id: string;
   network: NetworkID;
+  verified: boolean;
+  turbo: boolean;
   snapshot_chain_id?: number;
   name: string;
   avatar: string;
@@ -91,6 +94,7 @@ export type Space = {
   twitter: string;
   github: string;
   discord: string;
+  coingecko?: string;
   voting_power_symbol: string;
   controller: string;
   voting_delay: number;
