@@ -41,7 +41,7 @@ export const METADATA: Record<string, Metadata> = {
   oeth: {
     name: 'Optimism',
     chainId: 10,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-optimism/version/latest',
     avatar: 'ipfs://QmfF4kwhGL8QosUXvgq2KWCmavhKBvwD6kbhs7L4p5ZAWb',
     blockTime: 2
   },
