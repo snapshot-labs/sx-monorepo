@@ -38,6 +38,13 @@ export const METADATA: Record<string, Metadata> = {
     avatar: 'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
     blockTime: ETH_MAINNET_BLOCK_TIME
   },
+  oeth: {
+    name: 'Optimism',
+    chainId: 10,
+    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
+    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
+    blockTime: 2
+  },
   eth: {
     name: 'Ethereum',
     chainId: 1,
@@ -118,7 +125,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     baseChainId: chainId,
     currentChainId: currentChainId ?? chainId,
     hasReceive: false,
-    supportsSimulation: ['eth', 'gor', 'sep', 'matic', 'arb1'].includes(networkId),
+    supportsSimulation: ['eth', 'gor', 'sep', 'oeth', 'matic', 'arb1'].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),
     api,
