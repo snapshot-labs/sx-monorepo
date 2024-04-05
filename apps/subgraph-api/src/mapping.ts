@@ -154,7 +154,9 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   )
 
   space.strategies_metadata = event.params.input.votingStrategyMetadataURIs
-  space.authenticators = event.params.input.authenticators.map<Bytes>((address) => address)
+  space.authenticators = event.params.input.authenticators.map<string>((address) =>
+    toChecksumAddress(address.toHexString())
+  )
   space.proposal_count = 0
   space.vote_count = 0
   space.proposer_count = 0
@@ -486,8 +488,10 @@ export function handleAuthenticatorsAdded(event: AuthenticatorsAdded): void {
 
   let newAuthenticators = space.authenticators
   for (let i = 0; i < event.params.newAuthenticators.length; i++) {
-    if (!newAuthenticators.includes(event.params.newAuthenticators[i])) {
-      newAuthenticators.push(event.params.newAuthenticators[i])
+    const authenticator = toChecksumAddress(event.params.newAuthenticators[i].toHexString())
+
+    if (!newAuthenticators.includes(authenticator)) {
+      newAuthenticators.push(authenticator)
     }
   }
 
@@ -503,8 +507,10 @@ export function handleAuthenticatorsRemoved(event: AuthenticatorsRemoved): void 
 
   let newAuthenticators = space.authenticators
   for (let i = 0; i < event.params.authenticators.length; i++) {
-    if (newAuthenticators.includes(event.params.authenticators[i])) {
-      newAuthenticators.splice(newAuthenticators.indexOf(event.params.authenticators[i]), 1)
+    const authenticator = toChecksumAddress(event.params.authenticators[i].toHexString())
+
+    if (newAuthenticators.includes(authenticator)) {
+      newAuthenticators.splice(newAuthenticators.indexOf(authenticator), 1)
     }
   }
 
