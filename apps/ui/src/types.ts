@@ -80,6 +80,8 @@ export type StrategyParsedMetadata = {
 export type Space = {
   id: string;
   network: NetworkID;
+  verified: boolean;
+  turbo: boolean;
   snapshot_chain_id?: number;
   name: string;
   avatar: string;
