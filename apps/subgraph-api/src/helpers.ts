@@ -73,10 +73,10 @@ export function updateProposalValidationStrategy(
   metadataUri: string,
   blockNumber: BigInt
 ): void {
-  space.validation_strategy = validationStrategyAddress
+  space.validation_strategy = toChecksumAddress(validationStrategyAddress.toHexString())
   space.validation_strategy_params = validationStrategyParams.toHexString()
 
-  if (space.validation_strategy.equals(VOTING_POWER_VALIDATION_STRATEGY)) {
+  if (validationStrategyAddress.equals(VOTING_POWER_VALIDATION_STRATEGY)) {
     space.voting_power_validation_strategy_metadata = metadataUri
 
     let params = decodeProposalValidationParams(validationStrategyParams)
