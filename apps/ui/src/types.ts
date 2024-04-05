@@ -80,6 +80,8 @@ export type StrategyParsedMetadata = {
 export type Space = {
   id: string;
   network: NetworkID;
+  verified: boolean;
+  turbo: boolean;
   snapshot_chain_id?: number;
   name: string;
   avatar: string;
@@ -91,6 +93,7 @@ export type Space = {
   twitter: string;
   github: string;
   discord: string;
+  coingecko?: string;
   voting_power_symbol: string;
   controller: string;
   voting_delay: number;

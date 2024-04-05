@@ -3,6 +3,8 @@ import gql from 'graphql-tag';
 const SPACE_FRAGMENT = gql`
   fragment offchainSpaceFragment on Space {
     id
+    verified
+    turbo
     admins
     members
     name
@@ -11,6 +13,7 @@ const SPACE_FRAGMENT = gql`
     website
     twitter
     github
+    coingecko
     symbol
     treasuries {
       name
