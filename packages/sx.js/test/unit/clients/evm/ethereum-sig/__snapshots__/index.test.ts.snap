@@ -3,7 +3,7 @@
 exports[`EthereumSig > should create propose envelope 1`] = `
 {
   "data": {
-    "authenticator": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+    "authenticator": "0xc537d997dDc783E071F82CCBfAa0D768d310001b",
     "executionStrategy": {
       "addr": "0x6241b5c89350bb3c465179706cf26050ea32444f",
       "params": "0x00",
@@ -12,7 +12,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
     "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
     "strategies": [
       {
-        "address": "0xc1245c5dca7885c73e32294140f1e5d30688c202",
+        "address": "0xC1245C5DCa7885C73E32294140F1e5d30688c202",
         "index": 0,
       },
     ],
@@ -22,7 +22,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
     "domain": {
       "chainId": 5,
       "name": "snapshot-x",
-      "verifyingContract": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+      "verifyingContract": "0xc537d997dDc783E071F82CCBfAa0D768d310001b",
       "version": "1.0.0",
     },
     "message": {
@@ -82,7 +82,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
 exports[`EthereumSig > should create update proposal envelope 1`] = `
 {
   "data": {
-    "authenticator": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+    "authenticator": "0xc537d997dDc783E071F82CCBfAa0D768d310001b",
     "executionStrategy": {
       "addr": "0x6241b5c89350bb3c465179706cf26050ea32444f",
       "params": "0x00",
@@ -96,7 +96,7 @@ exports[`EthereumSig > should create update proposal envelope 1`] = `
     "domain": {
       "chainId": 5,
       "name": "snapshot-x",
-      "verifyingContract": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+      "verifyingContract": "0xc537d997dDc783E071F82CCBfAa0D768d310001b",
       "version": "1.0.0",
     },
     "message": {
@@ -156,14 +156,14 @@ exports[`EthereumSig > should create update proposal envelope 1`] = `
 exports[`EthereumSig > should create vote envelope 1`] = `
 {
   "data": {
-    "authenticator": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+    "authenticator": "0xc537d997dDc783E071F82CCBfAa0D768d310001b",
     "choice": 1,
     "metadataUri": "",
     "proposal": 1,
     "space": "0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649",
     "strategies": [
       {
-        "address": "0xc1245c5dca7885c73e32294140f1e5d30688c202",
+        "address": "0xC1245C5DCa7885C73E32294140F1e5d30688c202",
         "index": 0,
       },
     ],
@@ -173,7 +173,7 @@ exports[`EthereumSig > should create vote envelope 1`] = `
     "domain": {
       "chainId": 5,
       "name": "snapshot-x",
-      "verifyingContract": "0xc537d997ddc783e071f82ccbfaa0d768d310001b",
+      "verifyingContract": "0xc537d997dDc783E071F82CCBfAa0D768d310001b",
       "version": "1.0.0",
     },
     "message": {

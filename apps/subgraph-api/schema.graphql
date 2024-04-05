@@ -13,8 +13,8 @@ type Space @entity {
   strategies_params: [String!]!
   strategies_metadata: [String!]!
   strategies_parsed_metadata: [StrategiesParsedMetadata!]! @derivedFrom(field: "space")
-  authenticators: [Bytes!]!
-  validation_strategy: Bytes!
+  authenticators: [String!]!
+  validation_strategy: String!
   validation_strategy_params: String!
   voting_power_validation_strategy_strategies: [Bytes!]!
   voting_power_validation_strategy_strategies_params: [String!]!
