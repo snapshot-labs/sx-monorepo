@@ -45,7 +45,7 @@ function createStandardConfig(
   };
 }
 
-function createStarknetConfig(networkId: keyof typeof evmNetworks): EvmNetworkConfig {
+function createEvmConfig(networkId: keyof typeof evmNetworks): EvmNetworkConfig {
   const network = evmNetworks[networkId];
 
   const authenticators = {
@@ -94,6 +94,7 @@ function createStarknetConfig(networkId: keyof typeof evmNetworks): EvmNetworkCo
 export const evmNetworks = {
   eth: createStandardConfig(1),
   gor: createStandardConfig(5),
+  oeth: createStandardConfig(10),
   sep: createStandardConfig(11155111, {
     strategies: {
       Axiom: '0xaC6dbd42Ed254E9407fe0D2798784d0110979DC2',
@@ -130,9 +131,10 @@ export const evmNetworks = {
   }
 } as const;
 
-export const evmMainnet = createStarknetConfig('eth');
-export const evmGoerli = createStarknetConfig('gor');
-export const evmSepolia = createStarknetConfig('sep');
-export const evmPolygon = createStarknetConfig('matic');
-export const evmArbitrum = createStarknetConfig('arb1');
-export const evmLineaGoerli = createStarknetConfig('linea-testnet');
+export const evmMainnet = createEvmConfig('eth');
+export const evmGoerli = createEvmConfig('gor');
+export const evmSepolia = createEvmConfig('sep');
+export const evmOptimism = createEvmConfig('oeth');
+export const evmPolygon = createEvmConfig('matic');
+export const evmArbitrum = createEvmConfig('arb1');
+export const evmLineaGoerli = createEvmConfig('linea-testnet');
