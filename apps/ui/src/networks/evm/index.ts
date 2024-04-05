@@ -42,7 +42,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Optimism',
     chainId: 10,
     apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
-    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
+    avatar: 'ipfs://QmfF4kwhGL8QosUXvgq2KWCmavhKBvwD6kbhs7L4p5ZAWb',
     blockTime: 2
   },
   eth: {
