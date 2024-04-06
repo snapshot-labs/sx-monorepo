@@ -3,6 +3,7 @@ import {
   clients,
   evmPolygon,
   evmArbitrum,
+  evmOptimism,
   evmMainnet,
   evmGoerli,
   evmSepolia,
@@ -13,6 +14,7 @@ import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
 export const NETWORKS = new Map<number, EvmNetworkConfig>([
+  [10, evmOptimism],
   [137, evmPolygon],
   [42161, evmArbitrum],
   [1, evmMainnet],
