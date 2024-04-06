@@ -126,9 +126,9 @@ watch(
       @click="handlePick(asset)"
     >
       <div class="flex items-center min-w-0 pr-2">
-        <UiNetworkBadge :id="networkId">
+        <UiBadgeNetwork :id="networkId">
           <UiStamp :id="`${networkId}:${asset.contractAddress}`" type="token" :size="32" />
-        </UiNetworkBadge>
+        </UiBadgeNetwork>
         <div class="flex flex-col ml-3 leading-5 min-w-0">
           <div class="text-skin-link" v-text="shorten(asset.symbol, 'symbol')" />
           <div class="text-[17px] truncate" v-text="shorten(asset.name, 24)" />

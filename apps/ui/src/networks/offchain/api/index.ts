@@ -64,8 +64,10 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
 
   return {
     id: space.id,
-    controller: '',
     network: networkId,
+    verified: space.verified,
+    turbo: space.turbo,
+    controller: '',
     snapshot_chain_id: parseInt(space.network),
     name: space.name,
     avatar: '',
@@ -75,6 +77,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     github: space.github,
     twitter: space.twitter,
     discord: '',
+    coingecko: space.coingecko,
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
