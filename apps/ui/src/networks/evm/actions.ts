@@ -3,6 +3,7 @@ import { Contract } from '@ethersproject/contracts';
 import {
   clients,
   getEvmStrategy,
+  evmOptimism,
   evmArbitrum,
   evmPolygon,
   evmMainnet,
@@ -44,6 +45,7 @@ import type {
 import { getSwapLink } from '@/helpers/link';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
+  10: evmOptimism,
   137: evmPolygon,
   42161: evmArbitrum,
   1: evmMainnet,

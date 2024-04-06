@@ -5,16 +5,16 @@
       "startBlock": 18962278
     }
   },
-  "goerli": {
-    "ProxyFactory": {
-      "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
-      "startBlock": 9893638
-    }
-  },
   "sepolia": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
       "startBlock": 4519171
+    }
+  },
+  "optimism": {
+    "ProxyFactory": {
+      "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
+      "startBlock": 118359200
     }
   },
   "matic": {

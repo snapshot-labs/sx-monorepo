@@ -70,7 +70,7 @@ export function handleSpaceMetadata(content: Bytes): void {
     if (executionStrategies && executionStrategiesTypes) {
       spaceMetadata.executors = executionStrategies
         .toArray()
-        .map<Bytes>((strategy) => Bytes.fromByteArray(Bytes.fromHexString(strategy.toString())))
+        .map<string>((strategy) => toChecksumAddress(strategy.toString()))
       spaceMetadata.executors_types = executionStrategiesTypes
         .toArray()
         .map<string>((type) => type.toString())

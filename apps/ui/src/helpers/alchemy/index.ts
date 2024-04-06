@@ -8,6 +8,7 @@ const NETWORKS = {
   1: 'eth-mainnet',
   5: 'eth-goerli',
   11155111: 'eth-sepolia',
+  10: 'opt-mainnet',
   137: 'polygon-mainnet',
   42161: 'arb-mainnet'
 };
