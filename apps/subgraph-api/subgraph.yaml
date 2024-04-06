@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ProxyFactory
-    network: sepolia
+    network: optimism
     source:
       abi: ProxyFactory
       address: "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c"
-      startBlock: 4519171
+      startBlock: 118359200
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -31,7 +31,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: Space
-    network: sepolia
+    network: optimism
     source:
       abi: Space
     mapping:
@@ -81,7 +81,7 @@ templates:
       file: ./src/mapping.ts
   - kind: ethereum
     name: TimelockExecutionStrategy
-    network: sepolia
+    network: optimism
     source:
       abi: TimelockExecutionStrategy
     mapping:
@@ -111,7 +111,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: optimism
   - name: ProposalMetadata
     kind: file/ipfs
     mapping:
@@ -124,7 +124,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: optimism
   - name: StrategiesParsedMetadataData
     kind: file/ipfs
     mapping:
@@ -137,7 +137,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: optimism
   - name: VotingPowerValidationStrategyMetadata
     kind: file/ipfs
     mapping:
@@ -150,4 +150,4 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: optimism

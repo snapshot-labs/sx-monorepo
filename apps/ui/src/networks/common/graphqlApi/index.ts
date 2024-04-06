@@ -84,6 +84,8 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   return {
     ...space,
     network: networkId,
+    verified: false,
+    turbo: false,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
     cover: space.metadata.cover,
