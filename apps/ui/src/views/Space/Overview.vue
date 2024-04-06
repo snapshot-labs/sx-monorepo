@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import autolinker from 'autolinker';
 import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
@@ -102,7 +103,7 @@ watchEffect(() => setTitle(props.space.name));
         <div
           v-if="space.about"
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
-          v-text="space.about"
+          v-html="autolinker.link(space.about)"
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
