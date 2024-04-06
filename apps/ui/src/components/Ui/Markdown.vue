@@ -15,7 +15,7 @@ const remarkable = new Remarkable({
   linkTarget: '_blank'
 }).use(linkify);
 remarkable.core.ruler.disable(['abbr', 'abbr2', 'footnote_tail', 'replacements', 'smartquotes']);
-remarkable.block.ruler.disable(['code', 'deflist', 'fences', 'footnote', 'htmlblock', 'lheading']);
+remarkable.block.ruler.disable(['code', 'deflist', 'footnote', 'htmlblock', 'lheading']);
 remarkable.inline.ruler.disable([
   'autolink',
   'del',
@@ -226,6 +226,14 @@ const parsed = computed(() => {
 
   table img {
     background-color: transparent;
+  }
+
+  pre {
+    @apply m-0 mb-3 p-3 rounded-lg bg-skin-border text-base overflow-auto;
+
+    code {
+      @apply p-0 m-0 bg-transparent border-none;
+    }
   }
 }
 </style>
