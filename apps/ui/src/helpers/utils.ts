@@ -139,12 +139,16 @@ export function getCurrentName(currentUnit: 'block' | 'second') {
   return 'seconds';
 }
 
-export function _c(value: string | bigint, decimals = 18) {
+export function _c(
+  value: string | bigint,
+  notation: 'standard' | 'compact' = 'standard',
+  decimals = 18
+) {
   const raw = BigInt(value);
   const parsed = Number(raw) / 10 ** decimals;
   if (raw !== 0n && parsed < 0.001) return `~0`;
 
-  const formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
+  const formatter = new Intl.NumberFormat('en', { notation, maximumFractionDigits: 3 });
   return formatter.format(parsed);
 }
 

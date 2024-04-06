@@ -273,7 +273,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               <h4
                 class="text-skin-link truncate"
                 v-text="
-                  `${_c(asset.tokenBalance || 0n, asset.decimals || 0)} ${shorten(
+                  `${_c(asset.tokenBalance || 0n, 'compact', asset.decimals || 0)} ${shorten(
                     asset.symbol,
                     'symbol'
                   )}`
