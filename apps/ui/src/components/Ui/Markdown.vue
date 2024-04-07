@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import hljs from 'highlight.js';
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
-import hljs from 'highlight.js';
 import { icons } from '@iconify-json/heroicons-outline';
 import { linkify } from 'remarkable/linkify';
 import { getUrl } from '@/helpers/utils';
