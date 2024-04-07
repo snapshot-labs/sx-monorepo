@@ -9,6 +9,9 @@ const props = defineProps<{
   body: string;
 }>();
 
+const uiStore = useUiStore();
+const { copy } = useClipboard();
+
 const remarkable = new Remarkable({
   html: false,
   breaks: true,
@@ -49,6 +52,32 @@ const parsed = computed(() => {
   const formattedBody = props.body.replace(/ipfs:\/\/(\w+)/g, value => getUrl(value) || '#');
 
   return remarkable.render(formattedBody);
+});
+
+onMounted(() => {
+  const body = document.querySelector('.markdown-body');
+  if (body !== null) {
+    body.querySelectorAll('pre>code').forEach(function (code) {
+      const parent = code.parentElement;
+      const copyButton = document.createElement('button');
+      const icon = document.createElement('i');
+
+      copyButton.classList.add('copy');
+      copyButton.setAttribute('type', 'button');
+      copyButton.appendChild(icon);
+      copyButton.innerHTML =
+        '<svg viewBox="0 0 24 24" width="20px" height="20px"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2"></path></svg>';
+
+      copyButton.addEventListener('click', function () {
+        if (parent !== null) {
+          copy(parent.innerText.trim());
+          uiStore.addNotification('success', 'Code copied');
+        }
+      });
+
+      code.prepend(copyButton);
+    });
+  }
 });
 </script>
 
@@ -249,10 +278,14 @@ html.dark {
   }
 
   pre {
-    @apply m-0 mb-3 p-3 rounded-lg bg-skin-border text-base overflow-auto;
+    @apply m-0 mb-3 p-3 rounded-lg bg-skin-border text-base overflow-auto relative;
 
     code {
       @apply p-0 m-0 bg-transparent border-none;
+    }
+
+    .copy {
+      @apply absolute right-2.5 top-2.5 text-skin-text bg-skin-border rounded p-1;
     }
   }
 }
