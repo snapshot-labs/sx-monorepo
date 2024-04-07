@@ -51,7 +51,8 @@ const error = computed(() => props.votingPowerStatus === 'error');
             v-text="network.constants.STRATEGIES[strategy.address] || strategy.address"
           />
           <div class="text-skin-link">
-            {{ _n(Number(strategy.value) / 10 ** finalDecimals) }} {{ votingPowerSymbol }}
+            {{ _n(Number(strategy.value) / 10 ** finalDecimals, 'compact') }}
+            {{ votingPowerSymbol }}
           </div>
         </div>
         <div class="flex justify-between">
