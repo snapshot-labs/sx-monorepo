@@ -7,6 +7,7 @@ const props = defineProps<{ proposal: ProposalType }>();
 const { getTsFromCurrent } = useMetaStore();
 const route = useRoute();
 const { vote } = useActions();
+const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 const sendingType = ref<Choice | null>(null);
 
@@ -35,10 +36,17 @@ async function handleVoteClick(choice: Choice) {
           class="space-x-2 flex"
         >
           <ProposalIconStatus width="17" height="17" :state="proposal.state" class="top-[7.5px]" />
-          <h3
-            class="leading-6 my-1 text-[21px] md:truncate md:text-ellipsis"
-            v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
-          />
+
+          <div class="md:flex md:min-w-0 my-1 items-center leading-6">
+            <h3
+              class="text-[21px] md:truncate md:text-ellipsis inline mr-2"
+              v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
+            />
+            <IH-check
+              v-if="votes[`${proposal.network}:${proposal.id}`]"
+              class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-[1px]"
+            />
+          </div>
         </router-link>
         <div class="inline">
           {{ getProposalId(proposal) }}
