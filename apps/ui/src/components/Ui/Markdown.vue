@@ -61,11 +61,9 @@ onMounted(() => {
     body.querySelectorAll('pre>code').forEach(function (code) {
       const parent = code.parentElement;
       const copyButton = document.createElement('button');
-      const icon = document.createElement('i');
 
       copyButton.classList.add('copy');
       copyButton.setAttribute('type', 'button');
-      copyButton.appendChild(icon);
       copyButton.innerHTML = `<svg viewBox="0 0 24 24" width="20px" height="20px">${icons.icons.duplicate.body}</svg>`;
 
       copyButton.addEventListener('click', function () {
