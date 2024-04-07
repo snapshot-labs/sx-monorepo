@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
+import hljs from 'highlight.js';
 import { linkify } from 'remarkable/linkify';
 import { getUrl } from '@/helpers/utils';
 
@@ -12,7 +13,20 @@ const remarkable = new Remarkable({
   html: false,
   breaks: true,
   typographer: false,
-  linkTarget: '_blank'
+  linkTarget: '_blank',
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(lang, str).value;
+      } catch (err) {}
+    }
+
+    try {
+      return hljs.highlightAuto(str).value;
+    } catch (err) {}
+
+    return '';
+  }
 }).use(linkify);
 remarkable.core.ruler.disable(['abbr', 'abbr2', 'footnote_tail', 'replacements', 'smartquotes']);
 remarkable.block.ruler.disable(['code', 'deflist', 'footnote', 'htmlblock', 'lheading']);
@@ -43,6 +57,12 @@ const parsed = computed(() => {
 </template>
 
 <style lang="scss">
+@import 'highlight.js/scss/github.scss';
+
+html.dark {
+  @import 'highlight.js/scss/github-dark-dimmed.scss';
+}
+
 .markdown-body {
   font-size: 22px;
   line-height: 1.3;
