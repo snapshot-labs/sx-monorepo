@@ -71,7 +71,9 @@ export const useSpacesStore = defineStore('spaces', () => {
     async (currentIds, previousIds) => {
       const newIds = !previousIds
         ? currentIds
-        : currentIds.filter((id: string) => !previousIds.includes(id));
+        : currentIds.filter(
+            (id: string) => !previousIds.includes(id) && !starredSpacesMap.value.has(id)
+          );
 
       const spaces = await getSpaces({
         id_in: newIds
