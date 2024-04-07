@@ -10,7 +10,7 @@ const spacesStore = useSpacesStore();
     <router-link :to="{ name: 'home' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
-    <UiLoading v-if="spacesStore.starredSpacesLoading" />
+    <UiLoading v-if="!spacesStore.starredSpacesLoaded" />
     <draggable
       v-else
       v-model="spacesStore.starredSpaces"
