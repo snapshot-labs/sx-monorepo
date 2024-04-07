@@ -18,6 +18,7 @@ const spacesStore = useSpacesStore();
       :delay-on-touch-only="true"
       :touch-start-threshold="35"
       :item-key="i => i"
+      v-bind="{ animation: 200 }"
       class="space-y-3 p-2"
     >
       <template #item="{ element }">
