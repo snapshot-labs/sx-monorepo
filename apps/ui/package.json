@@ -52,7 +52,7 @@
     "@walletconnect/web3wallet": "^1.10.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
-    "autolinker": "^4.0.0",
+    "autolinker": "^3.11.0",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.10",
     "electron": "^26.2.3",
