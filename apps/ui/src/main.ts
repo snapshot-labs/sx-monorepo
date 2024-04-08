@@ -34,4 +34,5 @@ const app = createApp({ render: () => h(App) })
 app.use(pinia);
 
 app.mount('#app');
+
 export default app;
