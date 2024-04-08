@@ -75,12 +75,21 @@ export const useSpacesStore = defineStore('spaces', () => {
             (id: string) => !previousIds.includes(id) && !starredSpacesMap.value.has(id)
           );
 
-      const spaces = await getSpaces({
-        id_in: newIds
-      });
-      starredSpacesLoaded.value = true;
+      if (!newIds.length) {
+        starredSpacesLoaded.value = true;
+        return;
+      }
 
-      starredSpacesData.value = [...starredSpacesData.value, ...spaces];
+      const spaces = await getSpaces({
+        id_in: newIds.filter(id => !spacesMap.value.has(id))
+      });
+
+      starredSpacesLoaded.value = true;
+      starredSpacesData.value = [
+        ...starredSpacesData.value,
+        ...spaces,
+        ...newIds.map(id => spacesMap.value.get(id)).filter(s => !!s)
+      ];
     },
     { immediate: true }
   );
