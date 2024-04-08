@@ -88,7 +88,7 @@ export const useSpacesStore = defineStore('spaces', () => {
       starredSpacesData.value = [
         ...starredSpacesData.value,
         ...spaces,
-        ...newIds.map(id => spacesMap.value.get(id)).filter(s => !!s)
+        ...(newIds.map(id => spacesMap.value.get(id)).filter(s => !!s) as Space[])
       ];
     },
     { immediate: true }
