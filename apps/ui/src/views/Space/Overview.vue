@@ -103,7 +103,7 @@ watchEffect(() => setTitle(props.space.name));
         <div
           v-if="space.about"
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
-          v-html="autolinker.link(space.about)"
+          v-html="autolinker.link(space.about, { sanitizeHtml: true })"
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
