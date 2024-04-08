@@ -83,6 +83,10 @@ async function handleVoteClick(choice: Choice) {
 
   try {
     await vote(proposal.value, choice);
+    // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+    if (offchainNetworks.includes(proposal.value.network)) {
+      proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
+    }
   } finally {
     sendingType.value = null;
   }
