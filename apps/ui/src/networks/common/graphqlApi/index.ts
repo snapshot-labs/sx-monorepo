@@ -305,7 +305,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
           first: limit,
           skip,
           where: {
-            space_in: [spaceIds],
+            space_in: spaceIds,
             cancelled: false,
             metadata_: { title_contains_nocase: searchQuery },
             ...filters
