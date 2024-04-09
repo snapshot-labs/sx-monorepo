@@ -18,6 +18,7 @@ import Settings from '@/views/Settings.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import Explore from '@/views/Explore.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
+import SettingsFollowings from '@/views/Settings/Followings.vue';
 import Apps from '@/views/Apps.vue';
 import App from '@/views/App.vue';
 
@@ -61,6 +62,7 @@ const routes: any[] = [
     component: Settings,
     children: [
       { path: '', name: 'settings-spaces', component: SettingsSpaces },
+      { path: 'followings', name: 'settings-followings', component: SettingsFollowings },
       { path: 'contacts', name: 'settings-contacts', component: Contacts }
     ]
   },

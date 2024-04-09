@@ -63,6 +63,10 @@ const navigationConfig = computed(() => ({
       : undefined)
   },
   settings: {
+    followings: {
+      name: 'Followings',
+      icon: IHNewspaper
+    },
     spaces: {
       name: 'My spaces',
       icon: IHStop
