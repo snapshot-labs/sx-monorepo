@@ -36,7 +36,6 @@ const results = computed(() => {
 
       return {
         choice: i + 1,
-        score,
         progress,
         adjustedProgress: progress * totalProgress.value
       };
@@ -129,7 +128,7 @@ const results = computed(() => {
           :title="labels[result.choice - 1]"
           class="choice-bg float-left h-full"
           :style="{
-            width: `${result.progress.toFixed(3)}%`
+            width: `${result.adjustedProgress.toFixed(3)}%`
           }"
           :class="`_${result.choice}`"
         />
