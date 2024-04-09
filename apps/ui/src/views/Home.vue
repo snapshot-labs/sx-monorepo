@@ -5,7 +5,6 @@ import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
-
 const SOCIALS = [
   {
     href: 'https://twitter.com/SnapshotLabs',
@@ -20,6 +19,18 @@ const SOCIALS = [
     icon: ICGithub
   }
 ];
+
+const router = useRouter();
+const { web3 } = useWeb3();
+
+watch(
+  () => web3.value.account,
+  value => {
+    if (!value) return;
+
+    router.push('/settings/followings');
+  }
+);
 </script>
 
 <template>
