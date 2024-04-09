@@ -16,7 +16,7 @@ type Space @entity {
   authenticators: [String!]!
   validation_strategy: String!
   validation_strategy_params: String!
-  voting_power_validation_strategy_strategies: [Bytes!]!
+  voting_power_validation_strategy_strategies: [String!]!
   voting_power_validation_strategy_strategies_params: [String!]!
   voting_power_validation_strategy_metadata: String!
   voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadata!]!
