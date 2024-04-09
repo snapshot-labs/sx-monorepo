@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-import { getNetwork } from '@/networks';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
 
 const PROPOSALS_LIMIT = 20;
-// TODO: Handle multiple networks
-const NETWORK_ID = 's';
 
 useTitle('Followings');
 
@@ -25,7 +23,12 @@ const selectIconBaseProps = {
   height: 16
 };
 
-const network = computed(() => getNetwork(NETWORK_ID));
+const networkId = computed(
+  () => offchainNetworks.filter(network => enabledNetworks.includes(network))[0]
+);
+
+// TODO: Support multiple networks
+const network = computed(() => getNetwork(networkId.value));
 
 async function handleEndReached() {
   if (hasMore.value) fetchMore();
@@ -35,7 +38,7 @@ async function loadProposals(skip = 0) {
   return network.value.api.loadProposals(
     followedSpaceIds.value,
     { limit: PROPOSALS_LIMIT, skip },
-    metaStore.getCurrent(NETWORK_ID) || 0,
+    metaStore.getCurrent(networkId.value) || 0,
     filter.value
   );
 }
@@ -62,9 +65,9 @@ watch(
   () => web3.value.account,
   async value => {
     if (value) {
-      await metaStore.fetchBlock(NETWORK_ID);
+      await metaStore.fetchBlock(networkId.value);
 
-      const user = await getNetwork(NETWORK_ID).api.loadUser(value);
+      const user = await getNetwork(networkId.value).api.loadUser(value);
       followedSpaceIds.value = user?.follows || [];
 
       if (followedSpaceIds.value.length) {
