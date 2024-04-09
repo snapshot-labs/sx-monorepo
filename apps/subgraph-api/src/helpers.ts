@@ -85,7 +85,7 @@ export function updateProposalValidationStrategy(
       space.proposal_threshold = new BigDecimal(getProposalValidationThreshold(params))
       space.voting_power_validation_strategy_strategies = getProposalValidationStrategies(
         params
-      ).map<Bytes>((strategy) => strategy)
+      ).map<string>((strategy) => toChecksumAddress(strategy.toHexString()))
       space.voting_power_validation_strategy_strategies_params =
         getProposalValidationStrategiesParams(params).map<string>((params) => params.toHexString())
     } else {
