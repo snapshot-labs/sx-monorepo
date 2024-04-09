@@ -183,7 +183,7 @@ export type NetworkApi = {
   ): Promise<Vote[]>;
   loadUserVotes(spaceId: string, voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
-    spaceId: string,
+    spaceIds: string[],
     paginationOpts: PaginationOpts,
     current: number,
     filter?: 'any' | 'active' | 'pending' | 'closed',

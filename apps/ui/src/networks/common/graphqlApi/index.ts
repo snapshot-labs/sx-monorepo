@@ -283,7 +283,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       );
     },
     loadProposals: async (
-      spaceId: string,
+      spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
       filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
@@ -305,7 +305,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
           first: limit,
           skip,
           where: {
-            space: spaceId,
+            space_in: [spaceIds],
             cancelled: false,
             metadata_: { title_contains_nocase: searchQuery },
             ...filters

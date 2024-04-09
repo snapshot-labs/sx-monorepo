@@ -140,6 +140,16 @@ export const USER_VOTES_QUERY = gql`
   }
 `;
 
+export const USER_FOLLOWS_QUERY = gql`
+  query ($follower: String!) {
+    follows(where: { follower: $follower }) {
+      space {
+        id
+      }
+    }
+  }
+`;
+
 export const VOTES_QUERY = gql`
   query (
     $first: Int!

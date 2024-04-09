@@ -188,6 +188,7 @@ export type User = {
   proposal_count: number;
   vote_count: number;
   created: number;
+  follows?: string[];
 };
 
 export type Contact = {

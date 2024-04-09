@@ -5,6 +5,7 @@ import {
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
   USER_VOTES_QUERY,
+  USER_FOLLOWS_QUERY,
   VOTES_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
@@ -265,7 +266,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       );
     },
     loadProposals: async (
-      spaceId: string,
+      spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
       filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
@@ -287,7 +288,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
           first: limit,
           skip,
           where: {
-            space: spaceId,
+            space_in: spaceIds,
             title_contains: searchQuery,
             flagged: false,
             ...filters
@@ -336,12 +337,23 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       return formatSpace(data.space, networkId);
     },
     loadUser: async (id: string): Promise<User | null> => {
+      const {
+        data: { follows }
+      }: { data: { follows: { space: { id: string } }[] } } = await apollo.query({
+        query: USER_FOLLOWS_QUERY,
+        variables: {
+          first: 25,
+          follower: id
+        }
+      });
+
       // NOTE: missing proposal/vote count on offchain
       return {
         id,
         proposal_count: 0,
         vote_count: 0,
-        created: 0
+        created: 0,
+        follows: follows.map(follow => follow.space.id)
       };
     }
   };

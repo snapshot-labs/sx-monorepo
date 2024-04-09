@@ -22,7 +22,7 @@ async function fetch() {
   loaded.value = false;
 
   proposals.value = await network.value.api.loadProposals(
-    props.space.id,
+    [props.space.id],
     {
       limit: PROPOSALS_LIMIT
     },
@@ -39,7 +39,7 @@ async function fetchMore() {
   loadingMore.value = true;
 
   const moreProposals = await network.value.api.loadProposals(
-    props.space.id,
+    [props.space.id],
     {
       limit: PROPOSALS_LIMIT,
       skip: proposals.value.length
