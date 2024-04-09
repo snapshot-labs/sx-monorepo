@@ -30,7 +30,7 @@ async function handleVoteClick(choice: Choice) {
             name: 'proposal-overview',
             params: {
               id: proposal.proposal_id,
-              space: `${route.params.id}`
+              space: `${proposal.network}:${proposal.space.id}`
             }
           }"
           class="space-x-2 flex"

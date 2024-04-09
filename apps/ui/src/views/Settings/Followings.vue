@@ -4,7 +4,7 @@ import { getNetwork } from '@/networks';
 import { Proposal } from '@/types';
 
 const PROPOSALS_LIMIT = 20;
-// TODO: Handle more networks dynamically
+// TODO: Handle multiple networks
 const NETWORK_ID = 's';
 
 useTitle('Followings');
@@ -28,12 +28,9 @@ const selectIconBaseProps = {
 const network = computed(() => getNetwork(NETWORK_ID));
 
 async function handleEndReached() {
-  if (!hasMore.value) return;
-
-  fetchMore();
+  if (hasMore.value) fetchMore();
 }
 
-// TODO: Inject space to each proposals
 async function loadProposals(skip = 0) {
   return network.value.api.loadProposals(
     followedSpaceIds.value,
@@ -45,9 +42,7 @@ async function loadProposals(skip = 0) {
 
 async function fetch() {
   loaded.value = false;
-
   proposals.value = await loadProposals();
-
   hasMore.value = proposals.value.length === PROPOSALS_LIMIT;
   loaded.value = true;
 }
