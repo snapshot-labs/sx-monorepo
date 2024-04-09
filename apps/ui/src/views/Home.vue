@@ -25,11 +25,8 @@ const { web3 } = useWeb3();
 
 watch(
   () => web3.value.account,
-  value => {
-    if (!value) return;
-
-    router.push('/settings/followings');
-  }
+  value => value && router.push({ name: 'settings-followings' }),
+  { immediate: true }
 );
 </script>
 
