@@ -22,12 +22,12 @@ const remarkable = new Remarkable({
     if (lang && hljs.getLanguage(lang)) {
       try {
         return hljs.highlight(str, { language: lang }).value;
-      } catch (err) {}
+      } catch (e) {}
     }
 
     try {
       return hljs.highlightAuto(str).value;
-    } catch (err) {}
+    } catch (e) {}
 
     return '';
   }
