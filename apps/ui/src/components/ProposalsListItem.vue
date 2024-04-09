@@ -5,7 +5,6 @@ import type { Proposal as ProposalType, Choice } from '@/types';
 const props = defineProps<{ proposal: ProposalType }>();
 
 const { getTsFromCurrent } = useMetaStore();
-const route = useRoute();
 const { vote } = useActions();
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);

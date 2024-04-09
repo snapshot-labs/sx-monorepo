@@ -62,7 +62,7 @@ const routes: any[] = [
     component: Settings,
     children: [
       { path: '', name: 'settings-spaces', component: SettingsSpaces },
-      { path: 'followings', name: 'settings-followings', component: SettingsFollowings },
+      { path: 'home', name: 'settings-followings', component: SettingsFollowings },
       { path: 'contacts', name: 'settings-contacts', component: Contacts }
     ]
   },
