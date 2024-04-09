@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { startIntercom } from './helpers/intercom';
+
 const el = ref(null);
 
 const route = useRoute();
@@ -32,6 +34,7 @@ function handleTransactionReject() {
 }
 
 onMounted(async () => {
+  startIntercom();
   uiStore.restorePendingTransactions();
   await init();
 });

@@ -73,10 +73,10 @@ export function updateProposalValidationStrategy(
   metadataUri: string,
   blockNumber: BigInt
 ): void {
-  space.validation_strategy = validationStrategyAddress
+  space.validation_strategy = toChecksumAddress(validationStrategyAddress.toHexString())
   space.validation_strategy_params = validationStrategyParams.toHexString()
 
-  if (space.validation_strategy.equals(VOTING_POWER_VALIDATION_STRATEGY)) {
+  if (validationStrategyAddress.equals(VOTING_POWER_VALIDATION_STRATEGY)) {
     space.voting_power_validation_strategy_metadata = metadataUri
 
     let params = decodeProposalValidationParams(validationStrategyParams)
@@ -85,7 +85,7 @@ export function updateProposalValidationStrategy(
       space.proposal_threshold = new BigDecimal(getProposalValidationThreshold(params))
       space.voting_power_validation_strategy_strategies = getProposalValidationStrategies(
         params
-      ).map<Bytes>((strategy) => strategy)
+      ).map<string>((strategy) => toChecksumAddress(strategy.toHexString()))
       space.voting_power_validation_strategy_strategies_params =
         getProposalValidationStrategiesParams(params).map<string>((params) => params.toHexString())
     } else {
