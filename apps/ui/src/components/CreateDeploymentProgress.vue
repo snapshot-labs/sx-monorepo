@@ -231,7 +231,7 @@ onMounted(() => deploy());
       <router-link
         :to="{
           name: 'space-overview',
-          params: { id: `${networkId}:${predictedSpaceAddress?.toLowerCase()}` }
+          params: { id: `${networkId}:${predictedSpaceAddress}` }
         }"
         text="here"
       />.
