@@ -342,16 +342,6 @@ export function useActions() {
     await wrapPromise(proposal.network, network.actions.finalizeProposal(auth.web3, proposal));
   }
 
-  async function receiveProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
-
-    const network = getReadWriteNetwork(proposal.network);
-    if (!network.hasReceive) throw new Error('Receive on this network is not supported');
-
-    await wrapPromise('gor', network.actions.receiveProposal(auth.web3, proposal));
-  }
-
   async function executeTransactions(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
@@ -505,7 +495,6 @@ export function useActions() {
     updateProposal: wrapWithErrors(updateProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
     finalizeProposal: wrapWithErrors(finalizeProposal),
-    receiveProposal: wrapWithErrors(receiveProposal),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
     vetoProposal: wrapWithErrors(vetoProposal),

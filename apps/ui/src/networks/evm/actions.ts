@@ -394,8 +394,14 @@ export function createActions(
         { noWait: isContract }
       );
     },
-    finalizeProposal: () => null,
-    receiveProposal: () => null,
+    finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
+      await executionCall(chainId, 'finalizeProposal', {
+        space: proposal.space.id,
+        proposalId: proposal.proposal_id
+      });
+
+      return null;
+    },
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
