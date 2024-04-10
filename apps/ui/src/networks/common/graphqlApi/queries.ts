@@ -126,6 +126,7 @@ const PROPOSAL_FRAGMENT = gql`
     execution_tx
     veto_tx
     vote_count
+    execution_ready
     executed
     vetoed
     completed

@@ -176,6 +176,7 @@ export type Proposal = {
   veto_tx: string | null;
   vote_count: number;
   has_execution_window_opened: boolean;
+  execution_ready: boolean;
   vetoed: boolean;
   completed: boolean;
   cancelled: boolean;

@@ -99,7 +99,7 @@ async function handleVetoProposalClick() {
     </div>
     <template v-else>
       <UiButton
-        v-if="proposal.execution_strategy_type === 'Axiom'"
+        v-if="proposal.execution_strategy_type === 'Axiom' && !proposal.execution_ready"
         class="mb-2 w-full flex justify-center items-center"
         :loading="finalizeProposalSending"
         @click="handleFinalizeProposalClick"

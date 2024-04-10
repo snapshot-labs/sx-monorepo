@@ -117,6 +117,7 @@ type Proposal @entity {
   execution_tx: Bytes
   veto_tx: Bytes
   vote_count: Int!
+  execution_ready: Boolean!
   executed: Boolean!
   vetoed: Boolean!
   completed: Boolean!
