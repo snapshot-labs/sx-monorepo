@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import hljs from 'highlight.js';
+import hljs from 'highlight.js/lib/common';
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
 import { icons } from '@iconify-json/heroicons-outline';
