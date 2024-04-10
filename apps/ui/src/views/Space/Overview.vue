@@ -48,6 +48,14 @@ const socials = computed(() =>
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
 
+const autolinkedAbout = computed(() =>
+  autolinker.link(props.space.about || '', {
+    sanitizeHtml: true,
+    phone: false,
+    replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
+  })
+);
+
 watchEffect(() => setTitle(props.space.name));
 </script>
 
@@ -103,7 +111,7 @@ watchEffect(() => setTitle(props.space.name));
         <div
           v-if="space.about"
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
-          v-html="autolinker.link(space.about, { sanitizeHtml: true })"
+          v-html="autolinkedAbout"
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
