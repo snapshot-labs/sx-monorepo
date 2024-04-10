@@ -8,6 +8,7 @@ export const useSpacesStore = defineStore('spaces', () => {
   const { mixpanel } = useMixpanel();
   const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
   const starredSpacesData = ref([] as Space[]);
+  const starredSpacesLoaded = ref(false);
 
   const {
     loading,
@@ -70,13 +71,25 @@ export const useSpacesStore = defineStore('spaces', () => {
     async (currentIds, previousIds) => {
       const newIds = !previousIds
         ? currentIds
-        : currentIds.filter((id: string) => !previousIds.includes(id));
+        : currentIds.filter(
+            (id: string) => !previousIds.includes(id) && !starredSpacesMap.value.has(id)
+          );
+
+      if (!newIds.length) {
+        starredSpacesLoaded.value = true;
+        return;
+      }
 
       const spaces = await getSpaces({
-        id_in: newIds
+        id_in: newIds.filter(id => !spacesMap.value.has(id))
       });
 
-      starredSpacesData.value = [...starredSpacesData.value, ...spaces];
+      starredSpacesLoaded.value = true;
+      starredSpacesData.value = [
+        ...starredSpacesData.value,
+        ...spaces,
+        ...(newIds.map(id => spacesMap.value.get(id)).filter(s => !!s) as Space[])
+      ];
     },
     { immediate: true }
   );
@@ -84,6 +97,7 @@ export const useSpacesStore = defineStore('spaces', () => {
   return {
     starredSpacesIds,
     starredSpaces,
+    starredSpacesLoaded,
     loading,
     loaded,
     networksMap,
