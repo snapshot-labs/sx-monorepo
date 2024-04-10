@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import hljs from 'highlight.js/lib/common';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import rust from 'highlight.js/lib/languages/rust';
+import python from 'highlight.js/lib/languages/python';
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
 import { icons } from '@iconify-json/heroicons-outline';
 import { linkify } from 'remarkable/linkify';
 import { getUrl } from '@/helpers/utils';
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('rust', rust);
+hljs.registerLanguage('python', python);
 
 const props = defineProps<{
   body: string;
