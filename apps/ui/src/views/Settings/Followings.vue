@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
+import { getNames } from '@/helpers/stamp';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
 
@@ -30,16 +31,28 @@ const networkId = computed(
 // TODO: Support multiple networks
 const network = computed(() => getNetwork(networkId.value));
 
+async function withAuthorNames(proposals: Proposal[]) {
+  const names = await getNames(proposals.map(proposal => proposal.author.id));
+
+  return proposals.map(proposal => {
+    proposal.author.name = names[proposal.author.id];
+
+    return proposal;
+  });
+}
+
 async function handleEndReached() {
   if (hasMore.value) fetchMore();
 }
 
 async function loadProposals(skip = 0) {
-  return network.value.api.loadProposals(
-    followedSpaceIds.value,
-    { limit: PROPOSALS_LIMIT, skip },
-    metaStore.getCurrent(networkId.value) || 0,
-    filter.value
+  return withAuthorNames(
+    await network.value.api.loadProposals(
+      followedSpaceIds.value,
+      { limit: PROPOSALS_LIMIT, skip },
+      metaStore.getCurrent(networkId.value) || 0,
+      filter.value
+    )
   );
 }
 
