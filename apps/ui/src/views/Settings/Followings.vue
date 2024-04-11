@@ -7,7 +7,7 @@ const PROPOSALS_LIMIT = 20;
 
 useTitle('Followings');
 
-const { web3 } = useWeb3();
+const { web3, authInitiated } = useWeb3();
 const metaStore = useMetaStore();
 
 const loaded = ref(false);
@@ -60,30 +60,28 @@ async function fetchMore() {
   loadingMore.value = false;
 }
 
-// TODO: Avoid "no proposals" message flashing when user is not logged in yet
 watch(
-  () => web3.value.account,
-  async value => {
-    if (value) {
-      await metaStore.fetchBlock(networkId.value);
+  [() => web3.value.account, () => web3.value.authLoading, authInitiated],
+  async ([account, authLoading, authInitiated]) => {
+    if (!authInitiated || authLoading) return;
 
-      const user = await getNetwork(networkId.value).api.loadUser(value);
-      followedSpaceIds.value = user?.follows || [];
-
-      if (followedSpaceIds.value.length) {
-        fetch();
-      }
+    if (!account) {
+      loaded.value = true;
+      return;
     }
 
-    loaded.value = true;
+    await metaStore.fetchBlock(networkId.value);
+
+    const user = await getNetwork(networkId.value).api.loadUser(account);
+    followedSpaceIds.value = user?.follows || [];
+
+    if (followedSpaceIds.value.length) fetch();
   },
   { immediate: true }
 );
 
 watch(filter, (toFilter, fromFilter) => {
-  if (toFilter !== fromFilter && web3.value.account) {
-    fetch();
-  }
+  if (toFilter !== fromFilter && web3.value.account) fetch();
 });
 </script>
 

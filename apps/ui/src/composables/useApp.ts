@@ -5,7 +5,7 @@ const state = reactive({
   loading: false
 });
 
-const { login } = useWeb3();
+const { login, initiateAuth } = useWeb3();
 
 export function useApp() {
   async function init() {
@@ -14,9 +14,7 @@ export function useApp() {
 
     // Auto connect with gnosis-connector when inside gnosis-safe iframe
     if (window?.parent === window)
-      auth.getConnector().then(connector => {
-        if (connector) login(connector);
-      });
+      auth.getConnector().then(connector => (connector ? login(connector) : initiateAuth()));
     else login('gnosis');
 
     state.init = true;
