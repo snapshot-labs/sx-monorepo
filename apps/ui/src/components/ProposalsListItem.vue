@@ -24,32 +24,57 @@ async function handleVoteClick(choice: Choice) {
   <div>
     <div class="border-b mx-4 py-[14px] flex">
       <div class="flex-auto mr-4 w-0">
-        <router-link
-          :to="{
-            name: 'proposal-overview',
-            params: {
-              id: proposal.proposal_id,
-              space: `${proposal.network}:${proposal.space.id}`
-            }
-          }"
-          class="space-x-2 flex"
-        >
-          <ProposalIconStatus width="17" height="17" :state="proposal.state" class="top-[7.5px]" />
+        <div class="space-x-2 flex">
+          <router-link
+            :to="{
+              name: 'proposal-overview',
+              params: {
+                id: proposal.proposal_id,
+                space: `${proposal.network}:${proposal.space.id}`
+              }
+            }"
+          >
+            <ProposalIconStatus
+              width="17"
+              height="17"
+              :state="proposal.state"
+              class="top-[7.5px]"
+            />
+          </router-link>
 
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
-            <div class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0">
+            <router-link
+              :to="{
+                name: 'space-overview',
+                params: {
+                  id: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0"
+            >
               {{ proposal.space.name }}
-            </div>
-            <h3
-              class="text-[21px] md:truncate md:text-ellipsis inline mr-2"
-              v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
-            />
-            <IH-check
-              v-if="votes[`${proposal.network}:${proposal.id}`]"
-              class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-[1px]"
-            />
+            </router-link>
+
+            <router-link
+              :to="{
+                name: 'proposal-overview',
+                params: {
+                  id: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+            >
+              <h3
+                class="text-[21px] md:truncate md:text-ellipsis inline mr-2"
+                v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
+              />
+              <IH-check
+                v-if="votes[`${proposal.network}:${proposal.id}`]"
+                class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-[1px]"
+              />
+            </router-link>
           </div>
-        </router-link>
+        </div>
         <div class="inline">
           {{ getProposalId(proposal) }}
           by
