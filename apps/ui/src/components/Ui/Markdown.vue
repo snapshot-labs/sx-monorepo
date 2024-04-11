@@ -1,21 +1,48 @@
 <script setup lang="ts">
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import rust from 'highlight.js/lib/languages/rust';
+import python from 'highlight.js/lib/languages/python';
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
+import { icons } from '@iconify-json/heroicons-outline';
 import { linkify } from 'remarkable/linkify';
 import { getUrl } from '@/helpers/utils';
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('rust', rust);
+hljs.registerLanguage('python', python);
 
 const props = defineProps<{
   body: string;
 }>();
 
+const uiStore = useUiStore();
+const { copy } = useClipboard();
+
 const remarkable = new Remarkable({
   html: false,
   breaks: true,
   typographer: false,
-  linkTarget: '_blank'
+  linkTarget: '_blank',
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(str, { language: lang }).value;
+      } catch (e) {}
+    }
+
+    try {
+      return hljs.highlightAuto(str).value;
+    } catch (e) {}
+
+    return '';
+  }
 }).use(linkify);
 remarkable.core.ruler.disable(['abbr', 'abbr2', 'footnote_tail', 'replacements', 'smartquotes']);
-remarkable.block.ruler.disable(['code', 'deflist', 'fences', 'footnote', 'htmlblock', 'lheading']);
+remarkable.block.ruler.disable(['code', 'deflist', 'footnote', 'htmlblock', 'lheading']);
 remarkable.inline.ruler.disable([
   'autolink',
   'del',
@@ -36,6 +63,30 @@ const parsed = computed(() => {
 
   return remarkable.render(formattedBody);
 });
+
+onMounted(() => {
+  const body = document.querySelector('.markdown-body');
+
+  if (!body) return;
+
+  body.querySelectorAll('pre>code').forEach(code => {
+    const parent = code.parentElement;
+    const copyButton = document.createElement('button');
+
+    copyButton.classList.add('copy');
+    copyButton.setAttribute('type', 'button');
+    copyButton.innerHTML = `<svg viewBox="0 0 24 24" width="20px" height="20px">${icons.icons.duplicate.body}</svg>`;
+
+    copyButton.addEventListener('click', () => {
+      if (parent !== null) {
+        copy(parent.innerText.trim());
+        uiStore.addNotification('success', 'Code copied');
+      }
+    });
+
+    code.prepend(copyButton);
+  });
+});
 </script>
 
 <template>
@@ -43,6 +94,12 @@ const parsed = computed(() => {
 </template>
 
 <style lang="scss">
+@import 'highlight.js/scss/github.scss';
+
+html.dark {
+  @import 'highlight.js/scss/github-dark-dimmed.scss';
+}
+
 .markdown-body {
   font-size: 22px;
   line-height: 1.3;
@@ -226,6 +283,18 @@ const parsed = computed(() => {
 
   table img {
     background-color: transparent;
+  }
+
+  pre {
+    @apply m-0 mb-3 p-3 rounded-lg bg-skin-border text-base overflow-auto relative;
+
+    code {
+      @apply p-0 m-0 bg-transparent border-none;
+    }
+
+    .copy {
+      @apply absolute right-2.5 top-2.5 text-skin-text bg-skin-border rounded p-1;
+    }
   }
 }
 </style>
