@@ -129,6 +129,7 @@ watch(filter, (toFilter, fromFilter) => {
       :loading="!loaded"
       :loading-more="loadingMore"
       :proposals="proposals"
+      show-space
       @end-reached="handleEndReached"
     />
   </div>

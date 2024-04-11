@@ -2,7 +2,7 @@
 import { _rt, _n, shortenAddress, getProposalId } from '@/helpers/utils';
 import type { Proposal as ProposalType, Choice } from '@/types';
 
-const props = defineProps<{ proposal: ProposalType }>();
+const props = defineProps<{ proposal: ProposalType; showSpace: boolean }>();
 
 const { getTsFromCurrent } = useMetaStore();
 const { vote } = useActions();
@@ -37,6 +37,9 @@ async function handleVoteClick(choice: Choice) {
           <ProposalIconStatus width="17" height="17" :state="proposal.state" class="top-[7.5px]" />
 
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
+            <div class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0">
+              {{ proposal.space.name }}
+            </div>
             <h3
               class="text-[21px] md:truncate md:text-ellipsis inline mr-2"
               v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
