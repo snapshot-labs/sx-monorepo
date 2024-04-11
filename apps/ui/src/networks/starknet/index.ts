@@ -65,7 +65,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
   const provider = createProvider(rpcUrl);
   const api = createApi(apiUrl, networkId);
-  const constants = createConstants(networkId);
+  const constants = createConstants(networkId, baseNetworkId);
 
   const helpers = {
     isAuthenticatorSupported: (authenticator: string) =>

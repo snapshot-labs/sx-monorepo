@@ -1,5 +1,6 @@
+import { Signer } from '@ethersproject/abstract-signer';
 import { CallData, uint256 } from 'starknet';
-import { utils, starknetNetworks } from '@snapshot-labs/sx';
+import { clients, utils, starknetNetworks } from '@snapshot-labs/sx';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinPineapple } from '@/helpers/pin';
 import { StrategyConfig, StrategyTemplate } from '../types';
@@ -8,11 +9,13 @@ import IHCode from '~icons/heroicons-outline/code';
 import IHCube from '~icons/heroicons-outline/cube';
 import IHPencil from '~icons/heroicons-outline/pencil';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
+import IHUserCircle from '~icons/heroicons-outline/user-circle';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
+import { EVM_CONNECTORS } from '../common/constants';
 
-export function createConstants(networkId: NetworkID) {
-  const config = starknetNetworks[networkId];
+export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) {
+  const config = starknetNetworks[networkId as 'sn' | 'sn-tn' | 'sn-sep'];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
   const SUPPORTED_AUTHENTICATORS = {
@@ -398,9 +401,9 @@ export function createConstants(networkId: NetworkID) {
 
   const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = EDITOR_VOTING_STRATEGIES.filter(
     strategy =>
-      ![config.Strategies.EVMSlotValue, config.Strategies.OZVotesStorageProof].includes(
-        strategy.address
-      )
+      !(
+        [config.Strategies.EVMSlotValue, config.Strategies.OZVotesStorageProof] as string[]
+      ).includes(strategy.address)
   );
 
   const EDITOR_EXECUTION_STRATEGIES = [
@@ -409,6 +412,61 @@ export function createConstants(networkId: NetworkID) {
       type: 'NoExecutionSimpleMajority',
       name: EXECUTORS.NoExecutionSimpleMajority,
       paramsDefinition: null
+    },
+    {
+      address: config.ExecutionStrategies.EthRelayer,
+      type: 'EthRelayer',
+      name: EXECUTORS.EthRelayer,
+      about:
+        'An execution strategy that allows proposals to execute transactions from a specified target Avatar contract on L1, the most popular one being a Safe.',
+      icon: IHUserCircle,
+      generateSummary: (params: Record<string, any>) =>
+        `(${params.quorum}, ${shorten(params.contractAddress)})`,
+      deployNetworkId: baseNetworkId,
+      deployConnectors: EVM_CONNECTORS,
+      deploy: async (
+        client: clients.StarknetTx,
+        signer: Signer,
+        controller: string,
+        spaceAddress: string,
+        params: Record<string, any>
+      ): Promise<{ address: string; txId: string }> => {
+        return client.deployL1AvatarExecution({
+          signer,
+          params: {
+            controller: params.l1Controller,
+            target: params.contractAddress,
+            executionRelayer: config.ExecutionStrategies.EthRelayer,
+            spaces: [spaceAddress],
+            quorum: BigInt(params.quorum)
+          }
+        });
+      },
+      paramsDefinition: {
+        type: 'object',
+        title: 'Params',
+        additionalProperties: false,
+        required: ['l1Controller', 'quorum', 'contractAddress'],
+        properties: {
+          l1Controller: {
+            type: 'string',
+            format: 'address',
+            title: 'Controller address',
+            examples: ['0x0000…']
+          },
+          quorum: {
+            type: 'integer',
+            title: 'Quorum',
+            examples: ['1']
+          },
+          contractAddress: {
+            type: 'string',
+            format: 'address',
+            title: 'Avatar address',
+            examples: ['0x0000…']
+          }
+        }
+      }
     }
   ];
 
