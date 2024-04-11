@@ -19,15 +19,6 @@ const SOCIALS = [
     icon: ICGithub
   }
 ];
-
-const router = useRouter();
-const { web3 } = useWeb3();
-
-watch(
-  () => web3.value.account,
-  value => value && router.push({ name: 'settings-followings' }),
-  { immediate: true }
-);
 </script>
 
 <template>
