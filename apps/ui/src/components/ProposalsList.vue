@@ -15,7 +15,7 @@ const props = withDefaults(
     };
   }>(),
   {
-    showSpace: true
+    showSpace: false
   }
 );
 

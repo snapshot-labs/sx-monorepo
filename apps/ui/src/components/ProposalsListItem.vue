@@ -44,6 +44,7 @@ async function handleVoteClick(choice: Choice) {
 
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
             <router-link
+              v-if="showSpace"
               :to="{
                 name: 'space-overview',
                 params: {
