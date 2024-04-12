@@ -63,10 +63,6 @@ const navigationConfig = computed(() => ({
       : undefined)
   },
   settings: {
-    followings: {
-      name: 'Followings',
-      icon: IHNewspaper
-    },
     spaces: {
       name: 'My spaces',
       icon: IHStop
@@ -102,4 +98,5 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
       </router-link>
     </div>
   </div>
+  <router-view v-else name="AppNav" />
 </template>

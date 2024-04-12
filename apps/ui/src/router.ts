@@ -16,8 +16,9 @@ import User from '@/views/User.vue';
 import Create from '@/views/Create.vue';
 import Settings from '@/views/Settings.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
-import Explore from '@/views/Explore.vue';
-import Home from '@/views/Home.vue';
+import Explore from '@/views/Feed/Explore.vue';
+import Home from '@/views/Feed/Home.vue';
+import FeedNav from '@/views/Feed/Nav.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Apps from '@/views/Apps.vue';
 import App from '@/views/App.vue';
@@ -65,8 +66,8 @@ const routes: any[] = [
       { path: 'contacts', name: 'settings-contacts', component: Contacts }
     ]
   },
-  { path: '/explore', name: 'explore', component: Explore },
-  { path: '/home', name: 'home', component: Home },
+  { path: '/explore', name: 'explore', components: { default: Explore, AppNav: FeedNav } },
+  { path: '/home', name: 'home', components: { default: Home, AppNav: FeedNav } },
   { path: '/apps', name: 'apps', component: Apps },
   { path: '/apps/:id', name: 'app', component: App }
 ];

@@ -10,6 +10,7 @@ useTitle('Home');
 
 const { web3, authInitiated } = useWeb3();
 const metaStore = useMetaStore();
+const uiStore = useUiStore();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
@@ -100,48 +101,53 @@ watch(filter, (toFilter, fromFilter) => {
 
 <template>
   <div>
-    <div class="flex justify-between">
-      <div class="flex flex-row p-4 space-x-2">
-        <UiSelectDropdown
-          v-model="filter"
-          title="Status"
-          gap="12px"
-          placement="left"
-          :items="[
-            {
-              key: 'any',
-              label: 'Any'
-            },
-            {
-              key: 'pending',
-              label: 'Pending',
-              component: ProposalIconStatus,
-              componentProps: { ...selectIconBaseProps, state: 'pending' }
-            },
-            {
-              key: 'active',
-              label: 'Active',
-              component: ProposalIconStatus,
-              componentProps: { ...selectIconBaseProps, state: 'active' }
-            },
-            {
-              key: 'closed',
-              label: 'Closed',
-              component: ProposalIconStatus,
-              componentProps: { ...selectIconBaseProps, state: 'passed' }
-            }
-          ]"
-        />
+    <div
+      class="ml-0 lg:ml-[240px] mr-0"
+      :class="{ 'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen }"
+    >
+      <div class="flex justify-between">
+        <div class="flex flex-row p-4 space-x-2">
+          <UiSelectDropdown
+            v-model="filter"
+            title="Status"
+            gap="12px"
+            placement="left"
+            :items="[
+              {
+                key: 'any',
+                label: 'Any'
+              },
+              {
+                key: 'pending',
+                label: 'Pending',
+                component: ProposalIconStatus,
+                componentProps: { ...selectIconBaseProps, state: 'pending' }
+              },
+              {
+                key: 'active',
+                label: 'Active',
+                component: ProposalIconStatus,
+                componentProps: { ...selectIconBaseProps, state: 'active' }
+              },
+              {
+                key: 'closed',
+                label: 'Closed',
+                component: ProposalIconStatus,
+                componentProps: { ...selectIconBaseProps, state: 'passed' }
+              }
+            ]"
+          />
+        </div>
       </div>
+      <ProposalsList
+        title="Proposals"
+        limit="off"
+        :loading="!loaded"
+        :loading-more="loadingMore"
+        :proposals="proposals"
+        show-space
+        @end-reached="handleEndReached"
+      />
     </div>
-    <ProposalsList
-      title="Proposals"
-      limit="off"
-      :loading="!loaded"
-      :loading-more="loadingMore"
-      :proposals="proposals"
-      show-space
-      @end-reached="handleEndReached"
-    />
   </div>
 </template>
