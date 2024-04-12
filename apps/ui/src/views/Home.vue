@@ -1,89 +1,147 @@
 <script setup lang="ts">
-import { version, repository } from '@/../package.json';
-import ICX from '~icons/c/x';
-import ICDiscord from '~icons/c/discord';
-import ICGithub from '~icons/c/github';
+import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
+import { getNames } from '@/helpers/stamp';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { Proposal } from '@/types';
 
-const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
-const SOCIALS = [
-  {
-    href: 'https://twitter.com/SnapshotLabs',
-    icon: ICX
+const PROPOSALS_LIMIT = 20;
+
+useTitle('Home');
+
+const { web3, authInitiated } = useWeb3();
+const metaStore = useMetaStore();
+
+const loaded = ref(false);
+const loadingMore = ref(false);
+const hasMore = ref(false);
+const proposals = ref<Proposal[]>([]);
+const followedSpaceIds = ref<string[]>([]);
+
+const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
+
+const selectIconBaseProps = {
+  width: 16,
+  height: 16
+};
+
+const networkId = computed(
+  () => offchainNetworks.filter(network => enabledNetworks.includes(network))[0]
+);
+
+// TODO: Support multiple networks
+const network = computed(() => getNetwork(networkId.value));
+
+async function withAuthorNames(proposals: Proposal[]) {
+  const names = await getNames(proposals.map(proposal => proposal.author.id));
+
+  return proposals.map(proposal => {
+    proposal.author.name = names[proposal.author.id];
+
+    return proposal;
+  });
+}
+
+async function handleEndReached() {
+  if (hasMore.value) fetchMore();
+}
+
+async function loadProposals(skip = 0) {
+  return withAuthorNames(
+    await network.value.api.loadProposals(
+      followedSpaceIds.value,
+      { limit: PROPOSALS_LIMIT, skip },
+      metaStore.getCurrent(networkId.value) || 0,
+      filter.value
+    )
+  );
+}
+
+async function fetch() {
+  loaded.value = false;
+  proposals.value = await loadProposals();
+  hasMore.value = proposals.value.length === PROPOSALS_LIMIT;
+  loaded.value = true;
+}
+
+async function fetchMore() {
+  loadingMore.value = true;
+
+  const moreProposals = await loadProposals(proposals.value.length);
+
+  proposals.value = [...proposals.value, ...moreProposals];
+  hasMore.value = moreProposals.length === PROPOSALS_LIMIT;
+  loadingMore.value = false;
+}
+
+watch(
+  [() => web3.value.account, () => web3.value.authLoading, authInitiated],
+  async ([account, authLoading, authInitiated]) => {
+    if (!authInitiated || authLoading) return;
+
+    if (!account) {
+      loaded.value = true;
+      return;
+    }
+
+    await metaStore.fetchBlock(networkId.value);
+
+    const user = await getNetwork(networkId.value).api.loadUser(account);
+    followedSpaceIds.value = user?.follows || [];
+
+    if (followedSpaceIds.value.length) fetch();
   },
-  {
-    href: 'https://discord.gg/snapshot',
-    icon: ICDiscord
-  },
-  {
-    href: 'https://github.com/snapshot-labs',
-    icon: ICGithub
-  }
-];
+  { immediate: true }
+);
+
+watch(filter, (toFilter, fromFilter) => {
+  if (toFilter !== fromFilter && web3.value.account) fetch();
+});
 </script>
 
 <template>
   <div>
-    <div class="py-8 mb-6 border-b hero">
-      <UiContainer class="!max-w-screen-md my-1">
-        <h1 class="mb-4 mono max-w-[580px]">The governance stack for your organization.</h1>
-        <a href="https://tally.so/r/wA2D2o" target="_blank">
-          <UiButton class="primary">
-            Sign up for beta
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </UiButton>
-        </a>
-      </UiContainer>
+    <div class="flex justify-between">
+      <div class="flex flex-row p-4 space-x-2">
+        <UiSelectDropdown
+          v-model="filter"
+          title="Status"
+          gap="12px"
+          placement="left"
+          :items="[
+            {
+              key: 'any',
+              label: 'Any'
+            },
+            {
+              key: 'pending',
+              label: 'Pending',
+              component: ProposalIconStatus,
+              componentProps: { ...selectIconBaseProps, state: 'pending' }
+            },
+            {
+              key: 'active',
+              label: 'Active',
+              component: ProposalIconStatus,
+              componentProps: { ...selectIconBaseProps, state: 'active' }
+            },
+            {
+              key: 'closed',
+              label: 'Closed',
+              component: ProposalIconStatus,
+              componentProps: { ...selectIconBaseProps, state: 'passed' }
+            }
+          ]"
+        />
+      </div>
     </div>
-    <UiContainer class="!max-w-screen-md space-y-4">
-      <div class="space-y-2">
-        <div class="eyebrow">Learn more</div>
-        <div class="space-y-2">
-          <div>
-            <a href="https://docs.snapshotx.xyz" target="_blank">
-              Documentation <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
-          </div>
-          <div>
-            <a href="https://github.com/snapshot-labs/sx-evm" target="_blank">
-              Core contracts <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
-          </div>
-          <div>
-            <a href="https://docs.snapshotx.xyz/protocol-sx-evm/audits" target="_blank">
-              Audits <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
-          </div>
-          <div>
-            <a href="https://docs.snapshotx.xyz/services/sx.js" target="_blank">
-              SX.js <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
-          </div>
-          <div>
-            <a
-              :href="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
-              target="_blank"
-            >
-              Version {{ version }}<span v-if="COMMIT_SHA" v-text="`#${COMMIT_SHA.slice(0, 7)}`" />
-              <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="space-y-2">
-        <div class="eyebrow">Join the community</div>
-        <div class="flex space-x-2">
-          <a
-            v-for="social in SOCIALS"
-            :key="social.href"
-            :href="social.href"
-            target="_blank"
-            class="text-[#606060] hover:text-skin-link"
-          >
-            <component :is="social.icon" class="w-[32px] h-[32px]" />
-          </a>
-        </div>
-      </div>
-      <div>© {{ new Date().getFullYear() }} Snapshot Labs</div>
-    </UiContainer>
+    <ProposalsList
+      title="Proposals"
+      limit="off"
+      :loading="!loaded"
+      :loading-more="loadingMore"
+      :proposals="proposals"
+      show-space
+      @end-reached="handleEndReached"
+    />
   </div>
 </template>
