@@ -27,8 +27,10 @@ const authInitiated = ref(false);
 export function useWeb3() {
   const { mixpanel } = useMixpanel();
 
-  async function login(connector = 'injected') {
-    initiateAuth();
+  async function login(connector: string | undefined | boolean = 'injected') {
+    authInitiated.value = true;
+
+    if (!connector) return;
 
     auth = getInstance();
     state.authLoading = true;
@@ -109,10 +111,6 @@ export function useWeb3() {
     }
   }
 
-  function initiateAuth() {
-    authInitiated.value = true;
-  }
-
   function handleChainChanged(chainId) {
     if (!networks[chainId]) {
       networks[chainId] = {
@@ -134,7 +132,6 @@ export function useWeb3() {
   return {
     login,
     logout,
-    initiateAuth,
     authInitiated,
     web3: computed(() => state),
     web3Account: computed(() => state.account)
