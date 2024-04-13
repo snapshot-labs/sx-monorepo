@@ -8,6 +8,7 @@ const PROPOSALS_LIMIT = 20;
 
 useTitle('Home');
 
+const router = useRouter();
 const { web3, authInitiated } = useWeb3();
 const metaStore = useMetaStore();
 const uiStore = useUiStore();
@@ -82,8 +83,7 @@ watch(
     if (!authInitiated || authLoading) return;
 
     if (!account) {
-      loaded.value = true;
-      return;
+      return router.push({ name: 'landing' });
     }
 
     await metaStore.fetchBlock(networkId.value);
