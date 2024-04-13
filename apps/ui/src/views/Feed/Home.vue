@@ -91,7 +91,12 @@ watch(
     const user = await getNetwork(networkId.value).api.loadUser(account);
     followedSpaceIds.value = user?.follows || [];
 
-    if (followedSpaceIds.value.length) fetch();
+    if (!followedSpaceIds.value.length) {
+      loaded.value = true;
+      return;
+    }
+
+    fetch();
   },
   { immediate: true }
 );
