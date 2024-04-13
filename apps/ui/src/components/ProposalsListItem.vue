@@ -34,12 +34,7 @@ async function handleVoteClick(choice: Choice) {
               }
             }"
           >
-            <ProposalIconStatus
-              width="17"
-              height="17"
-              :state="proposal.state"
-              class="top-[7.5px]"
-            />
+            <ProposalIconStatus width="17" height="17" :state="proposal.state" class="top-[6px]" />
           </router-link>
 
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
