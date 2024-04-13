@@ -33,6 +33,8 @@ const networkId = computed(
 const network = computed(() => getNetwork(networkId.value));
 
 async function withAuthorNames(proposals: Proposal[]) {
+  if (!proposals.length) return proposals;
+
   const names = await getNames(proposals.map(proposal => proposal.author.id));
 
   return proposals.map(proposal => {
