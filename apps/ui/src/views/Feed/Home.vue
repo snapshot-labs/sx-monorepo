@@ -83,9 +83,7 @@ watch(
   async ([account, authLoading, authInitiated]) => {
     if (!authInitiated || authLoading) return;
 
-    if (!account) {
-      return router.push({ name: 'landing' });
-    }
+    if (!account) return router.push({ name: 'landing' });
 
     loaded.value = false;
     await metaStore.fetchBlock(networkId.value);
