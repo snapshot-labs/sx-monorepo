@@ -110,5 +110,4 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
       </router-link>
     </div>
   </div>
-  <router-view v-else name="AppNav" />
 </template>
