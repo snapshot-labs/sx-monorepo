@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { startIntercom } from './helpers/intercom';
 
+const ROUTES_WITH_APP_NAV = ['space', 'home', 'explore'];
+
 const el = ref(null);
 
 const route = useRoute();
@@ -71,7 +73,7 @@ watch(isSwiping, () => {
         v-if="uiStore.sidebarOpen"
         class="backdrop lg:hidden"
         :style="{
-          left: `${72 + (route.matched[0]?.name === 'space' ? 240 : 0)}px`
+          left: `${72 + (ROUTES_WITH_APP_NAV.includes(route.matched[0]?.name?.toString() || '') ? 240 : 0)}px`
         }"
         @click="uiStore.toggleSidebar"
       />
