@@ -11,7 +11,7 @@ watchEffect(() => setTitle('Explore'));
 <template>
   <div>
     <div
-      class="ml-0 lg:ml-[240px] mr-0"
+      class="ml-0 lg:ml-[240px] mr-0 xl:mr-[240px]"
       :class="{ 'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen }"
     >
       <UiContainer class="!max-w-screen-md pt-5">
@@ -24,5 +24,6 @@ watchEffect(() => setTitle('Explore'));
         </div>
       </UiContainer>
     </div>
+    <div class="invisible xl:visible fixed w-[240px] border-l bottom-0 top-[72px] right-0" />
   </div>
 </template>
