@@ -10,7 +10,7 @@ export function useAccount() {
     if (!web3Account.value) votes.value = {};
   });
 
-  async function loadVotes(networkId: NetworkID, spaceId: string) {
+  async function loadVotes(networkId: NetworkID, spaceId?: string) {
     const account = web3.value.account;
     if (!account) return;
 

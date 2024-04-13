@@ -181,7 +181,7 @@ export type NetworkApi = {
     filter?: 'any' | 'for' | 'against' | 'abstain',
     sortBy?: 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
   ): Promise<Vote[]>;
-  loadUserVotes(spaceId: string, voter: string): Promise<{ [key: string]: Vote }>;
+  loadUserVotes(spaceId: string | undefined, voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
     spaceIds: string[],
     paginationOpts: PaginationOpts,

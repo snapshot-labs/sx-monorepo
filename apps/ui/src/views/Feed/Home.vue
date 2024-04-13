@@ -9,9 +9,10 @@ const PROPOSALS_LIMIT = 20;
 useTitle('Home');
 
 const router = useRouter();
-const { web3, authInitiated } = useWeb3();
 const metaStore = useMetaStore();
 const uiStore = useUiStore();
+const { web3, authInitiated } = useWeb3();
+const { loadVotes } = useAccount();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
@@ -98,6 +99,7 @@ watch(
       return;
     }
 
+    loadVotes(networkId.value);
     fetch();
   },
   { immediate: true }
