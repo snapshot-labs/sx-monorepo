@@ -5,6 +5,7 @@ import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
+
 const SOCIALS = [
   {
     href: 'https://twitter.com/SnapshotLabs',
