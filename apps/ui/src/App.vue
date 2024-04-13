@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { startIntercom } from './helpers/intercom';
 
-const ROUTES_WITH_APP_NAV = ['space', 'home', 'explore'];
+const ROUTES_WITH_APP_NAV = ['space', 'my'];
 
 const el = ref(null);
 
