@@ -46,7 +46,7 @@ async function handleEndReached() {
   if (hasMore.value) fetchMore();
 }
 
-async function loadProposals(skip = 0) {
+async function loadProposalsPage(skip = 0) {
   return withAuthorNames(
     await network.value.api.loadProposals(
       followedSpaceIds.value,
@@ -59,7 +59,7 @@ async function loadProposals(skip = 0) {
 
 async function fetch() {
   loaded.value = false;
-  proposals.value = await loadProposals();
+  proposals.value = await loadProposalsPage();
   hasMore.value = proposals.value.length === PROPOSALS_LIMIT;
   loaded.value = true;
 }
@@ -67,7 +67,7 @@ async function fetch() {
 async function fetchMore() {
   loadingMore.value = true;
 
-  const moreProposals = await loadProposals(proposals.value.length);
+  const moreProposals = await loadProposalsPage(proposals.value.length);
 
   proposals.value = [...proposals.value, ...moreProposals];
   hasMore.value = moreProposals.length === PROPOSALS_LIMIT;
