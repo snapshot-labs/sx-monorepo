@@ -8,10 +8,8 @@ const PROPOSALS_LIMIT = 20;
 
 useTitle('Home');
 
-const router = useRouter();
 const metaStore = useMetaStore();
-const uiStore = useUiStore();
-const { web3, authInitiated } = useWeb3();
+const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
 
 const loaded = ref(false);
@@ -78,13 +76,10 @@ async function fetchMore() {
   loadingMore.value = false;
 }
 
+// Assume that the user is logged in at this point, verified by the parent route
 watch(
-  [() => web3.value.account, () => web3.value.authLoading, authInitiated],
-  async ([account, authLoading, authInitiated]) => {
-    if (!authInitiated || authLoading) return;
-
-    if (!account) return router.push({ name: 'landing' });
-
+  () => web3.value.account,
+  async account => {
     loaded.value = false;
     await metaStore.fetchBlock(networkId.value);
 
