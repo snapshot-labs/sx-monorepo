@@ -41,9 +41,7 @@ const currentLimit = computed(() => {
           :key="i"
           :proposal="proposal"
           :show-space="showSpace"
-        >
-          <template #proposal-title-prefix> Test 2 </template>
-        </ProposalsListItem>
+        />
       </UiContainerInfiniteScroll>
       <div v-if="!proposals.length" class="px-4 py-3 flex items-center text-skin-link">
         <IH-exclamation-circle class="inline-block mr-2" />
