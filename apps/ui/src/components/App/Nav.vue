@@ -8,6 +8,8 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHUsers from '~icons/heroicons-outline/users';
 import IHStop from '~icons/heroicons-outline/stop';
+import IHGlobe from '~icons/heroicons-outline/globe-americas';
+import IHHome from '~icons/heroicons-outline/home';
 
 const route = useRoute();
 const uiStore = useUiStore();
@@ -70,6 +72,16 @@ const navigationConfig = computed(() => ({
     contacts: {
       name: 'Contacts',
       icon: IHUsers
+    }
+  },
+  my: {
+    home: {
+      name: 'Home',
+      icon: IHHome
+    },
+    explore: {
+      name: 'Explore',
+      icon: IHGlobe
     }
   }
 }));
