@@ -86,10 +86,12 @@ watch(
       return router.push({ name: 'landing' });
     }
 
+    loaded.value = false;
     await metaStore.fetchBlock(networkId.value);
 
     const user = await getNetwork(networkId.value).api.loadUser(account);
     followedSpaceIds.value = user?.follows || [];
+    proposals.value = [];
 
     if (!followedSpaceIds.value.length) {
       loaded.value = true;
