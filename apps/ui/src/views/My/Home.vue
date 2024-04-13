@@ -109,49 +109,47 @@ watch(filter, (toFilter, fromFilter) => {
 </script>
 
 <template>
-  <div>
-    <div class="flex justify-between">
-      <div class="flex flex-row p-4 space-x-2">
-        <UiSelectDropdown
-          v-model="filter"
-          title="Status"
-          gap="12px"
-          placement="left"
-          :items="[
-            {
-              key: 'any',
-              label: 'Any'
-            },
-            {
-              key: 'pending',
-              label: 'Pending',
-              component: ProposalIconStatus,
-              componentProps: { ...selectIconBaseProps, state: 'pending' }
-            },
-            {
-              key: 'active',
-              label: 'Active',
-              component: ProposalIconStatus,
-              componentProps: { ...selectIconBaseProps, state: 'active' }
-            },
-            {
-              key: 'closed',
-              label: 'Closed',
-              component: ProposalIconStatus,
-              componentProps: { ...selectIconBaseProps, state: 'passed' }
-            }
-          ]"
-        />
-      </div>
+  <div class="flex justify-between">
+    <div class="flex flex-row p-4 space-x-2">
+      <UiSelectDropdown
+        v-model="filter"
+        title="Status"
+        gap="12px"
+        placement="left"
+        :items="[
+          {
+            key: 'any',
+            label: 'Any'
+          },
+          {
+            key: 'pending',
+            label: 'Pending',
+            component: ProposalIconStatus,
+            componentProps: { ...selectIconBaseProps, state: 'pending' }
+          },
+          {
+            key: 'active',
+            label: 'Active',
+            component: ProposalIconStatus,
+            componentProps: { ...selectIconBaseProps, state: 'active' }
+          },
+          {
+            key: 'closed',
+            label: 'Closed',
+            component: ProposalIconStatus,
+            componentProps: { ...selectIconBaseProps, state: 'passed' }
+          }
+        ]"
+      />
     </div>
-    <ProposalsList
-      title="Proposals"
-      limit="off"
-      :loading="!loaded"
-      :loading-more="loadingMore"
-      :proposals="proposals"
-      show-space
-      @end-reached="handleEndReached"
-    />
   </div>
+  <ProposalsList
+    title="Proposals"
+    limit="off"
+    :loading="!loaded"
+    :loading-more="loadingMore"
+    :proposals="proposals"
+    show-space
+    @end-reached="handleEndReached"
+  />
 </template>
