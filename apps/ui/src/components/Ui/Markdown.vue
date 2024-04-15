@@ -21,7 +21,6 @@ const props = defineProps<{
   body: string;
 }>();
 
-const uiStore = useUiStore();
 const { copy } = useClipboard();
 
 const remarkable = new Remarkable({
@@ -72,21 +71,35 @@ onMounted(() => {
   if (!body) return;
 
   body.querySelectorAll('pre>code').forEach(code => {
-    const parent = code.parentElement;
+    const parent = code.parentElement!;
+
     const copyButton = document.createElement('button');
-
-    copyButton.classList.add('copy');
+    const copySvg = `<svg viewBox="0 0 24 24" width="20px" height="20px">${icons.icons.duplicate.body}</svg>`;
+    copyButton.classList.add('text-skin-text');
     copyButton.setAttribute('type', 'button');
-    copyButton.innerHTML = `<svg viewBox="0 0 24 24" width="20px" height="20px">${icons.icons.duplicate.body}</svg>`;
-
+    copyButton.innerHTML = copySvg;
     copyButton.addEventListener('click', () => {
       if (parent !== null) {
-        copy(parent.innerText.trim());
-        uiStore.addNotification('success', 'Code copied');
+        copy(code.textContent!);
+
+        copyButton.innerHTML = `<svg viewBox="0 0 24 24" width="20px" height="20px">${icons.icons.check.body}</svg>`;
+        copyButton.classList.add('!text-skin-success');
+        setTimeout(() => {
+          copyButton.innerHTML = copySvg;
+          copyButton.classList.remove('!text-skin-success');
+        }, 1e3);
       }
     });
 
-    code.prepend(copyButton);
+    const titleBar = document.createElement('div');
+    titleBar.classList.add('title-bar');
+
+    const language = document.createElement('div');
+    language.innerHTML = code.getAttribute('class')?.split('language-')[1] || '';
+
+    titleBar.append(language);
+    titleBar.append(copyButton);
+    parent.prepend(titleBar);
   });
 });
 </script>
@@ -288,14 +301,14 @@ html.dark {
   }
 
   pre {
-    @apply m-0 mb-3 p-3 rounded-lg bg-skin-border text-base overflow-auto relative;
+    @apply m-0 mb-3 p-0 rounded-lg border bg-transparent overflow-hidden;
 
-    code {
-      @apply p-0 m-0 bg-transparent border-none;
+    .title-bar {
+      @apply p-2.5 px-3 text-base text-skin-text font-semibold flex justify-between items-center font-serif;
     }
 
-    .copy {
-      @apply absolute right-2.5 top-2.5 text-skin-text bg-skin-border rounded p-1;
+    code {
+      @apply p-3 m-0 bg-skin-border rounded-none border-none overflow-auto block;
     }
   }
 }
