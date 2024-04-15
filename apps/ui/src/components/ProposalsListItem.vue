@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { _rt, _n, shortenAddress, getProposalId } from '@/helpers/utils';
+import { quorumLabel, quorumProgress } from '@/helpers/quorum';
+import { _rt, _n, _p, shortenAddress, getProposalId } from '@/helpers/utils';
 import type { Proposal as ProposalType, Choice } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
@@ -10,6 +11,8 @@ const { vote } = useActions();
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 const sendingType = ref<Choice | null>(null);
+
+const totalProgress = computed(() => quorumProgress(props.proposal));
 
 async function handleVoteClick(choice: Choice) {
   sendingType.value = choice;
@@ -72,6 +75,10 @@ async function handleVoteClick(choice: Choice) {
             @click="modalOpenTimeline = true"
             v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"
           />
+          <span v-if="proposal.quorum">
+            · {{ quorumLabel(proposal.quorum_type) }}:
+            <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+          </span>
         </span>
       </div>
       <div class="hidden md:block">

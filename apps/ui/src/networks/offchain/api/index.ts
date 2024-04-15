@@ -136,6 +136,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     max_end: proposal.end,
     snapshot: proposal.snapshot,
     quorum: proposal.quorum,
+    quorum_type: proposal.quorumType,
     choices: proposal.choices,
     scores: proposal.scores,
     scores_total: proposal.scores_total,

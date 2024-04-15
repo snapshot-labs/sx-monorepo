@@ -62,6 +62,7 @@ export type ApiProposal = {
   discussion: string;
   author: string;
   quorum: number;
+  quorumType?: 'default' | 'rejection';
   start: number;
   end: number;
   snapshot: number;

@@ -67,6 +67,7 @@ const PROPOSAL_FRAGMENT = gql`
     discussion
     author
     quorum
+    quorumType
     start
     end
     snapshot
