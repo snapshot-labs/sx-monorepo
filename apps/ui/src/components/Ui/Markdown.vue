@@ -4,6 +4,7 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import json from 'highlight.js/lib/languages/json';
 import rust from 'highlight.js/lib/languages/rust';
 import python from 'highlight.js/lib/languages/python';
+import { solidity } from 'highlightjs-solidity';
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
 import { icons } from '@iconify-json/heroicons-outline';
@@ -14,6 +15,7 @@ hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('json', json);
 hljs.registerLanguage('rust', rust);
 hljs.registerLanguage('python', python);
+hljs.registerLanguage('solidity', solidity);
 
 const props = defineProps<{
   body: string;
@@ -94,10 +96,10 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-@import 'highlight.js/scss/github.scss';
+@import '@/assets/styles/highlightjs/github.scss';
 
 html.dark {
-  @import 'highlight.js/scss/github-dark-dimmed.scss';
+  @import '@/assets/styles/highlightjs/github-dark-dimmed.scss';
 }
 
 .markdown-body {
