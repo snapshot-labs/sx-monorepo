@@ -66,6 +66,11 @@ const results = computed(() => {
       >
         <IC-Shutter class="w-[80px] text-skin-text inline-block" />
       </a>
+
+      <div v-if="proposal.quorum" class="mt-3.5">
+        {{ quorumLabel(proposal.quorum_type) }}:
+        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+      </div>
     </div>
   </div>
   <template v-else>
