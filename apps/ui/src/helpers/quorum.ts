@@ -10,7 +10,7 @@ export function quorumProgress(proposal: Proposal): number {
           .reduce((a, b) => a + b, 0)
       : proposal.scores_total;
 
-  return Math.min(totalScore / proposal.quorum, 1);
+  return totalScore / proposal.quorum;
 }
 
 export function quorumChoiceProgress(
@@ -18,9 +18,11 @@ export function quorumChoiceProgress(
   result: { choice: number; progress: number },
   quorumProgress: number
 ): number {
-  if (quorumType !== 'rejection') return result.progress * quorumProgress;
+  const cappedQuorumProgress = Math.min(quorumProgress, 1);
 
-  return result.choice - 1 === REJECTION_QUORUM_CHOICE_INDEX ? quorumProgress * 100 : 0;
+  if (quorumType !== 'rejection') return result.progress * cappedQuorumProgress;
+
+  return result.choice - 1 === REJECTION_QUORUM_CHOICE_INDEX ? cappedQuorumProgress * 100 : 0;
 }
 
 export function quorumLabel(quorumType: Proposal['quorum_type']): string {
