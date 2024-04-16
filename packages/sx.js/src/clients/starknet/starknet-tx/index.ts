@@ -1,4 +1,4 @@
-import { Account, CallData, shortString, uint256, hash } from 'starknet';
+import { stark, Account, CallData, shortString, uint256, hash } from 'starknet';
 import { ContractFactory } from '@ethersproject/contracts';
 import { Signer } from '@ethersproject/abstract-signer';
 import { poseidonHashMany } from 'micro-starknet';
@@ -204,7 +204,8 @@ export class StarknetTx {
     const calls = [call];
 
     const fee = opts?.nonce ? await account.estimateFee(calls) : null;
-    return account.execute(calls, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    return account.execute(calls, undefined, fee ? { maxFee } : undefined);
   }
 
   async updateProposal(account: Account, envelope: Envelope<UpdateProposal>, opts?: Opts) {
@@ -226,7 +227,8 @@ export class StarknetTx {
     });
 
     const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    return account.execute(call, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    return account.execute(call, undefined, fee ? { maxFee } : undefined);
   }
 
   async vote(account: Account, envelope: Envelope<Vote>, opts?: Opts) {
@@ -254,7 +256,8 @@ export class StarknetTx {
     });
 
     const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    return account.execute(call, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    return account.execute(call, undefined, fee ? { maxFee } : undefined);
   }
 
   execute({
