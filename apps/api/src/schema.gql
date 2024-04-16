@@ -118,6 +118,7 @@ type Proposal {
   execution_tx: String
   veto_tx: String
   vote_count: Int!
+  execution_ready: Boolean!
   executed: Boolean!
   vetoed: Boolean!
   completed: Boolean!

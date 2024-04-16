@@ -337,6 +337,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   proposal.execution_tx = null;
   proposal.veto_tx = null;
   proposal.vote_count = 0;
+  proposal.execution_ready = true;
   proposal.executed = false;
   proposal.vetoed = false;
   proposal.completed = false;

@@ -378,7 +378,6 @@ export function createActions(
       });
     },
     finalizeProposal: () => null,
-    receiveProposal: () => null,
     executeTransactions: () => null,
     executeQueuedProposal: () => null,
     vetoProposal: () => null,

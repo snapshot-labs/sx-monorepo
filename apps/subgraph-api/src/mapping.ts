@@ -1,7 +1,10 @@
 import { Address, BigDecimal, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
-import { AxiomExecutionStrategy } from '../generated/ProxyFactory/AxiomExecutionStrategy'
+import {
+  AxiomExecutionStrategy,
+  WriteOffchainVotes,
+} from '../generated/ProxyFactory/AxiomExecutionStrategy'
 import { TimelockExecutionStrategy } from '../generated/ProxyFactory/TimelockExecutionStrategy'
 import {
   SpaceCreated,
@@ -27,6 +30,7 @@ import {
 } from '../generated/templates/TimelockExecutionStrategy/TimelockExecutionStrategy'
 import {
   Space as SpaceTemplate,
+  AxiomExecutionStrategy as AxiomExecutionStrategyTemplate,
   TimelockExecutionStrategy as TimelockExecutionStrategyTemplate,
   SpaceMetadata as SpaceMetadataTemplate,
   ProposalMetadata as ProposalMetadataTemplate,
@@ -98,6 +102,8 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     executionStrategy.treasury = toChecksumAddress(event.params.proxy.toHexString())
     executionStrategy.timelock_delay = new BigInt(0)
     executionStrategy.save()
+
+    AxiomExecutionStrategyTemplate.create(event.params.proxy)
   } else if (event.params.implementation.equals(MASTER_SIMPLE_QUORUM_TIMELOCK)) {
     let executionStrategyContract = TimelockExecutionStrategy.bind(event.params.proxy)
     let typeResult = executionStrategyContract.try_getStrategyType()
@@ -232,6 +238,8 @@ export function handleProposalCreated(event: ProposalCreated): void {
     proposal.execution_strategy_type = 'none'
   }
 
+  proposal.execution_ready = proposal.execution_strategy_type != 'Axiom'
+
   let executionHash = new ExecutionHash(proposal.execution_hash)
   executionHash.proposal_id = proposalId
   executionHash.save()
@@ -299,6 +307,8 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
     proposal.timelock_delay = new BigInt(0)
     proposal.execution_strategy_type = 'none'
   }
+
+  proposal.execution_ready = proposal.execution_strategy_type != 'Axiom'
 
   let executionHash = new ExecutionHash(proposal.execution_hash)
   executionHash.proposal_id = proposalId
@@ -621,6 +631,21 @@ export function handleProposalValidationStrategyUpdated(
   )
 
   space.save()
+}
+
+export function handleAxiomWriteOffchainVotes(event: WriteOffchainVotes): void {
+  let contract = AxiomExecutionStrategy.bind(event.address)
+  let spaceResult = contract.try_space()
+  if (spaceResult.reverted) return
+
+  let spaceId = toChecksumAddress(spaceResult.value.toHexString())
+
+  let proposal = Proposal.load(`${spaceId}/${event.params.proposalId}`)
+  if (!proposal) return
+
+  proposal.execution_ready = true
+
+  proposal.save()
 }
 
 export function handleTimelockProposalExecuted(event: TimelockProposalExecuted): void {

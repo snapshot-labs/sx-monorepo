@@ -7,16 +7,9 @@ import { Proposal as ProposalType } from '@/types';
 const props = defineProps<{ proposal: ProposalType }>();
 
 const { web3 } = useWeb3();
-const {
-  finalizeProposal,
-  receiveProposal,
-  executeTransactions,
-  executeQueuedProposal,
-  vetoProposal
-} = useActions();
+const { finalizeProposal, executeTransactions, executeQueuedProposal, vetoProposal } = useActions();
 
 const finalizeProposalSending = ref(false);
-const receiveProposalSending = ref(false);
 const executeTransactionsSending = ref(false);
 const executeQueuedProposalSending = ref(false);
 const vetoProposalSending = ref(false);
@@ -46,16 +39,6 @@ async function handleFinalizeProposalClick() {
     await finalizeProposal(props.proposal);
   } finally {
     finalizeProposalSending.value = false;
-  }
-}
-
-async function handleReceiveProposalClick() {
-  receiveProposalSending.value = true;
-
-  try {
-    await receiveProposal(props.proposal);
-  } finally {
-    receiveProposalSending.value = false;
   }
 }
 
@@ -116,7 +99,7 @@ async function handleVetoProposalClick() {
     </div>
     <template v-else>
       <UiButton
-        v-if="network.hasReceive"
+        v-if="proposal.execution_strategy_type === 'Axiom' && !proposal.execution_ready"
         class="mb-2 w-full flex justify-center items-center"
         :loading="finalizeProposalSending"
         @click="handleFinalizeProposalClick"
@@ -125,16 +108,7 @@ async function handleVetoProposalClick() {
         Finalize proposal
       </UiButton>
       <UiButton
-        v-if="network.hasReceive"
-        class="mb-2 w-full flex justify-center items-center"
-        :loading="receiveProposalSending"
-        @click="handleReceiveProposalClick"
-      >
-        <IH-database class="inline-block mr-2" />
-        Receive proposal
-      </UiButton>
-      <UiButton
-        v-if="proposal.state !== 'executed'"
+        v-else-if="proposal.state !== 'executed'"
         class="mb-2 w-full flex justify-center items-center"
         :loading="executeTransactionsSending"
         @click="handleExecuteTransactionsClick"
