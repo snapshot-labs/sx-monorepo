@@ -134,7 +134,16 @@ async function handleCancelClick() {
   cancelling.value = true;
 
   try {
-    await cancelProposal(props.proposal);
+    const result = await cancelProposal(props.proposal);
+
+    if (!offchainNetworks.includes(props.proposal.network) || !result) return;
+
+    router.push({
+      name: 'space-overview',
+      params: {
+        id: `${props.proposal.network}:${props.proposal.space.id}`
+      }
+    });
   } finally {
     cancelling.value = false;
   }
