@@ -56,8 +56,8 @@ export function createConstants(networkId: NetworkID) {
 
   const STRATEGIES = {
     [config.Strategies.Vanilla]: 'Vanilla',
-    [config.Strategies.Comp]: 'ERC-20 Votes (EIP-5805)',
-    [config.Strategies.OZVotes]: 'ERC-20 Votes Comp (EIP-5805)',
+    [config.Strategies.Comp]: 'ERC-20 Votes Comp (EIP-5805)',
+    [config.Strategies.OZVotes]: 'ERC-20 Votes (EIP-5805)',
     [config.Strategies.Whitelist]: 'Merkle whitelist'
   };
 
