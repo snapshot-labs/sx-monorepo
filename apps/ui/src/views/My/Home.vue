@@ -44,10 +44,6 @@ async function withAuthorNames(proposals: Proposal[]) {
   });
 }
 
-async function handleEndReached() {
-  if (hasMore.value) fetchMore();
-}
-
 async function loadProposalsPage(skip = 0) {
   return withAuthorNames(
     await network.value.api.loadProposals(
@@ -74,6 +70,10 @@ async function fetchMore() {
   proposals.value = [...proposals.value, ...moreProposals];
   hasMore.value = moreProposals.length === PROPOSALS_LIMIT;
   loadingMore.value = false;
+}
+
+async function handleEndReached() {
+  if (hasMore.value) fetchMore();
 }
 
 // Assume that the user is logged in at this point, verified by the parent route
