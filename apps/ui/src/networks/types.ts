@@ -101,6 +101,7 @@ export type ReadOnlyNetworkActions = {
     space: Space,
     cid: string,
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
   updateProposal(
@@ -111,6 +112,7 @@ export type ReadOnlyNetworkActions = {
     proposalId: number | string,
     cid: string,
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);
@@ -146,6 +148,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       validationStrategy: StrategyConfig;
       votingStrategies: StrategyConfig[];
       executionStrategies: StrategyConfig[];
+      executionDestinations: string[];
       metadata: SpaceMetadata;
     }
   );

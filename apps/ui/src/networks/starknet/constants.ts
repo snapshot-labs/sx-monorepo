@@ -36,7 +36,9 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
     [config.Strategies.OZVotesStorageProof]: true
   };
 
-  const SUPPORTED_EXECUTORS = {};
+  const SUPPORTED_EXECUTORS = {
+    EthRelayer: true
+  };
 
   const RELAYER_AUTHENTICATORS = {
     [config.Authenticators.StarkSig]: 'starknet',

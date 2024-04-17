@@ -34,6 +34,7 @@ import type {
   NetworkID
 } from '@/types';
 import { getProvider } from '@/helpers/provider';
+import { convertToMetaTransactions } from '@/helpers/transactions';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
@@ -178,6 +179,7 @@ export function createActions(
       space: Space,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) => {
       const isContract = await getIsContract(connectorType, account);
@@ -198,7 +200,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams
         };
       } else {
         selectedExecutionStrategy = {
@@ -254,6 +261,7 @@ export function createActions(
       proposalId: number | string,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) {
       const isContract = await getIsContract(connectorType, account);
@@ -274,7 +282,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams
         };
       } else {
         selectedExecutionStrategy = {
@@ -379,7 +392,21 @@ export function createActions(
       });
     },
     finalizeProposal: () => null,
-    executeTransactions: () => null,
+    executeTransactions: async (web3: any, proposal: Proposal) => {
+      const executionData = getExecutionData(
+        proposal.space,
+        proposal.execution_strategy,
+        proposal.execution_destination,
+        convertToMetaTransactions(proposal.execution)
+      );
+
+      return client.execute({
+        signer: web3.provider.account,
+        space: proposal.space.id,
+        proposalId: proposal.proposal_id as number,
+        executionPayload: executionData.executionParams
+      });
+    },
     executeQueuedProposal: () => null,
     vetoProposal: () => null,
     setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {

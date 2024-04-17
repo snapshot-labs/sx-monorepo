@@ -188,6 +188,7 @@ export function createActions(
       space: Space,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) => {
       await verifyNetwork(web3, chainId);
@@ -206,7 +207,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams[0]
         };
       } else {
         selectedExecutionStrategy = {
@@ -263,6 +269,7 @@ export function createActions(
       proposalId: number | string,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) {
       await verifyNetwork(web3, chainId);
@@ -281,7 +288,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams[0]
         };
       } else {
         selectedExecutionStrategy = {
@@ -409,6 +421,7 @@ export function createActions(
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
+        proposal.execution_destination,
         convertToMetaTransactions(proposal.execution)
       );
 
@@ -424,6 +437,7 @@ export function createActions(
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
+        proposal.execution_destination,
         convertToMetaTransactions(proposal.execution)
       );
 

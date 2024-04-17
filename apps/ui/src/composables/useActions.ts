@@ -222,6 +222,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -256,6 +257,7 @@ export function useActions() {
         space,
         pinned.cid,
         executionStrategy,
+        executionDestinationAddress,
         convertToMetaTransactions(transactions)
       )
     );
@@ -277,6 +279,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -312,6 +315,7 @@ export function useActions() {
         proposalId,
         pinned.cid,
         executionStrategy,
+        executionDestinationAddress,
         convertToMetaTransactions(transactions)
       )
     );
@@ -346,7 +350,6 @@ export function useActions() {
 
   async function executeTransactions(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getReadWriteNetwork(proposal.network);
 

@@ -113,7 +113,8 @@ const supportedExecutionStrategies = computed(() => {
       if (!strategy) return null;
 
       return {
-        address: strategy.id,
+        address: strategy.address,
+        destinationAddress: strategy.destination_address,
         type: strategy.type,
         treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
       };
@@ -190,6 +191,7 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
+        proposal.value.executionStrategy?.destinationAddress ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
     } else {
@@ -201,6 +203,7 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
+        proposal.value.executionStrategy?.destinationAddress ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
     }

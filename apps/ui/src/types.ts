@@ -30,6 +30,7 @@ export type VoteType =
 
 export type SelectedStrategy = {
   address: string;
+  destinationAddress?: string | null;
   type: string;
 };
 
