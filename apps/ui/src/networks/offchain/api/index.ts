@@ -345,11 +345,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         created: 0
       };
     },
-    loadLeaderboard: async (
-      spaceId: string,
-      paginationOpts: PaginationOpts,
-      sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
-    ): Promise<User[]> => {
+    loadLeaderboard: async (): Promise<User[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     }
