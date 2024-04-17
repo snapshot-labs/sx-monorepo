@@ -229,3 +229,29 @@ export const USER_QUERY = gql`
     }
   }
 `;
+
+export const LEADERBOARD_QUERY = gql`
+  query (
+    $first: Int!
+    $skip: Int!
+    $orderBy: Leaderboard_orderBy
+    $orderDirection: OrderDirection!
+    $where: Leaderboard_filter
+  ) {
+    leaderboards(
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      where: $where
+    ) {
+      id
+      user {
+        id
+        created
+      }
+      proposal_count
+      vote_count
+    }
+  }
+`;

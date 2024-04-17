@@ -7,6 +7,7 @@ import IHCash from '~icons/heroicons-outline/cash';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHUsers from '~icons/heroicons-outline/users';
+import IHUserGroup from '~icons/heroicons-outline/user-group';
 import IHStop from '~icons/heroicons-outline/stop';
 
 const route = useRoute();
@@ -36,6 +37,10 @@ const navigationConfig = computed(() => ({
     proposals: {
       name: 'Proposals',
       icon: IHNewspaper
+    },
+    leaderboard: {
+      name: 'Leaderboard',
+      icon: IHUserGroup
     },
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
