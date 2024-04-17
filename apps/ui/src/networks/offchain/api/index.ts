@@ -344,6 +344,14 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         vote_count: 0,
         created: 0
       };
+    },
+    loadLeaderboard: async (
+      spaceId: string,
+      paginationOpts: PaginationOpts,
+      sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
+    ): Promise<User[]> => {
+      // NOTE: leaderboard implementation is pending on offchain
+      return [];
     }
   };
 }
