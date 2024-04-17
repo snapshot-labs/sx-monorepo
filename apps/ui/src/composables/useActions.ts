@@ -141,6 +141,7 @@ export function useActions() {
     validationStrategy: StrategyConfig,
     votingStrategies: StrategyConfig[],
     executionStrategies: StrategyConfig[],
+    executionDestinations: string[],
     controller: string
   ) {
     if (!web3.value.account) {
@@ -162,6 +163,7 @@ export function useActions() {
       validationStrategy,
       votingStrategies,
       executionStrategies,
+      executionDestinations,
       metadata
     });
 

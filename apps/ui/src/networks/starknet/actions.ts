@@ -112,13 +112,15 @@ export function createActions(
         validationStrategy: StrategyConfig;
         votingStrategies: StrategyConfig[];
         executionStrategies: StrategyConfig[];
+        executionDestinations: string[];
         metadata: SpaceMetadata;
       }
     ) {
       const pinned = await helpers.pin(
         createErc1155Metadata(params.metadata, {
           execution_strategies: params.executionStrategies.map(config => config.address),
-          execution_strategies_types: params.executionStrategies.map(config => config.type)
+          execution_strategies_types: params.executionStrategies.map(config => config.type),
+          execution_destinations: params.executionDestinations
         })
       );
 
@@ -158,7 +160,8 @@ export function createActions(
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
           execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types
+          execution_strategies_types: space.executors_types,
+          execution_destinations: space.executors_destinations
         })
       );
 

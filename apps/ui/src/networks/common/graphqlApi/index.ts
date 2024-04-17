@@ -129,6 +129,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     }),
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
+    executors_destinations: space.metadata.executors_destinations,
     executors_strategies: space.metadata.executors_strategies,
     voting_power_validation_strategies_parsed_metadata: processStrategiesMetadata(
       space.voting_power_validation_strategies_parsed_metadata

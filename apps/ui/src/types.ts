@@ -111,8 +111,10 @@ export type Space = {
   authenticators: string[];
   executors: string[];
   executors_types: string[];
+  executors_destinations: string[];
   executors_strategies: {
-    id: string;
+    address: string;
+    destination_address: string | null;
     type: string;
     treasury: string | null;
     treasury_chain: number | null;
@@ -164,6 +166,7 @@ export type Proposal = {
   execution_time: number;
   execution_strategy: string;
   execution_strategy_type: string;
+  execution_destination: string | null;
   timelock_veto_guardian: string | null;
   strategies_indicies: number[];
   strategies: string[];
