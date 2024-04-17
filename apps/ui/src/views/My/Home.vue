@@ -83,7 +83,7 @@ watch(
     loaded.value = false;
     await metaStore.fetchBlock(networkId.value);
 
-    const user = await getNetwork(networkId.value).api.loadUser(account);
+    const user = await network.value.api.loadUser(account);
     followedSpaceIds.value = user?.follows || [];
     proposals.value = [];
 
