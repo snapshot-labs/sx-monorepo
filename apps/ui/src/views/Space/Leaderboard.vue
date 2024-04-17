@@ -10,6 +10,7 @@ type UserWithName = User & { name?: string };
 
 const props = defineProps<{ space: Space }>();
 
+const uiStore = useUiStore();
 const { setTitle } = useTitle();
 
 const loaded = ref(false);
@@ -60,19 +61,30 @@ async function loadUsers(): Promise<UserWithName[]> {
 
 async function fetch() {
   loaded.value = false;
-  users.value = await loadUsers();
-  hasMore.value = users.value.length === USERS_LIMIT;
-  loaded.value = true;
+
+  try {
+    users.value = await loadUsers();
+    hasMore.value = users.value.length === USERS_LIMIT;
+  } catch (e) {
+    failed.value = true;
+  } finally {
+    loaded.value = true;
+  }
 }
 
 async function fetchMore() {
   loadingMore.value = true;
 
-  const moreUsers = await loadUsers();
+  try {
+    const moreUsers = await loadUsers();
 
-  users.value = [...users.value, ...moreUsers];
-  hasMore.value = moreUsers.length === USERS_LIMIT;
-  loadingMore.value = false;
+    users.value = [...users.value, ...moreUsers];
+    hasMore.value = moreUsers.length === USERS_LIMIT;
+  } catch (e) {
+    uiStore.addNotification('error', 'Failed to load more users');
+  } finally {
+    loadingMore.value = false;
+  }
 }
 
 function handleSortChange(type: 'vote_count' | 'proposal_count') {
@@ -83,7 +95,7 @@ function handleSortChange(type: 'vote_count' | 'proposal_count') {
   }
 }
 
-async function handleEndReached() {
+function handleEndReached() {
   if (hasMore.value) fetchMore();
 }
 
@@ -141,13 +153,13 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
         </td>
         <template v-else>
           <tbody>
-            <td v-if="loaded && users.length === 0" class="px-4 py-3 flex items-center" colspan="3">
+            <td v-if="failed" class="px-4 py-3 flex items-center" colspan="3">
               <IH-exclamation-circle class="inline-block mr-2" />
-              There are no activities.
+              Failed to load the leaderboard.
             </td>
-            <td v-else-if="loaded && failed" class="px-4 py-3 flex items-center" colspan="3">
+            <td v-else-if="users.length === 0" class="px-4 py-3 flex items-center" colspan="3">
               <IH-exclamation-circle class="inline-block mr-2" />
-              Failed to load leaderboard.
+              This space does not have any activities yet.
             </td>
             <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
               <tr v-for="(user, i) in users" :key="i" class="border-b relative">
