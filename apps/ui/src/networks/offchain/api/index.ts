@@ -18,7 +18,8 @@ import {
   User,
   NetworkID,
   ProposalState,
-  SpaceMetadataTreasury
+  SpaceMetadataTreasury,
+  Follow
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
@@ -340,24 +341,27 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       return formatSpace(data.space, networkId);
     },
     loadUser: async (id: string): Promise<User | null> => {
-      const {
-        data: { follows }
-      }: { data: { follows: { space: { id: string } }[] } } = await apollo.query({
-        query: USER_FOLLOWS_QUERY,
-        variables: {
-          first: 25,
-          follower: id
-        }
-      });
-
       // NOTE: missing proposal/vote count on offchain
       return {
         id,
         proposal_count: 0,
         vote_count: 0,
-        created: 0,
-        follows: follows.map(follow => follow.space.id)
+        created: 0
       };
+    },
+    loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
+      const {
+        data: { follows }
+      }: { data: { follows: Follow[] } } = await apollo.query({
+        query: USER_FOLLOWS_QUERY,
+        variables: {
+          first: 25,
+          follower: userId,
+          space: spaceId
+        }
+      });
+
+      return follows;
     }
   };
 }

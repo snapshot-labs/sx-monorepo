@@ -83,8 +83,8 @@ watch(
     loaded.value = false;
     await metaStore.fetchBlock(networkId.value);
 
-    const user = await network.value.api.loadUser(account);
-    followedSpaceIds.value = user?.follows || [];
+    const follows = await network.value.api.loadFollows(account);
+    followedSpaceIds.value = follows.map(follow => follow.space.id);
     proposals.value = [];
 
     if (!followedSpaceIds.value.length) {

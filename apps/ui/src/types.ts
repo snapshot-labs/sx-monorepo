@@ -191,6 +191,13 @@ export type User = {
   follows?: string[];
 };
 
+export type Follow = {
+  id: string;
+  follower: string;
+  space: Space;
+  created: number;
+};
+
 export type Contact = {
   address: string;
   name: string;

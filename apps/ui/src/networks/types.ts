@@ -10,7 +10,8 @@ import type {
   User,
   Choice,
   NetworkID,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  Follow
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -197,6 +198,7 @@ export type NetworkApi = {
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User | null>;
+  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
 };
 
 export type NetworkConstants = {
