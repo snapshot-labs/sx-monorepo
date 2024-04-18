@@ -1,7 +1,7 @@
 import { getNetwork } from '@/networks';
-import type { NetworkID, Space, Vote } from '@/types';
+import type { NetworkID, Proposal, Space, Vote } from '@/types';
 
-const votes: Ref<Record<string, Vote>> = ref({});
+const votes: Ref<Record<Proposal['id'], Vote>> = ref({});
 const follows: Ref<Space['id'][]> = ref([]);
 
 export function useAccount() {
