@@ -134,6 +134,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     supportsSimulation: true,
     managerConnectors: STARKNET_CONNECTORS,
     actions: createActions(networkId, provider, helpers, {
+      chainId,
       l1ChainId: baseChainId,
       ethUrl: ethRpcUrl
     }),

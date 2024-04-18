@@ -408,7 +408,7 @@ export function createActions(
       );
     },
     finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
-      await executionCall(chainId, 'finalizeProposal', {
+      await executionCall('eth', chainId, 'finalizeProposal', {
         space: proposal.space.id,
         proposalId: proposal.proposal_id
       });
@@ -425,7 +425,7 @@ export function createActions(
         convertToMetaTransactions(proposal.execution)
       );
 
-      return executionCall(chainId, 'execute', {
+      return executionCall('eth', chainId, 'execute', {
         space: proposal.space.id,
         proposalId: proposal.proposal_id,
         executionParams: executionData.executionParams[0]
@@ -441,7 +441,7 @@ export function createActions(
         convertToMetaTransactions(proposal.execution)
       );
 
-      return executionCall(chainId, 'executeQueuedProposal', {
+      return executionCall('eth', chainId, 'executeQueuedProposal', {
         space: proposal.space.id,
         executionStrategy: proposal.execution_strategy,
         executionParams: executionData.executionParams[0]

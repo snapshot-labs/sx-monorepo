@@ -166,10 +166,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
     execution: formatExecution(proposal.metadata.execution),
-    has_execution_window_opened:
-      proposal.execution_strategy_type === 'Axiom'
-        ? proposal.max_end <= current
-        : proposal.min_end <= current,
+    has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(proposal.execution_strategy_type)
+      ? proposal.max_end <= current
+      : proposal.min_end <= current,
     state: getProposalState(proposal, current),
     network: networkId,
     privacy: null,

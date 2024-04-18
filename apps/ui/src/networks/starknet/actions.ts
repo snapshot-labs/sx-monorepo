@@ -5,7 +5,7 @@ import {
   getStarknetStrategy,
   NetworkConfig
 } from '@snapshot-labs/sx';
-import { MANA_URL } from '@/helpers/mana';
+import { MANA_URL, executionCall } from '@/helpers/mana';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import {
   getExecutionData,
@@ -45,7 +45,7 @@ export function createActions(
   networkId: NetworkID,
   starkProvider: RpcProvider,
   helpers: NetworkHelpers,
-  { l1ChainId, ethUrl }: { l1ChainId: number; ethUrl: string }
+  { chainId, l1ChainId, ethUrl }: { chainId: string; l1ChainId: number; ethUrl: string }
 ): NetworkActions {
   const networkConfig = CONFIGS[networkId];
   if (!networkConfig) throw new Error(`Unsupported network ${networkId}`);
@@ -400,11 +400,10 @@ export function createActions(
         convertToMetaTransactions(proposal.execution)
       );
 
-      return client.execute({
-        signer: web3.provider.account,
+      return executionCall('stark', chainId, 'execute', {
         space: proposal.space.id,
-        proposalId: proposal.proposal_id as number,
-        executionPayload: executionData.executionParams
+        proposalId: proposal.proposal_id,
+        executionParams: executionData.executionParams
       });
     },
     executeQueuedProposal: () => null,
