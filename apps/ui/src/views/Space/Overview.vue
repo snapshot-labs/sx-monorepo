@@ -14,20 +14,26 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const { loadFollows, follows, followsLoaded, toggleSpaceStar, starredSpacesIds } = useAccount();
+const {
+  starredSpacesIds,
+  followedSpacesIds,
+  followedSpacesLoaded,
+  loadFollowedSpaces,
+  toggleSpaceStar
+} = useAccount();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
 
 onMounted(() => {
   proposalsStore.fetchSummary(props.space.id, props.space.network, PROPOSALS_LIMIT);
-  loadFollows(props.space.network);
+  loadFollowedSpaces(props.space.network);
 });
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
 const spaceStarred = computed(() => starredSpacesIds.value.includes(spaceIdComposite));
-const spaceFollowed = computed(() => follows.value.includes(props.space.id));
+const spaceFollowed = computed(() => followedSpacesIds.value.includes(props.space.id));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 const isOffchainSpace = computed(() => offchainNetworks.includes(props.space.network));
 
@@ -77,10 +83,10 @@ watchEffect(() => setTitle(props.space.name));
         <template v-if="isOffchainSpace">
           <UiTooltip
             v-if="web3.type !== 'argentx'"
-            :title="followsLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
+            :title="followedSpacesLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
           >
             <UiButton disabled class="group">
-              <UiLoading v-if="!followsLoaded" />
+              <UiLoading v-if="!followedSpacesLoaded" />
               <span v-else-if="spaceFollowed" class="inline-block">
                 <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
                 <span class="group-hover:hidden">Following</span>

@@ -3,8 +3,8 @@ import type { NetworkID, Proposal, Space, Vote } from '@/types';
 import pkg from '../../package.json';
 
 const votes = ref<Record<Proposal['id'], Vote>>({});
-const follows = ref<Space['id'][]>([]);
-const followsLoaded = ref(false);
+const followedSpacesIds = ref<Space['id'][]>([]);
+const followedSpacesLoaded = ref(false);
 const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
 const starredSpacesData = ref<Space[]>([]);
 const starredSpacesLoaded = ref(false);
@@ -24,17 +24,19 @@ export function useAccount() {
     votes.value = { ...votes.value, ...userVotes };
   }
 
-  async function loadFollows(networkId: NetworkID) {
+  async function loadFollowedSpaces(networkId: NetworkID) {
     const { account, type } = web3.value;
     if (!account || type === 'argentx') {
-      follows.value = [];
-      followsLoaded.value = true;
+      followedSpacesIds.value = [];
+      followedSpacesLoaded.value = true;
       return;
     }
 
     const network = getNetwork(networkId);
-    follows.value = (await network.api.loadFollows(account)).map(follow => follow.space.id);
-    followsLoaded.value = true;
+    followedSpacesIds.value = (await network.api.loadFollows(account)).map(
+      follow => follow.space.id
+    );
+    followedSpacesLoaded.value = true;
   }
 
   function toggleSpaceStar(id: string) {
@@ -98,20 +100,20 @@ export function useAccount() {
   watchEffect(() => {
     if (!web3Account.value) {
       votes.value = {};
-      follows.value = [];
+      followedSpacesIds.value = [];
     }
   });
 
   return {
+    account: web3.value.account,
     starredSpacesIds,
     starredSpaces,
     starredSpacesLoaded,
-    account: web3.value.account,
-    loadVotes,
-    loadFollows,
+    followedSpacesIds,
+    followedSpacesLoaded,
     votes,
-    follows,
-    followsLoaded,
+    loadVotes,
+    loadFollowedSpaces,
     toggleSpaceStar
   };
 }
