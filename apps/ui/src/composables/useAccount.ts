@@ -3,6 +3,7 @@ import type { NetworkID, Proposal, Space, Vote } from '@/types';
 
 const votes: Ref<Record<Proposal['id'], Vote>> = ref({});
 const follows: Ref<Space['id'][]> = ref([]);
+const followsLoaded = ref(false);
 
 export function useAccount() {
   const { web3, web3Account } = useWeb3();
@@ -25,12 +26,14 @@ export function useAccount() {
     const { account, type } = web3.value;
     if (!account || type === 'argentx') {
       follows.value = [];
+      followsLoaded.value = true;
       return;
     }
 
     const network = getNetwork(networkId);
     follows.value = (await network.api.loadFollows(account)).map(follow => follow.space.id);
+    followsLoaded.value = true;
   }
 
-  return { account: web3.value.account, loadVotes, loadFollows, votes, follows };
+  return { account: web3.value.account, loadVotes, loadFollows, votes, follows, followsLoaded };
 }
