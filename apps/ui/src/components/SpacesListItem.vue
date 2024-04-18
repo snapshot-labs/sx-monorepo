@@ -4,7 +4,7 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const spacesStore = useSpacesStore();
+const { toggleSpaceStar, starredSpacesIds } = useAccount();
 </script>
 
 <template>
@@ -24,10 +24,10 @@ const spacesStore = useSpacesStore();
     </div>
     <button
       class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-      @click.prevent="spacesStore.toggleSpaceStar(`${space.network}:${space.id}`)"
+      @click.prevent="toggleSpaceStar(`${space.network}:${space.id}`)"
     >
       <IS-star
-        v-if="spacesStore.starredSpacesIds.includes(`${space.network}:${space.id}`)"
+        v-if="starredSpacesIds.includes(`${space.network}:${space.id}`)"
         class="inline-block"
       />
       <IH-star v-else class="inline-block" />

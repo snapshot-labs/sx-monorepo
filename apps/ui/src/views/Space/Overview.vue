@@ -14,8 +14,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const { loadFollows, follows, followsLoaded } = useAccount();
-const spacesStore = useSpacesStore();
+const { loadFollows, follows, followsLoaded, toggleSpaceStar, starredSpacesIds } = useAccount();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
@@ -27,7 +26,7 @@ onMounted(() => {
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
-const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
+const spaceStarred = computed(() => starredSpacesIds.value.includes(spaceIdComposite));
 const spaceFollowed = computed(() => follows.value.includes(props.space.id));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 const isOffchainSpace = computed(() => offchainNetworks.includes(props.space.network));
@@ -91,7 +90,7 @@ watchEffect(() => setTitle(props.space.name));
           </UiTooltip>
         </template>
         <UiTooltip v-else :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'">
-          <UiButton class="w-[46px] !px-0" @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
+          <UiButton class="w-[46px] !px-0" @click="toggleSpaceStar(spaceIdComposite)">
             <IS-star v-if="spaceStarred" class="inline-block" />
             <IH-star v-else class="inline-block" />
           </UiButton>
