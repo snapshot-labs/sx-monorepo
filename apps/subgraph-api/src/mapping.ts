@@ -91,7 +91,16 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     let executionStrategyContract = AxiomExecutionStrategy.bind(event.params.proxy)
     let typeResult = executionStrategyContract.try_getStrategyType()
     let quorumResult = executionStrategyContract.try_quorum()
-    if (typeResult.reverted || quorumResult.reverted) return
+    let snapshotAddressResult = executionStrategyContract.try_snapshotAddress()
+    let snapshotSlotResult = executionStrategyContract.try_snapshotSlot()
+    if (
+      typeResult.reverted ||
+      quorumResult.reverted ||
+      snapshotAddressResult.reverted ||
+      snapshotSlotResult.reverted
+    ) {
+      return
+    }
 
     let executionStrategy = new ExecutionStrategy(
       toChecksumAddress(event.params.proxy.toHexString())
@@ -101,6 +110,10 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
     executionStrategy.treasury = toChecksumAddress(event.params.proxy.toHexString())
     executionStrategy.timelock_delay = new BigInt(0)
+    executionStrategy.axiom_snapshot_address = toChecksumAddress(
+      snapshotAddressResult.value.toHexString()
+    )
+    executionStrategy.axiom_snapshot_slot = snapshotSlotResult.value
     executionStrategy.save()
 
     AxiomExecutionStrategyTemplate.create(event.params.proxy)
@@ -230,6 +243,8 @@ export function handleProposalCreated(event: ProposalCreated): void {
     proposal.quorum = executionStrategy.quorum
     proposal.timelock_veto_guardian = executionStrategy.timelock_veto_guardian
     proposal.timelock_delay = executionStrategy.timelock_delay
+    proposal.axiom_snapshot_address = executionStrategy.axiom_snapshot_address
+    proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot
     proposal.execution_strategy_type = executionStrategy.type
   } else {
     proposal.quorum = new BigDecimal(new BigInt(0))
@@ -301,6 +316,8 @@ export function handleProposalUpdated(event: ProposalUpdated): void {
   if (executionStrategy !== null) {
     proposal.quorum = executionStrategy.quorum
     proposal.timelock_delay = executionStrategy.timelock_delay
+    proposal.axiom_snapshot_address = executionStrategy.axiom_snapshot_address
+    proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot
     proposal.execution_strategy_type = executionStrategy.type
   } else {
     proposal.quorum = new BigDecimal(new BigInt(0))
