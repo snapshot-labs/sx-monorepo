@@ -10,13 +10,12 @@ useTitle('Home');
 
 const metaStore = useMetaStore();
 const { web3 } = useWeb3();
-const { loadVotes } = useAccount();
+const { loadVotes, loadFollows, follows } = useAccount();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
 const hasMore = ref(false);
 const proposals = ref<Proposal[]>([]);
-const followedSpaceIds = ref<string[]>([]);
 
 const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
 
@@ -47,7 +46,7 @@ async function withAuthorNames(proposals: Proposal[]) {
 async function loadProposalsPage(skip = 0) {
   return withAuthorNames(
     await network.value.api.loadProposals(
-      followedSpaceIds.value,
+      follows.value,
       { limit: PROPOSALS_LIMIT, skip },
       metaStore.getCurrent(networkId.value) || 0,
       filter.value
@@ -76,32 +75,30 @@ async function handleEndReached() {
   if (hasMore.value) fetchMore();
 }
 
-// Assume that the user is logged in at this point, verified by the parent route
+onMounted(() => {
+  metaStore.fetchBlock(networkId.value);
+  loadFollows(networkId.value);
+});
+
 watch(
-  [() => web3.value.account, () => web3.value.type],
-  async ([account, type]) => {
+  () => web3.value.account,
+  () => loadFollows(networkId.value)
+);
+
+watch(
+  () => follows.value,
+  () => {
     loaded.value = false;
-
-    if (type === 'argentx') {
-      loaded.value = true;
-      return;
-    }
-
-    await metaStore.fetchBlock(networkId.value);
-
-    const follows = await network.value.api.loadFollows(account);
-    followedSpaceIds.value = follows.map(follow => follow.space.id);
     proposals.value = [];
 
-    if (!followedSpaceIds.value.length) {
+    if (!follows.value.length) {
       loaded.value = true;
       return;
     }
 
     loadVotes(networkId.value);
     fetch();
-  },
-  { immediate: true }
+  }
 );
 
 watch(filter, (toFilter, fromFilter) => {
