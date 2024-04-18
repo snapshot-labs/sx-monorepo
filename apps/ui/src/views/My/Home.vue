@@ -78,9 +78,15 @@ async function handleEndReached() {
 
 // Assume that the user is logged in at this point, verified by the parent route
 watch(
-  () => web3.value.account,
-  async account => {
+  [() => web3.value.account, () => web3.value.type],
+  async ([account, type]) => {
     loaded.value = false;
+
+    if (type === 'argentx') {
+      loaded.value = true;
+      return;
+    }
+
     await metaStore.fetchBlock(networkId.value);
 
     const follows = await network.value.api.loadFollows(account);
