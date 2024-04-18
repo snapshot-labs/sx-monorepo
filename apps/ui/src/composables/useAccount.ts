@@ -5,12 +5,14 @@ import pkg from '../../package.json';
 const votes = ref<Record<Proposal['id'], Vote>>({});
 const followedSpacesIds = ref<Space['id'][]>([]);
 const followedSpacesLoaded = ref(false);
+// This storage contains the list of offchain starred spaces, as well as a local
+// copy of the followed spaces (which will be synced with backend on page load)
 const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
 const starredOrFollowedSpacesData = ref<Space[]>([]);
 const starredSpacesLoaded = ref(false);
 
 export function useAccount() {
-  const { web3, web3Account } = useWeb3();
+  const { web3 } = useWeb3();
   const { mixpanel } = useMixpanel();
   const { spacesMap, getSpaces } = useSpaces();
 
@@ -30,10 +32,20 @@ export function useAccount() {
 
   async function loadFollowedSpaces() {
     const network = getNetwork(offchainNetworkId.value);
-    const followsIds = (await network.api.loadFollows(web3.value.account)).map(
+    const followedIds = (await network.api.loadFollows(web3.value.account)).map(
       follow => `${offchainNetworkId.value}:${follow.space.id}`
     );
-    const newIds = followsIds.filter(id => !followedSpacesIds.value.includes(id));
+    const newIds = followedIds.filter(id => !followedSpacesIds.value.includes(id));
+    console.log(followedIds);
+    const newOrder = Array.from(
+      new Set(
+        [...starredSpacesIds.value, ...followedIds].filter(
+          id => !id.startsWith(`${offchainNetworkId.value}:`) || followedIds.includes(id)
+        )
+      )
+    );
+
+    starredSpacesIds.value = newOrder;
 
     if (!newIds.length) {
       followedSpacesLoaded.value = true;
@@ -45,7 +57,7 @@ export function useAccount() {
     });
 
     followedSpacesLoaded.value = true;
-    followedSpacesIds.value = followsIds;
+    followedSpacesIds.value = followedIds;
 
     starredOrFollowedSpacesData.value = [
       ...starredOrFollowedSpacesData.value,
@@ -78,7 +90,7 @@ export function useAccount() {
 
   const starredOrFollowedSpaces = computed({
     get() {
-      return [...starredSpacesIds.value, ...followedSpacesIds.value]
+      return starredSpacesIds.value
         .map(id => starredOrFollowedSpacesMap.value.get(id))
         .filter(Boolean) as Space[];
     },
@@ -115,10 +127,11 @@ export function useAccount() {
     { immediate: true }
   );
 
-  watchEffect(() => {
-    if (!web3Account.value || web3.value.type === 'argentx') {
+  watch([() => web3.value.account, () => web3.value.type], ([web3, type]) => {
+    if (!web3 || type === 'argentx') {
       votes.value = {};
       followedSpacesIds.value = [];
+      return;
     }
 
     loadFollowedSpaces();
