@@ -10,7 +10,7 @@ useTitle('Home');
 
 const metaStore = useMetaStore();
 const { web3 } = useWeb3();
-const { loadVotes, loadFollowedSpaces, followedSpacesIds } = useAccount();
+const { loadVotes, followedSpacesIds } = useAccount();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
@@ -77,13 +77,7 @@ async function handleEndReached() {
 
 onMounted(() => {
   metaStore.fetchBlock(networkId.value);
-  loadFollowedSpaces(networkId.value);
 });
-
-watch(
-  () => web3.value.account,
-  () => loadFollowedSpaces(networkId.value)
-);
 
 watch(
   () => followedSpacesIds.value,

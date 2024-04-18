@@ -14,20 +14,13 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const {
-  starredSpacesIds,
-  followedSpacesIds,
-  followedSpacesLoaded,
-  loadFollowedSpaces,
-  toggleSpaceStar
-} = useAccount();
+const { starredSpacesIds, followedSpacesIds, followedSpacesLoaded, toggleSpaceStar } = useAccount();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
 
 onMounted(() => {
   proposalsStore.fetchSummary(props.space.id, props.space.network, PROPOSALS_LIMIT);
-  loadFollowedSpaces(props.space.network);
 });
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;

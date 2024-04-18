@@ -2,7 +2,7 @@
 import draggable from 'vuedraggable';
 
 const uiStore = useUiStore();
-const { starredSpacesLoaded, starredSpaces } = useAccount();
+const { starredSpacesLoaded, followedSpacesLoaded, starredOrFollowedSpaces } = useAccount();
 </script>
 
 <template>
@@ -10,10 +10,10 @@ const { starredSpacesLoaded, starredSpaces } = useAccount();
     <router-link :to="{ name: 'landing' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
-    <UiLoading v-if="!starredSpacesLoaded" />
+    <UiLoading v-if="!starredSpacesLoaded || !followedSpacesLoaded" />
     <draggable
       v-else
-      v-model="starredSpaces"
+      v-model="starredOrFollowedSpaces"
       :delay="100"
       :delay-on-touch-only="true"
       :touch-start-threshold="35"

@@ -1,4 +1,4 @@
-import { getNetwork } from '@/networks';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import type { NetworkID, Proposal, Space, Vote } from '@/types';
 import pkg from '../../package.json';
 
@@ -6,13 +6,17 @@ const votes = ref<Record<Proposal['id'], Vote>>({});
 const followedSpacesIds = ref<Space['id'][]>([]);
 const followedSpacesLoaded = ref(false);
 const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
-const starredSpacesData = ref<Space[]>([]);
+const starredOrFollowedSpacesData = ref<Space[]>([]);
 const starredSpacesLoaded = ref(false);
 
 export function useAccount() {
   const { web3, web3Account } = useWeb3();
   const { mixpanel } = useMixpanel();
   const { spacesMap, getSpaces } = useSpaces();
+
+  const offchainNetworkId = computed(
+    () => offchainNetworks.filter(network => enabledNetworks.includes(network))[0]
+  );
 
   async function loadVotes(networkId: NetworkID, spaceId?: string) {
     const account = web3.value.account;
@@ -24,19 +28,30 @@ export function useAccount() {
     votes.value = { ...votes.value, ...userVotes };
   }
 
-  async function loadFollowedSpaces(networkId: NetworkID) {
-    const { account, type } = web3.value;
-    if (!account || type === 'argentx') {
-      followedSpacesIds.value = [];
+  async function loadFollowedSpaces() {
+    const network = getNetwork(offchainNetworkId.value);
+    const followsIds = (await network.api.loadFollows(web3.value.account)).map(
+      follow => `${offchainNetworkId.value}:${follow.space.id}`
+    );
+    const newIds = followsIds.filter(id => !followedSpacesIds.value.includes(id));
+
+    if (!newIds.length) {
       followedSpacesLoaded.value = true;
       return;
     }
 
-    const network = getNetwork(networkId);
-    followedSpacesIds.value = (await network.api.loadFollows(account)).map(
-      follow => follow.space.id
-    );
+    const spaces = await getSpaces({
+      id_in: newIds.filter(id => !spacesMap.value.has(id))
+    });
+
     followedSpacesLoaded.value = true;
+    followedSpacesIds.value = followsIds;
+
+    starredOrFollowedSpacesData.value = [
+      ...starredOrFollowedSpacesData.value,
+      ...spaces,
+      ...(newIds.map(id => spacesMap.value.get(id)).filter(s => !!s) as Space[])
+    ];
   }
 
   function toggleSpaceStar(id: string) {
@@ -54,14 +69,17 @@ export function useAccount() {
     });
   }
 
-  const starredSpacesMap = computed(
-    () => new Map(starredSpacesData.value.map(space => [`${space.network}:${space.id}`, space]))
+  const starredOrFollowedSpacesMap = computed(
+    () =>
+      new Map(
+        starredOrFollowedSpacesData.value.map(space => [`${space.network}:${space.id}`, space])
+      )
   );
 
-  const starredSpaces = computed({
+  const starredOrFollowedSpaces = computed({
     get() {
-      return starredSpacesIds.value
-        .map(id => starredSpacesMap.value.get(id))
+      return [...starredSpacesIds.value, ...followedSpacesIds.value]
+        .map(id => starredOrFollowedSpacesMap.value.get(id))
         .filter(Boolean) as Space[];
     },
     set(spaces: Space[]) {
@@ -75,7 +93,7 @@ export function useAccount() {
       const newIds = !previousIds
         ? currentIds
         : currentIds.filter(
-            (id: string) => !previousIds.includes(id) && !starredSpacesMap.value.has(id)
+            (id: string) => !previousIds.includes(id) && !starredOrFollowedSpacesMap.value.has(id)
           );
 
       if (!newIds.length) {
@@ -88,8 +106,8 @@ export function useAccount() {
       });
 
       starredSpacesLoaded.value = true;
-      starredSpacesData.value = [
-        ...starredSpacesData.value,
+      starredOrFollowedSpacesData.value = [
+        ...starredOrFollowedSpacesData.value,
         ...spaces,
         ...(newIds.map(id => spacesMap.value.get(id)).filter(s => !!s) as Space[])
       ];
@@ -98,22 +116,23 @@ export function useAccount() {
   );
 
   watchEffect(() => {
-    if (!web3Account.value) {
+    if (!web3Account.value || web3.value.type === 'argentx') {
       votes.value = {};
       followedSpacesIds.value = [];
     }
+
+    loadFollowedSpaces();
   });
 
   return {
     account: web3.value.account,
     starredSpacesIds,
-    starredSpaces,
+    starredOrFollowedSpaces,
     starredSpacesLoaded,
     followedSpacesIds,
     followedSpacesLoaded,
     votes,
     loadVotes,
-    loadFollowedSpaces,
     toggleSpaceStar
   };
 }
