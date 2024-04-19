@@ -27,7 +27,7 @@ const spacesStore = useSpacesStore();
           class="block"
           @click="uiStore.sidebarOpen = false"
         >
-          <UiTooltip :title="element.name" placement="right">
+          <UiTooltip :title="element.name" placement="right" :touch="false">
             <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />
           </UiTooltip>
         </router-link>

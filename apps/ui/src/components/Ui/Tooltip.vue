@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import type { Placement } from 'tippy.js';
+import type { Props } from 'tippy.js';
 
-defineProps<{
-  title: string;
-  placement?: Placement;
-}>();
+withDefaults(
+  defineProps<{
+    title: string;
+    placement?: Props['placement'];
+    touch?: Props['touch'];
+  }>(),
+  {
+    placement: 'top',
+    touch: true
+  }
+);
 </script>
 
 <template>
-  <div v-tippy="{ content: title, placement }" class="inline-block relative">
+  <div v-tippy="{ content: title, placement, touch }" class="inline-block relative">
     <slot />
   </div>
 </template>
