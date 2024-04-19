@@ -72,22 +72,19 @@ watchEffect(() => setTitle(props.space.name));
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
-
-        <template v-if="isOffchainSpace">
-          <UiTooltip
-            v-if="web3.type !== 'argentx'"
-            :title="followedSpacesLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
-          >
-            <UiButton disabled class="group">
-              <UiLoading v-if="!followedSpacesLoaded" />
-              <span v-else-if="spaceFollowed" class="inline-block">
-                <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
-                <span class="group-hover:hidden">Following</span>
-              </span>
-              <span v-else class="inline-block">Follow</span>
-            </UiButton>
-          </UiTooltip>
-        </template>
+        <UiTooltip
+          v-if="isOffchainSpace && web3.type !== 'argentx'"
+          :title="followedSpacesLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
+        >
+          <UiButton disabled class="group">
+            <UiLoading v-if="!followedSpacesLoaded" />
+            <span v-else-if="spaceFollowed" class="inline-block">
+              <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
+              <span class="group-hover:hidden">Following</span>
+            </span>
+            <span v-else class="inline-block">Follow</span>
+          </UiButton>
+        </UiTooltip>
         <UiTooltip v-else :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'">
           <UiButton class="w-[46px] !px-0" @click="toggleSpaceStar(spaceIdComposite)">
             <IS-star v-if="spaceStarred" class="inline-block" />
