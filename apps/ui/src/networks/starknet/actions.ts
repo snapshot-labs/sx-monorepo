@@ -406,7 +406,9 @@ export function createActions(
         executionParams: executionData.executionParams
       });
     },
-    executeQueuedProposal: () => null,
+    executeQueuedProposal: () => {
+      throw new Error('Not implemented');
+    },
     vetoProposal: () => null,
     setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {
       return client.setVotingDelay({

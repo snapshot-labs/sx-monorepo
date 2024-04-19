@@ -34,6 +34,9 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     isExecutorSupported: () => false,
     isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
+    getTransaction: () => {
+      throw new Error('Not implemented');
+    },
     waitForTransaction: () => {
       throw new Error('Not implemented');
     },
