@@ -2,7 +2,7 @@
 import draggable from 'vuedraggable';
 
 const uiStore = useUiStore();
-const { starredSpacesLoaded, followedSpacesLoaded, bookmarkedSpaces } = useAccount();
+const { bookmarksLoaded, bookmarkedSpaces } = useAccount();
 </script>
 
 <template>
@@ -10,7 +10,7 @@ const { starredSpacesLoaded, followedSpacesLoaded, bookmarkedSpaces } = useAccou
     <router-link :to="{ name: 'landing' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
-    <UiLoading v-if="!starredSpacesLoaded || !followedSpacesLoaded" />
+    <UiLoading v-if="!bookmarksLoaded" />
     <draggable
       v-else
       v-model="bookmarkedSpaces"
