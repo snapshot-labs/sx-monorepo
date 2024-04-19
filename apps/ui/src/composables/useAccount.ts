@@ -4,7 +4,7 @@ import pkg from '../../package.json';
 
 const votes = ref<Record<Proposal['id'], Vote>>({});
 const spacesData = ref<Space[]>([]);
-const followedSpacesIds = ref<Space['id'][]>([]);
+const followedSpacesIds = ref<string[]>([]);
 const followedSpacesLoaded = ref(false);
 const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
 const starredSpacesLoaded = ref(false);
