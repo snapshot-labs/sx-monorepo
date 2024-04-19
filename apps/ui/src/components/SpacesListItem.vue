@@ -5,11 +5,13 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { toggleSpaceStar, starredSpacesIds } = useAccount();
+
+const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 </script>
 
 <template>
   <router-link
-    :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
+    :to="{ name: 'space-overview', params: { id: spaceIdComposite } }"
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
     <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] absolute" />
@@ -24,12 +26,9 @@ const { toggleSpaceStar, starredSpacesIds } = useAccount();
     </div>
     <button
       class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-      @click.prevent="toggleSpaceStar(`${space.network}:${space.id}`)"
+      @click.prevent="toggleSpaceStar(spaceIdComposite)"
     >
-      <IS-star
-        v-if="starredSpacesIds.includes(`${space.network}:${space.id}`)"
-        class="inline-block"
-      />
+      <IS-star v-if="starredSpacesIds.includes(spaceIdComposite)" class="inline-block" />
       <IH-star v-else class="inline-block" />
     </button>
     <div class="px-4">
