@@ -127,15 +127,20 @@ export function useAccount() {
     { immediate: true }
   );
 
-  watch([() => web3.value.account, () => web3.value.type], ([web3, type]) => {
-    if (!web3 || type === 'argentx') {
-      votes.value = {};
-      followedSpacesIds.value = [];
-      return;
-    }
+  watch(
+    [() => web3.value.account, () => web3.value.type],
+    ([web3, type]) => {
+      if (!web3 || type === 'argentx') {
+        votes.value = {};
+        followedSpacesIds.value = [];
+        followedSpacesLoaded.value = true;
+        return;
+      }
 
-    loadFollowedSpaces();
-  });
+      loadFollowedSpaces();
+    },
+    { immediate: true }
+  );
 
   return {
     account: web3.value.account,
