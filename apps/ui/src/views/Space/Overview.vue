@@ -26,7 +26,7 @@ onMounted(() => {
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
 const spaceStarred = computed(() => starredSpacesIds.value.includes(spaceIdComposite));
-const spaceFollowed = computed(() => followedSpacesIds.value.includes(props.space.id));
+const spaceFollowed = computed(() => followedSpacesIds.value.includes(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 const isOffchainSpace = computed(() => offchainNetworks.includes(props.space.network));
 
