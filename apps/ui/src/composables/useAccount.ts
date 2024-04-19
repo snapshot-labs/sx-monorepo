@@ -3,16 +3,19 @@ import type { NetworkID, Proposal, Space, Vote } from '@/types';
 import pkg from '../../package.json';
 
 const votes = ref<Record<Proposal['id'], Vote>>({});
+const spacesData = ref<Space[]>([]);
 const followedSpacesIds = ref<Space['id'][]>([]);
 const followedSpacesLoaded = ref(false);
-// This storage contains the list of offchain starred spaces, as well as a local
-// copy of the followed spaces (which will be synced with backend on page load)
 const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
-const starredOrFollowedSpacesData = ref<Space[]>([]);
 const starredSpacesLoaded = ref(false);
+// Combined list of starred and followed spaces by account, to keep sort order
+const accountBookmarkedSpacesIds = useStorage(
+  `${pkg.name}.spaces-bookmarked`,
+  {} as Record<string, string[]>
+);
 
 export function useAccount() {
-  const { web3 } = useWeb3();
+  const { web3, authInitiated } = useWeb3();
   const { mixpanel } = useMixpanel();
   const { spacesMap, getSpaces } = useSpaces();
 
@@ -36,31 +39,25 @@ export function useAccount() {
       follow => `${offchainNetworkId.value}:${follow.space.id}`
     );
     const newIds = followedIds.filter(id => !followedSpacesIds.value.includes(id));
-    console.log(followedIds);
-    const newOrder = Array.from(
+
+    accountBookmarkedSpacesIds.value[web3.value.account] = Array.from(
       new Set(
-        [...starredSpacesIds.value, ...followedIds].filter(
+        [...(accountBookmarkedSpacesIds.value[web3.value.account] || []), ...followedIds].filter(
           id => !id.startsWith(`${offchainNetworkId.value}:`) || followedIds.includes(id)
         )
       )
     );
 
-    starredSpacesIds.value = newOrder;
-
-    if (!newIds.length) {
-      followedSpacesLoaded.value = true;
-      return;
-    }
+    if (!newIds.length) return;
 
     const spaces = await getSpaces({
       id_in: newIds.filter(id => !spacesMap.value.has(id))
     });
 
-    followedSpacesLoaded.value = true;
     followedSpacesIds.value = followedIds;
 
-    starredOrFollowedSpacesData.value = [
-      ...starredOrFollowedSpacesData.value,
+    spacesData.value = [
+      ...spacesData.value,
       ...spaces,
       ...(newIds.map(id => spacesMap.value.get(id)).filter(s => !!s) as Space[])
     ];
@@ -71,8 +68,15 @@ export function useAccount() {
 
     if (alreadyStarred) {
       starredSpacesIds.value = starredSpacesIds.value.filter((spaceId: string) => spaceId !== id);
+      accountBookmarkedSpacesIds.value[web3.value.account] = accountBookmarkedSpacesIds.value[
+        web3.value.account
+      ].filter((spaceId: string) => spaceId !== id);
     } else {
       starredSpacesIds.value = [id, ...starredSpacesIds.value];
+      accountBookmarkedSpacesIds.value[web3.value.account] = [
+        id,
+        ...(accountBookmarkedSpacesIds.value[web3.value.account] || [])
+      ];
     }
 
     mixpanel.track('Set space favorite', {
@@ -81,31 +85,48 @@ export function useAccount() {
     });
   }
 
-  const starredOrFollowedSpacesMap = computed(
-    () =>
-      new Map(
-        starredOrFollowedSpacesData.value.map(space => [`${space.network}:${space.id}`, space])
-      )
+  const bookmarkedSpacesMap = computed(
+    () => new Map(spacesData.value.map(space => [`${space.network}:${space.id}`, space]))
   );
 
-  const starredOrFollowedSpaces = computed({
+  const bookmarkedSpaces = computed({
     get() {
-      return starredSpacesIds.value
-        .map(id => starredOrFollowedSpacesMap.value.get(id))
+      return (
+        web3.value.account
+          ? accountBookmarkedSpacesIds.value[web3.value.account] || []
+          : starredSpacesIds.value
+      )
+        .map(id => bookmarkedSpacesMap.value.get(id))
         .filter(Boolean) as Space[];
     },
     set(spaces: Space[]) {
-      starredSpacesIds.value = spaces.map(space => `${space.network}:${space.id}`);
+      starredSpacesIds.value = spaces
+        .filter(space => space.network !== offchainNetworkId.value)
+        .map(space => `${space.network}:${space.id}`);
+
+      accountBookmarkedSpacesIds.value[web3.value.account] = spaces.map(
+        space => `${space.network}:${space.id}`
+      );
     }
   });
 
   watch(
     starredSpacesIds,
     async (currentIds, previousIds) => {
+      if (web3.value.account) {
+        accountBookmarkedSpacesIds.value[web3.value.account] = Array.from(
+          new Set(
+            [...(accountBookmarkedSpacesIds.value[web3.value.account] || []), ...currentIds].filter(
+              id => id.startsWith(`${offchainNetworkId.value}:`) || currentIds.includes(id)
+            )
+          )
+        );
+      }
+
       const newIds = !previousIds
         ? currentIds
         : currentIds.filter(
-            (id: string) => !previousIds.includes(id) && !starredOrFollowedSpacesMap.value.has(id)
+            (id: string) => !previousIds.includes(id) && !bookmarkedSpacesMap.value.has(id)
           );
 
       if (!newIds.length) {
@@ -118,8 +139,8 @@ export function useAccount() {
       });
 
       starredSpacesLoaded.value = true;
-      starredOrFollowedSpacesData.value = [
-        ...starredOrFollowedSpacesData.value,
+      spacesData.value = [
+        ...spacesData.value,
         ...spaces,
         ...(newIds.map(id => spacesMap.value.get(id)).filter(s => !!s) as Space[])
       ];
@@ -128,24 +149,28 @@ export function useAccount() {
   );
 
   watch(
-    [() => web3.value.account, () => web3.value.type],
-    ([web3, type]) => {
-      if (!web3 || type === 'argentx') {
+    [() => web3.value.account, () => web3.value.type, () => authInitiated.value],
+    async ([web3, type, authInitiated]) => {
+      if (!authInitiated) return;
+
+      if (!web3) {
         votes.value = {};
         followedSpacesIds.value = [];
         followedSpacesLoaded.value = true;
         return;
       }
 
-      loadFollowedSpaces();
+      if (type !== 'argentx') await loadFollowedSpaces();
+
+      followedSpacesLoaded.value = true;
     },
     { immediate: true }
   );
 
   return {
     account: web3.value.account,
+    bookmarkedSpaces,
     starredSpacesIds,
-    starredOrFollowedSpaces,
     starredSpacesLoaded,
     followedSpacesIds,
     followedSpacesLoaded,

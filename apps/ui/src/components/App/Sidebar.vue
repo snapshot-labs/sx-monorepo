@@ -2,7 +2,7 @@
 import draggable from 'vuedraggable';
 
 const uiStore = useUiStore();
-const { starredSpacesLoaded, followedSpacesLoaded, starredOrFollowedSpaces } = useAccount();
+const { starredSpacesLoaded, followedSpacesLoaded, bookmarkedSpaces } = useAccount();
 </script>
 
 <template>
@@ -13,7 +13,7 @@ const { starredSpacesLoaded, followedSpacesLoaded, starredOrFollowedSpaces } = u
     <UiLoading v-if="!starredSpacesLoaded || !followedSpacesLoaded" />
     <draggable
       v-else
-      v-model="starredOrFollowedSpaces"
+      v-model="bookmarkedSpaces"
       :delay="100"
       :delay-on-touch-only="true"
       :touch-start-threshold="35"
