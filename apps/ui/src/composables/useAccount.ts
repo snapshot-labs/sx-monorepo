@@ -19,9 +19,9 @@ export function useAccount() {
   const { spacesMap, getSpaces } = useSpaces();
   const { mixpanel } = useMixpanel();
 
-  const offchainNetworkId = computed(
-    () => offchainNetworks.filter(network => enabledNetworks.includes(network))[0]
-  );
+  const offchainNetworkId = offchainNetworks.filter(network =>
+    enabledNetworks.includes(network)
+  )[0];
 
   const bookmarksLoaded = computed(() => starredSpacesLoaded.value && followedSpacesLoaded.value);
 
@@ -44,7 +44,7 @@ export function useAccount() {
       new Set(
         [...bookmarkedSpacesIds.value, ...spaceIds].filter(
           id =>
-            id.startsWith(`${offchainNetworkId.value}:`) !== (type === 'followed') ||
+            id.startsWith(`${offchainNetworkId}:`) !== (type === 'followed') ||
             spaceIds.includes(id)
         )
       )
@@ -66,9 +66,9 @@ export function useAccount() {
   }
 
   async function loadFollowedSpaces() {
-    const network = getNetwork(offchainNetworkId.value);
+    const network = getNetwork(offchainNetworkId);
     const followedIds = (await network.api.loadFollows(web3.value.account)).map(
-      follow => `${offchainNetworkId.value}:${follow.space.id}`
+      follow => `${offchainNetworkId}:${follow.space.id}`
     );
     const newIds = followedIds.filter(id => !followedSpacesIds.value.includes(id));
     followedSpacesIds.value = followedIds;
@@ -108,7 +108,7 @@ export function useAccount() {
     },
     set(spaces: Space[]) {
       starredSpacesIds.value = spaces
-        .filter(space => space.network !== offchainNetworkId.value)
+        .filter(space => space.network !== offchainNetworkId)
         .map(space => `${space.network}:${space.id}`);
 
       accountsBookmarkedSpacesIds.value[web3.value.account] = spaces.map(
