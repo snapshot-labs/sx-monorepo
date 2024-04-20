@@ -594,6 +594,8 @@ export function createActions(
           };
         })
       );
-    }
+    },
+    followSpace: () => {},
+    unfollowSpace: () => {}
   };
 }
