@@ -18,6 +18,7 @@ const {
   starredSpacesIds,
   followedSpacesIds,
   followedSpacesLoaded,
+  followSpaceLoading,
   toggleSpaceStar,
   toggleSpaceFollow
 } = useAccount();
@@ -83,7 +84,7 @@ watchEffect(() => setTitle(props.space.name));
           :title="followedSpacesLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
         >
           <UiButton class="group" @click="toggleSpaceFollow(spaceIdComposite)">
-            <UiLoading v-if="!followedSpacesLoaded" />
+            <UiLoading v-if="!followedSpacesLoaded || followSpaceLoading" />
             <span v-else-if="spaceFollowed" class="inline-block">
               <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
               <span class="group-hover:hidden">Following</span>

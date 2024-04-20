@@ -6,6 +6,7 @@ const votes = ref<Record<Proposal['id'], Vote>>({});
 const spacesData = ref<Space[]>([]);
 const followedSpacesIds = ref<string[]>([]);
 const followedSpacesLoaded = ref(false);
+const followSpaceLoading = ref(false);
 const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
 const starredSpacesLoaded = ref(false);
 // Combined list of starred and followed spaces by account, to keep sort order
@@ -100,17 +101,25 @@ export function useAccount() {
   async function toggleSpaceFollow(id: string) {
     const alreadyFollowed = followedSpacesIds.value.includes(id);
     const [spaceNetwork, spaceId] = id.split(':');
+    followSpaceLoading.value = true;
 
-    if (alreadyFollowed) {
-      await actions.unfollowSpace(spaceNetwork as NetworkID, spaceId);
-      followedSpacesIds.value = followedSpacesIds.value.filter((spaceId: string) => spaceId !== id);
-      accountsBookmarkedSpacesIds.value[web3.value.account] = accountsBookmarkedSpacesIds.value[
-        web3.value.account
-      ].filter((spaceId: string) => spaceId !== id);
-    } else {
-      await actions.followSpace(spaceNetwork as NetworkID, spaceId);
-      followedSpacesIds.value = [id, ...followedSpacesIds.value];
-      accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
+    try {
+      if (alreadyFollowed) {
+        await actions.unfollowSpace(spaceNetwork as NetworkID, spaceId);
+        followedSpacesIds.value = followedSpacesIds.value.filter(
+          (spaceId: string) => spaceId !== id
+        );
+        accountsBookmarkedSpacesIds.value[web3.value.account] = accountsBookmarkedSpacesIds.value[
+          web3.value.account
+        ].filter((spaceId: string) => spaceId !== id);
+      } else {
+        await actions.followSpace(spaceNetwork as NetworkID, spaceId);
+        followedSpacesIds.value = [id, ...followedSpacesIds.value];
+        accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
+      }
+    } catch (e) {
+    } finally {
+      followSpaceLoading.value = false;
     }
   }
 
@@ -179,6 +188,7 @@ export function useAccount() {
     starredSpacesLoaded,
     followedSpacesIds,
     followedSpacesLoaded,
+    followSpaceLoading,
     votes,
     loadVotes,
     toggleSpaceStar,
