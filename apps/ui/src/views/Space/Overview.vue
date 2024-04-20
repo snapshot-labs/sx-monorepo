@@ -83,7 +83,11 @@ watchEffect(() => setTitle(props.space.name));
           v-if="isOffchainSpace && web3.type !== 'argentx'"
           :title="followedSpacesLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
         >
-          <UiButton class="group" @click="toggleSpaceFollow(spaceIdComposite)">
+          <UiButton
+            class="group"
+            :disabled="!followedSpacesLoaded || followSpaceLoading"
+            @click="toggleSpaceFollow(spaceIdComposite)"
+          >
             <UiLoading v-if="!followedSpacesLoaded || followSpaceLoading" />
             <span v-else-if="spaceFollowed" class="inline-block">
               <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
