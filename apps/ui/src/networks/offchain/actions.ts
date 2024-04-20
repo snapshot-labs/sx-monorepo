@@ -202,16 +202,16 @@ export function createActions(
         };
       });
     },
-    followSpace(web3: Web3Provider, space: Space) {
+    followSpace(web3: Web3Provider, spaceId: string) {
       return client.followSpace({
         signer: web3.getSigner(),
-        data: { space: space.id }
+        data: { space: spaceId }
       });
     },
-    unfollowSpace(web3: Web3Provider, space: Space) {
+    unfollowSpace(web3: Web3Provider, spaceId: string) {
       return client.unfollowSpace({
         signer: web3.getSigner(),
-        data: { space: space.id }
+        data: { space: spaceId }
       });
     }
   };

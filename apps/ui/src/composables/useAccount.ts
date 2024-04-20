@@ -99,18 +99,16 @@ export function useAccount() {
 
   async function toggleSpaceFollow(id: string) {
     const alreadyFollowed = followedSpacesIds.value.includes(id);
-    const space = bookmarkedSpacesMap.value.get(id);
-
-    if (!space) return;
+    const [spaceNetwork, spaceId] = id.split(':');
 
     if (alreadyFollowed) {
-      await actions.unfollowSpace(space.network, space);
+      await actions.unfollowSpace(spaceNetwork as NetworkID, spaceId);
       followedSpacesIds.value = followedSpacesIds.value.filter((spaceId: string) => spaceId !== id);
       accountsBookmarkedSpacesIds.value[web3.value.account] = accountsBookmarkedSpacesIds.value[
         web3.value.account
       ].filter((spaceId: string) => spaceId !== id);
     } else {
-      await actions.followSpace(space.network, space);
+      await actions.followSpace(spaceNetwork as NetworkID, spaceId);
       followedSpacesIds.value = [id, ...followedSpacesIds.value];
       accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
     }

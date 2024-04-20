@@ -493,7 +493,7 @@ export function useActions() {
     });
   }
 
-  async function followSpace(networkId: NetworkID, space: Space) {
+  async function followSpace(networkId: NetworkID, spaceId: string) {
     if (!web3.value.account) {
       await forceLogin();
       return false;
@@ -501,12 +501,12 @@ export function useActions() {
 
     const network = getNetwork(networkId);
 
-    await wrapPromise(networkId, network.actions.followSpace(auth.web3, space));
+    await wrapPromise(networkId, network.actions.followSpace(auth.web3, spaceId));
 
     return true;
   }
-  
-  async function unfollowSpace(networkId: NetworkID, space: Space) {
+
+  async function unfollowSpace(networkId: NetworkID, spaceId: string) {
     if (!web3.value.account) {
       await forceLogin();
       return false;
@@ -514,7 +514,7 @@ export function useActions() {
 
     const network = getNetwork(networkId);
 
-    await wrapPromise(networkId, network.actions.unfollowSpace(auth.web3, space));
+    await wrapPromise(networkId, network.actions.unfollowSpace(auth.web3, spaceId));
 
     return true;
   }
