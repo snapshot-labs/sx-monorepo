@@ -2,8 +2,6 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
 
-const ROUTES_WITH_SEARCH = ['space', 'my'];
-
 const route = useRoute();
 const router = useRouter();
 const auth = getInstance();
@@ -18,9 +16,7 @@ const searchValue = ref('');
 
 const { focused } = useFocus(searchInput);
 
-const currentRouteName = computed(() => {
-  return String(route.matched[0]?.name);
-});
+const hasSearch = computed(() => ['space', 'my'].includes(String(route.matched[0]?.name)));
 
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
@@ -55,9 +51,8 @@ watch(route, to => {
     <div
       class="flex items-center justify-between h-[71px] px-4 bg-skin-bg"
       :class="{
-        'lg:ml-[240px]': ROUTES_WITH_SEARCH.includes(currentRouteName),
-        'translate-x-[240px] lg:translate-x-0':
-          uiStore.sidebarOpen && ROUTES_WITH_SEARCH.includes(currentRouteName)
+        'lg:ml-[240px]': hasSearch,
+        'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasSearch
       }"
     >
       <div class="flex flex-grow items-center h-full">
@@ -65,10 +60,7 @@ watch(route, to => {
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
           @click="uiStore.toggleSidebar"
         />
-        <div
-          v-if="ROUTES_WITH_SEARCH.includes(currentRouteName)"
-          class="flex items-center flex-1 px-2 py-3 h-full"
-        >
+        <div v-if="hasSearch" class="flex items-center flex-1 px-2 py-3 h-full">
           <IH-search class="mr-2.5 flex-shrink-0" :class="{ 'text-skin-link': focused }" />
           <form class="flex flex-grow" @submit="handleSearchSubmit">
             <input
