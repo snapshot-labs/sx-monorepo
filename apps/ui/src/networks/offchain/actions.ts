@@ -201,6 +201,18 @@ export function createActions(
           swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
         };
       });
+    },
+    followSpace(web3: Web3Provider, space: Space) {
+      return client.followSpace({
+        signer: web3.getSigner(),
+        data: { space: space.id }
+      });
+    },
+    unfollowSpace(web3: Web3Provider, space: Space) {
+      return client.unfollowSpace({
+        signer: web3.getSigner(),
+        data: { space: space.id }
+      });
     }
   };
 }

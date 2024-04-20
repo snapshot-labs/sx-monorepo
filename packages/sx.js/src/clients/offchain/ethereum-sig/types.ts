@@ -100,3 +100,19 @@ export const cancelProposalTypes = {
     { name: 'proposal', type: 'bytes32' }
   ]
 };
+
+export const followSpaceTypes = {
+  Follow: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
+  ]
+};
+
+export const unfollowSpaceTypes = {
+  Unfollow: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
+  ]
+};

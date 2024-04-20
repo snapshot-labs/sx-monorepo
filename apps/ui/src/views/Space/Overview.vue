@@ -14,7 +14,13 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const { starredSpacesIds, followedSpacesIds, followedSpacesLoaded, toggleSpaceStar } = useAccount();
+const {
+  starredSpacesIds,
+  followedSpacesIds,
+  followedSpacesLoaded,
+  toggleSpaceStar,
+  toggleSpaceFollow
+} = useAccount();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
@@ -76,7 +82,7 @@ watchEffect(() => setTitle(props.space.name));
           v-if="isOffchainSpace && web3.type !== 'argentx'"
           :title="followedSpacesLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
         >
-          <UiButton disabled class="group">
+          <UiButton class="group" @click="toggleSpaceFollow(spaceIdComposite)">
             <UiLoading v-if="!followedSpacesLoaded" />
             <span v-else-if="spaceFollowed" class="inline-block">
               <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>

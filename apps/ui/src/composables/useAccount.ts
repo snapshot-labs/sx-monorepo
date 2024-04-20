@@ -15,6 +15,7 @@ const accountsBookmarkedSpacesIds = useStorage(
 );
 
 export function useAccount() {
+  const actions = useActions();
   const { web3, authInitiated } = useWeb3();
   const { spacesMap, getSpaces } = useSpaces();
   const { mixpanel } = useMixpanel();
@@ -96,6 +97,25 @@ export function useAccount() {
     });
   }
 
+  async function toggleSpaceFollow(id: string) {
+    const alreadyFollowed = followedSpacesIds.value.includes(id);
+    const space = bookmarkedSpacesMap.value.get(id);
+
+    if (!space) return;
+
+    if (alreadyFollowed) {
+      await actions.unfollowSpace(space.network, space);
+      followedSpacesIds.value = followedSpacesIds.value.filter((spaceId: string) => spaceId !== id);
+      accountsBookmarkedSpacesIds.value[web3.value.account] = accountsBookmarkedSpacesIds.value[
+        web3.value.account
+      ].filter((spaceId: string) => spaceId !== id);
+    } else {
+      await actions.followSpace(space.network, space);
+      followedSpacesIds.value = [id, ...followedSpacesIds.value];
+      accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
+    }
+  }
+
   const bookmarkedSpacesMap = computed(
     () => new Map(spacesData.value.map(space => [`${space.network}:${space.id}`, space]))
   );
@@ -163,6 +183,7 @@ export function useAccount() {
     followedSpacesLoaded,
     votes,
     loadVotes,
-    toggleSpaceStar
+    toggleSpaceStar,
+    toggleSpaceFollow
   };
 }

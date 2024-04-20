@@ -493,6 +493,31 @@ export function useActions() {
     });
   }
 
+  async function followSpace(networkId: NetworkID, space: Space) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(networkId);
+
+    await wrapPromise(networkId, network.actions.followSpace(auth.web3, space));
+
+    return true;
+  }
+  async function unfollowSpace(networkId: NetworkID, space: Space) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(networkId);
+
+    await wrapPromise(networkId, network.actions.unfollowSpace(auth.web3, space));
+
+    return true;
+  }
+
   return {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
@@ -512,6 +537,8 @@ export function useActions() {
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
     updateStrategies: wrapWithErrors(updateStrategies),
-    delegate: wrapWithErrors(delegate)
+    delegate: wrapWithErrors(delegate),
+    followSpace: wrapWithErrors(followSpace),
+    unfollowSpace: wrapWithErrors(unfollowSpace)
   };
 }

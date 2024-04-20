@@ -119,6 +119,8 @@ export type ReadOnlyNetworkActions = {
     proposal: Proposal,
     choice: Choice
   ): Promise<any>;
+  followSpace(web3: Web3Provider, space: Space);
+  unfollowSpace(web3: Web3Provider, space: Space);
   send(envelope: any): Promise<any>;
 };
 
