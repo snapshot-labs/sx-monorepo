@@ -505,6 +505,7 @@ export function useActions() {
 
     return true;
   }
+  
   async function unfollowSpace(networkId: NetworkID, space: Space) {
     if (!web3.value.account) {
       await forceLogin();
