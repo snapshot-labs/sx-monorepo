@@ -108,7 +108,9 @@ export function useActions() {
     const network = getNetwork(networkId);
 
     if (!(await alias.isValid())) {
-      alias.create(address => wrapPromise(networkId, network.actions.setAlias(auth.web3, address)));
+      await alias.create(address =>
+        wrapPromise(networkId, network.actions.setAlias(auth.web3, address))
+      );
     }
 
     return alias.wallet.value || auth.web3;
