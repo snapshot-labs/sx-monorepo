@@ -105,7 +105,9 @@ export function useAccount() {
 
     try {
       if (alreadyFollowed) {
-        await actions.unfollowSpace(spaceNetwork as NetworkID, spaceId);
+        const result = await actions.unfollowSpace(spaceNetwork as NetworkID, spaceId);
+        if (!result) return;
+
         followedSpacesIds.value = followedSpacesIds.value.filter(
           (spaceId: string) => spaceId !== id
         );
@@ -113,7 +115,11 @@ export function useAccount() {
           web3.value.account
         ].filter((spaceId: string) => spaceId !== id);
       } else {
-        await actions.followSpace(spaceNetwork as NetworkID, spaceId);
+        const result = await actions.followSpace(spaceNetwork as NetworkID, spaceId);
+        if (!result) return;
+
+        fetchSpacesData([id]);
+
         followedSpacesIds.value = [id, ...followedSpacesIds.value];
         accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
       }
