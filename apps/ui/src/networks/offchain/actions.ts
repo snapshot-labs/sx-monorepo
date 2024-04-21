@@ -1,4 +1,4 @@
-import { isAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import {
   OffchainNetworkConfig,
   clients,
@@ -11,7 +11,8 @@ import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getUrl } from '@/helpers/utils';
 import { getProvider } from '@/helpers/provider';
 import { getSwapLink } from '@/helpers/link';
-import type { Web3Provider } from '@ethersproject/providers';
+import { Web3Provider } from '@ethersproject/providers';
+import type { Wallet } from '@ethersproject/wallet';
 import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType } from '@/types';
 import type {
   ReadOnlyNetworkActions,
@@ -202,16 +203,22 @@ export function createActions(
         };
       });
     },
-    followSpace(web3: Web3Provider, spaceId: string) {
+    followSpace(web3: Web3Provider | Wallet, spaceId: string, from: string) {
       return client.followSpace({
-        signer: web3.getSigner(),
-        data: { space: spaceId }
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { space: spaceId, from: from || getAddress(from) }
       });
     },
-    unfollowSpace(web3: Web3Provider, spaceId: string) {
+    unfollowSpace(web3: Web3Provider | Wallet, spaceId: string, from: string) {
       return client.unfollowSpace({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { space: spaceId, from: from || getAddress(from) }
+      });
+    },
+    setAlias(web3: Web3Provider, alias: string) {
+      return client.setAlias({
         signer: web3.getSigner(),
-        data: { space: spaceId }
+        data: { alias }
       });
     }
   };

@@ -198,6 +198,11 @@ export type Follow = {
   created: number;
 };
 
+export type Alias = {
+  address: string;
+  alias: string;
+};
+
 export type Contact = {
   address: string;
   name: string;

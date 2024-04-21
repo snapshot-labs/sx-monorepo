@@ -12,11 +12,14 @@ import type {
   NetworkID,
   VoteType
 } from '@/types';
+import type { Web3Provider } from '@ethersproject/providers';
 import type { Connector, StrategyConfig } from '@/networks/types';
+import type { Wallet } from '@ethersproject/wallet';
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
   const uiStore = useUiStore();
+  const alias = useAlias();
   const { web3 } = useWeb3();
   const { getCurrentFromDuration } = useMetaStore();
   const { modalAccountOpen } = useModal();
@@ -99,6 +102,16 @@ export function useActions() {
 
   async function forceLogin() {
     modalAccountOpen.value = true;
+  }
+
+  async function aliasableSigner(networkId: NetworkID): Promise<Web3Provider | Wallet> {
+    const network = getNetwork(networkId);
+
+    if (!(await alias.isValid())) {
+      alias.create(address => wrapPromise(networkId, network.actions.setAlias(auth.web3, address)));
+    }
+
+    return alias.wallet.value || auth.web3;
   }
 
   async function predictSpaceAddress(networkId: NetworkID, salt: string): Promise<string | null> {
@@ -501,7 +514,10 @@ export function useActions() {
 
     const network = getNetwork(networkId);
 
-    await wrapPromise(networkId, network.actions.followSpace(auth.web3, spaceId));
+    await wrapPromise(
+      networkId,
+      network.actions.followSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
+    );
 
     return true;
   }
@@ -514,7 +530,10 @@ export function useActions() {
 
     const network = getNetwork(networkId);
 
-    await wrapPromise(networkId, network.actions.unfollowSpace(auth.web3, spaceId));
+    await wrapPromise(
+      networkId,
+      network.actions.unfollowSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
+    );
 
     return true;
   }
