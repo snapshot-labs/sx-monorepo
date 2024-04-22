@@ -55,6 +55,6 @@ yarn typecheck
 Packages are versioned using [`changesets`](https://github.com/changesets/changesets).
 In most cases all you need to do is when adding new changes to versioned packages (right now it's just `sx.js`)
 is to execute `yarn changeset`, specify package you updated, version bump per [semver](https://semver.org/) and description of your changes.
-Then comit generated files in your PR.
+Then commit generated files in your PR.
 
 Once merged changesets actions will create PR that can be used to release and publish those packages.
