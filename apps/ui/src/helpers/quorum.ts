@@ -5,9 +5,7 @@ const REJECTION_QUORUM_CHOICE_INDEX = 1;
 export function quorumProgress(proposal: Proposal): number {
   const totalScore =
     proposal.quorum_type === 'rejection'
-      ? proposal.scores
-          .filter((c, i) => i === REJECTION_QUORUM_CHOICE_INDEX)
-          .reduce((a, b) => a + b, 0)
+      ? proposal.scores[REJECTION_QUORUM_CHOICE_INDEX] ?? 0
       : proposal.scores_total;
 
   return totalScore / proposal.quorum;
