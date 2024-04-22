@@ -9,6 +9,7 @@ const props = defineProps<{ proposal: ProposalType }>();
 const uiStore = useUiStore();
 const { votes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
+const { isInvalidNetwork } = useSafeWallet(props.proposal.snapshot_chain_id);
 
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
@@ -54,6 +55,9 @@ const isSupported = computed(() => {
 
   <slot v-else-if="!isSupported" name="unsupported">
     Voting for this proposal is not supported
+  </slot>
+  <slot v-else-if="isInvalidNetwork" name="wrong-safe-network">
+    Safe's network should be same as space's network
   </slot>
   <div v-else class="py-2">
     <slot />
