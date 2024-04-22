@@ -14,9 +14,8 @@ const getSafeVersion = useMemoize(async (networkKey: string, account: string) =>
   return contract.VERSION([]);
 });
 
-export function useSafeWallet(network) {
+export function useSafeWallet(network: string) {
   const { web3 } = useWeb3();
-
   const auth = getInstance();
   const connectorName = computed(() => auth.provider.value?.connectorName);
 

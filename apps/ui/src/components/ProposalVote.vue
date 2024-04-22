@@ -9,7 +9,7 @@ const props = defineProps<{ proposal: ProposalType }>();
 const uiStore = useUiStore();
 const { votes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
-const { isInvalidNetwork } = useSafeWallet(props.proposal.snapshot_chain_id);
+const { isInvalidNetwork } = useSafeWallet(props.proposal.space.snapshot_chain_id.toString());
 
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
