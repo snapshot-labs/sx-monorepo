@@ -91,10 +91,11 @@ export function useActions() {
 
       console.log('Receipt', receipt);
 
+      if (envelope.signatureData.signature === '0x')
+        uiStore.addNotification('success', 'Your vote is pending! waiting for other signers');
       hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
       console.log('Receipt', envelope);
-
       uiStore.addPendingTransaction(envelope.transaction_hash || envelope.hash, networkId);
     }
   }
