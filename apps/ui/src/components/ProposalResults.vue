@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { _p } from '@/helpers/utils';
+import { quorumLabel, quorumProgress, quorumChoiceProgress } from '@/helpers/quorum';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -22,9 +23,7 @@ const labels = {
   2: 'Abstain'
 };
 
-const totalProgress = computed(() =>
-  Math.min(props.proposal.scores_total / props.proposal.quorum, 1)
-);
+const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const results = computed(() => {
   // TODO: sx-api returns number, sx-subgraph returns string
@@ -36,8 +35,7 @@ const results = computed(() => {
 
       return {
         choice: i + 1,
-        progress,
-        adjustedProgress: progress * totalProgress.value
+        progress
       };
     })
     .sort((a, b) => b.progress - a.progress);
@@ -68,6 +66,11 @@ const results = computed(() => {
       >
         <IC-Shutter class="w-[80px] text-skin-text inline-block" />
       </a>
+
+      <div v-if="proposal.quorum" class="mt-3.5">
+        {{ quorumLabel(proposal.quorum_type) }}:
+        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+      </div>
     </div>
   </div>
   <template v-else>
@@ -103,6 +106,10 @@ const results = computed(() => {
         <div class="truncate grow" v-text="proposal.choices[result.choice - 1]" />
         <div v-text="_p(result.progress / 100)" />
       </div>
+      <div v-if="proposal.quorum">
+        {{ quorumLabel(proposal.quorum_type) }}:
+        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+      </div>
       <div v-if="proposal.privacy === 'shutter'" class="flex flex-col mt-2.5">
         <div class="text-xs">Powered by</div>
         <div class="flex items-center">
@@ -128,7 +135,7 @@ const results = computed(() => {
           :title="labels[result.choice - 1]"
           class="choice-bg float-left h-full"
           :style="{
-            width: `${result.adjustedProgress.toFixed(3)}%`
+            width: `${quorumChoiceProgress(props.proposal.quorum_type, result, totalProgress).toFixed(3)}%`
           }"
           :class="`_${result.choice}`"
         />

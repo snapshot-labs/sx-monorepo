@@ -161,7 +161,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
         : proposal.min_end <= current,
     state: getProposalState(proposal, current),
     network: networkId,
-    privacy: null
+    privacy: null,
+    quorum: +proposal.quorum
   };
 }
 
