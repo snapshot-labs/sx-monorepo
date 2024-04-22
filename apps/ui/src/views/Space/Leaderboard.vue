@@ -29,6 +29,8 @@ const sortBy = ref(
 const network = computed(() => getNetwork(props.space.network));
 
 async function withAuthorNames(users: UserWithName[]): Promise<UserWithName[]> {
+  if (!users.length) return [];
+
   const names = await getNames(users.map(user => user.id));
 
   return users.map(user => {
