@@ -11,12 +11,12 @@ export function useAccount() {
     if (!web3Account.value) votes.value = {};
   });
 
-  async function loadVotes(networkId: NetworkID, spaceId?: string) {
+  async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
     const account = web3.value.account;
     if (!account) return;
 
     const network = getNetwork(networkId);
-    const userVotes = await network.api.loadUserVotes(spaceId, account);
+    const userVotes = await network.api.loadUserVotes(spaceIds, account);
 
     votes.value = { ...votes.value, ...userVotes };
   }

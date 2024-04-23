@@ -96,7 +96,7 @@ watch(
       return;
     }
 
-    loadVotes(networkId.value);
+    loadVotes(networkId.value, follows.value);
     fetch();
   }
 );

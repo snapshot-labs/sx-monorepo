@@ -253,14 +253,11 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         return formattedVote;
       });
     },
-    loadUserVotes: async (
-      spaceId: string | undefined,
-      voter: string
-    ): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
-          spaceId,
+          spaceIds,
           voter
         }
       });
