@@ -72,7 +72,12 @@ watchEffect(() => setTitle(props.space.name));
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
-        <UiButton v-if="isOffchainSpace && web3.type !== 'argentx'" disabled class="group">
+        <UiButton
+          v-if="isOffchainSpace && web3.type !== 'argentx'"
+          disabled
+          class="group"
+          :class="{ 'hover:border-skin-danger': spaceFollowed }"
+        >
           <UiLoading v-if="!followedSpacesLoaded" />
           <span v-else-if="spaceFollowed" class="inline-block">
             <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
