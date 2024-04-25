@@ -23,7 +23,16 @@ import {
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { BASIC_CHOICES } from '@/helpers/constants';
-import { Space, Proposal, Vote, User, Transaction, NetworkID, ProposalState } from '@/types';
+import {
+  Space,
+  Proposal,
+  Vote,
+  User,
+  Transaction,
+  NetworkID,
+  ProposalState,
+  Follow
+} from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
 
 type ApiOptions = {
@@ -273,11 +282,11 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         return vote;
       });
     },
-    loadUserVotes: async (spaceId: string, voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
-          spaceId,
+          spaceIds,
           voter
         }
       });
@@ -287,7 +296,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       );
     },
     loadProposals: async (
-      spaceId: string,
+      spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
       filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
@@ -309,7 +318,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
           first: limit,
           skip,
           where: {
-            space: spaceId,
+            space_in: spaceIds,
             cancelled: false,
             metadata_: { title_contains_nocase: searchQuery },
             ...filters
@@ -423,6 +432,9 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       ]);
 
       return joinHighlightUser(data.user ?? null, highlightResult?.data?.sxuser ?? null);
+    },
+    loadFollows: async () => {
+      return [] as Follow[];
     }
   };
 }

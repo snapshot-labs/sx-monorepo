@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import Home from '@/views/Home.vue';
+import Landing from '@/views/Landing.vue';
 import Space from '@/views/Space.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
@@ -16,7 +16,9 @@ import User from '@/views/User.vue';
 import Create from '@/views/Create.vue';
 import Settings from '@/views/Settings.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
-import Explore from '@/views/Explore.vue';
+import My from '@/views/My.vue';
+import Home from '@/views/My/Home.vue';
+import Explore from '@/views/My/Explore.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Apps from '@/views/Apps.vue';
 import App from '@/views/App.vue';
@@ -24,7 +26,7 @@ import App from '@/views/App.vue';
 const { mixpanel } = useMixpanel();
 
 const routes: any[] = [
-  { path: '/', name: 'home', component: Home },
+  { path: '/', name: 'landing', component: Landing },
   {
     path: '/:id',
     name: 'space',
@@ -64,7 +66,15 @@ const routes: any[] = [
       { path: 'contacts', name: 'settings-contacts', component: Contacts }
     ]
   },
-  { path: '/explore', name: 'explore', component: Explore },
+  {
+    path: '/home',
+    name: 'my',
+    component: My,
+    children: [
+      { path: '/home', name: 'my-home', component: Home },
+      { path: '/explore', name: 'my-explore', component: Explore }
+    ]
+  },
   { path: '/apps', name: 'apps', component: Apps },
   { path: '/apps/:id', name: 'app', component: App }
 ];

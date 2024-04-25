@@ -190,6 +190,14 @@ export type User = {
   proposal_count: number;
   vote_count: number;
   created: number;
+  follows?: string[];
+};
+
+export type Follow = {
+  id: string;
+  follower: string;
+  space: Space;
+  created: number;
 };
 
 export type Contact = {
