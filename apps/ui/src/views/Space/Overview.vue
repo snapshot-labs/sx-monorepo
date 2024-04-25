@@ -85,7 +85,10 @@ watchEffect(() => setTitle(props.space.name));
           </span>
           <span v-else class="inline-block">Follow</span>
         </UiButton>
-        <UiTooltip v-else :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'">
+        <UiTooltip
+          v-else-if="!isOffchainSpace"
+          :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'"
+        >
           <UiButton class="w-[46px] !px-0" @click="toggleSpaceStar(spaceIdComposite)">
             <IS-star v-if="spaceStarred" class="inline-block" />
             <IH-star v-else class="inline-block" />
