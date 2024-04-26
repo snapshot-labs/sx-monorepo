@@ -77,7 +77,12 @@ export function useSpaces() {
   }
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
-    const exploreNetworks = enabledNetworks.filter(network => !offchainNetworks.includes(network));
+    let exploreNetworks = enabledNetworks.filter(network => !offchainNetworks.includes(network));
+
+    if (filter?.networkType === 'snapshot') {
+      exploreNetworks = ['s'];
+    }
+    if (filter?.networkType) delete filter.networkType;
 
     const results = await Promise.all(
       exploreNetworks.map(async id => {
@@ -133,9 +138,17 @@ export function useSpaces() {
   }
 
   async function fetch(filter?: SpacesFilter) {
-    if (loading.value || loaded.value) return;
     loading.value = true;
-
+    networksMap.value = Object.fromEntries(
+      enabledNetworks.map(network => [
+        network,
+        {
+          spaces: {},
+          spacesIdsList: [],
+          hasMoreSpaces: true
+        } as NetworkRecord
+      ])
+    );
     await _fetchSpaces(true, filter);
 
     loaded.value = true;

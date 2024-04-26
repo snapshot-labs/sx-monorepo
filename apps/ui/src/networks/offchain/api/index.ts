@@ -318,7 +318,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       const { data } = await apollo.query({
         query: SPACES_RANKING_QUERY,
         variables: {
-          first: Math.min(limit, 20),
+          first: Math.min(limit, 18),
           skip,
           where: {
             ...filter
@@ -326,7 +326,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.ranking.items.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({

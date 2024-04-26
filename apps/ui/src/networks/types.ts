@@ -18,6 +18,7 @@ export type PaginationOpts = { limit: number; skip?: number };
 export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
+  networkType?: string;
 };
 export type Connector = 'argentx' | 'injected' | 'walletconnect' | 'walletlink' | 'gnosis';
 export type GeneratedMetadata =
