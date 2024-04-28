@@ -47,8 +47,10 @@ export const useUsersStore = defineStore('users', {
         (acc, user) => {
           acc.vote_count += user.vote_count;
           acc.proposal_count += user.proposal_count;
-          if (user.created < acc.created || acc.created === 0) {
-            acc.created = user.created;
+
+          const minCreated = [acc.created, user.created].filter(Number);
+          if (minCreated.length) {
+            acc.created = Math.min(...minCreated);
           }
 
           return acc;
