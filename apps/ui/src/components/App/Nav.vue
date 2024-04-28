@@ -95,6 +95,11 @@ const shortcuts = computed(() => {
               name: 'Profile',
               link: { name: 'user', params: { id: web3.value.account } },
               icon: IHUser
+            },
+            settings: {
+              name: 'Settings',
+              link: { name: 'settings' },
+              icon: IHCog
             }
           }
         }
