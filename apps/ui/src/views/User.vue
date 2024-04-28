@@ -6,11 +6,9 @@ const usersStore = useUsersStore();
 const { setTitle } = useTitle();
 
 const id = route.params.id as string;
-const user = computed(() => (id ? usersStore.getUser(id) : null));
+const user = computed(() => usersStore.getUser(id));
 
-onMounted(() => {
-  usersStore.fetchUser(id);
-});
+onMounted(() => usersStore.fetchUser(id));
 
 watchEffect(() => setTitle(`${id} user profile`));
 </script>
