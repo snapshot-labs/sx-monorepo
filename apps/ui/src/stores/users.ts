@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia';
 import { enabledNetworks as enabledNetworkIds, getNetwork } from '@/networks';
+import { getNames } from '@/helpers/stamp';
 import type { User } from '@/types';
+
+type UserWithName = User & { name: string };
 
 type UserRecord = {
   loading: boolean;
   loaded: boolean;
-  user: User | null;
+  user: UserWithName | null;
 };
 
 const enabledNetworks = enabledNetworkIds.map(network => getNetwork(network));
@@ -38,7 +41,7 @@ export const useUsersStore = defineStore('users', {
         await Promise.allSettled(enabledNetworks.map(network => network.api.loadUser(userId)))
       )
         .map(result => (result.status === 'fulfilled' ? result.value : null))
-        .filter(Boolean) as User[];
+        .filter(Boolean) as UserWithName[];
 
       record.value.user = users.reduce(
         (acc, user) => {
@@ -50,7 +53,13 @@ export const useUsersStore = defineStore('users', {
 
           return acc;
         },
-        { id: userId, vote_count: 0, proposal_count: 0, created: 0 }
+        {
+          id: userId,
+          name: (await getNames([userId]))[userId],
+          vote_count: 0,
+          proposal_count: 0,
+          created: 0
+        }
       );
       record.value.loaded = true;
       record.value.loading = false;

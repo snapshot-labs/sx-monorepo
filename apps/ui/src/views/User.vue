@@ -29,7 +29,7 @@ watchEffect(() => setTitle(`${id} user profile`));
           :size="90"
           class="mb-2 border-[4px] border-skin-bg !bg-skin-border"
         />
-        <h1>{{ shortenAddress(user.id) }}</h1>
+        <h1>{{ user.name || shortenAddress(user.id) }}</h1>
         <div>
           <b class="text-skin-link">{{ _n(user.proposal_count) }}</b> proposals ·
           <b class="text-skin-link">{{ _n(user.vote_count) }}</b> votes
