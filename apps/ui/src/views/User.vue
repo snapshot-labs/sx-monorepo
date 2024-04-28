@@ -1,25 +1,18 @@
 <script setup lang="ts">
 import { shortenAddress, _n } from '@/helpers/utils';
 
-const { setTitle } = useTitle();
-const { networkId, address } = useRouteParser('id');
+const route = useRoute();
 const usersStore = useUsersStore();
+const { setTitle } = useTitle();
 
-const user = computed(() => (address.value ? usersStore.getUser(address.value) : null));
+const id = route.params.id as string;
+const user = computed(() => (id ? usersStore.getUser(id) : null));
 
-watch(
-  [networkId, address],
-  () => {
-    if (!address.value || !networkId.value) return;
+onMounted(() => {
+  usersStore.fetchUser(id);
+});
 
-    usersStore.fetchUser(address.value, networkId.value);
-  },
-  {
-    immediate: true
-  }
-);
-
-watchEffect(() => setTitle(`${address.value} user profile`));
+watchEffect(() => setTitle(`${id} user profile`));
 </script>
 
 <template>
