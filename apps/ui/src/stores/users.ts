@@ -3,7 +3,7 @@ import { enabledNetworks as enabledNetworkIds, getNetwork } from '@/networks';
 import { getNames } from '@/helpers/stamp';
 import type { User } from '@/types';
 
-type UserWithName = User & { name: string };
+type UserWithName = User & { name?: string };
 
 type UserRecord = {
   loading: boolean;
