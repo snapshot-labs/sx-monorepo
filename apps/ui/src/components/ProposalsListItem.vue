@@ -82,7 +82,7 @@ async function handleVoteClick(choice: Choice) {
             class="text-skin-text"
             :to="{
               name: 'user',
-              params: { id: `${proposal.network}:${proposal.author.id}` }
+              params: { id: proposal.author.id }
             }"
           >
             {{ proposal.author.name || shortenAddress(proposal.author.id) }}
