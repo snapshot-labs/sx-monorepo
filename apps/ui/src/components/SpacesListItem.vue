@@ -37,8 +37,8 @@ const spacesStore = useSpacesStore();
       <h5 class="line-clamp-2 leading-6" v-text="space.about" />
     </div>
     <h5 class="absolute bottom-4 px-4 text-[17px]">
-      <b class="text-skin-link" v-text="_n(space.proposal_count)" /> proposals ·
-      <b class="text-skin-link" v-text="_n(space.vote_count)" /> votes
+      <b class="text-skin-link" v-text="_n(space.proposal_count, 'compact')" /> proposals ·
+      <b class="text-skin-link" v-text="_n(space.vote_count, 'compact')" /> votes
     </h5>
   </router-link>
 </template>
