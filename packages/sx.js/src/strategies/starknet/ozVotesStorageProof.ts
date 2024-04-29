@@ -146,7 +146,6 @@ export default function createOzVotesStorageProofStrategy({
       }
 
       const tokenContract = new EvmContract(contractAddress, OzVotesToken, provider);
-      if (!timestamp) return tokenContract.getVotes(voterAddress);
 
       const numCheckpoints: number = await tokenContract.numCheckpoints(voterAddress);
       if (numCheckpoints === 0) return 0n;
