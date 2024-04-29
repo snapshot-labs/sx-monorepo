@@ -98,7 +98,7 @@ const shortcuts = computed(() => {
             },
             settings: {
               name: 'Settings',
-              link: { name: 'settings' },
+              link: { name: 'settings-spaces' },
               icon: IHCog
             }
           }
