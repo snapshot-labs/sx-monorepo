@@ -16,6 +16,9 @@ const searchValue = ref('');
 
 const { focused } = useFocus(searchInput);
 
+const hasAppNav = computed(() =>
+  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+);
 const hasSearch = computed(() => ['space', 'my'].includes(String(route.matched[0]?.name)));
 
 async function handleLogin(connector) {
@@ -51,8 +54,8 @@ watch(route, to => {
     <div
       class="flex items-center justify-between h-[71px] px-4 bg-skin-bg"
       :class="{
-        'lg:ml-[240px]': hasSearch,
-        'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasSearch
+        'lg:ml-[240px]': hasAppNav,
+        'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasAppNav
       }"
     >
       <div class="flex flex-grow items-center h-full">
