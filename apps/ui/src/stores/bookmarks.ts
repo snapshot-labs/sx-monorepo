@@ -10,8 +10,8 @@ function compositeSpaceId(space: Space) {
 }
 
 export const useBookmarksStore = defineStore('bookmarks', () => {
-  const { web3, authInitiated } = useWeb3();
   const spacesStore = useSpacesStore();
+  const { web3, authInitiated } = useWeb3();
   const { mixpanel } = useMixpanel();
 
   const spacesData = ref<Space[]>([]);
@@ -155,7 +155,6 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   return {
     bookmarkedSpaces,
     bookmarksLoaded,
-    starredSpacesLoaded,
     followedSpacesIds,
     followedSpacesLoaded,
     isStarred,
