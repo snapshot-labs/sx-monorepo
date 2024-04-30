@@ -33,18 +33,13 @@ watch(
   <div>
     <div :class="{ 'text-skin-danger': error && dirty }" v-text="definition.title" />
     <div class="flex !mb-0" :class="{ 's-error': error && dirty }">
-      <UiWrapperInput :definition="{ title: 'Days' }" class="flex-1" :error="error" :dirty="dirty">
+      <UiWrapperInput :definition="{ title: 'Days' }" class="flex-1" :dirty="dirty">
         <input v-model="days" class="s-input !rounded-r-none" type="number" min="0" />
       </UiWrapperInput>
-      <UiWrapperInput :definition="{ title: 'Hours' }" class="flex-1" :error="error" :dirty="dirty">
+      <UiWrapperInput :definition="{ title: 'Hours' }" class="flex-1" :dirty="dirty">
         <input v-model="hours" class="s-input !rounded-none !border-l-0" type="number" min="0" />
       </UiWrapperInput>
-      <UiWrapperInput
-        :definition="{ title: 'Minutes' }"
-        class="flex-1"
-        :error="error"
-        :dirty="dirty"
-      >
+      <UiWrapperInput :definition="{ title: 'Minutes' }" class="flex-1" :dirty="dirty">
         <input
           v-model="minutes"
           class="s-input !rounded-l-none !border-l-0"

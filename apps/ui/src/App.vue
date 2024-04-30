@@ -17,7 +17,9 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
-const hasAppNav = computed(() => ['space', 'my'].includes(String(route.matched[0]?.name)));
+const hasAppNav = computed(() =>
+  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+);
 
 function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;

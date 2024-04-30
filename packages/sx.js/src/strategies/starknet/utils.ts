@@ -7,6 +7,10 @@ export function getSlotKey(voterAddress: string, slotIndex: number) {
   );
 }
 
+export function getNestedSlotKey(previous: string, index: number) {
+  return `0x${(BigInt(keccak256(`${previous}`)) + BigInt(index)).toString(16)}`;
+}
+
 export async function getBinaryTree(
   deployedOnChain: string,
   snapshotTimestamp: number,
