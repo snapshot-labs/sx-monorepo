@@ -5,17 +5,8 @@ import { NetworkID } from '@/types';
 export const useSpacesStore = defineStore('spaces', () => {
   const metaStore = useMetaStore();
 
-  const {
-    loading,
-    loaded,
-    networksMap,
-    spaces,
-    spacesMap,
-    hasMoreSpaces,
-    fetch,
-    fetchMore,
-    getSpaces
-  } = useSpaces();
+  const { loading, loaded, networksMap, spaces, spacesMap, hasMoreSpaces, fetch, fetchMore } =
+    useSpaces();
 
   async function fetchSpace(spaceId: string, networkId: NetworkID) {
     await metaStore.fetchBlock(networkId);
@@ -31,6 +22,29 @@ export const useSpacesStore = defineStore('spaces', () => {
     };
   }
 
+  async function fetchSpaces(spaceIds: string[], networkId: NetworkID) {
+    await metaStore.fetchBlock(networkId);
+
+    const network = getNetwork(networkId);
+
+    const spaces = await network.api.loadSpaces(
+      {
+        skip: 0,
+        limit: 100
+      },
+      {
+        id_in: spaceIds
+      }
+    );
+
+    if (!spaces.length) return;
+
+    networksMap.value[networkId].spaces = {
+      ...networksMap.value[networkId].spaces,
+      ...Object.fromEntries(spaces.map(space => [space.id, space]))
+    };
+  }
+
   return {
     loading,
     loaded,
@@ -41,6 +55,6 @@ export const useSpacesStore = defineStore('spaces', () => {
     fetch,
     fetchMore,
     fetchSpace,
-    getSpaces
+    fetchSpaces
   };
 });

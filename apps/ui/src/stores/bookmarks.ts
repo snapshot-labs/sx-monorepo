@@ -12,7 +12,6 @@ function compositeSpaceId(space: Space) {
 export const useBookmarksStore = defineStore('bookmarks', () => {
   const { web3, authInitiated } = useWeb3();
   const spacesStore = useSpacesStore();
-  const { spacesMap, getSpaces } = spacesStore;
   const { mixpanel } = useMixpanel();
 
   const spacesData = ref<Space[]>([]);
@@ -66,14 +65,14 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   async function fetchSpacesData(ids: string[]) {
     if (!ids.length) return;
 
-    const spaces = await getSpaces({
-      id_in: ids.filter(id => !spacesMap.has(id))
-    });
+    await spacesStore.fetchSpaces(
+      ids.filter(id => !spacesStore.spacesMap.has(id)).map(id => id.split(':')[1]),
+      offchainNetworkId
+    );
 
     spacesData.value = [
       ...spacesData.value,
-      ...spaces,
-      ...(ids.map(id => spacesMap.get(id)).filter(Boolean) as Space[])
+      ...(ids.map(id => spacesStore.spacesMap.get(id)).filter(Boolean) as Space[])
     ];
   }
 
