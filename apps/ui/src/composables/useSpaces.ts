@@ -3,7 +3,7 @@ import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, NetworkID } from '@/types';
 import { SpacesFilter } from '@/networks/types';
 
-const SPACES_LIMIT = 1000;
+const SPACES_LIMIT = 18;
 
 type NetworkRecord = {
   spaces: Record<string, Space>;
@@ -156,7 +156,7 @@ export function useSpaces() {
   }
 
   async function fetchMore(filter?: SpacesFilter) {
-    if (loading.value || !loaded.value) return;
+    if (loading.value || !loaded.value || loadingMore.value) return;
     loadingMore.value = true;
 
     await _fetchSpaces(false, filter);
@@ -166,6 +166,7 @@ export function useSpaces() {
 
   return {
     loading,
+    loadingMore,
     loaded,
     networksMap,
     spaces,
