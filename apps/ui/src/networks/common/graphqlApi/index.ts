@@ -164,10 +164,14 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
     execution: formatExecution(proposal.metadata.execution),
-    has_execution_window_opened: proposal.min_end <= current,
+    has_execution_window_opened:
+      proposal.execution_strategy_type === 'Axiom'
+        ? proposal.max_end <= current
+        : proposal.min_end <= current,
     state: getProposalState(proposal, current),
     network: networkId,
-    privacy: null
+    privacy: null,
+    quorum: +proposal.quorum
   };
 }
 
@@ -278,14 +282,11 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         return vote;
       });
     },
-    loadUserVotes: async (
-      spaceId: string | undefined,
-      voter: string
-    ): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
-          spaceId,
+          spaceIds,
           voter
         }
       });

@@ -124,7 +124,6 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     chainId,
     baseChainId: chainId,
     currentChainId: currentChainId ?? chainId,
-    hasReceive: false,
     supportsSimulation: ['eth', 'gor', 'sep', 'oeth', 'matic', 'arb1'].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),

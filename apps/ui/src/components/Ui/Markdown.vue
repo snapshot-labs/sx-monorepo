@@ -1,21 +1,49 @@
 <script setup lang="ts">
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import rust from 'highlight.js/lib/languages/rust';
+import python from 'highlight.js/lib/languages/python';
+import { solidity } from 'highlightjs-solidity';
 import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
+import { icons } from '@iconify-json/heroicons-outline';
 import { linkify } from 'remarkable/linkify';
 import { getUrl } from '@/helpers/utils';
+
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('rust', rust);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('solidity', solidity);
 
 const props = defineProps<{
   body: string;
 }>();
 
+const { copy } = useClipboard();
+
 const remarkable = new Remarkable({
   html: false,
   breaks: true,
   typographer: false,
-  linkTarget: '_blank'
+  linkTarget: '_blank',
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(str, { language: lang }).value;
+      } catch (e) {}
+    }
+
+    try {
+      return hljs.highlightAuto(str).value;
+    } catch (e) {}
+
+    return '';
+  }
 }).use(linkify);
 remarkable.core.ruler.disable(['abbr', 'abbr2', 'footnote_tail', 'replacements', 'smartquotes']);
-remarkable.block.ruler.disable(['code', 'deflist', 'fences', 'footnote', 'htmlblock', 'lheading']);
+remarkable.block.ruler.disable(['code', 'deflist', 'footnote', 'htmlblock', 'lheading']);
 remarkable.inline.ruler.disable([
   'autolink',
   'del',
@@ -36,6 +64,44 @@ const parsed = computed(() => {
 
   return remarkable.render(formattedBody);
 });
+
+onMounted(() => {
+  const body = document.querySelector('.markdown-body');
+
+  if (!body) return;
+
+  body.querySelectorAll('pre>code').forEach(code => {
+    const parent = code.parentElement!;
+
+    const copyButton = document.createElement('button');
+    const copySvg = `<svg viewBox="0 0 24 24" width="20px" height="20px">${icons.icons.duplicate.body}</svg>`;
+    copyButton.classList.add('text-skin-text');
+    copyButton.setAttribute('type', 'button');
+    copyButton.innerHTML = copySvg;
+    copyButton.addEventListener('click', () => {
+      if (parent !== null) {
+        copy(code.textContent!);
+
+        copyButton.innerHTML = `<svg viewBox="0 0 24 24" width="20px" height="20px">${icons.icons.check.body}</svg>`;
+        copyButton.classList.add('!text-skin-success');
+        setTimeout(() => {
+          copyButton.innerHTML = copySvg;
+          copyButton.classList.remove('!text-skin-success');
+        }, 1e3);
+      }
+    });
+
+    const titleBar = document.createElement('div');
+    titleBar.classList.add('title-bar');
+
+    const language = document.createElement('div');
+    language.innerHTML = code.getAttribute('class')?.split('language-')[1] || '';
+
+    titleBar.append(language);
+    titleBar.append(copyButton);
+    parent.prepend(titleBar);
+  });
+});
 </script>
 
 <template>
@@ -43,6 +109,12 @@ const parsed = computed(() => {
 </template>
 
 <style lang="scss">
+@import '@/assets/styles/highlightjs/github.scss';
+
+html.dark {
+  @import '@/assets/styles/highlightjs/github-dark-dimmed.scss';
+}
+
 .markdown-body {
   font-size: 22px;
   line-height: 1.3;
@@ -226,6 +298,18 @@ const parsed = computed(() => {
 
   table img {
     background-color: transparent;
+  }
+
+  pre {
+    @apply m-0 mb-3 p-0 rounded-lg border bg-transparent overflow-hidden;
+
+    .title-bar {
+      @apply p-2.5 px-3 text-base text-skin-text font-semibold flex justify-between items-center font-serif;
+    }
+
+    code {
+      @apply p-3 m-0 bg-skin-border rounded-none border-none overflow-auto block;
+    }
   }
 }
 </style>

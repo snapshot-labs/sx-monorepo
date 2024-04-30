@@ -8,7 +8,7 @@ import OzVotesToken from './abis/OzVotesToken.json';
 import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
-import { getSlotKey, getBinaryTree } from './utils';
+import { getSlotKey, getNestedSlotKey, getBinaryTree } from './utils';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
@@ -134,8 +134,18 @@ export default function createOzVotesStorageProofStrategy({
       const { contractAddress, slotIndex } = metadata;
       const provider = new StaticJsonRpcProvider(ethUrl, chainId);
 
+      if (!timestamp) {
+        // this uses 32/224 bit storage layout, instead of official 48/208 from OZ
+        const slotKey = getSlotKey(voterAddress, slotIndex);
+        const length = Number(await provider.getStorageAt(contractAddress, slotKey));
+
+        const nestedSlotKey = getNestedSlotKey(slotKey, length - 1);
+        const storage = await provider.getStorageAt(contractAddress, nestedSlotKey);
+
+        return BigInt(storage.slice(0, -8));
+      }
+
       const tokenContract = new EvmContract(contractAddress, OzVotesToken, provider);
-      if (!timestamp) return tokenContract.getVotes(voterAddress);
 
       const numCheckpoints: number = await tokenContract.numCheckpoints(voterAddress);
       if (numCheckpoints === 0) return 0n;

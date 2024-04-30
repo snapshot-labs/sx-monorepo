@@ -104,6 +104,7 @@ export type ApiProposal = {
   execution_tx: string | null;
   veto_tx: string | null;
   vote_count: number;
+  execution_ready: boolean;
   executed: boolean;
   vetoed: boolean;
   completed: boolean;

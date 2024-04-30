@@ -107,7 +107,7 @@ watch(
               :to="{
                 name: 'user',
                 params: {
-                  id: `${proposal.network}:${vote.voter.id}`
+                  id: vote.voter.id
                 }
               }"
               class="grow"

@@ -24,6 +24,7 @@ import {
   createStrategyPicker
 } from '@/networks/common/helpers';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
+import { vote as highlightVote } from '@/helpers/highlight';
 import type { Web3Provider } from '@ethersproject/providers';
 import type {
   Connector,
@@ -368,8 +369,13 @@ export function createActions(
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: getSdkChoice(choice),
-        metadataUri: ''
+        metadataUri: '',
+        chainId
       };
+
+      if (!isContract && proposal.execution_strategy_type === 'Axiom') {
+        return highlightVote({ signer: web3.getSigner(), data });
+      }
 
       if (relayerType === 'evm') {
         return ethSigClient.vote({
@@ -388,8 +394,14 @@ export function createActions(
         { noWait: isContract }
       );
     },
-    finalizeProposal: () => null,
-    receiveProposal: () => null,
+    finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
+      await executionCall(chainId, 'finalizeProposal', {
+        space: proposal.space.id,
+        proposalId: proposal.proposal_id
+      });
+
+      return null;
+    },
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 

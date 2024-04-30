@@ -7,7 +7,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const { getDurationFromCurrent } = useMetaStore();
+const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 const { setVotingDelay, setMinVotingDuration, setMaxVotingDuration, transferOwnership } =
   useActions();
 
@@ -94,7 +94,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             }"
             :custom-error-validation="
               value =>
-                Number(value) > space.max_voting_period
+                getCurrentFromDuration(space.network, Number(value)) > space.max_voting_period
                   ? 'Must be equal to or lower than max. voting period'
                   : undefined
             "
@@ -118,7 +118,7 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             }"
             :custom-error-validation="
               value =>
-                Number(value) < space.min_voting_period
+                getCurrentFromDuration(space.network, Number(value)) < space.min_voting_period
                   ? 'Must be equal to or higher than min. voting period'
                   : undefined
             "

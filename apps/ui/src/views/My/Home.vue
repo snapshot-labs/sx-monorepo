@@ -90,7 +90,7 @@ watch(
       return;
     }
 
-    loadVotes(networkId.value);
+    loadVotes(networkId.value, followedSpacesIds.value);
     fetch();
   }
 );
