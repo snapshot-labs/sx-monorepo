@@ -10,7 +10,8 @@ import type {
   User,
   Choice,
   NetworkID,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  Follow
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -150,7 +151,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   );
   setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
-  receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
   vetoProposal(web3: Web3Provider, proposal: Proposal);
@@ -183,9 +183,9 @@ export type NetworkApi = {
     filter?: 'any' | 'for' | 'against' | 'abstain',
     sortBy?: 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
   ): Promise<Vote[]>;
-  loadUserVotes(spaceId: string, voter: string): Promise<{ [key: string]: Vote }>;
+  loadUserVotes(spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
-    spaceId: string,
+    spaceIds: string[],
     paginationOpts: PaginationOpts,
     current: number,
     filter?: 'any' | 'active' | 'pending' | 'closed',
@@ -199,6 +199,7 @@ export type NetworkApi = {
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User | null>;
+  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
 };
 
 export type NetworkConstants = {
@@ -238,7 +239,6 @@ type BaseNetwork = {
   baseChainId: number;
   currentChainId: number;
   baseNetworkId?: NetworkID;
-  hasReceive: boolean;
   supportsSimulation: boolean;
   managerConnectors: Connector[];
   api: NetworkApi;

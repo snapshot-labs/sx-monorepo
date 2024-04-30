@@ -131,6 +131,7 @@ export type Proposal = {
   network: NetworkID;
   type: VoteType;
   quorum: number;
+  quorum_type?: 'default' | 'rejection';
   space: {
     id: string;
     name: string;
@@ -176,6 +177,7 @@ export type Proposal = {
   veto_tx: string | null;
   vote_count: number;
   has_execution_window_opened: boolean;
+  execution_ready: boolean;
   vetoed: boolean;
   completed: boolean;
   cancelled: boolean;
@@ -187,6 +189,14 @@ export type User = {
   id: string;
   proposal_count: number;
   vote_count: number;
+  created: number;
+  follows?: string[];
+};
+
+export type Follow = {
+  id: string;
+  follower: string;
+  space: Space;
   created: number;
 };
 

@@ -80,6 +80,24 @@ templates:
           handler: handleProposalValidationStrategyUpdated
       file: ./src/mapping.ts
   - kind: ethereum
+    name: AxiomExecutionStrategy
+    network: optimism
+    source:
+      abi: AxiomExecutionStrategy
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ProposalExecuted
+      abis:
+        - name: AxiomExecutionStrategy
+          file: ./abis/AxiomExecutionStrategy.json
+      eventHandlers:
+        - event: WriteOffchainVotes(uint256,uint256,uint256,uint256,uint256)
+          handler: handleAxiomWriteOffchainVotes
+      file: ./src/mapping.ts
+  - kind: ethereum
     name: TimelockExecutionStrategy
     network: optimism
     source:

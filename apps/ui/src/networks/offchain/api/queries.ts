@@ -67,6 +67,7 @@ const PROPOSAL_FRAGMENT = gql`
     discussion
     author
     quorum
+    quorumType
     start
     end
     snapshot
@@ -123,8 +124,8 @@ export const SPACE_QUERY = gql`
 `;
 
 export const USER_VOTES_QUERY = gql`
-  query ($spaceId: String, $voter: String) {
-    votes(where: { space: $spaceId, voter: $voter }) {
+  query ($spaceIds: [String], $voter: String) {
+    votes(where: { space_in: $spaceIds, voter: $voter }) {
       id
       voter
       space {
@@ -136,6 +137,16 @@ export const USER_VOTES_QUERY = gql`
       choice
       vp
       created
+    }
+  }
+`;
+
+export const USER_FOLLOWS_QUERY = gql`
+  query ($follower: String!) {
+    follows(where: { follower: $follower }) {
+      space {
+        id
+      }
     }
   }
 `;

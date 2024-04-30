@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { _rt, _n, shortenAddress, getProposalId } from '@/helpers/utils';
+import { quorumLabel, quorumProgress } from '@/helpers/quorum';
+import { _rt, _n, _p, shortenAddress, getProposalId } from '@/helpers/utils';
 import type { Proposal as ProposalType, Choice } from '@/types';
 
-const props = defineProps<{ proposal: ProposalType }>();
+const props = defineProps<{ proposal: ProposalType; showSpace: boolean }>();
 
 const { getTsFromCurrent } = useMetaStore();
-const route = useRoute();
 const { vote } = useActions();
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 const sendingType = ref<Choice | null>(null);
+
+const totalProgress = computed(() => quorumProgress(props.proposal));
 
 async function handleVoteClick(choice: Choice) {
   sendingType.value = choice;
@@ -25,29 +27,54 @@ async function handleVoteClick(choice: Choice) {
   <div>
     <div class="border-b mx-4 py-[14px] flex">
       <div class="flex-auto mr-4 w-0">
-        <router-link
-          :to="{
-            name: 'proposal-overview',
-            params: {
-              id: proposal.proposal_id,
-              space: `${route.params.id}`
-            }
-          }"
-          class="space-x-2 flex"
-        >
-          <ProposalIconStatus width="17" height="17" :state="proposal.state" class="top-[7.5px]" />
+        <div class="space-x-2 flex">
+          <router-link
+            :to="{
+              name: 'proposal-overview',
+              params: {
+                id: proposal.proposal_id,
+                space: `${proposal.network}:${proposal.space.id}`
+              }
+            }"
+          >
+            <ProposalIconStatus width="17" height="17" :state="proposal.state" class="top-[6px]" />
+          </router-link>
 
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
-            <h3
-              class="text-[21px] md:truncate md:text-ellipsis inline mr-2"
-              v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
-            />
-            <IH-check
-              v-if="votes[`${proposal.network}:${proposal.id}`]"
-              class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-[1px]"
-            />
+            <router-link
+              v-if="showSpace"
+              :to="{
+                name: 'space-overview',
+                params: {
+                  id: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0"
+            >
+              {{ proposal.space.name }}
+            </router-link>
+
+            <router-link
+              :to="{
+                name: 'proposal-overview',
+                params: {
+                  id: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="md:flex md:min-w-0"
+            >
+              <h3
+                class="text-[21px] inline md:truncate md:text-ellipsis mr-2"
+                v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
+              />
+              <IH-check
+                v-if="votes[`${proposal.network}:${proposal.id}`]"
+                class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-[2px]"
+              />
+            </router-link>
           </div>
-        </router-link>
+        </div>
         <div class="inline">
           {{ getProposalId(proposal) }}
           by
@@ -55,7 +82,7 @@ async function handleVoteClick(choice: Choice) {
             class="text-skin-text"
             :to="{
               name: 'user',
-              params: { id: `${proposal.network}:${proposal.author.id}` }
+              params: { id: proposal.author.id }
             }"
           >
             {{ proposal.author.name || shortenAddress(proposal.author.id) }}
@@ -66,6 +93,9 @@ async function handleVoteClick(choice: Choice) {
             · {{ _n(proposal.vote_count, 'compact') }}
             {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
           </template>
+          <span v-if="proposal.quorum" class="lowercase">
+            · {{ _p(totalProgress) }} {{ quorumLabel(proposal.quorum_type) }}
+          </span>
           ·
           <a
             class="text-skin-text"

@@ -18,6 +18,7 @@ const props = defineProps<{
 const router = useRouter();
 const route = useRoute();
 const uiStore = useUiStore();
+const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
@@ -135,15 +136,15 @@ async function handleCancelClick() {
 
   try {
     const result = await cancelProposal(props.proposal);
-
-    if (!offchainNetworks.includes(props.proposal.network) || !result) return;
-
-    router.push({
-      name: 'space-overview',
-      params: {
-        id: `${props.proposal.network}:${props.proposal.space.id}`
-      }
-    });
+    if (result) {
+      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      router.push({
+        name: 'space-overview',
+        params: {
+          id: `${props.proposal.network}:${props.proposal.space.id}`
+        }
+      });
+    }
   } finally {
     cancelling.value = false;
   }
@@ -198,7 +199,7 @@ onBeforeUnmount(() => destroyAudio());
         <router-link
           :to="{
             name: 'user',
-            params: { id: `${proposal.network}:${proposal.author.id}` }
+            params: { id: proposal.author.id }
           }"
           class="flex items-center py-3"
         >

@@ -2478,6 +2478,17 @@
   dependencies:
     "@snapshot-labs/eslint-config-base" "^0.1.0-beta.15"
 
+"@snapshot-labs/highlight@^0.1.0-beta.2":
+  version "0.1.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/highlight/-/highlight-0.1.0-beta.2.tgz#a4784ee5141894c86e037266c80ae7dc2965e674"
+  integrity sha512-d6g3iftLj8FJi1t2HVnMPI6iZejiBwYaH0pL4HrQpcLnZ0mtZ3xR+A4l87k7IBMWGIhgHxlPj0oJOum2QInwDQ==
+  dependencies:
+    "@ethersproject/contracts" "^5.7.0"
+    "@ethersproject/providers" "^5.7.2"
+    "@ethersproject/wallet" "^5.7.0"
+    "@snapshot-labs/pineapple" "^0.2.0"
+    cross-fetch "^3.1.5"
+
 "@snapshot-labs/lock@^0.2.0":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.3.tgz#6023433ac2c5ad9edb388e6913d8ccb4fedf5c38"
@@ -2491,6 +2502,13 @@
     "@walletconnect/ethereum-provider" "^2.10.6"
     "@walletconnect/modal" "^2.6.2"
     fortmatic "^2.2.1"
+
+"@snapshot-labs/pineapple@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/pineapple/-/pineapple-0.2.0.tgz#b7005baa1ee6b56d446668972fe52b420fa12357"
+  integrity sha512-qphtrQQVYyDVbviak2Zluuh73SWaQFnG9+K/oLsSKSLg0TQmrY8aYxxjDipOTtX0Oyz7+OWYaADZ37gVyp/JxA==
+  dependencies:
+    cross-fetch "^3.1.5"
 
 "@snapshot-labs/pineapple@^1.1.0":
   version "1.1.0"

@@ -5,6 +5,7 @@ import {
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
   USER_VOTES_QUERY,
+  USER_FOLLOWS_QUERY,
   VOTES_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
@@ -17,7 +18,8 @@ import {
   User,
   NetworkID,
   ProposalState,
-  SpaceMetadataTreasury
+  SpaceMetadataTreasury,
+  Follow
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
@@ -136,6 +138,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     max_end: proposal.end,
     snapshot: proposal.snapshot,
     quorum: proposal.quorum,
+    quorum_type: proposal.quorumType,
     choices: proposal.choices,
     scores: proposal.scores,
     scores_total: proposal.scores_total,
@@ -159,6 +162,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       strategies_parsed_metadata: []
     },
     // NOTE: ignored
+    execution_ready: false,
     execution: [],
     execution_hash: '',
     execution_time: 0,
@@ -251,11 +255,11 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         return formattedVote;
       });
     },
-    loadUserVotes: async (spaceId: string, voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
-          spaceId,
+          spaceIds,
           voter
         }
       });
@@ -265,7 +269,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       );
     },
     loadProposals: async (
-      spaceId: string,
+      spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
       filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
@@ -287,7 +291,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
           first: limit,
           skip,
           where: {
-            space: spaceId,
+            space_in: spaceIds,
             title_contains: searchQuery,
             flagged: false,
             ...filters
@@ -343,6 +347,20 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         vote_count: 0,
         created: 0
       };
+    },
+    loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
+      const {
+        data: { follows }
+      }: { data: { follows: Follow[] } } = await apollo.query({
+        query: USER_FOLLOWS_QUERY,
+        variables: {
+          first: 25,
+          follower: userId,
+          space: spaceId
+        }
+      });
+
+      return follows;
     }
   };
 }

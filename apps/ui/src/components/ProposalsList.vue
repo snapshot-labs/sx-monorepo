@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import type { Proposal as ProposalType } from '@/types';
 
-const props = defineProps<{
-  title: string;
-  loading?: boolean;
-  loadingMore?: boolean;
-  limit?: number | 'off';
-  proposals: ProposalType[];
-  route?: {
-    name: string;
-    linkTitle: string;
-  };
-}>();
+const props = withDefaults(
+  defineProps<{
+    title: string;
+    loading?: boolean;
+    loadingMore?: boolean;
+    limit?: number | 'off';
+    proposals: ProposalType[];
+    showSpace?: boolean;
+    route?: {
+      name: string;
+      linkTitle: string;
+    };
+  }>(),
+  {
+    showSpace: false
+  }
+);
 
 const emit = defineEmits<{
   (e: 'endReached');
@@ -34,6 +40,7 @@ const currentLimit = computed(() => {
           v-for="(proposal, i) in proposals.slice(0, currentLimit)"
           :key="i"
           :proposal="proposal"
+          :show-space="showSpace"
         />
       </UiContainerInfiniteScroll>
       <div v-if="!proposals.length" class="px-4 py-3 flex items-center text-skin-link">

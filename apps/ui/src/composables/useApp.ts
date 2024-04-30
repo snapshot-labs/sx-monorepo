@@ -13,10 +13,7 @@ export function useApp() {
     state.loading = true;
 
     // Auto connect with gnosis-connector when inside gnosis-safe iframe
-    if (window?.parent === window)
-      auth.getConnector().then(connector => {
-        if (connector) login(connector);
-      });
+    if (window?.parent === window) auth.getConnector().then(connector => login(connector));
     else login('gnosis');
 
     state.init = true;
