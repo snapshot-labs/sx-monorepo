@@ -5,6 +5,10 @@ import { Space } from '@/types';
 
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
+function compositeSpaceId(space: Space) {
+  return `${space.network}:${space.id}`;
+}
+
 export const useBookmarksStore = defineStore('bookmarks', () => {
   const { web3, authInitiated } = useWeb3();
   const spacesStore = useSpacesStore();
@@ -29,7 +33,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   );
 
   const bookmarkedSpacesMap = computed(
-    () => new Map(spacesData.value.map(space => [`${space.network}:${space.id}`, space]))
+    () => new Map(spacesData.value.map(space => [compositeSpaceId(space), space]))
   );
 
   const bookmarkedSpaces = computed({
@@ -41,18 +45,42 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     set(spaces: Space[]) {
       starredSpacesIds.value = spaces
         .filter(space => space.network !== offchainNetworkId)
-        .map(space => `${space.network}:${space.id}`);
+        .map(compositeSpaceId);
 
-      accountsBookmarkedSpacesIds.value[web3.value.account] = spaces.map(
-        space => `${space.network}:${space.id}`
-      );
+      accountsBookmarkedSpacesIds.value[web3.value.account] = spaces.map(compositeSpaceId);
     }
   });
 
+  function syncBookmarkedSpacesIds(spaceIds: string[], type: 'starred' | 'followed') {
+    accountsBookmarkedSpacesIds.value[web3.value.account] = Array.from(
+      new Set(
+        [...bookmarkedSpacesIds.value, ...spaceIds].filter(
+          id =>
+            id.startsWith(`${offchainNetworkId}:`) !== (type === 'followed') ||
+            spaceIds.includes(id)
+        )
+      )
+    );
+  }
+
+  async function fetchSpacesData(ids: string[]) {
+    if (!ids.length) return;
+
+    const spaces = await getSpaces({
+      id_in: ids.filter(id => !spacesMap.has(id))
+    });
+
+    spacesData.value = [
+      ...spacesData.value,
+      ...spaces,
+      ...(ids.map(id => spacesMap.get(id)).filter(Boolean) as Space[])
+    ];
+  }
+
   async function loadFollowedSpaces() {
     const network = getNetwork(offchainNetworkId);
-    const followedIds = (await network.api.loadFollows(web3.value.account)).map(
-      follow => `${offchainNetworkId}:${follow.space.id}`
+    const followedIds = (await network.api.loadFollows(web3.value.account)).map(follow =>
+      compositeSpaceId(follow.space)
     );
     const newIds = followedIds.filter(id => !followedSpacesIds.value.includes(id));
     followedSpacesIds.value = followedIds;
@@ -78,32 +106,6 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
       space: id,
       favorite: !alreadyStarred
     });
-  }
-
-  async function fetchSpacesData(ids: string[]) {
-    if (!ids.length) return;
-
-    const spaces = await getSpaces({
-      id_in: ids.filter(id => !spacesMap.has(id))
-    });
-
-    spacesData.value = [
-      ...spacesData.value,
-      ...spaces,
-      ...(ids.map(id => spacesMap.get(id)).filter(Boolean) as Space[])
-    ];
-  }
-
-  function syncBookmarkedSpacesIds(spaceIds: string[], type: 'starred' | 'followed') {
-    accountsBookmarkedSpacesIds.value[web3.value.account] = Array.from(
-      new Set(
-        [...bookmarkedSpacesIds.value, ...spaceIds].filter(
-          id =>
-            id.startsWith(`${offchainNetworkId}:`) !== (type === 'followed') ||
-            spaceIds.includes(id)
-        )
-      )
-    );
   }
 
   watch(
