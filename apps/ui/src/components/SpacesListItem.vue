@@ -6,7 +6,6 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const spacesStore = useSpacesStore();
-console.log(props.space);
 </script>
 
 <template>
