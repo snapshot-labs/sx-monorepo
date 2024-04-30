@@ -65,10 +65,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   async function fetchSpacesData(ids: string[]) {
     if (!ids.length) return;
 
-    await spacesStore.fetchSpaces(
-      ids.filter(id => !spacesStore.spacesMap.has(id)).map(id => id.split(':')[1]),
-      offchainNetworkId
-    );
+    await spacesStore.fetchSpaces(ids.filter(id => !spacesStore.spacesMap.has(id)));
 
     spacesData.value = [
       ...spacesData.value,
@@ -93,12 +90,16 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
 
     if (alreadyStarred) {
       starredSpacesIds.value = starredSpacesIds.value.filter((spaceId: string) => spaceId !== id);
-      accountsBookmarkedSpacesIds.value[web3.value.account] = accountsBookmarkedSpacesIds.value[
-        web3.value.account
-      ].filter((spaceId: string) => spaceId !== id);
+
+      if (web3.value.account)
+        accountsBookmarkedSpacesIds.value[web3.value.account] = accountsBookmarkedSpacesIds.value[
+          web3.value.account
+        ].filter((spaceId: string) => spaceId !== id);
     } else {
       starredSpacesIds.value = [id, ...starredSpacesIds.value];
-      accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
+
+      if (web3.value.account)
+        accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
     }
 
     mixpanel.track('Set space favorite', {
