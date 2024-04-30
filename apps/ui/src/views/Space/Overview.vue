@@ -15,7 +15,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const { starredSpacesIds, followedSpacesIds, followedSpacesLoaded, toggleSpaceStar } = useAccount();
+const bookmarksStore = useBookmarksStore();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
@@ -27,8 +27,8 @@ onMounted(() => {
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
-const spaceStarred = computed(() => starredSpacesIds.value.includes(spaceIdComposite));
-const spaceFollowed = computed(() => followedSpacesIds.value.includes(spaceIdComposite));
+const spaceStarred = computed(() => bookmarksStore.starredSpacesIds.includes(spaceIdComposite));
+const spaceFollowed = computed(() => bookmarksStore.followedSpacesIds.includes(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const socials = computed(() =>
@@ -87,7 +87,7 @@ watchEffect(() => setTitle(props.space.name));
           class="group"
           :class="{ 'hover:border-skin-danger': spaceFollowed }"
         >
-          <UiLoading v-if="!followedSpacesLoaded" />
+          <UiLoading v-if="!bookmarksStore.followedSpacesLoaded" />
           <span v-else-if="spaceFollowed" class="inline-block">
             <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
             <span class="group-hover:hidden">Following</span>
@@ -98,7 +98,10 @@ watchEffect(() => setTitle(props.space.name));
           v-else-if="!isOffchainSpace"
           :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'"
         >
-          <UiButton class="w-[46px] !px-0" @click="toggleSpaceStar(spaceIdComposite)">
+          <UiButton
+            class="w-[46px] !px-0"
+            @click="bookmarksStore.toggleSpaceStar(spaceIdComposite)"
+          >
             <IS-star v-if="spaceStarred" class="inline-block" />
             <IH-star v-else class="inline-block" />
           </UiButton>

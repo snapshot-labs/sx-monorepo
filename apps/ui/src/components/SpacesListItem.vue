@@ -4,7 +4,7 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const { toggleSpaceStar, starredSpacesIds } = useAccount();
+const bookmarksStore = useBookmarksStore();
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 </script>
@@ -26,9 +26,12 @@ const spaceIdComposite = `${props.space.network}:${props.space.id}`;
     </div>
     <button
       class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-      @click.prevent="toggleSpaceStar(spaceIdComposite)"
+      @click.prevent="bookmarksStore.toggleSpaceStar(spaceIdComposite)"
     >
-      <IS-star v-if="starredSpacesIds.includes(spaceIdComposite)" class="inline-block" />
+      <IS-star
+        v-if="bookmarksStore.starredSpacesIds.includes(spaceIdComposite)"
+        class="inline-block"
+      />
       <IH-star v-else class="inline-block" />
     </button>
     <div class="px-4">
