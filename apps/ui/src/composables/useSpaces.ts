@@ -3,7 +3,10 @@ import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, NetworkID } from '@/types';
 import { SpacesFilter } from '@/networks/types';
 
-const SPACES_LIMIT = 18;
+const SPACES_LIMIT = {
+  snapshot: 18,
+  default: 1000
+};
 
 type NetworkRecord = {
   spaces: Record<string, Space>;
@@ -15,6 +18,12 @@ export function useSpaces() {
   const loading = ref(false);
   const loadingMore = ref(false);
   const loaded = ref(false);
+  const networkType = ref('snapshot');
+  const exploreNetworks = computed(() =>
+    networkType.value === 'snapshot'
+      ? ['s']
+      : enabledNetworks.filter(network => !offchainNetworks.includes(network))
+  );
   const networksMap = ref(
     Object.fromEntries(
       enabledNetworks.map(network => [
@@ -30,7 +39,9 @@ export function useSpaces() {
 
   const spaces = computed(() =>
     Object.values(networksMap.value).flatMap(record =>
-      record.spacesIdsList.map(spaceId => record.spaces[spaceId])
+      record.spacesIdsList
+        .map(spaceId => record.spaces[spaceId])
+        .filter(space => exploreNetworks.value.includes(space.network))
     )
   );
 
@@ -66,7 +77,7 @@ export function useSpaces() {
         return network.api.loadSpaces(
           {
             skip: 0,
-            limit: SPACES_LIMIT
+            limit: SPACES_LIMIT.default
           },
           requestFilter
         );
@@ -77,16 +88,14 @@ export function useSpaces() {
   }
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
-    let exploreNetworks = enabledNetworks.filter(network => !offchainNetworks.includes(network));
-
-    if (filter?.networkType === 'snapshot') {
-      exploreNetworks = ['s'];
+    let spacesLimit = SPACES_LIMIT.default;
+    if (networkType.value === 'snapshot') {
+      spacesLimit = SPACES_LIMIT.snapshot;
     }
-    if (filter?.networkType) delete filter.networkType;
 
     const results = await Promise.all(
-      exploreNetworks.map(async id => {
-        const network = getNetwork(id);
+      exploreNetworks.value.map(async id => {
+        const network = getNetwork(id as NetworkID);
 
         const record = networksMap.value[id];
         if (!record.hasMoreSpaces) {
@@ -100,7 +109,7 @@ export function useSpaces() {
         const spaces = await network.api.loadSpaces(
           {
             skip: overwrite ? 0 : record.spacesIdsList.length,
-            limit: SPACES_LIMIT
+            limit: spacesLimit
           },
           filter
         );
@@ -108,7 +117,7 @@ export function useSpaces() {
         return {
           id,
           spaces,
-          hasMoreSpaces: spaces.length === SPACES_LIMIT
+          hasMoreSpaces: spaces.length === spacesLimit
         };
       })
     );
@@ -135,20 +144,11 @@ export function useSpaces() {
         })
       ) as Record<NetworkID, NetworkRecord>)
     };
+    console.log('networksMap.value', networksMap.value);
   }
 
   async function fetch(filter?: SpacesFilter) {
     loading.value = true;
-    networksMap.value = Object.fromEntries(
-      enabledNetworks.map(network => [
-        network,
-        {
-          spaces: {},
-          spacesIdsList: [],
-          hasMoreSpaces: true
-        } as NetworkRecord
-      ])
-    );
     await _fetchSpaces(true, filter);
 
     loaded.value = true;
@@ -164,6 +164,11 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
+  async function handleNetworkTypeChange(type: string) {
+    networkType.value = type;
+    await fetch();
+  }
+
   return {
     loading,
     loadingMore,
@@ -174,6 +179,7 @@ export function useSpaces() {
     hasMoreSpaces,
     getSpaces,
     fetch,
-    fetchMore
+    fetchMore,
+    handleNetworkTypeChange
   };
 }

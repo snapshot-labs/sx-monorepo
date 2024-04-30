@@ -6,15 +6,11 @@ const spacesStore = useSpacesStore();
 watchEffect(() => setTitle('Explore'));
 
 const filter = ref('snapshot' as 'snapshot' | 'snapshotx');
-onMounted(() => spacesStore.fetch({ networkType: filter.value }));
+onMounted(() => spacesStore.fetch());
 
 watch(filter, toFilter => {
-  spacesStore.fetch({ networkType: toFilter });
+  spacesStore.handleNetworkTypeChange(toFilter);
 });
-
-async function handleEndReached() {
-  if (spacesStore.hasMoreSpaces) spacesStore.fetchMore({ networkType: filter.value });
-}
 </script>
 
 <template>
@@ -45,7 +41,7 @@ async function handleEndReached() {
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
         <UiContainerInfiniteScroll
           :loading-more="spacesStore.loadingMore"
-          @end-reached="handleEndReached"
+          @end-reached="spacesStore.fetchMore"
         >
           <SpacesListItem v-for="space in spacesStore.spaces" :key="space.id" :space="space" />
           <div></div>
