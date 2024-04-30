@@ -82,7 +82,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     const followedIds = (await network.api.loadFollows(web3.value.account)).map(follow =>
       compositeSpaceId(follow.space)
     );
-    const newIds = followedIds.filter(id => !followedSpacesIds.value.includes(id));
+    const newIds = followedIds.filter(id => !isFollowed(id));
     followedSpacesIds.value = followedIds;
 
     syncBookmarkedSpacesIds(followedIds, 'followed');
@@ -90,7 +90,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   }
 
   function toggleSpaceStar(id: string) {
-    const alreadyStarred = starredSpacesIds.value.includes(id);
+    const alreadyStarred = isStarred(id);
 
     if (alreadyStarred) {
       starredSpacesIds.value = starredSpacesIds.value.filter((spaceId: string) => spaceId !== id);
@@ -106,6 +106,14 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
       space: id,
       favorite: !alreadyStarred
     });
+  }
+
+  function isStarred(spaceId: string) {
+    return starredSpacesIds.value.includes(spaceId);
+  }
+
+  function isFollowed(spaceId: string) {
+    return followedSpacesIds.value.includes(spaceId);
   }
 
   watch(
@@ -147,10 +155,11 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   return {
     bookmarkedSpaces,
     bookmarksLoaded,
-    starredSpacesIds,
     starredSpacesLoaded,
     followedSpacesIds,
     followedSpacesLoaded,
+    isStarred,
+    isFollowed,
     toggleSpaceStar
   };
 });

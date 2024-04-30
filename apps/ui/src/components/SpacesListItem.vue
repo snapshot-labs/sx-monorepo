@@ -28,10 +28,7 @@ const spaceIdComposite = `${props.space.network}:${props.space.id}`;
       class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
       @click.prevent="bookmarksStore.toggleSpaceStar(spaceIdComposite)"
     >
-      <IS-star
-        v-if="bookmarksStore.starredSpacesIds.includes(spaceIdComposite)"
-        class="inline-block"
-      />
+      <IS-star v-if="bookmarksStore.isStarred(spaceIdComposite)" class="inline-block" />
       <IH-star v-else class="inline-block" />
     </button>
     <div class="px-4">

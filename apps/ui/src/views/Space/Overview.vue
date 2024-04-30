@@ -27,8 +27,8 @@ onMounted(() => {
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
-const spaceStarred = computed(() => bookmarksStore.starredSpacesIds.includes(spaceIdComposite));
-const spaceFollowed = computed(() => bookmarksStore.followedSpacesIds.includes(spaceIdComposite));
+const spaceStarred = computed(() => bookmarksStore.isStarred(spaceIdComposite));
+const spaceFollowed = computed(() => bookmarksStore.isFollowed(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const socials = computed(() =>
