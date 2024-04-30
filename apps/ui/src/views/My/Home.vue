@@ -46,7 +46,7 @@ async function withAuthorNames(proposals: Proposal[]) {
 async function loadProposalsPage(skip = 0) {
   return withAuthorNames(
     await network.value.api.loadProposals(
-      followedSpacesIds.value,
+      followedSpacesIds.value.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
       { limit: PROPOSALS_LIMIT, skip },
       metaStore.getCurrent(networkId.value) || 0,
       filter.value
