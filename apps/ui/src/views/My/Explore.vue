@@ -11,6 +11,10 @@ onMounted(() => spacesStore.fetch({ networkType: filter.value }));
 watch(filter, toFilter => {
   spacesStore.fetch({ networkType: toFilter });
 });
+
+async function handleEndReached() {
+  if (spacesStore.hasMoreSpaces) spacesStore.fetchMore({ networkType: filter.value });
+}
 </script>
 
 <template>
@@ -39,7 +43,14 @@ watch(filter, toFilter => {
     <UiLoading v-if="spacesStore.loading" class="block m-4" />
     <div v-else-if="spacesStore.loaded" class="max-w-screen-md mx-auto p-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-        <SpacesListItem v-for="space in spacesStore.spaces" :key="space.id" :space="space" />
+        <UiContainerInfiniteScroll
+          :loading-more="spacesStore.loadingMore"
+          @end-reached="handleEndReached"
+        >
+          <SpacesListItem v-for="space in spacesStore.spaces" :key="space.id" :space="space" />
+          <div></div>
+          <!-- Empty div make the loader inside infinite scroll align center -->
+        </UiContainerInfiniteScroll>
       </div>
     </div>
   </div>

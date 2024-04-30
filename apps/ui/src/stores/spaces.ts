@@ -12,6 +12,7 @@ export const useSpacesStore = defineStore('spaces', () => {
 
   const {
     loading,
+    loadingMore,
     loaded,
     networksMap,
     spaces,
@@ -99,6 +100,7 @@ export const useSpacesStore = defineStore('spaces', () => {
     starredSpaces,
     starredSpacesLoaded,
     loading,
+    loadingMore,
     loaded,
     networksMap,
     spaces,
