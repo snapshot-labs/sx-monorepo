@@ -89,7 +89,7 @@ export function useSpaces() {
         const network = getNetwork(id as NetworkID);
 
         const record = networksMap.value[id];
-        if (!record.hasMoreSpaces) {
+        if (!overwrite && !record.hasMoreSpaces) {
           return {
             id,
             spaces: [],
@@ -154,8 +154,8 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
-  async function handleProtocolChange(type: ExplorePageProtocol) {
-    protocol.value = type;
+  async function handleProtocolChange(newProtocol: ExplorePageProtocol) {
+    protocol.value = newProtocol;
     await fetch();
   }
 
