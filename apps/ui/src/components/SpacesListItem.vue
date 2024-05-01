@@ -27,16 +27,6 @@ const spacesStore = useSpacesStore();
         />
       </UiBadgeNetwork>
     </div>
-    <button
-      class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-      @click.prevent="spacesStore.toggleSpaceStar(`${space.network}:${space.id}`)"
-    >
-      <IS-star
-        v-if="spacesStore.starredSpacesIds.includes(`${space.network}:${space.id}`)"
-        class="inline-block"
-      />
-      <IH-star v-else class="inline-block" />
-    </button>
     <div class="px-4">
       <div class="flex items-center">
         <h3 class="truncate" v-text="space.name" />
