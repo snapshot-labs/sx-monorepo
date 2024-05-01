@@ -72,7 +72,7 @@ export class StarknetSig {
       verifyingContract
     };
 
-    const data: typedData.TypedData = {
+    const data: typeof typedData.TypedData = {
       types,
       primaryType,
       domain,

@@ -72,7 +72,7 @@
     "pinia": "^2.1.6",
     "remarkable": "^2.0.1",
     "scrollmonitor": "^1.2.11",
-    "starknet": "5.25.0",
+    "starknet": "6.8.0",
     "stream-browserify": "^3.0.0",
     "tippy.js": "^6.3.7",
     "unplugin-auto-import": "^0.16.6",

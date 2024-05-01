@@ -1,4 +1,5 @@
-import { Account, CairoOption, CairoOptionVariant, CallData, cairo } from 'starknet';
+import { Account, CairoOption, CairoOptionVariant, CallData, cairo, stark } from 'starknet';
+import { ESTIMATE_FEE_OVERHEAD_PERCENT } from '../constants';
 
 type ProofElement = {
   index: number;
@@ -46,7 +47,10 @@ export class HerodotusController {
       })
     };
 
-    const fee = await signer.estimateFee(call);
-    return signer.execute(call, undefined, { ...opts, maxFee: fee.suggestedMaxFee });
+    const fee = opts?.nonce ? await signer.estimateFee(call) : null;
+    const maxFee = fee
+      ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, ESTIMATE_FEE_OVERHEAD_PERCENT)
+      : undefined;
+    return signer.execute(call, undefined, fee ? { maxFee } : undefined);
   }
 }
