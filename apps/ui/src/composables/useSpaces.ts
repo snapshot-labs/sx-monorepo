@@ -15,10 +15,6 @@ export function useSpaces() {
   const loaded = ref(false);
   const protocol = ref('snapshot' as ExplorePageProtocol);
 
-  watch(protocol, toFilter => {
-    handleProtocolChange(toFilter);
-  });
-
   const networksMap = ref(
     Object.fromEntries(
       enabledNetworks.map(network => [
@@ -158,6 +154,10 @@ export function useSpaces() {
     protocol.value = newProtocol;
     await fetch();
   }
+
+  watch(protocol, toFilter => {
+    handleProtocolChange(toFilter);
+  });
 
   return {
     loading,
