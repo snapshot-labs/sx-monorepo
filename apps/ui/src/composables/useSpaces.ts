@@ -13,10 +13,10 @@ export function useSpaces() {
   const loading = ref(false);
   const loadingMore = ref(false);
   const loaded = ref(false);
-  const networkType = ref('snapshot' as ExplorePageProtocol);
+  const protocol = ref('snapshot' as ExplorePageProtocol);
 
-  watch(networkType, toFilter => {
-    handleNetworkTypeChange(toFilter);
+  watch(protocol, toFilter => {
+    handleProtocolChange(toFilter);
   });
 
   const networksMap = ref(
@@ -36,7 +36,7 @@ export function useSpaces() {
     Object.values(networksMap.value).flatMap(record =>
       record.spacesIdsList
         .map(spaceId => record.spaces[spaceId])
-        .filter(space => explorePageProtocols[networkType.value].networks.includes(space.network))
+        .filter(space => explorePageProtocols[protocol.value].networks.includes(space.network))
     )
   );
 
@@ -83,7 +83,7 @@ export function useSpaces() {
   }
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
-    const { networks, limit } = explorePageProtocols[networkType.value];
+    const { networks, limit } = explorePageProtocols[protocol.value];
     const results = await Promise.all(
       networks.map(async id => {
         const network = getNetwork(id as NetworkID);
@@ -154,8 +154,8 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
-  async function handleNetworkTypeChange(type: ExplorePageProtocol) {
-    networkType.value = type;
+  async function handleProtocolChange(type: ExplorePageProtocol) {
+    protocol.value = type;
     await fetch();
   }
 
@@ -170,7 +170,7 @@ export function useSpaces() {
     getSpaces,
     fetch,
     fetchMore,
-    networkType,
-    handleNetworkTypeChange
+    protocol,
+    handleProtocolChange
   };
 }
