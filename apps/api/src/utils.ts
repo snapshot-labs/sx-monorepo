@@ -3,7 +3,7 @@ import {
   BigNumberish,
   CallData,
   Contract,
-  Provider,
+  RpcProvider,
   hash,
   shortString,
   validateAndParseAddress
@@ -33,10 +33,8 @@ type StrategyConfig = {
 const ethProvider = new JsonRpcProvider(
   process.env.L1_NETWORK_NODE_URL ?? 'https://rpc.brovider.xyz/5'
 );
-const starkProvider = new Provider({
-  rpc: {
-    nodeUrl: networkNodeUrl
-  }
+const starkProvider = new RpcProvider({
+  nodeUrl: networkNodeUrl
 });
 
 const encodersAbi = new CallData(EncodersAbi);

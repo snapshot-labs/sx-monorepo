@@ -7,6 +7,7 @@ import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getAuthenticator } from '../../../authenticators/starknet';
 import { hexPadLeft } from '../../../utils/encoding';
 import { defaultNetwork } from '../../../networks';
+import { ESTIMATE_FEE_OVERHEAD_PERCENT } from '../constants';
 import SpaceAbi from './abis/Space.json';
 import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy.json';
 import {
@@ -204,7 +205,9 @@ export class StarknetTx {
     const calls = [call];
 
     const fee = opts?.nonce ? await account.estimateFee(calls) : null;
-    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    const maxFee = fee
+      ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, ESTIMATE_FEE_OVERHEAD_PERCENT)
+      : undefined;
     return account.execute(calls, undefined, fee ? { maxFee } : undefined);
   }
 
@@ -227,7 +230,9 @@ export class StarknetTx {
     });
 
     const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    const maxFee = fee
+      ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, ESTIMATE_FEE_OVERHEAD_PERCENT)
+      : undefined;
     return account.execute(call, undefined, fee ? { maxFee } : undefined);
   }
 
@@ -256,7 +261,9 @@ export class StarknetTx {
     });
 
     const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    const maxFee = fee
+      ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, ESTIMATE_FEE_OVERHEAD_PERCENT)
+      : undefined;
     return account.execute(call, undefined, fee ? { maxFee } : undefined);
   }
 
