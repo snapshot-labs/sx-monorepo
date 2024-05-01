@@ -75,7 +75,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
   snapshot: {
     key: 'snapshot',
     label: 'Snapshot',
-    networks: ['s'],
+    networks: enabledNetworks.filter(network => offchainNetworks.includes(network)),
     limit: 18
   },
   snapshotx: {
