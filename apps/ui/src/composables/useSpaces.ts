@@ -1,12 +1,7 @@
 import { ref, computed } from 'vue';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { enabledNetworks, getNetwork, explorePageProtocols } from '@/networks';
 import { Space, NetworkID } from '@/types';
-import { SpacesFilter } from '@/networks/types';
-
-const SPACES_LIMIT = {
-  snapshot: 18,
-  default: 1000
-};
+import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
 
 type NetworkRecord = {
   spaces: Record<string, Space>;
@@ -18,12 +13,12 @@ export function useSpaces() {
   const loading = ref(false);
   const loadingMore = ref(false);
   const loaded = ref(false);
-  const networkType = ref('snapshot');
-  const exploreNetworks = computed(() =>
-    networkType.value === 'snapshot'
-      ? ['s']
-      : enabledNetworks.filter(network => !offchainNetworks.includes(network))
-  );
+  const networkType = ref('snapshot' as ExplorePageProtocol);
+
+  watch(networkType, toFilter => {
+    handleNetworkTypeChange(toFilter);
+  });
+
   const networksMap = ref(
     Object.fromEntries(
       enabledNetworks.map(network => [
@@ -41,7 +36,7 @@ export function useSpaces() {
     Object.values(networksMap.value).flatMap(record =>
       record.spacesIdsList
         .map(spaceId => record.spaces[spaceId])
-        .filter(space => exploreNetworks.value.includes(space.network))
+        .filter(space => explorePageProtocols[networkType.value].networks.includes(space.network))
     )
   );
 
@@ -77,7 +72,7 @@ export function useSpaces() {
         return network.api.loadSpaces(
           {
             skip: 0,
-            limit: SPACES_LIMIT.default
+            limit: explorePageProtocols['snapshotx'].limit
           },
           requestFilter
         );
@@ -88,13 +83,9 @@ export function useSpaces() {
   }
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
-    let spacesLimit = SPACES_LIMIT.default;
-    if (networkType.value === 'snapshot') {
-      spacesLimit = SPACES_LIMIT.snapshot;
-    }
-
+    const { networks, limit } = explorePageProtocols[networkType.value];
     const results = await Promise.all(
-      exploreNetworks.value.map(async id => {
+      networks.map(async id => {
         const network = getNetwork(id as NetworkID);
 
         const record = networksMap.value[id];
@@ -109,7 +100,7 @@ export function useSpaces() {
         const spaces = await network.api.loadSpaces(
           {
             skip: overwrite ? 0 : record.spacesIdsList.length,
-            limit: spacesLimit
+            limit
           },
           filter
         );
@@ -117,7 +108,7 @@ export function useSpaces() {
         return {
           id,
           spaces,
-          hasMoreSpaces: spaces.length === spacesLimit
+          hasMoreSpaces: spaces.length === limit
         };
       })
     );
@@ -144,7 +135,6 @@ export function useSpaces() {
         })
       ) as Record<NetworkID, NetworkRecord>)
     };
-    console.log('networksMap.value', networksMap.value);
   }
 
   async function fetch(filter?: SpacesFilter) {
@@ -164,7 +154,7 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
-  async function handleNetworkTypeChange(type: string) {
+  async function handleNetworkTypeChange(type: ExplorePageProtocol) {
     networkType.value = type;
     await fetch();
   }
@@ -180,6 +170,7 @@ export function useSpaces() {
     getSpaces,
     fetch,
     fetchMore,
+    networkType,
     handleNetworkTypeChange
   };
 }

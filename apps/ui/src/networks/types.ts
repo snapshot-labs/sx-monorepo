@@ -249,3 +249,12 @@ type BaseNetwork = {
 export type ReadOnlyNetwork = BaseNetwork & { readOnly: true; actions: ReadOnlyNetworkActions };
 export type ReadWriteNetwork = BaseNetwork & { readOnly?: false; actions: NetworkActions };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
+
+export type ExplorePageProtocol = 'snapshot' | 'snapshotx';
+
+export type ProtocolConfig = {
+  key: ExplorePageProtocol;
+  label: string;
+  networks: NetworkID[];
+  limit: number;
+};

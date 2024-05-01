@@ -2,7 +2,7 @@ import { createStarknetNetwork } from './starknet';
 import { createEvmNetwork } from './evm';
 import { createOffchainNetwork } from './offchain';
 import { NetworkID } from '@/types';
-import { ReadWriteNetwork } from './types';
+import { ExplorePageProtocol, ProtocolConfig, ReadWriteNetwork } from './types';
 
 const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
@@ -69,4 +69,19 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
  */
 export const supportsNullCurrent = (networkID: NetworkID) => {
   return !evmNetworks.includes(networkID);
+};
+
+export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> = {
+  snapshot: {
+    key: 'snapshot',
+    label: 'Snapshot',
+    networks: ['s'],
+    limit: 18
+  },
+  snapshotx: {
+    key: 'snapshotx',
+    label: 'Snapshot X',
+    networks: enabledNetworks.filter(network => !offchainNetworks.includes(network)),
+    limit: 1000
+  }
 };

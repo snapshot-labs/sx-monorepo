@@ -1,36 +1,28 @@
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 
 <script setup lang="ts">
+import { explorePageProtocols } from '../../networks';
+import { ProtocolConfig } from '../../networks/types';
+
 const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
 watchEffect(() => setTitle('Explore'));
-
-const filter = ref('snapshot' as 'snapshot' | 'snapshotx');
 onMounted(() => spacesStore.fetch());
-
-watch(filter, toFilter => {
-  spacesStore.handleNetworkTypeChange(toFilter);
-});
+const protocols = Object.values(explorePageProtocols).map((protocol: ProtocolConfig) => ({
+  key: protocol.key,
+  label: protocol.label
+}));
 </script>
 
 <template>
   <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown
-        v-model="filter"
+        v-model="spacesStore.networkType"
         title="Protocol"
         gap="12px"
         placement="left"
-        :items="[
-          {
-            key: 'snapshot',
-            label: 'Snapshot'
-          },
-          {
-            key: 'snapshotx',
-            label: 'Snapshot X'
-          }
-        ]"
+        :items="protocols"
       />
     </div>
   </div>
