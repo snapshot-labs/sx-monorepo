@@ -83,6 +83,8 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
 
     syncBookmarkedSpacesIds(followedIds, 'followed');
     fetchSpacesData(newIds);
+
+    console.log('fetch end');
   }
 
   function toggleSpaceStar(id: string) {
@@ -135,9 +137,14 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   );
 
   watch(
-    [() => web3.value.account, () => web3.value.type, () => authInitiated.value],
-    async ([web3, type, authInitiated]) => {
-      if (!authInitiated) return;
+    [
+      () => web3.value.account,
+      () => web3.value.type,
+      () => web3.value.authLoading,
+      () => authInitiated.value
+    ],
+    async ([web3, type, authLoading, authInitiated]) => {
+      if (!authInitiated || authLoading) return;
 
       if (!web3) {
         followedSpacesIds.value = [];
@@ -147,6 +154,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
 
       if (type !== 'argentx') await loadFollowedSpaces();
 
+      console.log('ready');
       followedSpacesLoaded.value = true;
     },
     { immediate: true }
@@ -155,6 +163,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   return {
     bookmarkedSpaces,
     bookmarksLoaded,
+    starredSpacesLoaded,
     followedSpacesIds,
     followedSpacesLoaded,
     isStarred,
