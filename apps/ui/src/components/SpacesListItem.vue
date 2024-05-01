@@ -4,8 +4,6 @@ import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
-
-const spacesStore = useSpacesStore();
 </script>
 
 <template>

@@ -1,5 +1,3 @@
-import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-
 <script setup lang="ts">
 import { explorePageProtocols } from '../../networks';
 import { ProtocolConfig } from '../../networks/types';
