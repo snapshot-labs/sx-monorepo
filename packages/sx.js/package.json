@@ -54,7 +54,7 @@
     "micro-starknet": "^0.2.3",
     "randombytes": "^2.1.0",
     "snake-case": "^3.0.4",
-    "starknet": "5.25.0"
+    "starknet": "6.11.0"
   },
   "devDependencies": {
     "@ethersproject/units": "^5.7.0",

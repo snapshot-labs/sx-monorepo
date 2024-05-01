@@ -1,5 +1,6 @@
 import {
   LibraryError,
+  ReceiptTx,
   constants as starknetConstants,
   TransactionExecutionStatus
 } from 'starknet';
@@ -106,7 +107,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
             return;
           }
 
-          if (tx.execution_status === TransactionExecutionStatus.SUCCEEDED) {
+          const receiptTx = new ReceiptTx(tx);
+          if (receiptTx.isSuccess()) {
             resolve(tx);
           } else {
             reject(tx);
