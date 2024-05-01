@@ -24,7 +24,10 @@ const decimals = computed(() =>
   Math.max(...props.votingPowers.map(votingPower => votingPower.decimals), 0)
 );
 const formattedVotingPower = computed(() => {
-  const value = _n(Number(votingPower.value) / 10 ** decimals.value, 'compact');
+  const value = _n(Number(votingPower.value) / 10 ** decimals.value, 'compact', {
+    maximumFractionDigits: 2,
+    formatDust: true
+  });
 
   if (props.votingPowerSymbol) {
     return `${value} ${props.votingPowerSymbol}`;
