@@ -130,7 +130,12 @@ export function _n(
   notation: 'standard' | 'compact' = 'standard',
   { maximumFractionDigits }: { maximumFractionDigits?: number } = {}
 ) {
-  const formatter = new Intl.NumberFormat('en', { notation, maximumFractionDigits });
+  if (maximumFractionDigits == 2 && value !== 0 && value < 0.01) return '~0';
+
+  const formatter = new Intl.NumberFormat('en', {
+    notation,
+    maximumFractionDigits
+  });
   return formatter.format(value).toLowerCase();
 }
 
