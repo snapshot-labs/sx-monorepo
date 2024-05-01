@@ -25,7 +25,8 @@ const decimals = computed(() =>
 );
 const formattedVotingPower = computed(() => {
   const value = _n(Number(votingPower.value) / 10 ** decimals.value, 'compact', {
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
+    formatDust: true
   });
 
   if (props.votingPowerSymbol) {

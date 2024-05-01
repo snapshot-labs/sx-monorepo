@@ -53,7 +53,8 @@ const error = computed(() => props.votingPowerStatus === 'error');
           <div class="text-skin-link">
             {{
               _n(Number(strategy.value) / 10 ** finalDecimals, 'compact', {
-                maximumFractionDigits: 2
+                maximumFractionDigits: 2,
+                formatDust: true
               })
             }}
             {{ votingPowerSymbol }}

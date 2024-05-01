@@ -128,9 +128,12 @@ export function getProposalId(proposal: Proposal) {
 export function _n(
   value: any,
   notation: 'standard' | 'compact' = 'standard',
-  { maximumFractionDigits }: { maximumFractionDigits?: number } = {}
+  {
+    maximumFractionDigits,
+    formatDust = false
+  }: { maximumFractionDigits?: number; formatDust?: boolean } = {}
 ) {
-  if (maximumFractionDigits == 2 && value !== 0 && value < 0.01) return '~0';
+  if (formatDust && value > 0 && value < 0.01) return '~0';
 
   const formatter = new Intl.NumberFormat('en', {
     notation,
