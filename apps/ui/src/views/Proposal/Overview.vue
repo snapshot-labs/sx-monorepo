@@ -18,6 +18,7 @@ const props = defineProps<{
 const router = useRouter();
 const route = useRoute();
 const uiStore = useUiStore();
+const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { cancelProposal } = useActions();
@@ -134,7 +135,16 @@ async function handleCancelClick() {
   cancelling.value = true;
 
   try {
-    await cancelProposal(props.proposal);
+    const result = await cancelProposal(props.proposal);
+    if (result) {
+      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      router.push({
+        name: 'space-overview',
+        params: {
+          id: `${props.proposal.network}:${props.proposal.space.id}`
+        }
+      });
+    }
   } finally {
     cancelling.value = false;
   }
