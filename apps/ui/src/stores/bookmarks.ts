@@ -83,8 +83,6 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
 
     syncBookmarkedSpacesIds(followedIds, 'followed');
     fetchSpacesData(newIds);
-
-    console.log('fetch end');
   }
 
   function toggleSpaceStar(id: string) {
@@ -154,7 +152,6 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
 
       if (type !== 'argentx') await loadFollowedSpaces();
 
-      console.log('ready');
       followedSpacesLoaded.value = true;
     },
     { immediate: true }
