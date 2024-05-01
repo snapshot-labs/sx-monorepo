@@ -2,14 +2,17 @@
 import { explorePageProtocols } from '../../networks';
 import { ProtocolConfig } from '../../networks/types';
 
-const { setTitle } = useTitle();
-const spacesStore = useSpacesStore();
-watchEffect(() => setTitle('Explore'));
-onMounted(() => spacesStore.fetch());
 const protocols = Object.values(explorePageProtocols).map((protocol: ProtocolConfig) => ({
   key: protocol.key,
   label: protocol.label
 }));
+
+const { setTitle } = useTitle();
+const spacesStore = useSpacesStore();
+
+onMounted(() => spacesStore.fetch());
+
+watchEffect(() => setTitle('Explore'));
 </script>
 
 <template>
