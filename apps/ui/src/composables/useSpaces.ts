@@ -150,13 +150,9 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
-  async function handleProtocolChange(newProtocol: ExplorePageProtocol) {
+  watch(protocol, async (newProtocol: ExplorePageProtocol) => {
     protocol.value = newProtocol;
     await fetch();
-  }
-
-  watch(protocol, toFilter => {
-    handleProtocolChange(toFilter);
   });
 
   return {
@@ -170,7 +166,6 @@ export function useSpaces() {
     getSpaces,
     fetch,
     fetchMore,
-    protocol,
-    handleProtocolChange
+    protocol
   };
 }
