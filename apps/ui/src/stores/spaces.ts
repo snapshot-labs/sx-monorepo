@@ -18,10 +18,10 @@ export const useSpacesStore = defineStore('spaces', () => {
     spaces,
     spacesMap,
     hasMoreSpaces,
+    protocol,
     getSpaces,
     fetch,
-    fetchMore,
-    protocol
+    fetchMore
   } = useSpaces();
 
   const starredSpacesMap = computed(
@@ -107,10 +107,10 @@ export const useSpacesStore = defineStore('spaces', () => {
     spaces,
     spacesMap,
     hasMoreSpaces,
+    protocol,
     fetch,
     fetchMore,
     fetchSpace,
-    toggleSpaceStar,
-    protocol
+    toggleSpaceStar
   };
 });
