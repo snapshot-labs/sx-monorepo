@@ -163,9 +163,9 @@ export function useSpaces() {
     spaces,
     spacesMap,
     hasMoreSpaces,
+    protocol,
     getSpaces,
     fetch,
-    fetchMore,
-    protocol
+    fetchMore
   };
 }
