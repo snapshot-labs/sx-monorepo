@@ -10,7 +10,8 @@ import type {
   User,
   Choice,
   NetworkID,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  Follow
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -182,9 +183,9 @@ export type NetworkApi = {
     filter?: 'any' | 'for' | 'against' | 'abstain',
     sortBy?: 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
   ): Promise<Vote[]>;
-  loadUserVotes(spaceId: string, voter: string): Promise<{ [key: string]: Vote }>;
+  loadUserVotes(spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
-    spaceId: string,
+    spaceIds: string[],
     paginationOpts: PaginationOpts,
     current: number,
     filter?: 'any' | 'active' | 'pending' | 'closed',
@@ -203,6 +204,7 @@ export type NetworkApi = {
     paginationOpts: PaginationOpts,
     sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
   ): Promise<User[]>;
+  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
 };
 
 export type NetworkConstants = {

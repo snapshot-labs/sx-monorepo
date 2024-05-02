@@ -131,6 +131,7 @@ export type Proposal = {
   network: NetworkID;
   type: VoteType;
   quorum: number;
+  quorum_type?: 'default' | 'rejection';
   space: {
     id: string;
     name: string;
@@ -188,6 +189,14 @@ export type User = {
   id: string;
   proposal_count: number;
   vote_count: number;
+  created: number;
+  follows?: string[];
+};
+
+export type Follow = {
+  id: string;
+  follower: string;
+  space: Space;
   created: number;
 };
 

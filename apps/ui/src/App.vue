@@ -17,6 +17,10 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
+const hasAppNav = computed(() =>
+  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+);
+
 function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
 
@@ -71,7 +75,7 @@ watch(isSwiping, () => {
         v-if="uiStore.sidebarOpen"
         class="backdrop lg:hidden"
         :style="{
-          left: `${72 + (route.matched[0]?.name === 'space' ? 240 : 0)}px`
+          left: `${72 + (hasAppNav ? 240 : 0)}px`
         }"
         @click="uiStore.toggleSidebar"
       />

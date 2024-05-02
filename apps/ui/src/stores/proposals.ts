@@ -83,7 +83,7 @@ export const useProposalsStore = defineStore('proposals', () => {
 
     const fetchedProposals = await withAuthorNames(
       await getNetwork(networkId).api.loadProposals(
-        spaceId,
+        [spaceId],
         {
           limit: PROPOSALS_LIMIT
         },
@@ -128,7 +128,7 @@ export const useProposalsStore = defineStore('proposals', () => {
 
     const fetchedProposals = await withAuthorNames(
       await getNetwork(networkId).api.loadProposals(
-        spaceId,
+        [spaceId],
         {
           limit: PROPOSALS_LIMIT,
           skip: record.value.proposalsIdsList.length
@@ -177,7 +177,7 @@ export const useProposalsStore = defineStore('proposals', () => {
     record.value.summaryLoading = true;
     record.value.summaryProposals = await withAuthorNames(
       await getNetwork(networkId).api.loadProposals(
-        spaceId,
+        [spaceId],
         { limit },
         metaStore.getCurrent(networkId) || 0
       )

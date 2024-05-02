@@ -30,7 +30,7 @@ watch(
 watchEffect(() => {
   if (!resolved.value || !networkId.value || !address.value) return;
 
-  loadVotes(networkId.value, address.value);
+  loadVotes(networkId.value, [address.value]);
 });
 
 watchEffect(() => {

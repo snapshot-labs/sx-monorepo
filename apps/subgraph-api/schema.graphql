@@ -80,6 +80,8 @@ type ExecutionStrategy @entity {
   treasury_chain: Int
   timelock_veto_guardian: String
   timelock_delay: BigInt!
+  axiom_snapshot_address: String
+  axiom_snapshot_slot: BigInt
 }
 
 type ExecutionHash @entity {
@@ -103,6 +105,8 @@ type Proposal @entity {
   execution_strategy_type: String!
   timelock_veto_guardian: String
   timelock_delay: BigInt!
+  axiom_snapshot_address: String
+  axiom_snapshot_slot: BigInt
   strategies_indicies: [Int]!
   strategies: [String!]!
   strategies_params: [String!]!

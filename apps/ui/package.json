@@ -74,6 +74,7 @@
     "scrollmonitor": "^1.2.11",
     "starknet": "5.25.0",
     "stream-browserify": "^3.0.0",
+    "tippy.js": "^6.3.7",
     "unplugin-auto-import": "^0.16.6",
     "util": "^0.12.5",
     "vue": "^3.4.15",
