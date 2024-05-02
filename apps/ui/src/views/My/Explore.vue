@@ -2,9 +2,9 @@
 import { explorePageProtocols } from '../../networks';
 import { ProtocolConfig } from '../../networks/types';
 
-const protocols = Object.values(explorePageProtocols).map((protocol: ProtocolConfig) => ({
-  key: protocol.key,
-  label: protocol.label
+const protocols = Object.values(explorePageProtocols).map(({ key, label }: ProtocolConfig) => ({
+  key,
+  label
 }));
 
 const { setTitle } = useTitle();

@@ -28,13 +28,13 @@ export function useSpaces() {
     )
   );
 
-  const spaces = computed(() =>
-    Object.values(networksMap.value).flatMap(record =>
-      record.spacesIdsList
-        .map(spaceId => record.spaces[spaceId])
-        .filter(space => explorePageProtocols[protocol.value].networks.includes(space.network))
-    )
-  );
+  const spaces = computed(() => {
+    const protocolNetworks = explorePageProtocols[protocol.value].networks;
+    return Object.values(networksMap.value).flatMap(record => {
+      const spacesFromRecord = record.spacesIdsList.map(spaceId => record.spaces[spaceId]);
+      return spacesFromRecord.filter(space => protocolNetworks.includes(space.network));
+    });
+  });
 
   const spacesMap = computed(
     () =>
@@ -134,7 +134,9 @@ export function useSpaces() {
   }
 
   async function fetch(filter?: SpacesFilter) {
+    if (loading.value || loaded.value) return;
     loading.value = true;
+
     await _fetchSpaces(true, filter);
 
     loaded.value = true;
