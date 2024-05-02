@@ -168,7 +168,13 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
                 <td class="text-left flex items-center pl-4 py-3">
                   <UiStamp :id="user.id" :size="32" class="mr-3" />
                   <div class="overflow-hidden">
-                    <a :href="network.helpers.getExplorerUrl(user.id, 'address')" target="_blank">
+                    <router-link
+                      class="text-skin-text"
+                      :to="{
+                        name: 'user',
+                        params: { id: user.id }
+                      }"
+                    >
                       <div class="leading-[22px]">
                         <h4
                           class="text-skin-link truncate"
@@ -179,7 +185,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
                           v-text="shorten(user.id)"
                         />
                       </div>
-                    </a>
+                    </router-link>
                   </div>
                 </td>
                 <td class="hidden md:table-cell align-middle text-right">
