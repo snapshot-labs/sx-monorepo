@@ -18,7 +18,7 @@ const loaded = ref(false);
 const loadingMore = ref(false);
 const hasMore = ref(false);
 const proposals = ref<Proposal[]>([]);
-const filter = ref<NonNullable<ProposalsFilter['state']>>('any');
+const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const selectIconBaseProps = {
   width: 16,
@@ -50,7 +50,7 @@ async function loadProposalsPage(skip = 0) {
       bookmarksStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
       { limit: PROPOSALS_LIMIT, skip },
       metaStore.getCurrent(networkId.value) || 0,
-      { state: filter.value }
+      { state: state.value }
     )
   );
 }
@@ -96,8 +96,8 @@ watch(
   }
 );
 
-watch(filter, (toFilter, fromFilter) => {
-  if (toFilter !== fromFilter && web3.value.account) fetch();
+watch(state, (toState, fromState) => {
+  if (toState !== fromState && web3.value.account) fetch();
 });
 </script>
 
@@ -105,7 +105,7 @@ watch(filter, (toFilter, fromFilter) => {
   <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown
-        v-model="filter"
+        v-model="state"
         title="Status"
         gap="12px"
         placement="left"
