@@ -15,7 +15,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const spacesStore = useSpacesStore();
+const bookmarksStore = useBookmarksStore();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
@@ -25,8 +25,10 @@ onMounted(() => {
 });
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
+const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
-const spaceStarred = computed(() => spacesStore.starredSpacesIds.includes(spaceIdComposite));
+const spaceStarred = computed(() => bookmarksStore.isStarred(spaceIdComposite));
+const spaceFollowed = computed(() => bookmarksStore.isFollowed(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const socials = computed(() =>
@@ -79,8 +81,27 @@ watchEffect(() => setTitle(props.space.name));
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
-        <UiTooltip :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'">
-          <UiButton class="w-[46px] !px-0" @click="spacesStore.toggleSpaceStar(spaceIdComposite)">
+        <UiButton
+          v-if="isOffchainSpace && web3.type !== 'argentx'"
+          disabled
+          class="group"
+          :class="{ 'hover:border-skin-danger': spaceFollowed }"
+        >
+          <UiLoading v-if="!bookmarksStore.followedSpacesLoaded" />
+          <span v-else-if="spaceFollowed" class="inline-block">
+            <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
+            <span class="group-hover:hidden">Following</span>
+          </span>
+          <span v-else class="inline-block">Follow</span>
+        </UiButton>
+        <UiTooltip
+          v-else-if="!isOffchainSpace"
+          :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'"
+        >
+          <UiButton
+            class="w-[46px] !px-0"
+            @click="bookmarksStore.toggleSpaceStar(spaceIdComposite)"
+          >
             <IS-star v-if="spaceStarred" class="inline-block" />
             <IH-star v-else class="inline-block" />
           </UiButton>
@@ -93,7 +114,7 @@ watchEffect(() => setTitle(props.space.name));
           <SpaceAvatar
             :space="space"
             :size="90"
-            :type="offchainNetworks.includes(space.network) ? 'space' : 'space-sx'"
+            :type="isOffchainSpace ? 'space' : 'space-sx'"
             class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-lg left-[-4px]"
           />
         </router-link>
@@ -104,7 +125,7 @@ watchEffect(() => setTitle(props.space.name));
         <div class="mb-3">
           <b class="text-skin-link">{{ _n(space.proposal_count) }}</b> proposals ·
           <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b> votes
-          <span v-if="offchainNetworks.includes(space.network)">
+          <span v-if="isOffchainSpace">
             · <b class="text-skin-link">{{ _n(space.follower_count, 'compact') }}</b> followers
           </span>
         </div>

@@ -4,12 +4,14 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const spacesStore = useSpacesStore();
+const bookmarksStore = useBookmarksStore();
+
+const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
 <template>
   <router-link
-    :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
+    :to="{ name: 'space-overview', params: { id: compositeSpaceId } }"
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
     <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] absolute" />
@@ -24,12 +26,9 @@ const spacesStore = useSpacesStore();
     </div>
     <button
       class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-      @click.prevent="spacesStore.toggleSpaceStar(`${space.network}:${space.id}`)"
+      @click.prevent="bookmarksStore.toggleSpaceStar(compositeSpaceId)"
     >
-      <IS-star
-        v-if="spacesStore.starredSpacesIds.includes(`${space.network}:${space.id}`)"
-        class="inline-block"
-      />
+      <IS-star v-if="bookmarksStore.isStarred(compositeSpaceId)" class="inline-block" />
       <IH-star v-else class="inline-block" />
     </button>
     <div class="px-4">
