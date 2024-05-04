@@ -1,0 +1,80 @@
+import { defineStore } from 'pinia';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { ProposalsFilter } from '@/networks/types';
+import { Proposal } from '@/types';
+import pkg from '../../package.json';
+
+type Notification = {
+  id: string;
+  proposal: Proposal;
+  type: 'started' | 'ended';
+  timestamp: number;
+  unread: boolean;
+};
+
+const OFFSET = 60 * 60 * 24 * 14; // 2 weeks
+const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
+const network = getNetwork(offchainNetworkId);
+
+export const useNotificationsStore = defineStore('notifications', () => {
+  const loading = ref(true);
+  const notifications = ref<Notification[]>([]);
+  const lastUnreadTs = useStorage(`${pkg.name}.notifications.last-unread`, 0);
+
+  const bookmarksStore = useBookmarksStore();
+  const metaStore = useMetaStore();
+
+  async function loadProposals(state: NonNullable<ProposalsFilter['state']>, pivotTs: number) {
+    return await network.api.loadProposals(
+      bookmarksStore.followedSpacesIds.map(id => id.split(':')[1]),
+      { limit: 100 },
+      metaStore.getCurrent(offchainNetworkId) || 0,
+      { state, start_gte: pivotTs }
+    );
+  }
+
+  async function loadNotifications() {
+    await metaStore.fetchBlock(offchainNetworkId);
+    const now = Math.floor(Date.now() / 1e3);
+    const pivotTs = now - OFFSET;
+
+    const proposals = (
+      await Promise.all([loadProposals('active', pivotTs), loadProposals('closed', pivotTs)])
+    ).flat();
+
+    proposals.forEach(proposal => {
+      const timestamp = proposal.min_end < now ? proposal.min_end : proposal.start;
+
+      notifications.value.push({
+        id: proposal.id,
+        proposal,
+        type: proposal.min_end < now ? 'ended' : 'started',
+        timestamp,
+        unread: timestamp > lastUnreadTs.value
+      });
+    });
+
+    notifications.value.sort((a, b) => b.timestamp - a.timestamp);
+  }
+
+  function markAllAsRead() {
+    notifications.value.forEach(notification => {
+      notification.unread = false;
+    });
+    lastUnreadTs.value = Math.floor(Date.now() / 1e3);
+  }
+
+  const notificationsCount = computed(() => notifications.value.length);
+
+  onMounted(async () => {
+    await loadNotifications();
+    loading.value = false;
+  });
+
+  return {
+    notificationsCount,
+    loading,
+    notifications,
+    markAllAsRead
+  };
+});
