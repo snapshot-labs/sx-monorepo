@@ -19,7 +19,9 @@ export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
 };
-export type ProposalsFilter = { state?: 'any' | 'active' | 'pending' | 'closed' };
+export type ProposalsFilter = {
+  state?: 'any' | 'active' | 'pending' | 'closed';
+} & Record<string, any>;
 export type Connector = 'argentx' | 'injected' | 'walletconnect' | 'walletlink' | 'gnosis';
 export type GeneratedMetadata =
   | {

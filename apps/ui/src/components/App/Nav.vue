@@ -11,6 +11,7 @@ import IHUser from '~icons/heroicons-outline/user';
 import IHStop from '~icons/heroicons-outline/stop';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
+import IHBell from '~icons/heroicons-outline/bell';
 
 const route = useRoute();
 const uiStore = useUiStore();
@@ -83,6 +84,10 @@ const navigationConfig = computed(() => ({
     explore: {
       name: 'Explore',
       icon: IHGlobe
+    },
+    notifications: {
+      name: 'Notifications',
+      icon: IHBell
     }
   }
 }));

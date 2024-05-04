@@ -272,11 +272,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filter: ProposalsFilter,
+      filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const filters: Record<string, any> = {};
-      const state = filter?.state || 'any';
+      const state = filters?.state || 'any';
 
       if (state === 'active') {
         filters.start_lte = current;
