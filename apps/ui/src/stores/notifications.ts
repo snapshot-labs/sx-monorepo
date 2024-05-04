@@ -41,6 +41,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const now = Math.floor(Date.now() / 1e3);
     const pivotTs = now - NOTIFICATION_TIME_WINDOW;
 
+    if (!bookmarksStore.followedSpacesIds.length) return;
+
     const followedSpaceIdsByNetwork: Record<NetworkID, string[]> = bookmarksStore.followedSpacesIds
       .map(id => id.split(':'))
       .reduce((acc, [networkId, spaceId]) => {
@@ -82,8 +84,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
     });
 
     notifications.value.sort((a, b) => b.timestamp - a.timestamp);
-
-    loading.value = false;
   }
 
   function markAllAsRead() {
@@ -98,10 +98,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
   );
 
   watch(
-    () => bookmarksStore.followedSpacesIds,
-    () => {
+    [() => bookmarksStore.followedSpacesIds, () => bookmarksStore.followedSpacesLoaded],
+    async ([spaceIds, loaded]) => {
+      if (!loaded) return;
+
+      loading.value = true;
       notifications.value = [];
-      loadNotifications();
+      await loadNotifications();
+
+      loading.value = false;
     },
     { immediate: true }
   );
