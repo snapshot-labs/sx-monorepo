@@ -6,13 +6,11 @@ const { setTitle } = useTitle();
 
 watchEffect(async () => {
   setTitle(
-    `Notifications${notificationsStore.notificationsCount ? ` (${notificationsStore.notificationsCount})` : ''}`
+    `Notifications${notificationsStore.unreadNotificationsCount ? ` (${notificationsStore.unreadNotificationsCount} unread)` : ''}`
   );
 });
 
-onUnmounted(() => {
-  notificationsStore.markAllAsRead();
-});
+onUnmounted(() => notificationsStore.markAllAsRead());
 </script>
 
 <template>
@@ -36,8 +34,7 @@ onUnmounted(() => {
             >
               {{ notification.proposal.space.name }}
             </router-link>
-            proposal has {{ notification.type }}
-            {{ _rt(notification.timestamp) }}
+            proposal has {{ notification.type }} {{ _rt(notification.timestamp) }}
             <router-link
               :to="{
                 name: 'proposal-overview',

@@ -64,7 +64,9 @@ export const useNotificationsStore = defineStore('notifications', () => {
     lastUnreadTs.value = Math.floor(Date.now() / 1e3);
   }
 
-  const notificationsCount = computed(() => notifications.value.length);
+  const unreadNotificationsCount = computed(
+    () => notifications.value.map(n => n.unread).filter(Boolean).length
+  );
 
   onMounted(async () => {
     await loadNotifications();
@@ -72,7 +74,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   });
 
   return {
-    notificationsCount,
+    unreadNotificationsCount,
     loading,
     notifications,
     markAllAsRead
