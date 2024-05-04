@@ -16,6 +16,7 @@ import IHBell from '~icons/heroicons-outline/bell';
 const route = useRoute();
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
+const notificationsStore = useNotificationsStore();
 
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
@@ -87,6 +88,7 @@ const navigationConfig = computed(() => ({
     },
     notifications: {
       name: 'Notifications',
+      count: notificationsStore.unreadNotificationsCount,
       icon: IHBell
     }
   }
@@ -133,6 +135,11 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
       >
         <component :is="item.icon" class="inline-block"></component>
         <span v-text="item.name" />
+        <span
+          v-if="item.count"
+          class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block"
+          v-text="item.count"
+        />
       </router-link>
       <router-link
         v-for="(item, key) in shortcuts[currentRouteName]"
