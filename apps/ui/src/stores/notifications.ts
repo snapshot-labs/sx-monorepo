@@ -65,7 +65,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     notifications.value.forEach(notification => {
       notification.unread = false;
     });
-    lastUnreadTs.value = Math.floor(Date.now() / 1e3);
+    lastUnreadTs.value = notifications.value[0]?.timestamp || 0;
   }
 
   const unreadNotificationsCount = computed(
