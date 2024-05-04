@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Network, ProposalsFilter } from '@/networks/types';
 import { NetworkID, Proposal } from '@/types';
 import pkg from '../../package.json';
@@ -44,11 +44,13 @@ export const useNotificationsStore = defineStore('notifications', () => {
     if (!bookmarksStore.followedSpacesIds.length) return;
 
     const followedSpaceIdsByNetwork: Record<NetworkID, string[]> = bookmarksStore.followedSpacesIds
-      .map(id => id.split(':'))
+      .map(id => id.split(':') as [NetworkID, string])
       .reduce(
         (acc, [networkId, spaceId]) => {
           acc[networkId] ||= [];
-          acc[networkId].push(spaceId);
+          acc[networkId].push(
+            offchainNetworks.includes(networkId) ? spaceId : `${networkId}:${spaceId}`
+          );
           return acc;
         },
         {} as Record<NetworkID, string[]>
