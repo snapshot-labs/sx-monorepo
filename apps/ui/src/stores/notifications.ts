@@ -12,9 +12,11 @@ type Notification = {
   unread: boolean;
 };
 
-const OFFSET = 60 * 60 * 24 * 14; // 2 weeks
+const NOTIFICATION_TIME_WINDOW = 60 * 60 * 24 * 14; // 2 weeks
+const REFRESH_INTERVAL = 60 * 15; // 15 minutes
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 const network = getNetwork(offchainNetworkId);
+let refreshNotificationInterval: NodeJS.Timeout;
 
 export const useNotificationsStore = defineStore('notifications', () => {
   const loading = ref(true);
@@ -36,7 +38,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   async function loadNotifications() {
     await metaStore.fetchBlock(offchainNetworkId);
     const now = Math.floor(Date.now() / 1e3);
-    const pivotTs = now - OFFSET;
+    const pivotTs = now - NOTIFICATION_TIME_WINDOW;
 
     const proposals = (
       await Promise.all([loadProposals('active', pivotTs), loadProposals('closed', pivotTs)])
@@ -44,6 +46,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     proposals.forEach(proposal => {
       const timestamp = proposal.min_end < now ? proposal.min_end : proposal.start;
+
+      if (notifications.value.some(n => n.id === proposal.id)) return;
 
       notifications.value.push({
         id: proposal.id,
@@ -68,10 +72,19 @@ export const useNotificationsStore = defineStore('notifications', () => {
     () => notifications.value.map(n => n.unread).filter(Boolean).length
   );
 
+  watch(bookmarksStore.followedSpacesIds, () => {
+    notifications.value = [];
+    loadNotifications();
+  });
+
   onMounted(async () => {
     await loadNotifications();
     loading.value = false;
+
+    refreshNotificationInterval = setInterval(loadNotifications, REFRESH_INTERVAL * 1e3);
   });
+
+  onBeforeUnmount(() => clearInterval(refreshNotificationInterval));
 
   return {
     unreadNotificationsCount,
