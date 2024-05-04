@@ -45,11 +45,14 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     const followedSpaceIdsByNetwork: Record<NetworkID, string[]> = bookmarksStore.followedSpacesIds
       .map(id => id.split(':'))
-      .reduce((acc, [networkId, spaceId]) => {
-        acc[networkId] ||= [];
-        acc[networkId].push(spaceId);
-        return acc;
-      }, {});
+      .reduce(
+        (acc, [networkId, spaceId]) => {
+          acc[networkId] ||= [];
+          acc[networkId].push(spaceId);
+          return acc;
+        },
+        {} as Record<NetworkID, string[]>
+      );
 
     (Object.keys(followedSpaceIdsByNetwork) as NetworkID[]).forEach(async networkId => {
       await metaStore.fetchBlock(networkId);
@@ -98,8 +101,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
   );
 
   watch(
-    [() => bookmarksStore.followedSpacesIds, () => bookmarksStore.followedSpacesLoaded],
-    async ([spaceIds, loaded]) => {
+    () => bookmarksStore.followedSpacesLoaded,
+    async loaded => {
       if (!loaded) return;
 
       loading.value = true;
