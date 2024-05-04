@@ -20,7 +20,7 @@ import {
   mixinHighlightVotes,
   joinHighlightUser
 } from './highlight';
-import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
+import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { BASIC_CHOICES } from '@/helpers/constants';
 import {
@@ -299,16 +299,18 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
+      filter: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
       const filters: Record<string, any> = {};
-      if (filter === 'active') {
+      const state = filter?.state || 'any';
+
+      if (state === 'active') {
         filters.start_lte = current;
         filters.max_end_gte = current;
-      } else if (filter === 'pending') {
+      } else if (state === 'pending') {
         filters.start_gt = current;
-      } else if (filter === 'closed') {
+      } else if (state === 'closed') {
         filters.max_end_lt = current;
       }
 

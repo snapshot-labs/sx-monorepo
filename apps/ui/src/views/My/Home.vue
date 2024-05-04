@@ -2,6 +2,7 @@
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNames } from '@/helpers/stamp';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { ProposalsFilter } from '@/networks/types';
 import { Proposal } from '@/types';
 
 const PROPOSALS_LIMIT = 20;
@@ -9,16 +10,15 @@ const PROPOSALS_LIMIT = 20;
 useTitle('Home');
 
 const metaStore = useMetaStore();
+const bookmarksStore = useBookmarksStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
-const bookmarksStore = useBookmarksStore();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
 const hasMore = ref(false);
 const proposals = ref<Proposal[]>([]);
-
-const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
+const filter = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const selectIconBaseProps = {
   width: 16,
@@ -50,7 +50,7 @@ async function loadProposalsPage(skip = 0) {
       bookmarksStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
       { limit: PROPOSALS_LIMIT, skip },
       metaStore.getCurrent(networkId.value) || 0,
-      filter.value
+      { state: filter.value }
     )
   );
 }

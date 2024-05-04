@@ -27,7 +27,7 @@ async function fetch() {
       limit: PROPOSALS_LIMIT
     },
     metaStore.getCurrent(props.space.network) || 0,
-    'any',
+    {},
     query.value
   );
 
@@ -45,7 +45,7 @@ async function fetchMore() {
       skip: proposals.value.length
     },
     metaStore.getCurrent(props.space.network) || 0,
-    'any',
+    {},
     query.value
   );
 

@@ -19,6 +19,7 @@ export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
 };
+export type ProposalsFilter = { state?: 'any' | 'active' | 'pending' | 'closed' };
 export type Connector = 'argentx' | 'injected' | 'walletconnect' | 'walletlink' | 'gnosis';
 export type GeneratedMetadata =
   | {
@@ -188,7 +189,7 @@ export type NetworkApi = {
     spaceIds: string[],
     paginationOpts: PaginationOpts,
     current: number,
-    filter?: 'any' | 'active' | 'pending' | 'closed',
+    filter?: ProposalsFilter,
     searchQuery?: string
   ): Promise<Proposal[]>;
   loadProposal(

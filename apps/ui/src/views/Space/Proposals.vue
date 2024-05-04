@@ -2,7 +2,7 @@
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { Space } from '@/types';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { ProposalsFilter, VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -13,7 +13,7 @@ const proposalsStore = useProposalsStore();
 
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
-const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
+const filter = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const selectIconBaseProps = {
   width: 16,
