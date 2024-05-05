@@ -134,10 +134,10 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
         :class="route.name === `${currentRouteName}-${key}` ? 'text-skin-link' : 'text-skin-text'"
       >
         <component :is="item.icon" class="inline-block"></component>
-        <span v-text="item.name" />
+        <span class="grow" v-text="item.name" />
         <span
           v-if="item.count"
-          class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block"
+          class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
           v-text="item.count"
         />
       </router-link>
