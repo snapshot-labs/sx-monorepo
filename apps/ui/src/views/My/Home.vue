@@ -81,19 +81,22 @@ onMounted(() => {
 });
 
 watch(
-  () => bookmarksStore.followedSpacesIds,
-  () => {
+  [() => bookmarksStore.followedSpacesIds, () => bookmarksStore.followedSpacesLoaded],
+  ([followedSpacesIds, followedSpacesLoaded]) => {
+    if (!followedSpacesLoaded) return;
+
     loaded.value = false;
     proposals.value = [];
 
-    if (!bookmarksStore.followedSpacesIds.length) {
+    if (!followedSpacesIds.length) {
       loaded.value = true;
       return;
     }
 
-    loadVotes(networkId.value, bookmarksStore.followedSpacesIds);
+    loadVotes(networkId.value, followedSpacesIds);
     fetch();
-  }
+  },
+  { immediate: true }
 );
 
 watch(state, (toState, fromState) => {
