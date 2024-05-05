@@ -313,7 +313,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         filters.max_end_lt = current;
       }
 
-      delete filters.space;
+      delete filters?.space;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
