@@ -19,10 +19,14 @@ let refreshNotificationInterval: NodeJS.Timeout;
 export const useNotificationsStore = defineStore('notifications', () => {
   const loading = ref(true);
   const notifications = ref<Notification[]>([]);
-  const lastUnreadTs = useStorage(`${pkg.name}.notifications.last-unread`, 0);
+  const lastUnreadTs = useStorage(
+    `${pkg.name}.notifications.last-unread`,
+    {} as Record<string, number>
+  );
 
   const bookmarksStore = useBookmarksStore();
   const metaStore = useMetaStore();
+  const { web3 } = useWeb3();
 
   async function loadProposals(
     network: Network,
@@ -63,7 +67,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const promises = (Object.entries(followedSpaceIdsByNetwork) as [NetworkID, string[]][])
       .map(([networkId, spaceIds]) => {
         const network = getNetwork(networkId);
-        const current = metaStore.getCurrent(networkId) || 0;
+        const current = metaStore.getCurrent(networkId) ?? 0;
 
         return [
           loadProposals(network, current, 'active', pivotTs, spaceIds),
@@ -76,6 +80,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     proposals.forEach(proposal => {
       const timestamp = proposal.min_end < now ? proposal.min_end : proposal.start;
+      const lastUnread = lastUnreadTs.value[web3.value.account] ?? 0;
 
       if (notifications.value.some(n => n.id === proposal.id)) return;
 
@@ -84,7 +89,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
         proposal,
         type: proposal.min_end < now ? 'ended' : 'started',
         timestamp,
-        unread: timestamp > lastUnreadTs.value
+        unread: timestamp > lastUnread
       });
     });
 
@@ -95,7 +100,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     notifications.value.forEach(notification => {
       notification.unread = false;
     });
-    lastUnreadTs.value = notifications.value[0]?.timestamp || 0;
+    lastUnreadTs.value[web3.value.account] = notifications.value[0]?.timestamp ?? 0;
   }
 
   const unreadNotificationsCount = computed(
@@ -103,7 +108,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   );
 
   watch(
-    () => bookmarksStore.followedSpacesLoaded,
+    [() => bookmarksStore.followedSpacesLoaded, () => bookmarksStore.followedSpacesIds],
     async loaded => {
       if (!loaded) return;
 
