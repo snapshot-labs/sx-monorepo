@@ -24,64 +24,6 @@ export function useMarkdownEditor(
   const hovered = ref(false);
   const uploading = ref(false);
 
-  watch(editorRef, el => {
-    if (!el) return;
-
-    el.addEventListener('keydown', (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
-        e.preventDefault();
-        shortcuts[e.key]();
-      }
-    });
-  });
-
-  watch(editorFileInputRef, el => {
-    if (!el) return;
-
-    el.addEventListener('change', () => {
-      if (!el.files) return;
-
-      uploadFile(el.files[0]);
-
-      el.value = '';
-    });
-  });
-
-  watch(editorContainerRef, el => {
-    if (!el) return;
-
-    let counter = 0;
-
-    el.addEventListener('dragenter', () => {
-      counter++;
-      hovered.value = true;
-    });
-
-    el.addEventListener('dragover', e => {
-      e.preventDefault();
-    });
-
-    el.addEventListener('dragleave', () => {
-      counter--;
-
-      if (counter === 0) hovered.value = false;
-    });
-
-    el.addEventListener('drop', e => {
-      console.log('drop');
-      e.preventDefault();
-      e.stopPropagation();
-      hovered.value = false;
-
-      if (!e.dataTransfer) return;
-
-      const { files } = e.dataTransfer;
-      if (!files.length) return;
-
-      uploadFile(files[0]);
-    });
-  });
-
   function scheduleSelection(start: number, end: number) {
     requestAnimationFrame(() => {
       if (editorRef.value) editorRef.value.setSelectionRange(start, end);
@@ -213,6 +155,64 @@ export function useMarkdownEditor(
   function link() {
     insertFormatting({ prefix: '[', suffix: '](url)' });
   }
+
+  watch(editorRef, el => {
+    if (!el) return;
+
+    el.addEventListener('keydown', (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
+        e.preventDefault();
+        shortcuts[e.key]();
+      }
+    });
+  });
+
+  watch(editorFileInputRef, el => {
+    if (!el) return;
+
+    el.addEventListener('change', () => {
+      if (!el.files) return;
+
+      uploadFile(el.files[0]);
+
+      el.value = '';
+    });
+  });
+
+  watch(editorContainerRef, el => {
+    if (!el) return;
+
+    let counter = 0;
+
+    el.addEventListener('dragenter', () => {
+      counter++;
+      hovered.value = true;
+    });
+
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+    });
+
+    el.addEventListener('dragleave', () => {
+      counter--;
+
+      if (counter === 0) hovered.value = false;
+    });
+
+    el.addEventListener('drop', e => {
+      console.log('drop');
+      e.preventDefault();
+      e.stopPropagation();
+      hovered.value = false;
+
+      if (!e.dataTransfer) return;
+
+      const { files } = e.dataTransfer;
+      if (!files.length) return;
+
+      uploadFile(files[0]);
+    });
+  });
 
   return {
     hovered,

@@ -53,8 +53,6 @@ function createDraft(
 }
 
 export function useEditor() {
-  watch(proposals, () => lsSet('proposals', removeEmpty(proposals)));
-
   const drafts = computed(() => {
     return Object.entries(removeEmpty(proposals))
       .map(([k, value]) => {
@@ -74,6 +72,8 @@ export function useEditor() {
   function removeDraft(key: string) {
     delete proposals[key];
   }
+
+  watch(proposals, () => lsSet('proposals', removeEmpty(proposals)));
 
   return {
     proposals,
