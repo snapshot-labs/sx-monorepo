@@ -41,7 +41,7 @@ export function createActions(
 
   return {
     async propose(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: Connector,
       account: string,
       space: Space,
@@ -78,13 +78,17 @@ export function createActions(
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: '{}',
         app: EDITOR_APP_NAME,
-        timestamp: currentTime
+        timestamp: currentTime,
+        from: getAddress(account)
       };
 
-      return client.propose({ signer: web3.getSigner(), data });
+      return client.propose({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     async updateProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: Connector,
       account: string,
       space: Space,
@@ -114,10 +118,14 @@ export function createActions(
         type: payload.type,
         discussion: payload.discussion,
         choices: payload.choices,
-        plugins: '{}'
+        plugins: '{}',
+        from: getAddress(account)
       };
 
-      return client.updateProposal({ signer: web3.getSigner(), data });
+      return client.updateProposal({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     cancelProposal(web3: Web3Provider, proposal: Proposal) {
       return client.cancel({
@@ -126,7 +134,7 @@ export function createActions(
       });
     },
     vote(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: Connector,
       account: string,
       proposal: Proposal,
@@ -144,7 +152,7 @@ export function createActions(
       };
 
       return client.vote({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data
       });
     },

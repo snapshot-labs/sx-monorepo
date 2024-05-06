@@ -608,7 +608,6 @@ export function createActions(
       );
     },
     followSpace: () => {},
-    unfollowSpace: () => {},
-    setAlias: () => {}
+    unfollowSpace: () => {}
   };
 }

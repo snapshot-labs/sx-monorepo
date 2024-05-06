@@ -132,6 +132,7 @@ export type Vote = {
   type: string;
   privacy?: Privacy;
   timestamp?: number;
+  from?: string;
 };
 
 export type Propose = {
@@ -147,6 +148,7 @@ export type Propose = {
   plugins: string;
   app: string;
   timestamp?: number;
+  from?: string;
 };
 
 export type UpdateProposal = {
@@ -158,6 +160,7 @@ export type UpdateProposal = {
   discussion: string;
   choices: string[];
   plugins: string;
+  from?: string;
 };
 
 export type CancelProposal = {
