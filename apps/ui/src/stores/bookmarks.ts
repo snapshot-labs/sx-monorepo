@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import pkg from '../../package.json';
-import { Space } from '@/types';
+import { NetworkID, Space } from '@/types';
 
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
@@ -11,12 +11,14 @@ function compositeSpaceId(space: Space) {
 
 export const useBookmarksStore = defineStore('bookmarks', () => {
   const spacesStore = useSpacesStore();
+  const actions = useActions();
   const { web3, authInitiated } = useWeb3();
   const { mixpanel } = useMixpanel();
 
   const spacesData = ref<Space[]>([]);
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
+  const followSpaceLoading = ref(false);
   const starredSpacesIds = useStorage(`${pkg.name}.spaces-starred`, [] as string[]);
   const starredSpacesLoaded = ref(false);
   // Combined list of starred and followed spaces by account, to keep sort order
@@ -108,6 +110,37 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     });
   }
 
+  async function toggleSpaceFollow(id: string) {
+    const alreadyFollowed = followedSpacesIds.value.includes(id);
+    const [spaceNetwork, spaceId] = id.split(':');
+    followSpaceLoading.value = true;
+
+    try {
+      if (alreadyFollowed) {
+        const result = await actions.unfollowSpace(spaceNetwork as NetworkID, spaceId);
+        if (!result) return;
+
+        followedSpacesIds.value = followedSpacesIds.value.filter(
+          (spaceId: string) => spaceId !== id
+        );
+        accountsBookmarkedSpacesIds.value[web3.value.account] = accountsBookmarkedSpacesIds.value[
+          web3.value.account
+        ].filter((spaceId: string) => spaceId !== id);
+      } else {
+        const result = await actions.followSpace(spaceNetwork as NetworkID, spaceId);
+        if (!result) return;
+
+        fetchSpacesData([id]);
+
+        followedSpacesIds.value = [id, ...followedSpacesIds.value];
+        accountsBookmarkedSpacesIds.value[web3.value.account] = [id, ...bookmarkedSpacesIds.value];
+      }
+    } catch (e) {
+    } finally {
+      followSpaceLoading.value = false;
+    }
+  }
+
   function isStarred(spaceId: string) {
     return starredSpacesIds.value.includes(spaceId);
   }
@@ -163,8 +196,10 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
     starredSpacesLoaded,
     followedSpacesIds,
     followedSpacesLoaded,
+    followSpaceLoading,
     isStarred,
     isFollowed,
-    toggleSpaceStar
+    toggleSpaceStar,
+    toggleSpaceFollow
   };
 });
