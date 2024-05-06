@@ -33,7 +33,7 @@ export async function registerTransaction(
 
 export async function executionCall(
   chainId: number,
-  method: 'execute' | 'executeQueuedProposal',
+  method: 'finalizeProposal' | 'execute' | 'executeQueuedProposal',
   params: any
 ) {
   return rpcCall(`eth_rpc/${chainId}`, method, params);

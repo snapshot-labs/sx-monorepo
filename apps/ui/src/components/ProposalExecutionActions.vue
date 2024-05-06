@@ -8,86 +8,19 @@ const props = defineProps<{ proposal: ProposalType }>();
 
 const { web3 } = useWeb3();
 const {
+  hasFinalize,
+  finalizeProposalSending,
+  executeProposalSending,
+  executeQueuedProposalSending,
+  vetoProposalSending,
+  executionCountdown,
   finalizeProposal,
-  receiveProposal,
-  executeTransactions,
+  executeProposal,
   executeQueuedProposal,
   vetoProposal
-} = useActions();
-
-const finalizeProposalSending = ref(false);
-const receiveProposalSending = ref(false);
-const executeTransactionsSending = ref(false);
-const executeQueuedProposalSending = ref(false);
-const vetoProposalSending = ref(false);
-const currentTimestamp = ref(Date.now());
+} = useExecutionActions(props.proposal);
 
 const network = computed(() => getNetwork(props.proposal.network));
-const baseNetwork = computed(() =>
-  network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
-);
-
-const { pause } = useIntervalFn(() => {
-  if (currentTimestamp.value > props.proposal.execution_time * 1000) {
-    pause();
-  }
-
-  currentTimestamp.value = Date.now();
-}, 1000);
-
-const countdown = computed(() => {
-  return Math.max(props.proposal.execution_time * 1000 - currentTimestamp.value, 0);
-});
-
-async function handleFinalizeProposalClick() {
-  finalizeProposalSending.value = true;
-
-  try {
-    await finalizeProposal(props.proposal);
-  } finally {
-    finalizeProposalSending.value = false;
-  }
-}
-
-async function handleReceiveProposalClick() {
-  receiveProposalSending.value = true;
-
-  try {
-    await receiveProposal(props.proposal);
-  } finally {
-    receiveProposalSending.value = false;
-  }
-}
-
-async function handleExecuteTransactionsClick() {
-  executeTransactionsSending.value = true;
-
-  try {
-    await executeTransactions(props.proposal);
-  } finally {
-    executeTransactionsSending.value = false;
-  }
-}
-
-async function handleExecuteQueuedProposalClick() {
-  executeQueuedProposalSending.value = true;
-
-  try {
-    await executeQueuedProposal(props.proposal);
-  } finally {
-    executeQueuedProposalSending.value = false;
-  }
-}
-
-async function handleVetoProposalClick() {
-  vetoProposalSending.value = true;
-
-  try {
-    await vetoProposal(props.proposal);
-  } finally {
-    vetoProposalSending.value = false;
-  }
-}
 </script>
 
 <template>
@@ -97,7 +30,7 @@ async function handleVetoProposalClick() {
       <a
         class="inline-flex items-center"
         target="_blank"
-        :href="baseNetwork.helpers.getExplorerUrl(proposal.execution_tx, 'transaction')"
+        :href="network.helpers.getExplorerUrl(proposal.execution_tx, 'transaction')"
       >
         {{ shorten(proposal.execution_tx) }}
         <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -108,7 +41,7 @@ async function handleVetoProposalClick() {
       <a
         class="inline-flex items-center"
         target="_blank"
-        :href="baseNetwork.helpers.getExplorerUrl(proposal.veto_tx, 'transaction')"
+        :href="network.helpers.getExplorerUrl(proposal.veto_tx, 'transaction')"
       >
         {{ shorten(proposal.veto_tx) }}
         <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -116,44 +49,35 @@ async function handleVetoProposalClick() {
     </div>
     <template v-else>
       <UiButton
-        v-if="network.hasReceive"
+        v-if="hasFinalize"
         class="mb-2 w-full flex justify-center items-center"
         :loading="finalizeProposalSending"
-        @click="handleFinalizeProposalClick"
+        @click="finalizeProposal"
       >
         <IH-check-circle class="inline-block mr-2" />
         Finalize proposal
       </UiButton>
       <UiButton
-        v-if="network.hasReceive"
+        v-else-if="proposal.state !== 'executed'"
         class="mb-2 w-full flex justify-center items-center"
-        :loading="receiveProposalSending"
-        @click="handleReceiveProposalClick"
-      >
-        <IH-database class="inline-block mr-2" />
-        Receive proposal
-      </UiButton>
-      <UiButton
-        v-if="proposal.state !== 'executed'"
-        class="mb-2 w-full flex justify-center items-center"
-        :loading="executeTransactionsSending"
-        @click="handleExecuteTransactionsClick"
+        :loading="executeProposalSending"
+        @click="executeProposal"
       >
         <IH-play class="inline-block mr-2" />
         Execute proposal
       </UiButton>
       <UiButton
         v-if="proposal.state === 'executed' && !proposal.completed"
-        :disabled="countdown > 0"
-        :title="countdown === 0 ? '' : 'Veto period has not ended yet'"
+        :disabled="executionCountdown > 0"
+        :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
         class="mb-2 w-full flex justify-center items-center"
         :loading="executeQueuedProposalSending"
-        @click="handleExecuteQueuedProposalClick"
+        @click="executeQueuedProposal"
       >
         <IH-play class="inline-block mr-2 flex-shrink-0" />
-        <template v-if="countdown === 0">Execute queued transactions</template>
+        <template v-if="executionCountdown === 0">Execute queued transactions</template>
         <template v-else>
-          Execution available in {{ dayjs.duration(countdown).format('HH:mm:ss') }}
+          Execution available in {{ dayjs.duration(executionCountdown).format('HH:mm:ss') }}
         </template>
       </UiButton>
       <UiButton
@@ -164,10 +88,10 @@ async function handleVetoProposalClick() {
           proposal.timelock_veto_guardian &&
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
         "
-        :disabled="countdown === 0"
+        :disabled="executionCountdown === 0"
         class="mb-2 w-full flex justify-center items-center"
         :loading="vetoProposalSending"
-        @click="handleVetoProposalClick"
+        @click="vetoProposal"
       >
         <IH-play class="inline-block mr-2 flex-shrink-0" />
         Veto execution

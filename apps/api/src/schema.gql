@@ -86,6 +86,8 @@ type ExecutionStrategy {
   treasury_chain: String
   timelock_veto_guardian: String
   timelock_delay: BigInt!
+  axiom_snapshot_address: String
+  axiom_snapshot_slot: BigInt
 }
 
 type Proposal {
@@ -104,6 +106,8 @@ type Proposal {
   execution_strategy_type: String!
   timelock_veto_guardian: String
   timelock_delay: Int
+  axiom_snapshot_address: String
+  axiom_snapshot_slot: BigInt
   strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
@@ -118,6 +122,7 @@ type Proposal {
   execution_tx: String
   veto_tx: String
   vote_count: Int!
+  execution_ready: Boolean!
   executed: Boolean!
   vetoed: Boolean!
   completed: Boolean!

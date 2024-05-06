@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import autolinker from 'autolinker';
 import { _n, compareAddresses, sanitizeUrl } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
@@ -14,14 +15,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const {
-  starredSpacesIds,
-  followedSpacesIds,
-  followedSpacesLoaded,
-  followSpaceLoading,
-  toggleSpaceStar,
-  toggleSpaceFollow
-} = useAccount();
+const bookmarksStore = useBookmarksStore();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
@@ -33,8 +27,8 @@ onMounted(() => {
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
-const spaceStarred = computed(() => starredSpacesIds.value.includes(spaceIdComposite));
-const spaceFollowed = computed(() => followedSpacesIds.value.includes(spaceIdComposite));
+const spaceStarred = computed(() => bookmarksStore.isStarred(spaceIdComposite));
+const spaceFollowed = computed(() => bookmarksStore.isFollowed(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const socials = computed(() =>
@@ -55,6 +49,14 @@ const socials = computed(() =>
 );
 
 const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
+
+const autolinkedAbout = computed(() =>
+  autolinker.link(props.space.about || '', {
+    sanitizeHtml: true,
+    phone: false,
+    replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
+  })
+);
 
 watchEffect(() => setTitle(props.space.name));
 </script>
@@ -79,25 +81,30 @@ watchEffect(() => setTitle(props.space.name));
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
-        <UiTooltip
+        <UiButton
           v-if="isOffchainSpace && web3.type !== 'argentx'"
-          :title="followedSpacesLoaded ? (spaceFollowed ? 'Unfollow' : 'Follow') : ''"
+          :disabled="!bookmarksStore.followedSpacesLoaded"
+          class="group"
+          :class="{ 'hover:border-skin-danger': spaceFollowed }"
+          @click="bookmarksStore.toggleSpaceFollow(spaceIdComposite)"
+        >
+          <UiLoading
+            v-if="!bookmarksStore.followedSpacesLoaded && !bookmarksStore.followSpaceLoading"
+          />
+          <span v-else-if="spaceFollowed" class="inline-block">
+            <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
+            <span class="group-hover:hidden">Following</span>
+          </span>
+          <span v-else class="inline-block">Follow</span>
+        </UiButton>
+        <UiTooltip
+          v-else-if="!isOffchainSpace"
+          :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'"
         >
           <UiButton
-            class="group"
-            :disabled="!followedSpacesLoaded || followSpaceLoading"
-            @click="toggleSpaceFollow(spaceIdComposite)"
+            class="w-[46px] !px-0"
+            @click="bookmarksStore.toggleSpaceStar(spaceIdComposite)"
           >
-            <UiLoading v-if="!followedSpacesLoaded || followSpaceLoading" />
-            <span v-else-if="spaceFollowed" class="inline-block">
-              <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
-              <span class="group-hover:hidden">Following</span>
-            </span>
-            <span v-else class="inline-block">Follow</span>
-          </UiButton>
-        </UiTooltip>
-        <UiTooltip v-else :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'">
-          <UiButton class="w-[46px] !px-0" @click="toggleSpaceStar(spaceIdComposite)">
             <IS-star v-if="spaceStarred" class="inline-block" />
             <IH-star v-else class="inline-block" />
           </UiButton>
@@ -128,7 +135,7 @@ watchEffect(() => setTitle(props.space.name));
         <div
           v-if="space.about"
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
-          v-text="space.about"
+          v-html="autolinkedAbout"
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">

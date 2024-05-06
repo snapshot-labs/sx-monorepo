@@ -52,6 +52,8 @@ export type StrategyTemplate = {
     params: string,
     metadata: StrategyParsedMetadata | null
   ) => Promise<Record<string, any>>;
+  deployConnectors?: Connector[];
+  deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
     signer: Signer,
@@ -154,7 +156,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   );
   setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
-  receiveProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
   vetoProposal(web3: Web3Provider, proposal: Proposal);
@@ -187,7 +188,7 @@ export type NetworkApi = {
     filter?: 'any' | 'for' | 'against' | 'abstain',
     sortBy?: 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
   ): Promise<Vote[]>;
-  loadUserVotes(spaceId: string | undefined, voter: string): Promise<{ [key: string]: Vote }>;
+  loadUserVotes(spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
     spaceIds: string[],
     paginationOpts: PaginationOpts,
@@ -244,7 +245,6 @@ type BaseNetwork = {
   baseChainId: number;
   currentChainId: number;
   baseNetworkId?: NetworkID;
-  hasReceive: boolean;
   supportsSimulation: boolean;
   managerConnectors: Connector[];
   api: NetworkApi;

@@ -6,7 +6,7 @@ import { getEthereumWallet, DEFAULT_INDEX, SPACES_INDICIES } from './dependencie
 
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
-  method: z.enum(['send', 'execute', 'executeQueuedProposal']),
+  method: z.enum(['send', 'finalizeProposal', 'execute', 'executeQueuedProposal']),
   params: z.any()
 });
 

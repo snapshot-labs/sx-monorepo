@@ -1,4 +1,6 @@
-import { Account, CallData, shortString, uint256, hash } from 'starknet';
+import { stark, Account, CallData, shortString, uint256, hash } from 'starknet';
+import { ContractFactory } from '@ethersproject/contracts';
+import { Signer } from '@ethersproject/abstract-signer';
 import { poseidonHashMany } from 'micro-starknet';
 import randomBytes from 'randombytes';
 import { getStrategiesWithParams } from '../../../utils/strategies';
@@ -6,6 +8,7 @@ import { getAuthenticator } from '../../../authenticators/starknet';
 import { hexPadLeft } from '../../../utils/encoding';
 import { defaultNetwork } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
+import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy.json';
 import {
   Vote,
   Propose,
@@ -28,6 +31,14 @@ type SpaceParams = {
   authenticators: string[];
   votingStrategies: AddressConfig[];
   votingStrategiesMetadata: string[];
+};
+
+type L1AvatarExecutionStrategyParams = {
+  controller: string;
+  target: string;
+  executionRelayer: string;
+  spaces: string[];
+  quorum: bigint;
 };
 
 type UpdateSettingsInput = {
@@ -120,6 +131,31 @@ export class StarknetTx {
     return { txId: res.transaction_hash, address };
   }
 
+  async deployL1AvatarExecution({
+    signer,
+    params: { controller, target, executionRelayer, spaces, quorum }
+  }: {
+    signer: Signer;
+    params: L1AvatarExecutionStrategyParams;
+  }): Promise<{ txId: string; address: string }> {
+    const l1AvatarExecutionStrategyContractFactor = new ContractFactory(
+      L1AvatarExecutionStrategyAbi.abi,
+      L1AvatarExecutionStrategyAbi.bytecode,
+      signer
+    );
+
+    const contract = await l1AvatarExecutionStrategyContractFactor.deploy(
+      controller,
+      target,
+      this.config.networkConfig.starknetCommit,
+      executionRelayer,
+      spaces,
+      quorum
+    );
+
+    return { address: contract.address, txId: contract.deployTransaction.hash };
+  }
+
   async getSalt({ sender, saltNonce }: { sender: string; saltNonce: string }) {
     return poseidonHashMany([BigInt(sender), BigInt(saltNonce)]);
   }
@@ -168,7 +204,8 @@ export class StarknetTx {
     const calls = [call];
 
     const fee = opts?.nonce ? await account.estimateFee(calls) : null;
-    return account.execute(calls, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    return account.execute(calls, undefined, fee ? { maxFee } : undefined);
   }
 
   async updateProposal(account: Account, envelope: Envelope<UpdateProposal>, opts?: Opts) {
@@ -190,7 +227,8 @@ export class StarknetTx {
     });
 
     const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    return account.execute(call, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    return account.execute(call, undefined, fee ? { maxFee } : undefined);
   }
 
   async vote(account: Account, envelope: Envelope<Vote>, opts?: Opts) {
@@ -218,7 +256,8 @@ export class StarknetTx {
     });
 
     const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    return account.execute(call, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = fee ? stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, 1.5) : undefined;
+    return account.execute(call, undefined, fee ? { maxFee } : undefined);
   }
 
   execute({

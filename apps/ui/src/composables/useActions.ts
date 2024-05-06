@@ -86,7 +86,9 @@ export function useActions() {
     if (await handleCommitEnvelope(envelope, networkId)) return;
 
     // TODO: unify send/soc to both return txHash under same property
-    if (envelope.signatureData || envelope.sig) {
+    if (envelope.payloadType === 'HIGHLIGHT_VOTE') {
+      console.log('Receipt', envelope.signatureData);
+    } else if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
       const hash = receipt.transaction_hash || receipt.hash;
 
@@ -185,7 +187,7 @@ export function useActions() {
       predictedSpaceAddress: predictSpaceAddress(networkId, salt)
     });
 
-    return receipt.txId;
+    return receipt;
   }
 
   async function updateMetadata(space: Space, metadata: SpaceMetadata) {
@@ -355,16 +357,6 @@ export function useActions() {
     await wrapPromise(proposal.network, network.actions.finalizeProposal(auth.web3, proposal));
   }
 
-  async function receiveProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
-
-    const network = getReadWriteNetwork(proposal.network);
-    if (!network.hasReceive) throw new Error('Receive on this network is not supported');
-
-    await wrapPromise('gor', network.actions.receiveProposal(auth.web3, proposal));
-  }
-
   async function executeTransactions(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
     if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
@@ -516,10 +508,15 @@ export function useActions() {
 
     const network = getNetwork(networkId);
 
-    await wrapPromise(
-      networkId,
-      network.actions.followSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
-    );
+    try {
+      await wrapPromise(
+        networkId,
+        network.actions.followSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
+      );
+    } catch (e) {
+      uiStore.addNotification('error', e.message);
+      return false;
+    }
 
     return true;
   }
@@ -532,10 +529,15 @@ export function useActions() {
 
     const network = getNetwork(networkId);
 
-    await wrapPromise(
-      networkId,
-      network.actions.unfollowSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
-    );
+    try {
+      await wrapPromise(
+        networkId,
+        network.actions.unfollowSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
+      );
+    } catch (e) {
+      uiStore.addNotification('error', e.message);
+      return false;
+    }
 
     return true;
   }
@@ -550,7 +552,6 @@ export function useActions() {
     updateProposal: wrapWithErrors(updateProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
     finalizeProposal: wrapWithErrors(finalizeProposal),
-    receiveProposal: wrapWithErrors(receiveProposal),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
     vetoProposal: wrapWithErrors(vetoProposal),
