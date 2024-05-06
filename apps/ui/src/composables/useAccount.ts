@@ -7,10 +7,6 @@ const follows: Ref<Space['id'][]> = ref([]);
 export function useAccount() {
   const { web3, web3Account } = useWeb3();
 
-  watchEffect(() => {
-    if (!web3Account.value) votes.value = {};
-  });
-
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
     const account = web3.value.account;
     if (!account) return;
@@ -31,6 +27,10 @@ export function useAccount() {
     const network = getNetwork(networkId);
     follows.value = (await network.api.loadFollows(account)).map(follow => follow.space.id);
   }
+
+  watchEffect(() => {
+    if (!web3Account.value) votes.value = {};
+  });
 
   return { account: web3.value.account, loadVotes, loadFollows, votes, follows };
 }
