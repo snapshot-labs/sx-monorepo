@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork, getReadWriteNetwork } from '@/networks';
+import { getNetwork, getReadWriteNetwork, offchainNetworks } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -107,6 +107,8 @@ export function useActions() {
   }
 
   async function aliasableSigner(networkId: NetworkID): Promise<Web3Provider | Wallet> {
+    if (!offchainNetworks.includes(networkId)) return auth.web3;
+
     const network = getNetwork(networkId);
 
     if (!(await alias.isValid())) {
@@ -209,7 +211,7 @@ export function useActions() {
     await wrapPromise(
       proposal.network,
       network.actions.vote(
-        auth.web3,
+        await aliasableSigner(proposal.network),
         web3.value.type as Connector,
         web3.value.account,
         proposal,
@@ -263,7 +265,7 @@ export function useActions() {
     await wrapPromise(
       space.network,
       network.actions.propose(
-        auth.web3,
+        await aliasableSigner(space.network),
         web3.value.type as Connector,
         web3.value.account,
         space,
@@ -318,7 +320,7 @@ export function useActions() {
     await wrapPromise(
       space.network,
       network.actions.updateProposal(
-        auth.web3,
+        await aliasableSigner(space.network),
         web3.value.type as Connector,
         web3.value.account,
         space,
