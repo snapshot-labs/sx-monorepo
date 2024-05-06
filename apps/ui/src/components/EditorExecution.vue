@@ -79,9 +79,12 @@ async function handleSimulateClick() {
   }
 }
 
-watch(model.value, () => {
-  simulationState.value = null;
-});
+watch(
+  () => model.value,
+  () => {
+    simulationState.value = null;
+  }
+);
 </script>
 <template>
   <div class="space-y-3">

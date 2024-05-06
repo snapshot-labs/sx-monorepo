@@ -188,7 +188,7 @@ watch([sortBy, choiceFilter], () => {
                   :to="{
                     name: 'user',
                     params: {
-                      id: `${proposal.network}:${vote.voter.id}`
+                      id: vote.voter.id
                     }
                   }"
                 >
@@ -223,7 +223,7 @@ watch([sortBy, choiceFilter], () => {
               <div v-else>
                 <UiTooltip
                   v-if="proposal.type !== 'basic'"
-                  class="truncate !block"
+                  class="max-w-[100%] truncate !inline-block"
                   :title="getChoiceText(proposal.choices, vote.choice)"
                 >
                   {{ getChoiceText(proposal.choices, vote.choice) }}

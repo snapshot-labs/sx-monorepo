@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { startIntercom } from './helpers/intercom';
 
-const ROUTES_WITH_APP_NAV = ['space', 'my'];
-
 const el = ref(null);
 
 const route = useRoute();
@@ -19,9 +17,9 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
-const currentRouteName = computed(() => {
-  return String(route.matched[0]?.name);
-});
+const hasAppNav = computed(() =>
+  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+);
 
 function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
@@ -77,7 +75,7 @@ watch(isSwiping, () => {
         v-if="uiStore.sidebarOpen"
         class="backdrop lg:hidden"
         :style="{
-          left: `${72 + (ROUTES_WITH_APP_NAV.includes(currentRouteName) ? 240 : 0)}px`
+          left: `${72 + (hasAppNav ? 240 : 0)}px`
         }"
         @click="uiStore.toggleSidebar"
       />
