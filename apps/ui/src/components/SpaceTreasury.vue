@@ -18,12 +18,14 @@ const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury } = useTreasury(props.treasuryData);
 const { createDraft } = useEditor();
+const { isStakeable } = useStaking();
 
 const page: Ref<'tokens' | 'nfts'> = ref('tokens');
 const modalOpen = ref({
   tokens: false,
   nfts: false,
-  walletConnectLink: false
+  walletConnectLink: false,
+  staking: false
 });
 
 const currentNetworkId = computed(() => {
@@ -104,7 +106,7 @@ const executionStrategy = computed(() => {
   };
 });
 
-function openModal(type: 'tokens' | 'nfts') {
+function openModal(type: 'tokens' | 'nfts' | 'staking') {
   modalOpen.value[type] = true;
 }
 
@@ -235,18 +237,23 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             target="_blank"
             class="mx-4 py-3 border-b flex"
           >
-            <div class="flex-auto flex items-center min-w-0">
-              <UiBadgeNetwork :id="treasury.networkId" class="mr-3">
+            <div class="flex-auto flex items-center min-w-0 space-x-3">
+              <UiBadgeNetwork :id="treasury.networkId">
                 <UiStamp
                   :id="`${treasury.networkId}:${asset.contractAddress}`"
                   type="token"
                   :size="32"
                 />
               </UiBadgeNetwork>
-              <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
+              <div class="flex flex-col leading-[22px] min-w-0 pr-2 md:pr-0">
                 <h4 class="truncate" v-text="asset.symbol" />
                 <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
               </div>
+              <UiTooltip v-if="isStakeable(treasury.networkId, asset)" title="Stake">
+                <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('staking')">
+                  <IHFire class="inline-block" />
+                </UiButton>
+              </UiTooltip>
             </div>
             <div
               v-if="asset.price"
@@ -338,6 +345,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"
       />
+      <ModalStaking :open="modalOpen.staking" @close="modalOpen.staking = false" />
     </teleport>
   </template>
 </template>
