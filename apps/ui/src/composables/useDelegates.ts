@@ -1,12 +1,17 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
+import { NetworkID } from '@/types';
 
 type ApiDelegate = {
   id: string;
   delegatedVotes: string;
-  delegatedVotesRaw: string;
   tokenHoldersRepresentedAmount: number;
+};
+
+type ApiDelegator = {
+  id: string;
+  tokenBalance: string;
 };
 
 type Delegate = ApiDelegate & {
@@ -21,6 +26,18 @@ type Governance = {
   totalDelegates: string;
 };
 
+type DelegatesSort =
+  | 'delegatedVotes-desc'
+  | 'delegatedVotes-asc'
+  | 'tokenHoldersRepresentedAmount-desc'
+  | 'tokenHoldersRepresentedAmount-asc';
+
+type DelegatorsSort = 'tokenBalance-desc' | 'tokenBalance-asc';
+
+const { web3Account } = useWeb3();
+
+type DelegateTabs = 'delegates' | 'my-delegators';
+
 const DELEGATES_LIMIT = 40;
 
 const DELEGATES_QUERY = gql`
@@ -34,13 +51,32 @@ const DELEGATES_QUERY = gql`
     ) {
       id
       delegatedVotes
-      delegatedVotesRaw
       tokenHoldersRepresentedAmount
     }
     governance(id: "GOVERNANCE") {
       delegatedVotes
       totalTokenHolders
       totalDelegates
+    }
+  }
+`;
+
+const MY_DELEGATORS_QUERY = network => gql`
+  query (
+    $first: Int!
+    $skip: Int!
+    $orderBy: TokenHolder_orderBy!
+    $orderDirection: OrderDirection!
+    $id: String!
+  ) {
+    delegate(id: $id) {
+      id
+      delegatedVotes
+      tokenHoldersRepresentedAmount
+    }
+    ${network === 'sn' ? 'tokenholders' : 'tokenHolders'}(first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection) {
+      id
+      tokenBalance
     }
   }
 `;
@@ -56,13 +92,15 @@ function convertUrl(apiUrl: string) {
   return apiUrl;
 }
 
-export function useDelegates(delegationApiUrl: string) {
+export function useDelegates(delegationApiUrl: string, network: NetworkID) {
   const delegates: Ref<Delegate[]> = ref([]);
+  const delegators: Ref<any> = ref([]);
   const loading = ref(false);
   const loadingMore = ref(false);
   const loaded = ref(false);
   const failed = ref(false);
   const hasMore = ref(false);
+  const tab: Ref<DelegateTabs> = ref('delegates'); // ref('my-delegators'); ///
 
   const httpLink = createHttpLink({
     uri: convertUrl(delegationApiUrl)
@@ -80,13 +118,9 @@ export function useDelegates(delegationApiUrl: string) {
     }
   });
 
-  async function _fetch(
+  async function _fetchDelegates(
     overwrite: boolean,
-    sortBy:
-      | 'delegatedVotes-desc'
-      | 'delegatedVotes-asc'
-      | 'tokenHoldersRepresentedAmount-desc'
-      | 'tokenHoldersRepresentedAmount-asc'
+    sortBy: DelegatesSort = 'delegatedVotes-desc'
   ) {
     const [orderBy, orderDirection] = sortBy.split('-');
 
@@ -127,18 +161,53 @@ export function useDelegates(delegationApiUrl: string) {
     hasMore.value = delegatesData.length === DELEGATES_LIMIT;
   }
 
-  async function fetch(
-    sortBy:
-      | 'delegatedVotes-desc'
-      | 'delegatedVotes-asc'
-      | 'tokenHoldersRepresentedAmount-desc'
-      | 'tokenHoldersRepresentedAmount-asc' = 'delegatedVotes-desc'
+  async function _fetchDelegators(
+    overwrite: boolean,
+    sortBy: DelegatorsSort = 'tokenBalance-desc'
   ) {
+    const [orderBy, orderDirection] = sortBy.split('-');
+
+    const { data } = await apollo.query({
+      query: MY_DELEGATORS_QUERY(network),
+      variables: {
+        orderBy,
+        orderDirection,
+        first: DELEGATES_LIMIT,
+        skip: overwrite ? 0 : delegates.value.length,
+        id: web3Account.value.toLowerCase()
+      }
+    });
+
+    if (data.delegate === null) return [];
+    const delegatorsData = data[network === 'sn' ? 'tokenholders' : 'tokenHolders'] as any[];
+    const addresses = delegatorsData.map(delegator => delegator.id);
+
+    const names = await getNames(addresses);
+
+    const newDelegators = delegatorsData.map((delegator: ApiDelegator) => {
+      const votesPercentage =
+        (Number(delegator.tokenBalance) / Number(data.delegate.delegatedVotes)) * 100 || 0;
+
+      return {
+        name: names[delegator.id] || null,
+        id: delegator.id,
+        delegatedVotes: Number(delegator.tokenBalance),
+        votesPercentage
+      };
+    });
+    // for now
+    delegators.value = overwrite ? newDelegators : [...delegators.value, ...newDelegators];
+    console.log('delegators.value', delegators.value);
+    hasMore.value = delegatorsData.length === DELEGATES_LIMIT;
+  }
+
+  async function fetch(sortBy) {
     if (loading.value || loaded.value) return;
     loading.value = true;
 
     try {
-      await _fetch(true, sortBy);
+      if (tab.value === 'delegates') await _fetchDelegates(true, sortBy);
+      else await _fetchDelegators(true, sortBy);
 
       loaded.value = true;
     } catch (e) {
@@ -148,29 +217,31 @@ export function useDelegates(delegationApiUrl: string) {
     }
   }
 
-  async function fetchMore(
-    sortBy:
-      | 'delegatedVotes-desc'
-      | 'delegatedVotes-asc'
-      | 'tokenHoldersRepresentedAmount-desc'
-      | 'tokenHoldersRepresentedAmount-asc' = 'delegatedVotes-desc'
-  ) {
+  async function fetchMore(sortBy) {
     if (loading.value || !loaded.value) return;
     loadingMore.value = true;
 
-    await _fetch(false, sortBy);
+    if (tab.value === 'delegates') await _fetchDelegates(false, sortBy);
+    else await _fetchDelegators(false, sortBy);
 
     loadingMore.value = false;
   }
 
   function reset() {
     delegates.value = [];
+    delegators.value = [];
     loading.value = false;
     loadingMore.value = false;
     loaded.value = false;
     failed.value = false;
     hasMore.value = false;
   }
+
+  watch([tab, web3Account], () => {
+    console.log('tab/web3 changed');
+    reset();
+    fetch(tab.value === 'delegates' ? 'delegatedVotes-desc' : 'tokenBalance-desc');
+  });
 
   return {
     loading,
@@ -179,8 +250,10 @@ export function useDelegates(delegationApiUrl: string) {
     failed,
     hasMore,
     delegates,
+    delegators,
     fetch,
     fetchMore,
-    reset
+    reset,
+    tab
   };
 }
