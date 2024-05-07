@@ -5,6 +5,8 @@ import { Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{ space: Space; delegation: SpaceMetadataDelegation }>();
 
+const { web3 } = useWeb3();
+
 const delegateModalOpen = ref(false);
 const sortBy = ref(
   'delegatedVotes-desc' as
@@ -14,8 +16,19 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-asc'
 );
 const { setTitle } = useTitle();
-const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMore, reset } =
-  useDelegates(props.delegation.apiUrl as string);
+const {
+  loading,
+  loadingMore,
+  loaded,
+  failed,
+  hasMore,
+  delegates,
+  delegators,
+  fetch,
+  fetchMore,
+  reset,
+  tab
+} = useDelegates(props.delegation.apiUrl as string, props.delegation.contractNetwork as string);
 
 const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
@@ -26,6 +39,23 @@ const currentNetwork = computed(() => {
     return null;
   }
 });
+
+const isDelegatesTab = computed(() => tab.value === 'delegates');
+const dataToDisplay = computed(() =>
+  isDelegatesTab.value
+    ? {
+        header: 'Delegatee',
+        noData: 'There are no delegates.',
+        data: delegates.value,
+        failMessage: 'Failed to load delegates.'
+      }
+    : {
+        header: 'Delegator',
+        noData: 'You have no delegators.',
+        data: delegators.value,
+        failMessage: 'Failed to load delegators.'
+      }
+);
 
 function handleSortChange(type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount') {
   if (sortBy.value.startsWith(type)) {
@@ -71,7 +101,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </div>
     <div class="space-y-3">
       <div>
-        <UiLabel label="Delegates" sticky />
+        <div class="flex pl-4 border-b space-x-3 sticky z-10 top-[71px] lg:top-[72px] bg-skin-bg">
+          <button type="button" @click="tab = 'delegates'">
+            <UiLink :is-active="isDelegatesTab" text="Delegates" />
+          </button>
+          <button v-if="web3.account" type="button" @click="tab = 'my-delegators'">
+            <UiLink :is-active="tab === 'my-delegators'" text="My Delegators" />
+          </button>
+        </div>
 
         <table class="text-left table-fixed w-full">
           <colgroup>
@@ -84,9 +121,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           >
             <tr>
               <th class="pl-4 font-medium">
-                <span class="relative bottom-[1px]">Delegatee</span>
+                <span class="relative bottom-[1px]">
+                  {{ isDelegatesTab ? 'Delegatee' : 'Delegator' }}
+                </span>
               </th>
-              <th class="hidden md:table-cell">
+              <th v-if="isDelegatesTab" class="hidden md:table-cell">
                 <button
                   class="relative bottom-[1px] flex items-center justify-end min-w-0 w-full font-medium hover:text-skin-link"
                   @click="handleSortChange('tokenHoldersRepresentedAmount')"
@@ -102,7 +141,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   />
                 </button>
               </th>
-              <th>
+              <th :colspan="isDelegatesTab ? 1 : 2">
                 <button
                   class="relative bottom-[1px] flex justify-end items-center min-w-0 w-full font-medium hover:text-skin-link pr-4"
                   @click="handleSortChange('delegatedVotes')"
@@ -120,22 +159,22 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <template v-else>
             <tbody>
               <td
-                v-if="loaded && delegates.length === 0"
+                v-if="loaded && dataToDisplay.data.length === 0"
                 class="px-4 py-3 flex items-center"
                 colspan="3"
               >
                 <IH-exclamation-circle class="inline-block mr-2" />
-                There are no delegates.
+                {{ dataToDisplay.noData }}
               </td>
               <td v-else-if="loaded && failed" class="px-4 py-3 flex items-center" colspan="3">
                 <IH-exclamation-circle class="inline-block mr-2" />
-                Failed to load delegates.
+                {{ dataToDisplay.failMessage }}
               </td>
               <UiContainerInfiniteScroll
                 :loading-more="loadingMore"
                 @end-reached="handleEndReached"
               >
-                <tr v-for="(delegate, i) in delegates" :key="i" class="border-b relative">
+                <tr v-for="(delegate, i) in dataToDisplay.data" :key="i" class="border-b relative">
                   <td class="text-left flex items-center pl-4 py-3">
                     <UiStamp :id="delegate.id" :size="32" class="mr-3" />
                     <div class="overflow-hidden">
@@ -156,7 +195,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       </a>
                     </div>
                   </td>
-                  <td class="hidden md:table-cell align-middle text-right">
+                  <td v-if="isDelegatesTab" class="hidden md:table-cell align-middle text-right">
                     <h4
                       class="text-skin-link"
                       v-text="_n(delegate.tokenHoldersRepresentedAmount)"
@@ -166,7 +205,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`"
                     />
                   </td>
-                  <td class="text-right pr-4 align-middle">
+                  <td class="text-right pr-4 align-middle" :colspan="isDelegatesTab ? 1 : 2">
                     <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
                     <div class="text-[17px]" v-text="`${delegate.votesPercentage.toFixed(3)}%`" />
                   </td>
