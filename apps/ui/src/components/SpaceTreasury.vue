@@ -18,7 +18,6 @@ const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury } = useTreasury(props.treasuryData);
 const { createDraft } = useEditor();
-const { isStakeable } = useStaking();
 
 const page: Ref<'tokens' | 'nfts'> = ref('tokens');
 const modalOpen = ref({
@@ -162,7 +161,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <IH-check v-else class="inline-block" />
         </UiButton>
       </UiTooltip>
-      <UiTooltip v-if="!isReadOnly" :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
+      <UiTooltip :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
         <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </UiButton>
@@ -249,7 +248,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 <h4 class="truncate" v-text="asset.symbol" />
                 <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
               </div>
-              <UiTooltip v-if="isStakeable(treasury.networkId, asset)" title="Stake">
+              <UiTooltip
+                v-if="
+                  asset.contractAddress === ETH_CONTRACT &&
+                  ['eth', 'sep'].includes(treasury.networkId)
+                "
+                title="Stake"
+              >
                 <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('staking')">
                   <IHFire class="inline-block" />
                 </UiButton>
@@ -345,7 +350,12 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"
       />
-      <ModalStaking :open="modalOpen.staking" @close="modalOpen.staking = false" />
+      <ModalStaking
+        :open="modalOpen.staking"
+        :network="treasury.network"
+        :network-id="treasury.networkId"
+        @close="modalOpen.staking = false"
+      />
     </teleport>
   </template>
 </template>
