@@ -1,4 +1,5 @@
 import { Account, CairoOption, CairoOptionVariant, CallData, cairo } from 'starknet';
+import { estimateStarknetFee } from '../../../utils/fees';
 
 type ProofElement = {
   index: number;
@@ -46,7 +47,7 @@ export class HerodotusController {
       })
     };
 
-    const fee = await signer.estimateFee(call);
-    return signer.execute(call, undefined, { ...opts, maxFee: fee.suggestedMaxFee });
+    const maxFee = opts?.nonce ? await estimateStarknetFee(signer, call) : undefined;
+    return signer.execute(call, undefined, { ...opts, maxFee });
   }
 }
