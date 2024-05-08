@@ -4,8 +4,6 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const bookmarksStore = useBookmarksStore();
-
 const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
@@ -24,13 +22,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
         />
       </UiBadgeNetwork>
     </div>
-    <button
-      class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-      @click.prevent="bookmarksStore.toggleSpaceStar(compositeSpaceId)"
-    >
-      <IS-star v-if="bookmarksStore.isStarred(compositeSpaceId)" class="inline-block" />
-      <IH-star v-else class="inline-block" />
-    </button>
+
     <div class="px-4">
       <h3 class="truncate mb-1" v-text="space.name" />
       <h5 class="line-clamp-2 leading-6" v-text="space.about" />
