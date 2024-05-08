@@ -200,6 +200,8 @@ export async function processProposal(proposal: DbProposal) {
       { nonce }
     );
 
+    nonceManager.increaseNonce();
+
     console.log('cached proposal', receipt);
 
     await db.markProposalProcessed(proposal.id);
