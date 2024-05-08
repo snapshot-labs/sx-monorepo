@@ -20,14 +20,6 @@ const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
     }
   ],
   [
-    constants.StarknetChainId.SN_GOERLI,
-    {
-      DESTINATION_CHAIN_ID: 'SN_GOERLI',
-      ACCUMULATES_CHAIN_ID: '5',
-      FEE: '0'
-    }
-  ],
-  [
     constants.StarknetChainId.SN_SEPOLIA,
     {
       DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
@@ -121,10 +113,9 @@ async function submitBatch(proposal: ApiProposal) {
 export async function registerProposal(proposal: ApiProposal) {
   if (
     proposal.chainId !== constants.StarknetChainId.SN_MAIN &&
-    proposal.chainId !== constants.StarknetChainId.SN_GOERLI &&
     proposal.chainId !== constants.StarknetChainId.SN_SEPOLIA
   ) {
-    throw new Error('Only Starknet mainnet, goerli and sepolia are supported');
+    throw new Error('Only Starknet mainnet and sepolia are supported');
   }
 
   await db.registerProposal(getId(proposal), {

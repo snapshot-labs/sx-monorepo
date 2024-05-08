@@ -59,7 +59,6 @@ const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
 
 const CHAIN_IDS = new Map<string, i32>()
 CHAIN_IDS.set('mainnet', 1)
-CHAIN_IDS.set('goerli', 5)
 CHAIN_IDS.set('sepolia', 11155111)
 CHAIN_IDS.set('optimism', 10)
 CHAIN_IDS.set('matic', 137)

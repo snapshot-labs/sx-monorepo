@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import createVanillaStrategy from '../../../../src/strategies/starknet/vanilla';
-import { defaultNetwork } from '../../../../src/networks';
+import { starknetSepolia } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
 
-const ethUrl = process.env.GOERLI_NODE_URL as string;
+const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('vanillaStrategy', () => {
   const vanillaStrategy = createVanillaStrategy();
-  const config = { starkProvider, ethUrl, networkConfig: defaultNetwork };
+  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
 
   it('should return type', () => {
     expect(vanillaStrategy.type).toBe('vanilla');
