@@ -15,7 +15,6 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const followedSpacesStore = useFollowedSpacesStore();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
@@ -27,7 +26,6 @@ onMounted(() => {
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
-const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const socials = computed(() =>
@@ -80,14 +78,7 @@ watchEffect(() => setTitle(props.space.name));
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
-        <UiButton disabled class="group" :class="{ 'hover:border-skin-danger': spaceFollowed }">
-          <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
-          <span v-else-if="spaceFollowed" class="inline-block">
-            <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
-            <span class="group-hover:hidden">Following</span>
-          </span>
-          <span v-else class="inline-block">Follow</span>
-        </UiButton>
+        <FollowButton :space="space" />
       </div>
     </div>
     <div class="px-4">
