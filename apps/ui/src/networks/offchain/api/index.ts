@@ -360,10 +360,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return follows.map(follow => {
-        follow.space.network = networkId;
-        return follow;
-      });
+      return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
     }
   };
 }
