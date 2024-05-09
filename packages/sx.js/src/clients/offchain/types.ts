@@ -88,12 +88,14 @@ export type EIP712CancelProposalMessage = {
 };
 
 export type EIP712FollowSpaceMessage = {
+  network: string;
   space: string;
   from?: string;
   timestamp?: number;
 };
 
 export type EIP712UnfollowSpaceMessage = {
+  network: string;
   space: string;
   from?: string;
   timestamp?: number;
@@ -155,12 +157,14 @@ export type CancelProposal = {
 
 export type FollowSpace = {
   from?: string;
+  network: string;
   space: string;
   timestamp?: number;
 };
 
 export type UnfollowSpace = {
   from?: string;
+  network: string;
   space: string;
   timestamp?: number;
 };

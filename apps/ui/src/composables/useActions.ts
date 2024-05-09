@@ -494,7 +494,7 @@ export function useActions() {
     const network = getNetwork(networkId);
 
     try {
-      await wrapPromise(networkId, network.actions.followSpace(auth.web3, spaceId));
+      await wrapPromise(networkId, network.actions.followSpace(auth.web3, networkId, spaceId));
     } catch (e) {
       uiStore.addNotification('error', e.message);
       return false;
@@ -512,7 +512,7 @@ export function useActions() {
     const network = getNetwork(networkId);
 
     try {
-      await wrapPromise(networkId, network.actions.unfollowSpace(auth.web3, spaceId));
+      await wrapPromise(networkId, network.actions.unfollowSpace(auth.web3, networkId, spaceId));
     } catch (e) {
       uiStore.addNotification('error', e.message);
       return false;

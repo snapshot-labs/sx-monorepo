@@ -12,7 +12,7 @@ import { getUrl } from '@/helpers/utils';
 import { getProvider } from '@/helpers/provider';
 import { getSwapLink } from '@/helpers/link';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType } from '@/types';
+import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType, NetworkID } from '@/types';
 import type {
   ReadOnlyNetworkActions,
   NetworkConstants,
@@ -202,16 +202,16 @@ export function createActions(
         };
       });
     },
-    followSpace(web3: Web3Provider, spaceId: string) {
+    followSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string) {
       return client.followSpace({
         signer: web3.getSigner(),
-        data: { space: spaceId }
+        data: { network: networkId, space: spaceId }
       });
     },
-    unfollowSpace(web3: Web3Provider, spaceId: string) {
+    unfollowSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string) {
       return client.unfollowSpace({
         signer: web3.getSigner(),
-        data: { space: spaceId }
+        data: { network: networkId, space: spaceId }
       });
     }
   };
