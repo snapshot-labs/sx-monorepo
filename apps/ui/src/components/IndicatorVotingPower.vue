@@ -49,7 +49,7 @@ function handleModalOpen() {
       :formatted-voting-power="formattedVotingPower"
       :on-click="handleModalOpen"
     >
-      <UiTooltip title="Your voting power">
+      <UiTooltip title="Your voting power" :touch="false">
         <UiButton
           v-if="web3.account && !(evmNetworks.includes(networkId) && web3.type === 'argentx')"
           :loading="loading"
