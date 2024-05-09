@@ -22,7 +22,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
         />
       </UiBadgeNetwork>
     </div>
-    <FollowButton :space="space" class="absolute top-2.5 right-2.5 hidden group-hover:block" />
+    <ButtonFollow :space="space" class="absolute top-2.5 right-2.5 hidden group-hover:block" />
     <div class="px-4">
       <h3 class="truncate mb-1" v-text="space.name" />
       <h5 class="line-clamp-2 leading-6" v-text="space.about" />

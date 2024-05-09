@@ -397,8 +397,6 @@ export default defineComponent({
       >
         <h4 class="eyebrow mb-2">Execution</h4>
         <div class="border rounded-lg mb-3">
-          {{ supportedExecutionStrategies }}
-          {{ executionStrategy }}
           <ExecutionButton
             v-for="strategy in supportedExecutionStrategies"
             :key="strategy.address"

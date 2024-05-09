@@ -78,7 +78,7 @@ watchEffect(() => setTitle(props.space.name));
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
-        <FollowButton :space="space" />
+        <ButtonFollow :space="space" />
       </div>
     </div>
     <div class="px-4">
