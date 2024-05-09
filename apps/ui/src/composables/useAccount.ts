@@ -1,8 +1,7 @@
 import { getNetwork } from '@/networks';
-import type { NetworkID, Proposal, Space, Vote } from '@/types';
+import type { NetworkID, Proposal, Vote } from '@/types';
 
-const votes: Ref<Record<Proposal['id'], Vote>> = ref({});
-const follows: Ref<Space['id'][]> = ref([]);
+const votes = ref<Record<Proposal['id'], Vote>>({});
 
 export function useAccount() {
   const { web3, web3Account } = useWeb3();
@@ -17,20 +16,13 @@ export function useAccount() {
     votes.value = { ...votes.value, ...userVotes };
   }
 
-  async function loadFollows(networkId: NetworkID) {
-    const { account, type } = web3.value;
-    if (!account || type === 'argentx') {
-      follows.value = [];
-      return;
-    }
-
-    const network = getNetwork(networkId);
-    follows.value = (await network.api.loadFollows(account)).map(follow => follow.space.id);
-  }
-
   watchEffect(() => {
     if (!web3Account.value) votes.value = {};
   });
 
-  return { account: web3.value.account, loadVotes, loadFollows, votes, follows };
+  return {
+    account: web3.value.account,
+    votes,
+    loadVotes
+  };
 }
