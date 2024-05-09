@@ -82,16 +82,16 @@ onMounted(() => {
 
 watch(
   () => followedSpacesStore.followedSpacesIds,
-  () => {
+  followedSpacesIds => {
     loaded.value = false;
     proposals.value = [];
 
-    if (!followedSpacesStore.followedSpacesIds.length) {
+    if (!followedSpacesIds.length) {
       loaded.value = true;
       return;
     }
 
-    loadVotes(networkId.value, followedSpacesStore.followedSpacesIds);
+    loadVotes(networkId.value, followedSpacesIds);
     fetch();
   }
 );
