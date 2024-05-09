@@ -5,15 +5,22 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const spaceIdComposite = `${props.space.network}:${props.space.id}`;
+
 const followedSpacesStore = useFollowedSpacesStore();
 
-const spaceFollowed = computed(() =>
-  followedSpacesStore.isFollowed(`${props.space.network}:${props.space.id}`)
-);
+const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
 </script>
 
 <template>
-  <UiButton disabled class="group" :class="{ 'hover:border-skin-danger': spaceFollowed }">
+  <UiButton
+    :disabled="
+      !followedSpacesStore.followedSpacesLoaded || followedSpacesStore.followedSpaceLoading
+    "
+    class="group"
+    :class="{ 'hover:border-skin-danger': spaceFollowed }"
+    @click="followedSpacesStore.toggleSpaceFollow(spaceIdComposite)"
+  >
     <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
     <span v-else-if="spaceFollowed" class="inline-block">
       <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
