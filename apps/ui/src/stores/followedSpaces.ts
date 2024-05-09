@@ -72,12 +72,12 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
 
   async function toggleSpaceFollow(id: string) {
     const alreadyFollowed = followedSpacesIds.value.includes(id);
-    const [spaceNetwork, spaceId] = id.split(':');
+    const [spaceNetwork, spaceId] = id.split(':') as [NetworkID, string];
     followedSpaceLoading.value = true;
 
     try {
       if (alreadyFollowed) {
-        const result = await actions.unfollowSpace(spaceNetwork as NetworkID, spaceId);
+        const result = await actions.unfollowSpace(spaceNetwork, spaceId);
         if (!result) return;
 
         followedSpacesIds.value = followedSpacesIds.value.filter(
@@ -87,7 +87,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
           web3.value.account
         ].filter((spaceId: string) => spaceId !== id);
       } else {
-        const result = await actions.followSpace(spaceNetwork as NetworkID, spaceId);
+        const result = await actions.followSpace(spaceNetwork, spaceId);
         if (!result) return;
 
         fetchSpacesData([id]);
