@@ -2,7 +2,7 @@
 import draggable from 'vuedraggable';
 
 const uiStore = useUiStore();
-const bookmarksStore = useBookmarksStore();
+const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>
@@ -10,10 +10,10 @@ const bookmarksStore = useBookmarksStore();
     <router-link :to="{ name: 'landing' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
-    <UiLoading v-if="!bookmarksStore.bookmarksLoaded" />
+    <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
     <draggable
       v-else
-      v-model="bookmarksStore.bookmarkedSpaces"
+      v-model="followedSpacesStore.followedSpaces"
       :delay="100"
       :delay-on-touch-only="true"
       :touch-start-threshold="35"

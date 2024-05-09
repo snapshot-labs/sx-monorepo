@@ -159,10 +159,14 @@ watch([sortBy, choiceFilter], () => {
     </td>
     <template v-else>
       <tbody>
-        <td v-if="votes.length === 0" class="px-4 py-3 flex items-center" colspan="5">
-          <IH-exclamation-circle class="inline-block mr-2" />
-          <span v-text="'There are no votes here.'" />
-        </td>
+        <tr>
+          <td v-if="votes.length === 0" colspan="5">
+            <div class="px-4 py-3 flex items-center">
+              <IH-exclamation-circle class="inline-block mr-2" />
+              <span v-text="'There are no votes here.'" />
+            </div>
+          </td>
+        </tr>
         <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
           <template #loading>
             <td colspan="5">

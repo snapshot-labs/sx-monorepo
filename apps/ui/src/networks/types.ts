@@ -201,6 +201,11 @@ export type NetworkApi = {
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User | null>;
+  loadLeaderboard(
+    spaceId: string,
+    paginationOpts: PaginationOpts,
+    sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
+  ): Promise<User[]>;
   loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
 };
 
