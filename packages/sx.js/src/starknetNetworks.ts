@@ -58,6 +58,7 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
     masterSpace: network.Meta.masterSpace,
     starknetCommit: network.Meta.starknetCommit,
     starknetCore: network.Meta.starknetCore,
+    feeEstimateOverride: network.Meta.feeEstimateOverride,
     authenticators,
     strategies
   };
@@ -72,7 +73,8 @@ export const starknetNetworks = {
       spaceFactory: '0x0250e28c97e729842190c3672f9fcf8db0fc78b8080e87a894831dc69e4f4439',
       masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
       starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
-      starknetCore: '0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4'
+      starknetCore: '0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4',
+      feeEstimateOverride: process.env.STARKNET_MAINNET_FEE_ESTIMATE_OVERRIDE
     },
     Authenticators: {
       Vanilla: '0xc4b0a7d8626638e7dd410b16ccbc48fe36e68f864dec75b23ef41e3732d5d2',
@@ -103,7 +105,8 @@ export const starknetNetworks = {
       spaceFactory: '0x063c62258e1ba4d9ad72eab809ea5c3d1a4545b721bc444d6068ced6246c2f3c',
       masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
       starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29',
-      starknetCore: '0xde29d060D45901Fb19ED6C6e959EB22d8626708e'
+      starknetCore: '0xde29d060D45901Fb19ED6C6e959EB22d8626708e',
+      feeEstimateOverride: process.env.STARKNET_GOERLI_FEE_ESTIMATE_OVERRIDE
     },
     Authenticators: {
       Vanilla: '0x46ad946f22ac4e14e271f24309f14ac36f0fde92c6831a605813fefa46e0893',
@@ -134,7 +137,8 @@ export const starknetNetworks = {
       spaceFactory: '0x302d332e9aceb184e5f301cb62c85181e7fc3b30559935c5736e987de579f6e',
       masterSpace: '0x04b61126a7def0956cb4ff342ba72d850ea6b78b0ddb3e0b45f3a99bc9eb5995',
       starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
-      starknetCore: '0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057'
+      starknetCore: '0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057',
+      feeEstimateOverride: process.env.STARKNET_SEPOLIA_FEE_ESTIMATE_OVERRIDE
     },
     Authenticators: {
       Vanilla: '0x51a4a1eb5ce28fc95edf408a847efccfb030d27314d9fbe82d82cb998ec1a0b',

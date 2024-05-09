@@ -204,7 +204,9 @@ export class StarknetTx {
 
     const calls = [call];
 
-    const maxFee = opts?.nonce ? await estimateStarknetFee(account, calls) : undefined;
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(account, this.config.networkConfig, calls)
+      : undefined;
     return account.execute(calls, undefined, { ...opts, maxFee });
   }
 
@@ -226,7 +228,9 @@ export class StarknetTx {
       metadataUri: envelope.data.metadataUri
     });
 
-    const maxFee = opts?.nonce ? await estimateStarknetFee(account, call) : undefined;
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(account, this.config.networkConfig, call)
+      : undefined;
     return account.execute(call, undefined, { ...opts, maxFee });
   }
 
@@ -254,7 +258,9 @@ export class StarknetTx {
       metadataUri: ''
     });
 
-    const maxFee = opts?.nonce ? await estimateStarknetFee(account, call) : undefined;
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(account, this.config.networkConfig, call)
+      : undefined;
     return account.execute(call, undefined, { ...opts, maxFee });
   }
 
