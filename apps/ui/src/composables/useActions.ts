@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork, getReadWriteNetwork } from '@/networks';
+import { enabledNetworks, getNetwork, getReadWriteNetwork, offchainNetworks } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -13,6 +13,8 @@ import type {
   VoteType
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
+
+const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -491,11 +493,15 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(networkId);
+    const network = getNetwork(offchainNetworkId);
 
     try {
-      await wrapPromise(networkId, network.actions.followSpace(auth.web3, networkId, spaceId));
+      await wrapPromise(
+        offchainNetworkId,
+        network.actions.followSpace(auth.web3, networkId, spaceId)
+      );
     } catch (e) {
+      console.log(e);
       uiStore.addNotification('error', e.message);
       return false;
     }
@@ -509,10 +515,13 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(networkId);
+    const network = getNetwork(offchainNetworkId);
 
     try {
-      await wrapPromise(networkId, network.actions.unfollowSpace(auth.web3, networkId, spaceId));
+      await wrapPromise(
+        offchainNetworkId,
+        network.actions.unfollowSpace(auth.web3, networkId, spaceId)
+      );
     } catch (e) {
       uiStore.addNotification('error', e.message);
       return false;
