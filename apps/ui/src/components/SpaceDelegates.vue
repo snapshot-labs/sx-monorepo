@@ -119,18 +119,15 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           </td>
           <template v-else>
             <tbody>
-              <td
-                v-if="loaded && delegates.length === 0"
-                class="px-4 py-3 flex items-center"
-                colspan="3"
-              >
-                <IH-exclamation-circle class="inline-block mr-2" />
-                There are no delegates.
-              </td>
-              <td v-else-if="loaded && failed" class="px-4 py-3 flex items-center" colspan="3">
-                <IH-exclamation-circle class="inline-block mr-2" />
-                Failed to load delegates.
-              </td>
+              <tr v-if="loaded && (delegates.length === 0 || failed)">
+                <td colspan="3">
+                  <div class="px-4 py-3 flex items-center">
+                    <IH-exclamation-circle class="inline-block mr-2" />
+                    <template v-if="delegates.length === 0">There are no delegates.</template>
+                    <template v-else-if="failed">Failed to load delegates.</template>
+                  </div>
+                </td>
+              </tr>
               <UiContainerInfiniteScroll
                 :loading-more="loadingMore"
                 @end-reached="handleEndReached"

@@ -154,15 +154,18 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           <UiLoading class="px-4 py-3 block" />
         </td>
         <template v-else>
-          <tbody>
-            <td v-if="failed" class="px-4 py-3 flex items-center" colspan="3">
-              <IH-exclamation-circle class="inline-block mr-2" />
-              Failed to load the leaderboard.
-            </td>
-            <td v-else-if="users.length === 0" class="px-4 py-3 flex items-center" colspan="3">
-              <IH-exclamation-circle class="inline-block mr-2" />
-              This space does not have any activities yet.
-            </td>
+          <tbody v-if="failed || users.length === 0">
+            <tr>
+              <td colspan="3">
+                <div class="px-4 py-3 flex items-center">
+                  <IH-exclamation-circle class="inline-block mr-2" />
+                  <template v-if="failed">Failed to load the leaderboard.</template>
+                  <template v-else-if="users.length === 0"
+                    >This space does not have any activities yet.</template
+                  >
+                </div>
+              </td>
+            </tr>
             <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
               <tr v-for="(user, i) in users" :key="i" class="border-b relative">
                 <td class="text-left flex items-center pl-4 py-3">
