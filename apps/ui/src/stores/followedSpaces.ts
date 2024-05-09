@@ -6,7 +6,7 @@ import { Space } from '@/types';
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 const network = getNetwork(offchainNetworkId);
 
-function compositeSpaceId(space: Space) {
+function getCompositeSpaceId(space: Space) {
   return `${space.network}:${space.id}`;
 }
 
@@ -29,7 +29,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
             const space = spacesStore.spacesMap.get(spaceId);
             if (!space) return;
 
-            return [compositeSpaceId(space), space];
+            return [getCompositeSpaceId(space), space];
           })
           .filter(Boolean) as [string, Space][]
       )
@@ -42,7 +42,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         .filter(Boolean) as Space[];
     },
     set(spaces: Space[]) {
-      followedSpacesIdsByAccount.value[web3.value.account] = spaces.map(compositeSpaceId);
+      followedSpacesIdsByAccount.value[web3.value.account] = spaces.map(getCompositeSpaceId);
     }
   });
 
@@ -54,7 +54,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
 
   async function loadFollowedSpaces() {
     const followedIds = (await network.api.loadFollows(web3.value.account)).map(follow =>
-      compositeSpaceId(follow.space)
+      getCompositeSpaceId(follow.space)
     );
     const newIds = followedIds.filter(id => !isFollowed(id));
     followedSpacesIds.value = followedIds;
