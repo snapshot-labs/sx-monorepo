@@ -4,12 +4,12 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const spacesStore = useSpacesStore();
+const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
 <template>
   <router-link
-    :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
+    :to="{ name: 'space-overview', params: { id: compositeSpaceId } }"
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
     <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] absolute" />
@@ -22,16 +22,7 @@ const spacesStore = useSpacesStore();
         />
       </UiBadgeNetwork>
     </div>
-    <button
-      class="hidden group-hover:block absolute top-3 right-3 hover:text-skin-link"
-      @click.prevent="spacesStore.toggleSpaceStar(`${space.network}:${space.id}`)"
-    >
-      <IS-star
-        v-if="spacesStore.starredSpacesIds.includes(`${space.network}:${space.id}`)"
-        class="inline-block"
-      />
-      <IH-star v-else class="inline-block" />
-    </button>
+    <ButtonFollow :space="space" class="absolute top-2.5 right-2.5 hidden group-hover:block" />
     <div class="px-4">
       <h3 class="truncate mb-1" v-text="space.name" />
       <h5 class="line-clamp-2 leading-6" v-text="space.about" />

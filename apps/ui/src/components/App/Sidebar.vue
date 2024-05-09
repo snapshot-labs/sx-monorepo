@@ -2,24 +2,24 @@
 import draggable from 'vuedraggable';
 
 const uiStore = useUiStore();
-const spacesStore = useSpacesStore();
+const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>
-  <div class="w-[72px] border-r fixed left-0 top-0 bottom-0 text-center">
+  <div class="w-[72px] flex flex-col border-r fixed left-0 top-0 bottom-0 text-center h-screen">
     <router-link :to="{ name: 'landing' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
-    <UiLoading v-if="!spacesStore.starredSpacesLoaded" />
+    <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
     <draggable
       v-else
-      v-model="spacesStore.starredSpaces"
+      v-model="followedSpacesStore.followedSpaces"
       :delay="100"
       :delay-on-touch-only="true"
       :touch-start-threshold="35"
       :item-key="i => i"
       v-bind="{ animation: 200 }"
-      class="space-y-3 p-2"
+      class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto"
     >
       <template #item="{ element }">
         <router-link
