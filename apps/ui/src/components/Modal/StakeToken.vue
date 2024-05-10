@@ -53,9 +53,9 @@ const form: {
 const formValid = computed(() => form.amount !== '');
 
 function handleMaxClick() {
-  if (!props.asset) return;
-
-  handleAmountUpdate(formatUnits(props.asset.tokenBalance, props.asset.decimals));
+  handleAmountUpdate(
+    formatUnits(props.asset?.tokenBalance || 0, DEFAULT_FORM_STATE.token.decimals)
+  );
 }
 
 function handleAmountUpdate(value) {
@@ -109,7 +109,6 @@ watch(
           @update:model-value="handleAmountUpdate"
         />
         <a
-          v-if="asset"
           class="absolute right-[16px] top-[4px]"
           href="#"
           @click.prevent="handleMaxClick"
