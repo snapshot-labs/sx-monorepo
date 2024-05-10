@@ -23,8 +23,8 @@ const page: Ref<'tokens' | 'nfts'> = ref('tokens');
 const modalOpen = ref({
   tokens: false,
   nfts: false,
-  walletConnectLink: false,
-  stake: false
+  stake: false,
+  walletConnectLink: false
 });
 
 const currentNetworkId = computed(() => {
@@ -161,7 +161,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <IH-check v-else class="inline-block" />
         </UiButton>
       </UiTooltip>
-      <UiTooltip :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
+      <UiTooltip v-if="!isReadOnly" :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
         <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </UiButton>
@@ -257,7 +257,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 :touch="false"
               >
                 <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('stake')">
-                  <IHFire class="inline-block" />
+                  <IH-Fire class="inline-block" />
                 </UiButton>
               </UiTooltip>
             </div>
