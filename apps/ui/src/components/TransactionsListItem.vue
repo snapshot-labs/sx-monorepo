@@ -23,7 +23,7 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'stakeToken') {
-    return `Stake <b>${_n(formatUnits(props.tx.value, 18), 'standard', {
+    return `Stake <b>${_n(formatUnits(props.tx.value, props.tx._form.token.decimals), 'standard', {
       maximumFractionDigits: 2,
       formatDust: true
     })}</b> ETH on <b>Lido</b>`;
