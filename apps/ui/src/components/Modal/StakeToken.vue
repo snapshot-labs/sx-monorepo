@@ -33,8 +33,8 @@ const props = defineProps<{
   open: boolean;
   address: string;
   network: number;
-  asset?: Token;
   networkId: NetworkID;
+  asset?: Token;
   initialState?: any;
 }>();
 
@@ -49,7 +49,6 @@ const form: {
   value: string | number;
   token: Token;
 } = reactive(clone(DEFAULT_FORM_STATE));
-const stakedAmount = ref<string>('');
 
 const formValid = computed(() => form.amount !== '');
 
@@ -61,7 +60,6 @@ function handleMaxClick() {
 
 function handleAmountUpdate(value) {
   form.amount = value;
-  stakedAmount.value = value;
 }
 
 async function handleSubmit() {
@@ -97,7 +95,7 @@ watch(
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3 v-text="'Stake lido'" />
+      <h3 v-text="'Stake with Lido'" />
     </template>
     <div class="s-box p-4">
       <div class="relative w-full">
@@ -105,7 +103,7 @@ watch(
           :model-value="form.amount"
           :definition="{
             type: 'number',
-            title: 'Send',
+            title: 'Stake',
             examples: ['0']
           }"
           @update:model-value="handleAmountUpdate"
@@ -124,17 +122,17 @@ watch(
       </div>
       <div class="relative w-full">
         <UiInputNumber
-          :model-value="stakedAmount"
+          :model-value="form.amount"
           disabled
           :definition="{
             type: 'number',
-            title: 'Get',
+            title: 'Receive',
             examples: ['0']
           }"
         />
         <div class="absolute right-[16px] top-[28px] flex items-center">
           <UiStamp
-            :id="STAKING_CONTRACTS[networkId].address"
+            :id="`${networkId}:${STAKING_CONTRACTS[networkId].address}`"
             type="token"
             class="mr-2"
             :size="20"

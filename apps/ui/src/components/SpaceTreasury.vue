@@ -253,7 +253,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                   asset.contractAddress === ETH_CONTRACT &&
                   ['eth', 'sep'].includes(treasury.networkId)
                 "
-                title="Stake"
+                title="Stake with Lido"
                 :touch="false"
               >
                 <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('stake')">
