@@ -286,6 +286,7 @@ export type StakeTokenTransaction = BaseTransaction & {
       decimals: number;
       symbol: string;
       address: string;
+      tokenBalance: number;
     };
     args: any;
     amount: string;

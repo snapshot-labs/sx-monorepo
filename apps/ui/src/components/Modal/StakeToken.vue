@@ -25,8 +25,9 @@ const DEFAULT_FORM_STATE = {
     decimals: 18,
     name: 'Ether',
     symbol: 'ETH',
-    contractAddress: ETH_CONTRACT
-  } as Token
+    contractAddress: ETH_CONTRACT,
+    tokenBalance: 0
+  } as unknown as Token
 };
 
 const props = defineProps<{
@@ -34,7 +35,7 @@ const props = defineProps<{
   address: string;
   network: number;
   networkId: NetworkID;
-  asset?: Token;
+  token?: Token;
   initialState?: any;
 }>();
 
@@ -53,9 +54,7 @@ const form: {
 const formValid = computed(() => form.amount !== '');
 
 function handleMaxClick() {
-  handleAmountUpdate(
-    formatUnits(props.asset?.tokenBalance || 0, DEFAULT_FORM_STATE.token.decimals)
-  );
+  handleAmountUpdate(formatUnits(form.token.tokenBalance, form.token.decimals));
 }
 
 function handleAmountUpdate(value) {
@@ -85,7 +84,7 @@ watch(
       handleAmountUpdate(props.initialState.amount);
     } else {
       form.to = DEFAULT_FORM_STATE.to;
-      form.token = DEFAULT_FORM_STATE.token;
+      form.token = props.token || DEFAULT_FORM_STATE.token;
       handleAmountUpdate(DEFAULT_FORM_STATE.amount);
     }
   }

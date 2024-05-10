@@ -171,7 +171,8 @@ export async function createStakeTokenTransaction({ token, form }): Promise<Stak
         name: token.name,
         decimals: token.decimals,
         symbol: token.symbol,
-        address: token.contractAddress
+        address: token.contractAddress,
+        tokenBalance: token.tokenBalance
       },
       args: form.args,
       amount: form.amount
