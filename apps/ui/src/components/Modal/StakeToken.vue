@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { formatUnits, parseUnits } from '@ethersproject/units';
+import { formatUnits } from '@ethersproject/units';
 import { NetworkID, Transaction } from '@/types';
-import { call } from '@/helpers/call';
+import { clone } from '@/helpers/utils';
+import { createStakeTokenTransaction } from '@/helpers/transactions';
 
 const STAKING_CONTRACTS = {
   eth: {
@@ -17,11 +17,25 @@ const STAKING_CONTRACTS = {
   }
 };
 
+const DEFAULT_FORM_STATE = {
+  to: '',
+  amount: '',
+  value: '',
+  token: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+    contractAddress: ETH_CONTRACT
+  } as Token
+};
+
 const props = defineProps<{
   open: boolean;
   address: string;
   network: number;
+  asset?: Token;
   networkId: NetworkID;
+  initialState?: any;
 }>();
 
 const emit = defineEmits<{
@@ -29,52 +43,54 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
-const amount = ref<string>('');
+const form: {
+  to: string;
+  amount: string | number;
+  value: string | number;
+  token: Token;
+} = reactive(clone(DEFAULT_FORM_STATE));
 const stakedAmount = ref<string>('');
-const asset = ref<Token | undefined>();
 
-const auth = getInstance();
-const { assetsMap, loadBalances } = useBalances();
-const { web3 } = useWeb3();
-
-const formValid = computed(() => amount.value !== '');
+const formValid = computed(() => form.amount !== '');
 
 function handleMaxClick() {
-  if (!web3.value.account || !asset.value) return;
+  if (!props.asset) return;
 
-  handleValueUpdate(formatUnits(asset.value.tokenBalance, asset.value.decimals));
+  handleAmountUpdate(formatUnits(props.asset.tokenBalance, props.asset.decimals));
 }
 
-function handleValueUpdate(value) {
-  amount.value = value;
+function handleAmountUpdate(value) {
+  form.amount = value;
   stakedAmount.value = value;
 }
 
 async function handleSubmit() {
-  const tx = await call(
-    auth.web3.getSigner(),
-    ['function submit(address _referral) external payable returns (uint256)'],
-    [
-      STAKING_CONTRACTS[props.networkId].address,
-      'submit',
-      [STAKING_CONTRACTS[props.networkId].referral],
-      { value: parseUnits(amount.value.toString(), asset.value!.decimals).toString() }
-    ]
-  );
+  const tx = await createStakeTokenTransaction({
+    token: form.token,
+    form: clone({
+      ...form,
+      to: STAKING_CONTRACTS[props.networkId].address,
+      args: { _referral: STAKING_CONTRACTS[props.networkId].referral }
+    })
+  });
 
   emit('add', tx);
   emit('close');
 }
 
 watch(
-  () => web3.value.account,
-  async account => {
-    if (!account) return;
-
-    await loadBalances(web3.value.account, props.network);
-    asset.value = assetsMap.value.get(ETH_CONTRACT);
-  },
-  { immediate: true }
+  () => props.open,
+  () => {
+    if (props.initialState) {
+      form.to = props.initialState.recipient;
+      form.token = props.initialState.token;
+      handleAmountUpdate(props.initialState.amount);
+    } else {
+      form.to = DEFAULT_FORM_STATE.to;
+      form.token = DEFAULT_FORM_STATE.token;
+      handleAmountUpdate(DEFAULT_FORM_STATE.amount);
+    }
+  }
 );
 </script>
 
@@ -86,15 +102,21 @@ watch(
     <div class="s-box p-4">
       <div class="relative w-full">
         <UiInputNumber
-          :model-value="amount"
+          :model-value="form.amount"
           :definition="{
             type: 'number',
             title: 'Send',
             examples: ['0']
           }"
-          @update:model-value="handleValueUpdate"
+          @update:model-value="handleAmountUpdate"
         />
-        <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick" v-text="'max'" />
+        <a
+          v-if="asset"
+          class="absolute right-[16px] top-[4px]"
+          href="#"
+          @click.prevent="handleMaxClick"
+          v-text="'max'"
+        />
         <div class="absolute right-[16px] top-[26px] flex items-center">
           <UiStamp :id="ETH_CONTRACT" type="token" class="mr-2" :size="20" />
           ETH

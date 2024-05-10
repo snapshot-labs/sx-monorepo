@@ -9,6 +9,7 @@ import {
   SendTokenTransaction,
   SendNftTransaction,
   ContractCallTransaction,
+  StakeTokenTransaction,
   Transaction
 } from '@/types';
 
@@ -138,6 +139,40 @@ export async function createContractCallTransaction({ form }): Promise<ContractC
       abi: form.abi,
       recipient: form.to,
       method: form.method,
+      args: form.args,
+      amount: form.amount
+    }
+  };
+}
+
+export async function createStakeTokenTransaction({ token, form }): Promise<StakeTokenTransaction> {
+  const args: Record<string, any> = Object.values(form.args);
+
+  let recipientAddress = form.to;
+  const resolvedTo = await resolver.resolveName(form.to);
+  if (resolvedTo?.address) recipientAddress = resolvedTo.address;
+
+  const resolvedReferral = await resolver.resolveName(args[0]);
+  if (resolvedReferral?.address) args[0] = resolvedReferral.address;
+
+  const abi = ['function submit(address _referral) external payable returns (uint256)'];
+  const iface = new Interface(abi);
+  const data = iface.encodeFunctionData('submit', args as any);
+
+  return {
+    _type: 'stakeToken',
+    to: recipientAddress,
+    data,
+    value: parseUnits(form.amount.toString(), 18).toString(),
+    salt: getSalt(),
+    _form: {
+      recipient: form.to,
+      token: {
+        name: token.name,
+        decimals: token.decimals,
+        symbol: token.symbol,
+        address: token.contractAddress
+      },
       args: form.args,
       amount: form.amount
     }

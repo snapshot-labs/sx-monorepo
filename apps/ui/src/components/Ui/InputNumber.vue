@@ -5,7 +5,7 @@ const props = withDefaults(
   defineProps<{
     error?: string;
     definition: any;
-    disabled: boolean;
+    disabled?: boolean;
   }>(),
   { disabled: false }
 );

@@ -342,6 +342,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         @close="modalOpen.nfts = false"
         @add="addTx"
       />
+      <ModalStakeToken
+        :open="modalOpen.stake"
+        :address="treasury.wallet"
+        :asset="sortedAssets.find(asset => asset.contractAddress === ETH_CONTRACT)"
+        :network="treasury.network"
+        :network-id="treasury.networkId"
+        @close="modalOpen.stake = false"
+        @add="addTx"
+      />
       <ModalLinkWalletConnect
         :open="modalOpen.walletConnectLink"
         :address="treasury.wallet"
@@ -350,13 +359,6 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :space-key="spaceKey"
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"
-      />
-      <ModalStakeToken
-        :open="modalOpen.stake"
-        :address="treasury.wallet"
-        :network="treasury.network"
-        :network-id="treasury.networkId"
-        @close="modalOpen.stake = false"
       />
     </teleport>
   </template>

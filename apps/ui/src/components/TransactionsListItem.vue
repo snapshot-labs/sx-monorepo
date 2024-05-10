@@ -8,13 +8,25 @@ const props = defineProps<{ tx: Transaction }>();
 
 const title = computed(() => {
   if (props.tx._type === 'sendToken') {
-    return `Send <b>${_n(formatUnits(props.tx._form.amount, props.tx._form.token.decimals))}</b> ${
-      props.tx._form.token.symbol
-    } to <b>_NAME_</b>`;
+    return `Send <b>${_n(
+      formatUnits(props.tx._form.amount, props.tx._form.token.decimals),
+      'standard',
+      {
+        maximumFractionDigits: 2,
+        formatDust: true
+      }
+    )}</b> ${props.tx._form.token.symbol} to <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'sendNft') {
     return `Send <b>${_n(formatUnits(props.tx._form.amount, 0))}</b> NFT to <b>_NAME_</b>`;
+  }
+
+  if (props.tx._type === 'stakeToken') {
+    return `Stake <b>${_n(formatUnits(props.tx.value, 18), 'standard', {
+      maximumFractionDigits: 2,
+      formatDust: true
+    })}</b> ETH on <b>Lido</b>`;
   }
 
   if (props.tx._type === 'contractCall') {
@@ -42,6 +54,7 @@ const parsedTitle = computedAsync(
       <slot name="left" />
       <IH-cash v-if="tx._type === 'sendToken'" />
       <IH-photograph v-else-if="tx._type === 'sendNft'" />
+      <IH-Fire v-else-if="tx._type === 'stakeToken'" />
       <IH-code v-else />
       <div class="ml-2 truncate text-skin-link" v-html="parsedTitle" />
     </div>

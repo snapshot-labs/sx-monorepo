@@ -277,6 +277,21 @@ export type SendNftTransaction = BaseTransaction & {
   };
 };
 
+export type StakeTokenTransaction = BaseTransaction & {
+  _type: 'stakeToken';
+  _form: {
+    recipient: string;
+    token: {
+      name: string;
+      decimals: number;
+      symbol: string;
+      address: string;
+    };
+    args: any;
+    amount: string;
+  };
+};
+
 export type ContractCallTransaction = BaseTransaction & {
   _type: 'contractCall';
   _form: {
@@ -288,7 +303,11 @@ export type ContractCallTransaction = BaseTransaction & {
   };
 };
 
-export type Transaction = SendTokenTransaction | SendNftTransaction | ContractCallTransaction;
+export type Transaction =
+  | SendTokenTransaction
+  | SendNftTransaction
+  | StakeTokenTransaction
+  | ContractCallTransaction;
 
 // Utils
 export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };
