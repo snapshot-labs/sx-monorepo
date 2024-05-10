@@ -20,6 +20,7 @@ const clientsMap = new Map<
   {
     provider: RpcProvider;
     client: clients.StarknetTx;
+    herodotusController: clients.HerodotusController;
     getAccount: (spaceAddress: string) => { account: Account; nonceManager: NonceManager };
   }
 >();
@@ -34,13 +35,18 @@ export function getClient(chainId: string) {
   const ethUrl = ETH_NODE_URLS.get(chainId);
   if (!ethUrl) throw new Error(`Missing ethereum node url for chainId ${chainId}`);
 
+  const networkConfig = NETWORKS.get(chainId);
+  if (!networkConfig) throw new Error(`Missing network config for chainId ${chainId}`);
+
   const client = new clients.StarknetTx({
     starkProvider: provider,
     ethUrl,
-    networkConfig: NETWORKS.get(chainId)
+    networkConfig
   });
 
-  clientsMap.set(chainId, { provider, client, getAccount });
+  const herodotusController = new clients.HerodotusController(networkConfig);
 
-  return { provider, client, getAccount };
+  clientsMap.set(chainId, { provider, client, herodotusController, getAccount });
+
+  return { provider, client, herodotusController, getAccount };
 }
