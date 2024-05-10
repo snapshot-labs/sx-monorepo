@@ -1,10 +1,14 @@
 <script setup lang="ts">
 const model = defineModel<string | number>();
 
-const props = defineProps<{
-  error?: string;
-  definition: any;
-}>();
+const props = withDefaults(
+  defineProps<{
+    error?: string;
+    definition: any;
+    disabled: boolean;
+  }>(),
+  { disabled: false }
+);
 
 const dirty = ref(false);
 
@@ -33,6 +37,8 @@ watch(model, () => {
       v-model="inputValue"
       type="number"
       class="s-input"
+      :disabled="disabled"
+      :class="{ '!text-skin-text': disabled }"
       v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
     />

@@ -24,7 +24,7 @@ const modalOpen = ref({
   tokens: false,
   nfts: false,
   walletConnectLink: false,
-  staking: false
+  stake: false
 });
 
 const currentNetworkId = computed(() => {
@@ -105,7 +105,7 @@ const executionStrategy = computed(() => {
   };
 });
 
-function openModal(type: 'tokens' | 'nfts' | 'staking') {
+function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
 }
 
@@ -254,8 +254,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                   ['eth', 'sep'].includes(treasury.networkId)
                 "
                 title="Stake"
+                :touch="false"
               >
-                <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('staking')">
+                <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('stake')">
                   <IHFire class="inline-block" />
                 </UiButton>
               </UiTooltip>
@@ -350,11 +351,12 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"
       />
-      <ModalStaking
-        :open="modalOpen.staking"
+      <ModalStakeToken
+        :open="modalOpen.stake"
+        :address="treasury.wallet"
         :network="treasury.network"
         :network-id="treasury.networkId"
-        @close="modalOpen.staking = false"
+        @close="modalOpen.stake = false"
       />
     </teleport>
   </template>

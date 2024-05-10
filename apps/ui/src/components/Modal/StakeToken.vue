@@ -19,6 +19,7 @@ const STAKING_CONTRACTS = {
 
 const props = defineProps<{
   open: boolean;
+  address: string;
   network: number;
   networkId: NetworkID;
 }>();
@@ -29,6 +30,7 @@ const emit = defineEmits<{
 }>();
 
 const amount = ref<string>('');
+const stakedAmount = ref<string>('');
 const asset = ref<Token | undefined>();
 
 const auth = getInstance();
@@ -40,7 +42,12 @@ const formValid = computed(() => amount.value !== '');
 function handleMaxClick() {
   if (!web3.value.account || !asset.value) return;
 
-  amount.value = formatUnits(asset.value.tokenBalance, asset.value.decimals);
+  handleValueUpdate(formatUnits(asset.value.tokenBalance, asset.value.decimals));
+}
+
+function handleValueUpdate(value) {
+  amount.value = value;
+  stakedAmount.value = value;
 }
 
 async function handleSubmit() {
@@ -82,17 +89,40 @@ watch(
           :model-value="amount"
           :definition="{
             type: 'number',
-            title: 'Amount',
+            title: 'Send',
+            examples: ['0']
+          }"
+          @update:model-value="handleValueUpdate"
+        />
+        <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick" v-text="'max'" />
+        <div class="absolute right-[16px] top-[26px] flex items-center">
+          <UiStamp :id="ETH_CONTRACT" type="token" class="mr-2" :size="20" />
+          ETH
+        </div>
+      </div>
+      <div class="relative w-full">
+        <UiInputNumber
+          :model-value="stakedAmount"
+          disabled
+          :definition="{
+            type: 'number',
+            title: 'Get',
             examples: ['0']
           }"
         />
-        <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick" v-text="'max'" />
+        <div class="absolute right-[16px] top-[28px] flex items-center">
+          <UiStamp
+            :id="STAKING_CONTRACTS[networkId].address"
+            type="token"
+            class="mr-2"
+            :size="20"
+          />
+          stETH
+        </div>
       </div>
     </div>
     <template #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
-        Stake lido tokens
-      </UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"> Confirm </UiButton>
     </template>
   </UiModal>
 </template>
