@@ -26,7 +26,7 @@ const title = computed(() => {
     return `Stake <b>${_n(formatUnits(props.tx.value, props.tx._form.token.decimals), 'standard', {
       maximumFractionDigits: 2,
       formatDust: true
-    })}</b> ETH with <b>Lido</b>`;
+    })} ${props.tx._form.token.symbol}</b> with <b>Lido</b>`;
   }
 
   if (props.tx._type === 'contractCall') {
