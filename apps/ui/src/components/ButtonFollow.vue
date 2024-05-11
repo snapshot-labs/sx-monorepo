@@ -21,7 +21,7 @@ const loading = computed(
     :disabled="loading"
     class="group"
     :class="{ 'hover:border-skin-danger': spaceFollowed }"
-    @click="followedSpacesStore.toggleSpaceFollow(spaceIdComposite)"
+    @click.prevent="followedSpacesStore.toggleSpaceFollow(spaceIdComposite)"
   >
     <UiLoading v-if="loading" />
     <span v-else-if="spaceFollowed" class="inline-block">
