@@ -154,7 +154,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           <UiLoading class="px-4 py-3 block" />
         </td>
         <template v-else>
-          <tbody v-if="failed || users.length === 0">
+          <tbody v-if="!failed && users.length > 0">
             <tr>
               <td colspan="3">
                 <div class="px-4 py-3 flex items-center">
