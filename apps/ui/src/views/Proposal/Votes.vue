@@ -137,10 +137,7 @@ watch([sortBy, choiceFilter], () => {
     <div class="w-[30px] lg:w-[60px]" />
   </div>
 
-  <div v-if="!loaded">
-    <UiLoading class="px-4 py-3 block" />
-  </div>
-
+  <UiLoading v-if="!loaded" class="px-4 py-3 block" />
   <template v-else>
     <div v-if="votes.length === 0" class="px-4 py-3 items-center space-x-2">
       <IH-exclamation-circle class="inline-block" />
