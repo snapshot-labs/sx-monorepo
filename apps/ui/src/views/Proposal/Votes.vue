@@ -166,10 +166,13 @@ watch([sortBy, choiceFilter], () => {
                 id: vote.voter.id
               }
             }"
-            class="truncate leading-[22px]"
+            class="overflow-hidden leading-[22px]"
           >
-            <h4 v-text="vote.voter.name || shortenAddress(vote.voter.id)" />
-            <div class="text-[17px] text-skin-text" v-text="shortenAddress(vote.voter.id)" />
+            <h4 class="truncate" v-text="vote.voter.name || shortenAddress(vote.voter.id)" />
+            <div
+              class="text-[17px] text-skin-text truncate"
+              v-text="shortenAddress(vote.voter.id)"
+            />
           </router-link>
         </div>
         <div class="hidden leading-[22px] w-[25%] lg:w-[20%] lg:flex flex-col justify-center">
