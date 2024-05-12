@@ -183,7 +183,7 @@ watch([sortBy, choiceFilter], () => {
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
-                <span class="text-skin-heading leading-6">Encrypted choice</span>
+                <span class="text-skin-heading leading-[22px]">Encrypted choice</span>
                 <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
               </div>
             </div>
