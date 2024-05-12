@@ -90,9 +90,7 @@ watch([sortBy, choiceFilter], () => {
 </script>
 
 <template>
-  <div
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b border-skin-border flex gap-x-1 font-medium"
-  >
+  <div class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex gap-x-1 font-medium">
     <div class="pl-4 w-[50%] lg:w-[40%]">Voter</div>
     <button
       class="hidden lg:flex w-[25%] lg:w-[20%] items-center hover:text-skin-link gap-x-1"
@@ -147,11 +145,7 @@ watch([sortBy, choiceFilter], () => {
       <template #loading>
         <UiLoading class="px-4 py-3 block" />
       </template>
-      <div
-        v-for="(vote, i) in votes"
-        :key="i"
-        class="border-b border-skin-border relative flex gap-x-1"
-      >
+      <div v-for="(vote, i) in votes" :key="i" class="border-b relative flex gap-x-1">
         <div
           class="top-0 bottom-0 left-0 -z-10 pointer-events-none absolute"
           :style="{
