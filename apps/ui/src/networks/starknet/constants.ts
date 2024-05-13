@@ -15,7 +15,7 @@ import { NetworkID, StrategyParsedMetadata } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
 
 export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) {
-  const config = starknetNetworks[networkId as 'sn' | 'sn-tn' | 'sn-sep'];
+  const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
   const SUPPORTED_AUTHENTICATORS = {

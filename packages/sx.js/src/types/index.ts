@@ -73,7 +73,7 @@ export interface Strategy {
 export type ClientOpts = {
   ethUrl: string;
   starkProvider: RpcProvider;
-  networkConfig?: NetworkConfig;
+  networkConfig: NetworkConfig;
 };
 
 export type ClientConfig = {

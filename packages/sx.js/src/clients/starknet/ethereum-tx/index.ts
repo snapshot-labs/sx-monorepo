@@ -5,7 +5,6 @@ import { Contract } from '@ethersproject/contracts';
 import StarknetCommitAbi from './abis/StarknetCommit.json';
 import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getChoiceEnum } from '../../../utils/starknet-enums';
-import { defaultNetwork } from '../../..';
 import { ClientConfig, ClientOpts, Envelope, Propose, UpdateProposal, Vote } from '../../../types';
 
 type CallOptions = {
@@ -196,8 +195,7 @@ export class EthereumTx {
 
   constructor(opts: ClientOpts & { sequencerUrl?: string }) {
     this.config = {
-      networkConfig: defaultNetwork,
-      sequencerUrl: opts.sequencerUrl || constants.BaseUrl.SN_GOERLI,
+      sequencerUrl: opts.sequencerUrl || constants.BaseUrl.SN_SEPOLIA,
       ...opts
     };
   }

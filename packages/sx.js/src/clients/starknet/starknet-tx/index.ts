@@ -7,7 +7,6 @@ import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getAuthenticator } from '../../../authenticators/starknet';
 import { hexPadLeft } from '../../../utils/encoding';
 import { estimateStarknetFee } from '../../../utils/fees';
-import { defaultNetwork } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy.json';
 import {
@@ -71,10 +70,7 @@ export class StarknetTx {
   config: ClientConfig;
 
   constructor(opts: ClientOpts) {
-    this.config = {
-      networkConfig: defaultNetwork,
-      ...opts
-    };
+    this.config = opts;
   }
 
   async deploySpace({

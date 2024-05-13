@@ -5,7 +5,6 @@ import {
   evmArbitrum,
   evmOptimism,
   evmMainnet,
-  evmGoerli,
   evmSepolia,
   evmLineaGoerli,
   EvmNetworkConfig
@@ -19,7 +18,6 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [137, evmPolygon],
   [42161, evmArbitrum],
   [1, evmMainnet],
-  [5, evmGoerli],
   [11155111, evmSepolia],
   [59140, evmLineaGoerli]
 ]);

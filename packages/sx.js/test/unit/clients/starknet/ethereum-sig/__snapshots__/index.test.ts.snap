@@ -3,7 +3,7 @@
 exports[`EthereumSig > should create propose envelope 1`] = `
 {
   "data": {
-    "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+    "authenticator": "0x53d98050a9738da0eac7498d909ea03f6eb03d07fb95877b54ff8acf7712276",
     "executionStrategy": {
       "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
       "params": [
@@ -14,7 +14,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     "strategies": [
       {
-        "address": "0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52",
+        "address": "0x13bcbe7318fb8aa219d264dcf5916feb873e596389ba93d923f9a23378cb743",
         "index": 0,
       },
     ],
@@ -22,9 +22,9 @@ exports[`EthereumSig > should create propose envelope 1`] = `
   "signatureData": {
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "message": {
-      "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+      "authenticator": "0x53d98050a9738da0eac7498d909ea03f6eb03d07fb95877b54ff8acf7712276",
       "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "chainId": "0x534e5f474f45524c49",
+      "chainId": "0x534e5f5345504f4c4941",
       "executionStrategy": {
         "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
         "params": [
@@ -43,8 +43,8 @@ exports[`EthereumSig > should create propose envelope 1`] = `
     },
     "primaryType": "Propose",
     "signature": [
-      "0xd4fd6517cc6e7d2bd4a447d819b06afa59ae31c10213548225ed196a73cb471b",
-      "0x5d261a51abd3874720974de7d3b77e5be2f07d7ee3021b234436e875f63e5c0",
+      "0xd5afddac398067aba3b0a187711756028c58581eb2960c14e0c13d2aacdbfe2a",
+      "0x932b410160287438497b7babbea7993f3c1226339c2972c96236a44989eb5ee",
       "0x1b",
     ],
   },
@@ -54,7 +54,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
 exports[`EthereumSig > should create update proposal envelope 1`] = `
 {
   "data": {
-    "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+    "authenticator": "0x53d98050a9738da0eac7498d909ea03f6eb03d07fb95877b54ff8acf7712276",
     "executionStrategy": {
       "addr": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
       "params": [
@@ -68,9 +68,9 @@ exports[`EthereumSig > should create update proposal envelope 1`] = `
   "signatureData": {
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "message": {
-      "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+      "authenticator": "0x53d98050a9738da0eac7498d909ea03f6eb03d07fb95877b54ff8acf7712276",
       "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      "chainId": "0x534e5f474f45524c49",
+      "chainId": "0x534e5f5345504f4c4941",
       "executionStrategy": {
         "address": "0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe",
         "params": [
@@ -87,8 +87,8 @@ exports[`EthereumSig > should create update proposal envelope 1`] = `
     },
     "primaryType": "UpdateProposal",
     "signature": [
-      "0x5f1bf0de83618d9a09d6ab5d312b1f9ac73d90692437c3b0013e437152f6ddca",
-      "0x391d4b5105fb27c294454fc242ed39716e766fb5b5ebb27a22259fd22cdee296",
+      "0x529e1995ccb8396a24ba7474308f4877654b71ddd15aa3e71f0385da4890551",
+      "0x30b965f2c15e9b4c7d319ed4f2049d0078987da74b34e74e9ca0228868ead914",
       "0x1c",
     ],
   },
@@ -98,13 +98,13 @@ exports[`EthereumSig > should create update proposal envelope 1`] = `
 exports[`EthereumSig > should create vote envelope 1`] = `
 {
   "data": {
-    "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
+    "authenticator": "0x53d98050a9738da0eac7498d909ea03f6eb03d07fb95877b54ff8acf7712276",
     "choice": 1,
     "proposal": 1,
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     "strategies": [
       {
-        "address": "0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52",
+        "address": "0x13bcbe7318fb8aa219d264dcf5916feb873e596389ba93d923f9a23378cb743",
         "index": 0,
       },
     ],
@@ -112,8 +112,8 @@ exports[`EthereumSig > should create vote envelope 1`] = `
   "signatureData": {
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "message": {
-      "authenticator": "0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e",
-      "chainId": "0x534e5f474f45524c49",
+      "authenticator": "0x53d98050a9738da0eac7498d909ea03f6eb03d07fb95877b54ff8acf7712276",
+      "chainId": "0x534e5f5345504f4c4941",
       "choice": "0x1",
       "metadataUri": [],
       "proposalId": "0x1",
@@ -123,8 +123,8 @@ exports[`EthereumSig > should create vote envelope 1`] = `
     },
     "primaryType": "Vote",
     "signature": [
-      "0x2b36d3788b74f2cbe37f4b2c548d71c685205bdec0944b72392d08b2ec2e6c08",
-      "0x5663003e085cb88bb0e7071cb54b134856ef6c6f23d60ee6c2ebd07c23b0ad24",
+      "0x2986292e9bf23c0f9f738fd32556f8096631c883dec6c4d771d2ce65d69649c7",
+      "0x2b068bd532570c93e54ac22b0c1e8683229e26c6677c0a68bc677da1a05668ad",
       "0x1b",
     ],
   },

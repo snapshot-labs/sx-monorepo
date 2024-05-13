@@ -11,7 +11,6 @@
     "create-local": "graph create --node http://localhost:8020/ snapshot-labs/sx-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ snapshot-labs/sx-subgraph",
     "deploy-local": "yarn create-local && graph deploy --node http://localhost:8020/ --network sepolia -l `LC_ALL=C tr -dc a-z0-9 </dev/urandom | head -c 32` snapshot-labs/sx-subgraph",
-    "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ snapshot-labs/sx-subgraph",
     "deploy-linea-testnet": "graph deploy --network linea-testnet --studio sx-linea-testnet",
     "deploy-studio": "graph deploy --studio -l v${npm_package_version}",
     "deploy-studio-mainnet": "yarn deploy-studio --network mainnet sx",

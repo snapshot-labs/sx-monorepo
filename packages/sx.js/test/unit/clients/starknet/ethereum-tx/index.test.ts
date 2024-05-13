@@ -2,22 +2,22 @@ import { describe, it, expect } from 'vitest';
 import { Wallet } from '@ethersproject/wallet';
 import { EthereumTx } from '../../../../../src/clients/starknet/ethereum-tx';
 import { starkProvider } from '../../../helpers';
-import { starknetNetworks, starknetGoerli } from '../../../../../src/networks';
+import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
 
 describe('EthereumTx', () => {
   const ethPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
-  const ethUrl = process.env.GOERLI_NODE_URL as string;
+  const ethUrl = process.env.SEPOLIA_NODE_URL as string;
   const wallet = new Wallet(ethPrivateKey);
 
   const ethereumTx = new EthereumTx({
     ethUrl,
     starkProvider,
-    networkConfig: starknetGoerli
+    networkConfig: starknetSepolia
   });
 
-  const { EthTx } = starknetNetworks['sn-tn'].Authenticators;
-  const { MerkleWhitelist } = starknetNetworks['sn-tn'].Strategies;
+  const { EthTx } = starknetNetworks['sn-sep'].Authenticators;
+  const { MerkleWhitelist } = starknetNetworks['sn-sep'].Strategies;
 
   it('should return propose hash', async () => {
     const data = {

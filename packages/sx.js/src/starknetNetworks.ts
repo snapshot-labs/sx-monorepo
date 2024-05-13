@@ -97,38 +97,6 @@ export const starknetNetworks = {
       NoExecutionSimpleMajority: '0x180e1f4fcd875b35690b6771b30197867d39c893d5ba6e32c36616733ee37c4'
     }
   },
-  'sn-tn': {
-    Meta: {
-      eip712ChainId: '0x534e5f474f45524c49',
-      herodotusAccumulatesChainId: 5,
-      herodotusDeployedOnChain: 'SN_GOERLI',
-      spaceFactory: '0x063c62258e1ba4d9ad72eab809ea5c3d1a4545b721bc444d6068ced6246c2f3c',
-      masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
-      starknetCommit: '0x8bf85537c80becba711447f66a9a4452e3575e29',
-      starknetCore: '0xde29d060D45901Fb19ED6C6e959EB22d8626708e',
-      feeEstimateOverride: process.env.STARKNET_GOERLI_FEE_ESTIMATE_OVERRIDE
-    },
-    Authenticators: {
-      Vanilla: '0x46ad946f22ac4e14e271f24309f14ac36f0fde92c6831a605813fefa46e0893',
-      EthSig: '0x48b33fe56e9b9354d4278ffdd5f6d546b13aa3d8c33149db2e2e2fdb48a369e',
-      EthTx: '0xd6f14d3df9ea2db12ed9572ab41d527f18dd24192e1744d3c100b2cd470812',
-      StarkSig: '0x5280813396bf63dd47531ccdbfa5887099d44421d3f62db3de8f7bed68794f5',
-      StarkTx: '0x573a7fc4d8dd3a860b376741c251772cd4d15508dd94564ff23a645d28042d'
-    },
-    Strategies: {
-      MerkleWhitelist: '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52',
-      ERC20Votes: '0x30258c0b5832763b16f4e5d2ddbf97b3d61b8ff3368a3e3f112533b8549dd29',
-      EVMSlotValue: '0x35dbd4e4f46a059557e1b299d17f4568b49488bad5da9a003b171d90052139e',
-      OZVotesStorageProof: '0x1b3cbb267de6d0f30ddf521cd385a2e11836f0c5ba6f7b2224cf77a6ed86acf'
-    },
-    ProposalValidations: {
-      VotingPower: '0x3ff398ab4e0aa9109c0cc889ff968c6215053a5e2176519b59f8ba87927c631'
-    },
-    ExecutionStrategies: {
-      EthRelayer: '0xa0a4bcf464e29f46dfb103521f33807271b4300ac5cd3118b15f31f89ecd94',
-      NoExecutionSimpleMajority: '0x4a5658d6b9fe62283147719a8b13d72f96e8959afacc716569b936c91089147'
-    }
-  },
   'sn-sep': {
     Meta: {
       eip712ChainId: '0x534e5f5345504f4c4941',
@@ -164,7 +132,4 @@ export const starknetNetworks = {
 } as const;
 
 export const starknetMainnet: NetworkConfig = createStarknetConfig('sn');
-export const starknetGoerli: NetworkConfig = createStarknetConfig('sn-tn');
 export const starknetSepolia: NetworkConfig = createStarknetConfig('sn-sep');
-
-export const defaultNetwork = starknetGoerli;
