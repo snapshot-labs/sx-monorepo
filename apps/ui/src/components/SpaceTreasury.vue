@@ -268,7 +268,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
               </div>
               <UiTooltip
-                v-if="asset.contractAddress === ETH_CONTRACT"
+                v-if="asset.contractAddress === ETH_CONTRACT && !isReadOnly"
                 title="Stake with Lido"
                 :touch="false"
               >
