@@ -71,6 +71,8 @@ export const supportsNullCurrent = (networkID: NetworkID) => {
   return !evmNetworks.includes(networkID);
 };
 
+export const DEFAULT_SPACES_LIMIT = 1000;
+
 export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> = {
   snapshot: {
     key: 'snapshot',
@@ -82,6 +84,6 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
     key: 'snapshotx',
     label: 'Snapshot X',
     networks: enabledNetworks.filter(network => !offchainNetworks.includes(network)),
-    limit: 1000
+    limit: DEFAULT_SPACES_LIMIT
   }
 };

@@ -1,5 +1,10 @@
 import { ref, computed } from 'vue';
-import { enabledNetworks, getNetwork, explorePageProtocols } from '@/networks';
+import {
+  enabledNetworks,
+  getNetwork,
+  explorePageProtocols,
+  DEFAULT_SPACES_LIMIT
+} from '@/networks';
 import { Space, NetworkID } from '@/types';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
 
@@ -68,7 +73,7 @@ export function useSpaces() {
         return network.api.loadSpaces(
           {
             skip: 0,
-            limit: explorePageProtocols['snapshotx'].limit
+            limit: DEFAULT_SPACES_LIMIT
           },
           requestFilter
         );
@@ -152,8 +157,7 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
-  watch(protocol, async (newProtocol: ExplorePageProtocol) => {
-    protocol.value = newProtocol;
+  watch(protocol, async () => {
     await fetch();
   });
 
