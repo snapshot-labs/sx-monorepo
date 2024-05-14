@@ -96,8 +96,6 @@ const sortedAssets = computed(() => {
     if (isEth(b)) return 1;
     return 0;
   });
-
-  return _assets;
 });
 
 const treasuryExplorerUrl = computed(() => {
