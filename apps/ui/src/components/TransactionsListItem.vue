@@ -54,7 +54,7 @@ const parsedTitle = computedAsync(
       <slot name="left" />
       <IH-cash v-if="tx._type === 'sendToken'" />
       <IH-photograph v-else-if="tx._type === 'sendNft'" />
-      <IH-Fire v-else-if="tx._type === 'stakeToken'" />
+      <IH-fire v-else-if="tx._type === 'stakeToken'" />
       <IH-code v-else />
       <div class="ml-2 truncate text-skin-link" v-html="parsedTitle" />
     </div>
