@@ -348,6 +348,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         created: 0
       };
     },
+    loadLeaderboard: async (): Promise<User[]> => {
+      // NOTE: leaderboard implementation is pending on offchain
+      return [];
+    },
     loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
       const {
         data: { follows }
@@ -360,7 +364,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return follows;
+      return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
     }
   };
 }

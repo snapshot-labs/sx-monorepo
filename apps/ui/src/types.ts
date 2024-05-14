@@ -10,11 +10,9 @@ export type NetworkID =
   | 'matic'
   | 'arb1'
   | 'oeth'
-  | 'gor'
   | 'sep'
   | 'linea-testnet'
   | 'sn'
-  | 'sn-tn'
   | 'sn-sep';
 
 export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;

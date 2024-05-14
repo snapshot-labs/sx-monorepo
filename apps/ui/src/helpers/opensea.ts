@@ -20,7 +20,6 @@ type ChainItem = {
 
 const SUPPORTED_ABIS = ['erc721', 'erc1155'];
 const OPENSEA_CHAINS: Record<number, ChainItem> = {
-  5: { name: 'goerli', isTestnet: true },
   11155111: { name: 'sepolia', isTestnet: true },
   1: { name: 'ethereum', isTestnet: false },
   10: { name: 'optimism', isTestnet: false },

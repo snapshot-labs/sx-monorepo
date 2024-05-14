@@ -4,7 +4,6 @@ import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
 import { getAuthenticator } from '../../../authenticators/evm';
 import { getStrategiesWithParams } from '../../../strategies/evm';
-import { evmGoerli } from '../../../networks';
 import SpaceAbi from './abis/Space.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
@@ -87,8 +86,8 @@ const NO_UPDATE_UINT32 = '0xf2cda9b1';
 export class EthereumTx {
   networkConfig: EvmNetworkConfig;
 
-  constructor(opts?: { networkConfig: EvmNetworkConfig }) {
-    this.networkConfig = opts?.networkConfig || evmGoerli;
+  constructor(opts: { networkConfig: EvmNetworkConfig }) {
+    this.networkConfig = opts.networkConfig;
   }
 
   async deployAvatarExecution({

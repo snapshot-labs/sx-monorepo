@@ -4,11 +4,12 @@ import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
+const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
 <template>
   <router-link
-    :to="{ name: 'space-overview', params: { id: `${space.network}:${space.id}` } }"
+    :to="{ name: 'space-overview', params: { id: compositeSpaceId } }"
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
     <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] absolute" />
@@ -25,6 +26,7 @@ const props = defineProps<{ space: Space }>();
         />
       </UiBadgeNetwork>
     </div>
+    <ButtonFollow :space="space" class="absolute top-2.5 right-2.5 hidden group-hover:block" />
     <div class="px-4">
       <div class="flex items-center">
         <h3 class="truncate" v-text="space.name" />

@@ -3,7 +3,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { starkProvider } from '../../../helpers';
 import { EthereumSig } from '../../../../../src/clients/starknet/ethereum-sig';
-import { starknetNetworks, starknetGoerli } from '../../../../../src/networks';
+import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
 
 describe('EthereumSig', () => {
   const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
@@ -15,7 +15,7 @@ describe('EthereumSig', () => {
   const client = new EthereumSig({
     starkProvider,
     ethUrl: 'https://rpc.brovider.xyz/5',
-    networkConfig: starknetGoerli
+    networkConfig: starknetSepolia
   });
 
   beforeAll(() => {
@@ -26,8 +26,8 @@ describe('EthereumSig', () => {
     vi.restoreAllMocks();
   });
 
-  const { EthSig } = starknetNetworks['sn-tn'].Authenticators;
-  const { MerkleWhitelist } = starknetNetworks['sn-tn'].Strategies;
+  const { EthSig } = starknetNetworks['sn-sep'].Authenticators;
+  const { MerkleWhitelist } = starknetNetworks['sn-sep'].Strategies;
 
   it('should create propose envelope', async () => {
     const envelope = await client.propose({

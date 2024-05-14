@@ -1,6 +1,5 @@
 import {
   starknetMainnet,
-  starknetGoerli,
   starknetSepolia,
   clients,
   getStarknetStrategy,
@@ -38,7 +37,6 @@ import { getProvider } from '@/helpers/provider';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
-  'sn-tn': starknetGoerli,
   'sn-sep': starknetSepolia
 };
 

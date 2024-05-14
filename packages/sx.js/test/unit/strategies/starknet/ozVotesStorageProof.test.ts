@@ -1,17 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import createOzVotesStorageProofStrategy from '../../../../src/strategies/starknet/ozVotesStorageProof';
-import { defaultNetwork } from '../../../../src/networks';
+import { starknetSepolia } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
 import { CallData, uint256 } from 'starknet';
 
-const ethUrl = process.env.GOERLI_NODE_URL as string;
+const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('ozVotesStorageProof', () => {
   const ozVotesStorageProofStrategy = createOzVotesStorageProofStrategy({
     deployedOnChain: 'SN_GOERLI'
   });
-  const config = { starkProvider, ethUrl, networkConfig: defaultNetwork };
+  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
 
   it('should return type', () => {
     expect(ozVotesStorageProofStrategy.type).toBe('ozVotesStorageProof');

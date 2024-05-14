@@ -15,17 +15,13 @@ import {
   EIP712VoteMessage,
   SignatureData
 } from '../../../types';
-import { defaultNetwork } from '../../..';
 import { getRSVFromSig } from '../../../utils/encoding';
 
 export class EthereumSig {
   config: ClientConfig;
 
   constructor(opts: ClientOpts) {
-    this.config = {
-      networkConfig: defaultNetwork,
-      ...opts
-    };
+    this.config = opts;
   }
 
   generateSalt() {
