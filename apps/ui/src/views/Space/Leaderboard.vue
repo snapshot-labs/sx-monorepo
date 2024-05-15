@@ -113,23 +113,25 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 
 <template>
   <UiLabel label="Leaderboard" sticky />
-  <div class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b w-full flex font-medium">
-    <div class="pl-4 w-[40%] lg:w-[50%] flex items-center">User</div>
+  <div
+    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b w-full flex font-medium gap-x-1"
+  >
+    <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
     <button
-      class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link gap-x-1"
+      class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link gap-x-1 truncate"
       @click="handleSortChange('proposal_count')"
     >
       <span class="truncate">Proposals</span>
-      <IH-arrow-sm-down v-if="sortBy === 'proposal_count-desc'" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'proposal_count-asc'" />
+      <IH-arrow-sm-down v-if="sortBy === 'proposal_count-desc'" class="shrink-0" />
+      <IH-arrow-sm-up v-else-if="sortBy === 'proposal_count-asc'" class="shrink-0" />
     </button>
     <button
-      class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] gap-x-1"
+      class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] gap-x-1 truncate"
       @click="handleSortChange('vote_count')"
     >
       <span class="truncate">Votes</span>
-      <IH-arrow-sm-down v-if="sortBy === 'vote_count-desc'" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'vote_count-asc'" />
+      <IH-arrow-sm-down v-if="sortBy === 'vote_count-desc'" class="shrink-0" />
+      <IH-arrow-sm-up v-else-if="sortBy === 'vote_count-asc'" class="shrink-0" />
     </button>
   </div>
   <UiLoading v-if="!loaded" class="px-4 py-3 block" />
@@ -140,8 +142,8 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
       <span v-else-if="users.length === 0"> This space does not have any activities yet. </span>
     </div>
     <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
-      <div v-for="(user, i) in users" :key="i" class="border-b flex items-center">
-        <div class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%]">
+      <div v-for="(user, i) in users" :key="i" class="border-b flex gap-x-1">
+        <div class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate">
           <UiStamp :id="user.id" :size="32" />
           <router-link
             :to="{
@@ -154,13 +156,17 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
             <div class="text-[17px] text-skin-text truncate" v-text="shorten(user.id)" />
           </router-link>
         </div>
-        <div class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%]">
+        <div
+          class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"
+        >
           <h4 class="text-skin-link" v-text="_n(user.proposal_count)" />
           <div class="text-[17px]">
             {{ _p(user.proposal_count / space.proposal_count) }}
           </div>
         </div>
-        <div class="flex flex-col items-end justify-center pr-4 leading-[22px] w-[30%] lg:w-[25%]">
+        <div
+          class="flex flex-col items-end justify-center pr-4 leading-[22px] w-[30%] lg:w-[25%] truncate"
+        >
           <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
           <div class="text-[17px]">
             {{ _p(user.vote_count / space.vote_count) }}

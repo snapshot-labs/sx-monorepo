@@ -75,24 +75,30 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <UiLabel label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
-        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium"
+        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium gap-x-1"
       >
-        <div class="pl-4 w-[60%] flex items-center">Delegatee</div>
+        <div class="pl-4 w-[60%] flex items-center truncate">Delegatee</div>
         <button
-          class="hidden md:flex w-[20%] items-center justify-end font-medium hover:text-skin-link gap-x-1"
+          class="hidden md:flex w-[20%] items-center justify-end font-medium hover:text-skin-link gap-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span>Delegators</span>
-          <IH-arrow-sm-down v-if="sortBy === 'tokenHoldersRepresentedAmount-desc'" />
-          <IH-arrow-sm-up v-else-if="sortBy === 'tokenHoldersRepresentedAmount-asc'" />
+          <IH-arrow-sm-down
+            v-if="sortBy === 'tokenHoldersRepresentedAmount-desc'"
+            class="shrink-0"
+          />
+          <IH-arrow-sm-up
+            v-else-if="sortBy === 'tokenHoldersRepresentedAmount-asc'"
+            class="shrink-0"
+          />
         </button>
         <button
-          class="w-[40%] md:w-[20%] flex justify-end items-center font-medium hover:text-skin-link pr-4 gap-x-1"
+          class="w-[40%] md:w-[20%] flex justify-end items-center font-medium hover:text-skin-link pr-4 gap-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
-          <IH-arrow-sm-down v-if="sortBy === 'delegatedVotes-desc'" />
-          <IH-arrow-sm-up v-else-if="sortBy === 'delegatedVotes-asc'" />
+          <IH-arrow-sm-down v-if="sortBy === 'delegatedVotes-desc'" class="shrink-0" />
+          <IH-arrow-sm-up v-else-if="sortBy === 'delegatedVotes-asc'" class="shrink-0" />
         </button>
       </div>
       <UiLoading v-if="loading" class="px-4 py-3 block" />
@@ -106,8 +112,8 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <template v-else-if="failed">Failed to load delegates.</template>
         </div>
         <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
-          <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex items-center">
-            <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3">
+          <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex gap-x-1">
+            <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
               <UiStamp :id="delegate.id" :size="32" />
               <a
                 :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')"
@@ -121,12 +127,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 <div class="text-[17px] text-skin-text truncate" v-text="shorten(delegate.id)" />
               </a>
             </div>
-            <div class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px]">
+            <div
+              class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"
+            >
               <h4 class="text-skin-link" v-text="_n(delegate.tokenHoldersRepresentedAmount)" />
               <div class="text-[17px]" v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`" />
             </div>
             <div
-              class="w-[40%] md:w-[20%] flex flex-col items-end justify-center pr-4 leading-[22px]"
+              class="w-[40%] md:w-[20%] flex flex-col items-end justify-center pr-4 leading-[22px] truncate"
             >
               <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
               <div class="text-[17px]" v-text="`${delegate.votesPercentage.toFixed(3)}%`" />

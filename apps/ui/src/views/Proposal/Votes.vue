@@ -91,16 +91,16 @@ watch([sortBy, choiceFilter], () => {
 
 <template>
   <div class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex gap-x-1 font-medium">
-    <div class="pl-4 w-[50%] lg:w-[40%]">Voter</div>
+    <div class="pl-4 w-[50%] lg:w-[40%] truncate">Voter</div>
     <button
-      class="hidden lg:flex w-[25%] lg:w-[20%] items-center hover:text-skin-link gap-x-1"
+      class="hidden lg:flex w-[25%] lg:w-[20%] items-center hover:text-skin-link gap-x-1 truncate"
       @click="handleSortChange('created')"
     >
       <span>Date</span>
-      <IH-arrow-sm-down v-if="sortBy === 'created-desc'" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" />
+      <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
+      <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
     </button>
-    <div class="w-[25%] lg:w-[20%]">
+    <div class="w-[25%] lg:w-[20%] truncate">
       <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
       <UiSelectDropdown
         v-else
@@ -117,27 +117,27 @@ watch([sortBy, choiceFilter], () => {
         ]"
       >
         <template #button>
-          <div class="flex items-center min-w-0 hover:text-skin-link gap-x-2">
+          <div class="flex items-center hover:text-skin-link gap-x-2">
             <span class="truncate">Choice</span>
-            <IH-adjustments-vertical />
+            <IH-adjustments-vertical class="shrink-0" />
           </div>
         </template>
       </UiSelectDropdown>
     </div>
     <button
-      class="w-[25%] lg:w-[20%] flex justify-end items-center hover:text-skin-link gap-x-1"
+      class="w-[25%] lg:w-[20%] flex justify-end items-center hover:text-skin-link gap-x-1 truncate"
       @click="handleSortChange('vp')"
     >
       <span class="truncate">Voting power</span>
-      <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" />
+      <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="shrink-0" />
+      <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="shrink-0" />
     </button>
     <div class="w-[30px] lg:w-[60px]" />
   </div>
 
   <UiLoading v-if="!loaded" class="px-4 py-3 block" />
   <template v-else>
-    <div v-if="votes.length === 0" class="px-4 py-3 items-center space-x-2">
+    <div v-if="votes.length === 0" class="px-4 py-3 flex items-center gap-x-2">
       <IH-exclamation-circle class="inline-block" />
       <span>There are no votes here.</span>
     </div>
@@ -157,7 +157,7 @@ watch([sortBy, choiceFilter], () => {
               : 'bg-skin-border opacity-40'
           "
         />
-        <div class="pl-4 py-3 w-[50%] lg:w-[40%] flex items-center gap-x-3">
+        <div class="pl-4 py-3 w-[50%] lg:w-[40%] flex items-center gap-x-3 truncate">
           <UiStamp :id="vote.voter.id" :size="32" />
           <router-link
             :to="{
@@ -175,11 +175,13 @@ watch([sortBy, choiceFilter], () => {
             />
           </router-link>
         </div>
-        <div class="hidden leading-[22px] w-[25%] lg:w-[20%] lg:flex flex-col justify-center">
+        <div
+          class="hidden leading-[22px] w-[25%] lg:w-[20%] lg:flex flex-col justify-center truncate"
+        >
           <h4>{{ _rt(vote.created) }}</h4>
           <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
         </div>
-        <div class="w-[25%] lg:w-[20%] flex items-center">
+        <div class="w-[25%] lg:w-[20%] flex items-center truncate">
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
@@ -215,7 +217,7 @@ watch([sortBy, choiceFilter], () => {
           </template>
         </div>
         <div
-          class="text-right leading-[22px] w-[25%] lg:w-[20%] flex flex-col items-end justify-center"
+          class="text-right leading-[22px] w-[25%] lg:w-[20%] flex flex-col items-end justify-center truncate"
         >
           <h4 class="text-skin-link">
             {{ _n(vote.vp / 10 ** votingPowerDecimals, 'compact') }}
