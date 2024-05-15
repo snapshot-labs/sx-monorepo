@@ -1,4 +1,4 @@
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork } from '@/networks';
 import type { NetworkID, Proposal, Vote } from '@/types';
 
 const votes = ref<Record<Proposal['id'], Vote>>({});
