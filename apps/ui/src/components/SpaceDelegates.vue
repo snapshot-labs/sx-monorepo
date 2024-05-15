@@ -79,7 +79,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       >
         <div class="pl-4 w-[60%] flex items-center truncate">Delegatee</div>
         <button
-          class="hidden md:flex w-[20%] items-center justify-end font-medium hover:text-skin-link gap-x-1 truncate"
+          class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link gap-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span>Delegators</span>
@@ -93,7 +93,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           />
         </button>
         <button
-          class="w-[40%] md:w-[20%] flex justify-end items-center font-medium hover:text-skin-link pr-4 gap-x-1 truncate"
+          class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link pr-4 gap-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
