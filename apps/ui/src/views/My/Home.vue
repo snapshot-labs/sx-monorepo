@@ -10,10 +10,9 @@ const PROPOSALS_LIMIT = 20;
 useTitle('Home');
 
 const metaStore = useMetaStore();
-const bookmarksStore = useBookmarksStore();
+const followedSpacesStore = useFollowedSpacesStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
-const followedSpacesStore = useFollowedSpacesStore();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
@@ -88,6 +87,7 @@ watch(
     proposals.value = [];
 
     if (!followedSpacesIds.length) {
+      console.log('0');
       loaded.value = true;
       return;
     }

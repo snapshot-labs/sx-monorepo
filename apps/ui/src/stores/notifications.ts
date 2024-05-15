@@ -24,7 +24,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     {} as Record<string, number>
   );
 
-  const bookmarksStore = useBookmarksStore();
+  const followedSpacesStore = useFollowedSpacesStore();
   const metaStore = useMetaStore();
   const { web3 } = useWeb3();
 
@@ -45,20 +45,21 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const now = Math.floor(Date.now() / 1e3);
     const pivotTs = now - NOTIFICATION_TIME_WINDOW;
 
-    if (!bookmarksStore.followedSpacesIds.length) return;
+    if (!followedSpacesStore.followedSpacesIds.length) return;
 
-    const followedSpaceIdsByNetwork: Record<NetworkID, string[]> = bookmarksStore.followedSpacesIds
-      .map(id => id.split(':') as [NetworkID, string])
-      .reduce(
-        (acc, [networkId, spaceId]) => {
-          acc[networkId] ||= [];
-          acc[networkId].push(
-            offchainNetworks.includes(networkId) ? spaceId : `${networkId}:${spaceId}`
-          );
-          return acc;
-        },
-        {} as Record<NetworkID, string[]>
-      );
+    const followedSpaceIdsByNetwork: Record<NetworkID, string[]> =
+      followedSpacesStore.followedSpacesIds
+        .map(id => id.split(':') as [NetworkID, string])
+        .reduce(
+          (acc, [networkId, spaceId]) => {
+            acc[networkId] ||= [];
+            acc[networkId].push(
+              offchainNetworks.includes(networkId) ? spaceId : `${networkId}:${spaceId}`
+            );
+            return acc;
+          },
+          {} as Record<NetworkID, string[]>
+        );
 
     (Object.keys(followedSpaceIdsByNetwork) as NetworkID[]).forEach(async networkId => {
       await metaStore.fetchBlock(networkId);
@@ -108,7 +109,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   );
 
   watch(
-    [() => bookmarksStore.followedSpacesLoaded, () => bookmarksStore.followedSpacesIds],
+    [() => followedSpacesStore.followedSpacesLoaded, () => followedSpacesStore.followedSpacesIds],
     async loaded => {
       if (!loaded) return;
 
