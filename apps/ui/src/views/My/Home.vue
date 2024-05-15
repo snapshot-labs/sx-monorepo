@@ -87,7 +87,6 @@ watch(
     proposals.value = [];
 
     if (!followedSpacesIds.length) {
-      console.log('0');
       loaded.value = true;
       return;
     }
