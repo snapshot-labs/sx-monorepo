@@ -66,6 +66,7 @@ export type NetworkConfig = {
   masterSpace: string;
   starknetCommit: string;
   starknetCore: string;
+  feeEstimateOverride?: string;
   herodotusAccumulatesChainId: number;
   authenticators: {
     [key: string]:

@@ -8,6 +8,7 @@ import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceEditSettings from '@/views/Space/EditSettings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
+import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import Editor from '@/views/Editor.vue';
 import Proposal from '@/views/Proposal.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
@@ -39,7 +40,8 @@ const routes: any[] = [
       { path: 'settings', name: 'space-settings', component: SpaceSettings },
       { path: 'edit-settings', name: 'space-edit-settings', component: SpaceEditSettings },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
-      { path: 'delegates', name: 'space-delegates', component: SpaceDelegates }
+      { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
+      { path: 'leaderboard', name: 'space-leaderboard', component: SpaceLeaderboard }
     ]
   },
   {

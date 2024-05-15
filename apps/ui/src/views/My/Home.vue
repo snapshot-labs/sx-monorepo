@@ -13,6 +13,7 @@ const metaStore = useMetaStore();
 const bookmarksStore = useBookmarksStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
+const followedSpacesStore = useFollowedSpacesStore();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
@@ -47,7 +48,7 @@ async function withAuthorNames(proposals: Proposal[]) {
 async function loadProposalsPage(skip = 0) {
   return withAuthorNames(
     await network.value.api.loadProposals(
-      bookmarksStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
+      followedSpacesStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
       { limit: PROPOSALS_LIMIT, skip },
       metaStore.getCurrent(networkId.value) || 0,
       { state: state.value }
@@ -81,10 +82,8 @@ onMounted(() => {
 });
 
 watch(
-  [() => bookmarksStore.followedSpacesIds, () => bookmarksStore.followedSpacesLoaded],
-  ([followedSpacesIds, followedSpacesLoaded]) => {
-    if (!followedSpacesLoaded) return;
-
+  () => followedSpacesStore.followedSpacesIds,
+  followedSpacesIds => {
     loaded.value = false;
     proposals.value = [];
 

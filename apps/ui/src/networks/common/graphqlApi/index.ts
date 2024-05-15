@@ -6,7 +6,8 @@ import {
   PROPOSAL_QUERY,
   SPACES_QUERY,
   SPACE_QUERY,
-  USER_QUERY
+  USER_QUERY,
+  LEADERBOARD_QUERY
 } from './queries';
 import {
   SPACES_QUERY as HIGHLIGHT_SPACES_QUERY,
@@ -435,6 +436,42 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       ]);
 
       return joinHighlightUser(data.user ?? null, highlightResult?.data?.sxuser ?? null);
+    },
+    loadLeaderboard(
+      spaceId: string,
+      { limit, skip = 0 }: PaginationOpts,
+      sortBy:
+        | 'vote_count-desc'
+        | 'vote_count-asc'
+        | 'proposal_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc'
+    ): Promise<User[]> {
+      const [orderBy, orderDirection] = sortBy.split('-') as [
+        'vote_count' | 'proposal_count',
+        'desc' | 'asc'
+      ];
+
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: limit,
+            skip,
+            orderBy,
+            orderDirection,
+            where: {
+              space: spaceId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            id: leaderboard.user.id,
+            created: leaderboard.user.created,
+            vote_count: leaderboard.vote_count,
+            proposal_count: leaderboard.proposal_count
+          }))
+        );
     },
     loadFollows: async () => {
       return [] as Follow[];

@@ -65,7 +65,7 @@ watch(isSwiping, () => {
 </script>
 
 <template>
-  <div ref="el" :class="{ 'overflow-hidden': scrollDisabled }">
+  <div ref="el" class="h-screen" :class="{ 'overflow-hidden': scrollDisabled }">
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
       <AppSidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />

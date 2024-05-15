@@ -14,16 +14,12 @@ import {
   StarknetEIP712VoteMessage,
   SignatureData
 } from '../../../types';
-import { defaultNetwork } from '../../..';
 
 export class StarknetSig {
   config: ClientConfig & { manaUrl: string };
 
   constructor(opts: ClientOpts & { manaUrl: string }) {
-    this.config = {
-      networkConfig: defaultNetwork,
-      ...opts
-    };
+    this.config = opts;
   }
 
   generateSalt() {
