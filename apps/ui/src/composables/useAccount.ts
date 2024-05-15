@@ -11,10 +11,7 @@ export function useAccount() {
     if (!account) return;
 
     const network = getNetwork(networkId);
-    const userVotes = await network.api.loadUserVotes(
-      spaceIds.map(id => (offchainNetworks.includes(networkId) ? id.split(':')[1] : id)),
-      account
-    );
+    const userVotes = await network.api.loadUserVotes(spaceIds, account);
 
     votes.value = { ...votes.value, ...userVotes };
   }
