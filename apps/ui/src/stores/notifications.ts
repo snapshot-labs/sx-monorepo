@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork } from '@/networks';
 import { Network, ProposalsFilter } from '@/networks/types';
 import { NetworkID, Proposal } from '@/types';
 import pkg from '../../package.json';
@@ -47,25 +47,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     if (!followedSpacesStore.followedSpacesIds.length) return;
 
-    const followedSpaceIdsByNetwork: Record<NetworkID, string[]> =
-      followedSpacesStore.followedSpacesIds
-        .map(id => id.split(':') as [NetworkID, string])
-        .reduce(
-          (acc, [networkId, spaceId]) => {
-            acc[networkId] ||= [];
-            acc[networkId].push(
-              offchainNetworks.includes(networkId) ? spaceId : `${networkId}:${spaceId}`
-            );
-            return acc;
-          },
-          {} as Record<NetworkID, string[]>
-        );
+    (Object.keys(followedSpacesStore.followedSpaceIdsByNetwork) as NetworkID[]).forEach(
+      async networkId => {
+        await metaStore.fetchBlock(networkId);
+      }
+    );
 
-    (Object.keys(followedSpaceIdsByNetwork) as NetworkID[]).forEach(async networkId => {
-      await metaStore.fetchBlock(networkId);
-    });
-
-    const promises = (Object.entries(followedSpaceIdsByNetwork) as [NetworkID, string[]][])
+    const promises = (
+      Object.entries(followedSpacesStore.followedSpaceIdsByNetwork) as [NetworkID, string[]][]
+    )
       .map(([networkId, spaceIds]) => {
         const network = getNetwork(networkId);
         const current = metaStore.getCurrent(networkId) ?? 0;
