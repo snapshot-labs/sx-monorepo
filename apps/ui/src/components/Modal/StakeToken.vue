@@ -79,7 +79,6 @@ async function handleSubmit() {
   const tx = await createStakeTokenTransaction({
     form: clone({
       ...form,
-      to: stakingContract.value.address,
       args: { referral: stakingContract.value.referral }
     })
   });
