@@ -145,7 +145,7 @@ export async function createContractCallTransaction({ form }): Promise<ContractC
   };
 }
 
-export async function createStakeTokenTransaction({ token, form }): Promise<StakeTokenTransaction> {
+export async function createStakeTokenTransaction({ form }): Promise<StakeTokenTransaction> {
   let contractAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);
   if (resolvedTo?.address) contractAddress = resolvedTo.address;
@@ -166,13 +166,6 @@ export async function createStakeTokenTransaction({ token, form }): Promise<Stak
     salt: getSalt(),
     _form: {
       recipient: form.to,
-      token: {
-        name: token.name,
-        decimals: token.decimals,
-        symbol: token.symbol,
-        address: token.contractAddress,
-        tokenBalance: token.tokenBalance
-      },
       args: form.args,
       amount: form.amount
     }

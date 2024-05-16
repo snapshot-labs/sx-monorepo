@@ -8,7 +8,7 @@ const props = defineProps<{ tx: Transaction }>();
 
 const title = computed(() => {
   if (props.tx._type === 'sendToken') {
-    return `Send <b>${_n(formatUnits(props.tx._form.amount, props.tx._form.token.decimals))}</b> ${
+    return `Send <b>${_n(formatUnits(props.tx._form.amount, props.tx._form.token.decimals), 'standard', { formatDust: true })}</b> ${
       props.tx._form.token.symbol
     } to <b>_NAME_</b>`;
   }
@@ -18,9 +18,7 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'stakeToken') {
-    return `Stake <b>${_n(formatUnits(props.tx.value, props.tx._form.token.decimals))} ${
-      props.tx._form.token.symbol
-    }</b> with <b>Lido</b>`;
+    return `Stake <b>${_n(formatUnits(props.tx.value, 18), 'standard', { formatDust: true })} ${'ETH'}</b> with <b>Lido</b>`;
   }
 
   if (props.tx._type === 'contractCall') {

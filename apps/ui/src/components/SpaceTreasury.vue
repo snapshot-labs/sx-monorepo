@@ -361,7 +361,6 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <ModalStakeToken
         :open="modalOpen.stake"
         :address="treasury.wallet"
-        :token="sortedAssets.find(asset => asset.contractAddress === ETH_CONTRACT)"
         :network="treasury.network"
         :network-id="treasury.networkId"
         @close="modalOpen.stake = false"

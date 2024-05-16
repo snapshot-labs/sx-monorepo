@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { Token } from '@/helpers/alchemy';
-import { ETH_CONTRACT } from '@/helpers/constants';
 import { formatUnits } from '@ethersproject/units';
-import { NetworkID, Transaction } from '@/types';
+import { ETH_CONTRACT } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { createStakeTokenTransaction } from '@/helpers/transactions';
+import { NetworkID, Transaction } from '@/types';
 
 const STAKING_CONTRACTS = {
   eth: {
@@ -19,15 +18,7 @@ const STAKING_CONTRACTS = {
 
 const DEFAULT_FORM_STATE = {
   to: '',
-  amount: '',
-  value: '',
-  token: {
-    decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
-    contractAddress: ETH_CONTRACT,
-    tokenBalance: 0
-  } as unknown as Token
+  amount: ''
 };
 
 const props = defineProps<{
@@ -35,7 +26,6 @@ const props = defineProps<{
   address: string;
   network: number;
   networkId: NetworkID;
-  token?: Token;
   initialState?: any;
 }>();
 
@@ -47,14 +37,38 @@ const emit = defineEmits<{
 const form: {
   to: string;
   amount: string | number;
-  value: string | number;
-  token: Token;
 } = reactive(clone(DEFAULT_FORM_STATE));
+
+const { assetsMap, loadBalances } = useBalances();
 
 const formValid = computed(() => form.amount !== '');
 
+const token = computed(() => {
+  let token = assetsMap.value?.get(ETH_CONTRACT);
+
+  const metadata = METADATA_BY_CHAIN_ID.get(props.network);
+
+  if (!token) {
+    return {
+      decimals: 18,
+      name: metadata?.name ?? 'Ether',
+      symbol: metadata?.ticker ?? 'ETH',
+      contractAddress: ETH_CONTRACT,
+      logo: null,
+      tokenBalance: '0x0',
+      price: 0,
+      value: 0,
+      change: 0
+    };
+  }
+
+  return token;
+});
+
+const stakingContract = computed(() => STAKING_CONTRACTS[props.networkId]);
+
 function handleMaxClick() {
-  handleAmountUpdate(formatUnits(form.token.tokenBalance, form.token.decimals));
+  handleAmountUpdate(formatUnits(token.value.tokenBalance, token.value.decimals));
 }
 
 function handleAmountUpdate(value) {
@@ -63,11 +77,10 @@ function handleAmountUpdate(value) {
 
 async function handleSubmit() {
   const tx = await createStakeTokenTransaction({
-    token: form.token,
     form: clone({
       ...form,
-      to: STAKING_CONTRACTS[props.networkId].address,
-      args: { _referral: STAKING_CONTRACTS[props.networkId].referral }
+      to: stakingContract.value.address,
+      args: { referral: stakingContract.value.referral }
     })
   });
 
@@ -75,16 +88,18 @@ async function handleSubmit() {
   emit('close');
 }
 
+onMounted(() => {
+  loadBalances(props.address, props.network);
+});
+
 watch(
   () => props.open,
   () => {
     if (props.initialState) {
       form.to = props.initialState.recipient;
-      form.token = props.initialState.token;
       handleAmountUpdate(props.initialState.amount);
     } else {
-      form.to = DEFAULT_FORM_STATE.to;
-      form.token = props.token || DEFAULT_FORM_STATE.token;
+      form.to = stakingContract.value?.address || DEFAULT_FORM_STATE.to;
       handleAmountUpdate(DEFAULT_FORM_STATE.amount);
     }
   }
@@ -97,49 +112,50 @@ watch(
       <h3 v-text="'Stake with Lido'" />
     </template>
     <div class="s-box p-4">
-      <div class="relative w-full">
-        <UiInputNumber
-          :model-value="form.amount"
-          :definition="{
-            type: 'number',
-            title: 'Stake',
-            examples: ['0']
-          }"
-          @update:model-value="handleAmountUpdate"
-        />
-        <a
-          class="absolute right-[16px] top-[4px]"
-          href="#"
-          @click.prevent="handleMaxClick"
-          v-text="'max'"
-        />
-        <div class="absolute right-[16px] top-[26px] flex items-center">
-          <UiStamp :id="ETH_CONTRACT" type="token" class="mr-2" :size="20" />
-          ETH
-        </div>
+      <div v-if="!stakingContract">
+        <UiAlert type="error">
+          <span>
+            The token <b>{{ token.symbol }}</b> can not be staked with Lido
+          </span>
+        </UiAlert>
       </div>
-      <div class="relative w-full">
-        <UiInputNumber
-          :model-value="form.amount"
-          disabled
-          :definition="{
-            type: 'number',
-            title: 'Receive',
-            examples: ['0']
-          }"
-        />
-        <div class="absolute right-[16px] top-[28px] flex items-center">
-          <UiStamp
-            :id="`${networkId}:${STAKING_CONTRACTS[networkId].address}`"
-            type="token"
-            class="mr-2"
-            :size="20"
+      <template v-else>
+        <div class="relative w-full">
+          <UiInputNumber
+            :model-value="form.amount"
+            :definition="{
+              type: 'number',
+              title: 'Stake',
+              examples: ['0']
+            }"
+            @update:model-value="handleAmountUpdate"
           />
-          stETH
+          <a class="absolute right-[16px] top-[4px]" href="#" @click.prevent="handleMaxClick">
+            max
+          </a>
+          <div class="absolute right-[16px] top-[26px] flex items-center gap-x-2">
+            <UiStamp :id="token.contractAddress" type="token" :size="20" />
+            ETH
+          </div>
         </div>
-      </div>
+        <div class="relative w-full">
+          <UiInputNumber
+            :model-value="form.amount"
+            disabled
+            :definition="{
+              type: 'number',
+              title: 'Receive',
+              examples: ['0']
+            }"
+          />
+          <div class="absolute right-[16px] top-[28px] flex items-center gap-x-2">
+            <UiStamp :id="`${networkId}:${stakingContract.address}`" type="token" :size="20" />
+            stETH
+          </div>
+        </div>
+      </template>
     </div>
-    <template #footer>
+    <template v-if="stakingContract" #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"> Confirm </UiButton>
     </template>
   </UiModal>

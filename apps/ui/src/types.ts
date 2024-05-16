@@ -281,13 +281,6 @@ export type StakeTokenTransaction = BaseTransaction & {
   _type: 'stakeToken';
   _form: {
     recipient: string;
-    token: {
-      name: string;
-      decimals: number;
-      symbol: string;
-      address: string;
-      tokenBalance: number;
-    };
     args: any;
     amount: string;
   };
