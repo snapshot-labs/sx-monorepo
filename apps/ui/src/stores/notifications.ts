@@ -35,7 +35,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     pivotTs: number,
     spaceIds: string[]
   ) {
-    return await network.api.loadProposals(spaceIds, { limit: 100 }, current, {
+    return network.api.loadProposals(spaceIds, { limit: 100 }, current, {
       state,
       start_gte: pivotTs
     });
