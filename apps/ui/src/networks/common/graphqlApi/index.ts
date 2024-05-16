@@ -303,7 +303,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const state = filters?.state || 'any';
+      const state = filters?.state;
 
       if (state === 'active') {
         filters.start_lte = current;
@@ -314,7 +314,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         filters.max_end_lt = current;
       }
 
-      delete filters?.space;
+      delete filters?.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
