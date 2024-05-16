@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
-import { defaultNetwork } from '../../../../src/networks';
+import { starknetSepolia } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
 
-const ethUrl = process.env.GOERLI_NODE_URL as string;
+const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('erc20VotesStrategy', () => {
   beforeAll(() => {
@@ -32,7 +32,7 @@ describe('erc20VotesStrategy', () => {
   });
 
   const erc20VotesStrategy = createErc20VotesStrategy();
-  const config = { starkProvider, ethUrl, networkConfig: defaultNetwork };
+  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
 
   it('should return type', () => {
     expect(erc20VotesStrategy.type).toBe('erc20Votes');

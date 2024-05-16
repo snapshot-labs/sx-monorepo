@@ -8,13 +8,11 @@ const contractAXclassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad4
 
 const NODE_URLS = new Map<string, string | undefined>([
   [constants.StarknetChainId.SN_MAIN, process.env.STARKNET_MAINNET_RPC_URL],
-  [constants.StarknetChainId.SN_GOERLI, process.env.STARKNET_GOERLI_RPC_URL],
   [constants.StarknetChainId.SN_SEPOLIA, process.env.STARKNET_SEPOLIA_RPC_URL]
 ]);
 
 export const ETH_NODE_URLS = new Map<string, string | undefined>([
   [constants.StarknetChainId.SN_MAIN, process.env.ETH_MAINNET_RPC_URL],
-  [constants.StarknetChainId.SN_GOERLI, process.env.ETH_GOERLI_RPC_URL],
   [constants.StarknetChainId.SN_SEPOLIA, process.env.ETH_SEPOLIA_RPC_URL]
 ]);
 
