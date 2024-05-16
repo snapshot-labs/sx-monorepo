@@ -14,7 +14,7 @@ type Notification = {
 
 const NOTIFICATION_TIME_WINDOW = 60 * 60 * 24 * 14; // 2 weeks
 const REFRESH_INTERVAL = 60 * 15; // 15 minutes
-let refreshNotificationInterval: NodeJS.Timeout;
+let refreshNotificationInterval: number;
 
 export const useNotificationsStore = defineStore('notifications', () => {
   const loading = ref(true);
@@ -35,7 +35,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     pivotTs: number,
     spaceIds: string[]
   ) {
-    return await network.api.loadProposals(spaceIds, { limit: 100 }, current, {
+    return network.api.loadProposals(spaceIds, { limit: 100 }, current, {
       state,
       start_gte: pivotTs
     });
