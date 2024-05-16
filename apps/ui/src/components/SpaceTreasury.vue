@@ -71,32 +71,14 @@ const totalChange = computed(() => {
   return ((totalQuote.value - totalPreviousQuote.value) / totalPreviousQuote.value) * 100;
 });
 
-const sortedAssets = computed(() => {
-  const _assets = assets.value || [];
-  if (
-    !_assets.find(asset => asset.contractAddress === ETH_CONTRACT) &&
-    ['sep', 'eth'].includes(currentNetworkId.value || '')
-  ) {
-    _assets.unshift({
-      decimals: 18,
-      name: 'Ether',
-      symbol: 'ETH',
-      contractAddress: ETH_CONTRACT,
-      logo: null,
-      tokenBalance: '0x0',
-      price: 0,
-      value: 0,
-      change: 0
-    });
-  }
-
-  return _assets.sort((a, b) => {
+const sortedAssets = computed(() =>
+  (assets.value || []).sort((a, b) => {
     const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
     if (isEth(a)) return -1;
     if (isEth(b)) return 1;
     return 0;
-  });
-});
+  })
+);
 
 const treasuryExplorerUrl = computed(() => {
   if (!currentNetwork.value || !treasury.value) return '';
