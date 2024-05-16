@@ -3,7 +3,8 @@ import { describe, it, expect, vi, beforeAll } from 'vitest';
 import {
   createSendTokenTransaction,
   createSendNftTransaction,
-  createContractCallTransaction
+  createContractCallTransaction,
+  createStakeTokenTransaction
 } from './transactions';
 
 describe('transactions', () => {
@@ -161,6 +162,22 @@ describe('transactions', () => {
           }
         }
       });
+
+      expect(tx).toMatchSnapshot();
+    });
+  });
+
+  describe('createStakeTokenTransaction', () => {
+    const form = {
+      to: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
+      amount: 1,
+      args: {
+        referral: '0x01e8CEC73B020AB9f822fD0dee3Aa4da2fe39e38'
+      }
+    };
+
+    it('should create a stake token transaction on mainnet', async () => {
+      const tx = await createStakeTokenTransaction({ form });
 
       expect(tx).toMatchSnapshot();
     });

@@ -161,3 +161,20 @@ exports[`transactions > createSendTokenTransaction > should create eth transacti
   "value": "1000000000000000000",
 }
 `;
+
+exports[`transactions > createStakeTokenTransaction > should create a stake token transaction on mainnet 1`] = `
+{
+  "_form": {
+    "amount": 1,
+    "args": {
+      "referral": "0x01e8CEC73B020AB9f822fD0dee3Aa4da2fe39e38",
+    },
+    "recipient": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+  },
+  "_type": "stakeToken",
+  "data": "0xa1903eab00000000000000000000000001e8cec73b020ab9f822fd0dee3aa4da2fe39e38",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+  "value": "1000000000000000000",
+}
+`;
