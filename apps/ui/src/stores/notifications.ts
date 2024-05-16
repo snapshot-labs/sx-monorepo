@@ -37,7 +37,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   ) {
     return network.api.loadProposals(spaceIds, { limit: 100 }, current, {
       state,
-      start_gte: pivotTs
+      ...{ [state === 'closed' ? 'end_gte' : 'start_gte']: pivotTs }
     });
   }
 
