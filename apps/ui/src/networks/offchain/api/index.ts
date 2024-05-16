@@ -275,7 +275,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const state = filters?.state || 'any';
+      const state = filters?.state;
 
       if (state === 'active') {
         filters.start_lte = current;
@@ -285,6 +285,8 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       } else if (state === 'closed') {
         filters.end_lt = current;
       }
+
+      delete filters.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
