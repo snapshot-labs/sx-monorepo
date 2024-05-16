@@ -72,7 +72,7 @@ const totalChange = computed(() => {
 });
 
 const sortedAssets = computed(() =>
-  (assets.value || []).sort((a, b) => {
+  (assets || []).value.sort((a, b) => {
     const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
     if (isEth(a)) return -1;
     if (isEth(b)) return 1;
