@@ -128,7 +128,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
-  <div v-if="!treasury || !currentNetwork" class="p-4 flex items-center text-skin-link gap-x-2">
+  <div v-if="!treasury || !currentNetwork" class="p-4 flex items-center text-skin-link space-x-2">
     <IH-exclamation-circle class="inline-block" />
     No treasury configured.
   </div>
@@ -218,7 +218,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
           <div
             v-else-if="loaded && sortedAssets.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link gap-x-2"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
             <IH-exclamation-circle class="inline-block" />
             There are no tokens in treasury.
@@ -301,7 +301,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         <div v-else-if="page === 'nfts'">
           <div
             v-if="nftsLoaded && nfts.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link gap-x-2"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
             <IH-exclamation-circle class="inline-block" />
             There are no NFTs in treasury.
