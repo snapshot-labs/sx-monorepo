@@ -58,7 +58,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 <template>
   <div
     v-if="!currentNetwork || !delegation.apiUrl"
-    class="px-4 py-3 flex items-center text-skin-link gap-x-2"
+    class="px-4 py-3 flex items-center text-skin-link space-x-2"
   >
     <IH-exclamation-circle class="inline-block" />
     <span>No delegation API configured.</span>
@@ -75,11 +75,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <UiLabel label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
-        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium gap-x-1"
+        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-1"
       >
         <div class="pl-4 w-[60%] flex items-center truncate">Delegatee</div>
         <button
-          class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link gap-x-1 truncate"
+          class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span>Delegators</span>
@@ -93,7 +93,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           />
         </button>
         <button
-          class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link pr-4 gap-x-1 truncate"
+          class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link pr-4 space-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -105,14 +105,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       <template v-else>
         <div
           v-if="loaded && (delegates.length === 0 || failed)"
-          class="px-4 py-3 flex items-center gap-x-2"
+          class="px-4 py-3 flex items-center space-x-2"
         >
           <IH-exclamation-circle class="inline-block" />
           <template v-if="delegates.length === 0">There are no delegates.</template>
           <template v-else-if="failed">Failed to load delegates.</template>
         </div>
         <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
-          <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex gap-x-1">
+          <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex space-x-1">
             <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
               <UiStamp :id="delegate.id" :size="32" />
               <a

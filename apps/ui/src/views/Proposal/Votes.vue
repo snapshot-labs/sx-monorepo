@@ -90,10 +90,12 @@ watch([sortBy, choiceFilter], () => {
 </script>
 
 <template>
-  <div class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex gap-x-1 font-medium">
+  <div
+    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-1 font-medium"
+  >
     <div class="pl-4 w-[50%] lg:w-[40%] truncate">Voter</div>
     <button
-      class="hidden lg:flex w-[25%] lg:w-[20%] items-center hover:text-skin-link gap-x-1 truncate"
+      class="hidden lg:flex w-[25%] lg:w-[20%] items-center hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('created')"
     >
       <span>Date</span>
@@ -117,7 +119,7 @@ watch([sortBy, choiceFilter], () => {
         ]"
       >
         <template #button>
-          <div class="flex items-center hover:text-skin-link gap-x-2">
+          <div class="flex items-center hover:text-skin-link space-x-2">
             <span class="truncate">Choice</span>
             <IH-adjustments-vertical class="shrink-0" />
           </div>
@@ -125,7 +127,7 @@ watch([sortBy, choiceFilter], () => {
       </UiSelectDropdown>
     </div>
     <button
-      class="w-[25%] lg:w-[20%] flex justify-end items-center hover:text-skin-link gap-x-1 truncate"
+      class="w-[25%] lg:w-[20%] flex justify-end items-center hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('vp')"
     >
       <span class="truncate">Voting power</span>
@@ -137,7 +139,7 @@ watch([sortBy, choiceFilter], () => {
 
   <UiLoading v-if="!loaded" class="px-4 py-3 block" />
   <template v-else>
-    <div v-if="votes.length === 0" class="px-4 py-3 flex items-center gap-x-2">
+    <div v-if="votes.length === 0" class="px-4 py-3 flex items-center space-x-2">
       <IH-exclamation-circle class="inline-block" />
       <span>There are no votes here.</span>
     </div>
@@ -145,7 +147,7 @@ watch([sortBy, choiceFilter], () => {
       <template #loading>
         <UiLoading class="px-4 py-3 block" />
       </template>
-      <div v-for="(vote, i) in votes" :key="i" class="border-b relative flex gap-x-1">
+      <div v-for="(vote, i) in votes" :key="i" class="border-b relative flex space-x-1">
         <div
           class="top-0 bottom-0 left-0 -z-10 pointer-events-none absolute"
           :style="{
