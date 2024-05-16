@@ -176,7 +176,7 @@ describe('transactions', () => {
       }
     };
 
-    it('should create a stake token transaction on mainnet', async () => {
+    it('should create a stake token transaction', async () => {
       const tx = await createStakeTokenTransaction({ form });
 
       expect(tx).toMatchSnapshot();

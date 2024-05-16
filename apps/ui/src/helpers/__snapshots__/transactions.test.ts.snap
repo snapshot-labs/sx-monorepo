@@ -162,7 +162,7 @@ exports[`transactions > createSendTokenTransaction > should create eth transacti
 }
 `;
 
-exports[`transactions > createStakeTokenTransaction > should create a stake token transaction on mainnet 1`] = `
+exports[`transactions > createStakeTokenTransaction > should create a stake token transaction 1`] = `
 {
   "_form": {
     "amount": 1,
