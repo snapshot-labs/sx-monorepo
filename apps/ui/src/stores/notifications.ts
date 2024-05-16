@@ -24,6 +24,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     {} as Record<string, number>
   );
 
+  const route = useRoute();
   const followedSpacesStore = useFollowedSpacesStore();
   const metaStore = useMetaStore();
   const { web3 } = useWeb3();
@@ -114,6 +115,10 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
   onMounted(() => {
     refreshNotificationInterval = setInterval(loadNotifications, REFRESH_INTERVAL * 1e3);
+    window.addEventListener(
+      'beforeunload',
+      () => String(route.name) === 'my-notifications' && markAllAsRead()
+    );
   });
 
   onBeforeUnmount(() => clearInterval(refreshNotificationInterval));
