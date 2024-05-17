@@ -76,6 +76,7 @@ export function createActions(
   const starkSigClient = new clients.StarknetSig(clientConfig);
   const ethSigClient = new clients.EthereumSig(clientConfig);
   const ethTxClient = new clients.EthereumTx(clientConfig);
+  const l1ExecutorClient = new clients.L1Executor();
 
   return {
     async predictSpaceAddress(web3: any, { salt }) {
@@ -406,8 +407,49 @@ export function createActions(
         executionParams: executionData.executionParams
       });
     },
-    executeQueuedProposal: () => {
-      throw new Error('Not implemented');
+    executeQueuedProposal: async (web3: any, proposal: Proposal) => {
+      if (!proposal.execution_destination) throw new Error('Execution destination is missing');
+
+      const activeVotingStrategies = proposal.strategies_indicies.reduce((acc, index) => {
+        return acc | (1n << BigInt(index));
+      }, 0n);
+
+      const proposalData = {
+        startTimestamp: BigInt(proposal.start),
+        minEndTimestamp: BigInt(proposal.min_end),
+        maxEndTimestamp: BigInt(proposal.max_end),
+        finalizationStatus: 0,
+        executionPayloadHash: proposal.execution_hash,
+        executionStrategy: proposal.execution_strategy,
+        authorAddressType: 1, // <- hardcoded, needs to be indexed (0 for starknet, 1 for ethereum)
+        author: proposal.author.id,
+        activeVotingStrategies: activeVotingStrategies
+      } as const;
+
+      const votesFor = BigInt(proposal.scores[0]);
+      const votesAgainst = BigInt(proposal.scores[1]);
+      const votesAbstain = BigInt(proposal.scores[2]);
+
+      const { executionParams } = getExecutionData(
+        proposal.space,
+        proposal.execution_strategy,
+        proposal.execution_destination,
+        convertToMetaTransactions(proposal.execution)
+      );
+
+      const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
+
+      return l1ExecutorClient.execute({
+        signer: web3.getSigner(),
+        executor: proposal.execution_destination,
+        space: proposal.space.id,
+        proposal: proposalData,
+        votesFor,
+        votesAgainst,
+        votesAbstain,
+        executionHash,
+        transactions: convertToMetaTransactions(proposal.execution)
+      });
     },
     vetoProposal: () => null,
     setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {

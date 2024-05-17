@@ -362,6 +362,8 @@ export function useActions() {
 
     const network = getReadWriteNetwork(proposal.network);
 
+    // TODO: we need to have a way to tell what network to use, for example for EthRelayer transactions
+    // it should be baseNetwork
     await wrapPromise(proposal.network, network.actions.executeQueuedProposal(auth.web3, proposal));
   }
 

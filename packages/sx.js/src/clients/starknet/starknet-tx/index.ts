@@ -144,7 +144,7 @@ export class StarknetTx {
     const contract = await l1AvatarExecutionStrategyContractFactor.deploy(
       controller,
       target,
-      this.config.networkConfig.starknetCommit,
+      this.config.networkConfig.starknetCore,
       executionRelayer,
       spaces,
       quorum

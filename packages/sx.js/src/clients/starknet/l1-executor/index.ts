@@ -1,16 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { Contract, ContractFactory } from '@ethersproject/contracts';
+import { Contract } from '@ethersproject/contracts';
 import L1ExecutorContract from './abis/L1AvatarExecutionStrategy.json';
 import { MetaTransaction } from '../../../utils/encoding';
-
-type DeployParams = {
-  owner: string;
-  target: string;
-  starknetCore: string;
-  executionRelayer: string;
-  starknetSpaces: string[];
-  quorum: bigint;
-};
 
 type ExecuteParams = {
   executor: string;
@@ -34,34 +25,6 @@ type ExecuteParams = {
 };
 
 export class L1Executor {
-  async deploy({
-    signer,
-    params: { owner, target, starknetCore, executionRelayer, starknetSpaces, quorum }
-  }: {
-    signer: Signer;
-    params: DeployParams;
-  }) {
-    const factory = new ContractFactory(
-      L1ExecutorContract.abi,
-      L1ExecutorContract.bytecode.object,
-      signer
-    );
-
-    const deploy = await factory.deploy(
-      owner,
-      target,
-      starknetCore,
-      executionRelayer,
-      starknetSpaces,
-      quorum
-    );
-
-    return {
-      address: deploy.address,
-      txId: deploy.deployTransaction.hash
-    };
-  }
-
   async execute({
     signer,
     executor,
