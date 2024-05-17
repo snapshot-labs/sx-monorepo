@@ -114,6 +114,21 @@ ajv.addFormat('ens-or-address', {
   }
 });
 
+ajv.addFormat('addresses-with-voting-power', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return value
+      .split(/[\n,]/)
+      .filter(Boolean)
+      .every(input => {
+        const [address, vp] = input.split(':').map(s => s.trim());
+
+        return address.length && addressValidator(address) && uint256Validator(vp || '');
+      });
+  }
+});
+
 ajv.addFormat('abi', {
   validate: (value: string) => {
     if (!value) return false;
@@ -200,6 +215,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be an integer.';
       case 'ethValue':
         return 'Must be a number.';
+      case 'addresses-with-voting-power':
+        return 'Must be a valid address with voting power.';
       default:
         return 'Invalid format.';
     }

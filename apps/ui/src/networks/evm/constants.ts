@@ -198,16 +198,21 @@ export function createConstants(networkId: NetworkID) {
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
       generateSummary: (params: Record<string, any>) => {
         const length =
-          params.whitelist.trim().length === 0 ? 0 : params.whitelist.split('\n').length;
+          params.whitelist.trim().length === 0
+            ? 0
+            : params.whitelist.split(/[\n,]/).filter(Boolean).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: (params: Record<string, any>) => {
-        const whitelist = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
+        const whitelist = params.whitelist
+          .split(/[\n,]/)
+          .filter(Boolean)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':');
 
-          return [address, BigInt(votingPower)];
-        });
+            return [address, BigInt(votingPower)];
+          });
 
         const tree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
 
@@ -215,14 +220,17 @@ export function createConstants(networkId: NetworkID) {
         return [abiCoder.encode(['bytes32'], [tree.root])];
       },
       generateMetadata: async (params: Record<string, any>) => {
-        const tree = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
+        const tree = params.whitelist
+          .split(/[\n,]/)
+          .filter(Boolean)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':');
 
-          return {
-            address,
-            votingPower: votingPower
-          };
-        });
+            return {
+              address,
+              votingPower: votingPower
+            };
+          });
 
         const pinned = await pinGraph({ tree });
 
@@ -261,7 +269,7 @@ export function createConstants(networkId: NetworkID) {
         properties: {
           whitelist: {
             type: 'string',
-            format: 'long',
+            format: 'addresses-with-voting-power',
             title: 'Whitelist',
             examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
           },
