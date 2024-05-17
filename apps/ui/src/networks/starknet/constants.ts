@@ -257,7 +257,7 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
           .map((item: string) => {
-            const [address, votingPower] = item.split(':');
+            const [address, votingPower] = item.split(':').map(s => s.trim());
             const type =
               address.length === 42
                 ? utils.merkle.AddressType.ETHEREUM
@@ -275,7 +275,7 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
           .map((item: string) => {
-            const [address, votingPower] = item.split(':');
+            const [address, votingPower] = item.split(':').map(s => s.trim());
             const type = address.length === 42 ? 1 : 0;
 
             return {

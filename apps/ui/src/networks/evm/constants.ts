@@ -209,7 +209,7 @@ export function createConstants(networkId: NetworkID) {
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
           .map((item: string) => {
-            const [address, votingPower] = item.split(':');
+            const [address, votingPower] = item.split(':').map(s => s.trim());
 
             return [address, BigInt(votingPower)];
           });
@@ -224,7 +224,7 @@ export function createConstants(networkId: NetworkID) {
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
           .map((item: string) => {
-            const [address, votingPower] = item.split(':');
+            const [address, votingPower] = item.split(':').map(s => s.trim());
 
             return {
               address,

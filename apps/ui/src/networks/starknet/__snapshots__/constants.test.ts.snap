@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Starknet Constants > EDITOR_VOTING_STRATEGIES > whitelist > generateParams > should return the encoded value of the whitelist tree root 1`] = `
+[
+  "0x26ac8b72505b27418bbc9b251f96d392e11a22152e38291903490c3d2d92948",
+]
+`;
