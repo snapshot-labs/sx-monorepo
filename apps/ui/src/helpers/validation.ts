@@ -120,7 +120,7 @@ ajv.addFormat('addresses-with-voting-power', {
 
     return value
       .split(/[\n,]/)
-      .filter(Boolean)
+      .filter(s => s.trim().length)
       .every(input => {
         const [address, vp] = input.split(':').map(s => s.trim());
 

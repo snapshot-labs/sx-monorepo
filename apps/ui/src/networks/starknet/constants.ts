@@ -248,14 +248,14 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
         const length =
           params.whitelist.trim().length === 0
             ? 0
-            : params.whitelist.split(/[\n,]/).filter(Boolean).length;
+            : params.whitelist.split(/[\n,]/).filter((s: string) => s.trim().length).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: (params: Record<string, any>) => {
         const leaves = params.whitelist
           .split(/[\n,]/)
-          .filter(Boolean)
+          .filter((s: string) => s.trim().length)
           .map((item: string) => {
             const [address, votingPower] = item.split(':');
             const type =
@@ -273,7 +273,7 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
       generateMetadata: async (params: Record<string, any>) => {
         const tree = params.whitelist
           .split(/[\n,]/)
-          .filter(Boolean)
+          .filter((s: string) => s.trim().length)
           .map((item: string) => {
             const [address, votingPower] = item.split(':');
             const type = address.length === 42 ? 1 : 0;
