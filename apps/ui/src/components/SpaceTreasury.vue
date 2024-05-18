@@ -87,8 +87,8 @@ const treasuryExplorerUrl = computed(() => {
 });
 
 const executionStrategy = computed(() => {
-  let executorIndex = props.space.executors.findIndex(
-    executorAddress => executorAddress === treasury.value?.wallet
+  let executorIndex = props.space.executors.findIndex(executorAddress =>
+    compareAddresses(executorAddress, treasury.value?.wallet || '')
   );
 
   if (executorIndex === -1) {
