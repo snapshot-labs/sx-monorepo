@@ -17,7 +17,7 @@ const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
-  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
+  : ['s', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'oeth', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];

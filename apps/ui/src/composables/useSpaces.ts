@@ -141,7 +141,7 @@ export function useSpaces() {
   }
 
   async function fetch(filter?: SpacesFilter) {
-    if (loading.value || loaded.value) return;
+    if (loading.value) return;
     loading.value = true;
 
     await _fetchSpaces(true, filter);
