@@ -36,9 +36,11 @@ watchEffect(() => setTitle('Explore'));
           :loading-more="spacesStore.loadingMore"
           @end-reached="spacesStore.fetchMore"
         >
-          <SpacesListItem v-for="space in spacesStore.spaces" :key="space.id" :space="space" />
-          <div></div>
-          <!-- Empty div make the loader inside infinite scroll align center -->
+          <SpacesListItem
+            v-for="space in spacesStore.explorePageSpaces"
+            :key="space.id"
+            :space="space"
+          />
         </UiContainerInfiniteScroll>
       </div>
     </div>

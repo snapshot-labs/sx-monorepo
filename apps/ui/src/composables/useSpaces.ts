@@ -33,6 +33,8 @@ export function useSpaces() {
     )
   );
 
+  const explorePageSpaces = ref<Space[]>([]);
+
   const spaces = computed(() => {
     const protocolNetworks = explorePageProtocols[protocol.value].networks;
     return Object.values(networksMap.value).flatMap(record => {
@@ -105,7 +107,7 @@ export function useSpaces() {
           },
           filter
         );
-
+        explorePageSpaces.value.push(...spaces);
         return {
           id,
           spaces,
@@ -158,6 +160,7 @@ export function useSpaces() {
   }
 
   watch(protocol, async () => {
+    explorePageSpaces.value = [];
     await fetch();
   });
 
@@ -166,6 +169,7 @@ export function useSpaces() {
     loadingMore,
     loaded,
     networksMap,
+    explorePageSpaces,
     spaces,
     spacesMap,
     hasMoreSpaces,
