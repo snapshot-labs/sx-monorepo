@@ -30,7 +30,7 @@ describe('Starknet Constants', () => {
             whitelist: input
           });
 
-          expect(summary).toMatchSnapshot();
+          expect(summary).toBe('0x26ac8b72505b27418bbc9b251f96d392e11a22152e38291903490c3d2d92948');
         });
       });
     });
