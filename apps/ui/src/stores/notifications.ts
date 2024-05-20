@@ -48,10 +48,12 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     if (!followedSpacesStore.followedSpacesIds.length) return;
 
-    (Object.keys(followedSpacesStore.followedSpaceIdsByNetwork) as NetworkID[]).forEach(
-      async networkId => {
-        await metaStore.fetchBlock(networkId);
-      }
+    await Promise.all(
+      (Object.keys(followedSpacesStore.followedSpaceIdsByNetwork) as NetworkID[]).map(
+        async networkId => {
+          await metaStore.fetchBlock(networkId);
+        }
+      )
     );
 
     const promises = (
