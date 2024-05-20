@@ -222,7 +222,12 @@ watch([sortBy, choiceFilter], () => {
           class="text-right leading-[22px] w-[25%] lg:w-[20%] flex flex-col items-end justify-center truncate"
         >
           <h4 class="text-skin-link">
-            {{ _n(vote.vp / 10 ** votingPowerDecimals, 'compact') }}
+            {{
+              _n(vote.vp / 10 ** votingPowerDecimals, 'compact', {
+                maximumFractionDigits: 3,
+                formatDust: true
+              })
+            }}
             {{ proposal.space.voting_power_symbol }}
           </h4>
           <div class="text-[17px]">{{ _n((vote.vp / proposal.scores_total) * 100) }}%</div>
