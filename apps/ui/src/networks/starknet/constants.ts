@@ -1,7 +1,7 @@
-import { Signer } from '@ethersproject/abstract-signer';
+import { Web3Provider } from '@ethersproject/providers';
 import { CallData, uint256 } from 'starknet';
 import { clients, utils, starknetNetworks } from '@snapshot-labs/sx';
-import { getUrl, shorten } from '@/helpers/utils';
+import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
 import { pinPineapple } from '@/helpers/pin';
 import { StrategyConfig, StrategyTemplate } from '../types';
 
@@ -14,7 +14,11 @@ import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
 
-export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) {
+export function createConstants(
+  networkId: NetworkID,
+  baseNetworkId: NetworkID,
+  baseChainId: number
+) {
   const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
@@ -436,13 +440,15 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
       deployConnectors: EVM_CONNECTORS,
       deploy: async (
         client: clients.StarknetTx,
-        signer: Signer,
+        web3: Web3Provider,
         controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
+        await verifyNetwork(web3, baseChainId);
+
         return client.deployL1AvatarExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.l1Controller,
             target: params.contractAddress,

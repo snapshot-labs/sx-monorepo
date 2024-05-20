@@ -96,7 +96,7 @@ export function createActions(
 
       return params.strategy.deploy(
         client,
-        web3.getSigner(),
+        web3,
         params.controller,
         params.spaceAddress,
         params.strategy.params

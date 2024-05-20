@@ -1,9 +1,9 @@
+import { Web3Provider } from '@ethersproject/providers';
 import { AbiCoder } from '@ethersproject/abi';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinGraph } from '@/helpers/pin';
-import type { Signer } from '@ethersproject/abstract-signer';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
 import type { StrategyConfig } from '../types';
 
@@ -402,13 +402,13 @@ export function createConstants(networkId: NetworkID) {
         `(${params.quorum}, ${shorten(params.contractAddress)})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployAvatarExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.controller,
             target: params.contractAddress,
@@ -454,13 +454,13 @@ export function createConstants(networkId: NetworkID) {
         `(${params.quorum}, ${params.timelockDelay})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployTimelockExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.controller,
             vetoGuardian: params.vetoGuardian || '0x0000000000000000000000000000000000000000',
@@ -512,13 +512,13 @@ export function createConstants(networkId: NetworkID) {
         `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         _controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployAxiomExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.controller || '0x0000000000000000000000000000000000000000',
             quorum: BigInt(params.quorum),
@@ -571,13 +571,13 @@ export function createConstants(networkId: NetworkID) {
         `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         _controller: string,
         _spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployIsokratiaExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             provingTimeAllowance: params.provingTimeAllowance,
             quorum: BigInt(params.quorum),

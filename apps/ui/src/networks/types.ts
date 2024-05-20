@@ -1,6 +1,5 @@
 import { FunctionalComponent } from 'vue';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { Signer } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import type {
   Space,
@@ -54,7 +53,7 @@ export type StrategyTemplate = {
   deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
-    signer: Signer,
+    web3: any,
     controller: string,
     spaceAddress: string,
     params: Record<string, any>
