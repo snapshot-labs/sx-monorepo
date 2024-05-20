@@ -246,36 +246,44 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
       generateSummary: (params: Record<string, any>) => {
         const length =
-          params.whitelist.trim().length === 0 ? 0 : params.whitelist.split('\n').length;
+          params.whitelist.trim().length === 0
+            ? 0
+            : params.whitelist.split(/[\n,]/).filter((s: string) => s.trim().length).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: (params: Record<string, any>) => {
-        const leaves = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
-          const type =
-            address.length === 42
-              ? utils.merkle.AddressType.ETHEREUM
-              : utils.merkle.AddressType.STARKNET;
+        const leaves = params.whitelist
+          .split(/[\n,]/)
+          .filter((s: string) => s.trim().length)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':').map(s => s.trim());
+            const type =
+              address.length === 42
+                ? utils.merkle.AddressType.ETHEREUM
+                : utils.merkle.AddressType.STARKNET;
 
-          return new utils.merkle.Leaf(type, address, BigInt(votingPower));
-        });
+            return new utils.merkle.Leaf(type, address, BigInt(votingPower));
+          });
 
         return [
           utils.merkle.generateMerkleRoot(leaves.map((leaf: utils.merkle.Leaf) => leaf.hash))
         ];
       },
       generateMetadata: async (params: Record<string, any>) => {
-        const tree = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
-          const type = address.length === 42 ? 1 : 0;
+        const tree = params.whitelist
+          .split(/[\n,]/)
+          .filter((s: string) => s.trim().length)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':').map(s => s.trim());
+            const type = address.length === 42 ? 1 : 0;
 
-          return {
-            type,
-            address,
-            votingPower: votingPower
-          };
-        });
+            return {
+              type,
+              address,
+              votingPower: votingPower
+            };
+          });
 
         const pinned = await pinPineapple({ tree });
 
@@ -314,7 +322,7 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
         properties: {
           whitelist: {
             type: 'string',
-            format: 'long',
+            format: 'addresses-with-voting-power',
             title: 'Whitelist',
             examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
           },

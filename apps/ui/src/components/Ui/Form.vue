@@ -52,6 +52,7 @@ const getComponent = (property: { type: string; format: string; enum?: string[] 
       return InputArray;
     case 'string':
       if (property.format === 'long') return Textarea;
+      if (property.format === 'addresses-with-voting-power') return Textarea;
       if (property.format === 'address') return InputAddress;
       if (property.format === 'ens-or-address') return InputAddress;
       if (property.format === 'stamp') return InputStamp;
