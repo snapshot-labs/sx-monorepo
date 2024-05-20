@@ -30,9 +30,9 @@ describe('EVM Constants', () => {
             whitelist: input
           });
 
-          expect(summary).toBe(
+          expect(summary).toEqual([
             '0x107aeb9f6cd74046422dc4138dd222efb6f0790d9e4e5e541fb00320e3866d49'
-          );
+          ]);
         });
       });
     });
