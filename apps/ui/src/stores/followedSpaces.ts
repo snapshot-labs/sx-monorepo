@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import pkg from '../../package.json';
-import { Space } from '@/types';
+import { NetworkID, Space } from '@/types';
 
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 const network = getNetwork(offchainNetworkId);
@@ -45,6 +45,21 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
       followedSpacesIdsByAccount.value[web3.value.account] = spaces.map(getCompositeSpaceId);
     }
   });
+
+  const followedSpaceIdsByNetwork = computed(() =>
+    followedSpacesIds.value
+      .map(id => id.split(':') as [NetworkID, string])
+      .reduce(
+        (acc, [networkId, spaceId]) => {
+          acc[networkId] ||= [];
+          acc[networkId].push(
+            offchainNetworks.includes(networkId) ? spaceId : `${networkId}:${spaceId}`
+          );
+          return acc;
+        },
+        {} as Record<NetworkID, string[]>
+      )
+  );
 
   async function fetchSpacesData(ids: string[]) {
     if (!ids.length) return;
@@ -93,6 +108,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   return {
     followedSpaces,
     followedSpacesIds,
+    followedSpaceIdsByNetwork,
     followedSpacesLoaded,
     isFollowed
   };
