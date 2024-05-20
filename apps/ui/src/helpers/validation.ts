@@ -216,7 +216,7 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'ethValue':
         return 'Must be a number.';
       case 'addresses-with-voting-power':
-        return 'Must be a valid address with voting power.';
+        return 'Must be a valid list of addresses with voting power.';
       default:
         return 'Invalid format.';
     }
