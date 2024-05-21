@@ -95,7 +95,6 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         followedSpacesIds.value.unshift(id);
         followedSpacesIdsByAccount.value[web3.value.account].unshift(id);
       }
-    } catch (e) {
     } finally {
       followedSpaceLoading.value = false;
     }
