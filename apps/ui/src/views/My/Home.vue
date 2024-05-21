@@ -93,7 +93,8 @@ watch(
 
     loadVotes(networkId.value, followedSpacesIds);
     fetch();
-  }
+  },
+  { immediate: true }
 );
 
 watch(filter, (toFilter, fromFilter) => {
