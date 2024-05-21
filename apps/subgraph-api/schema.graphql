@@ -45,6 +45,7 @@ type SpaceMetadata @entity {
   wallet: String!
   executors: [String!]!
   executors_types: [String!]!
+  executors_destinations: [String!]!
   executors_strategies: [ExecutionStrategy!]!
 }
 
@@ -74,6 +75,8 @@ type StrategiesParsedMetadataData @entity {
 
 type ExecutionStrategy @entity {
   id: ID!
+  address: String!
+  destination_address: String
   type: String!
   quorum: BigDecimal!
   treasury: String

@@ -98,7 +98,7 @@ export function createActions(
 
       return params.strategy.deploy(
         client,
-        web3.getSigner(),
+        web3,
         params.controller,
         params.spaceAddress,
         params.strategy.params
@@ -116,6 +116,7 @@ export function createActions(
         validationStrategy: StrategyConfig;
         votingStrategies: StrategyConfig[];
         executionStrategies: StrategyConfig[];
+        executionDestinations: string[];
         metadata: SpaceMetadata;
       }
     ) {
@@ -124,7 +125,8 @@ export function createActions(
       const pinned = await helpers.pin(
         createErc1155Metadata(params.metadata, {
           execution_strategies: params.executionStrategies.map(config => config.address),
-          execution_strategies_types: params.executionStrategies.map(config => config.type)
+          execution_strategies_types: params.executionStrategies.map(config => config.type),
+          execution_destinations: params.executionDestinations
         })
       );
 
@@ -168,7 +170,8 @@ export function createActions(
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
           execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types
+          execution_strategies_types: space.executors_types,
+          execution_destinations: space.executors_destinations
         })
       );
 
@@ -185,6 +188,7 @@ export function createActions(
       space: Space,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) => {
       await verifyNetwork(web3, chainId);
@@ -203,7 +207,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams[0]
         };
       } else {
         selectedExecutionStrategy = {
@@ -260,6 +269,7 @@ export function createActions(
       proposalId: number | string,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) {
       await verifyNetwork(web3, chainId);
@@ -278,7 +288,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams[0]
         };
       } else {
         selectedExecutionStrategy = {
@@ -393,7 +408,7 @@ export function createActions(
       );
     },
     finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
-      await executionCall(chainId, 'finalizeProposal', {
+      await executionCall('eth', chainId, 'finalizeProposal', {
         space: proposal.space.id,
         proposalId: proposal.proposal_id
       });
@@ -406,10 +421,11 @@ export function createActions(
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
+        proposal.execution_destination,
         convertToMetaTransactions(proposal.execution)
       );
 
-      return executionCall(chainId, 'execute', {
+      return executionCall('eth', chainId, 'execute', {
         space: proposal.space.id,
         proposalId: proposal.proposal_id,
         executionParams: executionData.executionParams[0]
@@ -421,10 +437,11 @@ export function createActions(
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
+        proposal.execution_destination,
         convertToMetaTransactions(proposal.execution)
       );
 
-      return executionCall(chainId, 'executeQueuedProposal', {
+      return executionCall('eth', chainId, 'executeQueuedProposal', {
         space: proposal.space.id,
         executionStrategy: proposal.execution_strategy,
         executionParams: executionData.executionParams[0]

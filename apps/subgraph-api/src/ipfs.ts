@@ -34,6 +34,7 @@ export function handleSpaceMetadata(content: Bytes): void {
     let votingPowerSymbol = propertiesObj.get('voting_power_symbol')
     let executionStrategies = propertiesObj.get('execution_strategies')
     let executionStrategiesTypes = propertiesObj.get('execution_strategies_types')
+    let executionDestinations = propertiesObj.get('execution_destinations')
 
     if (treasuries) {
       let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
@@ -67,7 +68,7 @@ export function handleSpaceMetadata(content: Bytes): void {
     spaceMetadata.discord = discord ? discord.toString() : ''
     spaceMetadata.voting_power_symbol = votingPowerSymbol ? votingPowerSymbol.toString() : 'VP'
 
-    if (executionStrategies && executionStrategiesTypes) {
+    if (executionStrategies && executionStrategiesTypes && executionDestinations) {
       spaceMetadata.executors = executionStrategies
         .toArray()
         .map<string>((strategy) => toChecksumAddress(strategy.toString()))
@@ -77,9 +78,13 @@ export function handleSpaceMetadata(content: Bytes): void {
       spaceMetadata.executors_strategies = executionStrategies
         .toArray()
         .map<string>((strategy) => toChecksumAddress(strategy.toString()))
+      spaceMetadata.executors_destinations = executionDestinations
+        .toArray()
+        .map<string>((destination) => destination.toString())
     } else {
       spaceMetadata.executors = []
       spaceMetadata.executors_types = []
+      spaceMetadata.executors_destinations = []
       spaceMetadata.executors_strategies = []
     }
   } else {
@@ -89,6 +94,7 @@ export function handleSpaceMetadata(content: Bytes): void {
     spaceMetadata.discord = ''
     spaceMetadata.executors = []
     spaceMetadata.executors_types = []
+    spaceMetadata.executors_destinations = []
     spaceMetadata.executors_strategies = []
   }
 

@@ -144,7 +144,7 @@ export class StarknetTx {
     const contract = await l1AvatarExecutionStrategyContractFactor.deploy(
       controller,
       target,
-      this.config.networkConfig.starknetCommit,
+      this.config.networkConfig.starknetCore,
       executionRelayer,
       spaces,
       quorum
@@ -260,22 +260,30 @@ export class StarknetTx {
     return account.execute(call, undefined, { ...opts, maxFee });
   }
 
-  execute({
-    signer,
-    space,
-    proposalId,
-    executionPayload
-  }: {
-    signer: Account;
-    space: string;
-    proposalId: number;
-    executionPayload: string[];
-  }) {
-    return signer.execute({
+  async execute(
+    {
+      signer,
+      space,
+      proposalId,
+      executionPayload
+    }: {
+      signer: Account;
+      space: string;
+      proposalId: number;
+      executionPayload: string[];
+    },
+    opts?: Opts
+  ) {
+    const call = {
       contractAddress: space,
       entrypoint: 'execute',
       calldata: callData.compile('execute', [uint256.bnToUint256(proposalId), executionPayload])
-    });
+    };
+
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(signer, this.config.networkConfig, call)
+      : undefined;
+    return signer.execute(call, undefined, { ...opts, maxFee });
   }
 
   async updateSettings({

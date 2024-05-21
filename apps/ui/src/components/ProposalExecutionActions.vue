@@ -9,6 +9,9 @@ const props = defineProps<{ proposal: ProposalType }>();
 const { web3 } = useWeb3();
 const {
   hasFinalize,
+  hasExecuteQueued,
+  fetchingDetails,
+  message,
   finalizeProposalSending,
   executeProposalSending,
   executeQueuedProposalSending,
@@ -25,7 +28,13 @@ const network = computed(() => getNetwork(props.proposal.network));
 
 <template>
   <div class="x-block !border-x rounded-lg p-3">
-    <div v-if="proposal.execution_tx">
+    <div v-if="fetchingDetails" class="flex justify-center">
+      <UiLoading class="text-center" />
+    </div>
+    <div v-else-if="message">
+      {{ message }}
+    </div>
+    <div v-else-if="proposal.execution_tx && proposal.execution_strategy_type !== 'EthRelayer'">
       Proposal has been already executed at
       <a
         class="inline-flex items-center"
@@ -67,7 +76,7 @@ const network = computed(() => getNetwork(props.proposal.network));
         Execute proposal
       </UiButton>
       <UiButton
-        v-if="proposal.state === 'executed' && !proposal.completed"
+        v-if="hasExecuteQueued"
         :disabled="executionCountdown > 0"
         :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
         class="mb-2 w-full flex justify-center items-center"

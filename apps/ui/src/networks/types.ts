@@ -1,6 +1,5 @@
 import { FunctionalComponent } from 'vue';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { Signer } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import type {
   Space,
@@ -54,7 +53,7 @@ export type StrategyTemplate = {
   deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
-    signer: Signer,
+    web3: any,
     controller: string,
     spaceAddress: string,
     params: Record<string, any>
@@ -101,6 +100,7 @@ export type ReadOnlyNetworkActions = {
     space: Space,
     cid: string,
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
   updateProposal(
@@ -111,6 +111,7 @@ export type ReadOnlyNetworkActions = {
     proposalId: number | string,
     cid: string,
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);
@@ -146,6 +147,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       validationStrategy: StrategyConfig;
       votingStrategies: StrategyConfig[];
       executionStrategies: StrategyConfig[];
+      executionDestinations: string[];
       metadata: SpaceMetadata;
     }
   );
@@ -227,6 +229,7 @@ export type NetworkHelpers = {
   isExecutorSupported(executor: string): boolean;
   isVotingTypeSupported(type: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
+  getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(

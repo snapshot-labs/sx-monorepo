@@ -55,7 +55,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
   const provider = createProvider(rpcUrl);
   const api = createApi(apiUrl, networkId);
-  const constants = createConstants(networkId, baseNetworkId);
+  const constants = createConstants(networkId, baseNetworkId, baseChainId);
 
   const helpers = {
     isAuthenticatorSupported: (authenticator: string) =>
@@ -68,6 +68,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
     isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
+    getTransaction: txId => provider.getTransactionReceipt(txId),
     waitForTransaction: txId => {
       let retries = 0;
 
@@ -134,6 +135,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     supportsSimulation: true,
     managerConnectors: STARKNET_CONNECTORS,
     actions: createActions(networkId, provider, helpers, {
+      chainId,
       l1ChainId: baseChainId,
       ethUrl: ethRpcUrl
     }),

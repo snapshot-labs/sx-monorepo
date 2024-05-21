@@ -53,6 +53,35 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
+  async function execute(id: number, params: any, res: Response) {
+    try {
+      const { space, proposalId, executionParams } = params;
+      const { account, nonceManager } = getAccount(space);
+
+      let receipt;
+      try {
+        await nonceManager.acquire();
+        const nonce = await nonceManager.getNonce();
+
+        receipt = await client.execute(
+          {
+            signer: account,
+            space,
+            proposalId,
+            executionPayload: executionParams
+          },
+          { nonce }
+        );
+      } finally {
+        nonceManager.release();
+      }
+
+      return rpcSuccess(res, receipt, id);
+    } catch (e) {
+      return rpcError(res, 500, e, id);
+    }
+  }
+
   async function registerTransaction(id: number, params: any, res: Response) {
     try {
       const { type, hash, payload } = params;
@@ -101,5 +130,5 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  return { send, registerTransaction, registerProposal, getAccount };
+  return { send, execute, registerTransaction, registerProposal, getAccount };
 };

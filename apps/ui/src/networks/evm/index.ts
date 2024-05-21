@@ -90,6 +90,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
     isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinGraph,
+    getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {

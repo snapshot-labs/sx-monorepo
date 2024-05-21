@@ -15,6 +15,7 @@ const createConfig = (
 
   return {
     manaRpcUrl: `${manaRpcUrl}/stark_rpc/${config.Meta.eip712ChainId}`,
+    baseChainId: config.Meta.herodotusAccumulatesChainId,
     factoryAddress: config.Meta.spaceFactory,
     propositionPowerValidationStrategyAddress: config.ProposalValidations.VotingPower,
     herodotusStrategies: [
