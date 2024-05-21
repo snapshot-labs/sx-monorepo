@@ -3,7 +3,7 @@ import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNames } from '@/helpers/stamp';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { ProposalsFilter } from '@/networks/types';
-import { Proposal } from '@/types';
+import { NetworkID, Proposal } from '@/types';
 
 const PROPOSALS_LIMIT = 20;
 
@@ -91,7 +91,9 @@ watch(
       return;
     }
 
-    loadVotes(networkId.value, followedSpacesIds);
+    for (const network in followedSpacesStore.followedSpaceIdsByNetwork) {
+      loadVotes(network as NetworkID, followedSpacesStore.followedSpaceIdsByNetwork[network]);
+    }
     fetch();
   },
   { immediate: true }
