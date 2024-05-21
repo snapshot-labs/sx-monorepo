@@ -108,8 +108,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
   watch(
     [() => followedSpacesStore.followedSpacesLoaded, () => followedSpacesStore.followedSpacesIds],
-    async loaded => {
-      if (!loaded) return;
+    async ([followedSpacesLoaded]) => {
+      if (!followedSpacesLoaded) return;
 
       loading.value = true;
       notifications.value = [];
