@@ -23,8 +23,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
     `${pkg.name}.notifications.last-unread`,
     {} as Record<string, number>
   );
+  const shownLastUnreadTs = ref(0);
 
-  const route = useRoute();
   const followedSpacesStore = useFollowedSpacesStore();
   const metaStore = useMetaStore();
   const { web3 } = useWeb3();
@@ -74,7 +74,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     proposals.forEach(proposal => {
       const timestamp = proposal.min_end < now ? proposal.min_end : proposal.start;
-      const lastUnread = lastUnreadTs.value[web3.value.account] ?? 0;
 
       if (notifications.value.some(n => n.id === proposal.id)) return;
 
@@ -83,18 +82,24 @@ export const useNotificationsStore = defineStore('notifications', () => {
         proposal,
         type: proposal.min_end < now ? 'ended' : 'started',
         timestamp,
-        unread: timestamp > lastUnread
+        unread: timestamp > shownLastUnreadTs.value
       });
     });
 
     notifications.value.sort((a, b) => b.timestamp - a.timestamp);
   }
 
+  function refreshLastUnreadTs() {
+    if (!notifications.value.length) return;
+
+    lastUnreadTs.value[web3.value.account] = notifications.value[0].timestamp;
+  }
+
   function markAllAsRead() {
     notifications.value.forEach(notification => {
       notification.unread = false;
     });
-    lastUnreadTs.value[web3.value.account] = notifications.value[0]?.timestamp ?? 0;
+    shownLastUnreadTs.value = notifications.value[0]?.timestamp ?? 0;
   }
 
   const unreadNotificationsCount = computed(
@@ -115,12 +120,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
     { immediate: true }
   );
 
+  watch(
+    () => web3.value.account,
+    account => {
+      shownLastUnreadTs.value = account ? lastUnreadTs.value[account] ?? 0 : 0;
+    }
+  );
+
   onMounted(() => {
     refreshNotificationInterval = window.setInterval(loadNotifications, REFRESH_INTERVAL * 1e3);
-    window.addEventListener(
-      'beforeunload',
-      () => String(route.name) === 'my-notifications' && markAllAsRead()
-    );
   });
 
   onBeforeUnmount(() => clearInterval(refreshNotificationInterval));
@@ -129,6 +137,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     unreadNotificationsCount,
     loading,
     notifications,
-    markAllAsRead
+    markAllAsRead,
+    refreshLastUnreadTs
   };
 });

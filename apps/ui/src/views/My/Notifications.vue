@@ -10,6 +10,14 @@ watchEffect(async () => {
   );
 });
 
+watch(
+  () => notificationsStore.unreadNotificationsCount,
+  () => {
+    notificationsStore.refreshLastUnreadTs();
+  },
+  { immediate: true }
+);
+
 onUnmounted(() => notificationsStore.markAllAsRead());
 </script>
 
@@ -52,6 +60,10 @@ onUnmounted(() => notificationsStore.markAllAsRead());
           </div>
         </div>
       </div>
+    </div>
+    <div v-else class="px-4 py-3 flex items-center space-x-2">
+      <IH-exclamation-circle class="inline-block" />
+      <span>All caught up, you don't have any notifications</span>
     </div>
   </div>
 </template>
