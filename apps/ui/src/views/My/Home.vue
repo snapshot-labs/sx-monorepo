@@ -95,7 +95,8 @@ watch(
       loadVotes(network as NetworkID, followedSpacesStore.followedSpaceIdsByNetwork[network]);
     }
     fetch();
-  }
+  },
+  { immediate: true }
 );
 
 watch(filter, (toFilter, fromFilter) => {
