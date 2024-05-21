@@ -81,8 +81,10 @@ onMounted(() => {
 });
 
 watch(
-  () => followedSpacesStore.followedSpacesIds,
-  followedSpacesIds => {
+  [() => followedSpacesStore.followedSpacesLoaded, () => followedSpacesStore.followedSpacesIds],
+  ([followedSpacesloaded, followedSpacesIds]) => {
+    if (!followedSpacesloaded) return;
+
     loaded.value = false;
     proposals.value = [];
 
