@@ -103,7 +103,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   }
 
   const unreadNotificationsCount = computed(
-    () => notifications.value.map(n => n.unread).filter(Boolean).length
+    () => notifications.value.filter(n => n.unread).length
   );
 
   watch(
