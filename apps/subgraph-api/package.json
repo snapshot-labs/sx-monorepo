@@ -20,8 +20,8 @@
     "deploy-studio-arbitrum": "yarn deploy-studio --network arbitrum-one sx-arbitrum"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.68.0",
-    "@graphprotocol/graph-ts": "0.33.0",
+    "@graphprotocol/graph-cli": "0.72.1",
+    "@graphprotocol/graph-ts": "0.35.1",
     "assemblyscript-json": "^1.1.0"
   },
   "devDependencies": {
