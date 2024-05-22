@@ -2,7 +2,7 @@ import { createStarknetNetwork } from './starknet';
 import { createEvmNetwork } from './evm';
 import { createOffchainNetwork } from './offchain';
 import { NetworkID } from '@/types';
-import { ReadWriteNetwork } from './types';
+import { ExplorePageProtocol, ProtocolConfig, ReadWriteNetwork } from './types';
 
 const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
@@ -17,7 +17,7 @@ const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
-  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
+  : ['s', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'oeth', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
@@ -57,4 +57,21 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
  */
 export const supportsNullCurrent = (networkID: NetworkID) => {
   return !evmNetworks.includes(networkID);
+};
+
+export const DEFAULT_SPACES_LIMIT = 1000;
+
+export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> = {
+  snapshot: {
+    key: 'snapshot',
+    label: 'Snapshot',
+    networks: enabledNetworks.filter(network => offchainNetworks.includes(network)),
+    limit: 18
+  },
+  snapshotx: {
+    key: 'snapshotx',
+    label: 'Snapshot X',
+    networks: enabledNetworks.filter(network => !offchainNetworks.includes(network)),
+    limit: DEFAULT_SPACES_LIMIT
+  }
 };

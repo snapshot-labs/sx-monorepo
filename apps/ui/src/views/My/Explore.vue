@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import { explorePageProtocols } from '../../networks';
+import { ProtocolConfig } from '../../networks/types';
+
+const protocols = Object.values(explorePageProtocols).map(({ key, label }: ProtocolConfig) => ({
+  key,
+  label
+}));
+
 const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
 
@@ -8,13 +16,33 @@ watchEffect(() => setTitle('Explore'));
 </script>
 
 <template>
-  <UiContainer class="!max-w-screen-md pt-5">
-    <h2 class="mb-4 mono !text-xl" v-text="'Explore'" />
-    <UiLoading v-if="!spacesStore.loaded" class="block mb-2" />
-    <div v-if="spacesStore.loaded" class="max-w-screen-md">
+  <div class="flex justify-between">
+    <div class="flex flex-row p-4 space-x-2">
+      <UiSelectDropdown
+        v-model="spacesStore.protocol"
+        title="Protocol"
+        gap="12px"
+        placement="left"
+        :items="protocols"
+      />
+    </div>
+  </div>
+  <div>
+    <UiLabel label="Spaces" sticky />
+    <UiLoading v-if="spacesStore.loading" class="block m-4" />
+    <div v-else-if="spacesStore.loaded" class="max-w-screen-md mx-auto p-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-        <SpacesListItem v-for="space in spacesStore.spaces" :key="space.id" :space="space" />
+        <UiContainerInfiniteScroll
+          :loading-more="spacesStore.loadingMore"
+          @end-reached="spacesStore.fetchMore"
+        >
+          <SpacesListItem
+            v-for="space in spacesStore.explorePageSpaces"
+            :key="space.id"
+            :space="space"
+          />
+        </UiContainerInfiniteScroll>
       </div>
     </div>
-  </UiContainer>
+  </div>
 </template>
