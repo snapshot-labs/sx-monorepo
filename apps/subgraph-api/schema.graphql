@@ -106,6 +106,7 @@ type Proposal @entity {
   execution_time: Int!
   execution_strategy: String!
   execution_strategy_type: String!
+  execution_destination: String
   timelock_veto_guardian: String
   timelock_delay: BigInt!
   axiom_snapshot_address: String
