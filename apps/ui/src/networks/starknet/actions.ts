@@ -580,6 +580,8 @@ export function createActions(
         })
       );
     },
+    followSpace: () => {},
+    unfollowSpace: () => {},
     send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper
   };
 }

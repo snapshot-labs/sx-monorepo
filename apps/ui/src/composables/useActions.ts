@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork, getReadWriteNetwork } from '@/networks';
+import { enabledNetworks, getNetwork, getReadWriteNetwork, offchainNetworks } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -13,6 +13,8 @@ import type {
   VoteType
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
+
+const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -492,6 +494,49 @@ export function useActions() {
     });
   }
 
+  async function followSpace(networkId: NetworkID, spaceId: string) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(offchainNetworkId);
+
+    try {
+      await wrapPromise(
+        offchainNetworkId,
+        network.actions.followSpace(auth.web3, networkId, spaceId)
+      );
+    } catch (e) {
+      console.log(e);
+      uiStore.addNotification('error', e.message);
+      return false;
+    }
+
+    return true;
+  }
+
+  async function unfollowSpace(networkId: NetworkID, spaceId: string) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(offchainNetworkId);
+
+    try {
+      await wrapPromise(
+        offchainNetworkId,
+        network.actions.unfollowSpace(auth.web3, networkId, spaceId)
+      );
+    } catch (e) {
+      uiStore.addNotification('error', e.message);
+      return false;
+    }
+
+    return true;
+  }
+
   return {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
@@ -510,6 +555,8 @@ export function useActions() {
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
     updateStrategies: wrapWithErrors(updateStrategies),
-    delegate: wrapWithErrors(delegate)
+    delegate: wrapWithErrors(delegate),
+    followSpace: wrapWithErrors(followSpace),
+    unfollowSpace: wrapWithErrors(unfollowSpace)
   };
 }

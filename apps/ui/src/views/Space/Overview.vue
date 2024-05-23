@@ -23,7 +23,6 @@ onMounted(() => {
   proposalsStore.fetchSummary(props.space.id, props.space.network, PROPOSALS_LIMIT);
 });
 
-const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
@@ -45,7 +44,9 @@ const socials = computed(() =>
     .filter(social => social.href)
 );
 
-const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
+const proposalsRecord = computed(
+  () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
+);
 
 const autolinkedAbout = computed(() =>
   autolinker.link(props.space.about || '', {

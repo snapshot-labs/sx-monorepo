@@ -10,7 +10,9 @@ import {
   rankedChoiceVoteTypes,
   weightedVoteTypes,
   updateProposalTypes,
-  cancelProposalTypes
+  cancelProposalTypes,
+  followSpaceTypes,
+  unfollowSpaceTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
@@ -20,11 +22,15 @@ import type {
   Propose,
   UpdateProposal,
   CancelProposal,
+  FollowSpace,
+  UnfollowSpace,
   EIP712Message,
   EIP712VoteMessage,
   EIP712ProposeMessage,
   EIP712UpdateProposal,
-  EIP712CancelProposalMessage
+  EIP712CancelProposalMessage,
+  EIP712FollowSpaceMessage,
+  EIP712UnfollowSpaceMessage
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
@@ -53,6 +59,8 @@ export class EthereumSig {
       | EIP712ProposeMessage
       | EIP712UpdateProposal
       | EIP712CancelProposalMessage
+      | EIP712FollowSpaceMessage
+      | EIP712UnfollowSpaceMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -76,7 +84,11 @@ export class EthereumSig {
     };
   }
 
-  public async send(envelope: Envelope<Vote | Propose | UpdateProposal | CancelProposal>) {
+  public async send(
+    envelope: Envelope<
+      Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace
+    >
+  ) {
     const { address, signature: sig, domain, types, message } = envelope.signatureData!;
     const payload = {
       address,
@@ -206,6 +218,36 @@ export class EthereumSig {
       );
     }
     const signatureData = await this.sign(signer, message, voteType);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async followSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: FollowSpace;
+  }): Promise<Envelope<FollowSpace>> {
+    const signatureData = await this.sign(signer, data, followSpaceTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async unfollowSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UnfollowSpace;
+  }): Promise<Envelope<UnfollowSpace>> {
+    const signatureData = await this.sign(signer, data, unfollowSpaceTypes);
 
     return {
       signatureData,

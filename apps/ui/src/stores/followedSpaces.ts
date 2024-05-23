@@ -12,10 +12,12 @@ function getCompositeSpaceId(space: Space) {
 
 export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   const spacesStore = useSpacesStore();
+  const actions = useActions();
   const { web3, authInitiated } = useWeb3();
 
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
+  const followedSpaceLoading = ref(false);
   const followedSpacesIdsByAccount = useStorage(
     `${pkg.name}.spaces-followed`,
     {} as Record<string, string[]>
@@ -83,6 +85,36 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     fetchSpacesData(newIds);
   }
 
+  async function toggleSpaceFollow(id: string) {
+    const alreadyFollowed = followedSpacesIds.value.includes(id);
+    const [spaceNetwork, spaceId] = id.split(':') as [NetworkID, string];
+    followedSpaceLoading.value = true;
+
+    try {
+      if (alreadyFollowed) {
+        const result = await actions.unfollowSpace(spaceNetwork, spaceId);
+        if (!result) return;
+
+        followedSpacesIds.value = followedSpacesIds.value.filter(
+          (spaceId: string) => spaceId !== id
+        );
+        followedSpacesIdsByAccount.value[web3.value.account] = followedSpacesIdsByAccount.value[
+          web3.value.account
+        ].filter((spaceId: string) => spaceId !== id);
+      } else {
+        const result = await actions.followSpace(spaceNetwork, spaceId);
+        if (!result) return;
+
+        fetchSpacesData([id]);
+
+        followedSpacesIds.value.unshift(id);
+        followedSpacesIdsByAccount.value[web3.value.account].unshift(id);
+      }
+    } finally {
+      followedSpaceLoading.value = false;
+    }
+  }
+
   function isFollowed(spaceId: string) {
     return followedSpacesIds.value.includes(spaceId);
   }
@@ -110,6 +142,8 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     followedSpacesIds,
     followedSpaceIdsByNetwork,
     followedSpacesLoaded,
+    followedSpaceLoading,
+    toggleSpaceFollow,
     isFollowed
   };
 });
