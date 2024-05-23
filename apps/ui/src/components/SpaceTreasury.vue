@@ -110,7 +110,7 @@ function openModal(type: 'tokens' | 'nfts' | 'stake') {
 }
 
 function addTx(tx: Transaction) {
-  const draftId = createDraft(spaceKey.value, {
+  const draftId = createDraft(props.space.network, spaceKey.value, {
     execution: [tx],
     executionStrategy: executionStrategy.value
   });

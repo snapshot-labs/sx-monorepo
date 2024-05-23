@@ -1,16 +1,27 @@
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
-import { Draft, Drafts } from '@/types';
+import { getNetwork } from '@/networks';
+import { Draft, Drafts, NetworkID } from '@/types';
 
 const proposals = reactive<Drafts>(lsGet('proposals', {}));
 
+function getDefaultVotingType(networkId: NetworkID) {
+  const network = getNetwork(networkId);
+
+  return network.helpers.isVotingTypeSupported('single-choice') ? 'single-choice' : 'basic';
+}
+
 function removeEmpty(proposals: Drafts): Drafts {
   return Object.entries(proposals).reduce((acc, [id, proposal]) => {
+    const networkId = id.split(':')[0] as NetworkID;
+    const defaultVotingType = getDefaultVotingType(networkId);
+
     const { execution, type, choices, ...rest } = omit(proposal, ['updatedAt']);
     const hasFormValues = Object.values(rest).some(val => !!val);
+    const hasChangedVotingType = type !== defaultVotingType;
     const hasFormChoices = type !== 'basic' && (choices || []).some(val => !!val);
 
-    if (execution.length === 0 && !hasFormValues && !hasFormChoices) {
+    if (execution.length === 0 && !hasFormValues && !hasChangedVotingType && !hasFormChoices) {
       return acc;
     }
 
@@ -30,10 +41,14 @@ function generateId() {
 }
 
 function createDraft(
+  networkId: NetworkID,
   spaceId: string,
   payload?: Partial<Draft> & { proposalId?: number | string },
   draftKey?: string
 ) {
+  const type = getDefaultVotingType(networkId);
+  const choices = type === 'single-choice' ? Array(2).fill('') : BASIC_CHOICES;
+
   const id = draftKey || generateId();
   const key = `${spaceId}:${id}`;
 
@@ -41,8 +56,8 @@ function createDraft(
     title: '',
     body: '',
     discussion: '',
-    type: 'basic',
-    choices: BASIC_CHOICES,
+    type,
+    choices,
     executionStrategy: null,
     execution: [],
     updatedAt: Date.now(),
