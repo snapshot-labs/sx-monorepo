@@ -8,7 +8,7 @@ import {
   USER_FOLLOWS_QUERY,
   VOTES_QUERY
 } from './queries';
-import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
+import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { CHAIN_IDS } from '@/helpers/constants';
 import {
@@ -274,18 +274,21 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
+      filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const filters: Record<string, any> = {};
-      if (filter === 'active') {
+      const state = filters?.state;
+
+      if (state === 'active') {
         filters.start_lte = current;
         filters.end_gte = current;
-      } else if (filter === 'pending') {
+      } else if (state === 'pending') {
         filters.start_gt = current;
-      } else if (filter === 'closed') {
+      } else if (state === 'closed') {
         filters.end_lt = current;
       }
+
+      delete filters.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,

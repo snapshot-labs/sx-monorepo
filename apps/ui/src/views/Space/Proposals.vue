@@ -2,7 +2,7 @@
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { Space } from '@/types';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { ProposalsFilter, VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -13,7 +13,7 @@ const proposalsStore = useProposalsStore();
 
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
-const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
+const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const selectIconBaseProps = {
   width: 16,
@@ -60,11 +60,11 @@ async function getVotingPower() {
 }
 
 watch(
-  [props.space, filter],
-  ([toSpace, toFilter], [fromSpace, fromFilter]) => {
-    if (toSpace.id !== fromSpace?.id || toFilter !== fromFilter) {
+  [props.space, state],
+  ([toSpace, toState], [fromSpace, fromState]) => {
+    if (toSpace.id !== fromSpace?.id || toState !== fromState) {
       proposalsStore.reset(toSpace.id, toSpace.network);
-      proposalsStore.fetch(toSpace.id, toSpace.network, toFilter);
+      proposalsStore.fetch(toSpace.id, toSpace.network, toState);
     }
 
     if (toSpace.id !== fromSpace?.id) {
@@ -87,7 +87,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
     <div class="flex justify-between">
       <div class="flex flex-row p-4 space-x-2">
         <UiSelectDropdown
-          v-model="filter"
+          v-model="state"
           title="Status"
           gap="12px"
           placement="left"

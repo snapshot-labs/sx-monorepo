@@ -20,6 +20,7 @@ import Contacts from '@/views/Settings/Contacts.vue';
 import My from '@/views/My.vue';
 import Home from '@/views/My/Home.vue';
 import Explore from '@/views/My/Explore.vue';
+import Notifications from '@/views/My/Notifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Apps from '@/views/Apps.vue';
 import App from '@/views/App.vue';
@@ -74,7 +75,8 @@ const routes: any[] = [
     component: My,
     children: [
       { path: '/home', name: 'my-home', component: Home },
-      { path: '/explore', name: 'my-explore', component: Explore }
+      { path: '/explore', name: 'my-explore', component: Explore },
+      { path: '/notifications', name: 'my-notifications', component: Notifications }
     ]
   },
   { path: '/apps', name: 'apps', component: Apps },
