@@ -39,11 +39,9 @@ const SOCIALS = [
       <div class="space-y-2">
         <div class="eyebrow">Learn more</div>
         <div class="space-y-2">
-          <!-- Remove this link after testing -->
-          <!-- We can only open home page on Safe, change link to your space if required -->
           <div>
-            <a href="/#/s:thanku.eth">
-              Snapshot off-chain space <IH-arrow-sm-right class="inline-block -rotate-45" />
+            <a href="/#/explore">
+              Explore page <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
           <div>
