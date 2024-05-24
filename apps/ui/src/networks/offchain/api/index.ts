@@ -288,7 +288,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         filters.end_lt = current;
       }
 
-      delete filters.state;
+      delete filters?.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
