@@ -116,7 +116,7 @@ export class EthereumSig {
 
     let url = this.sequencerUrl;
     if (sig === '0x') {
-      url = RELAYER_URLS[this.networkConfig.eip712ChainId];
+      url = RELAYER_URLS[this.networkConfig.eip712ChainId] || url;
     }
     const res = await fetch(url, body);
     const result = await res.json();
