@@ -288,6 +288,13 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         filters.end_lt = current;
       }
 
+      for (const key of Object.keys(filters)) {
+        if (/^(min|max)_end/.test(key)) {
+          filters[key.replace(/^(min|max)_/, '')] = filters[key];
+          delete filters[key];
+        }
+      }
+
       delete filters?.state;
 
       const { data } = await apollo.query({
@@ -360,7 +367,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
     loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
       const {
         data: { follows }
-      }: { data: { follows: Follow[] } } = await apollo.query({
+      }: { data: { follows: (Follow & { network: NetworkID })[] } } = await apollo.query({
         query: USER_FOLLOWS_QUERY,
         variables: {
           first: 25,
@@ -369,7 +376,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
+      return follows.map(follow => ({
+        ...follow,
+        space: { ...follow.space, network: follow.network }
+      }));
     }
   };
 }
