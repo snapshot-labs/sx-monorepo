@@ -2,7 +2,7 @@
 import { VOTING_TYPES_INFO } from '@/helpers/constants';
 import { VoteType } from '@/types';
 
-const props = defineProps<{
+defineProps<{
   open: boolean;
   initialState?: VoteType;
   votingTypes: VoteType[];
@@ -13,24 +13,10 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
-const currentValue = ref<VoteType | null>(null);
-
-function handleSubmit() {
-  if (currentValue.value !== null) {
-    emit('save', currentValue.value);
-  }
-
+function handleSelect(type: VoteType) {
+  emit('save', type);
   emit('close');
 }
-
-watch(
-  () => props.open,
-  () => {
-    if (props.open && props.initialState) {
-      currentValue.value = props.initialState;
-    }
-  }
-);
 </script>
 
 <template>
@@ -42,8 +28,8 @@ watch(
       <UiSelector
         v-for="(type, index) in votingTypes"
         :key="index"
-        :is-active="currentValue === type"
-        @click="currentValue = type"
+        :is-active="initialState === type"
+        @click="handleSelect(type)"
       >
         <div>
           <h4 class="text-skin-link" v-text="VOTING_TYPES_INFO[type].label" />
@@ -51,8 +37,5 @@ watch(
         </div>
       </UiSelector>
     </div>
-    <template #footer>
-      <UiButton class="w-full" @click="handleSubmit">Confirm</UiButton>
-    </template>
   </UiModal>
 </template>
