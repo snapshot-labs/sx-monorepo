@@ -17,6 +17,10 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
+const hasAppNav = computed(() =>
+  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+);
+
 function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
 
@@ -61,7 +65,7 @@ watch(isSwiping, () => {
 </script>
 
 <template>
-  <div ref="el" :class="{ 'overflow-hidden': scrollDisabled }">
+  <div ref="el" class="h-screen" :class="{ 'overflow-hidden': scrollDisabled }">
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
       <AppSidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />
@@ -71,7 +75,7 @@ watch(isSwiping, () => {
         v-if="uiStore.sidebarOpen"
         class="backdrop lg:hidden"
         :style="{
-          left: `${72 + (route.matched[0]?.name === 'space' ? 240 : 0)}px`
+          left: `${72 + (hasAppNav ? 240 : 0)}px`
         }"
         @click="uiStore.toggleSidebar"
       />

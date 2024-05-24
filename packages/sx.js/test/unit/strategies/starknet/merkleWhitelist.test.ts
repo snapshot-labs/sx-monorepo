@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import createMerkleWhitelistStrategy from '../../../../src/strategies/starknet/merkleWhitelist';
 import { AddressType, Leaf } from '../../../../src/utils/merkletree';
-import { defaultNetwork } from '../../../../src/networks';
+import { starknetSepolia } from '../../../../src/networks';
 import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
 
-const ethUrl = process.env.GOERLI_NODE_URL as string;
+const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('merkleWhitelist', () => {
   const leaf = new Leaf(AddressType.ETHEREUM, '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 42n);
@@ -21,7 +21,7 @@ describe('merkleWhitelist', () => {
   };
 
   const merkleWhitelist = createMerkleWhitelistStrategy();
-  const config = { starkProvider, ethUrl, networkConfig: defaultNetwork };
+  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
 
   it('should return type', () => {
     expect(merkleWhitelist.type).toBe('whitelist');

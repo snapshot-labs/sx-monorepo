@@ -6,7 +6,7 @@ import randomBytes from 'randombytes';
 import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getAuthenticator } from '../../../authenticators/starknet';
 import { hexPadLeft } from '../../../utils/encoding';
-import { defaultNetwork } from '../../../networks';
+import { estimateStarknetFee } from '../../../utils/fees';
 import SpaceAbi from './abis/Space.json';
 import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy.json';
 import {
@@ -70,10 +70,7 @@ export class StarknetTx {
   config: ClientConfig;
 
   constructor(opts: ClientOpts) {
-    this.config = {
-      networkConfig: defaultNetwork,
-      ...opts
-    };
+    this.config = opts;
   }
 
   async deploySpace({
@@ -147,7 +144,7 @@ export class StarknetTx {
     const contract = await l1AvatarExecutionStrategyContractFactor.deploy(
       controller,
       target,
-      this.config.networkConfig.starknetCommit,
+      this.config.networkConfig.starknetCore,
       executionRelayer,
       spaces,
       quorum
@@ -203,8 +200,10 @@ export class StarknetTx {
 
     const calls = [call];
 
-    const fee = opts?.nonce ? await account.estimateFee(calls) : null;
-    return account.execute(calls, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(account, this.config.networkConfig, calls)
+      : undefined;
+    return account.execute(calls, undefined, { ...opts, maxFee });
   }
 
   async updateProposal(account: Account, envelope: Envelope<UpdateProposal>, opts?: Opts) {
@@ -225,8 +224,10 @@ export class StarknetTx {
       metadataUri: envelope.data.metadataUri
     });
 
-    const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    return account.execute(call, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(account, this.config.networkConfig, call)
+      : undefined;
+    return account.execute(call, undefined, { ...opts, maxFee });
   }
 
   async vote(account: Account, envelope: Envelope<Vote>, opts?: Opts) {
@@ -253,26 +254,36 @@ export class StarknetTx {
       metadataUri: ''
     });
 
-    const fee = opts?.nonce ? await account.estimateFee(call) : null;
-    return account.execute(call, undefined, fee ? { maxFee: fee.suggestedMaxFee } : undefined);
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(account, this.config.networkConfig, call)
+      : undefined;
+    return account.execute(call, undefined, { ...opts, maxFee });
   }
 
-  execute({
-    signer,
-    space,
-    proposalId,
-    executionPayload
-  }: {
-    signer: Account;
-    space: string;
-    proposalId: number;
-    executionPayload: string[];
-  }) {
-    return signer.execute({
+  async execute(
+    {
+      signer,
+      space,
+      proposalId,
+      executionPayload
+    }: {
+      signer: Account;
+      space: string;
+      proposalId: number;
+      executionPayload: string[];
+    },
+    opts?: Opts
+  ) {
+    const call = {
       contractAddress: space,
       entrypoint: 'execute',
       calldata: callData.compile('execute', [uint256.bnToUint256(proposalId), executionPayload])
-    });
+    };
+
+    const maxFee = opts?.nonce
+      ? await estimateStarknetFee(signer, this.config.networkConfig, call)
+      : undefined;
+    return signer.execute(call, undefined, { ...opts, maxFee });
   }
 
   async updateSettings({

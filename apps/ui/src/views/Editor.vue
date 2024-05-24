@@ -46,6 +46,7 @@ const {
 } = useWalletConnectTransaction();
 const { getCurrent } = useMetaStore();
 const spacesStore = useSpacesStore();
+const proposalsStore = useProposalsStore();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
@@ -112,7 +113,8 @@ const supportedExecutionStrategies = computed(() => {
       if (!strategy) return null;
 
       return {
-        address: strategy.id,
+        address: strategy.address,
+        destinationAddress: strategy.destination_address,
         type: strategy.type,
         treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
       };
@@ -189,6 +191,7 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
+        proposal.value.executionStrategy?.destinationAddress ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
     } else {
@@ -200,10 +203,14 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
+        proposal.value.executionStrategy?.destinationAddress ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
     }
-    if (result) router.back();
+    if (result) {
+      proposalsStore.reset(address.value!, networkId.value!);
+      router.back();
+    }
   } finally {
     sending.value = false;
   }

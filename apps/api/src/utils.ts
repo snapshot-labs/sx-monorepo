@@ -30,8 +30,8 @@ type StrategyConfig = {
   params: BigNumberish[];
 };
 
-const ethProvider = new JsonRpcProvider(
-  process.env.L1_NETWORK_NODE_URL ?? 'https://rpc.brovider.xyz/5'
+export const ethProvider = new JsonRpcProvider(
+  process.env.L1_NETWORK_NODE_URL ?? `https://rpc.brovider.xyz/${networkProperties.baseChainId}`
 );
 const starkProvider = new Provider({
   rpc: {
@@ -128,11 +128,13 @@ export async function handleExecutionStrategy(address: string, payload: string[]
     );
 
     let quorum = 0n;
+    let destinationAddress = null;
     if (executionStrategyType === 'SimpleQuorumVanilla') {
       quorum = await executionContract.quorum();
     } else if (executionStrategyType === 'EthRelayer') {
       const [l1Destination] = payload;
       if (!l1Destination) throw new Error('Invalid payload for EthRelayer execution strategy');
+      destinationAddress = l1Destination;
 
       const SimpleQuorumExecutionStrategyContract = new EthContract(
         l1Destination,
@@ -145,6 +147,7 @@ export async function handleExecutionStrategy(address: string, payload: string[]
 
     return {
       executionStrategyType,
+      destinationAddress,
       quorum
     };
   } catch (e) {

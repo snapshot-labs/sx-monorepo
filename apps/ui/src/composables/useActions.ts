@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork, getReadWriteNetwork } from '@/networks';
+import { enabledNetworks, getNetwork, getReadWriteNetwork, offchainNetworks } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -13,6 +13,8 @@ import type {
   VoteType
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
+
+const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -142,6 +144,7 @@ export function useActions() {
     validationStrategy: StrategyConfig,
     votingStrategies: StrategyConfig[],
     executionStrategies: StrategyConfig[],
+    executionDestinations: string[],
     controller: string
   ) {
     if (!web3.value.account) {
@@ -163,6 +166,7 @@ export function useActions() {
       validationStrategy,
       votingStrategies,
       executionStrategies,
+      executionDestinations,
       metadata
     });
 
@@ -221,6 +225,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -255,6 +260,7 @@ export function useActions() {
         space,
         pinned.cid,
         executionStrategy,
+        executionDestinationAddress,
         convertToMetaTransactions(transactions)
       )
     );
@@ -276,6 +282,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -311,6 +318,7 @@ export function useActions() {
         proposalId,
         pinned.cid,
         executionStrategy,
+        executionDestinationAddress,
         convertToMetaTransactions(transactions)
       )
     );
@@ -345,7 +353,6 @@ export function useActions() {
 
   async function executeTransactions(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getReadWriteNetwork(proposal.network);
 
@@ -358,6 +365,8 @@ export function useActions() {
 
     const network = getReadWriteNetwork(proposal.network);
 
+    // TODO: we need to have a way to tell what network to use, for example for EthRelayer transactions
+    // it should be baseNetwork
     await wrapPromise(proposal.network, network.actions.executeQueuedProposal(auth.web3, proposal));
   }
 
@@ -486,6 +495,49 @@ export function useActions() {
     });
   }
 
+  async function followSpace(networkId: NetworkID, spaceId: string) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(offchainNetworkId);
+
+    try {
+      await wrapPromise(
+        offchainNetworkId,
+        network.actions.followSpace(auth.web3, networkId, spaceId)
+      );
+    } catch (e) {
+      console.log(e);
+      uiStore.addNotification('error', e.message);
+      return false;
+    }
+
+    return true;
+  }
+
+  async function unfollowSpace(networkId: NetworkID, spaceId: string) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(offchainNetworkId);
+
+    try {
+      await wrapPromise(
+        offchainNetworkId,
+        network.actions.unfollowSpace(auth.web3, networkId, spaceId)
+      );
+    } catch (e) {
+      uiStore.addNotification('error', e.message);
+      return false;
+    }
+
+    return true;
+  }
+
   return {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
@@ -504,6 +556,8 @@ export function useActions() {
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
     updateStrategies: wrapWithErrors(updateStrategies),
-    delegate: wrapWithErrors(delegate)
+    delegate: wrapWithErrors(delegate),
+    followSpace: wrapWithErrors(followSpace),
+    unfollowSpace: wrapWithErrors(unfollowSpace)
   };
 }

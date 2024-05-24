@@ -34,16 +34,6 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     apiUrl: 'https://api-1.snapshotx.xyz',
     explorerUrl: 'https://starkscan.co'
   },
-  'sn-tn': {
-    name: 'Starknet (Goerli)',
-    chainId: starknetConstants.StarknetChainId.SN_GOERLI,
-    baseChainId: 5,
-    baseNetworkId: 'gor',
-    rpcUrl: `https://starknet-goerli.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    ethRpcUrl: `https://goerli.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl: 'https://testnet-api-1.snapshotx.xyz',
-    explorerUrl: 'https://testnet.starkscan.co'
-  },
   'sn-sep': {
     name: 'Starknet (Sepolia)',
     chainId: starknetConstants.StarknetChainId.SN_SEPOLIA,
@@ -65,7 +55,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
   const provider = createProvider(rpcUrl);
   const api = createApi(apiUrl, networkId);
-  const constants = createConstants(networkId, baseNetworkId);
+  const constants = createConstants(networkId, baseNetworkId, baseChainId);
 
   const helpers = {
     isAuthenticatorSupported: (authenticator: string) =>
@@ -78,6 +68,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
     isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
+    getTransaction: txId => provider.getTransactionReceipt(txId),
     waitForTransaction: txId => {
       let retries = 0;
 
@@ -144,6 +135,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     supportsSimulation: true,
     managerConnectors: STARKNET_CONNECTORS,
     actions: createActions(networkId, provider, helpers, {
+      chainId,
       l1ChainId: baseChainId,
       ethUrl: ethRpcUrl
     }),

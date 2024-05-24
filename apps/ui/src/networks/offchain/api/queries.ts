@@ -67,6 +67,7 @@ const PROPOSAL_FRAGMENT = gql`
     discussion
     author
     quorum
+    quorumType
     start
     end
     snapshot
@@ -105,9 +106,11 @@ export const PROPOSALS_QUERY = gql`
 `;
 
 export const SPACES_RANKING_QUERY = gql`
-  query ($first: Int, $skip: Int, $where: SpaceWhere) {
-    spaces(first: $first, skip: $skip, where: $where) {
-      ...offchainSpaceFragment
+  query ($first: Int, $skip: Int, $where: RankingWhere) {
+    ranking(first: $first, skip: $skip, where: $where) {
+      items {
+        ...offchainSpaceFragment
+      }
     }
   }
   ${SPACE_FRAGMENT}
@@ -123,8 +126,8 @@ export const SPACE_QUERY = gql`
 `;
 
 export const USER_VOTES_QUERY = gql`
-  query ($spaceId: String, $voter: String) {
-    votes(where: { space: $spaceId, voter: $voter }) {
+  query ($spaceIds: [String], $voter: String) {
+    votes(where: { space_in: $spaceIds, voter: $voter }) {
       id
       voter
       space {
@@ -136,6 +139,16 @@ export const USER_VOTES_QUERY = gql`
       choice
       vp
       created
+    }
+  }
+`;
+
+export const USER_FOLLOWS_QUERY = gql`
+  query ($follower: String!) {
+    follows(where: { follower: $follower }) {
+      space {
+        id
+      }
     }
   }
 `;

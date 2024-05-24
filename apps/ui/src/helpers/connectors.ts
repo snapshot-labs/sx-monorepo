@@ -21,7 +21,7 @@ export default {
     options: {
       projectId: 'e6454bd61aba40b786e866a69bd4c5c6',
       chains: [1],
-      optionalChains: [1, 10, 56, 100, 42161, 137, 1088, 11155111],
+      optionalChains: [10, 56, 100, 42161, 137, 1088, 11155111],
       methods: ['eth_sendTransaction', 'eth_signTypedData_v4'],
       showQrModal: true
     }

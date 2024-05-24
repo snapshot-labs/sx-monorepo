@@ -1,6 +1,5 @@
 import { FunctionalComponent } from 'vue';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { Signer } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import type {
   Space,
@@ -10,7 +9,8 @@ import type {
   User,
   Choice,
   NetworkID,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  Follow
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -18,6 +18,9 @@ export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
 };
+export type ProposalsFilter = {
+  state?: 'any' | 'active' | 'pending' | 'closed';
+} & Record<string, any>;
 export type Connector = 'argentx' | 'injected' | 'walletconnect' | 'walletlink' | 'gnosis';
 export type GeneratedMetadata =
   | {
@@ -53,7 +56,7 @@ export type StrategyTemplate = {
   deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
-    signer: Signer,
+    web3: any,
     controller: string,
     spaceAddress: string,
     params: Record<string, any>
@@ -100,6 +103,7 @@ export type ReadOnlyNetworkActions = {
     space: Space,
     cid: string,
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
   updateProposal(
@@ -110,6 +114,7 @@ export type ReadOnlyNetworkActions = {
     proposalId: number | string,
     cid: string,
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     transactions: MetaTransaction[]
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);
@@ -120,6 +125,8 @@ export type ReadOnlyNetworkActions = {
     proposal: Proposal,
     choice: Choice
   ): Promise<any>;
+  followSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string);
+  unfollowSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string);
   send(envelope: any): Promise<any>;
 };
 
@@ -145,6 +152,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       validationStrategy: StrategyConfig;
       votingStrategies: StrategyConfig[];
       executionStrategies: StrategyConfig[];
+      executionDestinations: string[];
       metadata: SpaceMetadata;
     }
   );
@@ -182,12 +190,12 @@ export type NetworkApi = {
     filter?: 'any' | 'for' | 'against' | 'abstain',
     sortBy?: 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
   ): Promise<Vote[]>;
-  loadUserVotes(spaceId: string, voter: string): Promise<{ [key: string]: Vote }>;
+  loadUserVotes(spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }>;
   loadProposals(
-    spaceId: string,
+    spaceIds: string[],
     paginationOpts: PaginationOpts,
     current: number,
-    filter?: 'any' | 'active' | 'pending' | 'closed',
+    filter?: ProposalsFilter,
     searchQuery?: string
   ): Promise<Proposal[]>;
   loadProposal(
@@ -198,6 +206,12 @@ export type NetworkApi = {
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User | null>;
+  loadLeaderboard(
+    spaceId: string,
+    paginationOpts: PaginationOpts,
+    sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
+  ): Promise<User[]>;
+  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
 };
 
 export type NetworkConstants = {
@@ -220,6 +234,7 @@ export type NetworkHelpers = {
   isExecutorSupported(executor: string): boolean;
   isVotingTypeSupported(type: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
+  getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(
@@ -247,3 +262,12 @@ type BaseNetwork = {
 export type ReadOnlyNetwork = BaseNetwork & { readOnly: true; actions: ReadOnlyNetworkActions };
 export type ReadWriteNetwork = BaseNetwork & { readOnly?: false; actions: NetworkActions };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
+
+export type ExplorePageProtocol = 'snapshot' | 'snapshotx';
+
+export type ProtocolConfig = {
+  key: ExplorePageProtocol;
+  label: string;
+  networks: NetworkID[];
+  limit: number;
+};

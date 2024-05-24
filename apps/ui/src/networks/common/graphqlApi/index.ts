@@ -6,7 +6,8 @@ import {
   PROPOSAL_QUERY,
   SPACES_QUERY,
   SPACE_QUERY,
-  USER_QUERY
+  USER_QUERY,
+  LEADERBOARD_QUERY
 } from './queries';
 import {
   SPACES_QUERY as HIGHLIGHT_SPACES_QUERY,
@@ -20,10 +21,19 @@ import {
   mixinHighlightVotes,
   joinHighlightUser
 } from './highlight';
-import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
+import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { BASIC_CHOICES } from '@/helpers/constants';
-import { Space, Proposal, Vote, User, Transaction, NetworkID, ProposalState } from '@/types';
+import {
+  Space,
+  Proposal,
+  Vote,
+  User,
+  Transaction,
+  NetworkID,
+  ProposalState,
+  Follow
+} from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
 
 type ApiOptions = {
@@ -119,6 +129,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     }),
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
+    executors_destinations: space.metadata.executors_destinations,
     executors_strategies: space.metadata.executors_strategies,
     voting_power_validation_strategies_parsed_metadata: processStrategiesMetadata(
       space.voting_power_validation_strategies_parsed_metadata
@@ -155,13 +166,13 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
     execution: formatExecution(proposal.metadata.execution),
-    has_execution_window_opened:
-      proposal.execution_strategy_type === 'Axiom'
-        ? proposal.max_end <= current
-        : proposal.min_end <= current,
+    has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(proposal.execution_strategy_type)
+      ? proposal.max_end <= current
+      : proposal.min_end <= current,
     state: getProposalState(proposal, current),
     network: networkId,
-    privacy: null
+    privacy: null,
+    quorum: +proposal.quorum
   };
 }
 
@@ -272,11 +283,11 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         return vote;
       });
     },
-    loadUserVotes: async (spaceId: string, voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
-          spaceId,
+          spaceIds,
           voter
         }
       });
@@ -286,21 +297,24 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       );
     },
     loadProposals: async (
-      spaceId: string,
+      spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
+      filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const filters: Record<string, any> = {};
-      if (filter === 'active') {
+      const state = filters?.state;
+
+      if (state === 'active') {
         filters.start_lte = current;
         filters.max_end_gte = current;
-      } else if (filter === 'pending') {
+      } else if (state === 'pending') {
         filters.start_gt = current;
-      } else if (filter === 'closed') {
+      } else if (state === 'closed') {
         filters.max_end_lt = current;
       }
+
+      delete filters?.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -308,7 +322,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
           first: limit,
           skip,
           where: {
-            space: spaceId,
+            space_in: spaceIds,
             cancelled: false,
             metadata_: { title_contains_nocase: searchQuery },
             ...filters
@@ -422,6 +436,45 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       ]);
 
       return joinHighlightUser(data.user ?? null, highlightResult?.data?.sxuser ?? null);
+    },
+    loadLeaderboard(
+      spaceId: string,
+      { limit, skip = 0 }: PaginationOpts,
+      sortBy:
+        | 'vote_count-desc'
+        | 'vote_count-asc'
+        | 'proposal_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc'
+    ): Promise<User[]> {
+      const [orderBy, orderDirection] = sortBy.split('-') as [
+        'vote_count' | 'proposal_count',
+        'desc' | 'asc'
+      ];
+
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: limit,
+            skip,
+            orderBy,
+            orderDirection,
+            where: {
+              space: spaceId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            id: leaderboard.user.id,
+            created: leaderboard.user.created,
+            vote_count: leaderboard.vote_count,
+            proposal_count: leaderboard.proposal_count
+          }))
+        );
+    },
+    loadFollows: async () => {
+      return [] as Follow[];
     }
   };
 }

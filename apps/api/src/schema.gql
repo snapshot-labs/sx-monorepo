@@ -50,8 +50,8 @@ type SpaceMetadataItem {
   wallet: String!
   executors: [String]!
   executors_types: [String]!
-  # this is dummy field, we should add support for many-to-many in the future
-  executors_strategies: [ExecutionStrategy]! @derivedFrom(field: "id")
+  executors_destinations: [String]!
+  executors_strategies: [ExecutionStrategy]!
 }
 
 type VotingPowerValidationStrategiesParsedMetadataItem {
@@ -80,10 +80,12 @@ type StrategiesParsedMetadataDataItem {
 
 type ExecutionStrategy {
   id: String!
+  address: String!
+  destination_address: String
   type: String!
   quorum: BigDecimalVP!
   treasury: String
-  treasury_chain: String
+  treasury_chain: Int
   timelock_veto_guardian: String
   timelock_delay: BigInt!
   axiom_snapshot_address: String
@@ -104,6 +106,7 @@ type Proposal {
   execution_time: Int!
   execution_strategy: String!
   execution_strategy_type: String!
+  execution_destination: String
   timelock_veto_guardian: String
   timelock_delay: Int
   axiom_snapshot_address: String

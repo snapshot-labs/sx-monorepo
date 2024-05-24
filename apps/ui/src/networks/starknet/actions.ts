@@ -1,12 +1,11 @@
 import {
   starknetMainnet,
-  starknetGoerli,
   starknetSepolia,
   clients,
   getStarknetStrategy,
   NetworkConfig
 } from '@snapshot-labs/sx';
-import { MANA_URL } from '@/helpers/mana';
+import { MANA_URL, executionCall } from '@/helpers/mana';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import {
   getExecutionData,
@@ -35,10 +34,10 @@ import type {
   NetworkID
 } from '@/types';
 import { getProvider } from '@/helpers/provider';
+import { convertToMetaTransactions } from '@/helpers/transactions';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
-  'sn-tn': starknetGoerli,
   'sn-sep': starknetSepolia
 };
 
@@ -46,7 +45,7 @@ export function createActions(
   networkId: NetworkID,
   starkProvider: RpcProvider,
   helpers: NetworkHelpers,
-  { l1ChainId, ethUrl }: { l1ChainId: number; ethUrl: string }
+  { chainId, l1ChainId, ethUrl }: { chainId: string; l1ChainId: number; ethUrl: string }
 ): NetworkActions {
   const networkConfig = CONFIGS[networkId];
   if (!networkConfig) throw new Error(`Unsupported network ${networkId}`);
@@ -77,6 +76,7 @@ export function createActions(
   const starkSigClient = new clients.StarknetSig(clientConfig);
   const ethSigClient = new clients.EthereumSig(clientConfig);
   const ethTxClient = new clients.EthereumTx(clientConfig);
+  const l1ExecutorClient = new clients.L1Executor();
 
   return {
     async predictSpaceAddress(web3: any, { salt }) {
@@ -96,7 +96,7 @@ export function createActions(
 
       return params.strategy.deploy(
         client,
-        web3.getSigner(),
+        web3,
         params.controller,
         params.spaceAddress,
         params.strategy.params
@@ -114,13 +114,15 @@ export function createActions(
         validationStrategy: StrategyConfig;
         votingStrategies: StrategyConfig[];
         executionStrategies: StrategyConfig[];
+        executionDestinations: string[];
         metadata: SpaceMetadata;
       }
     ) {
       const pinned = await helpers.pin(
         createErc1155Metadata(params.metadata, {
           execution_strategies: params.executionStrategies.map(config => config.address),
-          execution_strategies_types: params.executionStrategies.map(config => config.type)
+          execution_strategies_types: params.executionStrategies.map(config => config.type),
+          execution_destinations: params.executionDestinations
         })
       );
 
@@ -160,7 +162,8 @@ export function createActions(
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
           execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types
+          execution_strategies_types: space.executors_types,
+          execution_destinations: space.executors_destinations
         })
       );
 
@@ -177,6 +180,7 @@ export function createActions(
       space: Space,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) => {
       const isContract = await getIsContract(connectorType, account);
@@ -197,7 +201,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams
         };
       } else {
         selectedExecutionStrategy = {
@@ -253,6 +262,7 @@ export function createActions(
       proposalId: number | string,
       cid: string,
       executionStrategy: string | null,
+      executionDestinationAddress: string | null,
       transactions: MetaTransaction[]
     ) {
       const isContract = await getIsContract(connectorType, account);
@@ -273,7 +283,12 @@ export function createActions(
       if (executionStrategy) {
         selectedExecutionStrategy = {
           addr: executionStrategy,
-          params: getExecutionData(space, executionStrategy, transactions).executionParams[0]
+          params: getExecutionData(
+            space,
+            executionStrategy,
+            executionDestinationAddress,
+            transactions
+          ).executionParams
         };
       } else {
         selectedExecutionStrategy = {
@@ -378,8 +393,64 @@ export function createActions(
       });
     },
     finalizeProposal: () => null,
-    executeTransactions: () => null,
-    executeQueuedProposal: () => null,
+    executeTransactions: async (web3: any, proposal: Proposal) => {
+      const executionData = getExecutionData(
+        proposal.space,
+        proposal.execution_strategy,
+        proposal.execution_destination,
+        convertToMetaTransactions(proposal.execution)
+      );
+
+      return executionCall('stark', chainId, 'execute', {
+        space: proposal.space.id,
+        proposalId: proposal.proposal_id,
+        executionParams: executionData.executionParams
+      });
+    },
+    executeQueuedProposal: async (web3: any, proposal: Proposal) => {
+      if (!proposal.execution_destination) throw new Error('Execution destination is missing');
+
+      const activeVotingStrategies = proposal.strategies_indicies.reduce((acc, index) => {
+        return acc | (1n << BigInt(index));
+      }, 0n);
+
+      const proposalData = {
+        startTimestamp: BigInt(proposal.start),
+        minEndTimestamp: BigInt(proposal.min_end),
+        maxEndTimestamp: BigInt(proposal.max_end),
+        finalizationStatus: 0,
+        executionPayloadHash: proposal.execution_hash,
+        executionStrategy: proposal.execution_strategy,
+        authorAddressType: 1, // <- hardcoded, needs to be indexed (0 for starknet, 1 for ethereum)
+        author: proposal.author.id,
+        activeVotingStrategies: activeVotingStrategies
+      } as const;
+
+      const votesFor = BigInt(proposal.scores[0]);
+      const votesAgainst = BigInt(proposal.scores[1]);
+      const votesAbstain = BigInt(proposal.scores[2]);
+
+      const { executionParams } = getExecutionData(
+        proposal.space,
+        proposal.execution_strategy,
+        proposal.execution_destination,
+        convertToMetaTransactions(proposal.execution)
+      );
+
+      const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
+
+      return l1ExecutorClient.execute({
+        signer: web3.getSigner(),
+        executor: proposal.execution_destination,
+        space: proposal.space.id,
+        proposal: proposalData,
+        votesFor,
+        votesAgainst,
+        votesAbstain,
+        executionHash,
+        transactions: convertToMetaTransactions(proposal.execution)
+      });
+    },
     vetoProposal: () => null,
     setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {
       return client.setVotingDelay({
@@ -509,6 +580,8 @@ export function createActions(
         })
       );
     },
+    followSpace: () => {},
+    unfollowSpace: () => {},
     send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper
   };
 }

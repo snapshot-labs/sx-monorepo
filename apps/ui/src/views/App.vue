@@ -37,6 +37,14 @@ onMounted(() => load());
         </div>
         <div class="md:flex md:space-x-4">
           <div class="space-y-5 p-4 border rounded-lg h-fit mb-4">
+            <div v-if="app.images" class="flex overflow-y-scroll no-scrollbar space-x-2">
+              <img
+                v-for="(image, i) in app.images.split(',')"
+                :key="i"
+                :src="image"
+                class="max-w-[96%]"
+              />
+            </div>
             <div>
               <div class="eyebrow mb-2">Overview</div>
               <div class="text-md text-skin-link" v-text="app.overview" />

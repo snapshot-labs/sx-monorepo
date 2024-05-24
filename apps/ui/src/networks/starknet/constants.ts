@@ -1,7 +1,7 @@
-import { Signer } from '@ethersproject/abstract-signer';
+import { Web3Provider } from '@ethersproject/providers';
 import { CallData, uint256 } from 'starknet';
 import { clients, utils, starknetNetworks } from '@snapshot-labs/sx';
-import { getUrl, shorten } from '@/helpers/utils';
+import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
 import { pinPineapple } from '@/helpers/pin';
 import { StrategyConfig, StrategyTemplate } from '../types';
 
@@ -14,8 +14,12 @@ import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
 
-export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) {
-  const config = starknetNetworks[networkId as 'sn' | 'sn-tn' | 'sn-sep'];
+export function createConstants(
+  networkId: NetworkID,
+  baseNetworkId: NetworkID,
+  baseChainId: number
+) {
+  const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
   const SUPPORTED_AUTHENTICATORS = {
@@ -36,7 +40,9 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
     [config.Strategies.OZVotesStorageProof]: true
   };
 
-  const SUPPORTED_EXECUTORS = {};
+  const SUPPORTED_EXECUTORS = {
+    EthRelayer: true
+  };
 
   const RELAYER_AUTHENTICATORS = {
     [config.Authenticators.StarkSig]: 'starknet',
@@ -246,36 +252,44 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
       generateSummary: (params: Record<string, any>) => {
         const length =
-          params.whitelist.trim().length === 0 ? 0 : params.whitelist.split('\n').length;
+          params.whitelist.trim().length === 0
+            ? 0
+            : params.whitelist.split(/[\n,]/).filter((s: string) => s.trim().length).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: (params: Record<string, any>) => {
-        const leaves = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
-          const type =
-            address.length === 42
-              ? utils.merkle.AddressType.ETHEREUM
-              : utils.merkle.AddressType.STARKNET;
+        const leaves = params.whitelist
+          .split(/[\n,]/)
+          .filter((s: string) => s.trim().length)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':').map(s => s.trim());
+            const type =
+              address.length === 42
+                ? utils.merkle.AddressType.ETHEREUM
+                : utils.merkle.AddressType.STARKNET;
 
-          return new utils.merkle.Leaf(type, address, BigInt(votingPower));
-        });
+            return new utils.merkle.Leaf(type, address, BigInt(votingPower));
+          });
 
         return [
           utils.merkle.generateMerkleRoot(leaves.map((leaf: utils.merkle.Leaf) => leaf.hash))
         ];
       },
       generateMetadata: async (params: Record<string, any>) => {
-        const tree = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
-          const type = address.length === 42 ? 1 : 0;
+        const tree = params.whitelist
+          .split(/[\n,]/)
+          .filter((s: string) => s.trim().length)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':').map(s => s.trim());
+            const type = address.length === 42 ? 1 : 0;
 
-          return {
-            type,
-            address,
-            votingPower: votingPower
-          };
-        });
+            return {
+              type,
+              address,
+              votingPower: votingPower
+            };
+          });
 
         const pinned = await pinPineapple({ tree });
 
@@ -314,7 +328,7 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
         properties: {
           whitelist: {
             type: 'string',
-            format: 'long',
+            format: 'addresses-with-voting-power',
             title: 'Whitelist',
             examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
           },
@@ -426,13 +440,15 @@ export function createConstants(networkId: NetworkID, baseNetworkId: NetworkID) 
       deployConnectors: EVM_CONNECTORS,
       deploy: async (
         client: clients.StarknetTx,
-        signer: Signer,
+        web3: Web3Provider,
         controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
+        await verifyNetwork(web3, baseChainId);
+
         return client.deployL1AvatarExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.l1Controller,
             target: params.contractAddress,

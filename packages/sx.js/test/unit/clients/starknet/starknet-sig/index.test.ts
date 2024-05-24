@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { Account } from 'starknet';
 import { starkProvider } from '../../../helpers';
 import { StarknetSig } from '../../../../../src/clients/starknet/starknet-sig';
-import { starknetNetworks, starknetGoerli } from '../../../../../src/networks';
+import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
 
 describe('StarknetSig', () => {
   const address = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
@@ -14,7 +14,7 @@ describe('StarknetSig', () => {
     starkProvider,
     ethUrl: 'https://rpc.brovider.xyz/5',
     manaUrl: 'http://localhost:3001',
-    networkConfig: starknetGoerli
+    networkConfig: starknetSepolia
   });
 
   beforeAll(() => {
@@ -25,8 +25,8 @@ describe('StarknetSig', () => {
     vi.restoreAllMocks();
   });
 
-  const { StarkSig } = starknetNetworks['sn-tn'].Authenticators;
-  const { MerkleWhitelist } = starknetNetworks['sn-tn'].Strategies;
+  const { StarkSig } = starknetNetworks['sn-sep'].Authenticators;
+  const { MerkleWhitelist } = starknetNetworks['sn-sep'].Strategies;
 
   it('should create propose envelope', async () => {
     const envelope = await client.propose({

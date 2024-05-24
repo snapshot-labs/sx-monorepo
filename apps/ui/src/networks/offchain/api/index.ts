@@ -5,9 +5,10 @@ import {
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
   USER_VOTES_QUERY,
+  USER_FOLLOWS_QUERY,
   VOTES_QUERY
 } from './queries';
-import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
+import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { CHAIN_IDS } from '@/helpers/constants';
 import {
@@ -17,7 +18,8 @@ import {
   User,
   NetworkID,
   ProposalState,
-  SpaceMetadataTreasury
+  SpaceMetadataTreasury,
+  Follow
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
@@ -103,6 +105,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     authenticators: [DEFAULT_AUTHENTICATOR],
     executors: [],
     executors_types: [],
+    executors_destinations: [],
     executors_strategies: [],
     strategies: space.strategies.map(strategy => strategy.name),
     strategies_indicies: [],
@@ -136,6 +139,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     max_end: proposal.end,
     snapshot: proposal.snapshot,
     quorum: proposal.quorum,
+    quorum_type: proposal.quorumType,
     choices: proposal.choices,
     scores: proposal.scores,
     scores_total: proposal.scores_total,
@@ -165,6 +169,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     execution_time: 0,
     execution_strategy: '',
     execution_strategy_type: '',
+    execution_destination: '',
     timelock_veto_guardian: null,
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indicies: [],
@@ -252,11 +257,11 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         return formattedVote;
       });
     },
-    loadUserVotes: async (spaceId: string, voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
-          spaceId,
+          spaceIds,
           voter
         }
       });
@@ -266,21 +271,24 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       );
     },
     loadProposals: async (
-      spaceId: string,
+      spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
+      filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const filters: Record<string, any> = {};
-      if (filter === 'active') {
+      const state = filters?.state;
+
+      if (state === 'active') {
         filters.start_lte = current;
         filters.end_gte = current;
-      } else if (filter === 'pending') {
+      } else if (state === 'pending') {
         filters.start_gt = current;
-      } else if (filter === 'closed') {
+      } else if (state === 'closed') {
         filters.end_lt = current;
       }
+
+      delete filters.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -288,7 +296,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
           first: limit,
           skip,
           where: {
-            space: spaceId,
+            space_in: spaceIds,
             title_contains: searchQuery,
             flagged: false,
             ...filters
@@ -323,7 +331,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.ranking.items.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
@@ -344,6 +352,24 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         vote_count: 0,
         created: 0
       };
+    },
+    loadLeaderboard: async (): Promise<User[]> => {
+      // NOTE: leaderboard implementation is pending on offchain
+      return [];
+    },
+    loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
+      const {
+        data: { follows }
+      }: { data: { follows: Follow[] } } = await apollo.query({
+        query: USER_FOLLOWS_QUERY,
+        variables: {
+          first: 25,
+          follower: userId,
+          space: spaceId
+        }
+      });
+
+      return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
     }
   };
 }

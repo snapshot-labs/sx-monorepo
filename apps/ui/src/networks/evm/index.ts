@@ -52,13 +52,6 @@ export const METADATA: Record<string, Metadata> = {
     avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: ETH_MAINNET_BLOCK_TIME
   },
-  gor: {
-    name: 'Ethereum Goerli',
-    chainId: 5,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx-goerli/version/latest',
-    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
-    blockTime: 15.52512
-  },
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
@@ -97,6 +90,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
     isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinGraph,
+    getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
@@ -124,7 +118,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     chainId,
     baseChainId: chainId,
     currentChainId: currentChainId ?? chainId,
-    supportsSimulation: ['eth', 'gor', 'sep', 'oeth', 'matic', 'arb1'].includes(networkId),
+    supportsSimulation: ['eth', 'sep', 'oeth', 'matic', 'arb1'].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),
     api,

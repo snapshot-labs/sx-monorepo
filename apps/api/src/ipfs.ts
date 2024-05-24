@@ -1,9 +1,15 @@
+import { validateAndParseAddress } from 'starknet';
+import { Contract as EthContract } from '@ethersproject/contracts';
+import { getAddress } from '@ethersproject/address';
 import {
   SpaceMetadataItem,
   ProposalMetadataItem,
-  StrategiesParsedMetadataDataItem
+  StrategiesParsedMetadataDataItem,
+  ExecutionStrategy
 } from '../.checkpoint/models';
-import { dropIpfs, getJSON, getSpaceName } from './utils';
+import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
+import { ethProvider, dropIpfs, getJSON, getSpaceName } from './utils';
+import { networkProperties } from './overrrides';
 
 export async function handleSpaceMetadata(space: string, metadataUri: string) {
   const exists = await SpaceMetadataItem.loadEntity(dropIpfs(metadataUri));
@@ -21,7 +27,9 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
   spaceMetadataItem.voting_power_symbol = '';
   spaceMetadataItem.wallet = '';
   spaceMetadataItem.executors = [];
+  spaceMetadataItem.executors_strategies = [];
   spaceMetadataItem.executors_types = [];
+  spaceMetadataItem.executors_destinations = [];
   spaceMetadataItem.treasuries = [];
   spaceMetadataItem.delegations = [];
 
@@ -55,7 +63,53 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
       metadata.properties.execution_strategies &&
       metadata.properties.execution_strategies_types
     ) {
-      spaceMetadataItem.executors = metadata.properties.execution_strategies;
+      // In Starknet execution strategies are not always deployed via proxy (e.g. EthRelayer).
+      // We have to intercept it there and create single use proxy for it.
+      const destinations: string[] = [];
+      const uniqueExecutors: string[] = [];
+      for (let i = 0; i < metadata.properties.execution_strategies.length; i++) {
+        const id = crypto.randomUUID();
+        const destination = (metadata.properties?.execution_destinations[i] as string) ?? '';
+
+        destinations.push(destination);
+        uniqueExecutors.push(id);
+
+        let executionStrategy = await ExecutionStrategy.loadEntity(id);
+        if (!executionStrategy) executionStrategy = new ExecutionStrategy(id);
+
+        executionStrategy.type = metadata.properties.execution_strategies_types[i];
+        executionStrategy.address = validateAndParseAddress(
+          metadata.properties.execution_strategies[i]
+        );
+        executionStrategy.quorum = '0';
+        executionStrategy.timelock_delay = 0n;
+
+        if (executionStrategy.type === 'EthRelayer') {
+          const l1Destination = getAddress(destination);
+
+          const l1AvatarExecutionStrategyContract = new EthContract(
+            l1Destination,
+            L1AvatarExectionStrategyAbi,
+            ethProvider
+          );
+
+          const quorum = (await l1AvatarExecutionStrategyContract.quorum()).toBigInt();
+          const treasury = await l1AvatarExecutionStrategyContract.target();
+
+          executionStrategy.destination_address = l1Destination;
+          executionStrategy.quorum = quorum;
+          executionStrategy.treasury = treasury;
+          executionStrategy.treasury_chain = networkProperties.baseChainId;
+        }
+
+        await executionStrategy.save();
+      }
+
+      spaceMetadataItem.executors = metadata.properties.execution_strategies.map(
+        (strategy: string) => validateAndParseAddress(strategy)
+      );
+      spaceMetadataItem.executors_strategies = uniqueExecutors;
+      spaceMetadataItem.executors_destinations = destinations;
       spaceMetadataItem.executors_types = metadata.properties.execution_strategies_types;
     }
   }

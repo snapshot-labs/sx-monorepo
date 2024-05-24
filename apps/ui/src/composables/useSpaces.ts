@@ -1,9 +1,12 @@
 import { ref, computed } from 'vue';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import {
+  enabledNetworks,
+  getNetwork,
+  explorePageProtocols,
+  DEFAULT_SPACES_LIMIT
+} from '@/networks';
 import { Space, NetworkID } from '@/types';
-import { SpacesFilter } from '@/networks/types';
-
-const SPACES_LIMIT = 1000;
+import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
 
 type NetworkRecord = {
   spaces: Record<string, Space>;
@@ -15,6 +18,8 @@ export function useSpaces() {
   const loading = ref(false);
   const loadingMore = ref(false);
   const loaded = ref(false);
+  const protocol = ref('snapshot' as ExplorePageProtocol);
+
   const networksMap = ref(
     Object.fromEntries(
       enabledNetworks.map(network => [
@@ -28,11 +33,15 @@ export function useSpaces() {
     )
   );
 
-  const spaces = computed(() =>
-    Object.values(networksMap.value).flatMap(record =>
-      record.spacesIdsList.map(spaceId => record.spaces[spaceId])
-    )
-  );
+  const explorePageSpaces = ref<Space[]>([]);
+
+  const spaces = computed(() => {
+    const protocolNetworks = explorePageProtocols[protocol.value].networks;
+    return Object.values(networksMap.value).flatMap(record => {
+      const spacesFromRecord = record.spacesIdsList.map(spaceId => record.spaces[spaceId]);
+      return spacesFromRecord.filter(space => protocolNetworks.includes(space.network));
+    });
+  });
 
   const spacesMap = computed(
     () =>
@@ -66,7 +75,7 @@ export function useSpaces() {
         return network.api.loadSpaces(
           {
             skip: 0,
-            limit: SPACES_LIMIT
+            limit: DEFAULT_SPACES_LIMIT
           },
           requestFilter
         );
@@ -77,14 +86,13 @@ export function useSpaces() {
   }
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
-    const exploreNetworks = enabledNetworks.filter(network => !offchainNetworks.includes(network));
-
+    const { networks, limit } = explorePageProtocols[protocol.value];
     const results = await Promise.all(
-      exploreNetworks.map(async id => {
-        const network = getNetwork(id);
+      networks.map(async id => {
+        const network = getNetwork(id as NetworkID);
 
         const record = networksMap.value[id];
-        if (!record.hasMoreSpaces) {
+        if (!overwrite && !record.hasMoreSpaces) {
           return {
             id,
             spaces: [],
@@ -95,15 +103,15 @@ export function useSpaces() {
         const spaces = await network.api.loadSpaces(
           {
             skip: overwrite ? 0 : record.spacesIdsList.length,
-            limit: SPACES_LIMIT
+            limit
           },
           filter
         );
-
+        explorePageSpaces.value.push(...spaces);
         return {
           id,
           spaces,
-          hasMoreSpaces: spaces.length === SPACES_LIMIT
+          hasMoreSpaces: spaces.length === limit
         };
       })
     );
@@ -133,7 +141,7 @@ export function useSpaces() {
   }
 
   async function fetch(filter?: SpacesFilter) {
-    if (loading.value || loaded.value) return;
+    if (loading.value) return;
     loading.value = true;
 
     await _fetchSpaces(true, filter);
@@ -143,7 +151,7 @@ export function useSpaces() {
   }
 
   async function fetchMore(filter?: SpacesFilter) {
-    if (loading.value || !loaded.value) return;
+    if (loading.value || !loaded.value || loadingMore.value) return;
     loadingMore.value = true;
 
     await _fetchSpaces(false, filter);
@@ -151,13 +159,21 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
+  watch(protocol, async () => {
+    explorePageSpaces.value = [];
+    await fetch();
+  });
+
   return {
     loading,
+    loadingMore,
     loaded,
     networksMap,
+    explorePageSpaces,
     spaces,
     spacesMap,
     hasMoreSpaces,
+    protocol,
     getSpaces,
     fetch,
     fetchMore

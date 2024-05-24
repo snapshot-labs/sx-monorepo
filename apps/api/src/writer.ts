@@ -111,7 +111,6 @@ export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, eve
     await space.save();
   } catch (e) {
     console.log('failed to update space metadata', e);
-    throw new Error('d');
   }
 };
 
@@ -349,6 +348,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   );
   if (executionStrategy) {
     proposal.execution_strategy_type = executionStrategy.executionStrategyType;
+    proposal.execution_destination = executionStrategy.destinationAddress;
     proposal.quorum = executionStrategy.quorum;
   }
 

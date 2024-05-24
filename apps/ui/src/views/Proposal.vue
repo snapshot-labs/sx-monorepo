@@ -106,7 +106,7 @@ watch(
 watchEffect(() => {
   if (!resolved.value || !networkId.value || !spaceAddress.value) return;
 
-  loadVotes(networkId.value, spaceAddress.value);
+  loadVotes(networkId.value, [spaceAddress.value]);
 });
 
 watchEffect(() => {

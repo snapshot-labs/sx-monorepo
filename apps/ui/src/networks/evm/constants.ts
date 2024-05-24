@@ -1,9 +1,9 @@
+import { Web3Provider } from '@ethersproject/providers';
 import { AbiCoder } from '@ethersproject/abi';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinGraph } from '@/helpers/pin';
-import type { Signer } from '@ethersproject/abstract-signer';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
 import type { StrategyConfig } from '../types';
 
@@ -198,16 +198,21 @@ export function createConstants(networkId: NetworkID) {
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
       generateSummary: (params: Record<string, any>) => {
         const length =
-          params.whitelist.trim().length === 0 ? 0 : params.whitelist.split('\n').length;
+          params.whitelist.trim().length === 0
+            ? 0
+            : params.whitelist.split(/[\n,]/).filter((s: string) => s.trim().length).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: (params: Record<string, any>) => {
-        const whitelist = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
+        const whitelist = params.whitelist
+          .split(/[\n,]/)
+          .filter((s: string) => s.trim().length)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':').map(s => s.trim());
 
-          return [address, BigInt(votingPower)];
-        });
+            return [address, BigInt(votingPower)];
+          });
 
         const tree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
 
@@ -215,14 +220,17 @@ export function createConstants(networkId: NetworkID) {
         return [abiCoder.encode(['bytes32'], [tree.root])];
       },
       generateMetadata: async (params: Record<string, any>) => {
-        const tree = params.whitelist.split('\n').map((item: string) => {
-          const [address, votingPower] = item.split(':');
+        const tree = params.whitelist
+          .split(/[\n,]/)
+          .filter((s: string) => s.trim().length)
+          .map((item: string) => {
+            const [address, votingPower] = item.split(':').map(s => s.trim());
 
-          return {
-            address,
-            votingPower: votingPower
-          };
-        });
+            return {
+              address,
+              votingPower: votingPower
+            };
+          });
 
         const pinned = await pinGraph({ tree });
 
@@ -261,7 +269,7 @@ export function createConstants(networkId: NetworkID) {
         properties: {
           whitelist: {
             type: 'string',
-            format: 'long',
+            format: 'addresses-with-voting-power',
             title: 'Whitelist',
             examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
           },
@@ -394,13 +402,13 @@ export function createConstants(networkId: NetworkID) {
         `(${params.quorum}, ${shorten(params.contractAddress)})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployAvatarExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.controller,
             target: params.contractAddress,
@@ -446,13 +454,13 @@ export function createConstants(networkId: NetworkID) {
         `(${params.quorum}, ${params.timelockDelay})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployTimelockExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.controller,
             vetoGuardian: params.vetoGuardian || '0x0000000000000000000000000000000000000000',
@@ -504,13 +512,13 @@ export function createConstants(networkId: NetworkID) {
         `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         _controller: string,
         spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployAxiomExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             controller: params.controller || '0x0000000000000000000000000000000000000000',
             quorum: BigInt(params.quorum),
@@ -563,13 +571,13 @@ export function createConstants(networkId: NetworkID) {
         `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
       deploy: async (
         client: clients.EvmEthereumTx,
-        signer: Signer,
+        web3: Web3Provider,
         _controller: string,
         _spaceAddress: string,
         params: Record<string, any>
       ): Promise<{ address: string; txId: string }> => {
         return client.deployIsokratiaExecution({
-          signer,
+          signer: web3.getSigner(),
           params: {
             provingTimeAllowance: params.provingTimeAllowance,
             quorum: BigInt(params.quorum),

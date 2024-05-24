@@ -1220,10 +1220,10 @@
     graphql-import-node "^0.0.5"
     js-yaml "^4.1.0"
 
-"@graphprotocol/graph-cli@0.68.0":
-  version "0.68.0"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.68.0.tgz#30464a75b7341d6c468f7ff3dba01259efff6b78"
-  integrity sha512-F3l1t+0qfGAGbD3i/3/qDnwZp8z37OE2PmdQdQkbImq1h34Cy8mjRKvc3ZJ4E2G16JkIevqK2rWwTRHcIGMTNA==
+"@graphprotocol/graph-cli@0.72.1":
+  version "0.72.1"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.72.1.tgz#d80bb8459a60ab34a49ede34ee5e022ee88124ea"
+  integrity sha512-9TpzgPBEC3sK6S0gyUS3Rz+HrrWwocJLjnGg2hCMbNJS+lvTbzeLyvGgxsK6z20KehD2Lbpe8imGUJmlnt5WBw==
   dependencies:
     "@float-capital/float-subgraph-uncrashable" "^0.0.0-alpha.4"
     "@oclif/core" "2.8.6"
@@ -1253,10 +1253,10 @@
     which "2.0.2"
     yaml "1.10.2"
 
-"@graphprotocol/graph-ts@0.33.0":
-  version "0.33.0"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.33.0.tgz#b918e698f31b31eb1f419f97a595bb60c61e01fc"
-  integrity sha512-HBUVblHUdjQZ/MEjjYPzVgmh+SiuF9VV0D8KubYfFAtzkqpVJlvdyk+RZTAJUiu8hpyYy0EVIcAnLEPtKlwMGQ==
+"@graphprotocol/graph-ts@0.35.1":
+  version "0.35.1"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.35.1.tgz#1e1ecc36d8f7a727ef3a6f1fed4c5ce16de378c2"
+  integrity sha512-74CfuQmf7JI76/XCC34FTkMMKeaf+3Pn0FIV3m9KNeaOJ+OI3CvjMIVRhOZdKcJxsFCBGaCCl0eQjh47xTjxKA==
   dependencies:
     assemblyscript "0.19.10"
 
@@ -2420,10 +2420,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.6.0.tgz#3c7c9c46e678feefe7a2e5bb609d3dbd665ffb3f"
   integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
 
-"@snapshot-labs/checkpoint@^0.1.0-beta.30":
-  version "0.1.0-beta.30"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.30.tgz#9f66a03bbcdd70f8da1d6debde9f15f5fa04eee4"
-  integrity sha512-5AwQ0DZmczIfJXFfs3r9RoemyDzxK53BoSw1N87W2uGS2K+Afe/FGDrz4kTdR++eYZjYksx0a93V1jAnTfl8BQ==
+"@snapshot-labs/checkpoint@^0.1.0-beta.34":
+  version "0.1.0-beta.34"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.34.tgz#ce7ccb988ff008a2ca827848aff852ee9a4904b9"
+  integrity sha512-EZ0enCmL44fc8gLl+Kxf8CEjeEtXi/wWzrdSvGDY4aS+PHV/TTkeg46vTXkkwmIOuPg6AgF2CRoqY8xa4Wm1Hw==
   dependencies:
     "@graphql-tools/schema" "^8.5.1"
     bluebird "^3.7.2"

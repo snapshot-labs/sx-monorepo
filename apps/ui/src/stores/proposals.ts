@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
 import { getNames } from '@/helpers/stamp';
 import type { NetworkID, Proposal } from '@/types';
+import { ProposalsFilter } from '@/networks/types';
 
 type SpaceRecord = {
   loading: boolean;
@@ -53,11 +54,7 @@ export const useProposalsStore = defineStore('proposals', () => {
     delete proposals.value[uniqueSpaceId];
   }
 
-  async function fetch(
-    spaceId: string,
-    networkId: NetworkID,
-    filter?: 'any' | 'active' | 'pending' | 'closed'
-  ) {
+  async function fetch(spaceId: string, networkId: NetworkID, state?: ProposalsFilter['state']) {
     await metaStore.fetchBlock(networkId);
 
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
@@ -83,12 +80,12 @@ export const useProposalsStore = defineStore('proposals', () => {
 
     const fetchedProposals = await withAuthorNames(
       await getNetwork(networkId).api.loadProposals(
-        spaceId,
+        [spaceId],
         {
           limit: PROPOSALS_LIMIT
         },
         metaStore.getCurrent(networkId) || 0,
-        filter
+        { state }
       )
     );
 
@@ -128,7 +125,7 @@ export const useProposalsStore = defineStore('proposals', () => {
 
     const fetchedProposals = await withAuthorNames(
       await getNetwork(networkId).api.loadProposals(
-        spaceId,
+        [spaceId],
         {
           limit: PROPOSALS_LIMIT,
           skip: record.value.proposalsIdsList.length
@@ -177,7 +174,7 @@ export const useProposalsStore = defineStore('proposals', () => {
     record.value.summaryLoading = true;
     record.value.summaryProposals = await withAuthorNames(
       await getNetwork(networkId).api.loadProposals(
-        spaceId,
+        [spaceId],
         { limit },
         metaStore.getCurrent(networkId) || 0
       )
