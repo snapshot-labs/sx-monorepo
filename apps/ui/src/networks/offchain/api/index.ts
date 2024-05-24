@@ -288,12 +288,12 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         filters.end_lt = current;
       }
 
-      for (const key of Object.keys(filters)) {
-        if (/^(min|max)_end/.test(key)) {
+      Object.keys(filters)
+        .filter(key => /^(min|max)_end/.test(key))
+        .forEach(key => {
           filters[key.replace(/^(min|max)_/, '')] = filters[key];
           delete filters[key];
-        }
-      }
+        });
 
       delete filters?.state;
 
