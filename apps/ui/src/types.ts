@@ -27,6 +27,10 @@ export type VoteType =
   | 'quadratic'
   | 'weighted'
   | 'custom';
+export type VoteTypeInfo = {
+  label: string;
+  description: string;
+};
 
 export type SelectedStrategy = {
   address: string;

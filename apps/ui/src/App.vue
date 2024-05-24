@@ -11,7 +11,8 @@ const { init, app } = useApp();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el);
 const { createDraft } = useEditor();
-const { spaceKey, network, executionStrategy, transaction, reset } = useWalletConnectTransaction();
+const { spaceKey, spaceNetwork, network, executionStrategy, transaction, reset } =
+  useWalletConnectTransaction();
 
 provide('web3', web3);
 
@@ -22,9 +23,10 @@ const hasAppNav = computed(() =>
 );
 
 function handleTransactionAccept() {
-  if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
+  if (!spaceKey.value || !spaceNetwork.value || !executionStrategy.value || !transaction.value)
+    return;
 
-  const draftId = createDraft(spaceKey.value, {
+  const draftId = createDraft(spaceNetwork.value, spaceKey.value, {
     execution: [transaction.value],
     executionStrategy: executionStrategy.value
   });
