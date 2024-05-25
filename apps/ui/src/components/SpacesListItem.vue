@@ -4,7 +4,6 @@ import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
-
 const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
