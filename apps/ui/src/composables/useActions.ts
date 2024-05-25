@@ -108,12 +108,12 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
-  async function aliasableSigner(networkId: NetworkID): Promise<Web3Provider | Wallet> {
-    const network = getNetwork(networkId);
+  async function aliasableSigner(): Promise<Web3Provider | Wallet> {
+    const network = getNetwork(offchainNetworkId);
 
     if (!(await alias.isValid())) {
       await alias.create(address =>
-        wrapPromise(networkId, network.actions.setAlias(auth.web3, address))
+        wrapPromise(offchainNetworkId, network.actions.setAlias(auth.web3, address))
       );
     }
 
@@ -520,12 +520,7 @@ export function useActions() {
     try {
       await wrapPromise(
         offchainNetworkId,
-        network.actions.followSpace(
-          await aliasableSigner(networkId),
-          networkId,
-          spaceId,
-          web3.value.account
-        )
+        network.actions.followSpace(await aliasableSigner(), networkId, spaceId, web3.value.account)
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
@@ -547,7 +542,7 @@ export function useActions() {
       await wrapPromise(
         offchainNetworkId,
         network.actions.unfollowSpace(
-          await aliasableSigner(networkId),
+          await aliasableSigner(),
           networkId,
           spaceId,
           web3.value.account
