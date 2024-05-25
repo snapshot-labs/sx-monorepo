@@ -27,6 +27,7 @@ export const useSpacesStore = defineStore('spaces', () => {
 
     const space = await network.api.loadSpace(spaceId);
     if (!space) return;
+
     networksMap.value[networkId].spaces = {
       ...networksMap.value[networkId].spaces,
       [spaceId]: space
