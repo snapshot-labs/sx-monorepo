@@ -519,7 +519,7 @@ export function useActions() {
 
     try {
       await wrapPromise(
-        networkId,
+        offchainNetworkId,
         network.actions.followSpace(
           await aliasableSigner(networkId),
           networkId,
@@ -545,7 +545,7 @@ export function useActions() {
 
     try {
       await wrapPromise(
-        networkId,
+        offchainNetworkId,
         network.actions.unfollowSpace(
           await aliasableSigner(networkId),
           networkId,
