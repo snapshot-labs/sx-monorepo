@@ -1,7 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import { getDefaultProvider } from '@ethersproject/providers';
-import pkg from '../../package.json';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import pkg from '../../package.json';
 
 const aliases = useStorage(`${pkg.name}.aliases`, {} as Record<string, string>);
 
@@ -13,17 +13,17 @@ export function useAlias() {
 
   const wallet = computed(() => {
     const provider = getDefaultProvider();
-    const pk = aliases.value[web3.value.account];
+    const privateKey = aliases.value[web3.value.account];
 
-    if (!pk) return null;
+    if (!privateKey) return null;
 
-    return new Wallet(pk, provider);
+    return new Wallet(privateKey, provider);
   });
 
-  async function create(actionFn: (address: string) => Promise<unknown>) {
+  async function create(networkCreateActionFn: (address: string) => Promise<unknown>) {
     const newAliasWallet = Wallet.createRandom();
 
-    await actionFn(newAliasWallet.address);
+    await networkCreateActionFn(newAliasWallet.address);
 
     aliases.value = {
       ...aliases.value,
