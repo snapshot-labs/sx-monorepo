@@ -36,7 +36,11 @@ export function useAlias() {
   async function isValid() {
     if (!wallet.value) return false;
 
-    const registeredAlias = await network.api.loadAlias(web3.value.account, wallet.value.address);
+    const registeredAlias = await network.api.loadAlias(
+      web3.value.account,
+      wallet.value.address,
+      Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30
+    );
 
     if (!registeredAlias) return false;
 

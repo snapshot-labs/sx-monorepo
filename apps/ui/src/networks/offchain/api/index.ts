@@ -373,14 +373,19 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
     },
-    loadAlias: async (address: string, aliasAddress: string): Promise<Alias | null> => {
+    loadAlias: async (
+      address: string,
+      aliasAddress: string,
+      created_gt: number
+    ): Promise<Alias | null> => {
       const {
         data: { aliases }
       }: { data: { aliases: Alias[] } } = await apollo.query({
         query: ALIASES_QUERY,
         variables: {
           address,
-          alias: aliasAddress
+          alias: aliasAddress,
+          created_gt
         }
       });
 
