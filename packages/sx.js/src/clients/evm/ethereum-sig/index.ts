@@ -3,7 +3,6 @@ import { AbiCoder } from '@ethersproject/abi';
 import { SplitUint256 } from '../../../utils/split-uint256';
 import { bytesToHex } from '../../../utils/bytes';
 import { getStrategiesWithParams } from '../../../strategies/evm';
-import { evmGoerli } from '../../../networks';
 import { domain as baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import type {
@@ -19,7 +18,7 @@ import type {
 import type { EvmNetworkConfig } from '../../../types';
 
 type EthereumSigClientOpts = {
-  networkConfig?: EvmNetworkConfig;
+  networkConfig: EvmNetworkConfig;
   manaUrl?: string;
 };
 
@@ -27,8 +26,8 @@ export class EthereumSig {
   manaUrl: string;
   networkConfig: EvmNetworkConfig;
 
-  constructor(opts?: EthereumSigClientOpts) {
-    this.networkConfig = opts?.networkConfig || evmGoerli;
+  constructor(opts: EthereumSigClientOpts) {
+    this.networkConfig = opts?.networkConfig;
     this.manaUrl = opts?.manaUrl || 'https://mana.pizza';
   }
 

@@ -23,6 +23,7 @@ const page: Ref<'tokens' | 'nfts'> = ref('tokens');
 const modalOpen = ref({
   tokens: false,
   nfts: false,
+  stake: false,
   walletConnectLink: false
 });
 
@@ -87,8 +88,8 @@ const treasuryExplorerUrl = computed(() => {
 });
 
 const executionStrategy = computed(() => {
-  let executorIndex = props.space.executors.findIndex(
-    executorAddress => executorAddress === treasury.value?.wallet
+  let executorIndex = props.space.executors.findIndex(executorAddress =>
+    compareAddresses(executorAddress, treasury.value?.wallet || '')
   );
 
   if (executorIndex === -1) {
@@ -104,12 +105,12 @@ const executionStrategy = computed(() => {
   };
 });
 
-function openModal(type: 'tokens' | 'nfts') {
+function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
 }
 
 function addTx(tx: Transaction) {
-  const draftId = createDraft(spaceKey.value, {
+  const draftId = createDraft(props.space.network, spaceKey.value, {
     execution: [tx],
     executionStrategy: executionStrategy.value
   });
@@ -127,8 +128,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
-  <div v-if="!treasury || !currentNetwork" class="p-4 flex items-center text-skin-link">
-    <IH-exclamation-circle class="inline-block mr-2" />
+  <div v-if="!treasury || !currentNetwork" class="p-4 flex items-center text-skin-link space-x-2">
+    <IH-exclamation-circle class="inline-block" />
     No treasury configured.
   </div>
   <template v-else>
@@ -216,14 +217,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         <div v-if="page === 'tokens'">
           <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
           <div
-            v-if="loaded && sortedAssets.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link"
+            v-else-if="loaded && sortedAssets.length === 0"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
-            <IH-exclamation-circle class="inline-block mr-2" />
+            <IH-exclamation-circle class="inline-block" />
             There are no tokens in treasury.
           </div>
           <a
             v-for="(asset, i) in sortedAssets"
+            v-else
             :key="i"
             :href="
               (asset.contractAddress === ETH_CONTRACT
@@ -235,18 +237,27 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             target="_blank"
             class="mx-4 py-3 border-b flex"
           >
-            <div class="flex-auto flex items-center min-w-0">
-              <UiBadgeNetwork :id="treasury.networkId" class="mr-3">
+            <div class="flex-auto flex items-center min-w-0 space-x-3">
+              <UiBadgeNetwork :id="treasury.networkId">
                 <UiStamp
                   :id="`${treasury.networkId}:${asset.contractAddress}`"
                   type="token"
                   :size="32"
                 />
               </UiBadgeNetwork>
-              <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
+              <div class="flex flex-col leading-[22px] min-w-0 pr-2 md:pr-0">
                 <h4 class="truncate" v-text="asset.symbol" />
                 <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
               </div>
+              <UiTooltip
+                v-if="asset.contractAddress === ETH_CONTRACT && !isReadOnly"
+                title="Stake with Lido"
+                :touch="false"
+              >
+                <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('stake')">
+                  <IH-fire class="inline-block" />
+                </UiButton>
+              </UiTooltip>
             </div>
             <div
               v-if="asset.price"
@@ -290,9 +301,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         <div v-else-if="page === 'nfts'">
           <div
             v-if="nftsLoaded && nfts.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
-            <IH-exclamation-circle class="inline-block mr-2" />
+            <IH-exclamation-circle class="inline-block" />
             There are no NFTs in treasury.
           </div>
           <UiLoading v-if="nftsLoading && !nftsLoaded" class="px-4 py-3 block" />
@@ -327,6 +338,14 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :network="treasury.network"
         :extra-contacts="extraContacts"
         @close="modalOpen.nfts = false"
+        @add="addTx"
+      />
+      <ModalStakeToken
+        :open="modalOpen.stake"
+        :address="treasury.wallet"
+        :network="treasury.network"
+        :network-id="treasury.networkId"
+        @close="modalOpen.stake = false"
         @add="addTx"
       />
       <ModalLinkWalletConnect

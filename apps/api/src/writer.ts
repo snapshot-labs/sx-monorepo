@@ -348,6 +348,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   );
   if (executionStrategy) {
     proposal.execution_strategy_type = executionStrategy.executionStrategyType;
+    proposal.execution_destination = executionStrategy.destinationAddress;
     proposal.quorum = executionStrategy.quorum;
   }
 

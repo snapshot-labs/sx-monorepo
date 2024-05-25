@@ -59,7 +59,6 @@ const MASTER_SIMPLE_QUORUM_TIMELOCK = Address.fromString(
 
 const CHAIN_IDS = new Map<string, i32>()
 CHAIN_IDS.set('mainnet', 1)
-CHAIN_IDS.set('goerli', 5)
 CHAIN_IDS.set('sepolia', 11155111)
 CHAIN_IDS.set('optimism', 10)
 CHAIN_IDS.set('matic', 137)
@@ -78,9 +77,9 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
     let targetAddress = executionStrategyContract.try_target()
     if (typeResult.reverted || quorumResult.reverted || targetAddress.reverted) return
 
-    let executionStrategy = new ExecutionStrategy(
-      toChecksumAddress(event.params.proxy.toHexString())
-    )
+    let address = toChecksumAddress(event.params.proxy.toHexString())
+    let executionStrategy = new ExecutionStrategy(address)
+    executionStrategy.address = address
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
@@ -102,9 +101,9 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
       return
     }
 
-    let executionStrategy = new ExecutionStrategy(
-      toChecksumAddress(event.params.proxy.toHexString())
-    )
+    let address = toChecksumAddress(event.params.proxy.toHexString())
+    let executionStrategy = new ExecutionStrategy(address)
+    executionStrategy.address = address
     executionStrategy.type = 'Axiom' // override because contract returns AxiomExecutionStrategyMock
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)
@@ -132,9 +131,9 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
       return
     }
 
-    let executionStrategy = new ExecutionStrategy(
-      toChecksumAddress(event.params.proxy.toHexString())
-    )
+    let address = toChecksumAddress(event.params.proxy.toHexString())
+    let executionStrategy = new ExecutionStrategy(address)
+    executionStrategy.address = address
     executionStrategy.type = typeResult.value
     executionStrategy.quorum = new BigDecimal(quorumResult.value)
     if (CHAIN_IDS.has(network)) executionStrategy.treasury_chain = CHAIN_IDS.get(network)

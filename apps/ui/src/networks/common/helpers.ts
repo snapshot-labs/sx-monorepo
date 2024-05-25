@@ -17,6 +17,7 @@ export function getSdkChoice(choice: Choice): SdkChoice {
 export function getExecutionData(
   space: SpaceExecutionData,
   executionStrategy: string,
+  destinationAddress: string | null,
   transactions: MetaTransaction[]
 ) {
   const supportedExecutionIndex = space.executors.findIndex(
@@ -29,7 +30,8 @@ export function getExecutionData(
 
   const executorType = space.executors_types[supportedExecutionIndex] as ExecutorType;
   return _getExecutionData(executorType, executionStrategy, {
-    transactions
+    transactions,
+    destination: destinationAddress || undefined
   });
 }
 

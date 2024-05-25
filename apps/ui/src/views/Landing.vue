@@ -12,7 +12,7 @@ const SOCIALS = [
     icon: ICX
   },
   {
-    href: 'https://discord.gg/snapshot',
+    href: 'https://discord.snapshot.org',
     icon: ICDiscord
   },
   {

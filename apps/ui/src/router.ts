@@ -8,6 +8,7 @@ import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceEditSettings from '@/views/Space/EditSettings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
+import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import Editor from '@/views/Editor.vue';
 import Proposal from '@/views/Proposal.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
@@ -19,6 +20,7 @@ import Contacts from '@/views/Settings/Contacts.vue';
 import My from '@/views/My.vue';
 import Home from '@/views/My/Home.vue';
 import Explore from '@/views/My/Explore.vue';
+import Notifications from '@/views/My/Notifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Apps from '@/views/Apps.vue';
 import App from '@/views/App.vue';
@@ -38,7 +40,8 @@ const routes: any[] = [
       { path: 'settings', name: 'space-settings', component: SpaceSettings },
       { path: 'edit-settings', name: 'space-edit-settings', component: SpaceEditSettings },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
-      { path: 'delegates', name: 'space-delegates', component: SpaceDelegates }
+      { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
+      { path: 'leaderboard', name: 'space-leaderboard', component: SpaceLeaderboard }
     ]
   },
   {
@@ -72,7 +75,8 @@ const routes: any[] = [
     component: My,
     children: [
       { path: '/home', name: 'my-home', component: Home },
-      { path: '/explore', name: 'my-explore', component: Explore }
+      { path: '/explore', name: 'my-explore', component: Explore },
+      { path: '/notifications', name: 'my-notifications', component: Notifications }
     ]
   },
   { path: '/apps', name: 'apps', component: Apps },

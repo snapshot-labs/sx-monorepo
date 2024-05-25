@@ -1,5 +1,5 @@
 {
-  "network_node_url": "https://starknet-goerli.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
+  "network_node_url": "https://starknet-sepolia.infura.io/v3/46a5dd9727bf48d4a132672d3f376146",
   "optimistic_indexing": true,
   "decimal_types": {
     "BigDecimalVP": {
@@ -9,8 +9,8 @@
   },
   "sources": [
     {
-      "contract": "0x63c62258e1ba4d9ad72eab809ea5c3d1a4545b721bc444d6068ced6246c2f3c",
-      "start": 907731,
+      "contract": "0x302d332e9aceb184e5f301cb62c85181e7fc3b30559935c5736e987de579f6e",
+      "start": 17960,
       "abi": "SpaceFactory",
       "events": [
         {

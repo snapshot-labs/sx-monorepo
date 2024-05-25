@@ -7,11 +7,14 @@ export const useSpacesStore = defineStore('spaces', () => {
 
   const {
     loading,
+    loadingMore,
     loaded,
     networksMap,
+    explorePageSpaces,
     spaces,
     spacesMap,
     hasMoreSpaces,
+    protocol,
     fetch,
     fetchMore,
     getSpaces
@@ -47,11 +50,14 @@ export const useSpacesStore = defineStore('spaces', () => {
 
   return {
     loading,
+    loadingMore,
     loaded,
     networksMap,
+    explorePageSpaces,
     spaces,
     spacesMap,
     hasMoreSpaces,
+    protocol,
     fetch,
     fetchMore,
     fetchSpace,

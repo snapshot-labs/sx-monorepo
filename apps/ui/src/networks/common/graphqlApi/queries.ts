@@ -17,8 +17,11 @@ const SPACE_FRAGMENT = gql`
       delegations
       executors
       executors_types
+      executors_destinations
       executors_strategies {
         id
+        address
+        destination_address
         type
         treasury_chain
         treasury
@@ -116,6 +119,7 @@ const PROPOSAL_FRAGMENT = gql`
     execution_time
     execution_strategy
     execution_strategy_type
+    execution_destination
     timelock_veto_guardian
     strategies_indicies
     strategies
@@ -226,6 +230,32 @@ export const USER_QUERY = gql`
       proposal_count
       vote_count
       created
+    }
+  }
+`;
+
+export const LEADERBOARD_QUERY = gql`
+  query (
+    $first: Int!
+    $skip: Int!
+    $orderBy: Leaderboard_orderBy
+    $orderDirection: OrderDirection!
+    $where: Leaderboard_filter
+  ) {
+    leaderboards(
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      where: $where
+    ) {
+      id
+      user {
+        id
+        created
+      }
+      proposal_count
+      vote_count
     }
   }
 `;

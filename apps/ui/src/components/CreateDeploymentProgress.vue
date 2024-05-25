@@ -10,6 +10,11 @@ type DeployingDependencyStep = {
   strategy: StrategyConfig;
 };
 
+type AddingDependencyStep = {
+  id: 'ADDING_DEPS';
+  strategy: StrategyConfig;
+};
+
 type DeployingSpaceStep = {
   id: 'DEPLOYING_SPACE';
   title: string;
@@ -20,7 +25,7 @@ type IndexingSpaceStep = {
   title: string;
 };
 
-type Step = DeployingDependencyStep | DeployingSpaceStep | IndexingSpaceStep;
+type Step = DeployingDependencyStep | AddingDependencyStep | DeployingSpaceStep | IndexingSpaceStep;
 
 const props = defineProps<{
   networkId: NetworkID;
@@ -46,13 +51,19 @@ const connectorModalConnectors = ref([] as string[]);
 const connectorCallbackFn: Ref<((value: string | false) => void) | null> = ref(null);
 const txIds = ref({});
 const deployedExecutionStrategies = ref([] as StrategyConfig[]);
+const executionStrategiesDestinations = ref([] as string[]);
 
 const network = computed(() => getNetwork(props.networkId));
 const steps = computed<Step[]>(() => {
-  const dependenciesSteps = props.executionStrategies.filter(strategy => strategy.deploy);
-
   return [
-    ...dependenciesSteps.map((config, i) => {
+    ...props.executionStrategies.map((config, i) => {
+      if (!config.deploy) {
+        return {
+          id: 'ADDING_DEPS' as const,
+          strategy: config
+        };
+      }
+
       const title = config.type
         ? `Deploying ${network.value.constants.EXECUTORS[config.type]} execution strategy`
         : 'Deploying dependency';
@@ -74,6 +85,13 @@ const steps = computed<Step[]>(() => {
   ];
 });
 
+const uiSteps = computed(() => {
+  return steps.value.filter(step => step.id !== 'ADDING_DEPS') as Exclude<
+    Step,
+    AddingDependencyStep
+  >[];
+});
+
 function getConnector(supportedConnectors: string[]) {
   connectorModalOpen.value = true;
   connectorModalConnectors.value = supportedConnectors;
@@ -93,7 +111,15 @@ function handleConnectorClose() {
   connectorModalOpen.value = false;
 }
 
-async function deployStep(step: DeployingDependencyStep | DeployingSpaceStep) {
+async function deployStep(
+  step: DeployingDependencyStep | AddingDependencyStep | DeployingSpaceStep
+) {
+  if (step.id === 'ADDING_DEPS') {
+    deployedExecutionStrategies.value.push(step.strategy);
+    executionStrategiesDestinations.value.push('');
+    return;
+  }
+
   const supportedConnectors =
     'strategy' in step && step.strategy.deployConnectors
       ? step.strategy.deployConnectors
@@ -108,10 +134,8 @@ async function deployStep(step: DeployingDependencyStep | DeployingSpaceStep) {
 
   let result;
   if (step.id === 'DEPLOYING_SPACE') {
-    const executionStrategies = [
-      ...props.executionStrategies.filter(strategy => strategy.address !== ''),
-      ...deployedExecutionStrategies.value
-    ];
+    const executionStrategies = deployedExecutionStrategies.value;
+    const executionDestinations = executionStrategiesDestinations.value;
 
     result = await createSpace(
       props.networkId,
@@ -122,6 +146,7 @@ async function deployStep(step: DeployingDependencyStep | DeployingSpaceStep) {
       props.validationStrategy,
       props.votingStrategies,
       executionStrategies,
+      executionDestinations,
       props.controller
     );
   } else {
@@ -138,19 +163,22 @@ async function deployStep(step: DeployingDependencyStep | DeployingSpaceStep) {
     return;
   }
 
-  const { address, txId } = result;
+  const { address, txId }: { address: string; txId: string } = result;
 
   txIds.value[step.id] = txId;
   const stepNetwork = getStepNetwork(step);
   const confirmedReceipt = await stepNetwork.helpers.waitForTransaction(txId);
   if (confirmedReceipt.status === 0) throw new Error('Transaction failed');
 
-  if (step.id !== 'DEPLOYING_SPACE' && step.strategy.address === '') {
-    deployedExecutionStrategies.value.push({
-      ...step.strategy,
-      deploy: undefined,
-      address
-    });
+  if (step.id !== 'DEPLOYING_SPACE') {
+    const isCrosschainDeploy = step.strategy.address !== '';
+    const destination = isCrosschainDeploy ? address : '';
+    const strategy = isCrosschainDeploy
+      ? step.strategy
+      : { ...step.strategy, deploy: undefined, address };
+
+    executionStrategiesDestinations.value.push(destination);
+    deployedExecutionStrategies.value.push(strategy);
   }
 
   currentStep.value = currentStep.value + 1;
@@ -200,7 +228,11 @@ onMounted(() => deploy());
     <div>Do not refresh this page until process is complete.</div>
 
     <div class="flex flex-col mt-4">
-      <div v-for="(step, i) in steps" :key="step.id" class="flex items-center gap-4 mb-3 last:mb-0">
+      <div
+        v-for="(step, i) in uiSteps"
+        :key="step.id"
+        class="flex items-center gap-4 mb-3 last:mb-0"
+      >
         <div>
           <IH-check v-if="i < currentStep" class="text-skin-success" />
           <IH-clock v-else-if="i > currentStep" />

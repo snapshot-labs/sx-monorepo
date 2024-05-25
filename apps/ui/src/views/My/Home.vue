@@ -2,23 +2,23 @@
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNames } from '@/helpers/stamp';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import { Proposal } from '@/types';
+import { ProposalsFilter } from '@/networks/types';
+import { NetworkID, Proposal } from '@/types';
 
 const PROPOSALS_LIMIT = 20;
 
 useTitle('Home');
 
 const metaStore = useMetaStore();
+const followedSpacesStore = useFollowedSpacesStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
-const bookmarksStore = useBookmarksStore();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
 const hasMore = ref(false);
 const proposals = ref<Proposal[]>([]);
-
-const filter = ref('any' as 'any' | 'active' | 'pending' | 'closed');
+const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const selectIconBaseProps = {
   width: 16,
@@ -47,10 +47,10 @@ async function withAuthorNames(proposals: Proposal[]) {
 async function loadProposalsPage(skip = 0) {
   return withAuthorNames(
     await network.value.api.loadProposals(
-      bookmarksStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
+      followedSpacesStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
       { limit: PROPOSALS_LIMIT, skip },
       metaStore.getCurrent(networkId.value) || 0,
-      filter.value
+      { state: state.value }
     )
   );
 }
@@ -81,23 +81,28 @@ onMounted(() => {
 });
 
 watch(
-  () => bookmarksStore.followedSpacesIds,
-  () => {
+  [() => followedSpacesStore.followedSpacesLoaded, () => followedSpacesStore.followedSpacesIds],
+  ([followedSpacesloaded, followedSpacesIds]) => {
+    if (!followedSpacesloaded) return;
+
     loaded.value = false;
     proposals.value = [];
 
-    if (!bookmarksStore.followedSpacesIds.length) {
+    if (!followedSpacesIds.length) {
       loaded.value = true;
       return;
     }
 
-    loadVotes(networkId.value, bookmarksStore.followedSpacesIds);
+    for (const network in followedSpacesStore.followedSpaceIdsByNetwork) {
+      loadVotes(network as NetworkID, followedSpacesStore.followedSpaceIdsByNetwork[network]);
+    }
     fetch();
-  }
+  },
+  { immediate: true }
 );
 
-watch(filter, (toFilter, fromFilter) => {
-  if (toFilter !== fromFilter && web3.value.account) fetch();
+watch(state, (toState, fromState) => {
+  if (toState !== fromState && web3.value.account) fetch();
 });
 </script>
 
@@ -105,7 +110,7 @@ watch(filter, (toFilter, fromFilter) => {
   <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown
-        v-model="filter"
+        v-model="state"
         title="Status"
         gap="12px"
         placement="left"

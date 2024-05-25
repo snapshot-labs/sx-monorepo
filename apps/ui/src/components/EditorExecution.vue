@@ -21,11 +21,13 @@ const editedTx: Ref<number | null> = ref(null);
 const modalState: Ref<{
   sendToken?: any;
   sendNft?: any;
+  stakeToken?: any;
   contractCall?: any;
 }> = ref({});
 const modalOpen = ref({
   sendToken: false,
   sendNft: false,
+  stakeToken: false,
   contractCall: false
 });
 const simulationState: Ref<'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null> =
@@ -49,7 +51,7 @@ function removeTx(index: number) {
   model.value = [...model.value.slice(0, index), ...model.value.slice(index + 1)];
 }
 
-function openModal(type: 'sendToken' | 'sendNft' | 'contractCall') {
+function openModal(type: 'sendToken' | 'sendNft' | 'stakeToken' | 'contractCall') {
   editedTx.value = null;
   modalState.value[type] = null;
   modalOpen.value[type] = true;
@@ -177,6 +179,16 @@ watch(
         :extra-contacts="extraContacts"
         :initial-state="modalState.sendNft"
         @close="modalOpen.sendNft = false"
+        @add="addTx"
+      />
+      <ModalStakeToken
+        v-if="treasury"
+        :open="modalOpen.stakeToken"
+        :address="treasury.wallet"
+        :network="treasury.network"
+        :network-id="treasury.networkId"
+        :initial-state="modalState.stakeToken"
+        @close="modalOpen.stakeToken = false"
         @add="addTx"
       />
       <ModalTransaction

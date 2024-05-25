@@ -9,7 +9,7 @@ import {
   VOTES_QUERY,
   ALIASES_QUERY
 } from './queries';
-import { PaginationOpts, SpacesFilter, NetworkApi } from '@/networks/types';
+import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { CHAIN_IDS } from '@/helpers/constants';
 import {
@@ -107,6 +107,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     authenticators: [DEFAULT_AUTHENTICATOR],
     executors: [],
     executors_types: [],
+    executors_destinations: [],
     executors_strategies: [],
     strategies: space.strategies.map(strategy => strategy.name),
     strategies_indicies: [],
@@ -170,6 +171,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     execution_time: 0,
     execution_strategy: '',
     execution_strategy_type: '',
+    execution_destination: '',
     timelock_veto_guardian: null,
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indicies: [],
@@ -274,18 +276,21 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filter: 'any' | 'active' | 'pending' | 'closed' = 'any',
+      filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const filters: Record<string, any> = {};
-      if (filter === 'active') {
+      const state = filters?.state;
+
+      if (state === 'active') {
         filters.start_lte = current;
         filters.end_gte = current;
-      } else if (filter === 'pending') {
+      } else if (state === 'pending') {
         filters.start_gt = current;
-      } else if (filter === 'closed') {
+      } else if (state === 'closed') {
         filters.end_lt = current;
       }
+
+      delete filters?.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -328,7 +333,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.ranking.items.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
@@ -350,6 +355,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         created: 0
       };
     },
+    loadLeaderboard: async (): Promise<User[]> => {
+      // NOTE: leaderboard implementation is pending on offchain
+      return [];
+    },
     loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
       const {
         data: { follows }
@@ -362,10 +371,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return follows.map(follow => {
-        follow.space.network = networkId;
-        return follow;
-      });
+      return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
     },
     loadAlias: async (address: string, aliasAddress: string): Promise<Alias | null> => {
       const {

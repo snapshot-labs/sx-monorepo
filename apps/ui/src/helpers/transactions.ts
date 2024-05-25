@@ -9,6 +9,7 @@ import {
   SendTokenTransaction,
   SendNftTransaction,
   ContractCallTransaction,
+  StakeTokenTransaction,
   Transaction
 } from '@/types';
 
@@ -101,7 +102,7 @@ export async function createSendNftTransaction({
 }
 
 export async function createContractCallTransaction({ form }): Promise<ContractCallTransaction> {
-  const args: Record<string, any> = Object.values(form.args);
+  const args: any[] = Object.values(form.args);
 
   let recipientAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);
@@ -138,6 +139,33 @@ export async function createContractCallTransaction({ form }): Promise<ContractC
       abi: form.abi,
       recipient: form.to,
       method: form.method,
+      args: form.args,
+      amount: form.amount
+    }
+  };
+}
+
+export async function createStakeTokenTransaction({ form }): Promise<StakeTokenTransaction> {
+  let contractAddress = form.to;
+  const resolvedTo = await resolver.resolveName(form.to);
+  if (resolvedTo?.address) contractAddress = resolvedTo.address;
+
+  let referralAddress = form.args.referral;
+  const resolvedReferral = await resolver.resolveName(form.args.referral);
+  if (resolvedReferral?.address) referralAddress = resolvedReferral.address;
+
+  const abi = ['function submit(address _referral) external payable returns (uint256)'];
+  const iface = new Interface(abi);
+  const data = iface.encodeFunctionData('submit', [referralAddress]);
+
+  return {
+    _type: 'stakeToken',
+    to: contractAddress,
+    data,
+    value: parseUnits(form.amount.toString(), 18).toString(),
+    salt: getSalt(),
+    _form: {
+      recipient: form.to,
       args: form.args,
       amount: form.amount
     }

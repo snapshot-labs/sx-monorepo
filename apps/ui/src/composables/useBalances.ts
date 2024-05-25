@@ -51,7 +51,9 @@ export function useBalances() {
 
     const data = await getBalances(address, networkId, baseToken);
     const tokensWithBalance = data.filter(
-      asset => formatUnits(asset.tokenBalance, asset.decimals) !== '0.0'
+      asset =>
+        formatUnits(asset.tokenBalance, asset.decimals) !== '0.0' ||
+        asset.symbol === baseToken.symbol
     );
 
     const coingeckoAssetPlatform = COINGECKO_ASSET_PLATFORMS[networkId];

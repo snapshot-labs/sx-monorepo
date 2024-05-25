@@ -1,6 +1,5 @@
 import fetch from 'cross-fetch';
 import { constants } from 'starknet';
-import { clients } from '@snapshot-labs/sx';
 import * as db from '../db';
 import { getClient } from './networks';
 
@@ -21,14 +20,6 @@ const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
     }
   ],
   [
-    constants.StarknetChainId.SN_GOERLI,
-    {
-      DESTINATION_CHAIN_ID: 'SN_GOERLI',
-      ACCUMULATES_CHAIN_ID: '5',
-      FEE: '0'
-    }
-  ],
-  [
     constants.StarknetChainId.SN_SEPOLIA,
     {
       DESTINATION_CHAIN_ID: 'SN_SEPOLIA',
@@ -37,8 +28,6 @@ const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
     }
   ]
 ]);
-
-const controller = new clients.HerodotusController();
 
 type ApiProposal = {
   chainId: string;
@@ -124,10 +113,9 @@ async function submitBatch(proposal: ApiProposal) {
 export async function registerProposal(proposal: ApiProposal) {
   if (
     proposal.chainId !== constants.StarknetChainId.SN_MAIN &&
-    proposal.chainId !== constants.StarknetChainId.SN_GOERLI &&
     proposal.chainId !== constants.StarknetChainId.SN_SEPOLIA
   ) {
-    throw new Error('Only Starknet mainnet, goerli and sepolia are supported');
+    throw new Error('Only Starknet mainnet and sepolia are supported');
   }
 
   await db.registerProposal(getId(proposal), {
@@ -168,7 +156,7 @@ export async function processProposal(proposal: DbProposal) {
     }
   }
 
-  const { getAccount } = getClient(proposal.chainId);
+  const { getAccount, herodotusController } = getClient(proposal.chainId);
   const { account, nonceManager } = getAccount('0x0');
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
@@ -190,7 +178,7 @@ export async function processProposal(proposal: DbProposal) {
     await nonceManager.acquire();
     const nonce = await nonceManager.getNonce();
 
-    const receipt = await controller.cacheTimestamp(
+    const receipt = await herodotusController.cacheTimestamp(
       {
         signer: account,
         contractAddress: proposal.strategyAddress,
@@ -199,6 +187,8 @@ export async function processProposal(proposal: DbProposal) {
       },
       { nonce }
     );
+
+    nonceManager.increaseNonce();
 
     console.log('cached proposal', receipt);
 

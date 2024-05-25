@@ -2,7 +2,7 @@ import { vi, describe, it, expect } from 'vitest';
 import * as sx from '@snapshot-labs/sx';
 import { getNetwork } from '../index';
 
-const network = getNetwork('s-tn');
+const network = getNetwork('s');
 const voter = '0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90';
 
 describe('offchain network', () => {

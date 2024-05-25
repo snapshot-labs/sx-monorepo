@@ -93,7 +93,6 @@ function createEvmConfig(networkId: keyof typeof evmNetworks): EvmNetworkConfig 
 
 export const evmNetworks = {
   eth: createStandardConfig(1),
-  gor: createStandardConfig(5),
   oeth: createStandardConfig(10),
   sep: createStandardConfig(11155111, {
     executionStrategies: {
@@ -132,7 +131,6 @@ export const evmNetworks = {
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');
-export const evmGoerli = createEvmConfig('gor');
 export const evmSepolia = createEvmConfig('sep');
 export const evmOptimism = createEvmConfig('oeth');
 export const evmPolygon = createEvmConfig('matic');

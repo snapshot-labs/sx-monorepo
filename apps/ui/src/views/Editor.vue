@@ -67,10 +67,15 @@ const proposalKey = computed(() => {
   return `${networkId.value}:${address.value}:${key}`;
 });
 const proposal = computed(() => {
-  if (!proposalKey.value) return null;
+  if (!proposalKey.value || !networkId.value) return null;
 
   if (!proposals[proposalKey.value]) {
-    createDraft(`${networkId.value}:${address.value}`, undefined, route.params.key as string);
+    createDraft(
+      networkId.value,
+      `${networkId.value}:${address.value}`,
+      undefined,
+      route.params.key as string
+    );
   }
 
   return proposals[proposalKey.value];
@@ -113,7 +118,8 @@ const supportedExecutionStrategies = computed(() => {
       if (!strategy) return null;
 
       return {
-        address: strategy.id,
+        address: strategy.address,
+        destinationAddress: strategy.destination_address,
         type: strategy.type,
         treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
       };
@@ -190,6 +196,7 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
+        proposal.value.executionStrategy?.destinationAddress ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
     } else {
@@ -201,6 +208,7 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
+        proposal.value.executionStrategy?.destinationAddress ?? null,
         proposal.value.executionStrategy?.address ? proposal.value.execution : []
       );
     }
@@ -297,7 +305,7 @@ const handleRouteChange: NavigationGuard = async to => {
   const resolved = await resolver.resolveName(to.params.id as string);
   if (!resolved) return false;
 
-  const draftId = createDraft(`${resolved.networkId}:${resolved.address}`);
+  const draftId = createDraft(resolved.networkId, `${resolved.networkId}:${resolved.address}`);
 
   return {
     ...to,
@@ -315,7 +323,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
+  <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 right-0 left-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
@@ -350,80 +358,87 @@ export default defineComponent({
         </div>
       </div>
     </nav>
-    <UiContainer v-if="proposal" class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
-      <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
-        You do not have enough voting power to create proposal in this space.
-      </UiAlert>
-      <UiInputString
-        :key="proposalKey || ''"
-        v-model="proposal.title"
-        :definition="TITLE_DEFINITION"
-        :error="formErrors.title"
-      />
-      <div class="flex space-x-3">
-        <button type="button" @click="previewEnabled = false">
-          <UiLink :is-active="!previewEnabled" text="Write" class="border-transparent" />
-        </button>
-        <button type="button" @click="previewEnabled = true">
-          <UiLink :is-active="previewEnabled" text="Preview" class="border-transparent" />
-        </button>
-      </div>
-      <UiMarkdown
-        v-if="previewEnabled"
-        class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
-        :body="proposal.body"
-      />
-      <UiComposer v-else v-model="proposal.body" class="" />
-      <div class="s-base mb-5">
+    <div class="md:mr-[340px]">
+      <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
+        <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
+          You do not have enough voting power to create proposal in this space.
+        </UiAlert>
         <UiInputString
           :key="proposalKey || ''"
-          v-model="proposal.discussion"
-          :definition="DISCUSSION_DEFINITION"
-          :error="formErrors.discussion"
+          v-model="proposal.title"
+          :definition="TITLE_DEFINITION"
+          :error="formErrors.title"
         />
-        <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
-      </div>
+        <div class="flex space-x-3">
+          <button type="button" @click="previewEnabled = false">
+            <UiLink :is-active="!previewEnabled" text="Write" class="border-transparent" />
+          </button>
+          <button type="button" @click="previewEnabled = true">
+            <UiLink :is-active="previewEnabled" text="Preview" class="border-transparent" />
+          </button>
+        </div>
+        <UiMarkdown
+          v-if="previewEnabled"
+          class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
+          :body="proposal.body"
+        />
+        <UiComposer v-else v-model="proposal.body" class="" />
+        <div class="s-base mb-5">
+          <UiInputString
+            :key="proposalKey || ''"
+            v-model="proposal.discussion"
+            :definition="DISCUSSION_DEFINITION"
+            :error="formErrors.discussion"
+          />
+          <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
+        </div>
+        <div
+          v-if="
+            space &&
+            network &&
+            supportedExecutionStrategies &&
+            supportedExecutionStrategies.length > 0
+          "
+        >
+          <h4 class="eyebrow mb-2">Execution</h4>
+          <div class="border rounded-lg mb-3">
+            <ExecutionButton
+              v-for="strategy in supportedExecutionStrategies"
+              :key="strategy.address"
+              class="flex-auto flex items-center gap-2"
+              @click="handleExecutionStrategySelected(strategy)"
+            >
+              <IH-chip />
+              <span class="flex-1">
+                {{ strategy.treasury.name }}
+                <span class="hidden sm:inline-block">
+                  ({{ network.constants.EXECUTORS[strategy.type] }} execution strategy)
+                </span>
+              </span>
+              <IH-check v-if="executionStrategy?.address === strategy.address" />
+            </ExecutionButton>
+          </div>
+          <EditorExecution
+            v-if="selectedExecutionWithTreasury"
+            :key="selectedExecutionWithTreasury.address"
+            v-model="proposal.execution"
+            :space="space"
+            :treasury-data="selectedExecutionWithTreasury.treasury"
+            :extra-contacts="extraContacts"
+            class="mb-4"
+          />
+        </div>
+      </UiContainer>
+    </div>
+
+    <div
+      class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
+    >
       <template v-if="votingTypes && (votingTypes.length > 1 || votingTypes[0] !== 'basic')">
         <EditorVotingType v-model="proposal" :voting-types="votingTypes" />
         <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
       </template>
-      <div
-        v-if="
-          space &&
-          network &&
-          supportedExecutionStrategies &&
-          supportedExecutionStrategies.length > 0
-        "
-      >
-        <h4 class="eyebrow mb-2">Execution</h4>
-        <div class="border rounded-lg mb-3">
-          <ExecutionButton
-            v-for="strategy in supportedExecutionStrategies"
-            :key="strategy.address"
-            class="flex-auto flex items-center gap-2"
-            @click="handleExecutionStrategySelected(strategy)"
-          >
-            <IH-chip />
-            <span class="flex-1">
-              {{ strategy.treasury.name }}
-              <span class="hidden sm:inline-block">
-                ({{ network.constants.EXECUTORS[strategy.type] }} execution strategy)
-              </span>
-            </span>
-            <IH-check v-if="executionStrategy?.address === strategy.address" />
-          </ExecutionButton>
-        </div>
-        <EditorExecution
-          v-if="selectedExecutionWithTreasury"
-          :key="selectedExecutionWithTreasury.address"
-          v-model="proposal.execution"
-          :space="space"
-          :treasury-data="selectedExecutionWithTreasury.treasury"
-          :extra-contacts="extraContacts"
-          class="mb-4"
-        />
-      </div>
-    </UiContainer>
+    </div>
     <teleport to="#modal">
       <ModalDrafts
         v-if="networkId && address"

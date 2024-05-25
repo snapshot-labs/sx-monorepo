@@ -10,11 +10,9 @@ export type NetworkID =
   | 'matic'
   | 'arb1'
   | 'oeth'
-  | 'gor'
   | 'sep'
   | 'linea-testnet'
   | 'sn'
-  | 'sn-tn'
   | 'sn-sep';
 
 export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
@@ -29,9 +27,14 @@ export type VoteType =
   | 'quadratic'
   | 'weighted'
   | 'custom';
+export type VoteTypeInfo = {
+  label: string;
+  description: string;
+};
 
 export type SelectedStrategy = {
   address: string;
+  destinationAddress?: string | null;
   type: string;
 };
 
@@ -113,8 +116,10 @@ export type Space = {
   authenticators: string[];
   executors: string[];
   executors_types: string[];
+  executors_destinations: string[];
   executors_strategies: {
-    id: string;
+    address: string;
+    destination_address: string | null;
     type: string;
     treasury: string | null;
     treasury_chain: number | null;
@@ -166,6 +171,7 @@ export type Proposal = {
   execution_time: number;
   execution_strategy: string;
   execution_strategy_type: string;
+  execution_destination: string | null;
   timelock_veto_guardian: string | null;
   strategies_indicies: number[];
   strategies: string[];
@@ -282,6 +288,15 @@ export type SendNftTransaction = BaseTransaction & {
   };
 };
 
+export type StakeTokenTransaction = BaseTransaction & {
+  _type: 'stakeToken';
+  _form: {
+    recipient: string;
+    args: any;
+    amount: string;
+  };
+};
+
 export type ContractCallTransaction = BaseTransaction & {
   _type: 'contractCall';
   _form: {
@@ -293,7 +308,11 @@ export type ContractCallTransaction = BaseTransaction & {
   };
 };
 
-export type Transaction = SendTokenTransaction | SendNftTransaction | ContractCallTransaction;
+export type Transaction =
+  | SendTokenTransaction
+  | SendNftTransaction
+  | StakeTokenTransaction
+  | ContractCallTransaction;
 
 // Utils
 export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };

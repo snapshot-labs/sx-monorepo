@@ -18,7 +18,7 @@ describe('utils', () => {
         treasuries: [
           {
             name: 'treasury 1',
-            network: 'gor',
+            network: 'sep',
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
@@ -27,7 +27,7 @@ describe('utils', () => {
             name: 'sample',
             apiType: 'governor-subgraph',
             apiUrl: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            contractNetwork: 'gor',
+            contractNetwork: 'sep',
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]
@@ -47,7 +47,7 @@ describe('utils', () => {
           treasuries: [
             {
               name: 'treasury 1',
-              network: 'gor',
+              network: 'sep',
               address: '0x000000000000000000000000000000000000dead'
             }
           ],
@@ -56,7 +56,7 @@ describe('utils', () => {
               name: 'sample',
               api_type: 'governor-subgraph',
               api_url: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-              contract: 'gor:0x000000000000000000000000000000000000dead'
+              contract: 'sep:0x000000000000000000000000000000000000dead'
             }
           ]
         }

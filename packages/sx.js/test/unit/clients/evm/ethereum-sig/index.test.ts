@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import { evmSepolia } from '../../../../../src/evmNetworks';
 import { EthereumSig } from '../../../../../src/clients/evm/ethereum-sig';
 
 describe('EthereumSig', () => {
@@ -13,7 +14,9 @@ describe('EthereumSig', () => {
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
     provider
   );
-  const ethSigClient = new EthereumSig();
+  const ethSigClient = new EthereumSig({
+    networkConfig: evmSepolia
+  });
 
   beforeAll(() => {
     vi.spyOn(ethSigClient, 'generateSalt').mockImplementation(() => 0);

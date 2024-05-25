@@ -15,7 +15,6 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const bookmarksStore = useBookmarksStore();
 const proposalsStore = useProposalsStore();
 
 const editSpaceModalOpen = ref(false);
@@ -24,11 +23,8 @@ onMounted(() => {
   proposalsStore.fetchSummary(props.space.id, props.space.network, PROPOSALS_LIMIT);
 });
 
-const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
-const spaceStarred = computed(() => bookmarksStore.isStarred(spaceIdComposite));
-const spaceFollowed = computed(() => bookmarksStore.isFollowed(spaceIdComposite));
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
 const socials = computed(() =>
@@ -48,7 +44,9 @@ const socials = computed(() =>
     .filter(social => social.href)
 );
 
-const proposalsRecord = computed(() => proposalsStore.proposals[spaceIdComposite]);
+const proposalsRecord = computed(
+  () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
+);
 
 const autolinkedAbout = computed(() =>
   autolinker.link(props.space.about || '', {
@@ -81,34 +79,7 @@ watchEffect(() => setTitle(props.space.name));
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
-        <UiButton
-          v-if="isOffchainSpace && web3.type !== 'argentx'"
-          :disabled="!bookmarksStore.followedSpacesLoaded"
-          class="group"
-          :class="{ 'hover:border-skin-danger': spaceFollowed }"
-          @click="bookmarksStore.toggleSpaceFollow(spaceIdComposite)"
-        >
-          <UiLoading
-            v-if="!bookmarksStore.followedSpacesLoaded && !bookmarksStore.followSpaceLoading"
-          />
-          <span v-else-if="spaceFollowed" class="inline-block">
-            <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
-            <span class="group-hover:hidden">Following</span>
-          </span>
-          <span v-else class="inline-block">Follow</span>
-        </UiButton>
-        <UiTooltip
-          v-else-if="!isOffchainSpace"
-          :title="spaceStarred ? 'Remove from favorites' : 'Add to favorites'"
-        >
-          <UiButton
-            class="w-[46px] !px-0"
-            @click="bookmarksStore.toggleSpaceStar(spaceIdComposite)"
-          >
-            <IS-star v-if="spaceStarred" class="inline-block" />
-            <IH-star v-else class="inline-block" />
-          </UiButton>
-        </UiTooltip>
+        <ButtonFollow :space="space" />
       </div>
     </div>
     <div class="px-4">

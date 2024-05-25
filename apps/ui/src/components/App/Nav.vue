@@ -7,14 +7,17 @@ import IHCash from '~icons/heroicons-outline/cash';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHUsers from '~icons/heroicons-outline/users';
+import IHUserGroup from '~icons/heroicons-outline/user-group';
 import IHUser from '~icons/heroicons-outline/user';
 import IHStop from '~icons/heroicons-outline/stop';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
+import IHBell from '~icons/heroicons-outline/bell';
 
 const route = useRoute();
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
+const notificationsStore = useNotificationsStore();
 
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
@@ -39,6 +42,10 @@ const navigationConfig = computed(() => ({
     proposals: {
       name: 'Proposals',
       icon: IHNewspaper
+    },
+    leaderboard: {
+      name: 'Leaderboard',
+      icon: IHUserGroup
     },
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
@@ -83,6 +90,11 @@ const navigationConfig = computed(() => ({
     explore: {
       name: 'Explore',
       icon: IHGlobe
+    },
+    notifications: {
+      name: 'Notifications',
+      count: notificationsStore.unreadNotificationsCount,
+      icon: IHBell
     }
   }
 }));
@@ -127,7 +139,12 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
         :class="route.name === `${currentRouteName}-${key}` ? 'text-skin-link' : 'text-skin-text'"
       >
         <component :is="item.icon" class="inline-block"></component>
-        <span v-text="item.name" />
+        <span class="grow" v-text="item.name" />
+        <span
+          v-if="item.count"
+          class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
+          v-text="item.count"
+        />
       </router-link>
       <router-link
         v-for="(item, key) in shortcuts[currentRouteName]"

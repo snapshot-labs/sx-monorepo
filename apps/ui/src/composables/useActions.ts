@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork, getReadWriteNetwork } from '@/networks';
+import { enabledNetworks, getNetwork, getReadWriteNetwork, offchainNetworks } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -15,6 +15,8 @@ import type {
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Connector, StrategyConfig } from '@/networks/types';
 import type { Wallet } from '@ethersproject/wallet';
+
+const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -156,6 +158,7 @@ export function useActions() {
     validationStrategy: StrategyConfig,
     votingStrategies: StrategyConfig[],
     executionStrategies: StrategyConfig[],
+    executionDestinations: string[],
     controller: string
   ) {
     if (!web3.value.account) {
@@ -177,6 +180,7 @@ export function useActions() {
       validationStrategy,
       votingStrategies,
       executionStrategies,
+      executionDestinations,
       metadata
     });
 
@@ -235,6 +239,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -269,6 +274,7 @@ export function useActions() {
         space,
         pinned.cid,
         executionStrategy,
+        executionDestinationAddress,
         convertToMetaTransactions(transactions)
       )
     );
@@ -290,6 +296,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     executionStrategy: string | null,
+    executionDestinationAddress: string | null,
     execution: Transaction[]
   ) {
     if (!web3.value.account) {
@@ -325,6 +332,7 @@ export function useActions() {
         proposalId,
         pinned.cid,
         executionStrategy,
+        executionDestinationAddress,
         convertToMetaTransactions(transactions)
       )
     );
@@ -359,7 +367,6 @@ export function useActions() {
 
   async function executeTransactions(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
 
     const network = getReadWriteNetwork(proposal.network);
 
@@ -372,6 +379,8 @@ export function useActions() {
 
     const network = getReadWriteNetwork(proposal.network);
 
+    // TODO: we need to have a way to tell what network to use, for example for EthRelayer transactions
+    // it should be baseNetwork
     await wrapPromise(proposal.network, network.actions.executeQueuedProposal(auth.web3, proposal));
   }
 
@@ -506,12 +515,17 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(networkId);
+    const network = getNetwork(offchainNetworkId);
 
     try {
       await wrapPromise(
         networkId,
-        network.actions.followSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
+        network.actions.followSpace(
+          await aliasableSigner(networkId),
+          networkId,
+          spaceId,
+          web3.value.account
+        )
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
@@ -527,12 +541,17 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(networkId);
+    const network = getNetwork(offchainNetworkId);
 
     try {
       await wrapPromise(
         networkId,
-        network.actions.unfollowSpace(await aliasableSigner(networkId), spaceId, web3.value.account)
+        network.actions.unfollowSpace(
+          await aliasableSigner(networkId),
+          networkId,
+          spaceId,
+          web3.value.account
+        )
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
