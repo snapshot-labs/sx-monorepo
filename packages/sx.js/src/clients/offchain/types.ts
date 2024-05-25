@@ -109,8 +109,8 @@ export type EIP712UnfollowSpaceMessage = {
 };
 
 export type EIP712SetAliasMessage = {
-  alias: string;
   from?: string;
+  alias: string;
   timestamp?: number;
 };
 
