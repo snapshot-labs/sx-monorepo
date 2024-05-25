@@ -1,4 +1,4 @@
-import { getAddress, isAddress } from '@ethersproject/address';
+import { isAddress } from '@ethersproject/address';
 import {
   OffchainNetworkConfig,
   clients,
@@ -203,21 +203,21 @@ export function createActions(
         };
       });
     },
-    followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from: string) {
+    followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string) {
       return client.followSpace({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
-        data: { network: networkId, space: spaceId, from: from || getAddress(from) }
+        data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
       });
     },
     unfollowSpace(
       web3: Web3Provider | Wallet,
       networkId: NetworkID,
       spaceId: string,
-      from: string
+      from?: string
     ) {
       return client.unfollowSpace({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
-        data: { network: networkId, space: spaceId, from: from || getAddress(from) }
+        data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
       });
     },
     setAlias(web3: Web3Provider, alias: string) {
