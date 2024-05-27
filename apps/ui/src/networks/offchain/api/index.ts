@@ -288,7 +288,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         filters.end_lt = current;
       }
 
-      Object.keys(filters)
+      Object.keys(filters || {})
         .filter(key => /^(min|max)_end/.test(key))
         .forEach(key => {
           filters[key.replace(/^(min|max)_/, '')] = filters[key];
