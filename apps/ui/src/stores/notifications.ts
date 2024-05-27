@@ -38,7 +38,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   ) {
     return network.api.loadProposals(spaceIds, { limit: 100 }, current, {
       state,
-      ...{ [state === 'closed' ? 'end_gte' : 'start_gte']: pivotTs }
+      ...{ [state === 'closed' ? 'max_end_gte' : 'start_gte']: pivotTs }
     });
   }
 
@@ -102,9 +102,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     shownLastUnreadTs.value = notifications.value[0]?.timestamp ?? 0;
   }
 
-  const unreadNotificationsCount = computed(
-    () => notifications.value.filter(n => n.unread).length
-  );
+  const unreadNotificationsCount = computed(() => notifications.value.filter(n => n.unread).length);
 
   watch(
     [() => followedSpacesStore.followedSpacesLoaded, () => followedSpacesStore.followedSpacesIds],
