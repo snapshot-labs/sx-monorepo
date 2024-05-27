@@ -12,9 +12,7 @@ import type {
   NetworkID,
   VoteType
 } from '@/types';
-import type { Web3Provider } from '@ethersproject/providers';
 import type { Connector, StrategyConfig } from '@/networks/types';
-import type { Wallet } from '@ethersproject/wallet';
 
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
@@ -108,7 +106,7 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
-  async function aliasableSigner(): Promise<Web3Provider | Wallet> {
+  async function aliasSigner() {
     const network = getNetwork(offchainNetworkId);
 
     return alias.getAliasWallet(address =>
@@ -516,7 +514,7 @@ export function useActions() {
     try {
       await wrapPromise(
         offchainNetworkId,
-        network.actions.followSpace(await aliasableSigner(), networkId, spaceId, web3.value.account)
+        network.actions.followSpace(await aliasSigner(), networkId, spaceId, web3.value.account)
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
@@ -537,12 +535,7 @@ export function useActions() {
     try {
       await wrapPromise(
         offchainNetworkId,
-        network.actions.unfollowSpace(
-          await aliasableSigner(),
-          networkId,
-          spaceId,
-          web3.value.account
-        )
+        network.actions.unfollowSpace(await aliasSigner(), networkId, spaceId, web3.value.account)
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
