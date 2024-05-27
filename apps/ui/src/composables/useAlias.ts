@@ -37,7 +37,7 @@ export function useAlias() {
     const registeredAlias = await network.api.loadAlias(
       web3.value.account,
       new Wallet(privateKey, provider).address,
-      Math.floor(Date.now() / 1000) - ALIAS_AVAILABILITY_PERIOD - ALIAS_AVAILABILITY_BUFFER
+      Math.floor(Date.now() / 1000) - ALIAS_AVAILABILITY_PERIOD + ALIAS_AVAILABILITY_BUFFER
     );
 
     return registeredAlias ? new Wallet(privateKey, provider) : null;
