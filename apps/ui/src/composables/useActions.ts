@@ -111,13 +111,9 @@ export function useActions() {
   async function aliasableSigner(): Promise<Web3Provider | Wallet> {
     const network = getNetwork(offchainNetworkId);
 
-    if (!(await alias.isValid())) {
-      await alias.create(address =>
-        wrapPromise(offchainNetworkId, network.actions.setAlias(auth.web3, address))
-      );
-    }
-
-    return alias.wallet.value || auth.web3;
+    return alias.getAliasWallet(address =>
+      wrapPromise(offchainNetworkId, network.actions.setAlias(auth.web3, address))
+    );
   }
 
   async function predictSpaceAddress(networkId: NetworkID, salt: string): Promise<string | null> {

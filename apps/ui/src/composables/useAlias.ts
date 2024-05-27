@@ -1,5 +1,6 @@
 import { Wallet } from '@ethersproject/wallet';
 import { getDefaultProvider } from '@ethersproject/providers';
+import { isHexString } from '@ethersproject/bytes';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import pkg from '../../package.json';
 
@@ -9,16 +10,8 @@ const networkId = offchainNetworks.filter(network => enabledNetworks.includes(ne
 const network = getNetwork(networkId);
 
 export function useAlias() {
+  const provider = getDefaultProvider();
   const { web3 } = useWeb3();
-
-  const wallet = computed(() => {
-    const provider = getDefaultProvider();
-    const privateKey = aliases.value[web3.value.account];
-
-    if (!privateKey) return null;
-
-    return new Wallet(privateKey, provider);
-  });
 
   async function create(networkCreateActionFn: (address: string) => Promise<unknown>) {
     const newAliasWallet = Wallet.createRandom();
@@ -31,19 +24,28 @@ export function useAlias() {
         [web3.value.account]: newAliasWallet.privateKey
       }
     };
+
+    return new Wallet(newAliasWallet.privateKey, provider);
   }
 
-  async function isValid() {
-    if (!wallet.value) return false;
+  async function existingAliasWallet(privateKey: string) {
+    if (!isHexString(privateKey)) return null;
 
     const registeredAlias = await network.api.loadAlias(
       web3.value.account,
-      wallet.value.address,
+      new Wallet(privateKey, provider).address,
       Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30
     );
 
-    return !!registeredAlias;
+    return registeredAlias ? new Wallet(privateKey, provider) : null;
   }
 
-  return { wallet, isValid, create };
+  async function getAliasWallet(networkCreateActionFn: (address: string) => Promise<unknown>) {
+    return (
+      (await existingAliasWallet(aliases.value[web3.value.account])) ||
+      (await create(networkCreateActionFn))
+    );
+  }
+
+  return { getAliasWallet };
 }
