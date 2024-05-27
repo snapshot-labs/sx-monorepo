@@ -42,12 +42,7 @@ export function useAlias() {
       Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30
     );
 
-    if (!registeredAlias) return false;
-
-    return (
-      registeredAlias.address === web3.value.account &&
-      registeredAlias.alias === wallet.value.address
-    );
+    return !!registeredAlias;
   }
 
   return { wallet, isValid, create };
