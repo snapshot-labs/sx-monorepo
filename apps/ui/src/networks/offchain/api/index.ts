@@ -389,7 +389,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return aliases?.[0];
+      return aliases?.[0] ?? null;
     }
   };
 }
