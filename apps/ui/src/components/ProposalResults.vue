@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { _p } from '@/helpers/utils';
+import { _n, _p } from '@/helpers/utils';
 import { quorumLabel, quorumProgress, quorumChoiceProgress } from '@/helpers/quorum';
 import { Proposal as ProposalType } from '@/types';
+
+const DEFAULT_MAX_CHOICES = 6;
 
 const props = withDefaults(
   defineProps<{
@@ -23,6 +25,8 @@ const labels = {
   2: 'Abstain'
 };
 
+const displayAllChoices = ref(false);
+
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const results = computed(() => {
@@ -39,6 +43,27 @@ const results = computed(() => {
       };
     })
     .sort((a, b) => b.progress - a.progress);
+});
+
+const visibleResults = computed(() => {
+  if (displayAllChoices.value) {
+    return results.value;
+  }
+
+  return results.value.slice(0, DEFAULT_MAX_CHOICES);
+});
+
+const otherResultsSummary = computed(() => {
+  return results.value.slice(DEFAULT_MAX_CHOICES).reduce(
+    (acc, result) => ({
+      progress: acc.progress + result.progress,
+      count: acc.count + 1
+    }),
+    {
+      progress: 0,
+      count: 0
+    }
+  );
 });
 </script>
 
@@ -76,7 +101,7 @@ const results = computed(() => {
   <template v-else>
     <div v-if="withDetails" class="flex flex-col gap-2">
       <div
-        v-for="result in results"
+        v-for="result in visibleResults"
         :key="result.choice"
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
         :class="{ [`_${result.choice} choice-border`]: proposal.type === 'basic' }"
@@ -106,6 +131,30 @@ const results = computed(() => {
         <div class="truncate grow" v-text="proposal.choices[result.choice - 1]" />
         <div v-text="_p(result.progress / 100)" />
       </div>
+      <button
+        v-if="!displayAllChoices && otherResultsSummary.count > 0"
+        type="button"
+        class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center text-left group"
+        @click="displayAllChoices = true"
+      >
+        <div
+          class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
+          :style="{
+            width: `${otherResultsSummary.progress.toFixed(2)}%`
+          }"
+        />
+        <div class="truncate grow">
+          Others
+          <span
+            class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-2"
+            v-text="_n(otherResultsSummary.count, 'compact')"
+          />
+        </div>
+        <div class="group-hover:hidden" v-text="_p(otherResultsSummary.progress / 100)" />
+        <div class="hidden group-hover:flex items-center gap-1">
+          See all <IH-arrow-down class="w-[16px] h-[16px]" />
+        </div>
+      </button>
       <div v-if="proposal.quorum">
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
