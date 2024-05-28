@@ -45,8 +45,12 @@ const results = computed(() => {
     .sort((a, b) => b.progress - a.progress);
 });
 
+const hasOneExtra = computed(() => {
+  return results.value.length === DEFAULT_MAX_CHOICES + 1;
+});
+
 const visibleResults = computed(() => {
-  if (displayAllChoices.value) {
+  if (displayAllChoices.value || hasOneExtra.value) {
     return results.value;
   }
 
@@ -54,7 +58,9 @@ const visibleResults = computed(() => {
 });
 
 const otherResultsSummary = computed(() => {
-  return results.value.slice(DEFAULT_MAX_CHOICES).reduce(
+  const oetherResultsStartIndex = hasOneExtra.value ? DEFAULT_MAX_CHOICES + 1 : DEFAULT_MAX_CHOICES;
+
+  return results.value.slice(oetherResultsStartIndex).reduce(
     (acc, result) => ({
       progress: acc.progress + result.progress,
       count: acc.count + 1
