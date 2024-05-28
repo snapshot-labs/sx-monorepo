@@ -82,7 +82,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         )
       )
     );
-    fetchSpacesData(newIds);
+    await fetchSpacesData(newIds);
   }
 
   async function toggleSpaceFollow(id: string) {
@@ -123,6 +123,8 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     [() => web3.value.account, () => web3.value.authLoading, () => authInitiated.value],
     async ([web3, authLoading, authInitiated]) => {
       if (!authInitiated || authLoading) return;
+
+      followedSpacesLoaded.value = false;
 
       if (!web3) {
         followedSpacesIds.value = [];
