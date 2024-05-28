@@ -12,7 +12,9 @@ const followedSpacesStore = useFollowedSpacesStore();
 const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
 
 const loading = computed(
-  () => !followedSpacesStore.followedSpacesLoaded || followedSpacesStore.followedSpaceLoading
+  () =>
+    !followedSpacesStore.followedSpacesLoaded ||
+    followedSpacesStore.followedSpaceLoading.has(spaceIdComposite)
 );
 </script>
 

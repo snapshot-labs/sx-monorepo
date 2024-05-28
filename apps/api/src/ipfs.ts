@@ -69,7 +69,7 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
       const uniqueExecutors: string[] = [];
       for (let i = 0; i < metadata.properties.execution_strategies.length; i++) {
         const id = crypto.randomUUID();
-        const destination = (metadata.properties?.execution_destinations[i] as string) ?? '';
+        const destination = (metadata.properties.execution_destinations?.[i] as string) ?? '';
 
         destinations.push(destination);
         uniqueExecutors.push(id);

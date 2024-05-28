@@ -7,7 +7,7 @@ import { formatUnits } from '@ethersproject/units';
 import { BigNumber } from '@ethersproject/bignumber';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { getABI } from '@/helpers/etherscan';
-import { SelectedStrategy } from '@/types';
+import { NetworkID, SelectedStrategy } from '@/types';
 
 type ApproveCallback = () => Promise<boolean>;
 type ConnectionData = {
@@ -73,6 +73,7 @@ async function parseCall(chainId: number, call) {
 }
 
 export function useWalletConnect(
+  networkId: NetworkID,
   chainId: number,
   account: string,
   spaceKey: string,
@@ -211,7 +212,7 @@ export function useWalletConnect(
 
       try {
         const transaction = await parseCall(chainId, request);
-        setTransaction(spaceKey, chainId, executionStrategy, transaction);
+        setTransaction(spaceKey, networkId, chainId, executionStrategy, transaction);
 
         await connector.respondSessionRequest({
           topic: payload.topic,
