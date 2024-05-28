@@ -10,7 +10,8 @@ const uiStore = useUiStore();
 const { votes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
-  (props.proposal.space.snapshot_chain_id || '1').toString()
+  props.proposal.network,
+  props.proposal.space.snapshot_chain_id
 );
 
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);

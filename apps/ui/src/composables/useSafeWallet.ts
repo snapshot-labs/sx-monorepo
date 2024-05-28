@@ -2,6 +2,8 @@ import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { computedAsync, useMemoize } from '@vueuse/core';
 import { Contract } from '@ethersproject/contracts';
 import { getProvider } from '@/helpers/provider';
+import { offchainNetworks } from '@/networks';
+import { NetworkID } from '@/types';
 
 const getSafeVersion = useMemoize(async (networkKey: string, account: string) => {
   const provider = getProvider(Number(networkKey));
@@ -14,19 +16,17 @@ const getSafeVersion = useMemoize(async (networkKey: string, account: string) =>
   return contract.VERSION([]);
 });
 
-export function useSafeWallet(network: string) {
+export function useSafeWallet(network: NetworkID, chainId = 1) {
   const { web3 } = useWeb3();
   const auth = getInstance();
   const connectorName = computed(() => auth.provider.value?.connectorName);
 
-  const networkKey = computed(() => web3.value.network.key);
-
-  const spaceNetworkKey = computed(() => network);
+  const signedChainId = computed(() => web3.value.network.key);
 
   const isSafeContract = computedAsync(async () => {
     if (!web3.value.account) return false;
 
-    const safeVersion = await getSafeVersion(networkKey.value, web3.value.account);
+    const safeVersion = await getSafeVersion(signedChainId.value, web3.value.account);
 
     return typeof safeVersion === 'string';
   }, false);
@@ -34,7 +34,11 @@ export function useSafeWallet(network: string) {
   const isSafeWallet = computed(() => connectorName.value === 'gnosis' || isSafeContract.value);
 
   const isInvalidNetwork = computed(() => {
-    return isSafeWallet.value && networkKey.value !== spaceNetworkKey.value;
+    return (
+      isSafeWallet.value &&
+      offchainNetworks.includes(network) &&
+      Number(signedChainId.value) !== chainId
+    );
   });
 
   return {
