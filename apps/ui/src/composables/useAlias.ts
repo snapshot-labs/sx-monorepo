@@ -31,7 +31,7 @@ export function useAlias() {
     return new Wallet(newAliasWallet.privateKey, provider);
   }
 
-  async function existingAliasWallet(privateKey: string) {
+  async function getExistingAliasWallet(privateKey: string) {
     if (!isHexString(privateKey)) return null;
 
     const registeredAlias = await network.api.loadAlias(
@@ -45,7 +45,7 @@ export function useAlias() {
 
   async function getAliasWallet(networkCreateActionFn: (address: string) => Promise<unknown>) {
     return (
-      (await existingAliasWallet(aliases.value[web3.value.account])) ||
+      (await getExistingAliasWallet(aliases.value[web3.value.account])) ||
       (await create(networkCreateActionFn))
     );
   }

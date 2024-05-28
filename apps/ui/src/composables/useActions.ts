@@ -106,7 +106,7 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
-  async function aliasSigner() {
+  async function getAliasSigner() {
     const network = getNetwork(offchainNetworkId);
 
     return alias.getAliasWallet(address =>
@@ -514,7 +514,7 @@ export function useActions() {
     try {
       await wrapPromise(
         offchainNetworkId,
-        network.actions.followSpace(await aliasSigner(), networkId, spaceId, web3.value.account)
+        network.actions.followSpace(await getAliasSigner(), networkId, spaceId, web3.value.account)
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
@@ -535,7 +535,12 @@ export function useActions() {
     try {
       await wrapPromise(
         offchainNetworkId,
-        network.actions.unfollowSpace(await aliasSigner(), networkId, spaceId, web3.value.account)
+        network.actions.unfollowSpace(
+          await getAliasSigner(),
+          networkId,
+          spaceId,
+          web3.value.account
+        )
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
