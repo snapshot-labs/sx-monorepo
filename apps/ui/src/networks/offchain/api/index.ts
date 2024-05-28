@@ -360,7 +360,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
     loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
       const {
         data: { follows }
-      }: { data: { follows: (Follow & { network: NetworkID })[] } } = await apollo.query({
+      }: { data: { follows: Follow[] } } = await apollo.query({
         query: USER_FOLLOWS_QUERY,
         variables: {
           first: 25,
