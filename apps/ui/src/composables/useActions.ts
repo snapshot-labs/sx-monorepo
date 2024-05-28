@@ -98,6 +98,7 @@ export function useActions() {
       hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
       console.log('Receipt', envelope);
+
       uiStore.addPendingTransaction(envelope.transaction_hash || envelope.hash, networkId);
     }
   }
