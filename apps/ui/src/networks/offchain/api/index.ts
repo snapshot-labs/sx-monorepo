@@ -376,7 +376,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
+      return follows.map(follow => ({
+        ...follow,
+        space: { ...follow.space, network: follow.network }
+      }));
     }
   };
 }
