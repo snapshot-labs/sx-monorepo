@@ -107,7 +107,9 @@ export function useSpaces() {
           },
           filter
         );
+
         explorePageSpaces.value.push(...spaces);
+
         return {
           id,
           spaces,
@@ -143,6 +145,7 @@ export function useSpaces() {
   async function fetch(filter?: SpacesFilter) {
     if (loading.value) return;
     loading.value = true;
+    explorePageSpaces.value = [];
 
     await _fetchSpaces(true, filter);
 
