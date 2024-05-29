@@ -118,3 +118,11 @@ export const unfollowSpaceTypes = {
     { name: 'timestamp', type: 'uint64' }
   ]
 };
+
+export const aliasTypes = {
+  Alias: [
+    { name: 'from', type: 'address' },
+    { name: 'alias', type: 'address' },
+    { name: 'timestamp', type: 'uint64' }
+  ]
+};

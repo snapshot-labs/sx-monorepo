@@ -11,7 +11,8 @@ import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getUrl } from '@/helpers/utils';
 import { getProvider } from '@/helpers/provider';
 import { getSwapLink } from '@/helpers/link';
-import type { Web3Provider } from '@ethersproject/providers';
+import { Web3Provider } from '@ethersproject/providers';
+import type { Wallet } from '@ethersproject/wallet';
 import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType, NetworkID } from '@/types';
 import type {
   ReadOnlyNetworkActions,
@@ -202,16 +203,27 @@ export function createActions(
         };
       });
     },
-    followSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string) {
+    followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string) {
       return client.followSpace({
-        signer: web3.getSigner(),
-        data: { network: networkId, space: spaceId }
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
       });
     },
-    unfollowSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string) {
+    unfollowSpace(
+      web3: Web3Provider | Wallet,
+      networkId: NetworkID,
+      spaceId: string,
+      from?: string
+    ) {
       return client.unfollowSpace({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
+      });
+    },
+    setAlias(web3: Web3Provider, alias: string) {
+      return client.setAlias({
         signer: web3.getSigner(),
-        data: { network: networkId, space: spaceId }
+        data: { alias }
       });
     }
   };

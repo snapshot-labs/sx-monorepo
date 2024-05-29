@@ -207,6 +207,11 @@ export type Follow = {
   network: NetworkID;
 };
 
+export type Alias = {
+  address: string;
+  alias: string;
+};
+
 export type Contact = {
   address: string;
   name: string;

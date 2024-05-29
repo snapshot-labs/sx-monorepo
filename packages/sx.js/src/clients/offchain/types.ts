@@ -12,7 +12,14 @@ export type SignatureData = {
 };
 
 export type Envelope<
-  T extends Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace
+  T extends
+    | Vote
+    | Propose
+    | UpdateProposal
+    | CancelProposal
+    | FollowSpace
+    | UnfollowSpace
+    | SetAlias
 > = {
   signatureData?: SignatureData;
   data: T;
@@ -101,6 +108,12 @@ export type EIP712UnfollowSpaceMessage = {
   timestamp?: number;
 };
 
+export type EIP712SetAliasMessage = {
+  from?: string;
+  alias: string;
+  timestamp?: number;
+};
+
 export type EIP712Message = Required<
   | EIP712VoteMessage
   | EIP712ProposeMessage
@@ -108,6 +121,7 @@ export type EIP712Message = Required<
   | EIP712CancelProposalMessage
   | EIP712FollowSpaceMessage
   | EIP712UnfollowSpaceMessage
+  | EIP712SetAliasMessage
 >;
 
 export type Vote = {
@@ -166,5 +180,11 @@ export type UnfollowSpace = {
   from?: string;
   network: string;
   space: string;
+  timestamp?: number;
+};
+
+export type SetAlias = {
+  from?: string;
+  alias: string;
   timestamp?: number;
 };

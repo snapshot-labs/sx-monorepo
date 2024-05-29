@@ -475,6 +475,9 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
     },
     loadFollows: async () => {
       return [] as Follow[];
+    },
+    loadAlias: async () => {
+      return null;
     }
   };
 }
