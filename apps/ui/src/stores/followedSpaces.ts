@@ -17,7 +17,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
 
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
-  const followedSpaceLoading = ref(false);
+  const followedSpaceLoading = reactive(new Set<string>());
   const followedSpacesIdsByAccount = useStorage(
     `${pkg.name}.spaces-followed`,
     {} as Record<string, string[]>
@@ -82,13 +82,13 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         )
       )
     );
-    fetchSpacesData(newIds);
+    await fetchSpacesData(newIds);
   }
 
   async function toggleSpaceFollow(id: string) {
     const alreadyFollowed = followedSpacesIds.value.includes(id);
     const [spaceNetwork, spaceId] = id.split(':') as [NetworkID, string];
-    followedSpaceLoading.value = true;
+    followedSpaceLoading.add(id);
 
     try {
       if (alreadyFollowed) {
@@ -111,7 +111,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         followedSpacesIdsByAccount.value[web3.value.account].unshift(id);
       }
     } finally {
-      followedSpaceLoading.value = false;
+      followedSpaceLoading.delete(id);
     }
   }
 
@@ -123,6 +123,8 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     [() => web3.value.account, () => web3.value.authLoading, () => authInitiated.value],
     async ([web3, authLoading, authInitiated]) => {
       if (!authInitiated || authLoading) return;
+
+      followedSpacesLoaded.value = false;
 
       if (!web3) {
         followedSpacesIds.value = [];

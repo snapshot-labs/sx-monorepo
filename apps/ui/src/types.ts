@@ -204,6 +204,7 @@ export type Follow = {
   follower: string;
   space: Space;
   created: number;
+  network: NetworkID;
 };
 
 export type Alias = {
