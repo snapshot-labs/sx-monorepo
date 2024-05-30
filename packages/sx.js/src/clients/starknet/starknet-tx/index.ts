@@ -1,6 +1,8 @@
 import { Account, CallData, shortString, uint256, hash } from 'starknet';
-import { ContractFactory } from '@ethersproject/contracts';
+import { Contract } from '@ethersproject/contracts';
 import { Signer } from '@ethersproject/abstract-signer';
+import { TransactionResponse } from '@ethersproject/providers';
+import { getAddress } from '@ethersproject/address';
 import { poseidonHashMany } from 'micro-starknet';
 import randomBytes from 'randombytes';
 import { getStrategiesWithParams } from '../../../utils/strategies';
@@ -8,7 +10,7 @@ import { getAuthenticator } from '../../../authenticators/starknet';
 import { hexPadLeft } from '../../../utils/encoding';
 import { estimateStarknetFee } from '../../../utils/fees';
 import SpaceAbi from './abis/Space.json';
-import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy.json';
+import L1AvatarExecutionStrategyFactoryAbi from '../l1-executor/abis/L1AvatarExecutionStrategyFactory.json';
 import {
   Vote,
   Propose,
@@ -135,13 +137,13 @@ export class StarknetTx {
     signer: Signer;
     params: L1AvatarExecutionStrategyParams;
   }): Promise<{ txId: string; address: string }> {
-    const l1AvatarExecutionStrategyContractFactor = new ContractFactory(
-      L1AvatarExecutionStrategyAbi.abi,
-      L1AvatarExecutionStrategyAbi.bytecode,
+    const l1AvatarExecutionStrategyFactory = new Contract(
+      this.config.networkConfig.l1AvatarExecutionStrategyFactory,
+      L1AvatarExecutionStrategyFactoryAbi,
       signer
     );
 
-    const contract = await l1AvatarExecutionStrategyContractFactor.deploy(
+    const response: TransactionResponse = await l1AvatarExecutionStrategyFactory.createContract(
       controller,
       target,
       this.config.networkConfig.starknetCore,
@@ -150,7 +152,23 @@ export class StarknetTx {
       quorum
     );
 
-    return { address: contract.address, txId: contract.deployTransaction.hash };
+    const receipt = await response.wait();
+
+    const deployLog = receipt.logs
+      .filter(
+        log =>
+          log.address === getAddress(this.config.networkConfig.l1AvatarExecutionStrategyFactory)
+      )
+      .map(log => {
+        return l1AvatarExecutionStrategyFactory.interface.parseLog(log);
+      })
+      .find(log => log.name === 'ContractDeployed');
+
+    if (!deployLog) throw new Error('Missing event');
+
+    const address = getAddress(deployLog.args[0] as string);
+
+    return { address, txId: receipt.transactionHash };
   }
 
   async getSalt({ sender, saltNonce }: { sender: string; saltNonce: string }) {

@@ -1,0 +1,43 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: L1AvatarExecutionStrategyFactory
+    network: sepolia
+    source:
+      abi: L1AvatarExecutionStrategyFactory
+      address: '0x8dc09f3a1af954919c13780c0ac2efe649cd855f'
+      startBlock: 5993845
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Execution
+      abis:
+        - name: L1AvatarExecutionStrategyFactory
+          file: ./abis/L1AvatarExecutionStrategyFactory.json
+      eventHandlers:
+        - event: ContractDeployed(indexed address)
+          handler: handleContractDeployed
+      file: ./src/mapping.ts
+templates:
+  - kind: ethereum
+    name: L1AvatarExecutionStrategy
+    network: sepolia
+    source:
+      abi: L1AvatarExecutionStrategy
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ProposalExecuted
+      abis:
+        - name: L1AvatarExecutionStrategy
+          file: ./abis/L1AvatarExecutionStrategy.json
+      eventHandlers:
+        - event: ProposalExecuted(indexed uint256,bytes32)
+          handler: handleProposalExecuted
+      file: ./src/mapping.ts

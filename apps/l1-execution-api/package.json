@@ -1,0 +1,22 @@
+{
+  "name": "l1-execution-api",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "dev": "yarn deploy-local",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ snapshot-labs/l1-execution-api",
+    "create-local": "graph create --node http://localhost:8020/ snapshot-labs/l1-execution-api",
+    "remove-local": "graph remove --node http://localhost:8020/ snapshot-labs/l1-execution-api",
+    "deploy-local": "yarn create-local && graph deploy --node http://localhost:8020/ --network sepolia -l `LC_ALL=C tr -dc a-z0-9 </dev/urandom | head -c 32` snapshot-labs/l1-execution-api",
+    "deploy-studio": "graph deploy --studio -l v${npm_package_version}",
+    "deploy-studio-mainnet": "yarn deploy-studio --network mainnet l1-execution-api",
+    "deploy-studio-sepolia": "yarn deploy-studio --network sepolia l1-execution-api-sepolia"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.72.1",
+    "@graphprotocol/graph-ts": "0.35.1",
+    "assemblyscript-json": "^1.1.0"
+  }
+}

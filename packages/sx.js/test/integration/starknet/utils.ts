@@ -44,6 +44,8 @@ import GnosisSafeL2Contract from './fixtures/l1/GnosisSafeL2.json';
 import GnosisSafeProxyFactoryContract from './fixtures/l1/GnosisSafeProxyFactory.json';
 import ModuleProxyFactoryContract from './fixtures/l1/ModuleProxyFactory.json';
 import L1AvatarExecutionStrategyMockMessagingContract from './fixtures/l1/L1AvatarExecutionStrategyMockMessaging.json';
+import L1AvatarExecutionStrategyContract from './fixtures/l1/L1AvatarExecutionStrategy.json';
+import L1AvatarExecutionStrategyFactoryContract from './fixtures/l1/L1AvatarExecutionStrategyFactory.json';
 import MockStarknetMessaging from './fixtures/l1/MockStarknetMessaging.json';
 import StarknetCommit from './fixtures/l1/StarknetCommit.json';
 import { NetworkConfig } from '../../../src/types';
@@ -132,6 +134,17 @@ export async function setup({
   await loadL1MessagingContract(ethUrl, starknetCore);
 
   const starknetCommit = await deployL1Dependency(ethereumWallet, StarknetCommit, starknetCore);
+
+  const masterl1AvatarExecutionStrategy = await deployL1Dependency(
+    ethereumWallet,
+    L1AvatarExecutionStrategyContract
+  );
+
+  const l1AvatarExecutionStrategyFactory = await deployL1Dependency(
+    ethereumWallet,
+    L1AvatarExecutionStrategyFactoryContract,
+    masterl1AvatarExecutionStrategy
+  );
 
   const erc20VotesToken = await deployDependency(
     starknetAccount,
@@ -253,8 +266,11 @@ export async function setup({
   const networkConfig: NetworkConfig = {
     eip712ChainId: '0x534e5f474f45524c49',
     spaceFactory: factoryAddress,
+    l1AvatarExecutionStrategyFactory,
     masterSpace: masterSpaceClassHash as string,
     starknetCommit,
+    starknetCore: '',
+    herodotusAccumulatesChainId: 1337,
     authenticators: {
       [hexPadLeft(vanillaAuthenticator)]: {
         type: 'vanilla'

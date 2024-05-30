@@ -1,6 +1,6 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
-import L1ExecutorContract from './abis/L1AvatarExecutionStrategy.json';
+import L1ExecutorContractAbi from './abis/L1AvatarExecutionStrategy.json';
 import { MetaTransaction } from '../../../utils/encoding';
 
 type ExecuteParams = {
@@ -38,7 +38,7 @@ export class L1Executor {
   }: {
     signer: Signer;
   } & ExecuteParams) {
-    const contract = new Contract(executor, L1ExecutorContract.abi, signer);
+    const contract = new Contract(executor, L1ExecutorContractAbi, signer);
 
     return contract.execute(
       space,

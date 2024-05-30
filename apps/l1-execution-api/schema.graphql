@@ -1,0 +1,7 @@
+type Execution @entity {
+  id: ID!
+  space: String!
+  executionHash: String!
+  created: Int!
+  tx: Bytes!
+}
