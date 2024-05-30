@@ -108,7 +108,7 @@ export function useSpaces() {
           filter
         );
 
-        explorePageSpaces.value.push(...spaces);
+        explorePageSpaces.value = [...(overwrite ? [] : explorePageSpaces.value), ...spaces];
 
         return {
           id,
@@ -163,7 +163,6 @@ export function useSpaces() {
   }
 
   watch(protocol, async () => {
-    explorePageSpaces.value = [];
     await fetch();
   });
 
