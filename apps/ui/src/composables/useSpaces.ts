@@ -145,7 +145,6 @@ export function useSpaces() {
   async function fetch(filter?: SpacesFilter) {
     if (loading.value) return;
     loading.value = true;
-    explorePageSpaces.value = [];
 
     await _fetchSpaces(true, filter);
 
@@ -163,6 +162,7 @@ export function useSpaces() {
   }
 
   watch(protocol, async () => {
+    explorePageSpaces.value = [];
     await fetch();
   });
 
