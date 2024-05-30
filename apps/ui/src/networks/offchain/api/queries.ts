@@ -114,6 +114,17 @@ export const SPACES_RANKING_QUERY = gql`
   ${SPACE_FRAGMENT}
 `;
 
+export const RANKING_QUERY = gql`
+  query ($first: Int, $skip: Int, $where: RankingWhere) {
+    ranking(first: $first, skip: $skip, where: $where) {
+      items {
+        ...offchainSpaceFragment
+      }
+    }
+  }
+  ${SPACE_FRAGMENT}
+`;
+
 export const SPACE_QUERY = gql`
   query ($id: String!) {
     space(id: $id) {

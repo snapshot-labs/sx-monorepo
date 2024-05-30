@@ -1,6 +1,7 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import {
   SPACES_RANKING_QUERY,
+  RANKING_QUERY,
   SPACE_QUERY,
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
@@ -25,6 +26,7 @@ import {
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
+import { clone } from '@/helpers/utils';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -329,18 +331,42 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      let _filters = clone(filter || {});
+
+      if (!_filters?.id_in) {
+        const { data } = await apollo.query({
+          query: RANKING_QUERY,
+          variables: {
+            first: limit,
+            skip,
+            where: {
+              ..._filters
+            }
+          }
+        });
+
+        _filters = { id_in: data.ranking.items.map(space => space.id) };
+        skip = 0;
+      }
+
       const { data } = await apollo.query({
         query: SPACES_RANKING_QUERY,
         variables: {
           first: limit,
           skip,
           where: {
-            ...filter
+            ..._filters
           }
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      const spaces: Space[] = data.spaces.map(space => formatSpace(space, networkId));
+
+      if (_filters.id_in) {
+        spaces.sort((a, b) => _filters.id_in!.indexOf(a.id) - _filters.id_in!.indexOf(b.id));
+      }
+
+      return spaces;
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
