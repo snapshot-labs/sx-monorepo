@@ -331,22 +331,13 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
-      const _filters: Record<string, any> | undefined = clone(filter);
-
-      if (_filters?.controller) {
-        // NOTE: get all ENS names associated to the controller
-        // and add them to filters
-      }
-
-      delete _filters?.controller;
-
       const { data } = await apollo.query({
         query: SPACES_RANKING_QUERY,
         variables: {
           first: Math.min(limit, 20),
           skip,
           where: {
-            ..._filters
+            ...filter
           }
         }
       });
