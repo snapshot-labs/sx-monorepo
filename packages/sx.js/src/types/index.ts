@@ -131,7 +131,11 @@ export type Vote = {
   choice: Choice;
 };
 
-export type Message = Propose | Vote | UpdateProposal;
+export type Alias = {
+  alias: string;
+};
+
+export type Message = Propose | Vote | UpdateProposal | Alias;
 
 export type SignatureData = {
   address: string;
@@ -195,6 +199,10 @@ export type EIP712UpdateProposalMessage = Omit<
 export type EIP712VoteMessage = Omit<StarknetEIP712VoteMessage, 'proposalId'> & {
   authenticator: string;
   proposalId: string;
+};
+
+export type EIP712AliasMessage = {
+  alias: string;
 };
 
 export type StrategiesAddresses = { index: number; address: string }[];

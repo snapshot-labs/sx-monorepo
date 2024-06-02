@@ -13,8 +13,12 @@ import type {
   VoteType
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
+import { starknetNetworks } from '@snapshot-labs/sx';
 
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
+const starknetNetworkId = (Object.keys(starknetNetworks) as NetworkID[])
+  .filter(network => enabledNetworks.includes(network))
+  .pop() as NetworkID;
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -107,7 +111,9 @@ export function useActions() {
   }
 
   async function getAliasSigner() {
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(
+      web3.value.type === 'argentx' ? starknetNetworkId : offchainNetworkId
+    );
 
     return alias.getAliasWallet(address =>
       wrapPromise(offchainNetworkId, network.actions.setAlias(auth.web3, address))

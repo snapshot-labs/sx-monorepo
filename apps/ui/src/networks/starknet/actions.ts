@@ -582,7 +582,12 @@ export function createActions(
     },
     followSpace: () => {},
     unfollowSpace: () => {},
-    setAlias: () => {},
+    setAlias(web3: any, alias: string) {
+      return ethSigClient.setAlias({
+        signer: web3.getSigner(),
+        data: { alias }
+      });
+    },
     send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper
   };
 }
