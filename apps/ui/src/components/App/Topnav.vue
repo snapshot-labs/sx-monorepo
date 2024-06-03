@@ -76,7 +76,7 @@ watch(route, to => {
           </form>
         </div>
         <router-link v-else :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
-          snapshot x
+          snapshot
         </router-link>
       </div>
       <div :key="web3.account" class="flex">
