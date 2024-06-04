@@ -105,7 +105,7 @@ export const PROPOSALS_QUERY = gql`
   ${PROPOSAL_FRAGMENT}
 `;
 
-export const SPACES_RANKING_QUERY = gql`
+export const SPACES_QUERY = gql`
   query ($first: Int, $skip: Int, $where: SpaceWhere) {
     spaces(first: $first, skip: $skip, where: $where) {
       ...offchainSpaceFragment

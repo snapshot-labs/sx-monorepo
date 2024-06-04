@@ -1,6 +1,6 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import {
-  SPACES_RANKING_QUERY,
+  SPACES_QUERY,
   RANKING_QUERY,
   SPACE_QUERY,
   PROPOSALS_QUERY,
@@ -350,7 +350,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       }
 
       const { data } = await apollo.query({
-        query: SPACES_RANKING_QUERY,
+        query: SPACES_QUERY,
         variables: {
           first: limit,
           skip,
