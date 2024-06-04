@@ -301,11 +301,11 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filters: ProposalsFilter,
+      filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: Record<string, any> = clone(filters);
-      const state = _filters?.state;
+      const _filters: Record<string, any> = clone(filters || {});
+      const state = _filters.state;
 
       if (state === 'active') {
         _filters.start_lte = current;
@@ -316,7 +316,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         _filters.max_end_lt = current;
       }
 
-      delete _filters?.state;
+      delete _filters.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
