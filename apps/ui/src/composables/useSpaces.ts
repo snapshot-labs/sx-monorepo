@@ -108,7 +108,7 @@ export function useSpaces() {
           filter
         );
 
-        explorePageSpaces.value = [...(overwrite ? [] : explorePageSpaces.value), ...spaces];
+        explorePageSpaces.value = overwrite ? spaces : [explorePageSpaces.value, ...spaces];
 
         return {
           id,
