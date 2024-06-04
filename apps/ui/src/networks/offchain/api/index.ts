@@ -25,6 +25,7 @@ import {
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
+import { clone } from '@/helpers/utils';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -279,25 +280,26 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       filters: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const state = filters?.state;
+      const _filters: Record<string, any> = clone(filters);
+      const state = _filters?.state;
 
       if (state === 'active') {
-        filters.start_lte = current;
-        filters.end_gte = current;
+        _filters.start_lte = current;
+        _filters.end_gte = current;
       } else if (state === 'pending') {
-        filters.start_gt = current;
+        _filters.start_gt = current;
       } else if (state === 'closed') {
-        filters.end_lt = current;
+        _filters.end_lt = current;
       }
 
-      Object.keys(filters || {})
+      Object.keys(_filters || {})
         .filter(key => /^(min|max)_end/.test(key))
         .forEach(key => {
-          filters[key.replace(/^(min|max)_/, '')] = filters[key];
-          delete filters[key];
+          _filters[key.replace(/^(min|max)_/, '')] = _filters[key];
+          delete _filters[key];
         });
 
-      delete filters?.state;
+      delete _filters?.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -308,7 +310,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
             space_in: spaceIds,
             title_contains: searchQuery,
             flagged: false,
-            ...filters
+            ..._filters
           }
         }
       });
