@@ -330,11 +330,11 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
-      if (!filter?.id_in) {
+      if (filter) {
         const { data } = await apollo.query({
-          query: RANKING_QUERY,
+          query: SPACES_QUERY,
           variables: {
-            first: Math.min(limit, 20),
+            first: limit,
             skip,
             where: {
               ...filter
@@ -342,21 +342,18 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
           }
         });
 
-        return data.ranking.items.map(space => formatSpace(space, networkId));
+        return data.spaces.map(space => formatSpace(space, networkId));
       }
 
       const { data } = await apollo.query({
-        query: SPACES_QUERY,
+        query: RANKING_QUERY,
         variables: {
-          first: limit,
-          skip,
-          where: {
-            ...filter
-          }
+          first: Math.min(limit, 20),
+          skip
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.ranking.items.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
