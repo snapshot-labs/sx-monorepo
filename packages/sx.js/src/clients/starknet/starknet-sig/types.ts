@@ -69,9 +69,10 @@ export const updateProposalTypes = {
 };
 
 export const aliasTypes = {
-  Alias: [
-    { name: 'from', type: 'address' },
-    { name: 'alias', type: 'address' },
-    { name: 'timestamp', type: 'uint64' }
+  StarkNetDomain: domainTypes.StarkNetDomain,
+  SetAlias: [
+    { name: 'from', type: 'ContractAddress' },
+    { name: 'alias', type: 'string' },
+    { name: 'timestamp', type: 'felt' }
   ]
 };

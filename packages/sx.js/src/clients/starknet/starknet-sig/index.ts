@@ -77,7 +77,6 @@ export class StarknetSig {
       domain,
       message
     };
-
     const signature = await signer.signMessage(data);
 
     return {
@@ -209,7 +208,13 @@ export class StarknetSig {
     signer: Account;
     data: Alias;
   }): Promise<Envelope<Alias>> {
-    const signatureData = await this.sign(signer, '', data, aliasTypes, 'SetAlias');
+    const message = {
+      from: signer.address,
+      timestamp: parseInt((Date.now() / 1e3).toFixed()),
+      ...data
+    };
+
+    const signatureData = await this.sign(signer, '', message, aliasTypes, 'SetAlias');
 
     return {
       signatureData,
