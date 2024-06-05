@@ -51,7 +51,7 @@ function handleSearchSubmit(e: Event) {
   router.push({
     name: searchConfig.value.searchRoute,
     query: {
-      ...(searchConfig.value.searchRoute === route.matched[0]?.name ? route.query : {}),
+      ...(searchConfig.value.searchRoute === route.name ? route.query : {}),
       q: searchValue.value
     }
   });
