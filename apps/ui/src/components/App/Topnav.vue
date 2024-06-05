@@ -42,10 +42,12 @@ function handleSearchSubmit(e: Event) {
   }
 }
 
-watch(route, to => {
-  if (to.name === 'space-search') return;
-  searchValue.value = '';
-});
+watch(
+  () => route.matched[0]?.name,
+  () => {
+    if (['space', 'my'].includes(route.matched[0]?.name as string)) searchValue.value = '';
+  }
+);
 </script>
 
 <template>
