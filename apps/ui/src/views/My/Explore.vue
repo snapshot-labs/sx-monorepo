@@ -16,7 +16,7 @@ const router = useRouter();
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 
 watch(protocol, value => {
-  router.push({ query: { q: route.query.q, p: value } });
+  router.push({ query: { ...route.query, p: value } });
 });
 
 watch(
@@ -70,7 +70,7 @@ watchEffect(() => setTitle('Explore'));
         </UiContainerInfiniteScroll>
       </div>
       <div v-else class="px-4 py-3 flex items-center space-x-2">
-        <IH-exclamation-circle class="inline-block" />
+        <IH-exclamation-circle class="inline-block shrink-0" />
         <span>No results found for your search</span>
       </div>
     </div>
