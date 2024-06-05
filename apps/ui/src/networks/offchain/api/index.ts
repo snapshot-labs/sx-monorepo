@@ -1,6 +1,7 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import {
-  SPACES_RANKING_QUERY,
+  SPACES_QUERY,
+  RANKING_QUERY,
   SPACE_QUERY,
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
@@ -331,14 +332,26 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      if (filter) {
+        const { data } = await apollo.query({
+          query: SPACES_QUERY,
+          variables: {
+            first: limit,
+            skip,
+            where: {
+              ...filter
+            }
+          }
+        });
+
+        return data.spaces.map(space => formatSpace(space, networkId));
+      }
+
       const { data } = await apollo.query({
-        query: SPACES_RANKING_QUERY,
+        query: RANKING_QUERY,
         variables: {
           first: Math.min(limit, 20),
-          skip,
-          where: {
-            ...filter
-          }
+          skip
         }
       });
 
