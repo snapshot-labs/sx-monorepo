@@ -31,10 +31,12 @@ async function handleLogin(connector) {
 function handleSearchSubmit(e: Event) {
   e.preventDefault();
 
-  if (!searchValue.value) {
-    router.push({ name: 'space-proposals' });
-  } else {
-    router.push({ name: 'space-search', query: { q: searchValue.value } });
+  if (route.matched[0]?.name === 'space') {
+    if (!searchValue.value) {
+      router.push({ name: 'space-proposals' });
+    } else {
+      router.push({ name: 'space-search', query: { q: searchValue.value } });
+    }
   }
 }
 
