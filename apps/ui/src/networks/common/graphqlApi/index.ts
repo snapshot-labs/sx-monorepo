@@ -376,14 +376,21 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      const _filter: Record<string, any> = clone(filter || {});
+
+      if (_filter.searchQuery) {
+        _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
+      }
+      delete _filter.searchQuery;
+
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
           first: limit,
           skip,
           where: {
-            ...filter,
-            metadata_: {}
+            metadata_: {},
+            ..._filter
           }
         }
       });

@@ -19,6 +19,7 @@ export type PaginationOpts = { limit: number; skip?: number };
 export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
+  searchQuery?: string;
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';

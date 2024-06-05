@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { explorePageProtocols } from '../../networks';
-import { ProtocolConfig } from '../../networks/types';
+import { ExplorePageProtocol, ProtocolConfig } from '../../networks/types';
 
 const protocols = Object.values(explorePageProtocols).map(({ key, label }: ProtocolConfig) => ({
   key,
@@ -9,8 +9,20 @@ const protocols = Object.values(explorePageProtocols).map(({ key, label }: Proto
 
 const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
+const route = useRoute();
 
-onMounted(() => spacesStore.fetch());
+const protocol = ref<ExplorePageProtocol>('snapshot');
+
+watch(
+  [() => route.query.q as string, () => protocol.value],
+  ([query, protocol]) => {
+    spacesStore.protocol = protocol;
+    spacesStore.fetch({ searchQuery: query });
+  },
+  {
+    immediate: true
+  }
+);
 
 watchEffect(() => setTitle('Explore'));
 </script>
@@ -19,7 +31,7 @@ watchEffect(() => setTitle('Explore'));
   <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown
-        v-model="spacesStore.protocol"
+        v-model="protocol"
         title="Protocol"
         gap="12px"
         placement="left"
@@ -34,7 +46,7 @@ watchEffect(() => setTitle('Explore'));
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
         <UiContainerInfiniteScroll
           :loading-more="spacesStore.loadingMore"
-          @end-reached="spacesStore.fetchMore"
+          @end-reached="spacesStore.fetchMore({ searchQuery: route.query.q as string })"
         >
           <SpacesListItem
             v-for="space in spacesStore.explorePageSpaces"

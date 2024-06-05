@@ -161,11 +161,6 @@ export function useSpaces() {
     loadingMore.value = false;
   }
 
-  watch(protocol, async () => {
-    explorePageSpaces.value = [];
-    await fetch();
-  });
-
   return {
     loading,
     loadingMore,
