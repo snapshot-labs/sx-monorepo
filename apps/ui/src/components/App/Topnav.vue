@@ -10,6 +10,19 @@ const { modalAccountOpen } = useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
 
+const SEARCH_CONFIG = {
+  space: {
+    defaultRoute: 'space-proposals',
+    searchRoute: 'space-search',
+    placeholder: 'Search for a proposal'
+  },
+  my: {
+    defaultRoute: 'my-explore',
+    searchRoute: 'my-explore',
+    placeholder: 'Search for a space'
+  }
+};
+
 const loading = ref(false);
 const searchInput = ref();
 const searchValue = ref('');
@@ -19,7 +32,7 @@ const { focused } = useFocus(searchInput);
 const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
-const hasSearch = computed(() => ['space', 'my'].includes(String(route.matched[0]?.name)));
+const searchConfig = computed(() => SEARCH_CONFIG[route.matched[0]?.name || '']);
 
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
@@ -31,15 +44,16 @@ async function handleLogin(connector) {
 function handleSearchSubmit(e: Event) {
   e.preventDefault();
 
-  if (route.matched[0]?.name === 'space') {
-    if (!searchValue.value) {
-      router.push({ name: 'space-proposals' });
-    } else {
-      router.push({ name: 'space-search', query: { q: searchValue.value } });
-    }
-  } else if (route.matched[0]?.name === 'my') {
-    router.push({ name: 'my-explore', query: { q: searchValue.value } });
-  }
+  if (!searchConfig.value) return;
+
+  router.push(
+    !searchValue.value
+      ? { name: searchConfig.value.defaultRoute }
+      : {
+          name: searchConfig.value.searchRoute,
+          query: { q: searchValue.value }
+        }
+  );
 }
 
 watch(
@@ -68,14 +82,14 @@ watch(
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
           @click="uiStore.toggleSidebar"
         />
-        <div v-if="hasSearch" class="flex items-center flex-1 px-2 py-3 h-full">
+        <div v-if="searchConfig" class="flex items-center flex-1 px-2 py-3 h-full">
           <IH-search class="mr-2.5 flex-shrink-0" :class="{ 'text-skin-link': focused }" />
           <form class="flex flex-grow" @submit="handleSearchSubmit">
             <input
               ref="searchInput"
               v-model.trim="searchValue"
               type="text"
-              placeholder="Search"
+              :placeholder="searchConfig.placeholder"
               class="bg-transparent text-skin-link text-[19px] w-full"
             />
           </form>
