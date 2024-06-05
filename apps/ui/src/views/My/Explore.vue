@@ -42,8 +42,11 @@ watchEffect(() => setTitle('Explore'));
   <div>
     <UiLabel label="Spaces" sticky />
     <UiLoading v-if="spacesStore.loading" class="block m-4" />
-    <div v-else-if="spacesStore.loaded" class="max-w-screen-md mx-auto p-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+    <div v-else-if="spacesStore.loaded">
+      <div
+        v-if="spacesStore.explorePageSpaces.length"
+        class="max-w-screen-md mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3"
+      >
         <UiContainerInfiniteScroll
           :loading-more="spacesStore.loadingMore"
           @end-reached="spacesStore.fetchMore({ searchQuery: route.query.q as string })"
@@ -54,6 +57,10 @@ watchEffect(() => setTitle('Explore'));
             :space="space"
           />
         </UiContainerInfiniteScroll>
+      </div>
+      <div v-else class="px-4 py-3 flex items-center space-x-2">
+        <IH-exclamation-circle class="inline-block" />
+        <span>No results found for your search</span>
       </div>
     </div>
   </div>
