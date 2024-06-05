@@ -46,14 +46,15 @@ function handleSearchSubmit(e: Event) {
 
   if (!searchConfig.value) return;
 
-  router.push(
-    !searchValue.value
-      ? { name: searchConfig.value.defaultRoute }
-      : {
-          name: searchConfig.value.searchRoute,
-          query: { q: searchValue.value }
-        }
-  );
+  if (!searchValue.value) return router.push({ name: searchConfig.value.defaultRoute });
+
+  router.push({
+    name: searchConfig.value.searchRoute,
+    query: {
+      ...(searchConfig.value.searchRoute === route.matched[0]?.name ? route.query : {}),
+      q: searchValue.value
+    }
+  });
 }
 
 watch(
