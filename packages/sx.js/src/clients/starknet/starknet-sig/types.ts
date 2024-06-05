@@ -67,3 +67,11 @@ export const updateProposalTypes = {
   Strategy: sharedTypes.Strategy,
   u256: sharedTypes.u256
 };
+
+export const aliasTypes = {
+  Alias: [
+    { name: 'from', type: 'address' },
+    { name: 'alias', type: 'address' },
+    { name: 'timestamp', type: 'uint64' }
+  ]
+};

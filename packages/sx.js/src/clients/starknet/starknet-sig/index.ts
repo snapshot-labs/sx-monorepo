@@ -1,7 +1,7 @@
 import randomBytes from 'randombytes';
 import { Account, CallData, shortString, typedData, uint256 } from 'starknet';
 import { getStrategiesWithParams } from '../../../utils/strategies';
-import { baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
+import { aliasTypes, baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
 import {
   ClientConfig,
   ClientOpts,
@@ -9,9 +9,11 @@ import {
   Propose,
   UpdateProposal,
   Vote,
+  Alias,
   StarknetEIP712ProposeMessage,
   StarknetEIP712UpdateProposalMessage,
   StarknetEIP712VoteMessage,
+  StarknetEIP712AliasMessage,
   SignatureData
 } from '../../../types';
 
@@ -55,6 +57,7 @@ export class StarknetSig {
       | StarknetEIP712ProposeMessage
       | StarknetEIP712UpdateProposalMessage
       | StarknetEIP712VoteMessage
+      | StarknetEIP712AliasMessage
   >(
     signer: Account,
     verifyingContract: string,
@@ -192,6 +195,21 @@ export class StarknetSig {
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, voteTypes, 'Vote');
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async setAlias({
+    signer,
+    data
+  }: {
+    signer: Account;
+    data: Alias;
+  }): Promise<Envelope<Alias>> {
+    const signatureData = await this.sign(signer, '', data, aliasTypes, 'SetAlias');
 
     return {
       signatureData,

@@ -184,6 +184,10 @@ export type StarknetEIP712VoteMessage = {
   metadataUri: string[];
 };
 
+export type StarknetEIP712AliasMessage = {
+  alias: string;
+};
+
 export type EIP712ProposeMessage = StarknetEIP712ProposeMessage & {
   authenticator: string;
 };
@@ -199,10 +203,6 @@ export type EIP712UpdateProposalMessage = Omit<
 export type EIP712VoteMessage = Omit<StarknetEIP712VoteMessage, 'proposalId'> & {
   authenticator: string;
   proposalId: string;
-};
-
-export type EIP712AliasMessage = {
-  alias: string;
 };
 
 export type StrategiesAddresses = { index: number; address: string }[];

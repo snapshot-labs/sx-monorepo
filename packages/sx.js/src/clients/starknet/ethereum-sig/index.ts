@@ -2,7 +2,7 @@ import randomBytes from 'randombytes';
 import { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import { CallData, shortString } from 'starknet';
 import { getStrategiesWithParams } from '../../../utils/strategies';
-import { proposeTypes, updateProposalTypes, voteTypes, aliasTypes } from './types';
+import { proposeTypes, updateProposalTypes, voteTypes } from './types';
 import {
   ClientConfig,
   ClientOpts,
@@ -10,11 +10,9 @@ import {
   Propose,
   UpdateProposal,
   Vote,
-  Alias,
   EIP712ProposeMessage,
   EIP712UpdateProposalMessage,
   EIP712VoteMessage,
-  EIP712AliasMessage,
   SignatureData
 } from '../../../types';
 import { getRSVFromSig } from '../../../utils/encoding';
@@ -31,11 +29,7 @@ export class EthereumSig {
   }
 
   public async sign<
-    T extends
-      | EIP712ProposeMessage
-      | EIP712UpdateProposalMessage
-      | EIP712VoteMessage
-      | EIP712AliasMessage
+    T extends EIP712ProposeMessage | EIP712UpdateProposalMessage | EIP712VoteMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -164,21 +158,6 @@ export class EthereumSig {
     };
 
     const signatureData = await this.sign(signer, message, voteTypes, 'Vote');
-
-    return {
-      signatureData,
-      data
-    };
-  }
-
-  public async setAlias({
-    signer,
-    data
-  }: {
-    signer: Signer & TypedDataSigner;
-    data: Alias;
-  }): Promise<Envelope<Alias>> {
-    const signatureData = await this.sign(signer, data, aliasTypes, 'SetAlias');
 
     return {
       signatureData,

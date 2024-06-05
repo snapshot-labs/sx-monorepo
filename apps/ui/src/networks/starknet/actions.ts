@@ -583,8 +583,8 @@ export function createActions(
     followSpace: () => {},
     unfollowSpace: () => {},
     setAlias(web3: any, alias: string) {
-      return ethSigClient.setAlias({
-        signer: web3.getSigner(),
+      return starkSigClient.setAlias({
+        signer: web3.provider.account,
         data: { alias }
       });
     },
