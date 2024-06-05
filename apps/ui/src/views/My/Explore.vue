@@ -6,18 +6,29 @@ const protocols = Object.values(explorePageProtocols).map(({ key, label }: Proto
   key,
   label
 }));
+const DEFAULT_PROTOCOL = 'snapshot';
 
 const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
 const route = useRoute();
+const router = useRouter();
 
-const protocol = ref<ExplorePageProtocol>('snapshot');
+const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
+
+watch(protocol, value => {
+  router.push({ query: { q: route.query.q, p: value } });
+});
 
 watch(
-  [() => route.query.q as string, () => protocol.value],
-  ([query, protocol]) => {
-    spacesStore.protocol = protocol;
-    spacesStore.fetch({ searchQuery: query });
+  [() => route.query.q as string, () => route.query.p as string],
+  ([searchQuery, protocolQuery]) => {
+    const _protocol = (
+      explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
+    ) as ExplorePageProtocol;
+
+    protocol.value = _protocol;
+    spacesStore.protocol = _protocol;
+    spacesStore.fetch({ searchQuery });
   },
   {
     immediate: true
