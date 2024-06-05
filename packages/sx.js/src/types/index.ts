@@ -186,6 +186,8 @@ export type StarknetEIP712VoteMessage = {
 
 export type StarknetEIP712AliasMessage = {
   alias: string;
+  from?: string;
+  timestamp?: number;
 };
 
 export type EIP712ProposeMessage = StarknetEIP712ProposeMessage & {
