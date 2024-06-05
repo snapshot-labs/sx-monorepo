@@ -43,10 +43,9 @@ function handleSearchSubmit(e: Event) {
 }
 
 watch(
-  () => route.matched[0]?.name,
-  () => {
-    if (['space', 'my'].includes(route.matched[0]?.name as string)) searchValue.value = '';
-  }
+  () => (route.query.q as string) || '',
+  searchQuery => (searchValue.value = searchQuery),
+  { immediate: true }
 );
 </script>
 
@@ -74,7 +73,7 @@ watch(
           <form class="flex flex-grow" @submit="handleSearchSubmit">
             <input
               ref="searchInput"
-              v-model="searchValue"
+              v-model.trim="searchValue"
               type="text"
               placeholder="Search"
               class="bg-transparent text-skin-link text-[19px] w-full"
