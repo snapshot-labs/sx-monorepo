@@ -37,6 +37,8 @@ function handleSearchSubmit(e: Event) {
     } else {
       router.push({ name: 'space-search', query: { q: searchValue.value } });
     }
+  } else if (route.matched[0]?.name === 'my') {
+    router.push({ name: 'my-explore', query: { q: searchValue.value } });
   }
 }
 
