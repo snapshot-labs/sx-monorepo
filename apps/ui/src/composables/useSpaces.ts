@@ -150,8 +150,6 @@ export function useSpaces() {
 
     await _fetchSpaces(true, filter);
 
-    console.log(protocol.value, explorePageSpaces.value);
-
     loaded.value = true;
     loading.value = false;
   }
