@@ -243,6 +243,16 @@ input[type='number'] {
   background-image: url('@/assets/grid-dark.svg');
 }
 
+.blocks {
+  background-repeat: repeat-x;
+  background-position: top -40px center;
+  background-image: url('@/assets/blocks-light.svg');
+}
+
+.dark .blocks {
+  background-image: url('@/assets/blocks-dark.svg');
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
