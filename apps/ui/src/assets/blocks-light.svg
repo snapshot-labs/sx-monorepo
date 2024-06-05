@@ -1,4 +1,4 @@
-<svg width="1365" height="469" viewBox="0 0 1365 469" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="1365" height="586" viewBox="0 0 1365 586" fill="none" xmlns="http://www.w3.org/2000/svg">
 <line x1="38.5" y1="1.52369e-05" x2="38.5" y2="468" stroke="#E5E5E6"/>
 <line x1="77.5" y1="1.52369e-05" x2="77.5" y2="468" stroke="#E5E5E6"/>
 <line x1="116.5" y1="1.52369e-05" x2="116.5" y2="468" stroke="#E5E5E6"/>
@@ -52,5 +52,10 @@
 <line x1="234" y1="429.5" y2="429.5" stroke="#E5E5E6"/>
 <line x1="1364" y1="429.5" x2="1169" y2="429.5" stroke="#E5E5E6"/>
 <line x1="1326" y1="468.5" x2="1208" y2="468.5" stroke="#E5E5E6"/>
-<line x1="194" y1="468.5" x2="38" y2="468.5" stroke="#E5E5E6"/>
+<line x1="78" y1="468.5" x2="38" y2="468.5" stroke="#E5E5E6"/>
+<line x1="195" y1="468.5" x2="116" y2="468.5" stroke="#E5E5E6"/>
+<rect x="155.5" y="546.5" width="39" height="39" stroke="#E5E5E6"/>
+<rect x="272.5" y="429.5" width="39" height="39" stroke="#E5E5E6"/>
+<rect x="1091.5" y="468.5" width="39" height="39" stroke="#E5E5E6"/>
+<rect x="1247.5" y="507.5" width="39" height="39" stroke="#E5E5E6"/>
 </svg>
