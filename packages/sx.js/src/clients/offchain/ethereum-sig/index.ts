@@ -42,6 +42,11 @@ const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   5: 'https://testnet.seq.snapshot.org'
 };
 
+const RELAYER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
+  1: 'https://relayer.snapshot.org',
+  5: 'https://testnet.seq.snapshot.org' // no relayer for testnet
+};
+
 type EthereumSigClientOpts = {
   networkConfig?: OffchainNetworkConfig;
   sequencerUrl?: string;
@@ -113,7 +118,11 @@ export class EthereumSig {
       body: JSON.stringify(payload)
     };
 
-    const res = await fetch(this.sequencerUrl, body);
+    let url = this.sequencerUrl;
+    if (sig === '0x') {
+      url = RELAYER_URLS[this.networkConfig.eip712ChainId] || url;
+    }
+    const res = await fetch(url, body);
     const result = await res.json();
 
     if (result.error) {
