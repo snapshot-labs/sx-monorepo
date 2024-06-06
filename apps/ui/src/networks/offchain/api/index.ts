@@ -8,7 +8,8 @@ import {
   USER_VOTES_QUERY,
   USER_FOLLOWS_QUERY,
   VOTES_QUERY,
-  ALIASES_QUERY
+  ALIASES_QUERY,
+  USER_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
@@ -369,13 +370,14 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       return formatSpace(data.space, networkId);
     },
     loadUser: async (id: string): Promise<User | null> => {
-      // NOTE: missing proposal/vote count on offchain
-      return {
-        id,
-        proposal_count: 0,
-        vote_count: 0,
-        created: 0
-      };
+      const {
+        data: { user }
+      } = await apollo.query({
+        query: USER_QUERY,
+        variables: { id }
+      });
+
+      return user ?? null;
     },
     loadLeaderboard: async (): Promise<User[]> => {
       // NOTE: leaderboard implementation is pending on offchain
