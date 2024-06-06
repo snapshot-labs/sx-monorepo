@@ -197,6 +197,8 @@ export type User = {
   vote_count: number;
   created: number;
   follows?: string[];
+  avatar?: string;
+  about?: string;
 };
 
 export type Follow = {
