@@ -40,11 +40,6 @@ const SOCIALS = [
         <div class="eyebrow">Learn more</div>
         <div class="space-y-2">
           <div>
-            <a href="/#/explore">
-              Explore page <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
-          </div>
-          <div>
             <a href="https://docs.snapshotx.xyz" target="_blank">
               Documentation <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
