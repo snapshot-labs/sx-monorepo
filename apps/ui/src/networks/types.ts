@@ -1,5 +1,6 @@
 import { FunctionalComponent } from 'vue';
 import type { Web3Provider } from '@ethersproject/providers';
+import type { Wallet } from '@ethersproject/wallet';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import type {
   Space,
@@ -10,7 +11,8 @@ import type {
   Choice,
   NetworkID,
   StrategyParsedMetadata,
-  Follow
+  Follow,
+  Alias
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -125,8 +127,9 @@ export type ReadOnlyNetworkActions = {
     proposal: Proposal,
     choice: Choice
   ): Promise<any>;
-  followSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string);
-  unfollowSpace(web3: Web3Provider, networkId: NetworkID, spaceId: string);
+  followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
+  unfollowSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
+  setAlias(web3: Web3Provider, alias: string);
   send(envelope: any): Promise<any>;
 };
 
@@ -212,6 +215,7 @@ export type NetworkApi = {
     sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
   ): Promise<User[]>;
   loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
+  loadAlias(address: string, alias: string, created_gt: number): Promise<Alias | null>;
 };
 
 export type NetworkConstants = {

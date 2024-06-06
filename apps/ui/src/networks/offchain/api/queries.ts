@@ -105,7 +105,16 @@ export const PROPOSALS_QUERY = gql`
   ${PROPOSAL_FRAGMENT}
 `;
 
-export const SPACES_RANKING_QUERY = gql`
+export const SPACES_QUERY = gql`
+  query ($first: Int, $skip: Int, $where: SpaceWhere) {
+    spaces(first: $first, skip: $skip, where: $where) {
+      ...offchainSpaceFragment
+    }
+  }
+  ${SPACE_FRAGMENT}
+`;
+
+export const RANKING_QUERY = gql`
   query ($first: Int, $skip: Int, $where: RankingWhere) {
     ranking(first: $first, skip: $skip, where: $where) {
       items {
@@ -146,6 +155,7 @@ export const USER_VOTES_QUERY = gql`
 export const USER_FOLLOWS_QUERY = gql`
   query ($follower: String!) {
     follows(where: { follower: $follower }) {
+      network
       space {
         id
       }
@@ -180,6 +190,15 @@ export const VOTES_QUERY = gql`
       choice
       vp
       created
+    }
+  }
+`;
+
+export const ALIASES_QUERY = gql`
+  query Aliases($address: String!, $alias: String!, $created_gt: Int) {
+    aliases(where: { address: $address, alias: $alias, created_gt: $created_gt }) {
+      address
+      alias
     }
   }
 `;

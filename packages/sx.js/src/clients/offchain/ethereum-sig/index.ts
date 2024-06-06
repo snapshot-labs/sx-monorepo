@@ -12,25 +12,28 @@ import {
   updateProposalTypes,
   cancelProposalTypes,
   followSpaceTypes,
-  unfollowSpaceTypes
+  unfollowSpaceTypes,
+  aliasTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
-import type {
-  SignatureData,
-  Envelope,
-  Vote,
-  Propose,
-  UpdateProposal,
-  CancelProposal,
-  FollowSpace,
-  UnfollowSpace,
-  EIP712Message,
-  EIP712VoteMessage,
-  EIP712ProposeMessage,
-  EIP712UpdateProposal,
-  EIP712CancelProposalMessage,
-  EIP712FollowSpaceMessage,
-  EIP712UnfollowSpaceMessage
+import {
+  type SignatureData,
+  type Envelope,
+  type Vote,
+  type Propose,
+  type UpdateProposal,
+  type CancelProposal,
+  type FollowSpace,
+  type UnfollowSpace,
+  type SetAlias,
+  type EIP712Message,
+  type EIP712VoteMessage,
+  type EIP712ProposeMessage,
+  type EIP712UpdateProposal,
+  type EIP712CancelProposalMessage,
+  type EIP712FollowSpaceMessage,
+  type EIP712UnfollowSpaceMessage,
+  type EIP712SetAliasMessage
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
@@ -66,6 +69,7 @@ export class EthereumSig {
       | EIP712CancelProposalMessage
       | EIP712FollowSpaceMessage
       | EIP712UnfollowSpaceMessage
+      | EIP712SetAliasMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -91,7 +95,7 @@ export class EthereumSig {
 
   public async send(
     envelope: Envelope<
-      Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace
+      Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace | SetAlias
     >
   ) {
     const { address, signature: sig, domain, types, message } = envelope.signatureData!;
@@ -257,6 +261,21 @@ export class EthereumSig {
     data: UnfollowSpace;
   }): Promise<Envelope<UnfollowSpace>> {
     const signatureData = await this.sign(signer, data, unfollowSpaceTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async setAlias({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: SetAlias;
+  }): Promise<Envelope<SetAlias>> {
+    const signatureData = await this.sign(signer, data, aliasTypes);
 
     return {
       signatureData,
