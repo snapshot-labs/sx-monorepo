@@ -103,7 +103,7 @@ const shortcuts = computed(() => {
     ...(web3.value.account
       ? {
           my: {
-            profile: {
+            user: {
               name: 'Profile',
               link: { name: 'user', params: { id: web3.value.account } },
               icon: IHUser
@@ -150,7 +150,8 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
         v-for="(item, key) in shortcuts[currentRouteName]"
         :key="key"
         :to="item.link"
-        class="px-4 py-1.5 space-x-2 flex items-center text-skin-text"
+        class="px-4 py-1.5 space-x-2 flex items-center"
+        :class="(route.name as string) === `${key}` ? 'text-skin-link' : 'text-skin-text'"
       >
         <component :is="item.icon" class="inline-block"></component>
         <span v-text="item.name" />
