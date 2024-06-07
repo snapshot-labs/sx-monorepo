@@ -199,6 +199,7 @@ export type User = {
   follows?: string[];
   name?: string;
   about?: string;
+  avatar?: string;
 };
 
 export type UserActivity = {
