@@ -12,7 +12,8 @@ import type {
   NetworkID,
   StrategyParsedMetadata,
   Follow,
-  Alias
+  Alias,
+  UserActivity
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -209,6 +210,7 @@ export type NetworkApi = {
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User | null>;
+  loadUserActivities(userId: string): Promise<UserActivity[]>;
   loadLeaderboard(
     spaceId: string,
     paginationOpts: PaginationOpts,

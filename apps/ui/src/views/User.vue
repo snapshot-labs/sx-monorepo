@@ -1,17 +1,25 @@
 <script setup lang="ts">
 import autolinker from 'autolinker';
-import { shortenAddress, sanitizeUrl } from '@/helpers/utils';
+import { shortenAddress, sanitizeUrl, _n, _p } from '@/helpers/utils';
 import ICX from '~icons/c/x';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
 import ICCoingecko from '~icons/c/coingecko';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { UserActivity, Space } from '@/types';
 
 const route = useRoute();
 const usersStore = useUsersStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const { copy, copied } = useClipboard();
+const spacesStore = useSpacesStore();
+
+const activities = ref<
+  (UserActivity & { space: Space; proposal_percentage: number; vote_percentage: number })[]
+>([]);
+const loadingActivities = ref(false);
 
 const id = route.params.id as string;
 
@@ -32,7 +40,6 @@ const socials = computed(() =>
     })
     .filter(social => social.href)
 );
-
 const autolinkedAbout = computed(() =>
   autolinker.link(user.value?.about || '', {
     sanitizeHtml: true,
@@ -40,7 +47,50 @@ const autolinkedAbout = computed(() =>
     replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
   })
 );
-onMounted(() => usersStore.fetchUser(id));
+
+async function loadActivities(userId: string) {
+  loadingActivities.value = true;
+
+  const results = await Promise.all(
+    enabledNetworks.map(networkId => {
+      const network = getNetwork(networkId);
+      return network.api.loadUserActivities(userId);
+    })
+  );
+
+  const _activities = results.flat().sort((a, b) => b.proposal_count - a.proposal_count);
+
+  await spacesStore.fetchSpaces(
+    _activities.map(activity => activity.spaceId).filter(id => !spacesStore.spacesMap.has(id))
+  );
+
+  const total_proposals = _activities
+    .map(activity => activity.proposal_count)
+    .reduce((a, b) => a + b, 0);
+
+  const total_votes = _activities.map(activity => activity.vote_count).reduce((a, b) => a + b, 0);
+
+  activities.value = _activities.map(activity => ({
+    ...activity,
+    space: spacesStore.spacesMap.get(activity.spaceId)!,
+    proposal_percentage: activity.proposal_count / total_proposals,
+    vote_percentage: activity.vote_count / total_votes
+  }));
+
+  loadingActivities.value = false;
+}
+
+function isOffchainSpace(space: Space) {
+  return offchainNetworks.includes(space.network);
+}
+
+onMounted(async () => {
+  await usersStore.fetchUser(id);
+
+  if (!user.value) return;
+
+  loadActivities(user.value.id);
+});
 
 watchEffect(() => setTitle(`${id} user profile`));
 </script>
@@ -67,7 +117,7 @@ watchEffect(() => setTitle(`${id} user profile`));
       </div>
     </div>
     <div class="px-4">
-      <div class="mb-4 relative">
+      <div class="mb-5 relative">
         <UiStamp
           :id="user.id"
           :size="90"
@@ -95,6 +145,60 @@ watchEffect(() => setTitle(`${id} user profile`));
               <component :is="social.icon" class="w-[26px] h-[26px]" />
             </a>
           </template>
+        </div>
+      </div>
+
+      <h4 class="mb-2 eyebrow leading-8">Activity</h4>
+    </div>
+    <div class="border-b w-full">
+      <div class="flex space-x-1 px-4 leading-8">
+        <span class="w-[50%]">Space</span>
+        <span class="w-[25%]">Proposals</span>
+        <span class="w-[25%]">Votes</span>
+        <span class="w-[88px]"></span>
+      </div>
+    </div>
+    <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
+    <div v-else-if="activities.length === 0" class="px-4 py-3 flex items-center space-x-2">
+      <IH-exclamation-circle class="inline-block" />
+      <span> This user does not have any activities yet. </span>
+    </div>
+    <div v-else class="mx-4">
+      <div v-for="(activity, i) in activities" :key="i" class="border-b flex space-x-1 py-[18px]">
+        <div class="flex items-center gap-x-3 leading-[22px] w-[50%] font-medium text-skin-link">
+          <SpaceAvatar
+            :space="activity.space"
+            :size="32"
+            :type="isOffchainSpace(activity.space) ? 'space' : 'space-sx'"
+            class="rounded-sm"
+          />
+
+          {{ activity.space.name }}
+        </div>
+        <div class="flex flex-col justify-center w-[25%] text-[18px] font-medium space-y-[2px]">
+          <h4 class="text-skin-link leading-[18px]" v-text="_n(activity.proposal_count)" />
+          <div class="leading-[18px]">
+            {{ _p(activity.proposal_percentage) }}
+          </div>
+        </div>
+        <div class="flex flex-col justify-center w-[25%] text-[18px] font-medium space-y-[2px]">
+          <h4 class="text-skin-link leading-[18px]" v-text="_n(activity.vote_count)" />
+          <div class="leading-[18px]">{{ _p(activity.vote_percentage) }}</div>
+        </div>
+        <div class="w-[88px] text-right">
+          <router-link
+            :to="{
+              name: 'space-overview',
+              params: {
+                id: activity.spaceId
+              }
+            }"
+            class="text-skin-link"
+          >
+            <UiButton class="!px-0 w-[40px] !h-[40px]">
+              <IH-arrow-sm-right class="inline-block" />
+            </UiButton>
+          </router-link>
         </div>
       </div>
     </div>

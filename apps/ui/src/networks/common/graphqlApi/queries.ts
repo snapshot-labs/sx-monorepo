@@ -254,6 +254,9 @@ export const LEADERBOARD_QUERY = gql`
         id
         created
       }
+      space {
+        id
+      }
       proposal_count
       vote_count
     }

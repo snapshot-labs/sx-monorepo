@@ -32,10 +32,13 @@ import {
   Transaction,
   NetworkID,
   ProposalState,
-  Follow
+  Follow,
+  UserActivity
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
 import { clone } from '@/helpers/utils';
+import { or } from 'ajv/dist/compile/codegen';
+import { net } from 'electron';
 
 type ApiOptions = {
   highlightApiUrl?: string;
@@ -438,6 +441,28 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       ]);
 
       return joinHighlightUser(data.user ?? null, highlightResult?.data?.sxuser ?? null);
+    },
+    loadUserActivities(userId: string): Promise<UserActivity[]> {
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: 1000,
+            skip: 0,
+            orderBy: 'proposal_count',
+            orderDirection: 'desc',
+            where: {
+              user: userId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            spaceId: `${networkId}:${leaderboard.space.id}`,
+            vote_count: leaderboard.vote_count,
+            proposal_count: leaderboard.proposal_count
+          }))
+        );
     },
     loadLeaderboard(
       spaceId: string,

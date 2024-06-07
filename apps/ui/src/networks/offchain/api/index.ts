@@ -23,7 +23,8 @@ import {
   ProposalState,
   SpaceMetadataTreasury,
   Follow,
-  Alias
+  Alias,
+  UserActivity
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
@@ -378,6 +379,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       });
 
       return user ?? null;
+    },
+    loadUserActivities: async (): Promise<UserActivity[]> => {
+      // NOTE: leaderboard implementation is pending on offchain
+      return [];
     },
     loadLeaderboard: async (): Promise<User[]> => {
       // NOTE: leaderboard implementation is pending on offchain

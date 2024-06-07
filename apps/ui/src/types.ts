@@ -201,6 +201,13 @@ export type User = {
   about?: string;
 };
 
+export type UserActivity = {
+  spaceId: string;
+  network: NetworkID;
+  proposal_count: number;
+  vote_count: number;
+};
+
 export type Follow = {
   id: string;
   follower: string;
