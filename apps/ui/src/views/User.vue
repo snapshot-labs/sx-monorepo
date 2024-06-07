@@ -165,7 +165,7 @@ watchEffect(() => setTitle(`${id} user profile`));
     </div>
     <div v-else class="mx-4">
       <div v-for="(activity, i) in activities" :key="i" class="border-b flex space-x-1 py-[18px]">
-        <div class="flex items-center gap-x-3 leading-[22px] w-[50%] font-medium text-skin-link">
+        <div class="flex items-center gap-x-3 leading-[22px] w-[50%] font-semibold text-skin-link">
           <SpaceAvatar
             :space="activity.space"
             :size="32"
@@ -175,13 +175,13 @@ watchEffect(() => setTitle(`${id} user profile`));
 
           {{ activity.space.name }}
         </div>
-        <div class="flex flex-col justify-center w-[25%] text-[18px] font-medium space-y-[2px]">
+        <div class="flex flex-col justify-center w-[25%] text-[18px] font-semibold space-y-[2px]">
           <h4 class="text-skin-link leading-[18px]" v-text="_n(activity.proposal_count)" />
           <div class="leading-[18px]">
             {{ _p(activity.proposal_percentage) }}
           </div>
         </div>
-        <div class="flex flex-col justify-center w-[25%] text-[18px] font-medium space-y-[2px]">
+        <div class="flex flex-col justify-center w-[25%] text-[18px] font-semibold space-y-[2px]">
           <h4 class="text-skin-link leading-[18px]" v-text="_n(activity.vote_count)" />
           <div class="leading-[18px]">{{ _p(activity.vote_percentage) }}</div>
         </div>
