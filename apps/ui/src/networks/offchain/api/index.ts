@@ -332,30 +332,30 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
-      if (filter) {
+      if (!filter || filter.hasOwnProperty('searchQuery')) {
         const { data } = await apollo.query({
-          query: SPACES_QUERY,
+          query: RANKING_QUERY,
           variables: {
-            first: limit,
+            first: Math.min(limit, 20),
             skip,
-            where: {
-              ...filter
-            }
+            where: filter?.searchQuery ? { search: filter.searchQuery } : {}
           }
         });
-
-        return data.spaces.map(space => formatSpace(space, networkId));
+        return data.ranking.items.map(space => formatSpace(space, networkId));
       }
 
       const { data } = await apollo.query({
-        query: RANKING_QUERY,
+        query: SPACES_QUERY,
         variables: {
-          first: Math.min(limit, 20),
-          skip
+          first: limit,
+          skip,
+          where: {
+            ...filter
+          }
         }
       });
 
-      return data.ranking.items.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
