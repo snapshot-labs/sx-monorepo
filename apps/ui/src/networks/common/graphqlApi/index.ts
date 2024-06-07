@@ -37,8 +37,6 @@ import {
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
 import { clone } from '@/helpers/utils';
-import { or } from 'ajv/dist/compile/codegen';
-import { net } from 'electron';
 
 type ApiOptions = {
   highlightApiUrl?: string;
