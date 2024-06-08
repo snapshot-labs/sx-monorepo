@@ -13,6 +13,11 @@ import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
+import ICX from '~icons/c/x';
+import ICDiscord from '~icons/c/discord';
+import ICGithub from '~icons/c/github';
+import ICCoingecko from '~icons/c/coingecko';
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
@@ -463,4 +468,21 @@ export function isValidAddress(address: string) {
   } catch (e) {
     return isAddress(address);
   }
+}
+
+export function getSocialNetworksLink(data: any) {
+  return [
+    { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
+    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
+    { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
+    { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
+    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
+  ]
+    .map(({ key, icon, urlFormat }) => {
+      const value = data[key];
+      const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
+
+      return href ? { key, icon, href } : {};
+    })
+    .filter(social => social.href);
 }

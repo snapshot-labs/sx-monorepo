@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import {
   shortenAddress,
-  sanitizeUrl,
   autoLinkText,
   _n,
   _p,
   getCacheHash,
-  isValidAddress
+  isValidAddress,
+  getSocialNetworksLink
 } from '@/helpers/utils';
-import ICX from '~icons/c/x';
-import ICGithub from '~icons/c/github';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { enabledNetworks, getNetwork } from '@/networks';
 import { UserActivity, Space, User } from '@/types';
 import { getNames } from '@/helpers/stamp';
 
@@ -29,6 +27,7 @@ const modalOpenEditUser = ref(false);
 const loaded = ref(false);
 
 const id = computed(() => route.params.id as string);
+
 const user = computed(
   () =>
     usersStore.getUser(id.value) ||
@@ -44,23 +43,15 @@ const user = computed(
         } as User)
       : null)
 );
-const socials = computed(() =>
-  [
-    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
-    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
-  ]
-    .map(({ key, icon, urlFormat }) => {
-      const value = user.value?.[key];
-      const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
 
-      return href ? { key, icon, href } : {};
-    })
-    .filter(social => social.href)
-);
+const socials = computed(() => getSocialNetworksLink(user.value));
+
 const shareMsg = computed(() =>
   encodeURIComponent(`${id.value}: ${window.location.origin}/#${route.path}`)
 );
+
 const cb = computed(() => getCacheHash(user.value?.avatar));
+
 const username = computedAsync(
   async () =>
     user.value?.name || (await getNames([id.value]))?.[id.value] || shortenAddress(id.value),
@@ -99,10 +90,6 @@ async function loadActivities(userId: string) {
   }));
 
   loadingActivities.value = false;
-}
-
-function isOffchainSpace(space: Space) {
-  return offchainNetworks.includes(space.network);
 }
 
 onMounted(async () => {

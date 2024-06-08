@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { _n, autoLinkText, compareAddresses, sanitizeUrl } from '@/helpers/utils';
+import { _n, autoLinkText, compareAddresses, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
-import ICX from '~icons/c/x';
-import ICDiscord from '~icons/c/discord';
-import ICGithub from '~icons/c/github';
-import ICCoingecko from '~icons/c/coingecko';
-import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
 const PROPOSALS_LIMIT = 4;
 
@@ -26,22 +21,7 @@ const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
 const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
 
-const socials = computed(() =>
-  [
-    { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
-    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
-    { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
-    { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
-    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
-  ]
-    .map(({ key, icon, urlFormat }) => {
-      const value = props.space[key];
-      const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
-
-      return href ? { key, icon, href } : {};
-    })
-    .filter(social => social.href)
-);
+const socials = computed(() => getSocialNetworksLink(props.space));
 
 const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
