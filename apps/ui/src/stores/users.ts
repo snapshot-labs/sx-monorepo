@@ -24,8 +24,8 @@ export const useUsersStore = defineStore('users', {
     }
   },
   actions: {
-    async fetchUser(userId: string) {
-      if (this.getUser(userId)) return;
+    async fetchUser(userId: string, force = false) {
+      if (this.getUser(userId) && !force) return;
 
       this.users[userId] = {
         loading: false,

@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import autolinker from 'autolinker';
-import { shortenAddress, sanitizeUrl, _n, _p } from '@/helpers/utils';
+import { shortenAddress, sanitizeUrl, autoLinkText, _n, _p } from '@/helpers/utils';
 import ICX from '~icons/c/x';
-import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
-import ICCoingecko from '~icons/c/coingecko';
-import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { UserActivity, Space, User } from '@/types';
 import { validateAndParseAddress } from 'starknet';
@@ -14,10 +10,12 @@ import { getNames } from '@/helpers/stamp';
 
 const route = useRoute();
 const usersStore = useUsersStore();
+const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const { copy, copied } = useClipboard();
-const spacesStore = useSpacesStore();
+
+const id = route.params.id as string;
 
 const activities = ref<
   (UserActivity & { space: Space; proposal_percentage: number; vote_percentage: number })[]
@@ -25,8 +23,6 @@ const activities = ref<
 const loadingActivities = ref(false);
 const modalOpenEditProfile = ref(false);
 const loaded = ref(false);
-
-const id = route.params.id as string;
 
 const user = computed(
   () =>
@@ -45,10 +41,7 @@ const user = computed(
 );
 const socials = computed(() =>
   [
-    { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
     { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
-    { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
-    { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
     { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
   ]
     .map(({ key, icon, urlFormat }) => {
@@ -59,13 +52,7 @@ const socials = computed(() =>
     })
     .filter(social => social.href)
 );
-const autolinkedAbout = computed(() =>
-  autolinker.link(user.value?.about || '', {
-    sanitizeHtml: true,
-    phone: false,
-    replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
-  })
-);
+
 const username = computedAsync(
   async () => user.value?.name || (await getNames([id]))?.[id] || shortenAddress(id)
 );
@@ -128,12 +115,10 @@ watchEffect(() => setTitle(`${id} user profile`));
 </script>
 
 <template>
-  <div v-if="!user">
-    <UiLoading v-if="!loaded" class="block text-center p-4" />
-    <div v-else class="px-4 py-3 flex items-center space-x-2">
-      <IH-exclamation-circle class="inline-block" />
-      <span>This user does not exist</span>
-    </div>
+  <UiLoading v-if="!loaded" class="block p-4" />
+  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
+    <IH-exclamation-circle class="inline-block" />
+    <span>This user does not exist</span>
   </div>
   <div v-else>
     <div class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]">
@@ -174,7 +159,7 @@ watchEffect(() => setTitle(`${id} user profile`));
         <div
           v-if="user.about"
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
-          v-html="autolinkedAbout"
+          v-html="autoLinkText(user.about)"
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
@@ -246,14 +231,13 @@ watchEffect(() => setTitle(`${id} user profile`));
         </router-link>
       </div>
     </div>
+    <teleport to="#modal">
+      <ModalEditProfile
+        v-if="user && web3.account === user.id"
+        :open="modalOpenEditProfile"
+        :user="user"
+        @close="modalOpenEditProfile = false"
+      />
+    </teleport>
   </div>
-
-  <teleport to="#modal">
-    <ModalEditProfile
-      v-if="user && web3.account === user.id"
-      :open="modalOpenEditProfile"
-      :user="user"
-      @close="modalOpenEditProfile = false"
-    />
-  </teleport>
 </template>

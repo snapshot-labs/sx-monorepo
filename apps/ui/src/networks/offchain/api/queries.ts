@@ -210,6 +210,9 @@ export const USER_QUERY = gql`
       name
       about
       avatar
+      cover
+      github
+      twitter
     }
   }
 `;

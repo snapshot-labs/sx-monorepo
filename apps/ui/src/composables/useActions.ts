@@ -553,7 +553,14 @@ export function useActions() {
 
   async function updateUser(user: User) {
     const network = getNetwork(offchainNetworkId);
-    const pinned = await network.helpers.pin(user);
+    const pinned = await network.helpers.pin({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      cover: user.cover,
+      github: user.github,
+      twitter: user.twitter
+    });
     if (!pinned || !pinned.cid) return false;
 
     await wrapPromise(offchainNetworkId, network.actions.updateUser(auth.web3, pinned.cid));

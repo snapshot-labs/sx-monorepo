@@ -205,6 +205,20 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
+function formatUser(user: User) {
+  return {
+    ...user,
+    proposal_count: user.proposal_count || 0,
+    vote_count: user.vote_count || 0,
+    name: user.name || '',
+    about: user.about || '',
+    avatar: user.avatar || '',
+    cover: user.cover || '',
+    github: user.github || '',
+    twitter: user.twitter || ''
+  };
+}
+
 export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   const httpLink = createHttpLink({ uri });
 
@@ -378,7 +392,9 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         variables: { id }
       });
 
-      return user ?? null;
+      if (!user) return null;
+
+      return formatUser(user);
     },
     loadUserActivities: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { User } from '@/types';
 
@@ -8,6 +9,7 @@ const props = defineProps<{
 }>();
 
 const actions = useActions();
+const usersStore = useUsersStore();
 
 const emit = defineEmits<{
   (e: 'close');
@@ -22,7 +24,8 @@ const definition = {
     avatar: {
       type: 'string',
       format: 'stamp',
-      title: 'Avatar'
+      title: 'Avatar',
+      default: props.user.id
     },
     name: {
       type: 'string',
@@ -51,14 +54,7 @@ const definition = {
   }
 };
 
-const form = ref<Record<string, any>>({
-  avatar: props.user.avatar,
-  cover: props.user.cover,
-  name: props.user.name,
-  about: props.user.about,
-  github: props.user.github,
-  twitter: props.user.twitter
-});
+const form = ref<Record<string, any>>(clone(props.user));
 const sending = ref(false);
 
 const formErrors = computed(() =>
@@ -70,6 +66,7 @@ async function handleSubmit() {
 
   try {
     if (await actions.updateUser(form.value as User)) {
+      usersStore.fetchUser(props.user.id, true);
       emit('close');
     }
   } finally {
@@ -79,11 +76,10 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" data-model="user-modal" @close="$emit('close')">
     <template #header>
       <h3>Edit profile</h3>
     </template>
-
     <UiInputStampCover v-model="(form as any).cover" :user="user" type="user" />
     <div class="s-box p-4 -mt-[80px]">
       <UiForm v-model="form" :error="formErrors" :definition="definition" />
@@ -102,7 +98,7 @@ async function handleSubmit() {
 </template>
 
 <style>
-.modal-body [path='avatar'] {
+[data-model='user-modal'] [path='avatar'] {
   @apply rounded-full;
 }
 </style>

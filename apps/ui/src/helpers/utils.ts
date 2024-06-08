@@ -12,6 +12,7 @@ import type { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import type { Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
+import Autolinker from 'autolinker';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
@@ -444,4 +445,14 @@ export function getChoiceText(
     .filter(([, weight]) => weight > 0)
     .map(([index, weight]) => `${_p(weight / total)} for ${availableChoices[Number(index) - 1]}`)
     .join(', ');
+}
+
+export function autoLinkText(text: string) {
+  if (!text) return text;
+
+  return Autolinker.link(text, {
+    sanitizeHtml: true,
+    phone: false,
+    replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
+  });
 }
