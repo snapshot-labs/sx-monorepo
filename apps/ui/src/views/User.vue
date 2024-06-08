@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { shortenAddress, sanitizeUrl, autoLinkText, _n, _p, getCacheHash } from '@/helpers/utils';
+import {
+  shortenAddress,
+  sanitizeUrl,
+  autoLinkText,
+  _n,
+  _p,
+  getCacheHash,
+  isValidAddress
+} from '@/helpers/utils';
 import ICX from '~icons/c/x';
 import ICGithub from '~icons/c/github';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { UserActivity, Space, User } from '@/types';
-import { validateAndParseAddress } from 'starknet';
-import { isAddress } from '@ethersproject/address';
 import { getNames } from '@/helpers/stamp';
 
 const route = useRoute();
@@ -14,8 +20,6 @@ const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const { copy, copied } = useClipboard();
-
-const currentUrl = `${window.location.origin}/#${route.path}`;
 
 const activities = ref<
   (UserActivity & { space: Space; proposal_percentage: number; vote_percentage: number })[]
@@ -53,11 +57,14 @@ const socials = computed(() =>
     })
     .filter(social => social.href)
 );
-const shareMsg = computed(() => encodeURIComponent(`${id.value}: ${currentUrl}`));
+const shareMsg = computed(() =>
+  encodeURIComponent(`${id.value}: ${window.location.origin}/#${route.path}`)
+);
 const cb = computed(() => getCacheHash(user.value?.avatar));
 const username = computedAsync(
   async () =>
-    user.value?.name || (await getNames([id.value]))?.[id.value] || shortenAddress(id.value)
+    user.value?.name || (await getNames([id.value]))?.[id.value] || shortenAddress(id.value),
+  shortenAddress(id.value)
 );
 
 async function loadActivities(userId: string) {
@@ -96,14 +103,6 @@ async function loadActivities(userId: string) {
 
 function isOffchainSpace(space: Space) {
   return offchainNetworks.includes(space.network);
-}
-
-function isValidAddress(address: string) {
-  try {
-    return !!validateAndParseAddress(address);
-  } catch (e) {
-    return isAddress(address);
-  }
 }
 
 onMounted(async () => {

@@ -5,7 +5,7 @@ import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
 import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import { getAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import networks from '@/helpers/networks.json';
@@ -455,4 +455,12 @@ export function autoLinkText(text: string) {
     phone: false,
     replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
   });
+}
+
+export function isValidAddress(address: string) {
+  try {
+    return !!validateAndParseAddress(address);
+  } catch (e) {
+    return isAddress(address);
+  }
 }
