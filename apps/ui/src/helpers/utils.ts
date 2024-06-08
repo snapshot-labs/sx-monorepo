@@ -3,16 +3,16 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
+import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
+import { upload as pin } from '@snapshot-labs/pineapple';
 import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
-import { upload as pin } from '@snapshot-labs/pineapple';
 import type { Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
-import Autolinker from 'autolinker';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
