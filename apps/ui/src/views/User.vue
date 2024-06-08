@@ -240,12 +240,7 @@ watchEffect(() => setTitle(`${id.value} user profile`));
         }"
         class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
       >
-        <SpaceAvatar
-          :space="activity.space"
-          :size="32"
-          :type="isOffchainSpace(activity.space) ? 'space' : 'space-sx'"
-          class="rounded-sm"
-        />
+        <SpaceAvatar :space="activity.space" :size="32" class="rounded-sm" />
         <span class="truncate" v-text="activity.space.name" />
       </router-link>
       <div class="flex flex-col justify-center w-[20%] lg:w-[25%] leading-[22px] truncate">
