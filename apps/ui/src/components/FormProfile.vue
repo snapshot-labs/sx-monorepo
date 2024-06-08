@@ -182,7 +182,7 @@ onMounted(() => {
 
 <template>
   <h3 v-if="showTitle" class="mb-4">Space profile</h3>
-  <UiInputStampCover v-model="(form as any).cover" :space="space" />
+  <UiInputStampCover v-model="(form as any).cover" :space="space" type="space" />
   <div class="s-box p-4 -mt-[80px]">
     <UiForm
       :model-value="form"

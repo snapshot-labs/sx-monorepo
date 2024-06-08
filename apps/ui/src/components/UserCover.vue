@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
-import { User } from '@/types';
 
 defineProps<{
-  user: User;
+  user: {
+    id: string;
+    avatar: string;
+    cover?: string;
+  };
 }>();
 </script>
 

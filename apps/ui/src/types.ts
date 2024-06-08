@@ -200,6 +200,9 @@ export type User = {
   name?: string;
   about?: string;
   avatar?: string;
+  cover?: string;
+  github?: string;
+  twitter?: string;
 };
 
 export type UserActivity = {
