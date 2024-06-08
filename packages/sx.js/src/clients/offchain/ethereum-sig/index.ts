@@ -27,6 +27,7 @@ import {
   type FollowSpace,
   type UnfollowSpace,
   type SetAlias,
+  type UpdateUser,
   type EIP712Message,
   type EIP712VoteMessage,
   type EIP712ProposeMessage,
@@ -35,8 +36,7 @@ import {
   type EIP712FollowSpaceMessage,
   type EIP712UnfollowSpaceMessage,
   type EIP712SetAliasMessage,
-  UpdateUser,
-  EIP712UpdateUserMessage
+  type EIP712UpdateUserMessage
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
