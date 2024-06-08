@@ -21,7 +21,7 @@ const activities = ref<
   (UserActivity & { space: Space; proposal_percentage: number; vote_percentage: number })[]
 >([]);
 const loadingActivities = ref(false);
-const modalOpenEditProfile = ref(false);
+const modalOpenEditUser = ref(false);
 const loaded = ref(false);
 
 const id = computed(() => route.params.id as string);
@@ -174,7 +174,7 @@ watchEffect(() => setTitle(`${id.value} user profile`));
         </UiDropdown>
 
         <UiTooltip v-if="web3.account === user.id" title="Edit profile">
-          <UiButton class="!px-0 w-[46px]" @click="modalOpenEditProfile = true">
+          <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
           </UiButton>
         </UiTooltip>
@@ -274,11 +274,11 @@ watchEffect(() => setTitle(`${id.value} user profile`));
       </div>
     </div>
     <teleport to="#modal">
-      <ModalEditProfile
+      <ModalEditUser
         v-if="user && web3.account === user.id"
-        :open="modalOpenEditProfile"
+        :open="modalOpenEditUser"
         :user="user"
-        @close="modalOpenEditProfile = false"
+        @close="modalOpenEditUser = false"
       />
     </teleport>
   </div>
