@@ -563,7 +563,10 @@ export function useActions() {
     });
     if (!pinned || !pinned.cid) return false;
 
-    await wrapPromise(offchainNetworkId, network.actions.updateUser(auth.web3, pinned.cid));
+    await wrapPromise(
+      offchainNetworkId,
+      network.actions.updateUser(await getAliasSigner(), pinned.cid, web3.value.account)
+    );
 
     return true;
   }
