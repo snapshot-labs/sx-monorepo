@@ -14,8 +14,8 @@ const props = defineProps<{
   };
   user?: {
     id: string;
-    cover: string;
-    avatar: string;
+    cover?: string;
+    avatar?: string;
   };
   error?: string;
 }>();

@@ -73,11 +73,7 @@ async function handleSubmit() {
       <h3>Edit profile</h3>
     </template>
 
-    <UiInputStampCover
-      v-model="(form as any).cover"
-      :user="{ id: user.id, avatar: user.avatar || '', cover: user.cover || '' }"
-      type="user"
-    />
+    <UiInputStampCover v-model="(form as any).cover" :user="user" type="user" />
     <div class="s-box p-4 -mt-[80px]">
       <UiForm v-model="form" :error="formErrors" :definition="definition" />
     </div>

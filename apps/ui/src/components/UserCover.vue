@@ -4,7 +4,7 @@ import { getCacheHash, getStampUrl } from '@/helpers/utils';
 defineProps<{
   user: {
     id: string;
-    avatar: string;
+    avatar?: string;
     cover?: string;
   };
 }>();
