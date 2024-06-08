@@ -10,6 +10,7 @@ import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { UserActivity, Space, User } from '@/types';
 import { validateAndParseAddress } from 'starknet';
 import { isAddress } from '@ethersproject/address';
+import { getNames } from '@/helpers/stamp';
 
 const route = useRoute();
 const usersStore = useUsersStore();
@@ -64,6 +65,9 @@ const autolinkedAbout = computed(() =>
     phone: false,
     replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
   })
+);
+const username = computedAsync(
+  async () => user.value?.name || (await getNames([id]))?.[id] || shortenAddress(id)
 );
 
 async function loadActivities(userId: string) {
@@ -157,7 +161,7 @@ watchEffect(() => setTitle(`${id} user profile`));
           :size="90"
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
-        <h1 v-text="user.name || shortenAddress(user.id)" />
+        <h1 v-text="username" />
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
