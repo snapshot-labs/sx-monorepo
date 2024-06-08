@@ -7,6 +7,8 @@ const props = defineProps<{
   user: User;
 }>();
 
+const actions = useActions();
+
 const emit = defineEmits<{
   (e: 'close');
 }>();
@@ -57,13 +59,22 @@ const form = ref<Record<string, any>>({
   github: props.user.github,
   twitter: props.user.twitter
 });
+const sending = ref(false);
 
 const formErrors = computed(() =>
   validateForm(definition, form.value, { skipEmptyOptionalFields: true })
 );
 
 async function handleSubmit() {
-  emit('close');
+  sending.value = true;
+
+  try {
+    if (await actions.updateUser(form.value as User)) {
+      emit('close');
+    }
+  } finally {
+    sending.value = false;
+  }
 }
 </script>
 
@@ -78,7 +89,12 @@ async function handleSubmit() {
       <UiForm v-model="form" :error="formErrors" :definition="definition" />
     </div>
     <template #footer>
-      <UiButton class="w-full" :disabled="Object.keys(formErrors).length > 0" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :disabled="Object.keys(formErrors).length > 0"
+        :loading="sending"
+        @click="handleSubmit"
+      >
         Save
       </UiButton>
     </template>

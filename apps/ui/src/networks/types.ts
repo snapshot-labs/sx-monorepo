@@ -131,6 +131,7 @@ export type ReadOnlyNetworkActions = {
   followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
   unfollowSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
   setAlias(web3: Web3Provider, alias: string);
+  updateUser(web3: Web3Provider | Wallet, cid: string, from?: string);
   send(envelope: any): Promise<any>;
 };
 

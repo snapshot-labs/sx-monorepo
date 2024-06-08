@@ -225,6 +225,28 @@ export function createActions(
         signer: web3.getSigner(),
         data: { alias }
       });
+    },
+    async updateUser(web3: Web3Provider | Wallet, cid: string, from?: string) {
+      let payload: {
+        name: string;
+        about: string;
+        avatar: string;
+        cover: string;
+        github: string;
+        twitter: string;
+      };
+
+      try {
+        const res = await fetch(getUrl(cid) as string);
+        payload = await res.json();
+      } catch (e) {
+        throw new Error('Failed to fetch user metadata');
+      }
+
+      return client.updateUser({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { profile: JSON.stringify(payload), ...(from ? { from } : {}) }
+      });
     }
   };
 }
