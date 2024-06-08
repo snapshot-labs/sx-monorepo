@@ -58,7 +58,9 @@ async function loadActivities(userId: string) {
     })
   );
 
-  const _activities = results.flat().sort((a, b) => b.proposal_count - a.proposal_count);
+  const _activities = results
+    .flat()
+    .sort((a, b) => b.proposal_count - a.proposal_count || b.vote_count - a.vote_count);
 
   await spacesStore.fetchSpaces(
     _activities.map(activity => activity.spaceId).filter(id => !spacesStore.spacesMap.has(id))
@@ -123,10 +125,9 @@ watchEffect(() => setTitle(`${id} user profile`));
           :size="90"
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
-
-        <h1>{{ user.name || shortenAddress(user.id) }}</h1>
+        <h1 v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 flex items-center space-x-2">
-          <span class="text-skin-text">{{ shortenAddress(user.id) }}</span>
+          <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
             <a href="#" class="text-skin-text" @click.prevent="copy(user.id)">
               <IH-duplicate v-if="!copied" class="inline-block" />
@@ -147,59 +148,66 @@ watchEffect(() => setTitle(`${id} user profile`));
           </template>
         </div>
       </div>
-
       <h4 class="mb-2 eyebrow leading-8">Activity</h4>
     </div>
     <div class="border-b w-full">
       <div class="flex space-x-1 px-4 leading-8">
-        <span class="w-[50%]">Space</span>
-        <span class="w-[25%]">Proposals</span>
-        <span class="w-[25%]">Votes</span>
-        <span class="w-[88px]"></span>
+        <span class="w-[60%] lg:w-[50%] truncate">Space</span>
+        <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
+        <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
+        <span class="hidden lg:block lg:w-[88px]"></span>
       </div>
     </div>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
     <div v-else-if="activities.length === 0" class="px-4 py-3 flex items-center space-x-2">
       <IH-exclamation-circle class="inline-block" />
-      <span> This user does not have any activities yet. </span>
+      <span>This user does not have any activities yet.</span>
     </div>
-    <div v-else class="mx-4">
-      <div v-for="(activity, i) in activities" :key="i" class="border-b flex space-x-1 py-[18px]">
-        <div class="flex items-center gap-x-3 leading-[22px] w-[50%] font-semibold text-skin-link">
-          <SpaceAvatar
-            :space="activity.space"
-            :size="32"
-            :type="isOffchainSpace(activity.space) ? 'space' : 'space-sx'"
-            class="rounded-sm"
-          />
-
-          {{ activity.space.name }}
-        </div>
-        <div class="flex flex-col justify-center w-[25%] text-[18px] font-semibold space-y-[2px]">
-          <h4 class="text-skin-link leading-[18px]" v-text="_n(activity.proposal_count)" />
-          <div class="leading-[18px]">
-            {{ _p(activity.proposal_percentage) }}
-          </div>
-        </div>
-        <div class="flex flex-col justify-center w-[25%] text-[18px] font-semibold space-y-[2px]">
-          <h4 class="text-skin-link leading-[18px]" v-text="_n(activity.vote_count)" />
-          <div class="leading-[18px]">{{ _p(activity.vote_percentage) }}</div>
-        </div>
-        <div class="w-[88px] text-right">
-          <router-link
-            :to="{
-              name: 'space-overview',
-              params: {
-                id: activity.spaceId
-              }
-            }"
-            class="text-skin-link"
-          >
-            <UiButton class="!px-0 w-[40px] !h-[40px]">
-              <IH-arrow-sm-right class="inline-block" />
-            </UiButton>
-          </router-link>
-        </div>
+    <div
+      v-for="(activity, i) in activities"
+      v-else
+      :key="i"
+      class="mx-4 border-b flex space-x-1 py-3"
+    >
+      <router-link
+        :to="{
+          name: 'space-overview',
+          params: {
+            id: activity.spaceId
+          }
+        }"
+        class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
+      >
+        <SpaceAvatar
+          :space="activity.space"
+          :size="32"
+          :type="isOffchainSpace(activity.space) ? 'space' : 'space-sx'"
+          class="rounded-sm"
+        />
+        <span class="truncate" v-text="activity.space.name" />
+      </router-link>
+      <div class="flex flex-col justify-center w-[20%] lg:w-[25%] leading-[22px] truncate">
+        <h4 class="text-skin-link truncate" v-text="_n(activity.proposal_count)" />
+        <div class="text-[17px] truncate" v-text="_p(activity.proposal_percentage)" />
+      </div>
+      <div class="flex flex-col justify-center w-[20%] lg:w-[25%] leading-[22px] truncate">
+        <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
+        <div class="text-[17px] truncate">{{ _p(activity.vote_percentage) }}</div>
+      </div>
+      <div class="hidden lg:block lg:w-[88px] text-right">
+        <router-link
+          :to="{
+            name: 'space-overview',
+            params: {
+              id: activity.spaceId
+            }
+          }"
+          class="text-skin-link"
+        >
+          <UiButton class="!px-0 w-[40px] !h-[40px]">
+            <IH-arrow-sm-right class="inline-block" />
+          </UiButton>
+        </router-link>
       </div>
     </div>
   </div>
