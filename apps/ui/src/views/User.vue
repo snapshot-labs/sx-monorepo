@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shortenAddress, sanitizeUrl, autoLinkText, _n, _p } from '@/helpers/utils';
+import { shortenAddress, sanitizeUrl, autoLinkText, _n, _p, getCacheHash } from '@/helpers/utils';
 import ICX from '~icons/c/x';
 import ICGithub from '~icons/c/github';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
@@ -103,6 +103,8 @@ function isValidAddress(address: string) {
   }
 }
 
+const cb = computed(() => getCacheHash(user.value?.avatar));
+
 onMounted(async () => {
   await usersStore.fetchUser(id);
 
@@ -144,6 +146,7 @@ watchEffect(() => setTitle(`${id} user profile`));
         <UiStamp
           :id="user.id"
           :size="90"
+          :cb="cb"
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
         <h1 v-text="username" />
