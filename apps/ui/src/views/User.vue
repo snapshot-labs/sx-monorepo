@@ -15,7 +15,6 @@ const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const { copy, copied } = useClipboard();
 
-const id = route.params.id as string;
 const currentUrl = `${window.location.origin}/#${route.path}`;
 
 const activities = ref<
@@ -25,12 +24,13 @@ const loadingActivities = ref(false);
 const modalOpenEditProfile = ref(false);
 const loaded = ref(false);
 
+const id = computed(() => route.params.id as string);
 const user = computed(
   () =>
-    usersStore.getUser(id) ||
-    (isValidAddress(id)
+    usersStore.getUser(id.value) ||
+    (isValidAddress(id.value)
       ? ({
-          id,
+          id: id.value,
           about: '',
           name: '',
           avatar: '',
@@ -53,9 +53,10 @@ const socials = computed(() =>
     })
     .filter(social => social.href)
 );
-const shareMsg = computed(() => encodeURIComponent(`${id}: ${currentUrl}`));
+const shareMsg = computed(() => encodeURIComponent(`${id.value}: ${currentUrl}`));
 const username = computedAsync(
-  async () => user.value?.name || (await getNames([id]))?.[id] || shortenAddress(id)
+  async () =>
+    user.value?.name || (await getNames([id.value]))?.[id.value] || shortenAddress(id.value)
 );
 
 async function loadActivities(userId: string) {
@@ -107,14 +108,14 @@ function isValidAddress(address: string) {
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 onMounted(async () => {
-  await usersStore.fetchUser(id);
+  await usersStore.fetchUser(id.value);
 
-  if (isValidAddress(id)) await loadActivities(id);
+  if (isValidAddress(id.value)) await loadActivities(id.value);
 
   loaded.value = true;
 });
 
-watchEffect(() => setTitle(`${id} user profile`));
+watchEffect(() => setTitle(`${id.value} user profile`));
 </script>
 
 <template>
