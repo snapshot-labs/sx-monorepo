@@ -197,12 +197,12 @@ export type User = {
   vote_count: number;
   created: number;
   follows?: string[];
-  name?: string;
-  about?: string;
-  avatar?: string;
-  cover?: string;
-  github?: string;
-  twitter?: string;
+  name: string;
+  about: string;
+  avatar: string;
+  cover: string;
+  github: string;
+  twitter: string;
 };
 
 export type UserActivity = {

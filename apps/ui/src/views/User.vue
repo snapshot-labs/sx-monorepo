@@ -7,7 +7,9 @@ import ICGithub from '~icons/c/github';
 import ICCoingecko from '~icons/c/coingecko';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import { UserActivity, Space } from '@/types';
+import { UserActivity, Space, User } from '@/types';
+import { validateAndParseAddress } from 'starknet';
+import { isAddress } from '@ethersproject/address';
 
 const route = useRoute();
 const usersStore = useUsersStore();
@@ -21,10 +23,25 @@ const activities = ref<
 >([]);
 const loadingActivities = ref(false);
 const modalOpenEditProfile = ref(false);
+const loaded = ref(false);
 
 const id = route.params.id as string;
 
-const user = computed(() => usersStore.getUser(id));
+const user = computed(
+  () =>
+    usersStore.getUser(id) ||
+    (isValidAddress(id)
+      ? ({
+          id,
+          about: '',
+          name: '',
+          avatar: '',
+          cover: '',
+          github: '',
+          twitter: ''
+        } as User)
+      : null)
+);
 const socials = computed(() =>
   [
     { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
@@ -87,19 +104,33 @@ function isOffchainSpace(space: Space) {
   return offchainNetworks.includes(space.network);
 }
 
+function isValidAddress(address: string) {
+  try {
+    return !!validateAndParseAddress(address);
+  } catch (e) {
+    return isAddress(address);
+  }
+}
+
 onMounted(async () => {
   await usersStore.fetchUser(id);
 
-  if (!user.value) return;
+  if (!isValidAddress(id)) await loadActivities(id);
 
-  loadActivities(user.value.id);
+  loaded.value = true;
 });
 
 watchEffect(() => setTitle(`${id} user profile`));
 </script>
 
 <template>
-  <UiLoading v-if="!user" class="block text-center p-4" />
+  <div v-if="!user">
+    <UiLoading v-if="!loaded" class="block text-center p-4" />
+    <div v-else class="px-4 py-3 flex items-center space-x-2">
+      <IH-exclamation-circle class="inline-block" />
+      <span>This user does not exist</span>
+    </div>
+  </div>
   <div v-else>
     <div class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]">
       <div class="w-full h-full overflow-hidden">
@@ -193,7 +224,7 @@ watchEffect(() => setTitle(`${id} user profile`));
       </div>
       <div class="flex flex-col justify-center w-[20%] lg:w-[25%] leading-[22px] truncate">
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
-        <div class="text-[17px] truncate">{{ _p(activity.vote_percentage) }}</div>
+        <div class="text-[17px] truncate" v-text="_p(activity.vote_percentage)" />
       </div>
       <div class="hidden lg:block lg:w-[88px] text-right">
         <router-link
