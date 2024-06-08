@@ -116,49 +116,7 @@ watchEffect(() => setTitle(`${id.value} user profile`));
       </div>
       <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <UiDropdown>
-          <template #button>
-            <UiButton class="!px-0 w-[46px]">
-              <IH-share class="inline-block" />
-            </UiButton>
-          </template>
-          <template #items>
-            <UiDropdownItem v-slot="{ active }">
-              <a
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                :href="`https://twitter.com/intent/tweet/?text=${shareMsg}`"
-                target="_blank"
-              >
-                <IC-x />
-                Share on X
-              </a>
-            </UiDropdownItem>
-            <UiDropdownItem v-slot="{ active }">
-              <a
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                :href="`https://hey.xyz/?hashtags=Snapshot&text=${shareMsg}`"
-                target="_blank"
-              >
-                <IC-lens />
-                Share on Lens
-              </a>
-            </UiDropdownItem>
-            <UiDropdownItem v-slot="{ active }">
-              <a
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                :href="`https://warpcast.com/~/compose?text=${shareMsg}`"
-                target="_blank"
-              >
-                <IC-farcaster />
-                Share on Farcaster
-              </a>
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
-
+        <ShareDropdown :message="shareMsg" class="!px-0 w-[46px]" />
         <UiTooltip v-if="web3.account === user.id" title="Edit profile">
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
