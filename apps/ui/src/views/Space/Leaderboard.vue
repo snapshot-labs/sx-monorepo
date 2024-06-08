@@ -32,7 +32,7 @@ async function withAuthorNames(users: User[]): Promise<User[]> {
   const names = await getNames(users.map(user => user.id));
 
   return users.map(user => {
-    user.name ||= names[user.id];
+    user.name = names[user.id];
 
     return user;
   });

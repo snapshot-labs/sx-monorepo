@@ -494,7 +494,13 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
             id: leaderboard.user.id,
             created: leaderboard.user.created,
             vote_count: leaderboard.vote_count,
-            proposal_count: leaderboard.proposal_count
+            proposal_count: leaderboard.proposal_count,
+            name: '',
+            about: '',
+            avatar: '',
+            cover: '',
+            github: '',
+            twitter: ''
           }))
         );
     },
