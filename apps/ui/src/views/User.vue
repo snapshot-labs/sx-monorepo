@@ -54,6 +54,7 @@ const socials = computed(() =>
     .filter(social => social.href)
 );
 const shareMsg = computed(() => encodeURIComponent(`${id.value}: ${currentUrl}`));
+const cb = computed(() => getCacheHash(user.value?.avatar));
 const username = computedAsync(
   async () =>
     user.value?.name || (await getNames([id.value]))?.[id.value] || shortenAddress(id.value)
@@ -104,8 +105,6 @@ function isValidAddress(address: string) {
     return isAddress(address);
   }
 }
-
-const cb = computed(() => getCacheHash(user.value?.avatar));
 
 onMounted(async () => {
   await usersStore.fetchUser(id.value);
