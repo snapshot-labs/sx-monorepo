@@ -108,7 +108,7 @@ const cb = computed(() => getCacheHash(user.value?.avatar));
 onMounted(async () => {
   await usersStore.fetchUser(id);
 
-  if (!isValidAddress(id)) await loadActivities(id);
+  if (isValidAddress(id)) await loadActivities(id);
 
   loaded.value = true;
 });
