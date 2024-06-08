@@ -77,14 +77,20 @@ watch(open, () => (step.value = null));
     </div>
     <div v-else>
       <div class="m-4 space-y-2">
-        <a :href="explorerUrl(web3.network.key, web3.account)" target="_blank" class="block">
-          <UiButton class="button-outline w-full flex justify-center items-center">
+        <router-link
+          :to="{ name: 'user', params: { id: web3.account } }"
+          class="block"
+          tabindex="-1"
+        >
+          <UiButton
+            class="button-outline w-full flex justify-center items-center"
+            @click="emit('close')"
+          >
             <UiStamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
             <span v-text="web3.name || shorten(web3.account)" />
-            <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </UiButton>
-        </a>
-        <router-link to="/settings" class="block">
+        </router-link>
+        <router-link to="/settings" class="block" tabindex="-1">
           <UiButton
             class="button-outline w-full flex justify-center items-center"
             @click="emit('close')"
