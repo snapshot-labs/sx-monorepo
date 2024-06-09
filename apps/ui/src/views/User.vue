@@ -160,8 +160,8 @@ watchEffect(() => setTitle(`${id.value} user profile`));
     <div class="border-b w-full">
       <div class="flex space-x-1 px-4 leading-8">
         <span class="w-[60%] lg:w-[50%] truncate">Space</span>
-        <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
-        <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
+        <span class="w-[20%] lg:w-[25%] text-end truncate">Proposals</span>
+        <span class="w-[20%] lg:w-[25%] text-end truncate">Votes</span>
         <span class="hidden lg:block lg:w-[88px]"></span>
       </div>
     </div>
@@ -188,11 +188,15 @@ watchEffect(() => setTitle(`${id.value} user profile`));
         <SpaceAvatar :space="activity.space" :size="32" class="rounded-sm" />
         <span class="truncate" v-text="activity.space.name" />
       </router-link>
-      <div class="flex flex-col justify-center w-[20%] lg:w-[25%] leading-[22px] truncate">
+      <div
+        class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
+      >
         <h4 class="text-skin-link truncate" v-text="_n(activity.proposal_count)" />
         <div class="text-[17px] truncate" v-text="_p(activity.proposal_percentage)" />
       </div>
-      <div class="flex flex-col justify-center w-[20%] lg:w-[25%] leading-[22px] truncate">
+      <div
+        class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
+      >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div class="text-[17px] truncate" v-text="_p(activity.vote_percentage)" />
       </div>
