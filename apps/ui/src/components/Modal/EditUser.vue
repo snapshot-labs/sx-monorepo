@@ -31,24 +31,28 @@ const definition = {
       type: 'string',
       title: 'Name',
       minLength: 1,
+      maxLength: 32,
       examples: ['Display name']
     },
     about: {
       type: 'string',
       format: 'long',
       title: 'About',
+      maxLength: 256,
       examples: ['Tell your story']
     },
     github: {
       type: 'string',
       format: 'github-handle',
       title: 'GitHub',
+      maxLength: 39,
       examples: ['GitHub handle']
     },
     twitter: {
       type: 'string',
       format: 'twitter-handle',
       title: 'X (Twitter)',
+      maxLength: 15,
       examples: ['X (Twitter) handle']
     }
   }
@@ -66,8 +70,8 @@ async function handleSubmit() {
 
   try {
     if (await actions.updateUser(form.value as User)) {
-      usersStore.fetchUser(props.user.id, true);
       await fetch(`https://cdn.stamp.fyi/clear/avatar/eth:${props.user.id}`);
+      usersStore.fetchUser(props.user.id, true);
       emit('close');
     }
   } finally {
