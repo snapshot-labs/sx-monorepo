@@ -104,7 +104,7 @@ watch(
   { immediate: true }
 );
 
-watchEffect(() => setTitle(`${id.value} user profile`));
+watchEffect(() => setTitle(`${username.value} user profile`));
 </script>
 
 <template>
