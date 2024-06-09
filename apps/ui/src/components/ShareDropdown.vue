@@ -1,5 +1,13 @@
 <script setup lang="ts">
 defineProps<{ message: string }>();
+
+const uiStore = useUiStore();
+const { copy } = useClipboard();
+
+function handleCopyLinkClick() {
+  copy(window.location.href);
+  uiStore.addNotification('success', 'Link copied.');
+}
 </script>
 
 <template>
@@ -12,6 +20,16 @@ defineProps<{ message: string }>();
       </slot>
     </template>
     <template #items>
+      <UiDropdownItem v-slot="{ active }">
+        <a
+          class="flex items-center gap-2"
+          :class="{ 'opacity-80': active }"
+          @click="handleCopyLinkClick"
+        >
+          <IH-link />
+          Copy link
+        </a>
+      </UiDropdownItem>
       <UiDropdownItem v-slot="{ active }">
         <a
           class="flex items-center gap-2"
