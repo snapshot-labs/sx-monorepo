@@ -147,6 +147,20 @@ watchEffect(() => setTitle('Network'));
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">
+      <div class="border p-4 rounded-lg">
+        <h3 class="mb-1">
+          <IH-exclamation-circle class="inline-block mr-1" />
+          Is your network already live on Snapshot?
+        </h3>
+        <div class="text-md">
+          Starting July 1, 2024, all networks must subscribe to the network plan to maintain support
+          on Snapshot. To ensure continuous service and avoid interruptions, please contact our team
+          today.
+        </div>
+      </div>
+    </UiContainer>
+
+    <UiContainer class="!max-w-[880px]">
       <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
       <h1 class="mb-3 text-center">Questions?</h1>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
