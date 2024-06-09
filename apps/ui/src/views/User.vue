@@ -92,13 +92,17 @@ async function loadActivities(userId: string) {
   loadingActivities.value = false;
 }
 
-onMounted(async () => {
-  await usersStore.fetchUser(id.value);
+watch(
+  id,
+  async userId => {
+    await usersStore.fetchUser(userId);
 
-  if (isValidAddress(id.value)) await loadActivities(id.value);
+    if (isValidAddress(id.value)) loadActivities(userId);
 
-  loaded.value = true;
-});
+    loaded.value = true;
+  },
+  { immediate: true }
+);
 
 watchEffect(() => setTitle(`${id.value} user profile`));
 </script>
