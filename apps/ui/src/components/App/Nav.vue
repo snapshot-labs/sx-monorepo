@@ -106,12 +106,14 @@ const shortcuts = computed(() => {
             user: {
               name: 'Profile',
               link: { name: 'user', params: { id: web3.value.account } },
-              icon: IHUser
+              icon: IHUser,
+              active: (route.name as string) === 'user' && route.params.id === web3.value.account
             },
             settings: {
               name: 'Settings',
               link: { name: 'settings-spaces' },
-              icon: IHCog
+              icon: IHCog,
+              active: false
             }
           }
         }
@@ -151,7 +153,7 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
         :key="key"
         :to="item.link"
         class="px-4 py-1.5 space-x-2 flex items-center"
-        :class="(route.name as string) === `${key}` ? 'text-skin-link' : 'text-skin-text'"
+        :class="item.active ? 'text-skin-link' : 'text-skin-text'"
       >
         <component :is="item.icon" class="inline-block"></component>
         <span v-text="item.name" />
