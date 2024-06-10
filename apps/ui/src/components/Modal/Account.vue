@@ -83,11 +83,11 @@ watch(open, () => (step.value = null));
           tabindex="-1"
         >
           <UiButton
-            class="button-outline w-full flex justify-center items-center"
+            class="button-outline w-full flex justify-center items-center space-x-2"
             @click="emit('close')"
           >
-            <UiStamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
-            <span v-text="web3.name || shorten(web3.account)" />
+            <UiStamp :id="web3.account" :size="18" />
+            <span>My profile</span>
           </UiButton>
         </router-link>
         <router-link to="/settings" class="block" tabindex="-1">
