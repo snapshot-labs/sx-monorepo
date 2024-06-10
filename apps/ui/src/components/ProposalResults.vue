@@ -74,28 +74,18 @@ const otherResultsSummary = computed(() => {
 </script>
 
 <template>
-  <div
-    v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails"
-    class="text-center py-3.5 leading-5"
-  >
-    <div
-      class="p-1.5 border text-skin-heading rounded-full mb-3 w-[40px] h-[40px] inline-block bg-skin-input-bg"
-    >
-      <IH-eye-off class="inline-block top-[2px] relative" />
+  <div v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails">
+    <div class="mb-1">
+      All votes are encrypted and will be decrypted only after the voting period is over, making the
+      results visible.
     </div>
-
-    <div class="flex flex-col gap-1">
-      <div class="text-skin-heading font-semibold">Shutter privacy enabled</div>
-      All votes will be encrypted until the voting period has ended and the final score is
-      calculated.
-    </div>
-
-    <div class="mt-2.5 text-center">
+    <div>
       <a
         href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
         target="_blank"
       >
-        <IC-Shutter class="w-[80px] text-skin-text inline-block" />
+        <IC-shutter class="w-[80px] inline-block" />
+        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </a>
 
       <div v-if="proposal.quorum" class="mt-3.5">
