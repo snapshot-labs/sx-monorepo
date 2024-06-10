@@ -19,7 +19,7 @@ const followedSpacesStore = useFollowedSpacesStore();
       :touch-start-threshold="35"
       :item-key="i => i"
       v-bind="{ animation: 200 }"
-      class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto"
+      class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
     >
       <template #item="{ element }">
         <router-link

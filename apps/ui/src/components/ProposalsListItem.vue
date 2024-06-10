@@ -106,6 +106,7 @@ async function handleVoteClick(choice: Choice) {
       </div>
       <div class="hidden md:block">
         <ProposalVote :proposal="proposal">
+          <template #wrong-safe-network><div /></template>
           <template #unsupported><div /></template>
           <template #waiting><div /></template>
           <template #cancelled><div /></template>
