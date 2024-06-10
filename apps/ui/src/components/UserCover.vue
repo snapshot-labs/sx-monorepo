@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCacheHash, getStampUrl } from '@/helpers/utils';
+import { getCacheHash, getStampUrl, getUrl } from '@/helpers/utils';
 
 defineProps<{
   user: {
@@ -11,7 +11,9 @@ defineProps<{
 </script>
 
 <template>
+  <img v-if="user.cover" :src="getUrl(user.cover)!" class="object-cover" alt="" />
   <div
+    v-else
     class="user-fallback-cover"
     :style="{
       'background-image': `url(${getStampUrl('avatar', user.id, 50, getCacheHash(user.avatar))}`
