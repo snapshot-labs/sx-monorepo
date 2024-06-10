@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getInjected } from '@snapshot-labs/lock/src/utils';
-import { shorten, explorerUrl } from '@/helpers/utils';
 import connectors, { mapConnectorId, getConnectorIconUrl } from '@/helpers/connectors';
 
 const win = window;
