@@ -5,7 +5,6 @@ import { NetworkID } from '@/types';
 const model = defineModel<string | null>();
 
 const props = defineProps<{
-  type: 'space' | 'user';
   space?: {
     id: string;
     cover: string;
@@ -65,18 +64,19 @@ async function handleFileChange(e: Event) {
     <img
       v-if="imgUrl"
       :src="imgUrl"
+      alt=""
       class="h-[100px] w-full object-cover group-hover:opacity-80"
       :class="{
         'opacity-80': isUploadingImage
       }"
     />
     <SpaceCover
-      v-else-if="type === 'space' && props.space?.cover"
+      v-else-if="props.space?.cover"
       :space="props.space"
       class="pointer-events-none !rounded-none min-h-full group-hover:opacity-80"
     />
     <UserCover
-      v-else-if="type === 'user' && props.user?.cover"
+      v-else-if="props.user?.cover"
       :user="props.user"
       class="pointer-events-none !rounded-none min-h-full group-hover:opacity-80"
     />
