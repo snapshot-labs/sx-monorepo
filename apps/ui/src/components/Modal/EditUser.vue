@@ -8,9 +8,6 @@ const props = defineProps<{
   user: User;
 }>();
 
-const actions = useActions();
-const usersStore = useUsersStore();
-
 const emit = defineEmits<{
   (e: 'close');
 }>();
@@ -57,6 +54,9 @@ const definition = {
     }
   }
 };
+
+const actions = useActions();
+const usersStore = useUsersStore();
 
 const form = ref<Record<string, any>>(clone(props.user));
 const sending = ref(false);
