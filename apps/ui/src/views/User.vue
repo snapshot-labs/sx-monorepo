@@ -189,7 +189,7 @@ watchEffect(() => setTitle(`${username.value} user profile`));
         }"
         class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
       >
-        <SpaceAvatar :space="activity.space" :size="32" class="rounded-[4px]" />
+        <SpaceAvatar :space="activity.space" :size="32" class="!rounded-[4px]" />
         <span class="truncate" v-text="activity.space.name" />
       </router-link>
       <div
