@@ -13,10 +13,11 @@ import IHStop from '~icons/heroicons-outline/stop';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
 import IHBell from '~icons/heroicons-outline/bell';
+import { type FunctionalComponent } from 'vue';
 
 type NavigationItem = {
   name: string;
-  icon: any;
+  icon: FunctionalComponent;
   count?: number;
   hidden?: boolean;
   link?: any;
@@ -131,16 +132,22 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(() =>
 });
 const navigationItems = computed(() =>
   Object.fromEntries(
-    Object.entries(navigationConfig.value[currentRouteName.value || ''] || {}).filter(
-      ([key, item]) => !item.hidden
-    )
-  )
-);
-const shortcutItems = computed(() =>
-  Object.fromEntries(
-    Object.entries(shortcuts.value[currentRouteName.value || ''] || {}).filter(
-      ([key, item]) => !item.hidden
-    )
+    Object.entries({
+      ...navigationConfig.value[currentRouteName.value],
+      ...shortcuts.value[currentRouteName.value]
+    })
+      .map(([key, item]): [string, NavigationItem] => {
+        return [
+          key,
+          {
+            ...item,
+            active: item.active ?? route.name === `${currentRouteName.value}-${key}`,
+            hidden: item.hidden ?? false,
+            link: item.link ?? { name: `${currentRouteName.value}-${key}` }
+          }
+        ];
+      })
+      .filter(([key, item]) => item.hidden === false)
   )
 );
 </script>
@@ -158,9 +165,9 @@ const shortcutItems = computed(() =>
       <router-link
         v-for="(item, key) in navigationItems"
         :key="key"
-        :to="{ name: `${currentRouteName}-${key}` }"
+        :to="item.link"
         class="px-4 py-1.5 space-x-2 flex items-center"
-        :class="route.name === `${currentRouteName}-${key}` ? 'text-skin-link' : 'text-skin-text'"
+        :class="item.active ? 'text-skin-link' : 'text-skin-text'"
       >
         <component :is="item.icon" class="inline-block"></component>
         <span class="grow" v-text="item.name" />
@@ -169,16 +176,6 @@ const shortcutItems = computed(() =>
           class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
           v-text="item.count"
         />
-      </router-link>
-      <router-link
-        v-for="(item, key) in shortcutItems"
-        :key="key"
-        :to="item.link"
-        class="px-4 py-1.5 space-x-2 flex items-center"
-        :class="item.active ? 'text-skin-link' : 'text-skin-text'"
-      >
-        <component :is="item.icon" class="inline-block"></component>
-        <span v-text="item.name" />
       </router-link>
     </div>
   </div>
