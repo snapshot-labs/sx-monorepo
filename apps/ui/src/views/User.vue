@@ -28,77 +28,82 @@ const loaded = ref(false);
 
 const id = computed(() => route.params.id as string);
 
-const user = computed(
-  () =>
+const user = computedAsync(
+  async () =>
     usersStore.getUser(id.value) ||
     (isValidAddress(id.value)
       ? ({
-          id: id.value
+          id: id.value,
+          name: (await getNames([id.value]))?.[id.value]
         } as User)
       : null)
 );
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
-const shareMsg = computed(() =>
-  encodeURIComponent(`${id.value}: ${window.location.origin}/#${route.path}`)
-);
+const shareMsg = computed(() => encodeURIComponent(`${id.value}: ${window.location.href}`));
 
 const cb = computed(() => getCacheHash(user.value?.avatar));
-
-const username = computedAsync(
-  async () =>
-    user.value?.name || (await getNames([id.value]))?.[id.value] || shortenAddress(id.value),
-  shortenAddress(id.value)
-);
 
 async function loadActivities(userId: string) {
   loadingActivities.value = true;
 
-  const results = await Promise.all(
-    enabledNetworks.map(networkId => {
-      const network = getNetwork(networkId);
-      return network.api.loadUserActivities(userId);
-    })
-  );
+  try {
+    const results = await Promise.all(
+      enabledNetworks.map(networkId => getNetwork(networkId).api.loadUserActivities(userId))
+    );
 
-  const _activities = results
-    .flat()
-    .sort((a, b) => b.proposal_count - a.proposal_count || b.vote_count - a.vote_count);
+    const aggregatedActivities = results
+      .flat()
+      .sort((a, b) => b.proposal_count - a.proposal_count || b.vote_count - a.vote_count);
 
-  await spacesStore.fetchSpaces(
-    _activities.map(activity => activity.spaceId).filter(id => !spacesStore.spacesMap.has(id))
-  );
+    await spacesStore.fetchSpaces(
+      aggregatedActivities
+        .map(activity => activity.spaceId)
+        .filter(id => !spacesStore.spacesMap.has(id))
+    );
 
-  const total_proposals = _activities
-    .map(activity => activity.proposal_count)
-    .reduce((a, b) => a + b, 0);
+    const totalProposals = aggregatedActivities
+      .map(activity => activity.proposal_count)
+      .reduce((a, b) => a + b, 0);
 
-  const total_votes = _activities.map(activity => activity.vote_count).reduce((a, b) => a + b, 0);
+    const totalVotes = aggregatedActivities
+      .map(activity => activity.vote_count)
+      .reduce((a, b) => a + b, 0);
 
-  activities.value = _activities.map(activity => ({
-    ...activity,
-    space: spacesStore.spacesMap.get(activity.spaceId)!,
-    proposal_percentage: activity.proposal_count / total_proposals,
-    vote_percentage: activity.vote_count / total_votes
-  }));
+    activities.value = aggregatedActivities
+      .map(activity => {
+        const space = spacesStore.spacesMap.get(activity.spaceId);
 
-  loadingActivities.value = false;
+        if (!space) return;
+
+        return {
+          ...activity,
+          space,
+          proposal_percentage: activity.proposal_count / totalProposals,
+          vote_percentage: activity.vote_count / totalVotes
+        };
+      })
+      .filter(Boolean) as typeof activities.value;
+  } finally {
+    loadingActivities.value = false;
+  }
 }
 
 watch(
   id,
   async userId => {
+    loaded.value = false;
     await usersStore.fetchUser(userId);
 
-    if (isValidAddress(id.value)) loadActivities(userId);
+    if (isValidAddress(userId)) loadActivities(userId);
 
     loaded.value = true;
   },
   { immediate: true }
 );
 
-watchEffect(() => setTitle(`${username.value} user profile`));
+watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
 </script>
 
 <template>
@@ -130,7 +135,7 @@ watchEffect(() => setTitle(`${username.value} user profile`));
           :cb="cb"
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
-        <h1 v-text="username" />
+        <h1 v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
@@ -145,7 +150,7 @@ watchEffect(() => setTitle(`${username.value} user profile`));
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
           v-html="autoLinkText(user.about)"
         />
-        <div v-if="socials.length > 0" class="space-x-2 flex">
+        <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
             <a :href="social.href" target="_blank" class="text-[#606060] hover:text-skin-link">
               <component :is="social.icon" class="w-[26px] h-[26px]" />
@@ -164,7 +169,7 @@ watchEffect(() => setTitle(`${username.value} user profile`));
       </div>
     </div>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
-    <div v-else-if="activities.length === 0" class="px-4 py-3 flex items-center space-x-2">
+    <div v-else-if="!activities.length" class="px-4 py-3 flex items-center space-x-2">
       <IH-exclamation-circle class="inline-block" />
       <span>This user does not have any activities yet.</span>
     </div>
@@ -206,6 +211,7 @@ watchEffect(() => setTitle(`${username.value} user profile`));
               id: activity.spaceId
             }
           }"
+          tabindex="-1"
           class="text-skin-link"
         >
           <UiButton class="!px-0 w-[40px] !h-[40px]">
@@ -216,7 +222,7 @@ watchEffect(() => setTitle(`${username.value} user profile`));
     </div>
     <teleport to="#modal">
       <ModalEditUser
-        v-if="user && web3.account === user.id"
+        v-if="web3.account === user.id"
         :open="modalOpenEditUser"
         :user="user"
         @close="modalOpenEditUser = false"
