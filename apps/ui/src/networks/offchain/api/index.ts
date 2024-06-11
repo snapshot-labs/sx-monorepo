@@ -205,12 +205,12 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-function formatUser(user: User) {
+async function formatUser(user: User) {
   return {
     ...user,
     proposal_count: user.proposal_count || 0,
     vote_count: user.vote_count || 0,
-    name: user.name || '',
+    name: user.name || (await getNames([user.id])[user.id]),
     about: user.about || '',
     avatar: user.avatar || '',
     cover: user.cover || '',
