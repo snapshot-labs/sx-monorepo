@@ -191,12 +191,7 @@ export type Proposal = {
   privacy: Privacy;
 };
 
-export type User = {
-  id: string;
-  proposal_count: number;
-  vote_count: number;
-  created: number;
-  follows?: string[];
+export type UserProfile = {
   name?: string;
   about?: string;
   avatar?: string;
@@ -204,6 +199,14 @@ export type User = {
   github?: string;
   twitter?: string;
 };
+
+export type User = {
+  id: string;
+  proposal_count: number;
+  vote_count: number;
+  created: number;
+  follows?: string[];
+} & UserProfile;
 
 export type UserActivity = {
   spaceId: string;
