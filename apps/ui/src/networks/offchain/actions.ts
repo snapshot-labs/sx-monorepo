@@ -13,7 +13,15 @@ import { getProvider } from '@/helpers/provider';
 import { getSwapLink } from '@/helpers/link';
 import { Web3Provider } from '@ethersproject/providers';
 import type { Wallet } from '@ethersproject/wallet';
-import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType, NetworkID } from '@/types';
+import type {
+  StrategyParsedMetadata,
+  Choice,
+  Proposal,
+  Space,
+  User,
+  VoteType,
+  NetworkID
+} from '@/types';
 import type {
   ReadOnlyNetworkActions,
   NetworkConstants,
@@ -226,26 +234,10 @@ export function createActions(
         data: { alias }
       });
     },
-    async updateUser(web3: Web3Provider | Wallet, cid: string, from?: string) {
-      let payload: {
-        name: string;
-        about: string;
-        avatar: string;
-        cover: string;
-        github: string;
-        twitter: string;
-      };
-
-      try {
-        const res = await fetch(getUrl(cid) as string);
-        payload = await res.json();
-      } catch (e) {
-        throw new Error('Failed to fetch user metadata');
-      }
-
+    async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {
       return client.updateUser({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
-        data: { profile: JSON.stringify(payload), ...(from ? { from } : {}) }
+        data: { profile: JSON.stringify(user), ...(from ? { from } : {}) }
       });
     }
   };
