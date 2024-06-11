@@ -70,7 +70,6 @@ async function handleSubmit() {
 
   try {
     if (await actions.updateUser(form.value as User)) {
-      await fetch(`https://cdn.stamp.fyi/clear/avatar/eth:${props.user.id}`);
       usersStore.fetchUser(props.user.id, true);
       emit('close');
     }
