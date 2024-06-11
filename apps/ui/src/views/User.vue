@@ -33,13 +33,7 @@ const user = computed(
     usersStore.getUser(id.value) ||
     (isValidAddress(id.value)
       ? ({
-          id: id.value,
-          about: '',
-          name: '',
-          avatar: '',
-          cover: '',
-          github: '',
-          twitter: ''
+          id: id.value
         } as User)
       : null)
 );
