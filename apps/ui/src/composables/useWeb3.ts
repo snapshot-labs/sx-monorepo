@@ -1,7 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { formatUnits } from '@ethersproject/units';
-import { getNames } from '@/helpers/stamp';
 import { formatAddress } from '@/helpers/utils';
 import networks from '@/helpers/networks.json';
 
@@ -95,9 +94,10 @@ export function useWeb3() {
       const acc = accounts.length > 0 ? accounts[0] : null;
 
       if (acc) {
-        const names = await getNames([acc]);
+        const usersStore = useUsersStore();
+        await usersStore.fetchUser(acc);
         state.account = formatAddress(acc);
-        state.name = names[acc];
+        state.name = usersStore.getUser(acc)?.name || '';
       }
 
       // NOTE: metamask doesn't return connectorName
