@@ -147,7 +147,7 @@ const navigationItems = computed(() =>
           }
         ];
       })
-      .filter(([key, item]) => item.hidden === false)
+      .filter(([, item]) => item.hidden === false)
   )
 );
 </script>
