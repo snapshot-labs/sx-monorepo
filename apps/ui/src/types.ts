@@ -207,7 +207,6 @@ export type User = {
 
 export type UserActivity = {
   spaceId: string;
-  network: NetworkID;
   proposal_count: number;
   vote_count: number;
 };
