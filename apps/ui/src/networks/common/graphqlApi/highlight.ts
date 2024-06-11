@@ -133,7 +133,13 @@ export function joinHighlightUser(user: User | null, highlightUser: User | null)
   return {
     ...user,
     ...highlightUser,
-    vote_count: user ? user.vote_count + highlightUser.vote_count : highlightUser.vote_count
+    vote_count: user ? user.vote_count + highlightUser.vote_count : highlightUser.vote_count,
+    name: user?.name || highlightUser?.name,
+    about: user?.about || highlightUser?.about,
+    avatar: user?.avatar || highlightUser?.avatar,
+    cover: user?.cover || highlightUser?.cover,
+    github: user?.github || highlightUser?.github,
+    twitter: user?.twitter || highlightUser?.twitter
   };
 }
 
