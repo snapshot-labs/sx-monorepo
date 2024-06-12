@@ -41,7 +41,7 @@ const user = computedAsync(
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
-const shareMsg = computed(() => encodeURIComponent(`${id.value}: ${window.location.href}`));
+const shareMsg = computed(() => encodeURIComponent(window.location.href));
 
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
