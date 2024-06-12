@@ -6,6 +6,7 @@ import { MetaTransaction } from '../../../utils/encoding';
 type ExecuteParams = {
   executor: string;
   space: string;
+  proposalId: number;
   proposal: {
     startTimestamp: bigint;
     minEndTimestamp: bigint;
@@ -29,6 +30,7 @@ export class L1Executor {
     signer,
     executor,
     space,
+    proposalId,
     proposal,
     votesFor,
     votesAgainst,
@@ -42,10 +44,9 @@ export class L1Executor {
 
     return contract.execute(
       space,
+      proposalId,
       proposal,
-      votesFor,
-      votesAgainst,
-      votesAbstain,
+      [votesFor, votesAgainst, votesAbstain],
       executionHash,
       transactions
     );

@@ -1,10 +1,6 @@
 import { Account, CallData, RpcProvider, uint256 } from 'starknet';
 import { Signer } from '@ethersproject/abstract-signer';
-import { Interface, defaultAbiCoder } from '@ethersproject/abi';
 import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
-import { keccak256 } from '@ethersproject/keccak256';
-import { keccak256 as solidityKeccak256 } from '@ethersproject/solidity';
-import { getCreate2Address } from '@ethersproject/address';
 import { Wallet } from '@ethersproject/wallet';
 import { StarknetTx } from '../../../src/clients';
 import { executeContractCallWithSigners } from './safeUtils';
@@ -42,9 +38,7 @@ import sxErc20VotesVotingStrategyCasm from './fixtures/sx_ERC20VotesVotingStrate
 import sxErc20VotesVotingStrategySierra from './fixtures/sx_ERC20VotesVotingStrategy.sierra.json';
 import GnosisSafeL2Contract from './fixtures/l1/GnosisSafeL2.json';
 import GnosisSafeProxyFactoryContract from './fixtures/l1/GnosisSafeProxyFactory.json';
-import ModuleProxyFactoryContract from './fixtures/l1/ModuleProxyFactory.json';
 import L1AvatarExecutionStrategyMockMessagingContract from './fixtures/l1/L1AvatarExecutionStrategyMockMessaging.json';
-import L1AvatarExecutionStrategyContract from './fixtures/l1/L1AvatarExecutionStrategy.json';
 import L1AvatarExecutionStrategyFactoryContract from './fixtures/l1/L1AvatarExecutionStrategyFactory.json';
 import MockStarknetMessaging from './fixtures/l1/MockStarknetMessaging.json';
 import StarknetCommit from './fixtures/l1/StarknetCommit.json';
@@ -137,7 +131,7 @@ export async function setup({
 
   const masterl1AvatarExecutionStrategy = await deployL1Dependency(
     ethereumWallet,
-    L1AvatarExecutionStrategyContract
+    L1AvatarExecutionStrategyMockMessagingContract
   );
 
   const l1AvatarExecutionStrategyFactory = await deployL1Dependency(
@@ -266,10 +260,11 @@ export async function setup({
   const networkConfig: NetworkConfig = {
     eip712ChainId: '0x534e5f474f45524c49',
     spaceFactory: factoryAddress,
+    l1AvatarExecutionStrategyImplementation: masterl1AvatarExecutionStrategy,
     l1AvatarExecutionStrategyFactory,
     masterSpace: masterSpaceClassHash as string,
     starknetCommit,
-    starknetCore: '',
+    starknetCore,
     herodotusAccumulatesChainId: 1337,
     authenticators: {
       [hexPadLeft(vanillaAuthenticator)]: {
@@ -368,8 +363,8 @@ export async function setup({
   const { l1AvatarExecutionStrategyContract, safeContract } = await setupL1ExecutionStrategy(
     ethereumWallet,
     {
+      client,
       spaceAddress,
-      starknetCore,
       ethRelayerAddress: ethRelayerExecutionStrategy,
       quorum: 1n
     }
@@ -403,13 +398,13 @@ export async function setup({
 export async function setupL1ExecutionStrategy(
   signer: Wallet,
   {
+    client,
     spaceAddress,
-    starknetCore,
     ethRelayerAddress,
     quorum
   }: {
+    client: StarknetTx;
     spaceAddress: string;
-    starknetCore: string;
     ethRelayerAddress: string;
     quorum: bigint;
   }
@@ -440,48 +435,19 @@ export async function setupL1ExecutionStrategy(
     '0x0000000000000000000000000000000000000000'
   );
 
-  const moduleFactory = await deployL1Dependency(signer, ModuleProxyFactoryContract);
-  const masterL1AvatarExecutionStrategy = await deployL1Dependency(
+  const { address } = await client.deployL1AvatarExecution({
     signer,
-    L1AvatarExecutionStrategyMockMessagingContract,
-    '0x0000000000000000000000000000000000000001',
-    '0x0000000000000000000000000000000000000001',
-    '0x0000000000000000000000000000000000000001',
-    1,
-    [],
-    0
-  );
-
-  const encodedInitParams = defaultAbiCoder.encode(
-    ['address', 'address', 'address', 'uint256', 'uint256[]', 'uint256'],
-    [template, template, starknetCore, ethRelayerAddress, [spaceAddress], quorum]
-  );
-
-  const l1AvatarExecutionStrategyMockMessagingInterface = new Interface(
-    L1AvatarExecutionStrategyMockMessagingContract.abi
-  );
-  const initData = l1AvatarExecutionStrategyMockMessagingInterface.encodeFunctionData('setUp', [
-    encodedInitParams
-  ]);
-
-  const masterCopyAddress = masterL1AvatarExecutionStrategy.toLowerCase().replace(/^0x/, '');
-
-  //This is the bytecode of the module proxy contract
-  const byteCode = `0x602d8060093d393df3363d3d373d3d3d363d73${masterCopyAddress}5af43d82803e903d91602b57fd5bf3`;
-
-  const salt = solidityKeccak256(
-    ['bytes32', 'uint256'],
-    [solidityKeccak256(['bytes'], [initData]), '0x01']
-  );
-
-  // TODO: can it be deployed without proxy?
-  const expectedAddress = getCreate2Address(moduleFactory, salt, keccak256(byteCode));
-
-  const moduleFactoryContract = new Contract(moduleFactory, ModuleProxyFactoryContract.abi, signer);
-  await moduleFactoryContract.deployModule(masterL1AvatarExecutionStrategy, initData, '0x01');
+    params: {
+      controller: template,
+      target: template,
+      executionRelayer: ethRelayerAddress,
+      spaces: [spaceAddress],
+      quorum
+    }
+  });
 
   const l1AvatarExecutionStrategyContract = new Contract(
-    expectedAddress,
+    address,
     L1AvatarExecutionStrategyMockMessagingContract.abi
   );
 
@@ -489,12 +455,11 @@ export async function setupL1ExecutionStrategy(
     safeContract,
     safeContract,
     'enableModule',
-    [expectedAddress],
+    [address],
     [signer]
   );
 
   return {
-    starknetCore,
     l1AvatarExecutionStrategyContract,
     safeContract
   };

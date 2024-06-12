@@ -443,6 +443,7 @@ export function createActions(
         signer: web3.getSigner(),
         executor: proposal.execution_destination,
         space: proposal.space.id,
+        proposalId: proposal.proposal_id as number,
         proposal: proposalData,
         votesFor,
         votesAgainst,

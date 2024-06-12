@@ -1,7 +1,7 @@
 type Execution @entity {
   id: ID!
   space: String!
-  executionHash: String!
+  proposalId: Int!
   created: Int!
   tx: Bytes!
 }

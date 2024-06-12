@@ -56,6 +56,7 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
     herodotusAccumulatesChainId: network.Meta.herodotusAccumulatesChainId,
     spaceFactory: network.Meta.spaceFactory,
     l1AvatarExecutionStrategyFactory: network.Meta.l1AvatarExecutionStrategyFactory,
+    l1AvatarExecutionStrategyImplementation: network.Meta.l1AvatarExecutionStrategyImplementation,
     masterSpace: network.Meta.masterSpace,
     starknetCommit: network.Meta.starknetCommit,
     starknetCore: network.Meta.starknetCore,
@@ -73,6 +74,7 @@ export const starknetNetworks = {
       herodotusDeployedOnChain: 'STARKNET',
       spaceFactory: '0x0250e28c97e729842190c3672f9fcf8db0fc78b8080e87a894831dc69e4f4439',
       l1AvatarExecutionStrategyFactory: '0x',
+      l1AvatarExecutionStrategyImplementation: '0x',
       masterSpace: '0x00f20287bef9f46c6051e425a84094d2436bcc1fef804db353e60f93661961ac',
       starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
       starknetCore: '0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4',
@@ -105,7 +107,8 @@ export const starknetNetworks = {
       herodotusAccumulatesChainId: 11155111,
       herodotusDeployedOnChain: 'SN_SEPOLIA',
       spaceFactory: '0x302d332e9aceb184e5f301cb62c85181e7fc3b30559935c5736e987de579f6e',
-      l1AvatarExecutionStrategyFactory: '0x8dc09f3a1af954919c13780c0ac2efe649cd855f',
+      l1AvatarExecutionStrategyFactory: '0x27981A29Ec87f2FBF873a2dcb0325405648FfCe1',
+      l1AvatarExecutionStrategyImplementation: '0xffEBbe7243cC6001cF44Dd10Bf3C1C7Cf678e215',
       masterSpace: '0x04b61126a7def0956cb4ff342ba72d850ea6b78b0ddb3e0b45f3a99bc9eb5995',
       starknetCommit: '0xf1ec7b0276aa5af11ecefe56efb0f198a77016e9',
       starknetCore: '0xE2Bb56ee936fd6433DC0F6e7e3b8365C906AA057',
@@ -128,7 +131,7 @@ export const starknetNetworks = {
       VotingPower: '0x296e1a5ad28c9bf32b9570d6e1bedae77917866cd5d92aea4ef9271905ef549'
     },
     ExecutionStrategies: {
-      EthRelayer: '0x72a0e53450c9c297225042d26b05ad62bf417c33ea30775e663538c0a29143a',
+      EthRelayer: '0x06c921569a23bb182ea4791290b773dd090dfdb117cb98737b4f91c21ef38f0e',
       NoExecutionSimpleMajority: '0x5327bdc6522d531b7770cd51aa641fb91c280a30cdece29edbf9edd970167f6'
     }
   }

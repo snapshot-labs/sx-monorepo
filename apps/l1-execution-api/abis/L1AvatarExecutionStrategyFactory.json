@@ -43,6 +43,11 @@
         "name": "_quorum",
         "type": "uint256",
         "internalType": "uint256"
+      },
+      {
+        "name": "salt",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
     "outputs": [],

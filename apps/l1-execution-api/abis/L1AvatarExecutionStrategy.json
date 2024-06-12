@@ -40,6 +40,11 @@
         "internalType": "uint256"
       },
       {
+        "name": "proposalId",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "name": "proposal",
         "type": "tuple",
         "internalType": "struct Proposal",
@@ -92,19 +97,26 @@
         ]
       },
       {
-        "name": "votesFor",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "votesAgainst",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "votesAbstain",
-        "type": "uint256",
-        "internalType": "uint256"
+        "name": "votes",
+        "type": "tuple",
+        "internalType": "struct Votes",
+        "components": [
+          {
+            "name": "votesFor",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "votesAgainst",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "votesAbstain",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
       },
       {
         "name": "executionHash",
@@ -135,11 +147,6 @@
             "name": "operation",
             "type": "uint8",
             "internalType": "enum Enum.Operation"
-          },
-          {
-            "name": "salt",
-            "type": "uint256",
-            "internalType": "uint256"
           }
         ]
       }
@@ -534,10 +541,10 @@
         "internalType": "uint256"
       },
       {
-        "name": "executionHash",
-        "type": "bytes32",
+        "name": "proposalId",
+        "type": "uint256",
         "indexed": false,
-        "internalType": "bytes32"
+        "internalType": "uint256"
       }
     ],
     "anonymous": false

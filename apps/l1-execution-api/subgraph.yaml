@@ -7,8 +7,8 @@ dataSources:
     network: sepolia
     source:
       abi: L1AvatarExecutionStrategyFactory
-      address: '0x8dc09f3a1af954919c13780c0ac2efe649cd855f'
-      startBlock: 5993845
+      address: "0x27981a29ec87f2fbf873a2dcb0325405648ffce1"
+      startBlock: 6078978
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -38,6 +38,6 @@ templates:
         - name: L1AvatarExecutionStrategy
           file: ./abis/L1AvatarExecutionStrategy.json
       eventHandlers:
-        - event: ProposalExecuted(indexed uint256,bytes32)
+        - event: ProposalExecuted(indexed uint256,uint256)
           handler: handleProposalExecuted
       file: ./src/mapping.ts

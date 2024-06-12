@@ -64,6 +64,7 @@ export type NetworkConfig = {
   eip712ChainId: string;
   spaceFactory: string;
   l1AvatarExecutionStrategyFactory: string;
+  l1AvatarExecutionStrategyImplementation: string;
   masterSpace: string;
   starknetCommit: string;
   starknetCore: string;
@@ -96,6 +97,7 @@ export type EvmNetworkConfig = Omit<
   | 'eip712ChainId'
   | 'spaceFactory'
   | 'l1AvatarExecutionStrategyFactory'
+  | 'l1AvatarExecutionStrategyImplementation'
   | 'starknetCommit'
   | 'starknetCore'
   | 'herodotusAccumulatesChainId'

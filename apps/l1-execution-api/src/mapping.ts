@@ -10,11 +10,11 @@ export function handleContractDeployed(event: ContractDeployed): void {
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let space = event.params.space.toHex()
   let paddedSpace = `0x${space.replace('0x', '').padStart(64, '0')}`
-  let executionHash = event.params.executionHash.toHex()
+  let proposalId = event.params.proposalId.toI32()
 
-  let executionEntity = new Execution(`${paddedSpace}/${executionHash}`)
+  let executionEntity = new Execution(`${paddedSpace}/${proposalId}`)
   executionEntity.space = paddedSpace
-  executionEntity.executionHash = executionHash
+  executionEntity.proposalId = proposalId
   executionEntity.created = event.block.timestamp.toI32()
   executionEntity.save()
 }
