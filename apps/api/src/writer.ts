@@ -1,5 +1,5 @@
 import { validateAndParseAddress } from 'starknet';
-import { CheckpointWriter } from '@snapshot-labs/checkpoint';
+import { starknet } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
 import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
@@ -21,7 +21,7 @@ type Strategy = {
   params: string[];
 };
 
-export const handleSpaceDeployed: CheckpointWriter = async ({ blockNumber, event, instance }) => {
+export const handleSpaceDeployed: starknet.Writer = async ({ blockNumber, event, instance }) => {
   console.log('Handle space deployed');
 
   if (!event) return;
@@ -32,7 +32,7 @@ export const handleSpaceDeployed: CheckpointWriter = async ({ blockNumber, event
   });
 };
 
-export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event }) => {
+export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
   console.log('Handle space created');
 
   if (!event || !tx.transaction_hash) return;
@@ -92,7 +92,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
   await space.save();
 };
 
-export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleMetadataUriUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space metadata uri updated');
@@ -114,7 +114,7 @@ export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, eve
   }
 };
 
-export const handleMinVotingDurationUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleMinVotingDurationUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space min voting duration updated');
@@ -129,7 +129,7 @@ export const handleMinVotingDurationUpdated: CheckpointWriter = async ({ rawEven
   await space.save();
 };
 
-export const handleMaxVotingDurationUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleMaxVotingDurationUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space max voting duration updated');
@@ -144,7 +144,7 @@ export const handleMaxVotingDurationUpdated: CheckpointWriter = async ({ rawEven
   await space.save();
 };
 
-export const handleOwnershipTransferred: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleOwnershipTransferred: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space ownership transferred');
@@ -159,7 +159,7 @@ export const handleOwnershipTransferred: CheckpointWriter = async ({ rawEvent, e
   await space.save();
 };
 
-export const handleVotingDelayUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleVotingDelayUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting delay updated');
@@ -174,7 +174,7 @@ export const handleVotingDelayUpdated: CheckpointWriter = async ({ rawEvent, eve
   await space.save();
 };
 
-export const handleAuthenticatorsAdded: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleAuthenticatorsAdded: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space authenticators added');
@@ -189,7 +189,7 @@ export const handleAuthenticatorsAdded: CheckpointWriter = async ({ rawEvent, ev
   await space.save();
 };
 
-export const handleAuthenticatorsRemoved: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleAuthenticatorsRemoved: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space authenticators removed');
@@ -206,7 +206,7 @@ export const handleAuthenticatorsRemoved: CheckpointWriter = async ({ rawEvent, 
   await space.save();
 };
 
-export const handleVotingStrategiesAdded: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleVotingStrategiesAdded: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting strategies added');
@@ -246,7 +246,7 @@ export const handleVotingStrategiesAdded: CheckpointWriter = async ({ rawEvent, 
   await space.save();
 };
 
-export const handleVotingStrategiesRemoved: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleVotingStrategiesRemoved: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting strategies removed');
@@ -272,7 +272,7 @@ export const handleVotingStrategiesRemoved: CheckpointWriter = async ({ rawEvent
   await space.save();
 };
 
-export const handleProposalValidationStrategyUpdated: CheckpointWriter = async ({
+export const handleProposalValidationStrategyUpdated: starknet.Writer = async ({
   rawEvent,
   event
 }) => {
@@ -295,7 +295,7 @@ export const handleProposalValidationStrategyUpdated: CheckpointWriter = async (
   await space.save();
 };
 
-export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, event }) => {
+export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, event }) => {
   if (!rawEvent || !event || !tx.transaction_hash) return;
 
   console.log('Handle propose');
@@ -414,7 +414,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   await Promise.all([proposal.save(), space.save()]);
 };
 
-export const handleCancel: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleCancel: starknet.Writer = async ({ rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle cancel');
@@ -435,7 +435,7 @@ export const handleCancel: CheckpointWriter = async ({ rawEvent, event }) => {
   await Promise.all([proposal.save(), space.save()]);
 };
 
-export const handleUpdate: CheckpointWriter = async ({ block, rawEvent, event }) => {
+export const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle update');
@@ -468,7 +468,7 @@ export const handleUpdate: CheckpointWriter = async ({ block, rawEvent, event })
   await proposal.save();
 };
 
-export const handleExecute: CheckpointWriter = async ({ tx, rawEvent, event }) => {
+export const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle execute');
@@ -486,7 +486,7 @@ export const handleExecute: CheckpointWriter = async ({ tx, rawEvent, event }) =
   await proposal.save();
 };
 
-export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event }) => {
+export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle vote');
