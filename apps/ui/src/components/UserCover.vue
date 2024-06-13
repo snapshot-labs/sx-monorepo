@@ -1,17 +1,30 @@
 <script setup lang="ts">
-import { getCacheHash, getStampUrl, getUrl } from '@/helpers/utils';
+import sha3 from 'js-sha3';
+import { getCacheHash, getStampUrl } from '@/helpers/utils';
 
-defineProps<{
+const props = defineProps<{
   user: {
     id: string;
     avatar?: string;
     cover?: string;
   };
 }>();
+
+const cb = computed(() =>
+  props.user.cover ? sha3.sha3_256(props.user.cover).slice(0, 16) : undefined
+);
 </script>
 
 <template>
-  <img v-if="user.cover" :src="getUrl(user.cover)!" class="object-cover" alt="" />
+  <UiStamp
+    v-if="user.cover"
+    :id="user.id"
+    :width="1500"
+    :height="156"
+    :cb="cb"
+    type="space-cover-sx"
+    class="object-cover"
+  />
   <div
     v-else
     class="user-fallback-cover"
