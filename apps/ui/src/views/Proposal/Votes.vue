@@ -205,11 +205,10 @@ watch([sortBy, choiceFilter], () => {
             </UiTooltip>
             <UiButton
               v-else
-              class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
+              class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent !text-gray-500 !border-gray-500"
               :class="{
                 '!text-skin-success !border-skin-success': vote.choice === 1,
-                '!text-skin-danger !border-skin-danger': vote.choice === 2,
-                '!text-gray-500 !border-gray-500': vote.choice === 3
+                '!text-skin-danger !border-skin-danger': vote.choice === 2
               }"
             >
               <IH-check v-if="vote.choice === 1" class="inline-block" />
