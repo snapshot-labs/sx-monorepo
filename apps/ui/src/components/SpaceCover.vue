@@ -4,10 +4,13 @@ import { offchainNetworks } from '@/networks';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 
-const props = defineProps<{
-  space: { id: string; cover: string; avatar: string; network: NetworkID };
-  size: 'sm' | 'lg';
-}>();
+const props = withDefaults(
+  defineProps<{
+    space: { id: string; cover: string; avatar: string; network: NetworkID };
+    size?: 'sm' | 'lg';
+  }>(),
+  { size: 'lg' }
+);
 
 const width = props.size === 'sm' ? 600 : 1500;
 const height = props.size === 'sm' ? 200 : 500;
