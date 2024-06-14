@@ -24,6 +24,7 @@ import Notifications from '@/views/My/Notifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Apps from '@/views/Apps.vue';
 import App from '@/views/App.vue';
+import Network from '@/views/Network.vue';
 
 const { mixpanel } = useMixpanel();
 
@@ -80,7 +81,8 @@ const routes: any[] = [
     ]
   },
   { path: '/apps', name: 'apps', component: Apps },
-  { path: '/apps/:id', name: 'app', component: App }
+  { path: '/apps/:id', name: 'app', component: App },
+  { path: '/network', name: 'network', component: Network }
 ];
 
 const router = createRouter({

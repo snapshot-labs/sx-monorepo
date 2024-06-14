@@ -12,31 +12,39 @@ import {
   updateProposalTypes,
   cancelProposalTypes,
   followSpaceTypes,
-  unfollowSpaceTypes
+  unfollowSpaceTypes,
+  aliasTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
-import type {
-  SignatureData,
-  Envelope,
-  Vote,
-  Propose,
-  UpdateProposal,
-  CancelProposal,
-  FollowSpace,
-  UnfollowSpace,
-  EIP712Message,
-  EIP712VoteMessage,
-  EIP712ProposeMessage,
-  EIP712UpdateProposal,
-  EIP712CancelProposalMessage,
-  EIP712FollowSpaceMessage,
-  EIP712UnfollowSpaceMessage
+import {
+  type SignatureData,
+  type Envelope,
+  type Vote,
+  type Propose,
+  type UpdateProposal,
+  type CancelProposal,
+  type FollowSpace,
+  type UnfollowSpace,
+  type SetAlias,
+  type EIP712Message,
+  type EIP712VoteMessage,
+  type EIP712ProposeMessage,
+  type EIP712UpdateProposal,
+  type EIP712CancelProposalMessage,
+  type EIP712FollowSpaceMessage,
+  type EIP712UnfollowSpaceMessage,
+  type EIP712SetAliasMessage
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
 const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
   5: 'https://testnet.seq.snapshot.org'
+};
+
+const RELAYER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
+  1: 'https://relayer.snapshot.org',
+  5: 'https://testnet.seq.snapshot.org' // no relayer for testnet
 };
 
 type EthereumSigClientOpts = {
@@ -61,6 +69,7 @@ export class EthereumSig {
       | EIP712CancelProposalMessage
       | EIP712FollowSpaceMessage
       | EIP712UnfollowSpaceMessage
+      | EIP712SetAliasMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -86,7 +95,7 @@ export class EthereumSig {
 
   public async send(
     envelope: Envelope<
-      Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace
+      Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace | SetAlias
     >
   ) {
     const { address, signature: sig, domain, types, message } = envelope.signatureData!;
@@ -109,7 +118,11 @@ export class EthereumSig {
       body: JSON.stringify(payload)
     };
 
-    const res = await fetch(this.sequencerUrl, body);
+    let url = this.sequencerUrl;
+    if (sig === '0x') {
+      url = RELAYER_URLS[this.networkConfig.eip712ChainId] || url;
+    }
+    const res = await fetch(url, body);
     const result = await res.json();
 
     if (result.error) {
@@ -248,6 +261,21 @@ export class EthereumSig {
     data: UnfollowSpace;
   }): Promise<Envelope<UnfollowSpace>> {
     const signatureData = await this.sign(signer, data, unfollowSpaceTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async setAlias({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: SetAlias;
+  }): Promise<Envelope<SetAlias>> {
+    const signatureData = await this.sign(signer, data, aliasTypes);
 
     return {
       signatureData,

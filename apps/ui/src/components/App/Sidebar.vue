@@ -10,6 +10,7 @@ const followedSpacesStore = useFollowedSpacesStore();
     <router-link :to="{ name: 'landing' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
+    <div class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10" />
     <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
     <draggable
       v-else
@@ -19,7 +20,7 @@ const followedSpacesStore = useFollowedSpacesStore();
       :touch-start-threshold="35"
       :item-key="i => i"
       v-bind="{ animation: 200 }"
-      class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto"
+      class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
     >
       <template #item="{ element }">
         <router-link

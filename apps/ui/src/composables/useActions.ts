@@ -19,6 +19,7 @@ const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.inc
 export function useActions() {
   const { mixpanel } = useMixpanel();
   const uiStore = useUiStore();
+  const alias = useAlias();
   const { web3 } = useWeb3();
   const { getCurrentFromDuration } = useMetaStore();
   const { modalAccountOpen } = useModal();
@@ -93,6 +94,8 @@ export function useActions() {
 
       console.log('Receipt', receipt);
 
+      if (envelope.signatureData.signature === '0x')
+        uiStore.addNotification('success', 'Your vote is pending! waiting for other signers');
       hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
       console.log('Receipt', envelope);
@@ -103,6 +106,14 @@ export function useActions() {
 
   async function forceLogin() {
     modalAccountOpen.value = true;
+  }
+
+  async function getAliasSigner() {
+    const network = getNetwork(offchainNetworkId);
+
+    return alias.getAliasWallet(address =>
+      wrapPromise(offchainNetworkId, network.actions.setAlias(auth.web3, address))
+    );
   }
 
   async function predictSpaceAddress(networkId: NetworkID, salt: string): Promise<string | null> {
@@ -505,10 +516,9 @@ export function useActions() {
     try {
       await wrapPromise(
         offchainNetworkId,
-        network.actions.followSpace(auth.web3, networkId, spaceId)
+        network.actions.followSpace(await getAliasSigner(), networkId, spaceId, web3.value.account)
       );
     } catch (e) {
-      console.log(e);
       uiStore.addNotification('error', e.message);
       return false;
     }
@@ -527,7 +537,12 @@ export function useActions() {
     try {
       await wrapPromise(
         offchainNetworkId,
-        network.actions.unfollowSpace(auth.web3, networkId, spaceId)
+        network.actions.unfollowSpace(
+          await getAliasSigner(),
+          networkId,
+          spaceId,
+          web3.value.account
+        )
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);

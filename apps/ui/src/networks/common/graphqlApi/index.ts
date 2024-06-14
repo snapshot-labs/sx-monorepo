@@ -35,6 +35,7 @@ import {
   Follow
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
+import { clone } from '@/helpers/utils';
 
 type ApiOptions = {
   highlightApiUrl?: string;
@@ -300,21 +301,22 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filters: ProposalsFilter,
+      filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const state = filters?.state;
+      const _filters: Record<string, any> = clone(filters || {});
+      const state = _filters.state;
 
       if (state === 'active') {
-        filters.start_lte = current;
-        filters.max_end_gte = current;
+        _filters.start_lte = current;
+        _filters.max_end_gte = current;
       } else if (state === 'pending') {
-        filters.start_gt = current;
+        _filters.start_gt = current;
       } else if (state === 'closed') {
-        filters.max_end_lt = current;
+        _filters.max_end_lt = current;
       }
 
-      delete filters?.state;
+      delete _filters.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -325,7 +327,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
             space_in: spaceIds,
             cancelled: false,
             metadata_: { title_contains_nocase: searchQuery },
-            ...filters
+            ..._filters
           }
         }
       });
@@ -374,14 +376,21 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      const _filter: Record<string, any> = clone(filter || {});
+
+      if (_filter.searchQuery) {
+        _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
+      }
+      delete _filter.searchQuery;
+
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
           first: limit,
           skip,
           where: {
-            ...filter,
-            metadata_: {}
+            metadata_: {},
+            ..._filter
           }
         }
       });
@@ -475,6 +484,9 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
     },
     loadFollows: async () => {
       return [] as Follow[];
+    },
+    loadAlias: async () => {
+      return null;
     }
   };
 }

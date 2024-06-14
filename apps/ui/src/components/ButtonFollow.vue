@@ -6,19 +6,21 @@ const props = defineProps<{
 }>();
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
-
+const { isSafeWallet } = useSafeWallet(props.space.network, props.space.snapshot_chain_id);
 const followedSpacesStore = useFollowedSpacesStore();
 
 const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
 
 const loading = computed(
-  () => !followedSpacesStore.followedSpacesLoaded || followedSpacesStore.followedSpaceLoading
+  () =>
+    !followedSpacesStore.followedSpacesLoaded ||
+    followedSpacesStore.followedSpaceLoading.has(spaceIdComposite)
 );
 </script>
 
 <template>
   <UiButton
-    :disabled="loading"
+    :disabled="loading || isSafeWallet"
     class="group"
     :class="{ 'hover:border-skin-danger': spaceFollowed }"
     @click.prevent="followedSpacesStore.toggleSpaceFollow(spaceIdComposite)"

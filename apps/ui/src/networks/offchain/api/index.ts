@@ -1,12 +1,14 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import {
-  SPACES_RANKING_QUERY,
+  SPACES_QUERY,
+  RANKING_QUERY,
   SPACE_QUERY,
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
   USER_VOTES_QUERY,
   USER_FOLLOWS_QUERY,
-  VOTES_QUERY
+  VOTES_QUERY,
+  ALIASES_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
@@ -19,10 +21,12 @@ import {
   NetworkID,
   ProposalState,
   SpaceMetadataTreasury,
-  Follow
+  Follow,
+  Alias
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
+import { clone } from '@/helpers/utils';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -274,21 +278,29 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       spaceIds: string[],
       { limit, skip = 0 }: PaginationOpts,
       current: number,
-      filters: ProposalsFilter,
+      filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const state = filters?.state;
+      const _filters: Record<string, any> = clone(filters || {});
+      const state = _filters.state;
 
       if (state === 'active') {
-        filters.start_lte = current;
-        filters.end_gte = current;
+        _filters.start_lte = current;
+        _filters.end_gte = current;
       } else if (state === 'pending') {
-        filters.start_gt = current;
+        _filters.start_gt = current;
       } else if (state === 'closed') {
-        filters.end_lt = current;
+        _filters.end_lt = current;
       }
 
-      delete filters?.state;
+      Object.keys(_filters || {})
+        .filter(key => /^(min|max)_end/.test(key))
+        .forEach(key => {
+          _filters[key.replace(/^(min|max)_/, '')] = _filters[key];
+          delete _filters[key];
+        });
+
+      delete _filters.state;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -299,7 +311,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
             space_in: spaceIds,
             title_contains: searchQuery,
             flagged: false,
-            ...filters
+            ..._filters
           }
         }
       });
@@ -320,10 +332,22 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      if (!filter || filter.hasOwnProperty('searchQuery')) {
+        const { data } = await apollo.query({
+          query: RANKING_QUERY,
+          variables: {
+            first: Math.min(limit, 20),
+            skip,
+            where: filter?.searchQuery ? { search: filter.searchQuery } : {}
+          }
+        });
+        return data.ranking.items.map(space => formatSpace(space, networkId));
+      }
+
       const { data } = await apollo.query({
-        query: SPACES_RANKING_QUERY,
+        query: SPACES_QUERY,
         variables: {
-          first: Math.min(limit, 20),
+          first: limit,
           skip,
           where: {
             ...filter
@@ -331,7 +355,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.ranking.items.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
@@ -369,7 +393,28 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return follows.map(follow => ({ ...follow, space: { ...follow.space, network: networkId } }));
+      return follows.map(follow => ({
+        ...follow,
+        space: { ...follow.space, network: follow.network }
+      }));
+    },
+    loadAlias: async (
+      address: string,
+      aliasAddress: string,
+      created_gt: number
+    ): Promise<Alias | null> => {
+      const {
+        data: { aliases }
+      }: { data: { aliases: Alias[] } } = await apollo.query({
+        query: ALIASES_QUERY,
+        variables: {
+          address,
+          alias: aliasAddress,
+          created_gt
+        }
+      });
+
+      return aliases?.[0] ?? null;
     }
   };
 }
