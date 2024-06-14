@@ -18,7 +18,7 @@ const cb = computed(() =>
     v-if="space.cover"
     :id="space.id"
     :width="1500"
-    :height="312"
+    :height="500"
     :cb="cb"
     type="space-cover-sx"
     class="object-cover !rounded-none h-full w-full"
