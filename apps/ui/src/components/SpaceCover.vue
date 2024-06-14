@@ -6,7 +6,11 @@ import { NetworkID } from '@/types';
 
 const props = defineProps<{
   space: { id: string; cover: string; avatar: string; network: NetworkID };
+  size: 'sm' | 'lg';
 }>();
+
+const width = props.size === 'sm' ? 600 : 1500;
+const height = props.size === 'sm' ? 200 : 500;
 
 const cb = computed(() =>
   props.space.cover ? sha3.sha3_256(props.space.cover).slice(0, 16) : undefined
@@ -14,14 +18,12 @@ const cb = computed(() =>
 </script>
 
 <template>
-  <UiStamp
+  <div
     v-if="space.cover"
-    :id="space.id"
-    :width="1500"
-    :height="156"
-    :cb="cb"
-    type="space-cover-sx"
-    class="object-cover"
+    :style="{
+      'background-image': `url(${getStampUrl('space-cover-sx', space.id, { width, height }, cb)}`
+    }"
+    class="bg-center bg-cover"
   />
   <div
     v-else
@@ -34,7 +36,7 @@ const cb = computed(() =>
         getCacheHash(space.avatar)
       )}`
     }"
-  ></div>
+  />
 </template>
 
 <style lang="scss" scoped>
