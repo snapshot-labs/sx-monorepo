@@ -37,7 +37,7 @@ watch(model, () => {
   <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
     <textarea
       v-model="inputValue"
-      class="s-input !py-0 !border-t-[30px] !border-b-[7px] border-transparent"
+      class="s-input !py-0 !border-t-[30px] border-transparent"
       v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
     />
