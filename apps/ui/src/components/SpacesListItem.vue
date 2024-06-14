@@ -12,7 +12,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
     :to="{ name: 'space-overview', params: { id: compositeSpaceId } }"
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
-    <SpaceCover :space="props.space" :size="'sm'" class="!rounded-none w-full h-[68px] absolute" />
+    <SpaceCover :space="props.space" size="sm" class="!rounded-none w-full h-[68px] absolute" />
     <div class="relative inline-block mx-4 mt-[34px]">
       <UiBadgeNetwork
         :id="space.network"
