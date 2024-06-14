@@ -18,10 +18,10 @@ const cb = computed(() =>
     v-if="space.cover"
     :id="space.id"
     :width="1500"
-    :height="156"
+    :height="312"
     :cb="cb"
     type="space-cover-sx"
-    class="object-cover"
+    class="object-cover !rounded-none h-full w-full"
   />
   <div
     v-else
@@ -39,15 +39,13 @@ const cb = computed(() =>
 
 <style lang="scss" scoped>
 .space-fallback-cover {
-  object-fit: cover;
+  @apply object-cover w-full h-full;
 
   &::after {
+    @apply absolute h-full w-full pointer-events-none;
+
     content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
     backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
-    pointer-events: none;
   }
 }
 </style>
