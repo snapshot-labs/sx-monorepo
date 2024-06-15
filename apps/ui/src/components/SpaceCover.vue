@@ -4,9 +4,16 @@ import { offchainNetworks } from '@/networks';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 
-const props = defineProps<{
-  space: { id: string; cover: string; avatar: string; network: NetworkID };
-}>();
+const props = withDefaults(
+  defineProps<{
+    space: { id: string; cover: string; avatar: string; network: NetworkID };
+    size?: 'sm' | 'lg';
+  }>(),
+  { size: 'lg' }
+);
+
+const width = props.size === 'sm' ? 450 : 1500;
+const height = props.size === 'sm' ? 120 : 400;
 
 const cb = computed(() =>
   props.space.cover ? sha3.sha3_256(props.space.cover).slice(0, 16) : undefined
@@ -17,8 +24,8 @@ const cb = computed(() =>
   <UiStamp
     v-if="space.cover"
     :id="space.id"
-    :width="1500"
-    :height="500"
+    :width="width"
+    :height="height"
     :cb="cb"
     type="space-cover-sx"
     class="object-cover !rounded-none h-full w-full"

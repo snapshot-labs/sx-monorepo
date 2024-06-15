@@ -13,7 +13,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
     <div class="h-[68px] w-full absolute">
-      <SpaceCover :space="props.space" />
+      <SpaceCover :space="props.space" size="sm" />
     </div>
     <div class="relative inline-block mx-4 mt-[34px]">
       <UiBadgeNetwork
