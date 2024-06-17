@@ -1,8 +1,0 @@
-{
-  "sepolia": {
-    "L1AvatarExecutionStrategyFactory": {
-      "address": "0x27981a29ec87f2fbf873a2dcb0325405648ffce1",
-      "startBlock": 6078978
-    }
-  }
-}

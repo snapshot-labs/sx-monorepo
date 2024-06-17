@@ -165,3 +165,11 @@ type Leaderboard @entity {
   proposal_count: Int!
   vote_count: Int!
 }
+
+type StarknetL1Execution @entity {
+  id: ID!
+  space: String!
+  proposalId: Int!
+  created: Int!
+  tx: Bytes!
+}
