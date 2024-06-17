@@ -5,7 +5,7 @@ import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
 import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import { getAddress, isAddress } from '@ethersproject/address';
+import { getAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import networks from '@/helpers/networks.json';
