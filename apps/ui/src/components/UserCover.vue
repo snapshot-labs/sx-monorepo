@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import sha3 from 'js-sha3';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 
 const props = defineProps<{
@@ -10,9 +9,7 @@ const props = defineProps<{
   };
 }>();
 
-const cb = computed(() =>
-  props.user.cover ? sha3.sha3_256(props.user.cover).slice(0, 16) : undefined
-);
+const cb = computed(() => getCacheHash(props.user.cover));
 </script>
 
 <template>
