@@ -512,6 +512,9 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
     },
     loadAlias: async () => {
       return null;
+    },
+    loadStatement: async () => {
+      return null;
     }
   };
 }
