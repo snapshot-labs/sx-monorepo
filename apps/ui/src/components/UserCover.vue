@@ -19,7 +19,7 @@ const cb = computed(() => getCacheHash(props.user.cover));
     :width="1500"
     :height="156"
     :cb="cb"
-    type="space-cover-sx"
+    type="user-cover"
     class="object-cover"
   />
   <div

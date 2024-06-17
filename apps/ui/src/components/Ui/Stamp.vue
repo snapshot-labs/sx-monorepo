@@ -3,7 +3,7 @@ import { getStampUrl } from '@/helpers/utils';
 
 withDefaults(
   defineProps<{
-    type?: 'avatar' | 'space' | 'space-sx' | 'space-cover-sx' | 'token';
+    type?: 'avatar' | 'user-cover' | 'space' | 'space-sx' | 'space-cover-sx' | 'token';
     id: string;
     size?: number;
     width?: number;
