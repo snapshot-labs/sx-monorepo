@@ -63,9 +63,9 @@ async function handleFileChange(e: Event) {
   >
     <img
       v-if="imgUrl"
-      :src="imgUrl"
       alt=""
-      class="h-[100px] w-full object-cover group-hover:opacity-80"
+      :src="imgUrl"
+      class="h-full w-full object-cover group-hover:opacity-80"
       :class="{
         'opacity-80': isUploadingImage
       }"
@@ -73,7 +73,7 @@ async function handleFileChange(e: Event) {
     <SpaceCover
       v-else-if="props.space?.cover"
       :space="props.space"
-      class="pointer-events-none !rounded-none min-h-full group-hover:opacity-80"
+      class="pointer-events-none group-hover:opacity-80"
     />
     <UserCover
       v-else-if="props.user?.cover"

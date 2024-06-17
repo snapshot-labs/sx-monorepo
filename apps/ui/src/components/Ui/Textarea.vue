@@ -35,9 +35,12 @@ watch(model, () => {
 
 <template>
   <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
+    <div
+      class="bg-gradient-to-b from-skin-border to-transparent top-[30px] h-2 w-full absolute z-10"
+    />
     <textarea
       v-model="inputValue"
-      class="s-input"
+      class="s-input !py-0 !border-t-[30px] border-transparent"
       v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
     />

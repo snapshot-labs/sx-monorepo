@@ -4,9 +4,16 @@ import { offchainNetworks } from '@/networks';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 
-const props = defineProps<{
-  space: { id: string; cover: string; avatar: string; network: NetworkID };
-}>();
+const props = withDefaults(
+  defineProps<{
+    space: { id: string; cover: string; avatar: string; network: NetworkID };
+    size?: 'sm' | 'lg';
+  }>(),
+  { size: 'lg' }
+);
+
+const width = props.size === 'sm' ? 450 : 1500;
+const height = props.size === 'sm' ? 120 : 400;
 
 const cb = computed(() =>
   props.space.cover ? sha3.sha3_256(props.space.cover).slice(0, 16) : undefined
@@ -17,11 +24,11 @@ const cb = computed(() =>
   <UiStamp
     v-if="space.cover"
     :id="space.id"
-    :width="1500"
-    :height="156"
+    :width="width"
+    :height="height"
     :cb="cb"
     type="space-cover-sx"
-    class="object-cover"
+    class="object-cover !rounded-none h-full w-full"
   />
   <div
     v-else
@@ -39,15 +46,13 @@ const cb = computed(() =>
 
 <style lang="scss" scoped>
 .space-fallback-cover {
-  object-fit: cover;
+  @apply object-cover w-full h-full;
 
   &::after {
+    @apply absolute h-full w-full pointer-events-none;
+
     content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
     backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
-    pointer-events: none;
   }
 }
 </style>

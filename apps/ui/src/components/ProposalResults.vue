@@ -167,7 +167,10 @@ const otherResultsSummary = computed(() => {
         </div>
       </div>
     </div>
-    <div v-else class="h-full flex items-center">
+    <div
+      v-else-if="!props.proposal.privacy || props.proposal.completed"
+      class="h-full flex items-center"
+    >
       <div
         class="rounded-full h-1.5 overflow-hidden"
         :style="{
