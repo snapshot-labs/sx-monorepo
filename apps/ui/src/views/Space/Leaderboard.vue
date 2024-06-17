@@ -145,8 +145,8 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           <UiStamp :id="user.id" :size="32" />
           <router-link
             :to="{
-              name: 'user',
-              params: { id: user.id }
+              name: 'space-user-overview',
+              params: { user: user.id }
             }"
             class="overflow-hidden"
           >

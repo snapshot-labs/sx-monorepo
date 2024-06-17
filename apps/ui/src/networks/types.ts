@@ -13,7 +13,8 @@ import type {
   StrategyParsedMetadata,
   Follow,
   Alias,
-  UserActivity
+  UserActivity,
+  Statement
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -216,10 +217,12 @@ export type NetworkApi = {
   loadLeaderboard(
     spaceId: string,
     paginationOpts: PaginationOpts,
-    sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
+    sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc',
+    user?: string
   ): Promise<User[]>;
   loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
   loadAlias(address: string, alias: string, created_gt: number): Promise<Alias | null>;
+  loadStatement(spaceId: string, userId: string): Promise<Statement | null>;
 };
 
 export type NetworkConstants = {

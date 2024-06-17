@@ -214,6 +214,14 @@ export type UserActivity = {
   vote_count: number;
 };
 
+export type Statement = {
+  userId: string;
+  spaceId: string;
+  network: NetworkID;
+  about: string;
+  statement: string;
+};
+
 export type Follow = {
   id: string;
   follower: string;

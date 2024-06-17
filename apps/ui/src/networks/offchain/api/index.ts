@@ -9,7 +9,8 @@ import {
   USER_FOLLOWS_QUERY,
   VOTES_QUERY,
   ALIASES_QUERY,
-  USER_QUERY
+  USER_QUERY,
+  STATEMENTS_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
@@ -24,7 +25,8 @@ import {
   SpaceMetadataTreasury,
   Follow,
   Alias,
-  UserActivity
+  UserActivity,
+  Statement
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
@@ -433,6 +435,19 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       });
 
       return aliases?.[0] ?? null;
+    },
+    loadStatement: async (spaceId: string, userId: string): Promise<Statement | null> => {
+      const {
+        data: { statements }
+      }: { data: { statements: Statement[] } } = await apollo.query({
+        query: STATEMENTS_QUERY,
+        variables: {
+          delegate: userId,
+          space: spaceId
+        }
+      });
+
+      return statements?.[0] ?? null;
     }
   };
 }

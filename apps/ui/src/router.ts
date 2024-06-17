@@ -13,6 +13,11 @@ import Editor from '@/views/Editor.vue';
 import Proposal from '@/views/Proposal.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
+import SpaceUser from '@/views/SpaceUser.vue';
+import SpaceUserOverview from '@/views/SpaceUser/Overview.vue';
+import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
+import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
+import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
 import User from '@/views/User.vue';
 import Create from '@/views/Create.vue';
 import Settings from '@/views/Settings.vue';
@@ -42,7 +47,18 @@ const routes: any[] = [
       { path: 'edit-settings', name: 'space-edit-settings', component: SpaceEditSettings },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
       { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
-      { path: 'leaderboard', name: 'space-leaderboard', component: SpaceLeaderboard }
+      { path: 'leaderboard', name: 'space-leaderboard', component: SpaceLeaderboard },
+      {
+        path: 'profile/:user',
+        name: 'space-user',
+        component: SpaceUser,
+        children: [
+          { path: '', name: 'space-user-overview', component: SpaceUserOverview },
+          { path: 'delegators', name: 'space-user-delegators', component: SpaceUserDelegators },
+          { path: 'proposals', name: 'space-user-proposals', component: SpaceUserProposals },
+          { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
+        ]
+      }
     ]
   },
   {

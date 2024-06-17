@@ -476,7 +476,8 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         | 'vote_count-desc'
         | 'vote_count-asc'
         | 'proposal_count-desc'
-        | 'proposal_count-asc' = 'vote_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc',
+      user?: string
     ): Promise<User[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
@@ -492,7 +493,8 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
             orderBy,
             orderDirection,
             where: {
-              space: spaceId
+              space: spaceId,
+              user
             }
           }
         })
