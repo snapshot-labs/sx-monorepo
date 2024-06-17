@@ -68,13 +68,8 @@ async function loadActivities(userId: string) {
         .filter(id => !spacesStore.spacesMap.has(id))
     );
 
-    const totalProposals = aggregatedActivities
-      .map(activity => activity.proposal_count)
-      .reduce((a, b) => a + b, 0);
-
-    const totalVotes = aggregatedActivities
-      .map(activity => activity.vote_count)
-      .reduce((a, b) => a + b, 0);
+    const totalProposals = aggregatedActivities.reduce((a, b) => a + b.proposal_count, 0);
+    const totalVotes = aggregatedActivities.reduce((a, b) => a + b.vote_count, 0);
 
     activities.value = aggregatedActivities
       .map(activity => {
