@@ -382,7 +382,7 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type: 'avatar' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
+  type: 'avatar' | 'user-cover' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string
