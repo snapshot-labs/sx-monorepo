@@ -25,24 +25,11 @@ const activities = ref<
 const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
 const loaded = ref(false);
+const placeholderUser = ref<User | null>(null);
 
 const id = computed(() => route.params.id as string);
 
-const user = computedAsync(
-  async () =>
-    usersStore.getUser(id.value) ||
-    (isValidAddress(id.value)
-      ? ({
-          id: id.value,
-          name: (await getNames([id.value]))?.[id.value]
-        } as User)
-      : null),
-  isValidAddress(id.value)
-    ? ({
-        id: id.value
-      } as User)
-    : null
-);
+const user = computed(() => usersStore.getUser(id.value) || placeholderUser.value);
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
@@ -93,12 +80,25 @@ async function loadActivities(userId: string) {
 watch(
   id,
   async userId => {
+    placeholderUser.value = null;
     loaded.value = false;
     await usersStore.fetchUser(userId);
 
     console.log(user.value);
 
-    if (isValidAddress(userId)) loadActivities(userId);
+    if (isValidAddress(userId)) {
+      loadActivities(userId);
+
+      if (!usersStore.getUser(userId)) {
+        placeholderUser.value = {
+          id: userId,
+          proposal_count: 0,
+          vote_count: 0,
+          created: Date.now() / 1000,
+          name: (await getNames([userId]))?.[userId]
+        };
+      }
+    }
 
     loaded.value = true;
   },
