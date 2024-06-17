@@ -84,8 +84,6 @@ watch(
     loaded.value = false;
     await usersStore.fetchUser(userId);
 
-    console.log(user.value);
-
     if (isValidAddress(userId)) {
       loadActivities(userId);
 
