@@ -17,7 +17,7 @@ const ajv = new Ajv({
 });
 addFormats(ajv);
 
-const addressValidator = (value: string) => {
+export const addressValidator = (value: string) => {
   try {
     return !!validateAndParseAddress(value);
   } catch (e) {

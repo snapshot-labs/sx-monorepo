@@ -462,14 +462,6 @@ export function autoLinkText(text: string) {
   });
 }
 
-export function isValidAddress(address: string) {
-  try {
-    return !!validateAndParseAddress(address);
-  } catch (e) {
-    return isAddress(address);
-  }
-}
-
 export function getSocialNetworksLink(data: any) {
   return [
     { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },

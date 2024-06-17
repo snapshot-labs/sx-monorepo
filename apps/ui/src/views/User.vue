@@ -5,9 +5,9 @@ import {
   _n,
   _p,
   getCacheHash,
-  isValidAddress,
   getSocialNetworksLink
 } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
 import { UserActivity, Space, User } from '@/types';
 import { getNames } from '@/helpers/stamp';
