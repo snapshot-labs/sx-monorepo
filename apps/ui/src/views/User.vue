@@ -36,7 +36,12 @@ const user = computedAsync(
           id: id.value,
           name: (await getNames([id.value]))?.[id.value]
         } as User)
-      : null)
+      : null),
+  isValidAddress(id.value)
+    ? ({
+        id: id.value
+      } as User)
+    : null
 );
 
 const socials = computed(() => getSocialNetworksLink(user.value));
@@ -95,6 +100,8 @@ watch(
   async userId => {
     loaded.value = false;
     await usersStore.fetchUser(userId);
+
+    console.log(user.value);
 
     if (isValidAddress(userId)) loadActivities(userId);
 
