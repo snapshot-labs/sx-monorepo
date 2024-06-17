@@ -126,7 +126,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       </div>
       <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <ShareDropdown :message="shareMsg" class="!px-0 w-[46px]" />
+        <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
         <UiTooltip v-if="web3.account === user.id" title="Edit profile">
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />

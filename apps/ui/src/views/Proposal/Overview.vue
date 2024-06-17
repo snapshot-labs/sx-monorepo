@@ -262,13 +262,13 @@ onBeforeUnmount(() => destroyAudio());
               <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
             </UiButton>
           </UiTooltip>
-          <ShareDropdown :message="shareMsg">
+          <DropdownShare :message="shareMsg">
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
                 <IH-share class="text-skin-text inline-block w-[22px] h-[22px]" />
               </UiButton>
             </template>
-          </ShareDropdown>
+          </DropdownShare>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
