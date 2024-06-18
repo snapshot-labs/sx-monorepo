@@ -219,6 +219,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   });
 
   return {
+    apiUrl: uri,
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,
