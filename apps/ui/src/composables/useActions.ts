@@ -369,17 +369,12 @@ export function useActions() {
   }
 
   async function executeTransactions(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-
     const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(proposal.network, network.actions.executeTransactions(auth.web3, proposal));
   }
 
   async function executeQueuedProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
-
     const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(

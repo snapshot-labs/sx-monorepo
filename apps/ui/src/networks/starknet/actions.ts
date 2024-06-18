@@ -76,7 +76,6 @@ export function createActions(
   const starkSigClient = new clients.StarknetSig(clientConfig);
   const ethSigClient = new clients.EthereumSig(clientConfig);
   const ethTxClient = new clients.EthereumTx(clientConfig);
-  const l1ExecutorClient = new clients.L1Executor();
 
   return {
     async predictSpaceAddress(web3: any, { salt }) {
@@ -411,13 +410,13 @@ export function createActions(
       if (!proposal.execution_destination) throw new Error('Execution destination is missing');
 
       const activeVotingStrategies = proposal.strategies_indicies.reduce((acc, index) => {
-        return acc | (1n << BigInt(index));
-      }, 0n);
+        return acc | (1 << index);
+      }, 0);
 
       const proposalData = {
-        startTimestamp: BigInt(proposal.start),
-        minEndTimestamp: BigInt(proposal.min_end),
-        maxEndTimestamp: BigInt(proposal.max_end),
+        startTimestamp: proposal.start,
+        minEndTimestamp: proposal.min_end,
+        maxEndTimestamp: proposal.max_end,
         finalizationStatus: 0,
         executionPayloadHash: proposal.execution_hash,
         executionStrategy: proposal.execution_strategy,
@@ -426,9 +425,9 @@ export function createActions(
         activeVotingStrategies: activeVotingStrategies
       } as const;
 
-      const votesFor = BigInt(proposal.scores[0]);
-      const votesAgainst = BigInt(proposal.scores[1]);
-      const votesAbstain = BigInt(proposal.scores[2]);
+      const votesFor = proposal.scores[0];
+      const votesAgainst = proposal.scores[1];
+      const votesAbstain = proposal.scores[2];
 
       const { executionParams } = getExecutionData(
         proposal.space,
@@ -439,17 +438,19 @@ export function createActions(
 
       const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
 
-      return l1ExecutorClient.execute({
-        signer: web3.getSigner(),
-        executor: proposal.execution_destination,
+      return executionCall('eth', l1ChainId, 'executeStarknetProposal', {
         space: proposal.space.id,
+        executor: proposal.execution_destination,
         proposalId: proposal.proposal_id as number,
         proposal: proposalData,
         votesFor,
         votesAgainst,
         votesAbstain,
         executionHash,
-        transactions: convertToMetaTransactions(proposal.execution)
+        transactions: convertToMetaTransactions(proposal.execution).map(tx => ({
+          ...tx,
+          salt: tx.salt.toString()
+        }))
       });
     },
     vetoProposal: () => null,
