@@ -153,6 +153,7 @@ export type Proposal = {
   };
   author: {
     id: string;
+    address_type: 0 | 1 | 2;
     name?: string;
   };
   execution_hash: string;

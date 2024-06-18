@@ -98,6 +98,7 @@ const PROPOSAL_FRAGMENT = gql`
     }
     author {
       id
+      address_type
     }
     quorum
     execution_hash

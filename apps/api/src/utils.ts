@@ -102,11 +102,17 @@ export function findVariant(value: { variant: Record<string, any> }) {
 }
 
 export function formatAddressVariant({ key, value }: { key: string; value: string }) {
-  return key === 'Starknet'
-    ? validateAndParseAddress(value)
-    : key === 'Ethereum'
-      ? getAddress(value)
-      : value;
+  const address =
+    key === 'Starknet'
+      ? validateAndParseAddress(value)
+      : key === 'Ethereum'
+        ? getAddress(value)
+        : value;
+
+  return {
+    type: key === 'Starknet' ? 0 : key === 'Ethereum' ? 1 : 2,
+    address
+  };
 }
 
 export function getVoteValue(label: string) {

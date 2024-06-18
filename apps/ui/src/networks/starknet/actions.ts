@@ -421,7 +421,7 @@ export function createActions(
         finalizationStatus: 0,
         executionPayloadHash: proposal.execution_hash,
         executionStrategy: proposal.execution_strategy,
-        authorAddressType: 1, // <- hardcoded, needs to be indexed (0 for starknet, 1 for ethereum)
+        authorAddressType: proposal.author.address_type,
         author: proposal.author.id,
         activeVotingStrategies: activeVotingStrategies
       } as const;
