@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { getNames } from '@/helpers/stamp';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
-import { autoLinkText, getCacheHash, getSocialNetworksLink, shortenAddress } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import {
+  _n,
+  autoLinkText,
+  getCacheHash,
+  getSocialNetworksLink,
+  shortenAddress
+} from '@/helpers/utils';
+import { getNetwork, supportsNullCurrent } from '@/networks';
 import type { Space, User } from '@/types';
+import type { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -13,10 +20,15 @@ const spacesStore = useSpacesStore();
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const { setTitle } = useTitle();
-const userStat = ref<User>({ vote_count: 0, proposal_count: 0 } as User);
+const { getCurrent } = useMetaStore();
 
+const userStat = ref<User>({ vote_count: 0, proposal_count: 0 } as User);
 const loaded = ref(false);
 const placeholderUser = ref<User | null>(null);
+const votingPowers = ref([] as VotingPower[]);
+const votingPowerStatus = ref<VotingPowerStatus>('loading');
+
+const network = computed(() => getNetwork(props.space.network));
 
 const userId = computed(() => route.params.user as string);
 
@@ -27,6 +39,22 @@ const socials = computed(() => getSocialNetworksLink(user.value));
 const shareMsg = computed(() => encodeURIComponent(window.location.href));
 
 const cb = computed(() => getCacheHash(user.value?.avatar));
+
+const formattedVotingPower = computed(() => {
+  const votingPower = votingPowers.value.reduce((acc, b) => acc + b.value, 0n);
+  const decimals = Math.max(...votingPowers.value.map(votingPower => votingPower.decimals), 0);
+
+  const value = _n(Number(votingPower) / 10 ** decimals, 'compact', {
+    maximumFractionDigits: 2,
+    formatDust: true
+  });
+
+  if (props.space.voting_power_symbol) {
+    return `${value} ${props.space.voting_power_symbol}`;
+  }
+
+  return value;
+});
 
 const navigation = computed(() => [
   { label: 'Statement', route: 'space-user-statement' },
@@ -51,6 +79,28 @@ async function loadUserMeta() {
   if (users[0]) userStat.value = users[0];
 }
 
+async function getVotingPower() {
+  votingPowerStatus.value = 'loading';
+  try {
+    votingPowers.value = await network.value.actions.getVotingPower(
+      props.space.id,
+      props.space.strategies,
+      props.space.strategies_params,
+      props.space.strategies_parsed_metadata,
+      userId.value,
+      {
+        at: supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0,
+        chainId: props.space.snapshot_chain_id
+      }
+    );
+    votingPowerStatus.value = 'success';
+  } catch (e) {
+    console.warn('Failed to load voting power', e);
+    votingPowers.value = [];
+    votingPowerStatus.value = 'error';
+  }
+}
+
 watch(
   userId,
   async id => {
@@ -69,6 +119,7 @@ watch(
         };
       }
       await loadUserMeta();
+      getVotingPower();
     }
 
     loaded.value = true;
@@ -127,7 +178,11 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.na
           <span class="text-skin-link" v-text="userStat.proposal_count" />
           proposals ·
           <span class="text-skin-link" v-text="userStat.vote_count" />
-          votes · VOTINGPOWER
+          votes
+          <template v-if="votingPowerStatus === 'success'">
+            ·
+            {{ formattedVotingPower }}
+          </template>
         </div>
         <div
           v-if="user.about"
