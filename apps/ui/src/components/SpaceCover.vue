@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import sha3 from 'js-sha3';
 import { offchainNetworks } from '@/networks';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { NetworkID } from '@/types';
@@ -15,9 +14,7 @@ const props = withDefaults(
 const width = props.size === 'sm' ? 450 : 1500;
 const height = props.size === 'sm' ? 120 : 400;
 
-const cb = computed(() =>
-  props.space.cover ? sha3.sha3_256(props.space.cover).slice(0, 16) : undefined
-);
+const cb = computed(() => getCacheHash(props.space.cover));
 </script>
 
 <template>

@@ -11,6 +11,11 @@ const props = defineProps<{
     avatar: string;
     network: NetworkID;
   };
+  user?: {
+    id: string;
+    cover?: string;
+    avatar?: string;
+  };
   error?: string;
 }>();
 
@@ -69,6 +74,11 @@ async function handleFileChange(e: Event) {
       v-else-if="props.space?.cover"
       :space="props.space"
       class="pointer-events-none group-hover:opacity-80"
+    />
+    <UserCover
+      v-else-if="props.user?.cover"
+      :user="props.user"
+      class="pointer-events-none !rounded-none min-h-full group-hover:opacity-80"
     />
 
     <div

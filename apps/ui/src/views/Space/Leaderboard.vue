@@ -6,8 +6,6 @@ import { Space, User } from '@/types';
 
 const USERS_LIMIT = 20;
 
-type UserWithName = User & { name?: string };
-
 const props = defineProps<{ space: Space }>();
 
 const uiStore = useUiStore();
@@ -17,7 +15,7 @@ const loaded = ref(false);
 const loadingMore = ref(false);
 const failed = ref(false);
 const hasMore = ref(false);
-const users = ref<UserWithName[]>([]);
+const users = ref<User[]>([]);
 const sortBy = ref(
   'vote_count-desc' as
     | 'vote_count-desc'
@@ -28,7 +26,7 @@ const sortBy = ref(
 
 const network = computed(() => getNetwork(props.space.network));
 
-async function withAuthorNames(users: UserWithName[]): Promise<UserWithName[]> {
+async function withAuthorNames(users: User[]): Promise<User[]> {
   if (!users.length) return [];
 
   const names = await getNames(users.map(user => user.id));
@@ -48,7 +46,7 @@ function reset() {
   hasMore.value = false;
 }
 
-async function loadUsers(): Promise<UserWithName[]> {
+async function loadUsers(): Promise<User[]> {
   return withAuthorNames(
     await network.value.api.loadLeaderboard(
       props.space.id,

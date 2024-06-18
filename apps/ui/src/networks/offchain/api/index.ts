@@ -8,7 +8,8 @@ import {
   USER_VOTES_QUERY,
   USER_FOLLOWS_QUERY,
   VOTES_QUERY,
-  ALIASES_QUERY
+  ALIASES_QUERY,
+  USER_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
@@ -22,7 +23,8 @@ import {
   ProposalState,
   SpaceMetadataTreasury,
   Follow,
-  Alias
+  Alias,
+  UserActivity
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
@@ -203,6 +205,15 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
+async function formatUser(user: User) {
+  return {
+    ...user,
+    proposal_count: user.proposal_count || 0,
+    vote_count: user.vote_count || 0,
+    name: user.name || (await getNames([user.id])[user.id])
+  };
+}
+
 export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   const httpLink = createHttpLink({ uri });
 
@@ -369,13 +380,20 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       return formatSpace(data.space, networkId);
     },
     loadUser: async (id: string): Promise<User | null> => {
-      // NOTE: missing proposal/vote count on offchain
-      return {
-        id,
-        proposal_count: 0,
-        vote_count: 0,
-        created: 0
-      };
+      const {
+        data: { user }
+      } = await apollo.query({
+        query: USER_QUERY,
+        variables: { id }
+      });
+
+      if (!user) return null;
+
+      return formatUser(user);
+    },
+    loadUserActivities: async (): Promise<UserActivity[]> => {
+      // NOTE: leaderboard implementation is pending on offchain
+      return [];
     },
     loadLeaderboard: async (): Promise<User[]> => {
       // NOTE: leaderboard implementation is pending on offchain

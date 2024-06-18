@@ -202,3 +202,17 @@ export const ALIASES_QUERY = gql`
     }
   }
 `;
+
+export const USER_QUERY = gql`
+  query User($id: String!) {
+    user(id: $id) {
+      id
+      name
+      about
+      avatar
+      cover
+      github
+      twitter
+    }
+  }
+`;

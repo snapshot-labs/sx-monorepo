@@ -12,7 +12,8 @@ import type {
   NetworkID,
   StrategyParsedMetadata,
   Follow,
-  Alias
+  Alias,
+  UserActivity
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -131,6 +132,7 @@ export type ReadOnlyNetworkActions = {
   followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
   unfollowSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
   setAlias(web3: Web3Provider, alias: string);
+  updateUser(web3: Web3Provider | Wallet, user: User, from?: string);
   send(envelope: any): Promise<any>;
 };
 
@@ -210,6 +212,7 @@ export type NetworkApi = {
   loadSpaces(paginationOpts: PaginationOpts, filter?: SpacesFilter): Promise<Space[]>;
   loadSpace(spaceId: string): Promise<Space | null>;
   loadUser(userId: string): Promise<User | null>;
+  loadUserActivities(userId: string): Promise<UserActivity[]>;
   loadLeaderboard(
     spaceId: string,
     paginationOpts: PaginationOpts,

@@ -10,7 +10,8 @@ import type {
   Space,
   Choice,
   NetworkID,
-  VoteType
+  VoteType,
+  User
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
 
@@ -552,6 +553,17 @@ export function useActions() {
     return true;
   }
 
+  async function updateUser(user: User) {
+    const network = getNetwork(offchainNetworkId);
+
+    await wrapPromise(
+      offchainNetworkId,
+      network.actions.updateUser(await getAliasSigner(), user, web3.value.account)
+    );
+
+    return true;
+  }
+
   return {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
@@ -572,6 +584,7 @@ export function useActions() {
     updateStrategies: wrapWithErrors(updateStrategies),
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
-    unfollowSpace: wrapWithErrors(unfollowSpace)
+    unfollowSpace: wrapWithErrors(unfollowSpace),
+    updateUser: wrapWithErrors(updateUser)
   };
 }

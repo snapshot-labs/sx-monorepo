@@ -13,7 +13,16 @@ import { getProvider } from '@/helpers/provider';
 import { getSwapLink } from '@/helpers/link';
 import { Web3Provider } from '@ethersproject/providers';
 import type { Wallet } from '@ethersproject/wallet';
-import type { StrategyParsedMetadata, Choice, Proposal, Space, VoteType, NetworkID } from '@/types';
+import type {
+  StrategyParsedMetadata,
+  Choice,
+  Proposal,
+  Space,
+  User,
+  VoteType,
+  NetworkID,
+  UserProfile
+} from '@/types';
 import type {
   ReadOnlyNetworkActions,
   NetworkConstants,
@@ -224,6 +233,21 @@ export function createActions(
       return client.setAlias({
         signer: web3.getSigner(),
         data: { alias }
+      });
+    },
+    async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {
+      const profile: UserProfile = {
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        cover: user.cover,
+        github: user.github,
+        twitter: user.twitter
+      };
+
+      return client.updateUser({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { profile: JSON.stringify(profile), ...(from ? { from } : {}) }
       });
     }
   };

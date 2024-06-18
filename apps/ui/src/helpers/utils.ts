@@ -3,15 +3,21 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
+import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
+import { upload as pin } from '@snapshot-labs/pineapple';
 import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
-import { upload as pin } from '@snapshot-labs/pineapple';
 import type { Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
+import ICX from '~icons/c/x';
+import ICDiscord from '~icons/c/discord';
+import ICGithub from '~icons/c/github';
+import ICCoingecko from '~icons/c/coingecko';
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
@@ -376,7 +382,7 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type: 'avatar' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
+  type: 'avatar' | 'user-cover' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string
@@ -444,4 +450,31 @@ export function getChoiceText(
     .filter(([, weight]) => weight > 0)
     .map(([index, weight]) => `${_p(weight / total)} for ${availableChoices[Number(index) - 1]}`)
     .join(', ');
+}
+
+export function autoLinkText(text: string) {
+  if (!text) return text;
+
+  return Autolinker.link(text, {
+    sanitizeHtml: true,
+    phone: false,
+    replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
+  });
+}
+
+export function getSocialNetworksLink(data: any) {
+  return [
+    { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
+    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
+    { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
+    { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
+    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
+  ]
+    .map(({ key, icon, urlFormat }) => {
+      const value = data[key];
+      const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
+
+      return href ? { key, icon, href } : {};
+    })
+    .filter(social => social.href);
 }
