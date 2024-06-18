@@ -2,10 +2,8 @@
 import { getNames } from '@/helpers/stamp';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { autoLinkText, getCacheHash, getSocialNetworksLink, shortenAddress } from '@/helpers/utils';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import type { Space, Statement, User } from '@/types';
-
-const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
+import { getNetwork } from '@/networks';
+import type { Space, User } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -16,7 +14,6 @@ const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const userStat = ref<User>({ vote_count: 0, proposal_count: 0 } as User);
-const statement = ref<Statement>({ about: '', statement: '' } as Statement);
 
 const loaded = ref(false);
 const placeholderUser = ref<User | null>(null);
@@ -52,11 +49,6 @@ async function loadUserMeta() {
   );
 
   if (users[0]) userStat.value = users[0];
-
-  const offchainNetwork = getNetwork(offchainNetworkId);
-
-  const _statement = await offchainNetwork.api.loadStatement(props.space.id, userId.value);
-  if (_statement) statement.value = _statement;
 }
 
 watch(
@@ -96,7 +88,7 @@ watch(
   }
 );
 
-watchEffect(() => setTitle(`${user.value?.name || userId.value} user profile`));
+watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`));
 </script>
 
 <template>
@@ -138,9 +130,9 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} user profile`));
           votes · VOTINGPOWER
         </div>
         <div
-          v-if="statement.about"
+          v-if="user.about"
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
-          v-html="autoLinkText(statement.about)"
+          v-html="autoLinkText(user.about)"
         />
         <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
@@ -162,6 +154,6 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} user profile`));
         </router-link>
       </div>
     </div>
-    <router-view :statement="statement" :user="user" :space="space" />
+    <router-view :user="user" :space="space" />
   </div>
 </template>
