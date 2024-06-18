@@ -134,6 +134,7 @@ export type ReadOnlyNetworkActions = {
   unfollowSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
   setAlias(web3: Web3Provider, alias: string);
   updateUser(web3: Web3Provider | Wallet, user: User, from?: string);
+  updateStatement(web3: Web3Provider | Wallet, statement: Statement, from?: string);
   send(envelope: any): Promise<any>;
 };
 
@@ -222,7 +223,7 @@ export type NetworkApi = {
   ): Promise<User[]>;
   loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
   loadAlias(address: string, alias: string, created_gt: number): Promise<Alias | null>;
-  loadStatement(spaceId: string, userId: string): Promise<Statement | null>;
+  loadStatement(networkId: NetworkID, spaceId: string, userId: string): Promise<Statement | null>;
 };
 
 export type NetworkConstants = {

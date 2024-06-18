@@ -209,6 +209,9 @@ export const STATEMENTS_QUERY = gql`
       about
       statement
       space
+      network
+      discourse
+      status
     }
   }
 `;

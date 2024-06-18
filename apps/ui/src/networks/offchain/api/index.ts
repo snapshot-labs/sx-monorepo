@@ -436,13 +436,18 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return aliases?.[0] ?? null;
     },
-    loadStatement: async (spaceId: string, userId: string): Promise<Statement | null> => {
+    loadStatement: async (
+      networkId: NetworkID,
+      spaceId: string,
+      userId: string
+    ): Promise<Statement | null> => {
       const {
         data: { statements }
       }: { data: { statements: Statement[] } } = await apollo.query({
         query: STATEMENTS_QUERY,
         variables: {
           delegate: userId,
+          network: networkId,
           space: spaceId
         }
       });

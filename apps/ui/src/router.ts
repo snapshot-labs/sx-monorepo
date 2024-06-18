@@ -14,7 +14,7 @@ import Proposal from '@/views/Proposal.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
-import SpaceUserOverview from '@/views/SpaceUser/Overview.vue';
+import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
@@ -53,7 +53,7 @@ const routes: any[] = [
         name: 'space-user',
         component: SpaceUser,
         children: [
-          { path: '', name: 'space-user-overview', component: SpaceUserOverview },
+          { path: '', name: 'space-user-statement', component: SpaceUserStatement },
           { path: 'delegators', name: 'space-user-delegators', component: SpaceUserDelegators },
           { path: 'proposals', name: 'space-user-proposals', component: SpaceUserProposals },
           { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }

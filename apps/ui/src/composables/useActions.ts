@@ -11,7 +11,8 @@ import type {
   Choice,
   NetworkID,
   VoteType,
-  User
+  User,
+  Statement
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
 
@@ -564,6 +565,14 @@ export function useActions() {
     return true;
   }
 
+  async function updateStatement(statement: Statement) {
+    const network = getNetwork(offchainNetworkId);
+
+    await wrapPromise(offchainNetworkId, network.actions.updateStatement(auth.web3, statement));
+
+    return true;
+  }
+
   return {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
@@ -585,6 +594,7 @@ export function useActions() {
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
-    updateUser: wrapWithErrors(updateUser)
+    updateUser: wrapWithErrors(updateUser),
+    updateStatement: wrapWithErrors(updateStatement)
   };
 }

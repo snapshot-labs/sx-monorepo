@@ -29,7 +29,7 @@ const shareMsg = computed(() => encodeURIComponent(window.location.href));
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const navigation = computed(() => [
-  { label: 'Statement', route: 'space-user-overview' },
+  { label: 'Statement', route: 'space-user-statement' },
   { label: 'Delegators', route: 'space-user-delegators' },
   { label: 'Proposals', route: 'space-user-proposals', count: userStat.value?.proposal_count },
   { label: 'Votes', route: 'space-user-votes', count: userStat.value?.vote_count }

@@ -215,11 +215,12 @@ export type UserActivity = {
 };
 
 export type Statement = {
-  userId: string;
-  spaceId: string;
+  space: string;
   network: NetworkID;
   about: string;
   statement: string;
+  discourse: string;
+  status: 'active' | 'inactive';
 };
 
 export type Follow = {
