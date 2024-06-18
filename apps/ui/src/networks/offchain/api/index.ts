@@ -168,6 +168,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       strategies_parsed_metadata: []
     },
     // NOTE: ignored
+    execution_network: networkId,
     execution_ready: false,
     execution: [],
     execution_hash: '',

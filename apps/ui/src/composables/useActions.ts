@@ -77,7 +77,11 @@ export function useActions() {
     return false;
   }
 
-  async function wrapPromise(networkId: NetworkID, promise: Promise<any>) {
+  async function wrapPromise(
+    networkId: NetworkID,
+    promise: Promise<any>,
+    opts: { transactionNetworkId?: NetworkID } = {}
+  ) {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
@@ -100,7 +104,10 @@ export function useActions() {
     } else {
       console.log('Receipt', envelope);
 
-      uiStore.addPendingTransaction(envelope.transaction_hash || envelope.hash, networkId);
+      uiStore.addPendingTransaction(
+        envelope.transaction_hash || envelope.hash,
+        opts.transactionNetworkId || networkId
+      );
     }
   }
 
@@ -375,9 +382,13 @@ export function useActions() {
 
     const network = getReadWriteNetwork(proposal.network);
 
-    // TODO: we need to have a way to tell what network to use, for example for EthRelayer transactions
-    // it should be baseNetwork
-    await wrapPromise(proposal.network, network.actions.executeQueuedProposal(auth.web3, proposal));
+    await wrapPromise(
+      proposal.network,
+      network.actions.executeQueuedProposal(auth.web3, proposal),
+      {
+        transactionNetworkId: proposal.execution_network
+      }
+    );
   }
 
   async function vetoProposal(proposal: Proposal) {

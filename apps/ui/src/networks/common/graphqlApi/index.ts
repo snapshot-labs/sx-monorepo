@@ -38,6 +38,7 @@ import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
 import { clone } from '@/helpers/utils';
 
 type ApiOptions = {
+  baseNetworkId?: NetworkID;
   highlightApiUrl?: string;
 };
 
@@ -142,7 +143,12 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   };
 }
 
-function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: number): Proposal {
+function formatProposal(
+  proposal: ApiProposal,
+  networkId: NetworkID,
+  current: number,
+  baseNetworkId?: NetworkID
+): Proposal {
   return {
     ...proposal,
     space: {
@@ -166,6 +172,10 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     title: proposal.metadata.title,
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
+    execution_network:
+      proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
+        ? baseNetworkId
+        : networkId,
     execution: formatExecution(proposal.metadata.execution),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(proposal.execution_strategy_type)
       ? proposal.max_end <= current
@@ -348,7 +358,9 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         });
       }
 
-      return data.proposals.map(proposal => formatProposal(proposal, networkId, current));
+      return data.proposals.map(proposal =>
+        formatProposal(proposal, networkId, current, opts.baseNetworkId)
+      );
     },
     loadProposal: async (
       spaceId: string,
@@ -371,7 +383,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       if (data.proposal.metadata === null) return null;
       data.proposal = joinHighlightProposal(data.proposal, highlightResult?.data.sxproposal);
 
-      return formatProposal(data.proposal, networkId, current);
+      return formatProposal(data.proposal, networkId, current, opts.baseNetworkId);
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,

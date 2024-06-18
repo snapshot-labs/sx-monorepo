@@ -134,6 +134,7 @@ export type Proposal = {
   id: string;
   proposal_id: number | string;
   network: NetworkID;
+  execution_network: NetworkID;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';
