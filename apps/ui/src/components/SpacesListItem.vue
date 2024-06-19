@@ -21,11 +21,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
         :size="!offchainNetworks.includes(space.network) ? 16 : 0"
         class="mb-2"
       >
-        <SpaceAvatar
-          :space="space"
-          :size="50"
-          class="border-skin-bg !bg-skin-border rounded-md border-[3px]"
-        />
+        <SpaceAvatar :space="space" :size="50" class="border-skin-bg rounded-md border-[3px]" />
       </UiBadgeNetwork>
     </div>
     <ButtonFollow :space="space" class="absolute top-2.5 right-2.5 hidden group-hover:block" />
