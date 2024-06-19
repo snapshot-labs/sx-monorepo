@@ -2,7 +2,7 @@
 import { getNames } from '@/helpers/stamp';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
-  _n,
+  _vp,
   autoLinkText,
   getCacheHash,
   getSocialNetworksLink,
@@ -44,10 +44,7 @@ const formattedVotingPower = computed(() => {
   const votingPower = votingPowers.value.reduce((acc, b) => acc + b.value, 0n);
   const decimals = Math.max(...votingPowers.value.map(votingPower => votingPower.decimals), 0);
 
-  const value = _n(Number(votingPower) / 10 ** decimals, 'compact', {
-    maximumFractionDigits: 2,
-    formatDust: true
-  });
+  const value = _vp(Number(votingPower) / 10 ** decimals);
 
   if (props.space.voting_power_symbol) {
     return `${value} ${props.space.voting_power_symbol}`;
