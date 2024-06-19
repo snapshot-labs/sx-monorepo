@@ -146,7 +146,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           <router-link
             :to="{
               name: 'space-user-statement',
-              params: { user: user.id }
+              params: { id: `${space.network}:${space.id}`, user: user.id }
             }"
             class="overflow-hidden"
           >

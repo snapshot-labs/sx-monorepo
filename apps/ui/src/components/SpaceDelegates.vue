@@ -115,9 +115,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex space-x-1">
             <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
               <UiStamp :id="delegate.id" :size="32" />
-              <a
-                :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')"
-                target="_blank"
+              <router-link
+                :to="{
+                  name: 'space-user-statement',
+                  params: { id: `${space.network}:${space.id}`, user: delegate.id }
+                }"
                 class="overflow-hidden leading-[22px]"
               >
                 <h4
@@ -125,7 +127,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   v-text="delegate.name || shorten(delegate.id)"
                 />
                 <div class="text-[17px] text-skin-text truncate" v-text="shorten(delegate.id)" />
-              </a>
+              </router-link>
             </div>
             <div
               class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"

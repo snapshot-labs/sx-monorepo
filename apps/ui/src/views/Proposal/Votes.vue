@@ -163,9 +163,10 @@ watch([sortBy, choiceFilter], () => {
           <UiStamp :id="vote.voter.id" :size="32" />
           <router-link
             :to="{
-              name: 'user',
+              name: 'space-user-statement',
               params: {
-                id: vote.voter.id
+                id: `${proposal.network}:${proposal.space.id}`,
+                user: vote.voter.id
               }
             }"
             class="overflow-hidden leading-[22px]"
