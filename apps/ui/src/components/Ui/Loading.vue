@@ -33,14 +33,6 @@ withDefaults(
         <path d="M10 2C4.477 2 0 6.477 0 12" stroke="#000000" stroke-width="4"></path>
         <rect x="8" width="4" height="4" rx="8"></rect>
       </g>
-      <animateTransform
-        attributeName="transform"
-        type="rotate"
-        from="0 0 0"
-        to="360 0 0"
-        dur="0.5s"
-        repeatCount="indefinite"
-      />
     </svg>
   </span>
 </template>
@@ -48,12 +40,23 @@ withDefaults(
 <style lang="scss">
 .loading {
   svg {
+    animation: rotation 0.5s linear infinite;
+
     path {
       stroke: rgba(var(--link));
     }
 
     stop {
       stop-color: rgba(var(--link));
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
   }
 
