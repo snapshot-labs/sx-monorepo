@@ -1,12 +1,20 @@
 import { getNetwork } from '@/networks';
 import type { NetworkID, Proposal, Vote } from '@/types';
 
+const { web3 } = useWeb3();
 const votes = ref<Record<Proposal['id'], Vote>>({});
 const pendingVotes = ref<Record<string, boolean>>({});
 
-export function useAccount() {
-  const { web3 } = useWeb3();
+watch(
+  () => web3.value.account,
+  (current, previous) => {
+    if (current !== previous) {
+      pendingVotes.value = {};
+    }
+  }
+);
 
+export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
     votes.value = {};
 
