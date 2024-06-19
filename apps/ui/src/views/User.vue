@@ -172,25 +172,25 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       <IH-exclamation-circle class="inline-block" />
       <span>This user does not have any activities yet.</span>
     </div>
-    <div
+    <router-link
       v-for="(activity, i) in activities"
       v-else
       :key="i"
+      :to="{
+        name: 'space-user-statement',
+        params: {
+          id: activity.spaceId,
+          user: user.id
+        }
+      }"
       class="mx-4 border-b flex space-x-1 py-3"
     >
-      <router-link
-        :to="{
-          name: 'space-user-statement',
-          params: {
-            id: activity.spaceId,
-            user: user.id
-          }
-        }"
+      <div
         class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
       >
         <SpaceAvatar :space="activity.space" :size="32" class="!rounded-[4px]" />
         <span class="truncate" v-text="activity.space.name" />
-      </router-link>
+      </div>
       <div
         class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
@@ -203,7 +203,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div class="text-[17px] truncate" v-text="_p(activity.vote_percentage)" />
       </div>
-    </div>
+    </router-link>
     <teleport to="#modal">
       <ModalEditUser
         v-if="web3.account === user.id"
