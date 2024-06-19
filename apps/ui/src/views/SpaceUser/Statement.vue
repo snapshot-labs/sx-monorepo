@@ -47,7 +47,7 @@ watch(userId, loadStatement, { immediate: true });
       <EditorStatement v-if="isEditMode" v-model="statement" @close="isEditMode = false" />
       <div v-else>
         <div class="relative mb-2.5">
-          <div class="inline-block border rounded-full pl-2 pr-[10px] pb-0.5 text-white">
+          <div class="inline-block border rounded-full pl-2 pr-[10px] pb-0.5 text-skin-heading">
             <template v-if="statement.status === 'active'">
               <IS-status-online class="text-skin-success inline-block w-[17px] h-[17px] mb-[1px]" />
               Active
