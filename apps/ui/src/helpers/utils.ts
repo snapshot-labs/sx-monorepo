@@ -16,6 +16,8 @@ import { MAX_SYMBOL_LENGTH } from './constants';
 import ICX from '~icons/c/x';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
+import ICLens from '~icons/c/lens';
+import ICFarcaster from '~icons/c/farcaster';
 import ICCoingecko from '~icons/c/coingecko';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
@@ -472,7 +474,9 @@ export function getSocialNetworksLink(data: any) {
     { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
     { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
-    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
+    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
+    { key: 'lens', icon: ICLens, urlFormat: 'https://github.com/$' },
+    { key: 'farcaster', icon: ICFarcaster, urlFormat: 'https://warpcast.com/$' }
   ]
     .map(({ key, icon, urlFormat }) => {
       const value = data[key];
