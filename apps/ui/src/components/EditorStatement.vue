@@ -31,7 +31,11 @@ const definition = computed(() => {
         maxLength: 10000
       },
       status: {
-        enum: ['active', 'inactive'],
+        enum: ['ACTIVE', 'INACTIVE'],
+        options: [
+          { id: 'ACTIVE', name: 'Active' },
+          { id: 'INACTIVE', name: 'Inactive' }
+        ],
         title: 'Status'
       }
     }
