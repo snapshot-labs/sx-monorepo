@@ -568,7 +568,10 @@ export function useActions() {
   async function updateStatement(statement: Statement) {
     const network = getNetwork(offchainNetworkId);
 
-    await wrapPromise(offchainNetworkId, network.actions.updateStatement(auth.web3, statement));
+    await wrapPromise(
+      offchainNetworkId,
+      network.actions.updateStatement(await getAliasSigner(), statement, web3.value.account)
+    );
 
     return true;
   }
