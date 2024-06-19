@@ -475,7 +475,7 @@ export function getSocialNetworksLink(data: any) {
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
     { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
     { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
-    { key: 'lens', icon: ICLens, urlFormat: 'https://github.com/$' },
+    { key: 'lens', icon: ICLens, urlFormat: 'https://hey.xyz/u/$' },
     { key: 'farcaster', icon: ICFarcaster, urlFormat: 'https://warpcast.com/$' }
   ]
     .map(({ key, icon, urlFormat }) => {
