@@ -67,8 +67,8 @@ async function loadActivities(userId: string) {
         return {
           ...activity,
           space,
-          proposal_percentage: activity.proposal_count / totalProposals,
-          vote_percentage: activity.vote_count / totalVotes
+          proposal_percentage: totalProposals ? activity.proposal_count / totalProposals : 0,
+          vote_percentage: totalVotes ? activity.vote_count / totalVotes : 0
         };
       })
       .filter(Boolean) as typeof activities.value;
