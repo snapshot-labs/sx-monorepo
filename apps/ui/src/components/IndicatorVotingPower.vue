@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _n } from '@/helpers/utils';
+import { _vp } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { evmNetworks } from '@/networks';
@@ -24,10 +24,7 @@ const decimals = computed(() =>
   Math.max(...props.votingPowers.map(votingPower => votingPower.decimals), 0)
 );
 const formattedVotingPower = computed(() => {
-  const value = _n(Number(votingPower.value) / 10 ** decimals.value, 'compact', {
-    maximumFractionDigits: 2,
-    formatDust: true
-  });
+  const value = _vp(Number(votingPower.value) / 10 ** decimals.value);
 
   if (props.votingPowerSymbol) {
     return `${value} ${props.votingPowerSymbol}`;
