@@ -148,6 +148,10 @@ export function _n(
   return formatter.format(value).toLowerCase();
 }
 
+export function _vp(value: number) {
+  return _n(value, 'compact', { maximumFractionDigits: value >= 1000 ? 1 : 3, formatDust: true });
+}
+
 export function getCurrentName(currentUnit: 'block' | 'second') {
   if (currentUnit === 'block') return 'blocks';
   return 'seconds';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getNetwork, offchainNetworks } from '@/networks';
-import { shortenAddress, _t, _rt, _n, getChoiceText } from '@/helpers/utils';
+import { shortenAddress, _t, _rt, _n, getChoiceText, _vp } from '@/helpers/utils';
 import { Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
@@ -223,12 +223,7 @@ watch([sortBy, choiceFilter], () => {
           class="text-right leading-[22px] w-[25%] lg:w-[20%] flex flex-col items-end justify-center truncate"
         >
           <h4 class="text-skin-link">
-            {{
-              _n(vote.vp / 10 ** votingPowerDecimals, 'compact', {
-                maximumFractionDigits: 3,
-                formatDust: true
-              })
-            }}
+            {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
             {{ proposal.space.voting_power_symbol }}
           </h4>
           <div class="text-[17px]">{{ _n((vote.vp / proposal.scores_total) * 100) }}%</div>
