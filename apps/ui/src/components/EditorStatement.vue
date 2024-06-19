@@ -30,13 +30,6 @@ const definition = computed(() => {
         title: 'Statement',
         maxLength: 10000
       },
-      discourse: {
-        type: 'string',
-        title: 'Discourse handle',
-        maxLength: 30,
-        pattern: '^[A-Za-z0-9-_.]*$',
-        examples: ['Discourse username']
-      },
       status: {
         enum: ['active', 'inactive'],
         title: 'Status'
@@ -85,11 +78,6 @@ async function handleSubmit() {
       />
       <UiComposer v-else v-model="form.statement" />
     </div>
-    <UiInputString
-      v-model="form.discourse"
-      :definition="definition.properties.discourse"
-      :error="formErrors.discourse"
-    />
     <div class="flex items-center justify-between space-x-2.5">
       <UiButton class="w-full" @click="$emit('close')">Cancel</UiButton>
       <UiButton
