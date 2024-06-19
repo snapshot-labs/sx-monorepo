@@ -2,6 +2,7 @@ import { getNetwork } from '@/networks';
 import type { NetworkID, Proposal, Vote } from '@/types';
 
 const votes = ref<Record<Proposal['id'], Vote>>({});
+const pendingVotes = ref<Record<string, boolean>>({});
 
 export function useAccount() {
   const { web3 } = useWeb3();
@@ -18,9 +19,15 @@ export function useAccount() {
     votes.value = { ...votes.value, ...userVotes };
   }
 
+  function addPendingVote(proposalId: string) {
+    pendingVotes.value[proposalId] = true;
+  }
+
   return {
     account: web3.value.account,
     votes,
-    loadVotes
+    pendingVotes,
+    loadVotes,
+    addPendingVote
   };
 }

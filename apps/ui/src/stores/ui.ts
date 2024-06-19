@@ -26,8 +26,7 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     sidebarOpen: false,
     notifications: [] as Notification[],
-    pendingTransactions: [] as PendingTransaction[],
-    pendingVotes: {} as Record<string, boolean>
+    pendingTransactions: [] as PendingTransaction[]
   }),
   actions: {
     async toggleSidebar() {
@@ -81,9 +80,6 @@ export const useUiStore = defineStore('ui', {
           updateStorage(this.pendingTransactions);
         }
       });
-    },
-    async addPendingVote(proposalId: string) {
-      this.pendingVotes[proposalId] = true;
     }
   }
 });
