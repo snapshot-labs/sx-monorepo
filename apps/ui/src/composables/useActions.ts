@@ -22,6 +22,7 @@ export function useActions() {
   const uiStore = useUiStore();
   const alias = useAlias();
   const { web3 } = useWeb3();
+  const { addPendingVote } = useAccount();
   const { getCurrentFromDuration } = useMetaStore();
   const { modalAccountOpen } = useModal();
   const auth = getInstance();
@@ -218,7 +219,7 @@ export function useActions() {
       )
     );
 
-    uiStore.addPendingVote(proposal.id);
+    addPendingVote(proposal.id);
 
     mixpanel.track('Vote', {
       network: proposal.network,
