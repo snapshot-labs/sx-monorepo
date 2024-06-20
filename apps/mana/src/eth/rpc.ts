@@ -29,6 +29,7 @@ export const createNetworkHandler = (chainId: number) => {
   const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
 
   const client = new clients.EvmEthereumTx({ networkConfig });
+  const l1ExecutorClient = new clients.L1Executor();
 
   async function send(id: number, params: any, res: Response) {
     try {
@@ -130,5 +131,39 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
-  return { send, finalizeProposal, execute, executeQueuedProposal };
+  async function executeStarknetProposal(id: number, params: any, res: Response) {
+    try {
+      const {
+        space,
+        executor,
+        proposalId,
+        proposal,
+        votesFor,
+        votesAgainst,
+        votesAbstain,
+        executionHash,
+        transactions
+      } = params;
+      const signer = getWallet(space);
+
+      const receipt = await l1ExecutorClient.execute({
+        signer,
+        space,
+        executor,
+        proposalId,
+        proposal,
+        votesFor,
+        votesAgainst,
+        votesAbstain,
+        executionHash,
+        transactions
+      });
+
+      return rpcSuccess(res, receipt, id);
+    } catch (e) {
+      return rpcError(res, 500, e, id);
+    }
+  }
+
+  return { send, finalizeProposal, execute, executeQueuedProposal, executeStarknetProposal };
 };

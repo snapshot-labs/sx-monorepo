@@ -35,8 +35,8 @@ describe('getExecutionData', () => {
       executor: address,
       executionParams: [
         '0x196F0548E3140D2C7f6532a206dd54FbC12232a4',
-        '0xb2ccadd39e92436dafecf5babd1d3470',
-        '0xec694cb630bd85f58df3c0d4f11d3d72'
+        '0x8869f726747656add8e2f72a37d82d3d',
+        '0xd4f0e8e4a53816cd4aa7f172075505b2'
       ]
     });
   });

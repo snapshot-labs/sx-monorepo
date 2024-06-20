@@ -54,7 +54,9 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     metadata;
 
   const provider = createProvider(rpcUrl);
-  const api = createApi(apiUrl, networkId);
+  const api = createApi(apiUrl, networkId, {
+    baseNetworkId
+  });
   const constants = createConstants(networkId, baseNetworkId, baseChainId);
 
   const helpers = {

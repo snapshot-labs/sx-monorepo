@@ -271,6 +271,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
   let user = User.load(userAddress)
   if (user == null) {
     user = new User(userAddress)
+    user.address_type = 1
     user.proposal_count = 0
     user.vote_count = 0
     user.created = event.block.timestamp.toI32()
@@ -427,6 +428,7 @@ export function handleVoteCreated(event: VoteCast): void {
   let user = User.load(voterAddress)
   if (user == null) {
     user = new User(voterAddress)
+    user.address_type = 1
     user.proposal_count = 0
     user.vote_count = 0
     user.created = event.block.timestamp.toI32()

@@ -12,6 +12,8 @@ const {
   hasExecuteQueued,
   fetchingDetails,
   message,
+  executionTx,
+  executionNetwork,
   finalizeProposalSending,
   executeProposalSending,
   executeQueuedProposalSending,
@@ -34,14 +36,14 @@ const network = computed(() => getNetwork(props.proposal.network));
     <div v-else-if="message">
       {{ message }}
     </div>
-    <div v-else-if="proposal.execution_tx && proposal.execution_strategy_type !== 'EthRelayer'">
+    <div v-else-if="executionTx">
       Proposal has been already executed at
       <a
         class="inline-flex items-center"
         target="_blank"
-        :href="network.helpers.getExplorerUrl(proposal.execution_tx, 'transaction')"
+        :href="executionNetwork.helpers.getExplorerUrl(executionTx, 'transaction')"
       >
-        {{ shorten(proposal.execution_tx) }}
+        {{ shorten(executionTx) }}
         <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
       </a>
     </div>
