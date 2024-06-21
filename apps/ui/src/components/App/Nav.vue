@@ -14,6 +14,7 @@ import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
 import IHBell from '~icons/heroicons-outline/bell';
 import { type FunctionalComponent } from 'vue';
+import { offchainNetworks } from '@/networks';
 
 type NavigationItem = {
   name: string;
@@ -55,7 +56,8 @@ const navigationConfig = computed<Record<string, Record<string, NavigationItem>>
     },
     leaderboard: {
       name: 'Leaderboard',
-      icon: IHUserGroup
+      icon: IHUserGroup,
+      hidden: (space.value && offchainNetworks.includes(space.value.network)) || false
     },
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
