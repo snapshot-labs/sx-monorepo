@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { compareAddresses } from '@/helpers/utils';
+import { offchainNetworks } from '@/networks';
 
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
@@ -14,7 +15,6 @@ import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
 import IHBell from '~icons/heroicons-outline/bell';
 import { type FunctionalComponent } from 'vue';
-import { offchainNetworks } from '@/networks';
 
 type NavigationItem = {
   name: string;
