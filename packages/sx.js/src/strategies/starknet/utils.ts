@@ -16,8 +16,13 @@ export async function getBinaryTree(
   snapshotTimestamp: number,
   chainId: number
 ) {
+  const apiUrl =
+    chainId === 1
+      ? 'https://rs-indexer.api.herodotus.cloud'
+      : 'https://staging.rs-indexer.api.herodotus.cloud';
+
   const res = await fetch(
-    `https://rs-indexer.api.herodotus.cloud/remappers/binsearch-path?timestamp=${snapshotTimestamp}&deployed_on_chain=${deployedOnChain}&accumulates_chain=${chainId}`,
+    `${apiUrl}/remappers/binsearch-path?timestamp=${snapshotTimestamp}&deployed_on_chain=${deployedOnChain}&accumulates_chain=${chainId}`,
     {
       headers: {
         accept: 'application/json'

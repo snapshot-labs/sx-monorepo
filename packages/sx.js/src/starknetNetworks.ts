@@ -137,10 +137,10 @@ export const starknetNetworks = {
     Strategies: {
       MerkleWhitelist: '0x13bcbe7318fb8aa219d264dcf5916feb873e596389ba93d923f9a23378cb743',
       ERC20Votes: '0x72067addfebbaf2d20ed07303a2c9b8e19154e8797e6e9d6819b37fea2a2963',
-      EVMSlotValue: '0x22e81f7427122b44945b253e9355f80ec34dbfcd24cb3c6e63cc8c69afc33bf',
-      OZVotesStorageProof: '0x16aa0c2eda8ff56fa9922a4858d4d91e3b01cf21d2aecd01e1c95d296362218',
+      EVMSlotValue: '0x3aaf61f015076dae5580207672df6076c0ab7b4d339a13dbe10b1f6be932793',
+      OZVotesStorageProof: '0x2713fd8af933632635212ac1217494b043c3e8ea58409433fa9273072191397',
       OZVotesTrace208StorageProof:
-        '0x2a2423e84db720caf37d12eeb4c14da5ef6c4b0226d274e29b9f0d28e750b41'
+        '0x5ade144027c3d704256b83e96c92364c5fd7a85e72dd929f02effe47cf30962'
     },
     ProposalValidations: {
       VotingPower: '0x296e1a5ad28c9bf32b9570d6e1bedae77917866cd5d92aea4ef9271905ef549'
