@@ -280,6 +280,12 @@ input[type='number'] {
     @apply mb-1 #{!important};
   }
 
+  textarea.s-input {
+    &, :focus {
+      @apply outline outline-1 outline-offset-0 outline-skin-danger border-transparent;
+    }
+  }
+
   .s-label {
     @apply text-skin-danger;
   }

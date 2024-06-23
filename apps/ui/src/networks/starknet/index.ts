@@ -1,8 +1,4 @@
-import {
-  constants as starknetConstants,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus
-} from 'starknet';
+import { LibraryError, constants as starknetConstants, TransactionExecutionStatus } from 'starknet';
 import { createApi } from '../common/graphqlApi';
 import { STARKNET_CONNECTORS } from '../common/constants';
 import { createActions } from './actions';
@@ -35,7 +31,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     explorerUrl: 'https://starkscan.co'
   },
   'sn-sep': {
-    name: 'Starknet (Sepolia)',
+    name: 'Starknet Sepolia',
     chainId: starknetConstants.StarknetChainId.SN_SEPOLIA,
     baseChainId: 11155111,
     baseNetworkId: 'sep',
@@ -80,30 +76,25 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
           try {
             tx = await provider.getTransactionReceipt(txId);
           } catch (e) {
-            if (retries > 20) {
-              clearInterval(timer);
-              reject();
-            }
+            if (e instanceof LibraryError && e.message.includes('Transaction hash not found')) {
+              if (retries > 60) {
+                clearInterval(timer);
+                reject();
+              }
 
-            retries++;
+              retries++;
+            }
 
             return;
           }
 
-          const successStates = [
-            TransactionFinalityStatus.ACCEPTED_ON_L1,
-            TransactionFinalityStatus.ACCEPTED_ON_L2
-          ];
-
-          if (successStates.includes(tx.finality_status as any)) {
-            clearInterval(timer);
+          if (tx.execution_status === TransactionExecutionStatus.SUCCEEDED) {
             resolve(tx);
-          }
-
-          if (tx.execution_status === TransactionExecutionStatus.REVERTED) {
-            clearInterval(timer);
+          } else {
             reject(tx);
           }
+
+          clearInterval(timer);
         }, 2000);
       });
     },
