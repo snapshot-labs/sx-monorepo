@@ -13,9 +13,9 @@ const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
-const { vote } = useActions();
 
-const sendingType = ref<Choice | null>(null);
+const modalOpenVote = ref(false);
+const selectedChoice = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
@@ -77,18 +77,16 @@ async function getVotingPower() {
 }
 
 async function handleVoteClick(choice: Choice) {
-  if (!proposal.value) return;
+  selectedChoice.value = choice;
+  modalOpenVote.value = true;
+}
 
-  sendingType.value = choice;
+async function handleVoteSubmitted() {
+  selectedChoice.value = null;
 
-  try {
-    await vote(proposal.value, choice);
-    // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-    if (offchainNetworks.includes(proposal.value.network)) {
-      proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
-    }
-  } finally {
-    sendingType.value = null;
+  // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+  if (offchainNetworks.includes(proposal.value.network)) {
+    proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
   }
 }
 
@@ -202,33 +200,25 @@ watchEffect(() => {
             </template>
           </IndicatorVotingPower>
           <ProposalVote v-if="proposal" :proposal="proposal">
-            <ProposalVoteBasic
-              v-if="proposal.type === 'basic'"
-              :sending-type="sendingType"
-              @vote="handleVoteClick"
-            />
+            <ProposalVoteBasic v-if="proposal.type === 'basic'" @vote="handleVoteClick" />
             <ProposalVoteSingleChoice
               v-else-if="proposal.type === 'single-choice'"
               :proposal="proposal"
-              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
               :proposal="proposal"
-              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
             <ProposalVoteRankedChoice
               v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
-              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
             <ProposalVoteWeighted
               v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
               :proposal="proposal"
-              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
           </ProposalVote>
@@ -243,5 +233,15 @@ watchEffect(() => {
         </div>
       </div>
     </template>
+    <teleport to="#modal">
+      <ModalVote
+        v-if="proposal && selectedChoice"
+        :choice="selectedChoice"
+        :proposal="proposal"
+        :open="modalOpenVote"
+        @close="modalOpenVote = false"
+        @voted="handleVoteSubmitted"
+      />
+    </teleport>
   </div>
 </template>
