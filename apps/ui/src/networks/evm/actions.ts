@@ -347,7 +347,8 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice
+      choice: Choice,
+      metadataCid?: string
     ) => {
       await verifyNetwork(web3, chainId);
 
@@ -382,7 +383,7 @@ export function createActions(
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: getSdkChoice(choice),
-        metadataUri: '',
+        metadataUri: metadataCid || '',
         chainId
       };
 

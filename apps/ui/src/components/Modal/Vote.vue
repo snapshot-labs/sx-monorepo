@@ -1,6 +1,23 @@
 <script setup lang="ts">
 import { getChoiceText } from '@/helpers/utils';
+import { validateForm } from '@/helpers/validation';
 import type { Choice, Proposal } from '@/types';
+
+const definition = {
+  type: 'object',
+  title: 'Vote',
+  additionalProperties: false,
+  required: [],
+  properties: {
+    reason: {
+      title: 'Reason',
+      type: 'string',
+      format: 'long',
+      examples: ['Share you reason (optional)'],
+      maxLength: 1000
+    }
+  }
+};
 
 const props = defineProps<{
   proposal: Proposal;
@@ -16,12 +33,17 @@ const emit = defineEmits<{
 const { vote } = useActions();
 
 const loading = ref(false);
+const form = ref<Record<string, string>>({ reason: '' });
+
+const formErrors = computed(() =>
+  validateForm(definition, form.value, { skipEmptyOptionalFields: true })
+);
 
 async function handleSubmit() {
   loading.value = true;
 
   try {
-    await vote(props.proposal, props.choice);
+    await vote(props.proposal, props.choice, form.value.reason);
     emit('voted');
   } finally {
     loading.value = false;
@@ -48,6 +70,9 @@ async function handleSubmit() {
         <dt class="text-sm leading-5">Voting power</dt>
         <dd class="font-semibold text-skin-heading text-[20px] leading-6" v-text="'--'" />
       </dl>
+      <div class="s-box">
+        <UiForm v-model="form" :error="formErrors" :definition="definition" />
+      </div>
     </div>
 
     <template #footer>
@@ -56,7 +81,7 @@ async function handleSubmit() {
         <UiButton
           primary
           class="w-full"
-          :disabled="!choice"
+          :disabled="!choice || Object.keys(formErrors).length > 0"
           :loading="loading"
           @click="handleSubmit"
         >

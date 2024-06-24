@@ -134,13 +134,25 @@ export function createActions(
         data: { proposal: proposal.proposal_id as string, space: proposal.space.id }
       });
     },
-    vote(
+    async vote(
       web3: Web3Provider,
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice
+      choice: Choice,
+      metadataCid?: string
     ): Promise<any> {
+      let reason: string | undefined;
+
+      if (metadataCid) {
+        try {
+          const res = await fetch(getUrl(metadataCid) as string);
+          reason = (await res.json()).reason;
+        } catch (e) {
+          throw new Error('Failed to fetch reason metadata');
+        }
+      }
+
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,
@@ -149,7 +161,8 @@ export function createActions(
         authenticator: '',
         strategies: [],
         metadataUri: '',
-        privacy: proposal.privacy
+        privacy: proposal.privacy,
+        reason
       };
 
       return client.vote({
