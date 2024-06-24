@@ -10,6 +10,7 @@ type HerodotusConfig = {
 };
 
 const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
+const HERODOTUS_LEGACY_API_KEY = process.env.HERODOTUS_LEGACY_API_KEY || '';
 const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
   [
     constants.StarknetChainId.SN_MAIN,
@@ -44,17 +45,19 @@ type DbProposal = {
   herodotusId: string | null;
 };
 
-function getApiUrl(accumulatesChainId: string) {
+function getApi(accumulatesChainId: string) {
   if (accumulatesChainId === '1') {
     return {
       apiUrl: 'https://api.herodotus.cloud',
-      indexerUrl: 'https://rs-indexer.api.herodotus.cloud'
+      indexerUrl: 'https://rs-indexer.api.herodotus.cloud',
+      apiKey: HERODOTUS_LEGACY_API_KEY
     };
   }
 
   return {
     apiUrl: 'https://staging.api.herodotus.cloud',
-    indexerUrl: 'https://staging.rs-indexer.api.herodotus.cloud'
+    indexerUrl: 'https://staging.rs-indexer.api.herodotus.cloud',
+    apiKey: HERODOTUS_API_KEY
   };
 }
 
@@ -63,11 +66,9 @@ function getId(proposal: ApiProposal) {
 }
 
 async function getStatus(id: string, accumulatesChainId: string) {
-  const { apiUrl } = getApiUrl(accumulatesChainId);
+  const { apiUrl, apiKey } = getApi(accumulatesChainId);
 
-  const res = await fetch(
-    `${apiUrl}/batch-query-status?apiKey=${HERODOTUS_API_KEY}&batchQueryId=${id}`
-  );
+  const res = await fetch(`${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`);
 
   const { queryStatus, error } = await res.json();
   if (error) throw new Error(error);
@@ -97,8 +98,8 @@ async function submitBatch(proposal: ApiProposal) {
     }
   };
 
-  const { apiUrl } = getApiUrl(ACCUMULATES_CHAIN_ID);
-  const res = await fetch(`${apiUrl}/submit-batch-query?apiKey=${HERODOTUS_API_KEY}`, {
+  const { apiUrl, apiKey } = getApi(ACCUMULATES_CHAIN_ID);
+  const res = await fetch(`${apiUrl}/submit-batch-query?apiKey=${apiKey}`, {
     method: 'post',
     headers: {
       'Content-Type': 'application/json'
@@ -178,7 +179,7 @@ export async function processProposal(proposal: DbProposal) {
     throw e;
   }
 
-  const { indexerUrl } = getApiUrl(ACCUMULATES_CHAIN_ID);
+  const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID);
 
   const res = await fetch(
     `${indexerUrl}/remappers/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,

@@ -1,6 +1,7 @@
 import { Account, CairoOption, CairoOptionVariant, CallData } from 'starknet';
 import { estimateStarknetFee } from '../../../utils/fees';
 import StrategyAbi from './abis/Strategy.json';
+import StrategyLegacy from './abis/StrategyLegacy.json';
 import { NetworkConfig } from '../../../types';
 
 type ProofElement = {
@@ -12,8 +13,6 @@ type ProofElement = {
 type Opts = {
   nonce?: string;
 };
-
-const callData = new CallData(StrategyAbi);
 
 export class HerodotusController {
   networkConfig: NetworkConfig;
@@ -36,6 +35,10 @@ export class HerodotusController {
     },
     opts?: Opts
   ) {
+    const callData = new CallData(
+      this.networkConfig.herodotusAccumulatesChainId === 1 ? StrategyLegacy : StrategyAbi
+    );
+
     const call = {
       contractAddress,
       entrypoint: 'cache_timestamp',
