@@ -383,7 +383,7 @@ export function createActions(
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: getSdkChoice(choice),
-        metadataUri: metadataCid || '',
+        metadataUri: metadataCid ? `ipfs://${metadataCid}` : '',
         chainId
       };
 
