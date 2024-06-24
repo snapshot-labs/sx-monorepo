@@ -221,6 +221,7 @@ export function useActions() {
         reason
       });
       if (!pinnedMetadata || !pinnedMetadata.cid) return false;
+      console.log('IPFS', pinnedMetadata);
     }
 
     await wrapPromise(
