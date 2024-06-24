@@ -36,12 +36,14 @@ export const useUsersStore = defineStore('users', {
       const record = toRef(this.users, userId) as Ref<UserRecord>;
       record.value.loading = false;
 
-      const user = await network.api.loadUser(userId);
+      const user = (await network.api.loadUser(userId)) || {
+        id: userId,
+        proposal_count: 0,
+        vote_count: 0
+      };
 
-      if (user) {
-        user.name ||= (await getNames([userId]))[userId];
-        record.value.user = user;
-      }
+      user.name ||= (await getNames([userId]))[userId];
+      record.value.user = user;
 
       record.value.loaded = true;
       record.value.loading = false;
