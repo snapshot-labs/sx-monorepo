@@ -19,7 +19,9 @@ onMounted(() => {
 
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
-const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
+const isController = computed(
+  () => web3.value.account && compareAddresses(props.space.controller, web3.value.account)
+);
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
