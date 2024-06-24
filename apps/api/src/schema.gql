@@ -153,6 +153,7 @@ type Vote {
 
 type User {
   id: String!
+  address_type: Int!
   proposal_count: Int!
   vote_count: Int!
   created: Int!

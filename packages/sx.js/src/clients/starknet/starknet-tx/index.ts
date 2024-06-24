@@ -1,14 +1,16 @@
 import { Account, CallData, shortString, uint256, hash } from 'starknet';
-import { ContractFactory } from '@ethersproject/contracts';
+import { Contract } from '@ethersproject/contracts';
 import { Signer } from '@ethersproject/abstract-signer';
+import { TransactionResponse } from '@ethersproject/providers';
 import { poseidonHashMany } from 'micro-starknet';
 import randomBytes from 'randombytes';
 import { getStrategiesWithParams } from '../../../utils/strategies';
 import { getAuthenticator } from '../../../authenticators/starknet';
 import { hexPadLeft } from '../../../utils/encoding';
 import { estimateStarknetFee } from '../../../utils/fees';
+import { predictCloneAddress } from '../../../utils/address';
 import SpaceAbi from './abis/Space.json';
-import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy.json';
+import L1AvatarExecutionStrategyFactoryAbi from '../l1-executor/abis/L1AvatarExecutionStrategyFactory.json';
 import {
   Vote,
   Propose,
@@ -130,27 +132,38 @@ export class StarknetTx {
 
   async deployL1AvatarExecution({
     signer,
-    params: { controller, target, executionRelayer, spaces, quorum }
+    params: { controller, target, executionRelayer, spaces, quorum },
+    salt
   }: {
     signer: Signer;
     params: L1AvatarExecutionStrategyParams;
+    salt?: string;
   }): Promise<{ txId: string; address: string }> {
-    const l1AvatarExecutionStrategyContractFactor = new ContractFactory(
-      L1AvatarExecutionStrategyAbi.abi,
-      L1AvatarExecutionStrategyAbi.bytecode,
+    const usedSalt = salt || `0x${randomBytes(32).toString('hex')}`;
+
+    const address = predictCloneAddress(
+      this.config.networkConfig.l1AvatarExecutionStrategyImplementation,
+      this.config.networkConfig.l1AvatarExecutionStrategyFactory,
+      usedSalt
+    );
+
+    const l1AvatarExecutionStrategyFactory = new Contract(
+      this.config.networkConfig.l1AvatarExecutionStrategyFactory,
+      L1AvatarExecutionStrategyFactoryAbi,
       signer
     );
 
-    const contract = await l1AvatarExecutionStrategyContractFactor.deploy(
+    const response: TransactionResponse = await l1AvatarExecutionStrategyFactory.createContract(
       controller,
       target,
       this.config.networkConfig.starknetCore,
       executionRelayer,
       spaces,
-      quorum
+      quorum,
+      usedSalt
     );
 
-    return { address: contract.address, txId: contract.deployTransaction.hash };
+    return { address, txId: response.hash };
   }
 
   async getSalt({ sender, saltNonce }: { sender: string; saltNonce: string }) {

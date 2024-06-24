@@ -3,17 +3,29 @@
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
       "startBlock": 18962278
+    },
+    "L1AvatarExecutionStrategyFactory": {
+      "address": "0x0000000000021210000000000000000000000000",
+      "startBlock": 18962278
     }
   },
   "sepolia": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
       "startBlock": 4519171
+    },
+    "L1AvatarExecutionStrategyFactory": {
+      "address": "0x27981a29ec87f2fbf873a2dcb0325405648ffce1",
+      "startBlock": 6078978
     }
   },
   "optimism": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
+      "startBlock": 118359200
+    },
+    "L1AvatarExecutionStrategyFactory": {
+      "address": "0x0000000000021210000000000000000000000000",
       "startBlock": 118359200
     }
   },
@@ -21,17 +33,29 @@
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
       "startBlock": 50858232
+    },
+    "L1AvatarExecutionStrategyFactory": {
+      "address": "0x0000000000021210000000000000000000000000",
+      "startBlock": 50858232
     }
   },
   "arbitrum-one": {
     "ProxyFactory": {
       "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
       "startBlock": 157825417
+    },
+    "L1AvatarExecutionStrategyFactory": {
+      "address": "0x0000000000021210000000000000000000000000",
+      "startBlock": 157825417
     }
   },
   "linea-testnet": {
     "ProxyFactory": {
       "address": "0x12A1FfFFfd70677939D61d641eA043bc9060c718",
+      "startBlock": 858097
+    },
+    "L1AvatarExecutionStrategyFactory": {
+      "address": "0x0000000000021210000000000000000000000000",
       "startBlock": 858097
     }
   }
