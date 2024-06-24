@@ -222,7 +222,7 @@ export type Statement = {
   about: string;
   statement: string;
   discourse: string;
-  status: 'active' | 'inactive';
+  status: 'ACTIVE' | 'INACTIVE';
 };
 
 export type Follow = {
