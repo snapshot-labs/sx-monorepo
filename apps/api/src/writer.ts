@@ -313,7 +313,7 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   const proposal = new Proposal(`${spaceId}/${proposalId}`);
   proposal.proposal_id = proposalId;
   proposal.space = spaceId;
-  proposal.author = author;
+  proposal.author = author.address;
   proposal.metadata = null;
   proposal.execution_hash = event.proposal.execution_payload_hash;
   proposal.start = parseInt(BigInt(event.proposal.start_timestamp).toString());
@@ -361,12 +361,13 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
     console.log(JSON.stringify(e).slice(0, 256));
   }
 
-  const existingUser = await User.loadEntity(author);
+  const existingUser = await User.loadEntity(author.address);
   if (existingUser) {
     existingUser.proposal_count += 1;
     await existingUser.save();
   } else {
-    const user = new User(author);
+    const user = new User(author.address);
+    user.address_type = author.type;
     user.created = created;
     await user.save();
   }
@@ -375,7 +376,7 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   if (!leaderboardItem) {
     leaderboardItem = new Leaderboard(`${spaceId}/${author}`);
     leaderboardItem.space = spaceId;
-    leaderboardItem.user = author;
+    leaderboardItem.user = author.address;
     leaderboardItem.vote_count = 0;
     leaderboardItem.proposal_count = 0;
   }
@@ -502,19 +503,20 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   const vote = new Vote(`${spaceId}/${proposalId}/${voter}`);
   vote.space = spaceId;
   vote.proposal = proposalId;
-  vote.voter = voter;
+  vote.voter = voter.address;
   vote.choice = choice;
   vote.vp = vp.toString();
   vote.created = created;
   vote.tx = tx.transaction_hash;
   await vote.save();
 
-  const existingUser = await User.loadEntity(voter);
+  const existingUser = await User.loadEntity(voter.address);
   if (existingUser) {
     existingUser.vote_count += 1;
     await existingUser.save();
   } else {
-    const user = new User(voter);
+    const user = new User(voter.address);
+    user.address_type = voter.type;
     user.created = created;
     await user.save();
   }
@@ -523,7 +525,7 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   if (!leaderboardItem) {
     leaderboardItem = new Leaderboard(`${spaceId}/${voter}`);
     leaderboardItem.space = spaceId;
-    leaderboardItem.user = voter;
+    leaderboardItem.user = voter.address;
     leaderboardItem.vote_count = 0;
     leaderboardItem.proposal_count = 0;
   }

@@ -6,8 +6,7 @@ import { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
-const uiStore = useUiStore();
-const { votes } = useAccount();
+const { votes, pendingVotes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
   props.proposal.network,
@@ -43,7 +42,7 @@ const isSupported = computed(() => {
     You have already voted for this proposal
   </slot>
 
-  <slot v-else-if="uiStore.pendingVotes[proposal.id]" name="voted-pending">
+  <slot v-else-if="pendingVotes[proposal.id]" name="voted-pending">
     You have already voted for this proposal
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">

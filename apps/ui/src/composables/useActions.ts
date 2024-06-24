@@ -23,6 +23,7 @@ export function useActions() {
   const uiStore = useUiStore();
   const alias = useAlias();
   const { web3 } = useWeb3();
+  const { addPendingVote } = useAccount();
   const { getCurrentFromDuration } = useMetaStore();
   const { modalAccountOpen } = useModal();
   const auth = getInstance();
@@ -79,7 +80,11 @@ export function useActions() {
     return false;
   }
 
-  async function wrapPromise(networkId: NetworkID, promise: Promise<any>) {
+  async function wrapPromise(
+    networkId: NetworkID,
+    promise: Promise<any>,
+    opts: { transactionNetworkId?: NetworkID } = {}
+  ) {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
@@ -102,7 +107,10 @@ export function useActions() {
     } else {
       console.log('Receipt', envelope);
 
-      uiStore.addPendingTransaction(envelope.transaction_hash || envelope.hash, networkId);
+      uiStore.addPendingTransaction(
+        envelope.transaction_hash || envelope.hash,
+        opts.transactionNetworkId || networkId
+      );
     }
   }
 
@@ -219,7 +227,7 @@ export function useActions() {
       )
     );
 
-    uiStore.addPendingVote(proposal.id);
+    addPendingVote(proposal.id);
 
     mixpanel.track('Vote', {
       network: proposal.network,
@@ -364,22 +372,21 @@ export function useActions() {
   }
 
   async function executeTransactions(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-
     const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(proposal.network, network.actions.executeTransactions(auth.web3, proposal));
   }
 
   async function executeQueuedProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
-
     const network = getReadWriteNetwork(proposal.network);
 
-    // TODO: we need to have a way to tell what network to use, for example for EthRelayer transactions
-    // it should be baseNetwork
-    await wrapPromise(proposal.network, network.actions.executeQueuedProposal(auth.web3, proposal));
+    await wrapPromise(
+      proposal.network,
+      network.actions.executeQueuedProposal(auth.web3, proposal),
+      {
+        transactionNetworkId: proposal.execution_network
+      }
+    );
   }
 
   async function vetoProposal(proposal: Proposal) {

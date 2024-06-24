@@ -133,7 +133,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     network: networkId,
     metadata_uri: proposal.ipfs,
     author: {
-      id: proposal.author
+      id: proposal.author,
+      address_type: 1
     },
     proposal_id: proposal.id,
     type: proposal.type,
@@ -171,6 +172,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       strategies_parsed_metadata: []
     },
     // NOTE: ignored
+    execution_network: networkId,
     execution_ready: false,
     execution: [],
     execution_hash: '',
@@ -232,6 +234,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   });
 
   return {
+    apiUrl: uri,
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,

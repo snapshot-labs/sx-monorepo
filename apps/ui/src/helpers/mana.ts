@@ -34,7 +34,7 @@ export async function registerTransaction(
 export async function executionCall(
   network: 'eth' | 'stark',
   chainId: number | string,
-  method: 'finalizeProposal' | 'execute' | 'executeQueuedProposal',
+  method: 'finalizeProposal' | 'execute' | 'executeQueuedProposal' | 'executeStarknetProposal',
   params: any
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);

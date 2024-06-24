@@ -581,30 +581,30 @@ describe('sx-starknet', () => {
       const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
 
       const proposal = {
-        startTimestamp: message_payload[1],
-        minEndTimestamp: message_payload[2],
-        maxEndTimestamp: message_payload[3],
-        finalizationStatus: message_payload[4],
-        executionPayloadHash: message_payload[5],
-        executionStrategy: message_payload[6],
-        authorAddressType: message_payload[7],
-        author: message_payload[8],
+        startTimestamp: message_payload[3],
+        minEndTimestamp: message_payload[4],
+        maxEndTimestamp: message_payload[5],
+        finalizationStatus: message_payload[6],
+        executionPayloadHash: message_payload[7],
+        executionStrategy: message_payload[8],
+        authorAddressType: message_payload[9],
+        author: message_payload[10],
         activeVotingStrategies: uint256.uint256ToBN({
-          low: message_payload[9],
-          high: message_payload[10]
+          low: message_payload[11],
+          high: message_payload[12]
         })
       };
       const votesFor = uint256.uint256ToBN({
-        low: message_payload[11],
-        high: message_payload[12]
-      });
-      const votesAgainst = uint256.uint256ToBN({
         low: message_payload[13],
         high: message_payload[14]
       });
-      const votesAbstain = uint256.uint256ToBN({
+      const votesAgainst = uint256.uint256ToBN({
         low: message_payload[15],
         high: message_payload[16]
+      });
+      const votesAbstain = uint256.uint256ToBN({
+        low: message_payload[17],
+        high: message_payload[18]
       });
 
       const l1ExecutorClient = new L1Executor();
@@ -612,6 +612,7 @@ describe('sx-starknet', () => {
         signer: wallet,
         executor: testConfig.l1AvatarExecutionStrategyContract.address,
         space: spaceAddress,
+        proposalId: 8,
         proposal,
         votesFor,
         votesAgainst,
