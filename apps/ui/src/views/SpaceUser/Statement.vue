@@ -29,7 +29,7 @@ async function loadStatement() {
       network: props.space.network,
       about: '',
       statement: '',
-      status: 'inactive',
+      status: 'INACTIVE',
       discourse: ''
     };
   } finally {
