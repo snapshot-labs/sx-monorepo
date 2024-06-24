@@ -200,6 +200,8 @@ export type UserProfile = {
   cover?: string;
   github?: string;
   twitter?: string;
+  lens?: string;
+  farcaster?: string;
 };
 
 export type User = {
