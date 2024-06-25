@@ -212,7 +212,7 @@ async function formatUser(user: User) {
     ...user,
     proposal_count: user.proposal_count || 0,
     vote_count: user.vote_count || 0,
-    name: user.name || (await getNames([user.id])[user.id]),
+    name: user.name || (await getNames([user.id])[user.id]) || '',
     about: user.about || '',
     avatar: user.avatar || '',
     cover: user.cover || '',
