@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import { getNames } from '@/helpers/stamp';
 import type { User } from '@/types';
 
 type UserRecord = {
