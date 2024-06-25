@@ -190,6 +190,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
 };
 
 export type NetworkApi = {
+  apiUrl: string;
   loadProposalVotes(
     proposal: Proposal,
     paginationOpts: PaginationOpts,

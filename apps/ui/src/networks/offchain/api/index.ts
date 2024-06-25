@@ -131,7 +131,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     network: networkId,
     metadata_uri: proposal.ipfs,
     author: {
-      id: proposal.author
+      id: proposal.author,
+      address_type: 1
     },
     proposal_id: proposal.id,
     type: proposal.type,
@@ -169,6 +170,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       strategies_parsed_metadata: []
     },
     // NOTE: ignored
+    execution_network: networkId,
     execution_ready: false,
     execution: [],
     execution_hash: '',
@@ -205,15 +207,6 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-async function formatUser(user: User) {
-  return {
-    ...user,
-    proposal_count: user.proposal_count || 0,
-    vote_count: user.vote_count || 0,
-    name: user.name || (await getNames([user.id])[user.id])
-  };
-}
-
 export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   const httpLink = createHttpLink({ uri });
 
@@ -230,6 +223,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   });
 
   return {
+    apiUrl: uri,
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,
@@ -379,17 +373,23 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return formatSpace(data.space, networkId);
     },
-    loadUser: async (id: string): Promise<User | null> => {
-      const {
+    loadUser: async (id: string): Promise<User> => {
+      let {
         data: { user }
       } = await apollo.query({
         query: USER_QUERY,
         variables: { id }
       });
 
-      if (!user) return null;
+      if (!user) {
+        user = { id };
+      }
 
-      return formatUser(user);
+      user.name ||= (await getNames([id]))[id];
+      user.proposal_count ||= 0;
+      user.vote_count ||= 0;
+
+      return user;
     },
     loadUserActivities: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain

@@ -57,12 +57,15 @@ export type OzVotesStorageProofStrategyConfig = {
   type: 'ozVotesStorageProof';
   params: {
     deployedOnChain: string;
+    trace: 208 | 224;
   };
 };
 
 export type NetworkConfig = {
   eip712ChainId: string;
   spaceFactory: string;
+  l1AvatarExecutionStrategyFactory: string;
+  l1AvatarExecutionStrategyImplementation: string;
   masterSpace: string;
   starknetCommit: string;
   starknetCore: string;
@@ -94,6 +97,8 @@ export type EvmNetworkConfig = Omit<
   NetworkConfig,
   | 'eip712ChainId'
   | 'spaceFactory'
+  | 'l1AvatarExecutionStrategyFactory'
+  | 'l1AvatarExecutionStrategyImplementation'
   | 'starknetCommit'
   | 'starknetCore'
   | 'herodotusAccumulatesChainId'

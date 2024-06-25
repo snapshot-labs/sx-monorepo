@@ -59,7 +59,7 @@ watchEffect(() => setTitle(props.space.name));
           <SpaceAvatar
             :space="space"
             :size="90"
-            class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-lg left-[-4px]"
+            class="relative mb-2 border-[4px] border-skin-bg !rounded-lg left-[-4px]"
           />
         </router-link>
         <div class="flex items-center">

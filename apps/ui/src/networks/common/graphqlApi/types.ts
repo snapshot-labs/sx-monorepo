@@ -82,6 +82,7 @@ export type ApiProposal = {
   };
   author: {
     id: string;
+    address_type: 0 | 1 | 2;
   };
   quorum: number;
   execution_hash: string;

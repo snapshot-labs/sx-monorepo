@@ -130,5 +130,11 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  return { send, execute, registerTransaction, registerProposal, getAccount };
+  return {
+    send,
+    execute,
+    registerTransaction,
+    registerProposal,
+    getAccount
+  };
 };

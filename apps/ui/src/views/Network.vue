@@ -31,6 +31,11 @@ const CUSTOMERS = [
     website: 'https://cyber.co'
   },
   {
+    name: 'Sei',
+    avatar: 'https://pbs.twimg.com/profile_images/1783226809892397056/oV7Dkq37_400x400.jpg',
+    website: 'https://www.sei.io'
+  },
+  {
     name: 'Gravity',
     avatar: 'https://pbs.twimg.com/profile_images/1795917311620378625/Dnrm-QVf_400x400.jpg',
     website: 'https://gravity.xyz'
@@ -124,16 +129,22 @@ watchEffect(() => setTitle('Network'));
       </div>
     </UiContainer>
 
-    <UiContainer class="!max-w-[880px] text-center">
+    <div class="text-center">
       <div class="eyebrow mb-4">Trusted by</div>
-      <div class="overflow-y-scroll no-scrollbar">
-        <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
-          <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
-            <img :alt="customer.name" :src="customer.avatar" class="w-[54px] h-[54px] rounded-lg" />
-          </a>
+      <div class="overflow-y-scroll no-scrollbar px-4">
+        <div class="w-fit mx-auto">
+          <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
+            <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
+              <img
+                :alt="customer.name"
+                :src="customer.avatar"
+                class="w-[54px] h-[54px] rounded-lg"
+              />
+            </a>
+          </div>
         </div>
       </div>
-    </UiContainer>
+    </div>
 
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Get started</div>

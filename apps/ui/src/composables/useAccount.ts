@@ -1,12 +1,23 @@
 import { getNetwork } from '@/networks';
 import type { NetworkID, Proposal, Vote } from '@/types';
 
+const { web3 } = useWeb3();
 const votes = ref<Record<Proposal['id'], Vote>>({});
+const pendingVotes = ref<Record<string, boolean>>({});
+
+watch(
+  () => web3.value.account,
+  (current, previous) => {
+    if (current !== previous) {
+      pendingVotes.value = {};
+    }
+  }
+);
 
 export function useAccount() {
-  const { web3, web3Account } = useWeb3();
-
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
+    votes.value = {};
+
     const account = web3.value.account;
     if (!account) return;
 
@@ -16,13 +27,15 @@ export function useAccount() {
     votes.value = { ...votes.value, ...userVotes };
   }
 
-  watchEffect(() => {
-    if (!web3Account.value) votes.value = {};
-  });
+  function addPendingVote(proposalId: string) {
+    pendingVotes.value[proposalId] = true;
+  }
 
   return {
     account: web3.value.account,
     votes,
-    loadVotes
+    pendingVotes,
+    loadVotes,
+    addPendingVote
   };
 }
