@@ -57,6 +57,7 @@ export type OzVotesStorageProofStrategyConfig = {
   type: 'ozVotesStorageProof';
   params: {
     deployedOnChain: string;
+    trace: 208 | 224;
   };
 };
 

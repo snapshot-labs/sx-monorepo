@@ -5,7 +5,7 @@ import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
 import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import { getAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import networks from '@/helpers/networks.json';
@@ -369,9 +369,7 @@ export function compareAddresses(a: string, b: string): boolean {
   if (a.length > 42 && b.length > 42) {
     return validateAndParseAddress(a) === validateAndParseAddress(b);
   }
-
-  // TODO: in future ignore padding as well
-  return a.toLowerCase() === b.toLowerCase();
+  return isAddress(a) && isAddress(b) && a.toLowerCase() === b.toLowerCase();
 }
 
 export function getSalt() {

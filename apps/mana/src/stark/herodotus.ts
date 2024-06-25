@@ -10,6 +10,7 @@ type HerodotusConfig = {
 };
 
 const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
+const HERODOTUS_LEGACY_API_KEY = process.env.HERODOTUS_LEGACY_API_KEY || '';
 const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
   [
     constants.StarknetChainId.SN_MAIN,
@@ -44,14 +45,30 @@ type DbProposal = {
   herodotusId: string | null;
 };
 
+function getApi(accumulatesChainId: string) {
+  if (accumulatesChainId === '1') {
+    return {
+      apiUrl: 'https://api.herodotus.cloud',
+      indexerUrl: 'https://rs-indexer.api.herodotus.cloud',
+      apiKey: HERODOTUS_LEGACY_API_KEY
+    };
+  }
+
+  return {
+    apiUrl: 'https://staging.api.herodotus.cloud',
+    indexerUrl: 'https://staging.rs-indexer.api.herodotus.cloud',
+    apiKey: HERODOTUS_API_KEY
+  };
+}
+
 function getId(proposal: ApiProposal) {
   return `${proposal.chainId}-${proposal.l1TokenAddress}-${proposal.strategyAddress}-${proposal.timestamp}`;
 }
 
-async function getStatus(id: string) {
-  const res = await fetch(
-    `https://api.herodotus.cloud/batch-query-status?apiKey=${HERODOTUS_API_KEY}&batchQueryId=${id}`
-  );
+async function getStatus(id: string, accumulatesChainId: string) {
+  const { apiUrl, apiKey } = getApi(accumulatesChainId);
+
+  const res = await fetch(`${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`);
 
   const { queryStatus, error } = await res.json();
   if (error) throw new Error(error);
@@ -81,16 +98,14 @@ async function submitBatch(proposal: ApiProposal) {
     }
   };
 
-  const res = await fetch(
-    `https://api.herodotus.cloud/submit-batch-query?apiKey=${HERODOTUS_API_KEY}`,
-    {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    }
-  );
+  const { apiUrl, apiKey } = getApi(ACCUMULATES_CHAIN_ID);
+  const res = await fetch(`${apiUrl}/submit-batch-query?apiKey=${apiKey}`, {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
 
   const result = await res.json();
 
@@ -143,8 +158,14 @@ export async function processProposal(proposal: DbProposal) {
     });
   }
 
+  const { getAccount, herodotusController } = getClient(proposal.chainId);
+  const { account, nonceManager } = getAccount('0x0');
+  const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
+  if (!mapping) throw new Error('Invalid chainId');
+  const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
+
   try {
-    const status = await getStatus(proposal.herodotusId);
+    const status = await getStatus(proposal.herodotusId, ACCUMULATES_CHAIN_ID);
     if (status !== 'DONE') {
       console.log('proposal is not ready yet', proposal.herodotusId, status);
       return;
@@ -154,17 +175,14 @@ export async function processProposal(proposal: DbProposal) {
       console.log('query does not exist', proposal.herodotusId);
       return db.markProposalProcessed(proposal.id);
     }
+
+    throw e;
   }
 
-  const { getAccount, herodotusController } = getClient(proposal.chainId);
-  const { account, nonceManager } = getAccount('0x0');
-  const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
-  if (!mapping) throw new Error('Invalid chainId');
-
-  const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
+  const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID);
 
   const res = await fetch(
-    `https://rs-indexer.api.herodotus.cloud/remappers/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,
+    `${indexerUrl}/remappers/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,
     {
       headers: {
         accept: 'application/json'
