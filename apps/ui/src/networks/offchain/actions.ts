@@ -134,7 +134,7 @@ export function createActions(
         data: { proposal: proposal.proposal_id as string, space: proposal.space.id }
       });
     },
-    async vote(
+    vote(
       web3: Web3Provider,
       connectorType: Connector,
       account: string,
