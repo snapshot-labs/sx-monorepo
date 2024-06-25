@@ -311,6 +311,10 @@ input[type='number'] {
   select {
     @apply h-[64px];
   }
+
+  textarea {
+    @apply min-h-[61px]
+  }
 }
 
 .s-compact {
