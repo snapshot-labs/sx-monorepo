@@ -6,6 +6,8 @@ import type { Proposal as ProposalType, Choice } from '@/types';
 const props = defineProps<{ proposal: ProposalType; showSpace: boolean }>();
 
 const { getTsFromCurrent } = useMetaStore();
+const { modalAccountOpen } = useModal();
+const { web3 } = useWeb3();
 
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
@@ -15,6 +17,8 @@ const selectedChoice = ref<Choice | null>(null);
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const handleVoteClick = (choice: Choice) => {
+  if (!web3.value.account) return (modalAccountOpen.value = true);
+
   selectedChoice.value = choice;
   modalOpenVote.value = true;
 };

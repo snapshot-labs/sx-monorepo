@@ -4,14 +4,15 @@ import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
 import type { Choice } from '@/types';
 
 const route = useRoute();
+const proposalsStore = useProposalsStore();
+const votingPowersStore = useVotingPowersStore();
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
-const proposalsStore = useProposalsStore();
-const votingPowersStore = useVotingPowersStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
+const { modalAccountOpen } = useModal();
 
 const modalOpenVote = ref(false);
 const selectedChoice = ref<Choice | null>(null);
@@ -38,6 +39,8 @@ const votingPowerDecimals = computed(() => {
 });
 
 async function handleVoteClick(choice: Choice) {
+  if (!web3.value.account) return (modalAccountOpen.value = true);
+
   selectedChoice.value = choice;
   modalOpenVote.value = true;
 }
