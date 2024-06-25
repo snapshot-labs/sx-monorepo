@@ -3,7 +3,6 @@ import { _vp } from '@/helpers/utils';
 import { utils } from '@snapshot-labs/sx';
 import { evmNetworks } from '@/networks';
 import type { NetworkID } from '@/types';
-
 import type { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{
