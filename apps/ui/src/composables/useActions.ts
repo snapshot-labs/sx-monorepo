@@ -214,15 +214,6 @@ export function useActions() {
     if (!web3.value.account) return await forceLogin();
 
     const network = getNetwork(proposal.network);
-    let pinnedMetadata: { cid: string; provider: string } | null = null;
-
-    if (reason) {
-      pinnedMetadata = await network.helpers.pin({
-        reason
-      });
-      if (!pinnedMetadata || !pinnedMetadata.cid) return false;
-      console.log('IPFS', pinnedMetadata);
-    }
 
     await wrapPromise(
       proposal.network,
@@ -232,7 +223,7 @@ export function useActions() {
         web3.value.account,
         proposal,
         choice,
-        pinnedMetadata?.cid
+        reason
       )
     );
 

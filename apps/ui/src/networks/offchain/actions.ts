@@ -140,19 +140,8 @@ export function createActions(
       account: string,
       proposal: Proposal,
       choice: Choice,
-      metadataCid?: string
+      reason: string
     ): Promise<any> {
-      let reason: string | undefined;
-
-      if (metadataCid) {
-        try {
-          const res = await fetch(getUrl(metadataCid) as string);
-          reason = (await res.json()).reason;
-        } catch (e) {
-          throw new Error('Failed to fetch reason metadata');
-        }
-      }
-
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,

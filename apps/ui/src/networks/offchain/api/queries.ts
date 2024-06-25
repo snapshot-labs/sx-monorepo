@@ -188,6 +188,7 @@ export const VOTES_QUERY = gql`
       }
       ipfs
       choice
+      reason
       vp
       created
     }

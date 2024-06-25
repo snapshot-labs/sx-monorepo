@@ -245,7 +245,7 @@ export type Vote = {
   };
   proposal: number | string;
   choice: number | number[] | Record<string, number>;
-  reason?: string;
+  reason: string;
   vp: number;
   created: number;
   tx: string;
