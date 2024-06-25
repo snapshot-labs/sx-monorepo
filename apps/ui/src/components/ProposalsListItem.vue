@@ -130,7 +130,6 @@ const handleVoteClick = (choice: Choice) => {
         @close="modalOpenTimeline = false"
       />
       <ModalVote
-        v-if="selectedChoice"
         :choice="selectedChoice"
         :proposal="proposal"
         :open="modalOpenVote"

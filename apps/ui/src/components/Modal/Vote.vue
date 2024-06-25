@@ -21,7 +21,7 @@ const definition = {
 
 const props = defineProps<{
   proposal: Proposal;
-  choice: Choice;
+  choice: Choice | null;
   open: boolean;
 }>();
 
@@ -64,6 +64,8 @@ const formattedVotingPower = computed(() => {
 async function handleSubmit() {
   loading.value = true;
 
+  if (!props.choice) return;
+
   try {
     await vote(props.proposal, props.choice, form.value.reason);
     emit('voted');
@@ -85,7 +87,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" data-model="user-modal" @close="$emit('close')">
+  <UiModal :open="open" @close="$emit('close')">
     <template #header>
       <h3>Cast your vote</h3>
     </template>
@@ -93,10 +95,14 @@ watch(
     <div class="m-4 flex flex-col space-y-3">
       <dl>
         <dt class="text-sm leading-5">Choice</dt>
-        <dd
-          class="font-semibold text-skin-heading text-[20px] leading-6"
-          v-text="getChoiceText(proposal.choices, choice)"
-        />
+        <dd class="font-semibold text-skin-heading text-[20px] leading-6">
+          <span
+            v-if="choice"
+            class="test-skin-heading"
+            v-text="getChoiceText(proposal.choices, choice)"
+          />
+          <span v-else class="text-skin-danger"> No choice selected </span>
+        </dd>
       </dl>
       <dl>
         <dt class="text-sm leading-5">Voting power</dt>
