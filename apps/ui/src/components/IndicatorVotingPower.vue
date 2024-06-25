@@ -8,9 +8,11 @@ import type { VotingPower, VotingPowerStatus } from '@/networks/types';
 const props = defineProps<{
   networkId: NetworkID;
   votingPower: {
+    totalVotingPower: number;
     votingPowers: VotingPower[];
     status: VotingPowerStatus;
     symbol: string;
+    decimals: number;
     error: utils.errors.VotingPowerDetailsError | null;
   };
 }>();
@@ -23,21 +25,13 @@ const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
 
-const totalVotingPower = computed(() =>
-  props.votingPower.votingPowers.reduce((acc, b) => acc + b.value, 0n)
-);
-const decimals = computed(() =>
-  Math.max(...props.votingPower.votingPowers.map(votingPower => votingPower.decimals), 0)
-);
 const formattedVotingPower = computed(() => {
-  const value = _vp(Number(totalVotingPower.value) / 10 ** decimals.value);
+  const { totalVotingPower, decimals, symbol } = props.votingPower;
+  const value = _vp(Number(totalVotingPower) / 10 ** decimals);
 
-  if (props.votingPower.symbol) {
-    return `${value} ${props.votingPower.symbol}`;
-  }
-
-  return value;
+  return symbol ? `${value} ${symbol}` : value;
 });
+
 const loading = computed(() => props.votingPower.status === 'loading');
 
 function handleModalOpen() {
@@ -76,7 +70,6 @@ function handleModalOpen() {
         :open="modalOpen"
         :network-id="networkId"
         :voting-power="props.votingPower"
-        :final-decimals="decimals"
         @close="modalOpen = false"
         @get-voting-power="$emit('getVotingPower')"
       />

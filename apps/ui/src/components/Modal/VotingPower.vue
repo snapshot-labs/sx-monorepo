@@ -9,10 +9,11 @@ const props = defineProps<{
   networkId: NetworkID;
   votingPower: {
     symbol: string;
+    totalVotingPower: number;
+    decimals: number;
     votingPowers: VotingPower[];
     status: VotingPowerStatus;
   };
-  finalDecimals: number;
 }>();
 
 defineEmits<{
@@ -54,7 +55,7 @@ const error = computed(() => props.votingPower.status === 'error');
           />
           <div class="text-skin-link">
             {{
-              _n(Number(strategy.value) / 10 ** finalDecimals, 'compact', {
+              _n(Number(strategy.value) / 10 ** votingPower.decimals, 'compact', {
                 maximumFractionDigits: 2,
                 formatDust: true
               })

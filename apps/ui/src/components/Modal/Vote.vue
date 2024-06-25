@@ -43,16 +43,9 @@ const formErrors = computed(() =>
 const votingPower = computed(() =>
   votingPowersStore.get(props.proposal.space as Space, props.proposal.snapshot)
 );
-const totalVotingPower = computed(() => {
-  if (!votingPower.value) return 0n;
 
-  return votingPower.value.votingPowers.reduce((acc, b) => acc + b.value, 0n);
-});
-const decimals = computed(() =>
-  Math.max(...votingPower.value.votingPowers.map(votingPower => votingPower.decimals), 0)
-);
 const formattedVotingPower = computed(() => {
-  const value = _vp(Number(totalVotingPower.value) / 10 ** decimals.value);
+  const value = _vp(Number(votingPower.value.totalVotingPower) / 10 ** votingPower.value.decimals);
 
   if (votingPower.value.symbol) {
     return `${value} ${votingPower.value.symbol}`;
@@ -131,7 +124,12 @@ watch(
         <UiButton
           primary
           class="w-full"
-          :disabled="!choice || Object.keys(formErrors).length > 0 || totalVotingPower === 0n"
+          :disabled="
+            !choice ||
+            Object.keys(formErrors).length > 0 ||
+            votingPower.status === 'loading' ||
+            votingPower.totalVotingPower === 0n
+          "
           :loading="loading"
           @click="handleSubmit"
         >

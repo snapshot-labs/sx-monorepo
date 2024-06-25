@@ -14,8 +14,10 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
         number,
         {
           votingPowers: VotingPower[];
+          totalVotingPower: number;
           status: VotingPowerStatus;
           symbol: string;
+          decimals: number;
           error: utils.errors.VotingPowerDetailsError | null;
         }
       >
@@ -41,10 +43,12 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
     votingPowers.value[space.id][block] = {
       status: 'loading',
       votingPowers: [],
+      totalVotingPower: 0,
+      decimals: 18,
       symbol: space.voting_power_symbol
     };
     try {
-      votingPowers.value[space.id][block].votingPowers = await network.actions.getVotingPower(
+      const vp = await network.actions.getVotingPower(
         space.id,
         item.strategies,
         item.strategies_params,
@@ -55,7 +59,14 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
           chainId: space.snapshot_chain_id
         }
       );
-      votingPowers.value[space.id][block].status = 'success';
+
+      votingPowers.value[space.id][block] = {
+        ...votingPowers.value[space.id][block],
+        votingPowers: vp,
+        totalVotingPower: vp.reduce((acc, b) => acc + b.value, 0n),
+        status: 'success',
+        decimals: Math.max(...vp.map(votingPower => votingPower.decimals), 0)
+      };
     } catch (e: unknown) {
       if (e instanceof utils.errors.VotingPowerDetailsError) {
         votingPowers.value[space.id][block].error = e;
@@ -72,7 +83,6 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
   }
 
   return {
-    votingPowers,
     get,
     fetch,
     reset
