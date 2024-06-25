@@ -23,14 +23,14 @@ const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
 
-const votingPower = computed(() =>
+const totalVotingPower = computed(() =>
   props.votingPower.votingPowers.reduce((acc, b) => acc + b.value, 0n)
 );
 const decimals = computed(() =>
   Math.max(...props.votingPower.votingPowers.map(votingPower => votingPower.decimals), 0)
 );
 const formattedVotingPower = computed(() => {
-  const value = _vp(Number(votingPower.value) / 10 ** decimals.value);
+  const value = _vp(Number(totalVotingPower.value) / 10 ** decimals.value);
 
   if (props.votingPower.symbol) {
     return `${value} ${props.votingPower.symbol}`;
