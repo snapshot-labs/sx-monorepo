@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _vp, getChoiceText } from '@/helpers/utils';
+import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import type { Choice, Proposal, Space } from '@/types';
 
@@ -43,16 +43,7 @@ const formErrors = computed(() =>
 const votingPower = computed(() =>
   votingPowersStore.get(props.proposal.space as Space, props.proposal.snapshot)
 );
-
-const formattedVotingPower = computed(() => {
-  const value = _vp(Number(votingPower.value.totalVotingPower) / 10 ** votingPower.value.decimals);
-
-  if (votingPower.value.symbol) {
-    return `${value} ${votingPower.value.symbol}`;
-  }
-
-  return value;
-});
+const formattedVotingPower = computed(() => getFormattedVotingPower(votingPower.value));
 
 async function handleSubmit() {
   loading.value = true;

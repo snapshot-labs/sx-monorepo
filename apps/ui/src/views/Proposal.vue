@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { offchainNetworks } from '@/networks';
-import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
+import { getStampUrl, getCacheHash, sanitizeUrl, getFormattedVotingPower } from '@/helpers/utils';
 import type { Choice } from '@/types';
 
 const route = useRoute();
@@ -37,6 +37,10 @@ const votingPowerDecimals = computed(() => {
     0
   );
 });
+
+const votingPower = computed(() =>
+  votingPowersStore.get(proposal.value.space, proposal.value.snapshot)
+);
 
 async function handleVoteClick(choice: Choice) {
   if (!web3.value.account) return (modalAccountOpen.value = true);
@@ -141,7 +145,7 @@ watchEffect(() => {
             v-if="web3.account && networkId"
             v-slot="props"
             :network-id="networkId"
-            :voting-power="votingPowersStore.get(proposal.space, proposal.snapshot)"
+            :voting-power="votingPower"
             class="mb-2 flex items-center"
             @get-voting-power="
               () => votingPowersStore.fetch(proposal.space, web3.account, proposal.snapshot)
@@ -149,11 +153,8 @@ watchEffect(() => {
           >
             <div
               v-if="
-                votingPowersStore.get(proposal.space, proposal.snapshot).error?.details ===
-                  'NOT_READY_YET' &&
-                ['evmSlotValue', 'ozVotesStorageProof'].includes(
-                  votingPowersStore.get(proposal.space, proposal.snapshot).error.source
-                )
+                votingPower.error?.details === 'NOT_READY_YET' &&
+                ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPower.error.source)
               "
               class="mt-2"
             >
@@ -165,18 +166,12 @@ watchEffect(() => {
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
               <a @click="props.onClick">
-                <UiLoading
-                  v-if="
-                    votingPowersStore.get(proposal.space, proposal.snapshot).status === 'loading'
-                  "
-                />
+                <UiLoading v-if="votingPower.status === 'loading'" />
                 <IH-exclamation
-                  v-else-if="
-                    votingPowersStore.get(proposal.space, proposal.snapshot).status === 'error'
-                  "
+                  v-else-if="votingPower.status === 'error'"
                   class="inline-block text-rose-500"
                 />
-                <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
+                <span v-else class="text-skin-link" v-text="getFormattedVotingPower(votingPower)" />
               </a>
             </template>
           </IndicatorVotingPower>

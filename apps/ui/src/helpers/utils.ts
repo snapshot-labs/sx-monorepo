@@ -488,3 +488,14 @@ export function getSocialNetworksLink(data: any) {
     })
     .filter(social => social.href);
 }
+
+export function getFormattedVotingPower(votingPower: {
+  totalVotingPower: number;
+  decimals: number;
+  symbol: string;
+}) {
+  const { totalVotingPower, decimals, symbol } = votingPower;
+  const value = _vp(Number(totalVotingPower) / 10 ** decimals);
+
+  return symbol ? `${value} ${symbol}` : value;
+}

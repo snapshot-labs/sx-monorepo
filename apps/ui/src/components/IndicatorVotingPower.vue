@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _vp } from '@/helpers/utils';
+import { getFormattedVotingPower } from '@/helpers/utils';
 import { utils } from '@snapshot-labs/sx';
 import { evmNetworks } from '@/networks';
 import type { NetworkID } from '@/types';
@@ -25,12 +25,7 @@ const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
 
-const formattedVotingPower = computed(() => {
-  const { totalVotingPower, decimals, symbol } = props.votingPower;
-  const value = _vp(Number(totalVotingPower) / 10 ** decimals);
-
-  return symbol ? `${value} ${symbol}` : value;
-});
+const formattedVotingPower = computed(() => getFormattedVotingPower(props.votingPower));
 
 const loading = computed(() => props.votingPower.status === 'loading');
 
