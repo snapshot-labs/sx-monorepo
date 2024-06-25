@@ -22,16 +22,21 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
     >
   >({});
 
-  const get = (space: Space, block = 'latest') => {
+  const get = (space: Space, block: string | number = 'latest') => {
     return votingPowers.value[space.id][block];
   };
 
-  const fetch = async (item: Space | Proposal, account: string, block = 'latest') => {
+  const fetch = async (
+    item: Space | Proposal,
+    account: string,
+    block: string | number = 'latest'
+  ) => {
     const space: Space = 'space' in item ? (item.space as Space) : item;
 
     if (votingPowers.value?.[space.id]?.[block]) return;
 
-    const network = computed(() => getNetwork(space.network));
+    const network = getNetwork(item.network);
+
     votingPowers.value[space.id] ||= {};
     votingPowers.value[space.id][block] = {
       status: 'loading',
@@ -39,14 +44,14 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       symbol: space.voting_power_symbol
     };
     try {
-      votingPowers.value[space.id][block].votingPowers = await network.value.actions.getVotingPower(
+      votingPowers.value[space.id][block].votingPowers = await network.actions.getVotingPower(
         space.id,
         item.strategies,
         item.strategies_params,
         space.strategies_parsed_metadata,
         account,
         {
-          at: supportsNullCurrent(space.network) ? null : getCurrent(space.network) || 0,
+          at: supportsNullCurrent(item.network) ? null : getCurrent(item.network) || 0,
           chainId: space.snapshot_chain_id
         }
       );

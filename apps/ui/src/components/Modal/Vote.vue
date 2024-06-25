@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { getChoiceText } from '@/helpers/utils';
+import { _vp, getChoiceText } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import type { Choice, Proposal } from '@/types';
+import type { Choice, Proposal, Space } from '@/types';
 
 const definition = {
   type: 'object',
@@ -31,6 +31,8 @@ const emit = defineEmits<{
 }>();
 
 const { vote } = useActions();
+const { web3 } = useWeb3();
+const votingPowersStore = useVotingPowersStore();
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -38,6 +40,26 @@ const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = computed(() =>
   validateForm(definition, form.value, { skipEmptyOptionalFields: true })
 );
+const votingPower = computed(() =>
+  votingPowersStore.get(props.proposal.space as Space, props.proposal.snapshot)
+);
+const totalVotingPower = computed(() => {
+  if (!votingPower.value) return 0n;
+
+  return votingPower.value.votingPowers.reduce((acc, b) => acc + b.value, 0n);
+});
+const decimals = computed(() =>
+  Math.max(...votingPower.value.votingPowers.map(votingPower => votingPower.decimals), 0)
+);
+const formattedVotingPower = computed(() => {
+  const value = _vp(Number(totalVotingPower.value) / 10 ** decimals.value);
+
+  if (votingPower.value.symbol) {
+    return `${value} ${votingPower.value.symbol}`;
+  }
+
+  return value;
+});
 
 async function handleSubmit() {
   loading.value = true;
@@ -50,6 +72,16 @@ async function handleSubmit() {
     emit('close');
   }
 }
+
+watch(
+  [() => props.open, () => props.proposal],
+  ([open, proposal]) => {
+    if (!open) return;
+
+    votingPowersStore.fetch(proposal, web3.value.account, proposal.snapshot);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -68,7 +100,19 @@ async function handleSubmit() {
       </dl>
       <dl>
         <dt class="text-sm leading-5">Voting power</dt>
-        <dd class="font-semibold text-skin-heading text-[20px] leading-6" v-text="'--'" />
+        <dd
+          v-if="votingPower?.status === 'success'"
+          class="font-semibold text-skin-heading text-[20px] leading-6"
+          v-text="formattedVotingPower"
+        />
+        <dd
+          v-else-if="votingPower?.status === 'error'"
+          class="font-semibold text-skin-heading text-[20px] leading-6"
+          v-text="formattedVotingPower"
+        />
+        <dd v-else>
+          <UiLoading />
+        </dd>
       </dl>
       <div class="s-box">
         <UiForm v-model="form" :error="formErrors" :definition="definition" />
@@ -81,7 +125,7 @@ async function handleSubmit() {
         <UiButton
           primary
           class="w-full"
-          :disabled="!choice || Object.keys(formErrors).length > 0"
+          :disabled="!choice || Object.keys(formErrors).length > 0 || totalVotingPower === 0n"
           :loading="loading"
           @click="handleSubmit"
         >

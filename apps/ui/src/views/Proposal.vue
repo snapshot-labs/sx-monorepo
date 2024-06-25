@@ -58,11 +58,7 @@ watch([() => web3.value.account, proposal], ([account, toProposal]) => {
     return votingPowersStore.reset();
   }
 
-  votingPowersStore.fetch(
-    { ...toProposal, space: { network: networkId.value, ...toProposal.space } },
-    account,
-    toProposal.snapshot
-  );
+  votingPowersStore.fetch(toProposal, account, toProposal.snapshot);
 });
 watch(
   [networkId, spaceAddress, id],
