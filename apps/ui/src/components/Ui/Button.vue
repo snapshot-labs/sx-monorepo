@@ -36,6 +36,10 @@ withDefaults(
 
   &.primary {
     @apply bg-skin-link text-skin-bg border-skin-link;
+
+    &:disabled {
+      @apply bg-skin-bg border-skin-border;
+    }
   }
 }
 </style>
