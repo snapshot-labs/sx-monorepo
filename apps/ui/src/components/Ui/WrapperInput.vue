@@ -33,7 +33,8 @@ const showError = computed(() => props.error && props.dirty);
 
 <style lang="scss">
 .s-base {
-  .s-label:has(+ input:focus),
+  .s-label:has(~ input:focus),
+  .s-label:has(~ textarea:focus),
   &.s-error {
     .s-label-char-count {
       display: block;
