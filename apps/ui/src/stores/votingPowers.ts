@@ -4,28 +4,26 @@ import { getNetwork, supportsNullCurrent } from '@/networks';
 import type { Proposal, Space } from '@/types';
 import type { VotingPower, VotingPowerStatus } from '@/networks/types';
 
+type VotingPowerItem = {
+  votingPowers: VotingPower[];
+  totalVotingPower: bigint;
+  status: VotingPowerStatus;
+  symbol: string;
+  decimals: number;
+  error: utils.errors.VotingPowerDetailsError | null;
+};
+
 export const useVotingPowersStore = defineStore('votingPowers', () => {
   const { getCurrent } = useMetaStore();
 
-  const votingPowers = ref<
-    Record<
-      string,
-      Record<
-        number,
-        {
-          votingPowers: VotingPower[];
-          totalVotingPower: number;
-          status: VotingPowerStatus;
-          symbol: string;
-          decimals: number;
-          error: utils.errors.VotingPowerDetailsError | null;
-        }
-      >
-    >
-  >({});
+  const votingPowers = reactive<Map<string, VotingPowerItem>>(new Map());
+
+  function getIndex(space: Space, block: string | number = 'latest') {
+    return `${space.id}:${block}`;
+  }
 
   const get = (space: Space, block: string | number = 'latest') => {
-    return votingPowers.value[space.id][block];
+    return votingPowers.get(getIndex(space, block));
   };
 
   const fetch = async (
@@ -35,18 +33,25 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
   ) => {
     const space: Space = 'space' in item ? (item.space as Space) : item;
 
-    if (votingPowers.value?.[space.id]?.[block]) return;
+    if (votingPowers.has(getIndex(space, block))) return;
 
     const network = getNetwork(item.network);
 
-    votingPowers.value[space.id] ||= {};
-    votingPowers.value[space.id][block] = {
+    let vpItem: VotingPowerItem = {
       status: 'loading',
       votingPowers: [],
-      totalVotingPower: 0,
+      totalVotingPower: 0n,
       decimals: 18,
-      symbol: space.voting_power_symbol
+      symbol: space.voting_power_symbol,
+      error: null
     };
+
+    if (!account) {
+      vpItem.status = 'success';
+      votingPowers.set(getIndex(space, block), vpItem);
+      return;
+    }
+
     try {
       const vp = await network.actions.getVotingPower(
         space.id,
@@ -60,8 +65,8 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
         }
       );
 
-      votingPowers.value[space.id][block] = {
-        ...votingPowers.value[space.id][block],
+      vpItem = {
+        ...vpItem,
         votingPowers: vp,
         totalVotingPower: vp.reduce((acc, b) => acc + b.value, 0n),
         status: 'success',
@@ -69,17 +74,18 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       };
     } catch (e: unknown) {
       if (e instanceof utils.errors.VotingPowerDetailsError) {
-        votingPowers.value[space.id][block].error = e;
+        vpItem.error = e;
       } else {
         console.warn('Failed to load voting power', e);
       }
 
-      votingPowers.value[space.id][block].status = 'error';
+      vpItem.status = 'error';
     }
+    votingPowers.set(getIndex(space, block), vpItem);
   };
 
   function reset() {
-    votingPowers.value = {};
+    votingPowers.clear();
   }
 
   return {

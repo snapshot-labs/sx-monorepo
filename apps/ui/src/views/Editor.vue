@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork } from '@/networks';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
@@ -44,15 +44,13 @@ const {
   transaction,
   reset
 } = useWalletConnectTransaction();
-const { getCurrent } = useMetaStore();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
+const votingPowersStore = useVotingPowersStore();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
-const fetchingVotingPower = ref(true);
-const votingPowerValid = ref(false);
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const space = computed(() => {
@@ -172,11 +170,7 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  return (
-    !fetchingVotingPower.value &&
-    votingPowerValid.value &&
-    Object.keys(formErrors.value).length === 0
-  );
+  return votingPowerValid.value && Object.keys(formErrors.value).length === 0;
 });
 
 async function handleProposeClick() {
@@ -237,33 +231,20 @@ function handleTransactionAccept() {
   reset();
 }
 
-async function getVotingPower() {
-  if (!space.value || !web3.value.account) return;
+const votingPower = computed(() => {
+  if (!space.value) return null;
 
-  fetchingVotingPower.value = true;
-  try {
-    const network = getNetwork(space.value.network);
+  return votingPowersStore.get(space.value);
+});
 
-    const votingPowers = await network.actions.getVotingPower(
-      space.value.id,
-      space.value.voting_power_validation_strategy_strategies,
-      space.value.voting_power_validation_strategy_strategies_params,
-      space.value.voting_power_validation_strategies_parsed_metadata,
-      web3.value.account,
-      {
-        at: supportsNullCurrent(space.value.network) ? null : getCurrent(space.value.network) || 0,
-        chainId: space.value.snapshot_chain_id
-      }
-    );
+const votingPowerValid = computed(() => {
+  if (!votingPower.value) return false;
 
-    const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);
-    votingPowerValid.value = currentVotingPower >= BigInt(space.value.proposal_threshold);
-  } catch (e) {
-    console.warn('Failed to load voting power', e);
-  } finally {
-    fetchingVotingPower.value = false;
-  }
-}
+  return (
+    votingPower.value.status === 'success' &&
+    votingPower.value.totalVotingPower >= BigInt(space.value!.proposal_threshold)
+  );
+});
 
 watch(
   [networkId, address],
@@ -274,7 +255,16 @@ watch(
   },
   { immediate: true }
 );
-watch([space, () => web3.value.account], () => getVotingPower());
+watch(
+  [space, () => web3.value.authLoading, () => web3.value.account],
+  ([toSpace, authLoading, toAccount]) => {
+    if (!toSpace || !proposal.value || authLoading) return;
+
+    if (!toAccount) votingPowersStore.reset();
+
+    votingPowersStore.fetch(toSpace, web3.value.account);
+  }
+);
 watch(proposalData, () => {
   if (!proposal.value) return;
 
@@ -345,7 +335,7 @@ export default defineComponent({
           </UiButton>
           <UiButton
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
-            :loading="sending || (web3.account !== '' && fetchingVotingPower)"
+            :loading="sending || !votingPower || votingPower.status === 'loading'"
             :disabled="!canSubmit"
             @click="handleProposeClick"
           >
@@ -360,9 +350,14 @@ export default defineComponent({
     </nav>
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
-        <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
-          You do not have enough voting power to create proposal in this space.
-        </UiAlert>
+        <template v-if="votingPower">
+          <UiAlert v-if="votingPower.status === 'error'" type="error" class="mb-4">
+            Error loading the voting power, please try again
+          </UiAlert>
+          <UiAlert v-else-if="!votingPowerValid" type="error" class="mb-4">
+            You do not have enough voting power to create proposal in this space.
+          </UiAlert>
+        </template>
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.title"
