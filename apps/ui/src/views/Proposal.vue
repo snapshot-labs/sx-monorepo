@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { utils } from '@snapshot-labs/sx';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { offchainNetworks } from '@/networks';
 import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
-import { Choice } from '@/types';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import type { Choice } from '@/types';
 
 const route = useRoute();
 const { setFavicon } = useFavicon();
@@ -11,16 +9,13 @@ const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
+const votingPowersStore = useVotingPowersStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
 
 const modalOpenVote = ref(false);
 const selectedChoice = ref<Choice | null>(null);
-const votingPowers = ref([] as VotingPower[]);
-const votingPowerStatus = ref<VotingPowerStatus>('loading');
-const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
 
-const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
 const proposal = computed(() => {
   if (!resolved.value || !spaceAddress.value || !networkId.value) {
@@ -42,40 +37,6 @@ const votingPowerDecimals = computed(() => {
   );
 });
 
-async function getVotingPower() {
-  if (!network.value) return;
-
-  votingPowerDetailsError.value = null;
-
-  if (!web3.value.account || !proposal.value) {
-    votingPowers.value = [];
-    votingPowerStatus.value = 'success';
-    return;
-  }
-
-  votingPowerStatus.value = 'loading';
-  try {
-    votingPowers.value = await network.value.actions.getVotingPower(
-      proposal.value.space.id,
-      proposal.value.strategies,
-      proposal.value.strategies_params,
-      proposal.value.space.strategies_parsed_metadata,
-      web3.value.account,
-      { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
-    );
-    votingPowerStatus.value = 'success';
-  } catch (e: unknown) {
-    if (e instanceof utils.errors.VotingPowerDetailsError) {
-      votingPowerDetailsError.value = e;
-    } else {
-      console.warn('Failed to load voting power', e);
-    }
-
-    votingPowers.value = [];
-    votingPowerStatus.value = 'error';
-  }
-}
-
 async function handleVoteClick(choice: Choice) {
   selectedChoice.value = choice;
   modalOpenVote.value = true;
@@ -90,7 +51,19 @@ async function handleVoteSubmitted() {
   }
 }
 
-watch([() => web3.value.account, proposal], () => getVotingPower());
+watch([() => web3.value.account, proposal], ([account, toProposal]) => {
+  if (!toProposal) return;
+
+  if (!account) {
+    return votingPowersStore.reset();
+  }
+
+  votingPowersStore.fetch(
+    { ...toProposal, space: { network: networkId.value, ...toProposal.space } },
+    account,
+    toProposal.snapshot
+  );
+});
 watch(
   [networkId, spaceAddress, id],
   async ([networkId, spaceAddress, id]) => {
@@ -169,16 +142,19 @@ watchEffect(() => {
             v-if="web3.account && networkId"
             v-slot="props"
             :network-id="networkId"
-            :status="votingPowerStatus"
-            :voting-power-symbol="proposal.space.voting_power_symbol"
-            :voting-powers="votingPowers"
+            :voting-power="votingPowersStore.get(proposal.space, proposal.snapshot)"
             class="mb-2 flex items-center"
-            @get-voting-power="getVotingPower"
+            @get-voting-power="
+              () => votingPowersStore.fetch(proposal.space, web3.account, proposal.snapshot)
+            "
           >
             <div
               v-if="
-                votingPowerDetailsError?.details === 'NOT_READY_YET' &&
-                ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPowerDetailsError.source)
+                votingPowersStore.get(proposal.space, proposal.snapshot).error?.details ===
+                  'NOT_READY_YET' &&
+                ['evmSlotValue', 'ozVotesStorageProof'].includes(
+                  votingPowersStore.get(proposal.space, proposal.snapshot).error.source
+                )
               "
               class="mt-2"
             >
@@ -190,9 +166,15 @@ watchEffect(() => {
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
               <a @click="props.onClick">
-                <UiLoading v-if="votingPowerStatus === 'loading'" />
+                <UiLoading
+                  v-if="
+                    votingPowersStore.get(proposal.space, proposal.snapshot).status === 'loading'
+                  "
+                />
                 <IH-exclamation
-                  v-else-if="votingPowerStatus === 'error'"
+                  v-else-if="
+                    votingPowersStore.get(proposal.space, proposal.snapshot).status === 'error'
+                  "
                   class="inline-block text-rose-500"
                 />
                 <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />

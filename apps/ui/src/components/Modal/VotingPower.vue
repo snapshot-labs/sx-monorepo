@@ -7,9 +7,11 @@ import { VotingPower, VotingPowerStatus } from '@/networks/types';
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
-  votingPowerSymbol: string;
-  votingPowers: VotingPower[];
-  votingPowerStatus: VotingPowerStatus;
+  votingPower: {
+    symbol: string;
+    votingPowers: VotingPower[];
+    status: VotingPowerStatus;
+  };
   finalDecimals: number;
 }>();
 
@@ -22,8 +24,8 @@ const network = computed(() => getNetwork(props.networkId));
 const baseNetwork = computed(() =>
   network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
 );
-const loading = computed(() => props.votingPowerStatus === 'loading');
-const error = computed(() => props.votingPowerStatus === 'error');
+const loading = computed(() => props.votingPower.status === 'loading');
+const error = computed(() => props.votingPower.status === 'error');
 </script>
 
 <template>
@@ -40,7 +42,7 @@ const error = computed(() => props.votingPowerStatus === 'error');
         </UiButton>
       </div>
       <div
-        v-for="(strategy, i) in votingPowers"
+        v-for="(strategy, i) in votingPower.votingPowers"
         :key="i"
         class="py-3 px-4 border-b last:border-b-0"
       >
@@ -57,7 +59,7 @@ const error = computed(() => props.votingPowerStatus === 'error');
                 formatDust: true
               })
             }}
-            {{ votingPowerSymbol }}
+            {{ votingPower.symbol }}
           </div>
         </div>
         <div class="flex justify-between">

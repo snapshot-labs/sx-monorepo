@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { _vp } from '@/helpers/utils';
-import { NetworkID } from '@/types';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { utils } from '@snapshot-labs/sx';
 import { evmNetworks } from '@/networks';
+import type { NetworkID } from '@/types';
+
+import type { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{
   networkId: NetworkID;
-  status: VotingPowerStatus;
-  votingPowerSymbol: string;
-  votingPowers: VotingPower[];
+  votingPower: {
+    votingPowers: VotingPower[];
+    status: VotingPowerStatus;
+    symbol: string;
+    error: utils.errors.VotingPowerDetailsError | null;
+  };
 }>();
 
 defineEmits<{
@@ -19,20 +24,22 @@ const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
 
-const votingPower = computed(() => props.votingPowers.reduce((acc, b) => acc + b.value, 0n));
+const votingPower = computed(() =>
+  props.votingPower.votingPowers.reduce((acc, b) => acc + b.value, 0n)
+);
 const decimals = computed(() =>
-  Math.max(...props.votingPowers.map(votingPower => votingPower.decimals), 0)
+  Math.max(...props.votingPower.votingPowers.map(votingPower => votingPower.decimals), 0)
 );
 const formattedVotingPower = computed(() => {
   const value = _vp(Number(votingPower.value) / 10 ** decimals.value);
 
-  if (props.votingPowerSymbol) {
-    return `${value} ${props.votingPowerSymbol}`;
+  if (props.votingPower.symbol) {
+    return `${value} ${props.votingPower.symbol}`;
   }
 
   return value;
 });
-const loading = computed(() => props.status === 'loading');
+const loading = computed(() => props.votingPower.status === 'loading');
 
 function handleModalOpen() {
   modalOpen.value = true;
@@ -57,7 +64,10 @@ function handleModalOpen() {
           @click="handleModalOpen"
         >
           <IH-lightning-bolt class="inline-block -ml-1" />
-          <IH-exclamation v-if="props.status === 'error'" class="inline-block ml-1 text-rose-500" />
+          <IH-exclamation
+            v-if="props.votingPower.status === 'error'"
+            class="inline-block ml-1 text-rose-500"
+          />
           <span v-else class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
       </UiTooltip>
@@ -66,9 +76,7 @@ function handleModalOpen() {
       <ModalVotingPower
         :open="modalOpen"
         :network-id="networkId"
-        :voting-power-symbol="votingPowerSymbol"
-        :voting-powers="props.votingPowers"
-        :voting-power-status="status"
+        :voting-power="props.votingPower"
         :final-decimals="decimals"
         @close="modalOpen = false"
         @get-voting-power="$emit('getVotingPower')"
