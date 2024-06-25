@@ -334,7 +334,8 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice
+      choice: Choice,
+      metadataCid?: string
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -370,7 +371,8 @@ export function createActions(
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
-        choice: getSdkChoice(choice)
+        choice: getSdkChoice(choice),
+        metadataUri: metadataCid ? `ipfs://${metadataCid}` : ''
       };
 
       if (relayerType === 'starknet') {
