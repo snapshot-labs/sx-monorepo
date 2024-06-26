@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { _n } from '@/helpers/utils';
+
 const props = withDefaults(
   defineProps<{
     definition: any;
@@ -20,7 +22,7 @@ const showError = computed(() => props.error && props.dirty);
         v-if="inputValueLength >= 0 && definition.maxLength"
         class="text-sm hidden grow text-right s-label-char-count whitespace-nowrap"
       >
-        {{ inputValueLength }} / {{ definition.maxLength }}
+        {{ _n(inputValueLength) }} / {{ _n(definition.maxLength) }}
       </div>
     </div>
     <slot />
@@ -31,7 +33,8 @@ const showError = computed(() => props.error && props.dirty);
 
 <style lang="scss">
 .s-base {
-  .s-label:has(+ input:focus),
+  .s-label:has(~ input:focus),
+  .s-label:has(~ textarea:focus),
   &.s-error {
     .s-label-char-count {
       display: block;
