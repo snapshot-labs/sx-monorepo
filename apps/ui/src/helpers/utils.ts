@@ -489,11 +489,13 @@ export function getSocialNetworksLink(data: any) {
     .filter(social => social.href);
 }
 
-export function getFormattedVotingPower(votingPower: {
-  totalVotingPower: number;
+export function getFormattedVotingPower(votingPower?: {
+  totalVotingPower: bigint;
   decimals: number;
   symbol: string;
 }) {
+  if (!votingPower) return;
+
   const { totalVotingPower, decimals, symbol } = votingPower;
   const value = _vp(Number(totalVotingPower) / 10 ** decimals);
 

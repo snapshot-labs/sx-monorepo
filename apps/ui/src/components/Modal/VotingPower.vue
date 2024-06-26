@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { utils } from '@snapshot-labs/sx';
 import { getNetwork } from '@/networks';
 import { _n, shorten } from '@/helpers/utils';
 import { NetworkID } from '@/types';
@@ -7,12 +8,13 @@ import { VotingPower, VotingPowerStatus } from '@/networks/types';
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
-  votingPower: {
+  votingPower?: {
     symbol: string;
-    totalVotingPower: number;
+    totalVotingPower: bigint;
     decimals: number;
     votingPowers: VotingPower[];
     status: VotingPowerStatus;
+    error: utils.errors.VotingPowerDetailsError | null;
   };
 }>();
 
@@ -25,8 +27,8 @@ const network = computed(() => getNetwork(props.networkId));
 const baseNetwork = computed(() =>
   network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
 );
-const loading = computed(() => props.votingPower.status === 'loading');
-const error = computed(() => props.votingPower.status === 'error');
+const loading = computed(() => !props.votingPower || props.votingPower.status === 'loading');
+const error = computed(() => props.votingPower && props.votingPower.status === 'error');
 </script>
 
 <template>
@@ -35,7 +37,7 @@ const error = computed(() => props.votingPower.status === 'error');
       <h3>Your voting power</h3>
     </template>
     <UiLoading v-if="loading" class="p-4 block text-center" />
-    <div v-else>
+    <div v-else-if="votingPower">
       <div v-if="error" class="p-4 flex flex-col gap-3 items-start">
         <UiAlert type="error">There was an error fetching your voting power.</UiAlert>
         <UiButton type="button" class="flex items-center gap-2" @click="$emit('getVotingPower')">

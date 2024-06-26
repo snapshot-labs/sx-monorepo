@@ -21,6 +21,8 @@ const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
 
+const votingPower = computed(() => votingPowersStore.get(props.space));
+
 async function handleEndReached() {
   if (!proposalsRecord.value?.hasMoreProposals) return;
 
@@ -91,7 +93,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
       <div class="flex flex-row p-4 space-x-2">
         <IndicatorVotingPower
           :network-id="space.network"
-          :voting-power="votingPowersStore.get(space)"
+          :voting-power="votingPower"
           @get-voting-power="() => votingPowersStore.fetch(space, web3.account)"
         />
         <router-link :to="{ name: 'editor' }">

@@ -45,6 +45,13 @@ const votingPower = computed(() =>
 );
 const formattedVotingPower = computed(() => getFormattedVotingPower(votingPower.value));
 
+const canSubmit = computed(
+  () =>
+    !!props.choice &&
+    Object.keys(formErrors.value).length === 0 &&
+    votingPower.value?.totalVotingPower !== 0n
+);
+
 async function handleSubmit() {
   loading.value = true;
 
@@ -77,6 +84,15 @@ watch(
     </template>
 
     <div class="m-4 flex flex-col space-y-3">
+      <template v-if="votingPower">
+        <UiAlert v-if="votingPower.status === 'error'" type="error">
+          Error loading the voting power, please try again
+        </UiAlert>
+        <UiAlert v-else-if="votingPower.totalVotingPower === 0n" type="error">
+          You do not have enough voting power to vote on this proposal.
+        </UiAlert>
+      </template>
+
       <dl>
         <dt class="text-sm leading-5">Choice</dt>
         <dd class="font-semibold text-skin-heading text-[20px] leading-6">
@@ -90,8 +106,11 @@ watch(
       </dl>
       <dl>
         <dt class="text-sm leading-5">Voting power</dt>
+        <dd v-if="!votingPower || votingPower.status === 'loading'">
+          <UiLoading />
+        </dd>
         <dd
-          v-if="votingPower?.status === 'success'"
+          v-else-if="votingPower?.status === 'success'"
           class="font-semibold text-skin-heading text-[20px] leading-6"
           v-text="formattedVotingPower"
         />
@@ -100,9 +119,6 @@ watch(
           class="font-semibold text-skin-heading text-[20px] leading-6"
           v-text="formattedVotingPower"
         />
-        <dd v-else>
-          <UiLoading />
-        </dd>
       </dl>
       <div class="s-box">
         <UiForm v-model="form" :error="formErrors" :definition="definition" />
@@ -115,12 +131,7 @@ watch(
         <UiButton
           primary
           class="w-full"
-          :disabled="
-            !choice ||
-            Object.keys(formErrors).length > 0 ||
-            votingPower.status === 'loading' ||
-            votingPower.totalVotingPower === 0n
-          "
+          :disabled="!canSubmit"
           :loading="loading"
           @click="handleSubmit"
         >

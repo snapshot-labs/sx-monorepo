@@ -153,6 +153,7 @@ watchEffect(() => {
           >
             <div
               v-if="
+                votingPower &&
                 votingPower.error?.details === 'NOT_READY_YET' &&
                 ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPower.error.source)
               "
@@ -166,7 +167,7 @@ watchEffect(() => {
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
               <a @click="props.onClick">
-                <UiLoading v-if="votingPower.status === 'loading'" />
+                <UiLoading v-if="!votingPower || votingPower.status === 'loading'" />
                 <IH-exclamation
                   v-else-if="votingPower.status === 'error'"
                   class="inline-block text-rose-500"

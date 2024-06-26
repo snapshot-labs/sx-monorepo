@@ -7,8 +7,8 @@ import type { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{
   networkId: NetworkID;
-  votingPower: {
-    totalVotingPower: number;
+  votingPower?: {
+    totalVotingPower: bigint;
     votingPowers: VotingPower[];
     status: VotingPowerStatus;
     symbol: string;
@@ -27,7 +27,7 @@ const modalOpen = ref(false);
 
 const formattedVotingPower = computed(() => getFormattedVotingPower(props.votingPower));
 
-const loading = computed(() => props.votingPower.status === 'loading');
+const loading = computed(() => !props.votingPower || props.votingPower.status === 'loading');
 
 function handleModalOpen() {
   modalOpen.value = true;
@@ -53,7 +53,7 @@ function handleModalOpen() {
         >
           <IH-lightning-bolt class="inline-block -ml-1" />
           <IH-exclamation
-            v-if="props.votingPower.status === 'error'"
+            v-if="props.votingPower && props.votingPower.status === 'error'"
             class="inline-block ml-1 text-rose-500"
           />
           <span v-else class="ml-1">{{ formattedVotingPower }}</span>
