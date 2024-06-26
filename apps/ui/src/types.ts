@@ -208,8 +208,9 @@ export type User = {
   id: string;
   proposal_count: number;
   vote_count: number;
-  created: number;
+  created?: number;
   follows?: string[];
+  name?: string;
 } & UserProfile;
 
 export type UserActivity = {

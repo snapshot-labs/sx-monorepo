@@ -372,9 +372,9 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${author}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${author.address}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = author.address;
     leaderboardItem.vote_count = 0;
@@ -500,7 +500,7 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   const created = block?.timestamp ?? getCurrentTimestamp();
   const voter = formatAddressVariant(findVariant(event.voter));
 
-  const vote = new Vote(`${spaceId}/${proposalId}/${voter}`);
+  const vote = new Vote(`${spaceId}/${proposalId}/${voter.address}`);
   vote.space = spaceId;
   vote.proposal = proposalId;
   vote.voter = voter.address;
@@ -521,9 +521,9 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${voter}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${voter.address}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = voter.address;
     leaderboardItem.vote_count = 0;

@@ -389,17 +389,23 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return formatSpace(data.space, networkId);
     },
-    loadUser: async (id: string): Promise<User | null> => {
-      const {
+    loadUser: async (id: string): Promise<User> => {
+      let {
         data: { user }
       } = await apollo.query({
         query: USER_QUERY,
         variables: { id }
       });
 
-      if (!user) return null;
+      if (!user) {
+        user = { id };
+      }
 
-      return formatUser(user);
+      user.name ||= (await getNames([id]))[id];
+      user.proposal_count ||= 0;
+      user.vote_count ||= 0;
+
+      return user;
     },
     loadUserActivities: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain

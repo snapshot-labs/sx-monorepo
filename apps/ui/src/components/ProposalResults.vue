@@ -104,7 +104,7 @@ const otherResultsSummary = computed(() => {
       >
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
-          :class="{ [`_${result.choice} choice-bg opacity-10`]: proposal.type === 'basic' }"
+          :class="{ [`_${result.choice} choice-bg opacity-20`]: proposal.type === 'basic' }"
           :style="{
             width: `${result.progress.toFixed(2)}%`
           }"

@@ -1,0 +1,140 @@
+[
+  {
+    "name": "core::integer::u256",
+    "type": "struct",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<core::felt252>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "name": "sx::external::herodotus::ProofElement",
+    "type": "struct",
+    "members": [
+      {
+        "name": "index",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "value",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "proof",
+        "type": "core::array::Span::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<sx::external::herodotus::ProofElement>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<sx::external::herodotus::ProofElement>"
+      }
+    ]
+  },
+  {
+    "name": "core::option::Option::<sx::external::herodotus::ProofElement>",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "Some",
+        "type": "sx::external::herodotus::ProofElement"
+      },
+      {
+        "name": "None",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "sx::external::herodotus::BinarySearchTree",
+    "type": "struct",
+    "members": [
+      {
+        "name": "mapper_id",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "last_pos",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "peaks",
+        "type": "core::array::Span::<core::felt252>"
+      },
+      {
+        "name": "proofs",
+        "type": "core::array::Span::<sx::external::herodotus::ProofElement>"
+      },
+      {
+        "name": "left_neighbor",
+        "type": "core::option::Option::<sx::external::herodotus::ProofElement>"
+      }
+    ]
+  },
+  {
+    "name": "cache_timestamp",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "timestamp",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "tree",
+        "type": "sx::external::herodotus::BinarySearchTree"
+      }
+    ],
+    "outputs": [],
+    "state_mutability": "external"
+  },
+  {
+    "name": "cached_timestamps",
+    "type": "function",
+    "inputs": [
+      {
+        "name": "timestamp",
+        "type": "core::integer::u32"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "core::integer::u256"
+      }
+    ],
+    "state_mutability": "view"
+  },
+  {
+    "name": "constructor",
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "timestamp_remappers",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "facts_registry",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  }
+]

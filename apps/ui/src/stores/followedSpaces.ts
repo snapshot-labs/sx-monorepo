@@ -120,13 +120,18 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   }
 
   watch(
-    [() => web3.value.account, () => web3.value.authLoading, () => authInitiated.value],
-    async ([web3, authLoading, authInitiated]) => {
+    [
+      () => web3.value.account,
+      () => web3.value.type,
+      () => web3.value.authLoading,
+      () => authInitiated.value
+    ],
+    async ([web3, walletType, authLoading, authInitiated]) => {
       if (!authInitiated || authLoading) return;
 
       followedSpacesLoaded.value = false;
 
-      if (!web3) {
+      if (!web3 || walletType === 'argentx') {
         followedSpacesIds.value = [];
         followedSpacesLoaded.value = true;
         return;

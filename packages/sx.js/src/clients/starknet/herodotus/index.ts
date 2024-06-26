@@ -1,5 +1,7 @@
-import { Account, CairoOption, CairoOptionVariant, CallData, cairo } from 'starknet';
+import { Account, CairoOption, CairoOptionVariant, CallData } from 'starknet';
 import { estimateStarknetFee } from '../../../utils/fees';
+import StrategyAbi from './abis/Strategy.json';
+import StrategyLegacy from './abis/StrategyLegacy.json';
 import { NetworkConfig } from '../../../types';
 
 type ProofElement = {
@@ -33,19 +35,23 @@ export class HerodotusController {
     },
     opts?: Opts
   ) {
+    const callData = new CallData(
+      this.networkConfig.herodotusAccumulatesChainId === 1 ? StrategyLegacy : StrategyAbi
+    );
+
     const call = {
       contractAddress,
       entrypoint: 'cache_timestamp',
-      calldata: CallData.compile({
+      calldata: callData.compile('cache_timestamp', {
         timestamp,
         tree: {
-          mapped_id: binaryTree.remapper.onchain_remapper_id,
+          mapper_id: binaryTree.remapper.onchain_remapper_id,
           last_pos: 3,
           peaks: binaryTree.proofs[0].peaks_hashes,
           proofs: binaryTree.proofs.map((proof: any) => {
             return {
               index: proof.element_index,
-              value: cairo.uint256(proof.element_hash),
+              value: proof.element_hash,
               proof: proof.siblings_hashes
             };
           }),

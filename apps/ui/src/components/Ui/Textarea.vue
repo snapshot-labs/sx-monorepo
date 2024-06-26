@@ -34,7 +34,12 @@ watch(model, () => {
 </script>
 
 <template>
-  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
+  <UiWrapperInput
+    :definition="definition"
+    :error="error"
+    :dirty="dirty"
+    :input-value-length="inputValue?.length"
+  >
     <div
       class="bg-gradient-to-b from-skin-border to-transparent top-[30px] h-2 w-full absolute z-10"
     />

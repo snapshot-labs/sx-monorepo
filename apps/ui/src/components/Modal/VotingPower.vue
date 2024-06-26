@@ -48,7 +48,7 @@ const error = computed(() => props.votingPowerStatus === 'error');
           <a
             :href="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
             target="_blank"
-            v-text="network.constants.STRATEGIES[strategy.address] || strategy.address"
+            v-text="network.constants.STRATEGIES[strategy.address] || shorten(strategy.address)"
           />
           <div class="text-skin-link">
             {{
