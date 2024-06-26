@@ -92,15 +92,7 @@ watch(
           id: userId,
           proposal_count: 0,
           vote_count: 0,
-          created: Date.now() / 1000,
-          name: (await getNames([userId]))?.[userId] || '',
-          about: '',
-          avatar: '',
-          cover: '',
-          twitter: '',
-          github: '',
-          lens: '',
-          farcaster: ''
+          created: Date.now() / 1000
         };
       }
     }
