@@ -84,16 +84,14 @@ watch(
     </template>
 
     <div class="m-4 flex flex-col space-y-3">
-      <template v-if="votingPower">
-        <MessageVotingPower
-          :voting-power="votingPower"
-          :min-voting-power="0n"
-          @fetch-voting-power="
-            () => votingPowersStore.fetch(proposal, web3.account, proposal.snapshot)
-          "
-        />
-      </template>
-
+      <MessageVotingPower
+        v-if="votingPower"
+        :voting-power="votingPower"
+        :min-voting-power="0n"
+        @fetch-voting-power="
+          () => votingPowersStore.fetch(proposal, web3.account, proposal.snapshot)
+        "
+      />
       <dl>
         <dt class="text-sm leading-5">Choice</dt>
         <dd class="font-semibold text-skin-heading text-[20px] leading-6">
@@ -104,9 +102,7 @@ watch(
           />
           <span v-else class="text-skin-danger"> No choice selected </span>
         </dd>
-      </dl>
-      <dl>
-        <dt class="text-sm leading-5">Voting power</dt>
+        <dt class="text-sm leading-5 mt-3">Voting power</dt>
         <dd v-if="!votingPower || votingPower.status === 'loading'">
           <UiLoading />
         </dd>

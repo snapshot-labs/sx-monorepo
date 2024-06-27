@@ -33,7 +33,8 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
   ) => {
     const space: Space = 'space' in item ? (item.space as Space) : item;
 
-    if (votingPowers.has(getIndex(space, block))) return;
+    const existingVotingPower = get(space, block);
+    if (existingVotingPower && existingVotingPower.status === 'success') return;
 
     const network = getNetwork(item.network);
 

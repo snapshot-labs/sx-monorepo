@@ -38,6 +38,7 @@ const loading = computed(() => !props.votingPower || props.votingPower.status ==
     <UiLoading v-if="loading" class="p-4 block text-center" />
     <div v-else-if="votingPower">
       <MessageVotingPower
+        class="p-4"
         :voting-power="votingPower"
         @fetch-voting-power="$emit('fetchVotingPower')"
       />
