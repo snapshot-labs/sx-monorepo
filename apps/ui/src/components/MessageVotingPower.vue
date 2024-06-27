@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   minVotingPower?: bigint;
   minProposalThreshold?: bigint;
   votingPower: {
@@ -11,6 +11,20 @@ defineProps<{
 defineEmits<{
   (e: 'fetchVotingPower');
 }>();
+
+const insufficientVoteVp = computed(
+  () =>
+    props.votingPower.status === 'success' &&
+    props.minVotingPower !== undefined &&
+    props.votingPower.totalVotingPower <= props.minVotingPower
+);
+
+const insufficientProposeVp = computed(
+  () =>
+    props.votingPower.status === 'success' &&
+    props.minProposalThreshold !== undefined &&
+    props.votingPower.totalVotingPower < props.minProposalThreshold
+);
 </script>
 
 <template>
@@ -24,22 +38,10 @@ defineEmits<{
       <IH-refresh />Retry
     </UiButton>
   </div>
-  <template v-else-if="votingPower.status === 'success'">
-    <UiAlert
-      v-if="minVotingPower !== undefined && votingPower.totalVotingPower <= minVotingPower"
-      type="error"
-      v-bind="$attrs"
-    >
-      You do not have enough voting power to vote on this proposal.
-    </UiAlert>
-    <UiAlert
-      v-else-if="
-        minProposalThreshold !== undefined && votingPower.totalVotingPower < minProposalThreshold
-      "
-      type="error"
-      v-bind="$attrs"
-    >
-      You do not have enough voting power to create proposal in this space.
-    </UiAlert>
-  </template>
+  <UiAlert v-else-if="insufficientVoteVp" type="error">
+    You do not have enough voting power to vote on this proposal.
+  </UiAlert>
+  <UiAlert v-else-if="insufficientProposeVp" type="error">
+    You do not have enough voting power to create proposal in this space.
+  </UiAlert>
 </template>
