@@ -37,7 +37,7 @@ const { resolved, address, networkId } = useResolve(param);
 const route = useRoute();
 const router = useRouter();
 const { propose, updateProposal } = useActions();
-const { web3 } = useWeb3();
+const { web3, authInitiated } = useWeb3();
 const {
   spaceKey,
   network: walletConnectNetwork,
@@ -46,7 +46,7 @@ const {
 } = useWalletConnectTransaction();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-const votingPowersStore = useVotingPowersStore();
+const { votingPower, fetch: fetchVotingPower, hasProposeVp } = useVotingPower();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
@@ -231,19 +231,14 @@ function handleTransactionAccept() {
   reset();
 }
 
-const votingPower = computed(() => {
-  if (!space.value) return null;
-
-  return votingPowersStore.get(space.value);
-});
+function handleFetchVotingPower() {
+  space.value && fetchVotingPower(space.value);
+}
 
 const votingPowerValid = computed(() => {
   if (!votingPower.value) return false;
 
-  return (
-    votingPower.value.status === 'success' &&
-    votingPower.value.totalVotingPower >= BigInt(space.value!.proposal_threshold)
-  );
+  return votingPower.value.status === 'success' && hasProposeVp();
 });
 
 watch(
@@ -255,16 +250,16 @@ watch(
   },
   { immediate: true }
 );
+
 watch(
-  [space, () => web3.value.authLoading, () => web3.value.account],
-  ([toSpace, authLoading, toAccount]) => {
-    if (!toSpace || !proposal.value || authLoading) return;
+  [space, () => web3.value.account, () => authInitiated.value],
+  ([toSpace, toAccount, authInitiated]) => {
+    if (!toSpace || !proposal.value || !authInitiated) return;
 
-    if (!toAccount) votingPowersStore.reset();
-
-    votingPowersStore.fetch(toSpace, web3.value.account);
+    handleFetchVotingPower();
   }
 );
+
 watch(proposalData, () => {
   if (!proposal.value) return;
 
@@ -284,7 +279,6 @@ watchEffect(() => {
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
-import { Space } from '@/types';
 
 const { createDraft } = useEditor();
 
@@ -356,7 +350,7 @@ export default defineComponent({
           class="mb-4"
           :voting-power="votingPower"
           :min-proposal-threshold="BigInt(space.proposal_threshold)"
-          @fetch-voting-power="() => votingPowersStore.fetch(space as Space, web3.account)"
+          @fetch-voting-power="handleFetchVotingPower"
         />
 
         <UiInputString

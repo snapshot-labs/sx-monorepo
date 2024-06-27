@@ -6,8 +6,7 @@ import { ProposalsFilter } from '@/networks/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { web3 } = useWeb3();
-const votingPowersStore = useVotingPowersStore();
+const { votingPower, fetch: fetchVotingPower } = useVotingPower();
 const proposalsStore = useProposalsStore();
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
@@ -21,12 +20,14 @@ const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
 
-const votingPower = computed(() => votingPowersStore.get(props.space));
-
 async function handleEndReached() {
   if (!proposalsRecord.value?.hasMoreProposals) return;
 
   proposalsStore.fetchMore(props.space.id, props.space.network);
+}
+
+function handleFetchVotingPower() {
+  fetchVotingPower(props.space);
 }
 
 watch(
@@ -38,18 +39,10 @@ watch(
     }
 
     if (toSpace.id !== fromSpace?.id) {
-      votingPowersStore.fetch(toSpace, web3.value.account);
+      handleFetchVotingPower();
     }
   },
   { immediate: true }
-);
-
-watch(
-  () => web3.value.account,
-  account => {
-    votingPowersStore.reset();
-    votingPowersStore.fetch(props.space, account);
-  }
 );
 
 watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
@@ -94,7 +87,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         <IndicatorVotingPower
           :network-id="space.network"
           :voting-power="votingPower"
-          @fetch-voting-power="() => votingPowersStore.fetch(space, web3.account)"
+          @fetch-voting-power="handleFetchVotingPower"
         />
         <router-link :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">

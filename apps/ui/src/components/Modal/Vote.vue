@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import type { Choice, Proposal, Space } from '@/types';
+import type { Choice, Proposal } from '@/types';
 
 const definition = {
   type: 'object',
@@ -31,8 +31,7 @@ const emit = defineEmits<{
 }>();
 
 const { vote } = useActions();
-const { web3 } = useWeb3();
-const votingPowersStore = useVotingPowersStore();
+const { votingPower, fetch: fetchVotingPower, hasVoteVp } = useVotingPower();
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -40,16 +39,10 @@ const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = computed(() =>
   validateForm(definition, form.value, { skipEmptyOptionalFields: true })
 );
-const votingPower = computed(() =>
-  votingPowersStore.get(props.proposal.space as Space, props.proposal.snapshot)
-);
 const formattedVotingPower = computed(() => getFormattedVotingPower(votingPower.value));
 
 const canSubmit = computed(
-  () =>
-    !!props.choice &&
-    Object.keys(formErrors.value).length === 0 &&
-    votingPower.value?.totalVotingPower !== 0n
+  () => !!props.choice && Object.keys(formErrors.value).length === 0 && hasVoteVp()
 );
 
 async function handleSubmit() {
@@ -66,14 +59,15 @@ async function handleSubmit() {
   }
 }
 
-watch(
-  [() => props.open, () => props.proposal],
-  ([open, proposal]) => {
-    if (!open) return;
+function handleFetchVotingPower() {
+  fetchVotingPower(props.proposal);
+}
 
-    votingPowersStore.fetch(proposal, web3.value.account, proposal.snapshot);
-  },
-  { immediate: true }
+watch(
+  () => props.open,
+  open => {
+    if (open) handleFetchVotingPower();
+  }
 );
 </script>
 
@@ -88,9 +82,7 @@ watch(
         v-if="votingPower"
         :voting-power="votingPower"
         :min-voting-power="0n"
-        @fetch-voting-power="
-          () => votingPowersStore.fetch(proposal, web3.account, proposal.snapshot)
-        "
+        @fetch-voting-power="handleFetchVotingPower"
       />
       <dl>
         <dt class="text-sm leading-5">Choice</dt>
@@ -107,12 +99,12 @@ watch(
           <UiLoading />
         </dd>
         <dd
-          v-else-if="votingPower?.status === 'success'"
+          v-else-if="votingPower.status === 'success'"
           class="font-semibold text-skin-heading text-[20px] leading-6"
           v-text="formattedVotingPower"
         />
         <dd
-          v-else-if="votingPower?.status === 'error'"
+          v-else-if="votingPower.status === 'error'"
           class="font-semibold text-skin-heading text-[20px] leading-6"
           v-text="formattedVotingPower"
         />

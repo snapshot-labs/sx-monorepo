@@ -5,7 +5,7 @@ import type { Choice } from '@/types';
 
 const route = useRoute();
 const proposalsStore = useProposalsStore();
-const votingPowersStore = useVotingPowersStore();
+const { votingPower, fetch: fetchVotingPower } = useVotingPower();
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
@@ -38,10 +38,6 @@ const votingPowerDecimals = computed(() => {
   );
 });
 
-const votingPower = computed(() =>
-  votingPowersStore.get(proposal.value.space, proposal.value.snapshot)
-);
-
 async function handleVoteClick(choice: Choice) {
   if (!web3.value.account) return (modalAccountOpen.value = true);
 
@@ -58,15 +54,14 @@ async function handleVoteSubmitted() {
   }
 }
 
-watch([() => web3.value.account, proposal], ([account, toProposal]) => {
-  if (!toProposal) return;
+function handleFetchVotingPower() {
+  fetchVotingPower(proposal.value);
+}
 
-  if (!account) {
-    return votingPowersStore.reset();
-  }
-
-  votingPowersStore.fetch(toProposal, account, toProposal.snapshot);
+watch(proposal, toProposal => {
+  if (toProposal) handleFetchVotingPower();
 });
+
 watch(
   [networkId, spaceAddress, id],
   async ([networkId, spaceAddress, id]) => {
@@ -147,9 +142,7 @@ watchEffect(() => {
             :network-id="networkId"
             :voting-power="votingPower"
             class="mb-2 flex items-center"
-            @fetch-voting-power="
-              () => votingPowersStore.fetch(proposal.space, web3.account, proposal.snapshot)
-            "
+            @fetch-voting-power="handleFetchVotingPower"
           >
             <div
               v-if="
