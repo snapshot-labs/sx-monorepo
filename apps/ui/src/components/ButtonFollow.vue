@@ -17,7 +17,7 @@ const { web3 } = useWeb3();
 
 const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
 const hidden = computed(
-  () => web3.value?.type === 'argentx' || SUPPORTED_NETWORKS.includes(props.space.network)
+  () => web3.value?.type === 'argentx' || !SUPPORTED_NETWORKS.includes(props.space.network)
 );
 
 const loading = computed(
