@@ -18,19 +18,15 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
 
   const votingPowers = reactive<Map<string, VotingPowerItem>>(new Map());
 
-  function getIndex(space: Space, block: string | number = 'latest') {
+  function getIndex(space: Space, block: string | number) {
     return `${space.id}:${block}`;
   }
 
-  const get = (space: Space, block: string | number = 'latest') => {
+  function get(space: Space, block: string | number = 'latest') {
     return votingPowers.get(getIndex(space, block));
-  };
+  }
 
-  const fetch = async (
-    item: Space | Proposal,
-    account: string,
-    block: string | number = 'latest'
-  ) => {
+  async function fetch(item: Space | Proposal, account: string, block: string | number = 'latest') {
     const space: Space = 'space' in item ? (item.space as Space) : item;
 
     const existingVotingPower = get(space, block);
@@ -46,12 +42,6 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       symbol: space.voting_power_symbol,
       error: null
     };
-
-    if (!account) {
-      vpItem.status = 'success';
-      votingPowers.set(getIndex(space, block), vpItem);
-      return;
-    }
 
     try {
       const vp = await network.actions.getVotingPower(
@@ -83,7 +73,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       vpItem.status = 'error';
     }
     votingPowers.set(getIndex(space, block), vpItem);
-  };
+  }
 
   function reset() {
     votingPowers.clear();

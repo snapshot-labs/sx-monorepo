@@ -43,8 +43,8 @@ export function useVotingPower() {
 
   watch(
     () => web3.value.account,
-    toAccount => {
-      if (!toAccount) reset();
+    account => {
+      if (!account) reset();
     }
   );
 
