@@ -85,12 +85,13 @@ watch(
 
     <div class="m-4 flex flex-col space-y-3">
       <template v-if="votingPower">
-        <UiAlert v-if="votingPower.status === 'error'" type="error">
-          Error loading the voting power, please try again
-        </UiAlert>
-        <UiAlert v-else-if="votingPower.totalVotingPower === 0n" type="error">
-          You do not have enough voting power to vote on this proposal.
-        </UiAlert>
+        <MessageVotingPower
+          :voting-power="votingPower"
+          :min-voting-power="0n"
+          @fetch-voting-power="
+            () => votingPowersStore.fetch(proposal, web3.account, proposal.snapshot)
+          "
+        />
       </template>
 
       <dl>

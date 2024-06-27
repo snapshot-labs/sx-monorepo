@@ -20,7 +20,7 @@ const props = defineProps<{
 
 defineEmits<{
   (e: 'close');
-  (e: 'getVotingPower');
+  (e: 'fetchVotingPower');
 }>();
 
 const network = computed(() => getNetwork(props.networkId));
@@ -28,7 +28,6 @@ const baseNetwork = computed(() =>
   network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
 );
 const loading = computed(() => !props.votingPower || props.votingPower.status === 'loading');
-const error = computed(() => props.votingPower && props.votingPower.status === 'error');
 </script>
 
 <template>
@@ -38,12 +37,10 @@ const error = computed(() => props.votingPower && props.votingPower.status === '
     </template>
     <UiLoading v-if="loading" class="p-4 block text-center" />
     <div v-else-if="votingPower">
-      <div v-if="error" class="p-4 flex flex-col gap-3 items-start">
-        <UiAlert type="error">There was an error fetching your voting power.</UiAlert>
-        <UiButton type="button" class="flex items-center gap-2" @click="$emit('getVotingPower')">
-          <IH-refresh />Retry
-        </UiButton>
-      </div>
+      <MessageVotingPower
+        :voting-power="votingPower"
+        @fetch-voting-power="$emit('fetchVotingPower')"
+      />
       <div
         v-for="(strategy, i) in votingPower.votingPowers"
         :key="i"

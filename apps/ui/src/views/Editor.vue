@@ -284,6 +284,7 @@ watchEffect(() => {
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
+import { Space } from '@/types';
 
 const { createDraft } = useEditor();
 
@@ -350,14 +351,13 @@ export default defineComponent({
     </nav>
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
-        <template v-if="votingPower">
-          <UiAlert v-if="votingPower.status === 'error'" type="error" class="mb-4">
-            Error loading the voting power, please try again
-          </UiAlert>
-          <UiAlert v-else-if="!votingPowerValid" type="error" class="mb-4">
-            You do not have enough voting power to create proposal in this space.
-          </UiAlert>
-        </template>
+        <MessageVotingPower
+          v-if="votingPower"
+          :voting-power="votingPower"
+          :min-voting-power="0n"
+          @fetch-voting-power="() => votingPowersStore.fetch(space as Space, web3.account)"
+        />
+
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.title"

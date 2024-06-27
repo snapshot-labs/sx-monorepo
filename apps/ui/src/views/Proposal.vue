@@ -147,7 +147,7 @@ watchEffect(() => {
             :network-id="networkId"
             :voting-power="votingPower"
             class="mb-2 flex items-center"
-            @get-voting-power="
+            @fetch-voting-power="
               () => votingPowersStore.fetch(proposal.space, web3.account, proposal.snapshot)
             "
           >

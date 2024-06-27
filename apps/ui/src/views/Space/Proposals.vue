@@ -94,7 +94,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         <IndicatorVotingPower
           :network-id="space.network"
           :voting-power="votingPower"
-          @get-voting-power="() => votingPowersStore.fetch(space, web3.account)"
+          @fetch-voting-power="() => votingPowersStore.fetch(space, web3.account)"
         />
         <router-link :to="{ name: 'editor' }">
           <UiTooltip title="New proposal">
