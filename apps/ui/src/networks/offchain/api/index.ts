@@ -401,11 +401,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         user = { id };
       }
 
-      user.name ||= (await getNames([id]))[id];
-      user.proposal_count ||= 0;
-      user.vote_count ||= 0;
-
-      return user;
+      return formatUser(user);
     },
     loadUserActivities: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain

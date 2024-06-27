@@ -9,8 +9,7 @@ import {
 } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { UserActivity, Space, User } from '@/types';
-import { getNames } from '@/helpers/stamp';
+import { UserActivity, Space } from '@/types';
 
 const route = useRoute();
 const usersStore = useUsersStore();
@@ -25,11 +24,10 @@ const activities = ref<
 const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
 const loaded = ref(false);
-const placeholderUser = ref<User | null>(null);
 
 const id = computed(() => route.params.id as string);
 
-const user = computed(() => usersStore.getUser(id.value) || placeholderUser.value);
+const user = computed(() => usersStore.getUser(id.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
@@ -80,22 +78,15 @@ async function loadActivities(userId: string) {
 watch(
   id,
   async userId => {
-    placeholderUser.value = null;
     loaded.value = false;
-    await usersStore.fetchUser(userId);
 
-    if (isValidAddress(userId)) {
-      loadActivities(userId);
-
-      if (!usersStore.getUser(userId)) {
-        placeholderUser.value = {
-          id: userId,
-          proposal_count: 0,
-          vote_count: 0,
-          created: Date.now() / 1000
-        };
-      }
+    if (!isValidAddress(userId)) {
+      loaded.value = true;
+      return;
     }
+
+    await usersStore.fetchUser(userId);
+    loadActivities(userId);
 
     loaded.value = true;
   },
