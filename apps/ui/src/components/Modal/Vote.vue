@@ -59,9 +59,9 @@ async function handleSubmit() {
   try {
     await vote(props.proposal, props.choice, form.value.reason);
     emit('voted');
+    emit('close');
   } finally {
     loading.value = false;
-    emit('close');
   }
 }
 
