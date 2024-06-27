@@ -1,7 +1,7 @@
 import { validateAndParseAddress } from 'starknet';
 import { starknet } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
-import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
+import { handleProposalMetadata, handleVoteMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
 import {
   getCurrentTimestamp,
@@ -508,6 +508,16 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   vote.vp = vp.toString();
   vote.created = created;
   vote.tx = tx.transaction_hash;
+
+  try {
+    const metadataUri = longStringToText(event.metadata_uri);
+    await handleVoteMetadata(metadataUri);
+
+    vote.metadata = dropIpfs(metadataUri);
+  } catch (e) {
+    console.log(JSON.stringify(e).slice(0, 256));
+  }
+
   await vote.save();
 
   const existingUser = await User.loadEntity(voter.address);
