@@ -46,7 +46,7 @@ const {
 } = useWalletConnectTransaction();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-const { votingPower, fetch: fetchVotingPower, hasProposeVp } = useVotingPower();
+const { votingPower, fetch: fetchVotingPower, hasProposeVp.value } = useVotingPower();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
@@ -170,7 +170,7 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  return hasProposeVp && Object.keys(formErrors.value).length === 0;
+  return hasProposeVp.value && Object.keys(formErrors.value).length === 0;
 });
 
 async function handleProposeClick() {
