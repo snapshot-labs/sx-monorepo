@@ -352,9 +352,10 @@ export default defineComponent({
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
-          v-if="votingPower"
+          v-if="votingPower && space"
+          class="mb-4"
           :voting-power="votingPower"
-          :min-voting-power="0n"
+          :min-proposal-threshold="BigInt(space.proposal_threshold)"
           @fetch-voting-power="() => votingPowersStore.fetch(space as Space, web3.account)"
         />
 
