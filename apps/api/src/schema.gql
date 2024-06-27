@@ -10,7 +10,7 @@ type Space {
   voting_delay: Int!
   min_voting_period: Int!
   max_voting_period: Int!
-  proposal_threshold: Int!
+  proposal_threshold: BigDecimalVP!
   next_strategy_index: Int!
   strategies_indicies: [Int]!
   strategies: [String]!

@@ -53,7 +53,7 @@ export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) 
   space.voting_delay = Number(BigInt(event.voting_delay).toString());
   space.min_voting_period = Number(BigInt(event.min_voting_duration).toString());
   space.max_voting_period = Number(BigInt(event.max_voting_duration).toString());
-  space.proposal_threshold = 0;
+  space.proposal_threshold = '0';
   space.strategies_indicies = strategies.map((_, i) => i);
   space.strategies = strategies;
   space.next_strategy_index = strategies.length;
