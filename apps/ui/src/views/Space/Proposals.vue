@@ -6,7 +6,8 @@ import { ProposalsFilter } from '@/networks/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { votingPower, fetch: fetchVotingPower } = useVotingPower();
+const { votingPower, fetch: fetchVotingPower, reset: resetVotingPower } = useVotingPower();
+const { web3 } = useWeb3();
 const proposalsStore = useProposalsStore();
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
@@ -37,10 +38,20 @@ watch(
       proposalsStore.reset(toSpace.id, toSpace.network);
       proposalsStore.fetch(toSpace.id, toSpace.network, toState);
     }
+  },
+  { immediate: true }
+);
 
-    if (toSpace.id !== fromSpace?.id) {
-      handleFetchVotingPower();
+watch(
+  [props.space, () => web3.value.account, () => web3.value.authLoading],
+  ([toSpace, toAccount, toAuthLoading], [, fromAccount, , ,]) => {
+    if (fromAccount && toAccount && fromAccount !== toAccount) {
+      resetVotingPower();
     }
+
+    if (toAuthLoading || !toSpace || !toAccount) return;
+
+    handleFetchVotingPower();
   },
   { immediate: true }
 );

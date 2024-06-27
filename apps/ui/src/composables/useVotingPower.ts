@@ -30,21 +30,23 @@ export function useVotingPower() {
       false
   );
 
-  function fetch(spaceOrProposal: Space | Proposal) {
-    item.value = spaceOrProposal;
+  function reset() {
+    votingPowersStore.reset();
+  }
 
+  function fetch(spaceOrProposal: Space | Proposal) {
+    if (!web3.value.account) return;
+
+    item.value = spaceOrProposal;
     votingPowersStore.fetch(item.value, web3.value.account, snapshot.value);
   }
 
   watch(
     () => web3.value.account,
-    (toAccount, fromAccount) => {
-      if (toAccount === fromAccount) return;
-
-      console.log('resetting voting power on user change');
-      votingPowersStore.reset();
+    toAccount => {
+      if (!toAccount) reset();
     }
   );
 
-  return { votingPower, fetch, hasVoteVp, hasProposeVp };
+  return { votingPower, hasVoteVp, hasProposeVp, fetch, reset };
 }

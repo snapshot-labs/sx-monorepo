@@ -31,7 +31,13 @@ const emit = defineEmits<{
 }>();
 
 const { vote } = useActions();
-const { votingPower, fetch: fetchVotingPower, hasVoteVp } = useVotingPower();
+const { web3 } = useWeb3();
+const {
+  votingPower,
+  fetch: fetchVotingPower,
+  reset: resetVotingPower,
+  hasVoteVp
+} = useVotingPower();
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -63,12 +69,13 @@ function handleFetchVotingPower() {
   fetchVotingPower(props.proposal);
 }
 
-watch(
-  () => props.open,
-  open => {
-    if (open) handleFetchVotingPower();
+watch([() => props.open, () => web3.value.account], ([open, toAccount], [, fromAccount]) => {
+  if (fromAccount && toAccount && fromAccount !== toAccount) {
+    resetVotingPower();
   }
-);
+
+  if (open) handleFetchVotingPower();
+});
 </script>
 
 <template>

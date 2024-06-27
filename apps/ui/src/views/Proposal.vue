@@ -5,7 +5,7 @@ import type { Choice } from '@/types';
 
 const route = useRoute();
 const proposalsStore = useProposalsStore();
-const { votingPower, fetch: fetchVotingPower } = useVotingPower();
+const { votingPower, fetch: fetchVotingPower, reset: resetVotingPower } = useVotingPower();
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
@@ -58,9 +58,19 @@ function handleFetchVotingPower() {
   fetchVotingPower(proposal.value);
 }
 
-watch(proposal, toProposal => {
-  if (toProposal) handleFetchVotingPower();
-});
+watch(
+  [proposal, () => web3.value.account, () => web3.value.authLoading],
+  ([toProposal, toAccount, toAuthLoading], [, fromAccount, , ,]) => {
+    if (fromAccount && toAccount && fromAccount !== toAccount) {
+      resetVotingPower();
+    }
+
+    if (toAuthLoading || !toProposal || !toAccount) return;
+
+    handleFetchVotingPower();
+  },
+  { immediate: true }
+);
 
 watch(
   [networkId, spaceAddress, id],
