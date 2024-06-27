@@ -42,7 +42,7 @@ const formErrors = computed(() =>
 const formattedVotingPower = computed(() => getFormattedVotingPower(votingPower.value));
 
 const canSubmit = computed(
-  () => !!props.choice && Object.keys(formErrors.value).length === 0 && hasVoteVp()
+  () => !!props.choice && Object.keys(formErrors.value).length === 0 && hasVoteVp
 );
 
 async function handleSubmit() {

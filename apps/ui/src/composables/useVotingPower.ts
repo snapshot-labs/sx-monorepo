@@ -18,22 +18,22 @@ export function useVotingPower() {
     () => space.value && votingPowersStore.get(space.value, snapshot.value)
   );
 
+  const hasVoteVp = computed(
+    () => (votingPower.value && votingPower.value.totalVotingPower > 0n) || false
+  );
+
+  const hasProposeVp = computed(
+    () =>
+      (votingPower.value &&
+        space.value &&
+        votingPower.value.totalVotingPower >= BigInt(space.value.proposal_threshold)) ||
+      false
+  );
+
   function fetch(spaceOrProposal: Space | Proposal) {
     item.value = spaceOrProposal;
 
     votingPowersStore.fetch(item.value, web3.value.account, snapshot.value);
-  }
-
-  function hasVoteVp() {
-    return votingPower.value && votingPower.value.totalVotingPower > 0n;
-  }
-
-  function hasProposeVp() {
-    return (
-      votingPower.value &&
-      space.value &&
-      votingPower.value.totalVotingPower >= BigInt(space.value.proposal_threshold)
-    );
   }
 
   watch(

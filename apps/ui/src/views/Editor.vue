@@ -170,7 +170,7 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  return votingPowerValid.value && Object.keys(formErrors.value).length === 0;
+  return hasProposeVp && Object.keys(formErrors.value).length === 0;
 });
 
 async function handleProposeClick() {
@@ -234,12 +234,6 @@ function handleTransactionAccept() {
 function handleFetchVotingPower() {
   space.value && fetchVotingPower(space.value);
 }
-
-const votingPowerValid = computed(() => {
-  if (!votingPower.value) return false;
-
-  return votingPower.value.status === 'success' && hasProposeVp();
-});
 
 watch(
   [networkId, address],
