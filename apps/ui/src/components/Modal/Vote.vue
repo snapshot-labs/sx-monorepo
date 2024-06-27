@@ -69,13 +69,17 @@ function handleFetchVotingPower() {
   fetchVotingPower(props.proposal);
 }
 
-watch([() => props.open, () => web3.value.account], ([open, toAccount], [, fromAccount]) => {
-  if (fromAccount && toAccount && fromAccount !== toAccount) {
-    resetVotingPower();
-  }
+watch(
+  [() => props.open, () => web3.value.account],
+  ([open, toAccount], [, fromAccount]) => {
+    if (fromAccount && toAccount && fromAccount !== toAccount) {
+      resetVotingPower();
+    }
 
-  if (open) handleFetchVotingPower();
-});
+    if (open) handleFetchVotingPower();
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
