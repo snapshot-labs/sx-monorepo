@@ -43,6 +43,11 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       error: null
     };
 
+    if (existingVotingPower) {
+      existingVotingPower.status = 'loading';
+      votingPowers.set(getIndex(space, block), existingVotingPower);
+    }
+
     try {
       const vp = await network.actions.getVotingPower(
         space.id,
