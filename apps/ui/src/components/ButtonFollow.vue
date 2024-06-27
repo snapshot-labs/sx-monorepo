@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { Space } from '@/types';
+import { METADATA } from '@/networks/starknet';
+
+// NOTE: Disabling on Starknet until we have support for starknet long addresses on sequencer
+const DISABLED_NETWORKS = Object.keys(METADATA);
 
 const props = defineProps<{
   space: Space;
@@ -12,7 +16,9 @@ const followedSpacesStore = useFollowedSpacesStore();
 const { web3 } = useWeb3();
 
 const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
-const hidden = computed(() => web3.value?.type === 'argentx');
+const hidden = computed(
+  () => web3.value?.type === 'argentx' || DISABLED_NETWORKS.includes(props.space.network)
+);
 
 const loading = computed(
   () =>
