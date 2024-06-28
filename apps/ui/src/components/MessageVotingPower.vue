@@ -39,7 +39,7 @@ const insufficientProposeVp = computed(
     </UiButton>
   </div>
   <UiAlert v-else-if="insufficientVoteVp" type="error">
-    You do not have enough voting power to vote on this proposal.
+    You do not have enough voting power to vote.
   </UiAlert>
   <UiAlert v-else-if="insufficientProposeVp" type="error">
     You do not have enough voting power to create proposal in this space.
