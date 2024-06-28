@@ -142,6 +142,7 @@ function handleFetchVotingPower() {
 
 function handleClose() {
   currentStepIndex.value = 'vote';
+  loading.value = false;
   emit('close');
 }
 
@@ -259,7 +260,7 @@ watch(
 
     <template v-if="currentStepIndex === 'vote' || currentStepIndex === 'error'" #footer>
       <div class="flex space-x-3">
-        <UiButton class="w-full" @click="$emit('close')"> Cancel </UiButton>
+        <UiButton class="w-full" @click="handleClose"> Cancel </UiButton>
         <UiButton
           primary
           class="w-full"
