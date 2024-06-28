@@ -147,8 +147,14 @@ type Vote @entity {
   proposal: Int!
   choice: Int!
   vp: BigDecimal!
+  metadata: VoteMetadata
   created: Int!
   tx: Bytes!
+}
+
+type VoteMetadata @entity {
+  id: ID!
+  reason: String!
 }
 
 type User @entity {

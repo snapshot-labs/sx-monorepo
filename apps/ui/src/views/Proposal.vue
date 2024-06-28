@@ -160,7 +160,6 @@ watchEffect(() => {
                 votingPower.error?.details === 'NOT_READY_YET' &&
                 ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPower.error.source)
               "
-              class="mt-2"
             >
               <span class="inline-flex align-top h-[27px] items-center">
                 <IH-exclamation-circle class="mr-1" />

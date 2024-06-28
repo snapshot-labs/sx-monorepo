@@ -9,7 +9,8 @@ const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('ozVotesStorageProof', () => {
   const ozVotesStorageProofStrategy = createOzVotesStorageProofStrategy({
-    deployedOnChain: 'SN_GOERLI'
+    trace: 224,
+    deployedOnChain: 'SN_SEPOLIA'
   });
   const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
 
@@ -31,26 +32,24 @@ describe('ozVotesStorageProof', () => {
     ).rejects.toThrow('Not supported for non-Ethereum addresses');
   });
 
-  describe.skip('getVotingPower', () => {
-    const timestamp = 1706623413;
-
-    it('should compute voting power for user', async () => {
+  describe('getVotingPower', () => {
+    it('should compute live voting power', async () => {
       const votingPower = await ozVotesStorageProofStrategy.getVotingPower(
-        '0x1b3cbb267de6d0f30ddf521cd385a2e11836f0c5ba6f7b2224cf77a6ed86acf',
+        '0x16aa0c2eda8ff56fa9922a4858d4d91e3b01cf21d2aecd01e1c95d296362218',
         '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
         {
-          contractAddress: '0xd96844c9B21CB6cCf2c236257c7fc703E43BA071',
+          contractAddress: '0x6Fd821e79cDf212aD8b06C59B28FE8C2185291d4',
           slotIndex: 8
         },
-        timestamp,
+        null,
         CallData.compile({
-          contractAddress: '0xd96844c9B21CB6cCf2c236257c7fc703E43BA071',
+          contractAddress: '0x6Fd821e79cDf212aD8b06C59B28FE8C2185291d4',
           slotIndex: uint256.bnToUint256(8)
         }),
         config
       );
 
-      expect(votingPower.toString()).toEqual('200000000000000000000');
+      expect(votingPower.toString()).toEqual('8000000000000000000');
     });
   });
 });
