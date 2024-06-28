@@ -78,6 +78,8 @@ templates:
           handler: handleProposalCancelled
         - event: VoteCast(uint256,address,uint8,uint256)
           handler: handleVoteCreated
+        - event: VoteCastWithMetadata(uint256,address,uint8,uint256,string)
+          handler: handleVoteCreatedWithMetadata
         - event: MetadataURIUpdated(string)
           handler: handleMetadataUriUpdated
         - event: VotingDelayUpdated(uint32)
@@ -159,6 +161,19 @@ templates:
       handler: handleProposalMetadata
       entities:
         - ProposalMetadata
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+    network: sepolia
+  - name: VoteMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleVoteMetadata
+      entities:
+        - VoteMetadata
       abis:
         - name: Space
           file: ./abis/Space.json

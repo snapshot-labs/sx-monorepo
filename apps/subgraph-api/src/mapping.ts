@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, dataSource, ethereum } from '@graphprotocol/graph-ts'
 import { ProxyDeployed } from '../generated/ProxyFactory/ProxyFactory'
 import { AvatarExecutionStrategy } from '../generated/ProxyFactory/AvatarExecutionStrategy'
 import {
@@ -13,6 +13,7 @@ import {
   ProposalExecuted,
   ProposalCancelled,
   VoteCast,
+  VoteCastWithMetadata,
   MetadataURIUpdated,
   VotingDelayUpdated,
   MinVotingDurationUpdated,
@@ -34,6 +35,7 @@ import {
   TimelockExecutionStrategy as TimelockExecutionStrategyTemplate,
   SpaceMetadata as SpaceMetadataTemplate,
   ProposalMetadata as ProposalMetadataTemplate,
+  VoteMetadata as VoteMetadataTemplate,
 } from '../generated/templates'
 import {
   Space,
@@ -389,32 +391,46 @@ export function handleProposalCancelled(event: ProposalCancelled): void {
   proposal.save()
 }
 
-export function handleVoteCreated(event: VoteCast): void {
+export function _handleVoteCreated(
+  event: ethereum.Event,
+  proposalId: BigInt,
+  choice: i32,
+  voter: Address,
+  votingPower: BigInt,
+  metadataUri: string | null
+): void {
   let space = Space.load(toChecksumAddress(event.address.toHexString()))
   if (space == null) {
     return
   }
 
   // Swap For/Against
-  let choice = event.params.choice
-  if (event.params.choice === 0) choice = 2
-  if (event.params.choice === 1) choice = 1
-  if (event.params.choice === 2) choice = 3
+  choice = choice
+  if (choice === 0) choice = 2
+  if (choice === 1) choice = 1
+  if (choice === 2) choice = 3
 
-  let vp = event.params.votingPower.toBigDecimal()
+  let vp = votingPower.toBigDecimal()
 
-  let voterAddress = toChecksumAddress(event.params.voter.toHexString())
-  let vote = new Vote(`${space.id}/${event.params.proposalId}/${voterAddress}`)
+  let voterAddress = toChecksumAddress(voter.toHexString())
+  let vote = new Vote(`${space.id}/${proposalId}/${voterAddress}`)
   vote.voter = voterAddress
   vote.space = space.id
-  vote.proposal = event.params.proposalId.toI32()
+  vote.proposal = proposalId.toI32()
   vote.choice = choice
   vote.vp = vp
   vote.created = event.block.timestamp.toI32()
   vote.tx = event.transaction.hash
+
+  if (metadataUri !== null && metadataUri.startsWith('ipfs://')) {
+    let hash = metadataUri.slice(7)
+    vote.metadata = hash
+    VoteMetadataTemplate.create(hash)
+  }
+
   vote.save()
 
-  let proposal = Proposal.load(`${space.id}/${event.params.proposalId}`)
+  let proposal = Proposal.load(`${space.id}/${proposalId}`)
   if (proposal !== null) {
     proposal.setBigDecimal(
       `scores_${choice.toString()}`,
@@ -452,6 +468,28 @@ export function handleVoteCreated(event: VoteCast): void {
   if (leaderboardItem.vote_count === 1) space.voter_count += 1
   space.vote_count += 1
   space.save()
+}
+
+export function handleVoteCreated(event: VoteCast): void {
+  _handleVoteCreated(
+    event,
+    event.params.proposalId,
+    event.params.choice,
+    event.params.voter,
+    event.params.votingPower,
+    null
+  )
+}
+
+export function handleVoteCreatedWithMetadata(event: VoteCastWithMetadata): void {
+  _handleVoteCreated(
+    event,
+    event.params.proposalId,
+    event.params.choice,
+    event.params.voter,
+    event.params.votingPower,
+    event.params.metadataUri
+  )
 }
 
 export function handleMetadataUriUpdated(event: MetadataURIUpdated): void {

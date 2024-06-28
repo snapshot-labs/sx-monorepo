@@ -1,7 +1,7 @@
 import { validateAndParseAddress } from 'starknet';
 import { starknet } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
-import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
+import { handleProposalMetadata, handleVoteMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
 import {
   getCurrentTimestamp,
@@ -53,7 +53,7 @@ export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) 
   space.voting_delay = Number(BigInt(event.voting_delay).toString());
   space.min_voting_period = Number(BigInt(event.min_voting_duration).toString());
   space.max_voting_period = Number(BigInt(event.max_voting_duration).toString());
-  space.proposal_threshold = 0;
+  space.proposal_threshold = '0';
   space.strategies_indicies = strategies.map((_, i) => i);
   space.strategies = strategies;
   space.next_strategy_index = strategies.length;
@@ -372,9 +372,9 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${author}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${author.address}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = author.address;
     leaderboardItem.vote_count = 0;
@@ -500,7 +500,7 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   const created = block?.timestamp ?? getCurrentTimestamp();
   const voter = formatAddressVariant(findVariant(event.voter));
 
-  const vote = new Vote(`${spaceId}/${proposalId}/${voter}`);
+  const vote = new Vote(`${spaceId}/${proposalId}/${voter.address}`);
   vote.space = spaceId;
   vote.proposal = proposalId;
   vote.voter = voter.address;
@@ -508,6 +508,16 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   vote.vp = vp.toString();
   vote.created = created;
   vote.tx = tx.transaction_hash;
+
+  try {
+    const metadataUri = longStringToText(event.metadata_uri);
+    await handleVoteMetadata(metadataUri);
+
+    vote.metadata = dropIpfs(metadataUri);
+  } catch (e) {
+    console.log(JSON.stringify(e).slice(0, 256));
+  }
+
   await vote.save();
 
   const existingUser = await User.loadEntity(voter.address);
@@ -521,9 +531,9 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${voter}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${voter.address}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = voter.address;
     leaderboardItem.vote_count = 0;

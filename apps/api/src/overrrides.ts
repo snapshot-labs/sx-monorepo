@@ -20,6 +20,7 @@ const createConfig = (
     propositionPowerValidationStrategyAddress: config.ProposalValidations.VotingPower,
     herodotusStrategies: [
       config.Strategies.OZVotesStorageProof,
+      config.Strategies.OZVotesTrace208StorageProof,
       config.Strategies.EVMSlotValue
     ].map(strategy => validateAndParseAddress(strategy)),
     startBlock
