@@ -122,7 +122,7 @@ async function handleSubmit() {
     if (offchainNetworks.includes(props.proposal.network)) {
       currentStepIndex.value = 'success';
     } else {
-      voteTx.value = uiStore.pendingTransactions[uiStore.pendingTransactions.length - 1];
+      voteTx.value = Array.from(uiStore.pendingTransactions).pop()?.[1];
       currentStepIndex.value = 'confirming';
     }
   } catch (e) {

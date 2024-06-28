@@ -18,13 +18,13 @@ const uiStore = useUiStore();
       <h3>Pending transactions</h3>
     </template>
     <div class="p-4">
-      <div v-if="uiStore.pendingTransactions.length === 0" class="text-center">
+      <div v-if="uiStore.pendingTransactions.size === 0" class="text-center">
         No pending transactions
       </div>
       <template v-else>
         <a
-          v-for="pendingTx in uiStore.pendingTransactions"
-          :key="pendingTx.txId"
+          v-for="[txId, pendingTx] in uiStore.pendingTransactions"
+          :key="txId"
           :href="
             getNetwork(pendingTx.networkId).helpers.getExplorerUrl(pendingTx.txId, 'transaction')
           "
