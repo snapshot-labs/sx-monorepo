@@ -7,10 +7,10 @@ import ISCheckCircle from '~icons/heroicons-solid/check-circle';
 import ICX from '~icons/c/x';
 import ICLens from '~icons/c/lens';
 import ICFarcaster from '~icons/c/farcaster';
-import { offchainNetworks } from '@/networks';
+import { offchainNetworks, getNetwork } from '@/networks';
 import type { Choice, Proposal } from '@/types';
 
-type VoteSteps = 'vote' | 'signing' | 'sending' | 'success' | 'error';
+type VoteSteps = 'vote' | 'signing' | 'confirming' | 'success' | 'error';
 
 const definition = {
   type: 'object',
@@ -47,9 +47,11 @@ const {
   reset: resetVotingPower,
   hasVoteVp
 } = useVotingPower();
+const uiStore = useUiStore();
 
 const loading = ref(false);
 const currentStepIndex = ref<VoteSteps>('vote');
+const voteTx = ref<(typeof uiStore.pendingTransactions)[0] | null>(null);
 const form = ref<Record<string, string>>({ reason: '' });
 
 const STEPS = {
@@ -62,7 +64,7 @@ const STEPS = {
     subtitle: 'We need your signature',
     footerText: 'Proceed in your wallet'
   },
-  sending: {
+  confirming: {
     icon: {
       component: Loading,
       class: 'opacity-40'
@@ -119,6 +121,9 @@ async function handleSubmit() {
 
     if (offchainNetworks.includes(props.proposal.network)) {
       currentStepIndex.value = 'success';
+    } else {
+      voteTx.value = uiStore.pendingTransactions[uiStore.pendingTransactions.length - 1];
+      currentStepIndex.value = 'confirming';
     }
   } catch (e) {
     if (e.code === 4001) {
@@ -154,6 +159,18 @@ watch(
     if (open) handleFetchVotingPower();
   },
   { immediate: true }
+);
+
+watch(
+  () => uiStore.pendingTransactions.length,
+  () => {
+    if (
+      currentStepIndex.value === 'confirming' &&
+      !uiStore.pendingTransactions.find(tx => tx.txId === voteTx.value?.txId)
+    ) {
+      currentStepIndex.value = 'success';
+    }
+  }
 );
 </script>
 
@@ -211,24 +228,24 @@ watch(
           <div class="font-semibold text-skin-heading text-[22px]" v-text="currentStep.title" />
           <div v-if="currentStep.subtitle" class="text-md" v-text="currentStep.subtitle" />
         </div>
-        <div v-if="currentStepIndex === 'success'" class="pb-2.5">
-          <div class="text-md">Share your vote</div>
-          <div class="p-2.5 flex space-x-2">
-            <UiButton
-              v-for="(network, i) in SHARE_SOCIAL_NETWORKS"
-              :key="i"
-              class="!px-0 w-[40px] !h-[40px]"
-              @click="handleShareVote(network.id)"
-            >
-              <component :is="network.icon" class="inline-block" />
-            </UiButton>
-          </div>
+      </div>
+      <div v-if="currentStepIndex === 'success'" class="pb-2.5 flex flex-col items-center">
+        <div class="text-md">Share your vote</div>
+        <div class="p-2.5 flex space-x-2">
+          <UiButton
+            v-for="(network, i) in SHARE_SOCIAL_NETWORKS"
+            :key="i"
+            class="!px-0 w-[40px] !h-[40px]"
+            @click="handleShareVote(network.id)"
+          >
+            <component :is="network.icon" class="inline-block" />
+          </UiButton>
         </div>
       </div>
       <a
-        v-if="currentStep.viewTx"
+        v-if="currentStep.viewTx && voteTx"
         class="text-skin-link text-md opacity-40 w-full leading-6 p-4 text-center block"
-        href="#"
+        :href="getNetwork(voteTx.networkId).helpers.getExplorerUrl(voteTx.txId, 'transaction')"
         target="_blank"
       >
         View transaction
