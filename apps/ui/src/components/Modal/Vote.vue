@@ -51,7 +51,6 @@ const uiStore = useUiStore();
 
 const loading = ref(false);
 const currentStepIndex = ref<VoteSteps>('vote');
-const voteTx = ref<(typeof uiStore.pendingTransactions)[0] | null>(null);
 const form = ref<Record<string, string>>({ reason: '' });
 
 const STEPS = {
@@ -110,7 +109,7 @@ const canSubmit = computed(
 
 const currentStep = computed(() => STEPS[currentStepIndex.value]);
 
-const lastTx = computed(() => Array.from(uiStore.transactions.values()).pop());
+const lastTx = computed(() => Object.values(uiStore.transactions).pop());
 
 async function handleSubmit() {
   loading.value = true;
