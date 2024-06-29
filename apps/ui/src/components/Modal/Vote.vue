@@ -126,7 +126,13 @@ async function handleSubmit() {
       currentStepIndex.value = 'confirming';
     }
   } catch (e) {
-    if (e.code === 4001) {
+    const isUserAbortError =
+      e.code === 4001 ||
+      e.message === 'User rejected the request.' ||
+      e.code === 'ACTION_REJECTED' ||
+      e.cause === 'User rejected';
+
+    if (isUserAbortError) {
       currentStepIndex.value = 'vote';
     } else {
       currentStepIndex.value = 'error';

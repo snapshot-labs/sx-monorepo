@@ -35,7 +35,8 @@ export function useActions() {
         const isUserAbortError =
           e.code === 4001 ||
           e.message === 'User rejected the request.' ||
-          e.code === 'ACTION_REJECTED';
+          e.code === 'ACTION_REJECTED' ||
+          e.cause === 'User rejected';
 
         if (!isUserAbortError) {
           uiStore.addNotification('error', 'Something went wrong. Please try again later.');
