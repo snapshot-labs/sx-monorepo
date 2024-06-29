@@ -248,9 +248,9 @@ watch(
         </div>
       </div>
       <a
-        v-if="currentStep.viewTx && voteTx"
+        v-if="currentStep.viewTx && lastTx"
         class="text-skin-link text-md opacity-40 w-full leading-6 p-4 text-center block"
-        :href="getNetwork(voteTx.networkId).helpers.getExplorerUrl(voteTx.txId, 'transaction')"
+        :href="getNetwork(lastTx.networkId).helpers.getExplorerUrl(lastTx.txId, 'transaction')"
         target="_blank"
       >
         View transaction
