@@ -16,7 +16,6 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const route = useRoute();
 const uiStore = useUiStore();
 const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
@@ -45,11 +44,6 @@ const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
-
-const currentUrl = `${window.location.origin}/#${route.path}`;
-const shareMsg = encodeURIComponent(
-  `${props.proposal.space.name}: ${props.proposal.title} ${currentUrl}`
-);
 
 const editable = computed(() => {
   return (
@@ -262,7 +256,7 @@ onBeforeUnmount(() => destroyAudio());
               <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
             </UiButton>
           </UiTooltip>
-          <DropdownShare :message="shareMsg">
+          <DropdownShare type="proposal" :shareable="proposal">
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
                 <IH-share class="text-skin-text inline-block w-[22px] h-[22px]" />

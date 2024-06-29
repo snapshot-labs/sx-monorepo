@@ -4,9 +4,6 @@ import { validateForm } from '@/helpers/validation';
 import Loading from '@/components/Ui/Loading.vue';
 import ISXCircle from '~icons/heroicons-solid/x-circle';
 import ISCheckCircle from '~icons/heroicons-solid/check-circle';
-import ICX from '~icons/c/x';
-import ICLens from '~icons/c/lens';
-import ICFarcaster from '~icons/c/farcaster';
 import { offchainNetworks, getNetwork } from '@/networks';
 import type { Choice, Proposal } from '@/types';
 
@@ -47,6 +44,7 @@ const {
   reset: resetVotingPower,
   hasVoteVp
 } = useVotingPower();
+const { socialNetworks, share } = useSharing();
 const uiStore = useUiStore();
 
 const loading = ref(false);
@@ -90,12 +88,6 @@ const STEPS = {
     subtitle: 'Oops... Your vote failed!'
   }
 };
-
-const SHARE_SOCIAL_NETWORKS = [
-  { id: 'x', name: 'X', icon: ICX },
-  { id: 'lens', name: 'Lens', icon: ICLens },
-  { id: 'farcaster', name: 'Farcaster', icon: ICFarcaster }
-];
 
 const formErrors = computed(() =>
   validateForm(definition, form.value, { skipEmptyOptionalFields: true })
@@ -153,8 +145,8 @@ function handleClose() {
   emit('close');
 }
 
-function handleShareVote(type: string) {
-  console.log('Share vote', type);
+function handleShareVote(socialNetwork: string) {
+  share(socialNetwork, 'vote', { proposal: props.proposal, choice: props.choice });
 }
 
 watch(
@@ -242,7 +234,7 @@ watch(
         <div class="text-md">Share your vote</div>
         <div class="p-2.5 flex space-x-2">
           <UiButton
-            v-for="(network, i) in SHARE_SOCIAL_NETWORKS"
+            v-for="(network, i) in socialNetworks"
             :key="i"
             class="!px-0 w-[40px] !h-[40px]"
             @click="handleShareVote(network.id)"
