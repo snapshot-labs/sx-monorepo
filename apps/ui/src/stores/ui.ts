@@ -9,7 +9,7 @@ type Notification = {
   message: string;
 };
 
-type PendingTransaction = {
+type Transaction = {
   networkId: NetworkID;
   txId: string;
   createdAt: number;
@@ -19,17 +19,20 @@ type PendingTransaction = {
 const PENDING_TRANSACTIONS_TIMEOUT = 10 * 60 * 1000;
 const PENDING_TRANSACTIONS_STORAGE_KEY = 'pendingTransactions';
 
-function updateStorage(pendingTransactions: Map<string, PendingTransaction>) {
-  console.log(pendingTransactions);
-  lsSet(PENDING_TRANSACTIONS_STORAGE_KEY, pendingTransactions);
+function updateStorage(transactions: Map<string, Transaction>) {
+  lsSet(PENDING_TRANSACTIONS_STORAGE_KEY, transactions);
 }
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
     sidebarOpen: false,
     notifications: [] as Notification[],
-    pendingTransactions: new Map<string, PendingTransaction>()
+    transactions: new Map<string, Transaction>()
   }),
+  getters: {
+    pendingTransactions: state =>
+      Array.from(state.transactions.values()).filter(p => p.status === 'pending')
+  },
   actions: {
     async toggleSidebar() {
       this.sidebarOpen = !this.sidebarOpen;
@@ -49,23 +52,31 @@ export const useUiStore = defineStore('ui', {
       this.notifications = this.notifications.filter(notification => notification.id !== id);
     },
     async addPendingTransaction(txId: string, networkId: NetworkID) {
-      this.pendingTransactions.set(txId, {
+      this.transactions.set(txId, {
         networkId,
         txId,
         createdAt: Date.now(),
         status: 'pending'
       });
-      updateStorage(this.pendingTransactions);
+      updateStorage(this.transactions);
 
       try {
         await getNetwork(networkId).helpers.waitForTransaction(txId);
+        this.transactions.set(txId, {
+          ...this.transactions.get(txId)!,
+          status: 'confirmed'
+        });
+      } catch (e) {
+        this.transactions.set(txId, {
+          ...this.transactions.get(txId)!,
+          status: 'failed'
+        });
       } finally {
-        this.pendingTransactions.delete(txId);
-        updateStorage(this.pendingTransactions);
+        updateStorage(this.transactions);
       }
     },
     async restorePendingTransactions() {
-      let persistedTransactions: Map<string, PendingTransaction> = lsGet(
+      let persistedTransactions: Map<string, Transaction> = lsGet(
         PENDING_TRANSACTIONS_STORAGE_KEY,
         new Map()
       );
@@ -76,20 +87,20 @@ export const useUiStore = defineStore('ui', {
 
       persistedTransactions.forEach((value, key) => {
         if (value.createdAt && value.createdAt + PENDING_TRANSACTIONS_TIMEOUT > Date.now()) {
-          this.pendingTransactions.set(key, value);
+          this.transactions.set(key, value);
         }
       });
 
-      if (persistedTransactions.size !== this.pendingTransactions.size) {
-        updateStorage(this.pendingTransactions);
+      if (persistedTransactions.size !== this.transactions.size) {
+        updateStorage(this.transactions);
       }
 
-      this.pendingTransactions.forEach(async ({ networkId, txId }) => {
+      this.transactions.forEach(async ({ networkId, txId }) => {
         try {
           await getNetwork(networkId).helpers.waitForTransaction(txId);
         } finally {
-          this.pendingTransactions.delete(txId);
-          updateStorage(this.pendingTransactions);
+          this.transactions.delete(txId);
+          updateStorage(this.transactions);
         }
       });
     }

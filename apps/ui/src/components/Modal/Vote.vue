@@ -110,6 +110,8 @@ const canSubmit = computed(
 
 const currentStep = computed(() => STEPS[currentStepIndex.value]);
 
+const lastTx = computed(() => Array.from(uiStore.transactions.values()).pop());
+
 async function handleSubmit() {
   loading.value = true;
 
@@ -122,7 +124,6 @@ async function handleSubmit() {
     if (offchainNetworks.includes(props.proposal.network)) {
       currentStepIndex.value = 'success';
     } else {
-      voteTx.value = Array.from(uiStore.pendingTransactions).pop()?.[1];
       currentStepIndex.value = 'confirming';
     }
   } catch (e) {
@@ -134,8 +135,6 @@ async function handleSubmit() {
 
     if (isUserAbortError) {
       currentStepIndex.value = 'vote';
-    } else {
-      currentStepIndex.value = 'error';
     }
   } finally {
     loading.value = false;
@@ -169,13 +168,12 @@ watch(
 );
 
 watch(
-  () => uiStore.pendingTransactions.length,
-  () => {
-    if (
-      currentStepIndex.value === 'confirming' &&
-      !uiStore.pendingTransactions.find(tx => tx.txId === voteTx.value?.txId)
-    ) {
+  () => lastTx.value?.status,
+  status => {
+    if (status === 'confirmed') {
       currentStepIndex.value = 'success';
+    } else if (status === 'failed') {
+      currentStepIndex.value = 'error';
     }
   }
 );
