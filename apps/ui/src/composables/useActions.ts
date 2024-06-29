@@ -228,6 +228,7 @@ export function useActions() {
       )
     );
 
+    // NOTE: revert this if the tx has failed
     addPendingVote(proposal.id);
 
     mixpanel.track('Vote', {

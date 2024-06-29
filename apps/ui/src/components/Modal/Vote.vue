@@ -109,6 +109,7 @@ const canSubmit = computed(
 
 const currentStep = computed(() => STEPS[currentStepIndex.value]);
 
+// NOTE: This is a temporary solution
 const lastTx = computed(() => Object.values(uiStore.transactions).pop());
 
 async function handleSubmit() {
@@ -134,6 +135,8 @@ async function handleSubmit() {
 
     if (isUserAbortError) {
       currentStepIndex.value = 'vote';
+    } else {
+      currentStepIndex.value = 'error';
     }
   } finally {
     loading.value = false;
