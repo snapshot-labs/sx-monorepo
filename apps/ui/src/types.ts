@@ -194,26 +194,25 @@ export type Proposal = {
 };
 
 export type UserProfile = {
-  name?: string;
-  about?: string;
-  avatar?: string;
-  cover?: string;
-  github?: string;
-  twitter?: string;
-  lens?: string;
-  farcaster?: string;
+  name: string;
+  about: string;
+  avatar: string;
+  cover: string;
+  github: string;
+  twitter: string;
+  lens: string;
+  farcaster: string;
 };
 
 export type User = {
   id: string;
-  proposal_count: number;
-  vote_count: number;
-  created?: number;
+  created: number | null;
   follows?: string[];
-  name?: string;
 } & UserProfile;
 
 export type UserActivity = {
+  id: string;
+  name?: string;
   spaceId: string;
   proposal_count: number;
   vote_count: number;

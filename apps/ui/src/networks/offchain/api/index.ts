@@ -207,22 +207,6 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-async function formatUser(user: User) {
-  return {
-    ...user,
-    proposal_count: user.proposal_count || 0,
-    vote_count: user.vote_count || 0,
-    name: user.name || (await getNames([user.id]))?.[user.id] || '',
-    about: user.about || '',
-    avatar: user.avatar || '',
-    cover: user.cover || '',
-    twitter: user.twitter || '',
-    github: user.github || '',
-    lens: user.lens || '',
-    farcaster: user.farcaster || ''
-  };
-}
-
 export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   const httpLink = createHttpLink({ uri });
 
@@ -401,13 +385,24 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         user = { id };
       }
 
-      return formatUser(user);
+      return {
+        ...user,
+        created: user.created || null,
+        name: user.name || (await getNames([user.id]))?.[user.id] || '',
+        about: user.about || '',
+        avatar: user.avatar || '',
+        cover: user.cover || '',
+        twitter: user.twitter || '',
+        github: user.github || '',
+        lens: user.lens || '',
+        farcaster: user.farcaster || ''
+      };
     },
     loadUserActivities: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     },
-    loadLeaderboard: async (): Promise<User[]> => {
+    loadLeaderboard: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     },
