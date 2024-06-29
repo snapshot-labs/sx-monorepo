@@ -169,6 +169,8 @@ watch(
 watch(
   () => lastTx.value?.status,
   status => {
+    if (currentStepIndex.value !== 'confirming') return;
+
     if (status === 'confirmed') {
       currentStepIndex.value = 'success';
     } else if (status === 'failed') {
