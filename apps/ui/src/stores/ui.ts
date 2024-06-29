@@ -35,7 +35,9 @@ export const useUiStore = defineStore('ui', {
   }),
   getters: {
     pendingTransactions: state =>
-      Object.values(state.transactions).filter(tx => tx.status === 'pending')
+      Object.values(state.transactions).filter(tx => tx.status === 'pending'),
+    failedTransactions: state =>
+      Object.values(state.transactions).filter(tx => tx.status === 'failed')
   },
   actions: {
     async toggleSidebar() {
