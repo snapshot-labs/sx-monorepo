@@ -2,10 +2,10 @@
 import { onMounted } from 'vue';
 
 useTitle('My spaces');
-const { web3Account } = useWeb3();
+const { web3 } = useWeb3();
 const { loaded, spaces, fetch } = useSpaces();
 
-onMounted(() => fetch({ controller: web3Account.value }));
+onMounted(() => fetch({ controller: web3.value.account }));
 </script>
 
 <template>
@@ -13,7 +13,10 @@ onMounted(() => fetch({ controller: web3Account.value }));
     <UiContainer class="!max-w-screen-md pt-5">
       <h2 class="mb-4 mono !text-xl" v-text="'My spaces'" />
       <UiLoading v-if="!loaded" class="block mb-2" />
-      <div v-if="loaded && !spaces.length" class="py-3 flex items-center text-skin-link">
+      <div
+        v-if="loaded && !spaces.length && !web3.authLoading"
+        class="py-3 flex items-center text-skin-link"
+      >
         <IH-exclamation-circle class="inline-block mr-2" />
         <span v-text="'There are no spaces here.'" />
       </div>
