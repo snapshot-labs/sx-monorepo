@@ -49,12 +49,13 @@ const error = computed(() => props.votingPowerStatus === 'error');
           <a
             :href="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
             target="_blank"
+            class="truncate"
             v-text="
               network.constants.STRATEGIES[strategy.address] ||
               (isValidAddress(strategy.address) ? shorten(strategy.address) : strategy.address)
             "
           />
-          <div class="text-skin-link">
+          <div class="text-skin-link shrink-0">
             {{
               _n(Number(strategy.value) / 10 ** finalDecimals, 'compact', {
                 maximumFractionDigits: 2,
