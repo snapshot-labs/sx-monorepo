@@ -237,6 +237,7 @@ watch(
             v-for="(network, i) in socialNetworks"
             :key="i"
             class="!px-0 w-[40px] !h-[40px]"
+            :title="`Share on ${network.name}`"
             @click="handleShareVote(network.id)"
           >
             <component :is="network.icon" class="inline-block" />
