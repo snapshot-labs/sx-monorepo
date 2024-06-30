@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { compareAddresses } from '@/helpers/utils';
+import { offchainNetworks } from '@/networks';
 
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
@@ -55,7 +56,8 @@ const navigationConfig = computed<Record<string, Record<string, NavigationItem>>
     },
     leaderboard: {
       name: 'Leaderboard',
-      icon: IHUserGroup
+      icon: IHUserGroup,
+      hidden: (space.value && offchainNetworks.includes(space.value.network)) || false
     },
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
