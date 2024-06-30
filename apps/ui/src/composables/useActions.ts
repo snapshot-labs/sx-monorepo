@@ -35,7 +35,8 @@ export function useActions() {
         const isUserAbortError =
           e.code === 4001 ||
           e.message === 'User rejected the request.' ||
-          e.code === 'ACTION_REJECTED';
+          e.code === 'ACTION_REJECTED' ||
+          e.cause === 'User rejected';
 
         if (!isUserAbortError) {
           uiStore.addNotification('error', 'Something went wrong. Please try again later.');
@@ -83,10 +84,11 @@ export function useActions() {
     networkId: NetworkID,
     promise: Promise<any>,
     opts: { transactionNetworkId?: NetworkID } = {}
-  ) {
+  ): Promise<string | undefined> {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
+    let hash;
 
     if (handleSafeEnvelope(envelope)) return;
     if (await handleCommitEnvelope(envelope, networkId)) return;
@@ -96,21 +98,22 @@ export function useActions() {
       console.log('Receipt', envelope.signatureData);
     } else if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
-      const hash = receipt.transaction_hash || receipt.hash;
+      hash = receipt.transaction_hash || receipt.hash;
 
       console.log('Receipt', receipt);
 
       if (envelope.signatureData.signature === '0x')
         uiStore.addNotification('success', 'Your vote is pending! waiting for other signers');
+
       hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
+      hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
 
-      uiStore.addPendingTransaction(
-        envelope.transaction_hash || envelope.hash,
-        opts.transactionNetworkId || networkId
-      );
+      uiStore.addPendingTransaction(hash, opts.transactionNetworkId || networkId);
     }
+
+    return hash;
   }
 
   async function forceLogin() {
@@ -215,7 +218,7 @@ export function useActions() {
 
     const network = getNetwork(proposal.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
         auth.web3,
@@ -227,7 +230,7 @@ export function useActions() {
       )
     );
 
-    addPendingVote(proposal.id);
+    addPendingVote(proposal.id, txHash!);
 
     mixpanel.track('Vote', {
       network: proposal.network,
@@ -235,6 +238,8 @@ export function useActions() {
       proposalId: proposal.id,
       choice
     });
+
+    return txHash;
   }
 
   async function propose(
