@@ -49,6 +49,7 @@ const uiStore = useUiStore();
 
 const loading = ref(false);
 const currentStepIndex = ref<VoteSteps>('vote');
+const voteTxHash = ref<string | null>(null);
 const form = ref<Record<string, string>>({ reason: '' });
 
 const STEPS = {
@@ -101,8 +102,7 @@ const canSubmit = computed(
 
 const currentStep = computed(() => STEPS[currentStepIndex.value]);
 
-// NOTE: This is a temporary solution
-const lastTx = computed(() => Object.values(uiStore.transactions).pop());
+const voteTx = computed(() => (voteTxHash.value ? uiStore.transactions[voteTxHash.value] : null));
 
 async function handleSubmit() {
   loading.value = true;
@@ -111,7 +111,7 @@ async function handleSubmit() {
 
   try {
     currentStepIndex.value = 'signing';
-    await vote(props.proposal, props.choice, form.value.reason);
+    voteTxHash.value = (await vote(props.proposal, props.choice, form.value.reason)) || null;
 
     if (offchainNetworks.includes(props.proposal.network)) {
       currentStepIndex.value = 'success';
@@ -162,7 +162,7 @@ watch(
 );
 
 watch(
-  () => lastTx.value?.status,
+  () => voteTx.value?.status,
   status => {
     if (currentStepIndex.value !== 'confirming') return;
 
@@ -245,9 +245,9 @@ watch(
         </div>
       </div>
       <a
-        v-if="currentStep.viewTx && lastTx"
+        v-if="currentStep.viewTx && voteTx"
         class="text-skin-link text-md opacity-40 w-full leading-6 p-4 text-center block"
-        :href="getNetwork(lastTx.networkId).helpers.getExplorerUrl(lastTx.txId, 'transaction')"
+        :href="getNetwork(voteTx.networkId).helpers.getExplorerUrl(voteTx.txId, 'transaction')"
         target="_blank"
       >
         View transaction

@@ -238,6 +238,8 @@ export function useActions() {
       proposalId: proposal.id,
       choice
     });
+
+    return txHash;
   }
 
   async function propose(
