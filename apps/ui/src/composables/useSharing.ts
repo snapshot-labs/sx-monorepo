@@ -14,7 +14,7 @@ export function useSharing() {
   ];
 
   function getProposalUrl(proposal: Proposal) {
-    return `https://${window.location.hostname}/#/${proposal.network}:${proposal.space.id}/proposal/${proposal.id}`;
+    return `https://${window.location.hostname}/#/${proposal.network}:${proposal.space.id}/proposal/${proposal.proposal_id}`;
   }
 
   function getMessage(type: string, payload: any) {
