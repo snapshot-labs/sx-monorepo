@@ -140,7 +140,7 @@ function handleFetchVotingPower() {
 }
 
 function handleClose() {
-  currentStepIndex.value = 'vote';
+  if ((currentStepIndex.value = 'error')) currentStepIndex.value = 'vote';
   loading.value = false;
   emit('close');
 }
