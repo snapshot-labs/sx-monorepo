@@ -134,3 +134,16 @@ export const updateUserTypes = {
     { name: 'profile', type: 'string' }
   ]
 };
+
+export const updateStatementTypes = {
+  Statement: [
+    { name: 'from', type: 'address' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'space', type: 'string' },
+    { name: 'about', type: 'string' },
+    { name: 'statement', type: 'string' },
+    { name: 'discourse', type: 'string' },
+    { name: 'status', type: 'string' },
+    { name: 'network', type: 'string' }
+  ]
+};

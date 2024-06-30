@@ -67,8 +67,8 @@ async function loadActivities(userId: string) {
         return {
           ...activity,
           space,
-          proposal_percentage: activity.proposal_count / totalProposals,
-          vote_percentage: activity.vote_count / totalVotes
+          proposal_percentage: totalProposals ? activity.proposal_count / totalProposals : 0,
+          vote_percentage: totalVotes ? activity.vote_count / totalVotes : 0
         };
       })
       .filter(Boolean) as typeof activities.value;
@@ -165,7 +165,6 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <span class="w-[60%] lg:w-[50%] truncate">Space</span>
         <span class="w-[20%] lg:w-[25%] text-end truncate">Proposals</span>
         <span class="w-[20%] lg:w-[25%] text-end truncate">Votes</span>
-        <span class="hidden lg:block lg:w-[88px]"></span>
       </div>
     </div>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
@@ -173,24 +172,25 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       <IH-exclamation-circle class="inline-block" />
       <span>This user does not have any activities yet.</span>
     </div>
-    <div
+    <router-link
       v-for="(activity, i) in activities"
       v-else
       :key="i"
+      :to="{
+        name: 'space-user-statement',
+        params: {
+          id: activity.spaceId,
+          user: user.id
+        }
+      }"
       class="mx-4 border-b flex space-x-1 py-3"
     >
-      <router-link
-        :to="{
-          name: 'space-overview',
-          params: {
-            id: activity.spaceId
-          }
-        }"
+      <div
         class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
       >
         <SpaceAvatar :space="activity.space" :size="32" class="!rounded-[4px]" />
         <span class="truncate" v-text="activity.space.name" />
-      </router-link>
+      </div>
       <div
         class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
@@ -203,23 +203,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div class="text-[17px] truncate" v-text="_p(activity.vote_percentage)" />
       </div>
-      <div class="hidden lg:block lg:w-[88px] text-right">
-        <router-link
-          :to="{
-            name: 'space-overview',
-            params: {
-              id: activity.spaceId
-            }
-          }"
-          tabindex="-1"
-          class="text-skin-link"
-        >
-          <UiButton class="!px-0 w-[40px] !h-[40px]">
-            <IH-arrow-sm-right class="inline-block" />
-          </UiButton>
-        </router-link>
-      </div>
-    </div>
+    </router-link>
     <teleport to="#modal">
       <ModalEditUser
         v-if="web3.account === user.id"

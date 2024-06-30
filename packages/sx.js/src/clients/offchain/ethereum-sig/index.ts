@@ -14,7 +14,8 @@ import {
   followSpaceTypes,
   unfollowSpaceTypes,
   aliasTypes,
-  updateUserTypes
+  updateUserTypes,
+  updateStatementTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import {
@@ -28,6 +29,7 @@ import {
   type UnfollowSpace,
   type SetAlias,
   type UpdateUser,
+  type UpdateStatement,
   type EIP712Message,
   type EIP712VoteMessage,
   type EIP712ProposeMessage,
@@ -36,7 +38,8 @@ import {
   type EIP712FollowSpaceMessage,
   type EIP712UnfollowSpaceMessage,
   type EIP712SetAliasMessage,
-  type EIP712UpdateUserMessage
+  type EIP712UpdateUserMessage,
+  type EIP712UpdateStatementMessage
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
@@ -74,6 +77,7 @@ export class EthereumSig {
       | EIP712UnfollowSpaceMessage
       | EIP712SetAliasMessage
       | EIP712UpdateUserMessage
+      | EIP712UpdateStatementMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -85,9 +89,8 @@ export class EthereumSig {
       timestamp: parseInt((Date.now() / 1e3).toFixed()),
       ...message
     };
-
     const signature = await signer._signTypedData(domain, types, EIP712Message);
-
+    console.log(signature);
     return {
       address,
       signature,
@@ -295,6 +298,21 @@ export class EthereumSig {
     data: UpdateUser;
   }) {
     const signatureData = await this.sign(signer, data, updateUserTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async updateStatement({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateStatement;
+  }) {
+    const signatureData = await this.sign(signer, data, updateStatementTypes);
 
     return {
       signatureData,

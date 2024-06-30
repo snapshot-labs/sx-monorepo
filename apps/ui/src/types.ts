@@ -217,6 +217,15 @@ export type UserActivity = {
   vote_count: number;
 };
 
+export type Statement = {
+  space: string;
+  network: NetworkID;
+  about: string;
+  statement: string;
+  discourse: string;
+  status: 'ACTIVE' | 'INACTIVE';
+};
+
 export type Follow = {
   id: string;
   follower: string;

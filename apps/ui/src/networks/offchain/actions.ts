@@ -21,7 +21,8 @@ import type {
   User,
   VoteType,
   NetworkID,
-  UserProfile
+  UserProfile,
+  Statement
 } from '@/types';
 import type {
   ReadOnlyNetworkActions,
@@ -248,6 +249,12 @@ export function createActions(
       return client.updateUser({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { profile: JSON.stringify(profile), ...(from ? { from } : {}) }
+      });
+    },
+    async updateStatement(web3: Web3Provider | Wallet, statement: Statement, from?: string) {
+      return client.updateStatement({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { ...statement, ...(from ? { from } : {}) }
       });
     }
   };
