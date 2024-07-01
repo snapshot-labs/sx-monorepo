@@ -27,7 +27,7 @@ withDefaults(
   </button>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 .button {
   &:disabled {
     color: rgba(var(--border)) !important;
@@ -36,6 +36,23 @@ withDefaults(
 
   &.primary {
     @apply bg-skin-link text-skin-bg border-skin-link;
+
+    &:disabled {
+      @apply bg-skin-bg border-skin-border text-skin-text;
+
+      .loading,
+      .loading.inverse {
+        svg {
+          path {
+            stroke: rgba(var(--border));
+          }
+
+          stop {
+            stop-color: rgba(var(--border));
+          }
+        }
+      }
+    }
   }
 }
 </style>

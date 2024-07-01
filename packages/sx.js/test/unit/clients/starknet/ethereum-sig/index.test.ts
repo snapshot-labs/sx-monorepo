@@ -82,6 +82,7 @@ describe('EthereumSig', () => {
             index: 0
           }
         ],
+        metadataUri: '',
         proposal: 1,
         choice: 1
       }

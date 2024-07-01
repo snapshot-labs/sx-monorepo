@@ -334,7 +334,8 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice
+      choice: Choice,
+      reason: string
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -365,12 +366,16 @@ export function createActions(
         })
       );
 
+      let pinned: { cid: string; provider: string } | null = null;
+      pinned = await helpers.pin({ reason });
+
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
-        choice: getSdkChoice(choice)
+        choice: getSdkChoice(choice),
+        metadataUri: pinned ? `ipfs://${pinned.cid}` : ''
       };
 
       if (relayerType === 'starknet') {

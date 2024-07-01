@@ -2,7 +2,6 @@
 import { Choice, Proposal } from '@/types';
 
 defineProps<{
-  sendingType: Choice | null;
   proposal: Proposal;
 }>();
 
@@ -37,12 +36,7 @@ function toggleSelectedChoice(choice: number) {
         <IH-check v-if="selectedChoices.includes(index + 1)" class="shrink-0" />
       </UiButton>
     </div>
-    <UiButton
-      primary
-      class="!h-[48px] w-full"
-      :loading="!!sendingType"
-      @click="emit('vote', selectedChoices)"
-    >
+    <UiButton primary class="!h-[48px] w-full" @click="emit('vote', selectedChoices)">
       Vote
     </UiButton>
   </div>

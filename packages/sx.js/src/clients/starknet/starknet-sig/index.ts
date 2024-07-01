@@ -188,7 +188,9 @@ export class StarknetSig {
       proposalId: uint256.bnToUint256(data.proposal),
       choice: `0x${data.choice.toString(16)}`,
       userVotingStrategies,
-      metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
+      metadataUri: shortString
+        .splitLongString(data.metadataUri)
+        .map(str => shortString.encodeShortString(str))
     };
 
     const signatureData = await this.sign(signer, data.authenticator, message, voteTypes, 'Vote');
