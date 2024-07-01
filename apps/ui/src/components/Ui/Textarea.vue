@@ -35,12 +35,14 @@ watch(model, () => {
 
 <template>
   <UiWrapperInput
+    v-slot="{ id }"
     :definition="definition"
     :error="error"
     :dirty="dirty"
     :input-value-length="inputValue?.length"
   >
     <textarea
+      :id="id"
       v-model="inputValue"
       class="s-input"
       v-bind="$attrs"
