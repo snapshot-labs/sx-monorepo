@@ -18,7 +18,7 @@ type Delegate = ApiDelegate & {
 
 type Governance = {
   delegatedVotes: string;
-  currentDelegates: string;
+  totalDelegates: string;
 };
 
 const DELEGATES_LIMIT = 40;
@@ -46,7 +46,7 @@ const DELEGATES_QUERY = gql`
     }
     governance(id: $governance) {
       delegatedVotes
-      currentDelegates
+      totalDelegates
     }
   }
 `;
@@ -115,7 +115,7 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
 
     const newDelegates = delegatesData.map((delegate: ApiDelegate) => {
       const delegatorsPercentage =
-        (Number(delegate.tokenHoldersRepresentedAmount) / Number(governanceData.currentDelegates)) *
+        (Number(delegate.tokenHoldersRepresentedAmount) / Number(governanceData.totalDelegates)) *
         100;
       const votesPercentage =
         (Number(delegate.delegatedVotes) / Number(governanceData.delegatedVotes)) * 100 || 0;
