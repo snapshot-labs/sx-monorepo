@@ -5,7 +5,8 @@ import {
   SpaceMetadataItem,
   ProposalMetadataItem,
   StrategiesParsedMetadataDataItem,
-  ExecutionStrategy
+  ExecutionStrategy,
+  VoteMetadataItem
 } from '../.checkpoint/models';
 import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
 import { ethProvider, dropIpfs, getJSON, getSpaceName } from './utils';
@@ -130,6 +131,18 @@ export async function handleProposalMetadata(metadataUri: string) {
   if (metadata.execution) proposalMetadataItem.execution = JSON.stringify(metadata.execution);
 
   await proposalMetadataItem.save();
+}
+
+export async function handleVoteMetadata(metadataUri: string) {
+  const exists = await VoteMetadataItem.loadEntity(dropIpfs(metadataUri));
+  if (exists) return;
+
+  const voteMetadataItem = new VoteMetadataItem(dropIpfs(metadataUri));
+
+  const metadata: any = await getJSON(metadataUri);
+  voteMetadataItem.reason = metadata.reason ?? '';
+
+  await voteMetadataItem.save();
 }
 
 export async function handleStrategiesParsedMetadata(metadataUri: string) {

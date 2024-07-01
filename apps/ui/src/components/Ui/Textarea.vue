@@ -34,7 +34,12 @@ watch(model, () => {
 </script>
 
 <template>
-  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
+  <UiWrapperInput
+    :definition="definition"
+    :error="error"
+    :dirty="dirty"
+    :input-value-length="inputValue?.length"
+  >
     <textarea
       v-model="inputValue"
       class="s-input"
