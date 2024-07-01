@@ -15,7 +15,7 @@ const sortBy = ref(
 );
 const { setTitle } = useTitle();
 const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMore, reset } =
-  useDelegates(props.delegation.apiUrl as string);
+  useDelegates(props.delegation.apiUrl as string, props.delegation.contractAddress as string);
 
 const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
@@ -114,17 +114,17 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
           <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex space-x-1">
             <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
-              <UiStamp :id="delegate.id" :size="32" />
+              <UiStamp :id="delegate.user" :size="32" />
               <a
-                :href="currentNetwork.helpers.getExplorerUrl(delegate.id, 'address')"
+                :href="currentNetwork.helpers.getExplorerUrl(delegate.user, 'address')"
                 target="_blank"
                 class="overflow-hidden leading-[22px]"
               >
                 <h4
                   class="text-skin-link truncate"
-                  v-text="delegate.name || shorten(delegate.id)"
+                  v-text="delegate.name || shorten(delegate.user)"
                 />
-                <div class="text-[17px] text-skin-text truncate" v-text="shorten(delegate.id)" />
+                <div class="text-[17px] text-skin-text truncate" v-text="shorten(delegate.user)" />
               </a>
             </div>
             <div
