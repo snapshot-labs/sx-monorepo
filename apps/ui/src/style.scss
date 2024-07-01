@@ -302,6 +302,13 @@ input[type='number'] {
 
   .s-label {
     @apply absolute px-3 mt-1 text-[17px];
+
+    &:has(+ textarea) ::before {
+      @apply block bg-gradient-to-b from-skin-border to-transparent h-2 w-full absolute top-[20px] left-0;
+
+      content: '';
+
+    }
   }
 
   .s-input {
@@ -312,8 +319,8 @@ input[type='number'] {
     @apply h-[64px];
   }
 
-  textarea {
-    @apply min-h-[61px]
+  textarea.s-input {
+    @apply min-h-[61px] py-0 border-t-[25px] border-transparent;
   }
 }
 
