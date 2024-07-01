@@ -48,15 +48,11 @@ export type WhitelistStrategyConfig = {
 
 export type EvmSlotValueStrategyConfig = {
   type: 'evmSlotValue';
-  params: {
-    deployedOnChain: string;
-  };
 };
 
 export type OzVotesStorageProofStrategyConfig = {
   type: 'ozVotesStorageProof';
   params: {
-    deployedOnChain: string;
     trace: 208 | 224;
   };
 };

@@ -23,7 +23,7 @@ export function getStrategy(address: string, networkConfig: NetworkConfig): Stra
   }
 
   if (strategy.type === 'evmSlotValue') {
-    return createEvmSlotValueStrategy(strategy.params);
+    return createEvmSlotValueStrategy();
   }
 
   if (strategy.type === 'ozVotesStorageProof') {
