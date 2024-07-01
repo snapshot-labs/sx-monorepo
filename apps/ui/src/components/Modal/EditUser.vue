@@ -51,6 +51,20 @@ const definition = {
       title: 'X (Twitter)',
       maxLength: 15,
       examples: ['X (Twitter) handle']
+    },
+    lens: {
+      type: 'string',
+      format: 'lens-handle',
+      title: 'Lens',
+      maxLength: 26,
+      examples: ['Lens handle']
+    },
+    farcaster: {
+      type: 'string',
+      format: 'farcaster-handle',
+      title: 'Farcaster',
+      maxLength: 17,
+      examples: ['Farcaster handle']
     }
   }
 };

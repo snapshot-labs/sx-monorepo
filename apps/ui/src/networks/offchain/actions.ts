@@ -242,7 +242,9 @@ export function createActions(
         avatar: user.avatar,
         cover: user.cover,
         github: user.github,
-        twitter: user.twitter
+        twitter: user.twitter,
+        lens: user.lens,
+        farcaster: user.farcaster
       };
 
       return client.updateUser({

@@ -490,7 +490,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         | 'vote_count-asc'
         | 'proposal_count-desc'
         | 'proposal_count-asc' = 'vote_count-desc'
-    ): Promise<User[]> {
+    ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
         'desc' | 'asc'
@@ -512,7 +512,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         .then(({ data }) =>
           data.leaderboards.map((leaderboard: any) => ({
             id: leaderboard.user.id,
-            created: leaderboard.user.created,
+            spaceId: leaderboard.space.id,
             vote_count: leaderboard.vote_count,
             proposal_count: leaderboard.proposal_count
           }))
