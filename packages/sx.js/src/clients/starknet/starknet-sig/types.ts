@@ -67,3 +67,12 @@ export const updateProposalTypes = {
   Strategy: sharedTypes.Strategy,
   u256: sharedTypes.u256
 };
+
+export const aliasTypes = {
+  StarkNetDomain: domainTypes.StarkNetDomain,
+  SetAlias: [
+    { name: 'from', type: 'ContractAddress' },
+    { name: 'alias', type: 'string' },
+    { name: 'timestamp', type: 'felt' }
+  ]
+};

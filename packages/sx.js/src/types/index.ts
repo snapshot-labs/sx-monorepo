@@ -1,5 +1,5 @@
-import type { BigNumberish, RpcProvider } from 'starknet';
-import type { Call } from 'starknet';
+import type { Call, BigNumberish, RpcProvider, StarkNetType } from 'starknet';
+import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '../utils/encoding';
 import type { NetworkConfig } from './networkConfig';
 
@@ -131,14 +131,20 @@ export type Vote = {
   choice: Choice;
 };
 
-export type Message = Propose | Vote | UpdateProposal;
+export type Alias = {
+  alias: string;
+};
+
+export type Message = Propose | Vote | UpdateProposal | Alias;
 
 export type SignatureData = {
   address: string;
   commitTxId?: string;
   commitHash?: string;
-  signature?: string[] | null;
+  signature?: string | string[] | null;
   message?: Record<string, any>;
+  domain?: TypedDataDomain;
+  types?: Record<string, TypedDataField[] | StarkNetType[]>;
   primaryType?: any;
 };
 
@@ -178,6 +184,12 @@ export type StarknetEIP712VoteMessage = {
   choice: string;
   userVotingStrategies: { index: number; params: string[] }[];
   metadataUri: string[];
+};
+
+export type StarknetEIP712AliasMessage = {
+  alias: string;
+  from?: string;
+  timestamp?: number;
 };
 
 export type EIP712ProposeMessage = StarknetEIP712ProposeMessage & {

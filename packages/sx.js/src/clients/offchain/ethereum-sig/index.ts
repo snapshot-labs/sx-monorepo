@@ -18,7 +18,6 @@ import {
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import {
-  type SignatureData,
   type Envelope,
   type Vote,
   type Propose,
@@ -38,7 +37,7 @@ import {
   type EIP712SetAliasMessage,
   type EIP712UpdateUserMessage
 } from '../types';
-import type { OffchainNetworkConfig } from '../../../types';
+import type { OffchainNetworkConfig, SignatureData } from '../../../types';
 
 const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
@@ -102,8 +101,15 @@ export class EthereumSig {
       Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace | SetAlias
     >
   ) {
-    const { address, signature: sig, domain, types, message } = envelope.signatureData!;
-    const payload = {
+    const {
+      address,
+      signature: sig,
+      domain,
+      types,
+      primaryType,
+      message
+    } = envelope.signatureData!;
+    const payload: any = {
       address,
       sig,
       data: {
@@ -112,6 +118,8 @@ export class EthereumSig {
         message
       }
     };
+
+    if (primaryType) payload.data.primaryType = primaryType;
 
     const body = {
       method: 'POST',
