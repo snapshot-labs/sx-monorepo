@@ -2,6 +2,13 @@ const get = () => import(/* webpackChunkName: "argentx" */ '@argent/get-starknet
 import LockConnector from '@snapshot-labs/lock/src/connector';
 
 export default class Connector extends LockConnector {
+  async logout() {
+    const argentx = await get();
+    await argentx.disconnect({
+      clearLastWallet: true
+    });
+  }
+
   async connect() {
     let provider;
     try {
