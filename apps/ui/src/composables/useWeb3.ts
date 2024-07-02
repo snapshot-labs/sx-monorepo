@@ -31,19 +31,23 @@ export function useWeb3() {
 
     if (!connector) return;
 
-    auth = getInstance();
-    state.authLoading = true;
-    await auth.login(connector);
-    if (auth.provider.value) {
-      mixpanel.track('Connect', { connector });
+    try {
+      auth = getInstance();
+      state.authLoading = true;
+      await auth.login(connector);
+      if (auth.provider.value) {
+        mixpanel.track('Connect', { connector });
 
-      auth.web3 = new Web3Provider(auth.provider.value, 'any');
-      await loadProvider();
-    }
+        auth.web3 = new Web3Provider(auth.provider.value, 'any');
+        await loadProvider();
+      }
 
-    // NOTE: Handle case where metamask stays locked after user ignored
-    // the unlock request on subsequent page loads
-    if (state.type !== 'injected' || auth.provider?.value?._state?.isUnlocked) {
+      // NOTE: Handle case where metamask stays locked after user ignored
+      // the unlock request on subsequent page loads
+      if (state.type !== 'injected' || auth.provider?.value?._state?.isUnlocked) {
+        state.authLoading = false;
+      }
+    } finally {
       state.authLoading = false;
     }
   }
