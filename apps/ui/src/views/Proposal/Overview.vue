@@ -52,9 +52,11 @@ const shareMsg = encodeURIComponent(
 );
 
 const editable = computed(() => {
+  // HACK: here we need to use snapshot instead of start because start is artifically
+  // shifted for Starknet's proposals with ERC20Votes strategies.
   return (
     compareAddresses(props.proposal.author.id, web3.value.account) &&
-    props.proposal.start > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
+    props.proposal.snapshot > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
 
