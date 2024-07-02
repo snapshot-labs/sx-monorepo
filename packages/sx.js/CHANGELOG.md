@@ -1,5 +1,23 @@
 # @snapshot-labs/sx
 
+## 0.2.0
+
+### Minor Changes
+
+- bde32f6: support on-chain voting with Safe using relayer
+
+### Patch Changes
+
+- bc7102e: add updateUser to OffchainEthereumSig
+- f49adac: add Axiom and Isokratia strategies to execution strategies instead of voting strategies
+- 76f59c6: overestimate fee when using nonce in StarknetTx client
+- b603a6e: add nonce management to execute call
+- b603a6e: remove deploy method from L1Executor
+- bdd30ea: add space follow and unfollow support for OffchainEthereumSig
+- f525474: add feeEstimateOverride to networkConfig
+- 7c922d4: update EthRelayer to work with latest contracts
+- ffb185d: add setAlias to OffchainEthereumSig
+
 ## 0.1.2
 
 ### Patch Changes
