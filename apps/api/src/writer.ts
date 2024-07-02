@@ -295,7 +295,7 @@ export const handleProposalValidationStrategyUpdated: starknet.Writer = async ({
   await space.save();
 };
 
-export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, event }) => {
+export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) => {
   if (!rawEvent || !event || !tx.transaction_hash) return;
 
   console.log('Handle propose');
@@ -308,7 +308,7 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   const proposalId = parseInt(BigInt(event.proposal_id).toString());
   const author = formatAddressVariant(findVariant(event.author));
 
-  const created = block?.timestamp ?? getCurrentTimestamp();
+  const created = BigInt(event.proposal.start_timestamp) - BigInt(space.voting_delay);
 
   const proposal = new Proposal(`${spaceId}/${proposalId}`);
   proposal.proposal_id = proposalId;
@@ -331,7 +331,7 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   proposal.strategies_indicies = space.strategies_indicies;
   proposal.strategies = space.strategies;
   proposal.strategies_params = space.strategies_params;
-  proposal.created = created;
+  proposal.created = parseInt(created.toString());
   proposal.tx = tx.transaction_hash;
   proposal.execution_tx = null;
   proposal.veto_tx = null;
@@ -368,7 +368,7 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   } else {
     const user = new User(author.address);
     user.address_type = author.type;
-    user.created = created;
+    user.created = parseInt(created.toString());
     await user.save();
   }
 
