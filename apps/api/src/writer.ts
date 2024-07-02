@@ -310,14 +310,25 @@ export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) =>
 
   const created = BigInt(event.proposal.start_timestamp) - BigInt(space.voting_delay);
 
+  // for erc20votes strategies we have to add artificial delay to prevent voting within same block
+  // snapshot needs to remain the same as we need real timestamp to compute VP
+  let startTimestamp = BigInt(event.proposal.start_timestamp);
+  let minEnd = BigInt(event.proposal.min_end_timestamp);
+  if (space.strategies.some(strategy => strategy === networkProperties.erc20VotesStrategy)) {
+    const minimumDelay = 10n * 60n;
+    startTimestamp =
+      startTimestamp > created + minimumDelay ? startTimestamp : created + minimumDelay;
+    minEnd = minEnd > startTimestamp ? minEnd : startTimestamp;
+  }
+
   const proposal = new Proposal(`${spaceId}/${proposalId}`);
   proposal.proposal_id = proposalId;
   proposal.space = spaceId;
   proposal.author = author.address;
   proposal.metadata = null;
   proposal.execution_hash = event.proposal.execution_payload_hash;
-  proposal.start = parseInt(BigInt(event.proposal.start_timestamp).toString());
-  proposal.min_end = parseInt(BigInt(event.proposal.min_end_timestamp).toString());
+  proposal.start = parseInt(startTimestamp.toString());
+  proposal.min_end = parseInt(minEnd.toString());
   proposal.max_end = parseInt(BigInt(event.proposal.max_end_timestamp).toString());
   proposal.snapshot = parseInt(BigInt(event.proposal.start_timestamp).toString());
   proposal.execution_time = 0;
