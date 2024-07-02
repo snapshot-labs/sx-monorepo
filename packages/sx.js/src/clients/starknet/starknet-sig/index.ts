@@ -84,8 +84,7 @@ export class StarknetSig {
       signature: Array.isArray(signature)
         ? signature.map(v => `0x${BigInt(v).toString(16)}`)
         : [`0x${signature.r.toString(16)}`, `0x${signature.s.toString(16)}`],
-      message,
-      primaryType
+      ...data
     };
   }
 

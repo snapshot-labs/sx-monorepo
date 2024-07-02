@@ -1,5 +1,5 @@
-import type { BigNumberish, RpcProvider } from 'starknet';
-import type { Call } from 'starknet';
+import type { Call, BigNumberish, RpcProvider, StarkNetType } from 'starknet';
+import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
 import type { MetaTransaction } from '../utils/encoding';
 import type { NetworkConfig } from './networkConfig';
 
@@ -141,8 +141,10 @@ export type SignatureData = {
   address: string;
   commitTxId?: string;
   commitHash?: string;
-  signature?: string[] | null;
+  signature?: string | string[] | null;
   message?: Record<string, any>;
+  domain?: TypedDataDomain;
+  types?: Record<string, TypedDataField[] | StarkNetType[]>;
   primaryType?: any;
 };
 
