@@ -17,7 +17,7 @@ const ajv = new Ajv({
 });
 addFormats(ajv);
 
-const addressValidator = (value: string) => {
+export const addressValidator = (value: string) => {
   try {
     return !!validateAndParseAddress(value);
   } catch (e) {
@@ -170,6 +170,22 @@ ajv.addFormat('discord-handle', {
     if (!value) return false;
 
     return !!value.match(/^[a-zA-Z0-9-]+$/);
+  }
+});
+
+ajv.addFormat('lens-handle', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[A-Za-z0-9_]+$/);
+  }
+});
+
+ajv.addFormat('farcaster-handle', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-z0-9-]+$/);
   }
 });
 

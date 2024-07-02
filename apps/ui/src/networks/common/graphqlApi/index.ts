@@ -32,12 +32,14 @@ import {
   Transaction,
   NetworkID,
   ProposalState,
-  Follow
+  Follow,
+  UserActivity
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
 import { clone } from '@/helpers/utils';
 
 type ApiOptions = {
+  baseNetworkId?: NetworkID;
   highlightApiUrl?: string;
 };
 
@@ -142,7 +144,12 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   };
 }
 
-function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: number): Proposal {
+function formatProposal(
+  proposal: ApiProposal,
+  networkId: NetworkID,
+  current: number,
+  baseNetworkId?: NetworkID
+): Proposal {
   return {
     ...proposal,
     space: {
@@ -166,6 +173,10 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID, current: nu
     title: proposal.metadata.title,
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
+    execution_network:
+      proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
+        ? baseNetworkId
+        : networkId,
     execution: formatExecution(proposal.metadata.execution),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(proposal.execution_strategy_type)
       ? proposal.max_end <= current
@@ -213,6 +224,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
   };
 
   return {
+    apiUrl: uri,
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,
@@ -347,7 +359,9 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         });
       }
 
-      return data.proposals.map(proposal => formatProposal(proposal, networkId, current));
+      return data.proposals.map(proposal =>
+        formatProposal(proposal, networkId, current, opts.baseNetworkId)
+      );
     },
     loadProposal: async (
       spaceId: string,
@@ -370,20 +384,27 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
       if (data.proposal.metadata === null) return null;
       data.proposal = joinHighlightProposal(data.proposal, highlightResult?.data.sxproposal);
 
-      return formatProposal(data.proposal, networkId, current);
+      return formatProposal(data.proposal, networkId, current, opts.baseNetworkId);
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      const _filter: Record<string, any> = clone(filter || {});
+
+      if (_filter.searchQuery) {
+        _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
+      }
+      delete _filter.searchQuery;
+
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
           first: limit,
           skip,
           where: {
-            ...filter,
-            metadata_: {}
+            metadata_: {},
+            ..._filter
           }
         }
       });
@@ -439,6 +460,28 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
 
       return joinHighlightUser(data.user ?? null, highlightResult?.data?.sxuser ?? null);
     },
+    loadUserActivities(userId: string): Promise<UserActivity[]> {
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: 1000,
+            skip: 0,
+            orderBy: 'proposal_count',
+            orderDirection: 'desc',
+            where: {
+              user: userId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            spaceId: `${networkId}:${leaderboard.space.id}`,
+            vote_count: leaderboard.vote_count,
+            proposal_count: leaderboard.proposal_count
+          }))
+        );
+    },
     loadLeaderboard(
       spaceId: string,
       { limit, skip = 0 }: PaginationOpts,
@@ -447,7 +490,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         | 'vote_count-asc'
         | 'proposal_count-desc'
         | 'proposal_count-asc' = 'vote_count-desc'
-    ): Promise<User[]> {
+    ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
         'desc' | 'asc'
@@ -469,7 +512,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         .then(({ data }) =>
           data.leaderboards.map((leaderboard: any) => ({
             id: leaderboard.user.id,
-            created: leaderboard.user.created,
+            spaceId: leaderboard.space.id,
             vote_count: leaderboard.vote_count,
             proposal_count: leaderboard.proposal_count
           }))

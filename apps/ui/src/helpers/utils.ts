@@ -3,15 +3,23 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
+import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import { getAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
+import { upload as pin } from '@snapshot-labs/pineapple';
 import networks from '@/helpers/networks.json';
 import pkg from '@/../package.json';
 import type { Web3Provider } from '@ethersproject/providers';
-import { upload as pin } from '@snapshot-labs/pineapple';
 import type { Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
+import ICX from '~icons/c/x';
+import ICDiscord from '~icons/c/discord';
+import ICGithub from '~icons/c/github';
+import ICLens from '~icons/c/lens';
+import ICFarcaster from '~icons/c/farcaster';
+import ICCoingecko from '~icons/c/coingecko';
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
 const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
@@ -140,6 +148,10 @@ export function _n(
     maximumFractionDigits
   });
   return formatter.format(value).toLowerCase();
+}
+
+export function _vp(value: number) {
+  return _n(value, 'compact', { maximumFractionDigits: value >= 1000 ? 1 : 3, formatDust: true });
 }
 
 export function getCurrentName(currentUnit: 'block' | 'second') {
@@ -359,9 +371,7 @@ export function compareAddresses(a: string, b: string): boolean {
   if (a.length > 42 && b.length > 42) {
     return validateAndParseAddress(a) === validateAndParseAddress(b);
   }
-
-  // TODO: in future ignore padding as well
-  return a.toLowerCase() === b.toLowerCase();
+  return isAddress(a) && isAddress(b) && a.toLowerCase() === b.toLowerCase();
 }
 
 export function getSalt() {
@@ -376,7 +386,7 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type: 'avatar' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
+  type: 'avatar' | 'user-cover' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string
@@ -444,4 +454,33 @@ export function getChoiceText(
     .filter(([, weight]) => weight > 0)
     .map(([index, weight]) => `${_p(weight / total)} for ${availableChoices[Number(index) - 1]}`)
     .join(', ');
+}
+
+export function autoLinkText(text: string) {
+  if (!text) return text;
+
+  return Autolinker.link(text, {
+    sanitizeHtml: true,
+    phone: false,
+    replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
+  });
+}
+
+export function getSocialNetworksLink(data: any) {
+  return [
+    { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
+    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
+    { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
+    { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
+    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
+    { key: 'lens', icon: ICLens, urlFormat: 'https://hey.xyz/u/$' },
+    { key: 'farcaster', icon: ICFarcaster, urlFormat: 'https://warpcast.com/$' }
+  ]
+    .map(({ key, icon, urlFormat }) => {
+      const value = data[key];
+      const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
+
+      return href ? { key, icon, href } : {};
+    })
+    .filter(social => social.href);
 }

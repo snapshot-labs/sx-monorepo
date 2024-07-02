@@ -1,17 +1,15 @@
 import { defineStore } from 'pinia';
-import { enabledNetworks as enabledNetworkIds, getNetwork } from '@/networks';
-import { getNames } from '@/helpers/stamp';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import type { User } from '@/types';
-
-type UserWithName = User & { name?: string };
 
 type UserRecord = {
   loading: boolean;
   loaded: boolean;
-  user: UserWithName | null;
+  user: User | null;
 };
 
-const enabledNetworks = enabledNetworkIds.map(network => getNetwork(network));
+const networkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
+const network = getNetwork(networkId);
 
 export const useUsersStore = defineStore('users', {
   state: () => ({
@@ -25,44 +23,20 @@ export const useUsersStore = defineStore('users', {
     }
   },
   actions: {
-    async fetchUser(userId: string) {
-      if (this.getUser(userId)) return;
+    async fetchUser(userId: string, force = false) {
+      if (this.getUser(userId) && !force) return;
 
-      this.users[userId] = {
+      this.users[userId] ||= {
         loading: false,
         loaded: false,
         user: null
       };
 
       const record = toRef(this.users, userId) as Ref<UserRecord>;
-      record.value.loading = false;
+      record.value.loading = true;
 
-      const users = (
-        await Promise.allSettled(enabledNetworks.map(network => network.api.loadUser(userId)))
-      )
-        .map(result => (result.status === 'fulfilled' ? result.value : null))
-        .filter(Boolean) as UserWithName[];
+      record.value.user = await network.api.loadUser(userId);
 
-      record.value.user = users.reduce(
-        (acc, user) => {
-          acc.vote_count += user.vote_count;
-          acc.proposal_count += user.proposal_count;
-
-          const minCreated = [acc.created, user.created].filter(Number);
-          if (minCreated.length) {
-            acc.created = Math.min(...minCreated);
-          }
-
-          return acc;
-        },
-        {
-          id: userId,
-          name: (await getNames([userId]))[userId],
-          vote_count: 0,
-          proposal_count: 0,
-          created: 0
-        }
-      );
       record.value.loaded = true;
       record.value.loading = false;
     }

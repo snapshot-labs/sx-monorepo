@@ -114,6 +114,12 @@ export type EIP712SetAliasMessage = {
   timestamp?: number;
 };
 
+export type EIP712UpdateUserMessage = {
+  from?: string;
+  profile: string;
+  timestamp?: number;
+};
+
 export type EIP712Message = Required<
   | EIP712VoteMessage
   | EIP712ProposeMessage
@@ -122,6 +128,7 @@ export type EIP712Message = Required<
   | EIP712FollowSpaceMessage
   | EIP712UnfollowSpaceMessage
   | EIP712SetAliasMessage
+  | EIP712UpdateUserMessage
 >;
 
 export type Vote = {
@@ -186,5 +193,11 @@ export type UnfollowSpace = {
 export type SetAlias = {
   from?: string;
   alias: string;
+  timestamp?: number;
+};
+
+export type UpdateUser = {
+  from?: string;
+  profile: string;
   timestamp?: number;
 };

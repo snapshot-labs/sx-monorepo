@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ProxyFactory
-    network: optimism
+    network: sepolia
     source:
       abi: ProxyFactory
       address: "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c"
-      startBlock: 118359200
+      startBlock: 4519171
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -28,10 +28,30 @@ dataSources:
         - event: ProxyDeployed(address,address)
           handler: handleProxyDeployed
       file: ./src/mapping.ts
+  - kind: ethereum
+    name: L1AvatarExecutionStrategyFactory
+    network: sepolia
+    source:
+      abi: L1AvatarExecutionStrategyFactory
+      address: "0x27981a29ec87f2fbf873a2dcb0325405648ffce1"
+      startBlock: 6078978
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - StarknetL1Execution
+      abis:
+        - name: L1AvatarExecutionStrategyFactory
+          file: ./abis/L1AvatarExecutionStrategyFactory.json
+      eventHandlers:
+        - event: ContractDeployed(indexed address)
+          handler: handleContractDeployed
+      file: ./src/starknet-mapping.ts
 templates:
   - kind: ethereum
     name: Space
-    network: optimism
+    network: sepolia
     source:
       abi: Space
     mapping:
@@ -58,6 +78,8 @@ templates:
           handler: handleProposalCancelled
         - event: VoteCast(uint256,address,uint8,uint256)
           handler: handleVoteCreated
+        - event: VoteCastWithMetadata(uint256,address,uint8,uint256,string)
+          handler: handleVoteCreatedWithMetadata
         - event: MetadataURIUpdated(string)
           handler: handleMetadataUriUpdated
         - event: VotingDelayUpdated(uint32)
@@ -81,7 +103,7 @@ templates:
       file: ./src/mapping.ts
   - kind: ethereum
     name: AxiomExecutionStrategy
-    network: optimism
+    network: sepolia
     source:
       abi: AxiomExecutionStrategy
     mapping:
@@ -99,7 +121,7 @@ templates:
       file: ./src/mapping.ts
   - kind: ethereum
     name: TimelockExecutionStrategy
-    network: optimism
+    network: sepolia
     source:
       abi: TimelockExecutionStrategy
     mapping:
@@ -129,7 +151,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: optimism
+    network: sepolia
   - name: ProposalMetadata
     kind: file/ipfs
     mapping:
@@ -142,7 +164,20 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: optimism
+    network: sepolia
+  - name: VoteMetadata
+    kind: file/ipfs
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/ipfs.ts
+      handler: handleVoteMetadata
+      entities:
+        - VoteMetadata
+      abis:
+        - name: Space
+          file: ./abis/Space.json
+    network: sepolia
   - name: StrategiesParsedMetadataData
     kind: file/ipfs
     mapping:
@@ -155,7 +190,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: optimism
+    network: sepolia
   - name: VotingPowerValidationStrategyMetadata
     kind: file/ipfs
     mapping:
@@ -168,4 +203,22 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: optimism
+    network: sepolia
+  - name: L1AvatarExecutionStrategy
+    kind: ethereum
+    network: sepolia
+    source:
+      abi: L1AvatarExecutionStrategy
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ProposalExecuted
+      abis:
+        - name: L1AvatarExecutionStrategy
+          file: ./abis/L1AvatarExecutionStrategy.json
+      eventHandlers:
+        - event: ProposalExecuted(indexed uint256,uint256)
+          handler: handleStarknetProposalExecuted
+      file: ./src/starknet-mapping.ts

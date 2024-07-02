@@ -31,6 +31,11 @@ const CUSTOMERS = [
     website: 'https://cyber.co'
   },
   {
+    name: 'Sei',
+    avatar: 'https://pbs.twimg.com/profile_images/1783226809892397056/oV7Dkq37_400x400.jpg',
+    website: 'https://www.sei.io'
+  },
+  {
     name: 'Gravity',
     avatar: 'https://pbs.twimg.com/profile_images/1795917311620378625/Dnrm-QVf_400x400.jpg',
     website: 'https://gravity.xyz'
@@ -39,8 +44,7 @@ const CUSTOMERS = [
 const FAQ = [
   {
     question: 'What payment methods does Snapshot accept?',
-    answer:
-      'Snapshot accepts payments in USDC, USDT, DAI, and GHO stablecoins. Additionally, we can accept native project tokens under certain conditions. For more details, please contact us.'
+    answer: 'Snapshot accepts payments in USDC, USDT, DAI, and GHO stablecoins.'
   },
   {
     question: 'What are the requirements to add a network?',
@@ -71,7 +75,7 @@ function toggleQuestion(id) {
 watchEffect(() => setTitle('Network'));
 </script>
 <template>
-  <div class="space-y-[80px] mb-6 blocks">
+  <div class="space-y-[80px] mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
         <h1 class="mb-4 mono max-w-[600px] mx-auto">Unlock governance for your ecosystem.</h1>
@@ -89,7 +93,7 @@ watchEffect(() => setTitle('Network'));
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">
-      <div class="eyebrow mb-3">Key features</div>
+      <div class="eyebrow mb-2">Key features</div>
       <h1 class="mb-3">What the network plan offers</h1>
       <div class="text-[21px] mb-4 max-w-[500px] mx-auto">
         Our network plan is designed to provide the infrastructure and support needed for effective
@@ -108,34 +112,42 @@ watchEffect(() => setTitle('Network'));
         </h3>
         <h3>
           <IH-check class="inline-block text-skin-success mr-2" />
+          Custom domain registry support
+        </h3>
+        <h3>
+          <IH-check class="inline-block text-skin-success mr-2" />
+          Dedicated customer support
+        </h3>
+        <h3>
+          <IH-check class="inline-block text-skin-success mr-2" />
           Quick setup (~48 hours)
         </h3>
         <h3>
           <IH-check class="inline-block text-skin-success mr-2" />
-          Social media announcement
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Dedicated support on Telegram
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Custom registry support
+          Co-marketing
         </h3>
       </div>
     </UiContainer>
 
-    <UiContainer class="!max-w-[880px] text-center">
-      <div class="eyebrow mb-3">Trusted by</div>
-      <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
-        <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
-          <img :alt="customer.name" :src="customer.avatar" class="w-[54px] h-[54px] rounded-lg" />
-        </a>
+    <div class="text-center">
+      <div class="eyebrow mb-4">Trusted by</div>
+      <div class="overflow-y-scroll no-scrollbar px-4">
+        <div class="w-fit mx-auto">
+          <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
+            <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
+              <img
+                :alt="customer.name"
+                :src="customer.avatar"
+                class="w-[54px] h-[54px] rounded-lg"
+              />
+            </a>
+          </div>
+        </div>
       </div>
-    </UiContainer>
+    </div>
 
     <UiContainer class="!max-w-[880px] text-center">
-      <div class="eyebrow mb-3">Get started</div>
+      <div class="eyebrow mb-2">Get started</div>
       <h1 class="mb-3">Start your integration</h1>
       <a :href="LINK" target="_blank">
         <UiButton class="primary">
@@ -146,7 +158,21 @@ watchEffect(() => setTitle('Network'));
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">
-      <div class="mb-3 eyebrow text-center">Frequently asked questions</div>
+      <div class="border p-4 rounded-lg">
+        <h3 class="mb-1">
+          <IH-exclamation-circle class="inline-block mr-1" />
+          Is your network already live on Snapshot?
+        </h3>
+        <div class="text-md">
+          Starting July 1, 2024, all networks must subscribe to the network plan to maintain support
+          on Snapshot. To ensure continuous service and avoid interruptions, please contact our team
+          today.
+        </div>
+      </div>
+    </UiContainer>
+
+    <UiContainer class="!max-w-[880px]">
+      <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
       <h1 class="mb-3 text-center">Questions?</h1>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
         <a class="flex items-center" @click="toggleQuestion(i)">

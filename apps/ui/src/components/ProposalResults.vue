@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { _p } from '@/helpers/utils';
+import { _n, _p } from '@/helpers/utils';
 import { quorumLabel, quorumProgress, quorumChoiceProgress } from '@/helpers/quorum';
 import { Proposal as ProposalType } from '@/types';
+
+const DEFAULT_MAX_CHOICES = 6;
 
 const props = withDefaults(
   defineProps<{
@@ -23,6 +25,8 @@ const labels = {
   2: 'Abstain'
 };
 
+const displayAllChoices = ref(false);
+
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const results = computed(() => {
@@ -40,31 +44,48 @@ const results = computed(() => {
     })
     .sort((a, b) => b.progress - a.progress);
 });
+
+const hasOneExtra = computed(() => {
+  return results.value.length === DEFAULT_MAX_CHOICES + 1;
+});
+
+const visibleResults = computed(() => {
+  if (displayAllChoices.value || hasOneExtra.value) {
+    return results.value;
+  }
+
+  return results.value.slice(0, DEFAULT_MAX_CHOICES);
+});
+
+const otherResultsSummary = computed(() => {
+  const oetherResultsStartIndex = hasOneExtra.value ? DEFAULT_MAX_CHOICES + 1 : DEFAULT_MAX_CHOICES;
+
+  return results.value.slice(oetherResultsStartIndex).reduce(
+    (acc, result) => ({
+      progress: acc.progress + result.progress,
+      count: acc.count + 1
+    }),
+    {
+      progress: 0,
+      count: 0
+    }
+  );
+});
 </script>
 
 <template>
-  <div
-    v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails"
-    class="text-center py-3.5 leading-5"
-  >
-    <div
-      class="p-1.5 border text-skin-heading rounded-full mb-3 w-[40px] h-[40px] inline-block bg-skin-input-bg"
-    >
-      <IH-eye-off class="inline-block top-[2px] relative" />
+  <div v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails">
+    <div class="mb-1">
+      All votes are encrypted and will be decrypted only after the voting period is over, making the
+      results visible.
     </div>
-
-    <div class="flex flex-col gap-1">
-      <div class="text-skin-heading font-semibold">Shutter privacy enabled</div>
-      All votes will be encrypted until the voting period has ended and the final score is
-      calculated.
-    </div>
-
-    <div class="mt-2.5 text-center">
+    <div>
       <a
         href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
         target="_blank"
       >
-        <IC-Shutter class="w-[80px] text-skin-text inline-block" />
+        <IC-shutter class="w-[80px] inline-block" />
+        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </a>
 
       <div v-if="proposal.quorum" class="mt-3.5">
@@ -76,14 +97,14 @@ const results = computed(() => {
   <template v-else>
     <div v-if="withDetails" class="flex flex-col gap-2">
       <div
-        v-for="result in results"
+        v-for="result in visibleResults"
         :key="result.choice"
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
         :class="{ [`_${result.choice} choice-border`]: proposal.type === 'basic' }"
       >
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
-          :class="{ [`_${result.choice} choice-bg opacity-10`]: proposal.type === 'basic' }"
+          :class="{ [`_${result.choice} choice-bg opacity-20`]: proposal.type === 'basic' }"
           :style="{
             width: `${result.progress.toFixed(2)}%`
           }"
@@ -106,6 +127,30 @@ const results = computed(() => {
         <div class="truncate grow" v-text="proposal.choices[result.choice - 1]" />
         <div v-text="_p(result.progress / 100)" />
       </div>
+      <button
+        v-if="!displayAllChoices && otherResultsSummary.count > 0"
+        type="button"
+        class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center text-left group"
+        @click="displayAllChoices = true"
+      >
+        <div
+          class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
+          :style="{
+            width: `${otherResultsSummary.progress.toFixed(2)}%`
+          }"
+        />
+        <div class="truncate grow">
+          Others
+          <span
+            class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-2"
+            v-text="_n(otherResultsSummary.count, 'compact')"
+          />
+        </div>
+        <div class="group-hover:hidden" v-text="_p(otherResultsSummary.progress / 100)" />
+        <div class="hidden group-hover:flex items-center gap-1">
+          See all <IH-arrow-down class="w-[16px] h-[16px]" />
+        </div>
+      </button>
       <div v-if="proposal.quorum">
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
@@ -122,7 +167,10 @@ const results = computed(() => {
         </div>
       </div>
     </div>
-    <div v-else class="h-full flex items-center">
+    <div
+      v-else-if="!props.proposal.privacy || props.proposal.completed"
+      class="h-full flex items-center"
+    >
       <div
         class="rounded-full h-1.5 overflow-hidden"
         :style="{

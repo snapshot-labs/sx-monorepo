@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getInjected } from '@snapshot-labs/lock/src/utils';
-import { shorten, explorerUrl } from '@/helpers/utils';
 import connectors, { mapConnectorId, getConnectorIconUrl } from '@/helpers/connectors';
 
 const win = window;
@@ -77,14 +76,20 @@ watch(open, () => (step.value = null));
     </div>
     <div v-else>
       <div class="m-4 space-y-2">
-        <a :href="explorerUrl(web3.network.key, web3.account)" target="_blank" class="block">
-          <UiButton class="button-outline w-full flex justify-center items-center">
-            <UiStamp :id="web3.account" :size="18" class="mr-2 -ml-1" />
-            <span v-text="web3.name || shorten(web3.account)" />
-            <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
+        <router-link
+          :to="{ name: 'user', params: { id: web3.account } }"
+          class="block"
+          tabindex="-1"
+        >
+          <UiButton
+            class="button-outline w-full flex justify-center items-center space-x-2"
+            @click="emit('close')"
+          >
+            <UiStamp :id="web3.account" :size="18" />
+            <span>My profile</span>
           </UiButton>
-        </a>
-        <router-link to="/settings" class="block">
+        </router-link>
+        <router-link to="/settings" class="block" tabindex="-1">
           <UiButton
             class="button-outline w-full flex justify-center items-center"
             @click="emit('close')"

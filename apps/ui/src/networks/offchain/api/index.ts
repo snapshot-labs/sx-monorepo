@@ -1,13 +1,15 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import {
-  SPACES_RANKING_QUERY,
+  SPACES_QUERY,
+  RANKING_QUERY,
   SPACE_QUERY,
   PROPOSALS_QUERY,
   PROPOSAL_QUERY,
   USER_VOTES_QUERY,
   USER_FOLLOWS_QUERY,
   VOTES_QUERY,
-  ALIASES_QUERY
+  ALIASES_QUERY,
+  USER_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
@@ -21,7 +23,8 @@ import {
   ProposalState,
   SpaceMetadataTreasury,
   Follow,
-  Alias
+  Alias,
+  UserActivity
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
@@ -128,7 +131,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     network: networkId,
     metadata_uri: proposal.ipfs,
     author: {
-      id: proposal.author
+      id: proposal.author,
+      address_type: 1
     },
     proposal_id: proposal.id,
     type: proposal.type,
@@ -166,6 +170,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       strategies_parsed_metadata: []
     },
     // NOTE: ignored
+    execution_network: networkId,
     execution_ready: false,
     execution: [],
     execution_hash: '',
@@ -218,6 +223,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
   });
 
   return {
+    apiUrl: uri,
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,
@@ -331,10 +337,22 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      if (!filter || filter.hasOwnProperty('searchQuery')) {
+        const { data } = await apollo.query({
+          query: RANKING_QUERY,
+          variables: {
+            first: Math.min(limit, 20),
+            skip,
+            where: filter?.searchQuery ? { search: filter.searchQuery } : {}
+          }
+        });
+        return data.ranking.items.map(space => formatSpace(space, networkId));
+      }
+
       const { data } = await apollo.query({
-        query: SPACES_RANKING_QUERY,
+        query: SPACES_QUERY,
         variables: {
-          first: Math.min(limit, 20),
+          first: limit,
           skip,
           where: {
             ...filter
@@ -342,7 +360,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.ranking.items.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
@@ -355,16 +373,36 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return formatSpace(data.space, networkId);
     },
-    loadUser: async (id: string): Promise<User | null> => {
-      // NOTE: missing proposal/vote count on offchain
+    loadUser: async (id: string): Promise<User> => {
+      let {
+        data: { user }
+      } = await apollo.query({
+        query: USER_QUERY,
+        variables: { id }
+      });
+
+      if (!user) {
+        user = { id };
+      }
+
       return {
-        id,
-        proposal_count: 0,
-        vote_count: 0,
-        created: 0
+        ...user,
+        created: user.created || null,
+        name: user.name || (await getNames([user.id]))?.[user.id] || '',
+        about: user.about || '',
+        avatar: user.avatar || '',
+        cover: user.cover || '',
+        twitter: user.twitter || '',
+        github: user.github || '',
+        lens: user.lens || '',
+        farcaster: user.farcaster || ''
       };
     },
-    loadLeaderboard: async (): Promise<User[]> => {
+    loadUserActivities: async (): Promise<UserActivity[]> => {
+      // NOTE: leaderboard implementation is pending on offchain
+      return [];
+    },
+    loadLeaderboard: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     },

@@ -262,49 +262,13 @@ onBeforeUnmount(() => destroyAudio());
               <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
             </UiButton>
           </UiTooltip>
-
-          <UiDropdown>
+          <DropdownShare :message="shareMsg">
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
                 <IH-share class="text-skin-text inline-block w-[22px] h-[22px]" />
               </UiButton>
             </template>
-            <template #items>
-              <UiDropdownItem v-slot="{ active }">
-                <a
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  :href="`https://twitter.com/intent/tweet/?text=${shareMsg}`"
-                  target="_blank"
-                >
-                  <IC-x />
-                  Share on X
-                </a>
-              </UiDropdownItem>
-              <UiDropdownItem v-slot="{ active }">
-                <a
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  :href="`https://hey.xyz/?hashtags=Snapshot&text=${shareMsg}`"
-                  target="_blank"
-                >
-                  <IC-lens />
-                  Share on Lens
-                </a>
-              </UiDropdownItem>
-              <UiDropdownItem v-slot="{ active }">
-                <a
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  :href="`https://warpcast.com/~/compose?text=${shareMsg}`"
-                  target="_blank"
-                >
-                  <IC-farcaster />
-                  Share on Farcaster
-                </a>
-              </UiDropdownItem>
-            </template>
-          </UiDropdown>
+          </DropdownShare>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">

@@ -134,6 +134,7 @@ export type Proposal = {
   id: string;
   proposal_id: number | string;
   network: NetworkID;
+  execution_network: NetworkID;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';
@@ -153,6 +154,7 @@ export type Proposal = {
   };
   author: {
     id: string;
+    address_type: 0 | 1 | 2;
     name?: string;
   };
   execution_hash: string;
@@ -191,12 +193,29 @@ export type Proposal = {
   privacy: Privacy;
 };
 
+export type UserProfile = {
+  name: string;
+  about: string;
+  avatar: string;
+  cover: string;
+  github: string;
+  twitter: string;
+  lens: string;
+  farcaster: string;
+};
+
 export type User = {
   id: string;
+  created: number | null;
+  follows?: string[];
+} & UserProfile;
+
+export type UserActivity = {
+  id: string;
+  name?: string;
+  spaceId: string;
   proposal_count: number;
   vote_count: number;
-  created: number;
-  follows?: string[];
 };
 
 export type Follow = {

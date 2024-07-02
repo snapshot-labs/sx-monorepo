@@ -98,6 +98,7 @@ const PROPOSAL_FRAGMENT = gql`
     }
     author {
       id
+      address_type
     }
     quorum
     execution_hash
@@ -253,6 +254,9 @@ export const LEADERBOARD_QUERY = gql`
       user {
         id
         created
+      }
+      space {
+        id
       }
       proposal_count
       vote_count

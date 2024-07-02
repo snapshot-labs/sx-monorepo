@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import path from 'path';
 import fs from 'fs';
-import Checkpoint, { createGetLoader, LogLevel } from '@snapshot-labs/checkpoint';
+import Checkpoint, { starknet, createGetLoader, LogLevel } from '@snapshot-labs/checkpoint';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
@@ -21,7 +21,8 @@ if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
 
-const checkpoint = new Checkpoint(config, writer, schema, {
+const indexer = new starknet.StarknetIndexer(writer);
+const checkpoint = new Checkpoint(config, indexer, schema, {
   logLevel: LogLevel.Info,
   resetOnConfigChange: true,
   prettifyLogs: process.env.NODE_ENV !== 'production',

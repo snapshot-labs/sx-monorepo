@@ -12,18 +12,16 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
     :to="{ name: 'space-overview', params: { id: compositeSpaceId } }"
     class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
   >
-    <SpaceCover :space="props.space" class="!rounded-none w-full h-[68px] absolute" />
+    <div class="h-[68px] w-full absolute">
+      <SpaceCover :space="props.space" size="sm" />
+    </div>
     <div class="relative inline-block mx-4 mt-[34px]">
       <UiBadgeNetwork
         :id="space.network"
         :size="!offchainNetworks.includes(space.network) ? 16 : 0"
         class="mb-2"
       >
-        <SpaceAvatar
-          :space="space"
-          :size="50"
-          class="border-skin-bg !bg-skin-border rounded-md border-[3px]"
-        />
+        <SpaceAvatar :space="space" :size="50" class="border-skin-bg rounded-md border-[3px]" />
       </UiBadgeNetwork>
     </div>
     <ButtonFollow :space="space" class="absolute top-2.5 right-2.5 hidden group-hover:block" />

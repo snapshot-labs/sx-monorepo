@@ -126,3 +126,11 @@ export const aliasTypes = {
     { name: 'timestamp', type: 'uint64' }
   ]
 };
+
+export const updateUserTypes = {
+  Profile: [
+    { name: 'from', type: 'address' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'profile', type: 'string' }
+  ]
+};

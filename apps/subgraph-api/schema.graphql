@@ -147,12 +147,19 @@ type Vote @entity {
   proposal: Int!
   choice: Int!
   vp: BigDecimal!
+  metadata: VoteMetadata
   created: Int!
   tx: Bytes!
 }
 
+type VoteMetadata @entity {
+  id: ID!
+  reason: String!
+}
+
 type User @entity {
   id: ID!
+  address_type: Int!
   proposal_count: Int!
   vote_count: Int!
   created: Int!
@@ -164,4 +171,12 @@ type Leaderboard @entity {
   user: User!
   proposal_count: Int!
   vote_count: Int!
+}
+
+type StarknetL1Execution @entity {
+  id: ID!
+  space: String!
+  proposalId: Int!
+  created: Int!
+  tx: Bytes!
 }

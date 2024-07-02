@@ -59,7 +59,6 @@ const routes: any[] = [
       { path: 'votes', name: 'proposal-votes', component: ProposalVotes }
     ]
   },
-  { path: '/profile/:id', name: 'user', component: User },
   { path: '/create', name: 'create', component: Create },
   {
     path: '/settings',
@@ -77,7 +76,8 @@ const routes: any[] = [
     children: [
       { path: '/home', name: 'my-home', component: Home },
       { path: '/explore', name: 'my-explore', component: Explore },
-      { path: '/notifications', name: 'my-notifications', component: Notifications }
+      { path: '/notifications', name: 'my-notifications', component: Notifications },
+      { path: '/profile/:id', name: 'user', component: User }
     ]
   },
   { path: '/apps', name: 'apps', component: Apps },

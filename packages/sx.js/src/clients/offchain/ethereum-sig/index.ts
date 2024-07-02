@@ -13,7 +13,8 @@ import {
   cancelProposalTypes,
   followSpaceTypes,
   unfollowSpaceTypes,
-  aliasTypes
+  aliasTypes,
+  updateUserTypes
 } from './types';
 import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import {
@@ -26,6 +27,7 @@ import {
   type FollowSpace,
   type UnfollowSpace,
   type SetAlias,
+  type UpdateUser,
   type EIP712Message,
   type EIP712VoteMessage,
   type EIP712ProposeMessage,
@@ -33,13 +35,19 @@ import {
   type EIP712CancelProposalMessage,
   type EIP712FollowSpaceMessage,
   type EIP712UnfollowSpaceMessage,
-  type EIP712SetAliasMessage
+  type EIP712SetAliasMessage,
+  type EIP712UpdateUserMessage
 } from '../types';
 import type { OffchainNetworkConfig } from '../../../types';
 
 const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
   5: 'https://testnet.seq.snapshot.org'
+};
+
+const RELAYER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
+  1: 'https://relayer.snapshot.org',
+  5: 'https://testnet.seq.snapshot.org' // no relayer for testnet
 };
 
 type EthereumSigClientOpts = {
@@ -65,6 +73,7 @@ export class EthereumSig {
       | EIP712FollowSpaceMessage
       | EIP712UnfollowSpaceMessage
       | EIP712SetAliasMessage
+      | EIP712UpdateUserMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -113,7 +122,11 @@ export class EthereumSig {
       body: JSON.stringify(payload)
     };
 
-    const res = await fetch(this.sequencerUrl, body);
+    let url = this.sequencerUrl;
+    if (sig === '0x') {
+      url = RELAYER_URLS[this.networkConfig.eip712ChainId] || url;
+    }
+    const res = await fetch(url, body);
     const result = await res.json();
 
     if (result.error) {
@@ -267,6 +280,21 @@ export class EthereumSig {
     data: SetAlias;
   }): Promise<Envelope<SetAlias>> {
     const signatureData = await this.sign(signer, data, aliasTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async updateUser({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateUser;
+  }) {
+    const signatureData = await this.sign(signer, data, updateUserTypes);
 
     return {
       signatureData,

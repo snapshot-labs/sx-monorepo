@@ -1,7 +1,7 @@
 import { validateAndParseAddress } from 'starknet';
-import { CheckpointWriter } from '@snapshot-labs/checkpoint';
+import { starknet } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
-import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
+import { handleProposalMetadata, handleVoteMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
 import {
   getCurrentTimestamp,
@@ -21,7 +21,7 @@ type Strategy = {
   params: string[];
 };
 
-export const handleSpaceDeployed: CheckpointWriter = async ({ blockNumber, event, instance }) => {
+export const handleSpaceDeployed: starknet.Writer = async ({ blockNumber, event, instance }) => {
   console.log('Handle space deployed');
 
   if (!event) return;
@@ -32,7 +32,7 @@ export const handleSpaceDeployed: CheckpointWriter = async ({ blockNumber, event
   });
 };
 
-export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event }) => {
+export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
   console.log('Handle space created');
 
   if (!event || !tx.transaction_hash) return;
@@ -53,7 +53,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
   space.voting_delay = Number(BigInt(event.voting_delay).toString());
   space.min_voting_period = Number(BigInt(event.min_voting_duration).toString());
   space.max_voting_period = Number(BigInt(event.max_voting_duration).toString());
-  space.proposal_threshold = 0;
+  space.proposal_threshold = '0';
   space.strategies_indicies = strategies.map((_, i) => i);
   space.strategies = strategies;
   space.next_strategy_index = strategies.length;
@@ -92,7 +92,7 @@ export const handleSpaceCreated: CheckpointWriter = async ({ block, tx, event })
   await space.save();
 };
 
-export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleMetadataUriUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space metadata uri updated');
@@ -114,7 +114,7 @@ export const handleMetadataUriUpdated: CheckpointWriter = async ({ rawEvent, eve
   }
 };
 
-export const handleMinVotingDurationUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleMinVotingDurationUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space min voting duration updated');
@@ -129,7 +129,7 @@ export const handleMinVotingDurationUpdated: CheckpointWriter = async ({ rawEven
   await space.save();
 };
 
-export const handleMaxVotingDurationUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleMaxVotingDurationUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space max voting duration updated');
@@ -144,7 +144,7 @@ export const handleMaxVotingDurationUpdated: CheckpointWriter = async ({ rawEven
   await space.save();
 };
 
-export const handleOwnershipTransferred: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleOwnershipTransferred: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space ownership transferred');
@@ -159,7 +159,7 @@ export const handleOwnershipTransferred: CheckpointWriter = async ({ rawEvent, e
   await space.save();
 };
 
-export const handleVotingDelayUpdated: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleVotingDelayUpdated: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting delay updated');
@@ -174,7 +174,7 @@ export const handleVotingDelayUpdated: CheckpointWriter = async ({ rawEvent, eve
   await space.save();
 };
 
-export const handleAuthenticatorsAdded: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleAuthenticatorsAdded: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space authenticators added');
@@ -189,7 +189,7 @@ export const handleAuthenticatorsAdded: CheckpointWriter = async ({ rawEvent, ev
   await space.save();
 };
 
-export const handleAuthenticatorsRemoved: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleAuthenticatorsRemoved: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space authenticators removed');
@@ -206,7 +206,7 @@ export const handleAuthenticatorsRemoved: CheckpointWriter = async ({ rawEvent, 
   await space.save();
 };
 
-export const handleVotingStrategiesAdded: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleVotingStrategiesAdded: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting strategies added');
@@ -246,7 +246,7 @@ export const handleVotingStrategiesAdded: CheckpointWriter = async ({ rawEvent, 
   await space.save();
 };
 
-export const handleVotingStrategiesRemoved: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleVotingStrategiesRemoved: starknet.Writer = async ({ rawEvent, event }) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting strategies removed');
@@ -272,7 +272,7 @@ export const handleVotingStrategiesRemoved: CheckpointWriter = async ({ rawEvent
   await space.save();
 };
 
-export const handleProposalValidationStrategyUpdated: CheckpointWriter = async ({
+export const handleProposalValidationStrategyUpdated: starknet.Writer = async ({
   rawEvent,
   event
 }) => {
@@ -295,7 +295,7 @@ export const handleProposalValidationStrategyUpdated: CheckpointWriter = async (
   await space.save();
 };
 
-export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, event }) => {
+export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, event }) => {
   if (!rawEvent || !event || !tx.transaction_hash) return;
 
   console.log('Handle propose');
@@ -313,7 +313,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   const proposal = new Proposal(`${spaceId}/${proposalId}`);
   proposal.proposal_id = proposalId;
   proposal.space = spaceId;
-  proposal.author = author;
+  proposal.author = author.address;
   proposal.metadata = null;
   proposal.execution_hash = event.proposal.execution_payload_hash;
   proposal.start = parseInt(BigInt(event.proposal.start_timestamp).toString());
@@ -361,21 +361,22 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
     console.log(JSON.stringify(e).slice(0, 256));
   }
 
-  const existingUser = await User.loadEntity(author);
+  const existingUser = await User.loadEntity(author.address);
   if (existingUser) {
     existingUser.proposal_count += 1;
     await existingUser.save();
   } else {
-    const user = new User(author);
+    const user = new User(author.address);
+    user.address_type = author.type;
     user.created = created;
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${author}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${author.address}`);
     leaderboardItem.space = spaceId;
-    leaderboardItem.user = author;
+    leaderboardItem.user = author.address;
     leaderboardItem.vote_count = 0;
     leaderboardItem.proposal_count = 0;
   }
@@ -414,7 +415,7 @@ export const handlePropose: CheckpointWriter = async ({ block, tx, rawEvent, eve
   await Promise.all([proposal.save(), space.save()]);
 };
 
-export const handleCancel: CheckpointWriter = async ({ rawEvent, event }) => {
+export const handleCancel: starknet.Writer = async ({ rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle cancel');
@@ -435,7 +436,7 @@ export const handleCancel: CheckpointWriter = async ({ rawEvent, event }) => {
   await Promise.all([proposal.save(), space.save()]);
 };
 
-export const handleUpdate: CheckpointWriter = async ({ block, rawEvent, event }) => {
+export const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle update');
@@ -468,7 +469,7 @@ export const handleUpdate: CheckpointWriter = async ({ block, rawEvent, event })
   await proposal.save();
 };
 
-export const handleExecute: CheckpointWriter = async ({ tx, rawEvent, event }) => {
+export const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle execute');
@@ -486,7 +487,7 @@ export const handleExecute: CheckpointWriter = async ({ tx, rawEvent, event }) =
   await proposal.save();
 };
 
-export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event }) => {
+export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle vote');
@@ -499,31 +500,42 @@ export const handleVote: CheckpointWriter = async ({ block, tx, rawEvent, event 
   const created = block?.timestamp ?? getCurrentTimestamp();
   const voter = formatAddressVariant(findVariant(event.voter));
 
-  const vote = new Vote(`${spaceId}/${proposalId}/${voter}`);
+  const vote = new Vote(`${spaceId}/${proposalId}/${voter.address}`);
   vote.space = spaceId;
   vote.proposal = proposalId;
-  vote.voter = voter;
+  vote.voter = voter.address;
   vote.choice = choice;
   vote.vp = vp.toString();
   vote.created = created;
   vote.tx = tx.transaction_hash;
+
+  try {
+    const metadataUri = longStringToText(event.metadata_uri);
+    await handleVoteMetadata(metadataUri);
+
+    vote.metadata = dropIpfs(metadataUri);
+  } catch (e) {
+    console.log(JSON.stringify(e).slice(0, 256));
+  }
+
   await vote.save();
 
-  const existingUser = await User.loadEntity(voter);
+  const existingUser = await User.loadEntity(voter.address);
   if (existingUser) {
     existingUser.vote_count += 1;
     await existingUser.save();
   } else {
-    const user = new User(voter);
+    const user = new User(voter.address);
+    user.address_type = voter.type;
     user.created = created;
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${voter}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${voter.address}`);
     leaderboardItem.space = spaceId;
-    leaderboardItem.user = voter;
+    leaderboardItem.user = voter.address;
     leaderboardItem.vote_count = 0;
     leaderboardItem.proposal_count = 0;
   }

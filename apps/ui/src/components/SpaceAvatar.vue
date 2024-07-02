@@ -21,6 +21,7 @@ const cb = computed(() => getCacheHash(props.space.avatar));
     :id="space.id"
     :size="size"
     :cb="cb"
+    class="!bg-skin-bg"
     :type="offchainNetworks.includes(space.network) ? 'space' : 'space-sx'"
   />
 </template>

@@ -87,6 +87,8 @@ export function useSpaces() {
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
     const { networks, limit } = explorePageProtocols[protocol.value];
+    if (overwrite) explorePageSpaces.value = [];
+
     const results = await Promise.all(
       networks.map(async id => {
         const network = getNetwork(id as NetworkID);
@@ -107,7 +109,9 @@ export function useSpaces() {
           },
           filter
         );
-        explorePageSpaces.value.push(...spaces);
+
+        explorePageSpaces.value = [...explorePageSpaces.value, ...spaces];
+
         return {
           id,
           spaces,
@@ -158,11 +162,6 @@ export function useSpaces() {
 
     loadingMore.value = false;
   }
-
-  watch(protocol, async () => {
-    explorePageSpaces.value = [];
-    await fetch();
-  });
 
   return {
     loading,

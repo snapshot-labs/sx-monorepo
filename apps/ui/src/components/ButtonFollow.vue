@@ -7,9 +7,12 @@ const props = defineProps<{
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
+const { isSafeWallet } = useSafeWallet(props.space.network, props.space.snapshot_chain_id);
 const followedSpacesStore = useFollowedSpacesStore();
+const { web3 } = useWeb3();
 
 const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
+const hidden = computed(() => web3.value?.type === 'argentx');
 
 const loading = computed(
   () =>
@@ -20,7 +23,8 @@ const loading = computed(
 
 <template>
   <UiButton
-    :disabled="loading"
+    v-if="!hidden"
+    :disabled="loading || isSafeWallet"
     class="group"
     :class="{ 'hover:border-skin-danger': spaceFollowed }"
     @click.prevent="followedSpacesStore.toggleSpaceFollow(spaceIdComposite)"

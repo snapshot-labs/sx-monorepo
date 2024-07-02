@@ -4,6 +4,7 @@ import { getNames } from '@/helpers/stamp';
 
 type ApiDelegate = {
   id: string;
+  user: string;
   delegatedVotes: string;
   delegatedVotesRaw: string;
   tokenHoldersRepresentedAmount: number;
@@ -17,29 +18,34 @@ type Delegate = ApiDelegate & {
 
 type Governance = {
   delegatedVotes: string;
-  totalTokenHolders: string;
   totalDelegates: string;
 };
 
 const DELEGATES_LIMIT = 40;
 
 const DELEGATES_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $orderBy: Delegate_orderBy!, $orderDirection: OrderDirection!) {
+  query (
+    $first: Int!
+    $skip: Int!
+    $orderBy: Delegate_orderBy!
+    $orderDirection: OrderDirection!
+    $governance: String!
+  ) {
     delegates(
       first: $first
       skip: $skip
       orderBy: $orderBy
       orderDirection: $orderDirection
-      where: { tokenHoldersRepresentedAmount_gte: 0 }
+      where: { tokenHoldersRepresentedAmount_gte: 0, governance: $governance }
     ) {
       id
+      user
       delegatedVotes
       delegatedVotesRaw
       tokenHoldersRepresentedAmount
     }
-    governance(id: "GOVERNANCE") {
+    governance(id: $governance) {
       delegatedVotes
-      totalTokenHolders
       totalDelegates
     }
   }
@@ -56,7 +62,7 @@ function convertUrl(apiUrl: string) {
   return apiUrl;
 }
 
-export function useDelegates(delegationApiUrl: string) {
+export function useDelegates(delegationApiUrl: string, governance: string) {
   const delegates: Ref<Delegate[]> = ref([]);
   const loading = ref(false);
   const loadingMore = ref(false);
@@ -95,6 +101,7 @@ export function useDelegates(delegationApiUrl: string) {
       variables: {
         orderBy,
         orderDirection,
+        governance: governance.toLowerCase(),
         first: DELEGATES_LIMIT,
         skip: overwrite ? 0 : delegates.value.length
       }
@@ -102,20 +109,19 @@ export function useDelegates(delegationApiUrl: string) {
 
     const governanceData = data.governance as Governance;
     const delegatesData = data.delegates as ApiDelegate[];
-    const addresses = delegatesData.map(delegate => delegate.id);
+    const addresses = delegatesData.map(delegate => delegate.user);
 
     const names = await getNames(addresses);
 
     const newDelegates = delegatesData.map((delegate: ApiDelegate) => {
       const delegatorsPercentage =
-        (Number(delegate.tokenHoldersRepresentedAmount) /
-          Number(governanceData.totalTokenHolders)) *
+        (Number(delegate.tokenHoldersRepresentedAmount) / Number(governanceData.totalDelegates)) *
         100;
       const votesPercentage =
         (Number(delegate.delegatedVotes) / Number(governanceData.delegatedVotes)) * 100 || 0;
 
       return {
-        name: names[delegate.id] || null,
+        name: names[delegate.user] || null,
         ...delegate,
         delegatorsPercentage,
         votesPercentage

@@ -13,6 +13,16 @@ import IHStop from '~icons/heroicons-outline/stop';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
 import IHBell from '~icons/heroicons-outline/bell';
+import { type FunctionalComponent } from 'vue';
+
+type NavigationItem = {
+  name: string;
+  icon: FunctionalComponent;
+  count?: number;
+  hidden?: boolean;
+  link?: any;
+  active?: boolean;
+};
 
 const route = useRoute();
 const uiStore = useUiStore();
@@ -33,7 +43,7 @@ const space = computed(() =>
 const isController = computed(() =>
   space.value ? compareAddresses(space.value.controller, web3.value.account) : false
 );
-const navigationConfig = computed(() => ({
+const navigationConfig = computed<Record<string, Record<string, NavigationItem>>>(() => ({
   space: {
     overview: {
       name: 'Overview',
@@ -85,7 +95,8 @@ const navigationConfig = computed(() => ({
   my: {
     home: {
       name: 'Home',
-      icon: IHHome
+      icon: IHHome,
+      hidden: !web3.value.account
     },
     explore: {
       name: 'Explore',
@@ -94,36 +105,56 @@ const navigationConfig = computed(() => ({
     notifications: {
       name: 'Notifications',
       count: notificationsStore.unreadNotificationsCount,
-      icon: IHBell
+      icon: IHBell,
+      hidden: !web3.value.account
     }
   }
 }));
-const shortcuts = computed(() => {
+const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(() => {
   return {
-    ...(web3.value.account
-      ? {
-          my: {
-            profile: {
-              name: 'Profile',
-              link: { name: 'user', params: { id: web3.value.account } },
-              icon: IHUser
-            },
-            settings: {
-              name: 'Settings',
-              link: { name: 'settings-spaces' },
-              icon: IHCog
-            }
-          }
-        }
-      : {})
+    my: {
+      user: {
+        name: 'Profile',
+        link: { name: 'user', params: { id: web3.value.account } },
+        icon: IHUser,
+        hidden: !web3.value.account,
+        active: (route.name as string) === 'user' && route.params.id === web3.value.account
+      },
+      settings: {
+        name: 'Settings',
+        link: { name: 'settings-spaces' },
+        icon: IHCog,
+        hidden: !web3.value.account,
+        active: false
+      }
+    }
   };
 });
-const navigationItems = computed(() => navigationConfig.value[currentRouteName.value || '']);
+const navigationItems = computed(() =>
+  Object.fromEntries(
+    Object.entries({
+      ...navigationConfig.value[currentRouteName.value],
+      ...shortcuts.value[currentRouteName.value]
+    })
+      .map(([key, item]): [string, NavigationItem] => {
+        return [
+          key,
+          {
+            ...item,
+            active: item.active ?? route.name === `${currentRouteName.value}-${key}`,
+            hidden: item.hidden ?? false,
+            link: item.link ?? { name: `${currentRouteName.value}-${key}` }
+          }
+        ];
+      })
+      .filter(([, item]) => item.hidden === false)
+  )
+);
 </script>
 
 <template>
   <div
-    v-if="navigationItems"
+    v-if="Object.keys(navigationItems).length"
     class="lg:visible fixed w-[240px] border-r left-[72px] top-0 bottom-0 z-10 bg-skin-bg"
     :class="{
       invisible: !uiStore.sidebarOpen
@@ -134,9 +165,9 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
       <router-link
         v-for="(item, key) in navigationItems"
         :key="key"
-        :to="{ name: `${currentRouteName}-${key}` }"
+        :to="item.link"
         class="px-4 py-1.5 space-x-2 flex items-center"
-        :class="route.name === `${currentRouteName}-${key}` ? 'text-skin-link' : 'text-skin-text'"
+        :class="item.active ? 'text-skin-link' : 'text-skin-text'"
       >
         <component :is="item.icon" class="inline-block"></component>
         <span class="grow" v-text="item.name" />
@@ -145,15 +176,6 @@ const navigationItems = computed(() => navigationConfig.value[currentRouteName.v
           class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
           v-text="item.count"
         />
-      </router-link>
-      <router-link
-        v-for="(item, key) in shortcuts[currentRouteName]"
-        :key="key"
-        :to="item.link"
-        class="px-4 py-1.5 space-x-2 flex items-center text-skin-text"
-      >
-        <component :is="item.icon" class="inline-block"></component>
-        <span v-text="item.name" />
       </router-link>
     </div>
   </div>

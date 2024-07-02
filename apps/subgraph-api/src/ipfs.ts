@@ -1,6 +1,11 @@
 import { Bytes, dataSource, json } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
-import { SpaceMetadata, ProposalMetadata, StrategiesParsedMetadataData } from '../generated/schema'
+import {
+  SpaceMetadata,
+  ProposalMetadata,
+  VoteMetadata,
+  StrategiesParsedMetadataData,
+} from '../generated/schema'
 import { toChecksumAddress, updateStrategiesParsedMetadata } from './helpers'
 
 export function handleSpaceMetadata(content: Bytes): void {
@@ -99,6 +104,17 @@ export function handleSpaceMetadata(content: Bytes): void {
   }
 
   spaceMetadata.save()
+}
+
+export function handleVoteMetadata(content: Bytes): void {
+  let proposalMetadata = new VoteMetadata(dataSource.stringParam())
+
+  let value = json.fromBytes(content)
+  let obj = value.toObject()
+  let reason = obj.get('reason')
+
+  proposalMetadata.reason = reason ? reason.toString() : ''
+  proposalMetadata.save()
 }
 
 export function handleProposalMetadata(content: Bytes): void {

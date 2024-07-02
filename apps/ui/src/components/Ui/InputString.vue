@@ -41,7 +41,7 @@ watch(model, () => {
     :input-value-length="inputValue?.length"
   >
     <input
-      v-model="inputValue"
+      v-model.trim="inputValue"
       type="text"
       class="s-input"
       v-bind="$attrs"
