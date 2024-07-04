@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _n, shorten } from '@/helpers/utils';
+import { _n, _p, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space, SpaceMetadataDelegation } from '@/types';
 
@@ -131,13 +131,13 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link" v-text="_n(delegate.tokenHoldersRepresentedAmount)" />
-              <div class="text-[17px]" v-text="`${delegate.delegatorsPercentage.toFixed(3)}%`" />
+              <div class="text-[17px]" v-text="_p(delegate.delegatorsPercentage)" />
             </div>
             <div
               class="w-[40%] md:w-[20%] flex flex-col items-end justify-center pr-4 leading-[22px] truncate"
             >
               <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
-              <div class="text-[17px]" v-text="`${delegate.votesPercentage.toFixed(3)}%`" />
+              <div class="text-[17px]" v-text="_p(delegate.votesPercentage)" />
             </div>
           </div>
           <template #loading>

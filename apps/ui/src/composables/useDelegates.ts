@@ -115,10 +115,9 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
 
     const newDelegates = delegatesData.map((delegate: ApiDelegate) => {
       const delegatorsPercentage =
-        (Number(delegate.tokenHoldersRepresentedAmount) / Number(governanceData.totalDelegates)) *
-        100;
+        Number(delegate.tokenHoldersRepresentedAmount) / Number(governanceData.totalDelegates);
       const votesPercentage =
-        (Number(delegate.delegatedVotes) / Number(governanceData.delegatedVotes)) * 100 || 0;
+        Number(delegate.delegatedVotes) / Number(governanceData.delegatedVotes) || 0;
 
       return {
         name: names[delegate.user] || null,
