@@ -112,7 +112,7 @@ export const followSpaceTypes = {
 
 export const unfollowSpaceTypes = {
   Unfollow: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'network', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' }
