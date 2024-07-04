@@ -103,7 +103,7 @@ export const cancelProposalTypes = {
 
 export const followSpaceTypes = {
   Follow: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'network', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' }
