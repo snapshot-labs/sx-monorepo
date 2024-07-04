@@ -55,17 +55,10 @@ export class StarknetSig {
       | StarknetEIP712ProposeMessage
       | StarknetEIP712UpdateProposalMessage
       | StarknetEIP712VoteMessage
-  >(
-    signer: Account,
-    verifyingContract: string,
-    message: T,
-    types: any,
-    primaryType: string
-  ): Promise<SignatureData> {
+  >(signer: Account, message: T, types: any, primaryType: string): Promise<SignatureData> {
     const domain = {
       ...baseDomain,
-      chainId: this.config.networkConfig.eip712ChainId,
-      verifyingContract
+      chainId: this.config.networkConfig.eip712ChainId
     };
 
     const data: typedData.TypedData = {
@@ -120,13 +113,7 @@ export class StarknetSig {
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(
-      signer,
-      data.authenticator,
-      message,
-      proposeTypes,
-      'Propose'
-    );
+    const signatureData = await this.sign(signer, message, proposeTypes, 'Propose');
 
     return {
       signatureData,
@@ -157,13 +144,7 @@ export class StarknetSig {
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(
-      signer,
-      data.authenticator,
-      message,
-      updateProposalTypes,
-      'UpdateProposal'
-    );
+    const signatureData = await this.sign(signer, message, updateProposalTypes, 'UpdateProposal');
 
     return {
       signatureData,
@@ -191,7 +172,7 @@ export class StarknetSig {
       metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
     };
 
-    const signatureData = await this.sign(signer, data.authenticator, message, voteTypes, 'Vote');
+    const signatureData = await this.sign(signer, message, voteTypes, 'Vote');
 
     return {
       signatureData,
