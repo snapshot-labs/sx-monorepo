@@ -8,15 +8,13 @@ import OzVotesToken from './abis/OzVotesToken.json';
 import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
-import { getSlotKey, getNestedSlotKey, getBinaryTree } from './utils';
+import { getSlotKey, getNestedSlotKey } from './utils';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
 export default function createOzVotesStorageProofStrategy({
-  deployedOnChain,
   trace
 }: {
-  deployedOnChain: string;
   trace: 208 | 224;
 }): Strategy {
   const type = 'ozVotesStorageProof';
@@ -96,8 +94,8 @@ export default function createOzVotesStorageProofStrategy({
       ])) as any;
       const startTimestamp = proposalStruct.start_timestamp;
 
-      const tree = await getBinaryTree(deployedOnChain, startTimestamp, chainId);
-      const l1BlockNumber = tree.path[1].block_number;
+      const contract = new Contract(OZVotesStorageProof, address, starkProvider);
+      const l1BlockNumber = await contract.cached_timestamps(startTimestamp);
 
       const { proofs, checkpointIndex } = await getProofs(
         contractAddress,
@@ -154,19 +152,19 @@ export default function createOzVotesStorageProofStrategy({
 
       const contract = new Contract(OZVotesStorageProof, strategyAddress, starkProvider);
 
-      const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
-      if (tree.message === 'No blocks found for binsearch') {
-        throw new VotingPowerDetailsError('Failed to get binary tree', type, 'NOT_READY_YET');
+      let l1BlockNumber: bigint;
+      try {
+        l1BlockNumber = await contract.cached_timestamps(timestamp);
+      } catch (e) {
+        throw new VotingPowerDetailsError('Timestamp is not cached', type, 'NOT_READY_YET');
       }
-
-      const l1BlockNumber = tree.path[1].block_number;
 
       const { proofs, checkpointIndex } = await getProofs(
         contractAddress,
         voterAddress,
         numCheckpoints,
         slotIndex,
-        l1BlockNumber,
+        Number(l1BlockNumber),
         ethUrl,
         chainId
       );

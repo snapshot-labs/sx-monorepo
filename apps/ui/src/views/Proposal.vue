@@ -27,6 +27,8 @@ const proposal = computed(() => {
 });
 
 const discussion = computed(() => {
+  if (!proposal.value) return null;
+
   return sanitizeUrl(proposal.value.discussion);
 });
 

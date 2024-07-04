@@ -32,10 +32,7 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
     ...(network.Strategies.EVMSlotValue
       ? ({
           [validateAndParseAddress(network.Strategies.EVMSlotValue)]: {
-            type: 'evmSlotValue',
-            params: {
-              deployedOnChain: network.Meta.herodotusDeployedOnChain
-            }
+            type: 'evmSlotValue'
           }
         } as const)
       : {}),
@@ -44,7 +41,6 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
           [validateAndParseAddress(network.Strategies.OZVotesStorageProof)]: {
             type: 'ozVotesStorageProof',
             params: {
-              deployedOnChain: network.Meta.herodotusDeployedOnChain,
               trace: 224
             }
           }
@@ -55,7 +51,6 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
           [validateAndParseAddress(network.Strategies.OZVotesTrace208StorageProof)]: {
             type: 'ozVotesStorageProof',
             params: {
-              deployedOnChain: network.Meta.herodotusDeployedOnChain,
               trace: 208
             }
           }

@@ -173,6 +173,22 @@ ajv.addFormat('discord-handle', {
   }
 });
 
+ajv.addFormat('lens-handle', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[A-Za-z0-9_]+$/);
+  }
+});
+
+ajv.addFormat('farcaster-handle', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-z0-9-]+$/);
+  }
+});
+
 ajv.addFormat('ethValue', {
   validate: value => {
     if (!value.match(/^([0-9]|[1-9][0-9]+)(\.[0-9]+)?$/)) return false;

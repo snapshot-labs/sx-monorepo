@@ -9,8 +9,7 @@ const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('ozVotesStorageProof', () => {
   const ozVotesStorageProofStrategy = createOzVotesStorageProofStrategy({
-    trace: 224,
-    deployedOnChain: 'SN_SEPOLIA'
+    trace: 224
   });
   const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
 

@@ -386,17 +386,24 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         user = { id };
       }
 
-      user.name ||= (await getNames([id]))[id];
-      user.proposal_count ||= 0;
-      user.vote_count ||= 0;
-
-      return user;
+      return {
+        ...user,
+        created: user.created || null,
+        name: user.name || (await getNames([user.id]))?.[user.id] || '',
+        about: user.about || '',
+        avatar: user.avatar || '',
+        cover: user.cover || '',
+        twitter: user.twitter || '',
+        github: user.github || '',
+        lens: user.lens || '',
+        farcaster: user.farcaster || ''
+      };
     },
     loadUserActivities: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     },
-    loadLeaderboard: async (): Promise<User[]> => {
+    loadLeaderboard: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     },

@@ -9,8 +9,7 @@ import {
 } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { UserActivity, Space, User } from '@/types';
-import { getNames } from '@/helpers/stamp';
+import { UserActivity, Space } from '@/types';
 
 const route = useRoute();
 const usersStore = useUsersStore();
@@ -25,11 +24,10 @@ const activities = ref<
 const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
 const loaded = ref(false);
-const placeholderUser = ref<User | null>(null);
 
 const id = computed(() => route.params.id as string);
 
-const user = computed(() => usersStore.getUser(id.value) || placeholderUser.value);
+const user = computed(() => usersStore.getUser(id.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
@@ -59,7 +57,7 @@ async function loadActivities(userId: string) {
     const totalVotes = aggregatedActivities.reduce((a, b) => a + b.vote_count, 0);
 
     activities.value = aggregatedActivities
-      .map(activity => {
+      .map((activity: UserActivity) => {
         const space = spacesStore.spacesMap.get(activity.spaceId);
 
         if (!space) return;
@@ -67,8 +65,8 @@ async function loadActivities(userId: string) {
         return {
           ...activity,
           space,
-          proposal_percentage: activity.proposal_count / totalProposals,
-          vote_percentage: activity.vote_count / totalVotes
+          proposal_percentage: totalProposals > 0 ? activity.proposal_count / totalProposals : 0,
+          vote_percentage: totalVotes > 0 ? activity.vote_count / totalVotes : 0
         };
       })
       .filter(Boolean) as typeof activities.value;
@@ -80,23 +78,15 @@ async function loadActivities(userId: string) {
 watch(
   id,
   async userId => {
-    placeholderUser.value = null;
     loaded.value = false;
-    await usersStore.fetchUser(userId);
 
-    if (isValidAddress(userId)) {
-      loadActivities(userId);
-
-      if (!usersStore.getUser(userId)) {
-        placeholderUser.value = {
-          id: userId,
-          proposal_count: 0,
-          vote_count: 0,
-          created: Date.now() / 1000,
-          name: (await getNames([userId]))?.[userId]
-        };
-      }
+    if (!isValidAddress(userId)) {
+      loaded.value = true;
+      return;
     }
+
+    await usersStore.fetchUser(userId);
+    loadActivities(userId);
 
     loaded.value = true;
   },
