@@ -68,9 +68,7 @@ const error = computed(() => props.votingPowerStatus === 'error');
         <div class="flex justify-between">
           <div v-if="strategy.token" class="flex items-center gap-2">
             <a
-              :href="
-                baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)
-              "
+              :href="network.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)"
               target="_blank"
               class="flex items-center text-skin-text"
             >
