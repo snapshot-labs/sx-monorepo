@@ -69,7 +69,10 @@ const error = computed(() => props.votingPowerStatus === 'error');
           <div v-if="strategy.token" class="flex items-center gap-2">
             <a
               :href="
-                baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)
+                (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(strategy.address)
+                  ? baseNetwork
+                  : network
+                ).helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)
               "
               target="_blank"
               class="flex items-center text-skin-text"
