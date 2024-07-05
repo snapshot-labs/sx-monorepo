@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { Account, Provider, uint256 } from 'starknet';
+import { Account, RpcProvider, uint256 } from 'starknet';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import ozAccountSierra from './fixtures/openzeppelin_Account.sierra.json';
@@ -11,19 +11,16 @@ import { deployDependency, flush, increaseTime, setTime, setup, TestConfig } fro
 
 describe('sx-starknet', () => {
   const ethUrl = 'http://127.0.0.1:8545';
-  const entryAddress = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
-  const entryPrivateKey = '0xcd613e30d8f16adf91b7584a2265b1f5';
+  const entryAddress = '0x260a8311b4f1092db620b923e8d7d20e76dedcc615fb4b6fdf28315b81de201';
+  const entryPrivateKey = '0xc10662b7b247c7cecf7e8a30726cff12';
   const ethPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
   let address = '';
   const publicKey = '0x138b5dd1ca094fcaebd669a5d2aa7bb7d13db32d5939939ee66b938ded2f361';
   const privateKey = '0x9c7d498a8f76dc87564274036988f668';
 
-  // RpcProvider doesn't work with starknet-devnet
-  const starkProvider = new Provider({
-    sequencer: {
-      baseUrl: 'http://127.0.0.1:5050'
-    }
+  const starkProvider = new RpcProvider({
+    nodeUrl: 'http://127.0.0.1:5050/rpc'
   });
 
   const provider = new JsonRpcProvider(ethUrl);
@@ -67,8 +64,7 @@ describe('sx-starknet', () => {
     ethTxClient = new EthereumTx({
       starkProvider: starkProvider as any,
       ethUrl,
-      networkConfig: testConfig.networkConfig,
-      sequencerUrl: 'http://127.0.0.1:5050'
+      networkConfig: testConfig.networkConfig
     });
     starkSigClient = new StarknetSig({
       starkProvider: starkProvider as any,
@@ -76,7 +72,7 @@ describe('sx-starknet', () => {
       networkConfig: testConfig.networkConfig,
       manaUrl: 'http://localhost:3000'
     });
-  }, 300_000);
+  }, 500_000);
 
   describe('vanilla authenticator', () => {
     it('StarknetTx.propose()', async () => {
@@ -570,7 +566,7 @@ describe('sx-starknet', () => {
 
     it('should execute on l1', async () => {
       const flushL2Response = await flush();
-      const message_payload = flushL2Response.consumed_messages.from_l2[0].payload;
+      const message_payload = flushL2Response.messages_to_l1[0].payload;
 
       const { executionParams } = getExecutionData(
         'EthRelayer',
