@@ -5,6 +5,8 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 import type { Token } from '@/helpers/alchemy';
 
+const ETHEREUM_NETWORKS = ['eth', 'sep'];
+
 const props = defineProps<{
   space: Space;
   treasuryData: SpaceMetadataTreasury;
@@ -250,7 +252,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
               </div>
               <UiTooltip
-                v-if="asset.contractAddress === ETH_CONTRACT && !isReadOnly"
+                v-if="
+                  asset.contractAddress === ETH_CONTRACT &&
+                  !isReadOnly &&
+                  ETHEREUM_NETWORKS.includes(treasury.networkId)
+                "
                 title="Stake with Lido"
                 :touch="false"
               >
