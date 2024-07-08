@@ -2,7 +2,7 @@
 useTitle('My spaces');
 
 const { web3 } = useWeb3();
-const { loading: spacesLoading, spaces, fetch } = useSpaces();
+const spacesStore = useSpacesStore();
 
 const loaded = ref(false);
 
@@ -11,7 +11,8 @@ watch(
   async controller => {
     loaded.value = false;
 
-    controller && (await fetch({ controller }));
+    spacesStore.protocol = 'snapshotx';
+    controller && (await spacesStore.fetch({ controller }));
 
     loaded.value = true;
   },
@@ -22,16 +23,16 @@ watch(
 <template>
   <UiContainer class="!max-w-screen-md pt-5">
     <h2 class="mb-4 mono !text-xl" v-text="'My spaces'" />
-    <UiLoading v-if="!loaded || spacesLoading || web3.authLoading" />
+    <UiLoading v-if="!spacesStore.loaded || spacesStore.loading || web3.authLoading" />
     <div
-      v-else-if="!spaces.length || !web3.account"
+      v-else-if="!spacesStore.spaces.length || !web3.account"
       class="flex items-center text-skin-link space-x-2"
     >
       <IH-exclamation-circle class="inline-block shrink-0" />
       <span v-text="'There are no spaces here.'" />
     </div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-      <SpacesListItem v-for="space in spaces" :key="space.id" :space="space" />
+      <SpacesListItem v-for="space in spacesStore.spaces" :key="space.id" :space="space" />
     </div>
   </UiContainer>
 </template>
