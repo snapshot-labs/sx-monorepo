@@ -351,6 +351,7 @@ onBeforeUnmount(() => destroyAudio());
         v-if="
           proposal.execution &&
           proposal.execution.length > 0 &&
+          proposal.scores.length > 0 &&
           BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
           BigInt(proposal.scores[0]) > BigInt(proposal.scores[1]) &&
           proposal.has_execution_window_opened
