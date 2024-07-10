@@ -15,7 +15,7 @@ import {
   createStrategyPicker
 } from '@/networks/common/helpers';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { CallData, type Account, type RpcProvider } from 'starknet';
+import { type Account, type RpcProvider, AllowArray, Call, CallData } from 'starknet';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type {
   Connector,
@@ -537,13 +537,31 @@ export function createActions(
 
       const { account }: { account: Account } = web3.provider;
 
-      return account.execute({
+      let calls: AllowArray<Call> = {
         contractAddress,
         entrypoint: 'delegate',
-        calldata: CallData.compile({
-          delegatee
-        })
-      });
+        calldata: CallData.compile({ delegatee })
+      };
+
+      // Temporary fix for NSTR to delegate for 2 tokens at once
+      if (
+        networkId === 'sn' &&
+        [
+          '0x0395989740c1d6ecc0cba880dd22e87cc209fdb6b8dc2794e9a399c4b2c34d94',
+          '0x07c251045154318a2376a3bb65be47d3c90df1740d8e35c9b9d943aa3f240e50'
+        ].includes(space.id)
+      ) {
+        calls = [
+          calls,
+          {
+            contractAddress: '0x046ab56ec0c6a6d42384251c97e9331aa75eb693e05ed8823e2df4de5713e9a4',
+            entrypoint: 'delegate',
+            calldata: CallData.compile({ delegatee })
+          }
+        ];
+      }
+
+      return account.execute(calls);
     },
     getVotingPower: async (
       spaceId: string,
