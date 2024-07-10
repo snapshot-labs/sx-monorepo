@@ -552,13 +552,16 @@ export function createActions(
         ].includes(space.id)
       ) {
         calls = [
-          calls,
-          {
-            contractAddress: '0x046ab56ec0c6a6d42384251c97e9331aa75eb693e05ed8823e2df4de5713e9a4',
-            entrypoint: 'delegate',
-            calldata: CallData.compile({ delegatee })
-          }
-        ];
+          '0x00c530f2c0aa4c16a0806365b0898499fba372e5df7a7172dc6fe9ba777e8007',
+          '0x02589fc11f60f21af6a1dda3aeb7a44305c552928af122f2834d1c3b1a7aa626',
+          '0x046ab56ec0c6a6d42384251c97e9331aa75eb693e05ed8823e2df4de5713e9a4',
+          '0x02b674ffda238279de5550d6f996bf717228d316555f07a77ef0a082d925b782',
+          '0x06f8ad459c712873993e9ffb9013a469248343c3d361e4d91a8cac6f98575834'
+        ].map(contractAddress => ({
+          contractAddress,
+          entrypoint: 'delegate',
+          calldata: CallData.compile({ delegatee })
+        }));
       }
 
       return account.execute(calls);
