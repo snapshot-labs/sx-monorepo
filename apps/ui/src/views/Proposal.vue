@@ -48,6 +48,8 @@ async function handleVoteClick(choice: Choice) {
 }
 
 async function handleVoteSubmitted() {
+  if (!proposal.value) return;
+
   selectedChoice.value = null;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
@@ -57,6 +59,8 @@ async function handleVoteSubmitted() {
 }
 
 function handleFetchVotingPower() {
+  if (!proposal.value) return;
+
   fetchVotingPower(proposal.value);
 }
 
