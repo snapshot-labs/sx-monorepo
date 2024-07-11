@@ -206,18 +206,30 @@ watch([sortBy, choiceFilter], () => {
               <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
             </div>
             <div v-else>
-              <UiButton
-                class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
-                :class="{
-                  '!text-skin-success !border-skin-success': vote.choice === 1,
-                  '!text-skin-danger !border-skin-danger': vote.choice === 2,
-                  '!text-gray-500 !border-gray-500': vote.choice === 3
-                }"
-              >
-                <IH-check v-if="vote.choice === 1" class="inline-block" />
-                <IH-x v-else-if="vote.choice === 2" class="inline-block" />
-                <IH-minus-sm v-else class="inline-block" />
-              </UiButton>
+              <div class="flex items-center space-x-2">
+                <div
+                  class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+                  :class="`_${vote.choice}`"
+                >
+                  <IH-check
+                    v-if="vote.choice === 1"
+                    class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  />
+                  <IH-x
+                    v-else-if="vote.choice === 2"
+                    class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  />
+                  <IH-minus-sm
+                    v-else-if="vote.choice === 3"
+                    class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  />
+                </div>
+                <div
+                  class="truncate grow text-skin-link"
+                  v-text="proposal.choices[(vote.choice as number) - 1]"
+                />
+              </div>
+
               <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
             </div>
           </template>
