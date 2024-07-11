@@ -205,7 +205,7 @@ watch([sortBy, choiceFilter], () => {
               </UiTooltip>
               <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
             </div>
-            <div v-else>
+            <div v-else class="flex flex-col truncate">
               <div class="flex items-center space-x-2">
                 <div
                   class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
@@ -229,7 +229,6 @@ watch([sortBy, choiceFilter], () => {
                   v-text="proposal.choices[(vote.choice as number) - 1]"
                 />
               </div>
-
               <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
             </div>
           </template>
