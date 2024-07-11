@@ -328,11 +328,19 @@ export type ContractCallTransaction = BaseTransaction & {
   };
 };
 
+export type RawTransaction = BaseTransaction & {
+  _type: 'raw';
+  _form: {
+    recipient: string;
+  };
+};
+
 export type Transaction =
   | SendTokenTransaction
   | SendNftTransaction
   | StakeTokenTransaction
-  | ContractCallTransaction;
+  | ContractCallTransaction
+  | RawTransaction;
 
 // Utils
 export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };

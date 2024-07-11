@@ -16,7 +16,7 @@ const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
 };
 const CHAIN_IDS: Partial<Record<NetworkID, number>> = {
   s: 1,
-  's-tn': 5
+  's-tn': 11155111
 };
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
