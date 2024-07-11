@@ -183,7 +183,9 @@ watch([sortBy, choiceFilter], () => {
           <h4>{{ _rt(vote.created) }}</h4>
           <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
         </div>
-        <div class="w-[25%] lg:w-[20%] flex items-center truncate">
+        <div
+          class="w-[25%] lg:w-[20%] flex flex-col items-start justify-center truncate leading-[22px]"
+        >
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
@@ -196,16 +198,16 @@ watch([sortBy, choiceFilter], () => {
             </UiTooltip>
           </template>
           <template v-else>
-            <div v-if="proposal.type !== 'basic'" class="truncate">
+            <template v-if="proposal.type !== 'basic'">
               <UiTooltip
-                class="max-w-[100%] truncate !inline-block leading-[22px]"
                 :title="getChoiceText(proposal.choices, vote.choice)"
+                class="max-w-[100%] truncate"
               >
                 <h4>{{ getChoiceText(proposal.choices, vote.choice) }}</h4>
               </UiTooltip>
               <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
-            </div>
-            <div v-else class="flex flex-col truncate">
+            </template>
+            <div v-else class="flex flex-col truncate leading-[22px]">
               <div class="flex items-center space-x-2">
                 <div
                   class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
