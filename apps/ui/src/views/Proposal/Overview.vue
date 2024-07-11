@@ -121,7 +121,10 @@ async function handleEditClick() {
             address: props.proposal.execution_strategy,
             type: props.proposal.execution_strategy_type
           },
-    execution: props.proposal.execution
+    execution:
+      !offchainNetworks.includes(props.proposal.network) && props.proposal.executions.length > 0
+        ? props.proposal.executions[0].transactions
+        : undefined
   });
 
   router.push({
@@ -338,19 +341,19 @@ onBeforeUnmount(() => destroyAudio());
           <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
-      <div v-if="proposal.execution && proposal.execution.length > 0">
+      <div v-if="proposal.executions && proposal.executions.length > 0">
         <h4 class="mb-3 eyebrow flex items-center">
           <IH-play class="inline-block mr-2" />
           <span>Execution</span>
         </h4>
         <div class="mb-4">
-          <ProposalExecutionsList :txs="proposal.execution" />
+          <ProposalExecutionsList :executions="proposal.executions" />
         </div>
       </div>
       <div
         v-if="
-          proposal.execution &&
-          proposal.execution.length > 0 &&
+          proposal.executions &&
+          proposal.executions.length > 0 &&
           proposal.scores.length > 0 &&
           BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
           BigInt(proposal.scores[0]) > BigInt(proposal.scores[1]) &&

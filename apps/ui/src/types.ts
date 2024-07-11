@@ -130,6 +130,13 @@ export type Space = {
   created: number;
 };
 
+export type ProposalExecution = {
+  safeName: string;
+  safeAddress: string;
+  networkId: NetworkID;
+  transactions: Transaction[];
+};
+
 export type Proposal = {
   id: string;
   proposal_id: number | string;
@@ -162,7 +169,7 @@ export type Proposal = {
   title: string;
   body: string;
   discussion: string;
-  execution: Transaction[];
+  executions: ProposalExecution[];
   start: number;
   min_end: number;
   max_end: number;
