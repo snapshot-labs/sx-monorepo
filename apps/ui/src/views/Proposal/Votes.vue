@@ -196,26 +196,30 @@ watch([sortBy, choiceFilter], () => {
             </UiTooltip>
           </template>
           <template v-else>
-            <UiTooltip
-              v-if="proposal.type !== 'basic'"
-              class="max-w-[100%] truncate !inline-block"
-              :title="getChoiceText(proposal.choices, vote.choice)"
-            >
-              {{ getChoiceText(proposal.choices, vote.choice) }}
-            </UiTooltip>
-            <UiButton
-              v-else
-              class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
-              :class="{
-                '!text-skin-success !border-skin-success': vote.choice === 1,
-                '!text-skin-danger !border-skin-danger': vote.choice === 2,
-                '!text-gray-500 !border-gray-500': vote.choice === 3
-              }"
-            >
-              <IH-check v-if="vote.choice === 1" class="inline-block" />
-              <IH-x v-else-if="vote.choice === 2" class="inline-block" />
-              <IH-minus-sm v-else class="inline-block" />
-            </UiButton>
+            <div v-if="proposal.type !== 'basic'" class="truncate">
+              <UiTooltip
+                class="max-w-[100%] truncate !inline-block leading-[22px]"
+                :title="getChoiceText(proposal.choices, vote.choice)"
+              >
+                <h4>{{ getChoiceText(proposal.choices, vote.choice) }}</h4>
+              </UiTooltip>
+              <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
+            </div>
+            <div v-else>
+              <UiButton
+                class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
+                :class="{
+                  '!text-skin-success !border-skin-success': vote.choice === 1,
+                  '!text-skin-danger !border-skin-danger': vote.choice === 2,
+                  '!text-gray-500 !border-gray-500': vote.choice === 3
+                }"
+              >
+                <IH-check v-if="vote.choice === 1" class="inline-block" />
+                <IH-x v-else-if="vote.choice === 2" class="inline-block" />
+                <IH-minus-sm v-else class="inline-block" />
+              </UiButton>
+              <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
+            </div>
           </template>
         </div>
         <div

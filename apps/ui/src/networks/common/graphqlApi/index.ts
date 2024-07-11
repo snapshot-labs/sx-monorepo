@@ -293,6 +293,9 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
 
       return data.votes.map(vote => {
         vote.voter.name = names[vote.voter.id] || null;
+        vote.reason = vote.metadata.reason;
+        delete vote.metadata;
+
         return vote;
       });
     },

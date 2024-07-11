@@ -202,6 +202,7 @@ function formatVote(vote: ApiVote): Vote {
     proposal: vote.proposal.id,
     choice: vote.choice,
     vp: vote.vp,
+    reason: vote.reason,
     created: vote.created,
     tx: vote.ipfs
   };

@@ -147,6 +147,7 @@ export const USER_VOTES_QUERY = gql`
       }
       choice
       vp
+      reason
       created
     }
   }
@@ -189,6 +190,7 @@ export const VOTES_QUERY = gql`
       ipfs
       choice
       vp
+      reason
       created
     }
   }
