@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { getNames } from '@/helpers/stamp';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   _vp,
@@ -9,7 +8,7 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
-import type { Space, User } from '@/types';
+import type { Space, UserActivity } from '@/types';
 import type { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{ space: Space }>();
@@ -22,9 +21,8 @@ const { resolved, address, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const { getCurrent } = useMetaStore();
 
-const userStat = ref<User>({ vote_count: 0, proposal_count: 0 } as User);
+const userActivity = ref<UserActivity>({ vote_count: 0, proposal_count: 0 } as UserActivity);
 const loaded = ref(false);
-const placeholderUser = ref<User | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 
@@ -32,7 +30,7 @@ const network = computed(() => getNetwork(props.space.network));
 
 const userId = computed(() => route.params.user as string);
 
-const user = computed(() => usersStore.getUser(userId.value) || placeholderUser.value);
+const user = computed(() => usersStore.getUser(userId.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
@@ -56,11 +54,11 @@ const formattedVotingPower = computed(() => {
 const navigation = computed(() => [
   { label: 'Statement', route: 'space-user-statement' },
   { label: 'Delegators', route: 'space-user-delegators' },
-  { label: 'Proposals', route: 'space-user-proposals', count: userStat.value?.proposal_count },
-  { label: 'Votes', route: 'space-user-votes', count: userStat.value?.vote_count }
+  { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
+  { label: 'Votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
 
-async function loadUserMeta() {
+async function loadUserActivity() {
   const spaceNetwork = getNetwork(props.space.network);
 
   const users = await spaceNetwork.api.loadLeaderboard(
@@ -73,7 +71,7 @@ async function loadUserMeta() {
     userId.value
   );
 
-  if (users[0]) userStat.value = users[0];
+  if (users[0]) userActivity.value = users[0];
 }
 
 async function getVotingPower() {
@@ -101,21 +99,11 @@ async function getVotingPower() {
 watch(
   userId,
   async id => {
-    placeholderUser.value = null;
     loaded.value = false;
-    await usersStore.fetchUser(id);
 
     if (isValidAddress(id)) {
-      if (!usersStore.getUser(id)) {
-        placeholderUser.value = {
-          id,
-          proposal_count: 0,
-          vote_count: 0,
-          created: Date.now() / 1000,
-          name: (await getNames([id]))?.[id]
-        };
-      }
-      await loadUserMeta();
+      await usersStore.fetchUser(id);
+      await loadUserActivity();
       getVotingPower();
     }
 
@@ -172,9 +160,9 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.na
         />
         <h1 v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 text-skin-text">
-          <span class="text-skin-link" v-text="userStat.proposal_count" />
+          <span class="text-skin-link" v-text="userActivity.proposal_count" />
           proposals ·
-          <span class="text-skin-link" v-text="userStat.vote_count" />
+          <span class="text-skin-link" v-text="userActivity.vote_count" />
           votes
           <template v-if="votingPowerStatus === 'success'">
             ·

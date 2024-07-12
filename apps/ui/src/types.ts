@@ -208,7 +208,7 @@ export type User = {
   id: string;
   created: number | null;
   follows?: string[];
-} & UserProfile;
+} & Partial<UserProfile>;
 
 export type UserActivity = {
   id: string;
