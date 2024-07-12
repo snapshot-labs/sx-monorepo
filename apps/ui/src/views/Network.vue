@@ -4,7 +4,7 @@ import { getUrl } from '@/helpers/utils';
 const CUSTOMERS = [
   {
     name: 'Blast',
-    avatar: 'ipfs//bafkreicqhrimt2zyp2kvhmbpvffxlmxovkg5vw6zkissyzibcfy45kbvrm',
+    avatar: 'ipfs://bafkreicqhrimt2zyp2kvhmbpvffxlmxovkg5vw6zkissyzibcfy45kbvrm',
     website: 'https://blast.io'
   },
   {
@@ -31,6 +31,11 @@ const CUSTOMERS = [
     name: 'Cyber',
     avatar: 'ipfs://bafkreifm2bbehoqpz4454o7gixnxfi6cgvqlxigqr3f6ipj7l2omtgfgnm',
     website: 'https://cyber.co'
+  },
+  {
+    name: 'Sei',
+    avatar: 'ipfs://bafkreiammyt7uztbztqbcqv4bydnczsh2fqmnjf6jxj4xnskzzl6sjrigq',
+    website: 'https://www.sei.io'
   },
   {
     name: 'Gravity',
@@ -128,13 +133,13 @@ watchEffect(() => setTitle('Network'));
 
     <div class="text-center">
       <div class="eyebrow mb-4">Trusted by</div>
-      <div class="overflow-y-scroll no-scrollbar px-4">
+      <div class="px-4">
         <div class="w-fit mx-auto">
-          <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
+          <div class="flex flex-wrap gap-4 justify-center">
             <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
               <img
                 :alt="customer.name"
-                :src="getUrl(customer.avatar)"
+                :src="getUrl(customer.avatar) ?? undefined"
                 class="w-[54px] h-[54px] rounded-lg"
               />
             </a>
