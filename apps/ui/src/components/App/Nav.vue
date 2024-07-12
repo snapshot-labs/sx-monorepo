@@ -56,8 +56,7 @@ const navigationConfig = computed<Record<string, Record<string, NavigationItem>>
     },
     leaderboard: {
       name: 'Leaderboard',
-      icon: IHUserGroup,
-      hidden: (space.value && offchainNetworks.includes(space.value.network)) || false
+      icon: IHUserGroup
     },
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
