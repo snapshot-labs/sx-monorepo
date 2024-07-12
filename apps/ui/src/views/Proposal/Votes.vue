@@ -17,6 +17,8 @@ const loadingMore = ref(false);
 const hasMore = ref(false);
 const sortBy = ref('vp-desc' as 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc');
 const choiceFilter = ref('any' as 'any' | 'for' | 'against' | 'abstain');
+const modalOpen = ref(false);
+const selectedVote = ref<Vote | null>(null);
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => {
@@ -68,6 +70,13 @@ async function handleEndReached() {
   hasMore.value = newVotes.length >= LIMIT;
   votes.value = [...votes.value, ...newVotes];
   loadingMore.value = false;
+}
+
+function handleVoteClick(vote: Vote | null) {
+  if (!vote?.reason) return;
+
+  selectedVote.value = vote;
+  modalOpen.value = true;
 }
 
 onMounted(() => {
@@ -178,7 +187,13 @@ watch([sortBy, choiceFilter], () => {
           </router-link>
         </div>
 
-        <div class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]">
+        <div
+          class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]"
+          :class="{
+            'cursor-pointer': vote.reason
+          }"
+          @click="handleVoteClick(vote)"
+        >
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
@@ -191,41 +206,34 @@ watch([sortBy, choiceFilter], () => {
             </UiTooltip>
           </template>
           <template v-else>
-            <template v-if="proposal.type !== 'basic'">
-              <UiTooltip
-                :title="getChoiceText(proposal.choices, vote.choice)"
-                class="max-w-[100%] truncate"
+            <UiTooltip
+              v-if="proposal.type !== 'basic'"
+              :title="getChoiceText(proposal.choices, vote.choice)"
+              class="max-w-[100%] truncate"
+            >
+              <h4 class="truncate">{{ getChoiceText(proposal.choices, vote.choice) }}</h4>
+            </UiTooltip>
+            <div v-else class="flex items-center space-x-2">
+              <div
+                class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+                :class="`_${vote.choice}`"
               >
-                <h4>{{ getChoiceText(proposal.choices, vote.choice) }}</h4>
-              </UiTooltip>
-              <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
-            </template>
-            <template v-else>
-              <div class="flex items-center space-x-2">
-                <div
-                  class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
-                  :class="`_${vote.choice}`"
-                >
-                  <IH-check
-                    v-if="vote.choice === 1"
-                    class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
-                  />
-                  <IH-x
-                    v-else-if="vote.choice === 2"
-                    class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
-                  />
-                  <IH-minus-sm
-                    v-else-if="vote.choice === 3"
-                    class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
-                  />
-                </div>
-                <div
-                  class="truncate grow text-skin-link"
-                  v-text="proposal.choices[(vote.choice as number) - 1]"
+                <IH-check
+                  v-if="vote.choice === 1"
+                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                />
+                <IH-x
+                  v-else-if="vote.choice === 2"
+                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                />
+                <IH-minus-sm
+                  v-else-if="vote.choice === 3"
+                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
                 />
               </div>
-              <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
-            </template>
+              <h4 class="truncate grow" v-text="proposal.choices[(vote.choice as number) - 1]" />
+            </div>
+            <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
           </template>
         </div>
         <div
@@ -280,4 +288,7 @@ watch([sortBy, choiceFilter], () => {
       </div>
     </UiContainerInfiniteScroll>
   </template>
+  <teleport to="#modal">
+    <ModalVoteReason :open="modalOpen" :vote="selectedVote" @close="modalOpen = false" />
+  </teleport>
 </template>
