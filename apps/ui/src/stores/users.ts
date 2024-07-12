@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import { getNames } from '@/helpers/stamp';
 import type { User } from '@/types';
 
 type UserRecord = {
@@ -27,21 +26,16 @@ export const useUsersStore = defineStore('users', {
     async fetchUser(userId: string, force = false) {
       if (this.getUser(userId) && !force) return;
 
-      this.users[userId] = {
+      this.users[userId] ||= {
         loading: false,
         loaded: false,
         user: null
       };
 
       const record = toRef(this.users, userId) as Ref<UserRecord>;
-      record.value.loading = false;
+      record.value.loading = true;
 
-      const user = await network.api.loadUser(userId);
-
-      if (user) {
-        user.name ||= (await getNames([userId]))[userId];
-        record.value.user = user;
-      }
+      record.value.user = await network.api.loadUser(userId);
 
       record.value.loaded = true;
       record.value.loading = false;

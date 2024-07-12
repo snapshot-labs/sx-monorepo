@@ -5,15 +5,11 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import EVMSlotValue from './abis/EVMSlotValue.json';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
-import { getSlotKey, getBinaryTree } from './utils';
+import { getSlotKey } from './utils';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
 
-export default function createEvmSlotValueStrategy({
-  deployedOnChain
-}: {
-  deployedOnChain: string;
-}): Strategy {
+export default function createEvmSlotValueStrategy(): Strategy {
   const type = 'evmSlotValue';
 
   async function getProof(
@@ -75,8 +71,8 @@ export default function createEvmSlotValueStrategy({
       const { herodotusAccumulatesChainId: chainId } = networkConfig;
       const { contractAddress, slotIndex } = metadata;
 
-      const tree = await getBinaryTree(deployedOnChain, startTimestamp, chainId);
-      const l1BlockNumber = tree.path[1].block_number;
+      const contract = new Contract(EVMSlotValue, address, starkProvider);
+      const l1BlockNumber = await contract.cached_timestamps(startTimestamp);
 
       const storageProof = await getProof(
         contractAddress,
@@ -120,18 +116,18 @@ export default function createEvmSlotValueStrategy({
 
       const contract = new Contract(EVMSlotValue, strategyAddress, clientConfig.starkProvider);
 
-      const tree = await getBinaryTree(deployedOnChain, timestamp, chainId);
-      if (tree.message === 'No blocks found for binsearch') {
-        throw new VotingPowerDetailsError('Failed to get binary tree', type, 'NOT_READY_YET');
+      let l1BlockNumber: bigint;
+      try {
+        l1BlockNumber = await contract.cached_timestamps(timestamp);
+      } catch (e) {
+        throw new VotingPowerDetailsError('Timestamp is not cached', type, 'NOT_READY_YET');
       }
-
-      const l1BlockNumber = tree.path[1].block_number;
 
       const storageProof = await getProof(
         contractAddress,
         voterAddress,
         slotIndex,
-        l1BlockNumber,
+        Number(l1BlockNumber),
         ethUrl,
         chainId
       );

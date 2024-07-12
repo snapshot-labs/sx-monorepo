@@ -42,7 +42,11 @@ export const useProposalsStore = defineStore('proposals', () => {
     return record.proposalsIdsList.map(proposalId => record.proposals[proposalId]);
   };
 
-  const getProposal = (spaceId: string, proposalId: number | string, networkId: NetworkID) => {
+  const getProposal = (
+    spaceId: string,
+    proposalId: number | string,
+    networkId: NetworkID
+  ): Proposal | undefined => {
     const record = proposals.value[getUniqueSpaceId(spaceId, networkId)];
     if (!record) return undefined;
 

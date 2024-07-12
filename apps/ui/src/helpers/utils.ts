@@ -5,7 +5,7 @@ import duration from 'dayjs/plugin/duration';
 import sha3 from 'js-sha3';
 import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import { getAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import networks from '@/helpers/networks.json';
@@ -16,6 +16,8 @@ import { MAX_SYMBOL_LENGTH } from './constants';
 import ICX from '~icons/c/x';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
+import ICLens from '~icons/c/lens';
+import ICFarcaster from '~icons/c/farcaster';
 import ICCoingecko from '~icons/c/coingecko';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
@@ -369,9 +371,7 @@ export function compareAddresses(a: string, b: string): boolean {
   if (a.length > 42 && b.length > 42) {
     return validateAndParseAddress(a) === validateAndParseAddress(b);
   }
-
-  // TODO: in future ignore padding as well
-  return a.toLowerCase() === b.toLowerCase();
+  return isAddress(a) && isAddress(b) && a.toLowerCase() === b.toLowerCase();
 }
 
 export function getSalt() {
@@ -472,7 +472,9 @@ export function getSocialNetworksLink(data: any) {
     { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
     { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
-    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' }
+    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
+    { key: 'lens', icon: ICLens, urlFormat: 'https://hey.xyz/u/$' },
+    { key: 'farcaster', icon: ICFarcaster, urlFormat: 'https://warpcast.com/$' }
   ]
     .map(({ key, icon, urlFormat }) => {
       const value = data[key];

@@ -52,9 +52,11 @@ const shareMsg = encodeURIComponent(
 );
 
 const editable = computed(() => {
+  // HACK: here we need to use snapshot instead of start because start is artifically
+  // shifted for Starknet's proposals with ERC20Votes strategies.
   return (
     compareAddresses(props.proposal.author.id, web3.value.account) &&
-    props.proposal.start > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
+    props.proposal.snapshot > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
 
@@ -349,6 +351,7 @@ onBeforeUnmount(() => destroyAudio());
         v-if="
           proposal.execution &&
           proposal.execution.length > 0 &&
+          proposal.scores.length > 0 &&
           BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
           BigInt(proposal.scores[0]) > BigInt(proposal.scores[1]) &&
           proposal.has_execution_window_opened

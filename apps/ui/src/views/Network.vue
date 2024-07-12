@@ -1,43 +1,45 @@
 <script setup lang="ts">
+import { getUrl } from '@/helpers/utils';
+
 const CUSTOMERS = [
   {
     name: 'Blast',
-    avatar: 'https://pbs.twimg.com/profile_images/1726739354700173312/OeT9Ef1J_400x400.jpg',
+    avatar: 'ipfs://bafkreicqhrimt2zyp2kvhmbpvffxlmxovkg5vw6zkissyzibcfy45kbvrm',
     website: 'https://blast.io'
   },
   {
     name: 'Starknet',
-    avatar: 'https://pbs.twimg.com/profile_images/1656626805816565763/WyFDMG6u_400x400.png',
+    avatar: 'ipfs://bafkreib5g7a6ufzpo5ebeosetgzoy5geduwcgmch7vighsbasth3wty77q',
     website: 'https://starknet.io'
   },
   {
     name: 'Linea',
-    avatar: 'https://pbs.twimg.com/profile_images/1639402103486521344/erDLnbwE_400x400.jpg',
+    avatar: 'ipfs://bafkreihtyzolub3sejuwc32hpdpjnt7ksowaguni2yuho3kyihhcqrtqce',
     website: 'https://linea.build'
   },
   {
     name: 'Merlin',
-    avatar: 'https://pbs.twimg.com/profile_images/1752499460175962112/C4IPI-zt_400x400.jpg',
+    avatar: 'ipfs://bafkreicew2qv3m756m7xs2nrjezinghps7rlessrqjqetvox74w4hov2xe',
     website: 'https://merlinchain.io'
   },
   {
     name: 'Immutable zkEVM',
-    avatar: 'https://pbs.twimg.com/profile_images/1652027246398550018/3yQcX1ZE_400x400.jpg',
+    avatar: 'ipfs://bafkreiepnhfv3hgexddjpyaeemxo3byhtxxit6t4zsponyczee6ddjqxwi',
     website: 'https://www.immutable.com'
   },
   {
     name: 'Cyber',
-    avatar: 'https://pbs.twimg.com/profile_images/1790617734281154560/MqaxhdzZ_400x400.jpg',
+    avatar: 'ipfs://bafkreifm2bbehoqpz4454o7gixnxfi6cgvqlxigqr3f6ipj7l2omtgfgnm',
     website: 'https://cyber.co'
   },
   {
     name: 'Sei',
-    avatar: 'https://pbs.twimg.com/profile_images/1783226809892397056/oV7Dkq37_400x400.jpg',
+    avatar: 'ipfs://bafkreiammyt7uztbztqbcqv4bydnczsh2fqmnjf6jxj4xnskzzl6sjrigq',
     website: 'https://www.sei.io'
   },
   {
     name: 'Gravity',
-    avatar: 'https://pbs.twimg.com/profile_images/1795917311620378625/Dnrm-QVf_400x400.jpg',
+    avatar: 'ipfs://bafkreia7lrda6v2fc5dthazn3qdost4yd2qrn3r4ntrd6lgmc2gvtvvhoa',
     website: 'https://gravity.xyz'
   }
 ];
@@ -137,7 +139,7 @@ watchEffect(() => setTitle('Network'));
             <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
               <img
                 :alt="customer.name"
-                :src="customer.avatar"
+                :src="getUrl(customer.avatar) ?? undefined"
                 class="w-[54px] h-[54px] rounded-lg"
               />
             </a>

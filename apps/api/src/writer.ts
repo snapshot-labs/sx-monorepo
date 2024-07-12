@@ -1,7 +1,7 @@
 import { validateAndParseAddress } from 'starknet';
 import { starknet } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
-import { handleProposalMetadata, handleSpaceMetadata } from './ipfs';
+import { handleProposalMetadata, handleVoteMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
 import {
   getCurrentTimestamp,
@@ -53,7 +53,7 @@ export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) 
   space.voting_delay = Number(BigInt(event.voting_delay).toString());
   space.min_voting_period = Number(BigInt(event.min_voting_duration).toString());
   space.max_voting_period = Number(BigInt(event.max_voting_duration).toString());
-  space.proposal_threshold = 0;
+  space.proposal_threshold = '0';
   space.strategies_indicies = strategies.map((_, i) => i);
   space.strategies = strategies;
   space.next_strategy_index = strategies.length;
@@ -295,7 +295,7 @@ export const handleProposalValidationStrategyUpdated: starknet.Writer = async ({
   await space.save();
 };
 
-export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, event }) => {
+export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) => {
   if (!rawEvent || !event || !tx.transaction_hash) return;
 
   console.log('Handle propose');
@@ -308,7 +308,18 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   const proposalId = parseInt(BigInt(event.proposal_id).toString());
   const author = formatAddressVariant(findVariant(event.author));
 
-  const created = block?.timestamp ?? getCurrentTimestamp();
+  const created = BigInt(event.proposal.start_timestamp) - BigInt(space.voting_delay);
+
+  // for erc20votes strategies we have to add artificial delay to prevent voting within same block
+  // snapshot needs to remain the same as we need real timestamp to compute VP
+  let startTimestamp = BigInt(event.proposal.start_timestamp);
+  let minEnd = BigInt(event.proposal.min_end_timestamp);
+  if (space.strategies.some(strategy => strategy === networkProperties.erc20VotesStrategy)) {
+    const minimumDelay = 10n * 60n;
+    startTimestamp =
+      startTimestamp > created + minimumDelay ? startTimestamp : created + minimumDelay;
+    minEnd = minEnd > startTimestamp ? minEnd : startTimestamp;
+  }
 
   const proposal = new Proposal(`${spaceId}/${proposalId}`);
   proposal.proposal_id = proposalId;
@@ -316,8 +327,8 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   proposal.author = author.address;
   proposal.metadata = null;
   proposal.execution_hash = event.proposal.execution_payload_hash;
-  proposal.start = parseInt(BigInt(event.proposal.start_timestamp).toString());
-  proposal.min_end = parseInt(BigInt(event.proposal.min_end_timestamp).toString());
+  proposal.start = parseInt(startTimestamp.toString());
+  proposal.min_end = parseInt(minEnd.toString());
   proposal.max_end = parseInt(BigInt(event.proposal.max_end_timestamp).toString());
   proposal.snapshot = parseInt(BigInt(event.proposal.start_timestamp).toString());
   proposal.execution_time = 0;
@@ -331,7 +342,7 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   proposal.strategies_indicies = space.strategies_indicies;
   proposal.strategies = space.strategies;
   proposal.strategies_params = space.strategies_params;
-  proposal.created = created;
+  proposal.created = parseInt(created.toString());
   proposal.tx = tx.transaction_hash;
   proposal.execution_tx = null;
   proposal.veto_tx = null;
@@ -368,13 +379,13 @@ export const handlePropose: starknet.Writer = async ({ block, tx, rawEvent, even
   } else {
     const user = new User(author.address);
     user.address_type = author.type;
-    user.created = created;
+    user.created = parseInt(created.toString());
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${author}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${author.address}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = author.address;
     leaderboardItem.vote_count = 0;
@@ -500,7 +511,7 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   const created = block?.timestamp ?? getCurrentTimestamp();
   const voter = formatAddressVariant(findVariant(event.voter));
 
-  const vote = new Vote(`${spaceId}/${proposalId}/${voter}`);
+  const vote = new Vote(`${spaceId}/${proposalId}/${voter.address}`);
   vote.space = spaceId;
   vote.proposal = proposalId;
   vote.voter = voter.address;
@@ -508,6 +519,16 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   vote.vp = vp.toString();
   vote.created = created;
   vote.tx = tx.transaction_hash;
+
+  try {
+    const metadataUri = longStringToText(event.metadata_uri);
+    await handleVoteMetadata(metadataUri);
+
+    vote.metadata = dropIpfs(metadataUri);
+  } catch (e) {
+    console.log(JSON.stringify(e).slice(0, 256));
+  }
+
   await vote.save();
 
   const existingUser = await User.loadEntity(voter.address);
@@ -521,9 +542,9 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter}`);
+  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter.address}`);
   if (!leaderboardItem) {
-    leaderboardItem = new Leaderboard(`${spaceId}/${voter}`);
+    leaderboardItem = new Leaderboard(`${spaceId}/${voter.address}`);
     leaderboardItem.space = spaceId;
     leaderboardItem.user = voter.address;
     leaderboardItem.vote_count = 0;

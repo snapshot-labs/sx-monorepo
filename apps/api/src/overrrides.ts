@@ -17,9 +17,11 @@ const createConfig = (
     manaRpcUrl: `${manaRpcUrl}/stark_rpc/${config.Meta.eip712ChainId}`,
     baseChainId: config.Meta.herodotusAccumulatesChainId,
     factoryAddress: config.Meta.spaceFactory,
+    erc20VotesStrategy: config.Strategies.ERC20Votes,
     propositionPowerValidationStrategyAddress: config.ProposalValidations.VotingPower,
     herodotusStrategies: [
       config.Strategies.OZVotesStorageProof,
+      config.Strategies.OZVotesTrace208StorageProof,
       config.Strategies.EVMSlotValue
     ].map(strategy => validateAndParseAddress(strategy)),
     startBlock

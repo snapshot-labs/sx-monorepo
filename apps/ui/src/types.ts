@@ -194,23 +194,25 @@ export type Proposal = {
 };
 
 export type UserProfile = {
-  name?: string;
-  about?: string;
-  avatar?: string;
-  cover?: string;
-  github?: string;
-  twitter?: string;
+  name: string;
+  about: string;
+  avatar: string;
+  cover: string;
+  github: string;
+  twitter: string;
+  lens: string;
+  farcaster: string;
 };
 
 export type User = {
   id: string;
-  proposal_count: number;
-  vote_count: number;
-  created: number;
+  created: number | null;
   follows?: string[];
 } & UserProfile;
 
 export type UserActivity = {
+  id: string;
+  name?: string;
   spaceId: string;
   proposal_count: number;
   vote_count: number;
@@ -335,11 +337,19 @@ export type ContractCallTransaction = BaseTransaction & {
   };
 };
 
+export type RawTransaction = BaseTransaction & {
+  _type: 'raw';
+  _form: {
+    recipient: string;
+  };
+};
+
 export type Transaction =
   | SendTokenTransaction
   | SendNftTransaction
   | StakeTokenTransaction
-  | ContractCallTransaction;
+  | ContractCallTransaction
+  | RawTransaction;
 
 // Utils
 export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };

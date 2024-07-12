@@ -31,6 +31,8 @@ const proposal = computed(() => {
 });
 
 const discussion = computed(() => {
+  if (!proposal.value) return null;
+
   return sanitizeUrl(proposal.value.discussion);
 });
 
@@ -61,7 +63,10 @@ async function getVotingPower() {
       proposal.value.strategies_params,
       proposal.value.space.strategies_parsed_metadata,
       web3.value.account,
-      { at: proposal.value.snapshot, chainId: proposal.value.space.snapshot_chain_id }
+      {
+        at: proposal.value.state === 'pending' ? null : proposal.value.snapshot,
+        chainId: proposal.value.space.snapshot_chain_id
+      }
     );
     votingPowerStatus.value = 'success';
   } catch (e: unknown) {
@@ -182,7 +187,6 @@ watchEffect(() => {
                 votingPowerDetailsError?.details === 'NOT_READY_YET' &&
                 ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPowerDetailsError.source)
               "
-              class="mt-2"
             >
               <span class="inline-flex align-top h-[27px] items-center">
                 <IH-exclamation-circle class="mr-1" />
@@ -198,6 +202,14 @@ watchEffect(() => {
                   class="inline-block text-rose-500"
                 />
                 <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
+              </a>
+              <a
+                v-if="votingPowerStatus === 'success' && props.votingPower === BigInt(0)"
+                href="https://help.snapshot.org/en/articles/9566904-why-do-i-have-0-voting-power"
+                target="_blank"
+                class="ml-1.5"
+              >
+                <IH-exclamation-circle />
               </a>
             </template>
           </IndicatorVotingPower>

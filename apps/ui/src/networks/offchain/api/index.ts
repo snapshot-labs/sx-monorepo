@@ -15,6 +15,9 @@ import {
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { clone } from '@/helpers/utils';
+import { parseOSnapTransaction } from '@/helpers/osnap';
+import { DEFAULT_VOTING_DELAY } from '../constants';
 import {
   Space,
   Proposal,
@@ -26,11 +29,10 @@ import {
   Follow,
   Alias,
   UserActivity,
-  Statement
+  Statement,
+  Transaction
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
-import { DEFAULT_VOTING_DELAY } from '../constants';
-import { clone } from '@/helpers/utils';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -128,6 +130,18 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
 }
 
 function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
+  let execution = [] as Transaction[];
+
+  if (proposal.plugins.oSnap) {
+    try {
+      execution = proposal.plugins.oSnap.safes.flatMap(safe =>
+        safe.transactions.map(transaction => parseOSnapTransaction(transaction))
+      );
+    } catch (e) {
+      console.warn('failed to parse oSnap execution', e);
+    }
+  }
+
   return {
     id: proposal.id,
     network: networkId,
@@ -141,6 +155,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     title: proposal.title,
     body: proposal.body,
     discussion: proposal.discussion,
+    execution,
     created: proposal.created,
     edited: proposal.updated,
     start: proposal.start,
@@ -174,7 +189,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     // NOTE: ignored
     execution_network: networkId,
     execution_ready: false,
-    execution: [],
     execution_hash: '',
     execution_time: 0,
     execution_strategy: '',
@@ -206,15 +220,6 @@ function formatVote(vote: ApiVote): Vote {
     vp: vote.vp,
     created: vote.created,
     tx: vote.ipfs
-  };
-}
-
-async function formatUser(user: User) {
-  return {
-    ...user,
-    proposal_count: user.proposal_count || 0,
-    vote_count: user.vote_count || 0,
-    name: user.name || (await getNames([user.id])[user.id])
   };
 }
 
@@ -384,23 +389,36 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
 
       return formatSpace(data.space, networkId);
     },
-    loadUser: async (id: string): Promise<User | null> => {
-      const {
+    loadUser: async (id: string): Promise<User> => {
+      let {
         data: { user }
       } = await apollo.query({
         query: USER_QUERY,
         variables: { id }
       });
 
-      if (!user) return null;
+      if (!user) {
+        user = { id };
+      }
 
-      return formatUser(user);
+      return {
+        ...user,
+        created: user.created || null,
+        name: user.name || (await getNames([user.id]))?.[user.id] || '',
+        about: user.about || '',
+        avatar: user.avatar || '',
+        cover: user.cover || '',
+        twitter: user.twitter || '',
+        github: user.github || '',
+        lens: user.lens || '',
+        farcaster: user.farcaster || ''
+      };
     },
     loadUserActivities: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     },
-    loadLeaderboard: async (): Promise<User[]> => {
+    loadLeaderboard: async (): Promise<UserActivity[]> => {
       // NOTE: leaderboard implementation is pending on offchain
       return [];
     },

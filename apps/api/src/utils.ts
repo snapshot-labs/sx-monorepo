@@ -185,7 +185,7 @@ export async function updateProposaValidationStrategy(
     ) as Record<string, any>;
 
     if (Object.keys(parsed).length !== 0) {
-      space.proposal_threshold = parsed.proposal_threshold;
+      space.proposal_threshold = parsed.proposal_threshold.toString(10);
       space.voting_power_validation_strategy_strategies = parsed.allowed_strategies.map(
         (strategy: StrategyConfig) => `0x${strategy.address.toString(16)}`
       );

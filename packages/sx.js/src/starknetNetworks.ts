@@ -32,10 +32,7 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
     ...(network.Strategies.EVMSlotValue
       ? ({
           [validateAndParseAddress(network.Strategies.EVMSlotValue)]: {
-            type: 'evmSlotValue',
-            params: {
-              deployedOnChain: network.Meta.herodotusDeployedOnChain
-            }
+            type: 'evmSlotValue'
           }
         } as const)
       : {}),
@@ -44,7 +41,17 @@ function createStarknetConfig(networkId: keyof typeof starknetNetworks): Network
           [validateAndParseAddress(network.Strategies.OZVotesStorageProof)]: {
             type: 'ozVotesStorageProof',
             params: {
-              deployedOnChain: network.Meta.herodotusDeployedOnChain
+              trace: 224
+            }
+          }
+        } as const)
+      : {}),
+    ...(network.Strategies.OZVotesTrace208StorageProof
+      ? ({
+          [validateAndParseAddress(network.Strategies.OZVotesTrace208StorageProof)]: {
+            type: 'ozVotesStorageProof',
+            params: {
+              trace: 208
             }
           }
         } as const)
@@ -91,7 +98,8 @@ export const starknetNetworks = {
       MerkleWhitelist: '0x528b83a6af52c56cb2134fd9190a441e930831af437c1cb0fa6e459ad1435ba',
       ERC20Votes: '0x2429becc80a90bbeb38c6566617c584f79c60f684e8e73313af58b109b7d637',
       EVMSlotValue: '0x699e53f4b40e19d96b8020386dbeeb156f40172d7bbb78b2a4204cf64ae75f',
-      OZVotesStorageProof: '0x7ee3cf64f1072fe21570356eb57d4e9f78169ea9235ba610f60a8b33c36cc6e'
+      OZVotesStorageProof: '0x7ee3cf64f1072fe21570356eb57d4e9f78169ea9235ba610f60a8b33c36cc6e',
+      OZVotesTrace208StorageProof: ''
     },
     ProposalValidations: {
       VotingPower: '0x1b28f95cbc5bcbe52014ef974d609f14497517f31d3c9e079a2464edf988751'
@@ -124,8 +132,10 @@ export const starknetNetworks = {
     Strategies: {
       MerkleWhitelist: '0x13bcbe7318fb8aa219d264dcf5916feb873e596389ba93d923f9a23378cb743',
       ERC20Votes: '0x72067addfebbaf2d20ed07303a2c9b8e19154e8797e6e9d6819b37fea2a2963',
-      EVMSlotValue: '0x1f8544918b5d9b4833fb2ba2d0c7ceb0d699ae7f2b8b23ea129c9a10fe8046c',
-      OZVotesStorageProof: '0x6df976878be613837f120529c6f630374f1fd65a9bd4ffdbc2b0f135b5edd2e'
+      EVMSlotValue: '0x3aaf61f015076dae5580207672df6076c0ab7b4d339a13dbe10b1f6be932793',
+      OZVotesStorageProof: '0x2713fd8af933632635212ac1217494b043c3e8ea58409433fa9273072191397',
+      OZVotesTrace208StorageProof:
+        '0x5ade144027c3d704256b83e96c92364c5fd7a85e72dd929f02effe47cf30962'
     },
     ProposalValidations: {
       VotingPower: '0x296e1a5ad28c9bf32b9570d6e1bedae77917866cd5d92aea4ef9271905ef549'

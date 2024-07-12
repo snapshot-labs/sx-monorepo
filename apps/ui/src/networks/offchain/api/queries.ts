@@ -84,6 +84,7 @@ const PROPOSAL_FRAGMENT = gql`
     updated
     votes
     privacy
+    plugins
   }
 `;
 
@@ -226,6 +227,8 @@ export const USER_QUERY = gql`
       cover
       github
       twitter
+      lens
+      farcaster
     }
   }
 `;

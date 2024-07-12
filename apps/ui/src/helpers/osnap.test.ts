@@ -1,0 +1,145 @@
+import { describe, it, expect } from 'vitest';
+import { parseOSnapTransaction } from './osnap';
+
+describe('parseOSnapTransaction', () => {
+  it('should parse oSnap transfer funds transaction', () => {
+    const transaction = {
+      to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      data: '0x',
+      type: 'transferFunds' as const,
+      token: {
+        name: 'Ether',
+        symbol: 'ETH',
+        address: 'main',
+        balance: '0.379',
+        chainId: '11155111',
+        logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+        decimals: 18,
+        verified: false
+      },
+      value: '1000000000000000',
+      amount: '1000000000000000',
+      isValid: true,
+      formatted: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 0, '1000000000000000', '0x'],
+      recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
+    };
+
+    expect(parseOSnapTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should parse oSnap transfer NFT transaction', () => {
+    const transaction = {
+      to: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+      data: '0x42842e0e0000000000000000000000008edfcc5f141ffc2b6892530d1fb21bbcdc74b455000000000000000000000000556b14cbda79a36dc33fcd461a04a5bcb5dc2a70000000000000000000000000000000000000000000000000000000000000032a',
+      type: 'transferNFT' as const,
+      value: '0',
+      isValid: true,
+      formatted: [
+        '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+        0,
+        '0',
+        '0x42842e0e0000000000000000000000008edfcc5f141ffc2b6892530d1fb21bbcdc74b455000000000000000000000000556b14cbda79a36dc33fcd461a04a5bcb5dc2a70000000000000000000000000000000000000000000000000000000000000032a'
+      ],
+      recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      collectable: {
+        id: '810',
+        uri: 'https://bafkreigtcra4mp2u5ppor2akc5mxjop6ag4o72ryugic63goqbxscpwygy.ipfs.nftstorage.link/',
+        name: 'Weeedidit Palls #101',
+        address: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+        logoUri:
+          'https://safe-transaction-assets.safe.global/tokens/logos/0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5.png',
+        imageUri:
+          'https://nft-delivery.infura-ipfs.io/ipfs/QmQiJyvrV8sETi8HtV89yaJit5or7ZaMUo8pFsCJXMM8RL/101.png',
+        metadata: {
+          name: 'Weeedidit Palls #101',
+          image:
+            'https://nft-delivery.infura-ipfs.io/ipfs/QmQiJyvrV8sETi8HtV89yaJit5or7ZaMUo8pFsCJXMM8RL/101.png',
+          attributes: [],
+          description:
+            'Step into a surreal universe of vibrant colors and mind-bending shapes. Explore a world where imagination reigns and creativity knows no bounds.'
+        },
+        tokenName: 'Weee Did It Palz',
+        description:
+          'Step into a surreal universe of vibrant colors and mind-bending shapes. Explore a world where imagination reigns and creativity knows no bounds.',
+        tokenSymbol: 'WDIT'
+      }
+    };
+
+    expect(parseOSnapTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should parse oSnap contract interaction transaction', () => {
+    const transaction = {
+      to: '0x000000000000cd17345801aa8147b8D3950260FF',
+      abi: '[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"content","type":"string"},{"indexed":true,"internalType":"string","name":"tag","type":"string"}],"name":"NewPost","type":"event"},{"inputs":[{"internalType":"string","name":"content","type":"string"},{"internalType":"string","name":"tag","type":"string"}],"name":"post","outputs":[],"stateMutability":"nonpayable","type":"function"}]',
+      data: '0x0ae1b13d000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000004746573740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000047465737400000000000000000000000000000000000000000000000000000000',
+      type: 'contractInteraction' as const,
+      value: '0',
+      method: {
+        gas: null,
+        name: 'post',
+        type: 'function',
+        inputs: [
+          {
+            name: 'content',
+            type: 'string',
+            indexed: null,
+            baseType: 'string',
+            components: null,
+            arrayLength: null,
+            _isParamType: true,
+            arrayChildren: null
+          },
+          {
+            name: 'tag',
+            type: 'string',
+            indexed: null,
+            baseType: 'string',
+            components: null,
+            arrayLength: null,
+            _isParamType: true,
+            arrayChildren: null
+          }
+        ],
+        outputs: [],
+        payable: false,
+        constant: false,
+        _isFragment: true,
+        stateMutability: 'nonpayable'
+      },
+      isValid: true,
+      formatted: [
+        '0x000000000000cd17345801aa8147b8D3950260FF',
+        0,
+        '0',
+        '0x0ae1b13d000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000004746573740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000047465737400000000000000000000000000000000000000000000000000000000'
+      ],
+      parameters: ['test', 'test']
+    };
+
+    expect(parseOSnapTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should parse oSnap raw transaction', () => {
+    const transaction = {
+      to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      data: '0x',
+      type: 'raw' as const,
+      value: '1',
+      isValid: true,
+      formatted: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 0, '1', '0x']
+    };
+
+    expect(parseOSnapTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should throw on unknown transaction', () => {
+    const transaction = {
+      type: 'unknown'
+    };
+
+    expect(() => parseOSnapTransaction(transaction as any)).toThrowError(
+      'Invalid transaction type'
+    );
+  });
+});

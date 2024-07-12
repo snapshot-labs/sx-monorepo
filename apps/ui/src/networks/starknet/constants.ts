@@ -37,8 +37,15 @@ export function createConstants(
     [config.Strategies.MerkleWhitelist]: true,
     [config.Strategies.ERC20Votes]: true,
     [config.Strategies.EVMSlotValue]: true,
-    [config.Strategies.OZVotesStorageProof]: true
+    [config.Strategies.OZVotesStorageProof]: true,
+    [config.Strategies.OZVotesTrace208StorageProof]: true
   };
+
+  const STORAGE_PROOF_STRATEGIES_TYPES = [
+    config.Strategies.EVMSlotValue,
+    config.Strategies.OZVotesStorageProof,
+    config.Strategies.OZVotesTrace208StorageProof
+  ];
 
   const SUPPORTED_EXECUTORS = {
     EthRelayer: true
@@ -65,7 +72,8 @@ export function createConstants(
     [config.Strategies.MerkleWhitelist]: 'Merkle whitelist',
     [config.Strategies.ERC20Votes]: 'ERC-20 Votes (EIP-5805)',
     [config.Strategies.EVMSlotValue]: 'EVM slot value',
-    [config.Strategies.OZVotesStorageProof]: 'OZ Votes storage proof'
+    [config.Strategies.OZVotesStorageProof]: 'OZ Votes storage proof (trace 224)',
+    [config.Strategies.OZVotesTrace208StorageProof]: 'OZ Votes storage proof (trace 208)'
   };
 
   const EXECUTORS = {
@@ -406,8 +414,17 @@ export function createConstants(
       ? [
           createSlotValueStrategyConfig(
             config.Strategies.OZVotesStorageProof,
-            'OZ Votes storage proof',
-            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances.'
+            'OZ Votes storage proof (trace 224)',
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 224 format).'
+          )
+        ]
+      : []),
+    ...(config.Strategies.OZVotesTrace208StorageProof
+      ? [
+          createSlotValueStrategyConfig(
+            config.Strategies.OZVotesTrace208StorageProof,
+            'OZ Votes storage proof (trace 208)',
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 208 format).'
           )
         ]
       : [])
@@ -503,6 +520,7 @@ export function createConstants(
     EDITOR_VOTING_STRATEGIES,
     EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
     EDITOR_EXECUTION_STRATEGIES,
-    EDITOR_VOTING_TYPES
+    EDITOR_VOTING_TYPES,
+    STORAGE_PROOF_STRATEGIES_TYPES
   };
 }

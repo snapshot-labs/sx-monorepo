@@ -48,7 +48,6 @@ export default {
   argentx: {
     id: 'argentx',
     name: 'Starknet',
-    type: 'injected',
     root: 'starknet',
     icon: starknetIcon
   }

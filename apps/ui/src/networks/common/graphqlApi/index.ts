@@ -514,7 +514,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         .then(({ data }) =>
           data.leaderboards.map((leaderboard: any) => ({
             id: leaderboard.user.id,
-            created: leaderboard.user.created,
+            spaceId: leaderboard.space.id,
             vote_count: leaderboard.vote_count,
             proposal_count: leaderboard.proposal_count
           }))
