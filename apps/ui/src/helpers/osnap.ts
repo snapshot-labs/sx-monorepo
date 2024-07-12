@@ -1,3 +1,5 @@
+import { ETH_CONTRACT } from './constants';
+import { JsonFragment } from '@ethersproject/abi';
 import {
   BaseTransaction,
   ContractCallTransaction,
@@ -6,7 +8,6 @@ import {
   SendTokenTransaction,
   Transaction
 } from '@/types';
-import { ETH_CONTRACT } from './constants';
 
 export const transactionTypes = [
   'transferFunds',
@@ -44,10 +45,15 @@ type OSnapTransferNFTTransaction = OSnapBaseTransaction & {
 type OSnapContractInteractionTransaction = OSnapBaseTransaction & {
   type: 'contractInteraction';
   abi: string;
-  method: {
-    name: string;
-  };
-  parameters: any[];
+  method: Required<JsonFragment>;
+  parameters: string[];
+};
+
+type OSnapSafeImportTransaction = OSnapBaseTransaction & {
+  type: 'safeImport';
+  abi: string;
+  method: Required<JsonFragment>;
+  parameters: { [key: string]: string };
 };
 
 type OSnapRawTransaction = OSnapBaseTransaction & {
@@ -58,6 +64,7 @@ type OSnapTransaction =
   | OSnapTransferFundsTransaction
   | OSnapTransferNFTTransaction
   | OSnapContractInteractionTransaction
+  | OSnapSafeImportTransaction
   | OSnapRawTransaction;
 
 function parseTransferFundsTransaction(
@@ -120,6 +127,26 @@ function parseContractInteractionTransaction(
   };
 }
 
+function parseSafeImportTransaction(
+  transaction: OSnapSafeImportTransaction
+): ContractCallTransaction {
+  return {
+    to: transaction.to,
+    data: transaction.data,
+    value: transaction.value,
+    salt: '',
+    _type: 'contractCall',
+    _form: {
+      recipient: transaction.to,
+      method: transaction.method.name,
+      args: transaction.method.inputs.map(input =>
+        input.name ? transaction.parameters[input.name] : null
+      ),
+      abi: JSON.parse(transaction.abi)
+    }
+  };
+}
+
 function parseRawTransaction(transaction: OSnapRawTransaction): RawTransaction {
   return {
     to: transaction.to,
@@ -141,6 +168,8 @@ export function parseOSnapTransaction(transaction: OSnapTransaction): Transactio
       return parseTransferNFTTransaction(transaction);
     case 'contractInteraction':
       return parseContractInteractionTransaction(transaction);
+    case 'safeImport':
+      return parseSafeImportTransaction(transaction);
     case 'raw':
       return parseRawTransaction(transaction);
     default:

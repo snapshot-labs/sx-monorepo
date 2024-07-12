@@ -106,7 +106,7 @@ describe('parseOSnapTransaction', () => {
         constant: false,
         _isFragment: true,
         stateMutability: 'nonpayable'
-      },
+      } as any,
       isValid: true,
       formatted: [
         '0x000000000000cd17345801aa8147b8D3950260FF',
@@ -115,6 +115,61 @@ describe('parseOSnapTransaction', () => {
         '0x0ae1b13d000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000004746573740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000047465737400000000000000000000000000000000000000000000000000000000'
       ],
       parameters: ['test', 'test']
+    };
+
+    expect(parseOSnapTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should parse oSnap safeImport transaction', () => {
+    const transaction = {
+      to: '0x4F604735c1cF31399C6E711D5962b2B3E0225AD3',
+      abi: '[{"type":"function","name":"transfer","constant":false,"inputs":[{"name":"to","type":"address","indexed":null,"components":null,"arrayLength":null,"arrayChildren":null,"baseType":"address","_isParamType":true},{"name":"amount","type":"uint256","indexed":null,"components":null,"arrayLength":null,"arrayChildren":null,"baseType":"uint256","_isParamType":true}],"outputs":[],"payable":false,"stateMutability":"nonpayable","gas":null,"_isFragment":true}]',
+      data: '0xa9059cbb000000000000000000000000fe1552da65facaac5b50b73ceda4c993e16d46940000000000000000000000000000000000000000000000000de0b6b3a7640000',
+      type: 'safeImport' as const,
+      value: '0',
+      method: {
+        gas: null,
+        name: 'transfer',
+        type: 'function',
+        inputs: [
+          {
+            name: 'to',
+            type: 'address',
+            indexed: null,
+            baseType: 'address',
+            components: null,
+            arrayLength: null,
+            _isParamType: true,
+            arrayChildren: null
+          },
+          {
+            name: 'amount',
+            type: 'uint256',
+            indexed: null,
+            baseType: 'uint256',
+            components: null,
+            arrayLength: null,
+            _isParamType: true,
+            arrayChildren: null
+          }
+        ],
+        outputs: [],
+        payable: false,
+        constant: false,
+        _isFragment: true,
+        stateMutability: 'nonpayable'
+      } as any,
+      isValid: true,
+      formatted: [
+        '0x4F604735c1cF31399C6E711D5962b2B3E0225AD3',
+        0,
+        '0',
+        '0xa9059cbb000000000000000000000000fe1552da65facaac5b50b73ceda4c993e16d46940000000000000000000000000000000000000000000000000de0b6b3a7640000'
+      ],
+      parameters: {
+        to: '0xfE1552DA65FAcAaC5B50b73CEDa4C993e16d4694',
+        amount: '1000000000000000000'
+      }
     };
 
     expect(parseOSnapTransaction(transaction)).toMatchSnapshot();
