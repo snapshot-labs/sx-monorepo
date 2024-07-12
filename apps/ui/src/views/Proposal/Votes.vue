@@ -94,7 +94,7 @@ watch([sortBy, choiceFilter], () => {
     class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-1 font-medium"
   >
     <div class="pl-4 max-w-[218px] w-[218px] truncate">Voter</div>
-    <div class="grow truncate">
+    <div class="grow w-[40%] truncate">
       <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
       <UiSelectDropdown
         v-else
@@ -134,7 +134,7 @@ watch([sortBy, choiceFilter], () => {
       <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="shrink-0" />
       <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="shrink-0" />
     </button>
-    <div class="w-[30px] lg:w-[60px]" />
+    <div class="min-w-[44px] lg:w-[60px]" />
   </div>
 
   <UiLoading v-if="!loaded" class="px-4 py-3 block" />
@@ -178,7 +178,7 @@ watch([sortBy, choiceFilter], () => {
           </router-link>
         </div>
 
-        <div class="grow flex flex-col items-start justify-center truncate leading-[22px]">
+        <div class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]">
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
@@ -200,7 +200,7 @@ watch([sortBy, choiceFilter], () => {
               </UiTooltip>
               <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
             </template>
-            <div v-else class="flex flex-col truncate leading-[22px]">
+            <template v-else>
               <div class="flex items-center space-x-2">
                 <div
                   class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
@@ -225,7 +225,7 @@ watch([sortBy, choiceFilter], () => {
                 />
               </div>
               <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
-            </div>
+            </template>
           </template>
         </div>
         <div
@@ -241,7 +241,7 @@ watch([sortBy, choiceFilter], () => {
           </h4>
           <div class="text-[17px]">{{ _n((vote.vp / proposal.scores_total) * 100) }}%</div>
         </div>
-        <div class="w-[30px] lg:w-[60px] flex items-center justify-center">
+        <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
           <UiDropdown>
             <template #button>
               <IH-dots-horizontal class="text-skin-link" />
