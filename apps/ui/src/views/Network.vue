@@ -133,9 +133,9 @@ watchEffect(() => setTitle('Network'));
 
     <div class="text-center">
       <div class="eyebrow mb-4">Trusted by</div>
-      <div class="px-4">
+      <div class="overflow-y-scroll no-scrollbar px-4">
         <div class="w-fit mx-auto">
-          <div class="flex flex-wrap gap-4 justify-center">
+          <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
             <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
               <img
                 :alt="customer.name"
