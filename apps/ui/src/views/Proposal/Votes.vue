@@ -93,16 +93,8 @@ watch([sortBy, choiceFilter], () => {
   <div
     class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-1 font-medium"
   >
-    <div class="pl-4 w-[50%] lg:w-[40%] truncate">Voter</div>
-    <button
-      class="hidden lg:flex w-[25%] lg:w-[20%] items-center hover:text-skin-link space-x-1 truncate"
-      @click="handleSortChange('created')"
-    >
-      <span>Date</span>
-      <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
-    </button>
-    <div class="w-[25%] lg:w-[20%] truncate">
+    <div class="pl-4 max-w-[218px] w-[218px] truncate">Voter</div>
+    <div class="grow truncate">
       <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
       <UiSelectDropdown
         v-else
@@ -127,7 +119,15 @@ watch([sortBy, choiceFilter], () => {
       </UiSelectDropdown>
     </div>
     <button
-      class="w-[25%] lg:w-[20%] flex justify-end items-center hover:text-skin-link space-x-1 truncate"
+      class="hidden lg:flex max-w-[144px] w-[144px] items-center hover:text-skin-link space-x-1 truncate"
+      @click="handleSortChange('created')"
+    >
+      <span>Date</span>
+      <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
+      <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
+    </button>
+    <button
+      class="max-w-[144px] w-[144px] flex items-center hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('vp')"
     >
       <span class="truncate">Voting power</span>
@@ -159,7 +159,7 @@ watch([sortBy, choiceFilter], () => {
               : 'bg-skin-border opacity-40'
           "
         />
-        <div class="pl-4 py-3 w-[50%] lg:w-[40%] flex items-center gap-x-3 truncate">
+        <div class="!ml-auto pl-4 py-3 max-w-[218px] w-[218px] flex items-center gap-x-3 truncate">
           <UiStamp :id="vote.voter.id" :size="32" />
           <router-link
             :to="{
@@ -177,15 +177,8 @@ watch([sortBy, choiceFilter], () => {
             />
           </router-link>
         </div>
-        <div
-          class="hidden leading-[22px] w-[25%] lg:w-[20%] lg:flex flex-col justify-center truncate"
-        >
-          <h4>{{ _rt(vote.created) }}</h4>
-          <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
-        </div>
-        <div
-          class="w-[25%] lg:w-[20%] flex flex-col items-start justify-center truncate leading-[22px]"
-        >
+
+        <div class="grow flex flex-col items-start justify-center truncate leading-[22px]">
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
@@ -236,8 +229,12 @@ watch([sortBy, choiceFilter], () => {
           </template>
         </div>
         <div
-          class="text-right leading-[22px] w-[25%] lg:w-[20%] flex flex-col items-end justify-center truncate"
+          class="hidden leading-[22px] max-w-[144px] w-[144px] lg:flex flex-col justify-center truncate"
         >
+          <h4>{{ _rt(vote.created) }}</h4>
+          <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
+        </div>
+        <div class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate">
           <h4 class="text-skin-link">
             {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
             {{ proposal.space.voting_power_symbol }}
@@ -247,7 +244,7 @@ watch([sortBy, choiceFilter], () => {
         <div class="w-[30px] lg:w-[60px] flex items-center justify-center">
           <UiDropdown>
             <template #button>
-              <IH-dots-vertical class="text-skin-link" />
+              <IH-dots-horizontal class="text-skin-link" />
             </template>
             <template #items>
               <UiDropdownItem v-slot="{ active }">
