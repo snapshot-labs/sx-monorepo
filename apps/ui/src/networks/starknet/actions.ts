@@ -397,7 +397,7 @@ export function createActions(
         proposal.space,
         proposal.execution_strategy,
         proposal.execution_destination,
-        convertToMetaTransactions(proposal.execution)
+        convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
       return executionCall('stark', chainId, 'execute', {
@@ -433,7 +433,7 @@ export function createActions(
         proposal.space,
         proposal.execution_strategy,
         proposal.execution_destination,
-        convertToMetaTransactions(proposal.execution)
+        convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
       const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
@@ -447,7 +447,7 @@ export function createActions(
         votesAgainst,
         votesAbstain,
         executionHash,
-        transactions: convertToMetaTransactions(proposal.execution).map(tx => ({
+        transactions: convertToMetaTransactions(proposal.executions[0].transactions).map(tx => ({
           ...tx,
           salt: tx.salt.toString()
         }))

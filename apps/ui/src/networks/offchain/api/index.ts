@@ -28,7 +28,7 @@ import {
   Follow,
   Alias,
   UserActivity,
-  Transaction
+  ProposalExecution
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
 
@@ -128,13 +128,22 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
 }
 
 function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
-  let execution = [] as Transaction[];
+  let executions = [] as ProposalExecution[];
 
   if (proposal.plugins.oSnap) {
+    const chainIdToNetworkId = Object.fromEntries(
+      Object.entries(CHAIN_IDS).map(([k, v]) => [v, k])
+    );
+
     try {
-      execution = proposal.plugins.oSnap.safes.flatMap(safe =>
-        safe.transactions.map(transaction => parseOSnapTransaction(transaction))
-      );
+      executions = proposal.plugins.oSnap.safes.map(safe => {
+        return {
+          safeName: safe.safeName,
+          safeAddress: safe.safeAddress,
+          networkId: chainIdToNetworkId[Number(safe.network)],
+          transactions: safe.transactions.map(transaction => parseOSnapTransaction(transaction))
+        };
+      });
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
     }
@@ -153,7 +162,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     title: proposal.title,
     body: proposal.body,
     discussion: proposal.discussion,
-    execution,
+    executions,
     created: proposal.created,
     edited: proposal.updated,
     start: proposal.start,
@@ -163,8 +172,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     quorum: proposal.quorum,
     quorum_type: proposal.quorumType,
     choices: proposal.choices,
-    scores: proposal.scores,
-    scores_total: proposal.scores_total,
+    scores: proposal.scores.map(v => Math.floor(v)),
+    scores_total: Math.floor(proposal.scores_total),
     vote_count: proposal.votes,
     state: getProposalState(proposal),
     cancelled: false,
