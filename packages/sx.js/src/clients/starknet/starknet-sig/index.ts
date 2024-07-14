@@ -87,7 +87,7 @@ export class StarknetSig {
     const signature = await signer.signMessage(data);
 
     return {
-      address: signer.address,
+      address: validateAndParseAddress(signer.address),
       signature: Array.isArray(signature)
         ? signature.map(v => `0x${BigInt(v).toString(16)}`)
         : [`0x${signature.r.toString(16)}`, `0x${signature.s.toString(16)}`],
