@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { compareAddresses } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
 
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
