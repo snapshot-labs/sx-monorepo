@@ -137,6 +137,6 @@ export async function getBalances(
         value: 0,
         change: 0
       }))
-      .filter(token => !token.symbol.includes('.'))
+      .filter(token => !token?.symbol?.includes('.'))
   ];
 }
