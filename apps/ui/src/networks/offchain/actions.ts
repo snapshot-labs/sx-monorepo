@@ -237,7 +237,7 @@ export function createActions(
       });
     },
     async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {
-      const profile: UserProfile = {
+      const profile: Partial<UserProfile> = {
         name: user.name,
         about: user.about,
         avatar: user.avatar,

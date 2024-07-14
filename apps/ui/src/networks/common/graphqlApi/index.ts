@@ -537,7 +537,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         | 'proposal_count-desc'
         | 'proposal_count-asc' = 'vote_count-desc',
       user?: string
-    ): Promise<User[]> {
+    ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
         'desc' | 'asc'
