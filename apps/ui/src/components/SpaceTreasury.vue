@@ -105,6 +105,10 @@ const executionStrategy = computed(() => {
   };
 });
 
+const hasStakeableAssets = computed(() => {
+  return assets.value.some(asset => asset.contractAddress === ETH_CONTRACT && !isReadOnly);
+});
+
 function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
 }
@@ -324,6 +328,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     </div>
     <teleport to="#modal">
       <ModalSendToken
+        v-if="!isReadOnly"
         :open="modalOpen.tokens"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -341,6 +346,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         @add="addTx"
       />
       <ModalStakeToken
+        v-if="hasStakeableAssets"
         :open="modalOpen.stake"
         :address="treasury.wallet"
         :network="treasury.network"
