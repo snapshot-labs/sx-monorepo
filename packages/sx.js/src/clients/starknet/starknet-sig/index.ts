@@ -1,5 +1,12 @@
 import randomBytes from 'randombytes';
-import { Account, CallData, shortString, typedData, uint256 } from 'starknet';
+import {
+  Account,
+  CallData,
+  shortString,
+  typedData,
+  uint256,
+  validateAndParseAddress
+} from 'starknet';
 import { getStrategiesWithParams } from '../../../utils/strategies';
 import { aliasTypes, baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
 import {
@@ -208,7 +215,7 @@ export class StarknetSig {
     data: Alias;
   }): Promise<Envelope<Alias>> {
     const message = {
-      from: signer.address,
+      from: validateAndParseAddress(signer.address),
       timestamp: parseInt((Date.now() / 1e3).toFixed()),
       ...data
     };
