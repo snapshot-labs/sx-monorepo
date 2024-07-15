@@ -106,7 +106,7 @@ const executionStrategy = computed(() => {
 });
 
 const hasStakeableAssets = computed(() => {
-  return assets.value.some(asset => asset.contractAddress === ETH_CONTRACT && !isReadOnly);
+  return !isReadOnly && assets.value.some(asset => asset.contractAddress === ETH_CONTRACT);
 });
 
 function openModal(type: 'tokens' | 'nfts' | 'stake') {
