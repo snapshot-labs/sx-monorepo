@@ -48,8 +48,8 @@ type DbProposal = {
 function getApi(accumulatesChainId: string) {
   if (accumulatesChainId === '1') {
     return {
-      apiUrl: 'https://api.herodotus.cloud',
-      indexerUrl: 'https://rs-indexer.api.herodotus.cloud',
+      apiUrl: 'https://snapshot.api.herodotus.cloud',
+      indexerUrl: 'https://snapshot.rs-indexer.api.herodotus.cloud',
       apiKey: HERODOTUS_LEGACY_API_KEY
     };
   }

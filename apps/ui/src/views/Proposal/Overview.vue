@@ -52,9 +52,11 @@ const shareMsg = encodeURIComponent(
 );
 
 const editable = computed(() => {
+  // HACK: here we need to use snapshot instead of start because start is artifically
+  // shifted for Starknet's proposals with ERC20Votes strategies.
   return (
     compareAddresses(props.proposal.author.id, web3.value.account) &&
-    props.proposal.start > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
+    props.proposal.snapshot > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
 
@@ -119,7 +121,10 @@ async function handleEditClick() {
             address: props.proposal.execution_strategy,
             type: props.proposal.execution_strategy_type
           },
-    execution: props.proposal.execution
+    execution:
+      !offchainNetworks.includes(props.proposal.network) && props.proposal.executions.length > 0
+        ? props.proposal.executions[0].transactions
+        : undefined
   });
 
   router.push({
@@ -336,19 +341,20 @@ onBeforeUnmount(() => destroyAudio());
           <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
-      <div v-if="proposal.execution && proposal.execution.length > 0">
+      <div v-if="proposal.executions && proposal.executions.length > 0">
         <h4 class="mb-3 eyebrow flex items-center">
           <IH-play class="inline-block mr-2" />
           <span>Execution</span>
         </h4>
         <div class="mb-4">
-          <ProposalExecutionsList :txs="proposal.execution" />
+          <ProposalExecutionsList :executions="proposal.executions" />
         </div>
       </div>
       <div
         v-if="
-          proposal.execution &&
-          proposal.execution.length > 0 &&
+          proposal.executions &&
+          proposal.executions.length > 0 &&
+          proposal.scores.length > 0 &&
           BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
           BigInt(proposal.scores[0]) > BigInt(proposal.scores[1]) &&
           proposal.has_execution_window_opened

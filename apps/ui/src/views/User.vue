@@ -57,7 +57,7 @@ async function loadActivities(userId: string) {
     const totalVotes = aggregatedActivities.reduce((a, b) => a + b.vote_count, 0);
 
     activities.value = aggregatedActivities
-      .map(activity => {
+      .map((activity: UserActivity) => {
         const space = spacesStore.spacesMap.get(activity.spaceId);
 
         if (!space) return;
@@ -65,8 +65,8 @@ async function loadActivities(userId: string) {
         return {
           ...activity,
           space,
-          proposal_percentage: activity.proposal_count / totalProposals,
-          vote_percentage: activity.vote_count / totalVotes
+          proposal_percentage: totalProposals > 0 ? activity.proposal_count / totalProposals : 0,
+          vote_percentage: totalVotes > 0 ? activity.vote_count / totalVotes : 0
         };
       })
       .filter(Boolean) as typeof activities.value;

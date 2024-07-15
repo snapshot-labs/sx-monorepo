@@ -15,7 +15,7 @@ import {
   createStrategyPicker
 } from '@/networks/common/helpers';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { CallData, type Account, type RpcProvider } from 'starknet';
+import { type Account, type RpcProvider, AllowArray, Call, CallData } from 'starknet';
 import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type {
   Connector,
@@ -397,7 +397,7 @@ export function createActions(
         proposal.space,
         proposal.execution_strategy,
         proposal.execution_destination,
-        convertToMetaTransactions(proposal.execution)
+        convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
       return executionCall('stark', chainId, 'execute', {
@@ -433,7 +433,7 @@ export function createActions(
         proposal.space,
         proposal.execution_strategy,
         proposal.execution_destination,
-        convertToMetaTransactions(proposal.execution)
+        convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
       const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
@@ -447,7 +447,7 @@ export function createActions(
         votesAgainst,
         votesAbstain,
         executionHash,
-        transactions: convertToMetaTransactions(proposal.execution).map(tx => ({
+        transactions: convertToMetaTransactions(proposal.executions[0].transactions).map(tx => ({
           ...tx,
           salt: tx.salt.toString()
         }))
@@ -537,13 +537,34 @@ export function createActions(
 
       const { account }: { account: Account } = web3.provider;
 
-      return account.execute({
+      let calls: AllowArray<Call> = {
         contractAddress,
         entrypoint: 'delegate',
-        calldata: CallData.compile({
-          delegatee
-        })
-      });
+        calldata: CallData.compile({ delegatee })
+      };
+
+      // Temporary fix for NSTR to delegate for 2 tokens at once
+      if (
+        networkId === 'sn' &&
+        [
+          '0x0395989740c1d6ecc0cba880dd22e87cc209fdb6b8dc2794e9a399c4b2c34d94',
+          '0x07c251045154318a2376a3bb65be47d3c90df1740d8e35c9b9d943aa3f240e50'
+        ].includes(space.id)
+      ) {
+        calls = [
+          '0x00c530f2c0aa4c16a0806365b0898499fba372e5df7a7172dc6fe9ba777e8007',
+          '0x02589fc11f60f21af6a1dda3aeb7a44305c552928af122f2834d1c3b1a7aa626',
+          '0x046ab56ec0c6a6d42384251c97e9331aa75eb693e05ed8823e2df4de5713e9a4',
+          '0x02b674ffda238279de5550d6f996bf717228d316555f07a77ef0a082d925b782',
+          '0x06f8ad459c712873993e9ffb9013a469248343c3d361e4d91a8cac6f98575834'
+        ].map(contractAddress => ({
+          contractAddress,
+          entrypoint: 'delegate',
+          calldata: CallData.compile({ delegatee })
+        }));
+      }
+
+      return account.execute(calls);
     },
     getVotingPower: async (
       spaceId: string,

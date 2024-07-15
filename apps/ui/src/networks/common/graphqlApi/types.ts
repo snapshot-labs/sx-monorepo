@@ -10,6 +10,15 @@ export type ApiStrategyParsedMetadata = {
   };
 };
 
+export type ApiExecutorStrategy = {
+  id: string;
+  address: string;
+  destination_address: string | null;
+  type: string;
+  treasury: string | null;
+  treasury_chain: number | null;
+};
+
 export type ApiSpace = {
   id: string;
   metadata: {
@@ -26,14 +35,7 @@ export type ApiSpace = {
     executors: string[];
     executors_types: string[];
     executors_destinations: string[];
-    executors_strategies: {
-      id: string;
-      address: string;
-      destination_address: string | null;
-      type: string;
-      treasury: string | null;
-      treasury_chain: number | null;
-    }[];
+    executors_strategies: ApiExecutorStrategy[];
     treasuries: string[];
     delegations: string[];
   };
@@ -74,8 +76,10 @@ export type ApiProposal = {
       name: string;
       avatar: string;
       voting_power_symbol: string;
+      treasuries: string[];
       executors: string[];
       executors_types: string[];
+      executors_strategies: ApiExecutorStrategy[];
     };
     authenticators: string[];
     strategies_parsed_metadata: ApiStrategyParsedMetadata[];

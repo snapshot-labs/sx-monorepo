@@ -22,7 +22,11 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return `Contract call to <b>_NAME_</b>`;
+    return 'Contract call to <b>_NAME_</b>';
+  }
+
+  if (props.tx._type === 'raw') {
+    return 'Raw transaction to <b>_NAME_</b>';
   }
 
   return '';

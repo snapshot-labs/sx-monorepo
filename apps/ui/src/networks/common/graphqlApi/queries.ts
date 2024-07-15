@@ -81,8 +81,17 @@ const PROPOSAL_FRAGMENT = gql`
         name
         avatar
         voting_power_symbol
+        treasuries
         executors
         executors_types
+        executors_strategies {
+          id
+          address
+          destination_address
+          type
+          treasury_chain
+          treasury
+        }
       }
       strategies_parsed_metadata {
         index
