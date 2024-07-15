@@ -40,7 +40,7 @@ const SOCIALS = [
         <div class="eyebrow">Learn more</div>
         <div class="space-y-2">
           <div>
-            <a href="https://docs.snapshotx.xyz" target="_blank">
+            <a href="https://docs.snapshot.box" target="_blank">
               Documentation <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
@@ -50,12 +50,12 @@ const SOCIALS = [
             </a>
           </div>
           <div>
-            <a href="https://docs.snapshotx.xyz/protocol-sx-evm/audits" target="_blank">
+            <a href="https://docs.snapshot.box/protocol-sx-evm/audits" target="_blank">
               Audits <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
           <div>
-            <a href="https://docs.snapshotx.xyz/services/sx.js" target="_blank">
+            <a href="https://docs.snapshot.box/services/sx.js" target="_blank">
               SX.js <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
