@@ -90,7 +90,6 @@ export class EthereumSig {
       ...message
     };
     const signature = await signer._signTypedData(domain, types, EIP712Message);
-    console.log(signature);
     return {
       address,
       signature,
