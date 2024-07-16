@@ -429,9 +429,9 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         })
         .then(({ data }) =>
           data.leaderboards.map((leaderboard: any) => ({
-            spaceId: `${networkId}:${leaderboard.space.id}`,
-            vote_count: leaderboard.vote_count,
-            proposal_count: leaderboard.proposal_count
+            spaceId: `${networkId}:${leaderboard.space}`,
+            vote_count: leaderboard.votesCount,
+            proposal_count: leaderboard.proposalsCount
           }))
         );
     },
