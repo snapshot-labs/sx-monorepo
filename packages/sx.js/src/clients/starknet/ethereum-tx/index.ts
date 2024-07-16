@@ -282,7 +282,7 @@ export class EthereumTx {
       data.proposal,
       getChoiceEnum(data.choice),
       userVotingStrategies,
-      shortString.splitLongString('') // metadataUri
+      shortString.splitLongString(data.metadataUri)
     ]);
 
     return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;

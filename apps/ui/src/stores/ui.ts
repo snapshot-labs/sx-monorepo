@@ -9,25 +9,36 @@ type Notification = {
   message: string;
 };
 
-type PendingTransaction = {
+type Transaction = {
   networkId: NetworkID;
   txId: string;
   createdAt: number;
+  status: 'pending' | 'confirmed' | 'failed';
 };
 
 const PENDING_TRANSACTIONS_TIMEOUT = 10 * 60 * 1000;
 const PENDING_TRANSACTIONS_STORAGE_KEY = 'pendingTransactions';
 
-function updateStorage(pendingTransactions: PendingTransaction[]) {
-  lsSet(PENDING_TRANSACTIONS_STORAGE_KEY, pendingTransactions);
+function updateStorage(transactions: Record<string, Transaction>) {
+  const filteredTransactions = Object.fromEntries(
+    Object.entries(transactions).filter(([, tx]) => tx.status === 'pending')
+  );
+
+  lsSet(PENDING_TRANSACTIONS_STORAGE_KEY, filteredTransactions);
 }
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
     sidebarOpen: false,
     notifications: [] as Notification[],
-    pendingTransactions: [] as PendingTransaction[]
+    transactions: {} as Record<string, Transaction>
   }),
+  getters: {
+    pendingTransactions: state =>
+      Object.values(state.transactions).filter(tx => tx.status === 'pending'),
+    failedTransactions: state =>
+      Object.values(state.transactions).filter(tx => tx.status === 'failed')
+  },
   actions: {
     async toggleSidebar() {
       this.sidebarOpen = !this.sidebarOpen;
@@ -47,37 +58,32 @@ export const useUiStore = defineStore('ui', {
       this.notifications = this.notifications.filter(notification => notification.id !== id);
     },
     async addPendingTransaction(txId: string, networkId: NetworkID) {
-      this.pendingTransactions.push({
+      this.transactions[txId] = {
         networkId,
         txId,
-        createdAt: Date.now()
-      });
-      updateStorage(this.pendingTransactions);
+        createdAt: Date.now(),
+        status: 'pending'
+      };
+      updateStorage(this.transactions);
 
       try {
         await getNetwork(networkId).helpers.waitForTransaction(txId);
+        this.transactions[txId].status = 'confirmed';
+      } catch (e) {
+        this.transactions[txId].status = 'failed';
       } finally {
-        this.pendingTransactions = this.pendingTransactions.filter(el => el.txId !== txId);
-        updateStorage(this.pendingTransactions);
+        updateStorage(this.transactions);
       }
     },
     async restorePendingTransactions() {
-      const persistedTransactions = lsGet(PENDING_TRANSACTIONS_STORAGE_KEY, []);
-
-      this.pendingTransactions = persistedTransactions.filter(
-        tx => tx.createdAt && tx.createdAt + PENDING_TRANSACTIONS_TIMEOUT > Date.now()
+      const persistedTransactions: Record<string, Transaction> = lsGet(
+        PENDING_TRANSACTIONS_STORAGE_KEY,
+        {}
       );
 
-      if (persistedTransactions.length !== this.pendingTransactions.length) {
-        updateStorage(this.pendingTransactions);
-      }
-
-      this.pendingTransactions.forEach(async ({ networkId, txId }) => {
-        try {
-          await getNetwork(networkId).helpers.waitForTransaction(txId);
-        } finally {
-          this.pendingTransactions = this.pendingTransactions.filter(el => el.txId !== txId);
-          updateStorage(this.pendingTransactions);
+      Object.values(persistedTransactions).forEach(tx => {
+        if (tx.createdAt + PENDING_TRANSACTIONS_TIMEOUT > Date.now()) {
+          this.addPendingTransaction(tx.txId, tx.networkId);
         }
       });
     }

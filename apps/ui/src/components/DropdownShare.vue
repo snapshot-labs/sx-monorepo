@@ -1,8 +1,11 @@
 <script setup lang="ts">
-defineProps<{ message: string }>();
+import { User, Proposal } from '@/types';
+
+defineProps<{ shareable: User | Proposal; type: string }>();
 
 const uiStore = useUiStore();
 const { copy } = useClipboard();
+const { socialNetworks, share } = useSharing();
 
 function handleCopyLinkClick() {
   copy(window.location.href);
@@ -30,37 +33,14 @@ function handleCopyLinkClick() {
           Copy link
         </a>
       </UiDropdownItem>
-      <UiDropdownItem v-slot="{ active }">
+      <UiDropdownItem v-for="(network, i) in socialNetworks" :key="i" v-slot="{ active }" i>
         <a
           class="flex items-center gap-2"
           :class="{ 'opacity-80': active }"
-          :href="`https://twitter.com/intent/tweet/?text=${message}`"
-          target="_blank"
+          @click="share(network.id, type, shareable)"
         >
-          <IC-x />
-          Share on X
-        </a>
-      </UiDropdownItem>
-      <UiDropdownItem v-slot="{ active }">
-        <a
-          class="flex items-center gap-2"
-          :class="{ 'opacity-80': active }"
-          :href="`https://hey.xyz/?hashtags=Snapshot&text=${message}`"
-          target="_blank"
-        >
-          <IC-lens />
-          Share on Lens
-        </a>
-      </UiDropdownItem>
-      <UiDropdownItem v-slot="{ active }">
-        <a
-          class="flex items-center gap-2"
-          :class="{ 'opacity-80': active }"
-          :href="`https://warpcast.com/~/compose?text=${message}`"
-          target="_blank"
-        >
-          <IC-farcaster />
-          Share on Farcaster
+          <component :is="network.icon" />
+          Share on {{ network.name }}
         </a>
       </UiDropdownItem>
     </template>

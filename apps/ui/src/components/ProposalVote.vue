@@ -42,7 +42,7 @@ const isSupported = computed(() => {
     You have already voted for this proposal
   </slot>
 
-  <slot v-else-if="pendingVotes[proposal.id]" name="voted-pending">
+  <slot v-else-if="pendingVotes.has(proposal.id)" name="voted-pending">
     You have already voted for this proposal
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">
