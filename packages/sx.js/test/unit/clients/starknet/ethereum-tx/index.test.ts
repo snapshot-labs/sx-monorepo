@@ -51,8 +51,7 @@ describe('EthereumTx', () => {
         }
       ],
       proposal: 32,
-      choice: 1,
-      metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
+      choice: 1
     };
 
     const result = await ethereumTx.getVoteHash(wallet, data);

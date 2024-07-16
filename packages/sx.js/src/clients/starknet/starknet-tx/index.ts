@@ -264,7 +264,7 @@ export class StarknetTx {
       proposalId: envelope.data.proposal,
       choice: envelope.data.choice,
       votingStrategies,
-      metadataUri: envelope.data.metadataUri
+      metadataUri: ''
     });
 
     const maxFee = opts?.nonce

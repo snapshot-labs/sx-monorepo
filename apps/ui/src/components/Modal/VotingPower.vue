@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { utils } from '@snapshot-labs/sx';
 import { getNetwork } from '@/networks';
 import { _n, shorten } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
@@ -9,26 +8,23 @@ import { VotingPower, VotingPowerStatus } from '@/networks/types';
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
-  votingPower?: {
-    symbol: string;
-    totalVotingPower: bigint;
-    decimals: number;
-    votingPowers: VotingPower[];
-    status: VotingPowerStatus;
-    error: utils.errors.VotingPowerDetailsError | null;
-  };
+  votingPowerSymbol: string;
+  votingPowers: VotingPower[];
+  votingPowerStatus: VotingPowerStatus;
+  finalDecimals: number;
 }>();
 
 defineEmits<{
   (e: 'close');
-  (e: 'fetchVotingPower');
+  (e: 'getVotingPower');
 }>();
 
 const network = computed(() => getNetwork(props.networkId));
 const baseNetwork = computed(() =>
   network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
 );
-const loading = computed(() => !props.votingPower || props.votingPower.status === 'loading');
+const loading = computed(() => props.votingPowerStatus === 'loading');
+const error = computed(() => props.votingPowerStatus === 'error');
 </script>
 
 <template>
@@ -37,14 +33,15 @@ const loading = computed(() => !props.votingPower || props.votingPower.status ==
       <h3>Your voting power</h3>
     </template>
     <UiLoading v-if="loading" class="p-4 block text-center" />
-    <div v-else-if="votingPower">
-      <MessageVotingPower
-        class="p-4"
-        :voting-power="votingPower"
-        @fetch-voting-power="$emit('fetchVotingPower')"
-      />
+    <div v-else>
+      <div v-if="error" class="p-4 flex flex-col gap-3 items-start">
+        <UiAlert type="error">There was an error fetching your voting power.</UiAlert>
+        <UiButton type="button" class="flex items-center gap-2" @click="$emit('getVotingPower')">
+          <IH-refresh />Retry
+        </UiButton>
+      </div>
       <div
-        v-for="(strategy, i) in votingPower.votingPowers"
+        v-for="(strategy, i) in votingPowers"
         :key="i"
         class="py-3 px-4 border-b last:border-b-0"
       >
@@ -60,12 +57,12 @@ const loading = computed(() => !props.votingPower || props.votingPower.status ==
           />
           <div class="text-skin-link shrink-0">
             {{
-              _n(Number(strategy.value) / 10 ** votingPower.decimals, 'compact', {
+              _n(Number(strategy.value) / 10 ** finalDecimals, 'compact', {
                 maximumFractionDigits: 2,
                 formatDust: true
               })
             }}
-            {{ votingPower.symbol }}
+            {{ votingPowerSymbol }}
           </div>
         </div>
         <div class="flex justify-between">
