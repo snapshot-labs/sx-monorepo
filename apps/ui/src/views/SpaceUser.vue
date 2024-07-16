@@ -55,7 +55,7 @@ const navigation = computed(() => [
   { label: 'Statement', route: 'space-user-statement' },
   { label: 'Delegators', route: 'space-user-delegators' },
   { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
-  { label: 'Votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
+  { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
 
 async function loadUserActivity() {
