@@ -3,7 +3,6 @@ import Draggable from 'vuedraggable';
 import { Choice, Proposal } from '@/types';
 
 const props = defineProps<{
-  sendingType: Choice | null;
   proposal: Proposal;
 }>();
 
@@ -38,12 +37,7 @@ const selectedChoices = ref<number[]>(props.proposal.choices.map((_, i) => i + 1
         </UiButton>
       </template>
     </Draggable>
-    <UiButton
-      primary
-      class="!h-[48px] w-full"
-      :loading="!!sendingType"
-      @click="emit('vote', selectedChoices)"
-    >
+    <UiButton primary class="!h-[48px] w-full" @click="emit('vote', selectedChoices)">
       Vote
     </UiButton>
   </div>

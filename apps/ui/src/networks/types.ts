@@ -128,7 +128,8 @@ export type ReadOnlyNetworkActions = {
     connectorType: Connector,
     account: string,
     proposal: Proposal,
-    choice: Choice
+    choice: Choice,
+    metadataCid?: string
   ): Promise<any>;
   followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);
   unfollowSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string);

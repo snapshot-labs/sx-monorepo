@@ -99,7 +99,11 @@ export function useWeb3() {
 
       if (acc) {
         const usersStore = useUsersStore();
-        await usersStore.fetchUser(acc);
+        try {
+          await usersStore.fetchUser(acc);
+        } catch (e) {
+          console.warn('failed to fetch user', e);
+        }
         state.account = formatAddress(acc);
         state.name = usersStore.getUser(acc)?.name || '';
       }

@@ -2,7 +2,7 @@
 
 An open source interface for Snapshot X protocol.
 
-**[Website](https://snapshotx.xyz)**
+**[Website](https://snapshot.box)**
 
 ## Development guide
 
