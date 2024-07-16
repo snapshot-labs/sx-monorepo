@@ -26,14 +26,14 @@ export const useUsersStore = defineStore('users', {
     async fetchUser(userId: string, force = false) {
       if (this.getUser(userId) && !force) return;
 
-      this.users[userId] = {
+      this.users[userId] ||= {
         loading: false,
         loaded: false,
         user: null
       };
 
       const record = toRef(this.users, userId) as Ref<UserRecord>;
-      record.value.loading = false;
+      record.value.loading = true;
 
       record.value.user = await network.api.loadUser(userId);
 

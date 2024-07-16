@@ -27,6 +27,8 @@ const proposal = computed(() => {
 });
 
 const discussion = computed(() => {
+  if (!proposal.value) return null;
+
   return sanitizeUrl(proposal.value.discussion);
 });
 
@@ -46,6 +48,8 @@ async function handleVoteClick(choice: Choice) {
 }
 
 async function handleVoteSubmitted() {
+  if (!proposal.value) return;
+
   selectedChoice.value = null;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
@@ -55,6 +59,8 @@ async function handleVoteSubmitted() {
 }
 
 function handleFetchVotingPower() {
+  if (!proposal.value) return;
+
   fetchVotingPower(proposal.value);
 }
 
@@ -175,6 +181,16 @@ watchEffect(() => {
                   class="inline-block text-rose-500"
                 />
                 <span v-else class="text-skin-link" v-text="getFormattedVotingPower(votingPower)" />
+              </a>
+              <a
+                v-if="
+                  votingPower?.status === 'success' && votingPower.totalVotingPower === BigInt(0)
+                "
+                href="https://help.snapshot.org/en/articles/9566904-why-do-i-have-0-voting-power"
+                target="_blank"
+                class="ml-1.5"
+              >
+                <IH-exclamation-circle />
               </a>
             </template>
           </IndicatorVotingPower>

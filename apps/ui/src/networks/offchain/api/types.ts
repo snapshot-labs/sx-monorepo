@@ -75,6 +75,7 @@ export type ApiProposal = {
   updated: number | null;
   votes: number;
   privacy: Privacy;
+  plugins: Record<string, any>;
 };
 
 export type ApiVote = {

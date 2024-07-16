@@ -130,6 +130,13 @@ export type Space = {
   created: number;
 };
 
+export type ProposalExecution = {
+  safeName: string;
+  safeAddress: string;
+  networkId: NetworkID;
+  transactions: Transaction[];
+};
+
 export type Proposal = {
   id: string;
   proposal_id: number | string;
@@ -162,7 +169,7 @@ export type Proposal = {
   title: string;
   body: string;
   discussion: string;
-  execution: Transaction[];
+  executions: ProposalExecution[];
   start: number;
   min_end: number;
   max_end: number;
@@ -194,24 +201,25 @@ export type Proposal = {
 };
 
 export type UserProfile = {
-  name?: string;
-  about?: string;
-  avatar?: string;
-  cover?: string;
-  github?: string;
-  twitter?: string;
+  name: string;
+  about: string;
+  avatar: string;
+  cover: string;
+  github: string;
+  twitter: string;
+  lens: string;
+  farcaster: string;
 };
 
 export type User = {
   id: string;
-  proposal_count: number;
-  vote_count: number;
-  created?: number;
+  created: number | null;
   follows?: string[];
-  name?: string;
 } & UserProfile;
 
 export type UserActivity = {
+  id: string;
+  name?: string;
   spaceId: string;
   proposal_count: number;
   vote_count: number;
@@ -328,11 +336,19 @@ export type ContractCallTransaction = BaseTransaction & {
   };
 };
 
+export type RawTransaction = BaseTransaction & {
+  _type: 'raw';
+  _form: {
+    recipient: string;
+  };
+};
+
 export type Transaction =
   | SendTokenTransaction
   | SendNftTransaction
   | StakeTokenTransaction
-  | ContractCallTransaction;
+  | ContractCallTransaction
+  | RawTransaction;
 
 // Utils
 export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };

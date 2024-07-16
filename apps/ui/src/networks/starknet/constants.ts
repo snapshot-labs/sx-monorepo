@@ -41,6 +41,12 @@ export function createConstants(
     [config.Strategies.OZVotesTrace208StorageProof]: true
   };
 
+  const STORAGE_PROOF_STRATEGIES_TYPES = [
+    config.Strategies.EVMSlotValue,
+    config.Strategies.OZVotesStorageProof,
+    config.Strategies.OZVotesTrace208StorageProof
+  ];
+
   const SUPPORTED_EXECUTORS = {
     EthRelayer: true
   };
@@ -514,6 +520,7 @@ export function createConstants(
     EDITOR_VOTING_STRATEGIES,
     EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
     EDITOR_EXECUTION_STRATEGIES,
-    EDITOR_VOTING_TYPES
+    EDITOR_VOTING_TYPES,
+    STORAGE_PROOF_STRATEGIES_TYPES
   };
 }

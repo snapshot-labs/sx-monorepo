@@ -426,7 +426,7 @@ export function createActions(
         proposal.space,
         proposal.execution_strategy,
         proposal.execution_destination,
-        convertToMetaTransactions(proposal.execution)
+        convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
       return executionCall('eth', chainId, 'execute', {
@@ -442,7 +442,7 @@ export function createActions(
         proposal.space,
         proposal.execution_strategy,
         proposal.execution_destination,
-        convertToMetaTransactions(proposal.execution)
+        convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
       return executionCall('eth', chainId, 'executeQueuedProposal', {

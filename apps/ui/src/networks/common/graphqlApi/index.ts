@@ -23,7 +23,7 @@ import {
 } from './highlight';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
-import { BASIC_CHOICES } from '@/helpers/constants';
+import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
 import {
   Space,
   Proposal,
@@ -33,10 +33,11 @@ import {
   NetworkID,
   ProposalState,
   Follow,
-  UserActivity
+  UserActivity,
+  ProposalExecution
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
-import { clone } from '@/helpers/utils';
+import { clone, compareAddresses } from '@/helpers/utils';
 
 type ApiOptions = {
   baseNetworkId?: NetworkID;
@@ -91,6 +92,51 @@ function processStrategiesMetadata(
 
   strategiesIndicies = strategiesIndicies || Array.from(Array(maxIndex + 1).keys());
   return strategiesIndicies.map(index => metadataMap[index]) || [];
+}
+
+function processExecutions(
+  proposal: ApiProposal,
+  executionNetworkId: NetworkID
+): ProposalExecution[] {
+  // NOTE: This is unstable, meaning that if executors_strategies or treasuries
+  // are modified in the future it will affect pass proposals.
+  // We should persist those values on proposal directly so it's stable.
+  // Right now we can't really update subgraphs because of TheGraph issue.
+
+  if (!proposal.metadata.execution) return [];
+
+  const match = proposal.space.metadata.executors_strategies.find(
+    strategy => strategy.address === proposal.execution_strategy
+  );
+
+  const treasuries = proposal.space.metadata.treasuries.map(treasury => {
+    const { name, network, address } = JSON.parse(treasury);
+
+    return {
+      name,
+      network,
+      address
+    };
+  });
+
+  const matchingTreasury = treasuries.find(treasury => {
+    if (!match) return null;
+
+    return (
+      match.treasury &&
+      compareAddresses(treasury.address, match.treasury) &&
+      match.treasury_chain === CHAIN_IDS[treasury.network]
+    );
+  });
+
+  return [
+    {
+      safeAddress: match?.treasury || '',
+      safeName: matchingTreasury?.name || 'Unnamed treasury',
+      networkId: matchingTreasury?.network || executionNetworkId,
+      transactions: formatExecution(proposal.metadata.execution)
+    }
+  ];
 }
 
 function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
@@ -150,6 +196,9 @@ function formatProposal(
   current: number,
   baseNetworkId?: NetworkID
 ): Proposal {
+  const executionNetworkId =
+    proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId ? baseNetworkId : networkId;
+
   return {
     ...proposal,
     space: {
@@ -173,11 +222,8 @@ function formatProposal(
     title: proposal.metadata.title,
     body: proposal.metadata.body,
     discussion: proposal.metadata.discussion,
-    execution_network:
-      proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
-        ? baseNetworkId
-        : networkId,
-    execution: formatExecution(proposal.metadata.execution),
+    execution_network: executionNetworkId,
+    executions: processExecutions(proposal, executionNetworkId),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(proposal.execution_strategy_type)
       ? proposal.max_end <= current
       : proposal.min_end <= current,
@@ -490,7 +536,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         | 'vote_count-asc'
         | 'proposal_count-desc'
         | 'proposal_count-asc' = 'vote_count-desc'
-    ): Promise<User[]> {
+    ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
         'desc' | 'asc'
@@ -512,7 +558,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         .then(({ data }) =>
           data.leaderboards.map((leaderboard: any) => ({
             id: leaderboard.user.id,
-            created: leaderboard.user.created,
+            spaceId: leaderboard.space.id,
             vote_count: leaderboard.vote_count,
             proposal_count: leaderboard.proposal_count
           }))

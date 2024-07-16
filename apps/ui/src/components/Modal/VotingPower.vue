@@ -2,6 +2,7 @@
 import { utils } from '@snapshot-labs/sx';
 import { getNetwork } from '@/networks';
 import { _n, shorten } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { NetworkID } from '@/types';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
 
@@ -51,9 +52,13 @@ const loading = computed(() => !props.votingPower || props.votingPower.status ==
           <a
             :href="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
             target="_blank"
-            v-text="network.constants.STRATEGIES[strategy.address] || shorten(strategy.address)"
+            class="truncate"
+            v-text="
+              network.constants.STRATEGIES[strategy.address] ||
+              (isValidAddress(strategy.address) ? shorten(strategy.address) : strategy.address)
+            "
           />
-          <div class="text-skin-link">
+          <div class="text-skin-link shrink-0">
             {{
               _n(Number(strategy.value) / 10 ** votingPower.decimals, 'compact', {
                 maximumFractionDigits: 2,
@@ -67,7 +72,10 @@ const loading = computed(() => !props.votingPower || props.votingPower.status ==
           <div v-if="strategy.token" class="flex items-center gap-2">
             <a
               :href="
-                baseNetwork.helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)
+                (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(strategy.address)
+                  ? baseNetwork
+                  : network
+                ).helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)
               "
               target="_blank"
               class="flex items-center text-skin-text"

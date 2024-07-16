@@ -219,7 +219,7 @@ export type NetworkApi = {
     spaceId: string,
     paginationOpts: PaginationOpts,
     sortBy?: 'vote_count-desc' | 'vote_count-asc' | 'proposal_count-desc' | 'proposal_count-asc'
-  ): Promise<User[]>;
+  ): Promise<UserActivity[]>;
   loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
   loadAlias(address: string, alias: string, created_gt: number): Promise<Alias | null>;
 };
@@ -234,6 +234,7 @@ export type NetworkConstants = {
   EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
+  STORAGE_PROOF_STRATEGIES_TYPES?: string[];
 };
 
 export type NetworkHelpers = {
