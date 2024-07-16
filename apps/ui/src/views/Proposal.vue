@@ -204,9 +204,7 @@ watchEffect(() => {
                 <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
               </a>
               <a
-                v-if="
-                  votingPower?.status === 'success' && votingPower.totalVotingPower === BigInt(0)
-                "
+                v-if="votingPowerStatus === 'success' && props.votingPower === BigInt(0)"
                 href="https://help.snapshot.org/en/articles/9566904-why-do-i-have-0-voting-power"
                 target="_blank"
                 class="ml-1.5"
