@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
+import { getValidator } from '@/helpers/validation';
 import type { Statement } from '@/types';
 
 const model = defineModel<Statement>({
@@ -16,8 +16,20 @@ const actions = useActions();
 const sending = ref(false);
 const previewEnabled = ref(false);
 const form = reactive(clone(model.value));
+const formErrors = ref({} as Record<string, any>);
+const formValidated = ref(false);
 
-const definition = {
+const STATUS_DEFINITION = {
+  enum: ['ACTIVE', 'INACTIVE'],
+  options: [
+    { id: 'ACTIVE', name: 'Active' },
+    { id: 'INACTIVE', name: 'Inactive' }
+  ],
+  title: 'Status'
+};
+
+const formValidator = getValidator({
+  $async: true,
   type: 'object',
   title: 'Statement',
   additionalProperties: false,
@@ -29,20 +41,9 @@ const definition = {
       title: 'Statement',
       maxLength: 10000
     },
-    status: {
-      enum: ['ACTIVE', 'INACTIVE'],
-      options: [
-        { id: 'ACTIVE', name: 'Active' },
-        { id: 'INACTIVE', name: 'Inactive' }
-      ],
-      title: 'Status'
-    }
+    status: STATUS_DEFINITION
   }
-};
-
-const formErrors = computed(() =>
-  validateForm(definition, form, { skipEmptyOptionalFields: true })
-);
+});
 
 async function handleSubmit() {
   sending.value = true;
@@ -55,15 +56,21 @@ async function handleSubmit() {
     sending.value = false;
   }
 }
+
+watchEffect(async () => {
+  formValidated.value = false;
+
+  formErrors.value = await formValidator.validateAsync({
+    statement: form.statement,
+    status: form.status
+  });
+  formValidated.value = true;
+});
 </script>
 
 <template>
   <div class="max-w-[592px] s-box">
-    <UiSelect
-      v-model="form.status"
-      :definition="definition.properties.status"
-      :error="formErrors.status"
-    />
+    <UiSelect v-model="form.status" :definition="STATUS_DEFINITION" :error="formErrors.status" />
     <div class="mb-3">
       <div class="flex space-x-3">
         <button type="button" @click="previewEnabled = false">
@@ -85,7 +92,7 @@ async function handleSubmit() {
       <UiButton
         primary
         class="w-full"
-        :disabled="Object.keys(formErrors).length > 0"
+        :disabled="!formValidated || Object.keys(formErrors).length > 0"
         :loading="sending"
         @click="handleSubmit"
       >
