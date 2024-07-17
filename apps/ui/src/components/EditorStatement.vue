@@ -17,33 +17,31 @@ const sending = ref(false);
 const previewEnabled = ref(false);
 const form = reactive(clone(model.value));
 
-const definition = computed(() => {
-  return {
-    type: 'object',
-    title: 'Statement',
-    additionalProperties: false,
-    required: [],
-    properties: {
-      statement: {
-        type: 'string',
-        format: 'long',
-        title: 'Statement',
-        maxLength: 10000
-      },
-      status: {
-        enum: ['ACTIVE', 'INACTIVE'],
-        options: [
-          { id: 'ACTIVE', name: 'Active' },
-          { id: 'INACTIVE', name: 'Inactive' }
-        ],
-        title: 'Status'
-      }
+const definition = {
+  type: 'object',
+  title: 'Statement',
+  additionalProperties: false,
+  required: [],
+  properties: {
+    statement: {
+      type: 'string',
+      format: 'long',
+      title: 'Statement',
+      maxLength: 10000
+    },
+    status: {
+      enum: ['ACTIVE', 'INACTIVE'],
+      options: [
+        { id: 'ACTIVE', name: 'Active' },
+        { id: 'INACTIVE', name: 'Inactive' }
+      ],
+      title: 'Status'
     }
-  };
-});
+  }
+};
 
 const formErrors = computed(() =>
-  validateForm(definition.value, form, { skipEmptyOptionalFields: true })
+  validateForm(definition, form, { skipEmptyOptionalFields: true })
 );
 
 async function handleSubmit() {
