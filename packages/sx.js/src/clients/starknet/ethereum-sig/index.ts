@@ -154,9 +154,7 @@ export class EthereumSig {
       proposalId: `0x${data.proposal.toString(16)}`,
       choice: `0x${data.choice.toString(16)}`,
       userVotingStrategies,
-      metadataUri: shortString
-        .splitLongString(data.metadataUri)
-        .map(str => shortString.encodeShortString(str))
+      metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
     };
 
     const signatureData = await this.sign(signer, message, voteTypes, 'Vote');

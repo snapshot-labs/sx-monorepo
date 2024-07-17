@@ -222,7 +222,7 @@ export class EthereumSig {
       space: data.space,
       proposal: data.proposal,
       choice,
-      reason: data.reason || '',
+      reason: '',
       app: '',
       metadata: ''
     };

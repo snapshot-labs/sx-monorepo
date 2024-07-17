@@ -140,8 +140,7 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice,
-      reason: string
+      choice: Choice
     ): Promise<any> {
       const data = {
         space: proposal.space.id,
@@ -151,8 +150,7 @@ export function createActions(
         authenticator: '',
         strategies: [],
         metadataUri: '',
-        privacy: proposal.privacy,
-        reason
+        privacy: proposal.privacy
       };
 
       return client.vote({
