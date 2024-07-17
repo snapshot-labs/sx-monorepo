@@ -27,7 +27,6 @@ const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const delegatesCount = ref(0);
-const delegates = ref<{ delegation: SpaceMetadataDelegation; delegate: Delegate }[]>([]);
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -80,7 +79,7 @@ async function loadUserActivity() {
 async function loadDelegates() {
   delegatesCount.value = 0;
 
-  delegates.value = (
+  const delegates = (
     await Promise.all(
       props.space.delegations.map(async delegation => {
         const { getDelegates } = useDelegates(
@@ -88,26 +87,23 @@ async function loadDelegates() {
           delegation.contractAddress as string
         );
 
-        return {
-          delegation,
-          delegate: (
-            await getDelegates({
-              orderBy: 'delegatedVotes',
-              orderDirection: 'asc',
-              skip: 0,
-              first: 1,
-              user: userId.value
-            })
-          )[0]
-        };
+        return (
+          await getDelegates({
+            orderBy: 'delegatedVotes',
+            orderDirection: 'asc',
+            skip: 0,
+            first: 1,
+            user: userId.value
+          })
+        )[0];
       })
     )
   )
     .flat()
-    .filter(d => d.delegate);
+    .filter(Boolean);
 
-  delegatesCount.value = delegates.value
-    .map(delegationData => delegationData.delegate.tokenHoldersRepresentedAmount || 0)
+  delegatesCount.value = delegates
+    .map(delegate => delegate.tokenHoldersRepresentedAmount || 0)
     .reduce((a, b) => a + b, 0);
 }
 
@@ -232,6 +228,6 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.na
         </router-link>
       </div>
     </div>
-    <router-view :user="user" :space="space" :delegates="delegates" />
+    <router-view :user="user" :space="space" />
   </div>
 </template>
