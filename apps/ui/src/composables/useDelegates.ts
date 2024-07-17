@@ -10,7 +10,7 @@ type ApiDelegate = {
   tokenHoldersRepresentedAmount: number;
 };
 
-type Delegate = ApiDelegate & {
+export type Delegate = ApiDelegate & {
   name: string | null;
   delegatorsPercentage: number;
   votesPercentage: number;

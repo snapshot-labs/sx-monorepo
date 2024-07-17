@@ -8,8 +8,9 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
-import type { Space, UserActivity } from '@/types';
+import type { Space, SpaceMetadataDelegation, UserActivity } from '@/types';
 import type { VotingPower, VotingPowerStatus } from '@/networks/types';
+import type { Delegate } from '@/composables/useDelegates';
 
 const props = defineProps<{ space: Space }>();
 
@@ -26,6 +27,7 @@ const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const delegatesCount = ref(0);
+const delegates = ref<{ delegation: SpaceMetadataDelegation; delegate: Delegate }[]>([]);
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -78,7 +80,7 @@ async function loadUserActivity() {
 async function loadDelegates() {
   delegatesCount.value = 0;
 
-  const delegates = (
+  delegates.value = (
     await Promise.all(
       props.space.delegations.map(async delegation => {
         const { getDelegates } = useDelegates(
@@ -86,19 +88,26 @@ async function loadDelegates() {
           delegation.contractAddress as string
         );
 
-        return getDelegates({
-          orderBy: 'delegatedVotes',
-          orderDirection: 'asc',
-          skip: 0,
-          first: 1,
-          user: userId.value
-        });
+        return {
+          delegation,
+          delegate: (
+            await getDelegates({
+              orderBy: 'delegatedVotes',
+              orderDirection: 'asc',
+              skip: 0,
+              first: 1,
+              user: userId.value
+            })
+          )[0]
+        };
       })
     )
-  ).flat();
+  )
+    .flat()
+    .filter(d => d.delegate);
 
-  delegatesCount.value = delegates
-    .map(delegates => delegates.tokenHoldersRepresentedAmount)
+  delegatesCount.value = delegates.value
+    .map(delegationData => delegationData.delegate.tokenHoldersRepresentedAmount || 0)
     .reduce((a, b) => a + b, 0);
 }
 
@@ -132,7 +141,7 @@ watch(
     if (isValidAddress(id)) {
       await usersStore.fetchUser(id);
       await loadUserActivity();
-      await loadDelegates();
+      loadDelegates();
       getVotingPower();
     }
 
@@ -223,6 +232,6 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.na
         </router-link>
       </div>
     </div>
-    <router-view :user="user" :space="space" />
+    <router-view :user="user" :space="space" :delegates="delegates" />
   </div>
 </template>
