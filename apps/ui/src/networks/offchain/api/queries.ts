@@ -232,3 +232,26 @@ export const USER_QUERY = gql`
     }
   }
 `;
+
+export const LEADERBOARD_QUERY = gql`
+  query (
+    $first: Int!
+    $skip: Int!
+    $orderBy: String
+    $orderDirection: OrderDirection!
+    $where: LeaderboardsWhere
+  ) {
+    leaderboards(
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      where: $where
+    ) {
+      user
+      space
+      proposalsCount
+      votesCount
+    }
+  }
+`;

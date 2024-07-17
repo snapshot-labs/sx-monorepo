@@ -10,7 +10,8 @@ import {
   VOTES_QUERY,
   ALIASES_QUERY,
   USER_QUERY,
-  STATEMENTS_QUERY
+  STATEMENTS_QUERY,
+  LEADERBOARD_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
@@ -423,13 +424,63 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         farcaster: user.farcaster || ''
       };
     },
-    loadUserActivities: async (): Promise<UserActivity[]> => {
-      // NOTE: leaderboard implementation is pending on offchain
-      return [];
+    loadUserActivities(userId: string): Promise<UserActivity[]> {
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: 1000,
+            skip: 0,
+            orderBy: 'proposal_count',
+            orderDirection: 'desc',
+            where: {
+              user: userId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            spaceId: `${networkId}:${leaderboard.space}`,
+            vote_count: leaderboard.votesCount,
+            proposal_count: leaderboard.proposalsCount
+          }))
+        );
     },
-    loadLeaderboard: async (): Promise<UserActivity[]> => {
-      // NOTE: leaderboard implementation is pending on offchain
-      return [];
+    loadLeaderboard(
+      spaceId: string,
+      { limit, skip = 0 }: PaginationOpts,
+      sortBy:
+        | 'vote_count-desc'
+        | 'vote_count-asc'
+        | 'proposal_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc'
+    ): Promise<UserActivity[]> {
+      const [orderBy, orderDirection] = sortBy.split('-') as [
+        'vote_count' | 'proposal_count',
+        'desc' | 'asc'
+      ];
+
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: limit,
+            skip,
+            orderBy,
+            orderDirection,
+            where: {
+              space: spaceId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            id: leaderboard.user,
+            spaceId: leaderboard.space,
+            vote_count: leaderboard.votesCount,
+            proposal_count: leaderboard.proposalsCount
+          }))
+        );
     },
     loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
       const {
