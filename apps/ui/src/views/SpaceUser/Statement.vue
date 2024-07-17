@@ -68,6 +68,10 @@ watch(userId, loadStatement, { immediate: true });
           class="text-skin-heading max-w-[592px]"
           :body="statement.statement"
         />
+        <div v-else class="flex items-center space-x-2">
+          <IH-exclamation-circle class="inline-block shrink-0" />
+          <span>This profile does not have statement.</span>
+        </div>
       </div>
     </template>
     <div v-else class="flex items-center space-x-2">
