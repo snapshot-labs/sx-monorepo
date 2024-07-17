@@ -114,11 +114,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
           <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex space-x-1">
             <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
-              <UiStamp :id="delegate.id" :size="32" />
+              <UiStamp :id="delegate.user" :size="32" />
               <router-link
                 :to="{
                   name: 'space-user-statement',
-                  params: { id: `${space.network}:${space.id}`, user: delegate.id }
+                  params: { id: `${space.network}:${space.id}`, user: delegate.user }
                 }"
                 class="overflow-hidden leading-[22px]"
               >
