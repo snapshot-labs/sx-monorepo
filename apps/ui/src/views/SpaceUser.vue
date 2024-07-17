@@ -25,6 +25,7 @@ const userActivity = ref<UserActivity>({ vote_count: 0, proposal_count: 0 } as U
 const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const delegatesCount = ref(0);
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -53,7 +54,7 @@ const formattedVotingPower = computed(() => {
 
 const navigation = computed(() => [
   { label: 'Statement', route: 'space-user-statement' },
-  { label: 'Delegators', route: 'space-user-delegators' },
+  { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
   { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
   { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
@@ -72,6 +73,33 @@ async function loadUserActivity() {
   );
 
   if (users[0]) userActivity.value = users[0];
+}
+
+async function loadDelegates() {
+  delegatesCount.value = 0;
+
+  const delegates = (
+    await Promise.all(
+      props.space.delegations.map(async delegation => {
+        const { getDelegates } = useDelegates(
+          delegation.apiUrl as string,
+          delegation.contractAddress as string
+        );
+
+        return getDelegates({
+          orderBy: 'delegatedVotes',
+          orderDirection: 'asc',
+          skip: 0,
+          first: 1,
+          user: userId.value
+        });
+      })
+    )
+  ).flat();
+
+  delegatesCount.value = delegates
+    .map(delegates => delegates.tokenHoldersRepresentedAmount)
+    .reduce((a, b) => a + b, 0);
 }
 
 async function getVotingPower() {
@@ -104,6 +132,7 @@ watch(
     if (isValidAddress(id)) {
       await usersStore.fetchUser(id);
       await loadUserActivity();
+      await loadDelegates();
       getVotingPower();
     }
 
