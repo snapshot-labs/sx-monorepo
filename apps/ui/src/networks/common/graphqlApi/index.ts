@@ -103,7 +103,8 @@ function processExecutions(
   // We should persist those values on proposal directly so it's stable.
   // Right now we can't really update subgraphs because of TheGraph issue.
 
-  if (!proposal.metadata.execution) return [];
+  const transactions = formatExecution(proposal.metadata.execution);
+  if (transactions.length === 0) return [];
 
   const match = proposal.space.metadata.executors_strategies.find(
     strategy => strategy.address === proposal.execution_strategy
@@ -134,7 +135,7 @@ function processExecutions(
       safeAddress: match?.treasury || '',
       safeName: matchingTreasury?.name || 'Unnamed treasury',
       networkId: matchingTreasury?.network || executionNetworkId,
-      transactions: formatExecution(proposal.metadata.execution)
+      transactions
     }
   ];
 }
