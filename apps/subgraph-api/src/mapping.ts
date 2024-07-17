@@ -26,6 +26,9 @@ import {
   ProposalValidationStrategyUpdated,
 } from '../generated/templates/Space/Space'
 import {
+  ContractDeployed,
+} from '../generated/templates/GeneralPurposeFactory/GeneralPurposeFactory'
+import {
   ProposalExecuted as TimelockProposalExecuted,
   ProposalVetoed as TimelockProposalVetoed,
 } from '../generated/templates/TimelockExecutionStrategy/TimelockExecutionStrategy'
@@ -735,4 +738,17 @@ export function handleTimelockProposalVetoed(event: TimelockProposalVetoed): voi
   proposal.vetoed = true
   proposal.veto_tx = event.transaction.hash
   proposal.save()
+}
+
+export function handleContractDeployed(event: ContractDeployed): void {
+  let network = dataSource.network()
+
+  const GENERIC_ERC20_VOTES = Address.fromString('0xa8ee539fdf1b86096da802366cd212c6ebd3d581') // wrong
+  const GENERIC_GOVERNOR = Address.fromString('0x6e4b442eb3b1cefdb97bfa2c5b1000a44fa4585e') // wrong
+
+  if (event.params.implementation.equals(GENERIC_ERC20_VOTES)) {
+    // TODO: Implement logic
+  } else if (event.params.implementation.equals(GENERIC_GOVERNOR)) {
+    // TODO: Implement logic
+  }
 }

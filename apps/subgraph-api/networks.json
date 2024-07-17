@@ -17,6 +17,10 @@
     "L1AvatarExecutionStrategyFactory": {
       "address": "0x27981a29ec87f2fbf873a2dcb0325405648ffce1",
       "startBlock": 6078978
+    },
+    "GeneralPurposeFactory": {
+      "address": "0x0f77c58bb8a75ed393123f9047e1787db637b251",
+      "startBlock": 6322178
     }
   },
   "optimism": {

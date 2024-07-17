@@ -222,3 +222,21 @@ templates:
         - event: ProposalExecuted(indexed uint256,uint256)
           handler: handleStarknetProposalExecuted
       file: ./src/starknet-mapping.ts
+  - name: GeneralPurposeFactory
+    kind: ethereum
+    network: sepolia
+    source:
+      abi: GeneralPurposeFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ContractDeployed
+      abis:
+        - name: GeneralPurposeFactory
+          file: ./abis/GeneralPurposeFactory.json
+      eventHandlers:
+        - event: ContractDeployed(address,address)
+          handler: handleContractDeployed
+      file: ./src/mapping.ts
