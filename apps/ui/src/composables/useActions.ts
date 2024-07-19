@@ -20,7 +20,12 @@ import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 const starknetNetworkId = (Object.keys(starknetNetworks) as NetworkID[])
   .filter(network => enabledNetworks.includes(network))
-  .pop() as NetworkID;
+  .find(id => {
+    return (
+      (offchainNetworkId === 's' && id === 'sn') ||
+      (offchainNetworkId === 's-tn' && id === 'sn-sep')
+    );
+  }) as NetworkID;
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
