@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
+import type { Space, NetworkID } from '@/types';
 
 const route = useRoute();
 const router = useRouter();
@@ -26,13 +27,16 @@ const SEARCH_CONFIG = {
 const loading = ref(false);
 const searchInput = ref();
 const searchValue = ref('');
+const breadcrumbSpace = ref<Space | null>(null);
 
 const { focused } = useFocus(searchInput);
+const spacesStore = useSpacesStore();
 
 const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 const searchConfig = computed(() => SEARCH_CONFIG[route.matched[0]?.name || '']);
+const showBreadcrumb = computed(() => route.matched[0]?.name === 'proposal');
 
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
@@ -62,6 +66,21 @@ watch(
   searchQuery => (searchValue.value = searchQuery),
   { immediate: true }
 );
+
+watch(
+  showBreadcrumb,
+  async show => {
+    breadcrumbSpace.value = null;
+
+    if (!show) return;
+
+    const [network, spaceId] = (route.params.space as string).split(':') as [NetworkID, string];
+    await spacesStore.fetchSpace(spaceId, network);
+
+    breadcrumbSpace.value = spacesStore.networksMap[network]?.spaces[spaceId];
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -72,7 +91,7 @@ watch(
     }"
   >
     <div
-      class="flex items-center justify-between h-[71px] px-4 bg-skin-bg"
+      class="flex items-center justify-between h-[71px] px-4 bg-skin-bg space-x-1"
       :class="{
         'lg:ml-[240px]': hasAppNav,
         'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasAppNav
@@ -95,6 +114,19 @@ watch(
             />
           </form>
         </div>
+        <template v-else-if="showBreadcrumb">
+          <router-link
+            v-if="breadcrumbSpace"
+            :to="{
+              name: 'space-overview',
+              params: { id: `${breadcrumbSpace.network}:${breadcrumbSpace.id}` }
+            }"
+            class="flex space-x-2.5 truncate text-[24px]"
+          >
+            <SpaceAvatar :space="breadcrumbSpace" :size="36" class="!rounded-[4px] shrink-0" />
+            <span class="truncate" v-text="breadcrumbSpace.name" />
+          </router-link>
+        </template>
         <router-link v-else :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
           snapshot
         </router-link>
