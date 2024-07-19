@@ -3,6 +3,7 @@ import { starknet } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
 import { handleProposalMetadata, handleVoteMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
+import { starknetNetworks } from '@snapshot-labs/sx';
 import {
   getCurrentTimestamp,
   dropIpfs,
@@ -26,10 +27,14 @@ export const handleSpaceDeployed: starknet.Writer = async ({ blockNumber, event,
 
   if (!event) return;
 
-  await instance.executeTemplate('Space', {
-    contract: event.contract_address,
-    start: blockNumber
-  });
+  const classHash = event.class_hash;
+
+  if (classHash === starknetNetworks.sn.Meta.masterSpace) {
+    await instance.executeTemplate('Space', {
+      contract: event.contract_address,
+      start: blockNumber
+    });
+  }
 };
 
 export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
