@@ -20,7 +20,7 @@ exports[`StarknetSig > should create propose envelope 1`] = `
     ],
   },
   "signatureData": {
-    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "address": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
     "message": {
       "author": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
       "executionStrategy": {
@@ -63,7 +63,7 @@ exports[`StarknetSig > should create update proposal envelope 1`] = `
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
   },
   "signatureData": {
-    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "address": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
     "message": {
       "author": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
       "executionStrategy": {
@@ -107,7 +107,7 @@ exports[`StarknetSig > should create vote envelope 1`] = `
     ],
   },
   "signatureData": {
-    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "address": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
     "message": {
       "choice": "0x1",
       "metadataUri": [],
