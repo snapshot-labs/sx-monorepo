@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
-import type { Space, NetworkID } from '@/types';
+import type { NetworkID } from '@/types';
 
 const route = useRoute();
 const router = useRouter();
 const auth = getInstance();
 const uiStore = useUiStore();
+const proposalsStore = useProposalsStore();
+const { param } = useRouteParser('space');
+const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { modalAccountOpen } = useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
@@ -27,16 +30,22 @@ const SEARCH_CONFIG = {
 const loading = ref(false);
 const searchInput = ref();
 const searchValue = ref('');
-const breadcrumbSpace = ref<Space | null>(null);
 
 const { focused } = useFocus(searchInput);
-const spacesStore = useSpacesStore();
 
 const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 const searchConfig = computed(() => SEARCH_CONFIG[route.matched[0]?.name || '']);
 const showBreadcrumb = computed(() => route.matched[0]?.name === 'proposal');
+const breadcrumbSpace = computed(() => {
+  if (!showBreadcrumb || !resolved.value || !spaceAddress.value || !networkId.value) {
+    return null;
+  }
+
+  return proposalsStore.getProposal(spaceAddress.value, route.params.id as string, networkId.value)
+    ?.space;
+});
 
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
@@ -64,21 +73,6 @@ function handleSearchSubmit(e: Event) {
 watch(
   () => (route.query.q as string) || '',
   searchQuery => (searchValue.value = searchQuery),
-  { immediate: true }
-);
-
-watch(
-  showBreadcrumb,
-  async show => {
-    breadcrumbSpace.value = null;
-
-    if (!show) return;
-
-    const [network, spaceId] = (route.params.space as string).split(':') as [NetworkID, string];
-    await spacesStore.fetchSpace(spaceId, network);
-
-    breadcrumbSpace.value = spacesStore.networksMap[network]?.spaces[spaceId];
-  },
   { immediate: true }
 );
 </script>
@@ -119,11 +113,15 @@ watch(
             v-if="breadcrumbSpace"
             :to="{
               name: 'space-overview',
-              params: { id: `${breadcrumbSpace.network}:${breadcrumbSpace.id}` }
+              params: { id: `${networkId}:${spaceAddress}` }
             }"
             class="flex space-x-2.5 truncate text-[24px]"
           >
-            <SpaceAvatar :space="breadcrumbSpace" :size="36" class="!rounded-[4px] shrink-0" />
+            <SpaceAvatar
+              :space="{ ...breadcrumbSpace, network: networkId as NetworkID }"
+              :size="36"
+              class="!rounded-[4px] shrink-0"
+            />
             <span class="truncate" v-text="breadcrumbSpace.name" />
           </router-link>
         </template>
