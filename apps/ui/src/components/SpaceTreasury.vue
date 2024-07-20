@@ -136,7 +136,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 <template>
   <div v-if="!treasury || !currentNetwork" class="p-4 flex items-center text-skin-link space-x-2">
     <IH-exclamation-circle class="inline-block shrink-0" />
-    No treasury configured.
+    <span>No treasury configured.</span>
   </div>
   <template v-else>
     <div class="p-4 space-x-2 flex">
