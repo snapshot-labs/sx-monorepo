@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { Choice, Proposal } from '@/types';
+import { Proposal } from '@/types';
 
 defineProps<{
-  sendingType: Choice | null;
   proposal: Proposal;
 }>();
 
@@ -30,7 +29,6 @@ const selectedChoice = ref<number | null>(null);
     <UiButton
       primary
       class="!h-[48px] w-full"
-      :loading="!!sendingType"
       :disabled="!selectedChoice"
       @click="emit('vote', selectedChoice!)"
     >

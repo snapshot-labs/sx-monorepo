@@ -210,7 +210,7 @@ export function useActions() {
     await wrapPromise(space.network, network.actions.setMetadata(auth.web3, space, metadata));
   }
 
-  async function vote(proposal: Proposal, choice: Choice) {
+  async function vote(proposal: Proposal, choice: Choice, reason: string) {
     if (!web3.value.account) return await forceLogin();
 
     const network = getNetwork(proposal.network);
@@ -222,7 +222,8 @@ export function useActions() {
         web3.value.type as Connector,
         web3.value.account,
         proposal,
-        choice
+        choice,
+        reason
       )
     );
 
