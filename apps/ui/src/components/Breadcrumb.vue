@@ -2,6 +2,7 @@
 import type { NetworkID } from '@/types';
 
 const route = useRoute();
+const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
@@ -12,9 +13,11 @@ const space = computed(() => {
   if (!show || !resolved.value || !spaceAddress.value || !networkId.value) {
     return null;
   }
-
-  return proposalsStore.getProposal(spaceAddress.value, route.params.id as string, networkId.value)
-    ?.space;
+  return (
+    spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`) ||
+    proposalsStore.getProposal(spaceAddress.value, route.params.id as string, networkId.value)
+      ?.space
+  );
 });
 </script>
 
