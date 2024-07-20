@@ -367,7 +367,7 @@ export function createActions(
       );
 
       let pinned: { cid: string; provider: string } | null = null;
-      pinned = await helpers.pin({ reason });
+      if (reason) pinned = await helpers.pin({ reason });
 
       const data = {
         space: proposal.space.id,
