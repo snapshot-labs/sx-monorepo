@@ -136,7 +136,7 @@ watch([sortBy, choiceFilter], () => {
       <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
     </button>
     <button
-      class="max-w-[144px] w-[144px] flex items-center hover:text-skin-link space-x-1 truncate"
+      class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('vp')"
     >
       <span class="truncate">Voting power</span>
@@ -242,7 +242,9 @@ watch([sortBy, choiceFilter], () => {
           <h4>{{ _rt(vote.created) }}</h4>
           <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
         </div>
-        <div class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate">
+        <div
+          class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center items-end truncate"
+        >
           <h4 class="text-skin-link">
             {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
             {{ proposal.space.voting_power_symbol }}
