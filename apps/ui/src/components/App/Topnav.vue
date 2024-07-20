@@ -84,7 +84,7 @@ watch(
         <form
           v-if="searchConfig"
           id="search-form"
-          class="flex flex-1 px-2 py-3 h-full"
+          class="flex flex-1 pr-2 py-3 h-full"
           @submit="handleSearchSubmit"
         >
           <label class="flex items-center w-full space-x-2.5">
