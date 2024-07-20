@@ -102,7 +102,7 @@ watch([sortBy, choiceFilter], () => {
   <div
     class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-1 font-medium"
   >
-    <div class="pl-4 max-w-[218px] w-[218px] truncate">Voter</div>
+    <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
     <div class="grow w-[40%] truncate">
       <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
       <UiSelectDropdown
