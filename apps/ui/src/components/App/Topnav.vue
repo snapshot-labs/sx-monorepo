@@ -6,7 +6,7 @@ const route = useRoute();
 const router = useRouter();
 const auth = getInstance();
 const uiStore = useUiStore();
-
+s;
 const { modalAccountOpen } = useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
