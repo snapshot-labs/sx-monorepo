@@ -168,25 +168,25 @@ watch([sortBy, choiceFilter], () => {
               : 'bg-skin-border opacity-40'
           "
         />
-        <div class="!ml-auto pl-4 py-3 max-w-[218px] w-[218px] flex items-center gap-x-3 truncate">
+
+        <router-link
+          :to="{
+            name: 'user',
+            params: {
+              id: vote.voter.id
+            }
+          }"
+          class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
+        >
           <UiStamp :id="vote.voter.id" :size="32" />
-          <router-link
-            :to="{
-              name: 'user',
-              params: {
-                id: vote.voter.id
-              }
-            }"
-            class="overflow-hidden leading-[22px]"
-          >
+          <div class="flex flex-col truncate">
             <h4 class="truncate" v-text="vote.voter.name || shortenAddress(vote.voter.id)" />
             <div
               class="text-[17px] text-skin-text truncate"
               v-text="shortenAddress(vote.voter.id)"
             />
-          </router-link>
-        </div>
-
+          </div>
+        </router-link>
         <div
           class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]"
           :class="{
