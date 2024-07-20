@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { shorten } from '@/helpers/utils';
-import type { NetworkID } from '@/types';
 
 const route = useRoute();
 const router = useRouter();
 const auth = getInstance();
 const uiStore = useUiStore();
-const proposalsStore = useProposalsStore();
-const { param } = useRouteParser('space');
-const { resolved, address: spaceAddress, networkId } = useResolve(param);
+
 const { modalAccountOpen } = useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
@@ -37,15 +34,6 @@ const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 const searchConfig = computed(() => SEARCH_CONFIG[route.matched[0]?.name || '']);
-const showBreadcrumb = computed(() => route.matched[0]?.name === 'proposal');
-const breadcrumbSpace = computed(() => {
-  if (!showBreadcrumb || !resolved.value || !spaceAddress.value || !networkId.value) {
-    return null;
-  }
-
-  return proposalsStore.getProposal(spaceAddress.value, route.params.id as string, networkId.value)
-    ?.space;
-});
 
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
@@ -108,26 +96,11 @@ watch(
             />
           </form>
         </div>
-        <template v-else-if="showBreadcrumb">
-          <router-link
-            v-if="breadcrumbSpace"
-            :to="{
-              name: 'space-overview',
-              params: { id: `${networkId}:${spaceAddress}` }
-            }"
-            class="flex space-x-2.5 truncate text-[24px]"
-          >
-            <SpaceAvatar
-              :space="{ ...breadcrumbSpace, network: networkId as NetworkID }"
-              :size="36"
-              class="!rounded-[4px] shrink-0"
-            />
-            <span class="truncate" v-text="breadcrumbSpace.name" />
+        <Breadcrumb>
+          <router-link :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
+            snapshot
           </router-link>
-        </template>
-        <router-link v-else :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
-          snapshot
-        </router-link>
+        </Breadcrumb>
       </div>
       <div :key="web3.account" class="flex">
         <UiButton v-if="loading || web3.authLoading" loading class="!px-0 w-[46px]" />
