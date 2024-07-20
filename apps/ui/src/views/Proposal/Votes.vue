@@ -72,7 +72,7 @@ async function handleEndReached() {
   loadingMore.value = false;
 }
 
-function handleVoteClick(vote: Vote | null) {
+function handleChoiceClick(vote: Vote | null) {
   if (!vote?.reason) return;
 
   selectedVote.value = vote;
@@ -192,7 +192,7 @@ watch([sortBy, choiceFilter], () => {
           :class="{
             'cursor-pointer': vote.reason
           }"
-          @click="handleVoteClick(vote)"
+          @click="handleChoiceClick(vote)"
         >
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
