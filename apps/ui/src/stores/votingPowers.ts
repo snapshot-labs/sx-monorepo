@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
 import { utils } from '@snapshot-labs/sx';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork } from '@/networks';
 import type { Proposal, Space } from '@/types';
 import type { VotingPower, VotingPowerStatus } from '@/networks/types';
+
+const LATEST_BLOCK_NAME = 'latest';
 
 type VotingPowerItem = {
   votingPowers: VotingPower[];
@@ -14,19 +16,17 @@ type VotingPowerItem = {
 };
 
 export const useVotingPowersStore = defineStore('votingPowers', () => {
-  const { getCurrent } = useMetaStore();
-
   const votingPowers = reactive<Map<string, VotingPowerItem>>(new Map());
 
-  function getIndex(space: Space, block: string | number) {
-    return `${space.id}:${block}`;
+  function getIndex(space: Space, block: number | null): string {
+    return `${space.id}:${block ?? LATEST_BLOCK_NAME}`;
   }
 
-  function get(space: Space, block: string | number = 'latest') {
+  function get(space: Space, block: number | null): VotingPowerItem | undefined {
     return votingPowers.get(getIndex(space, block));
   }
 
-  async function fetch(item: Space | Proposal, account: string, block: string | number = 'latest') {
+  async function fetch(item: Space | Proposal, account: string, block: number | null) {
     const space: Space = 'space' in item ? (item.space as Space) : item;
 
     const existingVotingPower = get(space, block);
@@ -56,7 +56,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
         space.strategies_parsed_metadata,
         account,
         {
-          at: supportsNullCurrent(item.network) ? null : getCurrent(item.network) || 0,
+          at: block,
           chainId: space.snapshot_chain_id
         }
       );
