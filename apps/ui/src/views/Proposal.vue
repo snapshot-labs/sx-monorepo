@@ -12,7 +12,7 @@ const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
-const { loadVotes } = useAccount();
+const { loadVotes, votes } = useAccount();
 const { vote } = useActions();
 
 const sendingType = ref<Choice | null>(null);
@@ -43,6 +43,10 @@ const votingPowerDecimals = computed(() => {
     0
   );
 });
+
+const hasVoted = computed(
+  () => proposal.value && votes.value[`${proposal.value.network}:${proposal.value.id}`]
+);
 
 async function getVotingPower() {
   if (!network.value) return;
@@ -169,11 +173,17 @@ watchEffect(() => {
       >
         <div v-if="!proposal.cancelled && ['pending', 'active'].includes(proposal.state)">
           <h4 class="mb-2 eyebrow flex items-center">
-            <IH-cursor-click class="inline-block mr-2" />
-            <span>Cast your vote</span>
+            <template v-if="hasVoted">
+              <IH-check-circle class="inline-block mr-2" />
+              <span>Your vote</span>
+            </template>
+            <template v-else>
+              <IH-cursor-click class="inline-block mr-2" />
+              <span>Cast your vote</span>
+            </template>
           </h4>
           <IndicatorVotingPower
-            v-if="web3.account && networkId"
+            v-if="web3.account && networkId && !hasVoted"
             v-slot="props"
             :network-id="networkId"
             :status="votingPowerStatus"
