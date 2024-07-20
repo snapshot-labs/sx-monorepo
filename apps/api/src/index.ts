@@ -59,7 +59,7 @@ async function run() {
     await sleep(PRODUCTION_INDEXER_DELAY);
   }
 
-  await checkpoint.reset();
+  // await checkpoint.reset();
   checkpoint.start();
 }
 

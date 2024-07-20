@@ -1,37 +1,82 @@
 <script setup lang="ts">
+import { explorePageProtocols } from '../../networks';
+import { ExplorePageProtocol, ProtocolConfig } from '../../networks/types';
+
 useTitle('My spaces');
 
+const protocols = Object.values(explorePageProtocols).map(({ key, label }: ProtocolConfig) => ({
+  key,
+  label
+}));
+const DEFAULT_PROTOCOL = 'snapshot';
+
+const spacesStore = useSpacesStore();
+const route = useRoute();
+const router = useRouter();
 const { web3 } = useWeb3();
-const { loading: spacesLoading, spaces, fetch } = useSpaces();
 
 const loaded = ref(false);
 
+const loading = computed(
+  () => !loaded || (web3.value.account && spacesStore.loading) || web3.value.authLoading
+);
+
 watch(
-  () => web3.value.account,
-  async controller => {
+  () => spacesStore.protocol,
+  value => {
+    router.push({ query: { ...route.query, p: value } });
+  }
+);
+
+watch(
+  [() => route.query.p as string, () => web3.value.account],
+  ([protocolQuery, controller]) => {
     loaded.value = false;
 
-    controller && (await fetch({ controller }));
+    const _protocol = (
+      explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
+    ) as ExplorePageProtocol;
+
+    spacesStore.protocol = _protocol;
+    if (controller) {
+      spacesStore.fetch({ controller });
+    } else {
+      spacesStore.explorePageSpaces = [];
+    }
 
     loaded.value = true;
   },
-  { immediate: true }
+  {
+    immediate: true
+  }
 );
 </script>
 
 <template>
-  <UiContainer class="!max-w-screen-md pt-5">
-    <h2 class="mb-4 mono !text-xl" v-text="'My spaces'" />
-    <UiLoading v-if="!loaded || spacesLoading || web3.authLoading" />
-    <div
-      v-else-if="!spaces.length || !web3.account"
-      class="flex items-center text-skin-link space-x-2"
-    >
-      <IH-exclamation-circle class="inline-block shrink-0" />
-      <span v-text="'There are no spaces here.'" />
+  <div class="flex justify-between">
+    <div class="flex flex-row p-4 space-x-2">
+      <UiSelectDropdown
+        v-model="spacesStore.protocol"
+        title="Protocol"
+        gap="12px"
+        placement="left"
+        :items="protocols"
+      />
     </div>
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-      <SpacesListItem v-for="space in spaces" :key="space.id" :space="space" />
+  </div>
+  <UiLabel label="My spaces" sticky />
+  <UiLoading v-if="loading" class="block m-4" />
+  <UiContainer v-else-if="spacesStore.explorePageSpaces.length" class="!max-w-screen-md pt-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+      <SpacesListItem
+        v-for="space in spacesStore.explorePageSpaces"
+        :key="space.id"
+        :space="space"
+      />
     </div>
   </UiContainer>
+  <div v-else class="px-4 py-3 flex items-center space-x-2">
+    <IH-exclamation-circle class="inline-block shrink-0" />
+    <span v-text="'There are no spaces here.'" />
+  </div>
 </template>

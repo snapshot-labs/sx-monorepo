@@ -9,11 +9,15 @@ import {
   USER_FOLLOWS_QUERY,
   VOTES_QUERY,
   ALIASES_QUERY,
-  USER_QUERY
+  USER_QUERY,
+  LEADERBOARD_QUERY
 } from './queries';
 import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { clone } from '@/helpers/utils';
+import { parseOSnapTransaction } from '@/helpers/osnap';
+import { DEFAULT_VOTING_DELAY } from '../constants';
 import {
   Space,
   Proposal,
@@ -24,11 +28,10 @@ import {
   SpaceMetadataTreasury,
   Follow,
   Alias,
-  UserActivity
+  UserActivity,
+  ProposalExecution
 } from '@/types';
 import { ApiSpace, ApiProposal, ApiVote } from './types';
-import { DEFAULT_VOTING_DELAY } from '../constants';
-import { clone } from '@/helpers/utils';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -126,6 +129,27 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
 }
 
 function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
+  let executions = [] as ProposalExecution[];
+
+  if (proposal.plugins.oSnap) {
+    const chainIdToNetworkId = Object.fromEntries(
+      Object.entries(CHAIN_IDS).map(([k, v]) => [v, k])
+    );
+
+    try {
+      executions = proposal.plugins.oSnap.safes.map(safe => {
+        return {
+          safeName: safe.safeName,
+          safeAddress: safe.safeAddress,
+          networkId: chainIdToNetworkId[Number(safe.network)],
+          transactions: safe.transactions.map(transaction => parseOSnapTransaction(transaction))
+        };
+      });
+    } catch (e) {
+      console.warn('failed to parse oSnap execution', e);
+    }
+  }
+
   return {
     id: proposal.id,
     network: networkId,
@@ -139,6 +163,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     title: proposal.title,
     body: proposal.body,
     discussion: proposal.discussion,
+    executions,
     created: proposal.created,
     edited: proposal.updated,
     start: proposal.start,
@@ -148,8 +173,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     quorum: proposal.quorum,
     quorum_type: proposal.quorumType,
     choices: proposal.choices,
-    scores: proposal.scores,
-    scores_total: proposal.scores_total,
+    scores: proposal.scores.map(v => Math.floor(v)),
+    scores_total: Math.floor(proposal.scores_total),
     vote_count: proposal.votes,
     state: getProposalState(proposal),
     cancelled: false,
@@ -172,7 +197,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     // NOTE: ignored
     execution_network: networkId,
     execution_ready: false,
-    execution: [],
     execution_hash: '',
     execution_time: 0,
     execution_strategy: '',
@@ -399,13 +423,63 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         farcaster: user.farcaster || ''
       };
     },
-    loadUserActivities: async (): Promise<UserActivity[]> => {
-      // NOTE: leaderboard implementation is pending on offchain
-      return [];
+    loadUserActivities(userId: string): Promise<UserActivity[]> {
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: 1000,
+            skip: 0,
+            orderBy: 'proposal_count',
+            orderDirection: 'desc',
+            where: {
+              user: userId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            spaceId: `${networkId}:${leaderboard.space}`,
+            vote_count: leaderboard.votesCount,
+            proposal_count: leaderboard.proposalsCount
+          }))
+        );
     },
-    loadLeaderboard: async (): Promise<UserActivity[]> => {
-      // NOTE: leaderboard implementation is pending on offchain
-      return [];
+    loadLeaderboard(
+      spaceId: string,
+      { limit, skip = 0 }: PaginationOpts,
+      sortBy:
+        | 'vote_count-desc'
+        | 'vote_count-asc'
+        | 'proposal_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc'
+    ): Promise<UserActivity[]> {
+      const [orderBy, orderDirection] = sortBy.split('-') as [
+        'vote_count' | 'proposal_count',
+        'desc' | 'asc'
+      ];
+
+      return apollo
+        .query({
+          query: LEADERBOARD_QUERY,
+          variables: {
+            first: limit,
+            skip,
+            orderBy,
+            orderDirection,
+            where: {
+              space: spaceId
+            }
+          }
+        })
+        .then(({ data }) =>
+          data.leaderboards.map((leaderboard: any) => ({
+            id: leaderboard.user,
+            spaceId: leaderboard.space,
+            vote_count: leaderboard.votesCount,
+            proposal_count: leaderboard.proposalsCount
+          }))
+        );
     },
     loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
       const {

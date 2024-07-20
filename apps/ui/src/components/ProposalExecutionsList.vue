@@ -1,13 +1,48 @@
 <script setup lang="ts">
-import { Transaction as TransactionType } from '@/types';
+import { sanitizeUrl, shorten } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
+import { NetworkID, ProposalExecution } from '@/types';
 
-defineProps<{ txs: TransactionType[] }>();
+defineProps<{ executions: ProposalExecution[] }>();
+
+function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
+  if (!safeAddress) return null;
+
+  try {
+    const network = getNetwork(networkId);
+
+    const url = network.helpers.getExplorerUrl(safeAddress, 'address');
+    return sanitizeUrl(url);
+  } catch (e) {
+    return null;
+  }
+}
 </script>
 
 <template>
-  <div v-if="txs.length > 0" class="x-block !border-x rounded-lg">
+  <div
+    v-for="execution in executions"
+    :key="`${execution.networkId}:${execution.safeAddress}`"
+    class="x-block !border-x rounded-lg mb-3 last:mb-0"
+  >
+    <a
+      :href="getTreasuryExplorerUrl(execution.networkId, execution.safeAddress) || undefined"
+      target="_blank"
+      class="flex justify-between items-center px-4 py-3 border-b"
+      :class="{
+        'pointer-events-none': !getTreasuryExplorerUrl(execution.networkId, execution.safeAddress)
+      }"
+    >
+      <UiBadgeNetwork :id="execution.networkId" class="mr-3">
+        <UiStamp :id="execution.safeAddress" type="avatar" :size="32" class="rounded-md" />
+      </UiBadgeNetwork>
+      <div class="flex-1 leading-[22px]">
+        <h4 class="text-skin-link" v-text="execution.safeName || shorten(execution.safeAddress)" />
+        <div class="text-skin-text text-[17px]" v-text="shorten(execution.safeAddress)" />
+      </div>
+    </a>
     <TransactionsListItem
-      v-for="(tx, i) in txs"
+      v-for="(tx, i) in execution.transactions"
       :key="i"
       :tx="tx"
       class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"

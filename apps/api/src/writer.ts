@@ -468,6 +468,7 @@ export const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) 
     console.log('failed to update proposal metadata', e);
   }
 
+  /*
   const executionStrategy = await handleExecutionStrategy(
     event.proposal.execution_strategy,
     event.payload
@@ -476,6 +477,7 @@ export const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) 
     proposal.execution_strategy_type = executionStrategy.executionStrategyType;
     proposal.quorum = executionStrategy.quorum;
   }
+  */
 
   await proposal.save();
 };
