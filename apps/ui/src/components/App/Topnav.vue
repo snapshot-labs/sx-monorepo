@@ -95,7 +95,7 @@ watch(
             />
           </form>
         </div>
-        <Breadcrumb>
+        <Breadcrumb v-else>
           <router-link :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
             snapshot
           </router-link>
