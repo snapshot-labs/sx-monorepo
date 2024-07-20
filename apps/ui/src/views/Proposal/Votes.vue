@@ -254,7 +254,9 @@ watch([sortBy, choiceFilter], () => {
         <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
           <UiDropdown>
             <template #button>
-              <IH-dots-horizontal class="text-skin-link" />
+              <UiButton class="!p-0 border-0 !h-[auto]">
+                <IH-dots-horizontal class="text-skin-link" />
+              </UiButton>
             </template>
             <template #items>
               <UiDropdownItem v-slot="{ active }">
