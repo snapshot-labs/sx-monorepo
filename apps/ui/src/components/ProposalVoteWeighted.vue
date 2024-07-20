@@ -3,6 +3,7 @@ import { _p, getChoiceWeight } from '@/helpers/utils';
 import { Choice, Proposal } from '@/types';
 
 defineProps<{
+  sendingType: Choice | null;
   proposal: Proposal;
 }>();
 
@@ -81,7 +82,12 @@ watch(
         ></div>
       </div>
     </div>
-    <UiButton primary class="!h-[48px] w-full" @click="$emit('vote', selectedChoices)">
+    <UiButton
+      primary
+      class="!h-[48px] w-full"
+      :loading="!!sendingType"
+      @click="$emit('vote', selectedChoices)"
+    >
       Vote
     </UiButton>
   </div>

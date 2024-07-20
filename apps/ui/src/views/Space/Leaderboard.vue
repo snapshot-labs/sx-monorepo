@@ -167,7 +167,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
         >
           <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
           <div class="text-[17px]">
-            {{ _p(user.vote_count / space.vote_count) }}
+            {{ _p(user.vote_count / space.proposal_count) }}
           </div>
         </div>
       </div>

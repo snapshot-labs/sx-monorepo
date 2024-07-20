@@ -1,22 +1,26 @@
 <script setup lang="ts">
-import { offchainNetworks } from '@/networks';
-import { getStampUrl, getCacheHash, sanitizeUrl, getFormattedVotingPower } from '@/helpers/utils';
-import type { Choice } from '@/types';
+import { utils } from '@snapshot-labs/sx';
+import { getNetwork, offchainNetworks } from '@/networks';
+import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
+import { Choice } from '@/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const route = useRoute();
-const proposalsStore = useProposalsStore();
-const { votingPower, fetch: fetchVotingPower, reset: resetVotingPower } = useVotingPower();
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
+const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
-const { modalAccountOpen } = useModal();
+const { vote } = useActions();
 
-const modalOpenVote = ref(false);
-const selectedChoice = ref<Choice | null>(null);
+const sendingType = ref<Choice | null>(null);
+const votingPowers = ref([] as VotingPower[]);
+const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
 
+const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
 const proposal = computed(() => {
   if (!resolved.value || !spaceAddress.value || !networkId.value) {
@@ -40,44 +44,60 @@ const votingPowerDecimals = computed(() => {
   );
 });
 
-async function handleVoteClick(choice: Choice) {
-  if (!web3.value.account) return (modalAccountOpen.value = true);
+async function getVotingPower() {
+  if (!network.value) return;
 
-  selectedChoice.value = choice;
-  modalOpenVote.value = true;
-}
+  votingPowerDetailsError.value = null;
 
-async function handleVoteSubmitted() {
-  if (!proposal.value) return;
+  if (!web3.value.account || !proposal.value) {
+    votingPowers.value = [];
+    votingPowerStatus.value = 'success';
+    return;
+  }
 
-  selectedChoice.value = null;
+  votingPowerStatus.value = 'loading';
+  try {
+    votingPowers.value = await network.value.actions.getVotingPower(
+      proposal.value.space.id,
+      proposal.value.strategies,
+      proposal.value.strategies_params,
+      proposal.value.space.strategies_parsed_metadata,
+      web3.value.account,
+      {
+        at: proposal.value.state === 'pending' ? null : proposal.value.snapshot,
+        chainId: proposal.value.space.snapshot_chain_id
+      }
+    );
+    votingPowerStatus.value = 'success';
+  } catch (e: unknown) {
+    if (e instanceof utils.errors.VotingPowerDetailsError) {
+      votingPowerDetailsError.value = e;
+    } else {
+      console.warn('Failed to load voting power', e);
+    }
 
-  // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-  if (offchainNetworks.includes(proposal.value.network)) {
-    proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
+    votingPowers.value = [];
+    votingPowerStatus.value = 'error';
   }
 }
 
-function handleFetchVotingPower() {
+async function handleVoteClick(choice: Choice) {
   if (!proposal.value) return;
 
-  fetchVotingPower(proposal.value);
+  sendingType.value = choice;
+
+  try {
+    await vote(proposal.value, choice);
+    // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+    if (offchainNetworks.includes(proposal.value.network)) {
+      proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
+    }
+  } finally {
+    sendingType.value = null;
+  }
 }
 
-watch(
-  [proposal, () => web3.value.account, () => web3.value.authLoading],
-  ([toProposal, toAccount, toAuthLoading], [, fromAccount, , ,]) => {
-    if (fromAccount && toAccount && fromAccount !== toAccount) {
-      resetVotingPower();
-    }
-
-    if (toAuthLoading || !toProposal || !toAccount) return;
-
-    handleFetchVotingPower();
-  },
-  { immediate: true }
-);
-
+watch([() => web3.value.account, proposal], () => getVotingPower());
 watch(
   [networkId, spaceAddress, id],
   async ([networkId, spaceAddress, id]) => {
@@ -156,15 +176,16 @@ watchEffect(() => {
             v-if="web3.account && networkId"
             v-slot="props"
             :network-id="networkId"
-            :voting-power="votingPower"
+            :status="votingPowerStatus"
+            :voting-power-symbol="proposal.space.voting_power_symbol"
+            :voting-powers="votingPowers"
             class="mb-2 flex items-center"
-            @fetch-voting-power="handleFetchVotingPower"
+            @get-voting-power="getVotingPower"
           >
             <div
               v-if="
-                votingPower &&
-                votingPower.error?.details === 'NOT_READY_YET' &&
-                ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPower.error.source)
+                votingPowerDetailsError?.details === 'NOT_READY_YET' &&
+                ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPowerDetailsError.source)
               "
             >
               <span class="inline-flex align-top h-[27px] items-center">
@@ -175,17 +196,15 @@ watchEffect(() => {
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
               <a @click="props.onClick">
-                <UiLoading v-if="!votingPower || votingPower.status === 'loading'" />
+                <UiLoading v-if="votingPowerStatus === 'loading'" />
                 <IH-exclamation
-                  v-else-if="votingPower.status === 'error'"
+                  v-else-if="votingPowerStatus === 'error'"
                   class="inline-block text-rose-500"
                 />
-                <span v-else class="text-skin-link" v-text="getFormattedVotingPower(votingPower)" />
+                <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
               </a>
               <a
-                v-if="
-                  votingPower?.status === 'success' && votingPower.totalVotingPower === BigInt(0)
-                "
+                v-if="votingPowerStatus === 'success' && props.votingPower === BigInt(0)"
                 href="https://help.snapshot.org/en/articles/9566904-why-do-i-have-0-voting-power"
                 target="_blank"
                 class="ml-1.5"
@@ -195,25 +214,33 @@ watchEffect(() => {
             </template>
           </IndicatorVotingPower>
           <ProposalVote v-if="proposal" :proposal="proposal">
-            <ProposalVoteBasic v-if="proposal.type === 'basic'" @vote="handleVoteClick" />
+            <ProposalVoteBasic
+              v-if="proposal.type === 'basic'"
+              :sending-type="sendingType"
+              @vote="handleVoteClick"
+            />
             <ProposalVoteSingleChoice
               v-else-if="proposal.type === 'single-choice'"
               :proposal="proposal"
+              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
               :proposal="proposal"
+              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
             <ProposalVoteRankedChoice
               v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
+              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
             <ProposalVoteWeighted
               v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
               :proposal="proposal"
+              :sending-type="sendingType"
               @vote="handleVoteClick"
             />
           </ProposalVote>
@@ -228,15 +255,5 @@ watchEffect(() => {
         </div>
       </div>
     </template>
-    <teleport to="#modal">
-      <ModalVote
-        v-if="proposal && selectedChoice"
-        :choice="selectedChoice"
-        :proposal="proposal"
-        :open="modalOpenVote"
-        @close="modalOpenVote = false"
-        @voted="handleVoteSubmitted"
-      />
-    </teleport>
   </div>
 </template>

@@ -81,7 +81,6 @@ describe('StarknetSig', () => {
             index: 0
           }
         ],
-        metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
         proposal: 1,
         choice: 1
       }
