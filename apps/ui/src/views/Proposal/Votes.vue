@@ -289,6 +289,13 @@ watch([sortBy, choiceFilter], () => {
     </UiContainerInfiniteScroll>
   </template>
   <teleport to="#modal">
-    <ModalVoteReason :open="modalOpen" :vote="selectedVote" @close="modalOpen = false" />
+    <ModalVoteReason
+      :open="modalOpen"
+      :vote="selectedVote"
+      @close="
+        modalOpen = false;
+        selectedVote = null;
+      "
+    />
   </teleport>
 </template>
