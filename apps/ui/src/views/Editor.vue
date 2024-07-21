@@ -66,11 +66,11 @@ const proposalKey = computed(() => {
   const key = route.params.key as string;
   return `${networkId.value}:${address.value}:${key}`;
 });
-const proposal = computedAsync(async () => {
+const proposal = computed(() => {
   if (!proposalKey.value || !networkId.value) return null;
 
   if (!proposals[proposalKey.value]) {
-    await createDraft(`${networkId.value}:${address.value}`, undefined, route.params.key as string);
+    createDraft(`${networkId.value}:${address.value}`, undefined, route.params.key as string);
   }
 
   return proposals[proposalKey.value];
@@ -293,7 +293,7 @@ const handleRouteChange: NavigationGuard = async to => {
   const resolved = await resolver.resolveName(to.params.id as string);
   if (!resolved) return false;
 
-  const draftId = await createDraft(`${resolved.networkId}:${resolved.address}`);
+  const draftId = createDraft(`${resolved.networkId}:${resolved.address}`);
 
   return {
     ...to,
