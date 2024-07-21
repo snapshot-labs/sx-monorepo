@@ -10,7 +10,6 @@ import {
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import type { Space, UserActivity } from '@/types';
 import type { VotingPower, VotingPowerStatus } from '@/networks/types';
-import type { Delegate } from '@/composables/useDelegates';
 
 const props = defineProps<{ space: Space }>();
 
