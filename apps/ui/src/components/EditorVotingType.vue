@@ -40,11 +40,11 @@ function handleVoteTypeSelected(type: VoteType) {
     <h4 class="eyebrow mb-2.5">Voting type</h4>
     <button
       type="button"
-      class="border rounded-xl py-2.5 px-3 flex gap-3 text-left relative border-skin-content w-full"
+      class="border rounded-xl py-2.5 px-3 flex text-left relative border-skin-content w-full"
       :class="{ 'border-skin-border cursor-not-allowed': !hasMultipleVotingType }"
       @click="handleVotingTypeClick"
     >
-      <h4 class="text-skin-link">{{ activeVotingType.label }}</h4>
+      <h4 class="text-skin-link mr-3">{{ activeVotingType.label }}</h4>
       <div
         v-if="hasMultipleVotingType"
         class="w-[20px] text-right text-skin-link absolute right-3 top-3"
