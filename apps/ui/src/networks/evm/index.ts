@@ -74,10 +74,10 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   const { name, chainId, currentChainId, apiUrl, avatar } = METADATA[networkId];
 
   const provider = getProvider(chainId);
-  const api = createApi(apiUrl, networkId, {
+  const constants = createConstants(networkId);
+  const api = createApi(apiUrl, networkId, constants, {
     highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
   });
-  const constants = createConstants(networkId);
 
   const helpers = {
     isAuthenticatorSupported: (authenticator: string) =>
@@ -88,7 +88,6 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       constants.RELAYER_AUTHENTICATORS[authenticator],
     isStrategySupported: (strategy: string) => constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
-    isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinGraph,
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),

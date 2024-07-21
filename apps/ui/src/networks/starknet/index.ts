@@ -50,10 +50,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     metadata;
 
   const provider = createProvider(rpcUrl);
-  const api = createApi(apiUrl, networkId, {
+  const constants = createConstants(networkId, baseNetworkId, baseChainId);
+  const api = createApi(apiUrl, networkId, constants, {
     baseNetworkId
   });
-  const constants = createConstants(networkId, baseNetworkId, baseChainId);
 
   const helpers = {
     isAuthenticatorSupported: (authenticator: string) =>
@@ -64,7 +64,6 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.RELAYER_AUTHENTICATORS[authenticator],
     isStrategySupported: (strategy: string) => constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
-    isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
     getTransaction: txId => provider.getTransactionReceipt(txId),
     waitForTransaction: txId => {

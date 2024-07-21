@@ -12,7 +12,13 @@ import {
   USER_QUERY,
   LEADERBOARD_QUERY
 } from './queries';
-import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
+import {
+  PaginationOpts,
+  SpacesFilter,
+  NetworkApi,
+  ProposalsFilter,
+  NetworkConstants
+} from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
@@ -50,7 +56,7 @@ function getProposalState(proposal: ApiProposal): ProposalState {
   return proposal.state;
 }
 
-function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
+function formatSpace(space: ApiSpace, networkId: NetworkID, constants: NetworkConstants): Space {
   const treasuries = space.treasuries
     .map(treasury => {
       return {
@@ -94,6 +100,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     follower_count: space.followersCount,
     voting_power_symbol: space.symbol,
     voting_delay: space.voting.delay ?? 0,
+    voting_types: space.voting.type ? [space.voting.type] : constants.EDITOR_VOTING_TYPES,
     min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
@@ -231,7 +238,11 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-export function createApi(uri: string, networkId: NetworkID): NetworkApi {
+export function createApi(
+  uri: string,
+  networkId: NetworkID,
+  constants: NetworkConstants
+): NetworkApi {
   const httpLink = createHttpLink({ uri });
 
   const apollo = new ApolloClient({
@@ -370,7 +381,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
             where: filter?.searchQuery ? { search: filter.searchQuery } : {}
           }
         });
-        return data.ranking.items.map(space => formatSpace(space, networkId));
+        return data.ranking.items.map(space => formatSpace(space, networkId, constants));
       }
 
       const { data } = await apollo.query({
@@ -384,7 +395,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
@@ -395,7 +406,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       if (!data.space) return null;
       if (data.space.metadata === null) return null;
 
-      return formatSpace(data.space, networkId);
+      return formatSpace(data.space, networkId, constants);
     },
     loadUser: async (id: string): Promise<User> => {
       let {

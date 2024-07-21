@@ -4,7 +4,7 @@ import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { getUrl, shorten } from '@/helpers/utils';
 import { pinGraph } from '@/helpers/pin';
-import { NetworkID, StrategyParsedMetadata } from '@/types';
+import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import type { StrategyConfig } from '../types';
 
 import IHCode from '~icons/heroicons-outline/code';
@@ -631,7 +631,7 @@ export function createConstants(networkId: NetworkID) {
     }
   ];
 
-  const EDITOR_VOTING_TYPES = ['basic'];
+  const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
     SUPPORTED_AUTHENTICATORS,

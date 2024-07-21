@@ -21,7 +21,13 @@ import {
   mixinHighlightVotes,
   joinHighlightUser
 } from './highlight';
-import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
+import {
+  PaginationOpts,
+  SpacesFilter,
+  NetworkApi,
+  ProposalsFilter,
+  NetworkConstants
+} from '@/networks/types';
 import { getNames } from '@/helpers/stamp';
 import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
 import {
@@ -140,7 +146,7 @@ function processExecutions(
   ];
 }
 
-function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
+function formatSpace(space: ApiSpace, networkId: NetworkID, constants: NetworkConstants): Space {
   return {
     ...space,
     network: networkId,
@@ -155,6 +161,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     voting_power_symbol: space.metadata.voting_power_symbol,
+    voting_types: constants.EDITOR_VOTING_TYPES,
     treasuries: space.metadata.treasuries.map(treasury => {
       const { name, network, address } = JSON.parse(treasury);
 
@@ -235,7 +242,12 @@ function formatProposal(
   };
 }
 
-export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = {}): NetworkApi {
+export function createApi(
+  uri: string,
+  networkId: NetworkID,
+  constants: NetworkConstants,
+  opts: ApiOptions = {}
+): NetworkApi {
   const httpLink = createHttpLink({ uri });
 
   const apollo = new ApolloClient({
@@ -471,7 +483,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
         });
       }
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
@@ -489,7 +501,7 @@ export function createApi(uri: string, networkId: NetworkID, opts: ApiOptions = 
 
       data.space = joinHighlightSpace(data.space, highlightResult?.data.sxspace);
 
-      return formatSpace(data.space, networkId);
+      return formatSpace(data.space, networkId, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
       const [{ data }, highlightResult] = await Promise.all([

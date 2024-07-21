@@ -24,7 +24,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const hubUrl = HUB_URLS[networkId];
   if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);
 
-  const api = createApi(hubUrl, networkId);
+  const api = createApi(hubUrl, networkId, constants);
 
   const helpers = {
     isAuthenticatorSupported: () => true,
@@ -32,7 +32,6 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     getRelayerAuthenticatorType: () => null,
     isStrategySupported: () => true,
     isExecutorSupported: () => false,
-    isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
     getTransaction: () => {
       throw new Error('Not implemented');

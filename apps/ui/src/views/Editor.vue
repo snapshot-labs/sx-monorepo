@@ -66,16 +66,11 @@ const proposalKey = computed(() => {
   const key = route.params.key as string;
   return `${networkId.value}:${address.value}:${key}`;
 });
-const proposal = computed(() => {
+const proposal = computedAsync(async () => {
   if (!proposalKey.value || !networkId.value) return null;
 
   if (!proposals[proposalKey.value]) {
-    createDraft(
-      networkId.value,
-      `${networkId.value}:${address.value}`,
-      undefined,
-      route.params.key as string
-    );
+    await createDraft(`${networkId.value}:${address.value}`, undefined, route.params.key as string);
   }
 
   return proposals[proposalKey.value];
@@ -139,12 +134,6 @@ const extraContacts = computed(() => {
   if (!space.value) return [];
 
   return space.value.treasuries as Contact[];
-});
-const votingTypes = computed(() => {
-  const networkValue = network.value;
-  if (!networkValue) return null;
-
-  return SUPPORTED_VOTING_TYPES.filter(type => networkValue.helpers.isVotingTypeSupported(type));
 });
 const formErrors = computed(() => {
   if (!proposal.value) return {};
@@ -293,7 +282,6 @@ watchEffect(() => {
 <script lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { resolver } from '@/helpers/resolver';
-import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 
 const { createDraft } = useEditor();
 
@@ -305,7 +293,7 @@ const handleRouteChange: NavigationGuard = async to => {
   const resolved = await resolver.resolveName(to.params.id as string);
   if (!resolved) return false;
 
-  const draftId = createDraft(resolved.networkId, `${resolved.networkId}:${resolved.address}`);
+  const draftId = await createDraft(`${resolved.networkId}:${resolved.address}`);
 
   return {
     ...to,
@@ -432,12 +420,11 @@ export default defineComponent({
     </div>
 
     <div
+      v-if="space"
       class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
     >
-      <template v-if="votingTypes">
-        <EditorVotingType v-model="proposal" :voting-types="votingTypes" />
-        <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
-      </template>
+      <EditorVotingType v-model="proposal" :voting-types="space.voting_types" />
+      <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
     </div>
     <teleport to="#modal">
       <ModalDrafts

@@ -1,20 +1,13 @@
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
 import { Draft, Drafts, NetworkID } from '@/types';
 
 const proposals = reactive<Drafts>(lsGet('proposals', {}));
 
-function getDefaultVotingType(networkId: NetworkID) {
-  const network = getNetwork(networkId);
-
-  return network.helpers.isVotingTypeSupported('single-choice') ? 'single-choice' : 'basic';
-}
-
 function removeEmpty(proposals: Drafts): Drafts {
-  return Object.entries(proposals).reduce((acc, [id, proposal]) => {
-    const networkId = id.split(':')[0] as NetworkID;
-    const defaultVotingType = getDefaultVotingType(networkId);
+  return Object.entries(proposals).reduce(async (acc, [id, proposal]) => {
+    const [networkId, space] = id.split(':');
+    const defaultVotingType = await getSpaceDefaultVoteType(`${networkId}:${space}`);
 
     const { execution, type, choices, ...rest } = omit(proposal, ['updatedAt']);
     const hasFormValues = Object.values(rest).some(val => !!val);
@@ -40,14 +33,27 @@ function generateId() {
   return (Math.random() + 1).toString(36).substring(7);
 }
 
-function createDraft(
-  networkId: NetworkID,
+async function getSpaceDefaultVoteType(spaceId: string) {
+  const spacesStore = useSpacesStore();
+  if (!spacesStore.spacesMap.get(spaceId)) {
+    const [id, networkId] = spaceId.split(':');
+    await spacesStore.fetchSpace(id, networkId as NetworkID);
+  }
+
+  const space = spacesStore.spacesMap.get(spaceId);
+
+  if (!space) throw new Error('Invalid space');
+
+  return space.voting_types.includes('single-choice') ? 'single-choice' : space.voting_types[0];
+}
+
+async function createDraft(
   spaceId: string,
   payload?: Partial<Draft> & { proposalId?: number | string },
   draftKey?: string
 ) {
-  const type = getDefaultVotingType(networkId);
-  const choices = type === 'single-choice' ? Array(2).fill('') : BASIC_CHOICES;
+  const type = payload?.type || (await getSpaceDefaultVoteType(spaceId));
+  const choices = type === 'basic' ? BASIC_CHOICES : Array(2).fill('');
 
   const id = draftKey || generateId();
   const key = `${spaceId}:${id}`;

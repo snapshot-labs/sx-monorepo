@@ -29,6 +29,7 @@ const SPACE_FRAGMENT = gql`
       delay
       period
       quorum
+      type
     }
     strategies {
       name

@@ -11,7 +11,7 @@ import IHPencil from '~icons/heroicons-outline/pencil';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHUserCircle from '~icons/heroicons-outline/user-circle';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
-import { NetworkID, StrategyParsedMetadata } from '@/types';
+import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
 
 export function createConstants(
@@ -503,7 +503,7 @@ export function createConstants(
     }
   ];
 
-  const EDITOR_VOTING_TYPES = ['basic'];
+  const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
     SUPPORTED_AUTHENTICATORS,
