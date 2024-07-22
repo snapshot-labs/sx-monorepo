@@ -75,7 +75,7 @@ function handleEditVoteClick() {
   </slot>
 
   <slot v-else-if="pendingVotes[proposal.id]" name="voted-pending">
-    This vote is pending confirmation
+    You have already voted for this proposal
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">
     Voting for this proposal hasn't started yet. Voting will start {{ _t(start) }}.
