@@ -1,7 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import { getDefaultProvider } from '@ethersproject/providers';
 import { isHexString } from '@ethersproject/bytes';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { metadataNetwork, getNetwork } from '@/networks';
 import pkg from '../../package.json';
 
 const ALIAS_AVAILABILITY_PERIOD = 60 * 60 * 24 * 30; // 30 days
@@ -9,8 +9,7 @@ const ALIAS_AVAILABILITY_BUFFER = 60 * 5; // 5 minutes
 
 const aliases = useStorage(`${pkg.name}.aliases`, {} as Record<string, string>);
 
-const networkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
-const network = getNetwork(networkId);
+const network = getNetwork(metadataNetwork);
 
 export function useAlias() {
   const provider = getDefaultProvider();

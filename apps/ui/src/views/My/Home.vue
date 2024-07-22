@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNames } from '@/helpers/stamp';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { metadataNetwork, getNetwork } from '@/networks';
 import { ProposalsFilter } from '@/networks/types';
 import { NetworkID, Proposal } from '@/types';
 
@@ -25,12 +25,8 @@ const selectIconBaseProps = {
   height: 16
 };
 
-const networkId = computed(
-  () => offchainNetworks.filter(network => enabledNetworks.includes(network))[0]
-);
-
 // TODO: Support multiple networks
-const network = computed(() => getNetwork(networkId.value));
+const network = computed(() => getNetwork(metadataNetwork));
 
 async function withAuthorNames(proposals: Proposal[]) {
   if (!proposals.length) return proposals;
@@ -49,7 +45,7 @@ async function loadProposalsPage(skip = 0) {
     await network.value.api.loadProposals(
       followedSpacesStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
       { limit: PROPOSALS_LIMIT, skip },
-      metaStore.getCurrent(networkId.value) || 0,
+      metaStore.getCurrent(metadataNetwork) || 0,
       { state: state.value }
     )
   );
@@ -77,7 +73,7 @@ async function handleEndReached() {
 }
 
 onMounted(() => {
-  metaStore.fetchBlock(networkId.value);
+  metaStore.fetchBlock(metadataNetwork);
 });
 
 watch(
