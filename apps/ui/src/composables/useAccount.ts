@@ -16,15 +16,14 @@ watch(
 
 export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
-    votes.value = {};
-
     const account = web3.value.account;
-    if (!account) return;
+    if (!account) {
+      votes.value = {};
+      return;
+    }
 
     const network = getNetwork(networkId);
-    const userVotes = await network.api.loadUserVotes(spaceIds, account);
-
-    votes.value = { ...votes.value, ...userVotes };
+    votes.value = await network.api.loadUserVotes(spaceIds, account);
   }
 
   function addPendingVote(proposalId: string) {
