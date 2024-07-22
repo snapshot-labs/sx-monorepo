@@ -51,8 +51,13 @@ function handleRemoveDraft(id: string) {
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ proposal.key }}</span>
           </router-link>
-          <a @click="handleRemoveDraft(proposal.id)">
-            <IH-trash class="mr-2" />
+          <a
+            tabindex="0"
+            class="mr-2"
+            @click="handleRemoveDraft(proposal.id)"
+            @keyup.enter="handleRemoveDraft(proposal.id)"
+          >
+            <IH-trash />
           </a>
         </div>
       </div>
