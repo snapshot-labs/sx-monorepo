@@ -1,11 +1,11 @@
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
-import { Draft, Drafts, VoteType } from '@/types';
+import type { Draft, Drafts, VoteType } from '@/types';
 
 const PREFERRED_VOTE_TYPE = 'single-choice';
 
 const proposals = reactive<Drafts>(lsGet('proposals', {}));
-const spaceVoteTypeMapping = reactive(new Map<string, VoteType>());
+const spaceVoteType = reactive(new Map<string, VoteType>());
 
 function generateId() {
   return (Math.random() + 1).toString(36).substring(7);
@@ -36,7 +36,7 @@ export function useEditor() {
     return Object.entries(proposals).reduce((acc, [id, proposal]) => {
       const { execution, type, choices, ...rest } = omit(proposal, ['updatedAt']);
       const hasFormValues = Object.values(rest).some(val => !!val);
-      const hasChangedVotingType = type !== spaceVoteTypeMapping.get(getSpaceId(id));
+      const hasChangedVotingType = type !== spaceVoteType.get(getSpaceId(id));
       const hasFormChoices = type !== 'basic' && (choices || []).some(val => !!val);
 
       if (execution.length === 0 && !hasFormValues && !hasChangedVotingType && !hasFormChoices) {
@@ -54,13 +54,16 @@ export function useEditor() {
     }, {});
   }
 
-  async function setSpaceDefaultVoteType(spaceIds: string[]) {
+  async function setSpacesVoteType(spaceIds: string[]) {
     const spacesStore = useSpacesStore();
-    const newIds = spaceIds.filter(id => !spaceVoteTypeMapping.has(id));
+    const newIds = spaceIds.filter(id => !spaceVoteType.has(id));
+
+    if (!newIds) return;
+
     await spacesStore.fetchSpaces(newIds);
 
-    for (const spaceId of newIds) {
-      const space = spacesStore.spacesMap.get(spaceId);
+    for (const id of newIds) {
+      const space = spacesStore.spacesMap.get(id);
 
       if (!space) continue;
 
@@ -68,7 +71,7 @@ export function useEditor() {
         ? PREFERRED_VOTE_TYPE
         : space.voting_types[0];
 
-      spaceVoteTypeMapping.set(spaceId, type);
+      spaceVoteType.set(id, type);
     }
   }
 
@@ -77,9 +80,9 @@ export function useEditor() {
     payload?: Partial<Draft> & { proposalId?: number | string },
     draftKey?: string
   ) {
-    await setSpaceDefaultVoteType([spaceId]);
+    await setSpacesVoteType([spaceId]);
 
-    const type = payload?.type || spaceVoteTypeMapping.get(spaceId)!;
+    const type = payload?.type || spaceVoteType.get(spaceId)!;
     const choices = type === 'basic' ? BASIC_CHOICES : Array(2).fill('');
 
     const id = draftKey ?? generateId();
@@ -107,7 +110,7 @@ export function useEditor() {
   watch(proposals, async items => {
     const ids = Object.keys(items).map(getSpaceId);
 
-    await setSpaceDefaultVoteType(ids);
+    await setSpacesVoteType(ids);
 
     lsSet('proposals', removeEmpty(proposals));
   });
