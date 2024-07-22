@@ -81,7 +81,7 @@ export function useEditor() {
     const type = payload?.type || spaceVoteTypeMapping.get(spaceId) || DEFAULT_VOTE_TYPE;
     const choices = type === 'basic' ? BASIC_CHOICES : Array(2).fill('');
 
-    const id = draftKey || generateId();
+    const id = draftKey ?? generateId();
     const key = `${spaceId}:${id}`;
 
     proposals[key] = {
@@ -104,7 +104,7 @@ export function useEditor() {
   }
 
   watch(proposals, async items => {
-    const ids = Object.keys(items).map(draftId => getSpaceId(draftId));
+    const ids = Object.keys(items).map(getSpaceId);
 
     await setSpaceDefaultVoteType(ids);
 
