@@ -115,8 +115,8 @@ function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
 }
 
-function addTx(tx: Transaction) {
-  const draftId = createDraft(spaceKey.value, {
+async function addTx(tx: Transaction) {
+  const draftId = await createDraft(spaceKey.value, {
     execution: [tx],
     executionStrategy: executionStrategy.value
   });

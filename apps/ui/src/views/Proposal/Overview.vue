@@ -102,12 +102,12 @@ const votingTime = computed(() => {
   return hasEnded ? `Ended ${time}` : time;
 });
 
-function handleEditClick() {
+async function handleEditClick() {
   if (!props.proposal) return;
 
   const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
 
-  const draftId = createDraft(spaceId, {
+  const draftId = await createDraft(spaceId, {
     proposalId: props.proposal.proposal_id,
     title: props.proposal.title,
     body: props.proposal.body,

@@ -21,10 +21,10 @@ const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 
-function handleTransactionAccept() {
+async function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
 
-  const draftId = createDraft(spaceKey.value, {
+  const draftId = await createDraft(spaceKey.value, {
     execution: [transaction.value],
     executionStrategy: executionStrategy.value
   });

@@ -3,7 +3,6 @@ import { lsGet, lsSet, omit } from '@/helpers/utils';
 import { Draft, Drafts, VoteType } from '@/types';
 
 const PREFERRED_VOTE_TYPE = 'single-choice';
-const DEFAULT_VOTE_TYPE = 'basic';
 
 const proposals = reactive<Drafts>(lsGet('proposals', {}));
 const spaceVoteTypeMapping = reactive(new Map<string, VoteType>());
@@ -73,12 +72,14 @@ export function useEditor() {
     }
   }
 
-  function createDraft(
+  async function createDraft(
     spaceId: string,
     payload?: Partial<Draft> & { proposalId?: number | string },
     draftKey?: string
   ) {
-    const type = payload?.type || spaceVoteTypeMapping.get(spaceId) || DEFAULT_VOTE_TYPE;
+    await setSpaceDefaultVoteType([spaceId]);
+
+    const type = payload?.type || spaceVoteTypeMapping.get(spaceId)!;
     const choices = type === 'basic' ? BASIC_CHOICES : Array(2).fill('');
 
     const id = draftKey ?? generateId();
