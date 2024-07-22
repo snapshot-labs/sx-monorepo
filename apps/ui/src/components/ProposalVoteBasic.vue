@@ -5,6 +5,7 @@ withDefaults(
   defineProps<{
     sendingType: Choice | null;
     size?: number;
+    choices?: Choice;
   }>(),
   { size: 48 }
 );

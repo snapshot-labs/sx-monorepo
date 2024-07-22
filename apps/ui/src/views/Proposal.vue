@@ -45,7 +45,7 @@ const votingPowerDecimals = computed(() => {
   );
 });
 
-const hasVoted = computed(
+const currentVote = computed(
   () => proposal.value && votes.value[`${proposal.value.network}:${proposal.value.id}`]
 );
 
@@ -178,7 +178,7 @@ watchEffect(() => {
               <IH-cursor-click class="inline-block mr-2" />
               <span>Edit your vote</span>
             </template>
-            <template v-else-if="hasVoted">
+            <template v-else-if="currentVote">
               <IH-check-circle class="inline-block mr-2" />
               <span>Your vote</span>
             </template>
@@ -188,7 +188,7 @@ watchEffect(() => {
             </template>
           </h4>
           <IndicatorVotingPower
-            v-if="web3.account && networkId && (!hasVoted || editMode)"
+            v-if="web3.account && networkId && (!currentVote || editMode)"
             v-slot="props"
             :network-id="networkId"
             :status="votingPowerStatus"
@@ -238,24 +238,28 @@ watchEffect(() => {
               v-else-if="proposal.type === 'single-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
+              :choices="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
               :proposal="proposal"
               :sending-type="sendingType"
+              :choices="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteRankedChoice
               v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
+              :choices="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteWeighted
               v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
               :proposal="proposal"
               :sending-type="sendingType"
+              :choices="currentVote?.choice"
               @vote="handleVoteClick"
             />
           </ProposalVote>

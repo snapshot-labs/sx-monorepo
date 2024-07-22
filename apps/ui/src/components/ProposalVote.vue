@@ -38,9 +38,11 @@ const isSupported = computed(() => {
   );
 });
 
+const currentVote = computed(() => votes.value[`${props.proposal.network}:${props.proposal.id}`]);
+
 const isEditable = computed(() => {
   return (
-    !!votes.value[`${props.proposal.network}:${props.proposal.id}`] &&
+    currentVote &&
     offchainNetworks.includes(props.proposal.network) &&
     props.proposal.state === 'active'
   );
@@ -55,20 +57,22 @@ function handleEditVoteClick() {
 </script>
 
 <template>
-  <slot
-    v-if="votes[`${proposal.network}:${proposal.id}`] && !editMode"
-    name="voted"
-    :vote="votes[`${proposal.network}:${proposal.id}`]"
-  >
+  <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
     <div class="py-2">
       <UiButton
         class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2 cursor-default"
         :class="{ 'cursor-pointer': isEditable }"
         @click="handleEditVoteClick()"
       >
-        <div class="grow truncate">
-          {{ getChoiceText(proposal.choices, votes[`${proposal.network}:${proposal.id}`].choice) }}
+        <div v-if="proposal.privacy" class="flex space-x-2 items-center grow truncate">
+          <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
+          <span class="truncate">Encrypted choice</span>
         </div>
+        <div
+          v-else
+          class="grow truncate"
+          v-text="getChoiceText(proposal.choices, currentVote.choice)"
+        />
         <IH-pencil v-if="isEditable" class="shrink-0" />
       </UiButton>
     </div>

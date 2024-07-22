@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { Choice, Proposal } from '@/types';
+import type { Choice, Proposal } from '@/types';
+
+type RankedChoice = number[];
 
 const props = defineProps<{
   sendingType: Choice | null;
   proposal: Proposal;
+  choices?: Choice;
 }>();
 
 const emit = defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<number[]>(props.proposal.choices.map((_, i) => i + 1));
+const selectedChoices = ref<RankedChoice>(
+  (props.choices as RankedChoice) || props.proposal.choices.map((_, i) => i + 1)
+);
 </script>
 
 <template>
