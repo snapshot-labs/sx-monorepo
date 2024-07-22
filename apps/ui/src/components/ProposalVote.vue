@@ -4,9 +4,9 @@ import { _t, getChoiceText } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import type { Proposal as ProposalType } from '@/types';
 
-const props = defineProps<{ proposal: ProposalType }>();
+const props = defineProps<{ proposal: ProposalType; editMode: boolean }>();
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'edit');
 }>();
 
@@ -16,8 +16,6 @@ const { isInvalidNetwork } = useSafeWallet(
   props.proposal.network,
   props.proposal.space.snapshot_chain_id
 );
-
-const editMode = ref(false);
 
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
@@ -38,7 +36,10 @@ const isSupported = computed(() => {
   );
 });
 
-const currentVote = computed(() => votes.value[`${props.proposal.network}:${props.proposal.id}`]);
+const currentVote = computed(() => {
+  const id = `${props.proposal.network}:${props.proposal.id}`;
+  return votes.value[id] || pendingVotes.value[id];
+});
 
 const isEditable = computed(() => {
   return (
@@ -47,13 +48,6 @@ const isEditable = computed(() => {
     props.proposal.state === 'active'
   );
 });
-
-function handleEditVoteClick() {
-  if (!isEditable.value) return;
-
-  editMode.value = true;
-  emit('edit');
-}
 </script>
 
 <template>
@@ -62,7 +56,7 @@ function handleEditVoteClick() {
       <UiButton
         class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2 cursor-default"
         :class="{ 'cursor-pointer': isEditable }"
-        @click="handleEditVoteClick()"
+        @click="isEditable && $emit('edit')"
       >
         <div v-if="proposal.privacy" class="flex space-x-2 items-center grow truncate">
           <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
@@ -78,9 +72,6 @@ function handleEditVoteClick() {
     </div>
   </slot>
 
-  <slot v-else-if="pendingVotes[proposal.id]" name="voted-pending">
-    You have already voted for this proposal
-  </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">
     Voting for this proposal hasn't started yet. Voting will start {{ _t(start) }}.
   </slot>

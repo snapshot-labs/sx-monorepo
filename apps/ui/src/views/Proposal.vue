@@ -96,9 +96,11 @@ async function handleVoteClick(choice: Choice) {
     // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
     if (offchainNetworks.includes(proposal.value.network)) {
       proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
+      loadVotes(networkId.value!, [spaceAddress.value!]);
     }
   } finally {
     sendingType.value = null;
+    editMode.value = false;
   }
 }
 
@@ -228,7 +230,12 @@ watchEffect(() => {
               </a>
             </template>
           </IndicatorVotingPower>
-          <ProposalVote v-if="proposal" :proposal="proposal" @edit="editMode = true">
+          <ProposalVote
+            v-if="proposal"
+            :proposal="proposal"
+            :edit-mode="editMode"
+            @edit="editMode = true"
+          >
             <ProposalVoteBasic
               v-if="proposal.type === 'basic'"
               :sending-type="sendingType"
