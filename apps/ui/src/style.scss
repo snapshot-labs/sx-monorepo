@@ -215,6 +215,10 @@ input[type='number'] {
   appearance: textfield;
 }
 
+input:placeholder-shown {
+  @apply text-ellipsis;
+}
+
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 1px;
