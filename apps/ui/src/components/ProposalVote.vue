@@ -6,6 +6,10 @@ import { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 
+const emit = defineEmits<{
+  (e: 'edit');
+}>();
+
 const { votes, pendingVotes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
@@ -46,6 +50,7 @@ function handleEditVoteClick() {
   if (!isEditable.value) return;
 
   editMode.value = true;
+  emit('edit');
 }
 </script>
 
@@ -55,16 +60,18 @@ function handleEditVoteClick() {
     name="voted"
     :vote="votes[`${proposal.network}:${proposal.id}`]"
   >
-    <UiButton
-      class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2 cursor-default"
-      :class="{ 'border-skin-link cursor-pointer': isEditable }"
-      @click="handleEditVoteClick()"
-    >
-      <div class="grow truncate">
-        {{ getChoiceText(proposal.choices, votes[`${proposal.network}:${proposal.id}`].choice) }}
-      </div>
-      <IH-pencil v-if="isEditable" class="shrink-0" />
-    </UiButton>
+    <div class="py-2">
+      <UiButton
+        class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2 cursor-default"
+        :class="{ 'cursor-pointer': isEditable }"
+        @click="handleEditVoteClick()"
+      >
+        <div class="grow truncate">
+          {{ getChoiceText(proposal.choices, votes[`${proposal.network}:${proposal.id}`].choice) }}
+        </div>
+        <IH-pencil v-if="isEditable" class="shrink-0" />
+      </UiButton>
+    </div>
   </slot>
 
   <slot v-else-if="pendingVotes[proposal.id]" name="voted-pending">

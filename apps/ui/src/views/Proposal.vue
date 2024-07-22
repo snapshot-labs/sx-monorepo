@@ -19,6 +19,7 @@ const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
+const editMode = ref(false);
 
 const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
 const id = computed(() => route.params.id as string);
@@ -173,7 +174,11 @@ watchEffect(() => {
       >
         <div v-if="!proposal.cancelled && ['pending', 'active'].includes(proposal.state)">
           <h4 class="mb-2 eyebrow flex items-center">
-            <template v-if="hasVoted">
+            <template v-if="editMode">
+              <IH-cursor-click class="inline-block mr-2" />
+              <span>Edit your vote</span>
+            </template>
+            <template v-else-if="hasVoted">
               <IH-check-circle class="inline-block mr-2" />
               <span>Your vote</span>
             </template>
@@ -183,7 +188,7 @@ watchEffect(() => {
             </template>
           </h4>
           <IndicatorVotingPower
-            v-if="web3.account && networkId && !hasVoted"
+            v-if="web3.account && networkId && (!hasVoted || editMode)"
             v-slot="props"
             :network-id="networkId"
             :status="votingPowerStatus"
@@ -223,7 +228,7 @@ watchEffect(() => {
               </a>
             </template>
           </IndicatorVotingPower>
-          <ProposalVote v-if="proposal" :proposal="proposal">
+          <ProposalVote v-if="proposal" :proposal="proposal" @edit="editMode = true">
             <ProposalVoteBasic
               v-if="proposal.type === 'basic'"
               :sending-type="sendingType"
