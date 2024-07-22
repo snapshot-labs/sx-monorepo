@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { _p, getChoiceWeight } from '@/helpers/utils';
-import { Choice, Proposal } from '@/types';
+import type { Choice, Proposal } from '@/types';
 
 type WeightedChoice = Record<string, number>;
 

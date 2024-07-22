@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Choice, Proposal } from '@/types';
+import type { Choice, Proposal } from '@/types';
 
 type ApprovalChoice = number[];
 

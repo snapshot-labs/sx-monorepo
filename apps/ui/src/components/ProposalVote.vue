@@ -2,7 +2,7 @@
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { _t, getChoiceText } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { Proposal as ProposalType } from '@/types';
+import type { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
 

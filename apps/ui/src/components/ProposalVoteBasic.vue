@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Choice } from '@/types';
+import type { Choice } from '@/types';
 
 withDefaults(
   defineProps<{
