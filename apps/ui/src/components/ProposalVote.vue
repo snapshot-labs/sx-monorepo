@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<{ proposal: ProposalType; editMode?: bool
 });
 
 defineEmits<{
-  (e: 'edit');
+  (e: 'enter-edit-mode');
 }>();
 
 const { votes, pendingVotes } = useAccount();
@@ -38,10 +38,7 @@ const isSupported = computed(() => {
   );
 });
 
-const currentVote = computed(() => {
-  const id = `${props.proposal.network}:${props.proposal.id}`;
-  return votes.value[id] || pendingVotes.value[id];
-});
+const currentVote = computed(() => votes.value[`${props.proposal.network}:${props.proposal.id}`]);
 
 const isEditable = computed(() => {
   return (
@@ -58,7 +55,7 @@ const isEditable = computed(() => {
       <UiButton
         class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2 cursor-default"
         :class="{ 'cursor-pointer': isEditable }"
-        @click="isEditable && $emit('edit')"
+        @click="isEditable && $emit('enter-edit-mode')"
       >
         <div v-if="proposal.privacy" class="flex space-x-2 items-center grow truncate">
           <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />

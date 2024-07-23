@@ -234,7 +234,7 @@ watchEffect(() => {
             v-if="proposal"
             :proposal="proposal"
             :edit-mode="editMode"
-            @edit="editMode = true"
+            @enter-edit-mode="editMode = true"
           >
             <ProposalVoteBasic
               v-if="proposal.type === 'basic'"
