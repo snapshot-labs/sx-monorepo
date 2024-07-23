@@ -145,17 +145,11 @@ watch(
   { immediate: true }
 );
 
-watch(
-  [resolved, networkId, address],
-  async ([resolved, networkId, address]) => {
-    if (!resolved || !networkId || !address) return;
+watch([resolved, networkId, address], async ([resolved, networkId, address]) => {
+  if (!resolved || !networkId || !address) return;
 
-    spacesStore.fetchSpace(address, networkId);
-  },
-  {
-    immediate: true
-  }
-);
+  spacesStore.networksMap[networkId].spaces[address];
+});
 
 watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`));
 </script>
