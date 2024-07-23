@@ -135,8 +135,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 
 <template>
   <div v-if="!treasury || !currentNetwork" class="p-4 flex items-center text-skin-link space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    No treasury configured.
+    <IH-exclamation-circle class="inline-block shrink-0" />
+    <span>No treasury configured.</span>
   </div>
   <template v-else>
     <div class="p-4 space-x-2 flex">
@@ -226,8 +226,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             v-else-if="loaded && sortedAssets.length === 0"
             class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
-            <IH-exclamation-circle class="inline-block" />
-            There are no tokens in treasury.
+            <IH-exclamation-circle class="inline-block shrink-0" />
+            <span>There are no tokens in treasury.</span>
           </div>
           <a
             v-for="(asset, i) in sortedAssets"
@@ -313,8 +313,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             v-if="nftsLoaded && nfts.length === 0"
             class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
-            <IH-exclamation-circle class="inline-block" />
-            There are no NFTs in treasury.
+            <IH-exclamation-circle class="inline-block shrink-0" />
+            <span>There are no NFTs in treasury.</span>
           </div>
           <UiLoading v-if="nftsLoading && !nftsLoaded" class="px-4 py-3 block" />
           <div class="flex flex-row flex-wrap gap-4 p-4">
