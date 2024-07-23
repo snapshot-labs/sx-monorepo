@@ -120,8 +120,8 @@ watch(model, () => {
 $toolBarHeight: 43px;
 
 .s-base {
-  textarea.s-input {
-    @apply border-t-[#{$toolBarHeight}];
+  .s-input {
+    @apply border-t-[#{$toolBarHeight}] pt-2;
   }
 
   .s-toolbar {
