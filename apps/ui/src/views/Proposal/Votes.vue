@@ -188,9 +188,9 @@ watch([sortBy, choiceFilter], () => {
           </div>
         </router-link>
         <a
-          class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px] !cursor-default"
+          class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]"
           :class="{
-            'cursor-pointer': vote.reason
+            '!cursor-default': !vote.reason
           }"
           :tabindex="vote.reason ? 0 : -1"
           @click="handleChoiceClick(vote)"
