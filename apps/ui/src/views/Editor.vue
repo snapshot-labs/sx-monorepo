@@ -12,13 +12,15 @@ type StrategyWithTreasury = SelectedStrategy & {
 const TITLE_DEFINITION = {
   type: 'string',
   title: 'Title',
-  minLength: 1
+  minLength: 1,
+  maxLength: 256
 };
 
 const DISCUSSION_DEFINITION = {
   type: 'string',
   format: 'uri',
   title: 'Discussion',
+  maxLength: 256,
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
@@ -26,6 +28,7 @@ const CHOICES_DEFINITION = {
   type: 'array',
   title: 'Choices',
   minItems: 1,
+  maxItems: 500,
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
 };
