@@ -9,6 +9,7 @@ watch(
   () => web3.value.account,
   (current, previous) => {
     if (current !== previous) {
+      votes.value = {};
       pendingVotes.value = {};
     }
   }
@@ -19,7 +20,6 @@ export function useAccount() {
     const account = web3.value.account;
 
     if (!account) {
-      votes.value = {};
       return;
     }
 
