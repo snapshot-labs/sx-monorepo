@@ -1,5 +1,12 @@
 <script setup lang="ts">
+import { _n } from '@/helpers/utils';
+
 const model = defineModel<string>({ required: true });
+
+const props = defineProps<{
+  error?: string;
+  definition: any;
+}>();
 
 const editorContainerRef = ref<HTMLDivElement | null>(null);
 const editorFileInputRef = ref<HTMLInputElement | null>(null);
@@ -10,17 +17,48 @@ const editor = useMarkdownEditor(
   editorContainerRef,
   value => (model.value = value)
 );
+
+const dirty = ref(false);
+
+const inputValue = computed({
+  get() {
+    if (!model.value && !dirty.value && props.definition.default) {
+      return props.definition.default;
+    }
+
+    return model.value;
+  },
+  set(newValue: string) {
+    dirty.value = true;
+    model.value = newValue;
+  }
+});
+
+const inputValueLength = computed(() => inputValue.value.length);
+
+const showError = computed(() => props.error && dirty.value);
+
+watch(model, () => {
+  dirty.value = true;
+});
 </script>
 
 <template>
   <div
     ref="editorContainerRef"
-    class="rounded-lg mb-3 border"
+    class="rounded-lg mb-3 border s-composer"
     :class="{
-      'ring-2': editor.hovered.value
+      'ring-2': editor.hovered.value,
+      's-error-composer': showError
     }"
   >
-    <div class="flex justify-end gap-1 py-2 px-3">
+    <div class="flex gap-1 py-2 px-3 items-center">
+      <label class="text-sm hidden s-label-char-count whitespace-nowrap">
+        <template v-if="inputValueLength >= 0 && definition.maxLength">
+          {{ _n(inputValueLength) }} / {{ _n(definition.maxLength) }}
+        </template>
+      </label>
+      <div class="grow"></div>
       <UiTooltip title="Add heading text">
         <button
           class="p-1 w-[26px] h-[26px] leading-[18px] hover:text-skin-link rounded focus-visible:ring-1"
@@ -72,11 +110,11 @@ const editor = useMarkdownEditor(
     <div class="s-base">
       <textarea
         ref="editorRef"
-        :value="model"
-        maxlength="9600"
+        v-model.trim="model"
         class="s-input h-[200px] !rounded-t-none !mb-0 !pt-[15px]"
         @input="event => (model = (event.target as HTMLInputElement).value)"
       />
     </div>
   </div>
+  <div v-if="showError" class="s-input-error-message mb-3 -mt-3">{{ error }}</div>
 </template>

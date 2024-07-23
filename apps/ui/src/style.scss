@@ -276,6 +276,25 @@ input:placeholder-shown {
   @apply block mb-1;
 }
 
+.s-error-composer {
+  @apply border border-skin-danger;
+
+  .s-label-char-count {
+    @apply text-skin-danger;
+  }
+}
+
+.s-base,
+.s-composer {
+  &:focus-within,
+  &.s-error,
+  &.s-error-editor {
+    .s-label-char-count {
+      display: block;
+    }
+  }
+}
+
 .s-error {
   @apply mb-2;
 
@@ -293,10 +312,10 @@ input:placeholder-shown {
   .s-label {
     @apply text-skin-danger;
   }
+}
 
-  .s-input-error-message {
-    @apply text-skin-danger;
-  }
+.s-input-error-message {
+  @apply text-skin-danger;
 }
 
 .s-box {
