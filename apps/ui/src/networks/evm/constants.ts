@@ -1,20 +1,19 @@
-import { Web3Provider } from '@ethersproject/providers';
 import { AbiCoder } from '@ethersproject/abi';
-import { clients, evmNetworks } from '@snapshot-labs/sx';
+import { Web3Provider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
-import { getUrl, shorten } from '@/helpers/utils';
+import { clients, evmNetworks } from '@snapshot-labs/sx';
+import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinGraph } from '@/helpers/pin';
+import { getUrl, shorten } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
 import type { StrategyConfig } from '../types';
-
-import IHCode from '~icons/heroicons-outline/code';
 import IHBeaker from '~icons/heroicons-outline/beaker';
-import IHCube from '~icons/heroicons-outline/cube';
-import IHPencil from '~icons/heroicons-outline/pencil';
 import IHClock from '~icons/heroicons-outline/clock';
-import IHUserCircle from '~icons/heroicons-outline/user-circle';
+import IHCode from '~icons/heroicons-outline/code';
+import IHCube from '~icons/heroicons-outline/cube';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
-import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import IHPencil from '~icons/heroicons-outline/pencil';
+import IHUserCircle from '~icons/heroicons-outline/user-circle';
 
 export function createConstants(networkId: NetworkID) {
   const config = evmNetworks[networkId];
@@ -105,7 +104,9 @@ export function createConstants(networkId: NetworkID) {
         const strategies = params.strategies.map((strategy: StrategyConfig) => {
           return {
             addr: strategy.address,
-            params: strategy.generateParams ? strategy.generateParams(strategy.params)[0] : '0x00'
+            params: strategy.generateParams
+              ? strategy.generateParams(strategy.params)[0]
+              : '0x00'
           };
         });
 
@@ -136,7 +137,10 @@ export function createConstants(networkId: NetworkID) {
         const abiCoder = new AbiCoder();
 
         return {
-          threshold: abiCoder.decode(['uint256', 'tuple(address addr, bytes params)[]'], params)[0]
+          threshold: abiCoder.decode(
+            ['uint256', 'tuple(address addr, bytes params)[]'],
+            params
+          )[0]
         };
       },
       paramsDefinition: {
@@ -169,7 +173,10 @@ export function createConstants(networkId: NetworkID) {
           decimals: 0
         }
       }),
-      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+      parseParams: async (
+        params: string,
+        metadata: StrategyParsedMetadata | null
+      ) => {
         if (!metadata) throw new Error('Missing metadata');
 
         return {
@@ -200,7 +207,9 @@ export function createConstants(networkId: NetworkID) {
         const length =
           params.whitelist.trim().length === 0
             ? 0
-            : params.whitelist.split(/[\n,]/).filter((s: string) => s.trim().length).length;
+            : params.whitelist
+                .split(/[\n,]/)
+                .filter((s: string) => s.trim().length).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
@@ -243,7 +252,10 @@ export function createConstants(networkId: NetworkID) {
           }
         };
       },
-      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+      parseParams: async (
+        params: string,
+        metadata: StrategyParsedMetadata | null
+      ) => {
         if (!metadata) throw new Error('Missing metadata');
 
         const getWhitelist = async (payload: string) => {
@@ -253,12 +265,16 @@ export function createConstants(networkId: NetworkID) {
 
           const res = await fetch(metadataUrl);
           const { tree } = await res.json();
-          return tree.map((item: any) => `${item.address}:${item.votingPower}`).join('\n');
+          return tree
+            .map((item: any) => `${item.address}:${item.votingPower}`)
+            .join('\n');
         };
 
         return {
           symbol: metadata.symbol,
-          whitelist: metadata.payload ? await getWhitelist(metadata.payload) : ''
+          whitelist: metadata.payload
+            ? await getWhitelist(metadata.payload)
+            : ''
         };
       },
       paramsDefinition: {
@@ -299,7 +315,10 @@ export function createConstants(networkId: NetworkID) {
           token: params.contractAddress
         }
       }),
-      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+      parseParams: async (
+        params: string,
+        metadata: StrategyParsedMetadata | null
+      ) => {
         if (!metadata) throw new Error('Missing metadata');
 
         return {
@@ -351,7 +370,10 @@ export function createConstants(networkId: NetworkID) {
           token: params.contractAddress
         }
       }),
-      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+      parseParams: async (
+        params: string,
+        metadata: StrategyParsedMetadata | null
+      ) => {
         if (!metadata) throw new Error('Missing metadata');
 
         return {
@@ -463,7 +485,9 @@ export function createConstants(networkId: NetworkID) {
           signer: web3.getSigner(),
           params: {
             controller: params.controller,
-            vetoGuardian: params.vetoGuardian || '0x0000000000000000000000000000000000000000',
+            vetoGuardian:
+              params.vetoGuardian ||
+              '0x0000000000000000000000000000000000000000',
             spaces: [spaceAddress],
             timelockDelay: BigInt(params.timelockDelay),
             quorum: BigInt(params.quorum)
@@ -520,12 +544,16 @@ export function createConstants(networkId: NetworkID) {
         return client.deployAxiomExecution({
           signer: web3.getSigner(),
           params: {
-            controller: params.controller || '0x0000000000000000000000000000000000000000',
+            controller:
+              params.controller || '0x0000000000000000000000000000000000000000',
             quorum: BigInt(params.quorum),
-            contractAddress: params.contractAddress || '0x0000000000000000000000000000000000000000',
+            contractAddress:
+              params.contractAddress ||
+              '0x0000000000000000000000000000000000000000',
             slotIndex: BigInt(params.slotIndex),
             space: spaceAddress,
-            querySchema: '0xa09cc16ccaa32b96ca5c404c1b4be60d7883a7178f432e8f9f3c22157fc0f873'
+            querySchema:
+              '0xa09cc16ccaa32b96ca5c404c1b4be60d7883a7178f432e8f9f3c22157fc0f873'
           }
         });
       },
@@ -581,8 +609,12 @@ export function createConstants(networkId: NetworkID) {
           params: {
             provingTimeAllowance: params.provingTimeAllowance,
             quorum: BigInt(params.quorum),
-            queryAddress: params.queryAddress || '0x0000000000000000000000000000000000000000',
-            contractAddress: params.contractAddress || '0x0000000000000000000000000000000000000000',
+            queryAddress:
+              params.queryAddress ||
+              '0x0000000000000000000000000000000000000000',
+            contractAddress:
+              params.contractAddress ||
+              '0x0000000000000000000000000000000000000000',
             slotIndex: BigInt(params.slotIndex)
           }
         });

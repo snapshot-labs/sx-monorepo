@@ -1,7 +1,7 @@
+import type { NetworkConfig } from './networkConfig';
+import type { MetaTransaction } from '../utils/encoding';
 import type { BigNumberish, RpcProvider } from 'starknet';
 import type { Call } from 'starknet';
-import type { MetaTransaction } from '../utils/encoding';
-import type { NetworkConfig } from './networkConfig';
 
 export * from './networkConfig';
 
@@ -46,7 +46,10 @@ export type Authenticator = {
   type: string;
   createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call;
   createVoteCall(envelope: Envelope<Vote>, args: VoteCallArgs): Call;
-  createUpdateProposalCall(envelope: Envelope<UpdateProposal>, args: UpdateProposalCallArgs): Call;
+  createUpdateProposalCall(
+    envelope: Envelope<UpdateProposal>,
+    args: UpdateProposalCallArgs
+  ): Call;
 };
 
 export interface Strategy {
@@ -192,7 +195,10 @@ export type EIP712UpdateProposalMessage = Omit<
   proposalId: string;
 };
 
-export type EIP712VoteMessage = Omit<StarknetEIP712VoteMessage, 'proposalId'> & {
+export type EIP712VoteMessage = Omit<
+  StarknetEIP712VoteMessage,
+  'proposalId'
+> & {
   authenticator: string;
   proposalId: string;
 };

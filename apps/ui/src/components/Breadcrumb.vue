@@ -15,8 +15,11 @@ const space = computed(() => {
   }
   return (
     spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`) ||
-    proposalsStore.getProposal(spaceAddress.value, route.params.id as string, networkId.value)
-      ?.space
+    proposalsStore.getProposal(
+      spaceAddress.value,
+      route.params.id as string,
+      networkId.value
+    )?.space
   );
 });
 </script>

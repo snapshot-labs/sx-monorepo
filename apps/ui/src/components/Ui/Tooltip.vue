@@ -15,7 +15,10 @@ withDefaults(
 </script>
 
 <template>
-  <div v-tippy="{ content: title, placement, touch }" class="inline-block relative">
+  <div
+    v-tippy="{ content: title, placement, touch }"
+    class="inline-block relative"
+  >
     <slot />
   </div>
 </template>

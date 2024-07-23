@@ -1,4 +1,5 @@
-export const MANA_URL = import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
+export const MANA_URL =
+  import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
 
 async function rpcCall(path: string, method: string, params: any) {
   const res = await fetch(`${MANA_URL}/${path}`, {
@@ -34,7 +35,11 @@ export async function registerTransaction(
 export async function executionCall(
   network: 'eth' | 'stark',
   chainId: number | string,
-  method: 'finalizeProposal' | 'execute' | 'executeQueuedProposal' | 'executeStarknetProposal',
+  method:
+    | 'finalizeProposal'
+    | 'execute'
+    | 'executeQueuedProposal'
+    | 'executeStarknetProposal',
   params: any
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);

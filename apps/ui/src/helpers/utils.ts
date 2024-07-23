@@ -1,27 +1,28 @@
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import updateLocale from 'dayjs/plugin/updateLocale';
-import duration from 'dayjs/plugin/duration';
-import sha3 from 'js-sha3';
-import Autolinker from 'autolinker';
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress, isAddress } from '@ethersproject/address';
-import { validateAndParseAddress } from 'starknet';
 import { upload as pin } from '@snapshot-labs/pineapple';
+import Autolinker from 'autolinker';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import updateLocale from 'dayjs/plugin/updateLocale';
+import sha3 from 'js-sha3';
+import { validateAndParseAddress } from 'starknet';
 import networks from '@/helpers/networks.json';
-import pkg from '@/../package.json';
-import type { Web3Provider } from '@ethersproject/providers';
 import type { Proposal, SpaceMetadata } from '@/types';
+import type { Web3Provider } from '@ethersproject/providers';
 import { MAX_SYMBOL_LENGTH } from './constants';
-import ICX from '~icons/c/x';
+import pkg from '@/../package.json';
+import ICCoingecko from '~icons/c/coingecko';
 import ICDiscord from '~icons/c/discord';
+import ICFarcaster from '~icons/c/farcaster';
 import ICGithub from '~icons/c/github';
 import ICLens from '~icons/c/lens';
-import ICFarcaster from '~icons/c/farcaster';
-import ICCoingecko from '~icons/c/coingecko';
+import ICX from '~icons/c/x';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
-const IPFS_GATEWAY: string = import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
+const IPFS_GATEWAY: string =
+  import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
   59140: {
     chainName: 'Linea Goerli test network',
@@ -76,8 +77,10 @@ export function getUrl(uri: string) {
   }
 
   const uriScheme = uri.split('://')[0];
-  if (uriScheme === 'ipfs') return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
-  if (uriScheme === 'ipns') return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  if (uriScheme === 'ipfs')
+    return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
+  if (uriScheme === 'ipns')
+    return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
   return uri;
 }
 
@@ -94,14 +97,18 @@ export function shortenAddress(str = '') {
   return `${formatted.slice(0, 6)}...${formatted.slice(formatted.length - 4)}`;
 }
 
-export function shorten(str: string, key?: number | 'symbol' | 'name' | 'choice'): string {
+export function shorten(
+  str: string,
+  key?: number | 'symbol' | 'name' | 'choice'
+): string {
   if (!str) return str;
   let limit;
   if (typeof key === 'number') limit = key;
   if (key === 'symbol') limit = MAX_SYMBOL_LENGTH;
   if (key === 'name') limit = 64;
   if (key === 'choice') limit = 12;
-  if (limit) return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
+  if (limit)
+    return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
   return shortenAddress(str);
 }
 
@@ -151,7 +158,10 @@ export function _n(
 }
 
 export function _vp(value: number) {
-  return _n(value, 'compact', { maximumFractionDigits: value >= 1000 ? 1 : 3, formatDust: true });
+  return _n(value, 'compact', {
+    maximumFractionDigits: value >= 1000 ? 1 : 3,
+    formatDust: true
+  });
 }
 
 export function getCurrentName(currentUnit: 'block' | 'second') {
@@ -169,7 +179,10 @@ export function _c(value: string | bigint, decimals = 18) {
 }
 
 export function _p(value: number) {
-  const formatter = new Intl.NumberFormat('en', { style: 'percent', maximumFractionDigits: 2 });
+  const formatter = new Intl.NumberFormat('en', {
+    style: 'percent',
+    maximumFractionDigits: 2
+  });
   return formatter.format(value);
 }
 
@@ -284,14 +297,20 @@ export function omit<T extends Record<string, unknown>, K extends keyof T>(
 ): Omit<T, K> {
   const entries = Object.entries(obj) as [K, any];
 
-  return Object.fromEntries(entries.filter(([k]) => !keys.includes(k))) as Omit<T, K>;
+  return Object.fromEntries(entries.filter(([k]) => !keys.includes(k))) as Omit<
+    T,
+    K
+  >;
 }
 
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
-export async function verifyNetwork(web3Provider: Web3Provider, chainId: number) {
+export async function verifyNetwork(
+  web3Provider: Web3Provider,
+  chainId: number
+) {
   if (!web3Provider.provider.request) return;
 
   const network = await web3Provider.getNetwork();
@@ -322,7 +341,9 @@ export async function verifyNetwork(web3Provider: Web3Provider, chainId: number)
 
     const network = await web3Provider.getNetwork();
     if (network.chainId !== chainId) {
-      const error = new Error('User rejected network change after it being added');
+      const error = new Error(
+        'User rejected network change after it being added'
+      );
       (error as any).code = 4001;
       throw error;
     }
@@ -386,7 +407,13 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type: 'avatar' | 'user-cover' | 'space' | 'space-sx' | 'space-cover-sx' | 'token',
+  type:
+    | 'avatar'
+    | 'user-cover'
+    | 'space'
+    | 'space-sx'
+    | 'space-cover-sx'
+    | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string
@@ -429,7 +456,10 @@ export function simplifyURL(fullURL: string): string {
   return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
 }
 
-export function getChoiceWeight(selectedChoices: Record<string, number>, index: number) {
+export function getChoiceWeight(
+  selectedChoices: Record<string, number>,
+  index: number
+) {
   const whole = Object.values(selectedChoices).reduce((a, b) => a + b, 0);
   const percent = selectedChoices[index + 1] / whole;
 
@@ -452,7 +482,10 @@ export function getChoiceText(
 
   return Object.entries(choice)
     .filter(([, weight]) => weight > 0)
-    .map(([index, weight]) => `${_p(weight / total)} for ${availableChoices[Number(index) - 1]}`)
+    .map(
+      ([index, weight]) =>
+        `${_p(weight / total)} for ${availableChoices[Number(index) - 1]}`
+    )
     .join(', ');
 }
 
@@ -462,7 +495,8 @@ export function autoLinkText(text: string) {
   return Autolinker.link(text, {
     sanitizeHtml: true,
     phone: false,
-    replaceFn: match => match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
+    replaceFn: match =>
+      match.buildTag().setAttr('href', sanitizeUrl(match.getAnchorHref())!)
   });
 }
 
@@ -471,7 +505,11 @@ export function getSocialNetworksLink(data: any) {
     { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
     { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
-    { key: 'coingecko', icon: ICCoingecko, urlFormat: 'https://www.coingecko.com/coins/$' },
+    {
+      key: 'coingecko',
+      icon: ICCoingecko,
+      urlFormat: 'https://www.coingecko.com/coins/$'
+    },
     { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
     { key: 'lens', icon: ICLens, urlFormat: 'https://hey.xyz/u/$' },
     { key: 'farcaster', icon: ICFarcaster, urlFormat: 'https://warpcast.com/$' }

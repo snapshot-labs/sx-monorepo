@@ -1,4 +1,7 @@
-import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
+import type {
+  TypedDataDomain,
+  TypedDataField
+} from '@ethersproject/abstract-signer';
 import type { ContractInterface } from '@ethersproject/contracts';
 import type { Provider } from '@ethersproject/providers';
 

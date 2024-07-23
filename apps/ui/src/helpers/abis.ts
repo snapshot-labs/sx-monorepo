@@ -15,7 +15,9 @@ export const abis = {
     'function transfer(address recipient, uint256 amount) returns (bool)',
     'function transferFrom(address sender, address recipient, uint256 amount) returns (bool)'
   ],
-  erc721: ['function safeTransferFrom(address from, address to, uint256 tokenId)'],
+  erc721: [
+    'function safeTransferFrom(address from, address to, uint256 tokenId)'
+  ],
   erc1155: [
     'function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)'
   ]

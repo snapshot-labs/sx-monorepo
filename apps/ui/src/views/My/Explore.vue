@@ -2,10 +2,12 @@
 import { explorePageProtocols } from '../../networks';
 import { ExplorePageProtocol, ProtocolConfig } from '../../networks/types';
 
-const protocols = Object.values(explorePageProtocols).map(({ key, label }: ProtocolConfig) => ({
-  key,
-  label
-}));
+const protocols = Object.values(explorePageProtocols).map(
+  ({ key, label }: ProtocolConfig) => ({
+    key,
+    label
+  })
+);
 const DEFAULT_PROTOCOL = 'snapshot';
 
 const { setTitle } = useTitle();
@@ -60,7 +62,9 @@ watchEffect(() => setTitle('Explore'));
       >
         <UiContainerInfiniteScroll
           :loading-more="spacesStore.loadingMore"
-          @end-reached="spacesStore.fetchMore({ searchQuery: route.query.q as string })"
+          @end-reached="
+            spacesStore.fetchMore({ searchQuery: route.query.q as string })
+          "
         >
           <SpacesListItem
             v-for="space in spacesStore.explorePageSpaces"

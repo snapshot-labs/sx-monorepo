@@ -1,7 +1,7 @@
 import { Response } from 'express';
-import { NETWORKS, getClient } from './networks';
-import * as db from '../db';
 import * as herodotus from './herodotus';
+import { getClient, NETWORKS } from './networks';
+import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
 
 export const createNetworkHandler = (chainId: string) => {
@@ -114,7 +114,12 @@ export const createNetworkHandler = (chainId: string) => {
         );
       }
 
-      console.log('Registering proposal', l1TokenAddress, strategyAddress, snapshotTimestamp);
+      console.log(
+        'Registering proposal',
+        l1TokenAddress,
+        strategyAddress,
+        snapshotTimestamp
+      );
 
       await herodotus.registerProposal({
         chainId,

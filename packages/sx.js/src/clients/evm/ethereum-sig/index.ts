@@ -1,21 +1,30 @@
-import randomBytes from 'randombytes';
 import { AbiCoder } from '@ethersproject/abi';
-import { SplitUint256 } from '../../../utils/split-uint256';
-import { bytesToHex } from '../../../utils/bytes';
-import { getStrategiesWithParams } from '../../../strategies/evm';
-import { domain as baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
-import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
+import randomBytes from 'randombytes';
+import type { EvmNetworkConfig } from '../../../types';
 import type {
-  Propose,
-  UpdateProposal,
-  Vote,
-  Envelope,
-  SignatureData,
   EIP712ProposeMessage,
   EIP712UpdateProposalMessage,
-  EIP712VoteMessage
+  EIP712VoteMessage,
+  Envelope,
+  Propose,
+  SignatureData,
+  UpdateProposal,
+  Vote
 } from '../types';
-import type { EvmNetworkConfig } from '../../../types';
+import type {
+  Signer,
+  TypedDataField,
+  TypedDataSigner
+} from '@ethersproject/abstract-signer';
+import {
+  domain as baseDomain,
+  proposeTypes,
+  updateProposalTypes,
+  voteTypes
+} from './types';
+import { getStrategiesWithParams } from '../../../strategies/evm';
+import { bytesToHex } from '../../../utils/bytes';
+import { SplitUint256 } from '../../../utils/split-uint256';
 
 type EthereumSigClientOpts = {
   networkConfig: EvmNetworkConfig;
@@ -36,7 +45,10 @@ export class EthereumSig {
   }
 
   public async sign<
-    T extends EIP712ProposeMessage | EIP712UpdateProposalMessage | EIP712VoteMessage
+    T extends
+      | EIP712ProposeMessage
+      | EIP712UpdateProposalMessage
+      | EIP712VoteMessage
   >(
     signer: Signer & TypedDataSigner,
     verifyingContract: string,
@@ -77,7 +89,10 @@ export class EthereumSig {
       })
     };
 
-    const res = await fetch(`${this.manaUrl}/eth_rpc/${this.networkConfig.eip712ChainId}`, body);
+    const res = await fetch(
+      `${this.manaUrl}/eth_rpc/${this.networkConfig.eip712ChainId}`,
+      body
+    );
     const json = await res.json();
 
     return json.result;
@@ -113,7 +128,12 @@ export class EthereumSig {
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(signer, data.authenticator, message, proposeTypes);
+    const signatureData = await this.sign(
+      signer,
+      data.authenticator,
+      message,
+      proposeTypes
+    );
 
     return {
       signatureData,
@@ -139,7 +159,12 @@ export class EthereumSig {
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(signer, data.authenticator, message, updateProposalTypes);
+    const signatureData = await this.sign(
+      signer,
+      data.authenticator,
+      message,
+      updateProposalTypes
+    );
 
     return {
       signatureData,
@@ -173,7 +198,12 @@ export class EthereumSig {
       voteMetadataURI: data.metadataUri
     };
 
-    const signatureData = await this.sign(signer, data.authenticator, message, voteTypes);
+    const signatureData = await this.sign(
+      signer,
+      data.authenticator,
+      message,
+      voteTypes
+    );
 
     return {
       signatureData,

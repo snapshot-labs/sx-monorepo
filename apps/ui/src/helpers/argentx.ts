@@ -9,7 +9,9 @@ export default class Connector extends LockConnector {
       const starknet = await argentx.connect();
 
       if (!starknet.wallet) {
-        throw Error('User rejected wallet selection or silent connect found nothing');
+        throw Error(
+          'User rejected wallet selection or silent connect found nothing'
+        );
       }
 
       if (!starknet.wallet.isConnected) {

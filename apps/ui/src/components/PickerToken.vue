@@ -2,11 +2,11 @@
 import { isAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
 import { abis } from '@/helpers/abis';
-import { ETH_CONTRACT } from '@/helpers/constants';
-import { _n, shorten } from '@/helpers/utils';
-import { getProvider } from '@/helpers/provider';
-import Multicaller from '@/helpers/multicaller';
 import type { Token } from '@/helpers/alchemy';
+import { ETH_CONTRACT } from '@/helpers/constants';
+import Multicaller from '@/helpers/multicaller';
+import { getProvider } from '@/helpers/provider';
+import { _n, shorten } from '@/helpers/utils';
 
 const props = defineProps<{
   searchValue: string;
@@ -33,9 +33,14 @@ const filteredAssets = computed(() => {
   return props.assets
     .filter(asset => {
       return (
-        asset.symbol.toLocaleLowerCase().includes(props.searchValue.toLocaleLowerCase()) ||
-        asset.name.toLocaleLowerCase().includes(props.searchValue.toLocaleLowerCase()) ||
-        asset.contractAddress.toLocaleLowerCase() === props.searchValue.toLocaleLowerCase()
+        asset.symbol
+          .toLocaleLowerCase()
+          .includes(props.searchValue.toLocaleLowerCase()) ||
+        asset.name
+          .toLocaleLowerCase()
+          .includes(props.searchValue.toLocaleLowerCase()) ||
+        asset.contractAddress.toLocaleLowerCase() ===
+          props.searchValue.toLocaleLowerCase()
       );
     })
     .sort((a, b) => {
@@ -109,12 +114,18 @@ watch(
 </script>
 
 <template>
-  <div v-if="loading || customTokenLoading" class="px-4 py-3 block flex justify-center">
+  <div
+    v-if="loading || customTokenLoading"
+    class="px-4 py-3 block flex justify-center"
+  >
     <UiLoading />
   </div>
   <template v-else>
     <div
-      v-if="filteredAssets.length === 0 && (!isSearchValueAddress || !isSearchValueValidToken)"
+      v-if="
+        filteredAssets.length === 0 &&
+        (!isSearchValueAddress || !isSearchValueValidToken)
+      "
       class="text-center py-3"
       v-text="'No results'"
     />
@@ -127,10 +138,17 @@ watch(
     >
       <div class="flex items-center min-w-0 pr-2">
         <UiBadgeNetwork :id="networkId">
-          <UiStamp :id="`${networkId}:${asset.contractAddress}`" type="token" :size="32" />
+          <UiStamp
+            :id="`${networkId}:${asset.contractAddress}`"
+            type="token"
+            :size="32"
+          />
         </UiBadgeNetwork>
         <div class="flex flex-col ml-3 leading-5 min-w-0">
-          <div class="text-skin-link" v-text="shorten(asset.symbol, 'symbol')" />
+          <div
+            class="text-skin-link"
+            v-text="shorten(asset.symbol, 'symbol')"
+          />
           <div class="text-[17px] truncate" v-text="shorten(asset.name, 24)" />
         </div>
       </div>

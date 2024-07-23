@@ -1,6 +1,9 @@
 const SIDEKICK_URL = 'https://sh5.co';
 
-export function useAi<T extends 'summary' | 'speech'>(type: T, proposalId: string) {
+export function useAi<T extends 'summary' | 'speech'>(
+  type: T,
+  proposalId: string
+) {
   type ContentType = T extends 'summary' ? string : ArrayBuffer;
 
   const content = ref(null) as Ref<ContentType | null>;
@@ -14,7 +17,9 @@ export function useAi<T extends 'summary' | 'speech'>(type: T, proposalId: strin
 
     try {
       state.value.loading = true;
-      content.value = (await (type === 'summary' ? fetchSummary() : fetchSpeech())) as ContentType;
+      content.value = (await (type === 'summary'
+        ? fetchSummary()
+        : fetchSpeech())) as ContentType;
       state.value.errored = false;
     } catch (e) {
       state.value.errored = true;
@@ -24,9 +29,12 @@ export function useAi<T extends 'summary' | 'speech'>(type: T, proposalId: strin
   }
 
   async function fetchSummary(): Promise<string> {
-    const response = await fetch(`${SIDEKICK_URL}/api/ai/summary/${proposalId}`, {
-      method: 'POST'
-    });
+    const response = await fetch(
+      `${SIDEKICK_URL}/api/ai/summary/${proposalId}`,
+      {
+        method: 'POST'
+      }
+    );
     const data = await response.json();
 
     return data.result as string;

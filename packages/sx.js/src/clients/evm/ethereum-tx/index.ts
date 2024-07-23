@@ -1,18 +1,24 @@
-import { Contract } from '@ethersproject/contracts';
 import { AbiCoder, Interface } from '@ethersproject/abi';
+import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
-import { getAuthenticator } from '../../../authenticators/evm';
-import { getStrategiesWithParams } from '../../../strategies/evm';
-import SpaceAbi from './abis/Space.json';
-import ProxyFactoryAbi from './abis/ProxyFactory.json';
+import type { EvmNetworkConfig } from '../../../types';
+import type {
+  AddressConfig,
+  Envelope,
+  Propose,
+  UpdateProposal,
+  Vote
+} from '../types';
+import type { Signer } from '@ethersproject/abstract-signer';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
-import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
 import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy.json';
 import IsokratiaExecutionStrategyAbi from './abis/IsokratiaExecutionStrategy.json';
-import type { Signer } from '@ethersproject/abstract-signer';
-import type { Propose, UpdateProposal, Vote, Envelope, AddressConfig } from '../types';
-import type { EvmNetworkConfig } from '../../../types';
+import ProxyFactoryAbi from './abis/ProxyFactory.json';
+import SpaceAbi from './abis/Space.json';
+import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
+import { getAuthenticator } from '../../../authenticators/evm';
+import { getStrategiesWithParams } from '../../../strategies/evm';
 
 type SpaceParams = {
   controller: string;
@@ -102,14 +108,18 @@ export class EthereumTx {
     saltNonce = saltNonce || `0x${randomBytes(32).toString('hex')}`;
 
     const implementationAddress =
-      this.networkConfig.executionStrategiesImplementations['SimpleQuorumAvatar'];
+      this.networkConfig.executionStrategiesImplementations[
+        'SimpleQuorumAvatar'
+      ];
 
     if (!implementationAddress) {
       throw new Error('Missing SimpleQuorumAvatar implementation address');
     }
 
     const abiCoder = new AbiCoder();
-    const avatarExecutionStrategyInterface = new Interface(AvatarExecutionStrategyAbi);
+    const avatarExecutionStrategyInterface = new Interface(
+      AvatarExecutionStrategyAbi
+    );
     const proxyFactoryContract = new Contract(
       this.networkConfig.proxyFactory,
       ProxyFactoryAbi,
@@ -120,14 +130,20 @@ export class EthereumTx {
       ['address', 'address', 'address[]', 'uint256'],
       [controller, target, spaces, quorum]
     );
-    const functionData = avatarExecutionStrategyInterface.encodeFunctionData('setUp', [initParams]);
+    const functionData = avatarExecutionStrategyInterface.encodeFunctionData(
+      'setUp',
+      [initParams]
+    );
 
     const sender = await signer.getAddress();
     const salt = await this.getSalt({
       sender,
       saltNonce
     });
-    const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
+    const address = await proxyFactoryContract.predictProxyAddress(
+      implementationAddress,
+      salt
+    );
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
@@ -149,14 +165,18 @@ export class EthereumTx {
     saltNonce = saltNonce || `0x${randomBytes(32).toString('hex')}`;
 
     const implementationAddress =
-      this.networkConfig.executionStrategiesImplementations['SimpleQuorumTimelock'];
+      this.networkConfig.executionStrategiesImplementations[
+        'SimpleQuorumTimelock'
+      ];
 
     if (!implementationAddress) {
       throw new Error('Missing SimpleQuorumTimelock implementation address');
     }
 
     const abiCoder = new AbiCoder();
-    const timelockExecutionStrategyInterface = new Interface(TimelockExecutionStrategyAbi);
+    const timelockExecutionStrategyInterface = new Interface(
+      TimelockExecutionStrategyAbi
+    );
     const proxyFactoryContract = new Contract(
       this.networkConfig.proxyFactory,
       ProxyFactoryAbi,
@@ -167,16 +187,20 @@ export class EthereumTx {
       ['address', 'address', 'address[]', 'uint256', 'uint256'],
       [controller, vetoGuardian, spaces, timelockDelay, quorum]
     );
-    const functionData = timelockExecutionStrategyInterface.encodeFunctionData('setUp', [
-      initParams
-    ]);
+    const functionData = timelockExecutionStrategyInterface.encodeFunctionData(
+      'setUp',
+      [initParams]
+    );
 
     const sender = await signer.getAddress();
     const salt = await this.getSalt({
       sender,
       saltNonce
     });
-    const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
+    const address = await proxyFactoryContract.predictProxyAddress(
+      implementationAddress,
+      salt
+    );
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
@@ -188,7 +212,14 @@ export class EthereumTx {
 
   async deployAxiomExecution({
     signer,
-    params: { controller, quorum, contractAddress, slotIndex, space, querySchema },
+    params: {
+      controller,
+      quorum,
+      contractAddress,
+      slotIndex,
+      space,
+      querySchema
+    },
     saltNonce
   }: {
     signer: Signer;
@@ -197,14 +228,17 @@ export class EthereumTx {
   }): Promise<{ txId: string; address: string }> {
     saltNonce = saltNonce || `0x${randomBytes(32).toString('hex')}`;
 
-    const implementationAddress = this.networkConfig.executionStrategiesImplementations['Axiom'];
+    const implementationAddress =
+      this.networkConfig.executionStrategiesImplementations['Axiom'];
 
     if (!implementationAddress) {
       throw new Error('Missing Axiom implementation address');
     }
 
     const abiCoder = new AbiCoder();
-    const axiomExecutionStrategyInterface = new Interface(AxiomExecutionStrategyAbi);
+    const axiomExecutionStrategyInterface = new Interface(
+      AxiomExecutionStrategyAbi
+    );
     const proxyFactoryContract = new Contract(
       this.networkConfig.proxyFactory,
       ProxyFactoryAbi,
@@ -215,14 +249,20 @@ export class EthereumTx {
       ['address', 'uint256', 'address', 'uint256', 'address', 'bytes32'],
       [controller, quorum, contractAddress, slotIndex, space, querySchema]
     );
-    const functionData = axiomExecutionStrategyInterface.encodeFunctionData('setUp', [initParams]);
+    const functionData = axiomExecutionStrategyInterface.encodeFunctionData(
+      'setUp',
+      [initParams]
+    );
 
     const sender = await signer.getAddress();
     const salt = await this.getSalt({
       sender,
       saltNonce
     });
-    const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
+    const address = await proxyFactoryContract.predictProxyAddress(
+      implementationAddress,
+      salt
+    );
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
@@ -234,7 +274,13 @@ export class EthereumTx {
 
   async deployIsokratiaExecution({
     signer,
-    params: { provingTimeAllowance, quorum, queryAddress, contractAddress, slotIndex },
+    params: {
+      provingTimeAllowance,
+      quorum,
+      queryAddress,
+      contractAddress,
+      slotIndex
+    },
     saltNonce
   }: {
     signer: Signer;
@@ -251,7 +297,9 @@ export class EthereumTx {
     }
 
     const abiCoder = new AbiCoder();
-    const isokratiaExecutionStrategyInterface = new Interface(IsokratiaExecutionStrategyAbi);
+    const isokratiaExecutionStrategyInterface = new Interface(
+      IsokratiaExecutionStrategyAbi
+    );
     const proxyFactoryContract = new Contract(
       this.networkConfig.proxyFactory,
       ProxyFactoryAbi,
@@ -262,16 +310,20 @@ export class EthereumTx {
       ['uint32', 'uint256', 'address', 'address', 'uint256'],
       [provingTimeAllowance, quorum, queryAddress, contractAddress, slotIndex]
     );
-    const functionData = isokratiaExecutionStrategyInterface.encodeFunctionData('setUp', [
-      initParams
-    ]);
+    const functionData = isokratiaExecutionStrategyInterface.encodeFunctionData(
+      'setUp',
+      [initParams]
+    );
 
     const sender = await signer.getAddress();
     const salt = await this.getSalt({
       sender,
       saltNonce
     });
-    const address = await proxyFactoryContract.predictProxyAddress(implementationAddress, salt);
+    const address = await proxyFactoryContract.predictProxyAddress(
+      implementationAddress,
+      salt
+    );
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
@@ -349,7 +401,13 @@ export class EthereumTx {
     return keccak256(['address', 'uint256'], [sender, saltNonce]);
   }
 
-  async predictSpaceAddress({ signer, saltNonce }: { signer: Signer; saltNonce: string }) {
+  async predictSpaceAddress({
+    signer,
+    saltNonce
+  }: {
+    signer: Signer;
+    saltNonce: string;
+  }) {
     const proxyFactoryContract = new Contract(
       this.networkConfig.proxyFactory,
       ProxyFactoryAbi,
@@ -362,14 +420,18 @@ export class EthereumTx {
       saltNonce
     });
 
-    return proxyFactoryContract.predictProxyAddress(this.networkConfig.masterSpace, salt);
+    return proxyFactoryContract.predictProxyAddress(
+      this.networkConfig.masterSpace,
+      salt
+    );
   }
 
   async propose(
     { signer, envelope }: { signer: Signer; envelope: Envelope<Propose> },
     opts: CallOptions = {}
   ) {
-    const proposerAddress = envelope.signatureData?.address || (await signer.getAddress());
+    const proposerAddress =
+      envelope.signatureData?.address || (await signer.getAddress());
 
     const userStrategies = await getStrategiesWithParams(
       'propose',
@@ -391,13 +453,22 @@ export class EthereumTx {
     const selector = functionData.slice(0, 10);
     const calldata = `0x${functionData.slice(10)}`;
 
-    const authenticator = getAuthenticator(envelope.data.authenticator, this.networkConfig);
+    const authenticator = getAuthenticator(
+      envelope.data.authenticator,
+      this.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
 
-    const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
-    const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
+    const { abi, args } = authenticator.createCall(envelope, selector, [
+      calldata
+    ]);
+    const authenticatorContract = new Contract(
+      envelope.data.authenticator,
+      abi,
+      signer
+    );
     const promise = authenticatorContract.authenticate(...args);
 
     return opts.noWait ? null : promise;
@@ -413,7 +484,8 @@ export class EthereumTx {
     },
     opts: CallOptions = {}
   ) {
-    const authorAddress = envelope.signatureData?.address || (await signer.getAddress());
+    const authorAddress =
+      envelope.signatureData?.address || (await signer.getAddress());
 
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('updateProposal', [
@@ -426,13 +498,22 @@ export class EthereumTx {
     const selector = functionData.slice(0, 10);
     const calldata = `0x${functionData.slice(10)}`;
 
-    const authenticator = getAuthenticator(envelope.data.authenticator, this.networkConfig);
+    const authenticator = getAuthenticator(
+      envelope.data.authenticator,
+      this.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
 
-    const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
-    const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
+    const { abi, args } = authenticator.createCall(envelope, selector, [
+      calldata
+    ]);
+    const authenticatorContract = new Contract(
+      envelope.data.authenticator,
+      abi,
+      signer
+    );
     const promise = authenticatorContract.authenticate(...args);
 
     return opts.noWait ? null : promise;
@@ -442,7 +523,8 @@ export class EthereumTx {
     { signer, envelope }: { signer: Signer; envelope: Envelope<Vote> },
     opts: CallOptions = {}
   ) {
-    const voterAddress = envelope.signatureData?.address || (await signer.getAddress());
+    const voterAddress =
+      envelope.signatureData?.address || (await signer.getAddress());
 
     const userVotingStrategies = await getStrategiesWithParams(
       'propose',
@@ -464,13 +546,22 @@ export class EthereumTx {
     const selector = functionData.slice(0, 10);
     const calldata = `0x${functionData.slice(10)}`;
 
-    const authenticator = getAuthenticator(envelope.data.authenticator, this.networkConfig);
+    const authenticator = getAuthenticator(
+      envelope.data.authenticator,
+      this.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
-    const { abi, args } = authenticator.createCall(envelope, selector, [calldata]);
+    const { abi, args } = authenticator.createCall(envelope, selector, [
+      calldata
+    ]);
 
-    const authenticatorContract = new Contract(envelope.data.authenticator, abi, signer);
+    const authenticatorContract = new Contract(
+      envelope.data.authenticator,
+      abi,
+      signer
+    );
     const promise = authenticatorContract.authenticate(...args);
 
     return opts.noWait ? null : promise;
@@ -513,7 +604,8 @@ export class EthereumTx {
       TimelockExecutionStrategyAbi,
       signer
     );
-    const promise = executionStrategyContract.executeQueuedProposal(executionParams);
+    const promise =
+      executionStrategyContract.executeQueuedProposal(executionParams);
 
     return opts.noWait ? null : promise;
   }
@@ -541,7 +633,11 @@ export class EthereumTx {
   }
 
   async cancel(
-    { signer, space, proposal }: { signer: Signer; space: string; proposal: number },
+    {
+      signer,
+      space,
+      proposal
+    }: { signer: Signer; space: string; proposal: number },
     opts: CallOptions = {}
   ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
@@ -586,12 +682,14 @@ export class EthereumTx {
         addr: NO_UPDATE_ADDRESS,
         params: '0x00'
       },
-      proposalValidationStrategyMetadataURI: settings.proposalValidationStrategyMetadataUri ?? '',
+      proposalValidationStrategyMetadataURI:
+        settings.proposalValidationStrategyMetadataUri ?? '',
       authenticatorsToAdd: settings.authenticatorsToAdd ?? [],
       authenticatorsToRemove: settings.authenticatorsToRemove ?? [],
       votingStrategiesToAdd: settings.votingStrategiesToAdd ?? [],
       votingStrategiesToRemove: settings.votingStrategiesToRemove ?? [],
-      votingStrategyMetadataURIsToAdd: settings.votingStrategyMetadataUrisToAdd ?? []
+      votingStrategyMetadataURIsToAdd:
+        settings.votingStrategyMetadataUrisToAdd ?? []
     });
 
     return opts.noWait ? null : promise;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNames } from '@/helpers/stamp';
-import { metadataNetwork, getNetwork } from '@/networks';
+import { getNetwork, metadataNetwork } from '@/networks';
 import { ProposalsFilter } from '@/networks/types';
 import { NetworkID, Proposal } from '@/types';
 
@@ -43,7 +43,9 @@ async function withAuthorNames(proposals: Proposal[]) {
 async function loadProposalsPage(skip = 0) {
   return withAuthorNames(
     await network.value.api.loadProposals(
-      followedSpacesStore.followedSpacesIds.map(compositeSpaceId => compositeSpaceId.split(':')[1]),
+      followedSpacesStore.followedSpacesIds.map(
+        compositeSpaceId => compositeSpaceId.split(':')[1]
+      ),
       { limit: PROPOSALS_LIMIT, skip },
       metaStore.getCurrent(metadataNetwork) || 0,
       { state: state.value }
@@ -77,7 +79,10 @@ onMounted(() => {
 });
 
 watch(
-  [() => followedSpacesStore.followedSpacesLoaded, () => followedSpacesStore.followedSpacesIds],
+  [
+    () => followedSpacesStore.followedSpacesLoaded,
+    () => followedSpacesStore.followedSpacesIds
+  ],
   ([followedSpacesloaded, followedSpacesIds]) => {
     if (!followedSpacesloaded) return;
 
@@ -90,7 +95,10 @@ watch(
     }
 
     for (const network in followedSpacesStore.followedSpaceIdsByNetwork) {
-      loadVotes(network as NetworkID, followedSpacesStore.followedSpaceIdsByNetwork[network]);
+      loadVotes(
+        network as NetworkID,
+        followedSpacesStore.followedSpaceIdsByNetwork[network]
+      );
     }
     fetch();
   },

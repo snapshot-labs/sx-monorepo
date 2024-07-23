@@ -1,8 +1,8 @@
-import { randomBytes } from '@ethersproject/random';
 import { BigNumber } from '@ethersproject/bignumber';
 import { arrayify, hexlify } from '@ethersproject/bytes';
-import { toUtf8Bytes, formatBytes32String } from '@ethersproject/strings';
-import { init, encrypt } from '@shutter-network/shutter-crypto';
+import { randomBytes } from '@ethersproject/random';
+import { formatBytes32String, toUtf8Bytes } from '@ethersproject/strings';
+import { encrypt, init } from '@shutter-network/shutter-crypto';
 import type { Privacy } from '../../types';
 
 const SHUTTER_EON_PUBKEY =
@@ -20,10 +20,18 @@ export async function encryptChoices(
   throw new Error('Encryption type not supported');
 }
 
-async function encryptShutterChoice(choice: string, id: string): Promise<string> {
-  const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+async function encryptShutterChoice(
+  choice: string,
+  id: string
+): Promise<string> {
+  const isBrowser =
+    typeof window !== 'undefined' && typeof window.document !== 'undefined';
   const shutterWasm = isBrowser
-    ? (await import('@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url')).default
+    ? (
+        await import(
+          '@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url'
+        )
+      ).default
     : undefined;
 
   if (window) await init(shutterWasm);
@@ -37,7 +45,12 @@ async function encryptShutterChoice(choice: string, id: string): Promise<string>
 
   const sigma = arrayify(BigNumber.from(randomBytes(32)));
 
-  const encryptedMessage = await encrypt(message, eonPublicKey, proposalId, sigma);
+  const encryptedMessage = await encrypt(
+    message,
+    eonPublicKey,
+    proposalId,
+    sigma
+  );
 
   return hexlify(encryptedMessage) ?? null;
 }

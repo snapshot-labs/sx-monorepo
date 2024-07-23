@@ -1,9 +1,12 @@
-import { getExecutionData as _getExecutionData, Choice as SdkChoice } from '@snapshot-labs/sx';
+import {
+  getExecutionData as _getExecutionData,
+  Choice as SdkChoice
+} from '@snapshot-labs/sx';
 import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import { EVM_CONNECTORS, STARKNET_CONNECTORS } from './constants';
 import { getUrl } from '@/helpers/utils';
 import { Connector, NetworkHelpers, StrategyConfig } from '@/networks/types';
 import { Choice, Space } from '@/types';
+import { EVM_CONNECTORS, STARKNET_CONNECTORS } from './constants';
 
 type SpaceExecutionData = Pick<Space, 'executors' | 'executors_types'>;
 type ExecutorType = Parameters<typeof _getExecutionData>[0];
@@ -28,7 +31,9 @@ export function getExecutionData(
     throw new Error('No supported executor configured for this space');
   }
 
-  const executorType = space.executors_types[supportedExecutionIndex] as ExecutorType;
+  const executorType = space.executors_types[
+    supportedExecutionIndex
+  ] as ExecutorType;
   return _getExecutionData(executorType, executionStrategy, {
     transactions,
     destination: destinationAddress || undefined
@@ -46,7 +51,10 @@ export async function parseStrategyMetadata(metadata: string | null) {
   return res.json();
 }
 
-export async function buildMetadata(helpers: NetworkHelpers, config: StrategyConfig) {
+export async function buildMetadata(
+  helpers: NetworkHelpers,
+  config: StrategyConfig
+) {
   if (!config.generateMetadata) return '';
 
   const metadata = await config.generateMetadata(config.params);
@@ -86,8 +94,10 @@ export function createStrategyPicker({
       .sort((a, b) => {
         const aRelayer = helpers.getRelayerAuthenticatorType(a);
         const bRelayer = helpers.getRelayerAuthenticatorType(b);
-        const aLowPriority = aRelayer && lowPriorityAuthenticators.includes(aRelayer);
-        const bLowPriority = bRelayer && lowPriorityAuthenticators.includes(bRelayer);
+        const aLowPriority =
+          aRelayer && lowPriorityAuthenticators.includes(aRelayer);
+        const bLowPriority =
+          bRelayer && lowPriorityAuthenticators.includes(bRelayer);
 
         if (aLowPriority && !bLowPriority) {
           return 1;
@@ -115,7 +125,8 @@ export function createStrategyPicker({
         const relayerType = helpers.getRelayerAuthenticatorType(authenticator);
 
         let connectors: Connector[] = [];
-        if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) connectors = EVM_CONNECTORS;
+        if (relayerType && ['evm', 'evm-tx'].includes(relayerType))
+          connectors = EVM_CONNECTORS;
         else if (relayerType === 'starknet') connectors = STARKNET_CONNECTORS;
         else connectors = managerConnectors;
 
@@ -131,10 +142,16 @@ export function createStrategyPicker({
     );
 
     const selectedStrategies = strategies
-      .map((strategy, index) => ({ address: strategy, index: strategiesIndicies[index] }) as const)
+      .map(
+        (strategy, index) =>
+          ({ address: strategy, index: strategiesIndicies[index] }) as const
+      )
       .filter(({ address }) => helpers.isStrategySupported(address));
 
-    if (!authenticatorInfo || (strategies.length !== 0 && selectedStrategies.length === 0)) {
+    if (
+      !authenticatorInfo ||
+      (strategies.length !== 0 && selectedStrategies.length === 0)
+    ) {
       throw new Error('Unsupported space');
     }
 

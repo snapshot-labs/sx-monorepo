@@ -1,44 +1,48 @@
-import { offchainGoerli } from '../../../offchainNetworks';
-import { encryptChoices } from '../utils';
+import type { OffchainNetworkConfig } from '../../../types';
+import type {
+  Signer,
+  TypedDataField,
+  TypedDataSigner
+} from '@ethersproject/abstract-signer';
 import {
-  domain,
-  proposeTypes,
-  basicVoteTypes,
-  singleChoiceVoteTypes,
-  approvalVoteTypes,
-  encryptedVoteTypes,
-  rankedChoiceVoteTypes,
-  weightedVoteTypes,
-  updateProposalTypes,
-  cancelProposalTypes,
-  followSpaceTypes,
-  unfollowSpaceTypes,
   aliasTypes,
-  updateUserTypes
+  approvalVoteTypes,
+  basicVoteTypes,
+  cancelProposalTypes,
+  domain,
+  encryptedVoteTypes,
+  followSpaceTypes,
+  proposeTypes,
+  rankedChoiceVoteTypes,
+  singleChoiceVoteTypes,
+  unfollowSpaceTypes,
+  updateProposalTypes,
+  updateUserTypes,
+  weightedVoteTypes
 } from './types';
-import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
+import { offchainGoerli } from '../../../offchainNetworks';
 import {
-  type SignatureData,
-  type Envelope,
-  type Vote,
-  type Propose,
-  type UpdateProposal,
   type CancelProposal,
-  type FollowSpace,
-  type UnfollowSpace,
-  type SetAlias,
-  type UpdateUser,
-  type EIP712Message,
-  type EIP712VoteMessage,
-  type EIP712ProposeMessage,
-  type EIP712UpdateProposal,
   type EIP712CancelProposalMessage,
   type EIP712FollowSpaceMessage,
-  type EIP712UnfollowSpaceMessage,
+  type EIP712Message,
+  type EIP712ProposeMessage,
   type EIP712SetAliasMessage,
-  type EIP712UpdateUserMessage
+  type EIP712UnfollowSpaceMessage,
+  type EIP712UpdateProposal,
+  type EIP712UpdateUserMessage,
+  type EIP712VoteMessage,
+  type Envelope,
+  type FollowSpace,
+  type Propose,
+  type SetAlias,
+  type SignatureData,
+  type UnfollowSpace,
+  type UpdateProposal,
+  type UpdateUser,
+  type Vote
 } from '../types';
-import type { OffchainNetworkConfig } from '../../../types';
+import { encryptChoices } from '../utils';
 
 const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
@@ -61,7 +65,8 @@ export class EthereumSig {
 
   constructor(opts?: EthereumSigClientOpts) {
     this.networkConfig = opts?.networkConfig || offchainGoerli;
-    this.sequencerUrl = opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
+    this.sequencerUrl =
+      opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
   }
 
   public async sign<
@@ -99,10 +104,22 @@ export class EthereumSig {
 
   public async send(
     envelope: Envelope<
-      Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace | SetAlias
+      | Vote
+      | Propose
+      | UpdateProposal
+      | CancelProposal
+      | FollowSpace
+      | UnfollowSpace
+      | SetAlias
     >
   ) {
-    const { address, signature: sig, domain, types, message } = envelope.signatureData!;
+    const {
+      address,
+      signature: sig,
+      domain,
+      types,
+      message
+    } = envelope.signatureData!;
     const payload = {
       address,
       sig,
@@ -131,7 +148,9 @@ export class EthereumSig {
 
     if (result.error) {
       throw new Error(
-        typeof result.error_description === 'string' ? result.error_description : result.error
+        typeof result.error_description === 'string'
+          ? result.error_description
+          : result.error
       );
     }
 
@@ -231,7 +250,9 @@ export class EthereumSig {
       message.choice = await encryptChoices(
         data.privacy,
         data.proposal,
-        typeof message.choice === 'string' ? message.choice : JSON.stringify(message.choice)
+        typeof message.choice === 'string'
+          ? message.choice
+          : JSON.stringify(message.choice)
       );
     }
     const signatureData = await this.sign(signer, message, voteType);

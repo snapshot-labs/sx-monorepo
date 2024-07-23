@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { metadataNetwork, getNetwork } from '@/networks';
+import { getNetwork, metadataNetwork } from '@/networks';
 import type { User } from '@/types';
 
 type UserRecord = {

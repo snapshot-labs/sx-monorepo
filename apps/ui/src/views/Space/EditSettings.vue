@@ -2,7 +2,11 @@
 import objectHash from 'object-hash';
 import { compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
-import { StrategyConfig, StrategyTemplate, GeneratedMetadata } from '@/networks/types';
+import {
+  GeneratedMetadata,
+  StrategyConfig,
+  StrategyTemplate
+} from '@/networks/types';
 import { Space, StrategyParsedMetadata } from '@/types';
 
 const props = defineProps<{ space: Space }>();
@@ -21,7 +25,9 @@ function processParams(paramsArray: string[]) {
   return paramsArray.map(params => (params === '' ? [] : params.split(',')));
 }
 
-function processMetadata(metadataArray: StrategyParsedMetadata[]): GeneratedMetadata[] {
+function processMetadata(
+  metadataArray: StrategyParsedMetadata[]
+): GeneratedMetadata[] {
   return metadataArray.map(metadata => {
     const result: GeneratedMetadata = {
       name: metadata.name,
@@ -65,7 +71,9 @@ async function getInitialStrategiesConfig(
     };
   });
 
-  return (await Promise.all(promises)).filter(strategy => strategy !== null) as StrategyConfig[];
+  return (await Promise.all(promises)).filter(
+    strategy => strategy !== null
+  ) as StrategyConfig[];
 }
 
 async function getInitialValidationStrategy(
@@ -82,7 +90,9 @@ async function getInitialValidationStrategy(
 
   if (!strategy) return null;
 
-  const resolvedParams = strategy.parseParams ? await strategy.parseParams(params, null) : {};
+  const resolvedParams = strategy.parseParams
+    ? await strategy.parseParams(params, null)
+    : {};
   const strategies = await getInitialStrategiesConfig(
     nestedStrategies,
     network.value.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
@@ -107,10 +117,14 @@ async function hasStrategyChanged(
 ) {
   let params;
   if (evmNetworks.includes(props.space.network)) {
-    params = strategy.generateParams ? strategy.generateParams(strategy.params) : ['0x'];
+    params = strategy.generateParams
+      ? strategy.generateParams(strategy.params)
+      : ['0x'];
     previousParams = previousParams ?? ['0x'];
   } else {
-    params = strategy.generateParams ? strategy.generateParams(strategy.params) : [];
+    params = strategy.generateParams
+      ? strategy.generateParams(strategy.params)
+      : [];
     previousParams = previousParams ?? [];
   }
 

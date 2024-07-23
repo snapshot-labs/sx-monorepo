@@ -1,7 +1,7 @@
-import { createStarknetNetwork } from './starknet';
+import { NetworkID } from '@/types';
 import { createEvmNetwork } from './evm';
 import { createOffchainNetwork } from './offchain';
-import { NetworkID } from '@/types';
+import { createStarknetNetwork } from './starknet';
 import { ExplorePageProtocol, ProtocolConfig, ReadWriteNetwork } from './types';
 
 const snapshotNetwork = createOffchainNetwork('s');
@@ -15,17 +15,27 @@ const ethereumNetwork = createEvmNetwork('eth');
 const sepoliaNetwork = createEvmNetwork('sep');
 const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
-export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORKS
+export const enabledNetworks: NetworkID[] = import.meta.env
+  .VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
   : ['s', 's-tn', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
 
-export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'oeth', 'sep', 'linea-testnet'];
+export const evmNetworks: NetworkID[] = [
+  'eth',
+  'matic',
+  'arb1',
+  'oeth',
+  'sep',
+  'linea-testnet'
+];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 // This network is used for aliases/follows/profiles/explore page.
-export const metadataNetwork: NetworkID = import.meta.env.VITE_METADATA_NETWORK || 's';
+export const metadataNetwork: NetworkID =
+  import.meta.env.VITE_METADATA_NETWORK || 's';
 
 export const getNetwork = (id: NetworkID) => {
-  if (!enabledNetworks.includes(id)) throw new Error(`Network ${id} is not enabled`);
+  if (!enabledNetworks.includes(id))
+    throw new Error(`Network ${id} is not enabled`);
 
   if (id === 's') return snapshotNetwork;
   if (id === 's-tn') return snapshotTestnetNetwork;
@@ -63,17 +73,20 @@ export const supportsNullCurrent = (networkID: NetworkID) => {
 
 export const DEFAULT_SPACES_LIMIT = 1000;
 
-export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> = {
-  snapshot: {
-    key: 'snapshot',
-    label: 'Snapshot',
-    networks: [metadataNetwork],
-    limit: 18
-  },
-  snapshotx: {
-    key: 'snapshotx',
-    label: 'Snapshot X',
-    networks: enabledNetworks.filter(network => !offchainNetworks.includes(network)),
-    limit: DEFAULT_SPACES_LIMIT
-  }
-};
+export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
+  {
+    snapshot: {
+      key: 'snapshot',
+      label: 'Snapshot',
+      networks: [metadataNetwork],
+      limit: 18
+    },
+    snapshotx: {
+      key: 'snapshotx',
+      label: 'Snapshot X',
+      networks: enabledNetworks.filter(
+        network => !offchainNetworks.includes(network)
+      ),
+      limit: DEFAULT_SPACES_LIMIT
+    }
+  };

@@ -1,6 +1,13 @@
 <script setup lang="ts">
+import {
+  _n,
+  _rt,
+  _t,
+  _vp,
+  getChoiceText,
+  shortenAddress
+} from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { shortenAddress, _t, _rt, _n, getChoiceText, _vp } from '@/helpers/utils';
 import { Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
@@ -15,13 +22,17 @@ const votes: Ref<Vote[]> = ref([]);
 const loaded = ref(false);
 const loadingMore = ref(false);
 const hasMore = ref(false);
-const sortBy = ref('vp-desc' as 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc');
+const sortBy = ref(
+  'vp-desc' as 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
+);
 const choiceFilter = ref('any' as 'any' | 'for' | 'against' | 'abstain');
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => {
   return Math.max(
-    ...props.proposal.space.strategies_parsed_metadata.map(metadata => metadata.decimals),
+    ...props.proposal.space.strategies_parsed_metadata.map(
+      metadata => metadata.decimals
+    ),
     0
   );
 });
@@ -46,7 +57,9 @@ async function loadVotes() {
 
 function handleSortChange(type: 'vp' | 'created') {
   if (sortBy.value.startsWith(type)) {
-    sortBy.value = sortBy.value.endsWith('desc') ? `${type}-asc` : `${type}-desc`;
+    sortBy.value = sortBy.value.endsWith('desc')
+      ? `${type}-asc`
+      : `${type}-desc`;
   } else {
     sortBy.value = `${type}-desc`;
   }
@@ -103,7 +116,9 @@ watch([sortBy, choiceFilter], () => {
       <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
     </button>
     <div class="w-[25%] lg:w-[20%] truncate">
-      <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
+      <template v-if="offchainNetworks.includes(proposal.network)"
+        >Choice</template
+      >
       <UiSelectDropdown
         v-else
         v-model="choiceFilter"
@@ -139,15 +154,25 @@ watch([sortBy, choiceFilter], () => {
 
   <UiLoading v-if="!loaded" class="px-4 py-3 block" />
   <template v-else>
-    <div v-if="votes.length === 0" class="px-4 py-3 flex items-center space-x-2">
+    <div
+      v-if="votes.length === 0"
+      class="px-4 py-3 flex items-center space-x-2"
+    >
       <IH-exclamation-circle class="inline-block" />
       <span>There are no votes here.</span>
     </div>
-    <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
+    <UiContainerInfiniteScroll
+      :loading-more="loadingMore"
+      @end-reached="handleEndReached"
+    >
       <template #loading>
         <UiLoading class="px-4 py-3 block" />
       </template>
-      <div v-for="(vote, i) in votes" :key="i" class="border-b relative flex space-x-1">
+      <div
+        v-for="(vote, i) in votes"
+        :key="i"
+        class="border-b relative flex space-x-1"
+      >
         <div
           class="top-0 bottom-0 left-0 -z-10 pointer-events-none absolute"
           :style="{
@@ -159,7 +184,9 @@ watch([sortBy, choiceFilter], () => {
               : 'bg-skin-border opacity-40'
           "
         />
-        <div class="pl-4 py-3 w-[50%] lg:w-[40%] flex items-center gap-x-3 truncate">
+        <div
+          class="pl-4 py-3 w-[50%] lg:w-[40%] flex items-center gap-x-3 truncate"
+        >
           <UiStamp :id="vote.voter.id" :size="32" />
           <router-link
             :to="{
@@ -170,7 +197,10 @@ watch([sortBy, choiceFilter], () => {
             }"
             class="overflow-hidden leading-[22px]"
           >
-            <h4 class="truncate" v-text="vote.voter.name || shortenAddress(vote.voter.id)" />
+            <h4
+              class="truncate"
+              v-text="vote.voter.name || shortenAddress(vote.voter.id)"
+            />
             <div
               class="text-[17px] text-skin-text truncate"
               v-text="shortenAddress(vote.voter.id)"
@@ -184,10 +214,14 @@ watch([sortBy, choiceFilter], () => {
           <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
         </div>
         <div class="w-[25%] lg:w-[20%] flex items-center truncate">
-          <template v-if="!!props.proposal.privacy && !props.proposal.completed">
+          <template
+            v-if="!!props.proposal.privacy && !props.proposal.completed"
+          >
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
-                <span class="text-skin-heading leading-[22px]">Encrypted choice</span>
+                <span class="text-skin-heading leading-[22px]"
+                  >Encrypted choice</span
+                >
                 <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
               </div>
             </div>
@@ -225,7 +259,9 @@ watch([sortBy, choiceFilter], () => {
             {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
             {{ proposal.space.voting_power_symbol }}
           </h4>
-          <div class="text-[17px]">{{ _n((vote.vp / proposal.scores_total) * 100) }}%</div>
+          <div class="text-[17px]">
+            {{ _n((vote.vp / proposal.scores_total) * 100) }}%
+          </div>
         </div>
         <div class="w-[30px] lg:w-[60px] flex items-center justify-center">
           <UiDropdown>

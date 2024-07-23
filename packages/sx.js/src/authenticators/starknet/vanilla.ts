@@ -1,23 +1,26 @@
 import { Call, CallData, hash, shortString, uint256 } from 'starknet';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
-import { getChoiceEnum, getUserAddressEnum } from '../../utils/starknet-enums';
 import {
   Authenticator,
   Envelope,
   Propose,
-  Vote,
-  UpdateProposal,
   ProposeCallArgs,
-  VoteCallArgs,
-  UpdateProposalCallArgs
+  UpdateProposal,
+  UpdateProposalCallArgs,
+  Vote,
+  VoteCallArgs
 } from '../../types';
+import { getChoiceEnum, getUserAddressEnum } from '../../utils/starknet-enums';
 
 const callData = new CallData(SpaceAbi);
 
 export default function createVanillaAuthenticator(): Authenticator {
   return {
     type: 'vanilla',
-    createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call {
+    createProposeCall(
+      envelope: Envelope<Propose>,
+      args: ProposeCallArgs
+    ): Call {
       const { space, authenticator } = envelope.data;
 
       const addressType = args.author.length === 42 ? 'ETHEREUM' : 'STARKNET';
@@ -31,7 +34,12 @@ export default function createVanillaAuthenticator(): Authenticator {
       return {
         contractAddress: authenticator,
         entrypoint: 'authenticate',
-        calldata: [space, hash.getSelectorFromName('propose'), calldata.length, ...calldata]
+        calldata: [
+          space,
+          hash.getSelectorFromName('propose'),
+          calldata.length,
+          ...calldata
+        ]
       };
     },
     createVoteCall(envelope: Envelope<Vote>, args: VoteCallArgs): Call {
@@ -49,7 +57,12 @@ export default function createVanillaAuthenticator(): Authenticator {
       return {
         contractAddress: authenticator,
         entrypoint: 'authenticate',
-        calldata: [space, hash.getSelectorFromName('vote'), calldata.length, ...calldata]
+        calldata: [
+          space,
+          hash.getSelectorFromName('vote'),
+          calldata.length,
+          ...calldata
+        ]
       };
     },
     createUpdateProposalCall(
@@ -69,7 +82,12 @@ export default function createVanillaAuthenticator(): Authenticator {
       return {
         contractAddress: authenticator,
         entrypoint: 'authenticate',
-        calldata: [space, hash.getSelectorFromName('update_proposal'), calldata.length, ...calldata]
+        calldata: [
+          space,
+          hash.getSelectorFromName('update_proposal'),
+          calldata.length,
+          ...calldata
+        ]
       };
     }
   };

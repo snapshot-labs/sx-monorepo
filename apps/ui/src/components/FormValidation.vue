@@ -83,7 +83,10 @@ watch(
         >
           <div class="flex min-w-0">
             <div class="whitespace-nowrap">{{ model.name }}</div>
-            <div v-if="model.generateSummary" class="ml-2 pr-2 text-skin-text truncate">
+            <div
+              v-if="model.generateSummary"
+              class="ml-2 pr-2 text-skin-text truncate"
+            >
               {{ model.generateSummary(model.params) }}
             </div>
           </div>

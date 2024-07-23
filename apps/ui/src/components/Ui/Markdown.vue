@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import { icons } from '@iconify-json/heroicons-outline';
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import json from 'highlight.js/lib/languages/json';
-import rust from 'highlight.js/lib/languages/rust';
 import python from 'highlight.js/lib/languages/python';
+import rust from 'highlight.js/lib/languages/rust';
 import { solidity } from 'highlightjs-solidity';
-import { computed } from 'vue';
 import { Remarkable } from 'remarkable';
-import { icons } from '@iconify-json/heroicons-outline';
 import { linkify } from 'remarkable/linkify';
+import { computed } from 'vue';
 import { getUrl } from '@/helpers/utils';
 
 hljs.registerLanguage('javascript', javascript);
@@ -42,8 +42,20 @@ const remarkable = new Remarkable({
     return '';
   }
 }).use(linkify);
-remarkable.core.ruler.disable(['abbr', 'abbr2', 'footnote_tail', 'replacements', 'smartquotes']);
-remarkable.block.ruler.disable(['code', 'deflist', 'footnote', 'htmlblock', 'lheading']);
+remarkable.core.ruler.disable([
+  'abbr',
+  'abbr2',
+  'footnote_tail',
+  'replacements',
+  'smartquotes'
+]);
+remarkable.block.ruler.disable([
+  'code',
+  'deflist',
+  'footnote',
+  'htmlblock',
+  'lheading'
+]);
 remarkable.inline.ruler.disable([
   'autolink',
   'del',
@@ -60,7 +72,10 @@ remarkable.inline.ruler.disable([
 ]);
 
 const parsed = computed(() => {
-  const formattedBody = props.body.replace(/ipfs:\/\/(\w+)/g, value => getUrl(value) || '#');
+  const formattedBody = props.body.replace(
+    /ipfs:\/\/(\w+)/g,
+    value => getUrl(value) || '#'
+  );
 
   return remarkable.render(formattedBody);
 });
@@ -95,7 +110,8 @@ onMounted(() => {
     titleBar.classList.add('title-bar');
 
     const language = document.createElement('div');
-    language.innerHTML = code.getAttribute('class')?.split('language-')[1] || '';
+    language.innerHTML =
+      code.getAttribute('class')?.split('language-')[1] || '';
 
     titleBar.append(language);
     titleBar.append(copyButton);

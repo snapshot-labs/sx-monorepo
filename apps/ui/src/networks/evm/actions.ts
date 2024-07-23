@@ -1,30 +1,30 @@
-import { Provider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
+import { Provider } from '@ethersproject/providers';
 import {
   clients,
-  getEvmStrategy,
-  evmOptimism,
   evmArbitrum,
-  evmPolygon,
-  evmMainnet,
-  evmSepolia,
   evmLineaGoerli,
-  EvmNetworkConfig
+  evmMainnet,
+  EvmNetworkConfig,
+  evmOptimism,
+  evmPolygon,
+  evmSepolia,
+  getEvmStrategy
 } from '@snapshot-labs/sx';
-import { MANA_URL, executionCall } from '@/helpers/mana';
 import { CHAIN_IDS } from '@/helpers/constants';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import { vote as highlightVote } from '@/helpers/highlight';
+import { getSwapLink } from '@/helpers/link';
+import { executionCall, MANA_URL } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
+import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import { EVM_CONNECTORS } from '@/networks/common/constants';
 import {
+  buildMetadata,
+  createStrategyPicker,
   getExecutionData,
   getSdkChoice,
-  buildMetadata,
-  parseStrategyMetadata,
-  createStrategyPicker
+  parseStrategyMetadata
 } from '@/networks/common/helpers';
-import { EVM_CONNECTORS } from '@/networks/common/constants';
-import { vote as highlightVote } from '@/helpers/highlight';
-import type { Web3Provider } from '@ethersproject/providers';
 import type {
   Connector,
   NetworkActions,
@@ -33,16 +33,16 @@ import type {
   StrategyConfig,
   VotingPower
 } from '@/networks/types';
-import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import type {
-  Space,
-  Proposal,
-  SpaceMetadata,
-  StrategyParsedMetadata,
   Choice,
-  NetworkID
+  NetworkID,
+  Proposal,
+  Space,
+  SpaceMetadata,
+  StrategyParsedMetadata
 } from '@/types';
-import { getSwapLink } from '@/helpers/link';
+import type { Web3Provider } from '@ethersproject/providers';
+import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
@@ -80,7 +80,10 @@ export function createActions(
     async predictSpaceAddress(web3: Web3Provider, { salt }) {
       await verifyNetwork(web3, chainId);
 
-      return client.predictSpaceAddress({ signer: web3.getSigner(), saltNonce: salt });
+      return client.predictSpaceAddress({
+        signer: web3.getSigner(),
+        saltNonce: salt
+      });
     },
     async deployDependency(
       web3: Web3Provider,
@@ -124,8 +127,12 @@ export function createActions(
 
       const pinned = await helpers.pin(
         createErc1155Metadata(params.metadata, {
-          execution_strategies: params.executionStrategies.map(config => config.address),
-          execution_strategies_types: params.executionStrategies.map(config => config.type),
+          execution_strategies: params.executionStrategies.map(
+            config => config.address
+          ),
+          execution_strategies_types: params.executionStrategies.map(
+            config => config.type
+          ),
           execution_destinations: params.executionDestinations
         })
       );
@@ -147,13 +154,17 @@ export function createActions(
           authenticators: params.authenticators.map(config => config.address),
           votingStrategies: params.votingStrategies.map(config => ({
             addr: config.address,
-            params: config.generateParams ? config.generateParams(config.params)[0] : '0x'
+            params: config.generateParams
+              ? config.generateParams(config.params)[0]
+              : '0x'
           })),
           votingStrategiesMetadata: metadataUris,
           proposalValidationStrategy: {
             addr: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
-              ? params.validationStrategy.generateParams(params.validationStrategy.params)[0]
+              ? params.validationStrategy.generateParams(
+                  params.validationStrategy.params
+                )[0]
               : '0x'
           },
           metadataUri: `ipfs://${pinned.cid}`,
@@ -164,7 +175,11 @@ export function createActions(
 
       return { txId: response.txId };
     },
-    setMetadata: async (web3: Web3Provider, space: Space, metadata: SpaceMetadata) => {
+    setMetadata: async (
+      web3: Web3Provider,
+      space: Space,
+      metadata: SpaceMetadata
+    ) => {
       await verifyNetwork(web3, chainId);
 
       const pinned = await helpers.pin(
@@ -195,13 +210,15 @@ export function createActions(
 
       const isContract = await getIsContract(account);
 
-      const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
-        authenticators: space.authenticators,
-        strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies: space.voting_power_validation_strategy_strategies.map((_, i) => i),
-        connectorType,
-        isContract
-      });
+      const { relayerType, authenticator, strategies } =
+        pickAuthenticatorAndStrategies({
+          authenticators: space.authenticators,
+          strategies: space.voting_power_validation_strategy_strategies,
+          strategiesIndicies:
+            space.voting_power_validation_strategy_strategies.map((_, i) => i),
+          connectorType,
+          isContract
+        });
 
       let selectedExecutionStrategy;
       if (executionStrategy) {
@@ -224,7 +241,9 @@ export function createActions(
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
           const metadata = await parseStrategyMetadata(
-            space.voting_power_validation_strategies_parsed_metadata[strategy.index].payload
+            space.voting_power_validation_strategies_parsed_metadata[
+              strategy.index
+            ].payload
           );
 
           return {
@@ -279,7 +298,8 @@ export function createActions(
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies: space.voting_power_validation_strategy_strategies.map((_, i) => i),
+        strategiesIndicies:
+          space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract
       });
@@ -353,17 +373,20 @@ export function createActions(
 
       const isContract = await getIsContract(account);
 
-      const { relayerType, authenticator, strategies } = pickAuthenticatorAndStrategies({
-        authenticators: proposal.space.authenticators,
-        strategies: proposal.strategies,
-        strategiesIndicies: proposal.strategies_indicies,
-        connectorType,
-        isContract
-      });
+      const { relayerType, authenticator, strategies } =
+        pickAuthenticatorAndStrategies({
+          authenticators: proposal.space.authenticators,
+          strategies: proposal.strategies,
+          strategiesIndicies: proposal.strategies_indicies,
+          connectorType,
+          isContract
+        });
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
-          const metadataIndex = proposal.strategies_indicies.indexOf(strategy.index);
+          const metadataIndex = proposal.strategies_indicies.indexOf(
+            strategy.index
+          );
 
           const metadata = await parseStrategyMetadata(
             proposal.space.strategies_parsed_metadata[metadataIndex].payload
@@ -456,7 +479,11 @@ export function createActions(
         executionHash: proposal.execution_hash
       });
     },
-    setVotingDelay: async (web3: Web3Provider, space: Space, votingDelay: number) => {
+    setVotingDelay: async (
+      web3: Web3Provider,
+      space: Space,
+      votingDelay: number
+    ) => {
       await verifyNetwork(web3, chainId);
 
       const address = await web3.getSigner().getAddress();
@@ -471,7 +498,11 @@ export function createActions(
         { noWait: isContract }
       );
     },
-    setMinVotingDuration: async (web3: Web3Provider, space: Space, minVotingDuration: number) => {
+    setMinVotingDuration: async (
+      web3: Web3Provider,
+      space: Space,
+      minVotingDuration: number
+    ) => {
       await verifyNetwork(web3, chainId);
 
       const address = await web3.getSigner().getAddress();
@@ -486,7 +517,11 @@ export function createActions(
         { noWait: isContract }
       );
     },
-    setMaxVotingDuration: async (web3: Web3Provider, space: Space, maxVotingDuration: number) => {
+    setMaxVotingDuration: async (
+      web3: Web3Provider,
+      space: Space,
+      maxVotingDuration: number
+    ) => {
       await verifyNetwork(web3, chainId);
 
       const address = await web3.getSigner().getAddress();
@@ -501,7 +536,11 @@ export function createActions(
         { noWait: isContract }
       );
     },
-    transferOwnership: async (web3: Web3Provider, space: Space, owner: string) => {
+    transferOwnership: async (
+      web3: Web3Provider,
+      space: Space,
+      owner: string
+    ) => {
       await verifyNetwork(web3, chainId);
 
       const address = await web3.getSigner().getAddress();
@@ -559,13 +598,17 @@ export function createActions(
         signer: web3.getSigner(),
         space: space.id,
         settings: {
-          authenticatorsToAdd: authenticatorsToAdd.map(config => config.address),
-          authenticatorsToRemove: space.authenticators.filter((authenticator, index) =>
-            authenticatorsToRemove.includes(index)
+          authenticatorsToAdd: authenticatorsToAdd.map(
+            config => config.address
+          ),
+          authenticatorsToRemove: space.authenticators.filter(
+            (authenticator, index) => authenticatorsToRemove.includes(index)
           ),
           votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
             addr: config.address,
-            params: config.generateParams ? config.generateParams(config.params)[0] : '0x'
+            params: config.generateParams
+              ? config.generateParams(config.params)[0]
+              : '0x'
           })),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
             index => space.strategies_indicies[index]
@@ -590,14 +633,18 @@ export function createActions(
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
-      if (snapshotInfo.at === null) throw new Error('EVM requires block number to be defined');
+      if (snapshotInfo.at === null)
+        throw new Error('EVM requires block number to be defined');
 
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getEvmStrategy(address, networkConfig);
-          if (!strategy) return { address, value: 0n, decimals: 0, token: null, symbol: '' };
+          if (!strategy)
+            return { address, value: 0n, decimals: 0, token: null, symbol: '' };
 
-          const strategyMetadata = await parseStrategyMetadata(strategiesMetadata[i].payload);
+          const strategyMetadata = await parseStrategyMetadata(
+            strategiesMetadata[i].payload
+          );
 
           const value = await strategy.getVotingPower(
             address,

@@ -37,13 +37,19 @@ export function useMarkdownEditor(
 
     const hasNoSelection = selectionStart === selectionEnd;
     const selectionFormattedOutside =
-      value.substring(selectionStart - formatting.prefix.length, selectionStart) ===
-        formatting.prefix &&
-      value.substring(selectionEnd, selectionEnd + formatting.suffix.length) === formatting.suffix;
+      value.substring(
+        selectionStart - formatting.prefix.length,
+        selectionStart
+      ) === formatting.prefix &&
+      value.substring(selectionEnd, selectionEnd + formatting.suffix.length) ===
+        formatting.suffix;
     const selectionFormattedInside =
-      value.substring(selectionStart, selectionStart + formatting.prefix.length) ===
-        formatting.prefix &&
-      value.substring(selectionEnd - formatting.suffix.length, selectionEnd) === formatting.suffix;
+      value.substring(
+        selectionStart,
+        selectionStart + formatting.prefix.length
+      ) === formatting.prefix &&
+      value.substring(selectionEnd - formatting.suffix.length, selectionEnd) ===
+        formatting.suffix;
 
     if (hasNoSelection) {
       const formattedValue =
@@ -84,7 +90,8 @@ export function useMarkdownEditor(
       return {
         value: formattedValue,
         selectionStart: selectionStart,
-        selectionEnd: selectionEnd - formatting.prefix.length - formatting.suffix.length
+        selectionEnd:
+          selectionEnd - formatting.prefix.length - formatting.suffix.length
       };
     }
 

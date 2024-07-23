@@ -1,10 +1,10 @@
-import createVanillaAuthenticator from './vanilla';
+import type { Authenticator, NetworkConfig } from '../../types';
 import createEthSigAuthenticator from './ethSig';
 import createEthTxAuthenticator from './ethTx';
 import createStarkSigAuthenticator from './starkSig';
 import createStarkTxAuthenticator from './starkTx';
+import createVanillaAuthenticator from './vanilla';
 import { hexPadLeft } from '../../utils/encoding';
-import type { Authenticator, NetworkConfig } from '../../types';
 
 export function getAuthenticator(
   address: string,

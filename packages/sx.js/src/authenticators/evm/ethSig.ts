@@ -1,13 +1,13 @@
-import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
-import { getRSVFromSig, hexPadLeft } from '../../utils/encoding';
 import type {
   Authenticator,
+  Call,
   Envelope,
   Propose,
   UpdateProposal,
-  Vote,
-  Call
+  Vote
 } from '../../clients/evm/types';
+import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
+import { getRSVFromSig, hexPadLeft } from '../../utils/encoding';
 
 export default function createEthSigAuthenticator(): Authenticator {
   return {
@@ -20,7 +20,8 @@ export default function createEthSigAuthenticator(): Authenticator {
       const { signatureData, data } = envelope;
       const { space } = data;
 
-      if (!signatureData) throw new Error('signatureData is required for this authenticator');
+      if (!signatureData)
+        throw new Error('signatureData is required for this authenticator');
 
       const { r, s, v } = getRSVFromSig(signatureData.signature);
 

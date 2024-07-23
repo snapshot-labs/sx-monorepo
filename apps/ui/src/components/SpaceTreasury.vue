@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { _n, _c, shorten, sanitizeUrl, compareAddresses } from '@/helpers/utils';
-import { getNetwork, evmNetworks } from '@/networks';
-import { ETH_CONTRACT } from '@/helpers/constants';
-import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 import type { Token } from '@/helpers/alchemy';
+import { ETH_CONTRACT } from '@/helpers/constants';
+import {
+  _c,
+  _n,
+  compareAddresses,
+  sanitizeUrl,
+  shorten
+} from '@/helpers/utils';
+import { evmNetworks, getNetwork } from '@/networks';
+import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
 const ETHEREUM_NETWORKS = ['eth', 'sep'];
 
@@ -70,7 +76,10 @@ const totalPreviousQuote = computed(() =>
 
 const totalChange = computed(() => {
   if (totalPreviousQuote.value === 0) return 0;
-  return ((totalQuote.value - totalPreviousQuote.value) / totalPreviousQuote.value) * 100;
+  return (
+    ((totalQuote.value - totalPreviousQuote.value) / totalPreviousQuote.value) *
+    100
+  );
 });
 
 const sortedAssets = computed(() =>
@@ -85,7 +94,10 @@ const sortedAssets = computed(() =>
 const treasuryExplorerUrl = computed(() => {
   if (!currentNetwork.value || !treasury.value) return '';
 
-  const url = currentNetwork.value.helpers.getExplorerUrl(treasury.value.wallet, 'address');
+  const url = currentNetwork.value.helpers.getExplorerUrl(
+    treasury.value.wallet,
+    'address'
+  );
   return sanitizeUrl(url);
 });
 
@@ -96,7 +108,9 @@ const executionStrategy = computed(() => {
 
   if (executorIndex === -1) {
     // If the treasury is not an executor, use the first avatar executor
-    executorIndex = props.space.executors_types.findIndex(e => e === 'SimpleQuorumAvatar');
+    executorIndex = props.space.executors_types.findIndex(
+      e => e === 'SimpleQuorumAvatar'
+    );
   }
 
   if (executorIndex === -1) return null;
@@ -108,7 +122,10 @@ const executionStrategy = computed(() => {
 });
 
 const hasStakeableAssets = computed(() => {
-  return !isReadOnly && assets.value.some(asset => asset.contractAddress === ETH_CONTRACT);
+  return (
+    !isReadOnly &&
+    assets.value.some(asset => asset.contractAddress === ETH_CONTRACT)
+  );
 });
 
 function openModal(type: 'tokens' | 'nfts' | 'stake') {
@@ -134,7 +151,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
-  <div v-if="!treasury || !currentNetwork" class="p-4 flex items-center text-skin-link space-x-2">
+  <div
+    v-if="!treasury || !currentNetwork"
+    class="p-4 flex items-center text-skin-link space-x-2"
+  >
     <IH-exclamation-circle class="inline-block shrink-0" />
     <span>No treasury configured.</span>
   </div>
@@ -143,10 +163,17 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <div class="flex-auto" />
 
       <UiTooltip
-        v-if="currentNetworkId && evmNetworks.includes(currentNetworkId) && !isReadOnly"
+        v-if="
+          currentNetworkId &&
+          evmNetworks.includes(currentNetworkId) &&
+          !isReadOnly
+        "
         title="Connect to apps"
       >
-        <UiButton class="!px-0 w-[46px]" @click="modalOpen.walletConnectLink = true">
+        <UiButton
+          class="!px-0 w-[46px]"
+          @click="modalOpen.walletConnectLink = true"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="480"
@@ -167,7 +194,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <IH-check v-else class="inline-block" />
         </UiButton>
       </UiTooltip>
-      <UiTooltip v-if="!isReadOnly" :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
+      <UiTooltip
+        v-if="!isReadOnly"
+        :title="page === 'tokens' ? 'Send token' : 'Send NFT'"
+      >
         <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </UiButton>
@@ -185,27 +215,47 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           }"
         >
           <UiBadgeNetwork :id="treasury.networkId" class="mr-3">
-            <UiStamp :id="treasury.wallet" type="avatar" :size="32" class="rounded-md" />
+            <UiStamp
+              :id="treasury.wallet"
+              type="avatar"
+              :size="32"
+              class="rounded-md"
+            />
           </UiBadgeNetwork>
           <div class="flex-1 leading-[22px]">
-            <h4 class="text-skin-link" v-text="treasury.name || shorten(treasury.wallet)" />
-            <div class="text-skin-text text-[17px]" v-text="shorten(treasury.wallet)" />
-          </div>
-          <div v-if="loaded" class="flex-col items-end text-right leading-[22px]">
             <h4
               class="text-skin-link"
-              v-text="`$${_n(totalQuote, 'standard', { maximumFractionDigits: 2 })}`"
+              v-text="treasury.name || shorten(treasury.wallet)"
+            />
+            <div
+              class="text-skin-text text-[17px]"
+              v-text="shorten(treasury.wallet)"
+            />
+          </div>
+          <div
+            v-if="loaded"
+            class="flex-col items-end text-right leading-[22px]"
+          >
+            <h4
+              class="text-skin-link"
+              v-text="
+                `$${_n(totalQuote, 'standard', { maximumFractionDigits: 2 })}`
+              "
             />
             <div v-if="Math.abs(totalChange) > 0.01" class="text-[17px]">
               <div
                 v-if="totalChange > 0"
                 class="text-skin-success"
-                v-text="`+${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`"
+                v-text="
+                  `+${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`
+                "
               />
               <div
                 v-if="totalChange < 0"
                 class="text-skin-danger"
-                v-text="`${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`"
+                v-text="
+                  `${_n(totalChange, 'standard', { maximumFractionDigits: 2 })}%`
+                "
               />
             </div>
           </div>
@@ -237,7 +287,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               (asset.contractAddress === ETH_CONTRACT
                 ? treasuryExplorerUrl
                 : sanitizeUrl(
-                    currentNetwork.helpers.getExplorerUrl(asset.contractAddress, 'token')
+                    currentNetwork.helpers.getExplorerUrl(
+                      asset.contractAddress,
+                      'token'
+                    )
                   )) || '#'
             "
             target="_blank"
@@ -253,7 +306,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               </UiBadgeNetwork>
               <div class="flex flex-col leading-[22px] min-w-0 pr-2 md:pr-0">
                 <h4 class="truncate" v-text="asset.symbol" />
-                <div class="text-[17px] truncate text-skin-text" v-text="asset.name" />
+                <div
+                  class="text-[17px] truncate text-skin-text"
+                  v-text="asset.name"
+                />
               </div>
               <UiTooltip
                 v-if="
@@ -264,7 +320,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 title="Stake with Lido"
                 :touch="false"
               >
-                <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('stake')">
+                <UiButton
+                  class="!px-0 w-[46px]"
+                  @click.prevent="openModal('stake')"
+                >
                   <IH-fire class="inline-block" />
                 </UiButton>
               </UiTooltip>
@@ -275,22 +334,30 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             >
               <h4
                 class="text-skin-link"
-                v-text="`$${_n(asset.price, 'standard', { maximumFractionDigits: 2 })}`"
+                v-text="
+                  `$${_n(asset.price, 'standard', { maximumFractionDigits: 2 })}`
+                "
               />
               <div v-if="asset.change" class="text-[17px]">
                 <div
                   v-if="asset.change > 0"
                   class="text-skin-success"
-                  v-text="`+${_n(asset.change, 'standard', { maximumFractionDigits: 2 })}%`"
+                  v-text="
+                    `+${_n(asset.change, 'standard', { maximumFractionDigits: 2 })}%`
+                  "
                 />
                 <div
                   v-if="asset.change < 0"
                   class="text-skin-danger"
-                  v-text="`${_n(asset.change, 'standard', { maximumFractionDigits: 2 })}%`"
+                  v-text="
+                    `${_n(asset.change, 'standard', { maximumFractionDigits: 2 })}%`
+                  "
                 />
               </div>
             </div>
-            <div class="flex-col items-end text-right leading-[22px] w-auto md:w-[240px]">
+            <div
+              class="flex-col items-end text-right leading-[22px] w-auto md:w-[240px]"
+            >
               <h4
                 class="text-skin-link truncate"
                 v-text="
@@ -303,7 +370,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               <div
                 v-if="asset.value"
                 class="text-[17px] text-skin-text"
-                v-text="`$${_n(asset.value, 'standard', { maximumFractionDigits: 2 })}`"
+                v-text="
+                  `$${_n(asset.value, 'standard', { maximumFractionDigits: 2 })}`
+                "
               />
             </div>
           </a>
@@ -316,7 +385,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <IH-exclamation-circle class="inline-block shrink-0" />
             <span>There are no NFTs in treasury.</span>
           </div>
-          <UiLoading v-if="nftsLoading && !nftsLoaded" class="px-4 py-3 block" />
+          <UiLoading
+            v-if="nftsLoading && !nftsLoaded"
+            class="px-4 py-3 block"
+          />
           <div class="flex flex-row flex-wrap gap-4 p-4">
             <a
               v-for="(nft, i) in nfts"
@@ -326,7 +398,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               class="block max-w-[120px]"
             >
               <UiNftImage :item="nft" class="w-full" />
-              <div class="mt-2 text-[17px] truncate">{{ nft.displayTitle }}</div>
+              <div class="mt-2 text-[17px] truncate">
+                {{ nft.displayTitle }}
+              </div>
             </a>
           </div>
         </div>

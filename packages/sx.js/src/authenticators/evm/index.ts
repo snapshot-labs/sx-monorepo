@@ -1,8 +1,8 @@
-import createVanillaAuthenticator from './vanilla';
-import createEthTxAuthenticator from './ethTx';
-import createEthSigAuthenticator from './ethSig';
 import type { Authenticator } from '../../clients/evm/types';
 import type { EvmNetworkConfig } from '../../types';
+import createEthSigAuthenticator from './ethSig';
+import createEthTxAuthenticator from './ethTx';
+import createVanillaAuthenticator from './vanilla';
 
 export function getAuthenticator(
   address: string,

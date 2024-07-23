@@ -31,10 +31,24 @@ watch(
 
 <template>
   <div>
-    <div :class="{ 'text-skin-danger': error && dirty }" v-text="definition.title" />
+    <div
+      :class="{ 'text-skin-danger': error && dirty }"
+      v-text="definition.title"
+    />
     <div class="flex !mb-0" :class="{ 's-error': error && dirty }">
-      <UiWrapperInput v-slot="{ id }" :definition="{ title: 'Days' }" class="flex-1" :dirty="dirty">
-        <input :id="id" v-model="days" class="s-input !rounded-r-none" type="number" min="0" />
+      <UiWrapperInput
+        v-slot="{ id }"
+        :definition="{ title: 'Days' }"
+        class="flex-1"
+        :dirty="dirty"
+      >
+        <input
+          :id="id"
+          v-model="days"
+          class="s-input !rounded-r-none"
+          type="number"
+          min="0"
+        />
       </UiWrapperInput>
       <UiWrapperInput
         v-slot="{ id }"

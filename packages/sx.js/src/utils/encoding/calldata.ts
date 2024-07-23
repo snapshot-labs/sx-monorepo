@@ -20,6 +20,9 @@ export function flatten2DArray(array2D: string[][]): string[] {
     offset += subarray.length;
     flatArray.push(`0x${offset.toString(16)}`);
   }
-  const elements = array2D.reduce((accumulator, value) => accumulator.concat(value), []);
+  const elements = array2D.reduce(
+    (accumulator, value) => accumulator.concat(value),
+    []
+  );
   return flatArray.concat(elements);
 }

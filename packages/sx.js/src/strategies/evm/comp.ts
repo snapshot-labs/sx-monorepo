@@ -1,7 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
-import ICompAbi from './abis/IComp.json';
-import type { Provider } from '@ethersproject/providers';
 import type { Strategy } from '../../clients/evm/types';
+import type { Provider } from '@ethersproject/providers';
+import ICompAbi from './abis/IComp.json';
 
 export default function createCompStrategy(): Strategy {
   return {
@@ -19,7 +19,9 @@ export default function createCompStrategy(): Strategy {
     ): Promise<bigint> {
       const compContract = new Contract(params, ICompAbi, provider);
 
-      const votingPower = await compContract.getCurrentVotes(voterAddress, { blockTag: block });
+      const votingPower = await compContract.getCurrentVotes(voterAddress, {
+        blockTag: block
+      });
 
       return BigInt(votingPower.toString());
     }
