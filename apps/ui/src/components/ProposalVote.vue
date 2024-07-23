@@ -4,7 +4,9 @@ import { _t, getChoiceText } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import type { Proposal as ProposalType } from '@/types';
 
-const props = defineProps<{ proposal: ProposalType; editMode: boolean }>();
+const props = withDefaults(defineProps<{ proposal: ProposalType; editMode?: boolean }>(), {
+  editMode: false
+});
 
 defineEmits<{
   (e: 'edit');
