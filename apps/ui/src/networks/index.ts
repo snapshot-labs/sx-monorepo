@@ -17,10 +17,12 @@ const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
-  : ['s', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
+  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'oeth', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
+// This network is used for aliases/follows/profiles/explore page.
+export const metadataNetwork: NetworkID = import.meta.env.VITE_METADATA_NETWORK || 's';
 
 export const getNetwork = (id: NetworkID) => {
   if (!enabledNetworks.includes(id)) throw new Error(`Network ${id} is not enabled`);
@@ -65,7 +67,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
   snapshot: {
     key: 'snapshot',
     label: 'Snapshot',
-    networks: enabledNetworks.filter(network => offchainNetworks.includes(network)),
+    networks: [metadataNetwork],
     limit: 18
   },
   snapshotx: {

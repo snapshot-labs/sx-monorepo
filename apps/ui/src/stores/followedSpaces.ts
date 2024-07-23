@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { metadataNetwork, offchainNetworks, getNetwork } from '@/networks';
 import pkg from '../../package.json';
 import { NetworkID, Space } from '@/types';
 
-const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
-const network = getNetwork(offchainNetworkId);
+const network = getNetwork(metadataNetwork);
 
 function getCompositeSpaceId(space: Space) {
   return `${space.network}:${space.id}`;
