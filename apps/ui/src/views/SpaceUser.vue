@@ -72,7 +72,12 @@ async function loadUserActivity() {
     userId.value
   );
 
-  if (users[0]) userActivity.value = users[0];
+  userActivity.value = users[0] || {
+    id: userId.value,
+    spaceId: props.space.id,
+    vote_count: 0,
+    proposal_count: 0
+  };
 }
 
 async function loadDelegates() {
