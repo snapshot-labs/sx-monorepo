@@ -27,8 +27,6 @@ const loading = ref(false);
 const searchInput = ref();
 const searchValue = ref('');
 
-const { focused } = useFocus(searchInput);
-
 const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
@@ -72,7 +70,7 @@ watch(
     }"
   >
     <div
-      class="flex items-center justify-between h-[71px] px-4 bg-skin-bg"
+      class="flex items-center justify-between h-[71px] px-4 bg-skin-bg space-x-1"
       :class="{
         'lg:ml-[240px]': hasAppNav,
         'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasAppNav
@@ -83,9 +81,14 @@ watch(
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
           @click="uiStore.toggleSidebar"
         />
-        <div v-if="searchConfig" class="flex items-center flex-1 px-2 py-3 h-full">
-          <IH-search class="mr-2.5 flex-shrink-0" :class="{ 'text-skin-link': focused }" />
-          <form class="flex flex-grow" @submit="handleSearchSubmit">
+        <form
+          v-if="searchConfig"
+          id="search-form"
+          class="flex flex-1 pr-2 py-3 h-full"
+          @submit="handleSearchSubmit"
+        >
+          <label class="flex items-center w-full space-x-2.5">
+            <IH-search class="shrink-0" />
             <input
               ref="searchInput"
               v-model.trim="searchValue"
@@ -93,11 +96,13 @@ watch(
               :placeholder="searchConfig.placeholder"
               class="bg-transparent text-skin-link text-[19px] w-full"
             />
-          </form>
-        </div>
-        <router-link v-else :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
-          snapshot
-        </router-link>
+          </label>
+        </form>
+        <Breadcrumb v-else>
+          <router-link :to="{ path: '/' }" class="flex items-center" style="font-size: 24px">
+            snapshot
+          </router-link>
+        </Breadcrumb>
       </div>
       <div :key="web3.account" class="flex">
         <UiButton v-if="loading || web3.authLoading" loading class="!px-0 w-[46px]" />
@@ -127,3 +132,9 @@ watch(
     <ModalAccount :open="modalAccountOpen" @close="modalAccountOpen = false" @login="handleLogin" />
   </teleport>
 </template>
+
+<style lang="scss" scoped>
+#search-form:focus-within svg {
+  color: rgba(var(--link));
+}
+</style>

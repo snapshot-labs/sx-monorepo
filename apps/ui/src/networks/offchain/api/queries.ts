@@ -155,8 +155,8 @@ export const USER_VOTES_QUERY = gql`
 `;
 
 export const USER_FOLLOWS_QUERY = gql`
-  query ($follower: String!) {
-    follows(where: { follower: $follower }) {
+  query ($follower: String!, $first: Int) {
+    follows(where: { follower: $follower }, first: $first) {
       network
       space {
         id
