@@ -121,7 +121,7 @@ $toolBarHeight: 43px;
 
 .s-base {
   .s-input {
-    @apply border-t-[#{$toolBarHeight}] pt-2;
+    @apply border-t-[#{$toolBarHeight}] pt-2 min-h-[85px];
   }
 
   .s-toolbar {
