@@ -276,16 +276,7 @@ input:placeholder-shown {
   @apply block mb-1;
 }
 
-.s-error-composer {
-  @apply border border-skin-danger;
-
-  .s-label-char-count {
-    @apply text-skin-danger;
-  }
-}
-
-.s-base,
-.s-composer {
+.s-base {
   &:focus-within,
   &.s-error,
   &.s-error-editor {

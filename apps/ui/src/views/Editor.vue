@@ -388,7 +388,7 @@ export default defineComponent({
         </div>
         <UiMarkdown
           v-if="previewEnabled"
-          class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
+          class="px-3 py-2 border rounded-lg mb-[14px] min-h-[200px]"
           :body="proposal.body"
         />
         <UiComposer

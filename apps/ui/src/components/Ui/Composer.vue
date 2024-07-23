@@ -46,13 +46,12 @@ watch(model, () => {
 <template>
   <div
     ref="editorContainerRef"
-    class="rounded-lg mb-3 border s-composer"
+    class="s-base"
     :class="{
-      'ring-2': editor.hovered.value,
-      's-error-composer': showError
+      's-error': showError
     }"
   >
-    <div class="flex gap-1 py-2 px-3 items-center">
+    <div class="s-label s-toolbar">
       <label class="text-sm hidden s-label-char-count whitespace-nowrap">
         <template v-if="inputValueLength >= 0 && definition.maxLength">
           {{ _n(inputValueLength) }} / {{ _n(definition.maxLength) }}
@@ -107,14 +106,34 @@ watch(model, () => {
         </label>
       </UiTooltip>
     </div>
-    <div class="s-base">
-      <textarea
-        ref="editorRef"
-        v-model.trim="model"
-        class="s-input h-[200px] !rounded-t-none !mb-0 !pt-[15px]"
-        @input="event => (model = (event.target as HTMLInputElement).value)"
-      />
-    </div>
+    <textarea
+      ref="editorRef"
+      v-model.trim="model"
+      class="s-input h-[200px]"
+      @input="event => (model = (event.target as HTMLInputElement).value)"
+    />
+    <div v-if="showError" class="s-input-error-message" v-text="error" />
   </div>
-  <div v-if="showError" class="s-input-error-message mb-3 -mt-3">{{ error }}</div>
 </template>
+
+<style scoped lang="scss">
+$toolBarHeight: 43px;
+
+.s-base {
+  textarea.s-input {
+    border-top-width: $toolBarHeight + 8px;
+  }
+
+  .s-toolbar {
+    @apply py-2 px-3 items-center space-x-1 flex bg-skin-bg h-[#{$toolBarHeight}] rounded-t-lg top-[1px] right-[1px] left-[1px] m-0;
+
+    &.s-label::before {
+      @apply top-[#{$toolBarHeight}];
+    }
+
+    .s-error & :not(.s-label-char-count) {
+      @apply text-skin-text;
+    }
+  }
+}
+</style>
