@@ -175,17 +175,17 @@ watchEffect(() => {
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
       >
         <div v-if="!proposal.cancelled && ['pending', 'active'].includes(proposal.state)">
-          <h4 class="mb-2 eyebrow flex items-center">
+          <h4 class="mb-2 eyebrow flex items-center space-x-2">
             <template v-if="editMode">
-              <IH-cursor-click class="inline-block mr-2" />
+              <IH-cursor-click />
               <span>Edit your vote</span>
             </template>
             <template v-else-if="currentVote">
-              <IH-check-circle class="inline-block mr-2" />
+              <IH-check-circle />
               <span>Your vote</span>
             </template>
             <template v-else>
-              <IH-cursor-click class="inline-block mr-2" />
+              <IH-cursor-click />
               <span>Cast your vote</span>
             </template>
           </h4>
