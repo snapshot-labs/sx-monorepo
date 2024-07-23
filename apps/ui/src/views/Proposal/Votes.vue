@@ -187,14 +187,11 @@ watch([sortBy, choiceFilter], () => {
             />
           </div>
         </router-link>
-        <a
+        <button
+          type="button"
           class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]"
-          :class="{
-            '!cursor-default': !vote.reason
-          }"
-          :tabindex="vote.reason ? 0 : -1"
+          :disabled="!vote.reason"
           @click="handleChoiceClick(vote)"
-          @keypress="handleChoiceClick(vote)"
         >
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
@@ -237,7 +234,7 @@ watch([sortBy, choiceFilter], () => {
             </div>
             <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
           </template>
-        </a>
+        </button>
         <div
           class="hidden leading-[22px] max-w-[144px] w-[144px] lg:flex flex-col justify-center truncate"
         >
