@@ -278,8 +278,7 @@ input:placeholder-shown {
 
 .s-base {
   &:focus-within,
-  &.s-error,
-  &.s-error-editor {
+  &.s-error {
     .s-label-char-count {
       display: block;
     }
