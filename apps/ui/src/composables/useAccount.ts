@@ -21,7 +21,9 @@ export function useAccount() {
     if (!account) return;
 
     const network = getNetwork(networkId);
-    votes.value = await network.api.loadUserVotes(spaceIds, account);
+    const userVotes = await network.api.loadUserVotes(spaceIds, account);
+
+    votes.value = { ...votes.value, ...userVotes };
   }
 
   function addPendingVote(proposalId: string) {
