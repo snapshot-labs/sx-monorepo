@@ -121,7 +121,7 @@ $toolBarHeight: 43px;
 
 .s-base {
   textarea.s-input {
-    border-top-width: $toolBarHeight + 8px;
+    @apply border-t-[#{$toolBarHeight}];
   }
 
   .s-toolbar {
@@ -130,10 +130,10 @@ $toolBarHeight: 43px;
     &.s-label::before {
       @apply top-[#{$toolBarHeight}];
     }
+  }
 
-    .s-error & :not(.s-label-char-count) {
-      @apply text-skin-text;
-    }
+  &.s-error .s-toolbar :not(.s-label-char-count) {
+    @apply text-skin-text;
   }
 }
 </style>
