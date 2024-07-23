@@ -13,7 +13,9 @@ const emit = defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<ApprovalChoice>((props.choices as ApprovalChoice) || []);
+const selectedChoices = ref<ApprovalChoice>(
+  (!props.proposal.privacy && (props.choices as ApprovalChoice)) || []
+);
 
 function toggleSelectedChoice(choice: number) {
   if (selectedChoices.value.includes(choice)) {

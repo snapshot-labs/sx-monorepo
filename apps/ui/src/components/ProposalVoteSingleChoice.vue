@@ -11,7 +11,9 @@ const emit = defineEmits<{
   (e: 'vote', value: number);
 }>();
 
-const selectedChoice = ref<number | null>((props.choices as number) || null);
+const selectedChoice = ref<number | null>(
+  (!props.proposal.privacy && (props.choices as number)) || null
+);
 </script>
 
 <template>

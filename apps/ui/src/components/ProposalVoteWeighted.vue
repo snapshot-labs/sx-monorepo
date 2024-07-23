@@ -14,7 +14,9 @@ defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<WeightedChoice>((props.choices as WeightedChoice) || {});
+const selectedChoices = ref<WeightedChoice>(
+  (!props.proposal.privacy && (props.choices as WeightedChoice)) || {}
+);
 
 function increaseChoice(index: number) {
   selectedChoices.value[index] ||= 0;
