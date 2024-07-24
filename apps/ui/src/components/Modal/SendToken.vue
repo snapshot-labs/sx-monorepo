@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
 import { METADATA_BY_CHAIN_ID } from '@/composables/useBalances';
-import { createSendTokenTransaction } from '@/helpers/transactions';
+import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
+import { createSendTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { Token } from '@/helpers/alchemy';
 import { Contact, Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
@@ -67,7 +67,10 @@ const allAssets = computed(() => [...assets.value, ...customTokens.value]);
 
 const currentToken = computed(() => {
   let token = assetsMap.value?.get(form.token);
-  if (!token) token = customTokens.value.find(existing => existing.contractAddress === form.token);
+  if (!token)
+    token = customTokens.value.find(
+      existing => existing.contractAddress === form.token
+    );
 
   const metadata = METADATA_BY_CHAIN_ID.get(props.network);
 
@@ -97,7 +100,11 @@ const formValid = computed(
 );
 
 function handleAddCustomToken(token: Token) {
-  if (customTokens.value.find(existing => existing.contractAddress === token.contractAddress)) {
+  if (
+    customTokens.value.find(
+      existing => existing.contractAddress === token.contractAddress
+    )
+  ) {
     return;
   }
 
@@ -139,7 +146,9 @@ function handleValueUpdate(value) {
 
 function handleMaxClick() {
   if (currentToken.value) {
-    handleAmountUpdate(formatUnits(currentToken.value.tokenBalance, currentToken.value.decimals));
+    handleAmountUpdate(
+      formatUnits(currentToken.value.tokenBalance, currentToken.value.decimals)
+    );
   }
 }
 
@@ -165,7 +174,12 @@ watch(
     if (props.initialState) {
       form.to = props.initialState.recipient;
       form.token = props.initialState.token.address;
-      handleAmountUpdate(formatUnits(props.initialState.amount, props.initialState.token.decimals));
+      handleAmountUpdate(
+        formatUnits(
+          props.initialState.amount,
+          props.initialState.token.decimals
+        )
+      );
     } else {
       form.to = DEFAULT_FORM_STATE.to;
       form.token = DEFAULT_FORM_STATE.token;
@@ -181,7 +195,8 @@ watch([() => props.address, () => props.network], ([address, network]) => {
 watch(currentToken, token => {
   if (!token || form.amount === '') return;
 
-  const amount = typeof form.amount === 'string' ? parseFloat(form.amount) : form.amount;
+  const amount =
+    typeof form.amount === 'string' ? parseFloat(form.amount) : form.amount;
   form.value = parseFloat((amount * token.price).toFixed(2));
 });
 
@@ -200,7 +215,10 @@ watchEffect(async () => {
     <template #header>
       <h3 v-text="'Send token'" />
       <template v-if="showPicker">
-        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
@@ -209,7 +227,9 @@ watchEffect(async () => {
             ref="searchInput"
             v-model="searchValue"
             type="text"
-            :placeholder="pickerType === 'token' ? 'Search name or paste address' : 'Search'"
+            :placeholder="
+              pickerType === 'token' ? 'Search name or paste address' : 'Search'
+            "
             class="flex-auto bg-transparent text-skin-link"
           />
         </div>
@@ -250,7 +270,10 @@ watchEffect(async () => {
       />
       <div class="s-base">
         <div class="s-label" v-text="'Token'" />
-        <button class="s-input text-left h-[61px]" @click="handlePickerClick('token')">
+        <button
+          class="s-input text-left h-[61px]"
+          @click="handlePickerClick('token')"
+        >
           <div class="flex items-center">
             <UiStamp
               v-if="currentToken"
@@ -276,7 +299,11 @@ watchEffect(async () => {
             }"
             @update:model-value="handleAmountUpdate"
           />
-          <a class="absolute right-[16px] top-[4px]" @click="handleMaxClick" v-text="'max'" />
+          <a
+            class="absolute right-[16px] top-[4px]"
+            @click="handleMaxClick"
+            v-text="'max'"
+          />
         </div>
         <UiInputNumber
           v-if="currentToken.price !== 0"
@@ -288,7 +315,9 @@ watchEffect(async () => {
       </div>
     </div>
     <template v-if="!showPicker" #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"> Confirm </UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+        Confirm
+      </UiButton>
     </template>
   </UiModal>
 </template>

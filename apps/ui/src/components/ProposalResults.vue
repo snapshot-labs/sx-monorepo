@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import {
+  quorumChoiceProgress,
+  quorumLabel,
+  quorumProgress
+} from '@/helpers/quorum';
 import { _n, _p } from '@/helpers/utils';
-import { quorumLabel, quorumProgress, quorumChoiceProgress } from '@/helpers/quorum';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -31,7 +35,9 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const results = computed(() => {
   // TODO: sx-api returns number, sx-subgraph returns string
-  const parsedTotal = parseFloat(props.proposal.scores_total as unknown as string);
+  const parsedTotal = parseFloat(
+    props.proposal.scores_total as unknown as string
+  );
 
   return props.proposal.scores
     .map((score, i) => {
@@ -58,7 +64,9 @@ const visibleResults = computed(() => {
 });
 
 const otherResultsSummary = computed(() => {
-  const oetherResultsStartIndex = hasOneExtra.value ? DEFAULT_MAX_CHOICES + 1 : DEFAULT_MAX_CHOICES;
+  const oetherResultsStartIndex = hasOneExtra.value
+    ? DEFAULT_MAX_CHOICES + 1
+    : DEFAULT_MAX_CHOICES;
 
   return results.value.slice(oetherResultsStartIndex).reduce(
     (acc, result) => ({
@@ -74,10 +82,12 @@ const otherResultsSummary = computed(() => {
 </script>
 
 <template>
-  <div v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails">
+  <div
+    v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails"
+  >
     <div class="mb-1">
-      All votes are encrypted and will be decrypted only after the voting period is over, making the
-      results visible.
+      All votes are encrypted and will be decrypted only after the voting period
+      is over, making the results visible.
     </div>
     <div>
       <a
@@ -100,11 +110,16 @@ const otherResultsSummary = computed(() => {
         v-for="result in visibleResults"
         :key="result.choice"
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
-        :class="{ [`_${result.choice} choice-border`]: proposal.type === 'basic' }"
+        :class="{
+          [`_${result.choice} choice-border`]: proposal.type === 'basic'
+        }"
       >
         <div
           class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
-          :class="{ [`_${result.choice} choice-bg opacity-20`]: proposal.type === 'basic' }"
+          :class="{
+            [`_${result.choice} choice-bg opacity-20`]:
+              proposal.type === 'basic'
+          }"
           :style="{
             width: `${result.progress.toFixed(2)}%`
           }"
@@ -114,7 +129,10 @@ const otherResultsSummary = computed(() => {
           class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
           :class="`_${result.choice}`"
         >
-          <IH-check v-if="result.choice === 1" class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5" />
+          <IH-check
+            v-if="result.choice === 1"
+            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+          />
           <IH-x
             v-else-if="result.choice === 2"
             class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
@@ -124,7 +142,10 @@ const otherResultsSummary = computed(() => {
             class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
           />
         </div>
-        <div class="truncate grow" v-text="proposal.choices[result.choice - 1]" />
+        <div
+          class="truncate grow"
+          v-text="proposal.choices[result.choice - 1]"
+        />
         <div v-text="_p(result.progress / 100)" />
       </div>
       <button
@@ -146,7 +167,10 @@ const otherResultsSummary = computed(() => {
             v-text="_n(otherResultsSummary.count, 'compact')"
           />
         </div>
-        <div class="group-hover:hidden" v-text="_p(otherResultsSummary.progress / 100)" />
+        <div
+          class="group-hover:hidden"
+          v-text="_p(otherResultsSummary.progress / 100)"
+        />
         <div class="hidden group-hover:flex items-center gap-1">
           See all <IH-arrow-down class="w-[16px] h-[16px]" />
         </div>

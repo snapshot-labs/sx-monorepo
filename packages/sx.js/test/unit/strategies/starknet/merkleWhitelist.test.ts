@@ -1,14 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { starknetSepolia } from '../../../../src/networks';
 import createMerkleWhitelistStrategy from '../../../../src/strategies/starknet/merkleWhitelist';
 import { AddressType, Leaf } from '../../../../src/utils/merkletree';
-import { starknetSepolia } from '../../../../src/networks';
-import { starkProvider } from '../../helpers';
 import { proposeEnvelope } from '../../fixtures';
+import { starkProvider } from '../../helpers';
 
 const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('merkleWhitelist', () => {
-  const leaf = new Leaf(AddressType.ETHEREUM, '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 42n);
+  const leaf = new Leaf(
+    AddressType.ETHEREUM,
+    '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+    42n
+  );
 
   const metadata = {
     tree: [
@@ -38,7 +42,13 @@ describe('merkleWhitelist', () => {
       config
     );
 
-    expect(params).toEqual(['1', '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', '0x2a', '0x0', '0']);
+    expect(params).toEqual([
+      '1',
+      '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      '0x2a',
+      '0x0',
+      '0'
+    ]);
   });
 
   describe('getVotingPower', () => {

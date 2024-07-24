@@ -10,7 +10,12 @@ export default class Multicaller {
   public calls: any[] = [];
   public paths: any[] = [];
 
-  constructor(network: string, provider: StaticJsonRpcProvider, abi: any[], options?) {
+  constructor(
+    network: string,
+    provider: StaticJsonRpcProvider,
+    abi: any[],
+    options?
+  ) {
     this.network = network;
     this.provider = provider;
     this.abi = abi;
@@ -25,7 +30,13 @@ export default class Multicaller {
 
   async execute(from?: any): Promise<any> {
     const obj = from || {};
-    const result = await multicall(this.network, this.provider, this.abi, this.calls, this.options);
+    const result = await multicall(
+      this.network,
+      this.provider,
+      this.abi,
+      this.calls,
+      this.options
+    );
     result.forEach((r, i) => set(obj, this.paths[i], r.length > 1 ? r : r[0]));
     this.calls = [];
     this.paths = [];

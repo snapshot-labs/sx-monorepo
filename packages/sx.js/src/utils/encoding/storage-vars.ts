@@ -1,5 +1,5 @@
-import { hash, ec } from 'starknet';
 import BN from 'bn.js';
+import { ec, hash } from 'starknet';
 
 const MAX_STORAGE_ITEM_SIZE = 256n;
 const ADDR_BOUND = 2n ** 251n - MAX_STORAGE_ITEM_SIZE;

@@ -1,7 +1,12 @@
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
-export type ProposalState = 'pending' | 'active' | 'passed' | 'rejected' | 'executed';
+export type ProposalState =
+  | 'pending'
+  | 'active'
+  | 'passed'
+  | 'rejected'
+  | 'executed';
 
 export type NetworkID =
   | 's'
@@ -15,7 +20,13 @@ export type NetworkID =
   | 'sn'
   | 'sn-sep';
 
-export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
+export type Choice =
+  | 'for'
+  | 'against'
+  | 'abstain'
+  | number
+  | number[]
+  | Record<string, number>;
 
 export type Privacy = 'shutter' | null;
 
@@ -351,4 +362,6 @@ export type Transaction =
   | RawTransaction;
 
 // Utils
-export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };
+export type RequiredProperty<T> = {
+  [P in keyof T]: Required<NonNullable<T[P]>>;
+};

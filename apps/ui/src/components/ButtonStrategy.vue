@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import IHCode from '~icons/heroicons-outline/code';
 import { StrategyTemplate } from '@/networks/types';
+import IHCode from '~icons/heroicons-outline/code';
 
 defineProps<{
   disabled?: boolean;
@@ -24,7 +24,11 @@ defineProps<{
     </div>
     <div class="py-3 px-4">
       <h4 class="text-skin-link" v-text="strategy.name" />
-      <div v-if="strategy.about" class="text-ellipsis" v-text="strategy.about" />
+      <div
+        v-if="strategy.about"
+        class="text-ellipsis"
+        v-text="strategy.about"
+      />
     </div>
   </button>
 </template>

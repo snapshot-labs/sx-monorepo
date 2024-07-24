@@ -14,13 +14,17 @@ export function getEthereumWallet(mnemonic: string, index: number) {
 
 export const createWalletProxy = (mnemonic: string, chainId: number) => {
   const signers = new Map<string, Wallet>();
-  const provider = new StaticJsonRpcProvider(`https://rpc.snapshotx.xyz/${chainId}`, chainId);
+  const provider = new StaticJsonRpcProvider(
+    `https://rpc.snapshotx.xyz/${chainId}`,
+    chainId
+  );
 
   return (spaceAddress: string) => {
     const normalizedSpaceAddress = spaceAddress.toLowerCase();
 
     if (!signers.has(normalizedSpaceAddress)) {
-      const index = SPACES_INDICIES.get(normalizedSpaceAddress) || DEFAULT_INDEX;
+      const index =
+        SPACES_INDICIES.get(normalizedSpaceAddress) || DEFAULT_INDEX;
       const wallet = getEthereumWallet(mnemonic, index);
       signers.set(normalizedSpaceAddress, wallet.connect(provider));
     }

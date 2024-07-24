@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { getChoiceText, shortenAddress } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { shortenAddress, getChoiceText } from '@/helpers/utils';
 import { Proposal as ProposalType, Vote } from '@/types';
 
 const LIMIT = 20;
@@ -30,7 +30,9 @@ function reset() {
 }
 
 async function loadVotes() {
-  votes.value = await network.value.api.loadProposalVotes(props.proposal, { limit: LIMIT });
+  votes.value = await network.value.api.loadProposalVotes(props.proposal, {
+    limit: LIMIT
+  });
   hasMore.value = votes.value.length >= LIMIT;
   loaded.value = true;
 }
@@ -83,7 +85,10 @@ watch(
     <UiLoading v-if="!loaded" class="p-4 block text-center" />
     <div v-else>
       <div v-if="votes.length > 0">
-        <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
+        <UiContainerInfiniteScroll
+          :loading-more="loadingMore"
+          @end-reached="handleEndReached"
+        >
           <div
             v-for="(vote, i) in votes"
             :key="i"
@@ -113,7 +118,9 @@ watch(
               @click="$emit('close')"
             >
               <UiStamp :id="vote.voter.id" :size="24" />
-              <span>{{ vote.voter.name || shortenAddress(vote.voter.id) }}</span>
+              <span>{{
+                vote.voter.name || shortenAddress(vote.voter.id)
+              }}</span>
             </router-link>
 
             <template v-if="isEncrypted">

@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   AddressType,
-  Leaf,
   generateMerkleProof,
-  generateMerkleRoot
+  generateMerkleRoot,
+  Leaf
 } from '../../../src/utils/merkletree';
 
 const TEST_LEAVES = new Array(20).fill(null).map((_, i) => {
@@ -17,9 +17,15 @@ const TEST_LEAVES = new Array(20).fill(null).map((_, i) => {
 
 describe('Leaf', () => {
   it('should compute hash', () => {
-    const leaf = new Leaf(AddressType.ETHEREUM, '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 42n);
+    const leaf = new Leaf(
+      AddressType.ETHEREUM,
+      '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      42n
+    );
 
-    expect(leaf.hash).toBe('0x196903245bb2dcafaf9acc391de440ce08a8853b7b1dcbfc670171bb255e119');
+    expect(leaf.hash).toBe(
+      '0x196903245bb2dcafaf9acc391de440ce08a8853b7b1dcbfc670171bb255e119'
+    );
   });
 });
 
@@ -28,7 +34,9 @@ describe('generateMerkleRoot', () => {
     const hashes = TEST_LEAVES.map(leaf => leaf.hash);
     const root = generateMerkleRoot(hashes);
 
-    expect(root).toBe('0x436373667bef3c745b30e5ae2b485ed5bed08a8c8696f8edeb5cd08ddcc5145');
+    expect(root).toBe(
+      '0x436373667bef3c745b30e5ae2b485ed5bed08a8c8696f8edeb5cd08ddcc5145'
+    );
   });
 });
 

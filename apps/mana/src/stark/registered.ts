@@ -1,8 +1,8 @@
 import { utils } from '@snapshot-labs/sx';
+import { processProposal } from './herodotus';
+import { getClient } from './networks';
 import * as db from '../db';
 import { sleep } from '../utils';
-import { getClient } from './networks';
-import { processProposal } from './herodotus';
 
 const INTERVAL = 15_000;
 
@@ -17,10 +17,16 @@ type Transaction = {
 const failedCounter: Record<string, number | undefined> = {};
 
 async function processTransaction(transaction: Transaction) {
-  const storageAddress = utils.encoding.getStorageVarAddress('_commits', transaction.hash);
+  const storageAddress = utils.encoding.getStorageVarAddress(
+    '_commits',
+    transaction.hash
+  );
 
   const { provider, getAccount, client } = getClient(transaction.network);
-  const value = await provider.getStorageAt(transaction.data.authenticator, storageAddress);
+  const value = await provider.getStorageAt(
+    transaction.data.authenticator,
+    storageAddress
+  );
   if (value === '0x0') return;
 
   const payload = {

@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import createOzVotesStorageProofStrategy from '../../../../src/strategies/starknet/ozVotesStorageProof';
-import { starknetSepolia } from '../../../../src/networks';
-import { starkProvider } from '../../helpers';
-import { proposeEnvelope } from '../../fixtures';
 import { CallData, uint256 } from 'starknet';
+import { describe, expect, it } from 'vitest';
+import { starknetSepolia } from '../../../../src/networks';
+import createOzVotesStorageProofStrategy from '../../../../src/strategies/starknet/ozVotesStorageProof';
+import { proposeEnvelope } from '../../fixtures';
+import { starkProvider } from '../../helpers';
 
 const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 

@@ -99,7 +99,13 @@ export const PROPOSAL_QUERY = gql`
 
 export const PROPOSALS_QUERY = gql`
   query ($first: Int!, $skip: Int!, $where: ProposalWhere) {
-    proposals(first: $first, skip: $skip, where: $where, orderBy: "created", orderDirection: desc) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: $where
+      orderBy: "created"
+      orderDirection: desc
+    ) {
       ...offchainProposalFragment
     }
   }
@@ -199,7 +205,9 @@ export const VOTES_QUERY = gql`
 
 export const ALIASES_QUERY = gql`
   query Aliases($address: String!, $alias: String!, $created_gt: Int) {
-    aliases(where: { address: $address, alias: $alias, created_gt: $created_gt }) {
+    aliases(
+      where: { address: $address, alias: $alias, created_gt: $created_gt }
+    ) {
       address
       alias
     }

@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeAll } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
-import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
-import { getExecutionData } from '../../../src/executors';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { setup, TestConfig } from './utils';
+import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
+import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
+import { getExecutionData } from '../../../src/executors';
 
 describe('EthereumTx', () => {
   const PROPOSAL_ID = 1;
@@ -38,7 +38,10 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: '0x00'
+          },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -77,7 +80,10 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethTxAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: '0x00'
+          },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -117,7 +123,10 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.ethSigAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: '0x00'
+          },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       });
@@ -159,7 +168,10 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: '0x00'
+          },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -200,7 +212,10 @@ describe('EthereumTx', () => {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
-          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: '0x00'
+          },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };
@@ -245,7 +260,10 @@ describe('EthereumTx', () => {
               metadata: testConfig.merkleWhitelistStrategyMetadata
             }
           ],
-          executionStrategy: { addr: testConfig.vanillaExecutionStrategy, params: '0x00' },
+          executionStrategy: {
+            addr: testConfig.vanillaExecutionStrategy,
+            params: '0x00'
+          },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
       };

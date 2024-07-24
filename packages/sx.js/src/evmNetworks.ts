@@ -12,7 +12,8 @@ function createStandardConfig(
 ) {
   const additionalAuthenticators = additionalProperties.authenticators || {};
   const additionalStrategies = additionalProperties.strategies || {};
-  const additionalExecutionStrategies = additionalProperties.executionStrategies || {};
+  const additionalExecutionStrategies =
+    additionalProperties.executionStrategies || {};
 
   return {
     Meta: {
@@ -45,7 +46,9 @@ function createStandardConfig(
   };
 }
 
-function createEvmConfig(networkId: keyof typeof evmNetworks): EvmNetworkConfig {
+function createEvmConfig(
+  networkId: keyof typeof evmNetworks
+): EvmNetworkConfig {
   const network = evmNetworks[networkId];
 
   const authenticators = {
@@ -75,7 +78,9 @@ function createEvmConfig(networkId: keyof typeof evmNetworks): EvmNetworkConfig 
   const executionStrategiesImplementations = {
     SimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
     SimpleQuorumTimelock: network.ExecutionStrategies.SimpleQuorumTimelock,
-    ...(network.ExecutionStrategies.Axiom ? { Axiom: network.ExecutionStrategies.Axiom } : {}),
+    ...(network.ExecutionStrategies.Axiom
+      ? { Axiom: network.ExecutionStrategies.Axiom }
+      : {}),
     ...(network.ExecutionStrategies.Isokratia
       ? { Isokratia: network.ExecutionStrategies.Isokratia }
       : {})

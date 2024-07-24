@@ -1,5 +1,5 @@
-import { IntsSequence } from '../ints-sequence';
 import { hexToBytes } from '../bytes';
+import { IntsSequence } from '../ints-sequence';
 
 /**
  * Single slot proof voting strategy parameter array encoding (Inclusive -> Exclusive):
@@ -24,7 +24,12 @@ export function encodeParams(
   proofsConcat: string[]
 ): string[] {
   const numNodes = `0x${proofSizesBytes.length.toString(16)}`;
-  return slot.concat([numNodes], proofSizesBytes, proofSizesWords, proofsConcat);
+  return slot.concat(
+    [numNodes],
+    proofSizesBytes,
+    proofSizesWords,
+    proofsConcat
+  );
 }
 
 /**
@@ -34,7 +39,8 @@ export function encodeParams(
  */
 export function decodeParams(params: string[]): string[][] {
   const [v0, v1, v2, v3] = params;
-  if (!v0 || !v1 || !v2 || !v3) throw new Error('Invalid storage proof parameters');
+  if (!v0 || !v1 || !v2 || !v3)
+    throw new Error('Invalid storage proof parameters');
 
   const slot: string[] = [v0, v1, v2, v3];
   const numNodes = Number(params[4]);
@@ -62,7 +68,11 @@ export interface ProofInputs {
  * @param accountOptions Config for Fossil to encode which of the values proved by the account proof get stored. Default 15 is all of them.
  * @returns ProofInputs object
  */
-export function getProofInputs(blockNumber: number, proofs: any, accountOptions = 15): ProofInputs {
+export function getProofInputs(
+  blockNumber: number,
+  proofs: any,
+  accountOptions = 15
+): ProofInputs {
   const accountProofArray = proofs.accountProof.map((node: string) =>
     IntsSequence.fromBytes(hexToBytes(node))
   );
@@ -71,7 +81,9 @@ export function getProofInputs(blockNumber: number, proofs: any, accountOptions 
   let accountProofSizesWords: string[] = [];
   for (const node of accountProofArray) {
     accountProof = accountProof.concat(node.values);
-    accountProofSizesBytes = accountProofSizesBytes.concat([`0x${node.bytesLength.toString(16)}`]);
+    accountProofSizesBytes = accountProofSizesBytes.concat([
+      `0x${node.bytesLength.toString(16)}`
+    ]);
     accountProofSizesWords = accountProofSizesWords.concat([
       `0x${node.values.length.toString(16)}`
     ]);

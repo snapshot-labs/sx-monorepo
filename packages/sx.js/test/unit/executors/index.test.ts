@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getExecutionData } from '../../../src/executors';
 
 describe('getExecutionData', () => {
   it('should create vanilla execution data', () => {
-    const address = '0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe';
+    const address =
+      '0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe';
 
     const data = getExecutionData('SimpleQuorumVanilla', address);
 
@@ -14,7 +15,8 @@ describe('getExecutionData', () => {
   });
 
   it('should create ethRelayer execution data', () => {
-    const address = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
+    const address =
+      '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
     const transactions = [
       {
         to: '0x2842c82E20ab600F443646e1BC8550B44a513D82',
@@ -42,7 +44,8 @@ describe('getExecutionData', () => {
   });
 
   it('should throw if inputs are missing', () => {
-    const address = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
+    const address =
+      '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
 
     expect(() => getExecutionData('EthRelayer', address)).toThrowError(
       'Not enough data to create execution for executor 0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81'

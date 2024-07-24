@@ -1,5 +1,5 @@
-import { validateAndParseAddress } from 'starknet';
 import { starknetNetworks } from '@snapshot-labs/sx';
+import { validateAndParseAddress } from 'starknet';
 
 export const networkNodeUrl =
   process.env.NETWORK_NODE_URL ||
@@ -18,7 +18,8 @@ const createConfig = (
     baseChainId: config.Meta.herodotusAccumulatesChainId,
     factoryAddress: config.Meta.spaceFactory,
     erc20VotesStrategy: config.Strategies.ERC20Votes,
-    propositionPowerValidationStrategyAddress: config.ProposalValidations.VotingPower,
+    propositionPowerValidationStrategyAddress:
+      config.ProposalValidations.VotingPower,
     herodotusStrategies: [
       config.Strategies.OZVotesStorageProof,
       config.Strategies.OZVotesTrace208StorageProof,

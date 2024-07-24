@@ -1,11 +1,14 @@
 import 'dotenv/config';
-import express from 'express';
 import cors from 'cors';
-import starkRpc from './stark';
-import ethRpc from './eth';
-import pkg from '../package.json';
+import express from 'express';
 import { createTables } from './db';
-import { registeredProposalsLoop, registeredTransactionsLoop } from './stark/registered';
+import ethRpc from './eth';
+import starkRpc from './stark';
+import {
+  registeredProposalsLoop,
+  registeredTransactionsLoop
+} from './stark/registered';
+import pkg from '../package.json';
 
 const app = express();
 const PORT = process.env.PORT || 3001;

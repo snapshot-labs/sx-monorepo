@@ -1,7 +1,10 @@
 <script setup lang="ts">
-const props = withDefaults(defineProps<{ url: string; showDefault?: boolean }>(), {
-  showDefault: false
-});
+const props = withDefaults(
+  defineProps<{ url: string; showDefault?: boolean }>(),
+  {
+    showDefault: false
+  }
+);
 
 type Preview = {
   meta: {
@@ -68,7 +71,10 @@ debouncedWatch(
         />
       </div>
     </template>
-    <div v-else-if="showDefault" class="px-4 py-3 flex gap-2 items-center w-full">
+    <div
+      v-else-if="showDefault"
+      class="px-4 py-3 flex gap-2 items-center w-full"
+    >
       <IH-link class="shrink-0" />
       <div class="truncate">{{ props.url }}</div>
     </div>

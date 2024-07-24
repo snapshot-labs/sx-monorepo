@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { getNetwork, supportsNullCurrent } from '@/networks';
+import {
+  ProposalsFilter,
+  VotingPower,
+  VotingPowerStatus
+} from '@/networks/types';
 import { Space } from '@/types';
-import { ProposalsFilter, VotingPower, VotingPowerStatus } from '@/networks/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -47,7 +51,9 @@ async function getVotingPower() {
       props.space.strategies_parsed_metadata,
       web3.value.account,
       {
-        at: supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0,
+        at: supportsNullCurrent(props.space.network)
+          ? null
+          : getCurrent(props.space.network) || 0,
         chainId: props.space.snapshot_chain_id
       }
     );
@@ -139,7 +145,9 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
       limit="off"
       :loading="!proposalsRecord?.loaded"
       :loading-more="proposalsRecord?.loadingMore"
-      :proposals="proposalsStore.getSpaceProposals(props.space.id, props.space.network)"
+      :proposals="
+        proposalsStore.getSpaceProposals(props.space.id, props.space.network)
+      "
       @end-reached="handleEndReached"
     />
   </div>

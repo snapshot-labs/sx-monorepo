@@ -1,23 +1,26 @@
 import { Call, CallData, shortString } from 'starknet';
 import StarkTxAuthenticatorAbi from './abis/StarkTxAuthenticator.json';
-import { getChoiceEnum } from '../../utils/starknet-enums';
 import {
   Authenticator,
   Envelope,
   Propose,
-  Vote,
-  UpdateProposal,
   ProposeCallArgs,
-  VoteCallArgs,
-  UpdateProposalCallArgs
+  UpdateProposal,
+  UpdateProposalCallArgs,
+  Vote,
+  VoteCallArgs
 } from '../../types';
+import { getChoiceEnum } from '../../utils/starknet-enums';
 
 const callData = new CallData(StarkTxAuthenticatorAbi);
 
 export default function createStarkTxAuthenticator(): Authenticator {
   return {
     type: 'starkTx',
-    createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call {
+    createProposeCall(
+      envelope: Envelope<Propose>,
+      args: ProposeCallArgs
+    ): Call {
       const { space, authenticator } = envelope.data;
 
       const compiled = callData.compile('authenticate_propose', [
