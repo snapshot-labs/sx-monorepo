@@ -54,9 +54,9 @@ const formattedVotingPower = computed(() => {
 
 const navigation = computed(() => [
   { label: 'Statement', route: 'space-user-statement' },
-  { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
-  { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
-  { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
+  // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
+  // { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
+  // { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
 
 async function loadUserActivity() {
