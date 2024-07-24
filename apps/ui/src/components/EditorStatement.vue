@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import type { Statement } from '@/types';
+import { Statement } from '@/types';
 
 const model = defineModel<Statement>({
   required: true
@@ -57,10 +57,10 @@ async function handleSubmit() {
   }
 }
 
-watchEffect(async () => {
+watchEffect(() => {
   formValidated.value = false;
 
-  formErrors.value = await formValidator.validateAsync({
+  formErrors.value = formValidator.validate({
     statement: form.statement,
     status: form.status
   });
