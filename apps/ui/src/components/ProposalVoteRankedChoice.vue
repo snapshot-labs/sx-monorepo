@@ -30,7 +30,9 @@ const selectedChoices = ref<RankedChoice>(
       item-key="id"
     >
       <template #item="{ element, index }">
-        <UiButton class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2">
+        <UiButton
+          class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
+        >
           <IC-drag class="text-skin-text" />
 
           <div class="grow truncate">

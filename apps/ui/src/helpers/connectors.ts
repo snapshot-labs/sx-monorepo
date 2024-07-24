@@ -1,9 +1,9 @@
-import { getUrl } from '@/helpers/utils';
-import metamaskIcon from '@/assets/connectors/metamask.png';
-import walletconnectIcon from '@/assets/connectors/walletconnect.png';
 import coinbaseIcon from '@/assets/connectors/coinbase.png';
 import gnosisIcon from '@/assets/connectors/gnosis.png';
+import metamaskIcon from '@/assets/connectors/metamask.png';
 import starknetIcon from '@/assets/connectors/starknet.png';
+import walletconnectIcon from '@/assets/connectors/walletconnect.png';
+import { getUrl } from '@/helpers/utils';
 
 export default {
   injected: {

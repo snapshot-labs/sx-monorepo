@@ -1,8 +1,12 @@
 import express from 'express';
 import z from 'zod';
+import {
+  DEFAULT_INDEX,
+  getEthereumWallet,
+  SPACES_INDICIES
+} from './dependencies';
 import { createNetworkHandler, NETWORKS } from './rpc';
 import { rpcError } from '../utils';
-import { getEthereumWallet, DEFAULT_INDEX, SPACES_INDICIES } from './dependencies';
 
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
@@ -17,7 +21,10 @@ const jsonRpcRequestSchema = z.object({
 });
 
 const handlers = Object.fromEntries(
-  Array.from(NETWORKS.keys()).map(chainId => [chainId, createNetworkHandler(chainId)])
+  Array.from(NETWORKS.keys()).map(chainId => [
+    chainId,
+    createNetworkHandler(chainId)
+  ])
 );
 
 const router = express.Router();

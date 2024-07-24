@@ -1,23 +1,26 @@
 import { Call, CallData, shortString, uint256 } from 'starknet';
 import StarkSigAuthenticatorAbi from './abis/StarkSigAuthenticator.json';
-import { getChoiceEnum } from '../../utils/starknet-enums';
 import {
   Authenticator,
   Envelope,
   Propose,
-  Vote,
-  UpdateProposal,
   ProposeCallArgs,
-  VoteCallArgs,
-  UpdateProposalCallArgs
+  UpdateProposal,
+  UpdateProposalCallArgs,
+  Vote,
+  VoteCallArgs
 } from '../../types';
+import { getChoiceEnum } from '../../utils/starknet-enums';
 
 const callData = new CallData(StarkSigAuthenticatorAbi);
 
 export default function createStarkSigAuthenticator(): Authenticator {
   return {
     type: 'starkSig',
-    createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call {
+    createProposeCall(
+      envelope: Envelope<Propose>,
+      args: ProposeCallArgs
+    ): Call {
       const { authenticator } = envelope.data;
 
       if (!envelope.signatureData?.signature) {

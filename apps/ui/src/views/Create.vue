@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { clone, getSalt } from '@/helpers/utils';
-import { getNetwork, enabledReadWriteNetworks } from '@/networks';
-import type { StrategyConfig } from '@/networks/types';
-import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
+import { enabledReadWriteNetworks, getNetwork } from '@/networks';
+import { StrategyConfig } from '@/networks/types';
+import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
 const PAGES = [
   {
@@ -95,14 +95,20 @@ const accessiblePages = computed(() => {
   const invalidPageIndex = PAGES.findIndex(page => !validatePage(page.id));
 
   return Object.fromEntries(
-    PAGES.map((page, i) => [page.id, invalidPageIndex === -1 ? true : i <= invalidPageIndex])
+    PAGES.map((page, i) => [
+      page.id,
+      invalidPageIndex === -1 ? true : i <= invalidPageIndex
+    ])
   );
 });
 const showCreate = computed(
-  () => PAGES.findIndex(page => page.id === currentPage.value) === PAGES.length - 1
+  () =>
+    PAGES.findIndex(page => page.id === currentPage.value) === PAGES.length - 1
 );
 const nextDisabled = computed(() => !validatePage(currentPage.value));
-const submitDisabled = computed(() => PAGES.some(page => !validatePage(page.id)));
+const submitDisabled = computed(() =>
+  PAGES.some(page => !validatePage(page.id))
+);
 
 function validatePage(page: PageID) {
   if (page === 'strategies') return votingStrategies.value.length > 0;
@@ -132,7 +138,10 @@ function handleNextClick() {
 
 async function handleSubmit() {
   salt.value = getSalt();
-  predictedSpaceAddress.value = await predictSpaceAddress(selectedNetworkId.value, salt.value);
+  predictedSpaceAddress.value = await predictSpaceAddress(
+    selectedNetworkId.value,
+    salt.value
+  );
   confirming.value = true;
 }
 
@@ -201,11 +210,16 @@ watchEffect(() => setTitle('Create space'));
             @delegations="v => (metadataForm.delegations = v)"
             @errors="v => handleErrors('profile', v)"
           />
-          <FormNetwork v-else-if="currentPage === 'network'" v-model="selectedNetworkId" />
+          <FormNetwork
+            v-else-if="currentPage === 'network'"
+            v-model="selectedNetworkId"
+          />
           <FormStrategies
             v-else-if="currentPage === 'strategies'"
             v-model="votingStrategies"
-            :available-strategies="selectedNetwork.constants.EDITOR_VOTING_STRATEGIES"
+            :available-strategies="
+              selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
+            "
             title="Voting strategies"
             description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
           />
@@ -213,16 +227,21 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'auths'"
             v-model="authenticators"
             unique
-            :available-strategies="selectedNetwork.constants.EDITOR_AUTHENTICATORS"
+            :available-strategies="
+              selectedNetwork.constants.EDITOR_AUTHENTICATORS
+            "
             title="Authenticators"
             description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
           />
           <FormValidation
             v-else-if="currentPage === 'validations'"
             v-model="validationStrategy"
-            :available-strategies="selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS"
+            :available-strategies="
+              selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS
+            "
             :available-voting-strategies="
-              selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
+              selectedNetwork.constants
+                .EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
             "
             title="Proposal validation"
             description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
@@ -230,7 +249,9 @@ watchEffect(() => setTitle('Create space'));
           <FormStrategies
             v-else-if="currentPage === 'executions'"
             v-model="executionStrategies"
-            :available-strategies="selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES"
+            :available-strategies="
+              selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES
+            "
             :default-params="{ controller }"
             title="Execution strategies"
             description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."
@@ -257,7 +278,12 @@ watchEffect(() => setTitle('Create space'));
         >
           Create
         </UiButton>
-        <UiButton v-else class="w-full" :disabled="nextDisabled" @click="handleNextClick">
+        <UiButton
+          v-else
+          class="w-full"
+          :disabled="nextDisabled"
+          @click="handleNextClick"
+        >
           Next
         </UiButton>
       </div>

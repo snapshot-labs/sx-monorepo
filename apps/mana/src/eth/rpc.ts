@@ -1,15 +1,15 @@
-import { Response } from 'express';
 import {
   clients,
-  evmPolygon,
   evmArbitrum,
-  evmOptimism,
-  evmMainnet,
-  evmSepolia,
   evmLineaGoerli,
-  EvmNetworkConfig
+  evmMainnet,
+  EvmNetworkConfig,
+  evmOptimism,
+  evmPolygon,
+  evmSepolia
 } from '@snapshot-labs/sx';
 import fetch from 'cross-fetch';
+import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
@@ -75,18 +75,21 @@ export const createNetworkHandler = (chainId: number) => {
     try {
       const { space, proposalId } = params;
 
-      const response = await fetch('http://ec2-44-197-171-215.compute-1.amazonaws.com:8000/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chainId,
-          space,
-          proposalId,
-          feeData: {
-            maxFeePerGas: '50000000000'
-          }
-        })
-      });
+      const response = await fetch(
+        'http://ec2-44-197-171-215.compute-1.amazonaws.com:8000/query',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chainId,
+            space,
+            proposalId,
+            feeData: {
+              maxFeePerGas: '50000000000'
+            }
+          })
+        }
+      );
 
       const result = await response.text();
 
@@ -131,7 +134,11 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
-  async function executeStarknetProposal(id: number, params: any, res: Response) {
+  async function executeStarknetProposal(
+    id: number,
+    params: any,
+    res: Response
+  ) {
     try {
       const {
         space,
@@ -165,5 +172,11 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
-  return { send, finalizeProposal, execute, executeQueuedProposal, executeStarknetProposal };
+  return {
+    send,
+    finalizeProposal,
+    execute,
+    executeQueuedProposal,
+    executeStarknetProposal
+  };
 };

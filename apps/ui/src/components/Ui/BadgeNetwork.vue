@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { getUrl } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
-import { getUrl } from '@/helpers/utils';
 
 const props = withDefaults(
   defineProps<{

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { getInjected } from '@snapshot-labs/lock/src/utils';
-import connectors, { mapConnectorId, getConnectorIconUrl } from '@/helpers/connectors';
+import connectors, {
+  getConnectorIconUrl,
+  mapConnectorId
+} from '@/helpers/connectors';
 
 const win = window;
 
@@ -49,7 +52,10 @@ watch(open, () => (step.value = null));
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3 v-if="!web3.account || step === 'connect'" v-text="'Connect wallet'" />
+      <h3
+        v-if="!web3.account || step === 'connect'"
+        v-text="'Connect wallet'"
+      />
       <h3 v-else v-text="'Account'" />
     </template>
     <div v-if="!web3.account || step === 'connect'">
@@ -61,7 +67,9 @@ watch(open, () => (step.value = null));
           class="block"
           @click="$emit('login', connector.id)"
         >
-          <UiButton class="button-outline w-full flex justify-center items-center">
+          <UiButton
+            class="button-outline w-full flex justify-center items-center"
+          >
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
@@ -100,7 +108,10 @@ watch(open, () => (step.value = null));
         <UiButton class="button-outline w-full" @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>
-        <UiButton class="button-outline w-full !text-skin-danger" @click="handleLogout">
+        <UiButton
+          class="button-outline w-full !text-skin-danger"
+          @click="handleLogout"
+        >
           Log out
         </UiButton>
       </div>

@@ -1,5 +1,4 @@
-import { describe, it, expect } from 'vitest';
-
+import { describe, expect, it } from 'vitest';
 import { _vp, createErc1155Metadata } from './utils';
 
 describe('utils', () => {
@@ -47,7 +46,8 @@ describe('utils', () => {
           {
             name: 'sample',
             apiType: 'governor-subgraph',
-            apiUrl: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
+            apiUrl:
+              'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
             contractNetwork: 'sep',
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
@@ -76,7 +76,8 @@ describe('utils', () => {
             {
               name: 'sample',
               api_type: 'governor-subgraph',
-              api_url: 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
+              api_url:
+                'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
               contract: 'sep:0x000000000000000000000000000000000000dead'
             }
           ]

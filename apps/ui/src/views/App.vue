@@ -37,7 +37,10 @@ onMounted(() => load());
         </div>
         <div class="md:flex md:space-x-4">
           <div class="space-y-5 p-4 border rounded-lg h-fit mb-4">
-            <div v-if="app.images" class="flex overflow-y-scroll no-scrollbar space-x-2">
+            <div
+              v-if="app.images"
+              class="flex overflow-y-scroll no-scrollbar space-x-2"
+            >
               <img
                 v-for="(image, i) in app.images.split(',')"
                 :key="i"
@@ -58,7 +61,9 @@ onMounted(() => load());
               <div class="text-md text-skin-link" v-text="app.start" />
             </div>
           </div>
-          <div class="border rounded-lg md:w-[300px] shrink-0 h-fit p-4 space-y-3 mb-4">
+          <div
+            class="border rounded-lg md:w-[300px] shrink-0 h-fit p-4 space-y-3 mb-4"
+          >
             <div>
               <h4 class="eyebrow" v-text="'Built by'" />
               {{ app.author }}

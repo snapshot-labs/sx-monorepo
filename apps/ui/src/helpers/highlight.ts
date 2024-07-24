@@ -1,9 +1,10 @@
-import { Client } from '@snapshot-labs/highlight';
 import { Wallet } from '@ethersproject/wallet';
+import { Client } from '@snapshot-labs/highlight';
 
 const WALLET_PRIVATE_KEY = Wallet.createRandom().privateKey;
 
-const HIGHLIGHT_URL = import.meta.env.VITE_HIGHLIGHT_URL || 'http://localhost:3000';
+const HIGHLIGHT_URL =
+  import.meta.env.VITE_HIGHLIGHT_URL || 'http://localhost:3000';
 
 const signer = new Wallet(WALLET_PRIVATE_KEY);
 

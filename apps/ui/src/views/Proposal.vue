@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { utils } from '@snapshot-labs/sx';
+import { getCacheHash, getStampUrl, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { getStampUrl, getCacheHash, sanitizeUrl } from '@/helpers/utils';
-import { Choice } from '@/types';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { Choice } from '@/types';
 
 const route = useRoute();
 const { setFavicon } = useFavicon();
@@ -21,14 +21,20 @@ const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
 const editMode = ref(false);
 
-const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
+const network = computed(() =>
+  networkId.value ? getNetwork(networkId.value) : null
+);
 const id = computed(() => route.params.id as string);
 const proposal = computed(() => {
   if (!resolved.value || !spaceAddress.value || !networkId.value) {
     return null;
   }
 
-  return proposalsStore.getProposal(spaceAddress.value, id.value, networkId.value);
+  return proposalsStore.getProposal(
+    spaceAddress.value,
+    id.value,
+    networkId.value
+  );
 });
 
 const discussion = computed(() => {
@@ -40,7 +46,9 @@ const discussion = computed(() => {
 const votingPowerDecimals = computed(() => {
   if (!proposal.value) return 0;
   return Math.max(
-    ...proposal.value.space.strategies_parsed_metadata.map(metadata => metadata.decimals),
+    ...proposal.value.space.strategies_parsed_metadata.map(
+      metadata => metadata.decimals
+    ),
     0
   );
 });
@@ -141,14 +149,19 @@ watchEffect(() => {
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 md:mr-[340px]">
-        <div class="flex px-4 bg-skin-bg border-b sticky top-[71px] lg:top-[72px] z-40 space-x-3">
+        <div
+          class="flex px-4 bg-skin-bg border-b sticky top-[71px] lg:top-[72px] z-40 space-x-3"
+        >
           <router-link
             :to="{
               name: 'proposal-overview',
               params: { id: proposal.proposal_id }
             }"
           >
-            <UiLink :is-active="route.name === 'proposal-overview'" text="Overview" />
+            <UiLink
+              :is-active="route.name === 'proposal-overview'"
+              text="Overview"
+            />
           </router-link>
           <router-link
             :to="{
@@ -164,7 +177,12 @@ watchEffect(() => {
               class="inline-block"
             />
           </router-link>
-          <a v-if="discussion" :href="discussion" target="_blank" class="flex items-center">
+          <a
+            v-if="discussion"
+            :href="discussion"
+            target="_blank"
+            class="flex items-center"
+          >
             <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
             <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
           </a>
@@ -202,13 +220,16 @@ watchEffect(() => {
             <div
               v-if="
                 votingPowerDetailsError?.details === 'NOT_READY_YET' &&
-                ['evmSlotValue', 'ozVotesStorageProof'].includes(votingPowerDetailsError.source)
+                ['evmSlotValue', 'ozVotesStorageProof'].includes(
+                  votingPowerDetailsError.source
+                )
               "
             >
               <span class="inline-flex align-top h-[27px] items-center">
                 <IH-exclamation-circle class="mr-1" />
               </span>
-              Please allow few minutes for the voting power to be collected from Ethereum.
+              Please allow few minutes for the voting power to be collected from
+              Ethereum.
             </div>
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
@@ -218,10 +239,17 @@ watchEffect(() => {
                   v-else-if="votingPowerStatus === 'error'"
                   class="inline-block text-rose-500"
                 />
-                <span v-else class="text-skin-link" v-text="props.formattedVotingPower" />
+                <span
+                  v-else
+                  class="text-skin-link"
+                  v-text="props.formattedVotingPower"
+                />
               </a>
               <a
-                v-if="votingPowerStatus === 'success' && props.votingPower === BigInt(0)"
+                v-if="
+                  votingPowerStatus === 'success' &&
+                  props.votingPower === BigInt(0)
+                "
                 href="https://help.snapshot.org/en/articles/9566904-why-do-i-have-0-voting-power"
                 target="_blank"
                 class="ml-1.5"
@@ -272,12 +300,22 @@ watchEffect(() => {
           </ProposalVote>
         </div>
 
-        <div v-if="!proposal.cancelled && proposal.state !== 'pending' && proposal.vote_count">
+        <div
+          v-if="
+            !proposal.cancelled &&
+            proposal.state !== 'pending' &&
+            proposal.vote_count
+          "
+        >
           <h4 class="mb-2.5 eyebrow flex items-center">
             <IH-chart-square-bar class="inline-block mr-2" />
             <span>Results</span>
           </h4>
-          <ProposalResults with-details :proposal="proposal" :decimals="votingPowerDecimals" />
+          <ProposalResults
+            with-details
+            :proposal="proposal"
+            :decimals="votingPowerDecimals"
+          />
         </div>
       </div>
     </template>

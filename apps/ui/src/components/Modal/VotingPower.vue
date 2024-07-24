@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { getNetwork } from '@/networks';
 import { _n, shorten } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
-import { NetworkID } from '@/types';
+import { getNetwork } from '@/networks';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
   open: boolean;
@@ -21,7 +21,9 @@ defineEmits<{
 
 const network = computed(() => getNetwork(props.networkId));
 const baseNetwork = computed(() =>
-  network.value.baseNetworkId ? getNetwork(network.value.baseNetworkId) : network.value
+  network.value.baseNetworkId
+    ? getNetwork(network.value.baseNetworkId)
+    : network.value
 );
 const loading = computed(() => props.votingPowerStatus === 'loading');
 const error = computed(() => props.votingPowerStatus === 'error');
@@ -35,8 +37,14 @@ const error = computed(() => props.votingPowerStatus === 'error');
     <UiLoading v-if="loading" class="p-4 block text-center" />
     <div v-else>
       <div v-if="error" class="p-4 flex flex-col gap-3 items-start">
-        <UiAlert type="error">There was an error fetching your voting power.</UiAlert>
-        <UiButton type="button" class="flex items-center gap-2" @click="$emit('getVotingPower')">
+        <UiAlert type="error"
+          >There was an error fetching your voting power.</UiAlert
+        >
+        <UiButton
+          type="button"
+          class="flex items-center gap-2"
+          @click="$emit('getVotingPower')"
+        >
           <IH-refresh />Retry
         </UiButton>
       </div>
@@ -52,7 +60,9 @@ const error = computed(() => props.votingPowerStatus === 'error');
             class="truncate"
             v-text="
               network.constants.STRATEGIES[strategy.address] ||
-              (isValidAddress(strategy.address) ? shorten(strategy.address) : strategy.address)
+              (isValidAddress(strategy.address)
+                ? shorten(strategy.address)
+                : strategy.address)
             "
           />
           <div class="text-skin-link shrink-0">
@@ -69,15 +79,26 @@ const error = computed(() => props.votingPowerStatus === 'error');
           <div v-if="strategy.token" class="flex items-center gap-2">
             <a
               :href="
-                (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(strategy.address)
+                (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(
+                  strategy.address
+                )
                   ? baseNetwork
                   : network
-                ).helpers.getExplorerUrl(strategy.token, 'contract', strategy.chainId)
+                ).helpers.getExplorerUrl(
+                  strategy.token,
+                  'contract',
+                  strategy.chainId
+                )
               "
               target="_blank"
               class="flex items-center text-skin-text"
             >
-              <UiStamp :id="strategy.token" type="avatar" :size="18" class="mr-2 rounded-sm" />
+              <UiStamp
+                :id="strategy.token"
+                type="avatar"
+                :size="18"
+                class="mr-2 rounded-sm"
+              />
               {{ shorten(strategy.token) }}
               <IH-arrow-sm-right class="ml-1 -rotate-45" />
             </a>

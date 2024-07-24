@@ -1,30 +1,30 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
+import App from '@/views/App.vue';
+import Apps from '@/views/Apps.vue';
+import Create from '@/views/Create.vue';
+import Editor from '@/views/Editor.vue';
 import Landing from '@/views/Landing.vue';
-import Space from '@/views/Space.vue';
+import Explore from '@/views/My/Explore.vue';
+import Home from '@/views/My/Home.vue';
+import Notifications from '@/views/My/Notifications.vue';
+import My from '@/views/My.vue';
+import Network from '@/views/Network.vue';
+import ProposalOverview from '@/views/Proposal/Overview.vue';
+import ProposalVotes from '@/views/Proposal/Votes.vue';
+import Proposal from '@/views/Proposal.vue';
+import Contacts from '@/views/Settings/Contacts.vue';
+import SettingsSpaces from '@/views/Settings/Spaces.vue';
+import Settings from '@/views/Settings.vue';
+import SpaceDelegates from '@/views/Space/Delegates.vue';
+import SpaceEditSettings from '@/views/Space/EditSettings.vue';
+import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearch from '@/views/Space/Search.vue';
 import SpaceSettings from '@/views/Space/Settings.vue';
-import SpaceEditSettings from '@/views/Space/EditSettings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
-import SpaceDelegates from '@/views/Space/Delegates.vue';
-import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
-import Editor from '@/views/Editor.vue';
-import Proposal from '@/views/Proposal.vue';
-import ProposalOverview from '@/views/Proposal/Overview.vue';
-import ProposalVotes from '@/views/Proposal/Votes.vue';
+import Space from '@/views/Space.vue';
 import User from '@/views/User.vue';
-import Create from '@/views/Create.vue';
-import Settings from '@/views/Settings.vue';
-import Contacts from '@/views/Settings/Contacts.vue';
-import My from '@/views/My.vue';
-import Home from '@/views/My/Home.vue';
-import Explore from '@/views/My/Explore.vue';
-import Notifications from '@/views/My/Notifications.vue';
-import SettingsSpaces from '@/views/Settings/Spaces.vue';
-import Apps from '@/views/Apps.vue';
-import App from '@/views/App.vue';
-import Network from '@/views/Network.vue';
 
 const { mixpanel } = useMixpanel();
 
@@ -39,10 +39,18 @@ const routes: any[] = [
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       { path: 'settings', name: 'space-settings', component: SpaceSettings },
-      { path: 'edit-settings', name: 'space-edit-settings', component: SpaceEditSettings },
+      {
+        path: 'edit-settings',
+        name: 'space-edit-settings',
+        component: SpaceEditSettings
+      },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
       { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
-      { path: 'leaderboard', name: 'space-leaderboard', component: SpaceLeaderboard }
+      {
+        path: 'leaderboard',
+        name: 'space-leaderboard',
+        component: SpaceLeaderboard
+      }
     ]
   },
   {
@@ -76,7 +84,11 @@ const routes: any[] = [
     children: [
       { path: '/home', name: 'my-home', component: Home },
       { path: '/explore', name: 'my-explore', component: Explore },
-      { path: '/notifications', name: 'my-notifications', component: Notifications },
+      {
+        path: '/notifications',
+        name: 'my-notifications',
+        component: Notifications
+      },
       { path: '/profile/:id', name: 'user', component: User }
     ]
   },

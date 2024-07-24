@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getAuthenticator } from '../../../../src/authenticators/starknet';
 import { starknetNetworks, starknetSepolia } from '../../../../src/networks';
 

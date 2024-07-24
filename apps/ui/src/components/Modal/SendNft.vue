@@ -123,7 +123,10 @@ watchEffect(async () => {
     <template #header>
       <h3 v-text="'Send NFT'" />
       <template v-if="showPicker">
-        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
@@ -169,9 +172,17 @@ watchEffect(async () => {
       />
       <div class="s-base">
         <div class="s-label" v-text="'NFT'" />
-        <button class="s-input text-left h-[61px]" @click="handlePickerClick('nft')">
+        <button
+          class="s-input text-left h-[61px]"
+          @click="handlePickerClick('nft')"
+        >
           <div class="flex items-center">
-            <UiNftImage v-if="currentNft" :item="currentNft" class="mr-2" :size="20" />
+            <UiNftImage
+              v-if="currentNft"
+              :item="currentNft"
+              class="mr-2"
+              :size="20"
+            />
             <div class="truncate">
               {{ currentNft?.displayTitle || 'Select NFT' }}
             </div>
@@ -189,7 +200,9 @@ watchEffect(async () => {
       />
     </div>
     <template v-if="!showPicker" #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"> Confirm </UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+        Confirm
+      </UiButton>
     </template>
   </UiModal>
 </template>
