@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Contact } from '@/types';
+import { Contact } from '@/types';
 import pkg from '../../package.json';
 
 export const useContactsStore = defineStore('contacts', {

@@ -1,4 +1,5 @@
-import type {
+import EthTxAuthenticatorAbi from './abis/EthTxAuthenticator.json';
+import {
   Authenticator,
   Call,
   Envelope,
@@ -6,7 +7,6 @@ import type {
   UpdateProposal,
   Vote
 } from '../../clients/evm/types';
-import EthTxAuthenticatorAbi from './abis/EthTxAuthenticator.json';
 
 export default function createEthTxAuthenticator(): Authenticator {
   return {

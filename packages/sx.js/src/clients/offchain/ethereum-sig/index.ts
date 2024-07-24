@@ -1,5 +1,4 @@
-import type { OffchainNetworkConfig } from '../../../types';
-import type {
+import {
   Signer,
   TypedDataField,
   TypedDataSigner
@@ -21,26 +20,27 @@ import {
   weightedVoteTypes
 } from './types';
 import { offchainGoerli } from '../../../offchainNetworks';
+import { OffchainNetworkConfig } from '../../../types';
 import {
-  type CancelProposal,
-  type EIP712CancelProposalMessage,
-  type EIP712FollowSpaceMessage,
-  type EIP712Message,
-  type EIP712ProposeMessage,
-  type EIP712SetAliasMessage,
-  type EIP712UnfollowSpaceMessage,
-  type EIP712UpdateProposal,
-  type EIP712UpdateUserMessage,
-  type EIP712VoteMessage,
-  type Envelope,
-  type FollowSpace,
-  type Propose,
-  type SetAlias,
-  type SignatureData,
-  type UnfollowSpace,
-  type UpdateProposal,
-  type UpdateUser,
-  type Vote
+  CancelProposal,
+  EIP712CancelProposalMessage,
+  EIP712FollowSpaceMessage,
+  EIP712Message,
+  EIP712ProposeMessage,
+  EIP712SetAliasMessage,
+  EIP712UnfollowSpaceMessage,
+  EIP712UpdateProposal,
+  EIP712UpdateUserMessage,
+  EIP712VoteMessage,
+  Envelope,
+  FollowSpace,
+  Propose,
+  SetAlias,
+  SignatureData,
+  UnfollowSpace,
+  UpdateProposal,
+  UpdateUser,
+  Vote
 } from '../types';
 import { encryptChoices } from '../utils';
 

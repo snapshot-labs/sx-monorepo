@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { uint256, validateAndParseAddress } from 'starknet';
-import type {
-  ClientConfig,
-  Envelope,
-  Propose,
-  Strategy,
-  Vote
-} from '../../types';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
 import { AddressType, generateMerkleProof, Leaf } from '../../utils/merkletree';
 
 type Entry = {

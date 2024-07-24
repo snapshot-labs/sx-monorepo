@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork } from '@/networks';
 import { ProposalsFilter } from '@/networks/types';
-import type { NetworkID, Proposal } from '@/types';
+import { NetworkID, Proposal } from '@/types';
 
 type SpaceRecord = {
   loading: boolean;

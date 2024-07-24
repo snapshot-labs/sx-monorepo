@@ -1,7 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
-import type { Strategy } from '../../clients/evm/types';
-import type { Provider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import ICompAbi from './abis/IComp.json';
+import { Strategy } from '../../clients/evm/types';
 
 export default function createCompStrategy(): Strategy {
   return {

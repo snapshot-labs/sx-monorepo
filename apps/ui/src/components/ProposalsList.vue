@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Proposal as ProposalType } from '@/types';
+import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
   defineProps<{

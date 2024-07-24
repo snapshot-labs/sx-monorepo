@@ -117,7 +117,9 @@ watch([sortBy, choiceFilter], () => {
   >
     <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
     <div class="grow w-[40%] truncate">
-      <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
+      <template v-if="offchainNetworks.includes(proposal.network)"
+        >Choice</template
+      >
       <UiSelectDropdown
         v-else
         v-model="choiceFilter"
@@ -203,7 +205,10 @@ watch([sortBy, choiceFilter], () => {
         >
           <UiStamp :id="vote.voter.id" :size="32" />
           <div class="flex flex-col truncate">
-            <h4 class="truncate" v-text="vote.voter.name || shortenAddress(vote.voter.id)" />
+            <h4
+              class="truncate"
+              v-text="vote.voter.name || shortenAddress(vote.voter.id)"
+            />
             <div
               class="text-[17px] text-skin-text truncate"
               v-text="shortenAddress(vote.voter.id)"
@@ -216,7 +221,9 @@ watch([sortBy, choiceFilter], () => {
           :disabled="!vote.reason"
           @click="handleChoiceClick(vote)"
         >
-          <template v-if="!!props.proposal.privacy && !props.proposal.completed">
+          <template
+            v-if="!!props.proposal.privacy && !props.proposal.completed"
+          >
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
                 <span class="text-skin-heading leading-[22px]"
@@ -235,7 +242,9 @@ watch([sortBy, choiceFilter], () => {
               :title="getChoiceText(proposal.choices, vote.choice)"
               class="max-w-[100%] truncate"
             >
-              <h4 class="truncate">{{ getChoiceText(proposal.choices, vote.choice) }}</h4>
+              <h4 class="truncate">
+                {{ getChoiceText(proposal.choices, vote.choice) }}
+              </h4>
             </UiTooltip>
             <div v-else class="flex items-center space-x-2">
               <div
@@ -255,9 +264,14 @@ watch([sortBy, choiceFilter], () => {
                   class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
                 />
               </div>
-              <h4 class="truncate grow" v-text="proposal.choices[(vote.choice as number) - 1]" />
+              <h4
+                class="truncate grow"
+                v-text="proposal.choices[(vote.choice as number) - 1]"
+              />
             </div>
-            <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
+            <div class="text-[17px] max-w-[100%] truncate">
+              {{ vote.reason }}
+            </div>
           </template>
         </button>
         <div

@@ -1,5 +1,8 @@
+import { Web3Provider } from '@ethersproject/providers';
+import { Wallet } from '@ethersproject/wallet';
+import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import { FunctionalComponent } from 'vue';
-import type {
+import {
   Alias,
   Choice,
   Follow,
@@ -12,9 +15,6 @@ import type {
   UserActivity,
   Vote
 } from '@/types';
-import type { Web3Provider } from '@ethersproject/providers';
-import type { Wallet } from '@ethersproject/wallet';
-import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 
 export type PaginationOpts = { limit: number; skip?: number };
 export type SpacesFilter = {

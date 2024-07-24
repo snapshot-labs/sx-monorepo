@@ -2,16 +2,10 @@
 
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { CallData, Contract } from 'starknet';
-import type {
-  ClientConfig,
-  Envelope,
-  Propose,
-  Strategy,
-  Vote
-} from '../../types';
 import EVMSlotValue from './abis/EVMSlotValue.json';
 import { getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 

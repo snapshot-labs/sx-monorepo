@@ -6,7 +6,7 @@ import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinGraph } from '@/helpers/pin';
 import { getUrl, shorten } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata } from '@/types';
-import type { StrategyConfig } from '../types';
+import { StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';
 import IHCode from '~icons/heroicons-outline/code';

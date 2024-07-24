@@ -118,7 +118,9 @@ watch(
               @click="$emit('close')"
             >
               <UiStamp :id="vote.voter.id" :size="24" />
-              <span>{{ vote.voter.name || shortenAddress(vote.voter.id) }}</span>
+              <span>{{
+                vote.voter.name || shortenAddress(vote.voter.id)
+              }}</span>
             </router-link>
 
             <template v-if="isEncrypted">

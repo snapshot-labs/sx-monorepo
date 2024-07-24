@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NetworkID } from '@/types';
+import { NetworkID } from '@/types';
 
 const route = useRoute();
 const spacesStore = useSpacesStore();

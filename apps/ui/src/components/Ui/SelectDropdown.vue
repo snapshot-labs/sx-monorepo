@@ -3,13 +3,13 @@
   lang="ts"
   generic="T extends string | number, U extends readonly Item<T>[]"
 >
-import type { Component } from 'vue';
+import { FunctionalComponent } from 'vue';
 
 export type Item<T extends string | number> = {
   key: T;
   label: string;
   indicator?: string;
-  component?: Component;
+  component?: FunctionalComponent;
   componentProps?: Record<string, unknown>;
 };
 

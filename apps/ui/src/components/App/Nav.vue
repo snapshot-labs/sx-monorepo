@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type FunctionalComponent } from 'vue';
+import { FunctionalComponent } from 'vue';
 import { compareAddresses } from '@/helpers/utils';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Token } from '@/helpers/alchemy';
+import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import {
   _c,

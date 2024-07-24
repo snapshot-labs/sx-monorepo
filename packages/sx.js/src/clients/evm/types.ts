@@ -1,9 +1,9 @@
-import type {
+import {
   TypedDataDomain,
   TypedDataField
 } from '@ethersproject/abstract-signer';
-import type { ContractInterface } from '@ethersproject/contracts';
-import type { Provider } from '@ethersproject/providers';
+import { ContractInterface } from '@ethersproject/contracts';
+import { Provider } from '@ethersproject/providers';
 
 enum Choice {
   Against = 0,

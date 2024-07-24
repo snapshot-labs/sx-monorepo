@@ -1,9 +1,9 @@
-import type { NetworkConfig, Strategy } from '../../types';
 import createErc20VotesStrategy from './erc20Votes';
 import createEvmSlotValueStrategy from './evmSlotValue';
 import createMerkleWhitelistStrategy from './merkleWhitelist';
 import createOzVotesStorageProofStrategy from './ozVotesStorageProof';
 import createVanillaStrategy from './vanilla';
+import { NetworkConfig, Strategy } from '../../types';
 import { hexPadLeft } from '../../utils/encoding';
 
 export function getStrategy(

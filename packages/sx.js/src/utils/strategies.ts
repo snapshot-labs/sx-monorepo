@@ -1,4 +1,5 @@
-import type {
+import { getStrategy } from '../strategies/starknet';
+import {
   ClientConfig,
   IndexedConfig,
   Propose,
@@ -6,7 +7,6 @@ import type {
   StrategyConfig,
   Vote
 } from '../types';
-import { getStrategy } from '../strategies/starknet';
 import { getStorageVarAddress } from '../utils/encoding';
 
 export async function getStrategies(

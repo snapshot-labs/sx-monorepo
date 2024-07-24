@@ -1,5 +1,6 @@
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress, isAddress } from '@ethersproject/address';
+import { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import Autolinker from 'autolinker';
 import dayjs from 'dayjs';
@@ -9,8 +10,7 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import sha3 from 'js-sha3';
 import { validateAndParseAddress } from 'starknet';
 import networks from '@/helpers/networks.json';
-import type { Proposal, SpaceMetadata } from '@/types';
-import type { Web3Provider } from '@ethersproject/providers';
+import { Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';

@@ -1,5 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
-import type { MetaTransaction } from '../utils/encoding';
+import { MetaTransaction } from '../utils/encoding';
 
 export default function createIsokratiaExecutor() {
   return {

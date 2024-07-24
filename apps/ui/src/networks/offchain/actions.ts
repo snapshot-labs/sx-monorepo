@@ -1,5 +1,6 @@
 import { isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
+import { Wallet } from '@ethersproject/wallet';
 import {
   clients,
   getOffchainStrategy,
@@ -10,7 +11,7 @@ import {
 import { getSwapLink } from '@/helpers/link';
 import { getProvider } from '@/helpers/provider';
 import { getUrl } from '@/helpers/utils';
-import type {
+import {
   Choice,
   NetworkID,
   Proposal,
@@ -20,7 +21,9 @@ import type {
   UserProfile,
   VoteType
 } from '@/types';
-import type {
+import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
+import { getSdkChoice } from './helpers';
+import {
   Connector,
   NetworkConstants,
   NetworkHelpers,
@@ -28,9 +31,6 @@ import type {
   SnapshotInfo,
   VotingPower
 } from '../types';
-import type { Wallet } from '@ethersproject/wallet';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
-import { getSdkChoice } from './helpers';
 
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
   1: offchainMainnet,

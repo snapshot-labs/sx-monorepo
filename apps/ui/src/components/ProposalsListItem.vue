@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
-import type { Choice, Proposal as ProposalType } from '@/types';
+import { Choice, Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType; showSpace: boolean }>();
 

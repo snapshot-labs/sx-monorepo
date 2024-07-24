@@ -1,7 +1,21 @@
 import { AbiCoder } from '@ethersproject/abi';
+import {
+  Signer,
+  TypedDataField,
+  TypedDataSigner
+} from '@ethersproject/abstract-signer';
 import randomBytes from 'randombytes';
-import type { EvmNetworkConfig } from '../../../types';
-import type {
+import {
+  domain as baseDomain,
+  proposeTypes,
+  updateProposalTypes,
+  voteTypes
+} from './types';
+import { getStrategiesWithParams } from '../../../strategies/evm';
+import { EvmNetworkConfig } from '../../../types';
+import { bytesToHex } from '../../../utils/bytes';
+import { SplitUint256 } from '../../../utils/split-uint256';
+import {
   EIP712ProposeMessage,
   EIP712UpdateProposalMessage,
   EIP712VoteMessage,
@@ -11,20 +25,6 @@ import type {
   UpdateProposal,
   Vote
 } from '../types';
-import type {
-  Signer,
-  TypedDataField,
-  TypedDataSigner
-} from '@ethersproject/abstract-signer';
-import {
-  domain as baseDomain,
-  proposeTypes,
-  updateProposalTypes,
-  voteTypes
-} from './types';
-import { getStrategiesWithParams } from '../../../strategies/evm';
-import { bytesToHex } from '../../../utils/bytes';
-import { SplitUint256 } from '../../../utils/split-uint256';
 
 type EthereumSigClientOpts = {
   networkConfig: EvmNetworkConfig;

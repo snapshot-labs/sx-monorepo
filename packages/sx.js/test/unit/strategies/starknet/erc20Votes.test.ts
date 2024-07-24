@@ -1,3 +1,4 @@
+import starknet from 'starknet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
 import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
@@ -9,7 +10,7 @@ const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 describe('erc20VotesStrategy', () => {
   beforeAll(() => {
     vi.mock('starknet', async importOriginal => {
-      const actual = await importOriginal<typeof import('starknet')>();
+      const actual = await importOriginal<typeof starknet>();
 
       return {
         ...actual,

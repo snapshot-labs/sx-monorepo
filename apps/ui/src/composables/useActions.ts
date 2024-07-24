@@ -2,8 +2,8 @@ import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
-import type { Connector, StrategyConfig } from '@/networks/types';
-import type {
+import { Connector, StrategyConfig } from '@/networks/types';
+import {
   Choice,
   NetworkID,
   Proposal,

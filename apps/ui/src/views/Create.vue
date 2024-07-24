@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { clone, getSalt } from '@/helpers/utils';
 import { enabledReadWriteNetworks, getNetwork } from '@/networks';
-import type { StrategyConfig } from '@/networks/types';
-import type { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
+import { StrategyConfig } from '@/networks/types';
+import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
 const PAGES = [
   {

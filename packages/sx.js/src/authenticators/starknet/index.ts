@@ -1,9 +1,9 @@
-import type { Authenticator, NetworkConfig } from '../../types';
 import createEthSigAuthenticator from './ethSig';
 import createEthTxAuthenticator from './ethTx';
 import createStarkSigAuthenticator from './starkSig';
 import createStarkTxAuthenticator from './starkTx';
 import createVanillaAuthenticator from './vanilla';
+import { Authenticator, NetworkConfig } from '../../types';
 import { hexPadLeft } from '../../utils/encoding';
 
 export function getAuthenticator(

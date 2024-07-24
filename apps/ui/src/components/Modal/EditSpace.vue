@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
-import type { Space, SpaceMetadata } from '@/types';
+import { Space, SpaceMetadata } from '@/types';
 
 const DEFAULT_FORM_STATE: SpaceMetadata = {
   name: '',

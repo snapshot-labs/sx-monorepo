@@ -5,13 +5,8 @@ import {
   starknetMainnet,
   starknetSepolia
 } from '@snapshot-labs/sx';
-import {
-  type Account,
-  AllowArray,
-  Call,
-  CallData,
-  type RpcProvider
-} from 'starknet';
+import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
+import { Account, AllowArray, Call, CallData, RpcProvider } from 'starknet';
 import { executionCall, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
@@ -27,7 +22,7 @@ import {
   getSdkChoice,
   parseStrategyMetadata
 } from '@/networks/common/helpers';
-import type {
+import {
   Connector,
   NetworkActions,
   NetworkHelpers,
@@ -35,7 +30,7 @@ import type {
   StrategyConfig,
   VotingPower
 } from '@/networks/types';
-import type {
+import {
   Choice,
   NetworkID,
   Proposal,
@@ -43,7 +38,6 @@ import type {
   SpaceMetadata,
   StrategyParsedMetadata
 } from '@/types';
-import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,

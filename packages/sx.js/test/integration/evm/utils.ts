@@ -1,4 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
+import { Signer } from '@ethersproject/abstract-signer';
 import {
   Contract,
   ContractFactory,
@@ -7,8 +8,6 @@ import {
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import randomBytes from 'randombytes';
-import type { EvmNetworkConfig } from '../../../src/types';
-import type { Signer } from '@ethersproject/abstract-signer';
 import AvatarContract from './fixtures/Avatar.json';
 import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
 import CompTokenContract from './fixtures/CompToken.json';
@@ -27,6 +26,7 @@ import VanillaProposalValidationStrategyContract from './fixtures/VanillaProposa
 import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
 import VotingPowerProposalValidationStrategyContract from './fixtures/VotingPowerProposalValidationStrategy.json';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
+import { EvmNetworkConfig } from '../../../src/types';
 
 export type TestConfig = {
   controller: string;

@@ -4,7 +4,6 @@ import VueTippy from 'vue-tippy';
 import App from '@/App.vue';
 import options from '@/helpers/auth';
 import router from '@/router';
-import '@/helpers/auth';
 import '@/style.scss';
 
 const knownHosts = ['app.safe.global', 'pilot.gnosisguild.org'];

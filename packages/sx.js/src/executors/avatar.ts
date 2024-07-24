@@ -1,5 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
-import type { MetaTransaction } from '../utils/encoding/execution-hash';
+import { MetaTransaction } from '../utils/encoding/execution-hash';
 
 export default function createAvatarExecutor() {
   return {

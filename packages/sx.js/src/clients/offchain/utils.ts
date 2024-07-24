@@ -3,7 +3,7 @@ import { arrayify, hexlify } from '@ethersproject/bytes';
 import { randomBytes } from '@ethersproject/random';
 import { formatBytes32String, toUtf8Bytes } from '@ethersproject/strings';
 import { encrypt, init } from '@shutter-network/shutter-crypto';
-import type { Privacy } from '../../types';
+import { Privacy } from '../../types';
 
 const SHUTTER_EON_PUBKEY =
   '0x0e6493bbb4ee8b19aa9b70367685049ff01dc9382c46aed83f8bc07d2a5ba3e6030bd83b942c1fd3dff5b79bef3b40bf6b666e51e7f0be14ed62daaffad47435265f5c9403b1a801921981f7d8659a9bd91fe92fb1cf9afdb16178a532adfaf51a237103874bb03afafe9cab2118dae1be5f08a0a28bf488c1581e9db4bc23ca';

@@ -1,7 +1,6 @@
-import type { NetworkConfig } from './networkConfig';
-import type { MetaTransaction } from '../utils/encoding';
-import type { BigNumberish, RpcProvider } from 'starknet';
-import type { Call } from 'starknet';
+import { BigNumberish, Call, RpcProvider } from 'starknet';
+import { NetworkConfig } from './networkConfig';
+import { MetaTransaction } from '../utils/encoding';
 
 export * from './networkConfig';
 

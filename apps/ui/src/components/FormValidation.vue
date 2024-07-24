@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
+import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
 const model = defineModel<StrategyConfig | null>({ required: true });
 

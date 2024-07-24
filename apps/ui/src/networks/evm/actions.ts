@@ -1,5 +1,5 @@
 import { Contract } from '@ethersproject/contracts';
-import { Provider } from '@ethersproject/providers';
+import { Provider, Web3Provider } from '@ethersproject/providers';
 import {
   clients,
   evmArbitrum,
@@ -11,6 +11,7 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
+import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
@@ -25,7 +26,7 @@ import {
   getSdkChoice,
   parseStrategyMetadata
 } from '@/networks/common/helpers';
-import type {
+import {
   Connector,
   NetworkActions,
   NetworkHelpers,
@@ -33,7 +34,7 @@ import type {
   StrategyConfig,
   VotingPower
 } from '@/networks/types';
-import type {
+import {
   Choice,
   NetworkID,
   Proposal,
@@ -41,8 +42,6 @@ import type {
   SpaceMetadata,
   StrategyParsedMetadata
 } from '@/types';
-import type { Web3Provider } from '@ethersproject/providers';
-import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,

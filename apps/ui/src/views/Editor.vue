@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
-import { CHAIN_IDS } from '@/helpers/constants';
-import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
+import { CHAIN_IDS, SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { resolver } from '@/helpers/resolver';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';

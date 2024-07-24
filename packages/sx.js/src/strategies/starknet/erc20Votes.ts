@@ -1,14 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { Contract } from 'starknet';
-import type {
-  ClientConfig,
-  Envelope,
-  Propose,
-  Strategy,
-  Vote
-} from '../../types';
 import ERC20VotesTokenAbi from './abis/ERC20VotesToken.json';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
 
 export default function createErc20VotesStrategy(): Strategy {
   return {

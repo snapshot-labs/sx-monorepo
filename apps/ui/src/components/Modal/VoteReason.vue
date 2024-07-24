@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Vote } from '@/types';
+import { Vote } from '@/types';
 
 defineProps<{
   open: boolean;

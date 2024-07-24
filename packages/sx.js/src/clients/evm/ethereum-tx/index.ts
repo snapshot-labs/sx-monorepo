@@ -1,16 +1,8 @@
 import { AbiCoder, Interface } from '@ethersproject/abi';
+import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
-import type { EvmNetworkConfig } from '../../../types';
-import type {
-  AddressConfig,
-  Envelope,
-  Propose,
-  UpdateProposal,
-  Vote
-} from '../types';
-import type { Signer } from '@ethersproject/abstract-signer';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
 import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy.json';
 import IsokratiaExecutionStrategyAbi from './abis/IsokratiaExecutionStrategy.json';
@@ -19,6 +11,14 @@ import SpaceAbi from './abis/Space.json';
 import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
 import { getAuthenticator } from '../../../authenticators/evm';
 import { getStrategiesWithParams } from '../../../strategies/evm';
+import { EvmNetworkConfig } from '../../../types';
+import {
+  AddressConfig,
+  Envelope,
+  Propose,
+  UpdateProposal,
+  Vote
+} from '../types';
 
 type SpaceParams = {
   controller: string;

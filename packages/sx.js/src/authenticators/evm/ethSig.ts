@@ -1,4 +1,5 @@
-import type {
+import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
+import {
   Authenticator,
   Call,
   Envelope,
@@ -6,7 +7,6 @@ import type {
   UpdateProposal,
   Vote
 } from '../../clients/evm/types';
-import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
 import { getRSVFromSig, hexPadLeft } from '../../utils/encoding';
 
 export default function createEthSigAuthenticator(): Authenticator {

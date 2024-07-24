@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
 import { enabledReadWriteNetworks, getNetwork } from '@/networks';
-import type { NetworkID } from '@/types';
+import { NetworkID } from '@/types';
 
 const model = defineModel<NetworkID>({
   required: true
