@@ -3,7 +3,6 @@ import { starknet } from '@snapshot-labs/checkpoint';
 import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
 import { handleProposalMetadata, handleVoteMetadata, handleSpaceMetadata } from './ipfs';
 import { networkProperties } from './overrrides';
-import { starknetNetworks } from '@snapshot-labs/sx';
 import {
   getCurrentTimestamp,
   dropIpfs,
