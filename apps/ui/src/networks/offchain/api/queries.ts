@@ -214,6 +214,19 @@ export const ALIASES_QUERY = gql`
   }
 `;
 
+export const STATEMENTS_QUERY = gql`
+  query Statements($delegate: String!, $space: String!) {
+    statements(where: { delegate: $delegate, space: $space }) {
+      about
+      statement
+      space
+      network
+      discourse
+      status
+    }
+  }
+`;
+
 export const USER_QUERY = gql`
   query User($id: String!) {
     user(id: $id) {

@@ -587,7 +587,8 @@ export function createApi(
         | 'vote_count-desc'
         | 'vote_count-asc'
         | 'proposal_count-desc'
-        | 'proposal_count-asc' = 'vote_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc',
+      user?: string
     ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
@@ -603,7 +604,8 @@ export function createApi(
             orderBy,
             orderDirection,
             where: {
-              space: spaceId
+              space: spaceId,
+              user
             }
           }
         })
@@ -620,6 +622,9 @@ export function createApi(
       return [] as Follow[];
     },
     loadAlias: async () => {
+      return null;
+    },
+    loadStatement: async () => {
       return null;
     }
   };

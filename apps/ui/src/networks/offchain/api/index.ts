@@ -22,6 +22,7 @@ import {
   ProposalState,
   Space,
   SpaceMetadataTreasury,
+  Statement,
   User,
   UserActivity,
   Vote
@@ -34,6 +35,7 @@ import {
   RANKING_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
+  STATEMENTS_QUERY,
   USER_FOLLOWS_QUERY,
   USER_QUERY,
   USER_VOTES_QUERY,
@@ -479,7 +481,8 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         | 'vote_count-desc'
         | 'vote_count-asc'
         | 'proposal_count-desc'
-        | 'proposal_count-asc' = 'vote_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc',
+      user?: string
     ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
@@ -495,7 +498,8 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
             orderBy,
             orderDirection,
             where: {
-              space: spaceId
+              space: spaceId,
+              user
             }
           }
         })
@@ -545,6 +549,24 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       });
 
       return aliases?.[0] ?? null;
+    },
+    loadStatement: async (
+      networkId: NetworkID,
+      spaceId: string,
+      userId: string
+    ): Promise<Statement | null> => {
+      const {
+        data: { statements }
+      }: { data: { statements: Statement[] } } = await apollo.query({
+        query: STATEMENTS_QUERY,
+        variables: {
+          delegate: userId,
+          network: networkId,
+          space: spaceId
+        }
+      });
+
+      return statements?.[0] ?? null;
     }
   };
 }

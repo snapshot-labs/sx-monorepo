@@ -196,9 +196,10 @@ watch([sortBy, choiceFilter], () => {
 
         <router-link
           :to="{
-            name: 'user',
+            name: 'space-user-statement',
             params: {
-              id: vote.voter.id
+              id: `${proposal.network}:${proposal.space.id}`,
+              user: vote.voter.id
             }
           }"
           class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate"

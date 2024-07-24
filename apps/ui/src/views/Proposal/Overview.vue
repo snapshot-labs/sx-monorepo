@@ -216,8 +216,11 @@ onBeforeUnmount(() => destroyAudio());
       <div class="flex justify-between items-center mb-3">
         <router-link
           :to="{
-            name: 'user',
-            params: { id: proposal.author.id }
+            name: 'space-user-statement',
+            params: {
+              id: `${proposal.network}:${proposal.space.id}`,
+              user: proposal.author.id
+            }
           }"
           class="flex items-center py-3"
         >

@@ -123,6 +123,17 @@ export type EIP712UpdateUserMessage = {
   timestamp?: number;
 };
 
+export type EIP712UpdateStatementMessage = {
+  from?: string;
+  timestamp?: number;
+  space: string;
+  network: string;
+  about: string;
+  statement: string;
+  discourse: string;
+  status: string;
+};
+
 export type EIP712Message = Required<
   | EIP712VoteMessage
   | EIP712ProposeMessage
@@ -203,4 +214,14 @@ export type UpdateUser = {
   from?: string;
   profile: string;
   timestamp?: number;
+};
+
+export type UpdateStatement = {
+  from?: string;
+  timestamp?: number;
+  space: string;
+  network: string;
+  statement: string;
+  discourse: string;
+  status: string;
 };

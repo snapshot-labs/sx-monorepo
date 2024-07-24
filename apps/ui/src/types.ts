@@ -226,7 +226,7 @@ export type User = {
   id: string;
   created: number | null;
   follows?: string[];
-} & UserProfile;
+} & Partial<UserProfile>;
 
 export type UserActivity = {
   id: string;
@@ -234,6 +234,15 @@ export type UserActivity = {
   spaceId: string;
   proposal_count: number;
   vote_count: number;
+};
+
+export type Statement = {
+  space: string;
+  network: NetworkID;
+  about: string;
+  statement: string;
+  discourse: string;
+  status: 'ACTIVE' | 'INACTIVE';
 };
 
 export type Follow = {

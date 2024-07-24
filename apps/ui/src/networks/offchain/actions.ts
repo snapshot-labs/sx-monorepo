@@ -16,6 +16,7 @@ import {
   NetworkID,
   Proposal,
   Space,
+  Statement,
   StrategyParsedMetadata,
   User,
   UserProfile,
@@ -250,7 +251,7 @@ export function createActions(
       });
     },
     async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {
-      const profile: UserProfile = {
+      const profile: Partial<UserProfile> = {
         name: user.name,
         about: user.about,
         avatar: user.avatar,
@@ -264,6 +265,16 @@ export function createActions(
       return client.updateUser({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { profile: JSON.stringify(profile), ...(from ? { from } : {}) }
+      });
+    },
+    async updateStatement(
+      web3: Web3Provider | Wallet,
+      statement: Statement,
+      from?: string
+    ) {
+      return client.updateStatement({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { ...statement, ...(from ? { from } : {}) }
       });
     }
   };

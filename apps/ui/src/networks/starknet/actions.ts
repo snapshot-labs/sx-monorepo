@@ -660,6 +660,7 @@ export function createActions(
     unfollowSpace: () => {},
     setAlias: () => {},
     updateUser: () => {},
+    updateStatement: () => {},
     send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper
   };
 }
