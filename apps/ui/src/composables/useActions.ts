@@ -1,11 +1,10 @@
-import { starknetNetworks } from '@snapshot-labs/sx';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import {
-  enabledNetworks,
   getNetwork,
   getReadWriteNetwork,
-  metadataNetwork,
-  offchainNetworks
+  starknetNetworks,
+  enabledNetworks,
+  metadataNetwork
 } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
@@ -22,17 +21,6 @@ import type {
 } from '@/types';
 import { Connector, StrategyConfig } from '@/networks/types';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
-
-const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
-const offchainToStarknetIds: Record<string, NetworkID> = {
-  s: 'sn',
-  's-tn': 'sn-sep'
-};
-
-const starknetNetworkId = (Object.keys(starknetNetworks) as NetworkID[]).find(
-  networkId =>
-    enabledNetworks.includes(networkId) && networkId === offchainToStarknetIds[offchainNetworkId]
-) as NetworkID;
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -137,8 +125,8 @@ export function useActions() {
   async function getAliasSigner() {
     const network = getNetwork(
       STARKNET_CONNECTORS.includes(web3.value.type as Connector)
-        ? starknetNetworkId
-        : offchainNetworkId
+        ? (starknetNetworks.find(id => enabledNetworks.includes(id)) as NetworkID)
+        : metadataNetwork
     );
 
     return alias.getAliasWallet(address =>

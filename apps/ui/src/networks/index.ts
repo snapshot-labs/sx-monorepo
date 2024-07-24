@@ -21,6 +21,7 @@ export const enabledNetworks: NetworkID[] = import.meta.env.VITE_ENABLED_NETWORK
 
 export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'oeth', 'sep', 'linea-testnet'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
+export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID = import.meta.env.VITE_METADATA_NETWORK || 's';
 
