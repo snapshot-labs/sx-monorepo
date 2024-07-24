@@ -1,4 +1,6 @@
 import { getNetwork, offchainNetworks } from '@/networks';
+import { STARKNET_CONNECTORS } from '@/networks/common/constants';
+import { Connector } from '@/networks/types';
 import { NetworkID, Proposal, Vote } from '@/types';
 
 const { web3 } = useWeb3();
@@ -21,7 +23,10 @@ export function useAccount() {
     if (!account) return;
 
     // On starknet account, we don't load votes for offchain networks (unsupported)
-    if (web3.value.type === 'argentx' && offchainNetworks.includes(networkId))
+    if (
+      STARKNET_CONNECTORS.includes(web3.value.type as Connector) &&
+      offchainNetworks.includes(networkId)
+    )
       return;
 
     const network = getNetwork(networkId);
