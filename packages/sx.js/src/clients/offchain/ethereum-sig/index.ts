@@ -119,6 +119,7 @@ export class EthereumSig {
       }
     };
 
+    // primaryType needs to be attached when sending starknet-sig generated payload
     if (primaryType) payload.data.primaryType = primaryType;
 
     const body = {
