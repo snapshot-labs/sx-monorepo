@@ -57,6 +57,7 @@ const {
 const { getCurrent } = useMetaStore();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
+const uiStore = useUiStore();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
@@ -184,15 +185,16 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  return (
-    !fetchingVotingPower.value &&
-    votingPowerValid.value &&
-    Object.keys(formErrors.value).length === 0
-  );
+  return !fetchingVotingPower.value && votingPowerValid.value;
 });
 
 async function handleProposeClick() {
   if (!space.value || !proposal.value) return;
+
+  if (Object.keys(formErrors.value).length > 0) {
+    uiStore.addNotification('error', 'The proposal form contains error');
+    return;
+  }
 
   sending.value = true;
 

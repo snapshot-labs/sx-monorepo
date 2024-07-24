@@ -38,7 +38,7 @@ watch(model, () => {
     v-slot="{ id }"
     :definition="definition"
     :error="error"
-    :dirty="dirty"
+    :dirty="dirty || model !== (props.definition.default || '')"
     :input-value-length="inputValue?.length"
   >
     <input
