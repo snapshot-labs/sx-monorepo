@@ -107,7 +107,6 @@ watch(
                   : 'bg-skin-border opacity-40'
               "
             />
-            <UiStamp :id="vote.voter.id" :size="24" />
             <router-link
               :to="{
                 name: 'user',
@@ -115,10 +114,11 @@ watch(
                   id: vote.voter.id
                 }
               }"
-              class="grow"
+              class="grow flex space-x-2 items-center"
               @click="$emit('close')"
             >
-              {{ vote.voter.name || shortenAddress(vote.voter.id) }}
+              <UiStamp :id="vote.voter.id" :size="24" />
+              <span>{{ vote.voter.name || shortenAddress(vote.voter.id) }}</span>
             </router-link>
 
             <template v-if="isEncrypted">

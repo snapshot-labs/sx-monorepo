@@ -368,6 +368,9 @@ export function createApi(
 
       return data.votes.map(vote => {
         vote.voter.name = names[vote.voter.id] || null;
+        vote.reason = vote.metadata?.reason;
+        delete vote.metadata;
+
         return vote;
       });
     },
