@@ -1,9 +1,18 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
+import {
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client/core';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap';
 import { getNames } from '@/helpers/stamp';
 import { clone } from '@/helpers/utils';
-import { NetworkApi, PaginationOpts, ProposalsFilter, SpacesFilter } from '@/networks/types';
+import {
+  NetworkApi,
+  PaginationOpts,
+  ProposalsFilter,
+  SpacesFilter
+} from '@/networks/types';
 import {
   Alias,
   Follow,
@@ -13,10 +22,10 @@ import {
   ProposalState,
   Space,
   SpaceMetadataTreasury,
+  Statement,
   User,
   UserActivity,
-  Vote,
-  Statement
+  Vote
 } from '@/types';
 import {
   ALIASES_QUERY,
@@ -26,9 +35,9 @@ import {
   RANKING_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
+  STATEMENTS_QUERY,
   USER_FOLLOWS_QUERY,
   USER_QUERY,
-  STATEMENTS_QUERY,
   USER_VOTES_QUERY,
   VOTES_QUERY
 } from './queries';
@@ -38,7 +47,10 @@ import { DEFAULT_VOTING_DELAY } from '../constants';
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
 const TREASURY_NETWORKS = new Map(
-  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [chainId, networkId as NetworkID])
+  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
+    chainId,
+    networkId as NetworkID
+  ])
 );
 
 function getProposalState(proposal: ApiProposal): ProposalState {
@@ -66,8 +78,10 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
   let validationName = space.validation.name;
   const validationParams = space.validation.params || {};
   if (space.validation.name === 'basic') {
-    validationParams.minScore = space.validation?.params?.minScore || space.filters.minScore;
-    validationParams.strategies = space.validation?.params?.strategies || space.strategies;
+    validationParams.minScore =
+      space.validation?.params?.minScore || space.filters.minScore;
+    validationParams.strategies =
+      space.validation?.params?.strategies || space.strategies;
   }
 
   if (space.filters.onlyMembers) {
@@ -144,7 +158,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
           safeName: safe.safeName,
           safeAddress: safe.safeAddress,
           networkId: chainIdToNetworkId[Number(safe.network)],
-          transactions: safe.transactions.map(transaction => parseOSnapTransaction(transaction))
+          transactions: safe.transactions.map(transaction =>
+            parseOSnapTransaction(transaction)
+          )
         };
       });
     } catch (e) {
@@ -293,7 +309,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         return formattedVote;
       });
     },
-    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (
+      spaceIds: string[],
+      voter: string
+    ): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
@@ -303,7 +322,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       });
 
       return Object.fromEntries(
-        data.votes.map(vote => [`${networkId}:${vote.proposal.id}`, formatVote(vote)])
+        data.votes.map(vote => [
+          `${networkId}:${vote.proposal.id}`,
+          formatVote(vote)
+        ])
       );
     },
     loadProposals: async (
@@ -348,9 +370,14 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.proposals.map(proposal => formatProposal(proposal, networkId));
+      return data.proposals.map(proposal =>
+        formatProposal(proposal, networkId)
+      );
     },
-    loadProposal: async (spaceId: string, proposalId: number): Promise<Proposal | null> => {
+    loadProposal: async (
+      spaceId: string,
+      proposalId: number
+    ): Promise<Proposal | null> => {
       const { data } = await apollo.query({
         query: PROPOSAL_QUERY,
         variables: { id: proposalId }
@@ -485,7 +512,10 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
           }))
         );
     },
-    loadFollows: async (userId?: string, spaceId?: string): Promise<Follow[]> => {
+    loadFollows: async (
+      userId?: string,
+      spaceId?: string
+    ): Promise<Follow[]> => {
       const {
         data: { follows }
       }: { data: { follows: Follow[] } } = await apollo.query({

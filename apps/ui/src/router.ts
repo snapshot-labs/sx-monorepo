@@ -23,12 +23,12 @@ import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearch from '@/views/Space/Search.vue';
 import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
-import SpaceUser from '@/views/SpaceUser.vue';
-import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
-import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
-import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
-import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
 import Space from '@/views/Space.vue';
+import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
+import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
+import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
+import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
+import SpaceUser from '@/views/SpaceUser.vue';
 import User from '@/views/User.vue';
 
 const { mixpanel } = useMixpanel();
@@ -51,15 +51,31 @@ const routes: any[] = [
       },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
       { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
-      { path: 'leaderboard', name: 'space-leaderboard', component: SpaceLeaderboard },
+      {
+        path: 'leaderboard',
+        name: 'space-leaderboard',
+        component: SpaceLeaderboard
+      },
       {
         path: 'profile/:user',
         name: 'space-user',
         component: SpaceUser,
         children: [
-          { path: '', name: 'space-user-statement', component: SpaceUserStatement },
-          { path: 'delegators', name: 'space-user-delegators', component: SpaceUserDelegators },
-          { path: 'proposals', name: 'space-user-proposals', component: SpaceUserProposals },
+          {
+            path: '',
+            name: 'space-user-statement',
+            component: SpaceUserStatement
+          },
+          {
+            path: 'delegators',
+            name: 'space-user-delegators',
+            component: SpaceUserDelegators
+          },
+          {
+            path: 'proposals',
+            name: 'space-user-proposals',
+            component: SpaceUserProposals
+          },
           { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
         ]
       }

@@ -70,14 +70,26 @@ watchEffect(() => {
 
 <template>
   <div class="max-w-[592px] s-box">
-    <UiSelect v-model="form.status" :definition="STATUS_DEFINITION" :error="formErrors.status" />
+    <UiSelect
+      v-model="form.status"
+      :definition="STATUS_DEFINITION"
+      :error="formErrors.status"
+    />
     <div class="mb-3">
       <div class="flex space-x-3">
         <button type="button" @click="previewEnabled = false">
-          <UiLink :is-active="!previewEnabled" text="Write" class="border-transparent" />
+          <UiLink
+            :is-active="!previewEnabled"
+            text="Write"
+            class="border-transparent"
+          />
         </button>
         <button type="button" @click="previewEnabled = true">
-          <UiLink :is-active="previewEnabled" text="Preview" class="border-transparent" />
+          <UiLink
+            :is-active="previewEnabled"
+            text="Preview"
+            class="border-transparent"
+          />
         </button>
       </div>
       <UiMarkdown

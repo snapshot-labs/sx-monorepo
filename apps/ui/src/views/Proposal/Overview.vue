@@ -217,7 +217,10 @@ onBeforeUnmount(() => destroyAudio());
         <router-link
           :to="{
             name: 'space-user-statement',
-            params: { id: `${proposal.network}:${proposal.space.id}`, user: proposal.author.id }
+            params: {
+              id: `${proposal.network}:${proposal.space.id}`,
+              user: proposal.author.id
+            }
           }"
           class="flex items-center py-3"
         >

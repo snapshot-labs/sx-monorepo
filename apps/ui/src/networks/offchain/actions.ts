@@ -16,11 +16,11 @@ import {
   NetworkID,
   Proposal,
   Space,
+  Statement,
   StrategyParsedMetadata,
   User,
-  VoteType,
   UserProfile,
-  Statement
+  VoteType
 } from '@/types';
 import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
@@ -178,7 +178,9 @@ export function createActions(
       const strategy = getOffchainStrategy(name);
 
       if (!strategy || !isAddress(voterAddress)) {
-        return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+        return [
+          { address: name, value: 0n, decimals: 0, token: null, symbol: '' }
+        ];
       }
 
       const result = await strategy.getVotingPower(
@@ -212,11 +214,20 @@ export function createActions(
           symbol: strategy.params.symbol,
           token: strategy.params.address,
           chainId: strategy.network ? parseInt(strategy.network) : undefined,
-          swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
+          swapLink: getSwapLink(
+            strategy.name,
+            strategy.params.address,
+            strategy.network
+          )
         };
       });
     },
-    followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string) {
+    followSpace(
+      web3: Web3Provider | Wallet,
+      networkId: NetworkID,
+      spaceId: string,
+      from?: string
+    ) {
       return client.followSpace({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
@@ -256,7 +267,11 @@ export function createActions(
         data: { profile: JSON.stringify(profile), ...(from ? { from } : {}) }
       });
     },
-    async updateStatement(web3: Web3Provider | Wallet, statement: Statement, from?: string) {
+    async updateStatement(
+      web3: Web3Provider | Wallet,
+      statement: Statement,
+      from?: string
+    ) {
       return client.updateStatement({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { ...statement, ...(from ? { from } : {}) }

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   _vp,
   autoLinkText,
@@ -7,9 +6,10 @@ import {
   getSocialNetworksLink,
   shortenAddress
 } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { getNetwork, supportsNullCurrent } from '@/networks';
-import type { Space, UserActivity } from '@/types';
-import type { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { Space, UserActivity } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -21,7 +21,10 @@ const { resolved, address, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const { getCurrent } = useMetaStore();
 
-const userActivity = ref<UserActivity>({ vote_count: 0, proposal_count: 0 } as UserActivity);
+const userActivity = ref<UserActivity>({
+  vote_count: 0,
+  proposal_count: 0
+} as UserActivity);
 const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
@@ -41,7 +44,10 @@ const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const formattedVotingPower = computed(() => {
   const votingPower = votingPowers.value.reduce((acc, b) => acc + b.value, 0n);
-  const decimals = Math.max(...votingPowers.value.map(votingPower => votingPower.decimals), 0);
+  const decimals = Math.max(
+    ...votingPowers.value.map(votingPower => votingPower.decimals),
+    0
+  );
 
   const value = _vp(Number(votingPower) / 10 ** decimals);
 
@@ -121,7 +127,9 @@ async function getVotingPower() {
       props.space.strategies_parsed_metadata,
       userId.value,
       {
-        at: supportsNullCurrent(props.space.network) ? null : getCurrent(props.space.network) || 0,
+        at: supportsNullCurrent(props.space.network)
+          ? null
+          : getCurrent(props.space.network) || 0,
         chainId: props.space.snapshot_chain_id
       }
     );
@@ -150,13 +158,18 @@ watch(
   { immediate: true }
 );
 
-watch([resolved, networkId, address], async ([resolved, networkId, address]) => {
-  if (!resolved || !networkId || !address) return;
+watch(
+  [resolved, networkId, address],
+  async ([resolved, networkId, address]) => {
+    if (!resolved || !networkId || !address) return;
 
-  spacesStore.networksMap[networkId].spaces[address];
-});
+    spacesStore.networksMap[networkId].spaces[address];
+  }
+);
 
-watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`));
+watchEffect(() =>
+  setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`)
+);
 </script>
 
 <template>
@@ -166,14 +179,21 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.na
     <span>This user does not exist</span>
   </div>
   <div v-else>
-    <div class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]">
+    <div
+      class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]"
+    >
       <div class="w-full h-full overflow-hidden">
         <UserCover :user="user" class="!rounded-none w-full min-h-full" />
       </div>
-      <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
+      <div
+        class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden"
+      />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <UiTooltip title="View profile">
-          <router-link :to="{ name: 'user', params: { id: user.id } }" tabindex="-1">
+          <router-link
+            :to="{ name: 'user', params: { id: user.id } }"
+            tabindex="-1"
+          >
             <UiButton class="!px-0 w-[46px]">
               <IH-user-circle class="inline-block" />
             </UiButton>
@@ -208,14 +228,20 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.na
         />
         <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
-            <a :href="social.href" target="_blank" class="text-[#606060] hover:text-skin-link">
+            <a
+              :href="social.href"
+              target="_blank"
+              class="text-[#606060] hover:text-skin-link"
+            >
               <component :is="social.icon" class="w-[26px] h-[26px]" />
             </a>
           </template>
         </div>
       </div>
     </div>
-    <div class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]">
+    <div
+      class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+    >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <router-link
           v-for="(item, i) in navigation"

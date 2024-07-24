@@ -1,4 +1,8 @@
-import { Signer, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer';
+import {
+  Signer,
+  TypedDataField,
+  TypedDataSigner
+} from '@ethersproject/abstract-signer';
 import {
   aliasTypes,
   approvalVoteTypes,
@@ -12,9 +16,9 @@ import {
   singleChoiceVoteTypes,
   unfollowSpaceTypes,
   updateProposalTypes,
+  updateStatementTypes,
   updateUserTypes,
-  weightedVoteTypes,
-  updateStatementTypes
+  weightedVoteTypes
 } from './types';
 import { offchainGoerli } from '../../../offchainNetworks';
 import { OffchainNetworkConfig } from '../../../types';
@@ -27,9 +31,9 @@ import {
   EIP712SetAliasMessage,
   EIP712UnfollowSpaceMessage,
   EIP712UpdateProposal,
+  EIP712UpdateStatementMessage,
   EIP712UpdateUserMessage,
   EIP712VoteMessage,
-  EIP712UpdateStatementMessage,
   Envelope,
   FollowSpace,
   Propose,
@@ -37,8 +41,8 @@ import {
   SignatureData,
   UnfollowSpace,
   UpdateProposal,
-  UpdateUser,
   UpdateStatement,
+  UpdateUser,
   Vote
 } from '../types';
 import { encryptChoices } from '../utils';
@@ -64,7 +68,8 @@ export class EthereumSig {
 
   constructor(opts?: EthereumSigClientOpts) {
     this.networkConfig = opts?.networkConfig || offchainGoerli;
-    this.sequencerUrl = opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
+    this.sequencerUrl =
+      opts?.sequencerUrl || SEQUENCER_URLS[this.networkConfig.eip712ChainId];
   }
 
   public async sign<
@@ -101,10 +106,22 @@ export class EthereumSig {
 
   public async send(
     envelope: Envelope<
-      Vote | Propose | UpdateProposal | CancelProposal | FollowSpace | UnfollowSpace | SetAlias
+      | Vote
+      | Propose
+      | UpdateProposal
+      | CancelProposal
+      | FollowSpace
+      | UnfollowSpace
+      | SetAlias
     >
   ) {
-    const { address, signature: sig, domain, types, message } = envelope.signatureData!;
+    const {
+      address,
+      signature: sig,
+      domain,
+      types,
+      message
+    } = envelope.signatureData!;
     const payload = {
       address,
       sig,
@@ -133,7 +150,9 @@ export class EthereumSig {
 
     if (result.error) {
       throw new Error(
-        typeof result.error_description === 'string' ? result.error_description : result.error
+        typeof result.error_description === 'string'
+          ? result.error_description
+          : result.error
       );
     }
 
@@ -233,7 +252,9 @@ export class EthereumSig {
       message.choice = await encryptChoices(
         data.privacy,
         data.proposal,
-        typeof message.choice === 'string' ? message.choice : JSON.stringify(message.choice)
+        typeof message.choice === 'string'
+          ? message.choice
+          : JSON.stringify(message.choice)
       );
     }
     const signatureData = await this.sign(signer, message, voteType);
