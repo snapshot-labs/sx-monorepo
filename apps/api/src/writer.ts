@@ -29,7 +29,7 @@ export const handleSpaceDeployed: starknet.Writer = async ({ blockNumber, event,
 
   const classHash = event.class_hash;
 
-  if (classHash === starknetNetworks.sn.Meta.masterSpace) {
+  if (classHash === networkProperties.spaceClassHash) {
     await instance.executeTemplate('Space', {
       contract: event.contract_address,
       start: blockNumber
