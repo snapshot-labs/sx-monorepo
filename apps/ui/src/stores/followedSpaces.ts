@@ -126,7 +126,11 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   }
 
   watch(
-    [() => web3.value.account, () => web3.value.authLoading, () => authInitiated.value],
+    [
+      () => web3.value.account,
+      () => web3.value.authLoading,
+      () => authInitiated.value
+    ],
     async ([web3, authLoading, authInitiated]) => {
       if (!authInitiated || authLoading) return;
 
