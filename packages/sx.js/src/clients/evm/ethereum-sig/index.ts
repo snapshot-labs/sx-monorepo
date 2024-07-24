@@ -28,7 +28,7 @@ export class EthereumSig {
 
   constructor(opts: EthereumSigClientOpts) {
     this.networkConfig = opts?.networkConfig;
-    this.manaUrl = opts?.manaUrl || 'https://mana.pizza';
+    this.manaUrl = opts?.manaUrl || 'https://mana.box';
   }
 
   generateSalt() {
