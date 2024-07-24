@@ -1,19 +1,18 @@
 <script lang="ts" setup>
+import { FunctionalComponent } from 'vue';
 import { compareAddresses } from '@/helpers/utils';
-
-import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
-import IHNewspaper from '~icons/heroicons-outline/newspaper';
+import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
-import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHCog from '~icons/heroicons-outline/cog';
-import IHUsers from '~icons/heroicons-outline/users';
-import IHUserGroup from '~icons/heroicons-outline/user-group';
-import IHUser from '~icons/heroicons-outline/user';
-import IHStop from '~icons/heroicons-outline/stop';
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
-import IHBell from '~icons/heroicons-outline/bell';
-import { type FunctionalComponent } from 'vue';
+import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
+import IHNewspaper from '~icons/heroicons-outline/newspaper';
+import IHStop from '~icons/heroicons-outline/stop';
+import IHUser from '~icons/heroicons-outline/user';
+import IHUserGroup from '~icons/heroicons-outline/user-group';
+import IHUsers from '~icons/heroicons-outline/users';
 
 type NavigationItem = {
   name: string;
@@ -41,9 +40,13 @@ const space = computed(() =>
 );
 
 const isController = computed(() =>
-  space.value ? compareAddresses(space.value.controller, web3.value.account) : false
+  space.value
+    ? compareAddresses(space.value.controller, web3.value.account)
+    : false
 );
-const navigationConfig = computed<Record<string, Record<string, NavigationItem>>>(() => ({
+const navigationConfig = computed<
+  Record<string, Record<string, NavigationItem>>
+>(() => ({
   space: {
     overview: {
       name: 'Overview',
@@ -110,26 +113,30 @@ const navigationConfig = computed<Record<string, Record<string, NavigationItem>>
     }
   }
 }));
-const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(() => {
-  return {
-    my: {
-      user: {
-        name: 'Profile',
-        link: { name: 'user', params: { id: web3.value.account } },
-        icon: IHUser,
-        hidden: !web3.value.account,
-        active: (route.name as string) === 'user' && route.params.id === web3.value.account
-      },
-      settings: {
-        name: 'Settings',
-        link: { name: 'settings-spaces' },
-        icon: IHCog,
-        hidden: !web3.value.account,
-        active: false
+const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
+  () => {
+    return {
+      my: {
+        user: {
+          name: 'Profile',
+          link: { name: 'user', params: { id: web3.value.account } },
+          icon: IHUser,
+          hidden: !web3.value.account,
+          active:
+            (route.name as string) === 'user' &&
+            route.params.id === web3.value.account
+        },
+        settings: {
+          name: 'Settings',
+          link: { name: 'settings-spaces' },
+          icon: IHCog,
+          hidden: !web3.value.account,
+          active: false
+        }
       }
-    }
-  };
-});
+    };
+  }
+);
 const navigationItems = computed(() =>
   Object.fromEntries(
     Object.entries({
@@ -141,7 +148,8 @@ const navigationItems = computed(() =>
           key,
           {
             ...item,
-            active: item.active ?? route.name === `${currentRouteName.value}-${key}`,
+            active:
+              item.active ?? route.name === `${currentRouteName.value}-${key}`,
             hidden: item.hidden ?? false,
             link: item.link ?? { name: `${currentRouteName.value}-${key}` }
           }

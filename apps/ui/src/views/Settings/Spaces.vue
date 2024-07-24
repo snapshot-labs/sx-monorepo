@@ -4,10 +4,12 @@ import { ExplorePageProtocol, ProtocolConfig } from '../../networks/types';
 
 useTitle('My spaces');
 
-const protocols = Object.values(explorePageProtocols).map(({ key, label }: ProtocolConfig) => ({
-  key,
-  label
-}));
+const protocols = Object.values(explorePageProtocols).map(
+  ({ key, label }: ProtocolConfig) => ({
+    key,
+    label
+  })
+);
 const DEFAULT_PROTOCOL = 'snapshot';
 
 const spacesStore = useSpacesStore();
@@ -18,7 +20,10 @@ const { web3 } = useWeb3();
 const loaded = ref(false);
 
 const loading = computed(
-  () => !loaded || (web3.value.account && spacesStore.loading) || web3.value.authLoading
+  () =>
+    !loaded ||
+    (web3.value.account && spacesStore.loading) ||
+    web3.value.authLoading
 );
 
 watch(
@@ -66,7 +71,10 @@ watch(
   </div>
   <UiLabel label="My spaces" sticky />
   <UiLoading v-if="loading" class="block m-4" />
-  <UiContainer v-else-if="spacesStore.explorePageSpaces.length" class="!max-w-screen-md pt-5">
+  <UiContainer
+    v-else-if="spacesStore.explorePageSpaces.length"
+    class="!max-w-screen-md pt-5"
+  >
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
       <SpacesListItem
         v-for="space in spacesStore.explorePageSpaces"

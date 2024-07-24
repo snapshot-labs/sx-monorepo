@@ -13,7 +13,9 @@ export function useNfts() {
     loaded.value = true;
   }
 
-  const nftsMap = computed(() => new Map(nfts.value.map(asset => [asset.id, asset])));
+  const nftsMap = computed(
+    () => new Map(nfts.value.map(asset => [asset.id, asset]))
+  );
 
   return { loading, loaded, nfts, nftsMap, loadNfts };
 }

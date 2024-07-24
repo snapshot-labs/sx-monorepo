@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { getInjected } from '@snapshot-labs/lock/src/utils';
-import connectors, { mapConnectorId, getConnectorIconUrl } from '@/helpers/connectors';
+import connectors, {
+  getConnectorIconUrl,
+  mapConnectorId
+} from '@/helpers/connectors';
 
 const win = window;
 
@@ -54,7 +57,9 @@ const availableConnectors = computed(() => {
           class="block"
           @click="emit('pick', connector.id)"
         >
-          <UiButton class="button-outline w-full flex justify-center items-center">
+          <UiButton
+            class="button-outline w-full flex justify-center items-center"
+          >
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"

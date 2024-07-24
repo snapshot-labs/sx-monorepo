@@ -1,18 +1,30 @@
 import express from 'express';
 import z from 'zod';
+import {
+  DEFAULT_INDEX,
+  getStarknetAccount,
+  SPACES_INDICIES
+} from './dependencies';
+import { NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
 import { rpcError } from '../utils';
-import { NETWORKS } from './networks';
-import { DEFAULT_INDEX, SPACES_INDICIES, getStarknetAccount } from './dependencies';
 
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
-  method: z.enum(['send', 'execute', 'registerTransaction', 'registerProposal']),
+  method: z.enum([
+    'send',
+    'execute',
+    'registerTransaction',
+    'registerProposal'
+  ]),
   params: z.any()
 });
 
 const handlers = Object.fromEntries(
-  Array.from(NETWORKS.keys()).map(chainId => [chainId, createNetworkHandler(chainId)])
+  Array.from(NETWORKS.keys()).map(chainId => [
+    chainId,
+    createNetworkHandler(chainId)
+  ])
 );
 
 const router = express.Router();

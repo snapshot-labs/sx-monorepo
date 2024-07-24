@@ -1,29 +1,29 @@
+import { getAddress } from '@ethersproject/address';
+import { BigNumber } from '@ethersproject/bignumber';
+import { Contract as EthContract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
+import { faker } from '@faker-js/faker';
+import { utils } from '@snapshot-labs/sx';
 import fetch from 'cross-fetch';
 import {
   BigNumberish,
   CallData,
   Contract,
-  Provider,
   hash,
+  Provider,
   shortString,
   validateAndParseAddress
 } from 'starknet';
-import { Contract as EthContract } from '@ethersproject/contracts';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { faker } from '@faker-js/faker';
-import { getAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber';
-import { utils } from '@snapshot-labs/sx';
+import EncodersAbi from './abis/encoders.json';
+import ExecutionStrategyAbi from './abis/executionStrategy.json';
+import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
+import { handleStrategiesParsedMetadata } from './ipfs';
+import { networkNodeUrl, networkProperties } from './overrrides';
 import {
   Space,
   StrategiesParsedMetadataItem,
   VotingPowerValidationStrategiesParsedMetadataItem
 } from '../.checkpoint/models';
-import EncodersAbi from './abis/encoders.json';
-import ExecutionStrategyAbi from './abis/executionStrategy.json';
-import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
-import { networkNodeUrl, networkProperties } from './overrrides';
-import { handleStrategiesParsedMetadata } from './ipfs';
 
 type StrategyConfig = {
   address: BigNumberish;
@@ -31,7 +31,8 @@ type StrategyConfig = {
 };
 
 export const ethProvider = new JsonRpcProvider(
-  process.env.L1_NETWORK_NODE_URL ?? `https://rpc.brovider.xyz/${networkProperties.baseChainId}`
+  process.env.L1_NETWORK_NODE_URL ??
+    `https://rpc.brovider.xyz/${networkProperties.baseChainId}`
 );
 const starkProvider = new Provider({
   rpc: {
@@ -64,8 +65,10 @@ export function getUrl(uri: string, gateway = 'pineapple.fyi') {
   )
     return `${ipfsGateway}/ipfs/${uri}`;
   const uriScheme = uri.split('://')[0];
-  if (uriScheme === 'ipfs') return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
-  if (uriScheme === 'ipns') return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  if (uriScheme === 'ipfs')
+    return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
+  if (uriScheme === 'ipns')
+    return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
   return uri;
 }
 
@@ -77,7 +80,9 @@ export async function getJSON(uri: string) {
 }
 
 export function getSpaceName(address: string) {
-  const seed = parseInt(hash.getSelectorFromName(address).toString().slice(0, 12));
+  const seed = parseInt(
+    hash.getSelectorFromName(address).toString().slice(0, 12)
+  );
   faker.seed(seed);
   const noun = faker.word.noun(6);
   return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
@@ -88,11 +93,16 @@ export function dropIpfs(metadataUri: string) {
 }
 
 export function longStringToText(array: string[]): string {
-  return array.reduce((acc, slice) => acc + shortString.decodeShortString(slice), '');
+  return array.reduce(
+    (acc, slice) => acc + shortString.decodeShortString(slice),
+    ''
+  );
 }
 
 export function findVariant(value: { variant: Record<string, any> }) {
-  const result = Object.entries(value.variant).find(([, v]) => typeof v !== 'undefined');
+  const result = Object.entries(value.variant).find(
+    ([, v]) => typeof v !== 'undefined'
+  );
   if (!result) throw new Error('Invalid variant');
 
   return {
@@ -101,7 +111,13 @@ export function findVariant(value: { variant: Record<string, any> }) {
   };
 }
 
-export function formatAddressVariant({ key, value }: { key: string; value: string }) {
+export function formatAddressVariant({
+  key,
+  value
+}: {
+  key: string;
+  value: string;
+}) {
   const address =
     key === 'Starknet'
       ? validateAndParseAddress(value)
@@ -123,11 +139,18 @@ export function getVoteValue(label: string) {
   throw new Error('Invalid vote label');
 }
 
-export async function handleExecutionStrategy(address: string, payload: string[]) {
+export async function handleExecutionStrategy(
+  address: string,
+  payload: string[]
+) {
   try {
     if (address === '0x0') return null;
 
-    const executionContract = new Contract(ExecutionStrategyAbi, address, starkProvider);
+    const executionContract = new Contract(
+      ExecutionStrategyAbi,
+      address,
+      starkProvider
+    );
 
     const executionStrategyType = shortString.decodeShortString(
       await executionContract.get_strategy_type()
@@ -139,7 +162,8 @@ export async function handleExecutionStrategy(address: string, payload: string[]
       quorum = await executionContract.quorum();
     } else if (executionStrategyType === 'EthRelayer') {
       const [l1Destination] = payload;
-      if (!l1Destination) throw new Error('Invalid payload for EthRelayer execution strategy');
+      if (!l1Destination)
+        throw new Error('Invalid payload for EthRelayer execution strategy');
       destinationAddress = l1Destination;
 
       const SimpleQuorumExecutionStrategyContract = new EthContract(
@@ -148,7 +172,9 @@ export async function handleExecutionStrategy(address: string, payload: string[]
         ethProvider
       );
 
-      quorum = (await SimpleQuorumExecutionStrategyContract.quorum()).toBigInt();
+      quorum = (
+        await SimpleQuorumExecutionStrategyContract.quorum()
+      ).toBigInt();
     }
 
     return {
@@ -173,11 +199,14 @@ export async function updateProposaValidationStrategy(
   space.validation_strategy_params = validationStrategyParams.join(',');
   space.voting_power_validation_strategy_strategies = [];
   space.voting_power_validation_strategy_strategies_params = [];
-  space.voting_power_validation_strategy_metadata = longStringToText(metadataUri);
+  space.voting_power_validation_strategy_metadata =
+    longStringToText(metadataUri);
 
   if (
     utils.encoding.hexPadLeft(validationStrategyAddress) ===
-    utils.encoding.hexPadLeft(networkProperties.propositionPowerValidationStrategyAddress)
+    utils.encoding.hexPadLeft(
+      networkProperties.propositionPowerValidationStrategyAddress
+    )
   ) {
     const parsed = encodersAbi.parse(
       'proposition_power_params',
@@ -186,13 +215,14 @@ export async function updateProposaValidationStrategy(
 
     if (Object.keys(parsed).length !== 0) {
       space.proposal_threshold = parsed.proposal_threshold.toString(10);
-      space.voting_power_validation_strategy_strategies = parsed.allowed_strategies.map(
-        (strategy: StrategyConfig) => `0x${strategy.address.toString(16)}`
-      );
-      space.voting_power_validation_strategy_strategies_params = parsed.allowed_strategies.map(
-        (strategy: StrategyConfig) =>
+      space.voting_power_validation_strategy_strategies =
+        parsed.allowed_strategies.map(
+          (strategy: StrategyConfig) => `0x${strategy.address.toString(16)}`
+        );
+      space.voting_power_validation_strategy_strategies_params =
+        parsed.allowed_strategies.map((strategy: StrategyConfig) =>
           strategy.params.map(param => `0x${param.toString(16)}`).join(',')
-      );
+        );
     }
 
     try {
@@ -238,7 +268,10 @@ export async function handleStrategiesMetadata(
   }
 }
 
-export async function handleVotingPowerValidationMetadata(spaceId: string, metadataUri: string) {
+export async function handleVotingPowerValidationMetadata(
+  spaceId: string,
+  metadataUri: string
+) {
   if (!metadataUri) return;
 
   const metadata: any = await getJSON(metadataUri);

@@ -23,14 +23,30 @@ withDefaults(
       viewBox="0 0 24 24"
     >
       <defs>
-        <linearGradient id="gradient" x1="28.154%" y1="63.74%" x2="74.629%" y2="17.783%">
+        <linearGradient
+          id="gradient"
+          x1="28.154%"
+          y1="63.74%"
+          x2="74.629%"
+          y2="17.783%"
+        >
           <stop stop-color="#000000" offset="0%"></stop>
           <stop stop-opacity="0" offset="100%"></stop>
         </linearGradient>
       </defs>
       <g transform="translate(2)" fill="none" fill-rule="evenodd">
-        <circle stroke="url(#gradient)" stroke-width="4" cx="10" cy="12" r="10"></circle>
-        <path d="M10 2C4.477 2 0 6.477 0 12" stroke="#000000" stroke-width="4"></path>
+        <circle
+          stroke="url(#gradient)"
+          stroke-width="4"
+          cx="10"
+          cy="12"
+          r="10"
+        ></circle>
+        <path
+          d="M10 2C4.477 2 0 6.477 0 12"
+          stroke="#000000"
+          stroke-width="4"
+        ></path>
         <rect x="8" width="4" height="4" rx="8"></rect>
       </g>
     </svg>

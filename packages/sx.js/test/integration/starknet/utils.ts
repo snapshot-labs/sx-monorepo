@@ -1,48 +1,56 @@
-import { Account, CallData, RpcProvider, uint256 } from 'starknet';
 import { Signer } from '@ethersproject/abstract-signer';
-import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
+import {
+  Contract,
+  ContractFactory,
+  ContractInterface
+} from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
-import { StarknetTx } from '../../../src/clients';
-import { executeContractCallWithSigners } from './safeUtils';
-import { hexPadLeft } from '../../../src/utils/encoding';
-import { AddressType, Leaf, generateMerkleRoot } from '../../../src/utils/merkletree';
-import sxFactoryCasm from './fixtures/sx_Factory.casm.json';
-import sxFactorySierra from './fixtures/sx_Factory.sierra.json';
+import { Account, CallData, RpcProvider, uint256 } from 'starknet';
+import GnosisSafeL2Contract from './fixtures/l1/GnosisSafeL2.json';
+import GnosisSafeProxyFactoryContract from './fixtures/l1/GnosisSafeProxyFactory.json';
+import L1AvatarExecutionStrategyFactoryContract from './fixtures/l1/L1AvatarExecutionStrategyFactory.json';
+import L1AvatarExecutionStrategyMockMessagingContract from './fixtures/l1/L1AvatarExecutionStrategyMockMessaging.json';
+import MockStarknetMessaging from './fixtures/l1/MockStarknetMessaging.json';
+import StarknetCommit from './fixtures/l1/StarknetCommit.json';
 import sxErc20VotesPresetCasm from './fixtures/sx_ERC20VotesPreset.casm.json';
 import sxErc20VotesPresetSierra from './fixtures/sx_ERC20VotesPreset.sierra.json';
-import sxSpaceCasm from './fixtures/sx_Space.casm.json';
-import sxSpaceSierra from './fixtures/sx_Space.sierra.json';
-import sxVanillaAuthenticatorCasm from './fixtures/sx_VanillaAuthenticator.casm.json';
-import sxVanillaAuthenticatorSierra from './fixtures/sx_VanillaAuthenticator.sierra.json';
+import sxErc20VotesVotingStrategyCasm from './fixtures/sx_ERC20VotesVotingStrategy.casm.json';
+import sxErc20VotesVotingStrategySierra from './fixtures/sx_ERC20VotesVotingStrategy.sierra.json';
+import sxEthRelayerExecutionStrategyCasm from './fixtures/sx_EthRelayerExecutionStrategy.casm.json';
+import sxEthRelayerExecutionStrategySierra from './fixtures/sx_EthRelayerExecutionStrategy.sierra.json';
 import sxEthSigAuthenticatorCasm from './fixtures/sx_EthSigAuthenticator.casm.json';
 import sxEthSigAuthenticatorSierra from './fixtures/sx_EthSigAuthenticator.sierra.json';
 import sxEthTxAuthenticatorCasm from './fixtures/sx_EthTxAuthenticator.casm.json';
 import sxEthTxAuthenticatorSierra from './fixtures/sx_EthTxAuthenticator.sierra.json';
+import sxFactoryCasm from './fixtures/sx_Factory.casm.json';
+import sxFactorySierra from './fixtures/sx_Factory.sierra.json';
+import sxMerkleWhitelistVotingStrategyCasm from './fixtures/sx_MerkleWhitelistVotingStrategy.casm.json';
+import sxMerkleWhitelistVotingStrategySierra from './fixtures/sx_MerkleWhitelistVotingStrategy.sierra.json';
+import sxPropositionPowerProposalValidationStrategyCasm from './fixtures/sx_PropositionPowerProposalValidationStrategy.casm.json';
+import sxPropositionPowerProposalValidationStrategySierra from './fixtures/sx_PropositionPowerProposalValidationStrategy.sierra.json';
+import sxSpaceCasm from './fixtures/sx_Space.casm.json';
+import sxSpaceSierra from './fixtures/sx_Space.sierra.json';
 import sxStarkSigAuthenticatorCasm from './fixtures/sx_StarkSigAuthenticator.casm.json';
 import sxStarkSigAuthenticatorSierra from './fixtures/sx_StarkSigAuthenticator.sierra.json';
 import sxStarkTxAuthenticatorCasm from './fixtures/sx_StarkTxAuthenticator.casm.json';
 import sxStarkTxAuthenticatorSierra from './fixtures/sx_StarkTxAuthenticator.sierra.json';
+import sxVanillaAuthenticatorCasm from './fixtures/sx_VanillaAuthenticator.casm.json';
+import sxVanillaAuthenticatorSierra from './fixtures/sx_VanillaAuthenticator.sierra.json';
 import sxVanillaExecutionStrategyCasm from './fixtures/sx_VanillaExecutionStrategy.casm.json';
 import sxVanillaExecutionStrategySierra from './fixtures/sx_VanillaExecutionStrategy.sierra.json';
-import sxEthRelayerExecutionStrategyCasm from './fixtures/sx_EthRelayerExecutionStrategy.casm.json';
-import sxEthRelayerExecutionStrategySierra from './fixtures/sx_EthRelayerExecutionStrategy.sierra.json';
 import sxVanillaProposalValidationStrategyCasm from './fixtures/sx_VanillaProposalValidationStrategy.casm.json';
 import sxVanillaProposalValidationStrategySierra from './fixtures/sx_VanillaProposalValidationStrategy.sierra.json';
-import sxPropositionPowerProposalValidationStrategyCasm from './fixtures/sx_PropositionPowerProposalValidationStrategy.casm.json';
-import sxPropositionPowerProposalValidationStrategySierra from './fixtures/sx_PropositionPowerProposalValidationStrategy.sierra.json';
 import sxVanillaVotingStrategyCasm from './fixtures/sx_VanillaVotingStrategy.casm.json';
 import sxVanillaVotingStrategySierra from './fixtures/sx_VanillaVotingStrategy.sierra.json';
-import sxMerkleWhitelistVotingStrategyCasm from './fixtures/sx_MerkleWhitelistVotingStrategy.casm.json';
-import sxMerkleWhitelistVotingStrategySierra from './fixtures/sx_MerkleWhitelistVotingStrategy.sierra.json';
-import sxErc20VotesVotingStrategyCasm from './fixtures/sx_ERC20VotesVotingStrategy.casm.json';
-import sxErc20VotesVotingStrategySierra from './fixtures/sx_ERC20VotesVotingStrategy.sierra.json';
-import GnosisSafeL2Contract from './fixtures/l1/GnosisSafeL2.json';
-import GnosisSafeProxyFactoryContract from './fixtures/l1/GnosisSafeProxyFactory.json';
-import L1AvatarExecutionStrategyMockMessagingContract from './fixtures/l1/L1AvatarExecutionStrategyMockMessaging.json';
-import L1AvatarExecutionStrategyFactoryContract from './fixtures/l1/L1AvatarExecutionStrategyFactory.json';
-import MockStarknetMessaging from './fixtures/l1/MockStarknetMessaging.json';
-import StarknetCommit from './fixtures/l1/StarknetCommit.json';
+import { executeContractCallWithSigners } from './safeUtils';
+import { StarknetTx } from '../../../src/clients';
 import { NetworkConfig } from '../../../src/types';
+import { hexPadLeft } from '../../../src/utils/encoding';
+import {
+  AddressType,
+  generateMerkleRoot,
+  Leaf
+} from '../../../src/utils/merkletree';
 
 export type TestConfig = {
   starknetCore: string;
@@ -74,7 +82,12 @@ export type TestConfig = {
   networkConfig: NetworkConfig;
 };
 
-export async function deployDependency(account: Account, sierra: any, casm: any, args: any[] = []) {
+export async function deployDependency(
+  account: Account,
+  sierra: any,
+  casm: any,
+  args: any[] = []
+) {
   const {
     deploy: { contract_address }
   } = await account.declareAndDeploy({
@@ -94,7 +107,11 @@ async function deployL1Dependency(
   },
   ...args: any[]
 ) {
-  const factory = new ContractFactory(contractDetails.abi, contractDetails.bytecode, signer);
+  const factory = new ContractFactory(
+    contractDetails.abi,
+    contractDetails.bytecode,
+    signer
+  );
 
   const contract = await factory.deploy(...args);
 
@@ -124,10 +141,18 @@ export async function setup({
     casm: sxFactoryCasm as any
   });
 
-  const starknetCore = await deployL1Dependency(ethereumWallet, MockStarknetMessaging, 5 * 60);
+  const starknetCore = await deployL1Dependency(
+    ethereumWallet,
+    MockStarknetMessaging,
+    5 * 60
+  );
   await loadL1MessagingContract(ethUrl, starknetCore);
 
-  const starknetCommit = await deployL1Dependency(ethereumWallet, StarknetCommit, starknetCore);
+  const starknetCommit = await deployL1Dependency(
+    ethereumWallet,
+    StarknetCommit,
+    starknetCore
+  );
 
   const masterl1AvatarExecutionStrategy = await deployL1Dependency(
     ethereumWallet,
@@ -245,7 +270,11 @@ export async function setup({
   const masterSpaceClassHash = masterSpaceResult.class_hash;
   const factoryAddress = factoryResult.deploy.contract_address;
 
-  const leaf = new Leaf(AddressType.ETHEREUM, '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 42n);
+  const leaf = new Leaf(
+    AddressType.ETHEREUM,
+    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    42n
+  );
   const merkleWhitelistStrategyMetadata = {
     tree: [leaf].map(leaf => ({
       type: leaf.type,
@@ -360,15 +389,13 @@ export async function setup({
 
   const spaceAddress = address;
 
-  const { l1AvatarExecutionStrategyContract, safeContract } = await setupL1ExecutionStrategy(
-    ethereumWallet,
-    {
+  const { l1AvatarExecutionStrategyContract, safeContract } =
+    await setupL1ExecutionStrategy(ethereumWallet, {
       client,
       spaceAddress,
       ethRelayerAddress: ethRelayerExecutionStrategy,
       quorum: 1n
-    }
-  );
+    });
 
   return {
     starknetCore,
@@ -412,7 +439,10 @@ export async function setupL1ExecutionStrategy(
   const signerAddress = await signer.getAddress();
 
   const singleton = await deployL1Dependency(signer, GnosisSafeL2Contract);
-  const factory = await deployL1Dependency(signer, GnosisSafeProxyFactoryContract);
+  const factory = await deployL1Dependency(
+    signer,
+    GnosisSafeProxyFactoryContract
+  );
 
   const gnosisSafeProxyFactoryContract = new Contract(
     factory,
@@ -420,7 +450,10 @@ export async function setupL1ExecutionStrategy(
     signer
   );
 
-  const template = await gnosisSafeProxyFactoryContract.callStatic.createProxy(singleton, '0x');
+  const template = await gnosisSafeProxyFactoryContract.callStatic.createProxy(
+    singleton,
+    '0x'
+  );
   await gnosisSafeProxyFactoryContract.createProxy(singleton, '0x');
 
   const safeContract = new Contract(template, GnosisSafeL2Contract.abi, signer);

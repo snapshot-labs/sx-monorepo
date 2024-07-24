@@ -36,10 +36,14 @@ export const SUPPORTED_VOTING_TYPES: VoteType[] = [
   'weighted',
   'quadratic'
 ] as const;
-export const VOTING_TYPES_INFO: Record<Exclude<VoteType, 'custom'>, VoteTypeInfo> = {
+export const VOTING_TYPES_INFO: Record<
+  Exclude<VoteType, 'custom'>,
+  VoteTypeInfo
+> = {
   basic: {
     label: 'Basic voting',
-    description: 'Voters have three choices: they can vote "For", "Against" or "Abstain".'
+    description:
+      'Voters have three choices: they can vote "For", "Against" or "Abstain".'
   },
   'single-choice': {
     label: 'Single choice voting',
@@ -47,7 +51,8 @@ export const VOTING_TYPES_INFO: Record<Exclude<VoteType, 'custom'>, VoteTypeInfo
   },
   approval: {
     label: 'Approval voting',
-    description: 'Voters can select multiple choices, each choice receiving full voting power.'
+    description:
+      'Voters can select multiple choices, each choice receiving full voting power.'
   },
   'ranked-choice': {
     label: 'Ranked choice voting',
@@ -56,7 +61,8 @@ export const VOTING_TYPES_INFO: Record<Exclude<VoteType, 'custom'>, VoteTypeInfo
   },
   weighted: {
     label: 'Weighted voting',
-    description: 'Each voter may spread voting power across any number of choices.'
+    description:
+      'Each voter may spread voting power across any number of choices.'
   },
   quadratic: {
     label: 'Quadratic voting',

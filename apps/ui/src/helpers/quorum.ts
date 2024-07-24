@@ -20,7 +20,9 @@ export function quorumChoiceProgress(
 
   if (quorumType !== 'rejection') return result.progress * cappedQuorumProgress;
 
-  return result.choice - 1 === REJECTION_QUORUM_CHOICE_INDEX ? cappedQuorumProgress * 100 : 0;
+  return result.choice - 1 === REJECTION_QUORUM_CHOICE_INDEX
+    ? cappedQuorumProgress * 100
+    : 0;
 }
 
 export function quorumLabel(quorumType: Proposal['quorum_type']): string {

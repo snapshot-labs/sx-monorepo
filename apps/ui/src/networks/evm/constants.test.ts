@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createConstants } from './constants';
 
 describe('EVM Constants', () => {
@@ -12,7 +12,9 @@ describe('EVM Constants', () => {
 
   describe('EDITOR_VOTING_STRATEGIES', () => {
     describe('whitelist', () => {
-      const strategy = constants.EDITOR_VOTING_STRATEGIES.find(s => s.name === 'Whitelist')!;
+      const strategy = constants.EDITOR_VOTING_STRATEGIES.find(
+        s => s.name === 'Whitelist'
+      )!;
 
       describe('generateSummary', () => {
         it('should return the correct number of addresses', () => {

@@ -16,12 +16,16 @@ function csvToJson(csv: string): any[] {
   const [header, ...lines] = csv
     .split('\n')
     .map(line =>
-      line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.trim().replace(/^"|"$/g, ''))
+      line
+        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+        .map(field => field.trim().replace(/^"|"$/g, ''))
     );
 
   return lines
     .filter(line => line.length > 1)
-    .map(line => Object.fromEntries(header.map((key, i) => [key, line[i] || ''])));
+    .map(line =>
+      Object.fromEntries(header.map((key, i) => [key, line[i] || '']))
+    );
 }
 
 const apps: Ref<any[]> = ref([]);
@@ -50,7 +54,9 @@ export function useApps() {
     return apps.value.filter(app => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { overview, ...appWithoutOverview } = app;
-      return JSON.stringify(appWithoutOverview).toLowerCase().includes(q.toLowerCase());
+      return JSON.stringify(appWithoutOverview)
+        .toLowerCase()
+        .includes(q.toLowerCase());
     });
   }
 

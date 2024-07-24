@@ -33,8 +33,13 @@ function handlePressEnter(index) {
       >
         <template #item="{ index }">
           <div>
-            <div class="flex items-center rounded-lg bg-skin-border h-[40px] gap-[12px] pl-2.5">
-              <div v-if="proposal.type !== 'basic'" class="text-skin-text handle cursor-grab">
+            <div
+              class="flex items-center rounded-lg bg-skin-border h-[40px] gap-[12px] pl-2.5"
+            >
+              <div
+                v-if="proposal.type !== 'basic'"
+                class="text-skin-text handle cursor-grab"
+              >
                 <IC-drag />
               </div>
               <div class="grow">

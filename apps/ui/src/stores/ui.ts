@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
+import { lsGet, lsSet } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { lsSet, lsGet } from '@/helpers/utils';
-import { NotificationType, NetworkID } from '@/types';
+import { NetworkID, NotificationType } from '@/types';
 
 type Notification = {
   id: string;
@@ -44,7 +44,9 @@ export const useUiStore = defineStore('ui', {
       setTimeout(() => this.dismissNotification(id), timeout);
     },
     dismissNotification(id: string) {
-      this.notifications = this.notifications.filter(notification => notification.id !== id);
+      this.notifications = this.notifications.filter(
+        notification => notification.id !== id
+      );
     },
     async addPendingTransaction(txId: string, networkId: NetworkID) {
       this.pendingTransactions.push({
@@ -57,7 +59,9 @@ export const useUiStore = defineStore('ui', {
       try {
         await getNetwork(networkId).helpers.waitForTransaction(txId);
       } finally {
-        this.pendingTransactions = this.pendingTransactions.filter(el => el.txId !== txId);
+        this.pendingTransactions = this.pendingTransactions.filter(
+          el => el.txId !== txId
+        );
         updateStorage(this.pendingTransactions);
       }
     },
@@ -65,7 +69,9 @@ export const useUiStore = defineStore('ui', {
       const persistedTransactions = lsGet(PENDING_TRANSACTIONS_STORAGE_KEY, []);
 
       this.pendingTransactions = persistedTransactions.filter(
-        tx => tx.createdAt && tx.createdAt + PENDING_TRANSACTIONS_TIMEOUT > Date.now()
+        tx =>
+          tx.createdAt &&
+          tx.createdAt + PENDING_TRANSACTIONS_TIMEOUT > Date.now()
       );
 
       if (persistedTransactions.length !== this.pendingTransactions.length) {
@@ -76,7 +82,9 @@ export const useUiStore = defineStore('ui', {
         try {
           await getNetwork(networkId).helpers.waitForTransaction(txId);
         } finally {
-          this.pendingTransactions = this.pendingTransactions.filter(el => el.txId !== txId);
+          this.pendingTransactions = this.pendingTransactions.filter(
+            el => el.txId !== txId
+          );
           updateStorage(this.pendingTransactions);
         }
       });

@@ -1,4 +1,8 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
+import {
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
 
@@ -52,7 +56,8 @@ const DELEGATES_QUERY = gql`
 `;
 
 function convertUrl(apiUrl: string) {
-  const hostedPattern = /https:\/\/thegraph\.com\/hosted-service\/subgraph\/([\w-]+)\/([\w-]+)/;
+  const hostedPattern =
+    /https:\/\/thegraph\.com\/hosted-service\/subgraph\/([\w-]+)\/([\w-]+)/;
 
   const hostedMatch = apiUrl.match(hostedPattern);
   if (hostedMatch) {
@@ -115,9 +120,11 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
 
     const newDelegates = delegatesData.map((delegate: ApiDelegate) => {
       const delegatorsPercentage =
-        Number(delegate.tokenHoldersRepresentedAmount) / Number(governanceData.totalDelegates);
+        Number(delegate.tokenHoldersRepresentedAmount) /
+        Number(governanceData.totalDelegates);
       const votesPercentage =
-        Number(delegate.delegatedVotes) / Number(governanceData.delegatedVotes) || 0;
+        Number(delegate.delegatedVotes) /
+          Number(governanceData.delegatedVotes) || 0;
 
       return {
         name: names[delegate.user] || null,
@@ -127,7 +134,9 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
       };
     });
 
-    delegates.value = overwrite ? newDelegates : [...delegates.value, ...newDelegates];
+    delegates.value = overwrite
+      ? newDelegates
+      : [...delegates.value, ...newDelegates];
 
     hasMore.value = delegatesData.length === DELEGATES_LIMIT;
   }

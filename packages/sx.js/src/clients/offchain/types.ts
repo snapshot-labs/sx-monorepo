@@ -1,5 +1,8 @@
-import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer';
-import type { Privacy } from '../../types';
+import {
+  TypedDataDomain,
+  TypedDataField
+} from '@ethersproject/abstract-signer';
+import { Privacy } from '../../types';
 
 export type Choice = number | number[] | string | Record<string, number>;
 

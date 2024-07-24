@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Contract, CallData } from 'starknet';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import { CallData, Contract } from 'starknet';
 import EVMSlotValue from './abis/EVMSlotValue.json';
-import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
-import { getUserAddressEnum } from '../../utils/starknet-enums';
 import { getSlotKey } from './utils';
+import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
 import { VotingPowerDetailsError } from '../../utils/errors';
-import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
+import { getUserAddressEnum } from '../../utils/starknet-enums';
 
 export default function createEvmSlotValueStrategy(): Strategy {
   const type = 'evmSlotValue';
@@ -55,14 +55,19 @@ export default function createEvmSlotValueStrategy(): Strategy {
       clientConfig: ClientConfig
     ): Promise<string[]> {
       if (call === 'propose') throw new Error('Not supported for proposing');
-      if (signerAddress.length !== 42) throw new Error('Not supported for non-Ethereum addresses');
+      if (signerAddress.length !== 42)
+        throw new Error('Not supported for non-Ethereum addresses');
       if (!metadata) throw new Error('Invalid metadata');
 
       const voteEnvelope = envelope as Envelope<Vote>;
 
       const { starkProvider, ethUrl, networkConfig } = clientConfig;
 
-      const spaceContract = new Contract(SpaceAbi, voteEnvelope.data.space, starkProvider);
+      const spaceContract = new Contract(
+        SpaceAbi,
+        voteEnvelope.data.space,
+        starkProvider
+      );
       const proposalStruct = (await spaceContract.call('proposals', [
         voteEnvelope.data.proposal
       ])) as any;
@@ -105,7 +110,10 @@ export default function createEvmSlotValueStrategy(): Strategy {
       const { contractAddress, slotIndex } = metadata;
 
       if (!timestamp) {
-        const provider = new StaticJsonRpcProvider(clientConfig.ethUrl, chainId);
+        const provider = new StaticJsonRpcProvider(
+          clientConfig.ethUrl,
+          chainId
+        );
         const storage = await provider.getStorageAt(
           contractAddress,
           getSlotKey(voterAddress, slotIndex)
@@ -114,13 +122,21 @@ export default function createEvmSlotValueStrategy(): Strategy {
         return BigInt(storage);
       }
 
-      const contract = new Contract(EVMSlotValue, strategyAddress, clientConfig.starkProvider);
+      const contract = new Contract(
+        EVMSlotValue,
+        strategyAddress,
+        clientConfig.starkProvider
+      );
 
       let l1BlockNumber: bigint;
       try {
         l1BlockNumber = await contract.cached_timestamps(timestamp);
       } catch (e) {
-        throw new VotingPowerDetailsError('Timestamp is not cached', type, 'NOT_READY_YET');
+        throw new VotingPowerDetailsError(
+          'Timestamp is not cached',
+          type,
+          'NOT_READY_YET'
+        );
       }
 
       const storageProof = await getProof(
@@ -134,7 +150,10 @@ export default function createEvmSlotValueStrategy(): Strategy {
 
       return contract.get_voting_power(
         timestamp,
-        getUserAddressEnum(voterAddress.length === 42 ? 'ETHEREUM' : 'STARKNET', voterAddress),
+        getUserAddressEnum(
+          voterAddress.length === 42 ? 'ETHEREUM' : 'STARKNET',
+          voterAddress
+        ),
         params,
         CallData.compile({
           storageProof

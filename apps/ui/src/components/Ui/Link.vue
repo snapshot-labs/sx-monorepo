@@ -9,7 +9,10 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex items-center" :class="[isActive && 'border-b border-skin-link -mb-[1px]']">
+  <div
+    class="flex items-center"
+    :class="[isActive && 'border-b border-skin-link -mb-[1px]']"
+  >
     <h4
       class="eyebrow py-2 cursor-pointer inline-block hover:text-skin-link"
       :class="[isActive ? 'text-skin-link' : 'text-skin-text']"

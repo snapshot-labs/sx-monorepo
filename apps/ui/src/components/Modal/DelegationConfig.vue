@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { getNetwork, enabledNetworks } from '@/networks';
-import { validateForm } from '@/helpers/validation';
-import { SpaceMetadataDelegation } from '@/types';
 import { clone } from '@/helpers/utils';
+import { validateForm } from '@/helpers/validation';
+import { enabledNetworks, getNetwork } from '@/networks';
+import { SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
@@ -66,12 +66,17 @@ const definition = computed(() => {
               type: 'string',
               format: 'uri',
               title: 'Delegation API URL',
-              examples: ['https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2']
+              examples: [
+                'https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2'
+              ]
             },
             contractNetwork: {
               type: 'string',
               enum: [null, ...availableNetworks.map(network => network.id)],
-              options: [{ id: null, name: 'No delegation contract' }, ...availableNetworks],
+              options: [
+                { id: null, name: 'No delegation contract' },
+                ...availableNetworks
+              ],
               title: 'Delegation contract network',
               nullable: true
             },
@@ -126,7 +131,10 @@ watch(
     <template #header>
       <h3 v-text="'Add delegation'" />
       <template v-if="showPicker">
-        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
@@ -153,10 +161,16 @@ watch(
       "
     />
     <div v-else class="s-box p-4">
-      <UiForm :model-value="form" :error="formErrors" :definition="definition" />
+      <UiForm
+        :model-value="form"
+        :error="formErrors"
+        :definition="definition"
+      />
     </div>
     <template #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">Confirm</UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"
+        >Confirm</UiButton
+      >
     </template>
   </UiModal>
 </template>

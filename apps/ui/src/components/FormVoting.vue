@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { validateForm } from '@/helpers/validation';
-import type { NetworkID } from '@/types';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
   form: any;

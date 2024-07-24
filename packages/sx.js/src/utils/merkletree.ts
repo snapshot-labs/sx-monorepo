@@ -1,4 +1,4 @@
-import { uint256, hash, ec } from 'starknet';
+import { ec, hash, uint256 } from 'starknet';
 
 export enum AddressType {
   STARKNET,
@@ -20,7 +20,12 @@ export class Leaf {
   public get hash(): string {
     const votingPowerUint256 = uint256.bnToUint256(this.votingPower);
 
-    const values = [this.type, this.address, votingPowerUint256.low, votingPowerUint256.high];
+    const values = [
+      this.type,
+      this.address,
+      votingPowerUint256.low,
+      votingPowerUint256.high
+    ];
 
     return hash.computeHashOnElements(values);
   }
