@@ -5,7 +5,7 @@ export const networkNodeUrl =
   process.env.NETWORK_NODE_URL ||
   'https://starknet-sepolia.infura.io/v3/46a5dd9727bf48d4a132672d3f376146';
 
-export const manaRpcUrl = process.env.VITE_MANA_URL || 'https://mana.pizza';
+export const manaRpcUrl = process.env.VITE_MANA_URL || 'https://mana.box';
 
 const createConfig = (
   networkId: keyof typeof starknetNetworks,
