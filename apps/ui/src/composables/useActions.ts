@@ -571,10 +571,10 @@ export function useActions() {
   }
 
   async function updateStatement(statement: Statement) {
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     await wrapPromise(
-      offchainNetworkId,
+      metadataNetwork,
       network.actions.updateStatement(await getAliasSigner(), statement, web3.value.account)
     );
 
