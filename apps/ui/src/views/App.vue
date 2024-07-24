@@ -31,8 +31,8 @@ onMounted(() => load());
               <div v-text="app.category" />
             </div>
           </div>
-          <a v-if="app.link" :href="app.link" target="_blank">
-            <UiButton class="primary w-full">Use integration</UiButton>
+          <a v-if="app.link" :href="app.link" target="_blank" class="s-button primary w-full">
+            Use integration
           </a>
         </div>
         <div class="md:flex md:space-x-4">

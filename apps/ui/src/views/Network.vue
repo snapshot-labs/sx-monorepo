@@ -81,14 +81,10 @@ watchEffect(() => setTitle('Network'));
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
         <h1 class="mb-4 mono max-w-[600px] mx-auto">Unlock governance for your ecosystem.</h1>
-        <div class="space-x-2">
-          <a target="_blank">
-            <a :href="LINK" target="_blank">
-              <UiButton class="primary">
-                Talk to sales
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </UiButton>
-            </a>
+        <div class="inline-block">
+          <a :href="LINK" target="_blank" class="s-button primary space-x-1">
+            <span>Talk to sales</span>
+            <IH-arrow-sm-right class="-rotate-45" />
           </a>
         </div>
       </UiContainer>
@@ -151,12 +147,12 @@ watchEffect(() => setTitle('Network'));
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Get started</div>
       <h1 class="mb-3">Start your integration</h1>
-      <a :href="LINK" target="_blank">
-        <UiButton class="primary">
-          Talk to sales
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </UiButton>
-      </a>
+      <div class="inline-block">
+        <a :href="LINK" target="_blank" class="s-button primary space-x-1">
+          <span>Talk to sales</span>
+          <IH-arrow-sm-right class="-rotate-45" />
+        </a>
+      </div>
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">
