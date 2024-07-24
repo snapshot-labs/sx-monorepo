@@ -1,5 +1,5 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { enabledNetworks, getNetwork, getReadWriteNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import type {
@@ -15,8 +15,6 @@ import type {
   Statement
 } from '@/types';
 import type { Connector, StrategyConfig } from '@/networks/types';
-
-const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -119,10 +117,10 @@ export function useActions() {
   }
 
   async function getAliasSigner() {
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     return alias.getAliasWallet(address =>
-      wrapPromise(offchainNetworkId, network.actions.setAlias(auth.web3, address))
+      wrapPromise(metadataNetwork, network.actions.setAlias(auth.web3, address))
     );
   }
 
@@ -520,11 +518,11 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     try {
       await wrapPromise(
-        offchainNetworkId,
+        metadataNetwork,
         network.actions.followSpace(await getAliasSigner(), networkId, spaceId, web3.value.account)
       );
     } catch (e) {
@@ -541,11 +539,11 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     try {
       await wrapPromise(
-        offchainNetworkId,
+        metadataNetwork,
         network.actions.unfollowSpace(
           await getAliasSigner(),
           networkId,
@@ -562,10 +560,10 @@ export function useActions() {
   }
 
   async function updateUser(user: User) {
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     await wrapPromise(
-      offchainNetworkId,
+      metadataNetwork,
       network.actions.updateUser(await getAliasSigner(), user, web3.value.account)
     );
 

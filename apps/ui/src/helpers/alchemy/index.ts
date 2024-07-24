@@ -76,7 +76,24 @@ export async function getTokenBalances(
   address: string,
   networkId: number
 ): Promise<GetTokenBalancesResponse> {
-  return request('alchemy_getTokenBalances', [address], networkId);
+  const results = { address, tokenBalances: [], pageKey: null };
+  let pageKey = null;
+
+  while (true) {
+    const pageResult = await request(
+      'alchemy_getTokenBalances',
+      [address, 'erc20', { pageKey }],
+      networkId
+    );
+
+    results.tokenBalances = results.tokenBalances.concat(pageResult.tokenBalances);
+
+    pageKey = pageResult.pageKey;
+
+    if (!pageKey) break;
+  }
+
+  return results;
 }
 
 /**
@@ -137,6 +154,6 @@ export async function getBalances(
         value: 0,
         change: 0
       }))
-      .filter(token => !token.symbol.includes('.'))
+      .filter(token => !token?.symbol?.includes('.'))
   ];
 }

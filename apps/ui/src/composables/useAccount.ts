@@ -9,6 +9,7 @@ watch(
   () => web3.value.account,
   (current, previous) => {
     if (current !== previous) {
+      votes.value = {};
       pendingVotes.value = {};
     }
   }
@@ -16,8 +17,6 @@ watch(
 
 export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
-    votes.value = {};
-
     const account = web3.value.account;
     if (!account) return;
 
