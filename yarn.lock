@@ -2421,10 +2421,10 @@
     yargs "^17.7.2"
     zod "^3.21.4"
 
-"@snapshot-labs/eslint-config-base@^0.1.0-beta.16":
-  version "0.1.0-beta.16"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-base/-/eslint-config-base-0.1.0-beta.16.tgz#14de6cc9fecd342490262dd413ed89f37a10df41"
-  integrity sha512-0RpFTI51kAYQ9PYv1FEPrUmd/ed6Vi/Ug7091uFtyFjVZSQrt42LTLBBXDMwkBDDygL2uyQ/EFpiE7jSb8Ublg==
+"@snapshot-labs/eslint-config-base@^0.1.0-beta.17":
+  version "0.1.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-base/-/eslint-config-base-0.1.0-beta.17.tgz#e989acfb31facb1518cdf170499de47aec1832c3"
+  integrity sha512-+NE6BTOKhxvs1el73r9cQEm3SOBhp9La8HUumE4WbMoZz67ovPsdJQt7QuqnqZNDAEiW5sP0eJNsnvvxGxO0ug==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.7.3"
     "@typescript-eslint/parser" "^6.7.3"
@@ -2432,20 +2432,20 @@
     eslint-plugin-import "^2.29.0"
     eslint-plugin-prettier "^5.0.1"
 
-"@snapshot-labs/eslint-config-vue@^0.1.0-beta.16":
-  version "0.1.0-beta.16"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-vue/-/eslint-config-vue-0.1.0-beta.16.tgz#c64ead6976940ff48eed70751f5eabc020f38bac"
-  integrity sha512-ai1dWX2+V4NbYMyyUQcYLhgIHJI8dG4b4SozUSiAiTNlkDKD3DrlLqa1WCOH+WJu0/MNfeXlD0Of/nbXmOIcgQ==
+"@snapshot-labs/eslint-config-vue@^0.1.0-beta.17":
+  version "0.1.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-vue/-/eslint-config-vue-0.1.0-beta.17.tgz#dccb2d31bb33345263db9f513160c047a395268d"
+  integrity sha512-3VPFLU3IsSsoxcWKSAlcDukAJVYx74boZNwn9LHmOoUz4R94w3yCaZ/SLLjjO03p203R0awfl3TBZ64yyPt8/A==
   dependencies:
-    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.16"
+    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.17"
     eslint-plugin-vue "^9.18.1"
 
-"@snapshot-labs/eslint-config@0.1.0-beta.16", "@snapshot-labs/eslint-config@^0.1.0-beta.16":
-  version "0.1.0-beta.16"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config/-/eslint-config-0.1.0-beta.16.tgz#bf3f5ead829278f4ffc9947d62858e887dd5b33f"
-  integrity sha512-EbW6zltneOen/8NJM1nPqMfQIzuXUjBwJ7HszImpoRs6qPx6TRZHvHX9aPsV35mI/EMzQT08BPKfohMhEYHztA==
+"@snapshot-labs/eslint-config@0.1.0-beta.17", "@snapshot-labs/eslint-config@^0.1.0-beta.17":
+  version "0.1.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config/-/eslint-config-0.1.0-beta.17.tgz#fe6d4721937902415888a1fa6fec15c57b114870"
+  integrity sha512-hgEL6hbMAeYKaw7D6Fh+axsU/RZtfCsZHdJOD+CpG/x4+jXaWnV+tKSe6AidT/Yz/wK/4V76t6cAkVJ10ciLOw==
   dependencies:
-    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.16"
+    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.17"
 
 "@snapshot-labs/highlight@^0.1.0-beta.2":
   version "0.1.0-beta.2"
@@ -2486,10 +2486,10 @@
   dependencies:
     ofetch "^1.3.3"
 
-"@snapshot-labs/prettier-config@0.1.0-beta.16", "@snapshot-labs/prettier-config@^0.1.0-beta.16":
-  version "0.1.0-beta.16"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.16.tgz#e405361ec54fe4cbee0330eaed596af83ae476f7"
-  integrity sha512-NZKBW0jHYco1fj9uTmD0VT6zpc2bHq9BgV6ykOpcQOGtkHsIIhgKlypRrY+Wqfz0T7T4ExGZGGBVJNGiRwYWNQ==
+"@snapshot-labs/prettier-config@0.1.0-beta.17", "@snapshot-labs/prettier-config@^0.1.0-beta.17":
+  version "0.1.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.17.tgz#ded7d95d31c53be21c2e1d30322e02c3534a6a74"
+  integrity sha512-G2XcHaeLFEvmOtniqbNPNfAFT5g/UIKefRHGqUuSd6sSJp3zHqbpplPdID0IsPaDxu6mJu+UYiLW2ohoB7WauQ==
 
 "@solana/buffer-layout@^4.0.1":
   version "4.0.1"
