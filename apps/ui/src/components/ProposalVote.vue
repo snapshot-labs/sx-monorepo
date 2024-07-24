@@ -2,11 +2,14 @@
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { _t, getChoiceText } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import type { Proposal as ProposalType } from '@/types';
+import { Proposal as ProposalType } from '@/types';
 
-const props = withDefaults(defineProps<{ proposal: ProposalType; editMode?: boolean }>(), {
-  editMode: false
-});
+const props = withDefaults(
+  defineProps<{ proposal: ProposalType; editMode?: boolean }>(),
+  {
+    editMode: false
+  }
+);
 
 defineEmits<{
   (e: 'enter-edit-mode');
@@ -38,7 +41,9 @@ const isSupported = computed(() => {
   );
 });
 
-const currentVote = computed(() => votes.value[`${props.proposal.network}:${props.proposal.id}`]);
+const currentVote = computed(
+  () => votes.value[`${props.proposal.network}:${props.proposal.id}`]
+);
 
 const isEditable = computed(() => {
   return (
@@ -57,7 +62,10 @@ const isEditable = computed(() => {
         :class="{ 'cursor-pointer': isEditable }"
         @click="isEditable && $emit('enter-edit-mode')"
       >
-        <div v-if="proposal.privacy" class="flex space-x-2 items-center grow truncate">
+        <div
+          v-if="proposal.privacy"
+          class="flex space-x-2 items-center grow truncate"
+        >
           <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
           <span class="truncate">Encrypted choice</span>
         </div>
@@ -70,7 +78,10 @@ const isEditable = computed(() => {
       </UiButton>
     </div>
   </slot>
-  <slot v-else-if="!isEditable && pendingVotes[proposal.id]" name="voted-pending">
+  <slot
+    v-else-if="!isEditable && pendingVotes[proposal.id]"
+    name="voted-pending"
+  >
     You have already voted for this proposal
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">

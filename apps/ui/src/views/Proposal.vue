@@ -18,7 +18,8 @@ const { vote } = useActions();
 const sendingType = ref<Choice | null>(null);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
-const votingPowerDetailsError = ref<utils.errors.VotingPowerDetailsError | null>(null);
+const votingPowerDetailsError =
+  ref<utils.errors.VotingPowerDetailsError | null>(null);
 const editMode = ref(false);
 
 const network = computed(() =>
@@ -54,7 +55,9 @@ const votingPowerDecimals = computed(() => {
 });
 
 const currentVote = computed(
-  () => proposal.value && votes.value[`${proposal.value.network}:${proposal.value.id}`]
+  () =>
+    proposal.value &&
+    votes.value[`${proposal.value.network}:${proposal.value.id}`]
 );
 
 async function getVotingPower() {
@@ -103,7 +106,11 @@ async function handleVoteClick(choice: Choice) {
     await vote(proposal.value, choice);
     // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
     if (offchainNetworks.includes(proposal.value.network)) {
-      proposalsStore.fetchProposal(spaceAddress.value!, id.value, networkId.value!);
+      proposalsStore.fetchProposal(
+        spaceAddress.value!,
+        id.value,
+        networkId.value!
+      );
       await loadVotes(networkId.value!, [spaceAddress.value!]);
     }
   } finally {
@@ -192,7 +199,12 @@ watchEffect(() => {
       <div
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
       >
-        <div v-if="!proposal.cancelled && ['pending', 'active'].includes(proposal.state)">
+        <div
+          v-if="
+            !proposal.cancelled &&
+            ['pending', 'active'].includes(proposal.state)
+          "
+        >
           <h4 class="mb-2 eyebrow flex items-center space-x-2">
             <template v-if="editMode">
               <IH-cursor-click />
@@ -233,7 +245,11 @@ watchEffect(() => {
             </div>
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
-              <a tabindex="0" @click="props.onClick" @keypress.enter="props.onClick">
+              <a
+                tabindex="0"
+                @click="props.onClick"
+                @keypress.enter="props.onClick"
+              >
                 <UiLoading v-if="votingPowerStatus === 'loading'" />
                 <IH-exclamation
                   v-else-if="votingPowerStatus === 'error'"

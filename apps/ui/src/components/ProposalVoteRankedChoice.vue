@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import type { Choice, Proposal } from '@/types';
+import { Choice, Proposal } from '@/types';
 
 type RankedChoice = number[];
 
