@@ -27,11 +27,9 @@ function handleContactEdit(contact) {
     <div class="flex">
       <div class="flex-auto" />
       <div class="pt-4 px-4 space-x-2">
-        <a>
-          <UiButton class="!px-0 w-[46px]" @click="openModal('editContact')">
-            <IH-plus-sm />
-          </UiButton>
-        </a>
+        <UiButton class="!px-0 w-[46px]" @click="openModal('editContact')">
+          <IH-plus-sm />
+        </UiButton>
       </div>
     </div>
     <UiLabel label="Contacts" />

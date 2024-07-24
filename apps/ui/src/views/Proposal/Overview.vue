@@ -238,10 +238,10 @@ onBeforeUnmount(() => destroyAudio());
               :disabled="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
-              <UiLoading v-if="aiSummaryState.loading" class="inline-block !w-[22px] !h-[22px]" />
+              <UiLoading v-if="aiSummaryState.loading" class="!w-[22px] !h-[22px]" />
               <IH-sparkles
                 v-else
-                class="inline-block w-[22px] h-[22px]"
+                class="w-[22px] h-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
             </UiButton>
@@ -259,25 +259,25 @@ onBeforeUnmount(() => destroyAudio());
               :disabled="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading v-if="aiSpeechState.loading" class="inline-block !w-[22px] !h-[22px]" />
+              <UiLoading v-if="aiSpeechState.loading" class="!w-[22px] !h-[22px]" />
               <IH-pause
                 v-else-if="audioState === 'playing'"
-                class="inline-block w-[22px] h-[22px] text-skin-link"
+                class="w-[22px] h-[22px] text-skin-link"
               />
-              <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
+              <IH-play v-else class="text-skin-text w-[22px] h-[22px]" />
             </UiButton>
           </UiTooltip>
           <DropdownShare :message="shareMsg">
             <template #button>
               <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-share class="text-skin-text inline-block w-[22px] h-[22px]" />
+                <IH-share class="text-skin-text w-[22px] h-[22px]" />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-dots-vertical class="text-skin-text inline-block w-[22px] h-[22px]" />
+                <IH-dots-vertical class="text-skin-text w-[22px] h-[22px]" />
               </UiButton>
             </template>
             <template #items>

@@ -43,8 +43,8 @@ const currentLimit = computed(() => {
           :show-space="showSpace"
         />
       </UiContainerInfiniteScroll>
-      <div v-if="!proposals.length" class="px-4 py-3 flex items-center text-skin-link">
-        <IH-exclamation-circle class="inline-block mr-2" />
+      <div v-if="!proposals.length" class="px-4 py-3 space-x-2 flex items-center text-skin-link">
+        <IH-exclamation-circle />
         <span v-text="'There are no proposals here.'" />
       </div>
       <router-link

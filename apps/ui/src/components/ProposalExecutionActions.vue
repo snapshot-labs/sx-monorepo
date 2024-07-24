@@ -61,31 +61,31 @@ const network = computed(() => getNetwork(props.proposal.network));
     <template v-else>
       <UiButton
         v-if="hasFinalize"
-        class="mb-2 w-full"
+        class="mb-2 w-full space-x-2"
         :loading="finalizeProposalSending"
         @click="finalizeProposal"
       >
-        <IH-check-circle class="inline-block mr-2" />
+        <IH-check-circle class="shrink-0" />
         Finalize proposal
       </UiButton>
       <UiButton
         v-else-if="proposal.state !== 'executed'"
-        class="mb-2 w-full"
+        class="mb-2 w-full space-x-2"
         :loading="executeProposalSending"
         @click="executeProposal"
       >
-        <IH-play class="inline-block mr-2" />
+        <IH-play class="shrink-0" />
         Execute proposal
       </UiButton>
       <UiButton
         v-if="hasExecuteQueued"
         :disabled="executionCountdown > 0"
         :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
-        class="mb-2 w-full"
+        class="mb-2 w-full space-x-2"
         :loading="executeQueuedProposalSending"
         @click="executeQueuedProposal"
       >
-        <IH-play class="inline-block mr-2 flex-shrink-0" />
+        <IH-play class="shrink-0" />
         <template v-if="executionCountdown === 0">Execute queued transactions</template>
         <template v-else>
           Execution available in {{ dayjs.duration(executionCountdown).format('HH:mm:ss') }}
@@ -100,11 +100,11 @@ const network = computed(() => getNetwork(props.proposal.network));
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
         "
         :disabled="executionCountdown === 0"
-        class="mb-2 w-full"
+        class="mb-2 w-full space-x-2"
         :loading="vetoProposalSending"
         @click="vetoProposal"
       >
-        <IH-play class="inline-block mr-2 flex-shrink-0" />
+        <IH-play class="shrink-0" />
         Veto execution
       </UiButton>
     </template>

@@ -152,7 +152,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             width="480"
             height="332"
             viewBox="0 0 480 332"
-            class="inline-block w-[26px] h-[26px]"
+            class="w-[26px] h-[26px]"
           >
             <path
               fill="rgba(var(--link))"
@@ -169,7 +169,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </UiTooltip>
       <UiTooltip v-if="!isReadOnly" :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
         <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
+          <IH-arrow-sm-right class="-rotate-45" />
         </UiButton>
       </UiTooltip>
     </div>

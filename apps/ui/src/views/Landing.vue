@@ -27,12 +27,12 @@ const SOCIALS = [
     <div class="py-8 mb-6 border-b hero">
       <UiContainer class="!max-w-screen-md my-1">
         <h1 class="mb-4 mono max-w-[580px]">The governance stack for your organization.</h1>
-        <a href="https://tally.so/r/wA2D2o" target="_blank">
-          <UiButton class="primary">
-            Sign up for beta
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </UiButton>
-        </a>
+        <div class="inline-block">
+          <a href="https://tally.so/r/wA2D2o" target="_blank" class="s-button primary space-x-1">
+            <span>Sign up for beta</span>
+            <IH-arrow-sm-right class="-rotate-45" />
+          </a>
+        </div>
       </UiContainer>
     </div>
     <UiContainer class="!max-w-screen-md space-y-4">

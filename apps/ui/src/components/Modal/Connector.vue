@@ -54,15 +54,15 @@ const availableConnectors = computed(() => {
           class="block"
           @click="emit('pick', connector.id)"
         >
-          <UiButton class="w-full">
+          <UiButton class="w-full space-x-2">
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
               width="28"
-              class="mr-2 -mt-1"
+              class="-mt-1"
               :alt="connector.name"
             />
-            {{ connector.name }}
+            <span v-text="connector.name" />
           </UiButton>
         </a>
       </div>

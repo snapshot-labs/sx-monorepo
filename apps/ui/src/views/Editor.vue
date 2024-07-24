@@ -351,7 +351,7 @@ export default defineComponent({
               class="hidden mr-2 md:inline-block"
               v-text="proposal?.proposalId ? 'Update' : 'Publish'"
             />
-            <IH-paper-airplane class="inline-block rotate-90" />
+            <IH-paper-airplane class="rotate-90" />
           </UiButton>
         </div>
       </div>
