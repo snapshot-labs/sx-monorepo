@@ -1,5 +1,5 @@
 import { getNetwork, offchainNetworks } from '@/networks';
-import type { NetworkID, Proposal, Vote } from '@/types';
+import { NetworkID, Proposal, Vote } from '@/types';
 
 const { web3 } = useWeb3();
 const votes = ref<Record<Proposal['id'], Vote>>({});
@@ -21,7 +21,8 @@ export function useAccount() {
     if (!account) return;
 
     // On starknet account, we don't load votes for offchain networks (unsupported)
-    if (web3.value.type === 'argentx' && offchainNetworks.includes(networkId)) return;
+    if (web3.value.type === 'argentx' && offchainNetworks.includes(networkId))
+      return;
 
     const network = getNetwork(networkId);
     const userVotes = await network.api.loadUserVotes(spaceIds, account);
