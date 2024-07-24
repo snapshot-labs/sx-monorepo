@@ -125,13 +125,11 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           :voting-powers="votingPowers"
           @get-voting-power="getVotingPower"
         />
-        <router-link :to="{ name: 'editor' }" tabindex="-1">
-          <UiTooltip title="New proposal">
-            <UiButton class="!px-0 w-[46px]">
-              <IH-pencil-alt class="inline-block" />
-            </UiButton>
-          </UiTooltip>
-        </router-link>
+        <UiTooltip title="New proposal">
+          <router-link :to="{ name: 'editor' }" class="s-button !px-0 w-[46px]">
+            <IH-pencil-alt />
+          </router-link>
+        </UiTooltip>
       </div>
     </div>
     <ProposalsList

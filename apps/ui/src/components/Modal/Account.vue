@@ -78,25 +78,13 @@ watch(open, () => (step.value = null));
       <div class="m-4 space-y-2">
         <router-link
           :to="{ name: 'user', params: { id: web3.account } }"
-          class="block"
-          tabindex="-1"
+          class="s-button space-x-2"
+          @click="emit('close')"
         >
-          <UiButton
-            class="button-outline w-full flex justify-center items-center space-x-2"
-            @click="emit('close')"
-          >
-            <UiStamp :id="web3.account" :size="18" />
-            <span>My profile</span>
-          </UiButton>
+          <UiStamp :id="web3.account" :size="18" />
+          <span>My profile</span>
         </router-link>
-        <router-link to="/settings" class="block" tabindex="-1">
-          <UiButton
-            class="button-outline w-full flex justify-center items-center"
-            @click="emit('close')"
-          >
-            <span>Settings</span>
-          </UiButton>
-        </router-link>
+        <router-link to="/settings" class="s-button" @click="emit('close')"> Settings </router-link>
         <UiButton class="button-outline w-full" @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>

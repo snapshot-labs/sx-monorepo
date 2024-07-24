@@ -37,17 +37,15 @@ watchEffect(() => setTitle(props.space.name));
         <SpaceCover :space="props.space" />
       </div>
       <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
-      <div class="absolute right-4 top-4 space-x-2">
-        <router-link :to="{ name: 'editor' }" tabindex="-1">
-          <UiTooltip title="New proposal">
-            <UiButton class="!px-0 w-[46px]">
-              <IH-pencil-alt class="inline-block" />
-            </UiButton>
-          </UiTooltip>
-        </router-link>
+      <div class="absolute right-4 top-4 space-x-2 flex">
+        <UiTooltip title="New proposal">
+          <router-link :to="{ name: 'editor' }" class="s-button !px-0 w-[46px]">
+            <IH-pencil-alt />
+          </router-link>
+        </UiTooltip>
         <UiTooltip v-if="isController" title="Edit profile">
           <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
-            <IH-cog class="inline-block" />
+            <IH-cog />
           </UiButton>
         </UiTooltip>
         <ButtonFollow :space="space" />

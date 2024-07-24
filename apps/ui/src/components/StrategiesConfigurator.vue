@@ -89,12 +89,16 @@ function handleStrategySave(value: Record<string, any>) {
           </div>
         </div>
         <div class="flex gap-3">
-          <a v-if="strategy.paramsDefinition" @click="editStrategy(strategy)">
+          <UiButton
+            v-if="strategy.paramsDefinition"
+            class="!border-0 !px-0 !h-auto"
+            @click="editStrategy(strategy)"
+          >
             <IH-pencil />
-          </a>
-          <a @click="removeStrategy(strategy)">
+          </UiButton>
+          <UiButton class="!border-0 !px-0 !h-auto" @click="removeStrategy(strategy)">
             <IH-trash />
-          </a>
+          </UiButton>
         </div>
       </div>
     </div>

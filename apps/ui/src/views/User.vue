@@ -129,10 +129,13 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
-            <a href="#" class="text-skin-text" @click.prevent="copy(user.id)">
+            <UiButton
+              class="!border-0 !px-0 !h-auto !text-skin-text"
+              @click.prevent="copy(user.id)"
+            >
               <IH-duplicate v-if="!copied" class="inline-block" />
               <IH-check v-else class="inline-block" />
-            </a>
+            </UiButton>
           </UiTooltip>
         </div>
         <div
@@ -193,7 +196,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div class="text-[17px] truncate" v-text="_p(activity.vote_percentage)" />
       </div>
-      <div class="hidden lg:block lg:w-[88px] text-right">
+      <div class="hidden lg:flex lg:w-[88px] justify-end">
         <router-link
           :to="{
             name: 'space-overview',
@@ -201,12 +204,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
               id: activity.spaceId
             }
           }"
-          tabindex="-1"
-          class="text-skin-link"
+          class="s-button !px-0 w-[40px] !h-[40px]"
         >
-          <UiButton class="!px-0 w-[40px] !h-[40px]">
-            <IH-arrow-sm-right class="inline-block" />
-          </UiButton>
+          <IH-arrow-sm-right />
         </router-link>
       </div>
     </div>

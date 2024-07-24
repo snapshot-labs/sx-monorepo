@@ -234,7 +234,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="'AI summary'"
           >
             <UiButton
-              class="!p-0 border-0 !h-[auto]"
+              class="!p-0 !border-0 !h-[auto]"
               :disabled="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
@@ -255,7 +255,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
           >
             <UiButton
-              class="!p-0 border-0 !h-[auto]"
+              class="!p-0 !border-0 !h-[auto]"
               :disabled="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
@@ -269,14 +269,14 @@ onBeforeUnmount(() => destroyAudio());
           </UiTooltip>
           <DropdownShare :message="shareMsg">
             <template #button>
-              <UiButton class="!p-0 border-0 !h-[auto]">
+              <UiButton class="!p-0 !border-0 !h-auto">
                 <IH-share class="text-skin-text inline-block w-[22px] h-[22px]" />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
-              <UiButton class="!p-0 border-0 !h-[auto]">
+              <UiButton class="!p-0 !border-0 !h-auto">
                 <IH-dots-vertical class="text-skin-text inline-block w-[22px] h-[22px]" />
               </UiButton>
             </template>

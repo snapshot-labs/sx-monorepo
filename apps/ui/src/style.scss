@@ -268,6 +268,19 @@ input:placeholder-shown {
 
 // Shot UI kit
 
+.s-button {
+  @apply rounded-full leading-[100%] border px-3.5 h-[46px] text-skin-link bg-skin-bg flex items-center justify-center;
+
+  &:disabled {
+    color: rgba(var(--border)) !important;
+    cursor: not-allowed;
+  }
+
+  &.primary {
+    @apply bg-skin-link text-skin-bg border-skin-link;
+  }
+}
+
 .s-input {
   @apply text-skin-heading border border-skin-border block rounded-[24px] py-2 px-3 w-full bg-transparent mb-3 focus:outline-none;
 }
