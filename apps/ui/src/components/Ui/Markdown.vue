@@ -8,7 +8,6 @@ import rust from 'highlight.js/lib/languages/rust';
 import { solidity } from 'highlightjs-solidity';
 import { Remarkable } from 'remarkable';
 import { linkify } from 'remarkable/linkify';
-import { computed } from 'vue';
 import { getUrl } from '@/helpers/utils';
 
 hljs.registerLanguage('javascript', javascript);
