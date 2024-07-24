@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { _vp } from '@/helpers/utils';
-import { NetworkID } from '@/types';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { evmNetworks } from '@/networks';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
   networkId: NetworkID;
@@ -19,7 +19,9 @@ const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
 
-const votingPower = computed(() => props.votingPowers.reduce((acc, b) => acc + b.value, 0n));
+const votingPower = computed(() =>
+  props.votingPowers.reduce((acc, b) => acc + b.value, 0n)
+);
 const decimals = computed(() =>
   Math.max(...props.votingPowers.map(votingPower => votingPower.decimals), 0)
 );
@@ -48,7 +50,10 @@ function handleModalOpen() {
     >
       <UiTooltip title="Your voting power" :touch="false">
         <UiButton
-          v-if="web3.account && !(evmNetworks.includes(networkId) && web3.type === 'argentx')"
+          v-if="
+            web3.account &&
+            !(evmNetworks.includes(networkId) && web3.type === 'argentx')
+          "
           :loading="loading"
           class="flex flex-row items-center justify-center"
           :class="{
@@ -57,7 +62,10 @@ function handleModalOpen() {
           @click="handleModalOpen"
         >
           <IH-lightning-bolt class="inline-block -ml-1" />
-          <IH-exclamation v-if="props.status === 'error'" class="inline-block ml-1 text-rose-500" />
+          <IH-exclamation
+            v-if="props.status === 'error'"
+            class="inline-block ml-1 text-rose-500"
+          />
           <span v-else class="ml-1">{{ formattedVotingPower }}</span>
         </UiButton>
       </UiTooltip>

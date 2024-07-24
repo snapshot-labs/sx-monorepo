@@ -1,9 +1,9 @@
+import gnosis from '@snapshot-labs/lock/connectors/gnosis';
 import injected from '@snapshot-labs/lock/connectors/injected';
 import walletconnect from '@snapshot-labs/lock/connectors/walletconnect';
-import connectors from '@/helpers/connectors';
 import walletlink from '@snapshot-labs/lock/connectors/walletlink';
-import gnosis from '@snapshot-labs/lock/connectors/gnosis';
 import argentx from '@/helpers/argentx';
+import connectors from '@/helpers/connectors';
 
 const options: any = { connectors: [] };
 const lockConnectors = {

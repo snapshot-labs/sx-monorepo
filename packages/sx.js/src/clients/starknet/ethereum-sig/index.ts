@@ -1,21 +1,25 @@
+import {
+  Signer,
+  TypedDataField,
+  TypedDataSigner
+} from '@ethersproject/abstract-signer';
 import randomBytes from 'randombytes';
-import { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
 import { CallData, shortString } from 'starknet';
-import { getStrategiesWithParams } from '../../../utils/strategies';
 import { proposeTypes, updateProposalTypes, voteTypes } from './types';
 import {
   ClientConfig,
   ClientOpts,
-  Envelope,
-  Propose,
-  UpdateProposal,
-  Vote,
   EIP712ProposeMessage,
   EIP712UpdateProposalMessage,
   EIP712VoteMessage,
-  SignatureData
+  Envelope,
+  Propose,
+  SignatureData,
+  UpdateProposal,
+  Vote
 } from '../../../types';
 import { getRSVFromSig } from '../../../utils/encoding';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 
 export class EthereumSig {
   config: ClientConfig;
@@ -29,7 +33,10 @@ export class EthereumSig {
   }
 
   public async sign<
-    T extends EIP712ProposeMessage | EIP712UpdateProposalMessage | EIP712VoteMessage
+    T extends
+      | EIP712ProposeMessage
+      | EIP712UpdateProposalMessage
+      | EIP712VoteMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -45,7 +52,11 @@ export class EthereumSig {
       ...message
     };
 
-    const signature = await signer._signTypedData(domain, types, extendedMessage);
+    const signature = await signer._signTypedData(
+      domain,
+      types,
+      extendedMessage
+    );
     const { r, s, v } = getRSVFromSig(signature);
 
     return {
@@ -90,7 +101,12 @@ export class EthereumSig {
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(signer, message, proposeTypes, 'Propose');
+    const signatureData = await this.sign(
+      signer,
+      message,
+      proposeTypes,
+      'Propose'
+    );
 
     return {
       signatureData,
@@ -122,7 +138,12 @@ export class EthereumSig {
       salt: this.generateSalt()
     };
 
-    const signatureData = await this.sign(signer, message, updateProposalTypes, 'UpdateProposal');
+    const signatureData = await this.sign(
+      signer,
+      message,
+      updateProposalTypes,
+      'UpdateProposal'
+    );
 
     return {
       signatureData,
@@ -154,7 +175,9 @@ export class EthereumSig {
       proposalId: `0x${data.proposal.toString(16)}`,
       choice: `0x${data.choice.toString(16)}`,
       userVotingStrategies,
-      metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
+      metadataUri: shortString
+        .splitLongString('')
+        .map(str => shortString.encodeShortString(str))
     };
 
     const signatureData = await this.sign(signer, message, voteTypes, 'Vote');

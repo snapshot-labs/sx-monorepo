@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { version, repository } from '@/../package.json';
-import ICX from '~icons/c/x';
+import { repository, version } from '@/../package.json';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
+import ICX from '~icons/c/x';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
 
@@ -26,7 +26,9 @@ const SOCIALS = [
   <div>
     <div class="py-8 mb-6 border-b hero">
       <UiContainer class="!max-w-screen-md my-1">
-        <h1 class="mb-4 mono max-w-[580px]">The governance stack for your organization.</h1>
+        <h1 class="mb-4 mono max-w-[580px]">
+          The governance stack for your organization.
+        </h1>
         <a href="https://tally.so/r/wA2D2o" target="_blank">
           <UiButton class="primary">
             Sign up for beta
@@ -41,16 +43,21 @@ const SOCIALS = [
         <div class="space-y-2">
           <div>
             <a href="https://docs.snapshot.box" target="_blank">
-              Documentation <IH-arrow-sm-right class="inline-block -rotate-45" />
+              Documentation
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
           <div>
             <a href="https://github.com/snapshot-labs/sx-evm" target="_blank">
-              Core contracts <IH-arrow-sm-right class="inline-block -rotate-45" />
+              Core contracts
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
           <div>
-            <a href="https://docs.snapshot.box/protocol-sx-evm/audits" target="_blank">
+            <a
+              href="https://docs.snapshot.box/protocol-sx-evm/audits"
+              target="_blank"
+            >
               Audits <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>
@@ -64,7 +71,8 @@ const SOCIALS = [
               :href="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
               target="_blank"
             >
-              Version {{ version }}<span v-if="COMMIT_SHA" v-text="`#${COMMIT_SHA.slice(0, 7)}`" />
+              Version {{ version
+              }}<span v-if="COMMIT_SHA" v-text="`#${COMMIT_SHA.slice(0, 7)}`" />
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </a>
           </div>

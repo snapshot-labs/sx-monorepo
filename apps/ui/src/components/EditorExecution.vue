@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { getNetwork } from '@/networks';
 import { simulate } from '@/helpers/tenderly';
-import { Transaction as TransactionType, Space, SpaceMetadataTreasury, Contact } from '@/types';
+import { getNetwork } from '@/networks';
+import {
+  Contact,
+  Space,
+  SpaceMetadataTreasury,
+  Transaction as TransactionType
+} from '@/types';
 
 const model = defineModel<TransactionType[]>({
   required: true
@@ -30,10 +35,13 @@ const modalOpen = ref({
   stakeToken: false,
   contractCall: false
 });
-const simulationState: Ref<'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null> =
-  ref(null);
+const simulationState: Ref<
+  'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
+> = ref(null);
 
-const network = computed(() => (props.space ? getNetwork(props.space.network) : null));
+const network = computed(() =>
+  props.space ? getNetwork(props.space.network) : null
+);
 
 function addTx(tx: TransactionType) {
   const newValue = [...model.value];
@@ -48,10 +56,15 @@ function addTx(tx: TransactionType) {
 }
 
 function removeTx(index: number) {
-  model.value = [...model.value.slice(0, index), ...model.value.slice(index + 1)];
+  model.value = [
+    ...model.value.slice(0, index),
+    ...model.value.slice(index + 1)
+  ];
 }
 
-function openModal(type: 'sendToken' | 'sendNft' | 'stakeToken' | 'contractCall') {
+function openModal(
+  type: 'sendToken' | 'sendNft' | 'stakeToken' | 'contractCall'
+) {
   editedTx.value = null;
   modalState.value[type] = null;
   modalOpen.value[type] = true;
@@ -70,7 +83,11 @@ async function handleSimulateClick() {
 
   simulationState.value = 'SIMULATING';
 
-  const valid = await simulate(treasury.value.network, treasury.value.wallet, model.value);
+  const valid = await simulate(
+    treasury.value.network,
+    treasury.value.wallet,
+    model.value
+  );
 
   if (valid) {
     simulationState.value = 'SIMULATION_SUCCEDED';
@@ -129,9 +146,12 @@ watch(
           </TransactionsListItem>
         </template>
       </Draggable>
-      <div class="border-t px-4 py-2 space-x-2 flex items-center justify-between">
+      <div
+        class="border-t px-4 py-2 space-x-2 flex items-center justify-between"
+      >
         <div class="flex items-center max-w-[70%]">
-          {{ model.length }} {{ model.length === 1 ? 'transaction' : 'transactions' }}
+          {{ model.length }}
+          {{ model.length === 1 ? 'transaction' : 'transactions' }}
         </div>
         <UiTooltip
           v-if="!network?.supportsSimulation"
@@ -139,7 +159,10 @@ watch(
         >
           <IH-shield-exclamation />
         </UiTooltip>
-        <UiTooltip v-else-if="simulationState === null" title="Simulate execution">
+        <UiTooltip
+          v-else-if="simulationState === null"
+          title="Simulate execution"
+        >
           <button class="flex" @click="handleSimulateClick">
             <IH-shield-check class="text-skin-link" />
           </button>

@@ -49,15 +49,20 @@ export const useNotificationsStore = defineStore('notifications', () => {
     if (!followedSpacesStore.followedSpacesIds.length) return;
 
     await Promise.all(
-      (Object.keys(followedSpacesStore.followedSpaceIdsByNetwork) as NetworkID[]).map(
-        async networkId => {
-          await metaStore.fetchBlock(networkId);
-        }
-      )
+      (
+        Object.keys(
+          followedSpacesStore.followedSpaceIdsByNetwork
+        ) as NetworkID[]
+      ).map(async networkId => {
+        await metaStore.fetchBlock(networkId);
+      })
     );
 
     const promises = (
-      Object.entries(followedSpacesStore.followedSpaceIdsByNetwork) as [NetworkID, string[]][]
+      Object.entries(followedSpacesStore.followedSpaceIdsByNetwork) as [
+        NetworkID,
+        string[]
+      ][]
     )
       .map(([networkId, spaceIds]) => {
         const network = getNetwork(networkId);
@@ -73,7 +78,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const proposals = (await Promise.all(promises)).flat();
 
     proposals.forEach(proposal => {
-      const timestamp = proposal.min_end < now ? proposal.min_end : proposal.start;
+      const timestamp =
+        proposal.min_end < now ? proposal.min_end : proposal.start;
 
       if (notifications.value.some(n => n.id === proposal.id)) return;
 
@@ -102,10 +108,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
     shownLastUnreadTs.value = notifications.value[0]?.timestamp ?? 0;
   }
 
-  const unreadNotificationsCount = computed(() => notifications.value.filter(n => n.unread).length);
+  const unreadNotificationsCount = computed(
+    () => notifications.value.filter(n => n.unread).length
+  );
 
   watch(
-    [() => followedSpacesStore.followedSpacesLoaded, () => followedSpacesStore.followedSpacesIds],
+    [
+      () => followedSpacesStore.followedSpacesLoaded,
+      () => followedSpacesStore.followedSpacesIds
+    ],
     async ([followedSpacesLoaded]) => {
       if (!followedSpacesLoaded) return;
 
@@ -126,7 +137,10 @@ export const useNotificationsStore = defineStore('notifications', () => {
   );
 
   onMounted(() => {
-    refreshNotificationInterval = window.setInterval(loadNotifications, REFRESH_INTERVAL * 1e3);
+    refreshNotificationInterval = window.setInterval(
+      loadNotifications,
+      REFRESH_INTERVAL * 1e3
+    );
   });
 
   onBeforeUnmount(() => clearInterval(refreshNotificationInterval));

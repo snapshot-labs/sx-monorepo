@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { offchainNetworks } from '@/networks';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
+import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
 
 const props = withDefaults(

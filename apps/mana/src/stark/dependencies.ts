@@ -1,10 +1,18 @@
-import { Account, RpcProvider, ec, hash, constants, validateAndParseAddress } from 'starknet';
 import * as bip32 from '@scure/bip32';
 import * as bip39 from '@scure/bip39';
+import {
+  Account,
+  constants,
+  ec,
+  hash,
+  RpcProvider,
+  validateAndParseAddress
+} from 'starknet';
 import { NonceManager } from './nonce-manager';
 
 const basePath = "m/44'/9004'/0'/0";
-const contractAXclassHash = '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
+const contractAXclassHash =
+  '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
 const NODE_URLS = new Map<string, string | undefined>([
   [constants.StarknetChainId.SN_MAIN, process.env.STARKNET_MAINNET_RPC_URL],
@@ -22,7 +30,8 @@ export function getProvider(chainId: string) {
 
 export function getStarknetAccount(mnemonic: string, index: number) {
   const masterSeed = bip39.mnemonicToSeedSync(mnemonic);
-  const hdKey1 = bip32.HDKey.fromMasterSeed(masterSeed).derive("m/44'/60'/0'/0/0");
+  const hdKey1 =
+    bip32.HDKey.fromMasterSeed(masterSeed).derive("m/44'/60'/0'/0/0");
   const hdKey2 = bip32.HDKey.fromMasterSeed(hdKey1.privateKey!);
 
   const path = `${basePath}/${index}`;
@@ -49,7 +58,10 @@ export const SPACES_INDICIES = new Map([
 ]);
 
 export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
-  const accounts = new Map<number, { account: Account; nonceManager: NonceManager }>();
+  const accounts = new Map<
+    number,
+    { account: Account; nonceManager: NonceManager }
+  >();
 
   return (spaceAddress: string) => {
     const normalizedSpaceAddress = validateAndParseAddress(spaceAddress);

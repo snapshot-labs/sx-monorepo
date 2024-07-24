@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getValidator } from './validation';
 
 describe('validation', () => {
@@ -24,7 +24,8 @@ describe('validation', () => {
 
     it('should not return errors for a single valid starknet address with voting power', () => {
       const result = validator.validate({
-        whitelist: '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4:1'
+        whitelist:
+          '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4:1'
       });
 
       expect(result).toEqual({});

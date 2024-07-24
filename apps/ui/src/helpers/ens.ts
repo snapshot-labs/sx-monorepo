@@ -1,6 +1,6 @@
 import { namehash } from '@ethersproject/hash';
-import { getProvider } from '@/helpers/provider';
 import { call } from '@/helpers/call';
+import { getProvider } from '@/helpers/provider';
 
 const abi = ['function addr(bytes32 node) view returns (address r)'];
 
@@ -17,9 +17,14 @@ export async function resolveName(name: string, chainId: number) {
   const provider = getProvider(chainId);
   const node = namehash(name);
 
-  const address: string = await call(provider, abi, [resolver, 'addr', [node]], {
-    blockTag: 'latest'
-  });
+  const address: string = await call(
+    provider,
+    abi,
+    [resolver, 'addr', [node]],
+    {
+      blockTag: 'latest'
+    }
+  );
 
   if (address === '0x0000000000000000000000000000000000000000') return null;
 

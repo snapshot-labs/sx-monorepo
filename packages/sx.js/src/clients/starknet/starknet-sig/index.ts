@@ -7,22 +7,28 @@ import {
   uint256,
   validateAndParseAddress
 } from 'starknet';
-import { getStrategiesWithParams } from '../../../utils/strategies';
-import { aliasTypes, baseDomain, proposeTypes, updateProposalTypes, voteTypes } from './types';
 import {
+  aliasTypes,
+  baseDomain,
+  proposeTypes,
+  updateProposalTypes,
+  voteTypes
+} from './types';
+import {
+  Alias,
   ClientConfig,
   ClientOpts,
   Envelope,
   Propose,
-  UpdateProposal,
-  Vote,
-  Alias,
+  SignatureData,
+  StarknetEIP712AliasMessage,
   StarknetEIP712ProposeMessage,
   StarknetEIP712UpdateProposalMessage,
   StarknetEIP712VoteMessage,
-  StarknetEIP712AliasMessage,
-  SignatureData
+  UpdateProposal,
+  Vote
 } from '../../../types';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 
 export class StarknetSig {
   config: ClientConfig & { manaUrl: string };
@@ -182,7 +188,13 @@ export class StarknetSig {
     };
   }
 
-  public async vote({ signer, data }: { signer: Account; data: Vote }): Promise<Envelope<Vote>> {
+  public async vote({
+    signer,
+    data
+  }: {
+    signer: Account;
+    data: Vote;
+  }): Promise<Envelope<Vote>> {
     const address = signer.address;
 
     const userVotingStrategies = await getStrategiesWithParams(
@@ -199,10 +211,18 @@ export class StarknetSig {
       proposalId: uint256.bnToUint256(data.proposal),
       choice: `0x${data.choice.toString(16)}`,
       userVotingStrategies,
-      metadataUri: shortString.splitLongString('').map(str => shortString.encodeShortString(str))
+      metadataUri: shortString
+        .splitLongString('')
+        .map(str => shortString.encodeShortString(str))
     };
 
-    const signatureData = await this.sign(signer, data.authenticator, message, voteTypes, 'Vote');
+    const signatureData = await this.sign(
+      signer,
+      data.authenticator,
+      message,
+      voteTypes,
+      'Vote'
+    );
 
     return {
       signatureData,
@@ -223,7 +243,13 @@ export class StarknetSig {
       ...data
     };
 
-    const signatureData = await this.sign(signer, '', message, aliasTypes, 'SetAlias');
+    const signatureData = await this.sign(
+      signer,
+      '',
+      message,
+      aliasTypes,
+      'SetAlias'
+    );
 
     return {
       signatureData,

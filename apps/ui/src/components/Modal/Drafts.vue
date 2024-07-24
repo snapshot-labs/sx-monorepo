@@ -15,7 +15,9 @@ const { drafts, removeDraft } = useEditor();
 const { open } = toRefs(props);
 
 const spaceDrafts = computed(() =>
-  drafts.value.filter(draft => draft.space === props.space && draft.networkId === props.networkId)
+  drafts.value.filter(
+    draft => draft.space === props.space && draft.networkId === props.networkId
+  )
 );
 
 function handleRemoveDraft(id: string) {

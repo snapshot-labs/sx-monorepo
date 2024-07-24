@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { evmSepolia } from '../../../../../src/evmNetworks';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { EthereumSig } from '../../../../../src/clients/evm/ethereum-sig';
+import { evmSepolia } from '../../../../../src/evmNetworks';
 
 describe('EthereumSig', () => {
   const space = '0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649';
@@ -32,7 +32,9 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202' }],
+        strategies: [
+          { index: 0, address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202' }
+        ],
         executionStrategy: { addr: executor, params: '0x00' },
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
       }
@@ -62,7 +64,9 @@ describe('EthereumSig', () => {
       data: {
         space,
         authenticator,
-        strategies: [{ index: 0, address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202' }],
+        strategies: [
+          { index: 0, address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202' }
+        ],
         proposal: 1,
         choice: 1,
         metadataUri: ''

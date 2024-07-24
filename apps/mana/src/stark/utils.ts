@@ -1,5 +1,5 @@
-import Common, { Chain, Hardfork } from '@ethereumjs/common';
 import blockFromRpc from '@ethereumjs/block/dist/from-rpc';
+import Common, { Chain, Hardfork } from '@ethereumjs/common';
 import { utils } from '@snapshot-labs/sx';
 
 const { hexToBytes } = utils.bytes;

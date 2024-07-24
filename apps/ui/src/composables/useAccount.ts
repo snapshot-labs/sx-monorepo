@@ -1,5 +1,5 @@
 import { getNetwork } from '@/networks';
-import type { NetworkID, Proposal, Vote } from '@/types';
+import { NetworkID, Proposal, Vote } from '@/types';
 
 const { web3 } = useWeb3();
 const votes = ref<Record<Proposal['id'], Vote>>({});
@@ -9,6 +9,7 @@ watch(
   () => web3.value.account,
   (current, previous) => {
     if (current !== previous) {
+      votes.value = {};
       pendingVotes.value = {};
     }
   }
@@ -16,8 +17,6 @@ watch(
 
 export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
-    votes.value = {};
-
     const account = web3.value.account;
     if (!account) return;
 

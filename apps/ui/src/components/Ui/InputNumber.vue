@@ -32,7 +32,12 @@ watch(model, () => {
 </script>
 
 <template>
-  <UiWrapperInput v-slot="{ id }" :definition="definition" :error="error" :dirty="dirty">
+  <UiWrapperInput
+    v-slot="{ id }"
+    :definition="definition"
+    :error="error"
+    :dirty="dirty"
+  >
     <input
       :id="id"
       v-model="inputValue"

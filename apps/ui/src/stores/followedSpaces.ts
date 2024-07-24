@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import { metadataNetwork, offchainNetworks, getNetwork } from '@/networks';
-import pkg from '../../package.json';
+import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { NetworkID, Space } from '@/types';
+import pkg from '../../package.json';
 
 const network = getNetwork(metadataNetwork);
 
@@ -43,7 +43,8 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         .filter(Boolean) as Space[];
     },
     set(spaces: Space[]) {
-      followedSpacesIdsByAccount.value[web3.value.account] = spaces.map(getCompositeSpaceId);
+      followedSpacesIdsByAccount.value[web3.value.account] =
+        spaces.map(getCompositeSpaceId);
     }
   });
 
@@ -54,7 +55,9 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         (acc, [networkId, spaceId]) => {
           acc[networkId] ||= [];
           acc[networkId].push(
-            offchainNetworks.includes(networkId) ? spaceId : `${networkId}:${spaceId}`
+            offchainNetworks.includes(networkId)
+              ? spaceId
+              : `${networkId}:${spaceId}`
           );
           return acc;
         },
@@ -65,20 +68,23 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   async function fetchSpacesData(ids: string[]) {
     if (!ids.length) return;
 
-    await spacesStore.fetchSpaces(ids.filter(id => !spacesStore.spacesMap.has(id)));
+    await spacesStore.fetchSpaces(
+      ids.filter(id => !spacesStore.spacesMap.has(id))
+    );
   }
 
   async function loadFollowedSpaces() {
-    const followedIds = (await network.api.loadFollows(web3.value.account)).map(follow =>
-      getCompositeSpaceId(follow.space)
+    const followedIds = (await network.api.loadFollows(web3.value.account)).map(
+      follow => getCompositeSpaceId(follow.space)
     );
     const newIds = followedIds.filter(id => !isFollowed(id));
     followedSpacesIds.value = followedIds;
     followedSpacesIdsByAccount.value[web3.value.account] = Array.from(
       new Set(
-        [...(followedSpacesIdsByAccount.value[web3.value.account] || []), ...followedIds].filter(
-          id => followedIds.includes(id)
-        )
+        [
+          ...(followedSpacesIdsByAccount.value[web3.value.account] || []),
+          ...followedIds
+        ].filter(id => followedIds.includes(id))
       )
     );
     await fetchSpacesData(newIds);
@@ -97,9 +103,10 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         followedSpacesIds.value = followedSpacesIds.value.filter(
           (spaceId: string) => spaceId !== id
         );
-        followedSpacesIdsByAccount.value[web3.value.account] = followedSpacesIdsByAccount.value[
-          web3.value.account
-        ].filter((spaceId: string) => spaceId !== id);
+        followedSpacesIdsByAccount.value[web3.value.account] =
+          followedSpacesIdsByAccount.value[web3.value.account].filter(
+            (spaceId: string) => spaceId !== id
+          );
       } else {
         const result = await actions.followSpace(spaceNetwork, spaceId);
         if (!result) return;

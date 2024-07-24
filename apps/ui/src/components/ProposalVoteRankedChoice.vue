@@ -11,7 +11,9 @@ const emit = defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<number[]>(props.proposal.choices.map((_, i) => i + 1));
+const selectedChoices = ref<number[]>(
+  props.proposal.choices.map((_, i) => i + 1)
+);
 </script>
 
 <template>
@@ -24,7 +26,9 @@ const selectedChoices = ref<number[]>(props.proposal.choices.map((_, i) => i + 1
       item-key="id"
     >
       <template #item="{ element, index }">
-        <UiButton class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2">
+        <UiButton
+          class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
+        >
           <IC-drag class="text-skin-text" />
 
           <div class="grow truncate">

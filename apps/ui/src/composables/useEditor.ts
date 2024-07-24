@@ -8,7 +8,9 @@ const proposals = reactive<Drafts>(lsGet('proposals', {}));
 function getDefaultVotingType(networkId: NetworkID) {
   const network = getNetwork(networkId);
 
-  return network.helpers.isVotingTypeSupported('single-choice') ? 'single-choice' : 'basic';
+  return network.helpers.isVotingTypeSupported('single-choice')
+    ? 'single-choice'
+    : 'basic';
 }
 
 function removeEmpty(proposals: Drafts): Drafts {
@@ -19,9 +21,15 @@ function removeEmpty(proposals: Drafts): Drafts {
     const { execution, type, choices, ...rest } = omit(proposal, ['updatedAt']);
     const hasFormValues = Object.values(rest).some(val => !!val);
     const hasChangedVotingType = type !== defaultVotingType;
-    const hasFormChoices = type !== 'basic' && (choices || []).some(val => !!val);
+    const hasFormChoices =
+      type !== 'basic' && (choices || []).some(val => !!val);
 
-    if (execution.length === 0 && !hasFormValues && !hasChangedVotingType && !hasFormChoices) {
+    if (
+      execution.length === 0 &&
+      !hasFormValues &&
+      !hasChangedVotingType &&
+      !hasFormChoices
+    ) {
       return acc;
     }
 

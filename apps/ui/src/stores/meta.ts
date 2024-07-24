@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia';
-import { NetworkID } from '@/types';
 import { getProvider } from '@/helpers/provider';
 import { evmNetworks, getNetwork } from '@/networks';
 import { METADATA } from '@/networks/evm';
+import { NetworkID } from '@/types';
 
 export const useMetaStore = defineStore('meta', () => {
   const currentTs = ref(new Map<NetworkID, number>());
   const currentBlocks = ref(new Map<NetworkID, number>());
 
   function getCurrent(networkId: NetworkID): number | undefined {
-    if (evmNetworks.includes(networkId)) return currentBlocks.value.get(networkId);
+    if (evmNetworks.includes(networkId))
+      return currentBlocks.value.get(networkId);
     return currentTs.value.get(networkId);
   }
 
@@ -49,7 +50,10 @@ export const useMetaStore = defineStore('meta', () => {
     const networkBlockNum = currentBlocks.value.get(networkId) || 0;
     const blockDiff = networkBlockNum - current;
 
-    return (currentTs.value.get(networkId) || 0) - METADATA[networkId].blockTime * blockDiff;
+    return (
+      (currentTs.value.get(networkId) || 0) -
+      METADATA[networkId].blockTime * blockDiff
+    );
   }
 
   return {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NetworkID } from '@/types';
+import { NetworkID } from '@/types';
 
 const route = useRoute();
 const spacesStore = useSpacesStore();
@@ -15,8 +15,11 @@ const space = computed(() => {
   }
   return (
     spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`) ||
-    proposalsStore.getProposal(spaceAddress.value, route.params.id as string, networkId.value)
-      ?.space
+    proposalsStore.getProposal(
+      spaceAddress.value,
+      route.params.id as string,
+      networkId.value
+    )?.space
   );
 });
 </script>

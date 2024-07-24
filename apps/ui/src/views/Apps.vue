@@ -45,7 +45,9 @@ watch(
       </div>
       <div v-else>
         <UiLink text="Featured" class="inline-block" />
-        <div class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div
+          class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
+        >
           <AppsListItem
             v-for="(app, i) in apps.filter(({ featured }) => featured)"
             :key="i"
@@ -58,7 +60,9 @@ watch(
             :text="category"
             class="inline-block"
           />
-          <div class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <div
+            class="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
+          >
             <AppsListItem
               v-for="(app, j) in apps.filter(app => category === app.category)"
               :key="j"

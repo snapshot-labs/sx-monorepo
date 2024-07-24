@@ -1,9 +1,13 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { keccak256 } from '@ethersproject/keccak256';
-import { MetaTransaction } from '../utils/encoding';
 import { uint256 } from 'starknet';
+import { MetaTransaction } from '../utils/encoding';
 
-export default function createEthRelayerExecutor({ destination }: { destination: string }) {
+export default function createEthRelayerExecutor({
+  destination
+}: {
+  destination: string;
+}) {
   return {
     type: 'ethRelayer',
     getExecutionData(executorAddress: string, transactions: MetaTransaction[]) {
@@ -14,7 +18,9 @@ export default function createEthRelayerExecutor({ destination }: { destination:
         [transactions]
       );
 
-      const executionHash = uint256.bnToUint256(BigInt(keccak256(executionParams)));
+      const executionHash = uint256.bnToUint256(
+        BigInt(keccak256(executionParams))
+      );
 
       return {
         executor: executorAddress,

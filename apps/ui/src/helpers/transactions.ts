@@ -1,14 +1,14 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
-import { abis } from '@/helpers/abis';
-import { getSalt } from '@/helpers/utils';
 import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
+import { abis } from '@/helpers/abis';
 import { Token } from '@/helpers/alchemy';
 import { resolver } from '@/helpers/resolver';
+import { getSalt } from '@/helpers/utils';
 import {
-  SendTokenTransaction,
-  SendNftTransaction,
   ContractCallTransaction,
+  SendNftTransaction,
+  SendTokenTransaction,
   StakeTokenTransaction,
   Transaction
 } from '@/types';
@@ -22,7 +22,8 @@ export async function createSendTokenTransaction({
 }): Promise<SendTokenTransaction> {
   const baseAmount = parseUnits(form.amount.toString(), token.decimals);
 
-  const isEth = token.contractAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+  const isEth =
+    token.contractAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
   let recipientAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);
@@ -79,7 +80,11 @@ export async function createSendNftTransaction({
   } else if (nft.type === 'erc721') {
     const iface = new Interface(abis.erc721);
 
-    data = iface.encodeFunctionData('safeTransferFrom', [address, recipientAddress, nft.tokenId]);
+    data = iface.encodeFunctionData('safeTransferFrom', [
+      address,
+      recipientAddress,
+      nft.tokenId
+    ]);
   }
 
   return {
@@ -101,7 +106,9 @@ export async function createSendNftTransaction({
   };
 }
 
-export async function createContractCallTransaction({ form }): Promise<ContractCallTransaction> {
+export async function createContractCallTransaction({
+  form
+}): Promise<ContractCallTransaction> {
   const args: any[] = Object.values(form.args);
 
   let recipientAddress = form.to;
@@ -145,7 +152,9 @@ export async function createContractCallTransaction({ form }): Promise<ContractC
   };
 }
 
-export async function createStakeTokenTransaction({ form }): Promise<StakeTokenTransaction> {
+export async function createStakeTokenTransaction({
+  form
+}): Promise<StakeTokenTransaction> {
   let contractAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);
   if (resolvedTo?.address) contractAddress = resolvedTo.address;
@@ -154,7 +163,9 @@ export async function createStakeTokenTransaction({ form }): Promise<StakeTokenT
   const resolvedReferral = await resolver.resolveName(form.args.referral);
   if (resolvedReferral?.address) referralAddress = resolvedReferral.address;
 
-  const abi = ['function submit(address _referral) external payable returns (uint256)'];
+  const abi = [
+    'function submit(address _referral) external payable returns (uint256)'
+  ];
   const iface = new Interface(abi);
   const data = iface.encodeFunctionData('submit', [referralAddress]);
 
@@ -172,7 +183,9 @@ export async function createStakeTokenTransaction({ form }): Promise<StakeTokenT
   };
 }
 
-export function convertToMetaTransactions(transactions: Transaction[]): MetaTransaction[] {
+export function convertToMetaTransactions(
+  transactions: Transaction[]
+): MetaTransaction[] {
   return transactions.map((tx: Transaction) => ({
     ...tx,
     operation: 0,

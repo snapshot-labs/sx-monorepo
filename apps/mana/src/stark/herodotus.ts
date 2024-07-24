@@ -1,7 +1,7 @@
 import fetch from 'cross-fetch';
 import { constants } from 'starknet';
-import * as db from '../db';
 import { getClient } from './networks';
+import * as db from '../db';
 
 type HerodotusConfig = {
   DESTINATION_CHAIN_ID: string;
@@ -68,7 +68,9 @@ function getId(proposal: ApiProposal) {
 async function getStatus(id: string, accumulatesChainId: string) {
   const { apiUrl, apiKey } = getApi(accumulatesChainId);
 
-  const res = await fetch(`${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`);
+  const res = await fetch(
+    `${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`
+  );
 
   const { queryStatus, error } = await res.json();
   if (error) throw new Error(error);

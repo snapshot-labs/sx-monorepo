@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import { getNetwork } from '@/networks';
 import { getNames } from '@/helpers/stamp';
-import type { NetworkID, Proposal } from '@/types';
+import { getNetwork } from '@/networks';
 import { ProposalsFilter } from '@/networks/types';
+import { NetworkID, Proposal } from '@/types';
 
 type SpaceRecord = {
   loading: boolean;
@@ -19,7 +19,8 @@ type SpaceRecord = {
 const PROPOSALS_LIMIT = 20;
 
 // TODO: create special _id that is used for UI that is prefixed by networkId
-const getUniqueSpaceId = (spaceId: string, networkId: NetworkID) => `${networkId}:${spaceId}`;
+const getUniqueSpaceId = (spaceId: string, networkId: NetworkID) =>
+  `${networkId}:${spaceId}`;
 
 export const useProposalsStore = defineStore('proposals', () => {
   const metaStore = useMetaStore();
@@ -39,7 +40,9 @@ export const useProposalsStore = defineStore('proposals', () => {
     const record = proposals.value[getUniqueSpaceId(spaceId, networkId)];
     if (!record) return [];
 
-    return record.proposalsIdsList.map(proposalId => record.proposals[proposalId]);
+    return record.proposalsIdsList.map(
+      proposalId => record.proposals[proposalId]
+    );
   };
 
   const getProposal = (
@@ -58,7 +61,11 @@ export const useProposalsStore = defineStore('proposals', () => {
     delete proposals.value[uniqueSpaceId];
   }
 
-  async function fetch(spaceId: string, networkId: NetworkID, state?: ProposalsFilter['state']) {
+  async function fetch(
+    spaceId: string,
+    networkId: NetworkID,
+    state?: ProposalsFilter['state']
+  ) {
     await metaStore.fetchBlock(networkId);
 
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
@@ -93,10 +100,14 @@ export const useProposalsStore = defineStore('proposals', () => {
       )
     );
 
-    record.value.proposalsIdsList = fetchedProposals.map(proposal => proposal.proposal_id);
+    record.value.proposalsIdsList = fetchedProposals.map(
+      proposal => proposal.proposal_id
+    );
     record.value.proposals = {
       ...record.value.proposals,
-      ...Object.fromEntries(fetchedProposals.map(proposal => [proposal.proposal_id, proposal]))
+      ...Object.fromEntries(
+        fetchedProposals.map(proposal => [proposal.proposal_id, proposal])
+      )
     };
     record.value.hasMoreProposals = fetchedProposals.length === PROPOSALS_LIMIT;
     record.value.loaded = true;
@@ -144,14 +155,20 @@ export const useProposalsStore = defineStore('proposals', () => {
     ];
     record.value.proposals = {
       ...record.value.proposals,
-      ...Object.fromEntries(fetchedProposals.map(proposal => [proposal.proposal_id, proposal]))
+      ...Object.fromEntries(
+        fetchedProposals.map(proposal => [proposal.proposal_id, proposal])
+      )
     };
 
     record.value.hasMoreProposals = fetchedProposals.length === PROPOSALS_LIMIT;
     record.value.loadingMore = false;
   }
 
-  async function fetchSummary(spaceId: string, networkId: NetworkID, limit = 3) {
+  async function fetchSummary(
+    spaceId: string,
+    networkId: NetworkID,
+    limit = 3
+  ) {
     await metaStore.fetchBlock(networkId);
 
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);
@@ -187,7 +204,11 @@ export const useProposalsStore = defineStore('proposals', () => {
     record.value.summaryLoading = false;
   }
 
-  async function fetchProposal(spaceId: string, proposalId: number | string, networkId: NetworkID) {
+  async function fetchProposal(
+    spaceId: string,
+    proposalId: number | string,
+    networkId: NetworkID
+  ) {
     await metaStore.fetchBlock(networkId);
 
     const uniqueSpaceId = getUniqueSpaceId(spaceId, networkId);

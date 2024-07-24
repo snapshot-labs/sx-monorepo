@@ -1,13 +1,13 @@
 import { getStrategy } from '../strategies/starknet';
-import { getStorageVarAddress } from '../utils/encoding';
-import type {
-  Propose,
-  Vote,
+import {
   ClientConfig,
+  IndexedConfig,
+  Propose,
   StrategiesAddresses,
   StrategyConfig,
-  IndexedConfig
+  Vote
 } from '../types';
+import { getStorageVarAddress } from '../utils/encoding';
 
 export async function getStrategies(
   data: Propose | Vote,
@@ -17,7 +17,10 @@ export async function getStrategies(
     data.strategies.map(id =>
       config.starkProvider.getStorageAt(
         data.space,
-        getStorageVarAddress('Voting_voting_strategies_store', id.index.toString(16))
+        getStorageVarAddress(
+          'Voting_voting_strategies_store',
+          id.index.toString(16)
+        )
       )
     )
   );
