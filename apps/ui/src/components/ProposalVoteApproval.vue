@@ -27,7 +27,7 @@ function toggleSelectedChoice(choice: number) {
       <UiButton
         v-for="(choice, index) in proposal.choices"
         :key="index"
-        class="!h-[48px] text-left w-full flex items-center"
+        class="!h-[48px] text-left w-full"
         :class="{ 'border-skin-text': selectedChoices.includes(index + 1) }"
         @click="toggleSelectedChoice(index + 1)"
       >

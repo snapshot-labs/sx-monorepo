@@ -61,7 +61,7 @@ const network = computed(() => getNetwork(props.proposal.network));
     <template v-else>
       <UiButton
         v-if="hasFinalize"
-        class="mb-2 w-full flex justify-center items-center"
+        class="mb-2 w-full"
         :loading="finalizeProposalSending"
         @click="finalizeProposal"
       >
@@ -70,7 +70,7 @@ const network = computed(() => getNetwork(props.proposal.network));
       </UiButton>
       <UiButton
         v-else-if="proposal.state !== 'executed'"
-        class="mb-2 w-full flex justify-center items-center"
+        class="mb-2 w-full"
         :loading="executeProposalSending"
         @click="executeProposal"
       >
@@ -81,7 +81,7 @@ const network = computed(() => getNetwork(props.proposal.network));
         v-if="hasExecuteQueued"
         :disabled="executionCountdown > 0"
         :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
-        class="mb-2 w-full flex justify-center items-center"
+        class="mb-2 w-full"
         :loading="executeQueuedProposalSending"
         @click="executeQueuedProposal"
       >
@@ -100,7 +100,7 @@ const network = computed(() => getNetwork(props.proposal.network));
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
         "
         :disabled="executionCountdown === 0"
-        class="mb-2 w-full flex justify-center items-center"
+        class="mb-2 w-full"
         :loading="vetoProposalSending"
         @click="vetoProposal"
       >

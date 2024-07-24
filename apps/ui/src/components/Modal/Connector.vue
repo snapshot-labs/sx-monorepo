@@ -54,7 +54,7 @@ const availableConnectors = computed(() => {
           class="block"
           @click="emit('pick', connector.id)"
         >
-          <UiButton class="button-outline w-full flex justify-center items-center">
+          <UiButton class="w-full">
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
