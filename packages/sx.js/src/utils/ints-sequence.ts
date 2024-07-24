@@ -1,5 +1,5 @@
-import { SplitUint256 } from './split-uint256';
 import { bytesToHex, hexToBytes } from './bytes';
+import { SplitUint256 } from './split-uint256';
 
 export class IntsSequence {
   values: string[];

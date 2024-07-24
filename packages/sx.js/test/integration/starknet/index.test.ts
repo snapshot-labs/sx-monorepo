@@ -1,22 +1,38 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { Account, Provider, uint256 } from 'starknet';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import ozAccountSierra from './fixtures/openzeppelin_Account.sierra.json';
+import { Account, Provider, uint256 } from 'starknet';
+import { beforeAll, describe, expect, it } from 'vitest';
 import ozAccountCasm from './fixtures/openzeppelin_Account.casm.json';
-import { EthereumSig, EthereumTx, L1Executor, StarknetSig, StarknetTx } from '../../../src/clients';
+import ozAccountSierra from './fixtures/openzeppelin_Account.sierra.json';
+import {
+  deployDependency,
+  flush,
+  increaseTime,
+  setTime,
+  setup,
+  TestConfig
+} from './utils';
+import {
+  EthereumSig,
+  EthereumTx,
+  L1Executor,
+  StarknetSig,
+  StarknetTx
+} from '../../../src/clients';
 import { getExecutionData } from '../../../src/executors';
 import { Choice } from '../../../src/types';
-import { deployDependency, flush, increaseTime, setTime, setup, TestConfig } from './utils';
 
 describe('sx-starknet', () => {
   const ethUrl = 'http://127.0.0.1:8545';
-  const entryAddress = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
+  const entryAddress =
+    '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
   const entryPrivateKey = '0xcd613e30d8f16adf91b7584a2265b1f5';
-  const ethPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+  const ethPrivateKey =
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
   let address = '';
-  const publicKey = '0x138b5dd1ca094fcaebd669a5d2aa7bb7d13db32d5939939ee66b938ded2f361';
+  const publicKey =
+    '0x138b5dd1ca094fcaebd669a5d2aa7bb7d13db32d5939939ee66b938ded2f361';
   const privateKey = '0x9c7d498a8f76dc87564274036988f668';
 
   // RpcProvider doesn't work with starknet-devnet
@@ -29,7 +45,11 @@ describe('sx-starknet', () => {
   const provider = new JsonRpcProvider(ethUrl);
   const wallet = new Wallet(ethPrivateKey, provider);
   const walletAddress = wallet.address;
-  const entryAccount = new Account(starkProvider, entryAddress, entryPrivateKey);
+  const entryAccount = new Account(
+    starkProvider,
+    entryAddress,
+    entryPrivateKey
+  );
   let account: Account;
 
   let client: StarknetTx;
@@ -42,7 +62,12 @@ describe('sx-starknet', () => {
   beforeAll(async () => {
     setTime(Math.floor(Date.now() / 1000));
 
-    address = await deployDependency(entryAccount, ozAccountSierra, ozAccountCasm, [publicKey]);
+    address = await deployDependency(
+      entryAccount,
+      ozAccountSierra,
+      ozAccountCasm,
+      [publicKey]
+    );
     account = new Account(starkProvider, address, privateKey, '1');
 
     testConfig = await setup({
@@ -502,7 +527,10 @@ describe('sx-starknet', () => {
       const { executionParams } = getExecutionData(
         'EthRelayer',
         testConfig.ethRelayerExecutionStrategy,
-        { transactions, destination: testConfig.l1AvatarExecutionStrategyContract.address }
+        {
+          transactions,
+          destination: testConfig.l1AvatarExecutionStrategyContract.address
+        }
       );
 
       const envelope = {
@@ -552,7 +580,10 @@ describe('sx-starknet', () => {
       const { executionParams } = getExecutionData(
         'EthRelayer',
         testConfig.ethRelayerExecutionStrategy,
-        { transactions, destination: testConfig.l1AvatarExecutionStrategyContract.address }
+        {
+          transactions,
+          destination: testConfig.l1AvatarExecutionStrategyContract.address
+        }
       );
 
       const receipt = await client.execute({
@@ -570,12 +601,16 @@ describe('sx-starknet', () => {
 
     it('should execute on l1', async () => {
       const flushL2Response = await flush();
-      const message_payload = flushL2Response.consumed_messages.from_l2[0].payload;
+      const message_payload =
+        flushL2Response.consumed_messages.from_l2[0].payload;
 
       const { executionParams } = getExecutionData(
         'EthRelayer',
         testConfig.ethRelayerExecutionStrategy,
-        { transactions, destination: testConfig.l1AvatarExecutionStrategyContract.address }
+        {
+          transactions,
+          destination: testConfig.l1AvatarExecutionStrategyContract.address
+        }
       );
 
       const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;

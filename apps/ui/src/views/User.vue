@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import {
-  shortenAddress,
-  autoLinkText,
   _n,
   _p,
+  autoLinkText,
   getCacheHash,
-  getSocialNetworksLink
+  getSocialNetworksLink,
+  shortenAddress
 } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { UserActivity, Space } from '@/types';
+import { Space, UserActivity } from '@/types';
 
 const route = useRoute();
 const usersStore = useUsersStore();
@@ -19,7 +19,11 @@ const { setTitle } = useTitle();
 const { copy, copied } = useClipboard();
 
 const activities = ref<
-  (UserActivity & { space: Space; proposal_percentage: number; vote_percentage: number })[]
+  (UserActivity & {
+    space: Space;
+    proposal_percentage: number;
+    vote_percentage: number;
+  })[]
 >([]);
 const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
@@ -40,12 +44,17 @@ async function loadActivities(userId: string) {
 
   try {
     const results = await Promise.all(
-      enabledNetworks.map(networkId => getNetwork(networkId).api.loadUserActivities(userId))
+      enabledNetworks.map(networkId =>
+        getNetwork(networkId).api.loadUserActivities(userId)
+      )
     );
 
     const aggregatedActivities = results
       .flat()
-      .sort((a, b) => b.proposal_count - a.proposal_count || b.vote_count - a.vote_count);
+      .sort(
+        (a, b) =>
+          b.proposal_count - a.proposal_count || b.vote_count - a.vote_count
+      );
 
     await spacesStore.fetchSpaces(
       aggregatedActivities
@@ -53,8 +62,14 @@ async function loadActivities(userId: string) {
         .filter(id => !spacesStore.spacesMap.has(id))
     );
 
-    const totalProposals = aggregatedActivities.reduce((a, b) => a + b.proposal_count, 0);
-    const totalVotes = aggregatedActivities.reduce((a, b) => a + b.vote_count, 0);
+    const totalProposals = aggregatedActivities.reduce(
+      (a, b) => a + b.proposal_count,
+      0
+    );
+    const totalVotes = aggregatedActivities.reduce(
+      (a, b) => a + b.vote_count,
+      0
+    );
 
     activities.value = aggregatedActivities
       .map((activity: UserActivity) => {
@@ -65,7 +80,8 @@ async function loadActivities(userId: string) {
         return {
           ...activity,
           space,
-          proposal_percentage: totalProposals > 0 ? activity.proposal_count / totalProposals : 0,
+          proposal_percentage:
+            totalProposals > 0 ? activity.proposal_count / totalProposals : 0,
           vote_percentage: totalVotes > 0 ? activity.vote_count / totalVotes : 0
         };
       })
@@ -103,14 +119,21 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
     <span>This user does not exist</span>
   </div>
   <div v-else>
-    <div class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]">
+    <div
+      class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]"
+    >
       <div class="w-full h-full overflow-hidden">
         <UserCover :user="user" class="!rounded-none w-full min-h-full" />
       </div>
-      <div class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden" />
+      <div
+        class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden"
+      />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
-        <UiTooltip v-if="web3.account === user.id && web3.type !== 'argentx'" title="Edit profile">
+        <UiTooltip
+          v-if="web3.account === user.id && web3.type !== 'argentx'"
+          title="Edit profile"
+        >
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
           </UiButton>
@@ -142,7 +165,11 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         />
         <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
-            <a :href="social.href" target="_blank" class="text-[#606060] hover:text-skin-link">
+            <a
+              :href="social.href"
+              target="_blank"
+              class="text-[#606060] hover:text-skin-link"
+            >
               <component :is="social.icon" class="w-[26px] h-[26px]" />
             </a>
           </template>
@@ -158,7 +185,10 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       </div>
     </div>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
-    <div v-else-if="!activities.length" class="px-4 py-3 flex items-center space-x-2">
+    <div
+      v-else-if="!activities.length"
+      class="px-4 py-3 flex items-center space-x-2"
+    >
       <IH-exclamation-circle class="inline-block" />
       <span>This user does not have any activities yet.</span>
     </div>
@@ -178,20 +208,33 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       <div
         class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
       >
-        <SpaceAvatar :space="activity.space" :size="32" class="!rounded-[4px]" />
+        <SpaceAvatar
+          :space="activity.space"
+          :size="32"
+          class="!rounded-[4px]"
+        />
         <span class="truncate" v-text="activity.space.name" />
       </div>
       <div
         class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
-        <h4 class="text-skin-link truncate" v-text="_n(activity.proposal_count)" />
-        <div class="text-[17px] truncate" v-text="_p(activity.proposal_percentage)" />
+        <h4
+          class="text-skin-link truncate"
+          v-text="_n(activity.proposal_count)"
+        />
+        <div
+          class="text-[17px] truncate"
+          v-text="_p(activity.proposal_percentage)"
+        />
       </div>
       <div
         class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
-        <div class="text-[17px] truncate" v-text="_p(activity.vote_percentage)" />
+        <div
+          class="text-[17px] truncate"
+          v-text="_p(activity.vote_percentage)"
+        />
       </div>
     </router-link>
     <teleport to="#modal">

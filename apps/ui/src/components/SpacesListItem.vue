@@ -21,21 +21,34 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
         :size="!offchainNetworks.includes(space.network) ? 16 : 0"
         class="mb-2"
       >
-        <SpaceAvatar :space="space" :size="50" class="border-skin-bg rounded-md border-[3px]" />
+        <SpaceAvatar
+          :space="space"
+          :size="50"
+          class="border-skin-bg rounded-md border-[3px]"
+        />
       </UiBadgeNetwork>
     </div>
-    <ButtonFollow :space="space" class="absolute top-2.5 right-2.5 hidden group-hover:block" />
+    <ButtonFollow
+      :space="space"
+      class="absolute top-2.5 right-2.5 hidden group-hover:block"
+    />
     <div class="px-4">
       <div class="flex items-center">
         <h3 class="truncate" v-text="space.name" />
-        <UiBadgeVerified class="ml-1" :verified="space.verified" :turbo="space.turbo" />
+        <UiBadgeVerified
+          class="ml-1"
+          :verified="space.verified"
+          :turbo="space.turbo"
+        />
       </div>
 
       <h5 class="mt-1 line-clamp-2 leading-6" v-text="space.about" />
     </div>
     <h5 class="absolute bottom-4 px-4 text-[17px]">
-      <b class="text-skin-link" v-text="_n(space.proposal_count, 'compact')" /> proposals ·
-      <b class="text-skin-link" v-text="_n(space.vote_count, 'compact')" /> votes
+      <b class="text-skin-link" v-text="_n(space.proposal_count, 'compact')" />
+      proposals ·
+      <b class="text-skin-link" v-text="_n(space.vote_count, 'compact')" />
+      votes
     </h5>
   </router-link>
 </template>

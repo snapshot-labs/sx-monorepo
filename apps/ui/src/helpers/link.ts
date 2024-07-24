@@ -10,7 +10,11 @@ const UNISWAP_CHAINS_BY_NETWORK = {
   '11155111': 'sepolia'
 };
 
-export function getSwapLink(strategy: string, address: string, chainId?: number) {
+export function getSwapLink(
+  strategy: string,
+  address: string,
+  chainId?: number
+) {
   if (
     strategy &&
     address &&

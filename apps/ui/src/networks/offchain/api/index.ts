@@ -1,39 +1,39 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
+import { CHAIN_IDS } from '@/helpers/constants';
+import { parseOSnapTransaction } from '@/helpers/osnap';
+import { getNames } from '@/helpers/stamp';
+import { clone } from '@/helpers/utils';
+import { NetworkApi, PaginationOpts, ProposalsFilter, SpacesFilter } from '@/networks/types';
 import {
-  SPACES_QUERY,
+  Alias,
+  Follow,
+  NetworkID,
+  Proposal,
+  ProposalExecution,
+  ProposalState,
+  Space,
+  SpaceMetadataTreasury,
+  User,
+  UserActivity,
+  Vote,
+  Statement
+} from '@/types';
+import {
+  ALIASES_QUERY,
+  LEADERBOARD_QUERY,
+  PROPOSAL_QUERY,
+  PROPOSALS_QUERY,
   RANKING_QUERY,
   SPACE_QUERY,
-  PROPOSALS_QUERY,
-  PROPOSAL_QUERY,
-  USER_VOTES_QUERY,
+  SPACES_QUERY,
   USER_FOLLOWS_QUERY,
-  VOTES_QUERY,
-  ALIASES_QUERY,
   USER_QUERY,
   STATEMENTS_QUERY,
-  LEADERBOARD_QUERY
+  USER_VOTES_QUERY,
+  VOTES_QUERY
 } from './queries';
-import { PaginationOpts, SpacesFilter, NetworkApi, ProposalsFilter } from '@/networks/types';
-import { getNames } from '@/helpers/stamp';
-import { CHAIN_IDS } from '@/helpers/constants';
-import { clone } from '@/helpers/utils';
-import { parseOSnapTransaction } from '@/helpers/osnap';
+import { ApiProposal, ApiSpace, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
-import {
-  Space,
-  Proposal,
-  Vote,
-  User,
-  NetworkID,
-  ProposalState,
-  SpaceMetadataTreasury,
-  Follow,
-  Alias,
-  UserActivity,
-  Statement,
-  ProposalExecution
-} from '@/types';
-import { ApiSpace, ApiProposal, ApiVote } from './types';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -228,6 +228,7 @@ function formatVote(vote: ApiVote): Vote {
     proposal: vote.proposal.id,
     choice: vote.choice,
     vp: vote.vp,
+    reason: vote.reason,
     created: vote.created,
     tx: vote.ipfs
   };

@@ -1,20 +1,20 @@
+import { Web3Provider } from '@ethersproject/providers';
+import { Wallet } from '@ethersproject/wallet';
+import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import { FunctionalComponent } from 'vue';
-import type { Web3Provider } from '@ethersproject/providers';
-import type { Wallet } from '@ethersproject/wallet';
-import type { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
-import type {
+import {
+  Alias,
+  Choice,
+  Follow,
+  NetworkID,
+  Proposal,
   Space,
   SpaceMetadata,
-  Proposal,
-  Vote,
-  User,
-  Choice,
-  NetworkID,
   StrategyParsedMetadata,
-  Follow,
-  Alias,
   UserActivity,
-  Statement
+  Statement,
+  User,
+  Vote
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -273,8 +273,14 @@ type BaseNetwork = {
   helpers: NetworkHelpers;
 };
 
-export type ReadOnlyNetwork = BaseNetwork & { readOnly: true; actions: ReadOnlyNetworkActions };
-export type ReadWriteNetwork = BaseNetwork & { readOnly?: false; actions: NetworkActions };
+export type ReadOnlyNetwork = BaseNetwork & {
+  readOnly: true;
+  actions: ReadOnlyNetworkActions;
+};
+export type ReadWriteNetwork = BaseNetwork & {
+  readOnly?: false;
+  actions: NetworkActions;
+};
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
 export type ExplorePageProtocol = 'snapshot' | 'snapshotx';

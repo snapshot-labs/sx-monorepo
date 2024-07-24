@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Contract, CallData } from 'starknet';
 import { Contract as EvmContract } from '@ethersproject/contracts';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { keccak256 } from '@ethersproject/keccak256';
-import OzVotesToken from './abis/OzVotesToken.json';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import { CallData, Contract } from 'starknet';
 import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
+import OzVotesToken from './abis/OzVotesToken.json';
+import { getNestedSlotKey, getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
-import { getUserAddressEnum } from '../../utils/starknet-enums';
-import { getSlotKey, getNestedSlotKey } from './utils';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
 import { VotingPowerDetailsError } from '../../utils/errors';
-import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
+import { getUserAddressEnum } from '../../utils/starknet-enums';
 
 export default function createOzVotesStorageProofStrategy({
   trace
@@ -31,12 +31,17 @@ export default function createOzVotesStorageProofStrategy({
     const provider = new StaticJsonRpcProvider(ethUrl, chainId);
 
     const checkpointSlotKey =
-      BigInt(keccak256(getSlotKey(voterAddress, slotIndex))) + BigInt(numCheckpoints) - BigInt(1);
+      BigInt(keccak256(getSlotKey(voterAddress, slotIndex))) +
+      BigInt(numCheckpoints) -
+      BigInt(1);
     const nextEmptySlotKey = checkpointSlotKey + BigInt(1);
 
     const proof = await provider.send('eth_getProof', [
       l1TokenAddress,
-      [`0x${checkpointSlotKey.toString(16)}`, `0x${nextEmptySlotKey.toString(16)}`],
+      [
+        `0x${checkpointSlotKey.toString(16)}`,
+        `0x${nextEmptySlotKey.toString(16)}`
+      ],
       `0x${blockNumber.toString(16)}`
     ]);
 
@@ -74,7 +79,8 @@ export default function createOzVotesStorageProofStrategy({
       clientConfig: ClientConfig
     ): Promise<string[]> {
       if (call === 'propose') throw new Error('Not supported for proposing');
-      if (signerAddress.length !== 42) throw new Error('Not supported for non-Ethereum addresses');
+      if (signerAddress.length !== 42)
+        throw new Error('Not supported for non-Ethereum addresses');
       if (!metadata) throw new Error('Invalid metadata');
 
       const { starkProvider, ethUrl, networkConfig } = clientConfig;
@@ -82,19 +88,32 @@ export default function createOzVotesStorageProofStrategy({
       const { contractAddress, slotIndex } = metadata;
 
       const provider = new StaticJsonRpcProvider(ethUrl, chainId);
-      const tokenContract = new EvmContract(contractAddress, OzVotesToken, provider);
-      const numCheckpoints: number = await tokenContract.numCheckpoints(signerAddress);
+      const tokenContract = new EvmContract(
+        contractAddress,
+        OzVotesToken,
+        provider
+      );
+      const numCheckpoints: number =
+        await tokenContract.numCheckpoints(signerAddress);
       if (numCheckpoints === 0) throw new Error('No checkpoints found');
 
       const voteEnvelope = envelope as Envelope<Vote>;
 
-      const spaceContract = new Contract(SpaceAbi, voteEnvelope.data.space, starkProvider);
+      const spaceContract = new Contract(
+        SpaceAbi,
+        voteEnvelope.data.space,
+        starkProvider
+      );
       const proposalStruct = (await spaceContract.call('proposals', [
         voteEnvelope.data.proposal
       ])) as any;
       const startTimestamp = proposalStruct.start_timestamp;
 
-      const contract = new Contract(OZVotesStorageProof, address, starkProvider);
+      const contract = new Contract(
+        OZVotesStorageProof,
+        address,
+        starkProvider
+      );
       const l1BlockNumber = await contract.cached_timestamps(startTimestamp);
 
       const { proofs, checkpointIndex } = await getProofs(
@@ -108,7 +127,8 @@ export default function createOzVotesStorageProofStrategy({
       );
 
       const [checkpointMptProof, exclusionMptProof] = proofs;
-      if (!checkpointMptProof || !exclusionMptProof) throw new Error('Invalid proofs');
+      if (!checkpointMptProof || !exclusionMptProof)
+        throw new Error('Invalid proofs');
 
       return CallData.compile({
         checkpointIndex,
@@ -136,27 +156,45 @@ export default function createOzVotesStorageProofStrategy({
 
       if (!timestamp) {
         const slotKey = getSlotKey(voterAddress, slotIndex);
-        const length = Number(await provider.getStorageAt(contractAddress, slotKey));
+        const length = Number(
+          await provider.getStorageAt(contractAddress, slotKey)
+        );
 
         const nestedSlotKey = getNestedSlotKey(slotKey, length - 1);
-        const storage = await provider.getStorageAt(contractAddress, nestedSlotKey);
+        const storage = await provider.getStorageAt(
+          contractAddress,
+          nestedSlotKey
+        );
 
         const bytesToSkip = (256 - trace) / 8;
         return BigInt(storage.slice(0, -bytesToSkip * 2));
       }
 
-      const tokenContract = new EvmContract(contractAddress, OzVotesToken, provider);
+      const tokenContract = new EvmContract(
+        contractAddress,
+        OzVotesToken,
+        provider
+      );
 
-      const numCheckpoints: number = await tokenContract.numCheckpoints(voterAddress);
+      const numCheckpoints: number =
+        await tokenContract.numCheckpoints(voterAddress);
       if (numCheckpoints === 0) return 0n;
 
-      const contract = new Contract(OZVotesStorageProof, strategyAddress, starkProvider);
+      const contract = new Contract(
+        OZVotesStorageProof,
+        strategyAddress,
+        starkProvider
+      );
 
       let l1BlockNumber: bigint;
       try {
         l1BlockNumber = await contract.cached_timestamps(timestamp);
       } catch (e) {
-        throw new VotingPowerDetailsError('Timestamp is not cached', type, 'NOT_READY_YET');
+        throw new VotingPowerDetailsError(
+          'Timestamp is not cached',
+          type,
+          'NOT_READY_YET'
+        );
       }
 
       const { proofs, checkpointIndex } = await getProofs(
@@ -170,7 +208,8 @@ export default function createOzVotesStorageProofStrategy({
       );
 
       const [checkpointMptProof, exclusionMptProof] = proofs;
-      if (!checkpointMptProof || !exclusionMptProof) throw new Error('Invalid proofs');
+      if (!checkpointMptProof || !exclusionMptProof)
+        throw new Error('Invalid proofs');
 
       return contract.get_voting_power(
         timestamp,

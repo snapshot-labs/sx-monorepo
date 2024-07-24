@@ -1,8 +1,8 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { formatUnits } from '@ethersproject/units';
-import { formatAddress } from '@/helpers/utils';
+import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import networks from '@/helpers/networks.json';
+import { formatAddress } from '@/helpers/utils';
 
 networks['starknet'] = {
   key: 'starknet',
@@ -11,7 +11,8 @@ networks['starknet'] = {
 };
 
 let auth;
-const defaultNetwork: any = import.meta.env.VITE_DEFAULT_NETWORK || Object.keys(networks)[0];
+const defaultNetwork: any =
+  import.meta.env.VITE_DEFAULT_NETWORK || Object.keys(networks)[0];
 
 const state = reactive({
   account: '',
@@ -44,7 +45,10 @@ export function useWeb3() {
 
       // NOTE: Handle case where metamask stays locked after user ignored
       // the unlock request on subsequent page loads
-      if (state.type !== 'injected' || auth.provider?.value?._state?.isUnlocked) {
+      if (
+        state.type !== 'injected' ||
+        auth.provider?.value?._state?.isUnlocked
+      ) {
         state.authLoading = false;
       }
     } finally {

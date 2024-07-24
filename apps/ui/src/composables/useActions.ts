@@ -1,20 +1,20 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import type {
-  Transaction,
-  Proposal,
-  SpaceMetadata,
-  SpaceSettings,
-  Space,
+import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
+import { Connector, StrategyConfig } from '@/networks/types';
+import {
   Choice,
   NetworkID,
-  VoteType,
+  Statement,
+  Proposal,
+  Space,
+  SpaceMetadata,
+  SpaceSettings,
+  Transaction,
   User,
-  Statement
+  VoteType
 } from '@/types';
-import type { Connector, StrategyConfig } from '@/networks/types';
 
 export function useActions() {
   const { mixpanel } = useMixpanel();

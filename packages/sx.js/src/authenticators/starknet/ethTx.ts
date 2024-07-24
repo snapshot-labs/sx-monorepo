@@ -1,23 +1,26 @@
 import { Call, CallData, shortString } from 'starknet';
 import EthTxAuthenticatorAbi from './abis/EthTxAuthenticator.json';
-import { getChoiceEnum } from '../../utils/starknet-enums';
 import {
   Authenticator,
   Envelope,
   Propose,
-  Vote,
-  UpdateProposal,
   ProposeCallArgs,
-  VoteCallArgs,
-  UpdateProposalCallArgs
+  UpdateProposal,
+  UpdateProposalCallArgs,
+  Vote,
+  VoteCallArgs
 } from '../../types';
+import { getChoiceEnum } from '../../utils/starknet-enums';
 
 const callData = new CallData(EthTxAuthenticatorAbi);
 
 export default function createEthTxAuthenticator(): Authenticator {
   return {
     type: 'ethTx',
-    createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call {
+    createProposeCall(
+      envelope: Envelope<Propose>,
+      args: ProposeCallArgs
+    ): Call {
       const { space, authenticator } = envelope.data;
 
       const compiled = callData.compile('authenticate_propose', [

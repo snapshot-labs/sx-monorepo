@@ -3,7 +3,10 @@ import { _n, _p, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space, SpaceMetadataDelegation } from '@/types';
 
-const props = defineProps<{ space: Space; delegation: SpaceMetadataDelegation }>();
+const props = defineProps<{
+  space: Space;
+  delegation: SpaceMetadataDelegation;
+}>();
 
 const delegateModalOpen = ref(false);
 const sortBy = ref(

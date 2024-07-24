@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getNetwork } from '@/networks';
-import { Space, Proposal as ProposalType } from '@/types';
+import { Proposal as ProposalType, Space } from '@/types';
 
 const PROPOSALS_LIMIT = 20;
 

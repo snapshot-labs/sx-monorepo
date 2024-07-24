@@ -1,12 +1,16 @@
-import { LibraryError, constants as starknetConstants, TransactionExecutionStatus } from 'starknet';
-import { createApi } from '../common/graphqlApi';
-import { STARKNET_CONNECTORS } from '../common/constants';
-import { createActions } from './actions';
-import { createProvider } from './provider';
-import { createConstants } from './constants';
+import {
+  LibraryError,
+  constants as starknetConstants,
+  TransactionExecutionStatus
+} from 'starknet';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
+import { createActions } from './actions';
+import { createConstants } from './constants';
+import { createProvider } from './provider';
+import { STARKNET_CONNECTORS } from '../common/constants';
+import { createApi } from '../common/graphqlApi';
 
 type Metadata = {
   name: string;
@@ -37,7 +41,9 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'sep',
     rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl: import.meta.env.VITE_STARKNET_SEPOLIA_API ?? 'https://testnet-api-1.snapshotx.xyz',
+    apiUrl:
+      import.meta.env.VITE_STARKNET_SEPOLIA_API ??
+      'https://testnet-api-1.snapshotx.xyz',
     explorerUrl: 'https://sepolia.starkscan.co'
   }
 };
@@ -46,8 +52,16 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   const metadata = METADATA[networkId];
   if (!metadata) throw new Error(`Unsupported network ${networkId}`);
 
-  const { name, chainId, baseChainId, baseNetworkId, rpcUrl, ethRpcUrl, apiUrl, explorerUrl } =
-    metadata;
+  const {
+    name,
+    chainId,
+    baseChainId,
+    baseNetworkId,
+    rpcUrl,
+    ethRpcUrl,
+    apiUrl,
+    explorerUrl
+  } = metadata;
 
   const provider = createProvider(rpcUrl);
   const api = createApi(apiUrl, networkId, {
@@ -62,9 +76,12 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
     getRelayerAuthenticatorType: (authenticator: string) =>
       constants.RELAYER_AUTHENTICATORS[authenticator],
-    isStrategySupported: (strategy: string) => constants.SUPPORTED_STRATEGIES[strategy],
-    isExecutorSupported: (executor: string) => constants.SUPPORTED_EXECUTORS[executor],
-    isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
+    isStrategySupported: (strategy: string) =>
+      constants.SUPPORTED_STRATEGIES[strategy],
+    isExecutorSupported: (executor: string) =>
+      constants.SUPPORTED_EXECUTORS[executor],
+    isVotingTypeSupported: (type: string) =>
+      constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
     getTransaction: txId => provider.getTransactionReceipt(txId),
     waitForTransaction: txId => {
@@ -76,7 +93,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
           try {
             tx = await provider.getTransactionReceipt(txId);
           } catch (e) {
-            if (e instanceof LibraryError && e.message.includes('Transaction hash not found')) {
+            if (
+              e instanceof LibraryError &&
+              e.message.includes('Transaction hash not found')
+            ) {
               if (retries > 60) {
                 clearInterval(timer);
                 reject();
@@ -111,7 +131,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     getExplorerUrl: (id, type) => {
       let dataType: 'tx' | 'contract' | 'token' = 'tx';
       if (type === 'token') dataType = 'token';
-      else if (['address', 'contract', 'strategy'].includes(type)) dataType = 'contract';
+      else if (['address', 'contract', 'strategy'].includes(type))
+        dataType = 'contract';
 
       return `${explorerUrl}/${dataType}/${id}`;
     }
@@ -119,7 +140,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
   return {
     name,
-    avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m',
+    avatar:
+      'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m',
     currentUnit: 'second',
     chainId,
     baseChainId,

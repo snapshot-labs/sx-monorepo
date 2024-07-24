@@ -26,7 +26,10 @@ onUnmounted(() => notificationsStore.markAllAsRead());
     <UiLabel :label="'Notifications'" sticky />
     <UiLoading v-if="notificationsStore.loading" class="block px-4 py-3" />
     <div v-else-if="notificationsStore.notifications.length">
-      <div v-for="(notification, i) in notificationsStore.notifications" :key="i">
+      <div
+        v-for="(notification, i) in notificationsStore.notifications"
+        :key="i"
+      >
         <div
           class="border-b px-4 py-[14px] flex space-x-3"
           :class="{ 'bg-skin-border/20': notification.unread }"
@@ -42,7 +45,8 @@ onUnmounted(() => notificationsStore.markAllAsRead());
             >
               {{ notification.proposal.space.name }}
             </router-link>
-            proposal has {{ notification.type }} {{ _rt(notification.timestamp) }}
+            proposal has {{ notification.type }}
+            {{ _rt(notification.timestamp) }}
             <router-link
               :to="{
                 name: 'proposal-overview',
@@ -54,7 +58,10 @@ onUnmounted(() => notificationsStore.markAllAsRead());
             >
               <h3
                 class="font-normal text-[21px]"
-                v-text="notification.proposal.title || `#${notification.proposal.proposal_id}`"
+                v-text="
+                  notification.proposal.title ||
+                  `#${notification.proposal.proposal_id}`
+                "
               />
             </router-link>
           </div>

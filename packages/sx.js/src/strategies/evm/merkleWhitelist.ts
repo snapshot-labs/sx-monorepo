@@ -7,7 +7,10 @@ type Entry = {
   votingPower: bigint;
 };
 
-function getProofForVoter(tree: StandardMerkleTree<[string, bigint]>, voter: string) {
+function getProofForVoter(
+  tree: StandardMerkleTree<[string, bigint]>,
+  voter: string
+) {
   for (const [i, v] of tree.entries()) {
     if ((v[0] as string).toLowerCase() === voter.toLowerCase()) {
       return { index: i, proof: tree.getProof(i) };
@@ -34,7 +37,10 @@ export default function createMerkleWhitelist(): Strategy {
         entry.address,
         entry.votingPower
       ]);
-      const merkleTree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
+      const merkleTree = StandardMerkleTree.of(whitelist, [
+        'address',
+        'uint96'
+      ]);
       const proof = getProofForVoter(merkleTree, signerAddress);
 
       if (!proof) throw new Error('Signer is not in whitelist');
@@ -55,7 +61,8 @@ export default function createMerkleWhitelist(): Strategy {
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
       const match = tree.find(
-        (entry: Entry) => entry.address.toLowerCase() === voterAddress.toLowerCase()
+        (entry: Entry) =>
+          entry.address.toLowerCase() === voterAddress.toLowerCase()
       );
 
       if (match) {

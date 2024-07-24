@@ -36,7 +36,10 @@ defineProps<{ state: ProposalState }>();
       v-else-if="state === 'passed'"
       class="text-skin-bg inline-block w-[17px] h-[17px] mb-[1px]"
     />
-    <IS-play v-else-if="state === 'executed'" class="text-white inline-block w-[17px] h-[17px]" />
+    <IS-play
+      v-else-if="state === 'executed'"
+      class="text-white inline-block w-[17px] h-[17px]"
+    />
     <IS-x-circle
       v-else-if="state === 'rejected'"
       class="text-white inline-block w-[17px] h-[17px] mb-[1px]"

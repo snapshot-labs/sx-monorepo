@@ -1,47 +1,47 @@
-import { offchainGoerli } from '../../../offchainNetworks';
-import { encryptChoices } from '../utils';
+import { Signer, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer';
 import {
-  domain,
-  proposeTypes,
-  basicVoteTypes,
-  singleChoiceVoteTypes,
-  approvalVoteTypes,
-  encryptedVoteTypes,
-  rankedChoiceVoteTypes,
-  weightedVoteTypes,
-  updateProposalTypes,
-  cancelProposalTypes,
-  followSpaceTypes,
-  unfollowSpaceTypes,
   aliasTypes,
+  approvalVoteTypes,
+  basicVoteTypes,
+  cancelProposalTypes,
+  domain,
+  encryptedVoteTypes,
+  followSpaceTypes,
+  proposeTypes,
+  rankedChoiceVoteTypes,
+  singleChoiceVoteTypes,
+  unfollowSpaceTypes,
+  updateProposalTypes,
   updateUserTypes,
+  weightedVoteTypes,
   updateStatementTypes
 } from './types';
-import type { Signer, TypedDataSigner, TypedDataField } from '@ethersproject/abstract-signer';
+import { offchainGoerli } from '../../../offchainNetworks';
+import { OffchainNetworkConfig } from '../../../types';
 import {
-  type SignatureData,
-  type Envelope,
-  type Vote,
-  type Propose,
-  type UpdateProposal,
-  type CancelProposal,
-  type FollowSpace,
-  type UnfollowSpace,
-  type SetAlias,
-  type UpdateUser,
-  type UpdateStatement,
-  type EIP712Message,
-  type EIP712VoteMessage,
-  type EIP712ProposeMessage,
-  type EIP712UpdateProposal,
-  type EIP712CancelProposalMessage,
-  type EIP712FollowSpaceMessage,
-  type EIP712UnfollowSpaceMessage,
-  type EIP712SetAliasMessage,
-  type EIP712UpdateUserMessage,
-  type EIP712UpdateStatementMessage
+  CancelProposal,
+  EIP712CancelProposalMessage,
+  EIP712FollowSpaceMessage,
+  EIP712Message,
+  EIP712ProposeMessage,
+  EIP712SetAliasMessage,
+  EIP712UnfollowSpaceMessage,
+  EIP712UpdateProposal,
+  EIP712UpdateUserMessage,
+  EIP712VoteMessage,
+  EIP712UpdateStatementMessage,
+  Envelope,
+  FollowSpace,
+  Propose,
+  SetAlias,
+  SignatureData,
+  UnfollowSpace,
+  UpdateProposal,
+  UpdateUser,
+  UpdateStatement,
+  Vote
 } from '../types';
-import type { OffchainNetworkConfig } from '../../../types';
+import { encryptChoices } from '../utils';
 
 const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',

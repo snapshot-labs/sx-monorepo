@@ -1,36 +1,36 @@
 import { isAddress } from '@ethersproject/address';
+import { Web3Provider } from '@ethersproject/providers';
+import { Wallet } from '@ethersproject/wallet';
 import {
-  OffchainNetworkConfig,
   clients,
   getOffchainStrategy,
   offchainGoerli,
-  offchainMainnet
+  offchainMainnet,
+  OffchainNetworkConfig
 } from '@snapshot-labs/sx';
-import { getSdkChoice } from './helpers';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
-import { getUrl } from '@/helpers/utils';
-import { getProvider } from '@/helpers/provider';
 import { getSwapLink } from '@/helpers/link';
-import { Web3Provider } from '@ethersproject/providers';
-import type { Wallet } from '@ethersproject/wallet';
-import type {
-  StrategyParsedMetadata,
+import { getProvider } from '@/helpers/provider';
+import { getUrl } from '@/helpers/utils';
+import {
   Choice,
+  NetworkID,
   Proposal,
   Space,
+  StrategyParsedMetadata,
   User,
   VoteType,
-  NetworkID,
   UserProfile,
   Statement
 } from '@/types';
-import type {
-  ReadOnlyNetworkActions,
+import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
+import { getSdkChoice } from './helpers';
+import {
+  Connector,
   NetworkConstants,
   NetworkHelpers,
+  ReadOnlyNetworkActions,
   SnapshotInfo,
-  VotingPower,
-  Connector
+  VotingPower
 } from '../types';
 
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
@@ -132,7 +132,10 @@ export function createActions(
     cancelProposal(web3: Web3Provider, proposal: Proposal) {
       return client.cancel({
         signer: web3.getSigner(),
-        data: { proposal: proposal.proposal_id as string, space: proposal.space.id }
+        data: {
+          proposal: proposal.proposal_id as string,
+          space: proposal.space.id
+        }
       });
     },
     vote(

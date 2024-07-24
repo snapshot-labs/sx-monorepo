@@ -2,11 +2,13 @@ import { Envelope, Propose, Vote } from '../../src/types';
 
 const proposeData = {
   space: '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',
-  authenticator: '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
+  authenticator:
+    '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
   strategies: [
     {
       index: 1,
-      address: '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
+      address:
+        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
     }
   ],
   executionStrategy: {
@@ -18,11 +20,13 @@ const proposeData = {
 
 const voteData = {
   space: '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',
-  authenticator: '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
+  authenticator:
+    '0x064cce9272197eba6353f5bbf060e097e516b411e66e83a9cf5910a08697df14',
   strategies: [
     {
       index: 1,
-      address: '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
+      address:
+        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
     }
   ],
   proposal: 3,

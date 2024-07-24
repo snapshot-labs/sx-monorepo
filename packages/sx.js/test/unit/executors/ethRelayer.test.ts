@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import createEthRelayerExecutor from '../../../src/executors/ethRelayer';
 
 describe('ethRelayerExecutor', () => {
@@ -6,7 +6,8 @@ describe('ethRelayerExecutor', () => {
     destination: '0xa88f72e92cc519d617b684F8A78d3532E7bb61ca'
   });
 
-  const address = '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
+  const address =
+    '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';
   const txs = [
     {
       to: '0x2842c82E20ab600F443646e1BC8550B44a513D82',

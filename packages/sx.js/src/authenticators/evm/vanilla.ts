@@ -1,11 +1,11 @@
 import VanillaAuthenticatorAbi from './abis/VanillaAuthenticator.json';
-import type {
+import {
   Authenticator,
+  Call,
   Envelope,
   Propose,
   UpdateProposal,
-  Vote,
-  Call
+  Vote
 } from '../../clients/evm/types';
 
 export default function createVanillaAuthenticator(): Authenticator {

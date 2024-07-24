@@ -1,7 +1,7 @@
-import { memoize } from '@/helpers/utils';
 import { resolveName as resolveEnsName } from '@/helpers/ens';
-import { NetworkID } from '@/types';
+import { memoize } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
+import { NetworkID } from '@/types';
 
 const ENS_CHAIN_ID = 1;
 const ENS_NETWORK_ID = 'eth';
@@ -42,7 +42,8 @@ function createResolver() {
     }
 
     const shouldUseEns =
-      id.endsWith('.eth') && !offchainNetworks.includes(id.split(':')[0] as NetworkID);
+      id.endsWith('.eth') &&
+      !offchainNetworks.includes(id.split(':')[0] as NetworkID);
 
     const resolved = shouldUseEns ? await resolveEns(id) : resolveStatic(id);
     if (resolved) {

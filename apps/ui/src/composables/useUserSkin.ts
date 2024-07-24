@@ -2,7 +2,9 @@ type Skin = 'dark' | 'light' | 'none';
 
 export function useUserSkin() {
   const store = useStorage<Skin>('skin', 'none');
-  const currentMode = computed(() => (['light', 'none'].includes(store.value) ? 'light' : 'dark'));
+  const currentMode = computed(() =>
+    ['light', 'none'].includes(store.value) ? 'light' : 'dark'
+  );
 
   function toggleSkin() {
     store.value = ['light', 'none'].includes(store.value) ? 'dark' : 'light';

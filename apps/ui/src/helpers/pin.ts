@@ -1,5 +1,5 @@
-import { create } from 'ipfs-http-client';
 import { pin } from '@snapshot-labs/pineapple';
+import { create } from 'ipfs-http-client';
 
 const client = create({ url: 'https://api.thegraph.com/ipfs/api/v0' });
 

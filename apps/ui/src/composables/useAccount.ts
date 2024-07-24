@@ -1,5 +1,5 @@
 import { getNetwork } from '@/networks';
-import type { NetworkID, Proposal, Vote } from '@/types';
+import { NetworkID, Proposal, Vote } from '@/types';
 
 const { web3 } = useWeb3();
 const votes = ref<Record<Proposal['id'], Vote>>({});

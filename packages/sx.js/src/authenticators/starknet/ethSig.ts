@@ -1,23 +1,26 @@
 import { Call, CallData, shortString } from 'starknet';
 import EthSigAuthenticatorAbi from './abis/EthSigAuthenticator.json';
-import { getChoiceEnum } from '../../utils/starknet-enums';
 import {
   Authenticator,
   Envelope,
   Propose,
-  Vote,
-  UpdateProposal,
   ProposeCallArgs,
-  VoteCallArgs,
-  UpdateProposalCallArgs
+  UpdateProposal,
+  UpdateProposalCallArgs,
+  Vote,
+  VoteCallArgs
 } from '../../types';
+import { getChoiceEnum } from '../../utils/starknet-enums';
 
 const callData = new CallData(EthSigAuthenticatorAbi);
 
 export default function createEthSigAuthenticator(): Authenticator {
   return {
     type: 'ethSig',
-    createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call {
+    createProposeCall(
+      envelope: Envelope<Propose>,
+      args: ProposeCallArgs
+    ): Call {
       const { space, authenticator } = envelope.data;
 
       if (!envelope.signatureData?.signature) {
@@ -63,7 +66,8 @@ export default function createEthSigAuthenticator(): Authenticator {
       }
 
       const [r, s, v] = envelope.signatureData.signature;
-      if (!r || !s || !v) throw new Error('signature needs to contain r, s and v');
+      if (!r || !s || !v)
+        throw new Error('signature needs to contain r, s and v');
 
       const compiled = callData.compile('authenticate_vote', [
         r,
