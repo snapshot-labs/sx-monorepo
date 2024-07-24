@@ -25,7 +25,7 @@ const userActivity = ref<UserActivity>({ vote_count: 0, proposal_count: 0 } as U
 const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
-const delegatesCount = ref(0);
+// const delegatesCount = ref(0);
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -80,36 +80,36 @@ async function loadUserActivity() {
   };
 }
 
-async function loadDelegates() {
-  delegatesCount.value = 0;
+// async function loadDelegates() {
+//   delegatesCount.value = 0;
 
-  const delegates = (
-    await Promise.all(
-      props.space.delegations.map(async delegation => {
-        const { getDelegates } = useDelegates(
-          delegation.apiUrl as string,
-          delegation.contractAddress as string
-        );
+//   const delegates = (
+//     await Promise.all(
+//       props.space.delegations.map(async delegation => {
+//         const { getDelegates } = useDelegates(
+//           delegation.apiUrl as string,
+//           delegation.contractAddress as string
+//         );
 
-        return (
-          await getDelegates({
-            orderBy: 'delegatedVotes',
-            orderDirection: 'asc',
-            skip: 0,
-            first: 1,
-            user: userId.value
-          })
-        )[0];
-      })
-    )
-  )
-    .flat()
-    .filter(Boolean);
+//         return (
+//           await getDelegates({
+//             orderBy: 'delegatedVotes',
+//             orderDirection: 'asc',
+//             skip: 0,
+//             first: 1,
+//             user: userId.value
+//           })
+//         )[0];
+//       })
+//     )
+//   )
+//     .flat()
+//     .filter(Boolean);
 
-  delegatesCount.value = delegates
-    .map(delegate => delegate.tokenHoldersRepresentedAmount || 0)
-    .reduce((a, b) => a + b, 0);
-}
+//   delegatesCount.value = delegates
+//     .map(delegate => delegate.tokenHoldersRepresentedAmount || 0)
+//     .reduce((a, b) => a + b, 0);
+// }
 
 async function getVotingPower() {
   votingPowerStatus.value = 'loading';
@@ -141,7 +141,7 @@ watch(
     if (isValidAddress(id)) {
       await usersStore.fetchUser(id);
       await loadUserActivity();
-      loadDelegates();
+      // loadDelegates();
       getVotingPower();
     }
 
@@ -222,7 +222,7 @@ watchEffect(() => setTitle(`${user.value?.name || userId.value} ${props.space.na
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
         >
-          <UiLink :is-active="route.name === item.route" :text="item.label" :count="item.count" />
+          <UiLink :is-active="route.name === item.route" :text="item.label" />
         </router-link>
       </div>
     </div>
