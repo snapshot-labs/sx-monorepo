@@ -1,4 +1,4 @@
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import type { NetworkID, Proposal, Vote } from '@/types';
 
 const { web3 } = useWeb3();
@@ -19,6 +19,8 @@ export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
     const account = web3.value.account;
     if (!account) return;
+
+    if (web3.value.type === 'argentx' && offchainNetworks.includes(networkId)) return;
 
     const network = getNetwork(networkId);
     const userVotes = await network.api.loadUserVotes(spaceIds, account);
