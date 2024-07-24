@@ -1,3 +1,4 @@
+import { starknetNetworks } from '@snapshot-labs/sx';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import {
   enabledNetworks,
@@ -19,8 +20,7 @@ import type {
   VoteType,
   User
 } from '@/types';
-import type { Connector, StrategyConfig } from '@/networks/types';
-import { starknetNetworks } from '@snapshot-labs/sx';
+import { Connector, StrategyConfig } from '@/networks/types';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 
 const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
