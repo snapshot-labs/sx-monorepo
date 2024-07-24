@@ -163,8 +163,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </UiTooltip>
       <UiTooltip title="Copy address">
         <UiButton class="!px-0 w-[46px]" @click="copy(treasury.wallet)">
-          <IH-duplicate v-if="!copied" class="inline-block" />
-          <IH-check v-else class="inline-block" />
+          <IH-duplicate v-if="!copied" />
+          <IH-check v-else />
         </UiButton>
       </UiTooltip>
       <UiTooltip v-if="!isReadOnly" :title="page === 'tokens' ? 'Send token' : 'Send NFT'">
@@ -265,7 +265,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 :touch="false"
               >
                 <UiButton class="!px-0 w-[46px]" @click.prevent="openModal('stake')">
-                  <IH-fire class="inline-block" />
+                  <IH-fire />
                 </UiButton>
               </UiTooltip>
             </div>

@@ -112,7 +112,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
         <UiTooltip v-if="web3.account === user.id && web3.type !== 'argentx'" title="Edit profile">
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
-            <IH-cog class="inline-block" />
+            <IH-cog />
           </UiButton>
         </UiTooltip>
       </div>
@@ -129,12 +129,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
-            <UiButton
-              class="!border-0 !px-0 !h-auto !text-skin-text"
-              @click.prevent="copy(user.id)"
-            >
-              <IH-duplicate v-if="!copied" class="inline-block" />
-              <IH-check v-else class="inline-block" />
+            <UiButton simple class="!text-skin-text" @click.prevent="copy(user.id)">
+              <IH-duplicate v-if="!copied" />
+              <IH-check v-else />
             </UiButton>
           </UiTooltip>
         </div>

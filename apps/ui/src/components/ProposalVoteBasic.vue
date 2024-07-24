@@ -23,7 +23,7 @@ const emit = defineEmits<{
         :loading="sendingType === 'for'"
         @click="emit('vote', 'for')"
       >
-        <IH-check class="inline-block" />
+        <IH-check />
       </UiButton>
     </UiTooltip>
     <UiTooltip title="Against">
@@ -33,7 +33,7 @@ const emit = defineEmits<{
         :loading="sendingType === 'against'"
         @click="emit('vote', 'against')"
       >
-        <IH-x class="inline-block" />
+        <IH-x />
       </UiButton>
     </UiTooltip>
     <UiTooltip title="Abstain">
@@ -43,7 +43,7 @@ const emit = defineEmits<{
         :loading="sendingType === 'abstain'"
         @click="emit('vote', 'abstain')"
       >
-        <IH-minus-sm class="inline-block" />
+        <IH-minus-sm />
       </UiButton>
     </UiTooltip>
   </div>

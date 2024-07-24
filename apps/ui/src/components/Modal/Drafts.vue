@@ -51,7 +51,7 @@ function handleRemoveDraft(id: string) {
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ proposal.key }}</span>
           </router-link>
-          <UiButton class="!border-0 !px-0 !h-auto" @click="handleRemoveDraft(proposal.id)">
+          <UiButton simple @click="handleRemoveDraft(proposal.id)">
             <IH-trash />
           </UiButton>
         </div>

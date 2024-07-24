@@ -212,9 +212,9 @@ watch([sortBy, choiceFilter], () => {
                 '!text-gray-500 !border-gray-500': vote.choice === 3
               }"
             >
-              <IH-check v-if="vote.choice === 1" class="inline-block" />
-              <IH-x v-else-if="vote.choice === 2" class="inline-block" />
-              <IH-minus-sm v-else class="inline-block" />
+              <IH-check v-if="vote.choice === 1" />
+              <IH-x v-else-if="vote.choice === 2" />
+              <IH-minus-sm v-else />
             </UiButton>
           </template>
         </div>

@@ -122,8 +122,8 @@ watch(
         </UiButton>
         <IndicatorPendingTransactions class="ml-2" />
         <UiButton class="!px-0 w-[46px] ml-2" @click="toggleSkin">
-          <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
-          <IH-moon v-else class="inline-block" />
+          <IH-light-bulb v-if="currentMode === 'dark'" />
+          <IH-moon v-else />
         </UiButton>
       </div>
     </div>

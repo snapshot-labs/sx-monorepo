@@ -68,7 +68,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]" @click="delegateModalOpen = true">
-          <IH-user-add class="inline-block" />
+          <IH-user-add />
         </UiButton>
       </UiTooltip>
     </div>

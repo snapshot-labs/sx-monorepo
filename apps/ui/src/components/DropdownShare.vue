@@ -15,7 +15,7 @@ function handleCopyLinkClick() {
     <template #button>
       <slot name="button">
         <UiButton v-bind="$attrs">
-          <IH-share class="inline-block" />
+          <IH-share />
         </UiButton>
       </slot>
     </template>
