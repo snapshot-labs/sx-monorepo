@@ -24,16 +24,16 @@ const loading = computed(
 <template>
   <UiButton
     v-if="!hidden"
+    :loading="loading"
     :disabled="loading || isSafeWallet"
-    class="group"
+    class="group !px-0"
     :class="{ 'hover:border-skin-danger': spaceFollowed }"
     @click.prevent="followedSpacesStore.toggleSpaceFollow(spaceIdComposite)"
   >
-    <UiLoading v-if="loading" />
-    <span v-else-if="spaceFollowed" class="inline-block">
+    <span v-if="spaceFollowed" class="px-3.5">
       <span class="group-hover:inline hidden text-skin-danger">Unfollow</span>
       <span class="group-hover:hidden">Following</span>
     </span>
-    <span v-else class="inline-block">Follow</span>
+    <span v-else class="px-3.5">Follow</span>
   </UiButton>
 </template>

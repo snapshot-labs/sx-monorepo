@@ -105,8 +105,8 @@ watch(
         </Breadcrumb>
       </div>
       <div :key="web3.account" class="flex space-x-2">
-        <UiButton v-if="loading || web3.authLoading" loading class="!px-0 w-[46px]" />
-        <UiButton v-else class="!px-0 w-[46px] sm:w-auto sm:!px-3" @click="modalAccountOpen = true">
+        <UiButtonRound v-if="loading || web3.authLoading" loading />
+        <UiButtonRound v-else class="sm:w-auto sm:!px-3" @click="modalAccountOpen = true">
           <span v-if="auth.isAuthenticated.value" class="sm:flex items-center space-x-2">
             <UiStamp :id="web3.account" :size="18" />
             <span class="hidden sm:block" v-text="web3.name || shorten(web3.account)" />
@@ -115,12 +115,12 @@ watch(
             <span class="hidden sm:block" v-text="'Connect wallet'" />
             <IH-login class="sm:hidden inline-block" />
           </template>
-        </UiButton>
+        </UiButtonRound>
         <IndicatorPendingTransactions />
-        <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
+        <UiButtonRound @click="toggleSkin">
           <IH-light-bulb v-if="currentMode === 'dark'" />
           <IH-moon v-else />
-        </UiButton>
+        </UiButtonRound>
       </div>
     </div>
   </nav>

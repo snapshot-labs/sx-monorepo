@@ -44,9 +44,9 @@ watchEffect(() => setTitle(props.space.name));
           </router-link>
         </UiTooltip>
         <UiTooltip v-if="isController" title="Edit profile">
-          <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
+          <UiButtonRound @click="editSpaceModalOpen = true">
             <IH-cog />
-          </UiButton>
+          </UiButtonRound>
         </UiTooltip>
         <ButtonFollow :space="space" />
       </div>

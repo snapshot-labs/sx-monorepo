@@ -67,9 +67,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="delegateModalOpen = true">
+        <UiButtonRound @click="delegateModalOpen = true">
           <IH-user-add />
-        </UiButton>
+        </UiButtonRound>
       </UiTooltip>
     </div>
     <UiLabel label="Delegates" sticky />

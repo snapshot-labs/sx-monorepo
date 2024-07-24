@@ -203,9 +203,10 @@ watch([sortBy, choiceFilter], () => {
             >
               {{ getChoiceText(proposal.choices, vote.choice) }}
             </UiTooltip>
-            <UiButton
+            <UiButtonRound
               v-else
-              class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
+              :size="40"
+              class="cursor-default bg-transparent"
               :class="{
                 '!text-skin-success !border-skin-success': vote.choice === 1,
                 '!text-skin-danger !border-skin-danger': vote.choice === 2,
@@ -215,7 +216,7 @@ watch([sortBy, choiceFilter], () => {
               <IH-check v-if="vote.choice === 1" />
               <IH-x v-else-if="vote.choice === 2" />
               <IH-minus-sm v-else />
-            </UiButton>
+            </UiButtonRound>
           </template>
         </div>
         <div

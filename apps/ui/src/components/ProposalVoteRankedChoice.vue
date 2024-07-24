@@ -24,14 +24,13 @@ const selectedChoices = ref<number[]>(props.proposal.choices.map((_, i) => i + 1
       item-key="id"
     >
       <template #item="{ element, index }">
-        <UiButton class="!h-[48px] text-left w-full handle cursor-grab gap-2">
+        <UiButton class="!h-[48px] text-left w-full handle cursor-grab">
           <IC-drag class="text-skin-text" />
-
           <div class="grow truncate">
             {{ proposal.choices[element - 1] }}
           </div>
           <div
-            class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block"
+            class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center"
           >
             #{{ index + 1 }}
           </div>

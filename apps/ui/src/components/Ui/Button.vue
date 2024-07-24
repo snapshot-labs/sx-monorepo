@@ -24,6 +24,7 @@ withDefaults(
     class="s-button"
     :class="{
       '!border-0 !px-0 !h-auto': simple,
+      'min-w-[46px]': !simple,
       primary: primary
     }"
   >

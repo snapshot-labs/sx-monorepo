@@ -63,7 +63,7 @@ function handlePressEnter(index) {
           </div>
         </template>
       </Draggable>
-      <UiButton v-if="proposal.type !== 'basic'" class="w-full space-x-1" @click="handleAddChoice">
+      <UiButton v-if="proposal.type !== 'basic'" class="w-full" @click="handleAddChoice">
         <IH-plus-sm />
         <span>Add choice</span>
       </UiButton>

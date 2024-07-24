@@ -269,7 +269,7 @@ input:placeholder-shown {
 // Shot UI kit
 
 .s-button {
-  @apply rounded-full leading-[100%] border px-3.5 h-[46px] text-skin-link bg-skin-bg flex items-center justify-center;
+  @apply rounded-full leading-[100%] border px-3.5 h-[46px] text-skin-link bg-skin-bg flex items-center justify-center space-x-2;
 
   &:disabled {
     color: rgba(var(--border)) !important;

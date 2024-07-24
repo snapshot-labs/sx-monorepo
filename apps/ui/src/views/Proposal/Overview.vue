@@ -226,7 +226,7 @@ onBeforeUnmount(() => destroyAudio());
             >
           </div>
         </router-link>
-        <div class="flex gap-2 items-center">
+        <div class="flex space-x-2 items-center">
           <UiTooltip
             v-if="
               offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500
@@ -234,13 +234,12 @@ onBeforeUnmount(() => destroyAudio());
             :title="'AI summary'"
           >
             <UiButton
-              class="!p-0 !border-0 !h-[auto]"
+              simple
+              :loading="aiSummaryState.loading"
               :disabled="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
-              <UiLoading v-if="aiSummaryState.loading" class="!w-[22px] !h-[22px]" />
               <IH-sparkles
-                v-else
                 class="w-[22px] h-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
@@ -255,28 +254,25 @@ onBeforeUnmount(() => destroyAudio());
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
           >
             <UiButton
-              class="!p-0 !border-0 !h-[auto]"
+              simple
+              :loading="aiSpeechState.loading"
               :disabled="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading v-if="aiSpeechState.loading" class="!w-[22px] !h-[22px]" />
-              <IH-pause
-                v-else-if="audioState === 'playing'"
-                class="w-[22px] h-[22px] text-skin-link"
-              />
+              <IH-pause v-if="audioState === 'playing'" class="w-[22px] h-[22px] text-skin-link" />
               <IH-play v-else class="text-skin-text w-[22px] h-[22px]" />
             </UiButton>
           </UiTooltip>
           <DropdownShare :message="shareMsg">
             <template #button>
-              <UiButton class="!p-0 !border-0 !h-auto">
+              <UiButton simple>
                 <IH-share class="text-skin-text w-[22px] h-[22px]" />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
-              <UiButton class="!p-0 !border-0 !h-auto">
+              <UiButton simple>
                 <IH-dots-vertical class="text-skin-text w-[22px] h-[22px]" />
               </UiButton>
             </template>

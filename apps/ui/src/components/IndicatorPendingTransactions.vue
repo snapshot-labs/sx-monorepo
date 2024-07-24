@@ -15,9 +15,9 @@ const pendingTransactionsModalOpen = ref(false);
     v-bind="$attrs"
     title="Pending transactions"
   >
-    <UiButton primary class="!px-0 w-[46px]" @click="pendingTransactionsModalOpen = true">
+    <UiButtonRound primary @click="pendingTransactionsModalOpen = true">
       {{ uiStore.pendingTransactions.length }}
-    </UiButton>
+    </UiButtonRound>
   </UiTooltip>
   <teleport to="#modal">
     <ModalPendingTransactions

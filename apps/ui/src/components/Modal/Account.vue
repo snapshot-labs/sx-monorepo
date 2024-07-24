@@ -61,7 +61,7 @@ watch(open, () => (step.value = null));
           class="block"
           @click="$emit('login', connector.id)"
         >
-          <UiButton class="w-full space-x-2">
+          <UiButton class="w-full">
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"

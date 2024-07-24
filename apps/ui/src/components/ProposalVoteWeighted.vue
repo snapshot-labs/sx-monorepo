@@ -56,25 +56,23 @@ watch(
         </div>
 
         <div class="flex gap-1 items-center">
-          <UiButton
+          <UiButtonRound
             :disabled="!selectedChoices[i + 1]"
-            class="rounded-full !p-0 !h-[28px] !w-[28px] text-sm shrink-0"
+            :size="28"
+            class="text-sm"
             @click.stop="decreaseChoice(i + 1)"
           >
             -
-          </UiButton>
+          </UiButtonRound>
           <UiInputNumber
             v-model.number="selectedChoices[i + 1]"
             :definition="{ examples: [0] }"
             min="0"
             class="!w-[18px] !px-0 !m-0 text-center !rounded-none !border-0 shrink-0"
           />
-          <UiButton
-            class="rounded-full !p-0 !h-[28px] !w-[28px] text-sm shrink-0"
-            @click.stop="increaseChoice(i + 1)"
-          >
+          <UiButtonRound :size="28" class="text-sm" @click.stop="increaseChoice(i + 1)">
             +
-          </UiButton>
+          </UiButtonRound>
         </div>
         <div
           class="top-0 left-0 bottom-0 absolute bg-skin-border opacity-40 -z-10"

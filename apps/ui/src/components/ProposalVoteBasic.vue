@@ -17,34 +17,34 @@ const emit = defineEmits<{
 <template>
   <div class="flex space-x-2">
     <UiTooltip title="For">
-      <UiButton
-        class="!text-skin-success !border-skin-success !px-0"
-        :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
+      <UiButtonRound
+        class="!text-skin-success !border-skin-success"
+        :size="size"
         :loading="sendingType === 'for'"
         @click="emit('vote', 'for')"
       >
         <IH-check />
-      </UiButton>
+      </UiButtonRound>
     </UiTooltip>
     <UiTooltip title="Against">
-      <UiButton
-        class="!text-skin-danger !border-skin-danger !px-0"
-        :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
+      <UiButtonRound
+        class="!text-skin-danger !border-skin-danger"
+        :size="size"
         :loading="sendingType === 'against'"
         @click="emit('vote', 'against')"
       >
         <IH-x />
-      </UiButton>
+      </UiButtonRound>
     </UiTooltip>
     <UiTooltip title="Abstain">
-      <UiButton
-        class="!text-gray-500 !border-gray-500 !px-0"
-        :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
+      <UiButtonRound
+        class="!text-gray-500 !border-gray-500"
+        :size="size"
         :loading="sendingType === 'abstain'"
         @click="emit('vote', 'abstain')"
       >
         <IH-minus-sm />
-      </UiButton>
+      </UiButtonRound>
     </UiTooltip>
   </div>
 </template>
