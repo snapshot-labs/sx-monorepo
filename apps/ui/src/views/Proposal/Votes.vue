@@ -17,6 +17,8 @@ const loadingMore = ref(false);
 const hasMore = ref(false);
 const sortBy = ref('vp-desc' as 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc');
 const choiceFilter = ref('any' as 'any' | 'for' | 'against' | 'abstain');
+const modalOpen = ref(false);
+const selectedVote = ref<Vote | null>(null);
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => {
@@ -70,6 +72,13 @@ async function handleEndReached() {
   loadingMore.value = false;
 }
 
+function handleChoiceClick(vote: Vote | null) {
+  if (!vote?.reason) return;
+
+  selectedVote.value = vote;
+  modalOpen.value = true;
+}
+
 onMounted(() => {
   loadVotes();
 });
@@ -93,16 +102,8 @@ watch([sortBy, choiceFilter], () => {
   <div
     class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-1 font-medium"
   >
-    <div class="pl-4 w-[50%] lg:w-[40%] truncate">Voter</div>
-    <button
-      class="hidden lg:flex w-[25%] lg:w-[20%] items-center hover:text-skin-link space-x-1 truncate"
-      @click="handleSortChange('created')"
-    >
-      <span>Date</span>
-      <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
-    </button>
-    <div class="w-[25%] lg:w-[20%] truncate">
+    <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
+    <div class="grow w-[40%] truncate">
       <template v-if="offchainNetworks.includes(proposal.network)">Choice</template>
       <UiSelectDropdown
         v-else
@@ -127,14 +128,22 @@ watch([sortBy, choiceFilter], () => {
       </UiSelectDropdown>
     </div>
     <button
-      class="w-[25%] lg:w-[20%] flex justify-end items-center hover:text-skin-link space-x-1 truncate"
+      class="hidden lg:flex max-w-[144px] w-[144px] items-center hover:text-skin-link space-x-1 truncate"
+      @click="handleSortChange('created')"
+    >
+      <span>Date</span>
+      <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
+      <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
+    </button>
+    <button
+      class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('vp')"
     >
       <span class="truncate">Voting power</span>
       <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="shrink-0" />
       <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="shrink-0" />
     </button>
-    <div class="w-[30px] lg:w-[60px]" />
+    <div class="min-w-[44px] lg:w-[60px]" />
   </div>
 
   <UiLoading v-if="!loaded" class="px-4 py-3 block" />
@@ -159,31 +168,31 @@ watch([sortBy, choiceFilter], () => {
               : 'bg-skin-border opacity-40'
           "
         />
-        <div class="pl-4 py-3 w-[50%] lg:w-[40%] flex items-center gap-x-3 truncate">
+
+        <router-link
+          :to="{
+            name: 'user',
+            params: {
+              id: vote.voter.id
+            }
+          }"
+          class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
+        >
           <UiStamp :id="vote.voter.id" :size="32" />
-          <router-link
-            :to="{
-              name: 'user',
-              params: {
-                id: vote.voter.id
-              }
-            }"
-            class="overflow-hidden leading-[22px]"
-          >
+          <div class="flex flex-col truncate">
             <h4 class="truncate" v-text="vote.voter.name || shortenAddress(vote.voter.id)" />
             <div
               class="text-[17px] text-skin-text truncate"
               v-text="shortenAddress(vote.voter.id)"
             />
-          </router-link>
-        </div>
-        <div
-          class="hidden leading-[22px] w-[25%] lg:w-[20%] lg:flex flex-col justify-center truncate"
+          </div>
+        </router-link>
+        <button
+          type="button"
+          class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]"
+          :disabled="!vote.reason"
+          @click="handleChoiceClick(vote)"
         >
-          <h4>{{ _rt(vote.created) }}</h4>
-          <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
-        </div>
-        <div class="w-[25%] lg:w-[20%] flex items-center truncate">
           <template v-if="!!props.proposal.privacy && !props.proposal.completed">
             <div class="hidden md:block">
               <div class="flex gap-1 items-center">
@@ -198,28 +207,42 @@ watch([sortBy, choiceFilter], () => {
           <template v-else>
             <UiTooltip
               v-if="proposal.type !== 'basic'"
-              class="max-w-[100%] truncate !inline-block"
               :title="getChoiceText(proposal.choices, vote.choice)"
+              class="max-w-[100%] truncate"
             >
-              {{ getChoiceText(proposal.choices, vote.choice) }}
+              <h4 class="truncate">{{ getChoiceText(proposal.choices, vote.choice) }}</h4>
             </UiTooltip>
-            <UiButton
-              v-else
-              class="!w-[40px] !h-[40px] !px-0 cursor-default bg-transparent"
-              :class="{
-                '!text-skin-success !border-skin-success': vote.choice === 1,
-                '!text-skin-danger !border-skin-danger': vote.choice === 2,
-                '!text-gray-500 !border-gray-500': vote.choice === 3
-              }"
-            >
-              <IH-check v-if="vote.choice === 1" class="inline-block" />
-              <IH-x v-else-if="vote.choice === 2" class="inline-block" />
-              <IH-minus-sm v-else class="inline-block" />
-            </UiButton>
+            <div v-else class="flex items-center space-x-2">
+              <div
+                class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+                :class="`_${vote.choice}`"
+              >
+                <IH-check
+                  v-if="vote.choice === 1"
+                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                />
+                <IH-x
+                  v-else-if="vote.choice === 2"
+                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                />
+                <IH-minus-sm
+                  v-else-if="vote.choice === 3"
+                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                />
+              </div>
+              <h4 class="truncate grow" v-text="proposal.choices[(vote.choice as number) - 1]" />
+            </div>
+            <div class="text-[17px] max-w-[100%] truncate">{{ vote.reason }}</div>
           </template>
+        </button>
+        <div
+          class="hidden leading-[22px] max-w-[144px] w-[144px] lg:flex flex-col justify-center truncate"
+        >
+          <h4>{{ _rt(vote.created) }}</h4>
+          <div class="text-[17px]">{{ _t(vote.created, 'MMM D, YYYY') }}</div>
         </div>
         <div
-          class="text-right leading-[22px] w-[25%] lg:w-[20%] flex flex-col items-end justify-center truncate"
+          class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center items-end truncate"
         >
           <h4 class="text-skin-link">
             {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
@@ -227,10 +250,12 @@ watch([sortBy, choiceFilter], () => {
           </h4>
           <div class="text-[17px]">{{ _n((vote.vp / proposal.scores_total) * 100) }}%</div>
         </div>
-        <div class="w-[30px] lg:w-[60px] flex items-center justify-center">
+        <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
           <UiDropdown>
             <template #button>
-              <IH-dots-vertical class="text-skin-link" />
+              <UiButton class="!p-0 border-0 !h-[auto] bg-transparent">
+                <IH-dots-horizontal class="text-skin-link" />
+              </UiButton>
             </template>
             <template #items>
               <UiDropdownItem v-slot="{ active }">
@@ -266,4 +291,14 @@ watch([sortBy, choiceFilter], () => {
       </div>
     </UiContainerInfiniteScroll>
   </template>
+  <teleport to="#modal">
+    <ModalVoteReason
+      :open="modalOpen"
+      :vote="selectedVote"
+      @close="
+        modalOpen = false;
+        selectedVote = null;
+      "
+    />
+  </teleport>
 </template>

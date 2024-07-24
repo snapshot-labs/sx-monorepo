@@ -188,6 +188,9 @@ export const VOTES_QUERY = gql`
       space {
         id
       }
+      metadata {
+        reason
+      }
       proposal
       choice
       vp
@@ -206,6 +209,9 @@ export const USER_VOTES_QUERY = gql`
       }
       space {
         id
+      }
+      metadata {
+        reason
       }
       proposal
       choice

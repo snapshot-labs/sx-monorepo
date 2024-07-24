@@ -90,5 +90,6 @@ export type ApiVote = {
   };
   choice: number | number[] | Record<string, number>;
   vp: number;
+  reason: string;
   created: number;
 };
