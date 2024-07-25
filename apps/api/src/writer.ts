@@ -26,8 +26,6 @@ export const handleContractDeployed: starknet.Writer = async ({ blockNumber, eve
 
   if (!event) return;
 
-  const classHash = event.class_hash;
-
   if (event.class_hash === networkProperties.spaceClassHash) {
     await instance.executeTemplate('Space', {
       contract: event.contract_address,
