@@ -50,7 +50,7 @@ function handleVoteTypeSelected(type: VoteType) {
       }"
       @click="handleVotingTypeClick"
     >
-      <h4 class="text-skin-link mr-3">{{ activeVotingType.label }}</h4>
+      <h4 class="text-skin-link mr-3" v-text="activeVotingType.label" />
       <div
         v-if="hasMultipleVotingType"
         class="w-[20px] text-right text-skin-link absolute right-3 top-3"
