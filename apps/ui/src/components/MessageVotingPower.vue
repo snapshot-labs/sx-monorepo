@@ -33,8 +33,14 @@ const insufficientProposeVp = computed(
     class="flex flex-col gap-3 items-start"
     v-bind="$attrs"
   >
-    <UiAlert type="error">There was an error fetching your voting power.</UiAlert>
-    <UiButton type="button" class="flex items-center gap-2" @click="$emit('fetchVotingPower')">
+    <UiAlert type="error"
+      >There was an error fetching your voting power.</UiAlert
+    >
+    <UiButton
+      type="button"
+      class="flex items-center gap-2"
+      @click="$emit('fetchVotingPower')"
+    >
       <IH-refresh />Retry
     </UiButton>
   </div>

@@ -41,7 +41,11 @@ const selectedChoices = ref<number[]>(
         </UiButton>
       </template>
     </Draggable>
-    <UiButton primary class="!h-[48px] w-full" @click="emit('vote', selectedChoices)">
+    <UiButton
+      primary
+      class="!h-[48px] w-full"
+      @click="emit('vote', selectedChoices)"
+    >
       Vote
     </UiButton>
   </div>

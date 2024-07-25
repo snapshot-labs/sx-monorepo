@@ -1,5 +1,5 @@
 import { supportsNullCurrent } from '@/networks';
-import type { Space, Proposal } from '@/types';
+import { Proposal, Space } from '@/types';
 
 export function useVotingPower() {
   const votingPowersStore = useVotingPowersStore();
@@ -10,11 +10,15 @@ export function useVotingPower() {
   const block = ref<number | null>(null);
 
   const space = computed(() =>
-    item.value && 'space' in item.value ? (item.value?.space as Space) : item.value
+    item.value && 'space' in item.value
+      ? (item.value?.space as Space)
+      : item.value
   );
 
   const proposal = computed(() =>
-    item.value && 'snapshot' in item.value ? (item.value as Proposal) : undefined
+    item.value && 'snapshot' in item.value
+      ? (item.value as Proposal)
+      : undefined
   );
 
   const proposalSnapshot = computed(() => {
@@ -28,19 +32,23 @@ export function useVotingPower() {
   );
 
   const hasVoteVp = computed(
-    () => (votingPower.value && votingPower.value.totalVotingPower > 0n) || false
+    () =>
+      (votingPower.value && votingPower.value.totalVotingPower > 0n) || false
   );
 
   const hasProposeVp = computed(
     () =>
       (votingPower.value &&
         space.value &&
-        votingPower.value.totalVotingPower >= BigInt(space.value.proposal_threshold)) ||
+        votingPower.value.totalVotingPower >=
+          BigInt(space.value.proposal_threshold)) ||
       false
   );
 
   function latestBlock(space: Space) {
-    return supportsNullCurrent(space.network) ? null : getCurrent(space.network) ?? 0;
+    return supportsNullCurrent(space.network)
+      ? null
+      : getCurrent(space.network) ?? 0;
   }
 
   function reset() {
@@ -51,7 +59,9 @@ export function useVotingPower() {
     if (!web3.value.account) return;
 
     item.value = spaceOrProposal;
-    block.value = proposal.value ? proposalSnapshot.value : latestBlock(space.value as Space);
+    block.value = proposal.value
+      ? proposalSnapshot.value
+      : latestBlock(space.value as Space);
 
     votingPowersStore.fetch(item.value, web3.value.account, block.value);
   }

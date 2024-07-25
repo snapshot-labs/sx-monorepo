@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia';
 import { utils } from '@snapshot-labs/sx';
+import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
-import type { Proposal, Space } from '@/types';
-import type { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { Proposal, Space } from '@/types';
 
 const LATEST_BLOCK_NAME = 'latest';
 
@@ -22,11 +22,18 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
     return `${space.id}:${block ?? LATEST_BLOCK_NAME}`;
   }
 
-  function get(space: Space, block: number | null): VotingPowerItem | undefined {
+  function get(
+    space: Space,
+    block: number | null
+  ): VotingPowerItem | undefined {
     return votingPowers.get(getIndex(space, block));
   }
 
-  async function fetch(item: Space | Proposal, account: string, block: number | null) {
+  async function fetch(
+    item: Space | Proposal,
+    account: string,
+    block: number | null
+  ) {
     const space: Space = 'space' in item ? (item.space as Space) : item;
 
     const existingVotingPower = get(space, block);

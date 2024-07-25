@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import type { Choice, Proposal } from '@/types';
+import { Choice, Proposal } from '@/types';
 
 const definition = {
   type: 'object',
@@ -45,10 +45,15 @@ const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = computed(() =>
   validateForm(definition, form.value, { skipEmptyOptionalFields: true })
 );
-const formattedVotingPower = computed(() => getFormattedVotingPower(votingPower.value));
+const formattedVotingPower = computed(() =>
+  getFormattedVotingPower(votingPower.value)
+);
 
 const canSubmit = computed(
-  () => !!props.choice && Object.keys(formErrors.value).length === 0 && hasVoteVp.value
+  () =>
+    !!props.choice &&
+    Object.keys(formErrors.value).length === 0 &&
+    hasVoteVp.value
 );
 
 async function handleSubmit() {

@@ -81,7 +81,11 @@ watch(
         ></div>
       </div>
     </div>
-    <UiButton primary class="!h-[48px] w-full" @click="$emit('vote', selectedChoices)">
+    <UiButton
+      primary
+      class="!h-[48px] w-full"
+      @click="$emit('vote', selectedChoices)"
+    >
       Vote
     </UiButton>
   </div>
