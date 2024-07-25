@@ -7,7 +7,7 @@ import {
   SendTokenTransaction,
   Transaction
 } from '@/types';
-import { ETH_CONTRACT } from './constants';
+import { ETH_CONTRACT } from '../constants';
 
 export const transactionTypes = [
   'transferFunds',

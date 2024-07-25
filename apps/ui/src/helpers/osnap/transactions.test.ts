@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { ETH_CONTRACT } from './constants';
 import {
   OptimisticGovernorTransaction,
   parseInternalTransaction,
   parseOSnapTransaction
-} from './osnap';
+} from './transactions';
+import { ETH_CONTRACT } from '../constants';
 
 describe('parseOSnapTransaction', () => {
   it('should parse oSnap transfer funds transaction', () => {
