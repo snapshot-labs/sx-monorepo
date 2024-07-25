@@ -312,7 +312,7 @@ watch([sortBy, choiceFilter], () => {
                 </a>
               </UiDropdownItem>
               <UiDropdownItem v-slot="{ active }">
-                <a
+                <button
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
                   @click.prevent="copy(vote.voter.id)"
@@ -325,7 +325,7 @@ watch([sortBy, choiceFilter], () => {
                     <IH-check :width="16" />
                     Copied
                   </template>
-                </a>
+                </button>
               </UiDropdownItem>
             </template>
           </UiDropdown>

@@ -131,13 +131,13 @@ watch(
             }"
             @update:model-value="handleAmountUpdate"
           />
-          <a
+          <button
             class="absolute right-[16px] top-[4px]"
             href="#"
             @click.prevent="handleMaxClick"
           >
             max
-          </a>
+          </button>
           <div
             class="absolute right-[16px] top-[26px] flex items-center gap-x-2"
           >

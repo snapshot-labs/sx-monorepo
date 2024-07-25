@@ -29,7 +29,7 @@ const filteredNfts = computed(() =>
       v-text="'No results'"
     />
     <div v-else class="grid gap-3 grid-cols-3 p-3">
-      <a
+      <button
         v-for="(nft, i) in filteredNfts"
         :key="i"
         role="button"
@@ -38,7 +38,7 @@ const filteredNfts = computed(() =>
       >
         <UiNftImage :item="nft" class="w-full" />
         <div class="mt-2 text-[17px] truncate">{{ nft.displayTitle }}</div>
-      </a>
+      </button>
     </div>
   </template>
 </template>

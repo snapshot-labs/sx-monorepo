@@ -91,7 +91,7 @@ watch(isSwiping, () => {
       />
       <AppTopnav />
       <AppNav />
-      <div
+      <button
         v-if="uiStore.sidebarOpen"
         class="backdrop lg:hidden"
         :style="{

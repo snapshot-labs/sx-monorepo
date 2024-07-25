@@ -42,12 +42,12 @@ watch(open, (val, prev) => {
         <div v-if="$slots.footer" class="border-t p-4 text-center">
           <slot name="footer" />
         </div>
-        <a
+        <button
           class="absolute right-0 -top-1 p-4 text-color"
           @click="$emit('close')"
         >
           <IH-x />
-        </a>
+        </button>
       </div>
     </div>
   </transition>

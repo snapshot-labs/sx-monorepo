@@ -105,7 +105,7 @@ async function handleVoteClick(choice: Choice) {
             · {{ _p(totalProgress) }} {{ quorumLabel(proposal.quorum_type) }}
           </span>
           ·
-          <a
+          <button
             class="text-skin-text"
             @click="modalOpenTimeline = true"
             v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"

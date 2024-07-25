@@ -59,12 +59,10 @@ watch(open, () => (step.value = null));
       <h3 v-else v-text="'Account'" />
     </template>
     <div v-if="!web3.account || step === 'connect'">
-      <div class="m-4 space-y-2">
-        <a
+      <div class="m-4 flex flex-col space-y-2">
+        <button
           v-for="connector in availableConnectors"
           :key="connector.id"
-          target="_blank"
-          class="block"
           @click="$emit('login', connector.id)"
         >
           <UiButton
@@ -79,7 +77,7 @@ watch(open, () => (step.value = null));
             />
             {{ connector.name }}
           </UiButton>
-        </a>
+        </button>
       </div>
     </div>
     <div v-else>

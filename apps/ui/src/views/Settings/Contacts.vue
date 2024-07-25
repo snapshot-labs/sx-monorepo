@@ -27,11 +27,9 @@ function handleContactEdit(contact) {
     <div class="flex">
       <div class="flex-auto" />
       <div class="pt-4 px-4 space-x-2">
-        <a>
-          <UiButton class="!px-0 w-[46px]" @click="openModal('editContact')">
-            <IH-plus-sm class="inline-block" />
-          </UiButton>
-        </a>
+        <UiButton class="!px-0 w-[46px]" @click="openModal('editContact')">
+          <IH-plus-sm class="inline-block" />
+        </UiButton>
       </div>
     </div>
     <UiLabel label="Contacts" />
@@ -51,18 +49,18 @@ function handleContactEdit(contact) {
         </div>
       </div>
       <div class="flex flex-row items-center content-center gap-x-3">
-        <a
+        <button
           class="invisible group-hover:visible"
           @click="handleContactEdit(contact)"
         >
           <IH-pencil />
-        </a>
-        <a
+        </button>
+        <button
           class="invisible group-hover:visible"
           @click="contactsStore.deleteContact(contact.address)"
         >
           <IH-trash />
-        </a>
+        </button>
       </div>
     </div>
     <div v-if="!contactsStore.contacts.length" class="px-4 py-3 text-skin-link">

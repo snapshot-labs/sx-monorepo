@@ -129,7 +129,7 @@ watch(
       class="text-center py-3"
       v-text="'No results'"
     />
-    <div
+    <button
       v-for="(asset, i) in filteredAssets"
       :key="i"
       role="button"
@@ -159,6 +159,6 @@ watch(
         />
         <div class="text-[17px]" v-text="`$${_n(asset.price)}`" />
       </div>
-    </div>
+    </button>
   </template>
 </template>

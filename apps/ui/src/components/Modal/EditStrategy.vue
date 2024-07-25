@@ -53,12 +53,12 @@ watch(
     <template #header>
       <h3>Edit strategy</h3>
       <template v-if="showPicker">
-        <a
+        <button
           class="absolute left-0 -top-1 p-4 text-color"
           @click="showPicker = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
-        </a>
+        </button>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
           <IH-search class="mx-2" />
           <input

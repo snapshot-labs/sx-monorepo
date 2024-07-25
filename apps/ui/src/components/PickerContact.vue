@@ -61,7 +61,7 @@ const filteredContacts = computed(() =>
         class="text-center py-3"
         v-text="'No results'"
       />
-      <div
+      <button
         v-for="contact in filteredContacts"
         :key="contact.address"
         role="button"
@@ -70,7 +70,7 @@ const filteredContacts = computed(() =>
       >
         <div class="flex items-center max-w-full">
           <UiStamp :id="contact.address" type="avatar" :size="32" />
-          <div class="flex flex-col ml-3 leading-5 overflow-hidden">
+          <div class="flex flex-col ml-3 leading-5 overflow-hidden text-left">
             <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
             <div
               class="text-[17px] text-ellipsis overflow-hidden"
@@ -78,7 +78,7 @@ const filteredContacts = computed(() =>
             />
           </div>
         </div>
-      </div>
+      </button>
     </template>
   </div>
 </template>

@@ -21,14 +21,14 @@ function handleCopyLinkClick() {
     </template>
     <template #items>
       <UiDropdownItem v-slot="{ active }">
-        <a
+        <button
           class="flex items-center gap-2"
           :class="{ 'opacity-80': active }"
           @click="handleCopyLinkClick"
         >
           <IH-link />
           Copy link
-        </a>
+        </button>
       </UiDropdownItem>
       <UiDropdownItem v-slot="{ active }">
         <a
