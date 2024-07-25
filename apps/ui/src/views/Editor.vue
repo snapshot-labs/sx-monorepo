@@ -4,7 +4,7 @@ import { CHAIN_IDS } from '@/helpers/constants';
 import { resolver } from '@/helpers/resolver';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
 import {
   Contact,
   RequiredProperty,
@@ -112,6 +112,16 @@ const supportedExecutionStrategies = computed(() => {
 
   return spaceValue.treasuries
     .map(treasury => {
+      // TODO: Check plugins
+      if (networkId.value && offchainNetworks.includes(networkId.value)) {
+        return {
+          address: treasury.address,
+          destinationAddress: null,
+          type: 'oSnap',
+          treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+        };
+      }
+
       const strategy = spaceValue.executors_strategies.find(strategy => {
         return (
           strategy.treasury &&
@@ -443,8 +453,11 @@ export default defineComponent({
               <span class="flex-1">
                 {{ strategy.treasury.name }}
                 <span class="hidden sm:inline-block">
-                  ({{ network.constants.EXECUTORS[strategy.type] }} execution
-                  strategy)
+                  ({{
+                    strategy.type === 'oSnap'
+                      ? 'oSnap'
+                      : `${network.constants.EXECUTORS[strategy.type]} execution strategy`
+                  }})
                 </span>
               </span>
               <IH-check

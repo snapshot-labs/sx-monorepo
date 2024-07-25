@@ -9,6 +9,7 @@ import {
   OffchainNetworkConfig
 } from '@snapshot-labs/sx';
 import { getSwapLink } from '@/helpers/link';
+import { OSnapPlugin, parseInternalTransaction } from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
 import { getUrl } from '@/helpers/utils';
 import {
@@ -18,6 +19,7 @@ import {
   Space,
   Statement,
   StrategyParsedMetadata,
+  Transaction,
   User,
   UserProfile,
   VoteType
@@ -55,7 +57,10 @@ export function createActions(
       connectorType: Connector,
       account: string,
       space: Space,
-      cid: string
+      cid: string,
+      executionStrategy: string | null,
+      executionDestinationAddress: string | null,
+      transactions: Transaction[]
     ) {
       let payload: {
         title: string;
@@ -76,6 +81,23 @@ export function createActions(
       const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
 
+      const plugins = {} as { oSnap?: OSnapPlugin };
+      if (executionStrategy && transactions.length) {
+        plugins.oSnap = {
+          safes: [
+            {
+              safeName: 'Sekhmet treasury',
+              safeAddress: executionStrategy,
+              network: '11155111',
+              transactions: transactions.map(tx =>
+                parseInternalTransaction(tx)
+              ),
+              moduleAddress: '0x7af017232a259734fcb873655117a6055c2d9a05'
+            }
+          ]
+        };
+      }
+
       const data = {
         space: space.id,
         title: payload.title,
@@ -86,7 +108,7 @@ export function createActions(
         start: startTime,
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
-        plugins: '{}',
+        plugins: JSON.stringify(plugins),
         app: EDITOR_APP_NAME,
         timestamp: currentTime
       };
@@ -99,7 +121,10 @@ export function createActions(
       account: string,
       space: Space,
       proposalId: number | string,
-      cid: string
+      cid: string,
+      executionStrategy: string | null,
+      executionDestinationAddress: string | null,
+      transactions: Transaction[]
     ) {
       let payload: {
         title: string;
@@ -116,6 +141,23 @@ export function createActions(
         throw new Error('Failed to fetch proposal metadata');
       }
 
+      const plugins = {} as { oSnap?: OSnapPlugin };
+      if (executionStrategy && transactions.length) {
+        plugins.oSnap = {
+          safes: [
+            {
+              safeName: 'Sekhmet treasury',
+              safeAddress: executionStrategy,
+              network: '11155111',
+              transactions: transactions.map(tx =>
+                parseInternalTransaction(tx)
+              ),
+              moduleAddress: '0x7af017232a259734fcb873655117a6055c2d9a05'
+            }
+          ]
+        };
+      }
+
       const data = {
         proposal: proposalId as string,
         space: space.id,
@@ -124,7 +166,7 @@ export function createActions(
         type: payload.type,
         discussion: payload.discussion,
         choices: payload.choices,
-        plugins: '{}'
+        plugins: JSON.stringify(plugins)
       };
 
       return client.updateProposal({ signer: web3.getSigner(), data });

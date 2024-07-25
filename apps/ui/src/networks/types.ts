@@ -1,6 +1,5 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
@@ -12,6 +11,7 @@ import {
   SpaceMetadata,
   Statement,
   StrategyParsedMetadata,
+  Transaction,
   User,
   UserActivity,
   Vote,
@@ -117,7 +117,7 @@ export type ReadOnlyNetworkActions = {
     cid: string,
     executionStrategy: string | null,
     executionDestinationAddress: string | null,
-    transactions: MetaTransaction[]
+    transactions: Transaction[]
   ): Promise<any>;
   updateProposal(
     web3: Web3Provider,
@@ -128,7 +128,7 @@ export type ReadOnlyNetworkActions = {
     cid: string,
     executionStrategy: string | null,
     executionDestinationAddress: string | null,
-    transactions: MetaTransaction[]
+    transactions: Transaction[]
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(

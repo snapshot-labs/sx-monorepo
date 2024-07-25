@@ -5,7 +5,6 @@ import {
   starknetMainnet,
   starknetSepolia
 } from '@snapshot-labs/sx';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { Account, AllowArray, Call, CallData, RpcProvider } from 'starknet';
 import { executionCall, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
@@ -36,7 +35,8 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  Transaction
 } from '@/types';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
@@ -198,7 +198,7 @@ export function createActions(
       cid: string,
       executionStrategy: string | null,
       executionDestinationAddress: string | null,
-      transactions: MetaTransaction[]
+      transactions: Transaction[]
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -224,7 +224,7 @@ export function createActions(
             space,
             executionStrategy,
             executionDestinationAddress,
-            transactions
+            convertToMetaTransactions(transactions)
           ).executionParams
         };
       } else {
@@ -286,7 +286,7 @@ export function createActions(
       cid: string,
       executionStrategy: string | null,
       executionDestinationAddress: string | null,
-      transactions: MetaTransaction[]
+      transactions: Transaction[]
     ) {
       const isContract = await getIsContract(connectorType, account);
 
@@ -311,7 +311,7 @@ export function createActions(
             space,
             executionStrategy,
             executionDestinationAddress,
-            transactions
+            convertToMetaTransactions(transactions)
           ).executionParams
         };
       } else {
