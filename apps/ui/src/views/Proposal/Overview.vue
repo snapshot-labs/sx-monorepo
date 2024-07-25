@@ -10,6 +10,7 @@ import {
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
+import { toBigIntOrNumber } from '../../helpers/utils';
 
 const props = defineProps<{
   proposal: Proposal;
@@ -385,8 +386,10 @@ onBeforeUnmount(() => destroyAudio());
           proposal.executions &&
           proposal.executions.length > 0 &&
           proposal.scores.length > 0 &&
-          BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
-          BigInt(proposal.scores[0]) > BigInt(proposal.scores[1]) &&
+          toBigIntOrNumber(proposal.scores_total) >=
+            toBigIntOrNumber(proposal.quorum) &&
+          toBigIntOrNumber(proposal.scores[0]) >
+            toBigIntOrNumber(proposal.scores[1]) &&
           proposal.has_execution_window_opened
         "
       >
