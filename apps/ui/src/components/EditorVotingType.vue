@@ -10,9 +10,13 @@ const props = defineProps<{
 
 const modalOpen = ref(false);
 
-const activeVotingType = computed<VoteTypeInfo>(() => VOTING_TYPES_INFO[proposal.value.type]);
+const activeVotingType = computed<VoteTypeInfo>(
+  () => VOTING_TYPES_INFO[proposal.value.type]
+);
 
-const hasMultipleVotingType = computed<boolean>(() => props.votingTypes.length > 1);
+const hasMultipleVotingType = computed<boolean>(
+  () => props.votingTypes.length > 1
+);
 
 function handleVotingTypeClick() {
   if (!hasMultipleVotingType.value) return;
@@ -41,7 +45,9 @@ function handleVoteTypeSelected(type: VoteType) {
     <button
       type="button"
       class="border rounded-xl py-2.5 px-3 flex text-left relative border-skin-content w-full"
-      :class="{ '!border-skin-border cursor-not-allowed': !hasMultipleVotingType }"
+      :class="{
+        '!border-skin-border cursor-not-allowed': !hasMultipleVotingType
+      }"
       @click="handleVotingTypeClick"
     >
       <h4 class="text-skin-link mr-3">{{ activeVotingType.label }}</h4>
