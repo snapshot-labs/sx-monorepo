@@ -26,13 +26,15 @@ export const handleContractDeployed: starknet.Writer = async ({ blockNumber, eve
 
   if (!event) return;
 
-  if (event.class_hash === networkProperties.spaceClassHash) {
+  const paddedClassHash = validateAndParseAddress(event.class_hash);
+
+  if (paddedClassHash === networkProperties.spaceClassHash) {
     await instance.executeTemplate('Space', {
       contract: event.contract_address,
       start: blockNumber
     });
   } else {
-    console.log('Unknown class hash', event.class_hash);
+    console.log('Unknown class hash', paddedClassHash);
   }
 };
 
