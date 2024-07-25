@@ -1,6 +1,8 @@
-<script setup lang="ts" generic="T extends string | number, U extends readonly Item<T>[]">
-import type { Component } from 'vue';
-
+<script
+  setup
+  lang="ts"
+  generic="T extends string | number, U extends readonly Item<T>[]"
+>
 export type Item<T extends string | number> = {
   key: T;
   label: string;
@@ -18,7 +20,9 @@ const props = defineProps<{
   placement?: 'left' | 'right';
 }>();
 
-const currentItem = computed(() => props.items.find(item => item.key === model.value));
+const currentItem = computed(() =>
+  props.items.find(item => item.key === model.value)
+);
 const items = computed(() => props.items);
 </script>
 
@@ -29,7 +33,9 @@ const items = computed(() => props.items);
         <button
           class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-[16px] min-w-[76px] h-[42px] top-1 outline-0 text-skin-link bg-skin-bg"
         >
-          <div class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text">
+          <div
+            class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
+          >
             {{ title }}
           </div>
           <template v-if="currentItem">
@@ -49,14 +55,26 @@ const items = computed(() => props.items);
       </slot>
     </template>
     <template #items>
-      <UiDropdownItem v-for="item in items" :key="item.key" v-slot="{ active, disabled }">
+      <UiDropdownItem
+        v-for="item in items"
+        :key="item.key"
+        v-slot="{ active, disabled }"
+      >
         <button
           class="flex items-center gap-2"
           :class="{ 'opacity-80': active, 'opacity-40': disabled }"
           @click="model = item.key"
         >
-          <div v-if="item.indicator" class="w-[8px] h-[8px] rounded-full" :class="item.indicator" />
-          <component :is="item.component" v-else-if="item.component" v-bind="item.componentProps" />
+          <div
+            v-if="item.indicator"
+            class="w-[8px] h-[8px] rounded-full"
+            :class="item.indicator"
+          />
+          <component
+            :is="item.component"
+            v-else-if="item.component"
+            v-bind="item.componentProps"
+          />
           {{ item.label }}
         </button>
       </UiDropdownItem>

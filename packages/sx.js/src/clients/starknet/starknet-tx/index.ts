@@ -1,25 +1,25 @@
-import { Account, CallData, shortString, uint256, hash } from 'starknet';
-import { Contract } from '@ethersproject/contracts';
 import { Signer } from '@ethersproject/abstract-signer';
+import { Contract } from '@ethersproject/contracts';
 import { TransactionResponse } from '@ethersproject/providers';
 import { poseidonHashMany } from 'micro-starknet';
 import randomBytes from 'randombytes';
-import { getStrategiesWithParams } from '../../../utils/strategies';
+import { Account, CallData, hash, shortString, uint256 } from 'starknet';
+import SpaceAbi from './abis/Space.json';
 import { getAuthenticator } from '../../../authenticators/starknet';
+import {
+  AddressConfig,
+  ClientConfig,
+  ClientOpts,
+  Envelope,
+  Propose,
+  UpdateProposal,
+  Vote
+} from '../../../types';
+import { predictCloneAddress } from '../../../utils/address';
 import { hexPadLeft } from '../../../utils/encoding';
 import { estimateStarknetFee } from '../../../utils/fees';
-import { predictCloneAddress } from '../../../utils/address';
-import SpaceAbi from './abis/Space.json';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import L1AvatarExecutionStrategyFactoryAbi from '../l1-executor/abis/L1AvatarExecutionStrategyFactory.json';
-import {
-  Vote,
-  Propose,
-  Envelope,
-  ClientOpts,
-  ClientConfig,
-  UpdateProposal,
-  AddressConfig
-} from '../../../types';
 
 type SpaceParams = {
   controller: string;
@@ -63,7 +63,8 @@ type Opts = {
 };
 
 const NO_UPDATE_U32 = '0xf2cda9b1';
-const NO_UPDATE_ADDRESS = '0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048';
+const NO_UPDATE_ADDRESS =
+  '0xf2cda9b13ed04e585461605c0d6e804933ca828111bd94d4e6a96c75e8b048';
 const NO_UPDATE_STRING = 'No update';
 
 const callData = new CallData(SpaceAbi);
@@ -118,7 +119,9 @@ export class StarknetTx {
             address: strategy.addr,
             params: strategy.params
           })),
-          votingStrategiesMetadata.map(metadata => shortString.splitLongString(metadata)),
+          votingStrategiesMetadata.map(metadata =>
+            shortString.splitLongString(metadata)
+          ),
           authenticators,
           shortString.splitLongString(metadataUri),
           shortString.splitLongString(daoUri)
@@ -153,15 +156,16 @@ export class StarknetTx {
       signer
     );
 
-    const response: TransactionResponse = await l1AvatarExecutionStrategyFactory.createContract(
-      controller,
-      target,
-      this.config.networkConfig.starknetCore,
-      executionRelayer,
-      spaces,
-      quorum,
-      usedSalt
-    );
+    const response: TransactionResponse =
+      await l1AvatarExecutionStrategyFactory.createContract(
+        controller,
+        target,
+        this.config.networkConfig.starknetCore,
+        executionRelayer,
+        spaces,
+        quorum,
+        usedSalt
+      );
 
     return { address, txId: response.hash };
   }
@@ -170,7 +174,13 @@ export class StarknetTx {
     return poseidonHashMany([BigInt(sender), BigInt(saltNonce)]);
   }
 
-  async predictSpaceAddress({ account, saltNonce }: { account: Account; saltNonce: string }) {
+  async predictSpaceAddress({
+    account,
+    saltNonce
+  }: {
+    account: Account;
+    saltNonce: string;
+  }) {
     const salt = await this.getSalt({ sender: account.address, saltNonce });
 
     return hexPadLeft(
@@ -186,7 +196,10 @@ export class StarknetTx {
   async propose(account: Account, envelope: Envelope<Propose>, opts?: Opts) {
     const authorAddress = envelope.signatureData?.address || account.address;
 
-    const authenticator = getAuthenticator(envelope.data.authenticator, this.config.networkConfig);
+    const authenticator = getAuthenticator(
+      envelope.data.authenticator,
+      this.config.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
@@ -219,10 +232,17 @@ export class StarknetTx {
     return account.execute(calls, undefined, { ...opts, maxFee });
   }
 
-  async updateProposal(account: Account, envelope: Envelope<UpdateProposal>, opts?: Opts) {
+  async updateProposal(
+    account: Account,
+    envelope: Envelope<UpdateProposal>,
+    opts?: Opts
+  ) {
     const authorAddress = envelope.signatureData?.address || account.address;
 
-    const authenticator = getAuthenticator(envelope.data.authenticator, this.config.networkConfig);
+    const authenticator = getAuthenticator(
+      envelope.data.authenticator,
+      this.config.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
@@ -246,7 +266,10 @@ export class StarknetTx {
   async vote(account: Account, envelope: Envelope<Vote>, opts?: Opts) {
     const voterAddress = envelope.signatureData?.address || account.address;
 
-    const authenticator = getAuthenticator(envelope.data.authenticator, this.config.networkConfig);
+    const authenticator = getAuthenticator(
+      envelope.data.authenticator,
+      this.config.networkConfig
+    );
     if (!authenticator) {
       throw new Error('Invalid authenticator');
     }
@@ -290,7 +313,10 @@ export class StarknetTx {
     const call = {
       contractAddress: space,
       entrypoint: 'execute',
-      calldata: callData.compile('execute', [uint256.bnToUint256(proposalId), executionPayload])
+      calldata: callData.compile('execute', [
+        uint256.bnToUint256(proposalId),
+        executionPayload
+      ])
     };
 
     const maxFee = opts?.nonce
@@ -313,8 +339,12 @@ export class StarknetTx {
         min_voting_duration: settings.minVotingDuration ?? NO_UPDATE_U32,
         max_voting_duration: settings.maxVotingDuration ?? NO_UPDATE_U32,
         voting_delay: settings.votingDelay ?? NO_UPDATE_U32,
-        metadata_uri: shortString.splitLongString(settings.metadataUri ?? NO_UPDATE_STRING),
-        dao_uri: shortString.splitLongString(settings.daoUri ?? NO_UPDATE_STRING),
+        metadata_uri: shortString.splitLongString(
+          settings.metadataUri ?? NO_UPDATE_STRING
+        ),
+        dao_uri: shortString.splitLongString(
+          settings.daoUri ?? NO_UPDATE_STRING
+        ),
         proposal_validation_strategy: settings.proposalValidationStrategy
           ? {
               address: settings.proposalValidationStrategy.addr,

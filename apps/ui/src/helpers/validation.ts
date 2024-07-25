@@ -1,11 +1,16 @@
+import { Interface } from '@ethersproject/abi';
+import { isAddress } from '@ethersproject/address';
+import { BigNumber } from '@ethersproject/bignumber';
+import {
+  MaxInt256,
+  MaxUint256,
+  MinInt256,
+  Zero
+} from '@ethersproject/constants';
+import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
-import { isAddress } from '@ethersproject/address';
-import { parseUnits } from '@ethersproject/units';
-import { Zero, MinInt256, MaxInt256, MaxUint256 } from '@ethersproject/constants';
-import { BigNumber } from '@ethersproject/bignumber';
-import { Interface } from '@ethersproject/abi';
 import { resolver } from '@/helpers/resolver';
 
 type Opts = { skipEmptyOptionalFields: boolean };
@@ -25,7 +30,8 @@ export const addressValidator = (value: string) => {
   }
 };
 
-const bytesValidator = (value: string) => !!value.match(/^0x([0-9a-fA-F][0-9a-fA-F])+$/);
+const bytesValidator = (value: string) =>
+  !!value.match(/^0x([0-9a-fA-F][0-9a-fA-F])+$/);
 
 const uint256Validator = (value: string) => {
   if (!value.match(/^([0-9]|[1-9][0-9]+)$/)) return false;
@@ -49,18 +55,19 @@ const int256Validator = (value: string) => {
   }
 };
 
-const getArrayValidator = (valueValidator: (value: string) => boolean) => (value: string) => {
-  if (!value) return false;
+const getArrayValidator =
+  (valueValidator: (value: string) => boolean) => (value: string) => {
+    if (!value) return false;
 
-  try {
-    const parsed = JSON.parse(value);
-    if (!Array.isArray(parsed)) return false;
+    try {
+      const parsed = JSON.parse(value);
+      if (!Array.isArray(parsed)) return false;
 
-    return parsed.every((value: string) => valueValidator(value));
-  } catch {
-    return false;
-  }
-};
+      return parsed.every((value: string) => valueValidator(value));
+    } catch {
+      return false;
+    }
+  };
 
 ajv.addFormat('address', {
   validate: addressValidator
@@ -124,7 +131,11 @@ ajv.addFormat('addresses-with-voting-power', {
       .every(input => {
         const [address, vp] = input.split(':').map(s => s.trim());
 
-        return address.length && addressValidator(address) && uint256Validator(vp || '');
+        return (
+          address.length &&
+          addressValidator(address) &&
+          uint256Validator(vp || '')
+        );
       });
   }
 });
@@ -296,7 +307,10 @@ export const getValidator = (schema: any) => {
 
       return getErrors(validate.errors);
     },
-    validateAsync: async (form: any, opts: Opts = { skipEmptyOptionalFields: false }) => {
+    validateAsync: async (
+      form: any,
+      opts: Opts = { skipEmptyOptionalFields: false }
+    ) => {
       try {
         await validate(getFormValues(schema, form, opts));
 
@@ -316,7 +330,9 @@ export const getValidator = (schema: any) => {
 export function validateForm(
   schema,
   form,
-  opts: { skipEmptyOptionalFields: boolean } = { skipEmptyOptionalFields: false }
+  opts: { skipEmptyOptionalFields: boolean } = {
+    skipEmptyOptionalFields: false
+  }
 ): Record<string, string> {
   const processedForm = getFormValues(schema, form, opts);
 

@@ -1,28 +1,32 @@
-import randomBytes from 'randombytes';
 import { AbiCoder } from '@ethersproject/abi';
+import { Signer } from '@ethersproject/abstract-signer';
+import {
+  Contract,
+  ContractFactory,
+  ContractInterface
+} from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { Contract, ContractFactory, ContractInterface } from '@ethersproject/contracts';
-import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
+import randomBytes from 'randombytes';
+import AvatarContract from './fixtures/Avatar.json';
+import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
+import CompTokenContract from './fixtures/CompToken.json';
+import CompVotingStrategyContract from './fixtures/CompVotingStrategy.json';
+import Erc20VotesTokenContract from './fixtures/Erc20VotesToken.json';
+import EthSigAuthenticatorContract from './fixtures/EthSigAuthenticator.json';
+import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
+import MerkleWhitelistVotingStrategyContract from './fixtures/MerkleWhitelistVotingStrategy.json';
+import OzVotesVotingStrategyContract from './fixtures/OzVotesVotingStrategy.json';
 import ProxyFactoryContract from './fixtures/ProxyFactory.json';
 import SpaceContract from './fixtures/Space.json';
-import AvatarContract from './fixtures/Avatar.json';
-import CompTokenContract from './fixtures/CompToken.json';
-import Erc20VotesTokenContract from './fixtures/Erc20VotesToken.json';
-import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
-import EthTxAuthenticatorContract from './fixtures/EthTxAuthenticator.json';
-import EthSigAuthenticatorContract from './fixtures/EthSigAuthenticator.json';
-import VanillaProposalValidationStrategyContract from './fixtures/VanillaProposalValidationStrategy.json';
-import VotingPowerProposalValidationStrategyContract from './fixtures/VotingPowerProposalValidationStrategy.json';
-import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
-import CompVotingStrategyContract from './fixtures/CompVotingStrategy.json';
-import OzVotesVotingStrategyContract from './fixtures/OzVotesVotingStrategy.json';
-import MerkleWhitelistVotingStrategyContract from './fixtures/MerkleWhitelistVotingStrategy.json';
-import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
-import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
 import TimelockExecutionStrategyContract from './fixtures/TimelockExecutionStrategy.json';
-import type { Signer } from '@ethersproject/abstract-signer';
-import type { EvmNetworkConfig } from '../../../src/types';
+import VanillaAuthenciatorContract from './fixtures/VanillaAuthenticator.json';
+import VanillaExecutionStrategyContract from './fixtures/VanillaExecutionStrategy.json';
+import VanillaProposalValidationStrategyContract from './fixtures/VanillaProposalValidationStrategy.json';
+import VanillaVotingStrategyContract from './fixtures/VanillaVotingStrategy.json';
+import VotingPowerProposalValidationStrategyContract from './fixtures/VotingPowerProposalValidationStrategy.json';
+import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
+import { EvmNetworkConfig } from '../../../src/types';
 
 export type TestConfig = {
   controller: string;
@@ -64,25 +68,43 @@ export async function deployDependency(
   contractDetails: ContractDetails,
   ...args: any[]
 ) {
-  const factory = new ContractFactory(contractDetails.abi, contractDetails.bytecode.object, signer);
+  const factory = new ContractFactory(
+    contractDetails.abi,
+    contractDetails.bytecode.object,
+    signer
+  );
 
   const contract = await factory.deploy(...args);
 
   return contract.address;
 }
 
-export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<TestConfig> {
+export async function setup(
+  provider: JsonRpcProvider,
+  signer: Signer
+): Promise<TestConfig> {
   const precomputedSpaceSalt = `0x${randomBytes(32).toString('hex')}`;
 
   const controller = await signer.getAddress();
 
   const avatar = await deployDependency(signer, AvatarContract);
   const compToken = await deployDependency(signer, CompTokenContract);
-  const erc20VotesToken = await deployDependency(signer, Erc20VotesTokenContract, 'VOTES', 'VOTES');
+  const erc20VotesToken = await deployDependency(
+    signer,
+    Erc20VotesTokenContract,
+    'VOTES',
+    'VOTES'
+  );
   const proxyFactory = await deployDependency(signer, ProxyFactoryContract);
   const masterSpace = await deployDependency(signer, SpaceContract);
-  const vanillaAuthenticator = await deployDependency(signer, VanillaAuthenciatorContract);
-  const ethTxAuthenticator = await deployDependency(signer, EthTxAuthenticatorContract);
+  const vanillaAuthenticator = await deployDependency(
+    signer,
+    VanillaAuthenciatorContract
+  );
+  const ethTxAuthenticator = await deployDependency(
+    signer,
+    EthTxAuthenticatorContract
+  );
   const ethSigAuthenticator = await deployDependency(
     signer,
     EthSigAuthenticatorContract,
@@ -98,9 +120,18 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
     VotingPowerProposalValidationStrategyContract
   );
 
-  const vanillaVotingStrategy = await deployDependency(signer, VanillaVotingStrategyContract);
-  const compVotingStrategy = await deployDependency(signer, CompVotingStrategyContract);
-  const ozVotesVotingStrategy = await deployDependency(signer, OzVotesVotingStrategyContract);
+  const vanillaVotingStrategy = await deployDependency(
+    signer,
+    VanillaVotingStrategyContract
+  );
+  const compVotingStrategy = await deployDependency(
+    signer,
+    CompVotingStrategyContract
+  );
+  const ozVotesVotingStrategy = await deployDependency(
+    signer,
+    OzVotesVotingStrategyContract
+  );
   const merkleWhitelistVotingStrategy = await deployDependency(
     signer,
     MerkleWhitelistVotingStrategyContract
@@ -166,28 +197,34 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
     saltNonce: precomputedSpaceSalt
   });
 
-  const { address: avatarExecutionStrategy } = await ethTxClient.deployAvatarExecution({
-    signer,
-    params: {
-      controller,
-      target: avatar,
-      spaces: [spaceAddress],
-      quorum: 1n
-    }
-  });
+  const { address: avatarExecutionStrategy } =
+    await ethTxClient.deployAvatarExecution({
+      signer,
+      params: {
+        controller,
+        target: avatar,
+        spaces: [spaceAddress],
+        quorum: 1n
+      }
+    });
 
-  const { address: timelockExecutionStrategy } = await ethTxClient.deployTimelockExecution({
-    signer,
-    params: {
-      controller,
-      vetoGuardian: controller,
-      spaces: [spaceAddress],
-      timelockDelay: 0n,
-      quorum: 1n
-    }
-  });
+  const { address: timelockExecutionStrategy } =
+    await ethTxClient.deployTimelockExecution({
+      signer,
+      params: {
+        controller,
+        vetoGuardian: controller,
+        spaces: [spaceAddress],
+        timelockDelay: 0n,
+        quorum: 1n
+      }
+    });
 
-  const compTokenContract = new Contract(compToken, CompTokenContract.abi, signer);
+  const compTokenContract = new Contract(
+    compToken,
+    CompTokenContract.abi,
+    signer
+  );
   await compTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
   await compTokenContract.delegate(controller);
 
@@ -196,7 +233,10 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
     Erc20VotesTokenContract.abi,
     signer
   );
-  await erc20VotesTokenContract.mint(controller, 2n * 10n ** COMP_TOKEN_DECIMALS);
+  await erc20VotesTokenContract.mint(
+    controller,
+    2n * 10n ** COMP_TOKEN_DECIMALS
+  );
   await erc20VotesTokenContract.delegate(controller);
 
   await signer.sendTransaction({
@@ -223,7 +263,10 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
   const tree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
 
   const abiCoder = new AbiCoder();
-  const whitelistVotingStrategyParams = abiCoder.encode(['bytes32'], [tree.root]);
+  const whitelistVotingStrategyParams = abiCoder.encode(
+    ['bytes32'],
+    [tree.root]
+  );
 
   await ethTxClient.deploySpace({
     signer,
@@ -259,10 +302,15 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
           ]
         )
       },
-      proposalValidationStrategyMetadataUri: 'proposalValidationStrategyMetadataUri',
+      proposalValidationStrategyMetadataUri:
+        'proposalValidationStrategyMetadataUri',
       daoUri: 'daoUri',
       metadataUri: 'metadataUri',
-      authenticators: [vanillaAuthenticator, ethTxAuthenticator, ethSigAuthenticator],
+      authenticators: [
+        vanillaAuthenticator,
+        ethTxAuthenticator,
+        ethSigAuthenticator
+      ],
       votingStrategies: [
         {
           addr: vanillaVotingStrategy,
@@ -281,7 +329,12 @@ export async function setup(provider: JsonRpcProvider, signer: Signer): Promise<
           params: whitelistVotingStrategyParams
         }
       ],
-      votingStrategiesMetadata: ['0x00', `0x${COMP_TOKEN_DECIMALS.toString(16)}`, '0x00', '0x00']
+      votingStrategiesMetadata: [
+        '0x00',
+        `0x${COMP_TOKEN_DECIMALS.toString(16)}`,
+        '0x00',
+        '0x00'
+      ]
     },
     saltNonce: precomputedSpaceSalt
   });

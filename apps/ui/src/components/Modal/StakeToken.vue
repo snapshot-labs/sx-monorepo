@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { clone } from '@/helpers/utils';
 import { createStakeTokenTransaction } from '@/helpers/transactions';
+import { clone } from '@/helpers/utils';
 import { NetworkID, Transaction } from '@/types';
 
 const STAKING_CONTRACTS = {
@@ -68,7 +68,9 @@ const token = computed(() => {
 const stakingContract = computed(() => STAKING_CONTRACTS[props.networkId]);
 
 function handleMaxClick() {
-  handleAmountUpdate(formatUnits(token.value.tokenBalance, token.value.decimals));
+  handleAmountUpdate(
+    formatUnits(token.value.tokenBalance, token.value.decimals)
+  );
 }
 
 function handleAmountUpdate(value) {
@@ -129,10 +131,16 @@ watch(
             }"
             @update:model-value="handleAmountUpdate"
           />
-          <a class="absolute right-[16px] top-[4px]" href="#" @click.prevent="handleMaxClick">
+          <a
+            class="absolute right-[16px] top-[4px]"
+            href="#"
+            @click.prevent="handleMaxClick"
+          >
             max
           </a>
-          <div class="absolute right-[16px] top-[26px] flex items-center gap-x-2">
+          <div
+            class="absolute right-[16px] top-[26px] flex items-center gap-x-2"
+          >
             <UiStamp :id="token.contractAddress" type="token" :size="20" />
             ETH
           </div>
@@ -147,15 +155,23 @@ watch(
               examples: ['0']
             }"
           />
-          <div class="absolute right-[16px] top-[28px] flex items-center gap-x-2">
-            <UiStamp :id="`${networkId}:${stakingContract.address}`" type="token" :size="20" />
+          <div
+            class="absolute right-[16px] top-[28px] flex items-center gap-x-2"
+          >
+            <UiStamp
+              :id="`${networkId}:${stakingContract.address}`"
+              type="token"
+              :size="20"
+            />
             stETH
           </div>
         </div>
       </template>
     </div>
     <template v-if="stakingContract" #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"> Confirm </UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+        Confirm
+      </UiButton>
     </template>
   </UiModal>
 </template>

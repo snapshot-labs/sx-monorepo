@@ -17,7 +17,8 @@ function updateIntersectionObserver() {
   if (!container.value) return;
   if (container.value.children.length === 0) return;
 
-  const lastElement = container.value.children[container.value.children.length - 1];
+  const lastElement =
+    container.value.children[container.value.children.length - 1];
 
   intersectionObserver.observe(lastElement);
 }

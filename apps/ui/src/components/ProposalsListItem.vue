@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { quorumLabel, quorumProgress } from '@/helpers/quorum';
-import { _rt, _n, _p, shortenAddress, getProposalId } from '@/helpers/utils';
-import type { Proposal as ProposalType, Choice } from '@/types';
+import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
+import { Choice, Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType; showSpace: boolean }>();
 
@@ -37,7 +37,12 @@ async function handleVoteClick(choice: Choice) {
               }
             }"
           >
-            <ProposalIconStatus width="17" height="17" :state="proposal.state" class="top-[6px]" />
+            <ProposalIconStatus
+              width="17"
+              height="17"
+              :state="proposal.state"
+              class="top-[6px]"
+            />
           </router-link>
 
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
@@ -81,8 +86,11 @@ async function handleVoteClick(choice: Choice) {
           <router-link
             class="text-skin-text"
             :to="{
-              name: 'user',
-              params: { id: proposal.author.id }
+              name: 'space-user-statement',
+              params: {
+                id: `${proposal.network}:${proposal.space.id}`,
+                user: proposal.author.id
+              }
             }"
           >
             {{ proposal.author.name || shortenAddress(proposal.author.id) }}
@@ -112,11 +120,17 @@ async function handleVoteClick(choice: Choice) {
           <template #cancelled><div /></template>
           <template #voted-pending><div /></template>
           <template #voted>
-            <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <ProposalResults
+              v-if="proposal.type === 'basic'"
+              :proposal="proposal"
+            />
             <div v-else />
           </template>
           <template #ended>
-            <ProposalResults v-if="proposal.type === 'basic'" :proposal="proposal" />
+            <ProposalResults
+              v-if="proposal.type === 'basic'"
+              :proposal="proposal"
+            />
             <div v-else />
           </template>
           <ProposalVoteBasic

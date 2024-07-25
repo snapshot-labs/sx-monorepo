@@ -2,7 +2,9 @@ import { formatAddress } from './utils';
 
 const resolvedAddresses = new Map<string, string | null>();
 
-export async function getNames(addresses: string[]): Promise<Record<string, string>> {
+export async function getNames(
+  addresses: string[]
+): Promise<Record<string, string>> {
   try {
     const inputMapping = Object.fromEntries(
       addresses.map(address => [address, formatAddress(address)])
@@ -32,7 +34,10 @@ export async function getNames(addresses: string[]): Promise<Record<string, stri
     }
 
     const entries: any = Object.entries(inputMapping)
-      .map(([address, formatted]) => [address, resolvedAddresses.get(formatted) || null])
+      .map(([address, formatted]) => [
+        address,
+        resolvedAddresses.get(formatted) || null
+      ])
       .filter(([, name]) => name);
 
     return Object.fromEntries(entries);

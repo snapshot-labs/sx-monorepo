@@ -40,8 +40,11 @@ const allContacts = computed(() => {
 const filteredContacts = computed(() =>
   allContacts.value.filter(contact => {
     return (
-      contact.name.toLocaleLowerCase().includes(props.searchValue.toLocaleLowerCase()) ||
-      contact.address.toLocaleLowerCase() === props.searchValue.toLocaleLowerCase()
+      contact.name
+        .toLocaleLowerCase()
+        .includes(props.searchValue.toLocaleLowerCase()) ||
+      contact.address.toLocaleLowerCase() ===
+        props.searchValue.toLocaleLowerCase()
     );
   })
 );
@@ -53,7 +56,11 @@ const filteredContacts = computed(() =>
       <UiLoading />
     </div>
     <template v-else>
-      <div v-if="filteredContacts.length === 0" class="text-center py-3" v-text="'No results'" />
+      <div
+        v-if="filteredContacts.length === 0"
+        class="text-center py-3"
+        v-text="'No results'"
+      />
       <div
         v-for="contact in filteredContacts"
         :key="contact.address"

@@ -1,22 +1,24 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
+import starknet from 'starknet';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
-import { starkProvider } from '../../helpers';
+import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
 import { proposeEnvelope } from '../../fixtures';
+import { starkProvider } from '../../helpers';
 
 const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('erc20VotesStrategy', () => {
   beforeAll(() => {
     vi.mock('starknet', async importOriginal => {
-      const actual = await importOriginal<typeof import('starknet')>();
+      const actual = await importOriginal<typeof starknet>();
 
       return {
         ...actual,
         Contract: class {
           async get_past_votes(voterAddress: string) {
             if (
-              voterAddress === '0x7ff6b17f07c4d83236e3fc5f94259a19d1ed41bbcf1822397ea17882e9b038d'
+              voterAddress ===
+              '0x7ff6b17f07c4d83236e3fc5f94259a19d1ed41bbcf1822397ea17882e9b038d'
             ) {
               return '79228132514264337593543950335';
             }

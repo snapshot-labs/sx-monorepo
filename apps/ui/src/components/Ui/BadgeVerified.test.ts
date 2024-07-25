@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { expect, it } from 'vitest';
 import VueTippy from 'vue-tippy';
 import BadgeVerified from './BadgeVerified.vue';
 

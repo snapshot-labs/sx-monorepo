@@ -4,8 +4,11 @@ export const REGISTERED_TRANSACTIONS = 'registered_transactions';
 export const REGISTERED_PROPOSALS = 'registered_proposals';
 
 export async function createTables() {
-  const registeredTransactionsTableExists = await knex.schema.hasTable(REGISTERED_TRANSACTIONS);
-  const registeredProposalsTableExists = await knex.schema.hasTable(REGISTERED_PROPOSALS);
+  const registeredTransactionsTableExists = await knex.schema.hasTable(
+    REGISTERED_TRANSACTIONS
+  );
+  const registeredProposalsTableExists =
+    await knex.schema.hasTable(REGISTERED_PROPOSALS);
 
   if (!registeredTransactionsTableExists) {
     await knex.schema.createTable(REGISTERED_TRANSACTIONS, t => {
@@ -33,7 +36,12 @@ export async function createTables() {
   }
 }
 
-export async function registerTransaction(network: string, type: string, hash: string, data: any) {
+export async function registerTransaction(
+  network: string,
+  type: string,
+  hash: string,
+  data: any
+) {
   return knex(REGISTERED_TRANSACTIONS).insert({
     network,
     type,
@@ -46,7 +54,10 @@ export async function getTransactionsToProcess() {
   return knex(REGISTERED_TRANSACTIONS).select('*').where({ processed: false });
 }
 
-export async function markTransactionProcessed(id: number, { failed = false } = {}) {
+export async function markTransactionProcessed(
+  id: number,
+  { failed = false } = {}
+) {
   return knex(REGISTERED_TRANSACTIONS)
     .update({ updated_at: knex.fn.now(), processed: true, failed })
     .where({ id });
@@ -73,7 +84,10 @@ export async function registerProposal(
   });
 }
 
-export async function updateProposal(id: string, proposal: { herodotusId: string }) {
+export async function updateProposal(
+  id: string,
+  proposal: { herodotusId: string }
+) {
   return knex(REGISTERED_PROPOSALS)
     .update({ updated_at: knex.fn.now(), ...proposal })
     .where({ id });

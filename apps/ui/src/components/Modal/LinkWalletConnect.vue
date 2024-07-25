@@ -17,7 +17,9 @@ const definition = {
       type: 'string',
       title: 'Pairing code',
       minLength: 1,
-      examples: ['wc:7a96b74baf1bb28beae7cbbf485e0dfc17ec3fc7d3f2eed9337ca2e7524e1d1d']
+      examples: [
+        'wc:7a96b74baf1bb28beae7cbbf485e0dfc17ec3fc7d3f2eed9337ca2e7524e1d1d'
+      ]
     }
   }
 };
@@ -101,9 +103,14 @@ watch(loading, () => {
     <div class="s-box p-4">
       <template v-if="logged && proposal">
         <div class="flex flex-col items-center">
-          <img :src="proposal.proposer.metadata.icons[0]" class="w-[48px] mb-3" />
+          <img
+            :src="proposal.proposer.metadata.icons[0]"
+            class="w-[48px] mb-3"
+          />
           <span class="text-center mb-2">
-            <strong class="text-skin-link">{{ proposal.proposer.metadata.name }}</strong>
+            <strong class="text-skin-link">{{
+              proposal.proposer.metadata.name
+            }}</strong>
             <span> is connected</span>
           </span>
           <span>You can start interacting with the app.</span>
@@ -115,13 +122,20 @@ watch(loading, () => {
         :error="formErrors"
         :definition="definition"
       />
-      <div v-else-if="step === 'APPROVE' && proposal" class="flex flex-col items-center">
+      <div
+        v-else-if="step === 'APPROVE' && proposal"
+        class="flex flex-col items-center"
+      >
         <img :src="proposal.proposer.metadata.icons[0]" class="w-[48px] mb-3" />
         <span class="text-center mb-2">
-          <strong class="text-skin-link">{{ proposal.proposer.metadata.name }}</strong>
+          <strong class="text-skin-link">{{
+            proposal.proposer.metadata.name
+          }}</strong>
           <span> wants to connect</span>
         </span>
-        <div class="text-[17px] font-bold text-skin-link">{{ proposal.proposer.metadata.url }}</div>
+        <div class="text-[17px] font-bold text-skin-link">
+          {{ proposal.proposer.metadata.url }}
+        </div>
       </div>
     </div>
     <template #footer>
@@ -146,7 +160,12 @@ watch(loading, () => {
       </UiButton>
       <div v-else-if="step === 'APPROVE' && approveFn" class="flex space-x-3">
         <UiButton class="w-full" @click="handleApprove(false)">Reject</UiButton>
-        <UiButton :primary="true" :loading="approving" class="w-full" @click="handleApprove(true)">
+        <UiButton
+          :primary="true"
+          :loading="approving"
+          class="w-full"
+          @click="handleApprove(true)"
+        >
           Approve
         </UiButton>
       </div>

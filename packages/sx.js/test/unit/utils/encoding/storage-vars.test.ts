@@ -1,10 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getStorageVarAddress } from '../../../../src/utils/encoding';
 
 describe('storageVars', () => {
   describe('getStorageVarAddress', () => {
     it('should calculate address for strage var with no arguments', () => {
-      const address = getStorageVarAddress('Voting_num_voting_strategies_store');
+      const address = getStorageVarAddress(
+        'Voting_num_voting_strategies_store'
+      );
 
       expect(address).toBe(
         '1132603603708845750901293048689264183551203819688552254429518139992977083884'

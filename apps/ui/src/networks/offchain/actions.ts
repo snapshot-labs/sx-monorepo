@@ -1,35 +1,36 @@
 import { isAddress } from '@ethersproject/address';
+import { Web3Provider } from '@ethersproject/providers';
+import { Wallet } from '@ethersproject/wallet';
 import {
-  OffchainNetworkConfig,
   clients,
   getOffchainStrategy,
   offchainGoerli,
-  offchainMainnet
+  offchainMainnet,
+  OffchainNetworkConfig
 } from '@snapshot-labs/sx';
-import { getSdkChoice } from './helpers';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
-import { getUrl } from '@/helpers/utils';
-import { getProvider } from '@/helpers/provider';
 import { getSwapLink } from '@/helpers/link';
-import { Web3Provider } from '@ethersproject/providers';
-import type { Wallet } from '@ethersproject/wallet';
-import type {
-  StrategyParsedMetadata,
+import { getProvider } from '@/helpers/provider';
+import { getUrl } from '@/helpers/utils';
+import {
   Choice,
+  NetworkID,
   Proposal,
   Space,
+  Statement,
+  StrategyParsedMetadata,
   User,
-  VoteType,
-  NetworkID,
-  UserProfile
+  UserProfile,
+  VoteType
 } from '@/types';
-import type {
-  ReadOnlyNetworkActions,
+import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
+import { getSdkChoice } from './helpers';
+import {
+  Connector,
   NetworkConstants,
   NetworkHelpers,
+  ReadOnlyNetworkActions,
   SnapshotInfo,
-  VotingPower,
-  Connector
+  VotingPower
 } from '../types';
 
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
@@ -131,7 +132,10 @@ export function createActions(
     cancelProposal(web3: Web3Provider, proposal: Proposal) {
       return client.cancel({
         signer: web3.getSigner(),
-        data: { proposal: proposal.proposal_id as string, space: proposal.space.id }
+        data: {
+          proposal: proposal.proposal_id as string,
+          space: proposal.space.id
+        }
       });
     },
     vote(
@@ -174,7 +178,9 @@ export function createActions(
       const strategy = getOffchainStrategy(name);
 
       if (!strategy || !isAddress(voterAddress)) {
-        return [{ address: name, value: 0n, decimals: 0, token: null, symbol: '' }];
+        return [
+          { address: name, value: 0n, decimals: 0, token: null, symbol: '' }
+        ];
       }
 
       const result = await strategy.getVotingPower(
@@ -208,11 +214,20 @@ export function createActions(
           symbol: strategy.params.symbol,
           token: strategy.params.address,
           chainId: strategy.network ? parseInt(strategy.network) : undefined,
-          swapLink: getSwapLink(strategy.name, strategy.params.address, strategy.network)
+          swapLink: getSwapLink(
+            strategy.name,
+            strategy.params.address,
+            strategy.network
+          )
         };
       });
     },
-    followSpace(web3: Web3Provider | Wallet, networkId: NetworkID, spaceId: string, from?: string) {
+    followSpace(
+      web3: Web3Provider | Wallet,
+      networkId: NetworkID,
+      spaceId: string,
+      from?: string
+    ) {
       return client.followSpace({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
@@ -236,7 +251,7 @@ export function createActions(
       });
     },
     async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {
-      const profile: UserProfile = {
+      const profile: Partial<UserProfile> = {
         name: user.name,
         about: user.about,
         avatar: user.avatar,
@@ -250,6 +265,16 @@ export function createActions(
       return client.updateUser({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { profile: JSON.stringify(profile), ...(from ? { from } : {}) }
+      });
+    },
+    async updateStatement(
+      web3: Web3Provider | Wallet,
+      statement: Statement,
+      from?: string
+    ) {
+      return client.updateStatement({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { ...statement, ...(from ? { from } : {}) }
       });
     }
   };

@@ -1,12 +1,12 @@
-import { Core } from '@walletconnect/core';
-import { Web3Wallet } from '@walletconnect/web3wallet';
-import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
-import { ProposalTypes, SessionTypes } from '@walletconnect/types';
 import { Interface } from '@ethersproject/abi';
-import { formatUnits } from '@ethersproject/units';
 import { BigNumber } from '@ethersproject/bignumber';
-import { createContractCallTransaction } from '@/helpers/transactions';
+import { formatUnits } from '@ethersproject/units';
+import { Core } from '@walletconnect/core';
+import { ProposalTypes, SessionTypes } from '@walletconnect/types';
+import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
+import { Web3Wallet } from '@walletconnect/web3wallet';
 import { getABI } from '@/helpers/etherscan';
+import { createContractCallTransaction } from '@/helpers/transactions';
 import { NetworkID, SelectedStrategy } from '@/types';
 
 type ApproveCallback = () => Promise<boolean>;
@@ -146,11 +146,17 @@ export function useWalletConnect(
     logged.value = false;
   }
 
-  function getApprovedNamespaces(proposal: ProposalTypes.Struct, chainId: number, account: string) {
+  function getApprovedNamespaces(
+    proposal: ProposalTypes.Struct,
+    chainId: number,
+    account: string
+  ) {
     const requiredChains = proposal.requiredNamespaces.eip155?.chains || [];
     const optionalChains = proposal.optionalNamespaces.eip155?.chains || [];
 
-    const chains = [...new Set([`eip155:${chainId}`, ...requiredChains, ...optionalChains])];
+    const chains = [
+      ...new Set([`eip155:${chainId}`, ...requiredChains, ...optionalChains])
+    ];
     const accounts = chains.map(chain => `${chain}:${account}`);
 
     return buildApprovedNamespaces({
@@ -212,7 +218,13 @@ export function useWalletConnect(
 
       try {
         const transaction = await parseCall(chainId, request);
-        setTransaction(spaceKey, networkId, chainId, executionStrategy, transaction);
+        setTransaction(
+          spaceKey,
+          networkId,
+          chainId,
+          executionStrategy,
+          transaction
+        );
 
         await connector.respondSessionRequest({
           topic: payload.topic,
