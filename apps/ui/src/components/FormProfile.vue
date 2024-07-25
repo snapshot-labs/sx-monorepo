@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
-import { SpaceMetadataTreasury, SpaceMetadataDelegation, NetworkID } from '@/types';
+import {
+  NetworkID,
+  SpaceMetadataDelegation,
+  SpaceMetadataTreasury
+} from '@/types';
 
 const props = withDefaults(
   defineProps<{
@@ -51,7 +55,9 @@ const definition = computed(() => {
         type: 'string',
         format: 'stamp',
         title: 'Avatar',
-        default: props.id || '0x2121212121212121212121212121212121212121212121212121212121212121'
+        default:
+          props.id ||
+          '0x2121212121212121212121212121212121212121212121212121212121212121'
       },
       name: {
         type: 'string',

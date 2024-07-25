@@ -11,7 +11,8 @@ const { init, app } = useApp();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el);
 const { createDraft } = useEditor();
-const { spaceKey, network, executionStrategy, transaction, reset } = useWalletConnectTransaction();
+const { spaceKey, network, executionStrategy, transaction, reset } =
+  useWalletConnectTransaction();
 
 provide('web3', web3);
 
@@ -65,10 +66,17 @@ watch(isSwiping, () => {
 </script>
 
 <template>
-  <div ref="el" class="min-h-screen" :class="{ 'overflow-clip': scrollDisabled }">
+  <div
+    ref="el"
+    class="min-h-screen"
+    :class="{ 'overflow-clip': scrollDisabled }"
+  >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
-      <AppSidebar class="lg:visible" :class="{ invisible: !uiStore.sidebarOpen }" />
+      <AppSidebar
+        class="lg:visible"
+        :class="{ invisible: !uiStore.sidebarOpen }"
+      />
       <AppTopnav />
       <AppNav />
       <div

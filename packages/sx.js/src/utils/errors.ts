@@ -4,7 +4,11 @@ export class VotingPowerDetailsError extends Error {
   source: string;
   details: VotingPowerDetailsErrorDetails;
 
-  constructor(message: string, source: string, details: VotingPowerDetailsErrorDetails) {
+  constructor(
+    message: string,
+    source: string,
+    details: VotingPowerDetailsErrorDetails
+  ) {
     super(message);
     this.name = 'VotingPowerDetailsError';
     this.source = source;

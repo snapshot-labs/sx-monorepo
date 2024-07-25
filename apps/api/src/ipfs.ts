@@ -1,16 +1,16 @@
-import { validateAndParseAddress } from 'starknet';
-import { Contract as EthContract } from '@ethersproject/contracts';
 import { getAddress } from '@ethersproject/address';
+import { Contract as EthContract } from '@ethersproject/contracts';
+import { validateAndParseAddress } from 'starknet';
+import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
+import { networkProperties } from './overrrides';
+import { dropIpfs, ethProvider, getJSON, getSpaceName } from './utils';
 import {
-  SpaceMetadataItem,
-  ProposalMetadataItem,
-  StrategiesParsedMetadataDataItem,
   ExecutionStrategy,
+  ProposalMetadataItem,
+  SpaceMetadataItem,
+  StrategiesParsedMetadataDataItem,
   VoteMetadataItem
 } from '../.checkpoint/models';
-import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
-import { ethProvider, dropIpfs, getJSON, getSpaceName } from './utils';
-import { networkProperties } from './overrrides';
 
 export async function handleSpaceMetadata(space: string, metadataUri: string) {
   const exists = await SpaceMetadataItem.loadEntity(dropIpfs(metadataUri));
@@ -39,26 +39,32 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
   if (metadata.name) spaceMetadataItem.name = metadata.name;
   if (metadata.description) spaceMetadataItem.about = metadata.description;
   if (metadata.avatar) spaceMetadataItem.avatar = metadata.avatar;
-  if (metadata.external_url) spaceMetadataItem.external_url = metadata.external_url;
+  if (metadata.external_url)
+    spaceMetadataItem.external_url = metadata.external_url;
 
   if (metadata.properties) {
-    if (metadata.properties.cover) spaceMetadataItem.cover = metadata.properties.cover;
+    if (metadata.properties.cover)
+      spaceMetadataItem.cover = metadata.properties.cover;
 
     if (metadata.properties.treasuries) {
-      spaceMetadataItem.treasuries = metadata.properties.treasuries.map((treasury: any) =>
-        JSON.stringify(treasury)
+      spaceMetadataItem.treasuries = metadata.properties.treasuries.map(
+        (treasury: any) => JSON.stringify(treasury)
       );
     }
     if (metadata.properties.delegations) {
-      spaceMetadataItem.delegations = metadata.properties.delegations.map((delegation: any) =>
-        JSON.stringify(delegation)
+      spaceMetadataItem.delegations = metadata.properties.delegations.map(
+        (delegation: any) => JSON.stringify(delegation)
       );
     }
-    if (metadata.properties.github) spaceMetadataItem.github = metadata.properties.github;
-    if (metadata.properties.twitter) spaceMetadataItem.twitter = metadata.properties.twitter;
-    if (metadata.properties.discord) spaceMetadataItem.discord = metadata.properties.discord;
+    if (metadata.properties.github)
+      spaceMetadataItem.github = metadata.properties.github;
+    if (metadata.properties.twitter)
+      spaceMetadataItem.twitter = metadata.properties.twitter;
+    if (metadata.properties.discord)
+      spaceMetadataItem.discord = metadata.properties.discord;
     if (metadata.properties.voting_power_symbol) {
-      spaceMetadataItem.voting_power_symbol = metadata.properties.voting_power_symbol;
+      spaceMetadataItem.voting_power_symbol =
+        metadata.properties.voting_power_symbol;
     }
     if (
       metadata.properties.execution_strategies &&
@@ -68,9 +74,14 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
       // We have to intercept it there and create single use proxy for it.
       const destinations: string[] = [];
       const uniqueExecutors: string[] = [];
-      for (let i = 0; i < metadata.properties.execution_strategies.length; i++) {
+      for (
+        let i = 0;
+        i < metadata.properties.execution_strategies.length;
+        i++
+      ) {
         const id = crypto.randomUUID();
-        const destination = (metadata.properties.execution_destinations?.[i] as string) ?? '';
+        const destination =
+          (metadata.properties.execution_destinations?.[i] as string) ?? '';
 
         destinations.push(destination);
         uniqueExecutors.push(id);
@@ -78,7 +89,8 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
         let executionStrategy = await ExecutionStrategy.loadEntity(id);
         if (!executionStrategy) executionStrategy = new ExecutionStrategy(id);
 
-        executionStrategy.type = metadata.properties.execution_strategies_types[i];
+        executionStrategy.type =
+          metadata.properties.execution_strategies_types[i];
         executionStrategy.address = validateAndParseAddress(
           metadata.properties.execution_strategies[i]
         );
@@ -94,7 +106,9 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
             ethProvider
           );
 
-          const quorum = (await l1AvatarExecutionStrategyContract.quorum()).toBigInt();
+          const quorum = (
+            await l1AvatarExecutionStrategyContract.quorum()
+          ).toBigInt();
           const treasury = await l1AvatarExecutionStrategyContract.target();
 
           executionStrategy.destination_address = l1Destination;
@@ -106,12 +120,14 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
         await executionStrategy.save();
       }
 
-      spaceMetadataItem.executors = metadata.properties.execution_strategies.map(
-        (strategy: string) => validateAndParseAddress(strategy)
-      );
+      spaceMetadataItem.executors =
+        metadata.properties.execution_strategies.map((strategy: string) =>
+          validateAndParseAddress(strategy)
+        );
       spaceMetadataItem.executors_strategies = uniqueExecutors;
       spaceMetadataItem.executors_destinations = destinations;
-      spaceMetadataItem.executors_types = metadata.properties.execution_strategies_types;
+      spaceMetadataItem.executors_types =
+        metadata.properties.execution_strategies_types;
     }
   }
 
@@ -127,8 +143,10 @@ export async function handleProposalMetadata(metadataUri: string) {
   const metadata: any = await getJSON(metadataUri);
   if (metadata.title) proposalMetadataItem.title = metadata.title;
   if (metadata.body) proposalMetadataItem.body = metadata.body;
-  if (metadata.discussion) proposalMetadataItem.discussion = metadata.discussion;
-  if (metadata.execution) proposalMetadataItem.execution = JSON.stringify(metadata.execution);
+  if (metadata.discussion)
+    proposalMetadataItem.discussion = metadata.discussion;
+  if (metadata.execution)
+    proposalMetadataItem.execution = JSON.stringify(metadata.execution);
 
   await proposalMetadataItem.save();
 }
@@ -146,14 +164,19 @@ export async function handleVoteMetadata(metadataUri: string) {
 }
 
 export async function handleStrategiesParsedMetadata(metadataUri: string) {
-  const exists = await StrategiesParsedMetadataDataItem.loadEntity(dropIpfs(metadataUri));
+  const exists = await StrategiesParsedMetadataDataItem.loadEntity(
+    dropIpfs(metadataUri)
+  );
   if (exists) return;
 
-  const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(dropIpfs(metadataUri));
+  const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(
+    dropIpfs(metadataUri)
+  );
 
   const metadata: any = await getJSON(metadataUri);
   if (metadata.name) strategiesParsedMetadataItem.name = metadata.name;
-  if (metadata.description) strategiesParsedMetadataItem.description = metadata.description;
+  if (metadata.description)
+    strategiesParsedMetadataItem.description = metadata.description;
 
   if (metadata.properties) {
     if (metadata.properties.decimals) {
@@ -162,7 +185,8 @@ export async function handleStrategiesParsedMetadata(metadataUri: string) {
     if (metadata.properties.symbol) {
       strategiesParsedMetadataItem.symbol = metadata.properties.symbol;
     }
-    if (metadata.properties.token) strategiesParsedMetadataItem.token = metadata.properties.token;
+    if (metadata.properties.token)
+      strategiesParsedMetadataItem.token = metadata.properties.token;
     if (metadata.properties.payload) {
       strategiesParsedMetadataItem.payload = metadata.properties.payload;
     }

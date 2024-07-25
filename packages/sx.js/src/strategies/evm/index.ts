@@ -1,17 +1,20 @@
-import createVanillaStrategy from './vanilla';
 import createCompStrategy from './comp';
-import createOzVotesStrategy from './ozVotes';
 import createMerkleWhitelist from './merkleWhitelist';
-import type {
+import createOzVotesStrategy from './ozVotes';
+import createVanillaStrategy from './vanilla';
+import {
+  IndexedConfig,
   Propose,
-  Vote,
-  StrategyConfig,
   Strategy,
-  IndexedConfig
+  StrategyConfig,
+  Vote
 } from '../../clients/evm/types';
-import type { EvmNetworkConfig } from '../../types';
+import { EvmNetworkConfig } from '../../types';
 
-export function getStrategy(address: string, networkConfig: EvmNetworkConfig): Strategy | null {
+export function getStrategy(
+  address: string,
+  networkConfig: EvmNetworkConfig
+): Strategy | null {
   const strategy = networkConfig.strategies[address];
   if (!strategy) return null;
 

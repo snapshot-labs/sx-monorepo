@@ -100,7 +100,13 @@ export const PROPOSAL_QUERY = gql`
 
 export const PROPOSALS_QUERY = gql`
   query ($first: Int!, $skip: Int!, $where: ProposalWhere) {
-    proposals(first: $first, skip: $skip, where: $where, orderBy: "created", orderDirection: desc) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: $where
+      orderBy: "created"
+      orderDirection: desc
+    ) {
       ...offchainProposalFragment
     }
   }
@@ -149,14 +155,15 @@ export const USER_VOTES_QUERY = gql`
       }
       choice
       vp
+      reason
       created
     }
   }
 `;
 
 export const USER_FOLLOWS_QUERY = gql`
-  query ($follower: String!) {
-    follows(where: { follower: $follower }) {
+  query ($follower: String!, $first: Int) {
+    follows(where: { follower: $follower }, first: $first) {
       network
       space {
         id
@@ -191,6 +198,7 @@ export const VOTES_QUERY = gql`
       ipfs
       choice
       vp
+      reason
       created
     }
   }
@@ -198,9 +206,24 @@ export const VOTES_QUERY = gql`
 
 export const ALIASES_QUERY = gql`
   query Aliases($address: String!, $alias: String!, $created_gt: Int) {
-    aliases(where: { address: $address, alias: $alias, created_gt: $created_gt }) {
+    aliases(
+      where: { address: $address, alias: $alias, created_gt: $created_gt }
+    ) {
       address
       alias
+    }
+  }
+`;
+
+export const STATEMENTS_QUERY = gql`
+  query Statements($delegate: String!, $space: String!) {
+    statements(where: { delegate: $delegate, space: $space }) {
+      about
+      statement
+      space
+      network
+      discourse
+      status
     }
   }
 `;

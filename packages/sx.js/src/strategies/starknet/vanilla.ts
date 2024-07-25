@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
 
 export default function createVanillaStrategy(): Strategy {
   return {

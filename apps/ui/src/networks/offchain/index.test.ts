@@ -1,5 +1,5 @@
-import { vi, describe, it, expect } from 'vitest';
 import * as sx from '@snapshot-labs/sx';
+import { describe, expect, it, vi } from 'vitest';
 import { getNetwork } from '../index';
 
 const network = getNetwork('s');
@@ -10,29 +10,38 @@ describe('offchain network', () => {
     describe('vote validation', () => {
       it.each([
         ['invalid address', 'invalid-address'],
-        ['starknet address', '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918']
-      ])('returns a single VotingPower object with 0 (%s)', async (label, invalidVoter) => {
-        await expect(
-          network.actions.getVotingPower(
-            'space.eth',
-            ['ticket', 'math', 'api'],
-            [{ network: 100, decimals: 9, address: 'TOKEN', symbol: 'SYM' }, {}],
-            [],
-            invalidVoter,
+        [
+          'starknet address',
+          '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'
+        ]
+      ])(
+        'returns a single VotingPower object with 0 (%s)',
+        async (label, invalidVoter) => {
+          await expect(
+            network.actions.getVotingPower(
+              'space.eth',
+              ['ticket', 'math', 'api'],
+              [
+                { network: 100, decimals: 9, address: 'TOKEN', symbol: 'SYM' },
+                {}
+              ],
+              [],
+              invalidVoter,
+              {
+                at: null
+              }
+            )
+          ).resolves.toEqual([
             {
-              at: null
+              address: 'ticket',
+              decimals: 0,
+              symbol: '',
+              token: null,
+              value: 0n
             }
-          )
-        ).resolves.toEqual([
-          {
-            address: 'ticket',
-            decimals: 0,
-            symbol: '',
-            token: null,
-            value: 0n
-          }
-        ]);
-      });
+          ]);
+        }
+      );
     });
 
     it('returns a VotingPower for each strategy', async () => {
@@ -44,12 +53,14 @@ describe('offchain network', () => {
         BigInt(Math.floor(3 * 10 ** 18))
       ];
 
-      const getOffchainStrategyFn = vi.spyOn(sx, 'getOffchainStrategy').mockReturnValueOnce({
-        type: 'remote-vp',
-        getVotingPower: async () => {
-          return result;
-        }
-      });
+      const getOffchainStrategyFn = vi
+        .spyOn(sx, 'getOffchainStrategy')
+        .mockReturnValueOnce({
+          type: 'remote-vp',
+          getVotingPower: async () => {
+            return result;
+          }
+        });
 
       await expect(
         network.actions.getVotingPower(
@@ -58,7 +69,12 @@ describe('offchain network', () => {
           [
             {
               name: 'ticket',
-              params: { network: 100, decimals: 9, address: 'TOKEN', symbol: 'SYM' }
+              params: {
+                network: 100,
+                decimals: 9,
+                address: 'TOKEN',
+                symbol: 'SYM'
+              }
             },
             { name: 'math', params: {}, network: 5 },
             { name: 'api', params: {} }
@@ -104,29 +120,35 @@ describe('offchain network', () => {
     describe('proposal validation', () => {
       it.each([
         ['invalid address', 'invalid-address'],
-        ['starknet address', '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918']
-      ])('returns a single VotingPower object with 0 (%s)', async (label, invalidVoter) => {
-        await expect(
-          network.actions.getVotingPower(
-            'space.eth',
-            ['basic', 'passport-gated'],
-            [{}, {}],
-            [],
-            invalidVoter,
+        [
+          'starknet address',
+          '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'
+        ]
+      ])(
+        'returns a single VotingPower object with 0 (%s)',
+        async (label, invalidVoter) => {
+          await expect(
+            network.actions.getVotingPower(
+              'space.eth',
+              ['basic', 'passport-gated'],
+              [{}, {}],
+              [],
+              invalidVoter,
+              {
+                at: null
+              }
+            )
+          ).resolves.toEqual([
             {
-              at: null
+              address: 'basic',
+              decimals: 0,
+              symbol: '',
+              token: null,
+              value: 0n
             }
-          )
-        ).resolves.toEqual([
-          {
-            address: 'basic',
-            decimals: 0,
-            symbol: '',
-            token: null,
-            value: 0n
-          }
-        ]);
-      });
+          ]);
+        }
+      );
 
       describe('when using the only-member strategy', () => {
         it('returns a single VotingPower with 1n when member is in the list', async () => {

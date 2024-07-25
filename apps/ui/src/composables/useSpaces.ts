@@ -1,12 +1,12 @@
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 import {
+  DEFAULT_SPACES_LIMIT,
   enabledNetworks,
-  getNetwork,
   explorePageProtocols,
-  DEFAULT_SPACES_LIMIT
+  getNetwork
 } from '@/networks';
-import { Space, NetworkID } from '@/types';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
+import { NetworkID, Space } from '@/types';
 
 type NetworkRecord = {
   spaces: Record<string, Space>;
@@ -38,8 +38,12 @@ export function useSpaces() {
   const spaces = computed(() => {
     const protocolNetworks = explorePageProtocols[protocol.value].networks;
     return Object.values(networksMap.value).flatMap(record => {
-      const spacesFromRecord = record.spacesIdsList.map(spaceId => record.spaces[spaceId]);
-      return spacesFromRecord.filter(space => protocolNetworks.includes(space.network));
+      const spacesFromRecord = record.spacesIdsList.map(
+        spaceId => record.spaces[spaceId]
+      );
+      return spacesFromRecord.filter(space =>
+        protocolNetworks.includes(space.network)
+      );
     });
   });
 
@@ -47,13 +51,18 @@ export function useSpaces() {
     () =>
       new Map(
         Object.values(networksMap.value).flatMap(record =>
-          Object.values(record.spaces).map(space => [`${space.network}:${space.id}`, space])
+          Object.values(record.spaces).map(space => [
+            `${space.network}:${space.id}`,
+            space
+          ])
         )
       )
   );
 
   const hasMoreSpaces = computed(() =>
-    Object.values(networksMap.value).some(record => record.hasMoreSpaces === true)
+    Object.values(networksMap.value).some(
+      record => record.hasMoreSpaces === true
+    )
   );
 
   async function getSpaces(filter?: SpacesFilter) {
@@ -66,7 +75,9 @@ export function useSpaces() {
         };
 
         if (requestFilter?.id_in) {
-          const filtered = requestFilter.id_in.filter(spaceId => spaceId.startsWith(`${id}:`));
+          const filtered = requestFilter.id_in.filter(spaceId =>
+            spaceId.startsWith(`${id}:`)
+          );
           if (filtered.length === 0) return [];
 
           requestFilter.id_in = filtered.map(spaceId => spaceId.split(':')[1]);
@@ -134,7 +145,9 @@ export function useSpaces() {
                 : [...networksMap.value[result.id].spacesIdsList, ...spacesIds],
               spaces: {
                 ...networksMap.value[result.id].spaces,
-                ...Object.fromEntries(result.spaces.map(space => [space.id, space]))
+                ...Object.fromEntries(
+                  result.spaces.map(space => [space.id, space])
+                )
               },
               hasMoreSpaces: result.hasMoreSpaces
             }

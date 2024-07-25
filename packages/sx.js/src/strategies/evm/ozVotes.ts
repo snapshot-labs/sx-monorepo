@@ -1,7 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
+import { Provider } from '@ethersproject/providers';
 import IVotes from './abis/IVotes.json';
-import type { Provider } from '@ethersproject/providers';
-import type { Strategy } from '../../clients/evm/types';
+import { Strategy } from '../../clients/evm/types';
 
 export default function createOzVotesStrategy(): Strategy {
   return {
@@ -19,7 +19,9 @@ export default function createOzVotesStrategy(): Strategy {
     ): Promise<bigint> {
       const votesContract = new Contract(params, IVotes, provider);
 
-      const votingPower = await votesContract.getVotes(voterAddress, { blockTag: block });
+      const votingPower = await votesContract.getVotes(voterAddress, {
+        blockTag: block
+      });
 
       return BigInt(votingPower.toString());
     }

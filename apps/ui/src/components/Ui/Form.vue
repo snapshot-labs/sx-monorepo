@@ -6,15 +6,15 @@ export default {
 
 <script setup lang="ts">
 import Form from './Form.vue';
-import InputArray from './InputArray.vue';
-import InputString from './InputString.vue';
-import Textarea from './Textarea.vue';
 import InputAddress from './InputAddress.vue';
+import InputArray from './InputArray.vue';
+import InputCheckbox from './InputCheckbox.vue';
 import InputDuration from './InputDuration.vue';
 import InputNumber from './InputNumber.vue';
-import InputCheckbox from './InputCheckbox.vue';
-import Select from './Select.vue';
 import InputStamp from './InputStamp.vue';
+import InputString from './InputString.vue';
+import Select from './Select.vue';
+import Textarea from './Textarea.vue';
 
 const model = defineModel<any>({ required: true });
 
@@ -40,7 +40,11 @@ const inputValue = computed({
   }
 });
 
-const getComponent = (property: { type: string; format: string; enum?: string[] }) => {
+const getComponent = (property: {
+  type: string;
+  format: string;
+  enum?: string[];
+}) => {
   let type = property.type;
   if (Array.isArray(property.type)) {
     type = property.type[0];

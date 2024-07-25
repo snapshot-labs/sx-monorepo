@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import createVanillaStrategy from '../../../../src/strategies/starknet/vanilla';
+import { describe, expect, it } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
-import { starkProvider } from '../../helpers';
+import createVanillaStrategy from '../../../../src/strategies/starknet/vanilla';
 import { proposeEnvelope } from '../../fixtures';
+import { starkProvider } from '../../helpers';
 
 const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 

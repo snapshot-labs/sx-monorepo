@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { getNetwork, supportsNullCurrent } from '@/networks';
-import { compareAddresses, omit } from '@/helpers/utils';
+import { NavigationGuard } from 'vue-router';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { resolver } from '@/helpers/resolver';
+import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { Contact, RequiredProperty, SelectedStrategy, SpaceMetadataTreasury } from '@/types';
+import { getNetwork, supportsNullCurrent } from '@/networks';
+import {
+  Contact,
+  RequiredProperty,
+  SelectedStrategy,
+  SpaceMetadataTreasury
+} from '@/types';
 
 type StrategyWithTreasury = SelectedStrategy & {
   treasury: RequiredProperty<SpaceMetadataTreasury>;
@@ -54,7 +61,9 @@ const sending = ref(false);
 const fetchingVotingPower = ref(true);
 const votingPowerValid = ref(false);
 
-const network = computed(() => (networkId.value ? getNetwork(networkId.value) : null));
+const network = computed(() =>
+  networkId.value ? getNetwork(networkId.value) : null
+);
 const space = computed(() => {
   if (!resolved.value) return null;
 
@@ -70,7 +79,11 @@ const proposal = computedAsync(async () => {
   if (!proposalKey.value || !networkId.value) return null;
 
   if (!proposals[proposalKey.value]) {
-    await createDraft(`${networkId.value}:${address.value}`, undefined, route.params.key as string);
+    await createDraft(
+      `${networkId.value}:${address.value}`,
+      undefined,
+      route.params.key as string
+    );
   }
 
   return proposals[proposalKey.value];
@@ -120,11 +133,13 @@ const supportedExecutionStrategies = computed(() => {
       };
     })
     .filter(
-      strategy => strategy && networkValue.helpers.isExecutorSupported(strategy.type)
+      strategy =>
+        strategy && networkValue.helpers.isExecutorSupported(strategy.type)
     ) as StrategyWithTreasury[];
 });
 const selectedExecutionWithTreasury = computed(() => {
-  if (!executionStrategy.value || !supportedExecutionStrategies.value) return null;
+  if (!executionStrategy.value || !supportedExecutionStrategies.value)
+    return null;
 
   return supportedExecutionStrategies.value.find(
     strategy => strategy.address === executionStrategy.value?.address
@@ -186,7 +201,9 @@ async function handleProposeClick() {
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address ? proposal.value.execution : []
+        proposal.value.executionStrategy?.address
+          ? proposal.value.execution
+          : []
       );
     } else {
       result = await propose(
@@ -198,7 +215,9 @@ async function handleProposeClick() {
         proposal.value.choices,
         proposal.value.executionStrategy?.address ?? null,
         proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address ? proposal.value.execution : []
+        proposal.value.executionStrategy?.address
+          ? proposal.value.execution
+          : []
       );
     }
     if (result) {
@@ -210,7 +229,9 @@ async function handleProposeClick() {
   }
 }
 
-async function handleExecutionStrategySelected(selectedExecutionStrategy: SelectedStrategy) {
+async function handleExecutionStrategySelected(
+  selectedExecutionStrategy: SelectedStrategy
+) {
   if (executionStrategy.value?.address === selectedExecutionStrategy.address) {
     executionStrategy.value = null;
   } else {
@@ -219,7 +240,13 @@ async function handleExecutionStrategySelected(selectedExecutionStrategy: Select
 }
 
 function handleTransactionAccept() {
-  if (!spaceKey.value || !executionStrategy.value || !transaction.value || !proposal.value) return;
+  if (
+    !spaceKey.value ||
+    !executionStrategy.value ||
+    !transaction.value ||
+    !proposal.value
+  )
+    return;
 
   proposal.value.execution.push(transaction.value);
 
@@ -240,13 +267,16 @@ async function getVotingPower() {
       space.value.voting_power_validation_strategies_parsed_metadata,
       web3.value.account,
       {
-        at: supportsNullCurrent(space.value.network) ? null : getCurrent(space.value.network) || 0,
+        at: supportsNullCurrent(space.value.network)
+          ? null
+          : getCurrent(space.value.network) || 0,
         chainId: space.value.snapshot_chain_id
       }
     );
 
     const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);
-    votingPowerValid.value = currentVotingPower >= BigInt(space.value.proposal_threshold);
+    votingPowerValid.value =
+      currentVotingPower >= BigInt(space.value.proposal_threshold);
   } catch (e) {
     console.warn('Failed to load voting power', e);
   } finally {
@@ -278,13 +308,8 @@ watchEffect(() => {
   setTitle(`${title} - ${space.value.name}`);
 });
 </script>
-
 <script lang="ts">
-import { NavigationGuard } from 'vue-router';
-import { resolver } from '@/helpers/resolver';
-
 const { createDraft } = useEditor();
-
 const handleRouteChange: NavigationGuard = async to => {
   if (to.params.key) {
     return true;
@@ -293,7 +318,9 @@ const handleRouteChange: NavigationGuard = async to => {
   const resolved = await resolver.resolveName(to.params.id as string);
   if (!resolved) return false;
 
-  const draftId = await createDraft(`${resolved.networkId}:${resolved.address}`);
+  const draftId = await createDraft(
+    `${resolved.networkId}:${resolved.address}`
+  );
 
   return {
     ...to,
@@ -312,7 +339,9 @@ export default defineComponent({
 
 <template>
   <div v-if="proposal">
-    <nav class="border-b bg-skin-bg fixed top-0 z-50 right-0 left-0 lg:left-[72px]">
+    <nav
+      class="border-b bg-skin-bg fixed top-0 z-50 right-0 left-0 lg:left-[72px]"
+    >
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
           <router-link
@@ -352,7 +381,11 @@ export default defineComponent({
     </nav>
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
-        <UiAlert v-if="!fetchingVotingPower && !votingPowerValid" type="error" class="mb-4">
+        <UiAlert
+          v-if="!fetchingVotingPower && !votingPowerValid"
+          type="error"
+          class="mb-4"
+        >
           You do not have enough voting power to create proposal in this space.
         </UiAlert>
         <UiInputString
@@ -363,10 +396,18 @@ export default defineComponent({
         />
         <div class="flex space-x-3">
           <button type="button" @click="previewEnabled = false">
-            <UiLink :is-active="!previewEnabled" text="Write" class="border-transparent" />
+            <UiLink
+              :is-active="!previewEnabled"
+              text="Write"
+              class="border-transparent"
+            />
           </button>
           <button type="button" @click="previewEnabled = true">
-            <UiLink :is-active="previewEnabled" text="Preview" class="border-transparent" />
+            <UiLink
+              :is-active="previewEnabled"
+              text="Preview"
+              class="border-transparent"
+            />
           </button>
         </div>
         <UiMarkdown
@@ -404,10 +445,13 @@ export default defineComponent({
               <span class="flex-1">
                 {{ strategy.treasury.name }}
                 <span class="hidden sm:inline-block">
-                  ({{ network.constants.EXECUTORS[strategy.type] }} execution strategy)
+                  ({{ network.constants.EXECUTORS[strategy.type] }} execution
+                  strategy)
                 </span>
               </span>
-              <IH-check v-if="executionStrategy?.address === strategy.address" />
+              <IH-check
+                v-if="executionStrategy?.address === strategy.address"
+              />
             </ExecutionButton>
           </div>
           <EditorExecution

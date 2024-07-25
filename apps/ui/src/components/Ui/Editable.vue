@@ -91,12 +91,18 @@ function handleSave() {
         <div
           class="flex gap-2 relative"
           :class="{
-            'top-[-19.5px]': definition.format !== 'duration' && !!formErrors.value,
-            'top-[-18.5px]': definition.format === 'duration' && !!formErrors.value,
+            'top-[-19.5px]':
+              definition.format !== 'duration' && !!formErrors.value,
+            'top-[-18.5px]':
+              definition.format === 'duration' && !!formErrors.value,
             'top-[-6px]': definition.format === 'duration'
           }"
         >
-          <button :disabled="!!formErrors.value" class="hover:opacity-80" @click="handleSave">
+          <button
+            :disabled="!!formErrors.value"
+            class="hover:opacity-80"
+            @click="handleSave"
+          >
             <IH-check />
           </button>
           <button class="hover:opacity-80" @click="editing = !editing">
@@ -105,7 +111,11 @@ function handleSave() {
         </div>
       </template>
       <template v-else>
-        <button v-if="editable" class="hover:opacity-80" @click="editing = !editing">
+        <button
+          v-if="editable"
+          class="hover:opacity-80"
+          @click="editing = !editing"
+        >
           <IH-pencil />
         </button>
       </template>

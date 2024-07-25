@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {
-  _rt,
   _n,
-  shortenAddress,
+  _rt,
   compareAddresses,
-  sanitizeUrl,
+  getProposalId,
   getUrl,
-  getProposalId
+  sanitizeUrl,
+  shortenAddress
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
@@ -56,7 +56,8 @@ const editable = computed(() => {
   // shifted for Starknet's proposals with ERC20Votes strategies.
   return (
     compareAddresses(props.proposal.author.id, web3.value.account) &&
-    props.proposal.snapshot > (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
+    props.proposal.snapshot >
+      (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
 
@@ -68,7 +69,9 @@ const cancellable = computed(() => {
       props.proposal.space.moderators || []
     ].flat();
 
-    return addresses.some(address => compareAddresses(address, web3.value.account));
+    return addresses.some(address =>
+      compareAddresses(address, web3.value.account)
+    );
   } else {
     return (
       compareAddresses(props.proposal.space.controller, web3.value.account) &&
@@ -95,7 +98,9 @@ const votingTime = computed(() => {
   const current = getCurrent(props.proposal.network);
   if (!current) return null;
 
-  const time = _rt(getTsFromCurrent(props.proposal.network, props.proposal.max_end));
+  const time = _rt(
+    getTsFromCurrent(props.proposal.network, props.proposal.max_end)
+  );
 
   const hasEnded = props.proposal.max_end <= current;
 
@@ -122,7 +127,8 @@ async function handleEditClick() {
             type: props.proposal.execution_strategy_type
           },
     execution:
-      !offchainNetworks.includes(props.proposal.network) && props.proposal.executions.length > 0
+      !offchainNetworks.includes(props.proposal.network) &&
+      props.proposal.executions.length > 0
         ? props.proposal.executions[0].transactions
         : undefined
   });
@@ -164,7 +170,10 @@ async function handleAiSummaryClick() {
   await fetchAiSummary();
 
   if (aiSummaryState.value.errored) {
-    return uiStore.addNotification('error', 'There was an error fetching the AI summary.');
+    return uiStore.addNotification(
+      'error',
+      'There was an error fetching the AI summary.'
+    );
   }
 
   aiSummaryOpen.value = true;
@@ -178,12 +187,16 @@ async function handleAiSpeechClick() {
   try {
     await fetchAiSpeech();
 
-    if (aiSpeechState.value.errored || aiSpeechContent.value === null) throw new Error();
+    if (aiSpeechState.value.errored || aiSpeechContent.value === null)
+      throw new Error();
 
     await initAudio(aiSpeechContent.value);
     playAudio();
   } catch (e) {
-    uiStore.addNotification('error', 'Failed to listen proposal, please try again later.');
+    uiStore.addNotification(
+      'error',
+      'Failed to listen proposal, please try again later.'
+    );
   }
 }
 
@@ -203,8 +216,11 @@ onBeforeUnmount(() => destroyAudio());
       <div class="flex justify-between items-center mb-3">
         <router-link
           :to="{
-            name: 'user',
-            params: { id: proposal.author.id }
+            name: 'space-user-statement',
+            params: {
+              id: `${proposal.network}:${proposal.space.id}`,
+              user: proposal.author.id
+            }
           }"
           class="flex items-center py-3"
         >
@@ -229,7 +245,8 @@ onBeforeUnmount(() => destroyAudio());
         <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
-              offchainNetworks.includes(props.proposal.network) && props.proposal.body.length > 500
+              offchainNetworks.includes(props.proposal.network) &&
+              props.proposal.body.length > 500
             "
             :title="'AI summary'"
           >
@@ -238,7 +255,10 @@ onBeforeUnmount(() => destroyAudio());
               :disabled="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
-              <UiLoading v-if="aiSummaryState.loading" class="inline-block !w-[22px] !h-[22px]" />
+              <UiLoading
+                v-if="aiSummaryState.loading"
+                class="inline-block !w-[22px] !h-[22px]"
+              />
               <IH-sparkles
                 v-else
                 class="inline-block w-[22px] h-[22px]"
@@ -259,25 +279,35 @@ onBeforeUnmount(() => destroyAudio());
               :disabled="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading v-if="aiSpeechState.loading" class="inline-block !w-[22px] !h-[22px]" />
+              <UiLoading
+                v-if="aiSpeechState.loading"
+                class="inline-block !w-[22px] !h-[22px]"
+              />
               <IH-pause
                 v-else-if="audioState === 'playing'"
                 class="inline-block w-[22px] h-[22px] text-skin-link"
               />
-              <IH-play v-else class="inline-block text-skin-text w-[22px] h-[22px]" />
+              <IH-play
+                v-else
+                class="inline-block text-skin-text w-[22px] h-[22px]"
+              />
             </UiButton>
           </UiTooltip>
           <DropdownShare :message="shareMsg">
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
-                <IH-share class="text-skin-text inline-block w-[22px] h-[22px]" />
+                <IH-share
+                  class="text-skin-text inline-block w-[22px] h-[22px]"
+                />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 border-0 !h-[auto]">
-                <IH-dots-vertical class="text-skin-text inline-block w-[22px] h-[22px]" />
+                <IH-dots-vertical
+                  class="text-skin-text inline-block w-[22px] h-[22px]"
+                />
               </UiButton>
             </template>
             <template #items>
@@ -370,10 +400,15 @@ onBeforeUnmount(() => destroyAudio());
       </div>
       <div>
         <a class="text-skin-text" @click="modalOpenVotes = true">
-          {{ _n(proposal.vote_count) }} {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+          {{ _n(proposal.vote_count) }}
+          {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
         </a>
         ·
-        <a class="text-skin-text" @click="modalOpenTimeline = true" v-text="votingTime" />
+        <a
+          class="text-skin-text"
+          @click="modalOpenTimeline = true"
+          v-text="votingTime"
+        />
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
     </div>

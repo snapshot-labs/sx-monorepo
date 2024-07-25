@@ -1,6 +1,6 @@
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
-import type { Draft, Drafts, VoteType } from '@/types';
+import { Draft, Drafts, VoteType } from '@/types';
 
 const PREFERRED_VOTE_TYPE = 'single-choice';
 
@@ -34,12 +34,20 @@ export function useEditor() {
 
   function removeEmpty(proposals: Drafts): Drafts {
     return Object.entries(proposals).reduce((acc, [id, proposal]) => {
-      const { execution, type, choices, ...rest } = omit(proposal, ['updatedAt']);
+      const { execution, type, choices, ...rest } = omit(proposal, [
+        'updatedAt'
+      ]);
       const hasFormValues = Object.values(rest).some(val => !!val);
       const hasChangedVotingType = type !== spaceVoteType.get(getSpaceId(id));
-      const hasFormChoices = type !== 'basic' && (choices || []).some(val => !!val);
+      const hasFormChoices =
+        type !== 'basic' && (choices || []).some(val => !!val);
 
-      if (execution.length === 0 && !hasFormValues && !hasChangedVotingType && !hasFormChoices) {
+      if (
+        execution.length === 0 &&
+        !hasFormValues &&
+        !hasChangedVotingType &&
+        !hasFormChoices
+      ) {
         return acc;
       }
 

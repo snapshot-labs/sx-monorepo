@@ -1,4 +1,4 @@
-import type { Strategy } from '../../clients/evm/types';
+import { Strategy } from '../../clients/evm/types';
 
 export default function createVanillaStrategy(): Strategy {
   return {

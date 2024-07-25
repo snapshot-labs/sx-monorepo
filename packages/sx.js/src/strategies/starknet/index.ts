@@ -1,12 +1,15 @@
-import createVanillaStrategy from './vanilla';
-import createMerkleWhitelistStrategy from './merkleWhitelist';
 import createErc20VotesStrategy from './erc20Votes';
-import { hexPadLeft } from '../../utils/encoding';
-import type { Strategy, NetworkConfig } from '../../types';
 import createEvmSlotValueStrategy from './evmSlotValue';
+import createMerkleWhitelistStrategy from './merkleWhitelist';
 import createOzVotesStorageProofStrategy from './ozVotesStorageProof';
+import createVanillaStrategy from './vanilla';
+import { NetworkConfig, Strategy } from '../../types';
+import { hexPadLeft } from '../../utils/encoding';
 
-export function getStrategy(address: string, networkConfig: NetworkConfig): Strategy | null {
+export function getStrategy(
+  address: string,
+  networkConfig: NetworkConfig
+): Strategy | null {
   const strategy = networkConfig.strategies[hexPadLeft(address)];
   if (!strategy) return null;
 

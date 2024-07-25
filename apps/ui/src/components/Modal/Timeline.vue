@@ -76,7 +76,11 @@ const now = parseInt((Date.now() / 1e3).toFixed());
     </template>
     <div class="p-4 flex flex-column">
       <div class="mt-1 ml-2">
-        <div v-for="(state, i) in states" :key="state.id" class="flex relative h-[60px]">
+        <div
+          v-for="(state, i) in states"
+          :key="state.id"
+          class="flex relative h-[60px]"
+        >
           <div
             class="absolute w-[15px] h-[15px] inline-block rounded-full -left-[7px] border-[4px] border-skin-bg"
             :class="state.value <= now ? 'bg-skin-heading' : 'bg-skin-border'"
@@ -89,7 +93,11 @@ const now = parseInt((Date.now() / 1e3).toFixed());
         </div>
       </div>
       <div class="flex-auto leading-6">
-        <div v-for="state in states" :key="state.id" class="mb-3 last:mb-0 h-[44px]">
+        <div
+          v-for="state in states"
+          :key="state.id"
+          class="mb-3 last:mb-0 h-[44px]"
+        >
           <h4 v-text="labels[state.id]" />
           {{ _t(state.value) }}
         </div>

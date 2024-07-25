@@ -12,7 +12,9 @@ const { web3Account } = useWeb3();
       >
         <router-view :key="web3Account.toLowerCase()" />
       </div>
-      <div class="invisible xl:visible fixed w-[240px] border-l bottom-0 top-[72px] right-0" />
+      <div
+        class="invisible xl:visible fixed w-[240px] border-l bottom-0 top-[72px] right-0"
+      />
     </div>
   </div>
 </template>

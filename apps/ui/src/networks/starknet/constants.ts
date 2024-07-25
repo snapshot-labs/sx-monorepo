@@ -1,18 +1,17 @@
 import { Web3Provider } from '@ethersproject/providers';
+import { clients, starknetNetworks, utils } from '@snapshot-labs/sx';
 import { CallData, uint256 } from 'starknet';
-import { clients, utils, starknetNetworks } from '@snapshot-labs/sx';
-import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
-import { pinPineapple } from '@/helpers/pin';
-import { StrategyConfig, StrategyTemplate } from '../types';
-
-import IHCode from '~icons/heroicons-outline/code';
-import IHCube from '~icons/heroicons-outline/cube';
-import IHPencil from '~icons/heroicons-outline/pencil';
-import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
-import IHUserCircle from '~icons/heroicons-outline/user-circle';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import { pinPineapple } from '@/helpers/pin';
+import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
+import { StrategyConfig, StrategyTemplate } from '../types';
+import IHCode from '~icons/heroicons-outline/code';
+import IHCube from '~icons/heroicons-outline/cube';
+import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
+import IHPencil from '~icons/heroicons-outline/pencil';
+import IHUserCircle from '~icons/heroicons-outline/user-circle';
 
 export function createConstants(
   networkId: NetworkID,
@@ -72,8 +71,10 @@ export function createConstants(
     [config.Strategies.MerkleWhitelist]: 'Merkle whitelist',
     [config.Strategies.ERC20Votes]: 'ERC-20 Votes (EIP-5805)',
     [config.Strategies.EVMSlotValue]: 'EVM slot value',
-    [config.Strategies.OZVotesStorageProof]: 'OZ Votes storage proof (trace 224)',
-    [config.Strategies.OZVotesTrace208StorageProof]: 'OZ Votes storage proof (trace 208)'
+    [config.Strategies.OZVotesStorageProof]:
+      'OZ Votes storage proof (trace 224)',
+    [config.Strategies.OZVotesTrace208StorageProof]:
+      'OZ Votes storage proof (trace 208)'
   };
 
   const EXECUTORS = {
@@ -110,7 +111,10 @@ export function createConstants(
         })
       }
     }),
-    parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+    parseParams: async (
+      params: string,
+      metadata: StrategyParsedMetadata | null
+    ) => {
       if (!metadata || !metadata.payload) throw new Error('Missing metadata');
 
       const [contractAddress] = params.split(',');
@@ -204,7 +208,9 @@ export function createConstants(
         const strategies = params.strategies.map((strategy: StrategyConfig) => {
           return {
             address: strategy.address,
-            params: strategy.generateParams ? strategy.generateParams(strategy.params) : []
+            params: strategy.generateParams
+              ? strategy.generateParams(strategy.params)
+              : []
           };
         });
 
@@ -262,7 +268,9 @@ export function createConstants(
         const length =
           params.whitelist.trim().length === 0
             ? 0
-            : params.whitelist.split(/[\n,]/).filter((s: string) => s.trim().length).length;
+            : params.whitelist
+                .split(/[\n,]/)
+                .filter((s: string) => s.trim().length).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
@@ -281,7 +289,9 @@ export function createConstants(
           });
 
         return [
-          utils.merkle.generateMerkleRoot(leaves.map((leaf: utils.merkle.Leaf) => leaf.hash))
+          utils.merkle.generateMerkleRoot(
+            leaves.map((leaf: utils.merkle.Leaf) => leaf.hash)
+          )
         ];
       },
       generateMetadata: async (params: Record<string, any>) => {
@@ -310,7 +320,10 @@ export function createConstants(
           }
         };
       },
-      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+      parseParams: async (
+        params: string,
+        metadata: StrategyParsedMetadata | null
+      ) => {
         if (!metadata) throw new Error('Missing metadata');
 
         const getWhitelist = async (payload: string) => {
@@ -320,12 +333,16 @@ export function createConstants(
 
           const res = await fetch(metadataUrl);
           const { tree } = await res.json();
-          return tree.map((item: any) => `${item.address}:${item.votingPower}`).join('\n');
+          return tree
+            .map((item: any) => `${item.address}:${item.votingPower}`)
+            .join('\n');
         };
 
         return {
           symbol: metadata.symbol,
-          whitelist: metadata.payload ? await getWhitelist(metadata.payload) : ''
+          whitelist: metadata.payload
+            ? await getWhitelist(metadata.payload)
+            : ''
         };
       },
       paramsDefinition: {
@@ -366,7 +383,10 @@ export function createConstants(
           token: params.contractAddress
         }
       }),
-      parseParams: async (params: string, metadata: StrategyParsedMetadata | null) => {
+      parseParams: async (
+        params: string,
+        metadata: StrategyParsedMetadata | null
+      ) => {
         if (!metadata) throw new Error('Missing metadata');
 
         return {
@@ -430,12 +450,16 @@ export function createConstants(
       : [])
   ];
 
-  const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = EDITOR_VOTING_STRATEGIES.filter(
-    strategy =>
-      !(
-        [config.Strategies.EVMSlotValue, config.Strategies.OZVotesStorageProof] as string[]
-      ).includes(strategy.address)
-  );
+  const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES =
+    EDITOR_VOTING_STRATEGIES.filter(
+      strategy =>
+        !(
+          [
+            config.Strategies.EVMSlotValue,
+            config.Strategies.OZVotesStorageProof
+          ] as string[]
+        ).includes(strategy.address)
+    );
 
   const EDITOR_EXECUTION_STRATEGIES = [
     {

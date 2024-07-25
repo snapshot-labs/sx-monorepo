@@ -6,11 +6,15 @@ const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>
-  <div class="w-[72px] flex flex-col border-r fixed left-0 top-0 bottom-0 text-center h-screen">
+  <div
+    class="w-[72px] flex flex-col border-r fixed left-0 top-0 bottom-0 text-center h-screen"
+  >
     <router-link :to="{ name: 'landing' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
     </router-link>
-    <div class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10" />
+    <div
+      class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10"
+    />
     <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
     <draggable
       v-else
@@ -24,7 +28,10 @@ const followedSpacesStore = useFollowedSpacesStore();
     >
       <template #item="{ element }">
         <router-link
-          :to="{ name: 'space-overview', params: { id: `${element.network}:${element.id}` } }"
+          :to="{
+            name: 'space-overview',
+            params: { id: `${element.network}:${element.id}` }
+          }"
           class="block"
           @click="uiStore.sidebarOpen = false"
         >

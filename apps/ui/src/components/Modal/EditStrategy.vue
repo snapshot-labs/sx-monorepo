@@ -53,7 +53,10 @@ watch(
     <template #header>
       <h3>Edit strategy</h3>
       <template v-if="showPicker">
-        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
@@ -83,7 +86,11 @@ watch(
       />
     </div>
     <template v-if="!showPicker" #footer>
-      <UiButton class="w-full" :disabled="Object.keys(formErrors).length > 0" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :disabled="Object.keys(formErrors).length > 0"
+        @click="handleSubmit"
+      >
         Confirm
       </UiButton>
     </template>

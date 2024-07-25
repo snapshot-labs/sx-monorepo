@@ -1,56 +1,63 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
 import {
-  VOTES_QUERY,
-  USER_VOTES_QUERY,
-  PROPOSALS_QUERY,
-  PROPOSAL_QUERY,
-  SPACES_QUERY,
-  SPACE_QUERY,
-  USER_QUERY,
-  LEADERBOARD_QUERY
-} from './queries';
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client/core';
+import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import { getNames } from '@/helpers/stamp';
+import { clone, compareAddresses } from '@/helpers/utils';
 import {
-  SPACES_QUERY as HIGHLIGHT_SPACES_QUERY,
-  SPACE_QUERY as HIGHLIGHT_SPACE_QUERY,
-  PROPOSALS_QUERY as HIGHLIGHT_PROPOSALS_QUERY,
+  NetworkApi,
+  NetworkConstants,
+  PaginationOpts,
+  ProposalsFilter,
+  SpacesFilter
+} from '@/networks/types';
+import {
+  Follow,
+  NetworkID,
+  Proposal,
+  ProposalExecution,
+  ProposalState,
+  Space,
+  Transaction,
+  User,
+  UserActivity,
+  Vote
+} from '@/types';
+import {
   PROPOSAL_QUERY as HIGHLIGHT_PROPOSAL_QUERY,
-  VOTES_QUERY as HIGHLIGHT_VOTES_QUERY,
+  PROPOSALS_QUERY as HIGHLIGHT_PROPOSALS_QUERY,
+  SPACE_QUERY as HIGHLIGHT_SPACE_QUERY,
+  SPACES_QUERY as HIGHLIGHT_SPACES_QUERY,
   USER_QUERY as HIGHLIGHT_USER_QUERY,
-  joinHighlightSpace,
+  VOTES_QUERY as HIGHLIGHT_VOTES_QUERY,
   joinHighlightProposal,
-  mixinHighlightVotes,
-  joinHighlightUser
+  joinHighlightSpace,
+  joinHighlightUser,
+  mixinHighlightVotes
 } from './highlight';
 import {
-  PaginationOpts,
-  SpacesFilter,
-  NetworkApi,
-  ProposalsFilter,
-  NetworkConstants
-} from '@/networks/types';
-import { getNames } from '@/helpers/stamp';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
-import {
-  Space,
-  Proposal,
-  Vote,
-  User,
-  Transaction,
-  NetworkID,
-  ProposalState,
-  Follow,
-  UserActivity,
-  ProposalExecution
-} from '@/types';
-import { ApiSpace, ApiProposal, ApiStrategyParsedMetadata } from './types';
-import { clone, compareAddresses } from '@/helpers/utils';
+  LEADERBOARD_QUERY,
+  PROPOSAL_QUERY,
+  PROPOSALS_QUERY,
+  SPACE_QUERY,
+  SPACES_QUERY,
+  USER_QUERY,
+  USER_VOTES_QUERY,
+  VOTES_QUERY
+} from './queries';
+import { ApiProposal, ApiSpace, ApiStrategyParsedMetadata } from './types';
 
 type ApiOptions = {
   baseNetworkId?: NetworkID;
   highlightApiUrl?: string;
 };
 
-function getProposalState(proposal: ApiProposal, current: number): ProposalState {
+function getProposalState(
+  proposal: ApiProposal,
+  current: number
+): ProposalState {
   if (proposal.executed) return 'executed';
   if (proposal.max_end <= current) {
     if (proposal.scores_total < proposal.quorum) return 'rejected';
@@ -96,7 +103,8 @@ function processStrategiesMetadata(
     ])
   );
 
-  strategiesIndicies = strategiesIndicies || Array.from(Array(maxIndex + 1).keys());
+  strategiesIndicies =
+    strategiesIndicies || Array.from(Array(maxIndex + 1).keys());
   return strategiesIndicies.map(index => metadataMap[index]) || [];
 }
 
@@ -146,7 +154,11 @@ function processExecutions(
   ];
 }
 
-function formatSpace(space: ApiSpace, networkId: NetworkID, constants: NetworkConstants): Space {
+function formatSpace(
+  space: ApiSpace,
+  networkId: NetworkID,
+  constants: NetworkConstants
+): Space {
   return {
     ...space,
     network: networkId,
@@ -188,9 +200,10 @@ function formatSpace(space: ApiSpace, networkId: NetworkID, constants: NetworkCo
     executors_types: space.metadata.executors_types,
     executors_destinations: space.metadata.executors_destinations,
     executors_strategies: space.metadata.executors_strategies,
-    voting_power_validation_strategies_parsed_metadata: processStrategiesMetadata(
-      space.voting_power_validation_strategies_parsed_metadata
-    ),
+    voting_power_validation_strategies_parsed_metadata:
+      processStrategiesMetadata(
+        space.voting_power_validation_strategies_parsed_metadata
+      ),
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
       space.strategies_indicies
@@ -205,7 +218,9 @@ function formatProposal(
   baseNetworkId?: NetworkID
 ): Proposal {
   const executionNetworkId =
-    proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId ? baseNetworkId : networkId;
+    proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
+      ? baseNetworkId
+      : networkId;
 
   return {
     ...proposal,
@@ -232,7 +247,9 @@ function formatProposal(
     discussion: proposal.metadata.discussion,
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
-    has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(proposal.execution_strategy_type)
+    has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
+      proposal.execution_strategy_type
+    )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
     state: getProposalState(proposal, current),
@@ -299,7 +316,10 @@ export function createApi(
         filters.choice = 3;
       }
 
-      const [orderBy, orderDirection] = sortBy.split('-') as ['vp' | 'created', 'desc' | 'asc'];
+      const [orderBy, orderDirection] = sortBy.split('-') as [
+        'vp' | 'created',
+        'desc' | 'asc'
+      ];
 
       const { data } = await apollo.query({
         query: VOTES_QUERY,
@@ -323,7 +343,10 @@ export function createApi(
         if (!cacheValid) {
           const { data: highlightData } = await highlightApolloClient.query({
             query: HIGHLIGHT_VOTES_QUERY,
-            variables: { space: proposal.space.id, proposal: proposal.proposal_id }
+            variables: {
+              space: proposal.space.id,
+              proposal: proposal.proposal_id
+            }
           });
 
           highlightVotesCache.key = cacheKey;
@@ -352,10 +375,16 @@ export function createApi(
 
       return data.votes.map(vote => {
         vote.voter.name = names[vote.voter.id] || null;
+        vote.reason = vote.metadata?.reason;
+        delete vote.metadata;
+
         return vote;
       });
     },
-    loadUserVotes: async (spaceIds: string[], voter: string): Promise<{ [key: string]: Vote }> => {
+    loadUserVotes: async (
+      spaceIds: string[],
+      voter: string
+    ): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
@@ -365,7 +394,10 @@ export function createApi(
       });
 
       return Object.fromEntries(
-        (data.votes as Vote[]).map(vote => [`${networkId}:${vote.space.id}/${vote.proposal}`, vote])
+        (data.votes as Vote[]).map(vote => [
+          `${networkId}:${vote.space.id}/${vote.proposal}`,
+          vote
+        ])
       );
     },
     loadProposals: async (
@@ -441,9 +473,17 @@ export function createApi(
       ]);
 
       if (data.proposal.metadata === null) return null;
-      data.proposal = joinHighlightProposal(data.proposal, highlightResult?.data.sxproposal);
+      data.proposal = joinHighlightProposal(
+        data.proposal,
+        highlightResult?.data.sxproposal
+      );
 
-      return formatProposal(data.proposal, networkId, current, opts.baseNetworkId);
+      return formatProposal(
+        data.proposal,
+        networkId,
+        current,
+        opts.baseNetworkId
+      );
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,
@@ -499,7 +539,10 @@ export function createApi(
           .catch(() => null)
       ]);
 
-      data.space = joinHighlightSpace(data.space, highlightResult?.data.sxspace);
+      data.space = joinHighlightSpace(
+        data.space,
+        highlightResult?.data.sxspace
+      );
 
       return formatSpace(data.space, networkId, constants);
     },
@@ -517,7 +560,10 @@ export function createApi(
           .catch(() => null)
       ]);
 
-      return joinHighlightUser(data.user ?? null, highlightResult?.data?.sxuser ?? null);
+      return joinHighlightUser(
+        data.user ?? null,
+        highlightResult?.data?.sxuser ?? null
+      );
     },
     loadUserActivities(userId: string): Promise<UserActivity[]> {
       return apollo
@@ -548,7 +594,8 @@ export function createApi(
         | 'vote_count-desc'
         | 'vote_count-asc'
         | 'proposal_count-desc'
-        | 'proposal_count-asc' = 'vote_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc',
+      user?: string
     ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
@@ -564,7 +611,8 @@ export function createApi(
             orderBy,
             orderDirection,
             where: {
-              space: spaceId
+              space: spaceId,
+              user
             }
           }
         })
@@ -581,6 +629,9 @@ export function createApi(
       return [] as Follow[];
     },
     loadAlias: async () => {
+      return null;
+    },
+    loadStatement: async () => {
       return null;
     }
   };

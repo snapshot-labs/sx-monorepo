@@ -1,5 +1,5 @@
 import { fetchScoreApi } from './utils';
-import { Strategy, SnapshotInfo } from '../../clients/offchain/types';
+import { SnapshotInfo, Strategy } from '../../clients/offchain/types';
 
 export default function createRemoteVpStrategy(): Strategy {
   return {
