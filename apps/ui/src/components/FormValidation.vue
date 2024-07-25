@@ -91,12 +91,12 @@ watch(
             </div>
           </div>
           <div class="flex gap-3">
-            <a v-if="model.paramsDefinition" @click="editStrategy(model)">
+            <button v-if="model.paramsDefinition" @click="editStrategy(model)">
               <IH-pencil />
-            </a>
-            <a @click="removeStrategy()">
+            </button>
+            <button @click="removeStrategy()">
               <IH-trash />
-            </a>
+            </button>
           </div>
         </div>
       </div>

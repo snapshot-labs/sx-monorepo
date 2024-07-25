@@ -399,12 +399,12 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <div>
-        <a class="text-skin-text" @click="modalOpenVotes = true">
+        <button class="text-skin-text" @click="modalOpenVotes = true">
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </a>
+        </button>
         ·
-        <a
+        <button
           class="text-skin-text"
           @click="modalOpenTimeline = true"
           v-text="votingTime"

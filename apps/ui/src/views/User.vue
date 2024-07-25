@@ -152,10 +152,10 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
-            <a href="#" class="text-skin-text" @click.prevent="copy(user.id)">
+            <button class="text-skin-text" @click.prevent="copy(user.id)">
               <IH-duplicate v-if="!copied" class="inline-block" />
               <IH-check v-else class="inline-block" />
-            </a>
+            </button>
           </UiTooltip>
         </div>
         <div

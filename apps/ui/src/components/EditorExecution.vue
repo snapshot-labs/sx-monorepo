@@ -135,12 +135,12 @@ watch(
             </template>
             <template #right>
               <div class="flex gap-3">
-                <a @click="editTx(i)">
+                <button @click="editTx(i)">
                   <IH-pencil />
-                </a>
-                <a @click="removeTx(i)">
+                </button>
+                <button @click="removeTx(i)">
                   <IH-trash />
-                </a>
+                </button>
               </div>
             </template>
           </TransactionsListItem>
