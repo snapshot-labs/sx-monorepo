@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
-import type { Space, SpaceMetadata } from '@/types';
+import { Space, SpaceMetadata } from '@/types';
 
 const DEFAULT_FORM_STATE: SpaceMetadata = {
   name: '',
@@ -81,7 +81,10 @@ watch(
       <h3 v-if="!showPicker">Edit profile</h3>
       <template v-else>
         <h3>Select contact</h3>
-        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">

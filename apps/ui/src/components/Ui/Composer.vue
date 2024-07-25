@@ -101,7 +101,12 @@ watch(model, () => {
             class="hidden"
             :disabled="editor.uploading.value"
           />
-          <UiLoading v-if="editor.uploading.value" :width="14" :height="14" class="inline-block" />
+          <UiLoading
+            v-if="editor.uploading.value"
+            :width="14"
+            :height="14"
+            class="inline-block"
+          />
           <IS-photo v-else class="w-[18px] h-[18px]" />
         </label>
       </UiTooltip>

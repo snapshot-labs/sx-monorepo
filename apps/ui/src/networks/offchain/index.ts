@@ -1,10 +1,10 @@
-import { createApi } from './api';
-import * as constants from './constants';
-import { createActions } from './actions';
+import networks from '@/helpers/networks.json';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
 import { NetworkID } from '@/types';
-import networks from '@/helpers/networks.json';
+import { createActions } from './actions';
+import { createApi } from './api';
+import * as constants from './constants';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
@@ -32,7 +32,8 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     getRelayerAuthenticatorType: () => null,
     isStrategySupported: () => true,
     isExecutorSupported: () => false,
-    isVotingTypeSupported: (type: string) => constants.EDITOR_VOTING_TYPES.includes(type),
+    isVotingTypeSupported: (type: string) =>
+      constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
     getTransaction: () => {
       throw new Error('Not implemented');

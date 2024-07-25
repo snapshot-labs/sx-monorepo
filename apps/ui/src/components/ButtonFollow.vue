@@ -7,11 +7,16 @@ const props = defineProps<{
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
 
-const { isSafeWallet } = useSafeWallet(props.space.network, props.space.snapshot_chain_id);
+const { isSafeWallet } = useSafeWallet(
+  props.space.network,
+  props.space.snapshot_chain_id
+);
 const followedSpacesStore = useFollowedSpacesStore();
 const { web3 } = useWeb3();
 
-const spaceFollowed = computed(() => followedSpacesStore.isFollowed(spaceIdComposite));
+const spaceFollowed = computed(() =>
+  followedSpacesStore.isFollowed(spaceIdComposite)
+);
 const hidden = computed(() => web3.value?.type === 'argentx');
 
 const loading = computed(

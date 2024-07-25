@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
-import { getNetwork } from '@/networks';
 import { compareAddresses, shorten } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
 
 const props = defineProps<{ proposal: ProposalType }>();
@@ -41,7 +41,9 @@ const network = computed(() => getNetwork(props.proposal.network));
       <a
         class="inline-flex items-center"
         target="_blank"
-        :href="executionNetwork.helpers.getExplorerUrl(executionTx, 'transaction')"
+        :href="
+          executionNetwork.helpers.getExplorerUrl(executionTx, 'transaction')
+        "
       >
         {{ shorten(executionTx) }}
         <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -86,9 +88,12 @@ const network = computed(() => getNetwork(props.proposal.network));
         @click="executeQueuedProposal"
       >
         <IH-play class="inline-block mr-2 flex-shrink-0" />
-        <template v-if="executionCountdown === 0">Execute queued transactions</template>
+        <template v-if="executionCountdown === 0"
+          >Execute queued transactions</template
+        >
         <template v-else>
-          Execution available in {{ dayjs.duration(executionCountdown).format('HH:mm:ss') }}
+          Execution available in
+          {{ dayjs.duration(executionCountdown).format('HH:mm:ss') }}
         </template>
       </UiButton>
       <UiButton

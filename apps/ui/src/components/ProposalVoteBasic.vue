@@ -19,7 +19,10 @@ const emit = defineEmits<{
     <UiTooltip title="For">
       <UiButton
         class="!text-skin-success !border-skin-success !px-0"
-        :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
+        :class="{
+          '!w-[48px] !h-[48px]': size === 48,
+          '!w-[40px] !h-[40px]': size === 40
+        }"
         :loading="sendingType === 'for'"
         @click="emit('vote', 'for')"
       >
@@ -29,7 +32,10 @@ const emit = defineEmits<{
     <UiTooltip title="Against">
       <UiButton
         class="!text-skin-danger !border-skin-danger !px-0"
-        :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
+        :class="{
+          '!w-[48px] !h-[48px]': size === 48,
+          '!w-[40px] !h-[40px]': size === 40
+        }"
         :loading="sendingType === 'against'"
         @click="emit('vote', 'against')"
       >
@@ -39,7 +45,10 @@ const emit = defineEmits<{
     <UiTooltip title="Abstain">
       <UiButton
         class="!text-gray-500 !border-gray-500 !px-0"
-        :class="{ '!w-[48px] !h-[48px]': size === 48, '!w-[40px] !h-[40px]': size === 40 }"
+        :class="{
+          '!w-[48px] !h-[48px]': size === 48,
+          '!w-[40px] !h-[40px]': size === 40
+        }"
         :loading="sendingType === 'abstain'"
         @click="emit('vote', 'abstain')"
       >

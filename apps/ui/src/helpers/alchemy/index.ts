@@ -1,5 +1,9 @@
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { GetTokenBalancesResponse, GetTokensMetadataResponse, GetBalancesResponse } from './types';
+import {
+  GetBalancesResponse,
+  GetTokenBalancesResponse,
+  GetTokensMetadataResponse
+} from './types';
 export * from './types';
 
 const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
@@ -18,7 +22,11 @@ function getApiUrl(networkId: number) {
   return `https://${network}.g.alchemy.com/v2/${apiKey}`;
 }
 
-export async function request(method: string, params: any[], networkId: number) {
+export async function request(
+  method: string,
+  params: any[],
+  networkId: number
+) {
   const res = await fetch(getApiUrl(networkId), {
     method: 'POST',
     body: JSON.stringify({
@@ -61,7 +69,10 @@ export async function batchRequest(
  * @param networkId Network ID
  * @returns Hex encoded ETH balance
  */
-export async function getBalance(address: string, networkId: number): Promise<string> {
+export async function getBalance(
+  address: string,
+  networkId: number
+): Promise<string> {
   return request('eth_getBalance', [address], networkId);
 }
 
@@ -76,7 +87,26 @@ export async function getTokenBalances(
   address: string,
   networkId: number
 ): Promise<GetTokenBalancesResponse> {
-  return request('alchemy_getTokenBalances', [address], networkId);
+  const results = { address, tokenBalances: [], pageKey: null };
+  let pageKey = null;
+
+  while (true) {
+    const pageResult = await request(
+      'alchemy_getTokenBalances',
+      [address, 'erc20', { pageKey }],
+      networkId
+    );
+
+    results.tokenBalances = results.tokenBalances.concat(
+      pageResult.tokenBalances
+    );
+
+    pageKey = pageResult.pageKey;
+
+    if (!pageKey) break;
+  }
+
+  return results;
 }
 
 /**
@@ -114,7 +144,9 @@ export async function getBalances(
     getTokenBalances(address, networkId)
   ]);
 
-  const contractAddresses = tokenBalances.map(balance => balance.contractAddress);
+  const contractAddresses = tokenBalances.map(
+    balance => balance.contractAddress
+  );
   const metadata = await getTokensMetadata(contractAddresses, networkId);
 
   return [
@@ -137,6 +169,6 @@ export async function getBalances(
         value: 0,
         change: 0
       }))
-      .filter(token => !token.symbol.includes('.'))
+      .filter(token => !token?.symbol?.includes('.'))
   ];
 }

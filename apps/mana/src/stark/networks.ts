@@ -1,6 +1,11 @@
-import { Account, RpcProvider, constants } from 'starknet';
-import { clients, starknetMainnet, starknetSepolia, NetworkConfig } from '@snapshot-labs/sx';
-import { ETH_NODE_URLS, getProvider, createAccountProxy } from './dependencies';
+import {
+  clients,
+  NetworkConfig,
+  starknetMainnet,
+  starknetSepolia
+} from '@snapshot-labs/sx';
+import { Account, constants, RpcProvider } from 'starknet';
+import { createAccountProxy, ETH_NODE_URLS, getProvider } from './dependencies';
 import { NonceManager } from './nonce-manager';
 
 export const NETWORKS = new Map<string, NetworkConfig>([
@@ -14,7 +19,10 @@ const clientsMap = new Map<
     provider: RpcProvider;
     client: clients.StarknetTx;
     herodotusController: clients.HerodotusController;
-    getAccount: (spaceAddress: string) => { account: Account; nonceManager: NonceManager };
+    getAccount: (spaceAddress: string) => {
+      account: Account;
+      nonceManager: NonceManager;
+    };
   }
 >();
 
@@ -23,13 +31,18 @@ export function getClient(chainId: string) {
   if (cached) return cached;
 
   const provider = getProvider(chainId);
-  const getAccount = createAccountProxy(process.env.STARKNET_MNEMONIC || '', provider);
+  const getAccount = createAccountProxy(
+    process.env.STARKNET_MNEMONIC || '',
+    provider
+  );
 
   const ethUrl = ETH_NODE_URLS.get(chainId);
-  if (!ethUrl) throw new Error(`Missing ethereum node url for chainId ${chainId}`);
+  if (!ethUrl)
+    throw new Error(`Missing ethereum node url for chainId ${chainId}`);
 
   const networkConfig = NETWORKS.get(chainId);
-  if (!networkConfig) throw new Error(`Missing network config for chainId ${chainId}`);
+  if (!networkConfig)
+    throw new Error(`Missing network config for chainId ${chainId}`);
 
   const client = new clients.StarknetTx({
     starkProvider: provider,
@@ -39,7 +52,12 @@ export function getClient(chainId: string) {
 
   const herodotusController = new clients.HerodotusController(networkConfig);
 
-  clientsMap.set(chainId, { provider, client, herodotusController, getAccount });
+  clientsMap.set(chainId, {
+    provider,
+    client,
+    herodotusController,
+    getAccount
+  });
 
   return { provider, client, herodotusController, getAccount };
 }

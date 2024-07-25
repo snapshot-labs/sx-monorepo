@@ -8,7 +8,8 @@ export async function estimateStarknetFee(
   networkConfig: NetworkConfig,
   calls: Call | Call[]
 ) {
-  if (networkConfig.feeEstimateOverride) return BigInt(networkConfig.feeEstimateOverride);
+  if (networkConfig.feeEstimateOverride)
+    return BigInt(networkConfig.feeEstimateOverride);
 
   const fee = await account.estimateFee(calls);
   return stark.estimatedFeeToMaxFee(fee.suggestedMaxFee, FEE_OVERHEAD);

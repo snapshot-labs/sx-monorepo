@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import createOzVotesStrategy from '../../../../src/strategies/evm/ozVotes';
 
 describe('ozVotes', () => {
@@ -12,7 +12,8 @@ describe('ozVotes', () => {
     vi.mock('@ethersproject/contracts', () => ({
       Contract: class {
         async getVotes(voterAddress: string) {
-          if (voterAddress === '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70') return '10000021';
+          if (voterAddress === '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70')
+            return '10000021';
           return '0';
         }
       }

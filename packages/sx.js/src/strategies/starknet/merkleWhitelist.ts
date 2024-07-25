@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { uint256, validateAndParseAddress } from 'starknet';
-import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
-import { AddressType, Leaf, generateMerkleProof } from '../../utils/merkletree';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import { AddressType, generateMerkleProof, Leaf } from '../../utils/merkletree';
 
 type Entry = {
   type: AddressType;
@@ -31,11 +31,14 @@ export default function createMerkleWhitelistStrategy(): Strategy {
       );
       const hashes = leaves.map(leaf => leaf.hash);
       const voterIndex = leaves.findIndex(
-        leaf => validateAndParseAddress(leaf.address) === validateAndParseAddress(signerAddress)
+        leaf =>
+          validateAndParseAddress(leaf.address) ===
+          validateAndParseAddress(signerAddress)
       );
 
       const leaf = leaves[voterIndex];
-      if (voterIndex === -1 || !leaf) throw new Error('Signer is not in whitelist');
+      if (voterIndex === -1 || !leaf)
+        throw new Error('Signer is not in whitelist');
 
       const votingPowerUint256 = uint256.bnToUint256(leaf.votingPower);
 
@@ -66,7 +69,9 @@ export default function createMerkleWhitelistStrategy(): Strategy {
         (entry: Entry) => new Leaf(entry.type, entry.address, entry.votingPower)
       );
       const voter = leaves.find(
-        leaf => validateAndParseAddress(leaf.address) === validateAndParseAddress(voterAddress)
+        leaf =>
+          validateAndParseAddress(leaf.address) ===
+          validateAndParseAddress(voterAddress)
       );
 
       return voter ? voter.votingPower : 0n;
