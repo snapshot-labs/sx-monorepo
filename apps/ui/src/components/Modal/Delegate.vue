@@ -89,7 +89,10 @@ watchEffect(async () => {
     <template #header>
       <h3>Delegate voting power</h3>
       <template v-if="showPicker">
-        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">

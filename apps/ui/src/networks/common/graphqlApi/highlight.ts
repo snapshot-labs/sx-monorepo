@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
-import { ApiSpace, ApiProposal } from './types';
 import { User, Vote } from '@/types';
+import { ApiProposal, ApiSpace } from './types';
 
 type HighlightSpace = {
   id: string;
@@ -119,15 +119,26 @@ export function joinHighlightProposal(
 
   return {
     ...proposal,
-    scores_1: Number(BigInt(proposal.scores_1) + BigInt(highlightProposal.scores_1)),
-    scores_2: Number(BigInt(proposal.scores_2) + BigInt(highlightProposal.scores_2)),
-    scores_3: Number(BigInt(proposal.scores_3) + BigInt(highlightProposal.scores_3)),
-    scores_total: Number(BigInt(proposal.scores_total) + BigInt(highlightProposal.scores_total)),
+    scores_1: Number(
+      BigInt(proposal.scores_1) + BigInt(highlightProposal.scores_1)
+    ),
+    scores_2: Number(
+      BigInt(proposal.scores_2) + BigInt(highlightProposal.scores_2)
+    ),
+    scores_3: Number(
+      BigInt(proposal.scores_3) + BigInt(highlightProposal.scores_3)
+    ),
+    scores_total: Number(
+      BigInt(proposal.scores_total) + BigInt(highlightProposal.scores_total)
+    ),
     vote_count: proposal.vote_count + highlightProposal.vote_count
   };
 }
 
-export function joinHighlightUser(user: User | null, highlightUser: User | null): User | null {
+export function joinHighlightUser(
+  user: User | null,
+  highlightUser: User | null
+): User | null {
   if (!highlightUser) return user;
 
   return {
@@ -160,7 +171,8 @@ export function mixinHighlightVotes(
   });
 
   const hasMore = votes.length === limit;
-  const thresholdValue = votes.length > 0 ? votes[votes.length - 1][orderBy] : null;
+  const thresholdValue =
+    votes.length > 0 ? votes[votes.length - 1][orderBy] : null;
 
   const mixins =
     !hasMore || thresholdValue === null
@@ -181,7 +193,9 @@ export function mixinHighlightVotes(
         );
 
   const result = [...votes, ...mixins.added].sort((a, b) =>
-    orderDirection === 'desc' ? b[orderBy] - a[orderBy] : a[orderBy] - b[orderBy]
+    orderDirection === 'desc'
+      ? b[orderBy] - a[orderBy]
+      : a[orderBy] - b[orderBy]
   );
 
   return { result, remaining: mixins.remaining };

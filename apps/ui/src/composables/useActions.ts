@@ -1,21 +1,20 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { enabledNetworks, getNetwork, getReadWriteNetwork, offchainNetworks } from '@/networks';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import type {
-  Transaction,
-  Proposal,
-  SpaceMetadata,
-  SpaceSettings,
-  Space,
+import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
+import { Connector, StrategyConfig } from '@/networks/types';
+import {
   Choice,
   NetworkID,
-  VoteType,
-  User
+  Proposal,
+  Space,
+  SpaceMetadata,
+  SpaceSettings,
+  Statement,
+  Transaction,
+  User,
+  VoteType
 } from '@/types';
-import type { Connector, StrategyConfig } from '@/networks/types';
-
-const offchainNetworkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -38,7 +37,10 @@ export function useActions() {
           e.code === 'ACTION_REJECTED';
 
         if (!isUserAbortError) {
-          uiStore.addNotification('error', 'Something went wrong. Please try again later.');
+          uiStore.addNotification(
+            'error',
+            'Something went wrong. Please try again later.'
+          );
         }
 
         throw e;
@@ -65,7 +67,10 @@ export function useActions() {
       });
 
       if (envelope.signatureData.commitTxId) {
-        uiStore.addPendingTransaction(envelope.signatureData.commitTxId, network.baseNetworkId);
+        uiStore.addPendingTransaction(
+          envelope.signatureData.commitTxId,
+          network.baseNetworkId
+        );
       }
 
       uiStore.addNotification(
@@ -101,7 +106,10 @@ export function useActions() {
       console.log('Receipt', receipt);
 
       if (envelope.signatureData.signature === '0x')
-        uiStore.addNotification('success', 'Your vote is pending! waiting for other signers');
+        uiStore.addNotification(
+          'success',
+          'Your vote is pending! waiting for other signers'
+        );
       hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
       console.log('Receipt', envelope);
@@ -118,14 +126,17 @@ export function useActions() {
   }
 
   async function getAliasSigner() {
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     return alias.getAliasWallet(address =>
-      wrapPromise(offchainNetworkId, network.actions.setAlias(auth.web3, address))
+      wrapPromise(metadataNetwork, network.actions.setAlias(auth.web3, address))
     );
   }
 
-  async function predictSpaceAddress(networkId: NetworkID, salt: string): Promise<string | null> {
+  async function predictSpaceAddress(
+    networkId: NetworkID,
+    salt: string
+  ): Promise<string | null> {
     if (!web3.value.account) {
       forceLogin();
       return null;
@@ -179,8 +190,14 @@ export function useActions() {
     const receipt = await network.actions.createSpace(auth.web3, salt, {
       controller,
       votingDelay: getCurrentFromDuration(networkId, settings.votingDelay),
-      minVotingDuration: getCurrentFromDuration(networkId, settings.minVotingDuration),
-      maxVotingDuration: getCurrentFromDuration(networkId, settings.maxVotingDuration),
+      minVotingDuration: getCurrentFromDuration(
+        networkId,
+        settings.minVotingDuration
+      ),
+      maxVotingDuration: getCurrentFromDuration(
+        networkId,
+        settings.maxVotingDuration
+      ),
       authenticators,
       validationStrategy,
       votingStrategies,
@@ -207,7 +224,10 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    await wrapPromise(space.network, network.actions.setMetadata(auth.web3, space, metadata));
+    await wrapPromise(
+      space.network,
+      network.actions.setMetadata(auth.web3, space, metadata)
+    );
   }
 
   async function vote(proposal: Proposal, choice: Choice, reason: string) {
@@ -357,24 +377,34 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    await wrapPromise(proposal.network, network.actions.cancelProposal(auth.web3, proposal));
+    await wrapPromise(
+      proposal.network,
+      network.actions.cancelProposal(auth.web3, proposal)
+    );
 
     return true;
   }
 
   async function finalizeProposal(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
+    if (web3.value.type === 'argentx')
+      throw new Error('ArgentX is not supported');
 
     const network = getReadWriteNetwork(proposal.network);
 
-    await wrapPromise(proposal.network, network.actions.finalizeProposal(auth.web3, proposal));
+    await wrapPromise(
+      proposal.network,
+      network.actions.finalizeProposal(auth.web3, proposal)
+    );
   }
 
   async function executeTransactions(proposal: Proposal) {
     const network = getReadWriteNetwork(proposal.network);
 
-    await wrapPromise(proposal.network, network.actions.executeTransactions(auth.web3, proposal));
+    await wrapPromise(
+      proposal.network,
+      network.actions.executeTransactions(auth.web3, proposal)
+    );
   }
 
   async function executeQueuedProposal(proposal: Proposal) {
@@ -391,11 +421,15 @@ export function useActions() {
 
   async function vetoProposal(proposal: Proposal) {
     if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx') throw new Error('ArgentX is not supported');
+    if (web3.value.type === 'argentx')
+      throw new Error('ArgentX is not supported');
 
     const network = getReadWriteNetwork(proposal.network);
 
-    await wrapPromise(proposal.network, network.actions.vetoProposal(auth.web3, proposal));
+    await wrapPromise(
+      proposal.network,
+      network.actions.vetoProposal(auth.web3, proposal)
+    );
   }
 
   async function setVotingDelay(space: Space, votingDelay: number) {
@@ -460,7 +494,10 @@ export function useActions() {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    await wrapPromise(space.network, network.actions.transferOwnership(auth.web3, space, owner));
+    await wrapPromise(
+      space.network,
+      network.actions.transferOwnership(auth.web3, space, owner)
+    );
   }
 
   async function updateStrategies(
@@ -504,7 +541,13 @@ export function useActions() {
 
     await wrapPromise(
       networkId,
-      network.actions.delegate(auth.web3, space, networkId, delegatee, delegationContract)
+      network.actions.delegate(
+        auth.web3,
+        space,
+        networkId,
+        delegatee,
+        delegationContract
+      )
     );
 
     mixpanel.track('Delegate', {
@@ -520,12 +563,17 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     try {
       await wrapPromise(
-        offchainNetworkId,
-        network.actions.followSpace(await getAliasSigner(), networkId, spaceId, web3.value.account)
+        metadataNetwork,
+        network.actions.followSpace(
+          await getAliasSigner(),
+          networkId,
+          spaceId,
+          web3.value.account
+        )
       );
     } catch (e) {
       uiStore.addNotification('error', e.message);
@@ -541,11 +589,11 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     try {
       await wrapPromise(
-        offchainNetworkId,
+        metadataNetwork,
         network.actions.unfollowSpace(
           await getAliasSigner(),
           networkId,
@@ -562,11 +610,30 @@ export function useActions() {
   }
 
   async function updateUser(user: User) {
-    const network = getNetwork(offchainNetworkId);
+    const network = getNetwork(metadataNetwork);
 
     await wrapPromise(
-      offchainNetworkId,
-      network.actions.updateUser(await getAliasSigner(), user, web3.value.account)
+      metadataNetwork,
+      network.actions.updateUser(
+        await getAliasSigner(),
+        user,
+        web3.value.account
+      )
+    );
+
+    return true;
+  }
+
+  async function updateStatement(statement: Statement) {
+    const network = getNetwork(metadataNetwork);
+
+    await wrapPromise(
+      metadataNetwork,
+      network.actions.updateStatement(
+        await getAliasSigner(),
+        statement,
+        web3.value.account
+      )
     );
 
     return true;
@@ -593,6 +660,7 @@ export function useActions() {
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
-    updateUser: wrapWithErrors(updateUser)
+    updateUser: wrapWithErrors(updateUser),
+    updateStatement: wrapWithErrors(updateStatement)
   };
 }

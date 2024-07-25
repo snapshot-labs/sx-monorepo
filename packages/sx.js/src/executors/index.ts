@@ -1,9 +1,9 @@
-import createVanillaExecutor from './vanilla';
-import createEthRelayerExecutor from './ethRelayer';
 import createAvatarExecutor from './avatar';
 import createAxiomExecutor from './axiom';
+import createEthRelayerExecutor from './ethRelayer';
 import createIsokratiaExecutor from './isokratia';
-import { ExecutorType, ExecutionInput } from '../types';
+import createVanillaExecutor from './vanilla';
+import { ExecutionInput, ExecutorType } from '../types';
 
 export function getExecutionData(
   type: ExecutorType,
@@ -14,8 +14,14 @@ export function getExecutionData(
     return createVanillaExecutor().getExecutionData(executorAddress);
   }
 
-  if (['SimpleQuorumAvatar', 'SimpleQuorumTimelock'].includes(type) && input?.transactions) {
-    return createAvatarExecutor().getExecutionData(executorAddress, input.transactions);
+  if (
+    ['SimpleQuorumAvatar', 'SimpleQuorumTimelock'].includes(type) &&
+    input?.transactions
+  ) {
+    return createAvatarExecutor().getExecutionData(
+      executorAddress,
+      input.transactions
+    );
   }
 
   if (type === 'EthRelayer' && input?.transactions && input.destination) {
@@ -25,12 +31,20 @@ export function getExecutionData(
   }
 
   if (type === 'Axiom' && input?.transactions) {
-    return createAxiomExecutor().getExecutionData(executorAddress, input.transactions);
+    return createAxiomExecutor().getExecutionData(
+      executorAddress,
+      input.transactions
+    );
   }
 
   if (type === 'Isokratia' && input?.transactions) {
-    return createIsokratiaExecutor().getExecutionData(executorAddress, input.transactions);
+    return createIsokratiaExecutor().getExecutionData(
+      executorAddress,
+      input.transactions
+    );
   }
 
-  throw new Error(`Not enough data to create execution for executor ${executorAddress}`);
+  throw new Error(
+    `Not enough data to create execution for executor ${executorAddress}`
+  );
 }

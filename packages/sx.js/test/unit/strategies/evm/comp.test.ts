@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import createCompStrategy from '../../../../src/strategies/evm/comp';
 
 describe('compStrategy', () => {

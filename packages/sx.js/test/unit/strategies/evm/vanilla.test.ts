@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { describe, expect, it } from 'vitest';
 import createVanillaStrategy from '../../../../src/strategies/evm/vanilla';
 
 describe('vanillaStrategy', () => {

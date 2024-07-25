@@ -12,11 +12,21 @@ export async function call(provider, abi: any[], call: any[], options?) {
   }
 }
 
-export async function multicall(network: string, provider, abi: any[], calls: any[], options?) {
+export async function multicall(
+  network: string,
+  provider,
+  abi: any[],
+  calls: any[],
+  options?
+) {
   const multicallAbi = [
     'function aggregate(tuple(address target, bytes callData)[] calls) view returns (uint256 blockNumber, bytes[] returnData)'
   ];
-  const multi = new Contract(networks[network].multicall, multicallAbi, provider);
+  const multi = new Contract(
+    networks[network].multicall,
+    multicallAbi,
+    provider
+  );
   const itf = new Interface(abi);
   try {
     const max = options?.limit || 500;
@@ -36,7 +46,9 @@ export async function multicall(network: string, provider, abi: any[], calls: an
     });
     let results: any = await Promise.all(promises);
     results = results.reduce((prev: any, [, res]: any) => prev.concat(res), []);
-    return results.map((call, i) => itf.decodeFunctionResult(calls[i][1], call));
+    return results.map((call, i) =>
+      itf.decodeFunctionResult(calls[i][1], call)
+    );
   } catch (e) {
     return Promise.reject(e);
   }

@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { starkProvider } from '../../../helpers';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { EthereumSig } from '../../../../../src/clients/starknet/ethereum-sig';
 import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
+import { starkProvider } from '../../../helpers';
 
 describe('EthereumSig', () => {
   const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
@@ -33,7 +33,8 @@ describe('EthereumSig', () => {
     const envelope = await client.propose({
       signer,
       data: {
-        space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
+        space:
+          '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
         authenticator: EthSig,
         strategies: [
           {
@@ -56,7 +57,8 @@ describe('EthereumSig', () => {
     const envelope = await client.updateProposal({
       signer,
       data: {
-        space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
+        space:
+          '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
         authenticator: EthSig,
         executionStrategy: {
           addr: '0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe',
@@ -74,7 +76,8 @@ describe('EthereumSig', () => {
     const envelope = await client.vote({
       signer,
       data: {
-        space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
+        space:
+          '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
         authenticator: EthSig,
         strategies: [
           {

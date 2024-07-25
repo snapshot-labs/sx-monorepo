@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { StrategyConfig, StrategyTemplate } from '@/networks/types';
+import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 
 const model = defineModel<StrategyConfig[]>({ required: true });
 
@@ -56,7 +56,10 @@ function handleStrategySave(value: Record<string, any>) {
   editStrategyModalOpen.value = false;
 
   let allStrategies = [...model.value];
-  if (editedStrategy.value && !allStrategies.find(s => s.id === editedStrategy.value?.id)) {
+  if (
+    editedStrategy.value &&
+    !allStrategies.find(s => s.id === editedStrategy.value?.id)
+  ) {
     allStrategies.push(editedStrategy.value);
   }
 
@@ -84,7 +87,10 @@ function handleStrategySave(value: Record<string, any>) {
       >
         <div class="flex min-w-0">
           <div class="whitespace-nowrap">{{ strategy.name }}</div>
-          <div v-if="strategy.generateSummary" class="ml-2 pr-2 text-skin-text truncate">
+          <div
+            v-if="strategy.generateSummary"
+            class="ml-2 pr-2 text-skin-text truncate"
+          >
             {{ strategy.generateSummary(strategy.params) }}
           </div>
         </div>
@@ -104,7 +110,9 @@ function handleStrategySave(value: Record<string, any>) {
       <ButtonStrategy
         v-for="strategy in availableStrategies"
         :key="strategy.address"
-        :disabled="limitReached || (unique && !!activeStrategiesMap[strategy.name])"
+        :disabled="
+          limitReached || (unique && !!activeStrategiesMap[strategy.name])
+        "
         :strategy="strategy"
         @click="addStrategy(strategy)"
       />

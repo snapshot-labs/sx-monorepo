@@ -1,7 +1,12 @@
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
-export type ProposalState = 'pending' | 'active' | 'passed' | 'rejected' | 'executed';
+export type ProposalState =
+  | 'pending'
+  | 'active'
+  | 'passed'
+  | 'rejected'
+  | 'executed';
 
 export type NetworkID =
   | 's'
@@ -15,7 +20,13 @@ export type NetworkID =
   | 'sn'
   | 'sn-sep';
 
-export type Choice = 'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
+export type Choice =
+  | 'for'
+  | 'against'
+  | 'abstain'
+  | number
+  | number[]
+  | Record<string, number>;
 
 export type Privacy = 'shutter' | null;
 
@@ -215,7 +226,7 @@ export type User = {
   id: string;
   created: number | null;
   follows?: string[];
-} & UserProfile;
+} & Partial<UserProfile>;
 
 export type UserActivity = {
   id: string;
@@ -223,6 +234,15 @@ export type UserActivity = {
   spaceId: string;
   proposal_count: number;
   vote_count: number;
+};
+
+export type Statement = {
+  space: string;
+  network: NetworkID;
+  about: string;
+  statement: string;
+  discourse: string;
+  status: 'ACTIVE' | 'INACTIVE';
 };
 
 export type Follow = {
@@ -255,6 +275,7 @@ export type Vote = {
   proposal: number | string;
   choice: number | number[] | Record<string, number>;
   vp: number;
+  reason?: string;
   created: number;
   tx: string;
 };
@@ -350,4 +371,6 @@ export type Transaction =
   | RawTransaction;
 
 // Utils
-export type RequiredProperty<T> = { [P in keyof T]: Required<NonNullable<T[P]>> };
+export type RequiredProperty<T> = {
+  [P in keyof T]: Required<NonNullable<T[P]>>;
+};

@@ -1,11 +1,11 @@
 import { formatUnits } from '@ethersproject/units';
 import { getBalances, GetBalancesResponse } from '@/helpers/alchemy';
-import { METADATA } from '@/networks/evm';
 import {
-  ETH_CONTRACT,
   COINGECKO_ASSET_PLATFORMS,
-  COINGECKO_BASE_ASSETS
+  COINGECKO_BASE_ASSETS,
+  ETH_CONTRACT
 } from '@/helpers/constants';
+import { METADATA } from '@/networks/evm';
 
 const COINGECKO_API_KEY = 'CG-1z19sMoCC6LoqR4b6avyLi3U';
 const COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3/simple';
@@ -25,7 +25,11 @@ export function useBalances() {
     return res.json();
   }
 
-  async function getCoins(assetPlatform: string, baseToken: string, contractAddresses: string[]) {
+  async function getCoins(
+    assetPlatform: string,
+    baseToken: string,
+    contractAddresses: string[]
+  ) {
     const [baseTokenData, tokenData] = await Promise.all([
       callCoinGecko(
         `${COINGECKO_API_URL}/price?ids=${baseToken}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
@@ -76,7 +80,8 @@ export function useBalances() {
 
         const price = coins[asset.contractAddress]?.usd || 0;
         const change = coins[asset.contractAddress]?.usd_24h_change || 0;
-        const value = parseFloat(formatUnits(asset.tokenBalance, asset.decimals)) * price;
+        const value =
+          parseFloat(formatUnits(asset.tokenBalance, asset.decimals)) * price;
 
         return {
           ...asset,

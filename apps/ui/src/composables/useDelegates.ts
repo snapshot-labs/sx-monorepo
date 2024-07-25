@@ -1,4 +1,8 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
+import {
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
 
@@ -10,7 +14,7 @@ type ApiDelegate = {
   tokenHoldersRepresentedAmount: number;
 };
 
-type Delegate = ApiDelegate & {
+export type Delegate = ApiDelegate & {
   name: string | null;
   delegatorsPercentage: number;
   votesPercentage: number;
@@ -21,6 +25,22 @@ type Governance = {
   totalDelegates: string;
 };
 
+type DelegatesQueryFilter = {
+  orderBy: string;
+  orderDirection: string;
+  skip: number;
+  first: number;
+  user?: string;
+};
+
+type SortOrder =
+  | 'delegatedVotes-desc'
+  | 'delegatedVotes-asc'
+  | 'tokenHoldersRepresentedAmount-desc'
+  | 'tokenHoldersRepresentedAmount-asc';
+
+const DEFAULT_ORDER = 'delegatedVotes-desc';
+
 const DELEGATES_LIMIT = 40;
 
 const DELEGATES_QUERY = gql`
@@ -30,13 +50,18 @@ const DELEGATES_QUERY = gql`
     $orderBy: Delegate_orderBy!
     $orderDirection: OrderDirection!
     $governance: String!
+    $user: String
   ) {
     delegates(
       first: $first
       skip: $skip
       orderBy: $orderBy
       orderDirection: $orderDirection
-      where: { tokenHoldersRepresentedAmount_gte: 0, governance: $governance }
+      where: {
+        tokenHoldersRepresentedAmount_gte: 0
+        governance: $governance
+        user: $user
+      }
     ) {
       id
       user
@@ -52,7 +77,8 @@ const DELEGATES_QUERY = gql`
 `;
 
 function convertUrl(apiUrl: string) {
-  const hostedPattern = /https:\/\/thegraph\.com\/hosted-service\/subgraph\/([\w-]+)\/([\w-]+)/;
+  const hostedPattern =
+    /https:\/\/thegraph\.com\/hosted-service\/subgraph\/([\w-]+)\/([\w-]+)/;
 
   const hostedMatch = apiUrl.match(hostedPattern);
   if (hostedMatch) {
@@ -86,38 +112,22 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
     }
   });
 
-  async function _fetch(
-    overwrite: boolean,
-    sortBy:
-      | 'delegatedVotes-desc'
-      | 'delegatedVotes-asc'
-      | 'tokenHoldersRepresentedAmount-desc'
-      | 'tokenHoldersRepresentedAmount-asc'
-  ) {
-    const [orderBy, orderDirection] = sortBy.split('-');
-
-    const { data } = await apollo.query({
-      query: DELEGATES_QUERY,
-      variables: {
-        orderBy,
-        orderDirection,
-        governance: governance.toLowerCase(),
-        first: DELEGATES_LIMIT,
-        skip: overwrite ? 0 : delegates.value.length
-      }
-    });
-
-    const governanceData = data.governance as Governance;
-    const delegatesData = data.delegates as ApiDelegate[];
+  async function formatDelegates(data: {
+    governance: Governance;
+    delegates: ApiDelegate[];
+  }): Promise<Delegate[]> {
+    const governanceData = data.governance;
+    const delegatesData = data.delegates;
     const addresses = delegatesData.map(delegate => delegate.user);
-
     const names = await getNames(addresses);
 
-    const newDelegates = delegatesData.map((delegate: ApiDelegate) => {
+    return delegatesData.map((delegate: ApiDelegate) => {
       const delegatorsPercentage =
-        Number(delegate.tokenHoldersRepresentedAmount) / Number(governanceData.totalDelegates);
+        Number(delegate.tokenHoldersRepresentedAmount) /
+        Number(governanceData.totalDelegates);
       const votesPercentage =
-        Number(delegate.delegatedVotes) / Number(governanceData.delegatedVotes) || 0;
+        Number(delegate.delegatedVotes) /
+          Number(governanceData.delegatedVotes) || 0;
 
       return {
         name: names[delegate.user] || null,
@@ -126,19 +136,37 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
         votesPercentage
       };
     });
-
-    delegates.value = overwrite ? newDelegates : [...delegates.value, ...newDelegates];
-
-    hasMore.value = delegatesData.length === DELEGATES_LIMIT;
   }
 
-  async function fetch(
-    sortBy:
-      | 'delegatedVotes-desc'
-      | 'delegatedVotes-asc'
-      | 'tokenHoldersRepresentedAmount-desc'
-      | 'tokenHoldersRepresentedAmount-asc' = 'delegatedVotes-desc'
-  ) {
+  async function getDelegates(
+    filter: DelegatesQueryFilter
+  ): Promise<Delegate[]> {
+    const { data } = await apollo.query({
+      query: DELEGATES_QUERY,
+      variables: { ...filter, governance: governance.toLowerCase() }
+    });
+
+    return formatDelegates(data);
+  }
+
+  async function _fetch(overwrite: boolean, sortBy: SortOrder) {
+    const [orderBy, orderDirection] = sortBy.split('-');
+
+    const newDelegates = await getDelegates({
+      orderBy,
+      orderDirection,
+      skip: overwrite ? 0 : delegates.value.length,
+      first: DELEGATES_LIMIT
+    });
+
+    delegates.value = overwrite
+      ? newDelegates
+      : [...delegates.value, ...newDelegates];
+
+    hasMore.value = newDelegates.length === DELEGATES_LIMIT;
+  }
+
+  async function fetch(sortBy: SortOrder = DEFAULT_ORDER) {
     if (loading.value || loaded.value) return;
     loading.value = true;
 
@@ -153,13 +181,7 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
     }
   }
 
-  async function fetchMore(
-    sortBy:
-      | 'delegatedVotes-desc'
-      | 'delegatedVotes-asc'
-      | 'tokenHoldersRepresentedAmount-desc'
-      | 'tokenHoldersRepresentedAmount-asc' = 'delegatedVotes-desc'
-  ) {
+  async function fetchMore(sortBy: SortOrder = DEFAULT_ORDER) {
     if (loading.value || !loaded.value) return;
     loadingMore.value = true;
 
@@ -184,6 +206,7 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
     failed,
     hasMore,
     delegates,
+    getDelegates,
     fetch,
     fetchMore,
     reset

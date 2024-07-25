@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, _d, compareAddresses } from '@/helpers/utils';
+import { _d, compareAddresses, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
@@ -8,11 +8,17 @@ const props = defineProps<{ space: Space }>();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
-const { setVotingDelay, setMinVotingDuration, setMaxVotingDuration, transferOwnership } =
-  useActions();
+const {
+  setVotingDelay,
+  setMinVotingDuration,
+  setMaxVotingDuration,
+  transferOwnership
+} = useActions();
 
 const network = computed(() => getNetwork(props.space.network));
-const isController = computed(() => compareAddresses(props.space.controller, web3.value.account));
+const isController = computed(() =>
+  compareAddresses(props.space.controller, web3.value.account)
+);
 
 const settingsLoading = ref({
   votingDelay: false,
@@ -94,7 +100,8 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             }"
             :custom-error-validation="
               value =>
-                getCurrentFromDuration(space.network, Number(value)) > space.max_voting_period
+                getCurrentFromDuration(space.network, Number(value)) >
+                space.max_voting_period
                   ? 'Must be equal to or lower than max. voting period'
                   : undefined
             "
@@ -118,7 +125,8 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             }"
             :custom-error-validation="
               value =>
-                getCurrentFromDuration(space.network, Number(value)) < space.min_voting_period
+                getCurrentFromDuration(space.network, Number(value)) <
+                space.min_voting_period
                   ? 'Must be equal to or higher than min. voting period'
                   : undefined
             "
@@ -132,7 +140,10 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
         </div>
         <div v-if="space.proposal_threshold !== '0'" class="mb-3">
           <div class="s-label !mb-0" v-text="'Proposal threshold'" />
-          <h4 class="text-skin-link text-md" v-text="space.proposal_threshold" />
+          <h4
+            class="text-skin-link text-md"
+            v-text="space.proposal_threshold"
+          />
         </div>
       </div>
     </div>
@@ -151,8 +162,16 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
           }"
           @save="value => handleSave('controller', value.toString())"
         >
-          <a :href="network.helpers.getExplorerUrl(space.controller, 'contract')" target="_blank">
-            <UiStamp :id="space.controller" type="avatar" :size="18" class="mr-2 rounded-sm" />
+          <a
+            :href="network.helpers.getExplorerUrl(space.controller, 'contract')"
+            target="_blank"
+          >
+            <UiStamp
+              :id="space.controller"
+              type="avatar"
+              :size="18"
+              class="mr-2 rounded-sm"
+            />
             {{ shorten(space.controller) }}
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </a>
@@ -162,12 +181,26 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
 
     <div>
       <UiLabel :label="'Auth(s)'" sticky />
-      <div v-for="(auth, i) in space.authenticators" :key="i" class="mx-4 py-3 border-b">
-        <a :href="network.helpers.getExplorerUrl(auth, 'contract')" target="_blank" class="flex">
+      <div
+        v-for="(auth, i) in space.authenticators"
+        :key="i"
+        class="mx-4 py-3 border-b"
+      >
+        <a
+          :href="network.helpers.getExplorerUrl(auth, 'contract')"
+          target="_blank"
+          class="flex"
+        >
           <h4 class="flex-auto" v-text="network.constants.AUTHS[auth]" />
           <div>
-            <UiStamp :id="auth" type="avatar" :size="18" class="mr-2 rounded-sm" />
-            {{ shorten(auth) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
+            <UiStamp
+              :id="auth"
+              type="avatar"
+              :size="18"
+              class="mr-2 rounded-sm"
+            />
+            {{ shorten(auth) }}
+            <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>
       </div>
@@ -177,13 +210,20 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
       <UiLabel :label="'Proposal validation'" sticky />
       <div class="mx-4 py-3 border-b">
         <a
-          :href="network.helpers.getExplorerUrl(space.validation_strategy, 'contract')"
+          :href="
+            network.helpers.getExplorerUrl(
+              space.validation_strategy,
+              'contract'
+            )
+          "
           target="_blank"
           class="flex"
         >
           <h4
             class="flex-auto"
-            v-text="network.constants.PROPOSAL_VALIDATIONS[space.validation_strategy]"
+            v-text="
+              network.constants.PROPOSAL_VALIDATIONS[space.validation_strategy]
+            "
           />
           <div>
             <UiStamp
@@ -201,16 +241,29 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
 
     <div>
       <UiLabel :label="'Strategie(s)'" sticky />
-      <div v-for="(strategy, i) in space.strategies" :key="i" class="mx-4 py-3 border-b">
+      <div
+        v-for="(strategy, i) in space.strategies"
+        :key="i"
+        class="mx-4 py-3 border-b"
+      >
         <a
           :href="network.helpers.getExplorerUrl(strategy, 'strategy')"
           target="_blank"
           class="flex"
         >
-          <h4 class="flex-auto" v-text="network.constants.STRATEGIES[strategy] || strategy" />
+          <h4
+            class="flex-auto"
+            v-text="network.constants.STRATEGIES[strategy] || strategy"
+          />
           <div>
-            <UiStamp :id="strategy" type="avatar" :size="18" class="mr-2 rounded-sm" />
-            {{ shorten(strategy) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
+            <UiStamp
+              :id="strategy"
+              type="avatar"
+              :size="18"
+              class="mr-2 rounded-sm"
+            />
+            {{ shorten(strategy) }}
+            <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>
       </div>
@@ -218,7 +271,11 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
 
     <div>
       <UiLabel :label="'Execution(s)'" sticky />
-      <div v-for="(executor, i) in space.executors" :key="i" class="mx-4 py-3 border-b">
+      <div
+        v-for="(executor, i) in space.executors"
+        :key="i"
+        class="mx-4 py-3 border-b"
+      >
         <a
           :href="network.helpers.getExplorerUrl(executor, 'contract')"
           target="_blank"
@@ -233,8 +290,14 @@ watchEffect(() => setTitle(`Settings - ${props.space.name}`));
             "
           />
           <div>
-            <UiStamp :id="executor" type="avatar" :size="18" class="mr-2 rounded-sm" />
-            {{ shorten(executor) }} <IH-arrow-sm-right class="inline-block -rotate-45" />
+            <UiStamp
+              :id="executor"
+              type="avatar"
+              :size="18"
+              class="mr-2 rounded-sm"
+            />
+            {{ shorten(executor) }}
+            <IH-arrow-sm-right class="inline-block -rotate-45" />
           </div>
         </a>
       </div>

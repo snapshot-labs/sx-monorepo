@@ -2,7 +2,7 @@
 
 import { Contract } from 'starknet';
 import ERC20VotesTokenAbi from './abis/ERC20VotesToken.json';
-import type { ClientConfig, Envelope, Strategy, Propose, Vote } from '../../types';
+import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
 
 export default function createErc20VotesStrategy(): Strategy {
   return {
@@ -17,7 +17,8 @@ export default function createErc20VotesStrategy(): Strategy {
       clientConfig: ClientConfig
     ): Promise<string[]> {
       const isEthereumAddress = signerAddress.length === 42;
-      if (isEthereumAddress) throw new Error('Not supported for Ethereum addresses');
+      if (isEthereumAddress)
+        throw new Error('Not supported for Ethereum addresses');
 
       return [];
     },
@@ -35,7 +36,11 @@ export default function createErc20VotesStrategy(): Strategy {
       const [tokenAddress] = params;
       if (!tokenAddress) throw new Error('Missing token address');
 
-      const contract = new Contract(ERC20VotesTokenAbi, tokenAddress, clientConfig.starkProvider);
+      const contract = new Contract(
+        ERC20VotesTokenAbi,
+        tokenAddress,
+        clientConfig.starkProvider
+      );
 
       if (timestamp) {
         return contract.get_past_votes(voterAddress, timestamp);

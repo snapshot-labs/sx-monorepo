@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Interface, Fragment, JsonFragment } from '@ethersproject/abi';
+import { Fragment, Interface, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import { getABI } from '@/helpers/etherscan';
+import { getProvider } from '@/helpers/provider';
+import { resolver } from '@/helpers/resolver';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { abiToDefinition, clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { getProvider } from '@/helpers/provider';
-import { resolver } from '@/helpers/resolver';
 import { Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
@@ -47,7 +47,10 @@ const iface = computed(() => {
 
 const methods = computed(() => {
   return Object.entries(iface.value.functions)
-    .filter(([, value]) => value.type === 'function' && value.stateMutability !== 'view')
+    .filter(
+      ([, value]) =>
+        value.type === 'function' && value.stateMutability !== 'view'
+    )
     .map(([name]) => name);
 });
 
@@ -58,7 +61,11 @@ const currentMethod = computed(() => {
 });
 
 const definition = computed(() => {
-  if (currentMethod.value && currentMethod.value.name && currentMethod.value.inputs.length > 0) {
+  if (
+    currentMethod.value &&
+    currentMethod.value.name &&
+    currentMethod.value.inputs.length > 0
+  ) {
     return abiToDefinition(currentMethod.value);
   }
 
@@ -255,7 +262,10 @@ watchEffect(async () => {
     <template #header>
       <h3 v-text="'Add transaction'" />
       <template v-if="showPicker">
-        <a class="absolute left-0 -top-1 p-4 text-color" @click="showPicker = false">
+        <a
+          class="absolute left-0 -top-1 p-4 text-color"
+          @click="showPicker = false"
+        >
           <IH-arrow-narrow-left class="mr-2" />
         </a>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
@@ -334,7 +344,9 @@ watchEffect(async () => {
       </div>
     </div>
     <template v-if="!showPicker" #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">Confirm</UiButton>
+      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"
+        >Confirm</UiButton
+      >
     </template>
   </UiModal>
 </template>

@@ -3,7 +3,8 @@ import { SpaceMetadataTreasury } from '@/types';
 
 export function useTreasury(treasuryData: SpaceMetadataTreasury) {
   const treasury = computed(() => {
-    if (!treasuryData || !treasuryData.network || !treasuryData.address) return null;
+    if (!treasuryData || !treasuryData.network || !treasuryData.address)
+      return null;
 
     const chainId = CHAIN_IDS[treasuryData.network];
     if (!chainId || !treasuryData) return null;

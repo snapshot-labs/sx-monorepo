@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
-import { _n, shorten } from '@/helpers/utils';
 import { getNames } from '@/helpers/stamp';
+import { _n, shorten } from '@/helpers/utils';
 import { Transaction } from '@/types';
 
 const props = defineProps<{ tx: Transaction }>();
@@ -45,7 +45,9 @@ const parsedTitle = computedAsync(
 </script>
 
 <template>
-  <div class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between">
+  <div
+    class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
+  >
     <div class="flex items-center max-w-[70%]">
       <slot name="left" />
       <IH-cash v-if="tx._type === 'sendToken'" />

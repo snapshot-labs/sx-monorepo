@@ -3,7 +3,10 @@ import { _n, _p, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space, SpaceMetadataDelegation } from '@/types';
 
-const props = defineProps<{ space: Space; delegation: SpaceMetadataDelegation }>();
+const props = defineProps<{
+  space: Space;
+  delegation: SpaceMetadataDelegation;
+}>();
 
 const delegateModalOpen = ref(false);
 const sortBy = ref(
@@ -14,8 +17,20 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-asc'
 );
 const { setTitle } = useTitle();
-const { loading, loadingMore, loaded, failed, hasMore, delegates, fetch, fetchMore, reset } =
-  useDelegates(props.delegation.apiUrl as string, props.delegation.contractAddress as string);
+const {
+  loading,
+  loadingMore,
+  loaded,
+  failed,
+  hasMore,
+  delegates,
+  fetch,
+  fetchMore,
+  reset
+} = useDelegates(
+  props.delegation.apiUrl as string,
+  props.delegation.contractAddress as string
+);
 
 const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
@@ -27,9 +42,13 @@ const currentNetwork = computed(() => {
   }
 });
 
-function handleSortChange(type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount') {
+function handleSortChange(
+  type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
+) {
   if (sortBy.value.startsWith(type)) {
-    sortBy.value = sortBy.value.endsWith('desc') ? `${type}-asc` : `${type}-desc`;
+    sortBy.value = sortBy.value.endsWith('desc')
+      ? `${type}-asc`
+      : `${type}-desc`;
   } else {
     sortBy.value = `${type}-desc`;
   }
@@ -97,8 +116,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
-          <IH-arrow-sm-down v-if="sortBy === 'delegatedVotes-desc'" class="shrink-0" />
-          <IH-arrow-sm-up v-else-if="sortBy === 'delegatedVotes-asc'" class="shrink-0" />
+          <IH-arrow-sm-down
+            v-if="sortBy === 'delegatedVotes-desc'"
+            class="shrink-0"
+          />
+          <IH-arrow-sm-up
+            v-else-if="sortBy === 'delegatedVotes-asc'"
+            class="shrink-0"
+          />
         </button>
       </div>
       <UiLoading v-if="loading" class="px-4 py-3 block" />
@@ -108,30 +133,53 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           class="px-4 py-3 flex items-center space-x-2"
         >
           <IH-exclamation-circle class="inline-block" />
-          <template v-if="delegates.length === 0">There are no delegates.</template>
+          <template v-if="delegates.length === 0"
+            >There are no delegates.</template
+          >
           <template v-else-if="failed">Failed to load delegates.</template>
         </div>
-        <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
-          <div v-for="(delegate, i) in delegates" :key="i" class="border-b flex space-x-1">
+        <UiContainerInfiniteScroll
+          :loading-more="loadingMore"
+          @end-reached="handleEndReached"
+        >
+          <div
+            v-for="(delegate, i) in delegates"
+            :key="i"
+            class="border-b flex space-x-1"
+          >
             <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
               <UiStamp :id="delegate.user" :size="32" />
-              <a
-                :href="currentNetwork.helpers.getExplorerUrl(delegate.user, 'address')"
-                target="_blank"
+              <router-link
+                :to="{
+                  name: 'space-user-statement',
+                  params: {
+                    id: `${space.network}:${space.id}`,
+                    user: delegate.user
+                  }
+                }"
                 class="overflow-hidden leading-[22px]"
               >
                 <h4
                   class="text-skin-link truncate"
                   v-text="delegate.name || shorten(delegate.user)"
                 />
-                <div class="text-[17px] text-skin-text truncate" v-text="shorten(delegate.user)" />
-              </a>
+                <div
+                  class="text-[17px] text-skin-text truncate"
+                  v-text="shorten(delegate.id)"
+                />
+              </router-link>
             </div>
             <div
               class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"
             >
-              <h4 class="text-skin-link" v-text="_n(delegate.tokenHoldersRepresentedAmount)" />
-              <div class="text-[17px]" v-text="_p(delegate.delegatorsPercentage)" />
+              <h4
+                class="text-skin-link"
+                v-text="_n(delegate.tokenHoldersRepresentedAmount)"
+              />
+              <div
+                class="text-[17px]"
+                v-text="_p(delegate.delegatorsPercentage)"
+              />
             </div>
             <div
               class="w-[40%] md:w-[20%] flex flex-col items-end justify-center pr-4 leading-[22px] truncate"

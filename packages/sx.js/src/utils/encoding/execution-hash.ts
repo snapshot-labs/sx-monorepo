@@ -1,6 +1,6 @@
+import { AbiCoder } from '@ethersproject/abi';
 import { _TypedDataEncoder } from '@ethersproject/hash';
 import { keccak256 } from '@ethersproject/keccak256';
-import { AbiCoder } from '@ethersproject/abi';
 
 export const EIP712_TYPES = {
   Transaction: [
@@ -53,7 +53,9 @@ export function createExecutionHash(
     chainId: chainId,
     verifyingContract: verifyingContract
   };
-  const txHashes = txs.map(tx => _TypedDataEncoder.hash(domain, EIP712_TYPES, tx));
+  const txHashes = txs.map(tx =>
+    _TypedDataEncoder.hash(domain, EIP712_TYPES, tx)
+  );
   const abiCoder = new AbiCoder();
   const executionHash = keccak256(abiCoder.encode(['bytes32[]'], [txHashes]));
   return {

@@ -159,7 +159,13 @@ export const PROPOSAL_QUERY = gql`
 
 export const PROPOSALS_QUERY = gql`
   query ($first: Int!, $skip: Int!, $where: Proposal_filter) {
-    proposals(first: $first, skip: $skip, where: $where, orderBy: created, orderDirection: desc) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: $where
+      orderBy: created
+      orderDirection: desc
+    ) {
       ...proposalFragment
     }
   }
@@ -188,6 +194,9 @@ export const VOTES_QUERY = gql`
       space {
         id
       }
+      metadata {
+        reason
+      }
       proposal
       choice
       vp
@@ -206,6 +215,9 @@ export const USER_VOTES_QUERY = gql`
       }
       space {
         id
+      }
+      metadata {
+        reason
       }
       proposal
       choice
@@ -226,7 +238,13 @@ export const SPACE_QUERY = gql`
 
 export const SPACES_QUERY = gql`
   query ($first: Int!, $skip: Int!, $where: Space_filter) {
-    spaces(first: $first, skip: $skip, orderBy: vote_count, orderDirection: desc, where: $where) {
+    spaces(
+      first: $first
+      skip: $skip
+      orderBy: vote_count
+      orderDirection: desc
+      where: $where
+    ) {
       ...spaceFragment
     }
   }

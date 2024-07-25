@@ -1,11 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { Account } from 'starknet';
-import { starkProvider } from '../../../helpers';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { StarknetSig } from '../../../../../src/clients/starknet/starknet-sig';
 import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
+import { starkProvider } from '../../../helpers';
 
 describe('StarknetSig', () => {
-  const address = '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
+  const address =
+    '0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4';
   const privateKey = '0xcd613e30d8f16adf91b7584a2265b1f5';
 
   const account = new Account(starkProvider, address, privateKey);
@@ -32,7 +33,8 @@ describe('StarknetSig', () => {
     const envelope = await client.propose({
       signer: account,
       data: {
-        space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
+        space:
+          '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
         authenticator: StarkSig,
         strategies: [
           {
@@ -55,7 +57,8 @@ describe('StarknetSig', () => {
     const envelope = await client.updateProposal({
       signer: account,
       data: {
-        space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
+        space:
+          '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
         authenticator: StarkSig,
         executionStrategy: {
           addr: '0x040de235a2b53e921d37c2ea2b160750ca2e94f01d709f78f870963559de8fbe',
@@ -73,7 +76,8 @@ describe('StarknetSig', () => {
     const envelope = await client.vote({
       signer: account,
       data: {
-        space: '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
+        space:
+          '0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8',
         authenticator: StarkSig,
         strategies: [
           {

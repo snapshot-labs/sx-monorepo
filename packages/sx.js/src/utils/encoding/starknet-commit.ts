@@ -10,6 +10,10 @@ const { computeHashOnElements } = hash;
  * @param calldata the payload for the method at address target one wants to execute
  * @returns A Pedersen hash of the data
  */
-export function getCommit(target: string, selector: string, calldata: string[]): string {
+export function getCommit(
+  target: string,
+  selector: string,
+  calldata: string[]
+): string {
   return computeHashOnElements([target, selector, ...calldata]);
 }

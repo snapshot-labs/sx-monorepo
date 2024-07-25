@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Contact } from '@/types';
+import { Contact } from '@/types';
 import pkg from '../../package.json';
 
 export const useContactsStore = defineStore('contacts', {
@@ -8,7 +8,9 @@ export const useContactsStore = defineStore('contacts', {
   }),
   actions: {
     saveContact(payload: Contact) {
-      const contact = this.contacts.find(contact => contact.address === payload.address);
+      const contact = this.contacts.find(
+        contact => contact.address === payload.address
+      );
       if (contact) {
         Object.entries(payload).map(([key, value]) => {
           contact[key] = value;
@@ -18,7 +20,9 @@ export const useContactsStore = defineStore('contacts', {
       }
     },
     deleteContact(address: string) {
-      this.contacts = this.contacts.filter(contact => contact.address !== address);
+      this.contacts = this.contacts.filter(
+        contact => contact.address !== address
+      );
     }
   }
 });

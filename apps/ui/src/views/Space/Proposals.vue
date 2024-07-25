@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-import { Space } from '@/types';
 import { ProposalsFilter } from '@/networks/types';
+import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { votingPower, fetch: fetchVotingPower, reset: resetVotingPower } = useVotingPower();
+const {
+  votingPower,
+  fetch: fetchVotingPower,
+  reset: resetVotingPower
+} = useVotingPower();
 const { web3 } = useWeb3();
 const proposalsStore = useProposalsStore();
 
@@ -100,7 +104,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           :voting-power="votingPower"
           @fetch-voting-power="handleFetchVotingPower"
         />
-        <router-link :to="{ name: 'editor' }">
+        <router-link :to="{ name: 'editor' }" tabindex="-1">
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />
@@ -114,7 +118,9 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
       limit="off"
       :loading="!proposalsRecord?.loaded"
       :loading-more="proposalsRecord?.loadingMore"
-      :proposals="proposalsStore.getSpaceProposals(props.space.id, props.space.network)"
+      :proposals="
+        proposalsStore.getSpaceProposals(props.space.id, props.space.network)
+      "
       @end-reached="handleEndReached"
     />
   </div>

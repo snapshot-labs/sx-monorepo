@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { parseOSnapTransaction } from './osnap';
 
 describe('parseOSnapTransaction', () => {
@@ -13,14 +13,20 @@ describe('parseOSnapTransaction', () => {
         address: 'main',
         balance: '0.379',
         chainId: '11155111',
-        logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+        logoUri:
+          'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
         decimals: 18,
         verified: false
       },
       value: '1000000000000000',
       amount: '1000000000000000',
       isValid: true,
-      formatted: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 0, '1000000000000000', '0x'],
+      formatted: [
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        0,
+        '1000000000000000',
+        '0x'
+      ],
       recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
     };
 

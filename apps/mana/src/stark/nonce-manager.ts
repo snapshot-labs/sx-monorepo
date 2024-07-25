@@ -1,5 +1,5 @@
-import { Account } from 'starknet';
 import { Mutex, MutexInterface } from 'async-mutex';
+import { Account } from 'starknet';
 
 export class NonceManager {
   private mutex = new Mutex();

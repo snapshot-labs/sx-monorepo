@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { getFormattedVotingPower } from '@/helpers/utils';
 import { utils } from '@snapshot-labs/sx';
+import { getFormattedVotingPower } from '@/helpers/utils';
 import { evmNetworks } from '@/networks';
-import type { NetworkID } from '@/types';
-import type { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
   networkId: NetworkID;
@@ -25,9 +25,13 @@ const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
 
-const formattedVotingPower = computed(() => getFormattedVotingPower(props.votingPower));
+const formattedVotingPower = computed(() =>
+  getFormattedVotingPower(props.votingPower)
+);
 
-const loading = computed(() => !props.votingPower || props.votingPower.status === 'loading');
+const loading = computed(
+  () => !props.votingPower || props.votingPower.status === 'loading'
+);
 
 function handleModalOpen() {
   modalOpen.value = true;
@@ -43,7 +47,10 @@ function handleModalOpen() {
     >
       <UiTooltip title="Your voting power" :touch="false">
         <UiButton
-          v-if="web3.account && !(evmNetworks.includes(networkId) && web3.type === 'argentx')"
+          v-if="
+            web3.account &&
+            !(evmNetworks.includes(networkId) && web3.type === 'argentx')
+          "
           :loading="loading"
           class="flex flex-row items-center justify-center"
           :class="{
