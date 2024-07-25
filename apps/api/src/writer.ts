@@ -21,18 +21,20 @@ type Strategy = {
   params: string[];
 };
 
-export const handleSpaceDeployed: starknet.Writer = async ({ blockNumber, event, instance }) => {
-  console.log('Handle space deployed');
+export const handleContractDeployed: starknet.Writer = async ({ blockNumber, event, instance }) => {
+  console.log('Handle contract deployed');
 
   if (!event) return;
 
   const classHash = event.class_hash;
 
-  if (classHash === networkProperties.spaceClassHash) {
+  if (event.class_hash === networkProperties.spaceClassHash) {
     await instance.executeTemplate('Space', {
       contract: event.contract_address,
       start: blockNumber
     });
+  } else {
+    console.log('Unknown class hash', event.class_hash);
   }
 };
 
