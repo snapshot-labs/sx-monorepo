@@ -270,6 +270,9 @@ async function handleExecutionStrategySelected(
     executionStrategy.value = null;
   } else {
     executionStrategy.value = selectedExecutionStrategy;
+    if (executionStrategy.value.type === 'oSnap' && proposal.value) {
+      proposal.value.type = 'basic';
+    }
   }
 }
 
@@ -506,7 +509,14 @@ export default defineComponent({
       v-if="space"
       class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
     >
-      <EditorVotingType v-model="proposal" :voting-types="space.voting_types" />
+      <EditorVotingType
+        v-model="proposal"
+        :voting-types="
+          selectedExecutionWithTreasury?.type === 'oSnap'
+            ? ['basic']
+            : space.voting_types
+        "
+      />
       <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
     </div>
     <teleport to="#modal">
