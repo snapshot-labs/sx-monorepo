@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { resolver } from '@/helpers/resolver';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
@@ -105,15 +106,38 @@ const executionStrategy = computed({
     proposal.value.executionStrategy = value;
   }
 });
-const supportedExecutionStrategies = computed(() => {
+const supportedExecutionStrategies = computedAsync(async () => {
   const spaceValue = space.value;
   const networkValue = network.value;
   if (!spaceValue || !networkValue) return null;
 
+  let oSnapSupportPerTreasury: boolean[] | null = null;
+  if (networkId.value && offchainNetworks.includes(networkId.value)) {
+    oSnapSupportPerTreasury = await Promise.all(
+      spaceValue.treasuries.map(async treasury => {
+        if (
+          !treasury.network ||
+          !treasury.address ||
+          !CHAIN_IDS[treasury.network]
+        ) {
+          return false;
+        }
+
+        return getIsOsnapEnabled(
+          CHAIN_IDS[treasury.network].toString(),
+          treasury.address
+        );
+      })
+    );
+  }
+
   return spaceValue.treasuries
-    .map(treasury => {
-      // TODO: Check plugins
+    .map((treasury, i) => {
       if (networkId.value && offchainNetworks.includes(networkId.value)) {
+        if (!oSnapSupportPerTreasury || !oSnapSupportPerTreasury[i]) {
+          return null;
+        }
+
         return {
           address: treasury.address,
           destinationAddress: null,
@@ -146,7 +170,7 @@ const supportedExecutionStrategies = computed(() => {
       strategy =>
         strategy && networkValue.helpers.isExecutorSupported(strategy.type)
     ) as StrategyWithTreasury[];
-});
+}, null);
 const selectedExecutionWithTreasury = computed(() => {
   if (!executionStrategy.value || !supportedExecutionStrategies.value)
     return null;

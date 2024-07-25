@@ -74,3 +74,46 @@ export const getModuleAddressForTreasury = async (
     throw error;
   }
 };
+
+/**
+ * Checks if a given treasury (Safe) has enabled oSnap.
+ */
+export const getIsOsnapEnabled = async (
+  network: Network,
+  treasuryAddress: string
+) => {
+  try {
+    const subgraph = getOptimisticGovernorSubgraph(network);
+    const query = gql`
+      query ($treasuryAddress: String!) {
+        safe(id: $treasuryAddress) {
+          isOptimisticGovernorEnabled
+        }
+      }
+    `;
+
+    type Result = {
+      safe?: { isOptimisticGovernorEnabled?: boolean };
+    };
+
+    const client = new ApolloClient({
+      uri: subgraph,
+      cache: new InMemoryCache()
+    });
+
+    const { data } = await client.query({
+      query,
+      variables: {
+        treasuryAddress: treasuryAddress.toLowerCase()
+      }
+    });
+
+    return (data as Result).safe?.isOptimisticGovernorEnabled ?? false;
+  } catch (error) {
+    console.warn(
+      `Unable to check if oSnap is enable for address ${treasuryAddress} on network ${network}`
+    );
+
+    throw error;
+  }
+};

@@ -3,4 +3,4 @@ export {
   parseOSnapTransaction,
   parseInternalTransaction
 } from './transactions';
-export { getModuleAddressForTreasury } from './getters';
+export { getModuleAddressForTreasury, getIsOsnapEnabled } from './getters';
