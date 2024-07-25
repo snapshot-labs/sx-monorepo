@@ -9,7 +9,11 @@ import {
   OffchainNetworkConfig
 } from '@snapshot-labs/sx';
 import { getSwapLink } from '@/helpers/link';
-import { OSnapPlugin, parseInternalTransaction } from '@/helpers/osnap';
+import {
+  getModuleAddressForTreasury,
+  OSnapPlugin,
+  parseInternalTransaction
+} from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
 import { getUrl } from '@/helpers/utils';
 import {
@@ -51,6 +55,35 @@ export function createActions(
     networkConfig
   });
 
+  async function getPlugins(
+    executionStrategy: string | null,
+    transactions: Transaction[]
+  ) {
+    const plugins = {} as { oSnap?: OSnapPlugin };
+    if (executionStrategy && transactions.length) {
+      const network = '11155111';
+      const treasuryAddress = executionStrategy;
+      const moduleAddress = await getModuleAddressForTreasury(
+        network,
+        treasuryAddress
+      );
+
+      plugins.oSnap = {
+        safes: [
+          {
+            safeName: 'Sekhmet treasury',
+            safeAddress: treasuryAddress,
+            network,
+            transactions: transactions.map(tx => parseInternalTransaction(tx)),
+            moduleAddress
+          }
+        ]
+      };
+    }
+
+    return plugins;
+  }
+
   return {
     async propose(
       web3: Web3Provider,
@@ -81,22 +114,7 @@ export function createActions(
       const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
 
-      const plugins = {} as { oSnap?: OSnapPlugin };
-      if (executionStrategy && transactions.length) {
-        plugins.oSnap = {
-          safes: [
-            {
-              safeName: 'Sekhmet treasury',
-              safeAddress: executionStrategy,
-              network: '11155111',
-              transactions: transactions.map(tx =>
-                parseInternalTransaction(tx)
-              ),
-              moduleAddress: '0x7af017232a259734fcb873655117a6055c2d9a05'
-            }
-          ]
-        };
-      }
+      const plugins = await getPlugins(executionStrategy, transactions);
 
       const data = {
         space: space.id,
@@ -141,22 +159,7 @@ export function createActions(
         throw new Error('Failed to fetch proposal metadata');
       }
 
-      const plugins = {} as { oSnap?: OSnapPlugin };
-      if (executionStrategy && transactions.length) {
-        plugins.oSnap = {
-          safes: [
-            {
-              safeName: 'Sekhmet treasury',
-              safeAddress: executionStrategy,
-              network: '11155111',
-              transactions: transactions.map(tx =>
-                parseInternalTransaction(tx)
-              ),
-              moduleAddress: '0x7af017232a259734fcb873655117a6055c2d9a05'
-            }
-          ]
-        };
-      }
+      const plugins = await getPlugins(executionStrategy, transactions);
 
       const data = {
         proposal: proposalId as string,
