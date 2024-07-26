@@ -23,6 +23,7 @@ import {
 } from '@/networks/common/helpers';
 import {
   Connector,
+  ExecutionInfo,
   NetworkActions,
   NetworkHelpers,
   SnapshotInfo,
@@ -35,8 +36,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
-  StrategyParsedMetadata,
-  Transaction
+  StrategyParsedMetadata
 } from '@/types';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
@@ -196,9 +196,7 @@ export function createActions(
       account: string,
       space: Space,
       cid: string,
-      executionStrategy: string | null,
-      executionDestinationAddress: string | null,
-      transactions: Transaction[]
+      executionInfo: ExecutionInfo | null
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -217,14 +215,14 @@ export function createActions(
       }
 
       let selectedExecutionStrategy;
-      if (executionStrategy) {
+      if (executionInfo) {
         selectedExecutionStrategy = {
-          addr: executionStrategy,
+          addr: executionInfo.strategyAddress,
           params: getExecutionData(
             space,
-            executionStrategy,
-            executionDestinationAddress,
-            convertToMetaTransactions(transactions)
+            executionInfo.strategyAddress,
+            executionInfo.destinationAddress,
+            convertToMetaTransactions(executionInfo.transactions)
           ).executionParams
         };
       } else {
@@ -284,9 +282,7 @@ export function createActions(
       space: Space,
       proposalId: number | string,
       cid: string,
-      executionStrategy: string | null,
-      executionDestinationAddress: string | null,
-      transactions: Transaction[]
+      executionInfo: ExecutionInfo | null
     ) {
       const isContract = await getIsContract(connectorType, account);
 
@@ -304,14 +300,14 @@ export function createActions(
       }
 
       let selectedExecutionStrategy;
-      if (executionStrategy) {
+      if (executionInfo) {
         selectedExecutionStrategy = {
-          addr: executionStrategy,
+          addr: executionInfo.strategyAddress,
           params: getExecutionData(
             space,
-            executionStrategy,
-            executionDestinationAddress,
-            convertToMetaTransactions(transactions)
+            executionInfo.strategyAddress,
+            executionInfo.destinationAddress,
+            convertToMetaTransactions(executionInfo.transactions)
           ).executionParams
         };
       } else {

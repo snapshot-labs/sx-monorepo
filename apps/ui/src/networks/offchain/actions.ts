@@ -23,7 +23,6 @@ import {
   Space,
   Statement,
   StrategyParsedMetadata,
-  Transaction,
   User,
   UserProfile,
   VoteType
@@ -32,6 +31,7 @@ import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
 import {
   Connector,
+  ExecutionInfo,
   NetworkConstants,
   NetworkHelpers,
   ReadOnlyNetworkActions,
@@ -55,26 +55,24 @@ export function createActions(
     networkConfig
   });
 
-  async function getPlugins(
-    executionStrategy: string | null,
-    transactions: Transaction[]
-  ) {
+  async function getPlugins(executionInfo: ExecutionInfo | null) {
     const plugins = {} as { oSnap?: OSnapPlugin };
-    if (executionStrategy && transactions.length) {
-      const network = '11155111';
-      const treasuryAddress = executionStrategy;
+    if (executionInfo && executionInfo.transactions.length) {
+      const treasuryAddress = executionInfo.strategyAddress;
       const moduleAddress = await getModuleAddressForTreasury(
-        network,
+        executionInfo.chainId.toString(),
         treasuryAddress
       );
 
       plugins.oSnap = {
         safes: [
           {
-            safeName: 'Sekhmet treasury',
+            safeName: executionInfo.treasuryName,
             safeAddress: treasuryAddress,
-            network,
-            transactions: transactions.map(tx => parseInternalTransaction(tx)),
+            network: executionInfo.chainId.toString(),
+            transactions: executionInfo.transactions.map(tx =>
+              parseInternalTransaction(tx)
+            ),
             moduleAddress
           }
         ]
@@ -91,9 +89,7 @@ export function createActions(
       account: string,
       space: Space,
       cid: string,
-      executionStrategy: string | null,
-      executionDestinationAddress: string | null,
-      transactions: Transaction[]
+      executionInfo: ExecutionInfo | null
     ) {
       let payload: {
         title: string;
@@ -114,7 +110,7 @@ export function createActions(
       const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
 
-      const plugins = await getPlugins(executionStrategy, transactions);
+      const plugins = await getPlugins(executionInfo);
 
       const data = {
         space: space.id,
@@ -140,9 +136,7 @@ export function createActions(
       space: Space,
       proposalId: number | string,
       cid: string,
-      executionStrategy: string | null,
-      executionDestinationAddress: string | null,
-      transactions: Transaction[]
+      executionInfo: ExecutionInfo | null
     ) {
       let payload: {
         title: string;
@@ -159,7 +153,7 @@ export function createActions(
         throw new Error('Failed to fetch proposal metadata');
       }
 
-      const plugins = await getPlugins(executionStrategy, transactions);
+      const plugins = await getPlugins(executionInfo);
 
       const data = {
         proposal: proposalId as string,

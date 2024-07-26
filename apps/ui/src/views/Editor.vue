@@ -6,6 +6,7 @@ import { resolver } from '@/helpers/resolver';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
+import { ExecutionInfo } from '@/networks/types';
 import {
   Contact,
   RequiredProperty,
@@ -223,6 +224,21 @@ async function handleProposeClick() {
   sending.value = true;
 
   try {
+    let executionInfo: ExecutionInfo | null = null;
+    if (
+      selectedExecutionWithTreasury.value &&
+      selectedExecutionWithTreasury.value.treasury.chainId
+    ) {
+      executionInfo = {
+        strategyAddress: selectedExecutionWithTreasury.value.address,
+        destinationAddress:
+          selectedExecutionWithTreasury.value.destinationAddress || '',
+        transactions: proposal.value.execution,
+        treasuryName: selectedExecutionWithTreasury.value.treasury.name,
+        chainId: selectedExecutionWithTreasury.value.treasury.chainId
+      };
+    }
+
     let result;
     if (proposal.value.proposalId) {
       result = await updateProposal(
@@ -233,11 +249,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        proposal.value.executionStrategy?.address ?? null,
-        proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address
-          ? proposal.value.execution
-          : []
+        executionInfo
       );
     } else {
       result = await propose(
@@ -247,11 +259,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        proposal.value.executionStrategy?.address ?? null,
-        proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address
-          ? proposal.value.execution
-          : []
+        executionInfo
       );
     }
     if (result) {
