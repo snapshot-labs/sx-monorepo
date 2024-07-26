@@ -132,7 +132,7 @@ watch(
     <button
       v-for="(asset, i) in filteredAssets"
       :key="i"
-      role="button"
+      type="button"
       class="px-3 py-2.5 border-b last:border-0 flex justify-between"
       @click="handlePick(asset)"
     >

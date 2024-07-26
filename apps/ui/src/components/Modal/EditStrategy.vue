@@ -54,6 +54,7 @@ watch(
       <h3>Edit strategy</h3>
       <template v-if="showPicker">
         <button
+          type="button"
           class="absolute left-0 -top-1 p-4 text-color"
           @click="showPicker = false"
         >

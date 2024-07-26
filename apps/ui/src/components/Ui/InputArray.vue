@@ -19,6 +19,6 @@ function addItem() {
     <div v-for="(item, i) in input" :key="i">
       <SString v-model="input[i]" :definition="{ title: '' }" />
     </div>
-    <button @click="addItem">Add</button>
+    <button type="button" @click="addItem">Add</button>
   </UiWrapperInput>
 </template>

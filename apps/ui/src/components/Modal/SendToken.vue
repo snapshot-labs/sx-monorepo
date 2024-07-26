@@ -216,6 +216,7 @@ watchEffect(async () => {
       <h3 v-text="'Send token'" />
       <template v-if="showPicker">
         <button
+          type="button"
           class="absolute left-0 -top-1 p-4 text-color"
           @click="showPicker = false"
         >
@@ -271,6 +272,7 @@ watchEffect(async () => {
       <div class="s-base">
         <div class="s-label" v-text="'Token'" />
         <button
+          type="button"
           class="s-input text-left h-[61px]"
           @click="handlePickerClick('token')"
         >
@@ -300,6 +302,7 @@ watchEffect(async () => {
             @update:model-value="handleAmountUpdate"
           />
           <button
+            type="button"
             class="absolute right-[16px] top-[4px]"
             @click="handleMaxClick"
             v-text="'max'"

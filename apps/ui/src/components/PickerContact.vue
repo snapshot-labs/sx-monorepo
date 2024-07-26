@@ -64,7 +64,7 @@ const filteredContacts = computed(() =>
       <button
         v-for="contact in filteredContacts"
         :key="contact.address"
-        role="button"
+        type="button"
         class="px-3 py-2.5 border-b last:border-0 flex justify-between"
         @click="emit('pick', contact.address)"
       >

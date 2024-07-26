@@ -10,6 +10,7 @@ defineProps<{
 
 <template>
   <button
+    type="button"
     :disabled="disabled"
     class="flex flex-col md:flex-row rounded-lg border cursor-pointer w-full text-left items-stretch overflow-hidden"
     :class="{

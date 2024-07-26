@@ -135,10 +135,10 @@ watch(
             </template>
             <template #right>
               <div class="flex gap-3">
-                <button @click="editTx(i)">
+                <button type="button" @click="editTx(i)">
                   <IH-pencil />
                 </button>
-                <button @click="removeTx(i)">
+                <button type="button" @click="removeTx(i)">
                   <IH-trash />
                 </button>
               </div>
@@ -163,7 +163,7 @@ watch(
           v-else-if="simulationState === null"
           title="Simulate execution"
         >
-          <button class="flex" @click="handleSimulateClick">
+          <button type="button" class="flex" @click="handleSimulateClick">
             <IH-shield-check class="text-skin-link" />
           </button>
         </UiTooltip>

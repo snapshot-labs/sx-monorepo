@@ -43,6 +43,7 @@ watch(open, (val, prev) => {
           <slot name="footer" />
         </div>
         <button
+          type="button"
           class="absolute right-0 -top-1 p-4 text-color"
           @click="$emit('close')"
         >

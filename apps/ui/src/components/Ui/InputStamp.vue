@@ -46,6 +46,7 @@ async function handleFileChange(e: Event) {
 
 <template>
   <button
+    type="button"
     v-bind="$attrs"
     class="relative group max-w-max cursor-pointer mb-3 border-[4px] border-skin-bg rounded-lg overflow-hidden bg-skin-border"
     @click="openFilePicker()"

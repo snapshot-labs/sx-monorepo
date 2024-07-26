@@ -22,6 +22,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       <button
         v-for="(delegation, i) in space.delegations"
         :key="i"
+        type="button"
         @click="activeDelegationId = i"
       >
         <UiLink

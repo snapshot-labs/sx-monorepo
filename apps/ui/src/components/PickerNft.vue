@@ -32,7 +32,7 @@ const filteredNfts = computed(() =>
       <button
         v-for="(nft, i) in filteredNfts"
         :key="i"
-        role="button"
+        type="button"
         class="block hover:opacity-80 transition-opacity"
         @click="emit('pick', nft.id)"
       >

@@ -93,6 +93,7 @@ watch(isSwiping, () => {
       <AppNav />
       <button
         v-if="uiStore.sidebarOpen"
+        type="button"
         class="backdrop lg:hidden"
         :style="{
           left: `${72 + (hasAppNav ? 240 : 0)}px`

@@ -82,6 +82,7 @@ watch(
       <template v-else>
         <h3>Select contact</h3>
         <button
+          type="button"
           class="absolute left-0 -top-1 p-4 text-color"
           @click="showPicker = false"
         >

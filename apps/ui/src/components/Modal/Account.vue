@@ -63,6 +63,7 @@ watch(open, () => (step.value = null));
         <button
           v-for="connector in availableConnectors"
           :key="connector.id"
+          type="button"
           @click="$emit('login', connector.id)"
         >
           <UiButton

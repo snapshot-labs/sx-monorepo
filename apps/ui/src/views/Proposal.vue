@@ -226,7 +226,7 @@ watchEffect(() => {
             </div>
             <template v-else>
               <span class="mr-1.5">Voting power:</span>
-              <button @click="props.onClick">
+              <button type="button" @click="props.onClick">
                 <UiLoading v-if="votingPowerStatus === 'loading'" />
                 <IH-exclamation
                   v-else-if="votingPowerStatus === 'error'"

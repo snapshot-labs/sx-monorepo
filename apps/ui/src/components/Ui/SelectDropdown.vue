@@ -31,6 +31,7 @@ const items = computed(() => props.items);
     <template #button>
       <slot name="button">
         <button
+          type="button"
           class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-[16px] min-w-[76px] h-[42px] top-1 outline-0 text-skin-link bg-skin-bg"
         >
           <div
@@ -61,6 +62,7 @@ const items = computed(() => props.items);
         v-slot="{ active, disabled }"
       >
         <button
+          type="button"
           class="flex items-center gap-2"
           :class="{ 'opacity-80': active, 'opacity-40': disabled }"
           @click="model = item.key"

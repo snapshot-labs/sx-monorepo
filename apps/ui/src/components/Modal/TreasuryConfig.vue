@@ -105,6 +105,7 @@ watch(
       <h3 v-text="'Add treasury'" />
       <template v-if="showPicker">
         <button
+          type="button"
           class="absolute left-0 -top-1 p-4 text-color"
           @click="showPicker = false"
         >

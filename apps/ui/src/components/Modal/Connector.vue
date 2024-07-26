@@ -53,6 +53,7 @@ const availableConnectors = computed(() => {
         <button
           v-for="connector in availableConnectors"
           :key="connector.id"
+          type="button"
           @click="emit('pick', connector.id)"
         >
           <UiButton

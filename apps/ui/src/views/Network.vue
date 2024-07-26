@@ -192,7 +192,11 @@ watchEffect(() => setTitle('Network'));
       <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
       <h1 class="mb-3 text-center">Questions?</h1>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
-        <button class="flex items-center" @click="toggleQuestion(i)">
+        <button
+          type="button"
+          class="flex items-center"
+          @click="toggleQuestion(i)"
+        >
           <h3 class="py-3 flex-auto">
             {{ question.question }}
           </h3>

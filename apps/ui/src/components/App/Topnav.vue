@@ -81,6 +81,7 @@ watch(
     >
       <div class="flex flex-grow items-center h-full">
         <button
+          type="button"
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
           @click="uiStore.toggleSidebar"
         >

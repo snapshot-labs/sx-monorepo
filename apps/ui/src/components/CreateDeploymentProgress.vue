@@ -250,6 +250,7 @@ onMounted(() => deploy());
           <h4 v-text="step.title" />
           <button
             v-if="failed && i === currentStep"
+            type="button"
             class="text-skin-text"
             @click="deploy(currentStep)"
           >

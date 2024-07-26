@@ -50,12 +50,14 @@ function handleContactEdit(contact) {
       </div>
       <div class="flex flex-row items-center content-center gap-x-3">
         <button
+          type="button"
           class="invisible group-hover:visible"
           @click="handleContactEdit(contact)"
         >
           <IH-pencil />
         </button>
         <button
+          type="button"
           class="invisible group-hover:visible"
           @click="contactsStore.deleteContact(contact.address)"
         >

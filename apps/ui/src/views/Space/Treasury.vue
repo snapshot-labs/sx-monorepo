@@ -29,6 +29,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <button
         v-for="(treasury, i) in filteredTreasuries"
         :key="i"
+        type="button"
         @click="activeTreasuryId = i"
       >
         <UiLink
