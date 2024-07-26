@@ -123,7 +123,7 @@ watch(
           @click="modalAccountOpen = true"
         >
           <span
-            v-if="auth.isAuthenticated.value"
+            v-if="auth.isAuthenticated.value && web3.account"
             class="sm:flex items-center space-x-2"
           >
             <UiStamp :id="web3.account" :size="18" />
