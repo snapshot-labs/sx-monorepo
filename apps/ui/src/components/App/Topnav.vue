@@ -123,14 +123,20 @@ watch(
           @click="modalAccountOpen = true"
         >
           <span
-            v-if="auth.isAuthenticated.value && web3.account"
+            v-if="auth.isAuthenticated.value"
             class="sm:flex items-center space-x-2"
           >
-            <UiStamp :id="web3.account" :size="18" />
-            <span
-              class="hidden sm:block"
-              v-text="web3.name || shorten(web3.account)"
-            />
+            <template v-if="web3.account">
+              <UiStamp :id="web3.account" :size="18" />
+              <span
+                class="hidden sm:block"
+                v-text="web3.name || shorten(web3.account)"
+              />
+            </template>
+            <div v-else class="flex space-x-2 items-center">
+              <UiLoading />
+              <span>Waiting for your wallet</span>
+            </div>
           </span>
           <template v-else>
             <span class="hidden sm:block" v-text="'Connect wallet'" />
