@@ -68,18 +68,22 @@ export function useWeb3() {
   async function loadProvider() {
     const connector = auth.provider.value?.connectorName;
     try {
-      if (auth.provider.value.on && connector !== 'argentx') {
-        auth.provider.value.on('chainChanged', async chainId => {
-          handleChainChanged(parseInt(formatUnits(chainId, 0)));
-        });
+      if (auth.provider.value.on) {
         auth.provider.value.on('accountsChanged', async accounts => {
+          console.log('account changed');
           if (accounts.length !== 0) {
             state.account = formatAddress(accounts[0]);
-            await login();
+            await login(connector);
           }
         });
-        // auth.provider.on('disconnect', async () => {});
+
+        if (connector !== 'argentx') {
+          auth.provider.value.on('chainChanged', async chainId => {
+            handleChainChanged(parseInt(formatUnits(chainId, 0)));
+          });
+        }
       }
+      // auth.provider.on('disconnect', async () => {});
       let network, accounts;
       try {
         if (connector === 'gnosis') {
