@@ -91,16 +91,14 @@ watchEffect(() => setTitle('Network'));
         <h1 class="mb-4 mono max-w-[600px] mx-auto">
           Unlock governance for your ecosystem.
         </h1>
-        <div class="space-x-2">
-          <a target="_blank">
-            <a :href="LINK" target="_blank">
-              <UiButton class="primary">
-                Talk to sales
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </UiButton>
-            </a>
-          </a>
-        </div>
+        <a
+          :href="LINK"
+          target="_blank"
+          class="px-4 py-3 space-x-2 bg-skin-link text-skin-bg rounded-full"
+        >
+          Talk to sales
+          <IH-arrow-sm-right class="inline-block -rotate-45" />
+        </a>
       </UiContainer>
     </div>
 
@@ -166,11 +164,13 @@ watchEffect(() => setTitle('Network'));
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Get started</div>
       <h1 class="mb-3">Start your integration</h1>
-      <a :href="LINK" target="_blank">
-        <UiButton class="primary">
-          Talk to sales
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </UiButton>
+      <a
+        :href="LINK"
+        target="_blank"
+        class="px-4 py-3 space-x-2 bg-skin-link text-skin-bg rounded-full"
+      >
+        Talk to sales
+        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </a>
     </UiContainer>
 
@@ -192,13 +192,17 @@ watchEffect(() => setTitle('Network'));
       <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
       <h1 class="mb-3 text-center">Questions?</h1>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
-        <a class="flex items-center" @click="toggleQuestion(i)">
+        <button
+          type="button"
+          class="flex items-center"
+          @click="toggleQuestion(i)"
+        >
           <h3 class="py-3 flex-auto">
             {{ question.question }}
           </h3>
           <IH-minus-sm v-if="currentQuestion === i" class="text-skin-text" />
           <IH-plus-sm v-else class="text-skin-text" />
-        </a>
+        </button>
         <div v-if="currentQuestion === i" class="text-[21px] pb-4 -mt-1">
           {{ question.answer }}
         </div>

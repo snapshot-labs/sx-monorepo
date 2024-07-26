@@ -45,7 +45,8 @@ async function handleFileChange(e: Event) {
 </script>
 
 <template>
-  <div
+  <button
+    type="button"
     v-bind="$attrs"
     class="relative group max-w-max cursor-pointer mb-3 border-[4px] border-skin-bg rounded-lg overflow-hidden bg-skin-border"
     @click="openFilePicker()"
@@ -74,7 +75,7 @@ async function handleFileChange(e: Event) {
       <UiLoading v-if="isUploadingImage" class="block z-5" />
       <IH-pencil v-else class="invisible text-skin-link group-hover:visible" />
     </div>
-  </div>
+  </button>
   <input
     ref="fileInput"
     type="file"

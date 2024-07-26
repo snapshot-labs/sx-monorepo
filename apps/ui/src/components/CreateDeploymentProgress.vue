@@ -248,13 +248,14 @@ onMounted(() => deploy());
         </div>
         <div>
           <h4 v-text="step.title" />
-          <a
+          <button
             v-if="failed && i === currentStep"
+            type="button"
             class="text-skin-text"
             @click="deploy(currentStep)"
           >
             Retry
-          </a>
+          </button>
           <a
             v-if="txIds[step.id]"
             class="inline-flex items-center"

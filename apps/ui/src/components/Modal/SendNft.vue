@@ -123,12 +123,13 @@ watchEffect(async () => {
     <template #header>
       <h3 v-text="'Send NFT'" />
       <template v-if="showPicker">
-        <a
+        <button
+          type="button"
           class="absolute left-0 -top-1 p-4 text-color"
           @click="showPicker = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
-        </a>
+        </button>
         <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
           <IH-search class="mx-2" />
           <input
@@ -173,6 +174,7 @@ watchEffect(async () => {
       <div class="s-base">
         <div class="s-label" v-text="'NFT'" />
         <button
+          type="button"
           class="s-input text-left h-[61px]"
           @click="handlePickerClick('nft')"
         >

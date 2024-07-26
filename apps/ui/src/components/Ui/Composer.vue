@@ -23,6 +23,7 @@ const editor = useMarkdownEditor(
     <div class="flex justify-end gap-1 py-2 px-3">
       <UiTooltip title="Add heading text">
         <button
+          type="button"
           class="p-1 w-[26px] h-[26px] leading-[18px] hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.heading"
         >
@@ -31,6 +32,7 @@ const editor = useMarkdownEditor(
       </UiTooltip>
       <UiTooltip title="Add bold text">
         <button
+          type="button"
           class="p-1 w-[26px] h-[26px] leading-[18px] font-bold hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.bold"
         >
@@ -39,6 +41,7 @@ const editor = useMarkdownEditor(
       </UiTooltip>
       <UiTooltip title="Add italic text">
         <button
+          type="button"
           class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.italic"
         >
@@ -47,6 +50,7 @@ const editor = useMarkdownEditor(
       </UiTooltip>
       <UiTooltip title="Add a link" class="w-[26px] h-[26px]">
         <button
+          type="button"
           class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.link"
         >

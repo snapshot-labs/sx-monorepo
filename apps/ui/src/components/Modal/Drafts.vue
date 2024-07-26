@@ -53,9 +53,9 @@ function handleRemoveDraft(id: string) {
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ proposal.key }}</span>
           </router-link>
-          <a @click="handleRemoveDraft(proposal.id)">
-            <IH-trash class="mr-2" />
-          </a>
+          <button type="button" @click="handleRemoveDraft(proposal.id)">
+            <IH-trash />
+          </button>
         </div>
       </div>
       <div v-else class="p-4 text-center">There isn't any drafts yet!</div>

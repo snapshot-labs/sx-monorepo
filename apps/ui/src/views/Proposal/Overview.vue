@@ -313,6 +313,7 @@ onBeforeUnmount(() => destroyAudio());
             <template #items>
               <UiDropdownItem v-if="editable" v-slot="{ active }">
                 <button
+                  type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
                   @click="handleEditClick"
@@ -327,6 +328,7 @@ onBeforeUnmount(() => destroyAudio());
                 :disabled="cancelling"
               >
                 <button
+                  type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active, 'opacity-40': disabled }"
                   @click="handleCancelClick"
@@ -399,12 +401,17 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <div>
-        <a class="text-skin-text" @click="modalOpenVotes = true">
+        <button
+          type="button"
+          class="text-skin-text"
+          @click="modalOpenVotes = true"
+        >
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </a>
+        </button>
         ·
-        <a
+        <button
+          type="button"
           class="text-skin-text"
           @click="modalOpenTimeline = true"
           v-text="votingTime"
