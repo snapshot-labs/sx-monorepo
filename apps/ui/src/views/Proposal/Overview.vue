@@ -253,14 +253,10 @@ onBeforeUnmount(() => destroyAudio());
             <UiButton
               class="!p-0 border-0 !h-[auto]"
               :disabled="aiSummaryState.loading"
+              :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
-              <UiLoading
-                v-if="aiSummaryState.loading"
-                class="inline-block !w-[22px] !h-[22px]"
-              />
               <IH-sparkles
-                v-else
                 class="inline-block w-[22px] h-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
@@ -277,14 +273,12 @@ onBeforeUnmount(() => destroyAudio());
             <UiButton
               class="!p-0 border-0 !h-[auto]"
               :disabled="aiSpeechState.loading"
+              :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading
-                v-if="aiSpeechState.loading"
-                class="inline-block !w-[22px] !h-[22px]"
-              />
+              <UiLoading class="inline-block !w-[22px] !h-[22px]" />
               <IH-pause
-                v-else-if="audioState === 'playing'"
+                v-if="audioState === 'playing'"
                 class="inline-block w-[22px] h-[22px] text-skin-link"
               />
               <IH-play
