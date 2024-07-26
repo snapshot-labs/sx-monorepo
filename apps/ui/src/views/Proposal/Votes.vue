@@ -135,7 +135,10 @@ watch([sortBy, choiceFilter], () => {
         ]"
       >
         <template #button>
-          <button class="flex items-center hover:text-skin-link space-x-2">
+          <button
+            class="flex items-center hover:text-skin-link space-x-2"
+            type="button"
+          >
             <span class="truncate">Choice</span>
             <IH-adjustments-vertical class="shrink-0" />
           </button>
