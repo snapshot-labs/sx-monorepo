@@ -89,7 +89,9 @@ async function fetchMore() {
 
 function handleSortChange(type: 'vote_count' | 'proposal_count') {
   if (sortBy.value.startsWith(type)) {
-    sortBy.value = sortBy.value.endsWith('desc') ? `${type}-asc` : `${type}-desc`;
+    sortBy.value = sortBy.value.endsWith('desc')
+      ? `${type}-asc`
+      : `${type}-desc`;
   } else {
     sortBy.value = `${type}-desc`;
   }
@@ -120,8 +122,14 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
       @click="handleSortChange('proposal_count')"
     >
       <span class="truncate">Proposals</span>
-      <IH-arrow-sm-down v-if="sortBy === 'proposal_count-desc'" class="shrink-0" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'proposal_count-asc'" class="shrink-0" />
+      <IH-arrow-sm-down
+        v-if="sortBy === 'proposal_count-desc'"
+        class="shrink-0"
+      />
+      <IH-arrow-sm-up
+        v-else-if="sortBy === 'proposal_count-asc'"
+        class="shrink-0"
+      />
     </button>
     <button
       class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] space-x-1 truncate"
@@ -129,29 +137,48 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
     >
       <span class="truncate">Votes</span>
       <IH-arrow-sm-down v-if="sortBy === 'vote_count-desc'" class="shrink-0" />
-      <IH-arrow-sm-up v-else-if="sortBy === 'vote_count-asc'" class="shrink-0" />
+      <IH-arrow-sm-up
+        v-else-if="sortBy === 'vote_count-asc'"
+        class="shrink-0"
+      />
     </button>
   </div>
   <UiLoading v-if="!loaded" class="px-4 py-3 block" />
   <template v-else>
-    <div v-if="failed || users.length === 0" class="px-4 py-3 flex items-center space-x-2">
+    <div
+      v-if="failed || users.length === 0"
+      class="px-4 py-3 flex items-center space-x-2"
+    >
       <IH-exclamation-circle class="inline-block" />
       <span v-if="failed">Failed to load the leaderboard.</span>
-      <span v-else-if="users.length === 0"> This space does not have any activities yet. </span>
+      <span v-else-if="users.length === 0">
+        This space does not have any activities yet.
+      </span>
     </div>
-    <UiContainerInfiniteScroll :loading-more="loadingMore" @end-reached="handleEndReached">
+    <UiContainerInfiniteScroll
+      :loading-more="loadingMore"
+      @end-reached="handleEndReached"
+    >
       <div v-for="(user, i) in users" :key="i" class="border-b flex space-x-1">
-        <div class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate">
+        <div
+          class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
+        >
           <UiStamp :id="user.id" :size="32" />
           <router-link
             :to="{
-              name: 'user',
-              params: { id: user.id }
+              name: 'space-user-statement',
+              params: { id: `${space.network}:${space.id}`, user: user.id }
             }"
             class="overflow-hidden"
           >
-            <h4 class="text-skin-link truncate" v-text="user.name || shorten(user.id)" />
-            <div class="text-[17px] text-skin-text truncate" v-text="shorten(user.id)" />
+            <h4
+              class="text-skin-link truncate"
+              v-text="user.name || shorten(user.id)"
+            />
+            <div
+              class="text-[17px] text-skin-text truncate"
+              v-text="shorten(user.id)"
+            />
           </router-link>
         </div>
         <div

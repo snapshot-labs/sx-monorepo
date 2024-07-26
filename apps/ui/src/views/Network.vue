@@ -4,42 +4,50 @@ import { getUrl } from '@/helpers/utils';
 const CUSTOMERS = [
   {
     name: 'Blast',
-    avatar: 'ipfs://bafkreicqhrimt2zyp2kvhmbpvffxlmxovkg5vw6zkissyzibcfy45kbvrm',
+    avatar:
+      'ipfs://bafkreicqhrimt2zyp2kvhmbpvffxlmxovkg5vw6zkissyzibcfy45kbvrm',
     website: 'https://blast.io'
   },
   {
     name: 'Starknet',
-    avatar: 'ipfs://bafkreib5g7a6ufzpo5ebeosetgzoy5geduwcgmch7vighsbasth3wty77q',
+    avatar:
+      'ipfs://bafkreib5g7a6ufzpo5ebeosetgzoy5geduwcgmch7vighsbasth3wty77q',
     website: 'https://starknet.io'
   },
   {
     name: 'Linea',
-    avatar: 'ipfs://bafkreihtyzolub3sejuwc32hpdpjnt7ksowaguni2yuho3kyihhcqrtqce',
+    avatar:
+      'ipfs://bafkreihtyzolub3sejuwc32hpdpjnt7ksowaguni2yuho3kyihhcqrtqce',
     website: 'https://linea.build'
   },
   {
     name: 'Merlin',
-    avatar: 'ipfs://bafkreicew2qv3m756m7xs2nrjezinghps7rlessrqjqetvox74w4hov2xe',
+    avatar:
+      'ipfs://bafkreicew2qv3m756m7xs2nrjezinghps7rlessrqjqetvox74w4hov2xe',
     website: 'https://merlinchain.io'
   },
   {
     name: 'Immutable zkEVM',
-    avatar: 'ipfs://bafkreiepnhfv3hgexddjpyaeemxo3byhtxxit6t4zsponyczee6ddjqxwi',
+    avatar:
+      'ipfs://bafkreiepnhfv3hgexddjpyaeemxo3byhtxxit6t4zsponyczee6ddjqxwi',
     website: 'https://www.immutable.com'
   },
   {
     name: 'Cyber',
-    avatar: 'ipfs://bafkreifm2bbehoqpz4454o7gixnxfi6cgvqlxigqr3f6ipj7l2omtgfgnm',
+    avatar:
+      'ipfs://bafkreifm2bbehoqpz4454o7gixnxfi6cgvqlxigqr3f6ipj7l2omtgfgnm',
     website: 'https://cyber.co'
   },
   {
     name: 'Sei',
-    avatar: 'ipfs://bafkreiammyt7uztbztqbcqv4bydnczsh2fqmnjf6jxj4xnskzzl6sjrigq',
+    avatar:
+      'ipfs://bafkreiammyt7uztbztqbcqv4bydnczsh2fqmnjf6jxj4xnskzzl6sjrigq',
     website: 'https://www.sei.io'
   },
   {
     name: 'Gravity',
-    avatar: 'ipfs://bafkreia7lrda6v2fc5dthazn3qdost4yd2qrn3r4ntrd6lgmc2gvtvvhoa',
+    avatar:
+      'ipfs://bafkreia7lrda6v2fc5dthazn3qdost4yd2qrn3r4ntrd6lgmc2gvtvvhoa',
     website: 'https://gravity.xyz'
   }
 ];
@@ -80,7 +88,9 @@ watchEffect(() => setTitle('Network'));
   <div class="space-y-[80px] mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
-        <h1 class="mb-4 mono max-w-[600px] mx-auto">Unlock governance for your ecosystem.</h1>
+        <h1 class="mb-4 mono max-w-[600px] mx-auto">
+          Unlock governance for your ecosystem.
+        </h1>
         <div class="space-x-2">
           <a target="_blank">
             <a :href="LINK" target="_blank">
@@ -98,8 +108,8 @@ watchEffect(() => setTitle('Network'));
       <div class="eyebrow mb-2">Key features</div>
       <h1 class="mb-3">What the network plan offers</h1>
       <div class="text-[21px] mb-4 max-w-[500px] mx-auto">
-        Our network plan is designed to provide the infrastructure and support needed for effective
-        governance.
+        Our network plan is designed to provide the infrastructure and support
+        needed for effective governance.
       </div>
       <div
         class="text-skin-link text-lg space-y-1.5 px-5 py-4 border text-left rounded-lg max-w-[500px] mx-auto"
@@ -136,7 +146,12 @@ watchEffect(() => setTitle('Network'));
       <div class="overflow-y-scroll no-scrollbar px-4">
         <div class="w-fit mx-auto">
           <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
-            <a v-for="(customer, i) in CUSTOMERS" :key="i" target="_blank" :href="customer.website">
+            <a
+              v-for="(customer, i) in CUSTOMERS"
+              :key="i"
+              target="_blank"
+              :href="customer.website"
+            >
               <img
                 :alt="customer.name"
                 :src="getUrl(customer.avatar) ?? undefined"
@@ -166,9 +181,9 @@ watchEffect(() => setTitle('Network'));
           Is your network already live on Snapshot?
         </h3>
         <div class="text-md">
-          Starting July 1, 2024, all networks must subscribe to the network plan to maintain support
-          on Snapshot. To ensure continuous service and avoid interruptions, please contact our team
-          today.
+          Starting July 1, 2024, all networks must subscribe to the network plan
+          to maintain support on Snapshot. To ensure continuous service and
+          avoid interruptions, please contact our team today.
         </div>
       </div>
     </UiContainer>

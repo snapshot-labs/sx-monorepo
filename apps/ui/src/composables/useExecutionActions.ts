@@ -1,8 +1,12 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core';
+import {
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNetwork } from '@/networks';
-import { Proposal } from '@/types';
 import { Network } from '@/networks/types';
+import { Proposal } from '@/types';
 
 export const STARKNET_L1_EXECUTION_QUERY = gql`
   query ($id: String!) {
@@ -22,12 +26,15 @@ export function useExecutionActions(proposal: Proposal) {
   const isL1ExecutionReady = ref(false);
 
   const fetchingDetails = ref(
-    STRATEGIES_WITH_EXTERNAL_DETAILS.includes(proposal.execution_strategy_type) &&
-      proposal.execution_tx
+    STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
+      proposal.execution_strategy_type
+    ) && proposal.execution_tx
   );
   const message: Ref<string | null> = ref(null);
   const executionTx = ref<string | null>(
-    proposal.execution_strategy_type !== 'EthRelayer' ? proposal.execution_tx : null
+    proposal.execution_strategy_type !== 'EthRelayer'
+      ? proposal.execution_tx
+      : null
   );
   const executionNetwork = ref<Network>(getNetwork(proposal.network));
   const finalizeProposalSending = ref(false);
@@ -64,7 +71,9 @@ export function useExecutionActions(proposal: Proposal) {
   async function fetchEthRelayerExecutionDetails() {
     if (!proposal.execution_tx) return;
 
-    const tx = await network.value.helpers.getTransaction(proposal.execution_tx);
+    const tx = await network.value.helpers.getTransaction(
+      proposal.execution_tx
+    );
     if (tx.finality_status !== 'ACCEPTED_ON_L1') {
       message.value = 'Waiting for execution to be received on L1.';
       return;
@@ -140,7 +149,12 @@ export function useExecutionActions(proposal: Proposal) {
   }
 
   onMounted(async () => {
-    if (!STRATEGIES_WITH_EXTERNAL_DETAILS.includes(proposal.execution_strategy_type)) return;
+    if (
+      !STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
+        proposal.execution_strategy_type
+      )
+    )
+      return;
 
     try {
       if (proposal.execution_strategy_type === 'EthRelayer') {

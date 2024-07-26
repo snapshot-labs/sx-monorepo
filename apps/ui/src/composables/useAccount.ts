@@ -1,5 +1,7 @@
-import { getNetwork } from '@/networks';
-import type { NetworkID, Proposal, Vote } from '@/types';
+import { getNetwork, offchainNetworks } from '@/networks';
+import { STARKNET_CONNECTORS } from '@/networks/common/constants';
+import { Connector } from '@/networks/types';
+import { NetworkID, Proposal, Vote } from '@/types';
 
 const { web3 } = useWeb3();
 const votes = ref<Record<Proposal['id'], Vote>>({});
@@ -9,6 +11,7 @@ watch(
   () => web3.value.account,
   (current, previous) => {
     if (current !== previous) {
+      votes.value = {};
       pendingVotes.value = {};
     }
   }
@@ -16,10 +19,15 @@ watch(
 
 export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
-    votes.value = {};
-
     const account = web3.value.account;
     if (!account) return;
+
+    // On starknet account, we don't load votes for offchain networks (unsupported)
+    if (
+      STARKNET_CONNECTORS.includes(web3.value.type as Connector) &&
+      offchainNetworks.includes(networkId)
+    )
+      return;
 
     const network = getNetwork(networkId);
     const userVotes = await network.api.loadUserVotes(spaceIds, account);

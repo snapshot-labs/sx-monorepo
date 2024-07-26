@@ -1,8 +1,8 @@
 import { Account, CairoOption, CairoOptionVariant, CallData } from 'starknet';
-import { estimateStarknetFee } from '../../../utils/fees';
 import StrategyAbi from './abis/Strategy.json';
 import StrategyLegacy from './abis/StrategyLegacy.json';
 import { NetworkConfig } from '../../../types';
+import { estimateStarknetFee } from '../../../utils/fees';
 
 type ProofElement = {
   index: number;
@@ -36,7 +36,9 @@ export class HerodotusController {
     opts?: Opts
   ) {
     const callData = new CallData(
-      this.networkConfig.herodotusAccumulatesChainId === 1 ? StrategyLegacy : StrategyAbi
+      this.networkConfig.herodotusAccumulatesChainId === 1
+        ? StrategyLegacy
+        : StrategyAbi
     );
 
     const call = {

@@ -1,4 +1,3 @@
-import { ETH_CONTRACT } from './constants';
 import { JsonFragment } from '@ethersproject/abi';
 import {
   BaseTransaction,
@@ -8,6 +7,7 @@ import {
   SendTokenTransaction,
   Transaction
 } from '@/types';
+import { ETH_CONTRACT } from './constants';
 
 export const transactionTypes = [
   'transferFunds',
@@ -83,13 +83,18 @@ function parseTransferFundsTransaction(
         name: transaction.token.name,
         decimals: transaction.token.decimals,
         symbol: transaction.token.symbol,
-        address: transaction.token.address === 'main' ? ETH_CONTRACT : transaction.token.address
+        address:
+          transaction.token.address === 'main'
+            ? ETH_CONTRACT
+            : transaction.token.address
       }
     }
   };
 }
 
-function parseTransferNFTTransaction(transaction: OSnapTransferNFTTransaction): SendNftTransaction {
+function parseTransferNFTTransaction(
+  transaction: OSnapTransferNFTTransaction
+): SendNftTransaction {
   return {
     to: transaction.to,
     data: transaction.data,
@@ -160,7 +165,9 @@ function parseRawTransaction(transaction: OSnapRawTransaction): RawTransaction {
   };
 }
 
-export function parseOSnapTransaction(transaction: OSnapTransaction): Transaction {
+export function parseOSnapTransaction(
+  transaction: OSnapTransaction
+): Transaction {
   switch (transaction.type) {
     case 'transferFunds':
       return parseTransferFundsTransaction(transaction);

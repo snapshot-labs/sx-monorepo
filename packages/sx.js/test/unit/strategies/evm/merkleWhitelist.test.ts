@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { AbiCoder } from '@ethersproject/abi';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
+import { describe, expect, it } from 'vitest';
 import createMerkleWhitelist from '../../../../src/strategies/evm/merkleWhitelist';
 
 describe('merkleWhitelistStrategy', () => {
@@ -9,7 +9,10 @@ describe('merkleWhitelistStrategy', () => {
 
   const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
 
-  const whitelist = [['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 21n]] as [string, bigint][];
+  const whitelist = [['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 21n]] as [
+    string,
+    bigint
+  ][];
   const merkleWhitelistStrategyMetadata = {
     tree: whitelist.map(([address, votingPower]) => ({
       address,

@@ -1,5 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
-import type { MetaTransaction } from '../utils/encoding/execution-hash';
+import { MetaTransaction } from '../utils/encoding/execution-hash';
 
 export default function createAvatarExecutor() {
   return {
@@ -8,7 +8,9 @@ export default function createAvatarExecutor() {
       const abiCoder = new AbiCoder();
 
       const executionParams = abiCoder.encode(
-        ['tuple(address to, uint256 value, bytes data, uint8 operation, uint256 salt)[]'],
+        [
+          'tuple(address to, uint256 value, bytes data, uint8 operation, uint256 salt)[]'
+        ],
         [transactions]
       );
 

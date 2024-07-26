@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { StrategyConfig, Connector } from '@/networks/types';
+import { Connector, StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
 type DeployingDependencyStep = {
@@ -25,7 +25,11 @@ type IndexingSpaceStep = {
   title: string;
 };
 
-type Step = DeployingDependencyStep | AddingDependencyStep | DeployingSpaceStep | IndexingSpaceStep;
+type Step =
+  | DeployingDependencyStep
+  | AddingDependencyStep
+  | DeployingSpaceStep
+  | IndexingSpaceStep;
 
 const props = defineProps<{
   networkId: NetworkID;
@@ -48,7 +52,8 @@ const completed = ref(false);
 const failed = ref(false);
 const connectorModalOpen = ref(false);
 const connectorModalConnectors = ref([] as string[]);
-const connectorCallbackFn: Ref<((value: string | false) => void) | null> = ref(null);
+const connectorCallbackFn: Ref<((value: string | false) => void) | null> =
+  ref(null);
 const txIds = ref({});
 const deployedExecutionStrategies = ref([] as StrategyConfig[]);
 const executionStrategiesDestinations = ref([] as string[]);
@@ -243,14 +248,23 @@ onMounted(() => deploy());
         </div>
         <div>
           <h4 v-text="step.title" />
-          <a v-if="failed && i === currentStep" class="text-skin-text" @click="deploy(currentStep)">
+          <a
+            v-if="failed && i === currentStep"
+            class="text-skin-text"
+            @click="deploy(currentStep)"
+          >
             Retry
           </a>
           <a
             v-if="txIds[step.id]"
             class="inline-flex items-center"
             target="_blank"
-            :href="getStepNetwork(step).helpers.getExplorerUrl(txIds[step.id], 'transaction')"
+            :href="
+              getStepNetwork(step).helpers.getExplorerUrl(
+                txIds[step.id],
+                'transaction'
+              )
+            "
           >
             {{ shorten(txIds[step.id]) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />

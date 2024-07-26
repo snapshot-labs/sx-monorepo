@@ -8,7 +8,10 @@ export function getChoiceEnum(choice: 0 | 1 | 2) {
   });
 }
 
-export function getUserAddressEnum(type: 'ETHEREUM' | 'STARKNET' | 'CUSTOM', address: string) {
+export function getUserAddressEnum(
+  type: 'ETHEREUM' | 'STARKNET' | 'CUSTOM',
+  address: string
+) {
   return new CairoCustomEnum({
     Starknet: type === 'STARKNET' ? address : undefined,
     Ethereum: type === 'ETHEREUM' ? address : undefined,

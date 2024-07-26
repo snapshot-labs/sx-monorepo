@@ -1,27 +1,41 @@
-import { validateAndParseAddress } from 'starknet';
 import { starknet } from '@snapshot-labs/checkpoint';
-import { Space, Vote, User, Proposal, Leaderboard } from '../.checkpoint/models';
-import { handleProposalMetadata, handleVoteMetadata, handleSpaceMetadata } from './ipfs';
+import { validateAndParseAddress } from 'starknet';
+import {
+  handleProposalMetadata,
+  handleSpaceMetadata,
+  handleVoteMetadata
+} from './ipfs';
 import { networkProperties } from './overrrides';
 import {
-  getCurrentTimestamp,
   dropIpfs,
   findVariant,
+  formatAddressVariant,
+  getCurrentTimestamp,
   getVoteValue,
   handleExecutionStrategy,
   handleStrategiesMetadata,
   longStringToText,
-  updateProposaValidationStrategy,
   registerProposal,
-  formatAddressVariant
+  updateProposaValidationStrategy
 } from './utils';
+import {
+  Leaderboard,
+  Proposal,
+  Space,
+  User,
+  Vote
+} from '../.checkpoint/models';
 
 type Strategy = {
   address: string;
   params: string[];
 };
 
-export const handleContractDeployed: starknet.Writer = async ({ blockNumber, event, instance }) => {
+export const handleContractDeployed: starknet.Writer = async ({
+  blockNumber,
+  event,
+  instance
+}) => {
   console.log('Handle contract deployed');
 
   if (!event) return;
@@ -38,7 +52,11 @@ export const handleContractDeployed: starknet.Writer = async ({ blockNumber, eve
   }
 };
 
-export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
+export const handleSpaceCreated: starknet.Writer = async ({
+  block,
+  tx,
+  event
+}) => {
   console.log('Handle space created');
 
   if (!event || !tx.transaction_hash) return;
@@ -49,16 +67,20 @@ export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) 
   const strategiesParams = event.voting_strategies.map((strategy: Strategy) =>
     strategy.params.join(',')
   ); // different format than sx-evm
-  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map((array: string[]) =>
-    longStringToText(array)
+  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(
+    (array: string[]) => longStringToText(array)
   );
 
   const space = new Space(validateAndParseAddress(event.space));
   space.metadata = null;
   space.controller = validateAndParseAddress(event.owner);
   space.voting_delay = Number(BigInt(event.voting_delay).toString());
-  space.min_voting_period = Number(BigInt(event.min_voting_duration).toString());
-  space.max_voting_period = Number(BigInt(event.max_voting_duration).toString());
+  space.min_voting_period = Number(
+    BigInt(event.min_voting_duration).toString()
+  );
+  space.max_voting_period = Number(
+    BigInt(event.max_voting_duration).toString()
+  );
   space.proposal_threshold = '0';
   space.strategies_indicies = strategies.map((_, i) => i);
   space.strategies = strategies;
@@ -81,7 +103,10 @@ export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) 
   );
 
   try {
-    const metadataUri = longStringToText(event.metadata_uri || []).replaceAll('\x00', '');
+    const metadataUri = longStringToText(event.metadata_uri || []).replaceAll(
+      '\x00',
+      ''
+    );
     await handleSpaceMetadata(space.id, metadataUri);
 
     space.metadata = dropIpfs(metadataUri);
@@ -98,7 +123,10 @@ export const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) 
   await space.save();
 };
 
-export const handleMetadataUriUpdated: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleMetadataUriUpdated: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space metadata uri updated');
@@ -106,7 +134,10 @@ export const handleMetadataUriUpdated: starknet.Writer = async ({ rawEvent, even
   const spaceId = validateAndParseAddress(rawEvent.from_address);
 
   try {
-    const metadataUri = longStringToText(event.metadata_uri).replaceAll('\x00', '');
+    const metadataUri = longStringToText(event.metadata_uri).replaceAll(
+      '\x00',
+      ''
+    );
     await handleSpaceMetadata(spaceId, metadataUri);
 
     const space = await Space.loadEntity(spaceId);
@@ -120,7 +151,10 @@ export const handleMetadataUriUpdated: starknet.Writer = async ({ rawEvent, even
   }
 };
 
-export const handleMinVotingDurationUpdated: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleMinVotingDurationUpdated: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space min voting duration updated');
@@ -130,12 +164,17 @@ export const handleMinVotingDurationUpdated: starknet.Writer = async ({ rawEvent
   const space = await Space.loadEntity(spaceId);
   if (!space) return;
 
-  space.min_voting_period = Number(BigInt(event.min_voting_duration).toString());
+  space.min_voting_period = Number(
+    BigInt(event.min_voting_duration).toString()
+  );
 
   await space.save();
 };
 
-export const handleMaxVotingDurationUpdated: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleMaxVotingDurationUpdated: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space max voting duration updated');
@@ -145,12 +184,17 @@ export const handleMaxVotingDurationUpdated: starknet.Writer = async ({ rawEvent
   const space = await Space.loadEntity(spaceId);
   if (!space) return;
 
-  space.max_voting_period = Number(BigInt(event.max_voting_duration).toString());
+  space.max_voting_period = Number(
+    BigInt(event.max_voting_duration).toString()
+  );
 
   await space.save();
 };
 
-export const handleOwnershipTransferred: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleOwnershipTransferred: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space ownership transferred');
@@ -165,7 +209,10 @@ export const handleOwnershipTransferred: starknet.Writer = async ({ rawEvent, ev
   await space.save();
 };
 
-export const handleVotingDelayUpdated: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleVotingDelayUpdated: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting delay updated');
@@ -180,7 +227,10 @@ export const handleVotingDelayUpdated: starknet.Writer = async ({ rawEvent, even
   await space.save();
 };
 
-export const handleAuthenticatorsAdded: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleAuthenticatorsAdded: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space authenticators added');
@@ -190,12 +240,17 @@ export const handleAuthenticatorsAdded: starknet.Writer = async ({ rawEvent, eve
   const space = await Space.loadEntity(spaceId);
   if (!space) return;
 
-  space.authenticators = [...new Set([...space.authenticators, ...event.authenticators])];
+  space.authenticators = [
+    ...new Set([...space.authenticators, ...event.authenticators])
+  ];
 
   await space.save();
 };
 
-export const handleAuthenticatorsRemoved: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleAuthenticatorsRemoved: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space authenticators removed');
@@ -212,7 +267,10 @@ export const handleAuthenticatorsRemoved: starknet.Writer = async ({ rawEvent, e
   await space.save();
 };
 
-export const handleVotingStrategiesAdded: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleVotingStrategiesAdded: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting strategies added');
@@ -230,8 +288,8 @@ export const handleVotingStrategiesAdded: starknet.Writer = async ({ rawEvent, e
   const strategiesParams = event.voting_strategies.map((strategy: Strategy) =>
     strategy.params.join(',')
   );
-  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map((array: string[]) =>
-    longStringToText(array)
+  const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(
+    (array: string[]) => longStringToText(array)
   );
 
   space.strategies_indicies = [
@@ -241,10 +299,17 @@ export const handleVotingStrategiesAdded: starknet.Writer = async ({ rawEvent, e
   space.strategies = [...space.strategies, ...strategies];
   space.next_strategy_index += strategies.length;
   space.strategies_params = [...space.strategies_params, ...strategiesParams];
-  space.strategies_metadata = [...space.strategies_metadata, ...strategiesMetadataUris];
+  space.strategies_metadata = [
+    ...space.strategies_metadata,
+    ...strategiesMetadataUris
+  ];
 
   try {
-    await handleStrategiesMetadata(space.id, strategiesMetadataUris, initialNextStrategy);
+    await handleStrategiesMetadata(
+      space.id,
+      strategiesMetadataUris,
+      initialNextStrategy
+    );
   } catch (e) {
     console.log('failed to handle strategies metadata', e);
   }
@@ -252,7 +317,10 @@ export const handleVotingStrategiesAdded: starknet.Writer = async ({ rawEvent, e
   await space.save();
 };
 
-export const handleVotingStrategiesRemoved: starknet.Writer = async ({ rawEvent, event }) => {
+export const handleVotingStrategiesRemoved: starknet.Writer = async ({
+  rawEvent,
+  event
+}) => {
   if (!event || !rawEvent) return;
 
   console.log('Handle space voting strategies removed');
@@ -269,8 +337,12 @@ export const handleVotingStrategiesRemoved: starknet.Writer = async ({ rawEvent,
   space.strategies_indicies = space.strategies_indicies.filter(
     (_, i) => !indiciesToRemove.includes(i)
   );
-  space.strategies = space.strategies.filter((_, i) => !indiciesToRemove.includes(i));
-  space.strategies_params = space.strategies_params.filter((_, i) => !indiciesToRemove.includes(i));
+  space.strategies = space.strategies.filter(
+    (_, i) => !indiciesToRemove.includes(i)
+  );
+  space.strategies_params = space.strategies_params.filter(
+    (_, i) => !indiciesToRemove.includes(i)
+  );
   space.strategies_metadata = space.strategies_metadata.filter(
     (_, i) => !indiciesToRemove.includes(i)
   );
@@ -301,7 +373,11 @@ export const handleProposalValidationStrategyUpdated: starknet.Writer = async ({
   await space.save();
 };
 
-export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) => {
+export const handlePropose: starknet.Writer = async ({
+  tx,
+  rawEvent,
+  event
+}) => {
   if (!rawEvent || !event || !tx.transaction_hash) return;
 
   console.log('Handle propose');
@@ -314,16 +390,23 @@ export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) =>
   const proposalId = parseInt(BigInt(event.proposal_id).toString());
   const author = formatAddressVariant(findVariant(event.author));
 
-  const created = BigInt(event.proposal.start_timestamp) - BigInt(space.voting_delay);
+  const created =
+    BigInt(event.proposal.start_timestamp) - BigInt(space.voting_delay);
 
   // for erc20votes strategies we have to add artificial delay to prevent voting within same block
   // snapshot needs to remain the same as we need real timestamp to compute VP
   let startTimestamp = BigInt(event.proposal.start_timestamp);
   let minEnd = BigInt(event.proposal.min_end_timestamp);
-  if (space.strategies.some(strategy => strategy === networkProperties.erc20VotesStrategy)) {
+  if (
+    space.strategies.some(
+      strategy => strategy === networkProperties.erc20VotesStrategy
+    )
+  ) {
     const minimumDelay = 10n * 60n;
     startTimestamp =
-      startTimestamp > created + minimumDelay ? startTimestamp : created + minimumDelay;
+      startTimestamp > created + minimumDelay
+        ? startTimestamp
+        : created + minimumDelay;
     minEnd = minEnd > startTimestamp ? minEnd : startTimestamp;
   }
 
@@ -335,10 +418,16 @@ export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) =>
   proposal.execution_hash = event.proposal.execution_payload_hash;
   proposal.start = parseInt(startTimestamp.toString());
   proposal.min_end = parseInt(minEnd.toString());
-  proposal.max_end = parseInt(BigInt(event.proposal.max_end_timestamp).toString());
-  proposal.snapshot = parseInt(BigInt(event.proposal.start_timestamp).toString());
+  proposal.max_end = parseInt(
+    BigInt(event.proposal.max_end_timestamp).toString()
+  );
+  proposal.snapshot = parseInt(
+    BigInt(event.proposal.start_timestamp).toString()
+  );
   proposal.execution_time = 0;
-  proposal.execution_strategy = validateAndParseAddress(event.proposal.execution_strategy);
+  proposal.execution_strategy = validateAndParseAddress(
+    event.proposal.execution_strategy
+  );
   proposal.execution_strategy_type = 'none';
   proposal.scores_1 = '0';
   proposal.scores_2 = '0';
@@ -389,7 +478,9 @@ export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) =>
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${author.address}`);
+  let leaderboardItem = await Leaderboard.loadEntity(
+    `${spaceId}/${author.address}`
+  );
   if (!leaderboardItem) {
     leaderboardItem = new Leaderboard(`${spaceId}/${author.address}`);
     leaderboardItem.space = spaceId;
@@ -407,7 +498,9 @@ export const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) =>
   const herodotusStrategiesIndicies = space.strategies
     .map((strategy, i) => [strategy, i] as const)
     .filter(([strategy]) =>
-      networkProperties.herodotusStrategies.includes(validateAndParseAddress(strategy))
+      networkProperties.herodotusStrategies.includes(
+        validateAndParseAddress(strategy)
+      )
     );
 
   for (const herodotusStrategy of herodotusStrategiesIndicies) {
@@ -453,7 +546,11 @@ export const handleCancel: starknet.Writer = async ({ rawEvent, event }) => {
   await Promise.all([proposal.save(), space.save()]);
 };
 
-export const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
+export const handleUpdate: starknet.Writer = async ({
+  block,
+  rawEvent,
+  event
+}) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle update');
@@ -474,6 +571,7 @@ export const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) 
     console.log('failed to update proposal metadata', e);
   }
 
+  /*
   const executionStrategy = await handleExecutionStrategy(
     event.proposal.execution_strategy,
     event.payload
@@ -482,11 +580,16 @@ export const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) 
     proposal.execution_strategy_type = executionStrategy.executionStrategyType;
     proposal.quorum = executionStrategy.quorum;
   }
+  */
 
   await proposal.save();
 };
 
-export const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) => {
+export const handleExecute: starknet.Writer = async ({
+  tx,
+  rawEvent,
+  event
+}) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle execute');
@@ -504,7 +607,12 @@ export const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) =>
   await proposal.save();
 };
 
-export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }) => {
+export const handleVote: starknet.Writer = async ({
+  block,
+  tx,
+  rawEvent,
+  event
+}) => {
   if (!rawEvent || !event) return;
 
   console.log('Handle vote');
@@ -548,7 +656,9 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
     await user.save();
   }
 
-  let leaderboardItem = await Leaderboard.loadEntity(`${spaceId}/${voter.address}`);
+  let leaderboardItem = await Leaderboard.loadEntity(
+    `${spaceId}/${voter.address}`
+  );
   if (!leaderboardItem) {
     leaderboardItem = new Leaderboard(`${spaceId}/${voter.address}`);
     leaderboardItem.space = spaceId;
@@ -571,7 +681,9 @@ export const handleVote: starknet.Writer = async ({ block, tx, rawEvent, event }
   const proposal = await Proposal.loadEntity(`${spaceId}/${proposalId}`);
   if (proposal) {
     proposal.vote_count += 1;
-    proposal.scores_total = (BigInt(proposal.scores_total) + BigInt(vote.vp)).toString();
+    proposal.scores_total = (
+      BigInt(proposal.scores_total) + BigInt(vote.vp)
+    ).toString();
     proposal[`scores_${choice}`] = (
       BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
     ).toString();

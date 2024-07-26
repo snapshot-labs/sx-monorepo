@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Props } from 'tippy.js';
+import { Props } from 'tippy.js';
 
 withDefaults(
   defineProps<{
@@ -15,7 +15,10 @@ withDefaults(
 </script>
 
 <template>
-  <div v-tippy="{ content: title, placement, touch }" class="inline-block relative">
+  <div
+    v-tippy="{ content: title, placement, touch }"
+    class="inline-block relative"
+  >
     <slot />
   </div>
 </template>

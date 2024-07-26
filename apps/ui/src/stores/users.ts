@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import type { User } from '@/types';
+import { getNetwork, metadataNetwork } from '@/networks';
+import { User } from '@/types';
 
 type UserRecord = {
   loading: boolean;
@@ -8,8 +8,7 @@ type UserRecord = {
   user: User | null;
 };
 
-const networkId = offchainNetworks.filter(network => enabledNetworks.includes(network))[0];
-const network = getNetwork(networkId);
+const network = getNetwork(metadataNetwork);
 
 export const useUsersStore = defineStore('users', {
   state: () => ({

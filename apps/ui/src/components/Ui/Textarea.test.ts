@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { expect, it } from 'vitest';
 import Textarea from './Textarea.vue';
 
 const definition = {
@@ -19,7 +19,9 @@ it('should render title & example', () => {
   });
 
   expect(wrapper.text()).toContain(definition.title);
-  expect(wrapper.find('textarea').attributes().placeholder).toBe(definition.examples[0]);
+  expect(wrapper.find('textarea').attributes().placeholder).toBe(
+    definition.examples[0]
+  );
 });
 
 it('should render current length', async () => {

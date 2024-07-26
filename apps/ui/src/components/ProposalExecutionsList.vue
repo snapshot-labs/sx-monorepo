@@ -26,19 +26,36 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
     class="x-block !border-x rounded-lg mb-3 last:mb-0"
   >
     <a
-      :href="getTreasuryExplorerUrl(execution.networkId, execution.safeAddress) || undefined"
+      :href="
+        getTreasuryExplorerUrl(execution.networkId, execution.safeAddress) ||
+        undefined
+      "
       target="_blank"
       class="flex justify-between items-center px-4 py-3 border-b"
       :class="{
-        'pointer-events-none': !getTreasuryExplorerUrl(execution.networkId, execution.safeAddress)
+        'pointer-events-none': !getTreasuryExplorerUrl(
+          execution.networkId,
+          execution.safeAddress
+        )
       }"
     >
       <UiBadgeNetwork :id="execution.networkId" class="mr-3">
-        <UiStamp :id="execution.safeAddress" type="avatar" :size="32" class="rounded-md" />
+        <UiStamp
+          :id="execution.safeAddress"
+          type="avatar"
+          :size="32"
+          class="rounded-md"
+        />
       </UiBadgeNetwork>
       <div class="flex-1 leading-[22px]">
-        <h4 class="text-skin-link" v-text="execution.safeName || shorten(execution.safeAddress)" />
-        <div class="text-skin-text text-[17px]" v-text="shorten(execution.safeAddress)" />
+        <h4
+          class="text-skin-link"
+          v-text="execution.safeName || shorten(execution.safeAddress)"
+        />
+        <div
+          class="text-skin-text text-[17px]"
+          v-text="shorten(execution.safeAddress)"
+        />
       </div>
     </a>
     <TransactionsListItem

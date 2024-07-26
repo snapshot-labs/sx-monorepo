@@ -1,13 +1,21 @@
 import fs from 'fs';
-import knex from 'knex';
 import { ConnectionString } from 'connection-string';
+import knex from 'knex';
 
 const connectionConfig = new ConnectionString(process.env.DATABASE_URL);
-if (!connectionConfig.protocol || !connectionConfig.hosts || !connectionConfig.path) {
+if (
+  !connectionConfig.protocol ||
+  !connectionConfig.hosts ||
+  !connectionConfig.path
+) {
   throw new Error('invalid connection string provided');
 }
 
-const sslConfig: { rejectUnauthorized?: boolean; sslmode?: string; ca?: string } = {};
+const sslConfig: {
+  rejectUnauthorized?: boolean;
+  sslmode?: string;
+  ca?: string;
+} = {};
 if (
   connectionConfig.params?.sslaccept === 'strict' ||
   connectionConfig.params?.ssl === 'rejectUnauthorized'

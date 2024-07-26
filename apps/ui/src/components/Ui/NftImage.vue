@@ -7,7 +7,11 @@ const props = defineProps({
 });
 
 const fallbackUrl = computed(() =>
-  getStampUrl('token', props.item.contractAddress, props.size ? props.size * 2 : 256)
+  getStampUrl(
+    'token',
+    props.item.contractAddress,
+    props.size ? props.size * 2 : 256
+  )
 );
 const url = computed(() => props.item.image || fallbackUrl.value);
 

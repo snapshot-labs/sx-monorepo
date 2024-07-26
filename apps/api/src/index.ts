@@ -1,13 +1,17 @@
 import 'dotenv/config';
-import path from 'path';
 import fs from 'fs';
-import Checkpoint, { starknet, createGetLoader, LogLevel } from '@snapshot-labs/checkpoint';
+import path from 'path';
 import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import config from './currentConfig';
-import spaceFactoryAbi from './abis/spaceFactory.json';
+import { startStandaloneServer } from '@apollo/server/standalone';
+import Checkpoint, {
+  createGetLoader,
+  LogLevel,
+  starknet
+} from '@snapshot-labs/checkpoint';
 import spaceAbi from './abis/space.json';
+import spaceFactoryAbi from './abis/spaceFactory.json';
+import config from './currentConfig';
 import * as writer from './writer';
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
@@ -55,11 +59,13 @@ async function run() {
   console.log(`Listening at ${url}`);
 
   if (process.env.NODE_ENV === 'production') {
-    console.log('Delaying indexer to prevent multiple processes indexing at the same time.');
+    console.log(
+      'Delaying indexer to prevent multiple processes indexing at the same time.'
+    );
     await sleep(PRODUCTION_INDEXER_DELAY);
   }
 
-  await checkpoint.reset();
+  // await checkpoint.reset();
   checkpoint.start();
 }
 
