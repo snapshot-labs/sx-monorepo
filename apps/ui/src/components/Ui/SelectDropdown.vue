@@ -31,6 +31,7 @@ const items = computed(() => props.items);
     <template #button>
       <slot name="button">
         <button
+          type="button"
           class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-[16px] min-w-[76px] h-[42px] top-1 text-skin-link bg-skin-bg"
         >
           <div
