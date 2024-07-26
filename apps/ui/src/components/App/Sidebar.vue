@@ -35,7 +35,7 @@ const followedSpacesStore = useFollowedSpacesStore();
           class="block"
           @click="uiStore.sidebarOpen = false"
         >
-          <UiTooltip :title="element.name" placement="right" :touch="false">
+          <UiTooltip :title="element.name" placement="right">
             <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />
           </UiTooltip>
         </router-link>

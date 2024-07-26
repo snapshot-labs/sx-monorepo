@@ -318,7 +318,6 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                   ETHEREUM_NETWORKS.includes(treasury.networkId)
                 "
                 title="Stake with Lido"
-                :touch="false"
               >
                 <UiButton
                   class="!px-0 w-[46px]"
