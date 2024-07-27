@@ -3,6 +3,7 @@ import { formatUnits } from '@ethersproject/units';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import networks from '@/helpers/networks.json';
 import { formatAddress } from '@/helpers/utils';
+import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 
 const STARKNET_NETWORKS = {
   '0x534e5f4d41494e': {
@@ -85,7 +86,7 @@ export function useWeb3() {
           }
         });
 
-        if (connector !== 'argentx') {
+        if (!STARKNET_CONNECTORS.includes(connector)) {
           auth.provider.value.on('chainChanged', async chainId => {
             handleChainChanged(parseInt(formatUnits(chainId, 0)));
           });
@@ -98,7 +99,7 @@ export function useWeb3() {
           const { chainId: safeChainId, safeAddress } = auth.web3.provider.safe;
           network = { chainId: safeChainId };
           accounts = [safeAddress];
-        } else if (connector === 'argentx') {
+        } else if (STARKNET_CONNECTORS.includes(connector)) {
           network = {
             chainId:
               auth.provider.value.provider.chainId ||
