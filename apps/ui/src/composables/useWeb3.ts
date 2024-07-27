@@ -70,7 +70,6 @@ export function useWeb3() {
     try {
       if (auth.provider.value.on) {
         auth.provider.value.on('accountsChanged', async accounts => {
-          console.log('account changed');
           if (accounts.length !== 0) {
             state.account = formatAddress(accounts[0]);
             await login(connector);
@@ -80,6 +79,10 @@ export function useWeb3() {
         if (connector !== 'argentx') {
           auth.provider.value.on('chainChanged', async chainId => {
             handleChainChanged(parseInt(formatUnits(chainId, 0)));
+          });
+        } else {
+          auth.provider.value.on('networkChanged', async chainId => {
+            handleChainChanged(chainId);
           });
         }
       }
@@ -91,7 +94,10 @@ export function useWeb3() {
           network = { chainId: safeChainId };
           accounts = [safeAddress];
         } else if (connector === 'argentx') {
-          network = { key: 'starknet', chainId: 'starknet' };
+          network = {
+            key: 'starknet',
+            chainId: auth.provider.value.provider.chainId
+          };
           accounts = [auth.provider.value.selectedAddress];
         } else {
           [network, accounts] = await Promise.all([
