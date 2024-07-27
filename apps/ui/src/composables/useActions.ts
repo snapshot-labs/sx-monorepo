@@ -6,7 +6,6 @@ import {
   getNetwork,
   getReadWriteNetwork,
   metadataNetwork,
-  offchainNetworks,
   starknetNetworks
 } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
@@ -24,18 +23,15 @@ import {
   VoteType
 } from '@/types';
 
-const offchainNetworkId = offchainNetworks.filter(network =>
-  enabledNetworks.includes(network)
-)[0];
 const offchainToStarknetIds: Record<string, NetworkID> = {
   s: 'sn',
   's-tn': 'sn-sep'
 };
 
-const starknetNetworkId = (Object.keys(starknetNetworks) as NetworkID[]).find(
+const starknetNetworkId = starknetNetworks.find(
   networkId =>
     enabledNetworks.includes(networkId) &&
-    networkId === offchainToStarknetIds[offchainNetworkId]
+    networkId === offchainToStarknetIds[metadataNetwork]
 ) as NetworkID;
 
 export function useActions() {
