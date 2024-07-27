@@ -86,8 +86,11 @@ async function handleVoteClick(choice: Choice) {
           <router-link
             class="text-skin-text"
             :to="{
-              name: 'user',
-              params: { id: proposal.author.id }
+              name: 'space-user-statement',
+              params: {
+                id: `${proposal.network}:${proposal.space.id}`,
+                user: proposal.author.id
+              }
             }"
           >
             {{ proposal.author.name || shortenAddress(proposal.author.id) }}
@@ -102,7 +105,8 @@ async function handleVoteClick(choice: Choice) {
             · {{ _p(totalProgress) }} {{ quorumLabel(proposal.quorum_type) }}
           </span>
           ·
-          <a
+          <button
+            type="button"
             class="text-skin-text"
             @click="modalOpenTimeline = true"
             v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"

@@ -10,6 +10,7 @@ import {
   Space,
   SpaceMetadata,
   SpaceSettings,
+  Statement,
   Transaction,
   User,
   VoteType
@@ -622,6 +623,21 @@ export function useActions() {
     return true;
   }
 
+  async function updateStatement(statement: Statement) {
+    const network = getNetwork(metadataNetwork);
+
+    await wrapPromise(
+      metadataNetwork,
+      network.actions.updateStatement(
+        await getAliasSigner(),
+        statement,
+        web3.value.account
+      )
+    );
+
+    return true;
+  }
+
   return {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
@@ -643,6 +659,7 @@ export function useActions() {
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
-    updateUser: wrapWithErrors(updateUser)
+    updateUser: wrapWithErrors(updateUser),
+    updateStatement: wrapWithErrors(updateStatement)
   };
 }

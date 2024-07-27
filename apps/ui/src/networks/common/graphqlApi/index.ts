@@ -57,10 +57,18 @@ function getProposalState(
   proposal: ApiProposal,
   current: number
 ): ProposalState {
+  // we have broken types, we should unify, this is quick fix for Nimbora PR
+  // those values are actually strings
+  // https://github.com/snapshot-labs/sx-monorepo/pull/529/files#r1691071502
+  const quorum = BigInt(proposal.quorum);
+  const scoresTotal = BigInt(proposal.scores_total);
+  const scoresFor = BigInt(proposal.scores_1);
+  const scoresAgainst = BigInt(proposal.scores_2);
+
   if (proposal.executed) return 'executed';
   if (proposal.max_end <= current) {
-    if (proposal.scores_total < proposal.quorum) return 'rejected';
-    return proposal.scores_1 > proposal.scores_2 ? 'passed' : 'rejected';
+    if (scoresTotal < quorum) return 'rejected';
+    return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
   if (proposal.start > current) return 'pending';
 
@@ -587,7 +595,8 @@ export function createApi(
         | 'vote_count-desc'
         | 'vote_count-asc'
         | 'proposal_count-desc'
-        | 'proposal_count-asc' = 'vote_count-desc'
+        | 'proposal_count-asc' = 'vote_count-desc',
+      user?: string
     ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
         'vote_count' | 'proposal_count',
@@ -603,7 +612,8 @@ export function createApi(
             orderBy,
             orderDirection,
             where: {
-              space: spaceId
+              space: spaceId,
+              user
             }
           }
         })
@@ -620,6 +630,9 @@ export function createApi(
       return [] as Follow[];
     },
     loadAlias: async () => {
+      return null;
+    },
+    loadStatement: async () => {
       return null;
     }
   };

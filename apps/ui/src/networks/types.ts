@@ -10,6 +10,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  Statement,
   StrategyParsedMetadata,
   User,
   UserActivity,
@@ -150,6 +151,11 @@ export type ReadOnlyNetworkActions = {
   );
   setAlias(web3: Web3Provider, alias: string);
   updateUser(web3: Web3Provider | Wallet, user: User, from?: string);
+  updateStatement(
+    web3: Web3Provider | Wallet,
+    statement: Statement,
+    from?: string
+  );
   send(envelope: any): Promise<any>;
 };
 
@@ -255,7 +261,8 @@ export type NetworkApi = {
       | 'vote_count-desc'
       | 'vote_count-asc'
       | 'proposal_count-desc'
-      | 'proposal_count-asc'
+      | 'proposal_count-asc',
+    user?: string
   ): Promise<UserActivity[]>;
   loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
   loadAlias(
@@ -263,6 +270,11 @@ export type NetworkApi = {
     alias: string,
     created_gt: number
   ): Promise<Alias | null>;
+  loadStatement(
+    networkId: NetworkID,
+    spaceId: string,
+    userId: string
+  ): Promise<Statement | null>;
 };
 
 export type NetworkConstants = {

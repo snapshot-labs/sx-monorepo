@@ -118,6 +118,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
   >
     <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
     <button
+      type="button"
       class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('proposal_count')"
     >
@@ -132,6 +133,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
       />
     </button>
     <button
+      type="button"
       class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] space-x-1 truncate"
       @click="handleSortChange('vote_count')"
     >
@@ -166,8 +168,8 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           <UiStamp :id="user.id" :size="32" />
           <router-link
             :to="{
-              name: 'user',
-              params: { id: user.id }
+              name: 'space-user-statement',
+              params: { id: `${space.network}:${space.id}`, user: user.id }
             }"
             class="overflow-hidden"
           >

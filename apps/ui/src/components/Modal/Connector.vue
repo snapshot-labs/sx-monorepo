@@ -49,12 +49,11 @@ const availableConnectors = computed(() => {
       <h3 v-text="'Connect wallet'" />
     </template>
     <div>
-      <div class="m-4 space-y-2">
-        <a
+      <div class="m-4 space-y-2 flex flex-col">
+        <button
           v-for="connector in availableConnectors"
           :key="connector.id"
-          target="_blank"
-          class="block"
+          type="button"
           @click="emit('pick', connector.id)"
         >
           <UiButton
@@ -69,7 +68,7 @@ const availableConnectors = computed(() => {
             />
             {{ connector.name }}
           </UiButton>
-        </a>
+        </button>
       </div>
     </div>
   </UiModal>

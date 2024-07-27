@@ -109,9 +109,10 @@ watch(
             />
             <router-link
               :to="{
-                name: 'user',
+                name: 'space-user-statement',
                 params: {
-                  id: vote.voter.id
+                  id: `${proposal.network}:${proposal.space.id}`,
+                  user: vote.voter.id
                 }
               }"
               class="grow flex space-x-2 items-center"

@@ -98,6 +98,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       >
         <div class="pl-4 w-[60%] flex items-center truncate">Delegatee</div>
         <button
+          type="button"
           class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
@@ -112,6 +113,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           />
         </button>
         <button
+          type="button"
           class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link pr-4 space-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
@@ -149,14 +151,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           >
             <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
               <UiStamp :id="delegate.user" :size="32" />
-              <a
-                :href="
-                  currentNetwork.helpers.getExplorerUrl(
-                    delegate.user,
-                    'address'
-                  )
-                "
-                target="_blank"
+              <router-link
+                :to="{
+                  name: 'space-user-statement',
+                  params: {
+                    id: `${space.network}:${space.id}`,
+                    user: delegate.user
+                  }
+                }"
                 class="overflow-hidden leading-[22px]"
               >
                 <h4
@@ -165,9 +167,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
                 <div
                   class="text-[17px] text-skin-text truncate"
-                  v-text="shorten(delegate.user)"
+                  v-text="shorten(delegate.id)"
                 />
-              </a>
+              </router-link>
             </div>
             <div
               class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"
