@@ -6,6 +6,7 @@ import {
   getNetwork,
   getReadWriteNetwork,
   metadataNetwork,
+  offchainNetworks,
   starknetNetworks
 } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
@@ -22,6 +23,20 @@ import {
   User,
   VoteType
 } from '@/types';
+
+const offchainNetworkId = offchainNetworks.filter(network =>
+  enabledNetworks.includes(network)
+)[0];
+const offchainToStarknetIds: Record<string, NetworkID> = {
+  s: 'sn',
+  's-tn': 'sn-sep'
+};
+
+const starknetNetworkId = (Object.keys(starknetNetworks) as NetworkID[]).find(
+  networkId =>
+    enabledNetworks.includes(networkId) &&
+    networkId === offchainToStarknetIds[offchainNetworkId]
+) as NetworkID;
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -135,10 +150,8 @@ export function useActions() {
   async function getAliasSigner() {
     const network = getNetwork(
       STARKNET_CONNECTORS.includes(web3.value.type as Connector)
-        ? (starknetNetworks.find(id =>
-            enabledNetworks.includes(id)
-          ) as NetworkID)
-        : metadataNetwork
+        ? starknetNetworkId
+        : offchainNetworkId
     );
 
     return alias.getAliasWallet(address =>
