@@ -147,7 +147,7 @@ export function useActions() {
     const network = getNetwork(
       STARKNET_CONNECTORS.includes(web3.value.type as Connector)
         ? starknetNetworkId
-        : offchainNetworkId
+        : metadataNetwork
     );
 
     return alias.getAliasWallet(address =>
