@@ -206,12 +206,12 @@ onMounted(() => {
         <div class="whitespace-nowrap">{{ treasury.name }}</div>
       </div>
       <div class="flex gap-3">
-        <a @click="editTreasury(i)">
+        <button type="button" @click="editTreasury(i)">
           <IH-pencil />
-        </a>
-        <a @click="deleteTreasury(i)">
+        </button>
+        <button type="button" @click="deleteTreasury(i)">
           <IH-trash />
-        </a>
+        </button>
       </div>
     </div>
     <UiButton class="w-full" @click="addTreasury">Add treasury</UiButton>
@@ -225,12 +225,12 @@ onMounted(() => {
         <div class="whitespace-nowrap">{{ delegation.name }}</div>
       </div>
       <div class="flex gap-3">
-        <a @click="editDelegation(i)">
+        <button type="button" @click="editDelegation(i)">
           <IH-pencil />
-        </a>
-        <a @click="deleteDelegation(i)">
+        </button>
+        <button type="button" @click="deleteDelegation(i)">
           <IH-trash />
-        </a>
+        </button>
       </div>
     </div>
     <UiButton class="w-full" @click="addDelegation">Add delegation</UiButton>

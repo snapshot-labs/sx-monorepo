@@ -146,6 +146,7 @@ watch([sortBy, choiceFilter], () => {
       </UiSelectDropdown>
     </div>
     <button
+      type="button"
       class="hidden lg:flex max-w-[144px] w-[144px] items-center hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('created')"
     >
@@ -154,6 +155,7 @@ watch([sortBy, choiceFilter], () => {
       <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
     </button>
     <button
+      type="button"
       class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link space-x-1 truncate"
       @click="handleSortChange('vp')"
     >
@@ -315,7 +317,8 @@ watch([sortBy, choiceFilter], () => {
                 </a>
               </UiDropdownItem>
               <UiDropdownItem v-slot="{ active }">
-                <a
+                <button
+                  type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
                   @click.prevent="copy(vote.voter.id)"
@@ -328,7 +331,7 @@ watch([sortBy, choiceFilter], () => {
                     <IH-check :width="16" />
                     Copied
                   </template>
-                </a>
+                </button>
               </UiDropdownItem>
             </template>
           </UiDropdown>

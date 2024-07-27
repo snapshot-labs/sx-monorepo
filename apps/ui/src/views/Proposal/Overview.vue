@@ -10,6 +10,7 @@ import {
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
+import { toBigIntOrNumber } from '../../helpers/utils';
 
 const props = defineProps<{
   proposal: Proposal;
@@ -253,14 +254,10 @@ onBeforeUnmount(() => destroyAudio());
             <UiButton
               class="!p-0 border-0 !h-[auto]"
               :disabled="aiSummaryState.loading"
+              :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
-              <UiLoading
-                v-if="aiSummaryState.loading"
-                class="inline-block !w-[22px] !h-[22px]"
-              />
               <IH-sparkles
-                v-else
                 class="inline-block w-[22px] h-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
@@ -277,14 +274,12 @@ onBeforeUnmount(() => destroyAudio());
             <UiButton
               class="!p-0 border-0 !h-[auto]"
               :disabled="aiSpeechState.loading"
+              :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading
-                v-if="aiSpeechState.loading"
-                class="inline-block !w-[22px] !h-[22px]"
-              />
+              <UiLoading class="inline-block !w-[22px] !h-[22px]" />
               <IH-pause
-                v-else-if="audioState === 'playing'"
+                v-if="audioState === 'playing'"
                 class="inline-block w-[22px] h-[22px] text-skin-link"
               />
               <IH-play
@@ -313,6 +308,7 @@ onBeforeUnmount(() => destroyAudio());
             <template #items>
               <UiDropdownItem v-if="editable" v-slot="{ active }">
                 <button
+                  type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
                   @click="handleEditClick"
@@ -327,6 +323,7 @@ onBeforeUnmount(() => destroyAudio());
                 :disabled="cancelling"
               >
                 <button
+                  type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active, 'opacity-40': disabled }"
                   @click="handleCancelClick"
@@ -385,8 +382,10 @@ onBeforeUnmount(() => destroyAudio());
           proposal.executions &&
           proposal.executions.length > 0 &&
           proposal.scores.length > 0 &&
-          BigInt(proposal.scores_total) >= BigInt(proposal.quorum) &&
-          BigInt(proposal.scores[0]) > BigInt(proposal.scores[1]) &&
+          toBigIntOrNumber(proposal.scores_total) >=
+            toBigIntOrNumber(proposal.quorum) &&
+          toBigIntOrNumber(proposal.scores[0]) >
+            toBigIntOrNumber(proposal.scores[1]) &&
           proposal.has_execution_window_opened
         "
       >
@@ -399,12 +398,17 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <div>
-        <a class="text-skin-text" @click="modalOpenVotes = true">
+        <button
+          type="button"
+          class="text-skin-text"
+          @click="modalOpenVotes = true"
+        >
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </a>
+        </button>
         ·
-        <a
+        <button
+          type="button"
           class="text-skin-text"
           @click="modalOpenTimeline = true"
           v-text="votingTime"

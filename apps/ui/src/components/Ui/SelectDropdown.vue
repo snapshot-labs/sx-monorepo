@@ -62,6 +62,7 @@ const items = computed(() => props.items);
         v-slot="{ active, disabled }"
       >
         <button
+          type="button"
           class="flex items-center gap-2"
           :class="{ 'opacity-80': active, 'opacity-40': disabled }"
           type="button"

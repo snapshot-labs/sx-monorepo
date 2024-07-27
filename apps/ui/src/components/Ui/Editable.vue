@@ -99,13 +99,18 @@ function handleSave() {
           }"
         >
           <button
+            type="button"
             :disabled="!!formErrors.value"
             class="hover:opacity-80"
             @click="handleSave"
           >
             <IH-check />
           </button>
-          <button class="hover:opacity-80" @click="editing = !editing">
+          <button
+            type="button"
+            class="hover:opacity-80"
+            @click="editing = !editing"
+          >
             <IH-x />
           </button>
         </div>
@@ -113,6 +118,7 @@ function handleSave() {
       <template v-else>
         <button
           v-if="editable"
+          type="button"
           class="hover:opacity-80"
           @click="editing = !editing"
         >

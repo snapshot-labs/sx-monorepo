@@ -80,10 +80,13 @@ watch(
       }"
     >
       <div class="flex flex-grow items-center h-full">
-        <IH-menu-alt-2
+        <button
+          type="button"
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
           @click="uiStore.toggleSidebar"
-        />
+        >
+          <IH-menu-alt-2 />
+        </button>
         <form
           v-if="searchConfig"
           id="search-form"
