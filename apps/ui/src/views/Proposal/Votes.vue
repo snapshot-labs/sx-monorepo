@@ -185,7 +185,7 @@ watch([sortBy, choiceFilter], () => {
         class="border-b relative flex space-x-1"
       >
         <div
-          class="top-0 bottom-0 left-0 -z-10 pointer-events-none absolute"
+          class="inset-y-0 left-0 -z-10 pointer-events-none absolute"
           :style="{
             width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
           }"
@@ -256,15 +256,15 @@ watch([sortBy, choiceFilter], () => {
               >
                 <IH-check
                   v-if="vote.choice === 1"
-                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  class="text-white size-[14px] mt-0.5 ml-0.5"
                 />
                 <IH-x
                   v-else-if="vote.choice === 2"
-                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  class="text-white size-[14px] mt-0.5 ml-0.5"
                 />
                 <IH-minus-sm
                   v-else-if="vote.choice === 3"
-                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  class="text-white size-[14px] mt-0.5 ml-0.5"
                 />
               </div>
               <h4

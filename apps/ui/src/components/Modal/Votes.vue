@@ -97,7 +97,7 @@ watch(
           >
             <div
               v-if="!isEncrypted"
-              class="absolute top-0 bottom-0 right-0 z-[-1]"
+              class="absolute inset-y-0 right-0 z-[-1]"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
               }"

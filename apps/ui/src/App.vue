@@ -78,11 +78,7 @@ watch(isSwiping, () => {
 </script>
 
 <template>
-  <div
-    ref="el"
-    class="min-h-screen"
-    :class="{ 'overflow-clip': scrollDisabled }"
-  >
+  <div ref="el" class="min-h-screen" :class="{ 'text-clip': scrollDisabled }">
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
       <AppSidebar

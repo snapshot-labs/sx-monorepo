@@ -66,9 +66,7 @@ watch(open, () => (step.value = null));
           type="button"
           @click="$emit('login', connector.id)"
         >
-          <UiButton
-            class="w-full flex justify-center items-center"
-          >
+          <UiButton class="w-full flex justify-center items-center">
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
@@ -107,10 +105,7 @@ watch(open, () => (step.value = null));
         <UiButton class="w-full" @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>
-        <UiButton
-          class="w-full !text-skin-danger"
-          @click="handleLogout"
-        >
+        <UiButton class="w-full !text-skin-danger" @click="handleLogout">
           Log out
         </UiButton>
       </div>
