@@ -120,7 +120,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
   </div>
   <div v-else>
     <div
-      class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-s86px] md:mb-[-70px] top-[-1px]"
+      class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
     >
       <div class="size-full overflow-hidden">
         <UserCover :user="user" class="!rounded-none w-full min-h-full" />
