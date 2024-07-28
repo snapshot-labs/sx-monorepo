@@ -38,7 +38,7 @@ function handleVoteTypeSelected(type: VoteType) {
       @click="modalOpen = true"
     >
       <h4 class="text-skin-link">{{ activeVotingType.label }}</h4>
-      <div class="w-[20px] text-right text-skin-link absolute right-3 top-3">
+      <div class="w-3.5 text-right text-skin-link absolute right-3 top-3">
         <IH-chevron-down />
       </div>
     </button>

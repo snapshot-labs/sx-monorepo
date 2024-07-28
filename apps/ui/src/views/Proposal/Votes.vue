@@ -232,11 +232,11 @@ watch([sortBy, choiceFilter], () => {
                 <span class="text-skin-heading leading-[22px]"
                   >Encrypted choice</span
                 >
-                <IH-lock-closed class="size-[16px] shrink-0" />
+                <IH-lock-closed class="size-3 shrink-0" />
               </div>
             </div>
             <UiTooltip title="Encrypted choice" class="cursor-help md:hidden">
-              <IH-lock-closed class="size-[16px]" />
+              <IH-lock-closed class="size-3" />
             </UiTooltip>
           </template>
           <template v-else>

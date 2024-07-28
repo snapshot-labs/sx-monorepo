@@ -125,9 +125,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       <div class="size-full overflow-hidden">
         <UserCover :user="user" class="!rounded-none w-full min-h-full" />
       </div>
-      <div
-        class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden"
-      />
+      <div class="relative bg-skin-bg h-3 -top-3 rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
         <UiTooltip
