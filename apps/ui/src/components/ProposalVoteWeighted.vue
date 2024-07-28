@@ -46,7 +46,7 @@ watch(
       <div
         v-for="(choice, i) in proposal.choices"
         :key="i"
-        class="!h-[48px] flex items-center border rounded-full px-3.5 pr-2.5 gap-2 relative overflow-hidden"
+        class="!h-7 flex items-center border rounded-full px-3.5 pr-2.5 gap-2 relative overflow-hidden"
         :class="{
           '!border-skin-link': selectedChoices[i + 1] > 0
         }"
@@ -77,14 +77,14 @@ watch(
           </UiButton>
         </div>
         <div
-          class="top-0 left-0 bottom-0 absolute bg-skin-border opacity-40 -z-10"
+          class="inset-y-0 left-0 absolute bg-skin-border opacity-40 -z-10"
           :style="{ width: _p(getChoiceWeight(selectedChoices, i)) }"
         ></div>
       </div>
     </div>
     <UiButton
       primary
-      class="!h-[48px] w-full"
+      class="!h-7 w-full"
       :loading="!!sendingType"
       @click="$emit('vote', selectedChoices)"
     >

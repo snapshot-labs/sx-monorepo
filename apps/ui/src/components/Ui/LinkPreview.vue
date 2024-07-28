@@ -52,7 +52,7 @@ debouncedWatch(
   >
     <template v-if="preview?.meta?.title">
       <div v-if="preview?.links?.icon?.[0]?.href" class="px-4 pr-0">
-        <div class="w-[32px]">
+        <div class="w-5">
           <img
             :src="preview.links.icon[0].href"
             width="32"

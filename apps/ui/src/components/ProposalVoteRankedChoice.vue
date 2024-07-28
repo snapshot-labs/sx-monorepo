@@ -27,7 +27,7 @@ const selectedChoices = ref<number[]>(
     >
       <template #item="{ element, index }">
         <UiButton
-          class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
+          class="!h-7 text-left w-full flex items-center handle cursor-grab gap-2"
         >
           <IC-drag class="text-skin-text" />
 
@@ -44,7 +44,7 @@ const selectedChoices = ref<number[]>(
     </Draggable>
     <UiButton
       primary
-      class="!h-[48px] w-full"
+      class="!h-7 w-full"
       :loading="!!sendingType"
       @click="emit('vote', selectedChoices)"
     >

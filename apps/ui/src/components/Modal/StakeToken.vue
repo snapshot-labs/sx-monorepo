@@ -133,15 +133,13 @@ watch(
           />
           <button
             type="button"
-            class="absolute right-[16px] top-[4px]"
+            class="absolute right-3 top-1"
             href="#"
             @click.prevent="handleMaxClick"
           >
             max
           </button>
-          <div
-            class="absolute right-[16px] top-[26px] flex items-center gap-x-2"
-          >
+          <div class="absolute right-3 top-[26px] flex items-center gap-x-2">
             <UiStamp :id="token.contractAddress" type="token" :size="20" />
             ETH
           </div>
@@ -156,9 +154,7 @@ watch(
               examples: ['0']
             }"
           />
-          <div
-            class="absolute right-[16px] top-[28px] flex items-center gap-x-2"
-          >
+          <div class="absolute right-3 top-[28px] flex items-center gap-x-2">
             <UiStamp
               :id="`${networkId}:${stakingContract.address}`"
               type="token"

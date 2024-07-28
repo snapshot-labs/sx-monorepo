@@ -115,7 +115,7 @@ const otherResultsSummary = computed(() => {
         }"
       >
         <div
-          class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
+          class="absolute bg-skin-border inset-y-0 left-0 pointer-events-none -z-10"
           :class="{
             [`_${result.choice} choice-bg opacity-20`]:
               proposal.type === 'basic'
@@ -126,20 +126,20 @@ const otherResultsSummary = computed(() => {
         />
         <div
           v-if="proposal.type === 'basic'"
-          class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+          class="rounded-full choice-bg inline-block size-[18px]"
           :class="`_${result.choice}`"
         >
           <IH-check
             v-if="result.choice === 1"
-            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
           />
           <IH-x
             v-else-if="result.choice === 2"
-            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
           />
           <IH-minus-sm
             v-else-if="result.choice === 3"
-            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
           />
         </div>
         <div
@@ -155,7 +155,7 @@ const otherResultsSummary = computed(() => {
         @click="displayAllChoices = true"
       >
         <div
-          class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
+          class="absolute bg-skin-border inset-y-0 left-0 pointer-events-none -z-10"
           :style="{
             width: `${otherResultsSummary.progress.toFixed(2)}%`
           }"
@@ -172,7 +172,7 @@ const otherResultsSummary = computed(() => {
           v-text="_p(otherResultsSummary.progress / 100)"
         />
         <div class="hidden group-hover:flex items-center gap-1">
-          See all <IH-arrow-down class="w-[16px] h-[16px]" />
+          See all <IH-arrow-down class="size-3" />
         </div>
       </button>
       <div v-if="proposal.quorum">

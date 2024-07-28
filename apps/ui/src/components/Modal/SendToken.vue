@@ -303,7 +303,7 @@ watchEffect(async () => {
           />
           <button
             type="button"
-            class="absolute right-[16px] top-[4px]"
+            class="absolute right-3 top-1"
             @click="handleMaxClick"
             v-text="'max'"
           />

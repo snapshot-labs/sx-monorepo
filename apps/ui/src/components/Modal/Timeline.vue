@@ -82,7 +82,7 @@ const now = parseInt((Date.now() / 1e3).toFixed());
           class="flex relative h-[60px]"
         >
           <div
-            class="absolute size-[15px] inline-block rounded-full -left-[7px] border-4 border-skin-bg"
+            class="absolute size-[15px] inline-block rounded-full left-[-7px] border-4 border-skin-bg"
             :class="state.value <= now ? 'bg-skin-heading' : 'bg-skin-border'"
           />
           <div
