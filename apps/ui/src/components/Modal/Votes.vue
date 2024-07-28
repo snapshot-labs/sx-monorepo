@@ -127,7 +127,7 @@ watch(
             <template v-if="isEncrypted">
               <div class="flex gap-1 items-center">
                 <span class="text-skin-heading">Encrypted choice</span>
-                <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
+                <IH-lock-closed class="size-[16px] shrink-0" />
               </div>
             </template>
             <UiTooltip

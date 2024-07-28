@@ -27,7 +27,7 @@ const availableNetworks = enabledReadWriteNetworks.map(id => {
       >
         <img
           :src="getUrl(network.avatar) ?? undefined"
-          class="w-[32px] h-[32px] mr-3 rounded-lg"
+          class="size-5 mr-3 rounded-lg"
         />
         {{ network.name }}
       </button>

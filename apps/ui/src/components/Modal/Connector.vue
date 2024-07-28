@@ -57,7 +57,7 @@ const availableConnectors = computed(() => {
           @click="emit('pick', connector.id)"
         >
           <UiButton
-            class="button-outline w-full flex justify-center items-center"
+            class="w-full flex justify-center items-center"
           >
             <img
               :src="getConnectorIconUrl(connector.icon)"

@@ -79,7 +79,7 @@ watch(
         'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasAppNav
       }"
     >
-      <div class="flex flex-grow items-center h-full">
+      <div class="flex grow items-center h-full">
         <button
           type="button"
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"

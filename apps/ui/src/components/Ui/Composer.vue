@@ -54,7 +54,7 @@ const editor = useMarkdownEditor(
           class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.link"
         >
-          <IS-link class="w-[18px] h-[18px]" />
+          <IS-link class="size-[18px]" />
         </button>
       </UiTooltip>
       <UiTooltip title="Add an image" class="w-[26px] h-[26px]">
@@ -74,7 +74,7 @@ const editor = useMarkdownEditor(
             :height="14"
             class="inline-block"
           />
-          <IS-photo v-else class="w-[18px] h-[18px]" />
+          <IS-photo v-else class="size-[18px]" />
         </label>
       </UiTooltip>
     </div>

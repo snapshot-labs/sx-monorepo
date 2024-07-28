@@ -116,7 +116,7 @@ watch(
 <template>
   <div
     v-if="loading || customTokenLoading"
-    class="px-4 py-3 block flex justify-center"
+    class="px-4 py-3 flex justify-center"
   >
     <UiLoading />
   </div>

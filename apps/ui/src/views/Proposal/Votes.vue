@@ -232,11 +232,11 @@ watch([sortBy, choiceFilter], () => {
                 <span class="text-skin-heading leading-[22px]"
                   >Encrypted choice</span
                 >
-                <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
+                <IH-lock-closed class="size-[16px] shrink-0" />
               </div>
             </div>
             <UiTooltip title="Encrypted choice" class="cursor-help md:hidden">
-              <IH-lock-closed class="w-[16px] h-[16px]" />
+              <IH-lock-closed class="size-[16px]" />
             </UiTooltip>
           </template>
           <template v-else>
@@ -251,7 +251,7 @@ watch([sortBy, choiceFilter], () => {
             </UiTooltip>
             <div v-else class="flex items-center space-x-2">
               <div
-                class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+                class="rounded-full choice-bg inline-block size-[18px]"
                 :class="`_${vote.choice}`"
               >
                 <IH-check

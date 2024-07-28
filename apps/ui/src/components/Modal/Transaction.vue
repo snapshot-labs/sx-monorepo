@@ -264,7 +264,7 @@ watchEffect(async () => {
       <template v-if="showPicker">
         <button
           type="button"
-          class="absolute left-0 -top-1 p-4 text-color"
+          class="absolute left-0 -top-1 p-4 text-skin-text"
           @click="showPicker = false"
         >
           <IH-arrow-narrow-left class="mr-2" />

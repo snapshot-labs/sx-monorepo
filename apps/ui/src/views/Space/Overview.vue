@@ -46,12 +46,10 @@ watchEffect(() => setTitle(props.space.name));
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]"
     >
-      <div class="w-full h-full">
+      <div class="size-full">
         <SpaceCover :space="props.space" />
       </div>
-      <div
-        class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden"
-      />
+      <div class="relative bg-skin-bg h-3 -top-3 rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2">
         <router-link :to="{ name: 'editor' }" tabindex="-1">
           <UiTooltip title="New proposal">
@@ -74,13 +72,13 @@ watchEffect(() => setTitle(props.space.name));
           <SpaceAvatar
             :space="space"
             :size="90"
-            class="relative mb-2 border-[4px] border-skin-bg !rounded-lg left-[-4px]"
+            class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
           />
         </router-link>
         <div class="flex items-center">
           <h1 v-text="space.name" />
           <UiBadgeVerified
-            class="ml-1 top-[2px]"
+            class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
           />
@@ -110,7 +108,7 @@ watchEffect(() => setTitle(props.space.name));
               target="_blank"
               class="text-[#606060] hover:text-skin-link"
             >
-              <component :is="social.icon" class="w-[26px] h-[26px]" />
+              <component :is="social.icon" class="size-[26px]" />
             </a>
           </template>
         </div>

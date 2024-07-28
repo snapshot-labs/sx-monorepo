@@ -19,7 +19,7 @@ const filteredNfts = computed(() =>
 </script>
 
 <template>
-  <div v-if="loading" class="px-4 py-3 block flex justify-center">
+  <div v-if="loading" class="px-4 py-3 flex justify-center">
     <UiLoading />
   </div>
   <template v-else>
