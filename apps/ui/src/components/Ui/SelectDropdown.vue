@@ -42,7 +42,7 @@ const items = computed(() => props.items);
           <template v-if="currentItem">
             <div
               v-if="currentItem.indicator"
-              class="size-2 rounded-full"
+              class="size-[8px] rounded-full"
               :class="currentItem.indicator"
             />
             <component
@@ -69,7 +69,7 @@ const items = computed(() => props.items);
         >
           <div
             v-if="item.indicator"
-            class="size-2 rounded-full"
+            class="size-[8px] rounded-full"
             :class="item.indicator"
           />
           <component

@@ -88,7 +88,7 @@ const SOCIALS = [
             target="_blank"
             class="text-[#606060] hover:text-skin-link"
           >
-            <component :is="social.icon" class="size-5" />
+            <component :is="social.icon" class="size-[32px]" />
           </a>
         </div>
       </div>

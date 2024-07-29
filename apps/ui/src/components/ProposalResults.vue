@@ -172,7 +172,7 @@ const otherResultsSummary = computed(() => {
           v-text="_p(otherResultsSummary.progress / 100)"
         />
         <div class="hidden group-hover:flex items-center gap-1">
-          See all <IH-arrow-down class="size-3" />
+          See all <IH-arrow-down class="size-[16px]" />
         </div>
       </button>
       <div v-if="proposal.quorum">
