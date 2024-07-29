@@ -1,13 +1,7 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import {
-  enabledNetworks,
-  getNetwork,
-  getReadWriteNetwork,
-  metadataNetwork,
-  starknetNetworks
-} from '@/networks';
+import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, StrategyConfig } from '@/networks/types';
 import {
