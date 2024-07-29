@@ -277,7 +277,6 @@ onBeforeUnmount(() => destroyAudio());
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading class="inline-block !w-[22px] !h-[22px]" />
               <IH-pause
                 v-if="audioState === 'playing'"
                 class="inline-block size-[22px] text-skin-link"

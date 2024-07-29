@@ -1,7 +1,14 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { registerTransaction } from '@/helpers/mana';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
+import {
+  enabledNetworks,
+  getNetwork,
+  getReadWriteNetwork,
+  metadataNetwork,
+  starknetNetworks
+} from '@/networks';
+import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, StrategyConfig } from '@/networks/types';
 import {
   Choice,
@@ -15,6 +22,13 @@ import {
   User,
   VoteType
 } from '@/types';
+
+const offchainToStarknetIds: Record<string, NetworkID> = {
+  s: 'sn',
+  's-tn': 'sn-sep'
+};
+
+const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
@@ -126,7 +140,11 @@ export function useActions() {
   }
 
   async function getAliasSigner() {
-    const network = getNetwork(metadataNetwork);
+    const network = getNetwork(
+      STARKNET_CONNECTORS.includes(web3.value.type as Connector)
+        ? starknetNetworkId
+        : metadataNetwork
+    );
 
     return alias.getAliasWallet(address =>
       wrapPromise(metadataNetwork, network.actions.setAlias(auth.web3, address))
