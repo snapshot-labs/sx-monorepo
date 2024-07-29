@@ -64,15 +64,6 @@ const visibleResults = computed(() => {
   return results.value.slice(0, DEFAULT_MAX_CHOICES);
 });
 
-const votingPowerDecimals = computed(() => {
-  return Math.max(
-    ...props.proposal.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
-
 const otherResultsSummary = computed(() => {
   const oetherResultsStartIndex = hasOneExtra.value
     ? DEFAULT_MAX_CHOICES + 1
@@ -157,7 +148,7 @@ const otherResultsSummary = computed(() => {
           v-text="proposal.choices[result.choice - 1]"
         />
         <div>
-          {{ _vp(result.score / 10 ** votingPowerDecimals) }}
+          {{ _vp(result.score / 10 ** decimals) }}
         </div>
         <div v-text="_p(result.progress / 100)" />
       </div>
