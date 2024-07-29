@@ -1,16 +1,26 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { constants } from 'starknet';
 import networks from '@/helpers/networks.json';
 import { formatAddress } from '@/helpers/utils';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector } from '@/networks/types';
 
-networks['starknet'] = {
-  key: 'starknet',
-  name: 'Starknet',
-  explorer: 'https://testnet.starkscan.co'
+const STARKNET_NETWORKS = {
+  [constants.StarknetChainId.SN_MAIN]: {
+    key: constants.StarknetChainId.SN_MAIN,
+    chainId: constants.StarknetChainId.SN_MAIN,
+    explorer: 'https://starkscan.co'
+  },
+  [constants.StarknetChainId.SN_SEPOLIA]: {
+    key: constants.StarknetChainId.SN_SEPOLIA,
+    chainId: constants.StarknetChainId.SN_SEPOLIA,
+    explorer: 'https://sepolia.starkscan.co'
+  }
 };
+
+Object.assign(networks, STARKNET_NETWORKS);
 
 let auth;
 const defaultNetwork: any =
@@ -80,8 +90,12 @@ export function useWeb3() {
           const { chainId: safeChainId, safeAddress } = auth.web3.provider.safe;
           network = { chainId: safeChainId };
           accounts = [safeAddress];
-        } else if (connector === 'argentx') {
-          network = { key: 'starknet', chainId: 'starknet' };
+        } else if (STARKNET_CONNECTORS.includes(connector)) {
+          network = {
+            chainId:
+              auth.provider.value.provider.chainId ||
+              auth.provider.value.provider.provider.chainId
+          };
           accounts = [auth.provider.value.selectedAddress];
         } else {
           [network, accounts] = await Promise.all([
