@@ -156,9 +156,8 @@ const otherResultsSummary = computed(() => {
           class="truncate grow"
           v-text="proposal.choices[result.choice - 1]"
         />
-        <div class="whitespace-nowrap">
+        <div>
           {{ _vp(result.score / 10 ** votingPowerDecimals) }}
-          {{ proposal.space.voting_power_symbol }}
         </div>
         <div v-text="_p(result.progress / 100)" />
       </div>
