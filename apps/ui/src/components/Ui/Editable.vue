@@ -95,7 +95,7 @@ function handleSave() {
               definition.format !== 'duration' && !!formErrors.value,
             'top-[-18.5px]':
               definition.format === 'duration' && !!formErrors.value,
-            'top-[-6px]': definition.format === 'duration'
+            '-top-1.5': definition.format === 'duration'
           }"
         >
           <button

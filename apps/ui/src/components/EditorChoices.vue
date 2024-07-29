@@ -34,7 +34,7 @@ function handlePressEnter(index) {
         <template #item="{ index }">
           <div>
             <div
-              class="flex items-center rounded-lg bg-skin-border h-[40px] gap-[12px] pl-2.5"
+              class="flex items-center rounded-lg bg-skin-border h-[40px] gap-2.5 pl-2.5"
             >
               <div
                 v-if="proposal.type !== 'basic'"
@@ -59,7 +59,7 @@ function handlePressEnter(index) {
               </div>
               <UiButton
                 v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
-                class="border-0 rounded-l-none rounded-r-lg bg-transparent !h-[40px] w-[40px] !px-0 text-center text-skin-text shrink-0"
+                class="border-0 rounded-l-none rounded-r-lg bg-transparent !size-[40px] !px-0 text-center text-skin-text shrink-0"
                 @click="proposal.choices.splice(index, 1)"
               >
                 <IH-trash class="inline-block" />

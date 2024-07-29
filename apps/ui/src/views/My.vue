@@ -6,7 +6,7 @@ const uiStore = useUiStore();
   <div>
     <div>
       <div
-        class="ml-0 lg:ml-[240px] mr-0 xl:mr-[240px]"
+        class="mx-0 lg:ml-[240px] xl:mr-[240px]"
         :class="{ 'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen }"
       >
         <router-view />

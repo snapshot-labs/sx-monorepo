@@ -153,7 +153,7 @@ watchEffect(() => setTitle('Network'));
               <img
                 :alt="customer.name"
                 :src="getUrl(customer.avatar) ?? undefined"
-                class="w-[54px] h-[54px] rounded-lg"
+                class="size-[54px] rounded-lg"
               />
             </a>
           </div>

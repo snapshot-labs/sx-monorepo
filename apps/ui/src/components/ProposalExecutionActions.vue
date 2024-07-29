@@ -87,7 +87,7 @@ const network = computed(() => getNetwork(props.proposal.network));
         :loading="executeQueuedProposalSending"
         @click="executeQueuedProposal"
       >
-        <IH-play class="inline-block mr-2 flex-shrink-0" />
+        <IH-play class="inline-block mr-2 shrink-0" />
         <template v-if="executionCountdown === 0"
           >Execute queued transactions</template
         >
@@ -109,7 +109,7 @@ const network = computed(() => getNetwork(props.proposal.network));
         :loading="vetoProposalSending"
         @click="vetoProposal"
       >
-        <IH-play class="inline-block mr-2 flex-shrink-0" />
+        <IH-play class="inline-block mr-2 shrink-0" />
         Veto execution
       </UiButton>
     </template>

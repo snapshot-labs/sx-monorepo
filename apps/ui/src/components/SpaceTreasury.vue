@@ -179,7 +179,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             width="480"
             height="332"
             viewBox="0 0 480 332"
-            class="inline-block w-[26px] h-[26px]"
+            class="inline-block size-[26px]"
           >
             <path
               fill="rgba(var(--link))"

@@ -83,7 +83,7 @@ watch(
         <h3>Select contact</h3>
         <button
           type="button"
-          class="absolute left-0 -top-1 p-4 text-color"
+          class="absolute left-0 -top-1 p-4"
           @click="showPicker = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
