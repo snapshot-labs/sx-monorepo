@@ -12,7 +12,7 @@ const props = withDefaults(
 );
 
 defineEmits<{
-  (e: 'enter-edit-mode');
+  (e: 'enterEditMode');
 }>();
 
 const { votes, pendingVotes } = useAccount();
@@ -60,7 +60,7 @@ const isEditable = computed(() => {
       <UiButton
         class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2 cursor-default"
         :class="{ 'cursor-pointer': isEditable }"
-        @click="isEditable && $emit('enter-edit-mode')"
+        @click="isEditable && $emit('enterEditMode')"
       >
         <div
           v-if="proposal.privacy"
