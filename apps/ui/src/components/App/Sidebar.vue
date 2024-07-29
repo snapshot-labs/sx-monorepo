@@ -13,7 +13,7 @@ const followedSpacesStore = useFollowedSpacesStore();
       <IH-stop class="inline-block my-4 size-[32px] text-skin-link" />
     </router-link>
     <div
-      class="bg-gradient-to-b from-skin-bg top-[72px] h-2 w-[71px] absolute z-10"
+      class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10"
     />
     <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
     <draggable

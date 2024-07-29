@@ -17,7 +17,7 @@ defineProps<{
       'opacity-50 cursor-not-allowed': disabled
     }"
   >
-    <div class="flex items-center justify-center min-h-6 bg-skin-border">
+    <div class="flex items-center justify-center min-h-[40px] bg-skin-border">
       <component
         :is="strategy.icon ? strategy.icon : IHCode"
         class="inline-block mx-3 text-skin-link"

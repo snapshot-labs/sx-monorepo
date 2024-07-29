@@ -34,7 +34,7 @@ function handlePressEnter(index) {
         <template #item="{ index }">
           <div>
             <div
-              class="flex items-center rounded-lg bg-skin-border h-6 gap-2.5 pl-2.5"
+              class="flex items-center rounded-lg bg-skin-border h-[40px] gap-2.5 pl-2.5"
             >
               <div
                 v-if="proposal.type !== 'basic'"
@@ -48,7 +48,7 @@ function handlePressEnter(index) {
                   v-model.trim="proposal.choices[index]"
                   type="text"
                   :maxLength="definition.items[0].maxLength"
-                  class="w-full h-6 py-[10px] bg-transparent text-skin-heading"
+                  class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
                   :class="{
                     '!cursor-not-allowed ml-1': proposal.type === 'basic'
                   }"

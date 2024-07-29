@@ -304,7 +304,7 @@ input:placeholder-shown {
   .s-label:has(+ textarea),
   .s-base:has(textarea:only-child) {
      &::before {
-      @apply block bg-gradient-to-b from-skin-border to-transparent h-2 w-full absolute top-3.5 left-0;
+      @apply block bg-gradient-to-b from-skin-border to-transparent h-[8px] w-full absolute top-3.5 left-0;
 
       content: '';
     }
