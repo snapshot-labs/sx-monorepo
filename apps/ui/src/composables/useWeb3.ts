@@ -1,19 +1,20 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { constants } from 'starknet';
 import networks from '@/helpers/networks.json';
 import { formatAddress } from '@/helpers/utils';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 
 const STARKNET_NETWORKS = {
-  '0x534e5f4d41494e': {
-    key: '0x534e5f4d41494e',
-    chainId: '0x534e5f4d41494e',
+  [constants.StarknetChainId.SN_MAIN]: {
+    key: constants.StarknetChainId.SN_MAIN,
+    chainId: constants.StarknetChainId.SN_MAIN,
     explorer: 'https://starkscan.co'
   },
-  '0x534e5f5345504f4c4941': {
-    key: '0x534e5f5345504f4c4941',
-    chainId: '0x534e5f5345504f4c4941',
+  [constants.StarknetChainId.SN_SEPOLIA]: {
+    key: constants.StarknetChainId.SN_SEPOLIA,
+    chainId: constants.StarknetChainId.SN_SEPOLIA,
     explorer: 'https://sepolia.starkscan.co'
   }
 };
