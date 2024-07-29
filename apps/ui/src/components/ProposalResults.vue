@@ -4,7 +4,7 @@ import {
   quorumLabel,
   quorumProgress
 } from '@/helpers/quorum';
-import { _n, _p } from '@/helpers/utils';
+import { _n, _p, _vp } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -45,7 +45,8 @@ const results = computed(() => {
 
       return {
         choice: i + 1,
-        progress
+        progress,
+        score
       };
     })
     .sort((a, b) => b.progress - a.progress);
@@ -146,6 +147,9 @@ const otherResultsSummary = computed(() => {
           class="truncate grow"
           v-text="proposal.choices[result.choice - 1]"
         />
+        <div>
+          {{ _vp(result.score / 10 ** decimals) }}
+        </div>
         <div v-text="_p(result.progress / 100)" />
       </div>
       <button
