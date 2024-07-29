@@ -5,6 +5,7 @@ import { constants } from 'starknet';
 import networks from '@/helpers/networks.json';
 import { formatAddress } from '@/helpers/utils';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
+import { Connector } from '@/networks/types';
 
 const STARKNET_NETWORKS = {
   [constants.StarknetChainId.SN_MAIN]: {
@@ -34,6 +35,7 @@ const state = reactive({
   authLoading: false
 });
 const authInitiated = ref(false);
+const loadedProviders = ref(new Set<Connector>());
 
 export function useWeb3() {
   const { mixpanel } = useMixpanel();
@@ -69,6 +71,7 @@ export function useWeb3() {
 
   function logout() {
     auth = getInstance();
+    removeProviderEvents(auth.provider.value);
     auth.logout();
     state.account = '';
     state.name = '';
@@ -78,22 +81,9 @@ export function useWeb3() {
 
   async function loadProvider() {
     const connector = auth.provider.value?.connectorName;
-    try {
-      if (auth.provider.value.on) {
-        auth.provider.value.on('accountsChanged', async accounts => {
-          if (accounts.length !== 0) {
-            state.account = formatAddress(accounts[0]);
-            await login(connector);
-          }
-        });
 
-        if (!STARKNET_CONNECTORS.includes(connector)) {
-          auth.provider.value.on('chainChanged', async chainId => {
-            handleChainChanged(parseInt(formatUnits(chainId, 0)));
-          });
-        }
-        // auth.provider.on('disconnect', async () => {});
-      }
+    try {
+      attachProviderEvents(auth.provider.value);
       let network, accounts;
       try {
         if (connector === 'gnosis') {
@@ -157,6 +147,38 @@ export function useWeb3() {
       // NOTE: metamask doesn't return connectorName
       state.type = 'injected';
     }
+  }
+
+  function attachProviderEvents(provider) {
+    const providerName: Connector = provider?.connectorName || 'injected';
+
+    if (loadedProviders.value.has(providerName)) return;
+    loadedProviders.value.add(providerName);
+
+    if (!provider.on) return;
+
+    provider.on('accountsChanged', async accounts => {
+      if (!accounts.length) return;
+
+      state.account = formatAddress(accounts[0]);
+      await login();
+    });
+
+    if (!STARKNET_CONNECTORS.includes(providerName)) {
+      provider.on('chainChanged', async chainId => {
+        handleChainChanged(parseInt(formatUnits(chainId, 0)));
+      });
+    }
+
+    // auth.provider.on('disconnect', async () => {});
+  }
+
+  function removeProviderEvents(provider) {
+    loadedProviders.value.delete(provider?.connectorName || 'injected');
+
+    try {
+      provider.removeAllListeners();
+    } catch (e: any) {}
   }
 
   return {
