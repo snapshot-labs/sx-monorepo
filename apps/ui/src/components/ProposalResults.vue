@@ -196,7 +196,7 @@ const otherResultsSummary = computed(() => {
       class="h-full flex items-center"
     >
       <div
-        class="rounded-full h-1.5 overflow-hidden"
+        class="rounded-full h-[4px].5 overflow-hidden"
         :style="{
           width: `${width}px`
         }"
