@@ -135,10 +135,13 @@ watch([sortBy, choiceFilter], () => {
         ]"
       >
         <template #button>
-          <div class="flex items-center hover:text-skin-link space-x-2">
+          <button
+            class="flex items-center hover:text-skin-link space-x-2"
+            type="button"
+          >
             <span class="truncate">Choice</span>
             <IH-adjustments-vertical class="shrink-0" />
-          </div>
+          </button>
         </template>
       </UiSelectDropdown>
     </div>
