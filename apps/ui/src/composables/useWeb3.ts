@@ -164,11 +164,12 @@ export function useWeb3() {
       await login();
     });
 
-    if (STARKNET_CONNECTORS.includes(providerName)) return;
+    if (!STARKNET_CONNECTORS.includes(providerName)) {
+      provider.on('chainChanged', async chainId => {
+        handleChainChanged(parseInt(formatUnits(chainId, 0)));
+      });
+    }
 
-    provider.on('chainChanged', async chainId => {
-      handleChainChanged(parseInt(formatUnits(chainId, 0)));
-    });
     // auth.provider.on('disconnect', async () => {});
   }
 
