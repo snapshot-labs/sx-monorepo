@@ -28,11 +28,7 @@ const offchainToStarknetIds: Record<string, NetworkID> = {
   's-tn': 'sn-sep'
 };
 
-const starknetNetworkId = starknetNetworks.find(
-  networkId =>
-    enabledNetworks.includes(networkId) &&
-    networkId === offchainToStarknetIds[metadataNetwork]
-) as NetworkID;
+const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
   const { mixpanel } = useMixpanel();
