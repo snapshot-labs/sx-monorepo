@@ -44,7 +44,7 @@ watch(open, (val, prev) => {
         </div>
         <button
           type="button"
-          class="absolute right-0 -top-1 p-4 text-skin-text"
+          class="absolute right-0 -top-1 p-4"
           @click="$emit('close')"
         >
           <IH-x />
