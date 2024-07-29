@@ -59,7 +59,7 @@ async function handleFileChange(e: Event) {
   <button
     type="button"
     v-bind="$attrs"
-    class="relative bg-skin-border h-[100px] mb-[-50px] w-full overflow-hidden cursor-pointer group"
+    class="relative block bg-skin-border h-[100px] mb-[-50px] w-full overflow-hidden cursor-pointer group"
     @click="openFilePicker()"
   >
     <img
