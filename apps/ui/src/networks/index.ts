@@ -29,6 +29,7 @@ export const evmNetworks: NetworkID[] = [
   'linea-testnet'
 ];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
+export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
