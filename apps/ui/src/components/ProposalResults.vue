@@ -4,7 +4,7 @@ import {
   quorumLabel,
   quorumProgress
 } from '@/helpers/quorum';
-import { _n, _p } from '@/helpers/utils';
+import { _n, _p, _vp } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -45,7 +45,8 @@ const results = computed(() => {
 
       return {
         choice: i + 1,
-        progress
+        progress,
+        score
       };
     })
     .sort((a, b) => b.progress - a.progress);
@@ -61,6 +62,15 @@ const visibleResults = computed(() => {
   }
 
   return results.value.slice(0, DEFAULT_MAX_CHOICES);
+});
+
+const votingPowerDecimals = computed(() => {
+  return Math.max(
+    ...props.proposal.space.strategies_parsed_metadata.map(
+      metadata => metadata.decimals
+    ),
+    0
+  );
 });
 
 const otherResultsSummary = computed(() => {
@@ -146,6 +156,10 @@ const otherResultsSummary = computed(() => {
           class="truncate grow"
           v-text="proposal.choices[result.choice - 1]"
         />
+        <div class="whitespace-nowrap">
+          {{ _vp(result.score / 10 ** votingPowerDecimals) }}
+          {{ proposal.space.voting_power_symbol }}
+        </div>
         <div v-text="_p(result.progress / 100)" />
       </div>
       <button
