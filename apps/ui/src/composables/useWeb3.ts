@@ -91,8 +91,8 @@ export function useWeb3() {
             handleChainChanged(parseInt(formatUnits(chainId, 0)));
           });
         }
+        // auth.provider.on('disconnect', async () => {});
       }
-      // auth.provider.on('disconnect', async () => {});
       let network, accounts;
       try {
         if (connector === 'gnosis') {
