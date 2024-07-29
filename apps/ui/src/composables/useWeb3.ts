@@ -155,16 +155,19 @@ export function useWeb3() {
     if (loadedProviders.value.has(providerName)) return;
     loadedProviders.value.add(providerName);
 
-    if (!provider.on || STARKNET_CONNECTORS.includes(providerName)) return;
+    if (!provider.on) return;
 
-    provider.on('chainChanged', async chainId => {
-      handleChainChanged(parseInt(formatUnits(chainId, 0)));
-    });
     provider.on('accountsChanged', async accounts => {
       if (!accounts.length) return;
 
       state.account = formatAddress(accounts[0]);
       await login();
+    });
+
+    if (STARKNET_CONNECTORS.includes(providerName)) return;
+
+    provider.on('chainChanged', async chainId => {
+      handleChainChanged(parseInt(formatUnits(chainId, 0)));
     });
     // auth.provider.on('disconnect', async () => {});
   }
