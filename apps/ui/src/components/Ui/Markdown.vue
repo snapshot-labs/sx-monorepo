@@ -123,14 +123,14 @@ onMounted(() => {
   <div class="markdown-body break-words" v-html="parsed" />
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/styles/highlightjs/github.scss';
 
 html.dark {
   @import '@/assets/styles/highlightjs/github-dark-dimmed.scss';
 }
 
-.markdown-body {
+.markdown-body:deep() {
   font-size: 22px;
   line-height: 1.3;
   word-wrap: break-word;
