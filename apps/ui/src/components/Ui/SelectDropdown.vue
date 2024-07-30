@@ -31,7 +31,8 @@ const items = computed(() => props.items);
     <template #button>
       <slot name="button">
         <button
-          class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-[16px] min-w-[76px] h-[42px] top-1 outline-0 text-skin-link bg-skin-bg"
+          type="button"
+          class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-3 min-w-[76px] h-[42px] top-1 outline-0 text-skin-link bg-skin-bg"
         >
           <div
             class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
@@ -41,7 +42,7 @@ const items = computed(() => props.items);
           <template v-if="currentItem">
             <div
               v-if="currentItem.indicator"
-              class="w-[8px] h-[8px] rounded-full"
+              class="size-[8px] rounded-full"
               :class="currentItem.indicator"
             />
             <component
@@ -61,13 +62,14 @@ const items = computed(() => props.items);
         v-slot="{ active, disabled }"
       >
         <button
+          type="button"
           class="flex items-center gap-2"
           :class="{ 'opacity-80': active, 'opacity-40': disabled }"
           @click="model = item.key"
         >
           <div
             v-if="item.indicator"
-            class="w-[8px] h-[8px] rounded-full"
+            class="size-[8px] rounded-full"
             :class="item.indicator"
           />
           <component

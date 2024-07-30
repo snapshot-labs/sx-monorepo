@@ -20,7 +20,13 @@ exports[`StarknetSig > should create propose envelope 1`] = `
     ],
   },
   "signatureData": {
-    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "address": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "domain": {
+      "chainId": "0x534e5f5345504f4c4941",
+      "name": "sx-starknet",
+      "verifyingContract": "0x213bb25044b189ccfda9882999dba32e011781dc11b2a6efa2b3d232824378e",
+      "version": "0.1.0",
+    },
     "message": {
       "author": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
       "executionStrategy": {
@@ -44,6 +50,62 @@ exports[`StarknetSig > should create propose envelope 1`] = `
       "0x7faa90924da8c43edec0109655f719aa06d597a97286d2a4844bc072bffdf3f",
       "0x2cd44c86f6f223ca5080c6f6092b93a9c932825b1b6a65e0515debcb22742ea",
     ],
+    "types": {
+      "Propose": [
+        {
+          "name": "space",
+          "type": "ContractAddress",
+        },
+        {
+          "name": "author",
+          "type": "ContractAddress",
+        },
+        {
+          "name": "metadataUri",
+          "type": "felt*",
+        },
+        {
+          "name": "executionStrategy",
+          "type": "Strategy",
+        },
+        {
+          "name": "userProposalValidationParams",
+          "type": "felt*",
+        },
+        {
+          "name": "salt",
+          "type": "felt252",
+        },
+      ],
+      "StarkNetDomain": [
+        {
+          "name": "name",
+          "type": "felt252",
+        },
+        {
+          "name": "version",
+          "type": "felt252",
+        },
+        {
+          "name": "chainId",
+          "type": "felt252",
+        },
+        {
+          "name": "verifyingContract",
+          "type": "ContractAddress",
+        },
+      ],
+      "Strategy": [
+        {
+          "name": "address",
+          "type": "felt252",
+        },
+        {
+          "name": "params",
+          "type": "felt*",
+        },
+      ],
+    },
   },
 }
 `;
@@ -63,7 +125,13 @@ exports[`StarknetSig > should create update proposal envelope 1`] = `
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
   },
   "signatureData": {
-    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "address": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "domain": {
+      "chainId": "0x534e5f5345504f4c4941",
+      "name": "sx-starknet",
+      "verifyingContract": "0x213bb25044b189ccfda9882999dba32e011781dc11b2a6efa2b3d232824378e",
+      "version": "0.1.0",
+    },
     "message": {
       "author": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
       "executionStrategy": {
@@ -88,6 +156,72 @@ exports[`StarknetSig > should create update proposal envelope 1`] = `
       "0x66f624dd2dcbc81ab4f6aea08db63b902a72517e461a4fbe30c27cd5b775e9b",
       "0x28993ed0dd85c5ac3b5017978f4251b014bc7bd375a02048c1e032997f75700",
     ],
+    "types": {
+      "StarkNetDomain": [
+        {
+          "name": "name",
+          "type": "felt252",
+        },
+        {
+          "name": "version",
+          "type": "felt252",
+        },
+        {
+          "name": "chainId",
+          "type": "felt252",
+        },
+        {
+          "name": "verifyingContract",
+          "type": "ContractAddress",
+        },
+      ],
+      "Strategy": [
+        {
+          "name": "address",
+          "type": "felt252",
+        },
+        {
+          "name": "params",
+          "type": "felt*",
+        },
+      ],
+      "UpdateProposal": [
+        {
+          "name": "space",
+          "type": "ContractAddress",
+        },
+        {
+          "name": "author",
+          "type": "ContractAddress",
+        },
+        {
+          "name": "proposalId",
+          "type": "u256",
+        },
+        {
+          "name": "executionStrategy",
+          "type": "Strategy",
+        },
+        {
+          "name": "metadataUri",
+          "type": "felt*",
+        },
+        {
+          "name": "salt",
+          "type": "felt252",
+        },
+      ],
+      "u256": [
+        {
+          "name": "low",
+          "type": "felt252",
+        },
+        {
+          "name": "high",
+          "type": "felt252",
+        },
+      ],
+    },
   },
 }
 `;
@@ -108,7 +242,13 @@ exports[`StarknetSig > should create vote envelope 1`] = `
     ],
   },
   "signatureData": {
-    "address": "0x7d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "address": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "domain": {
+      "chainId": "0x534e5f5345504f4c4941",
+      "name": "sx-starknet",
+      "verifyingContract": "0x213bb25044b189ccfda9882999dba32e011781dc11b2a6efa2b3d232824378e",
+      "version": "0.1.0",
+    },
     "message": {
       "choice": "0x1",
       "metadataUri": [
@@ -128,6 +268,72 @@ exports[`StarknetSig > should create vote envelope 1`] = `
       "0xd64cf8eb4218e6b47ab1756ab850b82b5bb9eec760c8cd0c1b68bb2ea597be",
       "0x56a47d37a6980a7f095ac54b5ce5108325333c7642234fc677423a59a027e38",
     ],
+    "types": {
+      "IndexedStrategy": [
+        {
+          "name": "index",
+          "type": "felt252",
+        },
+        {
+          "name": "params",
+          "type": "felt*",
+        },
+      ],
+      "StarkNetDomain": [
+        {
+          "name": "name",
+          "type": "felt252",
+        },
+        {
+          "name": "version",
+          "type": "felt252",
+        },
+        {
+          "name": "chainId",
+          "type": "felt252",
+        },
+        {
+          "name": "verifyingContract",
+          "type": "ContractAddress",
+        },
+      ],
+      "Vote": [
+        {
+          "name": "space",
+          "type": "ContractAddress",
+        },
+        {
+          "name": "voter",
+          "type": "ContractAddress",
+        },
+        {
+          "name": "proposalId",
+          "type": "u256",
+        },
+        {
+          "name": "choice",
+          "type": "felt252",
+        },
+        {
+          "name": "userVotingStrategies",
+          "type": "IndexedStrategy*",
+        },
+        {
+          "name": "metadataUri",
+          "type": "felt*",
+        },
+      ],
+      "u256": [
+        {
+          "name": "low",
+          "type": "felt252",
+        },
+        {
+          "name": "high",
+          "type": "felt252",
+        },
+      ],
+    },
   },
 }
 `;

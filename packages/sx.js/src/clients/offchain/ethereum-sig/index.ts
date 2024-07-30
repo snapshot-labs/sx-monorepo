@@ -21,7 +21,7 @@ import {
   weightedVoteTypes
 } from './types';
 import { offchainGoerli } from '../../../offchainNetworks';
-import { OffchainNetworkConfig } from '../../../types';
+import { OffchainNetworkConfig, SignatureData } from '../../../types';
 import {
   CancelProposal,
   EIP712CancelProposalMessage,
@@ -38,7 +38,6 @@ import {
   FollowSpace,
   Propose,
   SetAlias,
-  SignatureData,
   UnfollowSpace,
   UpdateProposal,
   UpdateStatement,
@@ -120,9 +119,10 @@ export class EthereumSig {
       signature: sig,
       domain,
       types,
+      primaryType,
       message
     } = envelope.signatureData!;
-    const payload = {
+    const payload: any = {
       address,
       sig,
       data: {
@@ -131,6 +131,9 @@ export class EthereumSig {
         message
       }
     };
+
+    // primaryType needs to be attached when sending starknet-sig generated payload
+    if (primaryType) payload.data.primaryType = primaryType;
 
     const body = {
       method: 'POST',

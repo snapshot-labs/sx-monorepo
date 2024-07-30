@@ -220,6 +220,15 @@ export function _d(s: number) {
     .trim();
 }
 
+export function toBigIntOrNumber(value) {
+  const parsedValue = parseFloat(value);
+  if (Number.isInteger(parsedValue)) {
+    return BigInt(value);
+  } else {
+    return parsedValue;
+  }
+}
+
 export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   try {
     return dayjs(number * 1e3).format(format);

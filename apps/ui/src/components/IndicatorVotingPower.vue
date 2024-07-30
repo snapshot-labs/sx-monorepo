@@ -45,7 +45,7 @@ function handleModalOpen() {
       :formatted-voting-power="formattedVotingPower"
       :on-click="handleModalOpen"
     >
-      <UiTooltip title="Your voting power" :touch="false">
+      <UiTooltip title="Your voting power">
         <UiButton
           v-if="
             web3.account &&

@@ -19,8 +19,8 @@ const emit = defineEmits<{
       <UiButton
         class="!text-skin-success !border-skin-success !px-0"
         :class="{
-          '!w-[48px] !h-[48px]': size === 48,
-          '!w-[40px] !h-[40px]': size === 40
+          '!size-[48px]': size === 48,
+          '!size-[40px]': size === 40
         }"
         @click="emit('vote', 'for')"
       >
@@ -31,8 +31,8 @@ const emit = defineEmits<{
       <UiButton
         class="!text-skin-danger !border-skin-danger !px-0"
         :class="{
-          '!w-[48px] !h-[48px]': size === 48,
-          '!w-[40px] !h-[40px]': size === 40
+          '!size-[48px]': size === 48,
+          '!size-[40px]': size === 40
         }"
         @click="emit('vote', 'against')"
       >
@@ -43,8 +43,8 @@ const emit = defineEmits<{
       <UiButton
         class="!text-gray-500 !border-gray-500 !px-0"
         :class="{
-          '!w-[48px] !h-[48px]': size === 48,
-          '!w-[40px] !h-[40px]': size === 40
+          '!size-[48px]': size === 48,
+          '!size-[40px]': size === 40
         }"
         @click="emit('vote', 'abstain')"
       >

@@ -663,7 +663,12 @@ export function createActions(
     },
     followSpace: () => {},
     unfollowSpace: () => {},
-    setAlias: () => {},
+    setAlias(web3: any, alias: string) {
+      return starkSigClient.setAlias({
+        signer: web3.provider.account,
+        data: { alias }
+      });
+    },
     updateUser: () => {},
     updateStatement: () => {},
     send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper

@@ -19,16 +19,17 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <a
+      <button
         v-for="(delegation, i) in space.delegations"
         :key="i"
+        type="button"
         @click="activeDelegationId = i"
       >
         <UiLink
           :is-active="activeDelegationId === i"
           :text="delegation.name || `Delegates ${i + 1}`"
         />
-      </a>
+      </button>
     </div>
   </div>
   <SpaceDelegates

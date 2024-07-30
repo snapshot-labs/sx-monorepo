@@ -9,7 +9,7 @@ withDefaults(
   }>(),
   {
     placement: 'top',
-    touch: true
+    touch: false
   }
 );
 </script>

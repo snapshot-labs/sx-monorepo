@@ -135,12 +135,12 @@ watch(
             </template>
             <template #right>
               <div class="flex gap-3">
-                <a @click="editTx(i)">
+                <button type="button" @click="editTx(i)">
                   <IH-pencil />
-                </a>
-                <a @click="removeTx(i)">
+                </button>
+                <button type="button" @click="removeTx(i)">
                   <IH-trash />
-                </a>
+                </button>
               </div>
             </template>
           </TransactionsListItem>
@@ -163,7 +163,7 @@ watch(
           v-else-if="simulationState === null"
           title="Simulate execution"
         >
-          <button class="flex" @click="handleSimulateClick">
+          <button type="button" class="flex" @click="handleSimulateClick">
             <IH-shield-check class="text-skin-link" />
           </button>
         </UiTooltip>

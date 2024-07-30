@@ -11,7 +11,7 @@ defineProps<{
 <template>
   <div
     class="flex items-center"
-    :class="[isActive && 'border-b border-skin-link -mb-[1px]']"
+    :class="[isActive && 'border-b border-skin-link mb-[-1px]']"
   >
     <h4
       class="eyebrow py-2 cursor-pointer inline-block hover:text-skin-link"
