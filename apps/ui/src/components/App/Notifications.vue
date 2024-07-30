@@ -3,7 +3,7 @@ const uiStore = useUiStore();
 </script>
 
 <template>
-  <div class="fixed bottom-4 left-0 right-0 z-[52]">
+  <div class="fixed bottom-4 inset-x-0 z-[52]">
     <UiAlert
       v-for="notification in uiStore.notifications"
       :key="notification.id"

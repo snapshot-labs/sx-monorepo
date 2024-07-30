@@ -7,10 +7,10 @@ const followedSpacesStore = useFollowedSpacesStore();
 
 <template>
   <div
-    class="w-[72px] flex flex-col border-r fixed left-0 top-0 bottom-0 text-center h-screen"
+    class="w-[72px] flex flex-col border-r fixed left-0 inset-y-0 text-center h-screen"
   >
     <router-link :to="{ name: 'landing' }" class="h-[72px] block">
-      <IH-stop class="inline-block my-4 w-[32px] h-[32px] text-skin-link" />
+      <IH-stop class="inline-block my-4 size-[32px] text-skin-link" />
     </router-link>
     <div
       class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10"
@@ -35,7 +35,7 @@ const followedSpacesStore = useFollowedSpacesStore();
           class="block"
           @click="uiStore.sidebarOpen = false"
         >
-          <UiTooltip :title="element.name" placement="right" :touch="false">
+          <UiTooltip :title="element.name" placement="right">
             <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />
           </UiTooltip>
         </router-link>

@@ -1,14 +1,26 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { constants } from 'starknet';
 import networks from '@/helpers/networks.json';
 import { formatAddress } from '@/helpers/utils';
+import { STARKNET_CONNECTORS } from '@/networks/common/constants';
+import { Connector } from '@/networks/types';
 
-networks['starknet'] = {
-  key: 'starknet',
-  name: 'Starknet',
-  explorer: 'https://testnet.starkscan.co'
+const STARKNET_NETWORKS = {
+  [constants.StarknetChainId.SN_MAIN]: {
+    key: constants.StarknetChainId.SN_MAIN,
+    chainId: constants.StarknetChainId.SN_MAIN,
+    explorer: 'https://starkscan.co'
+  },
+  [constants.StarknetChainId.SN_SEPOLIA]: {
+    key: constants.StarknetChainId.SN_SEPOLIA,
+    chainId: constants.StarknetChainId.SN_SEPOLIA,
+    explorer: 'https://sepolia.starkscan.co'
+  }
 };
+
+Object.assign(networks, STARKNET_NETWORKS);
 
 let auth;
 const defaultNetwork: any =
@@ -23,6 +35,7 @@ const state = reactive({
   authLoading: false
 });
 const authInitiated = ref(false);
+const loadedProviders = ref(new Set<Connector>());
 
 export function useWeb3() {
   const { mixpanel } = useMixpanel();
@@ -58,6 +71,7 @@ export function useWeb3() {
 
   function logout() {
     auth = getInstance();
+    removeProviderEvents(auth.provider.value);
     auth.logout();
     state.account = '';
     state.name = '';
@@ -67,27 +81,21 @@ export function useWeb3() {
 
   async function loadProvider() {
     const connector = auth.provider.value?.connectorName;
+
     try {
-      if (auth.provider.value.on && connector !== 'argentx') {
-        auth.provider.value.on('chainChanged', async chainId => {
-          handleChainChanged(parseInt(formatUnits(chainId, 0)));
-        });
-        auth.provider.value.on('accountsChanged', async accounts => {
-          if (accounts.length !== 0) {
-            state.account = formatAddress(accounts[0]);
-            await login();
-          }
-        });
-        // auth.provider.on('disconnect', async () => {});
-      }
+      attachProviderEvents(auth.provider.value);
       let network, accounts;
       try {
         if (connector === 'gnosis') {
           const { chainId: safeChainId, safeAddress } = auth.web3.provider.safe;
           network = { chainId: safeChainId };
           accounts = [safeAddress];
-        } else if (connector === 'argentx') {
-          network = { key: 'starknet', chainId: 'starknet' };
+        } else if (STARKNET_CONNECTORS.includes(connector)) {
+          network = {
+            chainId:
+              auth.provider.value.provider.chainId ||
+              auth.provider.value.provider.provider.chainId
+          };
           accounts = [auth.provider.value.selectedAddress];
         } else {
           [network, accounts] = await Promise.all([
@@ -139,6 +147,38 @@ export function useWeb3() {
       // NOTE: metamask doesn't return connectorName
       state.type = 'injected';
     }
+  }
+
+  function attachProviderEvents(provider) {
+    const providerName: Connector = provider?.connectorName || 'injected';
+
+    if (loadedProviders.value.has(providerName)) return;
+    loadedProviders.value.add(providerName);
+
+    if (!provider.on) return;
+
+    provider.on('accountsChanged', async accounts => {
+      if (!accounts.length) return;
+
+      state.account = formatAddress(accounts[0]);
+      await login();
+    });
+
+    if (!STARKNET_CONNECTORS.includes(providerName)) {
+      provider.on('chainChanged', async chainId => {
+        handleChainChanged(parseInt(formatUnits(chainId, 0)));
+      });
+    }
+
+    // auth.provider.on('disconnect', async () => {});
+  }
+
+  function removeProviderEvents(provider) {
+    loadedProviders.value.delete(provider?.connectorName || 'injected');
+
+    try {
+      provider.removeAllListeners();
+    } catch (e: any) {}
   }
 
   return {

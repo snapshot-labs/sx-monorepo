@@ -339,9 +339,7 @@ export default defineComponent({
 
 <template>
   <div v-if="proposal">
-    <nav
-      class="border-b bg-skin-bg fixed top-0 z-50 right-0 left-0 lg:left-[72px]"
-    >
+    <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
           <router-link

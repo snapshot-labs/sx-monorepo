@@ -180,14 +180,12 @@ watchEffect(() =>
   </div>
   <div v-else>
     <div
-      class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]"
+      class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
     >
-      <div class="w-full h-full overflow-hidden">
+      <div class="size-full overflow-hidden">
         <UserCover :user="user" class="!rounded-none w-full min-h-full" />
       </div>
-      <div
-        class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden"
-      />
+      <div class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <UiTooltip title="View profile">
           <router-link
@@ -208,7 +206,7 @@ watchEffect(() =>
           :id="user.id"
           :size="90"
           :cb="cb"
-          class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
+          class="relative mb-2 border-4 border-skin-bg !bg-skin-border !rounded-full -left-1"
         />
         <h1 v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 text-skin-text">
@@ -233,7 +231,7 @@ watchEffect(() =>
               target="_blank"
               class="text-[#606060] hover:text-skin-link"
             >
-              <component :is="social.icon" class="w-[26px] h-[26px]" />
+              <component :is="social.icon" class="size-[26px]" />
             </a>
           </template>
         </div>
