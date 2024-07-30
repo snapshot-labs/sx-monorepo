@@ -113,7 +113,7 @@ async function handleEditClick() {
 
   const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
 
-  const draftId = createDraft(props.proposal.network, spaceId, {
+  const draftId = await createDraft(spaceId, {
     proposalId: props.proposal.proposal_id,
     title: props.proposal.title,
     body: props.proposal.body,

@@ -8,6 +8,7 @@ import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
 import {
   NetworkApi,
+  NetworkConstants,
   PaginationOpts,
   ProposalsFilter,
   SpacesFilter
@@ -161,7 +162,11 @@ function processExecutions(
   ];
 }
 
-function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
+function formatSpace(
+  space: ApiSpace,
+  networkId: NetworkID,
+  constants: NetworkConstants
+): Space {
   return {
     ...space,
     network: networkId,
@@ -176,6 +181,7 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     voting_power_symbol: space.metadata.voting_power_symbol,
+    voting_types: constants.EDITOR_VOTING_TYPES,
     treasuries: space.metadata.treasuries.map(treasury => {
       const { name, network, address } = JSON.parse(treasury);
 
@@ -264,6 +270,7 @@ function formatProposal(
 export function createApi(
   uri: string,
   networkId: NetworkID,
+  constants: NetworkConstants,
   opts: ApiOptions = {}
 ): NetworkApi {
   const httpLink = createHttpLink({ uri });
@@ -524,7 +531,7 @@ export function createApi(
         });
       }
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
@@ -545,7 +552,7 @@ export function createApi(
         highlightResult?.data.sxspace
       );
 
-      return formatSpace(data.space, networkId);
+      return formatSpace(data.space, networkId, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
       const [{ data }, highlightResult] = await Promise.all([
