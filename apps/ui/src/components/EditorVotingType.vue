@@ -19,8 +19,6 @@ const hasMultipleVotingType = computed<boolean>(
 );
 
 function handleVotingTypeClick() {
-  if (!hasMultipleVotingType.value) return;
-
   modalOpen.value = true;
 }
 
@@ -48,6 +46,7 @@ function handleVoteTypeSelected(type: VoteType) {
       :class="{
         '!border-skin-border cursor-not-allowed': !hasMultipleVotingType
       }"
+      :disabled="!hasMultipleVotingType"
       @click="handleVotingTypeClick"
     >
       <h4 class="text-skin-link mr-3" v-text="activeVotingType.label" />
