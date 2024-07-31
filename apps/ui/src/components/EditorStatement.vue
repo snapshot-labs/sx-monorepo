@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Statement } from '@/types';
 
@@ -15,7 +14,10 @@ const actions = useActions();
 
 const sending = ref(false);
 const previewEnabled = ref(false);
-const form = reactive(clone(model.value));
+const form = reactive({
+  statement: model.value.statement,
+  status: model.value.status
+});
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
 
@@ -28,19 +30,21 @@ const STATUS_DEFINITION = {
   title: 'Status'
 };
 
+const STATEMENT_DEFINITION = {
+  type: 'string',
+  format: 'long',
+  title: 'Statement',
+  maxLength: 10000
+};
+
 const formValidator = getValidator({
   $async: true,
   type: 'object',
   title: 'Statement',
   additionalProperties: false,
-  required: [],
+  required: ['status', 'statement'],
   properties: {
-    statement: {
-      type: 'string',
-      format: 'long',
-      title: 'Statement',
-      maxLength: 10000
-    },
+    statement: STATEMENT_DEFINITION,
     status: STATUS_DEFINITION
   }
 });
@@ -49,21 +53,18 @@ async function handleSubmit() {
   sending.value = true;
 
   try {
-    await actions.updateStatement(form);
-    model.value = form;
+    await actions.updateStatement({ ...model.value, ...form });
+    model.value = { ...model.value, ...form };
     emit('close');
   } finally {
     sending.value = false;
   }
 }
 
-watchEffect(() => {
+watchEffect(async () => {
   formValidated.value = false;
 
-  formErrors.value = formValidator.validate({
-    statement: form.statement,
-    status: form.status
-  });
+  formErrors.value = await formValidator.validateAsync(form);
   formValidated.value = true;
 });
 </script>
@@ -97,7 +98,12 @@ watchEffect(() => {
         class="px-3 py-2 mb-3 border rounded-lg min-h-[200px]"
         :body="form.statement"
       />
-      <UiComposer v-else v-model="form.statement" />
+      <UiComposer
+        v-else
+        v-model="form.statement"
+        :definition="STATEMENT_DEFINITION"
+        :error="formErrors.statement"
+      />
     </div>
     <div class="flex items-center justify-between space-x-2.5">
       <UiButton class="w-full" @click="$emit('close')">Cancel</UiButton>

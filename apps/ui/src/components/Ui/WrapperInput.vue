@@ -37,15 +37,3 @@ const showError = computed(() => props.error && props.dirty);
     <legend v-if="definition.description" v-text="definition.description" />
   </div>
 </template>
-
-<style lang="scss">
-.s-base {
-  .s-label:has(~ input:focus),
-  .s-label:has(~ textarea:focus),
-  &.s-error {
-    .s-label-char-count {
-      display: block;
-    }
-  }
-}
-</style>

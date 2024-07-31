@@ -29,6 +29,13 @@ const DISCUSSION_DEFINITION = {
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
+const BODY_DEFINITION = {
+  type: 'string',
+  format: 'long',
+  title: 'Body',
+  maxLength: 9600
+};
+
 const CHOICES_DEFINITION = {
   type: 'array',
   title: 'Choices',
@@ -161,12 +168,14 @@ const formErrors = computed(() => {
       required: ['title', 'choices'],
       properties: {
         title: TITLE_DEFINITION,
+        body: BODY_DEFINITION,
         discussion: DISCUSSION_DEFINITION,
         choices: CHOICES_DEFINITION
       }
     },
     {
       title: proposal.value.title,
+      body: proposal.value.body,
       discussion: proposal.value.discussion,
       choices: proposal.value.choices
     },
@@ -410,10 +419,15 @@ export default defineComponent({
         </div>
         <UiMarkdown
           v-if="previewEnabled"
-          class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
+          class="px-3 py-2 border rounded-lg mb-[14px] min-h-[200px]"
           :body="proposal.body"
         />
-        <UiComposer v-else v-model="proposal.body" class="" />
+        <UiComposer
+          v-else
+          v-model="proposal.body"
+          :definition="BODY_DEFINITION"
+          :error="formErrors.body"
+        />
         <div class="s-base mb-5">
           <UiInputString
             :key="proposalKey || ''"

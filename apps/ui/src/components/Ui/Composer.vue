@@ -1,5 +1,12 @@
 <script setup lang="ts">
+import { _n } from '@/helpers/utils';
+
 const model = defineModel<string>({ required: true });
+
+const props = defineProps<{
+  error?: string;
+  definition: any;
+}>();
 
 const editorContainerRef = ref<HTMLDivElement | null>(null);
 const editorFileInputRef = ref<HTMLInputElement | null>(null);
@@ -10,17 +17,51 @@ const editor = useMarkdownEditor(
   editorContainerRef,
   value => (model.value = value)
 );
+
+const dirty = ref(false);
+
+const inputValue = computed({
+  get() {
+    if (!model.value && !dirty.value && props.definition.default) {
+      return props.definition.default;
+    }
+
+    return model.value;
+  },
+  set(newValue: string) {
+    dirty.value = true;
+    model.value = newValue;
+  }
+});
+
+const inputValueLength = computed(() => inputValue.value.length);
+
+const showError = computed<boolean>(
+  () =>
+    !!props.error &&
+    (dirty.value || props.definition.default !== inputValue.value)
+);
+
+watch(model, () => {
+  dirty.value = true;
+});
 </script>
 
 <template>
   <div
     ref="editorContainerRef"
-    class="rounded-lg mb-3 border"
+    class="s-base"
     :class="{
-      'ring-2': editor.hovered.value
+      's-error': showError
     }"
   >
-    <div class="flex justify-end gap-1 py-2 px-3">
+    <div class="s-label s-toolbar">
+      <label class="text-sm hidden s-label-char-count whitespace-nowrap">
+        <template v-if="inputValueLength >= 0 && definition.maxLength">
+          {{ _n(inputValueLength) }} / {{ _n(definition.maxLength) }}
+        </template>
+      </label>
+      <div class="grow"></div>
       <UiTooltip title="Add heading text">
         <button
           type="button"
@@ -78,14 +119,29 @@ const editor = useMarkdownEditor(
         </label>
       </UiTooltip>
     </div>
-    <div class="s-base">
-      <textarea
-        ref="editorRef"
-        :value="model"
-        maxlength="9600"
-        class="s-input h-[200px] !rounded-t-none !mb-0 !pt-[15px]"
-        @input="event => (model = (event.target as HTMLInputElement).value)"
-      />
-    </div>
+    <textarea ref="editorRef" v-model.trim="model" class="s-input h-[200px]" />
+    <div v-if="showError" class="s-input-error-message" v-text="error" />
   </div>
 </template>
+
+<style scoped lang="scss">
+$toolBarHeight: 43px;
+
+.s-base {
+  .s-input {
+    @apply border-t-[#{$toolBarHeight}] pt-2 min-h-[85px];
+  }
+
+  .s-toolbar {
+    @apply py-2 px-3 items-center space-x-1 flex bg-skin-bg h-[#{$toolBarHeight}] rounded-t-lg top-[1px] right-[1px] left-[1px] m-0;
+
+    &.s-label::before {
+      @apply top-[#{$toolBarHeight}];
+    }
+  }
+
+  &.s-error .s-toolbar :not(.s-label-char-count) {
+    @apply text-skin-text;
+  }
+}
+</style>
