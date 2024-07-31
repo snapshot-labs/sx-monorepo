@@ -31,7 +31,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'eth',
     rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl: 'https://api-1.snapshotx.xyz',
+    apiUrl: 'https://api.snapshot.box',
     explorerUrl: 'https://starkscan.co'
   },
   'sn-sep': {
@@ -43,7 +43,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     apiUrl:
       import.meta.env.VITE_STARKNET_SEPOLIA_API ??
-      'https://testnet-api-1.snapshotx.xyz',
+      'https://testnet-api.snapshot.box',
     explorerUrl: 'https://sepolia.starkscan.co'
   }
 };

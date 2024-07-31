@@ -28,7 +28,7 @@ async function getConnector() {
     metadata: {
       name: 'Snapshot',
       description: 'Where decisions get made',
-      url: 'https://snapshotx.org/',
+      url: 'https://snapshot.box',
       icons: []
     }
   });
