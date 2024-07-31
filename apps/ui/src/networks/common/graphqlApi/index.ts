@@ -188,7 +188,8 @@ function formatSpace(
       return {
         name,
         network,
-        address
+        address,
+        chainId: CHAIN_IDS[network]
       };
     }),
     delegations: space.metadata.delegations.map(delegation => {

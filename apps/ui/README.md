@@ -1,6 +1,6 @@
-# Snapshot X UI
+# Snapshot UI
 
-An open source interface for Snapshot X protocol.
+An open source interface for Snapshot and Snapshot X protocols.
 
 **[Website](https://snapshot.box)**
 
