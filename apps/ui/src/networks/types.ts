@@ -14,7 +14,8 @@ import {
   StrategyParsedMetadata,
   User,
   UserActivity,
-  Vote
+  Vote,
+  VoteType
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -288,6 +289,7 @@ export type NetworkConstants = {
   EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
+  EDITOR_VOTING_TYPES: VoteType[];
   STORAGE_PROOF_STRATEGIES_TYPES?: string[];
 };
 
@@ -299,7 +301,6 @@ export type NetworkHelpers = {
   ): 'evm' | 'evm-tx' | 'starknet' | null;
   isStrategySupported(strategy: string): boolean;
   isExecutorSupported(executor: string): boolean;
-  isVotingTypeSupported(type: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;

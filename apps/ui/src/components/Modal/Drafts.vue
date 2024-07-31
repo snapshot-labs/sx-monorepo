@@ -41,7 +41,7 @@ function handleRemoveDraft(id: string) {
         <div
           v-for="proposal in spaceDrafts"
           :key="proposal.id"
-          class="py-3 px-4 border-b last:border-b-0 flex justify-between items-center"
+          class="py-3 px-4 border-b last:border-b-0 flex justify-between items-center space-x-2"
         >
           <router-link
             :to="{
