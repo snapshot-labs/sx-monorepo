@@ -30,7 +30,6 @@ type DelegatesQueryFilter = {
   orderDirection: string;
   skip: number;
   first: number;
-  user?: string;
 };
 
 type SortOrder =
@@ -50,18 +49,13 @@ const DELEGATES_QUERY = gql`
     $orderBy: Delegate_orderBy!
     $orderDirection: OrderDirection!
     $governance: String!
-    $user: String
   ) {
     delegates(
       first: $first
       skip: $skip
       orderBy: $orderBy
       orderDirection: $orderDirection
-      where: {
-        tokenHoldersRepresentedAmount_gte: 0
-        governance: $governance
-        user: $user
-      }
+      where: { tokenHoldersRepresentedAmount_gte: 0, governance: $governance }
     ) {
       id
       user
