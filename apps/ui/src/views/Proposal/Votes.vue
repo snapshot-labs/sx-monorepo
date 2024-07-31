@@ -113,7 +113,7 @@ watch([sortBy, choiceFilter], () => {
 
 <template>
   <div
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-1 font-medium"
+    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-3 font-medium"
   >
     <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
     <div class="grow w-[40%]">
@@ -185,7 +185,7 @@ watch([sortBy, choiceFilter], () => {
       <div
         v-for="(vote, i) in votes"
         :key="i"
-        class="border-b relative flex space-x-1"
+        class="border-b relative flex space-x-3"
       >
         <div
           class="inset-y-0 left-0 -z-10 pointer-events-none absolute"
