@@ -20,12 +20,12 @@ onMounted(() => load());
             <IH-view-grid class="mr-1" />
             Apps
           </router-link>
-          <IH-chevron-right class="w-[14px] h-[14px]" />
+          <IH-chevron-right class="size-[14px]" />
           <div v-text="app.name" />
         </div>
         <div class="md:flex items-center mb-5">
           <div class="flex items-center flex-1 mb-3 md:mb-0">
-            <img class="w-[80px] h-[80px] rounded-lg mr-3" :src="app.avatar" />
+            <img class="size-[80px] rounded-lg mr-3" :src="app.avatar" />
             <div class="flex-1 leading-5 mb-1">
               <h1 v-text="app.name" />
               <div v-text="app.category" />

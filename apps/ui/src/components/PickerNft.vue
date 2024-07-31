@@ -19,7 +19,7 @@ const filteredNfts = computed(() =>
 </script>
 
 <template>
-  <div v-if="loading" class="px-4 py-3 block flex justify-center">
+  <div v-if="loading" class="px-4 py-3 flex justify-center">
     <UiLoading />
   </div>
   <template v-else>
@@ -29,16 +29,16 @@ const filteredNfts = computed(() =>
       v-text="'No results'"
     />
     <div v-else class="grid gap-3 grid-cols-3 p-3">
-      <a
+      <button
         v-for="(nft, i) in filteredNfts"
         :key="i"
-        role="button"
+        type="button"
         class="block hover:opacity-80 transition-opacity"
         @click="emit('pick', nft.id)"
       >
         <UiNftImage :item="nft" class="w-full" />
         <div class="mt-2 text-[17px] truncate">{{ nft.displayTitle }}</div>
-      </a>
+      </button>
     </div>
   </template>
 </template>

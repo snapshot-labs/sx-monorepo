@@ -49,17 +49,14 @@ const availableConnectors = computed(() => {
       <h3 v-text="'Connect wallet'" />
     </template>
     <div>
-      <div class="m-4 space-y-2">
-        <a
+      <div class="m-4 space-y-2 flex flex-col">
+        <button
           v-for="connector in availableConnectors"
           :key="connector.id"
-          target="_blank"
-          class="block"
+          type="button"
           @click="emit('pick', connector.id)"
         >
-          <UiButton
-            class="button-outline w-full flex justify-center items-center"
-          >
+          <UiButton class="w-full flex justify-center items-center">
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
@@ -69,7 +66,7 @@ const availableConnectors = computed(() => {
             />
             {{ connector.name }}
           </UiButton>
-        </a>
+        </button>
       </div>
     </div>
   </UiModal>

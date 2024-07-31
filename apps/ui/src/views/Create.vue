@@ -187,6 +187,7 @@ watchEffect(() => setTitle('Create space'));
           v-for="page in PAGES"
           ref="pagesRefs"
           :key="page.id"
+          type="button"
           :disabled="!accessiblePages[page.id]"
           class="px-3 py-1 block lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap"
           :class="{

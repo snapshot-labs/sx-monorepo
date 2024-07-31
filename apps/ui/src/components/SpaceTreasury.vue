@@ -132,8 +132,8 @@ function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
 }
 
-function addTx(tx: Transaction) {
-  const draftId = createDraft(props.space.network, spaceKey.value, {
+async function addTx(tx: Transaction) {
+  const draftId = await createDraft(spaceKey.value, {
     execution: [tx],
     executionStrategy: executionStrategy.value
   });
@@ -179,7 +179,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             width="480"
             height="332"
             viewBox="0 0 480 332"
-            class="inline-block w-[26px] h-[26px]"
+            class="inline-block size-[26px]"
           >
             <path
               fill="rgba(var(--link))"
@@ -318,7 +318,6 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                   ETHEREUM_NETWORKS.includes(treasury.networkId)
                 "
                 title="Stake with Lido"
-                :touch="false"
               >
                 <UiButton
                   class="!px-0 w-[46px]"

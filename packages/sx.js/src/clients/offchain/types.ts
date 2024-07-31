@@ -1,18 +1,6 @@
-import {
-  TypedDataDomain,
-  TypedDataField
-} from '@ethersproject/abstract-signer';
-import { Privacy } from '../../types';
+import { Privacy, SignatureData } from '../../types';
 
 export type Choice = number | number[] | string | Record<string, number>;
-
-export type SignatureData = {
-  address: string;
-  signature: string;
-  domain: TypedDataDomain;
-  types: Record<string, TypedDataField[]>;
-  message: Record<string, any>;
-};
 
 export type Envelope<
   T extends

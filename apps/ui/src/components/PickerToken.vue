@@ -116,7 +116,7 @@ watch(
 <template>
   <div
     v-if="loading || customTokenLoading"
-    class="px-4 py-3 block flex justify-center"
+    class="px-4 py-3 flex justify-center"
   >
     <UiLoading />
   </div>
@@ -129,10 +129,10 @@ watch(
       class="text-center py-3"
       v-text="'No results'"
     />
-    <div
+    <button
       v-for="(asset, i) in filteredAssets"
       :key="i"
-      role="button"
+      type="button"
       class="px-3 py-2.5 border-b last:border-0 flex justify-between"
       @click="handlePick(asset)"
     >
@@ -159,6 +159,6 @@ watch(
         />
         <div class="text-[17px]" v-text="`$${_n(asset.price)}`" />
       </div>
-    </div>
+    </button>
   </template>
 </template>

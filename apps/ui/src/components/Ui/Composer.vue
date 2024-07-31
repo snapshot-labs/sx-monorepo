@@ -64,7 +64,8 @@ watch(model, () => {
       <div class="grow"></div>
       <UiTooltip title="Add heading text">
         <button
-          class="p-1 w-[26px] h-[26px] leading-[18px] hover:text-skin-link rounded focus-visible:ring-1"
+          type="button"
+          class="p-1 size-[26px] leading-[18px] hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.heading"
         >
           H
@@ -72,7 +73,8 @@ watch(model, () => {
       </UiTooltip>
       <UiTooltip title="Add bold text">
         <button
-          class="p-1 w-[26px] h-[26px] leading-[18px] font-bold hover:text-skin-link rounded focus-visible:ring-1"
+          type="button"
+          class="p-1 size-[26px] leading-[18px] font-bold hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.bold"
         >
           B
@@ -80,23 +82,25 @@ watch(model, () => {
       </UiTooltip>
       <UiTooltip title="Add italic text">
         <button
-          class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
+          type="button"
+          class="p-1 size-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.italic"
         >
           <span class="mono !text-[17px] !font-normal">I</span>
         </button>
       </UiTooltip>
-      <UiTooltip title="Add a link" class="w-[26px] h-[26px]">
+      <UiTooltip title="Add a link" class="size-[26px]">
         <button
-          class="p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
+          type="button"
+          class="p-1 size-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.link"
         >
-          <IS-link class="w-[18px] h-[18px]" />
+          <IS-link class="size-[18px]" />
         </button>
       </UiTooltip>
-      <UiTooltip title="Add an image" class="w-[26px] h-[26px]">
+      <UiTooltip title="Add an image" class="size-[26px]">
         <label
-          class="flex justify-center p-1 w-[26px] h-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
+          class="flex justify-center p-1 size-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
         >
           <input
             ref="editorFileInputRef"
@@ -111,7 +115,7 @@ watch(model, () => {
             :height="14"
             class="inline-block"
           />
-          <IS-photo v-else class="w-[18px] h-[18px]" />
+          <IS-photo v-else class="size-[18px]" />
         </label>
       </UiTooltip>
     </div>

@@ -58,14 +58,12 @@ watch(userId, loadStatement, { immediate: true });
           >
             <template v-if="statement.status === 'ACTIVE'">
               <IS-status-online
-                class="text-skin-success inline-block w-[17px] h-[17px] mb-[1px]"
+                class="text-skin-success inline-block size-[17px] mb-[1px]"
               />
               Active
             </template>
             <template v-else>
-              <div
-                class="h-[8px] w-[8px] mx-[4px] bg-gray-500 rounded-full inline-block"
-              />
+              <div class="size-[8px] mx-1 bg-gray-500 rounded-full inline-block" />
               Inactive
             </template>
           </div>
