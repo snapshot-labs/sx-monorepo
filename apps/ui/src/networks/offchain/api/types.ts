@@ -30,6 +30,7 @@ export type ApiSpace = {
     delay: number | null;
     period: number | null;
     quorum: number | null;
+    type: VoteType | null;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];
   validation: {
