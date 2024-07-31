@@ -27,13 +27,13 @@ const currentNetwork = computed(() => {
   <div class="relative">
     <img
       v-if="currentNetwork"
-      :src="(currentNetwork && getUrl(currentNetwork.avatar)) ?? undefined"
-      :title="(currentNetwork && currentNetwork.name) ?? undefined"
+      :src="getUrl(currentNetwork.avatar) ?? undefined"
+      :title="currentNetwork.name ?? undefined"
       :style="{
         width: `${size}px`,
         height: `${size}px`
       }"
-      :alt="(currentNetwork && currentNetwork.name) ?? ''"
+      :alt="currentNetwork.name ?? ''"
       class="absolute rounded-full -bottom-1 -right-1 border-2 bg-skin-border border-skin-bg"
     />
     <slot />
