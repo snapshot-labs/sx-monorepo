@@ -6,7 +6,6 @@ export const CHAIN_IDS = {
   matic: 137,
   arb1: 42161,
   oeth: 10,
-  gno: 100,
   eth: 1,
   sep: 11155111,
   'linea-testnet': 59140
