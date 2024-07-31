@@ -134,7 +134,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           v-if="loaded && (delegates.length === 0 || failed)"
           class="px-4 py-3 flex items-center space-x-2"
         >
-          <IH-exclamation-circle class="inline-block" />
+          <IH-exclamation-circle class="inline-block mr-1" />
           <template v-if="delegates.length === 0"
             >There are no delegates.</template
           >

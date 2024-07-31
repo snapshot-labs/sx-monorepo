@@ -1,4 +1,4 @@
-const DEFAULT_TITLE = 'Snapshot X';
+const DEFAULT_TITLE = 'Snapshot';
 
 export function useTitle(title?: string) {
   const setTitle = (newTitle: string) => {

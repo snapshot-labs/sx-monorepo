@@ -12,6 +12,7 @@ import { Space, StrategyParsedMetadata } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { updateStrategies } = useActions();
+const { setTitle } = useTitle();
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -261,6 +262,8 @@ watchEffect(async () => {
 
   loading.value = false;
 });
+
+watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>

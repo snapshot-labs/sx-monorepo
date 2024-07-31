@@ -26,8 +26,8 @@ async function getConnector() {
       projectId: import.meta.env.VITE_WC_PROJECT_ID
     }),
     metadata: {
-      name: 'Snapshot X',
-      description: 'Snapshot X',
+      name: 'Snapshot',
+      description: 'Where decisions get made',
       url: 'https://snapshotx.org/',
       icons: []
     }
