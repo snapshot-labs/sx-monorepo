@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { resolver } from '@/helpers/resolver';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
+import { ExecutionInfo } from '@/networks/types';
 import {
   Contact,
   RequiredProperty,
@@ -27,6 +29,13 @@ const DISCUSSION_DEFINITION = {
   format: 'uri',
   title: 'Discussion',
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
+};
+
+const BODY_DEFINITION = {
+  type: 'string',
+  format: 'long',
+  title: 'Body',
+  maxLength: 9600
 };
 
 const CHOICES_DEFINITION = {
@@ -105,13 +114,46 @@ const executionStrategy = computed({
     proposal.value.executionStrategy = value;
   }
 });
-const supportedExecutionStrategies = computed(() => {
+const supportedExecutionStrategies = computedAsync(async () => {
   const spaceValue = space.value;
   const networkValue = network.value;
   if (!spaceValue || !networkValue) return null;
 
+  let oSnapSupportPerTreasury: boolean[] | null = null;
+  if (networkId.value && offchainNetworks.includes(networkId.value)) {
+    oSnapSupportPerTreasury = await Promise.all(
+      spaceValue.treasuries.map(async treasury => {
+        if (
+          !treasury.network ||
+          !treasury.address ||
+          !CHAIN_IDS[treasury.network]
+        ) {
+          return false;
+        }
+
+        return getIsOsnapEnabled(
+          CHAIN_IDS[treasury.network].toString(),
+          treasury.address
+        );
+      })
+    );
+  }
+
   return spaceValue.treasuries
-    .map(treasury => {
+    .map((treasury, i) => {
+      if (networkId.value && offchainNetworks.includes(networkId.value)) {
+        if (!oSnapSupportPerTreasury || !oSnapSupportPerTreasury[i]) {
+          return null;
+        }
+
+        return {
+          address: treasury.address,
+          destinationAddress: null,
+          type: 'oSnap',
+          treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+        };
+      }
+
       const strategy = spaceValue.executors_strategies.find(strategy => {
         return (
           strategy.treasury &&
@@ -136,7 +178,7 @@ const supportedExecutionStrategies = computed(() => {
       strategy =>
         strategy && networkValue.helpers.isExecutorSupported(strategy.type)
     ) as StrategyWithTreasury[];
-});
+}, null);
 const selectedExecutionWithTreasury = computed(() => {
   if (!executionStrategy.value || !supportedExecutionStrategies.value)
     return null;
@@ -161,12 +203,14 @@ const formErrors = computed(() => {
       required: ['title', 'choices'],
       properties: {
         title: TITLE_DEFINITION,
+        body: BODY_DEFINITION,
         discussion: DISCUSSION_DEFINITION,
         choices: CHOICES_DEFINITION
       }
     },
     {
       title: proposal.value.title,
+      body: proposal.value.body,
       discussion: proposal.value.discussion,
       choices: proposal.value.choices
     },
@@ -189,6 +233,21 @@ async function handleProposeClick() {
   sending.value = true;
 
   try {
+    let executionInfo: ExecutionInfo | null = null;
+    if (
+      selectedExecutionWithTreasury.value &&
+      selectedExecutionWithTreasury.value.treasury.chainId
+    ) {
+      executionInfo = {
+        strategyAddress: selectedExecutionWithTreasury.value.address,
+        destinationAddress:
+          selectedExecutionWithTreasury.value.destinationAddress || '',
+        transactions: proposal.value.execution,
+        treasuryName: selectedExecutionWithTreasury.value.treasury.name,
+        chainId: selectedExecutionWithTreasury.value.treasury.chainId
+      };
+    }
+
     let result;
     if (proposal.value.proposalId) {
       result = await updateProposal(
@@ -199,11 +258,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        proposal.value.executionStrategy?.address ?? null,
-        proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address
-          ? proposal.value.execution
-          : []
+        executionInfo
       );
     } else {
       result = await propose(
@@ -213,11 +268,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        proposal.value.executionStrategy?.address ?? null,
-        proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address
-          ? proposal.value.execution
-          : []
+        executionInfo
       );
     }
     if (result) {
@@ -236,6 +287,9 @@ async function handleExecutionStrategySelected(
     executionStrategy.value = null;
   } else {
     executionStrategy.value = selectedExecutionStrategy;
+    if (executionStrategy.value.type === 'oSnap' && proposal.value) {
+      proposal.value.type = 'basic';
+    }
   }
 }
 
@@ -410,10 +464,15 @@ export default defineComponent({
         </div>
         <UiMarkdown
           v-if="previewEnabled"
-          class="px-3 py-2 border rounded-lg mb-5 min-h-[200px]"
+          class="px-3 py-2 border rounded-lg mb-[14px] min-h-[200px]"
           :body="proposal.body"
         />
-        <UiComposer v-else v-model="proposal.body" class="" />
+        <UiComposer
+          v-else
+          v-model="proposal.body"
+          :definition="BODY_DEFINITION"
+          :error="formErrors.body"
+        />
         <div class="s-base mb-5">
           <UiInputString
             :key="proposalKey || ''"
@@ -443,8 +502,11 @@ export default defineComponent({
               <span class="flex-1">
                 {{ strategy.treasury.name }}
                 <span class="hidden sm:inline-block">
-                  ({{ network.constants.EXECUTORS[strategy.type] }} execution
-                  strategy)
+                  ({{
+                    strategy.type === 'oSnap'
+                      ? 'oSnap'
+                      : `${network.constants.EXECUTORS[strategy.type]} execution strategy`
+                  }})
                 </span>
               </span>
               <IH-check
@@ -469,7 +531,14 @@ export default defineComponent({
       v-if="space"
       class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
     >
-      <EditorVotingType v-model="proposal" :voting-types="space.voting_types" />
+      <EditorVotingType
+        v-model="proposal"
+        :voting-types="
+          selectedExecutionWithTreasury?.type === 'oSnap'
+            ? ['basic']
+            : space.voting_types
+        "
+      />
       <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
     </div>
     <teleport to="#modal">

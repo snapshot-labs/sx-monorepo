@@ -1,9 +1,8 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { registerTransaction } from '@/helpers/mana';
-import { convertToMetaTransactions } from '@/helpers/transactions';
 import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { Connector, StrategyConfig } from '@/networks/types';
+import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   Choice,
   NetworkID,
@@ -275,9 +274,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
-    executionStrategy: string | null,
-    executionDestinationAddress: string | null,
-    execution: Transaction[]
+    executionInfo: ExecutionInfo | null
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -286,18 +283,13 @@ export function useActions() {
 
     const network = getNetwork(space.network);
 
-    const transactions = execution.map((tx: Transaction) => ({
-      ...tx,
-      operation: 0
-    }));
-
     const pinned = await network.helpers.pin({
       title,
       body,
       discussion,
       type,
       choices: choices.filter(c => !!c),
-      execution: transactions
+      execution: executionInfo?.transactions ?? []
     });
     if (!pinned || !pinned.cid) return false;
     console.log('IPFS', pinned);
@@ -310,9 +302,17 @@ export function useActions() {
         web3.value.account,
         space,
         pinned.cid,
-        executionStrategy,
-        executionDestinationAddress,
-        convertToMetaTransactions(transactions)
+        executionInfo === null
+          ? executionInfo
+          : {
+              ...executionInfo,
+              transactions: executionInfo.transactions.map(
+                (tx: Transaction) => ({
+                  ...tx,
+                  operation: 0
+                })
+              )
+            }
       )
     );
 
@@ -332,9 +332,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
-    executionStrategy: string | null,
-    executionDestinationAddress: string | null,
-    execution: Transaction[]
+    executionInfo: ExecutionInfo | null
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -343,18 +341,13 @@ export function useActions() {
 
     const network = getNetwork(space.network);
 
-    const transactions = execution.map((tx: Transaction) => ({
-      ...tx,
-      operation: 0
-    }));
-
     const pinned = await network.helpers.pin({
       title,
       body,
       discussion,
       type,
       choices: choices.filter(c => !!c),
-      execution: transactions
+      execution: executionInfo?.transactions ?? []
     });
     if (!pinned || !pinned.cid) return false;
     console.log('IPFS', pinned);
@@ -368,9 +361,17 @@ export function useActions() {
         space,
         proposalId,
         pinned.cid,
-        executionStrategy,
-        executionDestinationAddress,
-        convertToMetaTransactions(transactions)
+        executionInfo === null
+          ? executionInfo
+          : {
+              ...executionInfo,
+              transactions: executionInfo.transactions.map(
+                (tx: Transaction) => ({
+                  ...tx,
+                  operation: 0
+                })
+              )
+            }
       )
     );
 

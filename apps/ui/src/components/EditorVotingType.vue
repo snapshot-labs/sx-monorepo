@@ -25,16 +25,25 @@ function handleVotingTypeClick() {
 function handleVoteTypeSelected(type: VoteType) {
   if (!proposal.value) return;
 
-  if (proposal.value.type === 'basic') {
+  proposal.value.type = type;
+}
+
+function updateChoices(currentType: VoteType, previousType: VoteType) {
+  if (previousType === 'basic') {
     proposal.value.choices = Array(2).fill('');
   }
 
-  proposal.value.type = type;
-
-  if (type === 'basic') {
+  if (currentType) {
     proposal.value.choices = [...BASIC_CHOICES];
   }
 }
+
+watch(
+  () => proposal.value.type,
+  (current, previous) => {
+    updateChoices(current, previous);
+  }
+);
 </script>
 
 <template>
