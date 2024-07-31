@@ -123,8 +123,10 @@ const executionStrategy = computed(() => {
 
 const hasStakeableAssets = computed(() => {
   return (
-    !isReadOnly &&
-    assets.value.some(asset => asset.contractAddress === ETH_CONTRACT)
+    treasury.value &&
+    !isReadOnly.value &&
+    assets.value.some(asset => asset.contractAddress === ETH_CONTRACT) &&
+    ETHEREUM_NETWORKS.includes(treasury.value.networkId)
   );
 });
 
@@ -313,9 +315,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               </div>
               <UiTooltip
                 v-if="
-                  asset.contractAddress === ETH_CONTRACT &&
-                  !isReadOnly &&
-                  ETHEREUM_NETWORKS.includes(treasury.networkId)
+                  asset.contractAddress === ETH_CONTRACT && hasStakeableAssets
                 "
                 title="Stake with Lido"
               >
