@@ -93,12 +93,12 @@ const otherResultsSummary = computed(() => {
     <div>
       <a
         href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
+        class="flex items-center text-skin-text"
         target="_blank"
       >
-        <IC-shutter class="w-[80px] inline-block" />
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
+        <IC-Shutter class="w-[80px]" />
+        <IH-arrow-sm-right class="-rotate-45" />
       </a>
-
       <div v-if="proposal.quorum" class="mt-3.5">
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
@@ -183,16 +183,15 @@ const otherResultsSummary = computed(() => {
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
       </div>
-      <div v-if="proposal.privacy === 'shutter'" class="flex flex-col mt-2.5">
-        <div class="text-xs">Powered by</div>
-        <div class="flex items-center">
-          <a
-            href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
-            target="_blank"
-          >
-            <IC-Shutter class="w-[80px] text-skin-text" />
-          </a>
-        </div>
+      <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
+        <a
+          href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
+          class="flex items-center text-skin-text"
+          target="_blank"
+        >
+          <IC-Shutter class="w-[80px]" />
+          <IH-arrow-sm-right class="-rotate-45" />
+        </a>
       </div>
     </div>
     <div
