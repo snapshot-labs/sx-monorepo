@@ -1,5 +1,99 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`parseInternalTransaction > should parse contract call transaction 1`] = `
+{
+  "abi": "[{"type":"function","name":"deposit","constant":false,"stateMutability":"payable","payable":true,"inputs":[],"outputs":[]}]",
+  "data": "0xd0e30db0",
+  "formatted": [
+    "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+    0,
+    "20000000000000000000",
+    "0xd0e30db0",
+  ],
+  "isValid": true,
+  "method": {
+    "constant": false,
+    "inputs": [],
+    "name": "deposit",
+    "outputs": [],
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "function",
+  },
+  "parameters": [],
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "type": "contractInteraction",
+  "value": "20000000000000000000",
+}
+`;
+
+exports[`parseInternalTransaction > should parse raw transaction 1`] = `
+{
+  "data": "0x",
+  "formatted": [
+    "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+    0,
+    "1",
+    "0x",
+  ],
+  "isValid": true,
+  "to": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+  "type": "raw",
+  "value": "1",
+}
+`;
+
+exports[`parseInternalTransaction > should parse transfer NFT transaction 1`] = `
+{
+  "collectable": {
+    "address": "0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5",
+    "id": "810",
+    "name": "Weeedidit Palls #101",
+    "tokenName": "Weee Did It Palz",
+  },
+  "data": "0x42842e0e000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000dead00000000000000000000000000000000000000000000000000000000000000a2",
+  "formatted": [
+    "0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5",
+    0,
+    "0",
+    "0x42842e0e000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000dead00000000000000000000000000000000000000000000000000000000000000a2",
+  ],
+  "isValid": true,
+  "recipient": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+  "to": "0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5",
+  "type": "transferNFT",
+  "value": "0",
+}
+`;
+
+exports[`parseInternalTransaction > should parse transfer token transaction 1`] = `
+{
+  "amount": "1",
+  "data": "0x",
+  "formatted": [
+    "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+    0,
+    "1",
+    "0x",
+  ],
+  "isValid": true,
+  "recipient": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+  "to": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+  "token": {
+    "address": "main",
+    "balance": "0",
+    "chainId": "",
+    "decimals": 18,
+    "logoUri": "",
+    "name": "Ether",
+    "symbol": "ETH",
+    "verified": false,
+  },
+  "type": "transferFunds",
+  "value": "1",
+}
+`;
+
 exports[`parseOSnapTransaction > should parse oSnap contract interaction transaction 1`] = `
 {
   "_form": {
