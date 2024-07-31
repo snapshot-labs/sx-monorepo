@@ -15,8 +15,8 @@ const props = withDefaults(
 
 const currentNetwork = computed(() => {
   try {
-    const [networkId] = props.id?.split(':') ?? [];
-    return getNetwork(networkId as NetworkID);
+    const [network] = props.id?.split(':') ?? [];
+    return getNetwork(network as NetworkID);
   } catch (e) {
     return null;
   }
