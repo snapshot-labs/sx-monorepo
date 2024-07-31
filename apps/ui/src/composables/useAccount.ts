@@ -20,10 +20,7 @@ watch(
 export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
     const account = web3.value.account;
-
-    if (!account) {
-      return;
-    }
+    if (!account) return;
 
     // On starknet account, we don't load votes for offchain networks (unsupported)
     if (
@@ -35,7 +32,7 @@ export function useAccount() {
     const network = getNetwork(networkId);
     const userVotes = await network.api.loadUserVotes(spaceIds, account);
 
-    votes.value = userVotes;
+    votes.value = { ...votes.value, ...userVotes };
   }
 
   function addPendingVote(proposalId: string) {
