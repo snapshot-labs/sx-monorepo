@@ -18,8 +18,14 @@ defineEmits<{
       <h3 v-text="'Reason'" />
     </template>
     <div
-      class="p-4 whitespace-pre-line text-skin-link"
+      class="vote-reason p-4 whitespace-pre-line text-skin-link"
       v-html="autoLinkText(vote?.reason || '')"
     />
   </UiModal>
 </template>
+
+<style class="scss" scoped>
+.vote-reason:deep() a {
+  text-decoration: underline;
+}
+</style>
