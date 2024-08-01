@@ -6,3 +6,11 @@ updates:
       interval: "daily"
     allow:
       - dependency-name: "@snapshot-labs/*"
+    groups:
+      snapshot:
+        applies-to: version-updates
+        patterns:
+        - "@snapshot-labs/*"
+        update-types:
+        - "minor"
+        - "patch"
