@@ -53,6 +53,7 @@ export type SpaceMetadataTreasury = {
   name: string | null;
   network: NetworkID | null;
   address: string | null;
+  chainId?: number;
 };
 
 export type SpaceMetadataDelegation = {
@@ -112,6 +113,7 @@ export type Space = {
   voting_power_symbol: string;
   controller: string;
   voting_delay: number;
+  voting_types: VoteType[];
   min_voting_period: number;
   max_voting_period: number;
   proposal_threshold: string;

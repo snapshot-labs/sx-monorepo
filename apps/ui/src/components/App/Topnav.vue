@@ -67,7 +67,7 @@ watch(
 
 <template>
   <nav
-    class="border-b fixed top-0 right-0 z-50 left-0 lg:left-[72px]"
+    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px]"
     :class="{
       'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
     }"
@@ -79,7 +79,7 @@ watch(
         'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasAppNav
       }"
     >
-      <div class="flex flex-grow items-center h-full">
+      <div class="flex grow items-center h-full">
         <button
           type="button"
           class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"

@@ -41,7 +41,7 @@ async function handleVoteClick(choice: Choice) {
               width="17"
               height="17"
               :state="proposal.state"
-              class="top-[6px]"
+              class="top-1.5"
             />
           </router-link>
 
@@ -70,12 +70,12 @@ async function handleVoteClick(choice: Choice) {
               class="md:flex md:min-w-0"
             >
               <h3
-                class="text-[21px] inline md:truncate md:text-ellipsis mr-2"
+                class="text-[21px] inline md:truncate mr-2"
                 v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
               />
               <IH-check
                 v-if="votes[`${proposal.network}:${proposal.id}`]"
-                class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-[2px]"
+                class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-0.5"
               />
             </router-link>
           </div>

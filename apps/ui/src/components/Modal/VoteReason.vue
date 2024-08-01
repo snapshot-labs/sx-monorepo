@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { autoLinkText } from '@/helpers/utils';
 import { Vote } from '@/types';
 
 defineProps<{
@@ -16,6 +17,15 @@ defineEmits<{
     <template #header>
       <h3 v-text="'Reason'" />
     </template>
-    <div class="p-4 whitespace-pre-line text-skin-link" v-text="vote?.reason" />
+    <div
+      class="vote-reason p-4 whitespace-pre-line text-skin-link"
+      v-html="autoLinkText(vote?.reason || '')"
+    />
   </UiModal>
 </template>
+
+<style class="scss" scoped>
+.vote-reason:deep() a {
+  text-decoration: underline;
+}
+</style>

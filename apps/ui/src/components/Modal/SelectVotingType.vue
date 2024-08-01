@@ -24,7 +24,7 @@ function handleSelect(type: VoteType) {
     <template #header>
       <h3>Select voting type</h3>
     </template>
-    <div class="p-4 flex flex-col gap-[12px]">
+    <div class="p-4 flex flex-col gap-2.5">
       <UiSelector
         v-for="(type, index) in votingTypes"
         :key="index"

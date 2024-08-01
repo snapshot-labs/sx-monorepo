@@ -113,7 +113,7 @@ async function handleEditClick() {
 
   const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
 
-  const draftId = createDraft(props.proposal.network, spaceId, {
+  const draftId = await createDraft(spaceId, {
     proposalId: props.proposal.proposal_id,
     title: props.proposal.title,
     body: props.proposal.body,
@@ -252,13 +252,13 @@ onBeforeUnmount(() => destroyAudio());
             :title="'AI summary'"
           >
             <UiButton
-              class="!p-0 border-0 !h-[auto]"
+              class="!p-0 border-0 !h-auto"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
               <IH-sparkles
-                class="inline-block w-[22px] h-[22px]"
+                class="inline-block size-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
             </UiButton>
@@ -272,36 +272,30 @@ onBeforeUnmount(() => destroyAudio());
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
           >
             <UiButton
-              class="!p-0 border-0 !h-[auto]"
+              class="!p-0 border-0 !h-auto"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
-              <UiLoading class="inline-block !w-[22px] !h-[22px]" />
               <IH-pause
                 v-if="audioState === 'playing'"
-                class="inline-block w-[22px] h-[22px] text-skin-link"
+                class="inline-block size-[22px] text-skin-link"
               />
-              <IH-play
-                v-else
-                class="inline-block text-skin-text w-[22px] h-[22px]"
-              />
+              <IH-play v-else class="inline-block text-skin-text size-[22px]" />
             </UiButton>
           </UiTooltip>
           <DropdownShare :message="shareMsg">
             <template #button>
-              <UiButton class="!p-0 border-0 !h-[auto]">
-                <IH-share
-                  class="text-skin-text inline-block w-[22px] h-[22px]"
-                />
+              <UiButton class="!p-0 border-0 !h-auto">
+                <IH-share class="text-skin-text inline-block size-[22px]" />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
-              <UiButton class="!p-0 border-0 !h-[auto]">
+              <UiButton class="!p-0 border-0 !h-auto">
                 <IH-dots-vertical
-                  class="text-skin-text inline-block w-[22px] h-[22px]"
+                  class="text-skin-text inline-block size-[22px]"
                 />
               </UiButton>
             </template>

@@ -123,29 +123,18 @@ onMounted(() => {
   <div class="markdown-body break-words" v-html="parsed" />
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/styles/highlightjs/github.scss';
 
 html.dark {
   @import '@/assets/styles/highlightjs/github-dark-dimmed.scss';
 }
 
-.markdown-body {
+.markdown-body:deep() {
   font-size: 22px;
   line-height: 1.3;
   word-wrap: break-word;
   color: var(--content);
-
-  &::before {
-    display: table;
-    content: '';
-  }
-
-  &::after {
-    display: table;
-    clear: both;
-    content: '';
-  }
 
   > *:first-child {
     margin-top: 0 !important;
@@ -326,5 +315,17 @@ html.dark {
       @apply p-3 m-0 bg-skin-border rounded-none border-none overflow-auto block;
     }
   }
+}
+
+// Those can't be nested because those don't work with :deep selector
+.markdown-body::before {
+  display: table;
+  content: '';
+}
+
+.markdown-body::after {
+  display: table;
+  clear: both;
+  content: '';
 }
 </style>

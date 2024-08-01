@@ -4,7 +4,7 @@ import {
   quorumLabel,
   quorumProgress
 } from '@/helpers/quorum';
-import { _n, _p } from '@/helpers/utils';
+import { _n, _p, _vp } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -45,7 +45,8 @@ const results = computed(() => {
 
       return {
         choice: i + 1,
-        progress
+        progress,
+        score
       };
     })
     .sort((a, b) => b.progress - a.progress);
@@ -92,12 +93,12 @@ const otherResultsSummary = computed(() => {
     <div>
       <a
         href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
+        class="flex items-center text-skin-text"
         target="_blank"
       >
-        <IC-shutter class="w-[80px] inline-block" />
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
+        <IC-Shutter class="w-[80px]" />
+        <IH-arrow-sm-right class="-rotate-45" />
       </a>
-
       <div v-if="proposal.quorum" class="mt-3.5">
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
@@ -115,7 +116,7 @@ const otherResultsSummary = computed(() => {
         }"
       >
         <div
-          class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
+          class="absolute bg-skin-border inset-y-0 left-0 pointer-events-none -z-10"
           :class="{
             [`_${result.choice} choice-bg opacity-20`]:
               proposal.type === 'basic'
@@ -126,26 +127,29 @@ const otherResultsSummary = computed(() => {
         />
         <div
           v-if="proposal.type === 'basic'"
-          class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+          class="rounded-full choice-bg inline-block size-[18px]"
           :class="`_${result.choice}`"
         >
           <IH-check
             v-if="result.choice === 1"
-            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
           />
           <IH-x
             v-else-if="result.choice === 2"
-            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
           />
           <IH-minus-sm
             v-else-if="result.choice === 3"
-            class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
           />
         </div>
         <div
           class="truncate grow"
           v-text="proposal.choices[result.choice - 1]"
         />
+        <div>
+          {{ _vp(result.score / 10 ** decimals) }}
+        </div>
         <div v-text="_p(result.progress / 100)" />
       </div>
       <button
@@ -155,7 +159,7 @@ const otherResultsSummary = computed(() => {
         @click="displayAllChoices = true"
       >
         <div
-          class="absolute bg-skin-border top-0 bottom-0 left-0 pointer-events-none -z-10"
+          class="absolute bg-skin-border inset-y-0 left-0 pointer-events-none -z-10"
           :style="{
             width: `${otherResultsSummary.progress.toFixed(2)}%`
           }"
@@ -172,23 +176,22 @@ const otherResultsSummary = computed(() => {
           v-text="_p(otherResultsSummary.progress / 100)"
         />
         <div class="hidden group-hover:flex items-center gap-1">
-          See all <IH-arrow-down class="w-[16px] h-[16px]" />
+          See all <IH-arrow-down class="size-[16px]" />
         </div>
       </button>
       <div v-if="proposal.quorum">
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
       </div>
-      <div v-if="proposal.privacy === 'shutter'" class="flex flex-col mt-2.5">
-        <div class="text-xs">Powered by</div>
-        <div class="flex items-center">
-          <a
-            href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
-            target="_blank"
-          >
-            <IC-Shutter class="w-[80px] text-skin-text" />
-          </a>
-        </div>
+      <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
+        <a
+          href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
+          class="flex items-center text-skin-text"
+          target="_blank"
+        >
+          <IC-Shutter class="w-[80px]" />
+          <IH-arrow-sm-right class="-rotate-45" />
+        </a>
       </div>
     </div>
     <div
@@ -196,7 +199,7 @@ const otherResultsSummary = computed(() => {
       class="h-full flex items-center"
     >
       <div
-        class="rounded-full h-1.5 overflow-hidden"
+        class="rounded-full h-[6px] overflow-hidden"
         :style="{
           width: `${width}px`
         }"

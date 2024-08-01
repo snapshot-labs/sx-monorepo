@@ -1,78 +1,18 @@
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
-import { Draft, Drafts, NetworkID } from '@/types';
+import { Draft, Drafts, VoteType } from '@/types';
+
+const PREFERRED_VOTE_TYPE = 'single-choice';
 
 const proposals = reactive<Drafts>(lsGet('proposals', {}));
-
-function getDefaultVotingType(networkId: NetworkID) {
-  const network = getNetwork(networkId);
-
-  return network.helpers.isVotingTypeSupported('single-choice')
-    ? 'single-choice'
-    : 'basic';
-}
-
-function removeEmpty(proposals: Drafts): Drafts {
-  return Object.entries(proposals).reduce((acc, [id, proposal]) => {
-    const networkId = id.split(':')[0] as NetworkID;
-    const defaultVotingType = getDefaultVotingType(networkId);
-
-    const { execution, type, choices, ...rest } = omit(proposal, ['updatedAt']);
-    const hasFormValues = Object.values(rest).some(val => !!val);
-    const hasChangedVotingType = type !== defaultVotingType;
-    const hasFormChoices =
-      type !== 'basic' && (choices || []).some(val => !!val);
-
-    if (
-      execution.length === 0 &&
-      !hasFormValues &&
-      !hasChangedVotingType &&
-      !hasFormChoices
-    ) {
-      return acc;
-    }
-
-    if (proposal.proposalId !== null) {
-      return acc;
-    }
-
-    return {
-      ...acc,
-      [id]: proposal
-    };
-  }, {});
-}
+const spaceVoteType = reactive(new Map<string, VoteType>());
 
 function generateId() {
   return (Math.random() + 1).toString(36).substring(7);
 }
 
-function createDraft(
-  networkId: NetworkID,
-  spaceId: string,
-  payload?: Partial<Draft> & { proposalId?: number | string },
-  draftKey?: string
-) {
-  const type = getDefaultVotingType(networkId);
-  const choices = type === 'single-choice' ? Array(2).fill('') : BASIC_CHOICES;
-
-  const id = draftKey || generateId();
-  const key = `${spaceId}:${id}`;
-
-  proposals[key] = {
-    title: '',
-    body: '',
-    discussion: '',
-    type,
-    choices,
-    executionStrategy: null,
-    execution: [],
-    updatedAt: Date.now(),
-    proposalId: null,
-    ...payload
-  };
-  return id;
+function getSpaceId(draftId: string) {
+  return draftId.split(':').slice(0, 2).join(':');
 }
 
 export function useEditor() {
@@ -92,11 +32,96 @@ export function useEditor() {
       .sort((a, b) => b.updatedAt - a.updatedAt);
   });
 
+  function removeEmpty(proposals: Drafts): Drafts {
+    return Object.entries(proposals).reduce((acc, [id, proposal]) => {
+      const { execution, type, choices, ...rest } = omit(proposal, [
+        'updatedAt'
+      ]);
+      const hasFormValues = Object.values(rest).some(val => !!val);
+      const hasChangedVotingType = type !== spaceVoteType.get(getSpaceId(id));
+      const hasFormChoices =
+        type !== 'basic' && (choices || []).some(val => !!val);
+
+      if (
+        execution.length === 0 &&
+        !hasFormValues &&
+        !hasChangedVotingType &&
+        !hasFormChoices
+      ) {
+        return acc;
+      }
+
+      if (proposal.proposalId !== null) {
+        return acc;
+      }
+
+      return {
+        ...acc,
+        [id]: proposal
+      };
+    }, {});
+  }
+
+  async function setSpacesVoteType(spaceIds: string[]) {
+    const spacesStore = useSpacesStore();
+    const newIds = spaceIds.filter(id => !spaceVoteType.has(id));
+
+    if (!newIds) return;
+
+    await spacesStore.fetchSpaces(newIds);
+
+    for (const id of newIds) {
+      const space = spacesStore.spacesMap.get(id);
+
+      if (!space) continue;
+
+      const type = space.voting_types.includes(PREFERRED_VOTE_TYPE)
+        ? PREFERRED_VOTE_TYPE
+        : space.voting_types[0];
+
+      spaceVoteType.set(id, type);
+    }
+  }
+
+  async function createDraft(
+    spaceId: string,
+    payload?: Partial<Draft> & { proposalId?: number | string },
+    draftKey?: string
+  ) {
+    await setSpacesVoteType([spaceId]);
+
+    const type = payload?.type || spaceVoteType.get(spaceId)!;
+    const choices = type === 'basic' ? BASIC_CHOICES : Array(2).fill('');
+
+    const id = draftKey ?? generateId();
+    const key = `${spaceId}:${id}`;
+
+    proposals[key] = {
+      title: '',
+      body: '',
+      discussion: '',
+      type,
+      choices,
+      executionStrategy: null,
+      execution: [],
+      updatedAt: Date.now(),
+      proposalId: null,
+      ...payload
+    };
+    return id;
+  }
+
   function removeDraft(key: string) {
     delete proposals[key];
   }
 
-  watch(proposals, () => lsSet('proposals', removeEmpty(proposals)));
+  watch(proposals, async items => {
+    const ids = Object.keys(items).map(getSpaceId);
+
+    await setSpacesVoteType(ids);
+
+    lsSet('proposals', removeEmpty(proposals));
+  });
 
   return {
     proposals,

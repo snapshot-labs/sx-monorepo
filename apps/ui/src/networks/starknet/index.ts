@@ -31,7 +31,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'eth',
     rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl: 'https://api-1.snapshotx.xyz',
+    apiUrl: 'https://api.snapshot.box',
     explorerUrl: 'https://starkscan.co'
   },
   'sn-sep': {
@@ -43,7 +43,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     apiUrl:
       import.meta.env.VITE_STARKNET_SEPOLIA_API ??
-      'https://testnet-api-1.snapshotx.xyz',
+      'https://testnet-api.snapshot.box',
     explorerUrl: 'https://sepolia.starkscan.co'
   }
 };
@@ -64,10 +64,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   } = metadata;
 
   const provider = createProvider(rpcUrl);
-  const api = createApi(apiUrl, networkId, {
+  const constants = createConstants(networkId, baseNetworkId, baseChainId);
+  const api = createApi(apiUrl, networkId, constants, {
     baseNetworkId
   });
-  const constants = createConstants(networkId, baseNetworkId, baseChainId);
 
   const helpers = {
     isAuthenticatorSupported: (authenticator: string) =>
@@ -80,8 +80,6 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
-    isVotingTypeSupported: (type: string) =>
-      constants.EDITOR_VOTING_TYPES.includes(type),
     pin: pinPineapple,
     getTransaction: txId => provider.getTransactionReceipt(txId),
     waitForTransaction: txId => {

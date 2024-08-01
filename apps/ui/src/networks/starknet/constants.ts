@@ -4,7 +4,7 @@ import { CallData, uint256 } from 'starknet';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinPineapple } from '@/helpers/pin';
 import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
-import { NetworkID, StrategyParsedMetadata } from '@/types';
+import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
 import { StrategyConfig, StrategyTemplate } from '../types';
 import IHCode from '~icons/heroicons-outline/code';
@@ -527,7 +527,7 @@ export function createConstants(
     }
   ];
 
-  const EDITOR_VOTING_TYPES = ['basic'];
+  const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
     SUPPORTED_AUTHENTICATORS,

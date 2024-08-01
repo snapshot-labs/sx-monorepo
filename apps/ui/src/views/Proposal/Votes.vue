@@ -113,10 +113,10 @@ watch([sortBy, choiceFilter], () => {
 
 <template>
   <div
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-1 font-medium"
+    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex space-x-3 font-medium"
   >
     <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
-    <div class="grow w-[40%] truncate">
+    <div class="grow w-[40%]">
       <template v-if="offchainNetworks.includes(proposal.network)"
         >Choice</template
       >
@@ -135,10 +135,13 @@ watch([sortBy, choiceFilter], () => {
         ]"
       >
         <template #button>
-          <div class="flex items-center hover:text-skin-link space-x-2">
+          <button
+            class="flex items-center hover:text-skin-link space-x-2"
+            type="button"
+          >
             <span class="truncate">Choice</span>
             <IH-adjustments-vertical class="shrink-0" />
-          </div>
+          </button>
         </template>
       </UiSelectDropdown>
     </div>
@@ -182,10 +185,10 @@ watch([sortBy, choiceFilter], () => {
       <div
         v-for="(vote, i) in votes"
         :key="i"
-        class="border-b relative flex space-x-1"
+        class="border-b relative flex space-x-3"
       >
         <div
-          class="top-0 bottom-0 left-0 -z-10 pointer-events-none absolute"
+          class="inset-y-0 left-0 -z-10 pointer-events-none absolute"
           :style="{
             width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
           }"
@@ -232,11 +235,11 @@ watch([sortBy, choiceFilter], () => {
                 <span class="text-skin-heading leading-[22px]"
                   >Encrypted choice</span
                 >
-                <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
+                <IH-lock-closed class="size-[16px] shrink-0" />
               </div>
             </div>
             <UiTooltip title="Encrypted choice" class="cursor-help md:hidden">
-              <IH-lock-closed class="w-[16px] h-[16px]" />
+              <IH-lock-closed class="size-[16px]" />
             </UiTooltip>
           </template>
           <template v-else>
@@ -251,20 +254,20 @@ watch([sortBy, choiceFilter], () => {
             </UiTooltip>
             <div v-else class="flex items-center space-x-2">
               <div
-                class="rounded-full choice-bg inline-block w-[18px] h-[18px]"
+                class="rounded-full choice-bg inline-block size-[18px]"
                 :class="`_${vote.choice}`"
               >
                 <IH-check
                   v-if="vote.choice === 1"
-                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  class="text-white size-[14px] mt-0.5 ml-0.5"
                 />
                 <IH-x
                   v-else-if="vote.choice === 2"
-                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  class="text-white size-[14px] mt-0.5 ml-0.5"
                 />
                 <IH-minus-sm
                   v-else-if="vote.choice === 3"
-                  class="text-white w-[14px] h-[14px] mt-0.5 ml-0.5"
+                  class="text-white size-[14px] mt-0.5 ml-0.5"
                 />
               </div>
               <h4

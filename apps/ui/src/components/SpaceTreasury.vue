@@ -123,8 +123,10 @@ const executionStrategy = computed(() => {
 
 const hasStakeableAssets = computed(() => {
   return (
-    !isReadOnly &&
-    assets.value.some(asset => asset.contractAddress === ETH_CONTRACT)
+    treasury.value &&
+    !isReadOnly.value &&
+    assets.value.some(asset => asset.contractAddress === ETH_CONTRACT) &&
+    ETHEREUM_NETWORKS.includes(treasury.value.networkId)
   );
 });
 
@@ -132,8 +134,8 @@ function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
 }
 
-function addTx(tx: Transaction) {
-  const draftId = createDraft(props.space.network, spaceKey.value, {
+async function addTx(tx: Transaction) {
+  const draftId = await createDraft(spaceKey.value, {
     execution: [tx],
     executionStrategy: executionStrategy.value
   });
@@ -179,7 +181,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             width="480"
             height="332"
             viewBox="0 0 480 332"
-            class="inline-block w-[26px] h-[26px]"
+            class="inline-block size-[26px]"
           >
             <path
               fill="rgba(var(--link))"
@@ -313,9 +315,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               </div>
               <UiTooltip
                 v-if="
-                  asset.contractAddress === ETH_CONTRACT &&
-                  !isReadOnly &&
-                  ETHEREUM_NETWORKS.includes(treasury.networkId)
+                  asset.contractAddress === ETH_CONTRACT && hasStakeableAssets
                 "
                 title="Stake with Lido"
               >

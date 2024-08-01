@@ -82,7 +82,7 @@ watch(
           </UiButton>
         </div>
         <div
-          class="top-0 left-0 bottom-0 absolute bg-skin-border opacity-40 -z-10"
+          class="inset-y-0 left-0 absolute bg-skin-border opacity-40 -z-10"
           :style="{ width: _p(getChoiceWeight(selectedChoices, i)) }"
         ></div>
       </div>
