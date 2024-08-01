@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoice = ref<RankedChoice>(
+const selectedChoices = ref<RankedChoice>(
   (!props.proposal.privacy && (props.defaultChoice as RankedChoice)) ||
     props.proposal.choices.map((_, i) => i + 1)
 );
@@ -23,7 +23,7 @@ const selectedChoice = ref<RankedChoice>(
 <template>
   <div class="flex flex-col gap-3">
     <Draggable
-      v-model="selectedChoice"
+      v-model="selectedChoices"
       v-bind="{ animation: 200 }"
       handle=".handle"
       class="flex flex-col gap-2"
@@ -50,7 +50,7 @@ const selectedChoice = ref<RankedChoice>(
       primary
       class="!h-[48px] w-full"
       :loading="!!sendingType"
-      @click="emit('vote', selectedChoice)"
+      @click="emit('vote', selectedChoices)"
     >
       Vote
     </UiButton>
