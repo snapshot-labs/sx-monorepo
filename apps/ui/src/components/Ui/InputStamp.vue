@@ -45,15 +45,16 @@ async function handleFileChange(e: Event) {
 </script>
 
 <template>
-  <div
+  <button
+    type="button"
     v-bind="$attrs"
-    class="relative group max-w-max cursor-pointer mb-3 border-[4px] border-skin-bg rounded-lg overflow-hidden bg-skin-border"
+    class="relative group max-w-max cursor-pointer mb-3 border-4 border-skin-bg rounded-lg overflow-hidden bg-skin-border"
     @click="openFilePicker()"
   >
     <img
       v-if="imgUrl"
       :src="imgUrl"
-      class="w-[80px] h-[80px] object-cover group-hover:opacity-80"
+      class="size-[80px] object-cover group-hover:opacity-80"
       :class="{
         'opacity-80': isUploadingImage
       }"
@@ -69,12 +70,12 @@ async function handleFileChange(e: Event) {
       }"
     />
     <div
-      class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row w-full h-full items-center content-center justify-center"
+      class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row size-full items-center content-center justify-center"
     >
-      <UiLoading v-if="isUploadingImage" class="block z-5" />
+      <UiLoading v-if="isUploadingImage" class="block z-10" />
       <IH-pencil v-else class="invisible text-skin-link group-hover:visible" />
     </div>
-  </div>
+  </button>
   <input
     ref="fileInput"
     type="file"

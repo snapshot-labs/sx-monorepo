@@ -11,14 +11,8 @@ const { init, app } = useApp();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el);
 const { createDraft } = useEditor();
-const {
-  spaceKey,
-  spaceNetwork,
-  network,
-  executionStrategy,
-  transaction,
-  reset
-} = useWalletConnectTransaction();
+const { spaceKey, network, executionStrategy, transaction, reset } =
+  useWalletConnectTransaction();
 
 provide('web3', web3);
 
@@ -28,16 +22,10 @@ const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 
-function handleTransactionAccept() {
-  if (
-    !spaceKey.value ||
-    !spaceNetwork.value ||
-    !executionStrategy.value ||
-    !transaction.value
-  )
-    return;
+async function handleTransactionAccept() {
+  if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
 
-  const draftId = createDraft(spaceNetwork.value, spaceKey.value, {
+  const draftId = await createDraft(spaceKey.value, {
     execution: [transaction.value],
     executionStrategy: executionStrategy.value
   });
@@ -91,8 +79,9 @@ watch(isSwiping, () => {
       />
       <AppTopnav />
       <AppNav />
-      <div
+      <button
         v-if="uiStore.sidebarOpen"
+        type="button"
         class="backdrop lg:hidden"
         :style="{
           left: `${72 + (hasAppNav ? 240 : 0)}px`

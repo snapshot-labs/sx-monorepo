@@ -1,6 +1,5 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
@@ -12,9 +11,11 @@ import {
   SpaceMetadata,
   Statement,
   StrategyParsedMetadata,
+  Transaction,
   User,
   UserActivity,
-  Vote
+  Vote,
+  VoteType
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
@@ -80,6 +81,14 @@ export type StrategyConfig = StrategyTemplate & {
   params: Record<string, any>;
 };
 
+export type ExecutionInfo = {
+  strategyAddress: string;
+  destinationAddress: string;
+  treasuryName: string;
+  chainId: number;
+  transactions: Transaction[];
+};
+
 export type SnapshotInfo = {
   at: number | null;
   chainId?: number;
@@ -114,9 +123,7 @@ export type ReadOnlyNetworkActions = {
     account: string,
     space: Space,
     cid: string,
-    executionStrategy: string | null,
-    executionDestinationAddress: string | null,
-    transactions: MetaTransaction[]
+    executionInfo: ExecutionInfo | null
   ): Promise<any>;
   updateProposal(
     web3: Web3Provider,
@@ -125,9 +132,7 @@ export type ReadOnlyNetworkActions = {
     space: Space,
     proposalId: number | string,
     cid: string,
-    executionStrategy: string | null,
-    executionDestinationAddress: string | null,
-    transactions: MetaTransaction[]
+    executionInfo: ExecutionInfo | null
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(
@@ -287,6 +292,7 @@ export type NetworkConstants = {
   EDITOR_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
+  EDITOR_VOTING_TYPES: VoteType[];
   STORAGE_PROOF_STRATEGIES_TYPES?: string[];
 };
 
@@ -298,7 +304,6 @@ export type NetworkHelpers = {
   ): 'evm' | 'evm-tx' | 'starknet' | null;
   isStrategySupported(strategy: string): boolean;
   isExecutorSupported(executor: string): boolean;
-  isVotingTypeSupported(type: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;

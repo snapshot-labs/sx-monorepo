@@ -94,7 +94,7 @@ export type ApiProposal = {
   min_end: number;
   max_end: number;
   snapshot: number;
-  // TODO: those are actually numbers, we need to adjust it across the app at some point
+  // TODO: those are actually strings, we need to adjust it across the app at some point
   scores_1: number;
   scores_2: number;
   scores_3: number;

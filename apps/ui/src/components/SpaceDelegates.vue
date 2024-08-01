@@ -98,6 +98,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       >
         <div class="pl-4 w-[60%] flex items-center truncate">Delegatee</div>
         <button
+          type="button"
           class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
@@ -112,6 +113,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           />
         </button>
         <button
+          type="button"
           class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link pr-4 space-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
@@ -130,13 +132,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       <template v-else>
         <div
           v-if="loaded && (delegates.length === 0 || failed)"
-          class="px-4 py-3 flex items-center space-x-2"
+          class="px-4 py-3 flex items-center space-x-1"
         >
-          <IH-exclamation-circle class="inline-block" />
-          <template v-if="delegates.length === 0"
-            >There are no delegates.</template
-          >
-          <template v-else-if="failed">Failed to load delegates.</template>
+          <IH-exclamation-circle class="inline-block shrink-0" />
+          <span v-if="delegates.length === 0">There are no delegates.</span>
+          <span v-else-if="failed">Failed to load delegates.</span>
         </div>
         <UiContainerInfiniteScroll
           :loading-more="loadingMore"

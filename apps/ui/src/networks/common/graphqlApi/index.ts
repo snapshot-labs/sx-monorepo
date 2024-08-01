@@ -8,6 +8,7 @@ import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
 import {
   NetworkApi,
+  NetworkConstants,
   PaginationOpts,
   ProposalsFilter,
   SpacesFilter
@@ -57,10 +58,18 @@ function getProposalState(
   proposal: ApiProposal,
   current: number
 ): ProposalState {
+  // we have broken types, we should unify, this is quick fix for Nimbora PR
+  // those values are actually strings
+  // https://github.com/snapshot-labs/sx-monorepo/pull/529/files#r1691071502
+  const quorum = BigInt(proposal.quorum);
+  const scoresTotal = BigInt(proposal.scores_total);
+  const scoresFor = BigInt(proposal.scores_1);
+  const scoresAgainst = BigInt(proposal.scores_2);
+
   if (proposal.executed) return 'executed';
   if (proposal.max_end <= current) {
-    if (proposal.scores_total < proposal.quorum) return 'rejected';
-    return proposal.scores_1 > proposal.scores_2 ? 'passed' : 'rejected';
+    if (scoresTotal < quorum) return 'rejected';
+    return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
   if (proposal.start > current) return 'pending';
 
@@ -153,7 +162,11 @@ function processExecutions(
   ];
 }
 
-function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
+function formatSpace(
+  space: ApiSpace,
+  networkId: NetworkID,
+  constants: NetworkConstants
+): Space {
   return {
     ...space,
     network: networkId,
@@ -168,13 +181,15 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     voting_power_symbol: space.metadata.voting_power_symbol,
+    voting_types: constants.EDITOR_VOTING_TYPES,
     treasuries: space.metadata.treasuries.map(treasury => {
       const { name, network, address } = JSON.parse(treasury);
 
       return {
         name,
         network,
-        address
+        address,
+        chainId: CHAIN_IDS[network]
       };
     }),
     delegations: space.metadata.delegations.map(delegation => {
@@ -256,6 +271,7 @@ function formatProposal(
 export function createApi(
   uri: string,
   networkId: NetworkID,
+  constants: NetworkConstants,
   opts: ApiOptions = {}
 ): NetworkApi {
   const httpLink = createHttpLink({ uri });
@@ -516,7 +532,7 @@ export function createApi(
         });
       }
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
@@ -537,7 +553,7 @@ export function createApi(
         highlightResult?.data.sxspace
       );
 
-      return formatSpace(data.space, networkId);
+      return formatSpace(data.space, networkId, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
       const [{ data }, highlightResult] = await Promise.all([

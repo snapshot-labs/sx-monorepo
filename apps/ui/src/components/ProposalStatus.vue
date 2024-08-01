@@ -26,23 +26,23 @@ defineProps<{ state: ProposalState }>();
   >
     <IS-clock
       v-if="state === 'pending'"
-      class="text-white inline-block w-[17px] h-[17px] mb-[1px]"
+      class="text-white inline-block size-[17px] mb-[1px]"
     />
     <IS-status-online
       v-else-if="state === 'active'"
-      class="text-white inline-block w-[17px] h-[17px] mb-[1px]"
+      class="text-white inline-block size-[17px] mb-[1px]"
     />
     <IS-check-circle
       v-else-if="state === 'passed'"
-      class="text-skin-bg inline-block w-[17px] h-[17px] mb-[1px]"
+      class="text-skin-bg inline-block size-[17px] mb-[1px]"
     />
     <IS-play
       v-else-if="state === 'executed'"
-      class="text-white inline-block w-[17px] h-[17px]"
+      class="text-white inline-block size-[17px]"
     />
     <IS-x-circle
       v-else-if="state === 'rejected'"
-      class="text-white inline-block w-[17px] h-[17px] mb-[1px]"
+      class="text-white inline-block size-[17px] mb-[1px]"
     />
     {{ titles[state] }}
   </div>

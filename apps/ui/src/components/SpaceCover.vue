@@ -25,7 +25,7 @@ const cb = computed(() => getCacheHash(props.space.cover));
     :height="height"
     :cb="cb"
     type="space-cover-sx"
-    class="object-cover !rounded-none h-full w-full"
+    class="object-cover !rounded-none size-full"
   />
   <div
     v-else

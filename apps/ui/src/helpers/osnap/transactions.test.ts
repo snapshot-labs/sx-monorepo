@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { parseOSnapTransaction } from './osnap';
+import {
+  OptimisticGovernorTransaction,
+  parseInternalTransaction,
+  parseOSnapTransaction
+} from './transactions';
+import { ETH_CONTRACT } from '../constants';
 
 describe('parseOSnapTransaction', () => {
   it('should parse oSnap transfer funds transaction', () => {
@@ -26,7 +31,7 @@ describe('parseOSnapTransaction', () => {
         0,
         '1000000000000000',
         '0x'
-      ],
+      ] as OptimisticGovernorTransaction,
       recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
     };
 
@@ -45,7 +50,7 @@ describe('parseOSnapTransaction', () => {
         0,
         '0',
         '0x42842e0e0000000000000000000000008edfcc5f141ffc2b6892530d1fb21bbcdc74b455000000000000000000000000556b14cbda79a36dc33fcd461a04a5bcb5dc2a70000000000000000000000000000000000000000000000000000000000000032a'
-      ],
+      ] as OptimisticGovernorTransaction,
       recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
       collectable: {
         id: '810',
@@ -119,7 +124,7 @@ describe('parseOSnapTransaction', () => {
         0,
         '0',
         '0x0ae1b13d000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000004746573740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000047465737400000000000000000000000000000000000000000000000000000000'
-      ],
+      ] as OptimisticGovernorTransaction,
       parameters: ['test', 'test']
     };
 
@@ -171,7 +176,7 @@ describe('parseOSnapTransaction', () => {
         0,
         '0',
         '0xa9059cbb000000000000000000000000fe1552da65facaac5b50b73ceda4c993e16d46940000000000000000000000000000000000000000000000000de0b6b3a7640000'
-      ],
+      ] as OptimisticGovernorTransaction,
       parameters: {
         to: '0xfE1552DA65FAcAaC5B50b73CEDa4C993e16d4694',
         amount: '1000000000000000000'
@@ -188,7 +193,12 @@ describe('parseOSnapTransaction', () => {
       type: 'raw' as const,
       value: '1',
       isValid: true,
-      formatted: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 0, '1', '0x']
+      formatted: [
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        0,
+        '1',
+        '0x'
+      ] as OptimisticGovernorTransaction
     };
 
     expect(parseOSnapTransaction(transaction)).toMatchSnapshot();
@@ -200,6 +210,96 @@ describe('parseOSnapTransaction', () => {
     };
 
     expect(() => parseOSnapTransaction(transaction as any)).toThrowError(
+      'Invalid transaction type'
+    );
+  });
+});
+
+describe('parseInternalTransaction', () => {
+  it('should parse transfer token transaction', () => {
+    const transaction = {
+      _type: 'sendToken' as const,
+      to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      data: '0x',
+      value: '1',
+      salt: '',
+      _form: {
+        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        amount: '1',
+        token: {
+          name: 'Ether',
+          decimals: 18,
+          symbol: 'ETH',
+          address: ETH_CONTRACT
+        }
+      }
+    };
+
+    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should parse transfer NFT transaction', () => {
+    const transaction = {
+      _type: 'sendNft' as const,
+      to: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+      data: '0x42842e0e000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000dead00000000000000000000000000000000000000000000000000000000000000a2',
+      value: '0',
+      salt: '',
+      _form: {
+        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        amount: '1',
+        nft: {
+          address: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+          id: '810',
+          name: 'Weeedidit Palls #101',
+          collection: 'Weee Did It Palz'
+        }
+      }
+    };
+
+    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should parse contract call transaction', () => {
+    const transaction = {
+      _type: 'contractCall' as const,
+      data: '0xd0e30db0',
+      salt: '0x000000000000000000000000000000000000000000000000000000000000',
+      to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
+      value: '20000000000000000000',
+      _form: {
+        abi: ['function deposit() payable'],
+        amount: '20',
+        args: {},
+        method: 'deposit()',
+        recipient: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844'
+      }
+    };
+
+    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should parse raw transaction', () => {
+    const transaction = {
+      _type: 'raw' as const,
+      to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      data: '0x',
+      value: '1',
+      salt: '',
+      _form: {
+        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
+      }
+    };
+
+    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
+  });
+
+  it('should throw on unknown transaction', () => {
+    const transaction = {
+      _type: 'unknown'
+    };
+
+    expect(() => parseInternalTransaction(transaction as any)).toThrowError(
       'Invalid transaction type'
     );
   });

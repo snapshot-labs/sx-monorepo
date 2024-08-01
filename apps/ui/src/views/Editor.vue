@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
-import { CHAIN_IDS, SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
+import { CHAIN_IDS } from '@/helpers/constants';
+import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { resolver } from '@/helpers/resolver';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
+import { ExecutionInfo } from '@/networks/types';
 import {
   Contact,
   RequiredProperty,
@@ -86,12 +88,11 @@ const proposalKey = computed(() => {
   const key = route.params.key as string;
   return `${networkId.value}:${address.value}:${key}`;
 });
-const proposal = computed(() => {
+const proposal = computedAsync(async () => {
   if (!proposalKey.value || !networkId.value) return null;
 
   if (!proposals[proposalKey.value]) {
-    createDraft(
-      networkId.value,
+    await createDraft(
       `${networkId.value}:${address.value}`,
       undefined,
       route.params.key as string
@@ -117,13 +118,46 @@ const executionStrategy = computed({
     proposal.value.executionStrategy = value;
   }
 });
-const supportedExecutionStrategies = computed(() => {
+const supportedExecutionStrategies = computedAsync(async () => {
   const spaceValue = space.value;
   const networkValue = network.value;
   if (!spaceValue || !networkValue) return null;
 
+  let oSnapSupportPerTreasury: boolean[] | null = null;
+  if (networkId.value && offchainNetworks.includes(networkId.value)) {
+    oSnapSupportPerTreasury = await Promise.all(
+      spaceValue.treasuries.map(async treasury => {
+        if (
+          !treasury.network ||
+          !treasury.address ||
+          !CHAIN_IDS[treasury.network]
+        ) {
+          return false;
+        }
+
+        return getIsOsnapEnabled(
+          CHAIN_IDS[treasury.network].toString(),
+          treasury.address
+        );
+      })
+    );
+  }
+
   return spaceValue.treasuries
-    .map(treasury => {
+    .map((treasury, i) => {
+      if (networkId.value && offchainNetworks.includes(networkId.value)) {
+        if (!oSnapSupportPerTreasury || !oSnapSupportPerTreasury[i]) {
+          return null;
+        }
+
+        return {
+          address: treasury.address,
+          destinationAddress: null,
+          type: 'oSnap',
+          treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+        };
+      }
+
       const strategy = spaceValue.executors_strategies.find(strategy => {
         return (
           strategy.treasury &&
@@ -148,7 +182,7 @@ const supportedExecutionStrategies = computed(() => {
       strategy =>
         strategy && networkValue.helpers.isExecutorSupported(strategy.type)
     ) as StrategyWithTreasury[];
-});
+}, null);
 const selectedExecutionWithTreasury = computed(() => {
   if (!executionStrategy.value || !supportedExecutionStrategies.value)
     return null;
@@ -161,14 +195,6 @@ const extraContacts = computed(() => {
   if (!space.value) return [];
 
   return space.value.treasuries as Contact[];
-});
-const votingTypes = computed(() => {
-  const networkValue = network.value;
-  if (!networkValue) return null;
-
-  return SUPPORTED_VOTING_TYPES.filter(type =>
-    networkValue.helpers.isVotingTypeSupported(type)
-  );
 });
 const formErrors = computed(() => {
   if (!proposal.value) return {};
@@ -212,6 +238,21 @@ async function handleProposeClick() {
   sending.value = true;
 
   try {
+    let executionInfo: ExecutionInfo | null = null;
+    if (
+      selectedExecutionWithTreasury.value &&
+      selectedExecutionWithTreasury.value.treasury.chainId
+    ) {
+      executionInfo = {
+        strategyAddress: selectedExecutionWithTreasury.value.address,
+        destinationAddress:
+          selectedExecutionWithTreasury.value.destinationAddress || '',
+        transactions: proposal.value.execution,
+        treasuryName: selectedExecutionWithTreasury.value.treasury.name,
+        chainId: selectedExecutionWithTreasury.value.treasury.chainId
+      };
+    }
+
     let result;
     if (proposal.value.proposalId) {
       result = await updateProposal(
@@ -222,11 +263,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        proposal.value.executionStrategy?.address ?? null,
-        proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address
-          ? proposal.value.execution
-          : []
+        executionInfo
       );
     } else {
       result = await propose(
@@ -236,11 +273,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        proposal.value.executionStrategy?.address ?? null,
-        proposal.value.executionStrategy?.destinationAddress ?? null,
-        proposal.value.executionStrategy?.address
-          ? proposal.value.execution
-          : []
+        executionInfo
       );
     }
     if (result) {
@@ -259,6 +292,9 @@ async function handleExecutionStrategySelected(
     executionStrategy.value = null;
   } else {
     executionStrategy.value = selectedExecutionStrategy;
+    if (executionStrategy.value.type === 'oSnap' && proposal.value) {
+      proposal.value.type = 'basic';
+    }
   }
 }
 
@@ -341,8 +377,7 @@ const handleRouteChange: NavigationGuard = async to => {
   const resolved = await resolver.resolveName(to.params.id as string);
   if (!resolved) return false;
 
-  const draftId = createDraft(
-    resolved.networkId,
+  const draftId = await createDraft(
     `${resolved.networkId}:${resolved.address}`
   );
 
@@ -363,14 +398,13 @@ export default defineComponent({
 
 <template>
   <div v-if="proposal">
-    <nav
-      class="border-b bg-skin-bg fixed top-0 z-50 right-0 left-0 lg:left-[72px]"
-    >
+    <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
           <router-link
             :to="{ name: 'space-overview', params: { id: param } }"
             class="mr-2"
+            tabindex="-1"
           >
             <UiButton class="leading-3 w-[46px] !px-0">
               <IH-arrow-narrow-left class="inline-block" />
@@ -473,8 +507,11 @@ export default defineComponent({
               <span class="flex-1">
                 {{ strategy.treasury.name }}
                 <span class="hidden sm:inline-block">
-                  ({{ network.constants.EXECUTORS[strategy.type] }} execution
-                  strategy)
+                  ({{
+                    strategy.type === 'oSnap'
+                      ? 'oSnap'
+                      : `${network.constants.EXECUTORS[strategy.type]} execution strategy`
+                  }})
                 </span>
               </span>
               <IH-check
@@ -496,16 +533,18 @@ export default defineComponent({
     </div>
 
     <div
+      v-if="space"
       class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
     >
-      <template
-        v-if="
-          votingTypes && (votingTypes.length > 1 || votingTypes[0] !== 'basic')
+      <EditorVotingType
+        v-model="proposal"
+        :voting-types="
+          selectedExecutionWithTreasury?.type === 'oSnap'
+            ? ['basic']
+            : space.voting_types
         "
-      >
-        <EditorVotingType v-model="proposal" :voting-types="votingTypes" />
-        <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
-      </template>
+      />
+      <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
     </div>
     <teleport to="#modal">
       <ModalDrafts

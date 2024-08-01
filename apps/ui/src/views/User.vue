@@ -120,20 +120,15 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
   </div>
   <div v-else>
     <div
-      class="relative bg-skin-border h-[156px] md:h-[140px] -mb-[86px] md:-mb-[70px] top-[-1px]"
+      class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
     >
-      <div class="w-full h-full overflow-hidden">
+      <div class="size-full overflow-hidden">
         <UserCover :user="user" class="!rounded-none w-full min-h-full" />
       </div>
-      <div
-        class="relative bg-skin-bg h-[16px] top-[-16px] rounded-t-[16px] md:hidden"
-      />
+      <div class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden" />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
-        <UiTooltip
-          v-if="web3.account === user.id && web3.type !== 'argentx'"
-          title="Edit profile"
-        >
+        <UiTooltip v-if="web3.account === user.id" title="Edit profile">
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
           </UiButton>
@@ -152,10 +147,14 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
-            <a href="#" class="text-skin-text" @click.prevent="copy(user.id)">
+            <button
+              type="button"
+              class="text-skin-text"
+              @click.prevent="copy(user.id)"
+            >
               <IH-duplicate v-if="!copied" class="inline-block" />
               <IH-check v-else class="inline-block" />
-            </a>
+            </button>
           </UiTooltip>
         </div>
         <div
@@ -170,7 +169,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
               target="_blank"
               class="text-[#606060] hover:text-skin-link"
             >
-              <component :is="social.icon" class="w-[26px] h-[26px]" />
+              <component :is="social.icon" class="size-[26px]" />
             </a>
           </template>
         </div>

@@ -26,16 +26,17 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <a
+      <button
         v-for="(treasury, i) in filteredTreasuries"
         :key="i"
+        type="button"
         @click="activeTreasuryId = i"
       >
         <UiLink
           :is-active="activeTreasuryId === i"
           :text="treasury.name || shorten(treasury.address)"
         />
-      </a>
+      </button>
     </div>
   </div>
   <SpaceTreasury

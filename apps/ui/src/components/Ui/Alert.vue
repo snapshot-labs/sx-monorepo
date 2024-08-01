@@ -24,12 +24,13 @@ const emit = defineEmits<{
     }"
   >
     <slot />
-    <a
+    <button
       v-if="dismissible"
+      type="button"
       class="text-skin-link opacity-50 hover:opacity-100"
       @click="emit('close')"
     >
       <IH-x />
-    </a>
+    </button>
   </div>
 </template>

@@ -9,6 +9,7 @@ import { getNames } from '@/helpers/stamp';
 import { clone } from '@/helpers/utils';
 import {
   NetworkApi,
+  NetworkConstants,
   PaginationOpts,
   ProposalsFilter,
   SpacesFilter
@@ -64,16 +65,23 @@ function getProposalState(proposal: ApiProposal): ProposalState {
   return proposal.state;
 }
 
-function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
-  const treasuries = space.treasuries
+function formatSpace(
+  space: ApiSpace,
+  networkId: NetworkID,
+  constants: NetworkConstants
+): Space {
+  const treasuries: SpaceMetadataTreasury[] = space.treasuries
     .map(treasury => {
+      const chainId = parseInt(treasury.network, 10);
+
       return {
         name: treasury.name,
-        network: TREASURY_NETWORKS.get(parseInt(treasury.network, 10)),
-        address: treasury.address
+        network: TREASURY_NETWORKS.get(chainId) ?? null,
+        address: treasury.address,
+        chainId
       };
     })
-    .filter(treasury => !!treasury.network) as SpaceMetadataTreasury[];
+    .filter(treasury => !!treasury.network);
 
   let validationName = space.validation.name;
   const validationParams = space.validation.params || {};
@@ -110,6 +118,9 @@ function formatSpace(space: ApiSpace, networkId: NetworkID): Space {
     follower_count: space.followersCount,
     voting_power_symbol: space.symbol,
     voting_delay: space.voting.delay ?? 0,
+    voting_types: space.voting.type
+      ? [space.voting.type]
+      : constants.EDITOR_VOTING_TYPES,
     min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
@@ -167,7 +178,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       console.warn('failed to parse oSnap execution', e);
     }
   }
-
   return {
     id: proposal.id,
     network: networkId,
@@ -191,8 +201,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     quorum: proposal.quorum,
     quorum_type: proposal.quorumType,
     choices: proposal.choices,
-    scores: proposal.scores.map(v => Math.floor(v)),
-    scores_total: Math.floor(proposal.scores_total),
+    scores: proposal.scores,
+    scores_total: proposal.scores_total,
     vote_count: proposal.votes,
     state: getProposalState(proposal),
     cancelled: false,
@@ -250,7 +260,11 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-export function createApi(uri: string, networkId: NetworkID): NetworkApi {
+export function createApi(
+  uri: string,
+  networkId: NetworkID,
+  constants: NetworkConstants
+): NetworkApi {
   const httpLink = createHttpLink({ uri });
 
   const apollo = new ApolloClient({
@@ -400,7 +414,9 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
             where: filter?.searchQuery ? { search: filter.searchQuery } : {}
           }
         });
-        return data.ranking.items.map(space => formatSpace(space, networkId));
+        return data.ranking.items.map(space =>
+          formatSpace(space, networkId, constants)
+        );
       }
 
       const { data } = await apollo.query({
@@ -414,7 +430,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId));
+      return data.spaces.map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
@@ -425,7 +441,7 @@ export function createApi(uri: string, networkId: NetworkID): NetworkApi {
       if (!data.space) return null;
       if (data.space.metadata === null) return null;
 
-      return formatSpace(data.space, networkId);
+      return formatSpace(data.space, networkId, constants);
     },
     loadUser: async (id: string): Promise<User> => {
       let {

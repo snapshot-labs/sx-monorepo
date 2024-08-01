@@ -5,7 +5,7 @@ import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinGraph } from '@/helpers/pin';
 import { getUrl, shorten } from '@/helpers/utils';
-import { NetworkID, StrategyParsedMetadata } from '@/types';
+import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';
@@ -663,7 +663,7 @@ export function createConstants(networkId: NetworkID) {
     }
   ];
 
-  const EDITOR_VOTING_TYPES = ['basic'];
+  const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
     SUPPORTED_AUTHENTICATORS,
