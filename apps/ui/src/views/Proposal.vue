@@ -111,7 +111,7 @@ async function handleVoteClick(choice: Choice) {
         id.value,
         networkId.value!
       );
-      await loadVotes(networkId.value!, [spaceAddress.value!]);
+      await loadVotes(proposal.value.network, [proposal.value.space.id]);
     }
   } finally {
     sendingType.value = null;
