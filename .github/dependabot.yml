@@ -10,6 +10,3 @@ updates:
       snapshot:
         patterns:
           - "@snapshot-labs/*"
-        update-types:
-          - "minor"
-          - "patch"
