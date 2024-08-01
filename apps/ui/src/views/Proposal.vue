@@ -285,28 +285,28 @@ watchEffect(() => {
               v-else-if="proposal.type === 'single-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
-              :choices="currentVote?.choice"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
               :proposal="proposal"
               :sending-type="sendingType"
-              :choices="currentVote?.choice"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteRankedChoice
               v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
-              :choices="currentVote?.choice"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteWeighted
               v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
               :proposal="proposal"
               :sending-type="sendingType"
-              :choices="currentVote?.choice"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
           </ProposalVote>

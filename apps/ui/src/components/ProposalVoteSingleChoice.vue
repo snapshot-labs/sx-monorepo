@@ -4,7 +4,7 @@ import { Choice, Proposal } from '@/types';
 const props = defineProps<{
   sendingType: Choice | null;
   proposal: Proposal;
-  choices?: Choice;
+  defaultChoice?: Choice;
 }>();
 
 const emit = defineEmits<{
@@ -12,7 +12,7 @@ const emit = defineEmits<{
 }>();
 
 const selectedChoice = ref<number | null>(
-  (!props.proposal.privacy && (props.choices as number)) || null
+  (!props.proposal.privacy && (props.defaultChoice as number)) || null
 );
 </script>
 

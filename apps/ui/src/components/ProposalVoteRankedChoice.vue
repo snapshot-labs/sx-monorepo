@@ -7,15 +7,15 @@ type RankedChoice = number[];
 const props = defineProps<{
   sendingType: Choice | null;
   proposal: Proposal;
-  choices?: Choice;
+  defaultChoice?: Choice;
 }>();
 
 const emit = defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<RankedChoice>(
-  (!props.proposal.privacy && (props.choices as RankedChoice)) ||
+const selectedChoice = ref<RankedChoice>(
+  (!props.proposal.privacy && (props.defaultChoice as RankedChoice)) ||
     props.proposal.choices.map((_, i) => i + 1)
 );
 </script>
@@ -23,7 +23,7 @@ const selectedChoices = ref<RankedChoice>(
 <template>
   <div class="flex flex-col gap-3">
     <Draggable
-      v-model="selectedChoices"
+      v-model="selectedChoice"
       v-bind="{ animation: 200 }"
       handle=".handle"
       class="flex flex-col gap-2"
@@ -50,7 +50,7 @@ const selectedChoices = ref<RankedChoice>(
       primary
       class="!h-[48px] w-full"
       :loading="!!sendingType"
-      @click="emit('vote', selectedChoices)"
+      @click="emit('vote', selectedChoice)"
     >
       Vote
     </UiButton>
