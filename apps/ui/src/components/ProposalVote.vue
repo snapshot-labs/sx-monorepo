@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
-import { _t } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { _t, getChoiceText } from '@/helpers/utils';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
 
-const props = defineProps<{ proposal: ProposalType }>();
+const props = withDefaults(
+  defineProps<{ proposal: ProposalType; editMode?: boolean }>(),
+  {
+    editMode: false
+  }
+);
+
+defineEmits<{
+  (e: 'enterEditMode');
+}>();
 
 const { votes, pendingVotes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
@@ -31,18 +40,54 @@ const isSupported = computed(() => {
     SUPPORTED_VOTING_TYPES.includes(props.proposal.type)
   );
 });
+
+const currentVote = computed(
+  () => votes.value[`${props.proposal.network}:${props.proposal.id}`]
+);
+
+const isEditable = computed(() => {
+  return (
+    currentVote.value &&
+    offchainNetworks.includes(props.proposal.network) &&
+    props.proposal.state === 'active'
+  );
+});
 </script>
 
 <template>
-  <slot
-    v-if="votes[`${proposal.network}:${proposal.id}`]"
-    name="voted"
-    :vote="votes[`${proposal.network}:${proposal.id}`]"
-  >
-    You have already voted for this proposal
+  <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
+    <div class="py-2">
+      <UiButton
+        class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2"
+        :disabled="!isEditable"
+        @click="$emit('enterEditMode')"
+      >
+        <div
+          v-if="proposal.privacy"
+          class="flex space-x-2 items-center grow truncate"
+          :class="{ 'text-skin-text': !isEditable }"
+        >
+          <IH-lock-closed class="size-[16px] shrink-0" />
+          <span class="truncate">Encrypted choice</span>
+        </div>
+        <div
+          v-else
+          class="grow truncate"
+          :class="{ 'text-skin-text': !isEditable }"
+          v-text="getChoiceText(proposal.choices, currentVote.choice)"
+        />
+        <IH-pencil v-if="isEditable" class="shrink-0" />
+      </UiButton>
+    </div>
   </slot>
-
-  <slot v-else-if="pendingVotes[proposal.id]" name="voted-pending">
+  <slot
+    v-else-if="
+      !isEditable &&
+      pendingVotes[proposal.id] &&
+      !offchainNetworks.includes(props.proposal.network)
+    "
+    name="voted-pending"
+  >
     You have already voted for this proposal
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">
