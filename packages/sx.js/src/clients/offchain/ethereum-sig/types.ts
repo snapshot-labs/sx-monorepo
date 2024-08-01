@@ -137,7 +137,7 @@ export const updateUserTypes = {
 
 export const updateStatementTypes = {
   Statement: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'space', type: 'string' },
     { name: 'about', type: 'string' },
