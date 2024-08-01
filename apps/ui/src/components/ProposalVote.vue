@@ -81,7 +81,11 @@ const isEditable = computed(() => {
     </div>
   </slot>
   <slot
-    v-else-if="!isEditable && pendingVotes[proposal.id]"
+    v-else-if="
+      !isEditable &&
+      pendingVotes[proposal.id] &&
+      !offchainNetworks.includes(props.proposal.network)
+    "
     name="voted-pending"
   >
     You have already voted for this proposal
