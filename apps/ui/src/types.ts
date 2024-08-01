@@ -53,6 +53,7 @@ export type SpaceMetadataTreasury = {
   name: string | null;
   network: NetworkID | null;
   address: string | null;
+  chainId?: number;
 };
 
 export type SpaceMetadataDelegation = {

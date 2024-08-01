@@ -9,6 +9,11 @@ import {
   OffchainNetworkConfig
 } from '@snapshot-labs/sx';
 import { getSwapLink } from '@/helpers/link';
+import {
+  getModuleAddressForTreasury,
+  OSnapPlugin,
+  parseInternalTransaction
+} from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
 import { getUrl } from '@/helpers/utils';
 import {
@@ -26,6 +31,7 @@ import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
 import {
   Connector,
+  ExecutionInfo,
   NetworkConstants,
   NetworkHelpers,
   ReadOnlyNetworkActions,
@@ -49,13 +55,41 @@ export function createActions(
     networkConfig
   });
 
+  async function getPlugins(executionInfo: ExecutionInfo | null) {
+    const plugins = {} as { oSnap?: OSnapPlugin };
+    if (executionInfo && executionInfo.transactions.length) {
+      const treasuryAddress = executionInfo.strategyAddress;
+      const moduleAddress = await getModuleAddressForTreasury(
+        executionInfo.chainId.toString(),
+        treasuryAddress
+      );
+
+      plugins.oSnap = {
+        safes: [
+          {
+            safeName: executionInfo.treasuryName,
+            safeAddress: treasuryAddress,
+            network: executionInfo.chainId.toString(),
+            transactions: executionInfo.transactions.map(tx =>
+              parseInternalTransaction(tx)
+            ),
+            moduleAddress
+          }
+        ]
+      };
+    }
+
+    return plugins;
+  }
+
   return {
     async propose(
       web3: Web3Provider,
       connectorType: Connector,
       account: string,
       space: Space,
-      cid: string
+      cid: string,
+      executionInfo: ExecutionInfo | null
     ) {
       let payload: {
         title: string;
@@ -76,6 +110,8 @@ export function createActions(
       const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
 
+      const plugins = await getPlugins(executionInfo);
+
       const data = {
         space: space.id,
         title: payload.title,
@@ -86,7 +122,7 @@ export function createActions(
         start: startTime,
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
-        plugins: '{}',
+        plugins: JSON.stringify(plugins),
         app: EDITOR_APP_NAME,
         timestamp: currentTime
       };
@@ -99,7 +135,8 @@ export function createActions(
       account: string,
       space: Space,
       proposalId: number | string,
-      cid: string
+      cid: string,
+      executionInfo: ExecutionInfo | null
     ) {
       let payload: {
         title: string;
@@ -116,6 +153,8 @@ export function createActions(
         throw new Error('Failed to fetch proposal metadata');
       }
 
+      const plugins = await getPlugins(executionInfo);
+
       const data = {
         proposal: proposalId as string,
         space: space.id,
@@ -124,7 +163,7 @@ export function createActions(
         type: payload.type,
         discussion: payload.discussion,
         choices: payload.choices,
-        plugins: '{}'
+        plugins: JSON.stringify(plugins)
       };
 
       return client.updateProposal({ signer: web3.getSigner(), data });

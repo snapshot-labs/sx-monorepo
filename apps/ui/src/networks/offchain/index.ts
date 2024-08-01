@@ -31,7 +31,10 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     isAuthenticatorContractSupported: () => false,
     getRelayerAuthenticatorType: () => null,
     isStrategySupported: () => true,
-    isExecutorSupported: () => false,
+    isExecutorSupported: (executorType: string) => {
+      if (executorType === 'oSnap') return true;
+      return false;
+    },
     pin: pinPineapple,
     getTransaction: () => {
       throw new Error('Not implemented');
@@ -70,7 +73,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     chainId: l1ChainId,
     baseChainId: l1ChainId,
     currentChainId: l1ChainId,
-    supportsSimulation: false,
+    supportsSimulation: true,
     managerConnectors: constants.CONNECTORS,
     api,
     constants,

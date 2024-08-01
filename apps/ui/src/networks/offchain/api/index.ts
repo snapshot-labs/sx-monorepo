@@ -70,15 +70,18 @@ function formatSpace(
   networkId: NetworkID,
   constants: NetworkConstants
 ): Space {
-  const treasuries = space.treasuries
+  const treasuries: SpaceMetadataTreasury[] = space.treasuries
     .map(treasury => {
+      const chainId = parseInt(treasury.network, 10);
+
       return {
         name: treasury.name,
-        network: TREASURY_NETWORKS.get(parseInt(treasury.network, 10)),
-        address: treasury.address
+        network: TREASURY_NETWORKS.get(chainId) ?? null,
+        address: treasury.address,
+        chainId
       };
     })
-    .filter(treasury => !!treasury.network) as SpaceMetadataTreasury[];
+    .filter(treasury => !!treasury.network);
 
   let validationName = space.validation.name;
   const validationParams = space.validation.params || {};

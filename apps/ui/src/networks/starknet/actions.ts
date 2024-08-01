@@ -5,7 +5,6 @@ import {
   starknetMainnet,
   starknetSepolia
 } from '@snapshot-labs/sx';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { Account, AllowArray, Call, CallData, RpcProvider } from 'starknet';
 import { executionCall, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
@@ -24,6 +23,7 @@ import {
 } from '@/networks/common/helpers';
 import {
   Connector,
+  ExecutionInfo,
   NetworkActions,
   NetworkHelpers,
   SnapshotInfo,
@@ -196,9 +196,7 @@ export function createActions(
       account: string,
       space: Space,
       cid: string,
-      executionStrategy: string | null,
-      executionDestinationAddress: string | null,
-      transactions: MetaTransaction[]
+      executionInfo: ExecutionInfo | null
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -217,14 +215,14 @@ export function createActions(
       }
 
       let selectedExecutionStrategy;
-      if (executionStrategy) {
+      if (executionInfo) {
         selectedExecutionStrategy = {
-          addr: executionStrategy,
+          addr: executionInfo.strategyAddress,
           params: getExecutionData(
             space,
-            executionStrategy,
-            executionDestinationAddress,
-            transactions
+            executionInfo.strategyAddress,
+            executionInfo.destinationAddress,
+            convertToMetaTransactions(executionInfo.transactions)
           ).executionParams
         };
       } else {
@@ -284,9 +282,7 @@ export function createActions(
       space: Space,
       proposalId: number | string,
       cid: string,
-      executionStrategy: string | null,
-      executionDestinationAddress: string | null,
-      transactions: MetaTransaction[]
+      executionInfo: ExecutionInfo | null
     ) {
       const isContract = await getIsContract(connectorType, account);
 
@@ -304,14 +300,14 @@ export function createActions(
       }
 
       let selectedExecutionStrategy;
-      if (executionStrategy) {
+      if (executionInfo) {
         selectedExecutionStrategy = {
-          addr: executionStrategy,
+          addr: executionInfo.strategyAddress,
           params: getExecutionData(
             space,
-            executionStrategy,
-            executionDestinationAddress,
-            transactions
+            executionInfo.strategyAddress,
+            executionInfo.destinationAddress,
+            convertToMetaTransactions(executionInfo.transactions)
           ).executionParams
         };
       } else {
