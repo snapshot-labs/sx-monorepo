@@ -85,7 +85,7 @@ function handleFetchVotingPower() {
 
 watch(
   [proposal, () => web3.value.account, () => web3.value.authLoading],
-  ([toProposal, toAccount, toAuthLoading], [, fromAccount, , ,]) => {
+  ([toProposal, toAccount, toAuthLoading], [, fromAccount]) => {
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       resetVotingPower();
     }
