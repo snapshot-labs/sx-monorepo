@@ -18,6 +18,11 @@ type StrategyWithTreasury = SelectedStrategy & {
   treasury: RequiredProperty<SpaceMetadataTreasury>;
 };
 
+const MAX_BODY_LENGTH = {
+  regular: 10000,
+  turbo: 40000
+} as const;
+
 const TITLE_DEFINITION = {
   type: 'string',
   title: 'Title',
@@ -31,13 +36,6 @@ const DISCUSSION_DEFINITION = {
   title: 'Discussion',
   maxLength: 256,
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
-};
-
-const BODY_DEFINITION = {
-  type: 'string',
-  format: 'long',
-  title: 'Body',
-  maxLength: 9600
 };
 
 const CHOICES_DEFINITION = {
@@ -195,6 +193,12 @@ const extraContacts = computed(() => {
 
   return space.value.treasuries as Contact[];
 });
+const body_definition = computed(() => ({
+  type: 'string',
+  format: 'long',
+  title: 'Body',
+  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'regular']
+}));
 const formErrors = computed(() => {
   if (!proposal.value) return {};
 
@@ -206,7 +210,7 @@ const formErrors = computed(() => {
       required: ['title', 'choices'],
       properties: {
         title: TITLE_DEFINITION,
-        body: BODY_DEFINITION,
+        body: body_definition.value,
         discussion: DISCUSSION_DEFINITION,
         choices: CHOICES_DEFINITION
       }
@@ -473,7 +477,7 @@ export default defineComponent({
         <UiComposer
           v-else
           v-model="proposal.body"
-          :definition="BODY_DEFINITION"
+          :definition="body_definition"
           :error="formErrors.body"
         />
         <div class="s-base mb-5">
