@@ -9,4 +9,4 @@ updates:
     groups:
       snapshot:
         patterns:
-          - "@snapshot-labs/*"
+        - "@snapshot-labs/*"
