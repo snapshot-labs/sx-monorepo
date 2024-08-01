@@ -47,7 +47,7 @@ const currentVote = computed(
 
 const isEditable = computed(() => {
   return (
-    currentVote &&
+    currentVote.value &&
     offchainNetworks.includes(props.proposal.network) &&
     props.proposal.state === 'active'
   );
