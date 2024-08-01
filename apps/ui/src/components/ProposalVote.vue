@@ -58,20 +58,22 @@ const isEditable = computed(() => {
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
     <div class="py-2">
       <UiButton
-        class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2 cursor-default"
-        :class="{ 'cursor-pointer': isEditable }"
-        @click="isEditable && $emit('enterEditMode')"
+        class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2"
+        :disabled="!isEditable"
+        @click="$emit('enterEditMode')"
       >
         <div
           v-if="proposal.privacy"
           class="flex space-x-2 items-center grow truncate"
+          :class="{ 'text-skin-text': !isEditable }"
         >
-          <IH-lock-closed class="w-[16px] h-[16px] shrink-0" />
+          <IH-lock-closed class="size-[16px] shrink-0" />
           <span class="truncate">Encrypted choice</span>
         </div>
         <div
           v-else
           class="grow truncate"
+          :class="{ 'text-skin-text': !isEditable }"
           v-text="getChoiceText(proposal.choices, currentVote.choice)"
         />
         <IH-pencil v-if="isEditable" class="shrink-0" />
