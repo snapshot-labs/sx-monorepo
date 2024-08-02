@@ -392,7 +392,8 @@ export default defineComponent({
           <UiButton
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
             :loading="
-              sending || !votingPower || votingPower.status === 'loading'
+              !!web3.account &&
+              (sending || !votingPower || votingPower.status === 'loading')
             "
             :disabled="!canSubmit"
             @click="handleProposeClick"
