@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { Choice, Proposal } from '@/types';
 
-defineProps<{
+const props = defineProps<{
   sendingType: Choice | null;
   proposal: Proposal;
+  defaultChoice?: Choice;
 }>();
 
 const emit = defineEmits<{
   (e: 'vote', value: number);
 }>();
 
-const selectedChoice = ref<number | null>(null);
+const selectedChoice = ref<number | null>(
+  (!props.proposal.privacy && (props.defaultChoice as number)) || null
+);
 </script>
 
 <template>

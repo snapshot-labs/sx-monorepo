@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { Choice, Proposal } from '@/types';
 
-defineProps<{
+type ApprovalChoice = number[];
+
+const props = defineProps<{
   sendingType: Choice | null;
   proposal: Proposal;
+  defaultChoice?: Choice;
 }>();
 
 const emit = defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<number[]>([]);
+const selectedChoices = ref<ApprovalChoice>(
+  (!props.proposal.privacy && (props.defaultChoice as ApprovalChoice)) || []
+);
 
 function toggleSelectedChoice(choice: number) {
   if (selectedChoices.value.includes(choice)) {

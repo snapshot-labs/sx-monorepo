@@ -12,7 +12,7 @@ const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const proposalsStore = useProposalsStore();
 const { web3 } = useWeb3();
-const { loadVotes } = useAccount();
+const { loadVotes, votes } = useAccount();
 const { vote } = useActions();
 
 const sendingType = ref<Choice | null>(null);
@@ -20,6 +20,7 @@ const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const votingPowerDetailsError =
   ref<utils.errors.VotingPowerDetailsError | null>(null);
+const editMode = ref(false);
 
 const network = computed(() =>
   networkId.value ? getNetwork(networkId.value) : null
@@ -52,6 +53,12 @@ const votingPowerDecimals = computed(() => {
     0
   );
 });
+
+const currentVote = computed(
+  () =>
+    proposal.value &&
+    votes.value[`${proposal.value.network}:${proposal.value.id}`]
+);
 
 async function getVotingPower() {
   if (!network.value) return;
@@ -104,9 +111,11 @@ async function handleVoteClick(choice: Choice) {
         id.value,
         networkId.value!
       );
+      await loadVotes(proposal.value.network, [proposal.value.space.id]);
     }
   } finally {
     sendingType.value = null;
+    editMode.value = false;
   }
 }
 
@@ -196,12 +205,22 @@ watchEffect(() => {
             ['pending', 'active'].includes(proposal.state)
           "
         >
-          <h4 class="mb-2 eyebrow flex items-center">
-            <IH-cursor-click class="inline-block mr-2" />
-            <span>Cast your vote</span>
+          <h4 class="mb-2 eyebrow flex items-center space-x-2">
+            <template v-if="editMode">
+              <IH-cursor-click />
+              <span>Edit your vote</span>
+            </template>
+            <template v-else-if="currentVote">
+              <IH-check-circle />
+              <span>Your vote</span>
+            </template>
+            <template v-else>
+              <IH-cursor-click />
+              <span>Cast your vote</span>
+            </template>
           </h4>
           <IndicatorVotingPower
-            v-if="web3.account && networkId"
+            v-if="web3.account && networkId && (!currentVote || editMode)"
             v-slot="props"
             :network-id="networkId"
             :status="votingPowerStatus"
@@ -251,7 +270,12 @@ watchEffect(() => {
               </a>
             </template>
           </IndicatorVotingPower>
-          <ProposalVote v-if="proposal" :proposal="proposal">
+          <ProposalVote
+            v-if="proposal"
+            :proposal="proposal"
+            :edit-mode="editMode"
+            @enter-edit-mode="editMode = true"
+          >
             <ProposalVoteBasic
               v-if="proposal.type === 'basic'"
               :sending-type="sendingType"
@@ -261,24 +285,28 @@ watchEffect(() => {
               v-else-if="proposal.type === 'single-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
               :proposal="proposal"
               :sending-type="sendingType"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteRankedChoice
               v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
               :sending-type="sendingType"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteWeighted
               v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
               :proposal="proposal"
               :sending-type="sendingType"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
           </ProposalVote>
