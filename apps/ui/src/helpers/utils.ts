@@ -484,7 +484,10 @@ export function getChoiceText(
   }
 
   if (Array.isArray(choice)) {
-    return choice.map(index => availableChoices[index - 1]).join(', ');
+    return (
+      choice.map(index => availableChoices[index - 1]).join(', ') ||
+      'Blank vote'
+    );
   }
 
   const total = Object.values(choice).reduce((acc, weight) => acc + weight, 0);

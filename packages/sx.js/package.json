@@ -18,8 +18,7 @@
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc && tsc -p tsconfig.cjs.json",
-    "lint:nofix": "eslint ./src ./test --ext .ts",
-    "lint": "yarn lint:nofix --fix",
+    "lint": "eslint ./src ./test --ext .ts",
     "prepare": "yarn build",
     "prepublishOnly": "yarn run lint",
     "node:evm": "anvil",

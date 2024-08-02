@@ -103,7 +103,10 @@ watch(loading, () => {
     <div class="s-box p-4">
       <template v-if="logged && proposal">
         <div class="flex flex-col items-center">
-          <img :src="proposal.proposer.metadata.icons[0]" class="w-[48px] mb-3" />
+          <img
+            :src="proposal.proposer.metadata.icons[0]"
+            class="w-[48px] mb-3"
+          />
           <span class="text-center mb-2">
             <strong class="text-skin-link">{{
               proposal.proposer.metadata.name
