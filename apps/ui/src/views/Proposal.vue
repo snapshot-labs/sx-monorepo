@@ -63,7 +63,10 @@ const currentVote = computed(
 );
 
 async function handleVoteClick(choice: Choice) {
-  if (!web3.value.account) return (modalAccountOpen.value = true);
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
 
   selectedChoice.value = choice;
   modalOpenVote.value = true;
