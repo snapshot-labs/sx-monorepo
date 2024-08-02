@@ -193,7 +193,7 @@ const extraContacts = computed(() => {
 
   return space.value.treasuries as Contact[];
 });
-const body_definition = computed(() => ({
+const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
@@ -210,7 +210,7 @@ const formErrors = computed(() => {
       required: ['title', 'choices'],
       properties: {
         title: TITLE_DEFINITION,
-        body: body_definition.value,
+        body: bodyDefinition.value,
         discussion: DISCUSSION_DEFINITION,
         choices: CHOICES_DEFINITION
       }
@@ -477,7 +477,7 @@ export default defineComponent({
         <UiComposer
           v-else
           v-model="proposal.body"
-          :definition="body_definition"
+          :definition="bodyDefinition"
           :error="formErrors.body"
         />
         <div class="s-base mb-5">
