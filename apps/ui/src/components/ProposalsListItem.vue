@@ -19,7 +19,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
 const handleVoteClick = (choice: Choice) => {
   if (!web3.value.account) {
     modalAccountOpen.value = true;
-    return
+    return;
   }
 
   selectedChoice.value = choice;
