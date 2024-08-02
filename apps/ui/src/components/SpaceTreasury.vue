@@ -10,6 +10,7 @@ import {
 } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
+import ICStake from '~icons/c/stake';
 
 const ETHEREUM_NETWORKS = ['eth', 'sep'];
 
@@ -323,7 +324,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                   class="!px-0 w-[46px]"
                   @click.prevent="openModal('stake')"
                 >
-                  <IH-fire class="inline-block" />
+                  <ICStake class="inline-block" />
                 </UiButton>
               </UiTooltip>
             </div>
