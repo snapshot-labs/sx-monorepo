@@ -6,6 +6,7 @@ import { Proposal, Space } from '@/types';
 
 const LATEST_BLOCK_NAME = 'latest';
 
+type SpaceDetails = Proposal['space'];
 type VotingPowerItem = {
   votingPowers: VotingPower[];
   totalVotingPower: bigint;
@@ -18,12 +19,12 @@ type VotingPowerItem = {
 export const useVotingPowersStore = defineStore('votingPowers', () => {
   const votingPowers = reactive<Map<string, VotingPowerItem>>(new Map());
 
-  function getIndex(space: Space, block: number | null): string {
+  function getIndex(space: SpaceDetails, block: number | null): string {
     return `${space.id}:${block ?? LATEST_BLOCK_NAME}`;
   }
 
   function get(
-    space: Space,
+    space: SpaceDetails,
     block: number | null
   ): VotingPowerItem | undefined {
     return votingPowers.get(getIndex(space, block));
@@ -34,7 +35,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
     account: string,
     block: number | null
   ) {
-    const space: Space = 'space' in item ? (item.space as Space) : item;
+    const space = 'space' in item ? item.space : item;
 
     const existingVotingPower = get(space, block);
     if (existingVotingPower && existingVotingPower.status === 'success') return;
