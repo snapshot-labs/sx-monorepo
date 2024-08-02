@@ -7,7 +7,7 @@ import { Proposal, Space } from '@/types';
 const LATEST_BLOCK_NAME = 'latest';
 
 type SpaceDetails = Proposal['space'];
-type VotingPowerItem = {
+export type VotingPowerItem = {
   votingPowers: VotingPower[];
   totalVotingPower: bigint;
   status: VotingPowerStatus;

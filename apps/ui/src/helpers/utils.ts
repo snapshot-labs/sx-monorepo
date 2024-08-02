@@ -10,6 +10,7 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import sha3 from 'js-sha3';
 import { validateAndParseAddress } from 'starknet';
 import networks from '@/helpers/networks.json';
+import { VotingPowerItem } from '@/stores/votingPowers';
 import { Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
@@ -538,11 +539,7 @@ export function getSocialNetworksLink(data: any) {
     .filter(social => social.href);
 }
 
-export function getFormattedVotingPower(votingPower?: {
-  totalVotingPower: bigint;
-  decimals: number;
-  symbol: string;
-}) {
+export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
   if (!votingPower) return;
 
   const { totalVotingPower, decimals, symbol } = votingPower;

@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { utils } from '@snapshot-labs/sx';
 import { getFormattedVotingPower } from '@/helpers/utils';
 import { evmNetworks } from '@/networks';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { VotingPowerItem } from '@/stores/votingPowers';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
   networkId: NetworkID;
-  votingPower?: {
-    totalVotingPower: bigint;
-    votingPowers: VotingPower[];
-    status: VotingPowerStatus;
-    symbol: string;
-    decimals: number;
-    error: utils.errors.VotingPowerDetailsError | null;
-  };
+  votingPower?: VotingPowerItem;
 }>();
 
 defineEmits<{

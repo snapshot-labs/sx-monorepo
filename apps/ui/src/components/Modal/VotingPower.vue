@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import { utils } from '@snapshot-labs/sx';
 import { _n, shorten } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { VotingPowerItem } from '@/stores/votingPowers';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
-  votingPower?: {
-    symbol: string;
-    totalVotingPower: bigint;
-    decimals: number;
-    votingPowers: VotingPower[];
-    status: VotingPowerStatus;
-    error: utils.errors.VotingPowerDetailsError | null;
-  };
+  votingPower?: VotingPowerItem;
 }>();
 
 defineEmits<{

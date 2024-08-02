@@ -1,11 +1,10 @@
 <script setup lang="ts">
+import { VotingPowerItem } from '@/stores/votingPowers';
+
 const props = defineProps<{
   minVotingPower?: bigint;
   minProposalThreshold?: bigint;
-  votingPower: {
-    status: string;
-    totalVotingPower: bigint;
-  };
+  votingPower: Pick<VotingPowerItem, 'status' | 'totalVotingPower'>;
 }>();
 
 defineEmits<{
