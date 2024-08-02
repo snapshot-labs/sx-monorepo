@@ -53,7 +53,7 @@ const { resolved, address, networkId } = useResolve(param);
 const route = useRoute();
 const router = useRouter();
 const { propose, updateProposal } = useActions();
-const { web3, authInitiated } = useWeb3();
+const { web3 } = useWeb3();
 const {
   spaceKey,
   network: walletConnectNetwork,
@@ -315,14 +315,11 @@ watch(
   { immediate: true }
 );
 
-watch(
-  [space, () => web3.value.account, () => authInitiated.value],
-  ([toSpace, toAccount, authInitiated]) => {
-    if (!toSpace || !proposal.value || !authInitiated) return;
+watch([space, () => web3.value.account], ([toSpace, toAccount]) => {
+  if (!toSpace || !proposal.value || !toAccount) return;
 
-    handleFetchVotingPower();
-  }
-);
+  handleFetchVotingPower();
+});
 
 watch(proposalData, () => {
   if (!proposal.value) return;
