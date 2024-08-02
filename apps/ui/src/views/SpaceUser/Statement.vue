@@ -63,7 +63,9 @@ watch(userId, loadStatement, { immediate: true });
               Active
             </template>
             <template v-else>
-              <div class="size-[8px] mx-1 bg-gray-500 rounded-full inline-block" />
+              <div
+                class="size-[8px] mx-1 bg-gray-500 rounded-full inline-block"
+              />
               Inactive
             </template>
           </div>
