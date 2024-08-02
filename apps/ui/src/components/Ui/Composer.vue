@@ -39,7 +39,7 @@ const inputValueLength = computed(() => inputValue.value.length);
 const showError = computed<boolean>(
   () =>
     !!props.error &&
-    (dirty.value || model.value !== (props.definition.default || ''))
+    (dirty.value || props.definition.default !== inputValue.value)
 );
 
 watch(model, () => {
