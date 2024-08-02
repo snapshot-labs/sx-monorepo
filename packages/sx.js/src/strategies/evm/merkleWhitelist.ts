@@ -4,7 +4,7 @@ import { Strategy, StrategyConfig } from '../../clients/evm/types';
 
 type Entry = {
   address: string;
-  votingPower: bigint;
+  votingPower: string;
 };
 
 function getProofForVoter(
@@ -29,14 +29,13 @@ export default function createMerkleWhitelist(): Strategy {
       signerAddress: string,
       metadata: Record<string, any> | null
     ): Promise<string> {
-      const tree = metadata?.tree;
+      const tree: Entry[] = metadata?.tree;
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
-      const whitelist: [string, bigint][] = tree.map((entry: Entry) => [
-        entry.address,
-        entry.votingPower
-      ]);
+      const whitelist = tree.map(
+        entry => [entry.address, BigInt(entry.votingPower)] as [string, bigint]
+      );
       const merkleTree = StandardMerkleTree.of(whitelist, [
         'address',
         'uint96'
@@ -56,17 +55,16 @@ export default function createMerkleWhitelist(): Strategy {
       voterAddress: string,
       metadata: Record<string, any> | null
     ): Promise<bigint> {
-      const tree = metadata?.tree;
+      const tree: Entry[] = metadata?.tree;
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
       const match = tree.find(
-        (entry: Entry) =>
-          entry.address.toLowerCase() === voterAddress.toLowerCase()
+        entry => entry.address.toLowerCase() === voterAddress.toLowerCase()
       );
 
       if (match) {
-        return BigInt(match.votingPower.toString());
+        return BigInt(match.votingPower);
       }
 
       return 0n;

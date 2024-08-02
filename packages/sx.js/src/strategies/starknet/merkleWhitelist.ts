@@ -7,7 +7,7 @@ import { AddressType, generateMerkleProof, Leaf } from '../../utils/merkletree';
 type Entry = {
   type: AddressType;
   address: string;
-  votingPower: bigint;
+  votingPower: string;
 };
 
 export default function createMerkleWhitelistStrategy(): Strategy {
@@ -22,12 +22,12 @@ export default function createMerkleWhitelistStrategy(): Strategy {
       envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig
     ): Promise<string[]> {
-      const tree = metadata?.tree;
+      const tree: Entry[] = metadata?.tree;
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
       const leaves: Leaf[] = tree.map(
-        (entry: Entry) => new Leaf(entry.type, entry.address, entry.votingPower)
+        entry => new Leaf(entry.type, entry.address, BigInt(entry.votingPower))
       );
       const hashes = leaves.map(leaf => leaf.hash);
       const voterIndex = leaves.findIndex(
@@ -61,12 +61,12 @@ export default function createMerkleWhitelistStrategy(): Strategy {
       params: string[],
       clientConfig: ClientConfig
     ): Promise<bigint> {
-      const tree = metadata?.tree;
+      const tree: Entry[] = metadata?.tree;
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
       const leaves: Leaf[] = tree.map(
-        (entry: Entry) => new Leaf(entry.type, entry.address, entry.votingPower)
+        entry => new Leaf(entry.type, entry.address, BigInt(entry.votingPower))
       );
       const voter = leaves.find(
         leaf =>
