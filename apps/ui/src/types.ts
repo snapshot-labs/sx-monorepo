@@ -289,8 +289,7 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
-  executionStrategy: SelectedStrategy | null;
-  execution: Transaction[];
+  executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
 };
 

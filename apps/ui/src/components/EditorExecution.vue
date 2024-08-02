@@ -132,7 +132,7 @@ watch(
           />
         </div>
       </button>
-      <div class="flex gap-2 p-3">
+      <div class="flex flex-col lg:flex-row gap-2 p-3">
         <UiButton
           class="w-full space-x-2"
           :disabled="!treasury"

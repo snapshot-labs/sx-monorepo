@@ -50,17 +50,18 @@ const currentNetwork = computed(() => {
 });
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
-
-const isReadOnly = computed(() => {
-  return !props.space.executors_strategies.find(
-    strategy =>
-      strategy.treasury &&
-      strategy.treasury_chain &&
-      treasury.value &&
-      compareAddresses(strategy.treasury, treasury.value.wallet) &&
-      strategy.treasury_chain === treasury.value.network
-  );
-});
+const executionStrategy = computed(
+  () =>
+    props.space.executors_strategies.find(
+      strategy =>
+        strategy.treasury &&
+        strategy.treasury_chain &&
+        treasury.value &&
+        compareAddresses(strategy.treasury, treasury.value.wallet) &&
+        strategy.treasury_chain === treasury.value.network
+    ) ?? null
+);
+const isReadOnly = computed(() => !executionStrategy);
 
 const totalQuote = computed(() =>
   assets.value.reduce((acc, asset) => {
@@ -101,26 +102,6 @@ const treasuryExplorerUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
-const executionStrategy = computed(() => {
-  let executorIndex = props.space.executors.findIndex(executorAddress =>
-    compareAddresses(executorAddress, treasury.value?.wallet || '')
-  );
-
-  if (executorIndex === -1) {
-    // If the treasury is not an executor, use the first avatar executor
-    executorIndex = props.space.executors_types.findIndex(
-      e => e === 'SimpleQuorumAvatar'
-    );
-  }
-
-  if (executorIndex === -1) return null;
-
-  return {
-    address: props.space.executors[executorIndex],
-    type: props.space.executors_types[executorIndex]
-  };
-});
-
 const hasStakeableAssets = computed(() => {
   return (
     treasury.value &&
@@ -135,9 +116,13 @@ function openModal(type: 'tokens' | 'nfts' | 'stake') {
 }
 
 async function addTx(tx: Transaction) {
+  const executions = {} as Record<string, Transaction[]>;
+  if (executionStrategy.value) {
+    executions[executionStrategy.value.address] = [tx];
+  }
+
   const draftId = await createDraft(spaceKey.value, {
-    execution: [tx],
-    executionStrategy: executionStrategy.value
+    executions
   });
   router.push(`create/${draftId}`);
 }

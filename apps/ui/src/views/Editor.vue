@@ -6,12 +6,13 @@ import { resolver } from '@/helpers/resolver';
 import { compareAddresses, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
-import { ExecutionInfo } from '@/networks/types';
 import {
   Contact,
   RequiredProperty,
   SelectedStrategy,
-  SpaceMetadataTreasury
+  SpaceMetadataTreasury,
+  Transaction,
+  VoteType
 } from '@/types';
 
 type StrategyWithTreasury = SelectedStrategy & {
@@ -59,6 +60,7 @@ const {
   spaceKey,
   network: walletConnectNetwork,
   transaction,
+  executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
 const { getCurrent } = useMetaStore();
@@ -103,17 +105,11 @@ const proposalData = computed(() => {
 
   return JSON.stringify(omit(proposal.value, ['updatedAt']));
 });
-const executionStrategy = computed({
-  get() {
-    if (!proposal.value) return null;
+const enforcedVoteType = ref<VoteType | null>(null);
+const supportsMultipleTreasuries = computed(() => {
+  if (!space.value) return false;
 
-    return proposal.value.executionStrategy;
-  },
-  set(value: SelectedStrategy | null) {
-    if (!proposal.value) return;
-
-    proposal.value.executionStrategy = value;
-  }
+  return offchainNetworks.includes(space.value.network);
 });
 const supportedExecutionStrategies = computedAsync(async () => {
   const spaceValue = space.value;
@@ -180,13 +176,28 @@ const supportedExecutionStrategies = computedAsync(async () => {
         strategy && networkValue.helpers.isExecutorSupported(strategy.type)
     ) as StrategyWithTreasury[];
 }, null);
-const selectedExecutionWithTreasury = computed(() => {
-  if (!executionStrategy.value || !supportedExecutionStrategies.value)
-    return null;
 
-  return supportedExecutionStrategies.value.find(
-    strategy => strategy.address === executionStrategy.value?.address
-  );
+const editorExecutions = computed(() => {
+  if (!proposal.value || !supportedExecutionStrategies.value) return [];
+
+  const executions = [] as (StrategyWithTreasury & {
+    transactions: Transaction[];
+  })[];
+
+  for (const execution in proposal.value.executions) {
+    const strategy = supportedExecutionStrategies.value.find(
+      strategy => strategy.address === execution
+    );
+
+    if (!strategy) continue;
+
+    executions.push({
+      ...strategy,
+      transactions: proposal.value.executions[execution] ?? []
+    });
+  }
+
+  return executions;
 });
 const extraContacts = computed(() => {
   if (!space.value) return [];
@@ -240,20 +251,15 @@ async function handleProposeClick() {
   sending.value = true;
 
   try {
-    let executionInfo: ExecutionInfo | null = null;
-    if (
-      selectedExecutionWithTreasury.value &&
-      selectedExecutionWithTreasury.value.treasury.chainId
-    ) {
-      executionInfo = {
-        strategyAddress: selectedExecutionWithTreasury.value.address,
-        destinationAddress:
-          selectedExecutionWithTreasury.value.destinationAddress || '',
-        transactions: proposal.value.execution,
-        treasuryName: selectedExecutionWithTreasury.value.treasury.name,
-        chainId: selectedExecutionWithTreasury.value.treasury.chainId
-      };
-    }
+    const executions = editorExecutions.value
+      .filter(strategy => strategy.treasury.chainId)
+      .map(strategy => ({
+        strategyAddress: strategy.address,
+        destinationAddress: strategy.destinationAddress || '',
+        transactions: proposal.value?.executions[strategy.address] ?? [],
+        treasuryName: strategy.treasury.name,
+        chainId: strategy.treasury.chainId as number
+      }));
 
     let result;
     if (proposal.value.proposalId) {
@@ -265,7 +271,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        executionInfo
+        executions
       );
     } else {
       result = await propose(
@@ -275,7 +281,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
-        executionInfo
+        executions
       );
     }
     if (result) {
@@ -291,28 +297,62 @@ async function handleProposeClick() {
 }
 
 async function handleExecutionStrategySelected(
-  selectedExecutionStrategy: SelectedStrategy
+  selectedExecutionStrategy: StrategyWithTreasury
 ) {
-  if (executionStrategy.value?.address === selectedExecutionStrategy.address) {
-    executionStrategy.value = null;
+  if (!proposal.value || !supportedExecutionStrategies.value) return;
+
+  const alreadySelected =
+    proposal.value.executions[selectedExecutionStrategy.address];
+
+  if (alreadySelected) {
+    delete proposal.value.executions[selectedExecutionStrategy.address];
   } else {
-    executionStrategy.value = selectedExecutionStrategy;
-    if (executionStrategy.value.type === 'oSnap' && proposal.value) {
-      proposal.value.type = 'basic';
+    if (!supportsMultipleTreasuries.value) {
+      proposal.value.executions = {};
     }
+
+    proposal.value.executions[selectedExecutionStrategy.address] = [];
   }
+
+  const hasOSnap = supportedExecutionStrategies.value.some(
+    strategy =>
+      strategy.type === 'oSnap' && proposal.value?.executions[strategy.address]
+  );
+
+  if (hasOSnap && proposal.value) {
+    enforcedVoteType.value = 'basic';
+    proposal.value.type = 'basic';
+  } else {
+    enforcedVoteType.value = null;
+  }
+}
+
+function handleExecutionUpdated(
+  strategyAddress: string,
+  transactions: Transaction[]
+) {
+  if (!proposal.value) return;
+
+  proposal.value.executions[strategyAddress] = transactions;
 }
 
 function handleTransactionAccept() {
   if (
     !spaceKey.value ||
-    !executionStrategy.value ||
+    !walletConnectTransactionExecutionStrategy.value ||
     !transaction.value ||
     !proposal.value
   )
     return;
 
-  proposal.value.execution.push(transaction.value);
+  const transactions =
+    proposal.value.executions[
+      walletConnectTransactionExecutionStrategy.value.address
+    ] ?? [];
+
+  proposal.value.executions[
+    walletConnectTransactionExecutionStrategy.value.address
+  ] = [...transactions, transaction.value];
 
   reset();
 }
@@ -519,19 +559,20 @@ export default defineComponent({
                   }})
                 </span>
               </span>
-              <IH-check
-                v-if="executionStrategy?.address === strategy.address"
-              />
+              <IH-check v-if="proposal.executions[strategy.address]" />
             </ExecutionButton>
           </div>
           <EditorExecution
-            v-if="selectedExecutionWithTreasury"
-            :key="selectedExecutionWithTreasury.address"
-            v-model="proposal.execution"
+            v-for="execution in editorExecutions"
+            :key="execution.address"
+            :model-value="execution.transactions"
             :space="space"
-            :treasury-data="selectedExecutionWithTreasury.treasury"
+            :treasury-data="execution.treasury"
             :extra-contacts="extraContacts"
             class="mb-4"
+            @update:model-value="
+              value => handleExecutionUpdated(execution.address, value)
+            "
           />
         </div>
       </UiContainer>
@@ -544,9 +585,7 @@ export default defineComponent({
       <EditorVotingType
         v-model="proposal"
         :voting-types="
-          selectedExecutionWithTreasury?.type === 'oSnap'
-            ? ['basic']
-            : space.voting_types
+          enforcedVoteType ? [enforcedVoteType] : space.voting_types
         "
       />
       <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />

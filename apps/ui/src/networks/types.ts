@@ -122,8 +122,12 @@ export type ReadOnlyNetworkActions = {
     connectorType: Connector,
     account: string,
     space: Space,
-    cid: string,
-    executionInfo: ExecutionInfo | null
+    title: string,
+    body: string,
+    discussion: string,
+    type: VoteType,
+    choices: string[],
+    executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
     web3: Web3Provider,
@@ -131,8 +135,12 @@ export type ReadOnlyNetworkActions = {
     account: string,
     space: Space,
     proposalId: number | string,
-    cid: string,
-    executionInfo: ExecutionInfo | null
+    title: string,
+    body: string,
+    discussion: string,
+    type: VoteType,
+    choices: string[],
+    executions: ExecutionInfo[] | null
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(

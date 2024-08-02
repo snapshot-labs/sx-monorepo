@@ -4,7 +4,23 @@ import { Draft, Drafts, VoteType } from '@/types';
 
 const PREFERRED_VOTE_TYPE = 'single-choice';
 
-const proposals = reactive<Drafts>(lsGet('proposals', {}));
+const storedProposals = lsGet('proposals', {});
+const processedProposals = Object.fromEntries(
+  Object.entries(storedProposals).map(([k, v]) => {
+    const processed = v as any;
+
+    // convert single treasury to multiple treasuries format
+    if ('execution' in processed && 'executionStrategy' in processed) {
+      processed.executions = {
+        [processed.executionStrategy.address]: processed.execution
+      };
+    }
+
+    return [k, v];
+  })
+);
+
+const proposals = reactive<Drafts>(processedProposals as Drafts);
 const spaceVoteType = reactive(new Map<string, VoteType>());
 
 function generateId() {
@@ -34,7 +50,7 @@ export function useEditor() {
 
   function removeEmpty(proposals: Drafts): Drafts {
     return Object.entries(proposals).reduce((acc, [id, proposal]) => {
-      const { execution, type, choices, ...rest } = omit(proposal, [
+      const { executions, type, choices, ...rest } = omit(proposal, [
         'updatedAt'
       ]);
       const hasFormValues = Object.values(rest).some(val => !!val);
@@ -43,7 +59,7 @@ export function useEditor() {
         type !== 'basic' && (choices || []).some(val => !!val);
 
       if (
-        execution.length === 0 &&
+        Object.keys(executions).length === 0 &&
         !hasFormValues &&
         !hasChangedVotingType &&
         !hasFormChoices
@@ -102,12 +118,12 @@ export function useEditor() {
       discussion: '',
       type,
       choices,
-      executionStrategy: null,
-      execution: [],
+      executions: Object.create(null),
       updatedAt: Date.now(),
       proposalId: null,
       ...payload
     };
+
     return id;
   }
 
