@@ -218,8 +218,8 @@ watchEffect(() => {
           >
             <div
               v-if="
-                votingPower &&
-                votingPower.error?.details === 'NOT_READY_YET' &&
+                votingPower?.error &&
+                votingPower.error.details === 'NOT_READY_YET' &&
                 ['evmSlotValue', 'ozVotesStorageProof'].includes(
                   votingPower.error.source
                 )
