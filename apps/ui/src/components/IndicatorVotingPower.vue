@@ -52,7 +52,7 @@ function handleModalOpen() {
         >
           <IH-lightning-bolt class="inline-block -ml-1" />
           <IH-exclamation
-            v-if="props.votingPower && props.votingPower.status === 'error'"
+            v-if="props.votingPower?.status === 'error'"
             class="inline-block ml-1 text-rose-500"
           />
           <span v-else class="ml-1">{{ formattedVotingPower }}</span>
