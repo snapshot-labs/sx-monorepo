@@ -2,16 +2,20 @@
 import Draggable from 'vuedraggable';
 import { Choice, Proposal } from '@/types';
 
+type RankedChoice = number[];
+
 const props = defineProps<{
   proposal: Proposal;
+  defaultChoice?: Choice;
 }>();
 
 const emit = defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<number[]>(
-  props.proposal.choices.map((_, i) => i + 1)
+const selectedChoices = ref<RankedChoice>(
+  (!props.proposal.privacy && (props.defaultChoice as RankedChoice)) ||
+    props.proposal.choices.map((_, i) => i + 1)
 );
 </script>
 

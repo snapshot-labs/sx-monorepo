@@ -5,7 +5,7 @@ import { NetworkID } from '@/types';
 
 const props = withDefaults(
   defineProps<{
-    id: string;
+    id?: string;
     size?: number;
   }>(),
   {
@@ -13,10 +13,10 @@ const props = withDefaults(
   }
 );
 
-const [network] = props.id.split(':');
-
 const currentNetwork = computed(() => {
+  if (!props.id) return null;
   try {
+    const [network] = props.id.split(':');
     return getNetwork(network as NetworkID);
   } catch (e) {
     return null;
@@ -27,12 +27,14 @@ const currentNetwork = computed(() => {
 <template>
   <div class="relative">
     <img
-      :src="(currentNetwork && getUrl(currentNetwork.avatar)) ?? undefined"
-      :title="(currentNetwork && currentNetwork.name) ?? undefined"
+      v-if="currentNetwork"
+      :src="getUrl(currentNetwork.avatar) ?? undefined"
+      :title="currentNetwork.name"
       :style="{
         width: `${size}px`,
         height: `${size}px`
       }"
+      :alt="currentNetwork.name"
       class="absolute rounded-full -bottom-1 -right-1 border-2 bg-skin-border border-skin-bg"
     />
     <slot />

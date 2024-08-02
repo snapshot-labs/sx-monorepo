@@ -20,11 +20,12 @@ const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const { loadVotes } = useAccount();
 const { modalAccountOpen } = useModal();
 
 const modalOpenVote = ref(false);
 const selectedChoice = ref<Choice | null>(null);
+const { loadVotes, votes } = useAccount();
+const editMode = ref(false);
 
 const id = computed(() => route.params.id as string);
 const proposal = computed(() => {
@@ -55,6 +56,12 @@ const votingPowerDecimals = computed(() => {
   );
 });
 
+const currentVote = computed(
+  () =>
+    proposal.value &&
+    votes.value[`${proposal.value.network}:${proposal.value.id}`]
+);
+
 async function handleVoteClick(choice: Choice) {
   if (!web3.value.account) return (modalAccountOpen.value = true);
 
@@ -67,13 +74,18 @@ async function handleVoteSubmitted() {
 
   selectedChoice.value = null;
 
-  // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-  if (offchainNetworks.includes(proposal.value.network)) {
-    proposalsStore.fetchProposal(
-      spaceAddress.value!,
-      id.value,
-      networkId.value!
-    );
+  try {
+    // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+    if (offchainNetworks.includes(proposal.value.network)) {
+      proposalsStore.fetchProposal(
+        spaceAddress.value!,
+        id.value,
+        networkId.value!
+      );
+      await loadVotes(proposal.value.network, [proposal.value.space.id]);
+    }
+  } finally {
+    editMode.value = false;
   }
 }
 
@@ -182,12 +194,22 @@ watchEffect(() => {
             ['pending', 'active'].includes(proposal.state)
           "
         >
-          <h4 class="mb-2 eyebrow flex items-center">
-            <IH-cursor-click class="inline-block mr-2" />
-            <span>Cast your vote</span>
+          <h4 class="mb-2 eyebrow flex items-center space-x-2">
+            <template v-if="editMode">
+              <IH-cursor-click />
+              <span>Edit your vote</span>
+            </template>
+            <template v-else-if="currentVote">
+              <IH-check-circle />
+              <span>Your vote</span>
+            </template>
+            <template v-else>
+              <IH-cursor-click />
+              <span>Cast your vote</span>
+            </template>
           </h4>
           <IndicatorVotingPower
-            v-if="web3.account && networkId"
+            v-if="web3.account && networkId && (!currentVote || editMode)"
             v-slot="props"
             :network-id="networkId"
             :voting-power="votingPower"
@@ -238,7 +260,12 @@ watchEffect(() => {
               </a>
             </template>
           </IndicatorVotingPower>
-          <ProposalVote v-if="proposal" :proposal="proposal">
+          <ProposalVote
+            v-if="proposal"
+            :proposal="proposal"
+            :edit-mode="editMode"
+            @enter-edit-mode="editMode = true"
+          >
             <ProposalVoteBasic
               v-if="proposal.type === 'basic'"
               @vote="handleVoteClick"
@@ -246,21 +273,25 @@ watchEffect(() => {
             <ProposalVoteSingleChoice
               v-else-if="proposal.type === 'single-choice'"
               :proposal="proposal"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteApproval
               v-else-if="proposal.type === 'approval'"
               :proposal="proposal"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteRankedChoice
               v-else-if="proposal.type === 'ranked-choice'"
               :proposal="proposal"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
             <ProposalVoteWeighted
               v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
               :proposal="proposal"
+              :default-choice="currentVote?.choice"
               @vote="handleVoteClick"
             />
           </ProposalVote>

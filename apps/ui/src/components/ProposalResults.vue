@@ -9,6 +9,8 @@ import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
 
+const SHUTTER_URL = 'https://blog.shutter.network/shielded-voting';
+
 const props = withDefaults(
   defineProps<{
     proposal: ProposalType;
@@ -92,8 +94,8 @@ const otherResultsSummary = computed(() => {
     </div>
     <div>
       <a
-        href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
-        class="flex items-center text-skin-text"
+        :href="SHUTTER_URL"
+        class="flex items-center text-skin-link"
         target="_blank"
       >
         <IC-Shutter class="w-[80px]" />
@@ -185,8 +187,8 @@ const otherResultsSummary = computed(() => {
       </div>
       <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
         <a
-          href="https://blog.shutter.network/announcing-shutter-governance-shielded-voting-for-daos/"
-          class="flex items-center text-skin-text"
+          :href="SHUTTER_URL"
+          class="flex items-center text-skin-link"
           target="_blank"
         >
           <IC-Shutter class="w-[80px]" />

@@ -2,15 +2,20 @@
 import { _p, getChoiceWeight } from '@/helpers/utils';
 import { Choice, Proposal } from '@/types';
 
-defineProps<{
+type WeightedChoice = Record<string, number>;
+
+const props = defineProps<{
   proposal: Proposal;
+  defaultChoice?: Choice;
 }>();
 
 defineEmits<{
   (e: 'vote', value: Choice);
 }>();
 
-const selectedChoices = ref<Record<string, number>>({});
+const selectedChoices = ref<WeightedChoice>(
+  (!props.proposal.privacy && (props.defaultChoice as WeightedChoice)) || {}
+);
 
 function increaseChoice(index: number) {
   selectedChoices.value[index] ||= 0;
