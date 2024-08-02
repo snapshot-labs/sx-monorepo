@@ -19,7 +19,7 @@ type StrategyWithTreasury = SelectedStrategy & {
 };
 
 const MAX_BODY_LENGTH = {
-  regular: 10000,
+  default: 10000,
   turbo: 40000
 } as const;
 
@@ -197,7 +197,7 @@ const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'regular']
+  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default']
 }));
 const formErrors = computed(() => {
   if (!proposal.value) return {};
