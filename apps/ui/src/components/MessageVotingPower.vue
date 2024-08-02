@@ -4,7 +4,7 @@ import { VotingPowerItem } from '@/stores/votingPowers';
 const props = defineProps<{
   minVotingPower?: bigint;
   minProposalThreshold?: bigint;
-  votingPower: Pick<VotingPowerItem, 'status' | 'totalVotingPower'>;
+  votingPower: VotingPowerItem;
 }>();
 
 defineEmits<{
