@@ -126,13 +126,22 @@ watch(
         />
       </dl>
       <div class="s-box">
-        <UiForm v-model="form" :error="formErrors" :definition="definition" />
+        <UiForm
+          v-model="form"
+          :error="formErrors"
+          :definition="VOTE_DEFINITION"
+        />
       </div>
     </div>
 
     <template #footer>
-      <div class="flex space-x-3">
-        <UiButton class="w-full" @click="$emit('close')"> Cancel </UiButton>
+      <div class="flex flex-col xs:flex-row gap-3">
+        <UiButton
+          class="w-full order-last xs:order-none"
+          @click="$emit('close')"
+        >
+          Cancel
+        </UiButton>
         <UiButton
           primary
           class="w-full"
