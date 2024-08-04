@@ -2421,10 +2421,10 @@
     yargs "^17.7.2"
     zod "^3.21.4"
 
-"@snapshot-labs/eslint-config-base@^0.1.0-beta.17":
-  version "0.1.0-beta.17"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-base/-/eslint-config-base-0.1.0-beta.17.tgz#e989acfb31facb1518cdf170499de47aec1832c3"
-  integrity sha512-+NE6BTOKhxvs1el73r9cQEm3SOBhp9La8HUumE4WbMoZz67ovPsdJQt7QuqnqZNDAEiW5sP0eJNsnvvxGxO0ug==
+"@snapshot-labs/eslint-config-base@^0.1.0-beta.18":
+  version "0.1.0-beta.18"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-base/-/eslint-config-base-0.1.0-beta.18.tgz#b39a1e6f14e7cdccbc02a70ae52e8a49459a41c3"
+  integrity sha512-OLB5Lcw+SUkjVhz6lo4oTCFthEkQrczh6t73dW4wmlug+OSAUPa8Uk9mh//b1Dsc4kQuh63CRVwRChJQlsuUHg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.7.3"
     "@typescript-eslint/parser" "^6.7.3"
@@ -2432,20 +2432,20 @@
     eslint-plugin-import "^2.29.0"
     eslint-plugin-prettier "^5.0.1"
 
-"@snapshot-labs/eslint-config-vue@^0.1.0-beta.17":
-  version "0.1.0-beta.17"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-vue/-/eslint-config-vue-0.1.0-beta.17.tgz#dccb2d31bb33345263db9f513160c047a395268d"
-  integrity sha512-3VPFLU3IsSsoxcWKSAlcDukAJVYx74boZNwn9LHmOoUz4R94w3yCaZ/SLLjjO03p203R0awfl3TBZ64yyPt8/A==
+"@snapshot-labs/eslint-config-vue@^0.1.0-beta.18":
+  version "0.1.0-beta.18"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config-vue/-/eslint-config-vue-0.1.0-beta.18.tgz#636d3e32513b155c5015901e66d928303d6560db"
+  integrity sha512-hJU+G3z9UvSyiFI+vK+xBcRNSttA2LFs0RB7SsMKPKCB4rC5vMZl0sH5A2BjWpLGvIi6PoS3WVhpEfn0ozxI6A==
   dependencies:
-    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.17"
+    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.18"
     eslint-plugin-vue "^9.18.1"
 
-"@snapshot-labs/eslint-config@0.1.0-beta.17", "@snapshot-labs/eslint-config@^0.1.0-beta.17":
-  version "0.1.0-beta.17"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config/-/eslint-config-0.1.0-beta.17.tgz#fe6d4721937902415888a1fa6fec15c57b114870"
-  integrity sha512-hgEL6hbMAeYKaw7D6Fh+axsU/RZtfCsZHdJOD+CpG/x4+jXaWnV+tKSe6AidT/Yz/wK/4V76t6cAkVJ10ciLOw==
+"@snapshot-labs/eslint-config@0.1.0-beta.18", "@snapshot-labs/eslint-config@^0.1.0-beta.18":
+  version "0.1.0-beta.18"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/eslint-config/-/eslint-config-0.1.0-beta.18.tgz#fb5b80f546a73399c3e071dcd29616077f489c4e"
+  integrity sha512-wE6Kd8aToMQSAf3wkRJxZBVboau9Wys04PC5yAUwABt1E2KOhJQ9d29NFpJtLPN+B0WBni/m6o46SmNMGkKXZg==
   dependencies:
-    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.17"
+    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.18"
 
 "@snapshot-labs/highlight@^0.1.0-beta.2":
   version "0.1.0-beta.2"
@@ -2458,10 +2458,10 @@
     "@snapshot-labs/pineapple" "^0.2.0"
     cross-fetch "^3.1.5"
 
-"@snapshot-labs/lock@^0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.5.tgz#fd8be8031784182a37e3b5b190060f931756c4b9"
-  integrity sha512-nxrPS1mwpXzn+6eiYxiouZxuDxDuLzMhM5c+hajD6SZtE5MwQcNuRnN4yKqk7KrudoWXE3XOImNIyKg7vOhHkw==
+"@snapshot-labs/lock@^0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.6.tgz#b910da3a4006438d7ed9d6f621801b2b617a29f3"
+  integrity sha512-9T/R2SzQf/y2Szd+yXFEX62YW/XuzIo7hfMB76gneYNNtFCbzzQtwQJNeGh/uJ8sEmuD1bES+hP1NRlohkgnlg==
   dependencies:
     "@coinbase/wallet-sdk" "^3.4.0"
     "@portis/web3" "^4.0.6"
@@ -2486,10 +2486,10 @@
   dependencies:
     ofetch "^1.3.3"
 
-"@snapshot-labs/prettier-config@0.1.0-beta.17", "@snapshot-labs/prettier-config@^0.1.0-beta.17":
-  version "0.1.0-beta.17"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.17.tgz#ded7d95d31c53be21c2e1d30322e02c3534a6a74"
-  integrity sha512-G2XcHaeLFEvmOtniqbNPNfAFT5g/UIKefRHGqUuSd6sSJp3zHqbpplPdID0IsPaDxu6mJu+UYiLW2ohoB7WauQ==
+"@snapshot-labs/prettier-config@0.1.0-beta.18", "@snapshot-labs/prettier-config@^0.1.0-beta.18":
+  version "0.1.0-beta.18"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.18.tgz#fcbd86d4557821bff774d60e5c636ad47ed85d77"
+  integrity sha512-v6tj7l19KJUWjBbsWpwxaYO2mlIDBFyAG0OMSPhUgrhltO7b6R4Ejxn2k4Qgi/NtlnOrj+3Gt3eQRry8Jfgjrg==
 
 "@solana/buffer-layout@^4.0.1":
   version "4.0.1"
@@ -12160,7 +12160,16 @@ strict-uri-encode@^2.0.0:
   resolved "https://registry.yarnpkg.com/strict-uri-encode/-/strict-uri-encode-2.0.0.tgz#b9c7330c7042862f6b142dc274bbcc5866ce3546"
   integrity sha512-QwiXZgpRcKkhTj2Scnn++4PKtWsH0kpzZ62L2R6c/LUVYv7hVnZqcg2+sMuT6R7Jusu1vviK/MFsu6kNJfWlEQ==
 
-"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.0.0, string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
+  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
+  dependencies:
+    emoji-regex "^8.0.0"
+    is-fullwidth-code-point "^3.0.0"
+    strip-ansi "^6.0.1"
+
+string-width@^4.0.0, string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -12224,7 +12233,7 @@ string_decoder@~1.1.1:
   dependencies:
     safe-buffer "~5.1.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -12237,6 +12246,13 @@ strip-ansi@^5.2.0:
   integrity sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA==
   dependencies:
     ansi-regex "^4.1.0"
+
+strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
 
 strip-ansi@^7.0.1:
   version "7.1.0"
@@ -13644,7 +13660,7 @@ wordwrap@^1.0.0:
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
   integrity sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -13657,6 +13673,15 @@ wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
+  dependencies:
+    ansi-styles "^4.0.0"
+    string-width "^4.1.0"
+    strip-ansi "^6.0.0"
+
+wrap-ansi@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
+  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
