@@ -45,6 +45,7 @@ export function useVotingPower() {
     () =>
       (votingPower.value &&
         space.value &&
+        votingPower.value.status === 'success' &&
         votingPower.value.totalVotingPower >=
           BigInt(space.value.proposal_threshold)) ||
       false
