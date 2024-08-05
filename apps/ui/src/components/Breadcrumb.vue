@@ -6,13 +6,11 @@ const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
 const uiStore = useUiStore();
 
-const param = ref<string>('');
-
-watchEffect(() => {
-  param.value = String(
+const param = computed(() =>
+  String(
     route.matched[0]?.name === 'space' ? route.params.id : route.params.space
-  );
-});
+  )
+);
 
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 
