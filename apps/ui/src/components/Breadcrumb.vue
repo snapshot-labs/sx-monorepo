@@ -9,10 +9,9 @@ const uiStore = useUiStore();
 const param = ref<string>('');
 
 watchEffect(() => {
-  param.value =
-    route.matched[0]?.name === 'space'
-      ? String(route.params.id)
-      : String(route.params.space);
+  param.value = String(
+    route.matched[0]?.name === 'space' ? route.params.id : route.params.space
+  );
 });
 
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
