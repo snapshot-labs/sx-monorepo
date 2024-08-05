@@ -80,8 +80,6 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       } else {
         vpItem.canVote = vpItem.totalVotingPower > 0n;
       }
-
-      console.log(vpItem);
     } catch (e: unknown) {
       if (e instanceof utils.errors.VotingPowerDetailsError) {
         vpItem.error = e;
