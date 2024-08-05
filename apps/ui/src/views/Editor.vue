@@ -227,11 +227,11 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  return (
-    !fetchingVotingPower.value &&
-    votingPowerValid.value &&
-    Object.keys(formErrors.value).length === 0
-  );
+  if (Object.keys(formErrors.value).length > 0) return false;
+
+  return web3.value.account
+    ? !fetchingVotingPower.value && votingPowerValid.value
+    : !web3.value.authLoading;
 });
 
 async function handleProposeClick() {
