@@ -98,7 +98,7 @@ watchEffect(() => setTitle('Network'));
   <div class="space-y-[80px] mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
-        <h1 class="mb-4 mono max-w-[600px] mx-auto">
+        <h1 class="mb-6 mono max-w-[600px] mx-auto">
           Unlock governance for your ecosystem.
         </h1>
         <a
@@ -173,7 +173,7 @@ watchEffect(() => setTitle('Network'));
 
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Get started</div>
-      <h1 class="mb-3">Start your integration</h1>
+      <h1 class="mb-5">Start your integration</h1>
       <a
         :href="LINK"
         target="_blank"
