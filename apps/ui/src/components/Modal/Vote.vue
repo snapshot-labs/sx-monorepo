@@ -112,13 +112,16 @@ watchEffect(async () => {
       />
       <dl>
         <dt class="text-sm leading-5">Choice</dt>
-        <dd class="font-semibold text-skin-heading text-[20px] leading-6">
+        <dd class="text-skin-heading text-[20px] leading-6">
           <span
             v-if="choice"
-            class="test-skin-heading"
+            class="test-skin-heading font-semibold"
             v-text="getChoiceText(proposal.choices, choice)"
           />
-          <span v-else class="text-skin-danger"> No choice selected </span>
+          <div v-else class="flex gap-1 text-skin-danger items-center">
+            <IH-exclamation-circle />
+            No choice selected
+          </div>
         </dd>
         <dt class="text-sm leading-5 mt-3">Voting power</dt>
         <dd v-if="!votingPower || votingPower.status === 'loading'">
