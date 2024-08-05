@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
+import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import {
-  Contact,
-  Space,
-  SpaceMetadataTreasury,
-  Transaction as TransactionType
-} from '@/types';
+import { Contact, Space, Transaction as TransactionType } from '@/types';
 
 const model = defineModel<TransactionType[]>({
   required: true
@@ -16,12 +12,12 @@ const model = defineModel<TransactionType[]>({
 
 const props = defineProps<{
   space: Space;
-  treasuryData: SpaceMetadataTreasury;
+  strategy: StrategyWithTreasury;
   extraContacts?: Contact[];
 }>();
 
 const uiStore = useUiStore();
-const { treasury } = useTreasury(props.treasuryData);
+const { treasury } = useTreasury(props.strategy.treasury);
 
 const editedTx: Ref<number | null> = ref(null);
 const modalState: Ref<{
@@ -109,50 +105,63 @@ watch(
 <template>
   <div class="space-y-3">
     <div class="overflow-hidden border rounded-lg">
-      <button
-        v-if="treasury"
-        class="w-full flex justify-between items-center px-4 py-3 text-start border-b"
+      <div
+        v-if="treasury && network"
+        class="w-full flex justify-between px-4 py-3 text-start"
       >
-        <UiBadgeNetwork :id="treasury.networkId" class="mr-3">
-          <UiStamp
-            :id="treasury.wallet"
-            type="avatar"
-            :size="32"
-            class="rounded-md"
-          />
-        </UiBadgeNetwork>
-        <div class="flex-1 leading-[22px]">
-          <h4
-            class="text-skin-link"
-            v-text="treasury.name || shorten(treasury.wallet)"
-          />
-          <div
-            class="text-skin-text text-[17px]"
-            v-text="shorten(treasury.wallet)"
-          />
+        <div class="flex justify-between items-center">
+          <UiBadgeNetwork :id="treasury.networkId" class="mr-3">
+            <UiStamp
+              :id="treasury.wallet"
+              type="avatar"
+              :size="32"
+              class="rounded-md"
+            />
+          </UiBadgeNetwork>
+          <div class="flex-1 leading-[22px]">
+            <h4
+              class="text-skin-link"
+              v-text="treasury.name || shorten(treasury.wallet)"
+            />
+            <div
+              class="text-skin-text text-[17px]"
+              v-text="
+                strategy.type === 'oSnap'
+                  ? 'oSnap'
+                  : `${network.constants.EXECUTORS[strategy.type]} execution strategy`
+              "
+            />
+          </div>
         </div>
-      </button>
-      <div class="flex flex-col lg:flex-row gap-2 p-3">
-        <UiButton
-          class="w-full space-x-2"
-          :disabled="!treasury"
-          @click="openModal('sendToken')"
-        >
-          <IH-cash class="inline-block" />
-          <span>Send token</span>
-        </UiButton>
-        <UiButton
-          class="w-full space-x-2"
-          :disabled="!treasury"
-          @click="openModal('sendNft')"
-        >
-          <IH-photograph class="inline-block" />
-          <span>Send NFT</span>
-        </UiButton>
-        <UiButton class="w-full space-x-2" @click="openModal('contractCall')">
-          <IH-code class="inline-block" />
-          <span>Contract call</span>
-        </UiButton>
+        <div class="space-x-2">
+          <UiTooltip title="Send token">
+            <UiButton
+              :disabled="!treasury"
+              class="!px-0 w-[46px]"
+              @click="openModal('sendToken')"
+            >
+              <IH-cash class="inline-block" />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Send NFT">
+            <UiButton
+              :disabled="!treasury"
+              class="!px-0 w-[46px]"
+              @click="openModal('sendNft')"
+            >
+              <IH-photograph class="inline-block" />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Contract call">
+            <UiButton
+              :disabled="!treasury"
+              class="!px-0 w-[46px]"
+              @click="openModal('contractCall')"
+            >
+              <IH-code class="inline-block" />
+            </UiButton>
+          </UiTooltip>
+        </div>
       </div>
       <template v-if="model.length > 0">
         <UiLabel label="Transactions" class="border-t" />

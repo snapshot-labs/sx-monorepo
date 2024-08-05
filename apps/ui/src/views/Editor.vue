@@ -493,7 +493,7 @@ export default defineComponent({
             :key="execution.address"
             :model-value="execution.transactions"
             :space="space"
-            :treasury-data="execution.treasury"
+            :strategy="execution"
             :extra-contacts="extraContacts"
             class="mb-4"
             @update:model-value="
