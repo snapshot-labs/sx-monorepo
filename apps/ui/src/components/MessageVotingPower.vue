@@ -28,20 +28,18 @@ defineEmits<{
       <IH-refresh />Retry
     </UiButton>
   </div>
-  <template v-else-if="votingPower.status === 'success'">
-    <UiAlert
-      v-if="action === 'vote' && !votingPower.canVote"
-      type="error"
-      v-bind="$attrs"
-    >
-      You do not have enough voting power to vote.
-    </UiAlert>
-    <UiAlert
-      v-else-if="action === 'propose' && !votingPower.canPropose"
-      type="error"
-      v-bind="$attrs"
-    >
-      You do not have enough voting power to create proposal in this space.
-    </UiAlert>
-  </template>
+  <UiAlert
+    v-else-if="action === 'vote' && !votingPower.canVote"
+    type="error"
+    v-bind="$attrs"
+  >
+    You do not have enough voting power to vote.
+  </UiAlert>
+  <UiAlert
+    v-else-if="action === 'propose' && !votingPower.canPropose"
+    type="error"
+    v-bind="$attrs"
+  >
+    You do not have enough voting power to create proposal in this space.
+  </UiAlert>
 </template>
