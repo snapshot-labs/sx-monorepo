@@ -27,8 +27,7 @@ const { web3 } = useWeb3();
 const {
   votingPower,
   fetch: fetchVotingPower,
-  reset: resetVotingPower,
-  hasVoteVp
+  reset: resetVotingPower
 } = useVotingPower();
 
 const loading = ref(false);
@@ -56,7 +55,7 @@ const canSubmit = computed(
     formValidated &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
-    hasVoteVp.value
+    votingPower.value?.canVote
 );
 
 async function handleSubmit() {
@@ -102,12 +101,11 @@ watchEffect(async () => {
     <template #header>
       <h3>Cast your vote</h3>
     </template>
-
     <div class="m-4 mb-3 flex flex-col space-y-3">
       <MessageVotingPower
         v-if="votingPower"
         :voting-power="votingPower"
-        :min-voting-power="0n"
+        action="vote"
         @fetch-voting-power="handleFetchVotingPower"
       />
       <dl>

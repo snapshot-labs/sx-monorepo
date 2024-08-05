@@ -36,21 +36,6 @@ export function useVotingPower() {
       )
   );
 
-  const hasVoteVp = computed(
-    () =>
-      (votingPower.value && votingPower.value.totalVotingPower > 0n) || false
-  );
-
-  const hasProposeVp = computed(
-    () =>
-      (votingPower.value &&
-        space.value &&
-        votingPower.value.status === 'success' &&
-        votingPower.value.totalVotingPower >=
-          BigInt(space.value.proposal_threshold)) ||
-      false
-  );
-
   function latestBlock(space: Space) {
     return supportsNullCurrent(space.network)
       ? null
@@ -79,5 +64,5 @@ export function useVotingPower() {
     }
   );
 
-  return { votingPower, hasVoteVp, hasProposeVp, fetch, reset };
+  return { votingPower, fetch, reset };
 }

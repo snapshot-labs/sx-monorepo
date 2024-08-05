@@ -63,7 +63,7 @@ const {
 } = useWalletConnectTransaction();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-const { votingPower, fetch: fetchVotingPower, hasProposeVp } = useVotingPower();
+const { votingPower, fetch: fetchVotingPower } = useVotingPower();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
@@ -225,7 +225,9 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  return hasProposeVp.value && Object.keys(formErrors.value).length === 0;
+  return (
+    votingPower.value?.canPropose && Object.keys(formErrors.value).length === 0
+  );
 });
 
 async function handleProposeClick() {
@@ -420,7 +422,7 @@ export default defineComponent({
           v-if="votingPower && space"
           class="mb-4"
           :voting-power="votingPower"
-          :min-proposal-threshold="BigInt(space.proposal_threshold)"
+          action="propose"
           @fetch-voting-power="handleFetchVotingPower"
         />
 

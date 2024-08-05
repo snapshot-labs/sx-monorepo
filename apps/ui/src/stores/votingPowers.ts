@@ -14,6 +14,8 @@ export type VotingPowerItem = {
   symbol: string;
   decimals: number;
   error: utils.errors.VotingPowerDetailsError | null;
+  canPropose: boolean;
+  canVote: boolean;
 };
 
 export function getIndex(space: SpaceDetails, block: number | null): string {
@@ -41,7 +43,9 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       totalVotingPower: 0n,
       decimals: 18,
       symbol: space.voting_power_symbol,
-      error: null
+      error: null,
+      canPropose: false,
+      canVote: false
     };
 
     if (existingVotingPower) {
@@ -69,6 +73,15 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
         status: 'success',
         decimals: Math.max(...vp.map(votingPower => votingPower.decimals), 0)
       };
+
+      if ('proposal_threshold' in space) {
+        vpItem.canPropose =
+          vpItem.totalVotingPower >= BigInt(space.proposal_threshold);
+      } else {
+        vpItem.canVote = vpItem.totalVotingPower > 0n;
+      }
+
+      console.log(vpItem);
     } catch (e: unknown) {
       if (e instanceof utils.errors.VotingPowerDetailsError) {
         vpItem.error = e;
