@@ -1,4 +1,5 @@
 import { supportsNullCurrent } from '@/networks';
+import { getIndex as getVotingPowerIndex } from '@/stores/votingPowers';
 import { Proposal, Space } from '@/types';
 
 export function useVotingPower() {
@@ -28,7 +29,11 @@ export function useVotingPower() {
   });
 
   const votingPower = computed(
-    () => space.value && votingPowersStore.get(space.value, block.value)
+    () =>
+      space.value &&
+      votingPowersStore.votingPowers.get(
+        getVotingPowerIndex(space.value, block.value)
+      )
   );
 
   const hasVoteVp = computed(

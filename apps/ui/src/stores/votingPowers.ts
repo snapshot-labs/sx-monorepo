@@ -16,19 +16,12 @@ export type VotingPowerItem = {
   error: utils.errors.VotingPowerDetailsError | null;
 };
 
+export function getIndex(space: SpaceDetails, block: number | null): string {
+  return `${space.id}:${block ?? LATEST_BLOCK_NAME}`;
+}
+
 export const useVotingPowersStore = defineStore('votingPowers', () => {
   const votingPowers = reactive<Map<string, VotingPowerItem>>(new Map());
-
-  function getIndex(space: SpaceDetails, block: number | null): string {
-    return `${space.id}:${block ?? LATEST_BLOCK_NAME}`;
-  }
-
-  function get(
-    space: SpaceDetails,
-    block: number | null
-  ): VotingPowerItem | undefined {
-    return votingPowers.get(getIndex(space, block));
-  }
 
   async function fetch(
     item: Space | Proposal,
@@ -37,7 +30,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
   ) {
     const space = 'space' in item ? item.space : item;
 
-    const existingVotingPower = get(space, block);
+    const existingVotingPower = votingPowers.get(getIndex(space, block));
     if (existingVotingPower && existingVotingPower.status === 'success') return;
 
     const network = getNetwork(item.network);
@@ -93,7 +86,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
   }
 
   return {
-    get,
+    votingPowers,
     fetch,
     reset
   };
