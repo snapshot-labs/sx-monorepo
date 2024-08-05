@@ -1,22 +1,14 @@
 <script setup lang="ts">
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
-import { validateForm } from '@/helpers/validation';
+import { getValidator } from '@/helpers/validation';
 import { Choice, Proposal } from '@/types';
 
-const definition = {
-  type: 'object',
-  title: 'Vote',
-  additionalProperties: false,
-  required: [],
-  properties: {
-    reason: {
-      title: 'Reason',
-      type: 'string',
-      format: 'long',
-      examples: ['Share you reason (optional)'],
-      maxLength: 1000
-    }
-  }
+const REASON_DEFINITION = {
+  title: 'Reason',
+  type: 'string',
+  format: 'long',
+  examples: ['Share you reason (optional)'],
+  maxLength: 1000
 };
 
 const props = defineProps<{
@@ -41,16 +33,27 @@ const {
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
+const formErrors = ref({} as Record<string, any>);
+const formValidated = ref(false);
 
-const formErrors = computed(() =>
-  validateForm(definition, form.value, { skipEmptyOptionalFields: true })
-);
+const formValidator = getValidator({
+  $async: true,
+  type: 'object',
+  title: 'Reason',
+  additionalProperties: false,
+  required: [],
+  properties: {
+    reason: REASON_DEFINITION
+  }
+});
+
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
 const canSubmit = computed(
   () =>
+    formValidated &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
     hasVoteVp.value
@@ -85,6 +88,13 @@ watch(
   },
   { immediate: true }
 );
+
+watchEffect(async () => {
+  formValidated.value = false;
+
+  formErrors.value = await formValidator.validateAsync(form.value);
+  formValidated.value = true;
+});
 </script>
 
 <template>
@@ -129,7 +139,7 @@ watch(
         <UiForm
           v-model="form"
           :error="formErrors"
-          :definition="VOTE_DEFINITION"
+          :definition="{ properties: { reason: REASON_DEFINITION } }"
         />
       </div>
     </div>
