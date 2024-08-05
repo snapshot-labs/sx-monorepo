@@ -103,7 +103,7 @@ watchEffect(async () => {
       <h3>Cast your vote</h3>
     </template>
 
-    <div class="m-4 flex flex-col space-y-3">
+    <div class="m-4 mb-3 flex flex-col space-y-3">
       <MessageVotingPower
         v-if="votingPower"
         :voting-power="votingPower"
