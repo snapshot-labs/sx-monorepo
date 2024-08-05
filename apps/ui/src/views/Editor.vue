@@ -1,23 +1,11 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
-import { CHAIN_IDS } from '@/helpers/constants';
-import { getIsOsnapEnabled } from '@/helpers/osnap';
+import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { resolver } from '@/helpers/resolver';
-import { compareAddresses, omit } from '@/helpers/utils';
+import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
-import {
-  Contact,
-  RequiredProperty,
-  SelectedStrategy,
-  SpaceMetadataTreasury,
-  Transaction,
-  VoteType
-} from '@/types';
-
-type StrategyWithTreasury = SelectedStrategy & {
-  treasury: RequiredProperty<SpaceMetadataTreasury>;
-};
+import { Contact, Transaction, VoteType } from '@/types';
 
 const MAX_BODY_LENGTH = {
   default: 10000,
@@ -79,8 +67,11 @@ const network = computed(() =>
 const space = computed(() => {
   if (!resolved.value) return null;
 
-  return spacesStore.spacesMap.get(`${networkId.value}:${address.value}`);
+  return (
+    spacesStore.spacesMap.get(`${networkId.value}:${address.value}`) ?? null
+  );
 });
+const { strategiesWithTreasuries } = useTreasuries(space);
 const proposalKey = computed(() => {
   if (!resolved.value) return null;
 
@@ -111,81 +102,16 @@ const supportsMultipleTreasuries = computed(() => {
 
   return offchainNetworks.includes(space.value.network);
 });
-const supportedExecutionStrategies = computedAsync(async () => {
-  const spaceValue = space.value;
-  const networkValue = network.value;
-  if (!spaceValue || !networkValue) return null;
-
-  let oSnapSupportPerTreasury: boolean[] | null = null;
-  if (networkId.value && offchainNetworks.includes(networkId.value)) {
-    oSnapSupportPerTreasury = await Promise.all(
-      spaceValue.treasuries.map(async treasury => {
-        if (
-          !treasury.network ||
-          !treasury.address ||
-          !CHAIN_IDS[treasury.network]
-        ) {
-          return false;
-        }
-
-        return getIsOsnapEnabled(
-          CHAIN_IDS[treasury.network].toString(),
-          treasury.address
-        );
-      })
-    );
-  }
-
-  return spaceValue.treasuries
-    .map((treasury, i) => {
-      if (networkId.value && offchainNetworks.includes(networkId.value)) {
-        if (!oSnapSupportPerTreasury || !oSnapSupportPerTreasury[i]) {
-          return null;
-        }
-
-        return {
-          address: treasury.address,
-          destinationAddress: null,
-          type: 'oSnap',
-          treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
-        };
-      }
-
-      const strategy = spaceValue.executors_strategies.find(strategy => {
-        return (
-          strategy.treasury &&
-          strategy.treasury_chain &&
-          treasury.address &&
-          treasury.network &&
-          compareAddresses(strategy.treasury, treasury.address) &&
-          CHAIN_IDS[treasury.network] === strategy.treasury_chain
-        );
-      });
-
-      if (!strategy) return null;
-
-      return {
-        address: strategy.address,
-        destinationAddress: strategy.destination_address,
-        type: strategy.type,
-        treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
-      };
-    })
-    .filter(
-      strategy =>
-        strategy && networkValue.helpers.isExecutorSupported(strategy.type)
-    ) as StrategyWithTreasury[];
-}, null);
 
 const editorExecutions = computed(() => {
-  if (!proposal.value || !supportedExecutionStrategies.value) return [];
+  if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
   const executions = [] as (StrategyWithTreasury & {
     transactions: Transaction[];
   })[];
 
   for (const execution in proposal.value.executions) {
-    const strategy = supportedExecutionStrategies.value.find(
+    const strategy = strategiesWithTreasuries.value.find(
       strategy => strategy.address === execution
     );
 
@@ -299,7 +225,7 @@ async function handleProposeClick() {
 async function handleExecutionStrategySelected(
   selectedExecutionStrategy: StrategyWithTreasury
 ) {
-  if (!proposal.value || !supportedExecutionStrategies.value) return;
+  if (!proposal.value || !strategiesWithTreasuries.value) return;
 
   const alreadySelected =
     proposal.value.executions[selectedExecutionStrategy.address];
@@ -314,7 +240,7 @@ async function handleExecutionStrategySelected(
     proposal.value.executions[selectedExecutionStrategy.address] = [];
   }
 
-  const hasOSnap = supportedExecutionStrategies.value.some(
+  const hasOSnap = strategiesWithTreasuries.value.some(
     strategy =>
       strategy.type === 'oSnap' && proposal.value?.executions[strategy.address]
   );
@@ -536,14 +462,14 @@ export default defineComponent({
           v-if="
             space &&
             network &&
-            supportedExecutionStrategies &&
-            supportedExecutionStrategies.length > 0
+            strategiesWithTreasuries &&
+            strategiesWithTreasuries.length > 0
           "
         >
           <h4 class="eyebrow mb-2">Execution</h4>
           <div class="border rounded-lg mb-3">
             <ExecutionButton
-              v-for="strategy in supportedExecutionStrategies"
+              v-for="strategy in strategiesWithTreasuries"
               :key="strategy.address"
               class="flex-auto flex items-center gap-2"
               @click="handleExecutionStrategySelected(strategy)"

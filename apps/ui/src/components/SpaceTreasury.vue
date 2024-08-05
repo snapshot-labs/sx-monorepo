@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import {
-  _c,
-  _n,
-  compareAddresses,
-  sanitizeUrl,
-  shorten
-} from '@/helpers/utils';
+import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
@@ -25,6 +19,7 @@ const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury } = useTreasury(props.treasuryData);
+const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
 const page: Ref<'tokens' | 'nfts'> = ref('tokens');
@@ -52,16 +47,11 @@ const currentNetwork = computed(() => {
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 const executionStrategy = computed(
   () =>
-    props.space.executors_strategies.find(
-      strategy =>
-        strategy.treasury &&
-        strategy.treasury_chain &&
-        treasury.value &&
-        compareAddresses(strategy.treasury, treasury.value.wallet) &&
-        strategy.treasury_chain === treasury.value.network
+    strategiesWithTreasuries.value?.find(
+      strategy => strategy.treasury.address === treasury.value?.wallet
     ) ?? null
 );
-const isReadOnly = computed(() => !executionStrategy);
+const isReadOnly = computed(() => executionStrategy.value === null);
 
 const totalQuote = computed(() =>
   assets.value.reduce((acc, asset) => {
@@ -419,6 +409,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         @add="addTx"
       />
       <ModalLinkWalletConnect
+        v-if="executionStrategy"
         :open="modalOpen.walletConnectLink"
         :address="treasury.wallet"
         :network="treasury.network"
