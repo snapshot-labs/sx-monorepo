@@ -280,7 +280,10 @@ async function handleProposeClick() {
     }
     if (result) {
       proposalsStore.reset(address.value!, networkId.value!);
-      router.back();
+      router.push({
+        name: 'space-proposals',
+        params: { id: param.value }
+      });
     }
   } finally {
     sending.value = false;
