@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate",
-    "lint": "eslint src/ test/ --ext .ts --fix",
+    "lint": "eslint src/ test/ --ext .ts",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "start": "node dist/src/index.js",
@@ -33,8 +33,8 @@
     "starknet": "^5.19.3"
   },
   "devDependencies": {
-    "@snapshot-labs/eslint-config": "0.1.0-beta.17",
-    "@snapshot-labs/prettier-config": "0.1.0-beta.17",
+    "@snapshot-labs/eslint-config": "0.1.0-beta.18",
+    "@snapshot-labs/prettier-config": "0.1.0-beta.18",
     "eslint": "^8.53.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
