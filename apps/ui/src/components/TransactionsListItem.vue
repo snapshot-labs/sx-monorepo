@@ -3,7 +3,6 @@ import { formatUnits } from '@ethersproject/units';
 import { getNames } from '@/helpers/stamp';
 import { _n, shorten } from '@/helpers/utils';
 import { Transaction } from '@/types';
-import ICStake from '~icons/c/stake';
 
 const props = defineProps<{ tx: Transaction }>();
 
@@ -53,7 +52,7 @@ const parsedTitle = computedAsync(
       <slot name="left" />
       <IH-cash v-if="tx._type === 'sendToken'" />
       <IH-photograph v-else-if="tx._type === 'sendNft'" />
-      <ICStake v-else-if="tx._type === 'stakeToken'" />
+      <IC-Stake v-else-if="tx._type === 'stakeToken'" />
       <IH-code v-else />
       <div class="ml-2 truncate text-skin-link" v-html="parsedTitle" />
     </div>
