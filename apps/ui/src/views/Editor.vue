@@ -110,21 +110,20 @@ const editorExecutions = computed(() => {
     transactions: Transaction[];
   })[];
 
-  for (const execution in proposal.value.executions) {
-    const strategy = strategiesWithTreasuries.value.find(
-      strategy => strategy.address === execution
-    );
-
-    if (!strategy) continue;
+  for (const strategy of strategiesWithTreasuries.value) {
+    const transactions = proposal.value.executions[strategy.address] ?? [];
 
     executions.push({
       ...strategy,
-      transactions: proposal.value.executions[execution] ?? []
+      transactions
     });
   }
 
   return executions;
 });
+const hasExecution = computed(() =>
+  editorExecutions.value.some(strategy => strategy.transactions.length > 0)
+);
 const extraContacts = computed(() => {
   if (!space.value) return [];
 
@@ -178,11 +177,14 @@ async function handleProposeClick() {
 
   try {
     const executions = editorExecutions.value
-      .filter(strategy => strategy.treasury.chainId)
+      .filter(
+        strategy =>
+          strategy.treasury.chainId && strategy.transactions.length > 0
+      )
       .map(strategy => ({
         strategyAddress: strategy.address,
         destinationAddress: strategy.destinationAddress || '',
-        transactions: proposal.value?.executions[strategy.address] ?? [],
+        transactions: strategy.transactions,
         treasuryName: strategy.treasury.name,
         chainId: strategy.treasury.chainId as number
       }));
@@ -219,37 +221,6 @@ async function handleProposeClick() {
     }
   } finally {
     sending.value = false;
-  }
-}
-
-async function handleExecutionStrategySelected(
-  selectedExecutionStrategy: StrategyWithTreasury
-) {
-  if (!proposal.value || !strategiesWithTreasuries.value) return;
-
-  const alreadySelected =
-    proposal.value.executions[selectedExecutionStrategy.address];
-
-  if (alreadySelected) {
-    delete proposal.value.executions[selectedExecutionStrategy.address];
-  } else {
-    if (!supportsMultipleTreasuries.value) {
-      proposal.value.executions = {};
-    }
-
-    proposal.value.executions[selectedExecutionStrategy.address] = [];
-  }
-
-  const hasOSnap = strategiesWithTreasuries.value.some(
-    strategy =>
-      strategy.type === 'oSnap' && proposal.value?.executions[strategy.address]
-  );
-
-  if (hasOSnap && proposal.value) {
-    enforcedVoteType.value = 'basic';
-    proposal.value.type = 'basic';
-  } else {
-    enforcedVoteType.value = null;
   }
 }
 
@@ -328,6 +299,21 @@ watch(proposalData, () => {
   if (!proposal.value) return;
 
   proposal.value.updatedAt = Date.now();
+});
+
+watchEffect(() => {
+  if (!proposal.value) return;
+
+  const hasOSnap = editorExecutions.value.find(
+    strategy => strategy.type === 'oSnap' && strategy.transactions.length > 0
+  );
+
+  if (hasOSnap) {
+    enforcedVoteType.value = 'basic';
+    proposal.value.type = 'basic';
+  } else {
+    enforcedVoteType.value = null;
+  }
 });
 
 watchEffect(() => {
@@ -467,35 +453,19 @@ export default defineComponent({
           "
         >
           <h4 class="eyebrow mb-2">Execution</h4>
-          <div class="border rounded-lg mb-3">
-            <ExecutionButton
-              v-for="strategy in strategiesWithTreasuries"
-              :key="strategy.address"
-              class="flex-auto flex items-center gap-2"
-              @click="handleExecutionStrategySelected(strategy)"
-            >
-              <IH-chip />
-              <span class="flex-1">
-                {{ strategy.treasury.name }}
-                <span class="hidden sm:inline-block">
-                  ({{
-                    strategy.type === 'oSnap'
-                      ? 'oSnap'
-                      : `${network.constants.EXECUTORS[strategy.type]} execution strategy`
-                  }})
-                </span>
-              </span>
-              <IH-check v-if="proposal.executions[strategy.address]" />
-            </ExecutionButton>
-          </div>
           <EditorExecution
             v-for="execution in editorExecutions"
             :key="execution.address"
             :model-value="execution.transactions"
+            :disabled="
+              !supportsMultipleTreasuries &&
+              hasExecution &&
+              execution.transactions.length === 0
+            "
             :space="space"
             :strategy="execution"
             :extra-contacts="extraContacts"
-            class="mb-4"
+            class="mb-3"
             @update:model-value="
               value => handleExecutionUpdated(execution.address, value)
             "

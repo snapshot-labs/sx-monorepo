@@ -12,6 +12,7 @@ const model = defineModel<TransactionType[]>({
 
 const props = defineProps<{
   space: Space;
+  disabled?: boolean;
   strategy: StrategyWithTreasury;
   extraContacts?: Contact[];
 }>();
@@ -110,7 +111,13 @@ watch(
         class="w-full flex justify-between px-4 py-3 text-start"
       >
         <div class="flex justify-between items-center">
-          <UiBadgeNetwork :id="treasury.networkId" class="mr-3">
+          <UiBadgeNetwork
+            :id="treasury.networkId"
+            class="mr-3"
+            :class="{
+              'opacity-40': disabled
+            }"
+          >
             <UiStamp
               :id="treasury.wallet"
               type="avatar"
@@ -121,10 +128,16 @@ watch(
           <div class="flex-1 leading-[22px]">
             <h4
               class="text-skin-link"
+              :class="{
+                'text-skin-border': disabled
+              }"
               v-text="treasury.name || shorten(treasury.wallet)"
             />
             <div
               class="text-skin-text text-[17px]"
+              :class="{
+                'text-skin-border': disabled
+              }"
               v-text="
                 strategy.type === 'oSnap'
                   ? 'oSnap'
@@ -136,7 +149,7 @@ watch(
         <div class="space-x-2">
           <UiTooltip title="Send token">
             <UiButton
-              :disabled="!treasury"
+              :disabled="!treasury || disabled"
               class="!px-0 w-[46px]"
               @click="openModal('sendToken')"
             >
@@ -145,7 +158,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Send NFT">
             <UiButton
-              :disabled="!treasury"
+              :disabled="!treasury || disabled"
               class="!px-0 w-[46px]"
               @click="openModal('sendNft')"
             >
@@ -154,7 +167,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Contract call">
             <UiButton
-              :disabled="!treasury"
+              :disabled="!treasury || disabled"
               class="!px-0 w-[46px]"
               @click="openModal('contractCall')"
             >
