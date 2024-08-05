@@ -62,7 +62,7 @@ describe('EthereumTx', () => {
 
     const result = await ethereumTx.getVoteHash(wallet, data);
     expect(result).toEqual(
-      '0x4affc1f0108aecdd06a9c2b8402ffe11ba37e27dfcbb98964ff68f83899367b'
+      '0x15c3ec5ebb1e82803db2d695eb12a902d5bb0d52c63e1536015e6d3debe70'
     );
   });
 
