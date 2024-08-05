@@ -4,13 +4,33 @@ import { NetworkID } from '@/types';
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-const { param } = useRouteParser('space');
+const uiStore = useUiStore();
+
+const param = ref<string>('');
+
+watchEffect(() => {
+  param.value = String(
+    route.matched[0]?.name === 'space' ? route.params.id : route.params.space
+  );
+});
+
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 
-const show = computed(() => route.matched[0]?.name === 'proposal');
+const showSpaceLogo = computed(() =>
+  ['proposal', 'space'].includes(String(route.matched[0]?.name))
+);
+
+const isInsideAppNav = computed(() =>
+  ['space'].includes(String(route.matched[0]?.name))
+);
 
 const space = computed(() => {
-  if (!show || !resolved.value || !spaceAddress.value || !networkId.value) {
+  if (
+    !showSpaceLogo.value ||
+    !resolved.value ||
+    !spaceAddress.value ||
+    !networkId.value
+  ) {
     return null;
   }
   return (
@@ -25,7 +45,14 @@ const space = computed(() => {
 </script>
 
 <template>
-  <template v-if="show">
+  <div
+    v-if="showSpaceLogo"
+    :class="{
+      'mr-4 pr-2 h-full hidden lg:flex items-center border-r': isInsideAppNav,
+      'w-[216px]': isInsideAppNav && !uiStore.sidebarOpen,
+      '!flex w-[172px]': isInsideAppNav && uiStore.sidebarOpen
+    }"
+  >
     <router-link
       v-if="space"
       :to="{
@@ -41,6 +68,6 @@ const space = computed(() => {
       />
       <span class="truncate" v-text="space.name" />
     </router-link>
-  </template>
+  </div>
   <slot v-else />
 </template>

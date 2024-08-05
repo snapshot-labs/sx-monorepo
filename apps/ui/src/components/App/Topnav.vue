@@ -28,10 +28,15 @@ const searchInput = ref();
 const searchValue = ref('');
 
 const hasAppNav = computed(() =>
-  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+  ['my', 'settings'].includes(String(route.matched[0]?.name))
 );
 const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
+);
+const showBreadcrumb = computed(() =>
+  ['space', 'proposal', 'landing', 'settings'].includes(
+    String(route.matched[0]?.name)
+  )
 );
 
 async function handleLogin(connector) {
@@ -87,6 +92,15 @@ watch(
         >
           <IH-menu-alt-2 />
         </button>
+        <Breadcrumb v-if="showBreadcrumb">
+          <router-link
+            :to="{ path: '/' }"
+            class="flex items-center"
+            style="font-size: 24px"
+          >
+            snapshot
+          </router-link>
+        </Breadcrumb>
         <form
           v-if="searchConfig"
           id="search-form"
@@ -104,15 +118,6 @@ watch(
             />
           </label>
         </form>
-        <Breadcrumb v-else>
-          <router-link
-            :to="{ path: '/' }"
-            class="flex items-center"
-            style="font-size: 24px"
-          >
-            snapshot
-          </router-link>
-        </Breadcrumb>
       </div>
       <div :key="web3.account" class="flex">
         <UiButton
