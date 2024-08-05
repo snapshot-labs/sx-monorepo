@@ -323,7 +323,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                   class="!px-0 w-[46px]"
                   @click.prevent="openModal('stake')"
                 >
-                  <IH-fire class="inline-block" />
+                  <IC-stake class="inline-block" />
                 </UiButton>
               </UiTooltip>
             </div>
