@@ -20,10 +20,10 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
 
 function getExecutionType(networkId: NetworkID, strategyType: string) {
   try {
-    if (strategyType === 'oSnap') return strategyType;
+    if (strategyType === 'oSnap') return 'oSnap execution';
 
     const network = getNetwork(networkId);
-    return network.constants.EXECUTORS[strategyType];
+    return `${network.constants.EXECUTORS[strategyType]} execution`;
   } catch (e) {
     return null;
   }

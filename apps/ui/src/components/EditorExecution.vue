@@ -140,8 +140,8 @@ watch(
               }"
               v-text="
                 strategy.type === 'oSnap'
-                  ? 'oSnap'
-                  : `${network.constants.EXECUTORS[strategy.type]} execution strategy`
+                  ? 'oSnap execution'
+                  : `${network.constants.EXECUTORS[strategy.type]} execution`
               "
             />
           </div>
