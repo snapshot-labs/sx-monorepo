@@ -144,6 +144,7 @@ export type Space = {
 };
 
 export type ProposalExecution = {
+  strategyType: string;
   safeName: string;
   safeAddress: string;
   networkId: NetworkID;
