@@ -3,6 +3,7 @@ import { formatUnits } from '@ethersproject/units';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { createStakeTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
+import { getValidator } from '@/helpers/validation';
 import { NetworkID, Transaction } from '@/types';
 
 const STAKING_CONTRACTS = {
@@ -21,6 +22,23 @@ const DEFAULT_FORM_STATE = {
   amount: ''
 };
 
+const AMOUNT_DEFINITION = {
+  type: 'string',
+  decimals: 18,
+  title: 'Amount',
+  examples: ['0']
+};
+
+const validator = getValidator({
+  type: 'object',
+  title: 'TokenTransfer',
+  additionalProperties: false,
+  required: ['amount'],
+  properties: {
+    amount: AMOUNT_DEFINITION
+  }
+});
+
 const props = defineProps<{
   open: boolean;
   address: string;
@@ -36,12 +54,17 @@ const emit = defineEmits<{
 
 const form: {
   to: string;
-  amount: string | number;
+  amount: string;
 } = reactive(clone(DEFAULT_FORM_STATE));
 
 const { assetsMap, loadBalances } = useBalances();
 
-const formValid = computed(() => form.amount !== '');
+const formErrors = computed(() =>
+  validator.validate({
+    amount: form.amount
+  })
+);
+const formValid = computed(() => Object.keys(formErrors.value).length === 0);
 
 const token = computed(() => {
   let token = assetsMap.value?.get(ETH_CONTRACT);
@@ -73,7 +96,7 @@ function handleMaxClick() {
   );
 }
 
-function handleAmountUpdate(value) {
+function handleAmountUpdate(value: string) {
   form.amount = value;
 }
 
@@ -122,13 +145,10 @@ watch(
       </div>
       <template v-else>
         <div class="relative w-full">
-          <UiInputNumber
+          <UiInputAmount
             :model-value="form.amount"
-            :definition="{
-              type: 'number',
-              title: 'Stake',
-              examples: ['0']
-            }"
+            :definition="AMOUNT_DEFINITION"
+            :error="formErrors.amount"
             @update:model-value="handleAmountUpdate"
           />
           <button
@@ -145,7 +165,7 @@ watch(
           </div>
         </div>
         <div class="relative w-full">
-          <UiInputNumber
+          <UiInputAmount
             :model-value="form.amount"
             disabled
             :definition="{
