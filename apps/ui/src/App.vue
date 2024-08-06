@@ -25,11 +25,13 @@ const hasAppNav = computed(() =>
 async function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
 
-  const draftId = await createDraft(spaceKey.value, {
+  const space = spaceKey.value;
+  const draftId = await createDraft(space, {
     execution: [transaction.value],
     executionStrategy: executionStrategy.value
   });
-  router.push(`/${spaceKey.value}/create/${draftId}`);
+
+  router.push(`/${space}/create/${draftId}`);
 
   reset();
 }
