@@ -6,6 +6,17 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { Transaction } from '@/types';
 import { contractData } from './constants';
 
+type SpaceConfigResponse =
+  | {
+      automaticExecution: true;
+    }
+  | {
+      automaticExecution: false;
+      rules: boolean;
+      bondToken: boolean;
+      bondAmount: boolean;
+    };
+
 /**
  * The `proposalHash` as represented in the Optimistic Governor contract is the keccak256 hash of the transactions that make up the proposal.
  */
@@ -209,4 +220,19 @@ export async function getOgProposalGql(params: {
   });
 
   return (data as Result).proposals[0];
+}
+
+/**
+ * Check if a space's deployed (on-chain) settings are supported by oSnap bots for auto execution
+ */
+export async function isConfigCompliant(safeAddress: string, chainId: number) {
+  const res = await fetch(
+    `https://osnap.uma.xyz/api/space-config?address=${safeAddress}&chainId=${chainId}`
+  );
+
+  if (!res.ok) {
+    throw new Error('Unable to fetch setting status');
+  }
+  const data = await res.json();
+  return data as unknown as SpaceConfigResponse;
 }

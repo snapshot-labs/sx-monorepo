@@ -7,7 +7,8 @@ import gql from 'graphql-tag';
 import {
   getModuleAddressForTreasury,
   getOgProposalGql,
-  getProposalHashFromTransactions
+  getProposalHashFromTransactions,
+  isConfigCompliant
 } from '@/helpers/osnap/getters';
 import { getNetwork } from '@/networks';
 import { Network } from '@/networks/types';
@@ -141,7 +142,14 @@ export function useExecutionActions(
       });
 
       if (!data) {
-        message.value = 'Waiting for execution to be initiated.';
+        const configCompliant = await isConfigCompliant(
+          execution.safeAddress,
+          execution.chainId
+        );
+
+        message.value = configCompliant.automaticExecution
+          ? 'Waiting for execution to be initiated.'
+          : 'Space is not configured for automatic execution.';
       } else if (data.executionTransactionHash) {
         try {
           executionNetwork.value = getNetwork(execution.networkId);
