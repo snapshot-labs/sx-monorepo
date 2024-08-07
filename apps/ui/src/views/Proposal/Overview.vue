@@ -10,7 +10,6 @@ import {
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
-import { toBigIntOrNumber } from '../../helpers/utils';
 
 const props = defineProps<{
   proposal: Proposal;
@@ -367,27 +366,10 @@ onBeforeUnmount(() => destroyAudio());
           <span>Execution</span>
         </h4>
         <div class="mb-4">
-          <ProposalExecutionsList :executions="proposal.executions" />
-        </div>
-      </div>
-      <div
-        v-if="
-          proposal.executions &&
-          proposal.executions.length > 0 &&
-          proposal.scores.length > 0 &&
-          toBigIntOrNumber(proposal.scores_total) >=
-            toBigIntOrNumber(proposal.quorum) &&
-          toBigIntOrNumber(proposal.scores[0]) >
-            toBigIntOrNumber(proposal.scores[1]) &&
-          proposal.has_execution_window_opened
-        "
-      >
-        <h4 class="mb-3 eyebrow flex items-center">
-          <IH-play class="inline-block mr-2" />
-          <span>Actions</span>
-        </h4>
-        <div class="mb-4">
-          <ProposalExecutionActions :proposal="proposal" />
+          <ProposalExecutionsList
+            :proposal="proposal"
+            :executions="proposal.executions"
+          />
         </div>
       </div>
       <div>

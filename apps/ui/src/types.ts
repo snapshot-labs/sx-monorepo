@@ -149,6 +149,7 @@ export type ProposalExecution = {
   safeAddress: string;
   networkId: NetworkID;
   transactions: Transaction[];
+  chainId?: number;
 };
 
 export type Proposal = {

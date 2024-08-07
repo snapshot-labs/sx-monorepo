@@ -65,7 +65,7 @@ export function createActions(
 
       const treasuryAddress = info.strategyAddress;
       const moduleAddress = await getModuleAddressForTreasury(
-        info.chainId.toString(),
+        info.chainId,
         treasuryAddress
       );
 
