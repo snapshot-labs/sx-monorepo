@@ -4,7 +4,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { resolver } from '@/helpers/resolver';
 import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Transaction, VoteType } from '@/types';
 
 const MAX_BODY_LENGTH = {
@@ -51,15 +51,13 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { getCurrent } = useMetaStore();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
+const { votingPower, fetch: fetchVotingPower } = useVotingPower();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
-const fetchingVotingPower = ref(true);
-const votingPowerValid = ref(false);
 
 const network = computed(() =>
   networkId.value ? getNetwork(networkId.value) : null
@@ -166,7 +164,7 @@ const canSubmit = computed(() => {
   if (Object.keys(formErrors.value).length > 0) return false;
 
   return web3.value.account
-    ? !fetchingVotingPower.value && votingPowerValid.value
+    ? votingPower.value?.canPropose
     : !web3.value.authLoading;
 });
 
@@ -254,35 +252,8 @@ function handleTransactionAccept() {
   reset();
 }
 
-async function getVotingPower() {
-  if (!space.value || !web3.value.account) return;
-
-  fetchingVotingPower.value = true;
-  try {
-    const network = getNetwork(space.value.network);
-
-    const votingPowers = await network.actions.getVotingPower(
-      space.value.id,
-      space.value.voting_power_validation_strategy_strategies,
-      space.value.voting_power_validation_strategy_strategies_params,
-      space.value.voting_power_validation_strategies_parsed_metadata,
-      web3.value.account,
-      {
-        at: supportsNullCurrent(space.value.network)
-          ? null
-          : getCurrent(space.value.network) || 0,
-        chainId: space.value.snapshot_chain_id
-      }
-    );
-
-    const currentVotingPower = votingPowers.reduce((a, b) => a + b.value, 0n);
-    votingPowerValid.value =
-      currentVotingPower >= BigInt(space.value.proposal_threshold);
-  } catch (e) {
-    console.warn('Failed to load voting power', e);
-  } finally {
-    fetchingVotingPower.value = false;
-  }
+function handleFetchVotingPower() {
+  space.value && fetchVotingPower(space.value);
 }
 
 watch(
@@ -294,7 +265,13 @@ watch(
   },
   { immediate: true }
 );
-watch([space, () => web3.value.account], () => getVotingPower());
+
+watch([space, () => web3.value.account], ([toSpace, toAccount]) => {
+  if (!toSpace || !proposal.value || !toAccount) return;
+
+  handleFetchVotingPower();
+});
+
 watch(proposalData, () => {
   if (!proposal.value) return;
 
@@ -380,7 +357,10 @@ export default defineComponent({
           </UiButton>
           <UiButton
             class="rounded-l-none border-l-0 float-left !m-0 !px-3"
-            :loading="sending || (web3.account !== '' && fetchingVotingPower)"
+            :loading="
+              !!web3.account &&
+              (sending || !votingPower || votingPower.status === 'loading')
+            "
             :disabled="!canSubmit"
             @click="handleProposeClick"
           >
@@ -395,13 +375,14 @@ export default defineComponent({
     </nav>
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
-        <UiAlert
-          v-if="!fetchingVotingPower && !votingPowerValid"
-          type="error"
+        <MessageVotingPower
+          v-if="votingPower && space"
           class="mb-4"
-        >
-          You do not have enough voting power to create proposal in this space.
-        </UiAlert>
+          :voting-power="votingPower"
+          action="propose"
+          @fetch-voting-power="handleFetchVotingPower"
+        />
+
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.title"

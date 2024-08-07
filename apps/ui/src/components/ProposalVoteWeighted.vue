@@ -5,7 +5,6 @@ import { Choice, Proposal } from '@/types';
 type WeightedChoice = Record<string, number>;
 
 const props = defineProps<{
-  sendingType: Choice | null;
   proposal: Proposal;
   defaultChoice?: Choice;
 }>();
@@ -90,7 +89,6 @@ watch(
     <UiButton
       primary
       class="!h-[48px] w-full"
-      :loading="!!sendingType"
       @click="$emit('vote', selectedChoices)"
     >
       Vote

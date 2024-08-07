@@ -6,22 +6,25 @@ import { Choice, Proposal as ProposalType } from '@/types';
 const props = defineProps<{ proposal: ProposalType; showSpace: boolean }>();
 
 const { getTsFromCurrent } = useMetaStore();
-const { vote } = useActions();
+const { modalAccountOpen } = useModal();
+const { web3 } = useWeb3();
+
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
-const sendingType = ref<Choice | null>(null);
+const modalOpenVote = ref(false);
+const selectedChoice = ref<Choice | null>(null);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
-async function handleVoteClick(choice: Choice) {
-  sendingType.value = choice;
-
-  try {
-    await vote(props.proposal, choice);
-  } finally {
-    sendingType.value = null;
+const handleVoteClick = (choice: Choice) => {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
   }
-}
+
+  selectedChoice.value = choice;
+  modalOpenVote.value = true;
+};
 </script>
 <template>
   <div>
@@ -136,7 +139,6 @@ async function handleVoteClick(choice: Choice) {
           </template>
           <ProposalVoteBasic
             v-if="proposal.type === 'basic'"
-            :sending-type="sendingType"
             :size="40"
             @vote="handleVoteClick"
           />
@@ -148,6 +150,13 @@ async function handleVoteClick(choice: Choice) {
         :open="modalOpenTimeline"
         :proposal="proposal"
         @close="modalOpenTimeline = false"
+      />
+      <ModalVote
+        :choice="selectedChoice"
+        :proposal="proposal"
+        :open="modalOpenVote"
+        @close="modalOpenVote = false"
+        @voted="selectedChoice = null"
       />
     </teleport>
   </div>

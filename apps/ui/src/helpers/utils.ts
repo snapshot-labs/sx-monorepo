@@ -10,7 +10,8 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import sha3 from 'js-sha3';
 import { validateAndParseAddress } from 'starknet';
 import networks from '@/helpers/networks.json';
-import { Proposal, SpaceMetadata } from '@/types';
+import { VotingPowerItem } from '@/stores/votingPowers';
+import { Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -475,20 +476,23 @@ export function getChoiceWeight(
   return isNaN(percent) ? 0 : percent;
 }
 
-export function getChoiceText(
-  availableChoices: string[],
-  choice: number | number[] | Record<string, number>
-) {
+export function getChoiceText(availableChoices: string[], choice: Choice) {
+  if (typeof choice === 'string') {
+    return ['for', 'against', 'abstain'].includes(choice)
+      ? choice.charAt(0).toUpperCase() + choice.slice(1)
+      : 'Invalid choice';
+  }
+
   if (typeof choice === 'number') {
-    return availableChoices[choice - 1];
+    return availableChoices[choice - 1] || 'Invalid choice';
   }
 
   if (Array.isArray(choice)) {
-    return (
-      choice.map(index => availableChoices[index - 1]).join(', ') ||
-      'Blank vote'
-    );
+    if (!choice.length) return 'Blank vote';
+    return choice.map(index => availableChoices[index - 1]).join(', ');
   }
+
+  if (!Object.keys(choice).length) return 'Blank vote';
 
   const total = Object.values(choice).reduce((acc, weight) => acc + weight, 0);
 
@@ -533,4 +537,13 @@ export function getSocialNetworksLink(data: any) {
       return href ? { key, icon, href } : {};
     })
     .filter(social => social.href);
+}
+
+export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
+  if (!votingPower) return;
+
+  const { totalVotingPower, decimals, symbol } = votingPower;
+  const value = _vp(Number(totalVotingPower) / 10 ** decimals);
+
+  return symbol ? `${value} ${symbol}` : value;
 }

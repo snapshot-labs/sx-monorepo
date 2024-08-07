@@ -148,7 +148,8 @@ export type ReadOnlyNetworkActions = {
     connectorType: Connector,
     account: string,
     proposal: Proposal,
-    choice: Choice
+    choice: Choice,
+    reason: string
   ): Promise<any>;
   followSpace(
     web3: Web3Provider | Wallet,

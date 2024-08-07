@@ -395,7 +395,8 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice
+      choice: Choice,
+      reason: string
     ) => {
       await verifyNetwork(web3, chainId);
 
@@ -427,13 +428,16 @@ export function createActions(
         })
       );
 
+      let pinned: { cid: string; provider: string } | null = null;
+      if (reason) pinned = await helpers.pin({ reason });
+
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: getSdkChoice(choice),
-        metadataUri: '',
+        metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
 

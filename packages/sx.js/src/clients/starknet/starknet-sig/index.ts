@@ -212,7 +212,7 @@ export class StarknetSig {
       choice: `0x${data.choice.toString(16)}`,
       userVotingStrategies,
       metadataUri: shortString
-        .splitLongString('')
+        .splitLongString(data.metadataUri)
         .map(str => shortString.encodeShortString(str))
     };
 

@@ -2,7 +2,6 @@
 import { Choice, Proposal } from '@/types';
 
 const props = defineProps<{
-  sendingType: Choice | null;
   proposal: Proposal;
   defaultChoice?: Choice;
 }>();
@@ -33,7 +32,6 @@ const selectedChoice = ref<number | null>(
     <UiButton
       primary
       class="!h-[48px] w-full"
-      :loading="!!sendingType"
       :disabled="!selectedChoice"
       @click="emit('vote', selectedChoice!)"
     >
