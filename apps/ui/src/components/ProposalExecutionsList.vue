@@ -17,6 +17,17 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
     return null;
   }
 }
+
+function getExecutionType(networkId: NetworkID, strategyType: string) {
+  try {
+    if (strategyType === 'oSnap') return 'oSnap execution';
+
+    const network = getNetwork(networkId);
+    return `${network.constants.EXECUTORS[strategyType]} execution`;
+  } catch (e) {
+    return null;
+  }
+}
 </script>
 
 <template>
@@ -31,7 +42,7 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
         undefined
       "
       target="_blank"
-      class="flex justify-between items-center px-4 py-3 border-b"
+      class="flex justify-between items-center px-4 py-3"
       :class="{
         'pointer-events-none': !getTreasuryExplorerUrl(
           execution.networkId,
@@ -54,10 +65,14 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
         />
         <div
           class="text-skin-text text-[17px]"
-          v-text="shorten(execution.safeAddress)"
+          v-text="
+            getExecutionType(execution.networkId, execution.strategyType) ||
+            shorten(execution.safeAddress)
+          "
         />
       </div>
     </a>
+    <UiLabel label="Transactions" class="border-t" />
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"

@@ -113,6 +113,16 @@ async function handleEditClick() {
 
   const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
 
+  const executions = Object.fromEntries(
+    props.proposal.executions.map(execution => {
+      const address = offchainNetworks.includes(props.proposal.network)
+        ? execution.safeAddress
+        : props.proposal.execution_strategy;
+
+      return [address, execution.transactions];
+    })
+  );
+
   const draftId = await createDraft(spaceId, {
     proposalId: props.proposal.proposal_id,
     title: props.proposal.title,
@@ -120,18 +130,7 @@ async function handleEditClick() {
     discussion: props.proposal.discussion,
     type: props.proposal.type,
     choices: props.proposal.choices,
-    executionStrategy:
-      props.proposal.execution_strategy_type === 'none'
-        ? null
-        : {
-            address: props.proposal.execution_strategy,
-            type: props.proposal.execution_strategy_type
-          },
-    execution:
-      !offchainNetworks.includes(props.proposal.network) &&
-      props.proposal.executions.length > 0
-        ? props.proposal.executions[0].transactions
-        : undefined
+    executions
   });
 
   router.push({

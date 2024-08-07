@@ -15,7 +15,6 @@ import {
   parseInternalTransaction
 } from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
-import { getUrl } from '@/helpers/utils';
 import {
   Choice,
   NetworkID,
@@ -55,29 +54,31 @@ export function createActions(
     networkConfig
   });
 
-  async function getPlugins(executionInfo: ExecutionInfo | null) {
+  async function getPlugins(executions: ExecutionInfo[] | null) {
     const plugins = {} as { oSnap?: OSnapPlugin };
-    if (executionInfo && executionInfo.transactions.length) {
-      const treasuryAddress = executionInfo.strategyAddress;
+
+    if (!executions) return plugins;
+
+    const safes = [] as OSnapPlugin['safes'];
+    for (const info of executions) {
+      if (!info.transactions.length) continue;
+
+      const treasuryAddress = info.strategyAddress;
       const moduleAddress = await getModuleAddressForTreasury(
-        executionInfo.chainId.toString(),
+        info.chainId.toString(),
         treasuryAddress
       );
 
-      plugins.oSnap = {
-        safes: [
-          {
-            safeName: executionInfo.treasuryName,
-            safeAddress: treasuryAddress,
-            network: executionInfo.chainId.toString(),
-            transactions: executionInfo.transactions.map(tx =>
-              parseInternalTransaction(tx)
-            ),
-            moduleAddress
-          }
-        ]
-      };
+      safes.push({
+        safeName: info.treasuryName,
+        safeAddress: treasuryAddress,
+        network: info.chainId.toString(),
+        transactions: info.transactions.map(tx => parseInternalTransaction(tx)),
+        moduleAddress
+      });
     }
+
+    plugins.oSnap = { safes };
 
     return plugins;
   }
@@ -88,37 +89,26 @@ export function createActions(
       connectorType: Connector,
       account: string,
       space: Space,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[]
     ) {
-      let payload: {
-        title: string;
-        body: string;
-        discussion: string;
-        type: VoteType;
-        choices: string[];
-      };
-
-      try {
-        const res = await fetch(getUrl(cid) as string);
-        payload = await res.json();
-      } catch (e) {
-        throw new Error('Failed to fetch proposal metadata');
-      }
-
       const currentTime = Math.floor(Date.now() / 1e3);
       const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
 
-      const plugins = await getPlugins(executionInfo);
+      const plugins = await getPlugins(executions);
 
       const data = {
         space: space.id,
-        title: payload.title,
-        body: payload.body,
-        type: payload.type,
-        discussion: payload.discussion,
-        choices: payload.choices,
+        title,
+        body,
+        type,
+        discussion,
+        choices,
         start: startTime,
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
@@ -135,34 +125,23 @@ export function createActions(
       account: string,
       space: Space,
       proposalId: number | string,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[]
     ) {
-      let payload: {
-        title: string;
-        body: string;
-        discussion: string;
-        type: VoteType;
-        choices: string[];
-      };
-
-      try {
-        const res = await fetch(getUrl(cid) as string);
-        payload = await res.json();
-      } catch (e) {
-        throw new Error('Failed to fetch proposal metadata');
-      }
-
-      const plugins = await getPlugins(executionInfo);
+      const plugins = await getPlugins(executions);
 
       const data = {
         proposal: proposalId as string,
         space: space.id,
-        title: payload.title,
-        body: payload.body,
-        type: payload.type,
-        discussion: payload.discussion,
-        choices: payload.choices,
+        title,
+        body,
+        type,
+        discussion,
+        choices,
         plugins: JSON.stringify(plugins)
       };
 

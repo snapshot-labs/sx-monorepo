@@ -40,7 +40,8 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  VoteType
 } from '@/types';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
@@ -200,10 +201,26 @@ export function createActions(
       connectorType: Connector,
       account: string,
       space: Space,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
+
+      const executionInfo = executions?.[0];
+      const pinned = await helpers.pin({
+        title,
+        body,
+        discussion,
+        type,
+        choices: choices.filter(c => !!c),
+        execution: executionInfo?.transactions ?? []
+      });
+      if (!pinned || !pinned.cid) return false;
+      console.log('IPFS', pinned);
 
       const isContract = await getIsContract(account);
 
@@ -255,7 +272,7 @@ export function createActions(
         authenticator,
         strategies: strategiesWithMetadata,
         executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${cid}`
+        metadataUri: `ipfs://${pinned.cid}`
       };
 
       if (relayerType === 'evm') {
@@ -283,10 +300,26 @@ export function createActions(
       account: string,
       space: Space,
       proposalId: number | string,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[] | null
     ) {
       await verifyNetwork(web3, chainId);
+
+      const executionInfo = executions?.[0];
+      const pinned = await helpers.pin({
+        title,
+        body,
+        discussion,
+        type,
+        choices: choices.filter(c => !!c),
+        execution: executionInfo?.transactions ?? []
+      });
+      if (!pinned || !pinned.cid) return false;
+      console.log('IPFS', pinned);
 
       const isContract = await getIsContract(account);
 
@@ -322,7 +355,7 @@ export function createActions(
         proposal: proposalId as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${cid}`
+        metadataUri: `ipfs://${pinned.cid}`
       };
 
       if (relayerType === 'evm') {
