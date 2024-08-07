@@ -335,7 +335,7 @@ watchEffect(() => {
             <IH-clock class="inline-block mr-2" />
             <span>Timeline</span>
           </h4>
-          <ProposalTimeline :proposal="proposal" />
+          <ProposalTimeline :data="proposal" />
         </div>
       </div>
     </template>

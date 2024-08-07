@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TimelineContent from '@/components/ProposalTimeline.vue';
+import ProposalTimeline from '@/components/ProposalTimeline.vue';
 import { Proposal } from '@/types';
 
 defineProps<{
@@ -18,7 +18,7 @@ defineEmits<{
       <h3 v-text="'Timeline'" />
     </template>
     <div class="p-4">
-      <TimelineContent :proposal="proposal" />
+      <ProposalTimeline :data="proposal" />
     </div>
   </UiModal>
 </template>

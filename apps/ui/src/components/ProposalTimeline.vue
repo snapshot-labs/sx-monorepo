@@ -16,11 +16,7 @@ type State = {
   value: number;
 };
 
-type Props =
-  | { proposal: Proposal; space?: never }
-  | { proposal?: never; space: Space };
-
-const props = defineProps<Props>();
+const props = defineProps<{ data: Proposal | Space }>();
 
 const labels = {
   created: 'Created',
@@ -45,7 +41,7 @@ onMounted(() => {
 });
 
 const formatTimelineValues = (): ProposalTimelineValues => {
-  const data = props.proposal || props.space;
+  const data = props.data;
   if ('start' in data) {
     const { network, created, start, min_end, max_end } = data;
     return { network, created, start, min_end, max_end };
