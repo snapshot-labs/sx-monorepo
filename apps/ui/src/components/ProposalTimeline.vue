@@ -57,7 +57,7 @@ const formatTimelineValues = (): ProposalTimelineValues => {
 
 const states: ComputedRef<State[]> = computed(() => {
   const { network, created, start, min_end, max_end } = formatTimelineValues();
-  let initial: State[] = [];
+  const initial: State[] = [];
 
   if (created) {
     initial.push({
@@ -65,11 +65,13 @@ const states: ComputedRef<State[]> = computed(() => {
       value: created
     });
   }
+
   initial.push({
     id: 'start',
     block_number: start,
     value: getTsFromCurrent(network, start)
   });
+
   if (min_end === max_end) {
     initial.push({
       id: 'end',
@@ -77,7 +79,7 @@ const states: ComputedRef<State[]> = computed(() => {
       value: getTsFromCurrent(network, min_end)
     });
   } else {
-    initial = initial.concat([
+    initial.push(
       {
         id: 'min_end',
         block_number: min_end,
@@ -88,8 +90,9 @@ const states: ComputedRef<State[]> = computed(() => {
         block_number: max_end,
         value: getTsFromCurrent(network, max_end)
       }
-    ]);
+    );
   }
+
   return initial;
 });
 </script>
