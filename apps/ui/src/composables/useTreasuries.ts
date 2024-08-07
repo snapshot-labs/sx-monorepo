@@ -33,7 +33,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
           }
 
           return getIsOsnapEnabled(
-            CHAIN_IDS[treasury.network].toString(),
+            CHAIN_IDS[treasury.network],
             treasury.address
           );
         })

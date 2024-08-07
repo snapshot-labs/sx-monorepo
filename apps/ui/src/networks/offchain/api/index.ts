@@ -157,6 +157,7 @@ function formatSpace(
 
 function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   let executions = [] as ProposalExecution[];
+  let executionType = '';
 
   if (proposal.plugins.oSnap) {
     const chainIdToNetworkId = Object.fromEntries(
@@ -165,20 +166,27 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
 
     try {
       executions = proposal.plugins.oSnap.safes.map(safe => {
+        const chainId = Number(safe.network);
+
         return {
           strategyType: 'oSnap',
           safeName: safe.safeName,
           safeAddress: safe.safeAddress,
-          networkId: chainIdToNetworkId[Number(safe.network)],
+          networkId: chainIdToNetworkId[chainId],
+          chainId,
           transactions: safe.transactions.map(transaction =>
             parseOSnapTransaction(transaction)
           )
         };
       });
+      executionType = 'oSnap';
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
     }
   }
+
+  const state = getProposalState(proposal);
+
   return {
     id: proposal.id,
     network: networkId,
@@ -205,7 +213,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     scores: proposal.scores,
     scores_total: proposal.scores_total,
     vote_count: proposal.votes,
-    state: getProposalState(proposal),
+    state,
     cancelled: false,
     vetoed: false,
     completed: proposal.state === 'closed',
@@ -223,13 +231,14 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       executors_types: [],
       strategies_parsed_metadata: []
     },
+    execution_strategy_type: executionType,
+    has_execution_window_opened: state === 'passed',
     // NOTE: ignored
     execution_network: networkId,
     execution_ready: false,
     execution_hash: '',
     execution_time: 0,
     execution_strategy: '',
-    execution_strategy_type: '',
     execution_destination: '',
     timelock_veto_guardian: null,
     strategies: proposal.strategies.map(strategy => strategy.name),
@@ -238,7 +247,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     tx: '',
     execution_tx: null,
     veto_tx: null,
-    has_execution_window_opened: false,
     privacy: proposal.privacy
   };
 }
