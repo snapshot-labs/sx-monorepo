@@ -11,9 +11,15 @@ const processedProposals = Object.fromEntries(
 
     // convert single treasury to multiple treasuries format
     if ('execution' in processed && 'executionStrategy' in processed) {
-      processed.executions = {
-        [processed.executionStrategy.address]: processed.execution
-      };
+      processed.executions =
+        processed.executionStrategy && processed.execution
+          ? {
+              [processed.executionStrategy.address]: processed.execution
+            }
+          : {};
+
+      delete processed.execution;
+      delete processed.executionStrategy;
     }
 
     return [k, v];
