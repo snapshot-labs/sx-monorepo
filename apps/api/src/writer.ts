@@ -565,16 +565,14 @@ export const handleUpdate: starknet.Writer = async ({
     console.log('failed to update proposal metadata', e);
   }
 
-  /*
   const executionStrategy = await handleExecutionStrategy(
-    event.proposal.execution_strategy,
+    event.execution_strategy,
     event.payload
   );
   if (executionStrategy) {
     proposal.execution_strategy_type = executionStrategy.executionStrategyType;
     proposal.quorum = executionStrategy.quorum;
   }
-  */
 
   await proposal.save();
 };
