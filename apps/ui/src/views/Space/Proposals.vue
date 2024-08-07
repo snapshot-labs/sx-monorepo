@@ -48,7 +48,7 @@ watch(
 
 watch(
   [props.space, () => web3.value.account, () => web3.value.authLoading],
-  ([toSpace, toAccount, toAuthLoading], [, fromAccount, , ,]) => {
+  ([toSpace, toAccount, toAuthLoading], [, fromAccount]) => {
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       resetVotingPower();
     }
