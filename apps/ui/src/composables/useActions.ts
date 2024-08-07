@@ -11,7 +11,6 @@ import {
   SpaceMetadata,
   SpaceSettings,
   Statement,
-  Transaction,
   User,
   VoteType
 } from '@/types';
@@ -275,7 +274,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
-    executionInfo: ExecutionInfo | null
+    executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -284,17 +283,6 @@ export function useActions() {
 
     const network = getNetwork(space.network);
 
-    const pinned = await network.helpers.pin({
-      title,
-      body,
-      discussion,
-      type,
-      choices: choices.filter(c => !!c),
-      execution: executionInfo?.transactions ?? []
-    });
-    if (!pinned || !pinned.cid) return false;
-    console.log('IPFS', pinned);
-
     await wrapPromise(
       space.network,
       network.actions.propose(
@@ -302,18 +290,12 @@ export function useActions() {
         web3.value.type as Connector,
         web3.value.account,
         space,
-        pinned.cid,
-        executionInfo === null
-          ? executionInfo
-          : {
-              ...executionInfo,
-              transactions: executionInfo.transactions.map(
-                (tx: Transaction) => ({
-                  ...tx,
-                  operation: 0
-                })
-              )
-            }
+        title,
+        body,
+        discussion,
+        type,
+        choices,
+        executions
       )
     );
 
@@ -333,7 +315,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
-    executionInfo: ExecutionInfo | null
+    executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -341,17 +323,6 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
-
-    const pinned = await network.helpers.pin({
-      title,
-      body,
-      discussion,
-      type,
-      choices: choices.filter(c => !!c),
-      execution: executionInfo?.transactions ?? []
-    });
-    if (!pinned || !pinned.cid) return false;
-    console.log('IPFS', pinned);
 
     await wrapPromise(
       space.network,
@@ -361,18 +332,12 @@ export function useActions() {
         web3.value.account,
         space,
         proposalId,
-        pinned.cid,
-        executionInfo === null
-          ? executionInfo
-          : {
-              ...executionInfo,
-              transactions: executionInfo.transactions.map(
-                (tx: Transaction) => ({
-                  ...tx,
-                  operation: 0
-                })
-              )
-            }
+        title,
+        body,
+        discussion,
+        type,
+        choices,
+        executions
       )
     );
 

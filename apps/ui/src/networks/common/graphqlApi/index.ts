@@ -154,6 +154,7 @@ function processExecutions(
 
   return [
     {
+      strategyType: match?.type || '',
       safeAddress: match?.treasury || '',
       safeName: matchingTreasury?.name || 'Unnamed treasury',
       networkId: matchingTreasury?.network || executionNetworkId,

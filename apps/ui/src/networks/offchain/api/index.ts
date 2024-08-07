@@ -166,6 +166,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     try {
       executions = proposal.plugins.oSnap.safes.map(safe => {
         return {
+          strategyType: 'oSnap',
           safeName: safe.safeName,
           safeAddress: safe.safeAddress,
           networkId: chainIdToNetworkId[Number(safe.network)],

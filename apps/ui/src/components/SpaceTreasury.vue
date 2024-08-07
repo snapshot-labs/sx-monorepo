@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import {
-  _c,
-  _n,
-  compareAddresses,
-  sanitizeUrl,
-  shorten
-} from '@/helpers/utils';
+import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
@@ -25,6 +19,7 @@ const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury } = useTreasury(props.treasuryData);
+const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
 const page: Ref<'tokens' | 'nfts'> = ref('tokens');
@@ -50,17 +45,13 @@ const currentNetwork = computed(() => {
 });
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
-
-const isReadOnly = computed(() => {
-  return !props.space.executors_strategies.find(
-    strategy =>
-      strategy.treasury &&
-      strategy.treasury_chain &&
-      treasury.value &&
-      compareAddresses(strategy.treasury, treasury.value.wallet) &&
-      strategy.treasury_chain === treasury.value.network
-  );
-});
+const executionStrategy = computed(
+  () =>
+    strategiesWithTreasuries.value?.find(
+      strategy => strategy.treasury.address === treasury.value?.wallet
+    ) ?? null
+);
+const isReadOnly = computed(() => executionStrategy.value === null);
 
 const totalQuote = computed(() =>
   assets.value.reduce((acc, asset) => {
@@ -101,26 +92,6 @@ const treasuryExplorerUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
-const executionStrategy = computed(() => {
-  let executorIndex = props.space.executors.findIndex(executorAddress =>
-    compareAddresses(executorAddress, treasury.value?.wallet || '')
-  );
-
-  if (executorIndex === -1) {
-    // If the treasury is not an executor, use the first avatar executor
-    executorIndex = props.space.executors_types.findIndex(
-      e => e === 'SimpleQuorumAvatar'
-    );
-  }
-
-  if (executorIndex === -1) return null;
-
-  return {
-    address: props.space.executors[executorIndex],
-    type: props.space.executors_types[executorIndex]
-  };
-});
-
 const hasStakeableAssets = computed(() => {
   return (
     treasury.value &&
@@ -135,9 +106,13 @@ function openModal(type: 'tokens' | 'nfts' | 'stake') {
 }
 
 async function addTx(tx: Transaction) {
+  const executions = {} as Record<string, Transaction[]>;
+  if (executionStrategy.value) {
+    executions[executionStrategy.value.address] = [tx];
+  }
+
   const draftId = await createDraft(spaceKey.value, {
-    execution: [tx],
-    executionStrategy: executionStrategy.value
+    executions
   });
   router.push(`create/${draftId}`);
 }
@@ -323,7 +298,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                   class="!px-0 w-[46px]"
                   @click.prevent="openModal('stake')"
                 >
-                  <IH-fire class="inline-block" />
+                  <IC-stake class="inline-block" />
                 </UiButton>
               </UiTooltip>
             </div>
@@ -434,6 +409,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         @add="addTx"
       />
       <ModalLinkWalletConnect
+        v-if="executionStrategy"
         :open="modalOpen.walletConnectLink"
         :address="treasury.wallet"
         :network="treasury.network"

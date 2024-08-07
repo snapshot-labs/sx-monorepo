@@ -213,6 +213,22 @@ ajv.addFormat('ethValue', {
   }
 });
 
+ajv.addKeyword({
+  keyword: 'decimals',
+  type: 'string',
+  schemaType: 'number',
+  validate: (schema: number, data: string) => {
+    if (!data) return true;
+
+    const regex = new RegExp(`^\\d+[.,]?\\d{0,${schema}}$`);
+    return regex.test(data);
+  },
+  error: {
+    message: ctx => {
+      return `Can have at most ${ctx.schemaValue} decimals`;
+    }
+  }
+});
 ajv.addKeyword('options');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
