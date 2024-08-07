@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { utils } from '@snapshot-labs/sx';
+import ProposalTimeline from '@/components/ProposalTimeline.vue';
 import { getCacheHash, getStampUrl, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
@@ -328,6 +329,13 @@ watchEffect(() => {
             :proposal="proposal"
             :decimals="votingPowerDecimals"
           />
+        </div>
+        <div>
+          <h4 class="mb-2.5 eyebrow flex items-center">
+            <IH-clock class="inline-block mr-2" />
+            <span>Timeline</span>
+          </h4>
+          <ProposalTimeline :proposal="proposal" />
         </div>
       </div>
     </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
+import ProposalTimeline from '@/components/ProposalTimeline.vue';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { resolver } from '@/helpers/resolver';
@@ -550,6 +551,10 @@ export default defineComponent({
         "
       />
       <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      <div>
+        <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
+        <ProposalTimeline :space="space" />
+      </div>
     </div>
     <teleport to="#modal">
       <ModalDrafts
