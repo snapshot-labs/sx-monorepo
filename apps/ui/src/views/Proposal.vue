@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { utils } from '@snapshot-labs/sx';
-import ProposalTimeline from '@/components/ProposalTimeline.vue';
 import { getCacheHash, getStampUrl, sanitizeUrl } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
