@@ -273,12 +273,14 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       <FormStrategies
         v-model="authenticators"
         unique
+        :network-id="space.network"
         :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
         title="Authenticators"
         description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
       />
       <FormValidation
         v-model="validationStrategy"
+        :network-id="space.network"
         :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
         :available-voting-strategies="
           network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
@@ -288,6 +290,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       />
       <FormStrategies
         v-model="votingStrategies"
+        :network-id="space.network"
         :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
         title="Voting strategies"
         description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
