@@ -9,6 +9,33 @@ import {
 } from '@/networks/types';
 import { Space, StrategyParsedMetadata } from '@/types';
 
+const TABS = [
+  {
+    id: 'authenticators',
+    name: 'Authenticators'
+  },
+  {
+    id: 'proposal-validation',
+    name: 'Proposal validation'
+  },
+  {
+    id: 'voting-strategies',
+    name: 'Voting strategies'
+  },
+  {
+    id: 'voting',
+    name: 'Voting'
+  },
+  {
+    id: 'execution',
+    name: 'Execution'
+  },
+  {
+    id: 'controller',
+    name: 'Controller'
+  }
+] as const;
+
 const props = defineProps<{ space: Space }>();
 
 const { updateStrategies } = useActions();
@@ -21,6 +48,7 @@ const saving = ref(false);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy = ref(null as StrategyConfig | null);
 const votingStrategies = ref([] as StrategyConfig[]);
+const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
 
 function processParams(paramsArray: string[]) {
   return paramsArray.map(params => (params === '' ? [] : params.split(',')));
@@ -267,10 +295,25 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
+  <div
+    class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+  >
+    <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+      <button
+        v-for="tab in TABS"
+        :key="tab.id"
+        type="button"
+        @click="activeTab = tab.id"
+      >
+        <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
+      </button>
+    </div>
+  </div>
   <div class="space-y-4 mx-4 pt-4">
     <UiLoading v-if="loading" />
     <template v-else>
       <FormStrategies
+        v-if="activeTab === 'authenticators'"
         v-model="authenticators"
         unique
         :network-id="space.network"
@@ -279,6 +322,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
       />
       <FormValidation
+        v-else-if="activeTab === 'proposal-validation'"
         v-model="validationStrategy"
         :network-id="space.network"
         :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
@@ -289,6 +333,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
       />
       <FormStrategies
+        v-else-if="activeTab === 'voting-strategies'"
         v-model="votingStrategies"
         :network-id="space.network"
         :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
