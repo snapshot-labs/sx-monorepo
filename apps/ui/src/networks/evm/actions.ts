@@ -606,14 +606,17 @@ export function createActions(
 
       return votesContract.delegate(delegatee);
     },
-    updateStrategies: async (
+    updateSettings: async (
       web3: any,
       space: Space,
       authenticatorsToAdd: StrategyConfig[],
       authenticatorsToRemove: number[],
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
-      validationStrategy: StrategyConfig
+      validationStrategy: StrategyConfig,
+      votingDelay: number | null,
+      minVotingDuration: number | null,
+      maxVotingDuration: number | null
     ) => {
       await verifyNetwork(web3, chainId);
 
@@ -652,7 +655,10 @@ export function createActions(
               ? validationStrategy.generateParams(validationStrategy.params)[0]
               : '0x'
           },
-          proposalValidationStrategyMetadataUri
+          proposalValidationStrategyMetadataUri,
+          votingDelay: votingDelay || undefined,
+          minVotingDuration: minVotingDuration || undefined,
+          maxVotingDuration: maxVotingDuration || undefined
         }
       });
     },
