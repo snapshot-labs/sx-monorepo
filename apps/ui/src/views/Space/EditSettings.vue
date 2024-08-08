@@ -42,8 +42,6 @@ const { updateSettings } = useActions();
 const { setTitle } = useTitle();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
-const network = computed(() => getNetwork(props.space.network));
-
 const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
 const loading = ref(true);
 const saving = ref(false);
@@ -53,6 +51,22 @@ const votingStrategies = ref([] as StrategyConfig[]);
 const votingDelay: Ref<number | null> = ref(null);
 const minVotingPeriod: Ref<number | null> = ref(null);
 const maxVotingPeriod: Ref<number | null> = ref(null);
+
+const network = computed(() => getNetwork(props.space.network));
+const executionStrategies = computed(() => {
+  return props.space.executors.map((executor, i) => {
+    return {
+      id: executor,
+      address: executor,
+      name:
+        network.value.constants.EXECUTORS[executor] ||
+        network.value.constants.EXECUTORS[props.space.executors_types[i]] ||
+        props.space.executors_types[i],
+      params: {},
+      paramsDefinition: {}
+    };
+  });
+});
 
 function currentToMinutesOnly(value: number) {
   const duration = getDurationFromCurrent(props.space.network, value);
@@ -466,6 +480,19 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             />
           </div>
         </div>
+      </div>
+      <div v-else-if="activeTab === 'execution'" class="mb-4">
+        <h3 class="text-md leading-6">Execution(s)</h3>
+        <span class="mb-4 inline-block">
+          This data is for information purposes only
+        </span>
+        <FormStrategiesStrategyActive
+          v-for="strategy in executionStrategies"
+          :key="strategy.id"
+          read-only
+          :network-id="space.network"
+          :strategy="strategy"
+        />
       </div>
       <UiButton :loading="saving" class="w-full" @click="save">Save</UiButton>
     </template>

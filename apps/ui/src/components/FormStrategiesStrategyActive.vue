@@ -4,14 +4,20 @@ import { getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID } from '@/types';
 
+type Strategy = Pick<
+  StrategyConfig,
+  'id' | 'address' | 'name' | 'params' | 'generateSummary' | 'paramsDefinition'
+>;
+
 const props = defineProps<{
+  readOnly?: boolean;
   networkId: NetworkID;
-  strategy: StrategyConfig;
+  strategy: Strategy;
 }>();
 
 defineEmits<{
-  (e: 'editStrategy', strategy: StrategyConfig);
-  (e: 'deleteStrategy', strategy: StrategyConfig);
+  (e: 'editStrategy', strategy: Strategy);
+  (e: 'deleteStrategy', strategy: Strategy);
 }>();
 
 const network = computed(() => getNetwork(props.networkId));
@@ -48,6 +54,7 @@ const network = computed(() => getNetwork(props.networkId));
       </a>
     </div>
     <div
+      v-if="!readOnly"
       class="flex gap-3"
       :class="{
         'self-start': strategy.address
