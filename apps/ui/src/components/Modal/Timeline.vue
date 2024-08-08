@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ProposalTimeline from '@/components/ProposalTimeline.vue';
 import { Proposal } from '@/types';
 
 defineProps<{
