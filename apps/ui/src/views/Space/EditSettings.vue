@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import objectHash from 'object-hash';
-import { compareAddresses } from '@/helpers/utils';
+import { _d, compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import {
   GeneratedMetadata,
@@ -38,17 +38,30 @@ const TABS = [
 
 const props = defineProps<{ space: Space }>();
 
-const { updateStrategies } = useActions();
+const { updateSettings } = useActions();
 const { setTitle } = useTitle();
+const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const network = computed(() => getNetwork(props.space.network));
 
+const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
 const loading = ref(true);
 const saving = ref(false);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy = ref(null as StrategyConfig | null);
 const votingStrategies = ref([] as StrategyConfig[]);
-const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
+const votingDelay: Ref<number | null> = ref(null);
+const minVotingPeriod: Ref<number | null> = ref(null);
+const maxVotingPeriod: Ref<number | null> = ref(null);
+
+function currentToMinutesOnly(value: number) {
+  const duration = getDurationFromCurrent(props.space.network, value);
+  return Math.round(duration / 60) * 60;
+}
+
+function formatCurrentValue(value: number) {
+  return _d(currentToMinutesOnly(value));
+}
 
 function processParams(paramsArray: string[]) {
   return paramsArray.map(params => (params === '' ? [] : params.split(',')));
@@ -231,6 +244,28 @@ async function processChanges(
   return [toAdd, toRemove];
 }
 
+function getIsMinVotingPeriodValid(value: number) {
+  if (maxVotingPeriod.value) {
+    return value <= maxVotingPeriod.value;
+  }
+
+  return (
+    getCurrentFromDuration(props.space.network, value) <=
+    props.space.max_voting_period
+  );
+}
+
+function getIsMaxVotingPeriodValid(value: number) {
+  if (minVotingPeriod.value) {
+    return value >= minVotingPeriod.value;
+  }
+
+  return (
+    getCurrentFromDuration(props.space.network, value) >=
+    props.space.min_voting_period
+  );
+}
+
 async function save() {
   if (!validationStrategy.value) return;
 
@@ -251,13 +286,16 @@ async function save() {
       props.space.strategies_parsed_metadata
     );
 
-    await updateStrategies(
+    await updateSettings(
       props.space,
       authenticatorsToAdd,
       authenticatorsToRemove,
       strategiesToAdd,
       strategiesToRemove,
-      validationStrategy.value
+      validationStrategy.value,
+      votingDelay.value,
+      minVotingPeriod.value,
+      maxVotingPeriod.value
     );
   } finally {
     saving.value = false;
@@ -340,6 +378,95 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         title="Voting strategies"
         description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
       />
+      <div v-else-if="activeTab === 'voting'" class="mb-4">
+        <h3 class="text-md leading-6">Voting</h3>
+        <span class="mb-4 inline-block">Placeholder description</span>
+        <h4 class="eyebrow mb-2 font-medium">Voting</h4>
+        <div class="space-y-3">
+          <div>
+            <div class="s-label !mb-0">Voting delay</div>
+            <UiEditable
+              editable
+              :initial-value="currentToMinutesOnly(space.voting_delay)"
+              :definition="{
+                type: 'integer',
+                format: 'duration'
+              }"
+              @save="value => (votingDelay = Number(value))"
+            >
+              <h4
+                class="text-skin-link text-md"
+                v-text="
+                  votingDelay
+                    ? _d(votingDelay)
+                    : formatCurrentValue(space.voting_delay) || 'No delay'
+                "
+              />
+            </UiEditable>
+          </div>
+          <div>
+            <div class="s-label !mb-0">Min. voting period</div>
+            <UiEditable
+              editable
+              :initial-value="currentToMinutesOnly(space.min_voting_period)"
+              :definition="{
+                type: 'integer',
+                format: 'duration'
+              }"
+              :custom-error-validation="
+                value =>
+                  !getIsMinVotingPeriodValid(Number(value))
+                    ? 'Must be equal to or lower than max. voting period'
+                    : undefined
+              "
+              @save="value => (minVotingPeriod = Number(value))"
+            >
+              <h4
+                class="text-skin-link text-md"
+                v-text="
+                  minVotingPeriod
+                    ? _d(minVotingPeriod)
+                    : formatCurrentValue(space.min_voting_period) || 'No min.'
+                "
+              />
+            </UiEditable>
+          </div>
+          <div>
+            <div class="s-label !mb-0">Max. voting period</div>
+            <UiEditable
+              editable
+              :initial-value="currentToMinutesOnly(space.max_voting_period)"
+              :definition="{
+                type: 'integer',
+                format: 'duration'
+              }"
+              :custom-error-validation="
+                value =>
+                  !getIsMaxVotingPeriodValid(Number(value))
+                    ? 'Must be equal to or higher than min. voting period'
+                    : undefined
+              "
+              @save="value => (maxVotingPeriod = Number(value))"
+            >
+              <h4
+                class="text-skin-link text-md"
+                v-text="
+                  maxVotingPeriod
+                    ? _d(maxVotingPeriod)
+                    : formatCurrentValue(space.max_voting_period)
+                "
+              />
+            </UiEditable>
+          </div>
+          <div v-if="space.proposal_threshold !== '0'">
+            <div class="s-label !mb-0" v-text="'Proposal threshold'" />
+            <h4
+              class="text-skin-link text-md"
+              v-text="space.proposal_threshold"
+            />
+          </div>
+        </div>
+      </div>
       <UiButton :loading="saving" class="w-full" @click="save">Save</UiButton>
     </template>
   </div>

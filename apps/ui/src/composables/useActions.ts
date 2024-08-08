@@ -478,13 +478,16 @@ export function useActions() {
     );
   }
 
-  async function updateStrategies(
+  async function updateSettings(
     space: Space,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
-    validationStrategy: StrategyConfig
+    validationStrategy: StrategyConfig,
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
   ) {
     if (!web3.value.account) return await forceLogin();
 
@@ -495,14 +498,21 @@ export function useActions() {
 
     await wrapPromise(
       space.network,
-      network.actions.updateStrategies(
+      network.actions.updateSettings(
         auth.web3,
         space,
         authenticatorsToAdd,
         authenticatorsToRemove,
         votingStrategiesToAdd,
         votingStrategiesToRemove,
-        validationStrategy
+        validationStrategy,
+        votingDelay ? getCurrentFromDuration(space.network, votingDelay) : null,
+        minVotingDuration
+          ? getCurrentFromDuration(space.network, minVotingDuration)
+          : null,
+        maxVotingDuration
+          ? getCurrentFromDuration(space.network, maxVotingDuration)
+          : null
       )
     );
   }
@@ -634,7 +644,7 @@ export function useActions() {
     setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
-    updateStrategies: wrapWithErrors(updateStrategies),
+    updateSettings: wrapWithErrors(updateSettings),
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
