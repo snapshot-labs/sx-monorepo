@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
-import ProposalTimeline from '@/components/ProposalTimeline.vue';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { resolver } from '@/helpers/resolver';
