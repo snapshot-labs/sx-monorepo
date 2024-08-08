@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import objectHash from 'object-hash';
-import { _d, compareAddresses } from '@/helpers/utils';
+import { _d, compareAddresses, shorten } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import {
   GeneratedMetadata,
@@ -38,11 +38,12 @@ const TABS = [
 
 const props = defineProps<{ space: Space }>();
 
-const { updateSettings } = useActions();
+const { updateSettings, transferOwnership } = useActions();
 const { setTitle } = useTitle();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
+const changeControllerModalOpen = ref(false);
 const loading = ref(true);
 const saving = ref(false);
 const authenticators = ref([] as StrategyConfig[]);
@@ -51,6 +52,7 @@ const votingStrategies = ref([] as StrategyConfig[]);
 const votingDelay: Ref<number | null> = ref(null);
 const minVotingPeriod: Ref<number | null> = ref(null);
 const maxVotingPeriod: Ref<number | null> = ref(null);
+const controller = ref(props.space.controller);
 
 const network = computed(() => getNetwork(props.space.network));
 const executionStrategies = computed(() => {
@@ -316,6 +318,13 @@ async function save() {
   }
 }
 
+async function handleControllerSave(value: string) {
+  changeControllerModalOpen.value = false;
+
+  await transferOwnership(props.space, value);
+  controller.value = value;
+}
+
 watchEffect(async () => {
   loading.value = true;
 
@@ -494,7 +503,49 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :strategy="strategy"
         />
       </div>
-      <UiButton :loading="saving" class="w-full" @click="save">Save</UiButton>
+      <div v-else-if="activeTab === 'controller'" class="mb-4">
+        <h3 class="text-md leading-6">Controller</h3>
+        <span class="mb-4 inline-block">Placeholder description</span>
+        <div
+          class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
+        >
+          <div class="flex flex-col">
+            <a
+              :href="network.helpers.getExplorerUrl(controller, 'contract')"
+              target="_blank"
+              class="flex items-center text-skin-text leading-5"
+            >
+              <UiStamp
+                :id="controller"
+                type="avatar"
+                :size="18"
+                class="mr-2 !rounded"
+              />
+              {{ shorten(controller) }}
+              <IH-arrow-sm-right class="-rotate-45" />
+            </a>
+          </div>
+          <button type="button" @click="changeControllerModalOpen = true">
+            <IH-pencil />
+          </button>
+        </div>
+        <teleport to="#modal">
+          <ModalChangeController
+            :open="changeControllerModalOpen"
+            :initial-state="{ controller }"
+            @close="changeControllerModalOpen = false"
+            @save="handleControllerSave"
+          />
+        </teleport>
+      </div>
+      <UiButton
+        v-if="activeTab !== 'controller'"
+        :loading="saving"
+        class="w-full"
+        @click="save"
+      >
+        Save
+      </UiButton>
     </template>
   </div>
 </template>
