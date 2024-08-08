@@ -46,12 +46,12 @@ const formatTimelineValues = (): ProposalTimelineValues => {
     const { network, created, start, min_end, max_end } = data;
     return { network, created, start, min_end, max_end };
   }
-  const start = now.value + (data?.voting_delay || 0);
+  const start = now.value + data.voting_delay;
   return {
     network: data.network,
     start,
-    min_end: start + (data?.min_voting_period || 0),
-    max_end: start + (data?.max_voting_period || 0)
+    min_end: start + data.min_voting_period,
+    max_end: start + data.max_voting_period
   };
 };
 
