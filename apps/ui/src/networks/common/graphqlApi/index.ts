@@ -101,6 +101,7 @@ function processStrategiesMetadata(
     parsedMetadata.map(metadata => [
       metadata.index,
       {
+        id: metadata.data.id,
         name: metadata.data.name,
         description: metadata.data.description,
         decimals: metadata.data.decimals,

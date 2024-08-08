@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import objectHash from 'object-hash';
-import { _d, compareAddresses, shorten } from '@/helpers/utils';
+import { _d, compareAddresses, getUrl, shorten } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import {
   GeneratedMetadata,
@@ -41,10 +41,12 @@ const props = defineProps<{ space: Space }>();
 const { updateSettings, transferOwnership } = useActions();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
+const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
 const changeControllerModalOpen = ref(false);
+const valuesChanged = ref(false);
 const loading = ref(true);
 const saving = ref(false);
 const authenticators = ref([] as StrategyConfig[]);
@@ -74,6 +76,87 @@ const executionStrategies = computed(() => {
     };
   });
 });
+
+const isModified = computedAsync(async () => {
+  try {
+    if (loading.value) return false;
+
+    if (
+      votingDelay.value &&
+      votingDelay.value !== currentToMinutesOnly(props.space.voting_delay)
+    ) {
+      return true;
+    }
+
+    if (
+      minVotingPeriod.value &&
+      minVotingPeriod.value !==
+        currentToMinutesOnly(props.space.min_voting_period)
+    ) {
+      return true;
+    }
+
+    if (
+      maxVotingPeriod.value &&
+      maxVotingPeriod.value !==
+        currentToMinutesOnly(props.space.max_voting_period)
+    ) {
+      return true;
+    }
+
+    // NOTE: those need to be reassigned there as computedAsync won't track changes after await call
+    const authenticatorsValue = authenticators.value;
+    const votingStrategiesValue = votingStrategies.value;
+    const validationStrategyValue = validationStrategy.value;
+
+    const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
+      authenticatorsValue,
+      props.space.authenticators,
+      [],
+      []
+    );
+
+    if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
+      return true;
+    }
+
+    const [strategiesToAdd, strategiesToRemove] = await processChanges(
+      votingStrategiesValue,
+      props.space.strategies,
+      props.space.strategies_params,
+      props.space.strategies_parsed_metadata
+    );
+
+    if (strategiesToAdd.length || strategiesToRemove.length) {
+      return true;
+    }
+
+    const isUnhandledValidationStrategy =
+      !validationStrategyValue ||
+      validationStrategyValue.type !== 'VotingPower';
+
+    if (isUnhandledValidationStrategy) {
+      return true;
+    }
+
+    const rebuiltMetadata = {
+      strategies_metadata:
+        props.space.voting_power_validation_strategies_parsed_metadata.map(
+          v => `ipfs://${v.id}`
+        )
+    };
+    const hasValidationStrategyChanged = await hasStrategyChanged(
+      validationStrategyValue,
+      [props.space.validation_strategy_params],
+      rebuiltMetadata
+    );
+    if (hasValidationStrategyChanged) return true;
+
+    return false;
+  } finally {
+    valuesChanged.value = false;
+  }
+}, false);
 
 function currentToMinutesOnly(value: number) {
   const duration = getDurationFromCurrent(props.space.network, value);
@@ -287,6 +370,33 @@ function getIsMaxVotingPeriodValid(value: number) {
   );
 }
 
+async function reset() {
+  authenticators.value = await getInitialStrategiesConfig(
+    props.space.authenticators,
+    network.value.constants.EDITOR_AUTHENTICATORS
+  );
+
+  votingStrategies.value = await getInitialStrategiesConfig(
+    props.space.strategies,
+    network.value.constants.EDITOR_VOTING_STRATEGIES,
+    props.space.strategies_params,
+    props.space.strategies_parsed_metadata
+  );
+
+  validationStrategy.value = await getInitialValidationStrategy(
+    props.space.validation_strategy,
+    network.value.constants.EDITOR_PROPOSAL_VALIDATIONS,
+    props.space.validation_strategy_params,
+    props.space.voting_power_validation_strategy_strategies,
+    props.space.voting_power_validation_strategy_strategies_params,
+    props.space.voting_power_validation_strategies_parsed_metadata
+  );
+
+  votingDelay.value = null;
+  minVotingPeriod.value = null;
+  maxVotingPeriod.value = null;
+}
+
 async function save() {
   if (!validationStrategy.value) return;
 
@@ -330,29 +440,25 @@ async function handleControllerSave(value: string) {
   controller.value = value;
 }
 
+watch(
+  () => [
+    authenticators.value,
+    votingStrategies.value,
+    validationStrategy.value,
+    votingDelay.value,
+    minVotingPeriod.value,
+    maxVotingPeriod.value
+  ],
+  () => {
+    valuesChanged.value = true;
+  },
+  { deep: true }
+);
+
 watchEffect(async () => {
   loading.value = true;
 
-  authenticators.value = await getInitialStrategiesConfig(
-    props.space.authenticators,
-    network.value.constants.EDITOR_AUTHENTICATORS
-  );
-
-  votingStrategies.value = await getInitialStrategiesConfig(
-    props.space.strategies,
-    network.value.constants.EDITOR_VOTING_STRATEGIES,
-    props.space.strategies_params,
-    props.space.strategies_parsed_metadata
-  );
-
-  validationStrategy.value = await getInitialValidationStrategy(
-    props.space.validation_strategy,
-    network.value.constants.EDITOR_PROPOSAL_VALIDATIONS,
-    props.space.validation_strategy_params,
-    props.space.voting_power_validation_strategy_strategies,
-    props.space.voting_power_validation_strategy_strategies_params,
-    props.space.voting_power_validation_strategies_parsed_metadata
-  );
+  await reset();
 
   loading.value = false;
 });
@@ -547,14 +653,18 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             />
           </teleport>
         </div>
-        <UiButton
-          v-if="activeTab !== 'controller'"
-          :loading="saving"
-          class="w-full"
-          @click="save"
+        <div
+          v-if="!uiStore.sidebarOpen && isModified && !valuesChanged"
+          class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-between items-center"
         >
-          Save
-        </UiButton>
+          <h4 class="leading-7 font-medium">You have unsaved changes</h4>
+          <div class="space-x-3">
+            <button type="reset" class="text-skin-heading" @click="reset">
+              Reset
+            </button>
+            <UiButton :loading="saving" primary @click="save">Save</UiButton>
+          </div>
+        </div>
       </template>
     </div>
   </template>
