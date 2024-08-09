@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { _t } from '@/helpers/utils';
-import { NetworkID, Proposal, Space } from '@/types';
+import { Proposal, Space } from '@/types';
 
 type ProposalTimelineValues = {
-  network: NetworkID;
   created?: number;
   start: number;
   min_end: number;
@@ -12,7 +11,6 @@ type ProposalTimelineValues = {
 
 type State = {
   id: string;
-  block_number?: number;
   value: number;
 };
 
@@ -26,7 +24,7 @@ const labels = {
   max_end: 'Max. end'
 };
 
-const { getTsFromCurrent } = useMetaStore();
+const { getTsFromCurrent, getDurationFromCurrentEVM } = useMetaStore();
 
 const now = ref(parseInt((Date.now() / 1e3).toFixed()));
 
@@ -44,19 +42,25 @@ const formatTimelineValues = (): ProposalTimelineValues => {
   const data = props.data;
   if ('start' in data) {
     const { network, created, start, min_end, max_end } = data;
-    return { network, created, start, min_end, max_end };
+    return {
+      created,
+      start: getTsFromCurrent(network, start),
+      min_end: getTsFromCurrent(network, min_end),
+      max_end: getTsFromCurrent(network, max_end)
+    };
   }
-  const start = now.value + data.voting_delay;
+  const network = data.network;
+  const start =
+    now.value + getDurationFromCurrentEVM(network, data.voting_delay);
   return {
-    network: data.network,
     start,
-    min_end: start + data.min_voting_period,
-    max_end: start + data.max_voting_period
+    min_end: start + getDurationFromCurrentEVM(network, data.min_voting_period),
+    max_end: start + getDurationFromCurrentEVM(network, data.max_voting_period)
   };
 };
 
 const states: ComputedRef<State[]> = computed(() => {
-  const { network, created, start, min_end, max_end } = formatTimelineValues();
+  const { created, start, min_end, max_end } = formatTimelineValues();
   const initial: State[] = [];
 
   if (created) {
@@ -68,27 +72,23 @@ const states: ComputedRef<State[]> = computed(() => {
 
   initial.push({
     id: 'start',
-    block_number: start,
-    value: getTsFromCurrent(network, start)
+    value: start
   });
 
   if (min_end === max_end) {
     initial.push({
       id: 'end',
-      block_number: min_end,
-      value: getTsFromCurrent(network, min_end)
+      value: min_end
     });
   } else {
     initial.push(
       {
         id: 'min_end',
-        block_number: min_end,
-        value: getTsFromCurrent(network, min_end)
+        value: min_end
       },
       {
         id: 'max_end',
-        block_number: max_end,
-        value: getTsFromCurrent(network, max_end)
+        value: max_end
       }
     );
   }
