@@ -218,6 +218,7 @@ watchEffect(() => setTitle('Create space'));
           <FormStrategies
             v-else-if="currentPage === 'strategies'"
             v-model="votingStrategies"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
             "
@@ -228,6 +229,7 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'auths'"
             v-model="authenticators"
             unique
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_AUTHENTICATORS
             "
@@ -237,6 +239,7 @@ watchEffect(() => setTitle('Create space'));
           <FormValidation
             v-else-if="currentPage === 'validations'"
             v-model="validationStrategy"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS
             "
@@ -250,6 +253,7 @@ watchEffect(() => setTitle('Create space'));
           <FormStrategies
             v-else-if="currentPage === 'executions'"
             v-model="executionStrategies"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES
             "

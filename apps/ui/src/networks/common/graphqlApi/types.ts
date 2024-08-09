@@ -1,6 +1,7 @@
 export type ApiStrategyParsedMetadata = {
   index: number;
   data: {
+    id: string;
     name: string;
     description: string;
     decimals: number;

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
+import { NetworkID } from '@/types';
 
 const model = defineModel<StrategyConfig[]>({ required: true });
 
 const props = withDefaults(
   defineProps<{
+    networkId: NetworkID;
     limit?: number;
     unique?: boolean;
     availableStrategies: StrategyTemplate[];
@@ -76,39 +78,19 @@ function handleStrategySave(value: Record<string, any>) {
 
 <template>
   <div>
-    <h4 class="eyebrow mb-2">Active</h4>
-    <div class="mb-3">
+    <h4 class="eyebrow mb-2 font-medium">Active</h4>
+    <div class="space-y-3 mb-4">
       <div v-if="model.length === 0">No strategies selected</div>
-      <div
+      <FormStrategiesStrategyActive
         v-for="strategy in model"
-        v-else
         :key="strategy.id"
-        class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
-      >
-        <div class="flex min-w-0">
-          <div class="whitespace-nowrap">{{ strategy.name }}</div>
-          <div
-            v-if="strategy.generateSummary"
-            class="ml-2 pr-2 text-skin-text truncate"
-          >
-            {{ strategy.generateSummary(strategy.params) }}
-          </div>
-        </div>
-        <div class="flex gap-3">
-          <button
-            v-if="strategy.paramsDefinition"
-            type="button"
-            @click="editStrategy(strategy)"
-          >
-            <IH-pencil />
-          </button>
-          <button type="button" @click="removeStrategy(strategy)">
-            <IH-trash />
-          </button>
-        </div>
-      </div>
+        :network-id="networkId"
+        :strategy="strategy"
+        @edit-strategy="editStrategy"
+        @delete-strategy="removeStrategy"
+      />
     </div>
-    <h4 class="eyebrow mb-2">Available</h4>
+    <h4 class="eyebrow mb-2 font-medium">Available</h4>
     <div v-if="availableStrategies.length === 0">No strategies available</div>
     <div v-else class="space-y-3">
       <ButtonStrategy
