@@ -2,6 +2,8 @@
 import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
+const API_DELAY = 10000;
+
 type Messages = {
   approveTitle?: string;
   approveSubtitle?: string;
@@ -68,6 +70,10 @@ const text = computed(() => {
   throw new Error('Invalid step');
 });
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function handleExecute() {
   step.value = 'approve';
   try {
@@ -76,6 +82,7 @@ async function handleExecute() {
     if (txId.value) {
       step.value = 'confirming';
       await network.value.helpers.waitForTransaction(txId.value);
+      await sleep(API_DELAY);
     }
 
     emit('confirmed');
