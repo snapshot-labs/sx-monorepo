@@ -1,0 +1,52 @@
+<template>
+  <svg
+    class="loading"
+    xmlns="http://www.w3.org/2000/svg"
+    width="64"
+    height="64"
+    viewBox="0 0 66 67"
+    fill="none"
+  >
+    <circle
+      opacity="0.4"
+      cx="33"
+      cy="33.5"
+      r="29"
+      stroke="#E5E5E6"
+      stroke-width="8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      opacity="0.4"
+      d="M33 62.5001C39.3839 62.5001 45.5894 60.3936 50.6541 56.5074C55.7188 52.6211 59.3596 47.1722 61.0119 41.0059"
+      stroke="#57606A"
+      stroke-width="8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</template>
+
+<style lang="scss" scoped>
+.loading {
+  animation: rotation 0.8s linear infinite;
+
+  path {
+    stroke: rgba(var(--link));
+  }
+
+  stop {
+    stop-color: rgba(var(--link));
+  }
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
+</style>
