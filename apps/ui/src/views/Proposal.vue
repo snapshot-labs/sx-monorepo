@@ -317,6 +317,13 @@ watchEffect(() => {
             :decimals="votingPowerDecimals"
           />
         </div>
+        <div>
+          <h4 class="mb-2.5 eyebrow flex items-center">
+            <IH-clock class="inline-block mr-2" />
+            <span>Timeline</span>
+          </h4>
+          <ProposalTimeline :data="proposal" />
+        </div>
       </div>
     </template>
     <teleport to="#modal">

@@ -43,7 +43,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   }
 
   async function loadNotifications() {
-    const now = Math.floor(Date.now() / 1e3);
+    const now = Math.floor(Date.now() / 1000);
     const pivotTs = now - NOTIFICATION_TIME_WINDOW;
 
     if (!followedSpacesStore.followedSpacesIds.length) return;
@@ -139,7 +139,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   onMounted(() => {
     refreshNotificationInterval = window.setInterval(
       loadNotifications,
-      REFRESH_INTERVAL * 1e3
+      REFRESH_INTERVAL * 1000
     );
   });
 
