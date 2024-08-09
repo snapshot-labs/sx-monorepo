@@ -73,23 +73,8 @@ async function handleVoteClick(choice: Choice) {
 }
 
 async function handleVoteSubmitted() {
-  if (!proposal.value) return;
-
   selectedChoice.value = null;
-
-  try {
-    // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-    if (offchainNetworks.includes(proposal.value.network)) {
-      proposalsStore.fetchProposal(
-        spaceAddress.value!,
-        id.value,
-        networkId.value!
-      );
-      await loadVotes(proposal.value.network, [proposal.value.space.id]);
-    }
-  } finally {
-    editMode.value = false;
-  }
+  editMode.value = false;
 }
 
 function handleFetchVotingPower() {
