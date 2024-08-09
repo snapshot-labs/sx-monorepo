@@ -1,5 +1,11 @@
 # @snapshot-labs/sx
 
+## 0.1.4
+
+### Patch Changes
+
+- 9e4e6ea: support submitting a reason when voting
+
 ## 0.1.3
 
 ### Patch Changes
