@@ -7,6 +7,7 @@ const props = defineProps<{ space: Space; user: User }>();
 const PROPOSALS_LIMIT = 20;
 
 const metaStore = useMetaStore();
+const { setTitle } = useTitle();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
@@ -59,6 +60,12 @@ async function handleEndReached() {
 onMounted(() => {
   fetch();
 });
+
+watchEffect(() =>
+  setTitle(
+    `${props.user.name || props.user.id} ${props.space.name}'s proposals`
+  )
+);
 </script>
 
 <template>
