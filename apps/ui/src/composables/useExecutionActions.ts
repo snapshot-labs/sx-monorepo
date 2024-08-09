@@ -4,9 +4,15 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
+import {
+  getModuleAddressForTreasury,
+  getOgProposalGql,
+  getProposalHashFromTransactions,
+  isConfigCompliant
+} from '@/helpers/osnap/getters';
 import { getNetwork } from '@/networks';
 import { Network } from '@/networks/types';
-import { Proposal } from '@/types';
+import { Proposal, ProposalExecution } from '@/types';
 
 export const STARKNET_L1_EXECUTION_QUERY = gql`
   query ($id: String!) {
@@ -17,9 +23,12 @@ export const STARKNET_L1_EXECUTION_QUERY = gql`
 `;
 
 const STRATEGIES_WITH_FINALIZE = ['Axiom'];
-const STRATEGIES_WITH_EXTERNAL_DETAILS = ['EthRelayer'];
+const STRATEGIES_WITH_EXTERNAL_DETAILS = ['EthRelayer', 'oSnap'];
 
-export function useExecutionActions(proposal: Proposal) {
+export function useExecutionActions(
+  proposal: Proposal,
+  execution: ProposalExecution
+) {
   const actions = useActions();
 
   const currentTimestamp = ref(Date.now());
@@ -28,7 +37,10 @@ export function useExecutionActions(proposal: Proposal) {
   const fetchingDetails = ref(
     STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
       proposal.execution_strategy_type
-    ) && proposal.execution_tx
+    ) &&
+      (proposal.execution_strategy_type === 'EthRelayer'
+        ? proposal.execution_tx
+        : true)
   );
   const message: Ref<string | null> = ref(null);
   const executionTx = ref<string | null>(
@@ -61,7 +73,7 @@ export function useExecutionActions(proposal: Proposal) {
       return proposal.state === 'executed' ? isL1ExecutionReady.value : false;
     }
 
-    return !proposal.completed;
+    return proposal.state === 'executed' && !proposal.completed;
   });
 
   const executionCountdown = computed(() => {
@@ -105,6 +117,53 @@ export function useExecutionActions(proposal: Proposal) {
     } else {
       executionTx.value = data.starknetL1Execution.tx;
       executionNetwork.value = baseNetwork;
+    }
+  }
+
+  async function fetchOSnapExecutionDetails() {
+    try {
+      if (!execution.chainId) {
+        throw new Error('Chain ID is required for oSnap execution');
+      }
+
+      const proposalHash = getProposalHashFromTransactions(
+        execution.transactions
+      );
+      const moduleAddress = await getModuleAddressForTreasury(
+        execution.chainId,
+        execution.safeAddress
+      );
+
+      const data = await getOgProposalGql({
+        chainId: execution.chainId,
+        explanation: proposal.metadata_uri,
+        moduleAddress,
+        proposalHash
+      });
+
+      if (!data) {
+        const configCompliant = await isConfigCompliant(
+          execution.safeAddress,
+          execution.chainId
+        );
+
+        message.value = configCompliant.automaticExecution
+          ? 'Waiting for execution to be initiated.'
+          : 'Space is not configured for automatic execution.';
+      } else if (data.executionTransactionHash) {
+        try {
+          executionNetwork.value = getNetwork(execution.networkId);
+          executionTx.value = data.executionTransactionHash;
+        } catch (e) {
+          message.value =
+            'Proposal has been executed but execution details are not available.';
+        }
+      } else {
+        message.value = 'Waiting for execution to be confirmed.';
+      }
+    } catch (e) {
+      console.warn(e);
+      message.value = 'Execution details failed to load.';
     }
   }
 
@@ -153,12 +212,15 @@ export function useExecutionActions(proposal: Proposal) {
       !STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
         proposal.execution_strategy_type
       )
-    )
+    ) {
       return;
+    }
 
     try {
       if (proposal.execution_strategy_type === 'EthRelayer') {
         await fetchEthRelayerExecutionDetails();
+      } else if (proposal.execution_strategy_type === 'oSnap') {
+        await fetchOSnapExecutionDetails();
       } else {
         throw new Error('Unsupported strategy');
       }

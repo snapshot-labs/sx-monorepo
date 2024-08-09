@@ -135,6 +135,7 @@ export type Vote = {
   strategies: StrategyConfig[];
   proposal: number;
   choice: Choice;
+  metadataUri: string;
 };
 
 export type Alias = {

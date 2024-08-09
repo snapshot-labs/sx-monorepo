@@ -144,10 +144,12 @@ export type Space = {
 };
 
 export type ProposalExecution = {
+  strategyType: string;
   safeName: string;
   safeAddress: string;
   networkId: NetworkID;
   transactions: Transaction[];
+  chainId?: number;
 };
 
 export type Proposal = {
@@ -289,8 +291,7 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
-  executionStrategy: SelectedStrategy | null;
-  execution: Transaction[];
+  executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
 };
 

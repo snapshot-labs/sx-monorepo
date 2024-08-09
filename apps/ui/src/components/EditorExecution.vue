@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
+import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
+import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import {
-  Contact,
-  Space,
-  SpaceMetadataTreasury,
-  Transaction as TransactionType
-} from '@/types';
+import { Contact, Space, Transaction as TransactionType } from '@/types';
 
 const model = defineModel<TransactionType[]>({
   required: true
@@ -15,12 +12,13 @@ const model = defineModel<TransactionType[]>({
 
 const props = defineProps<{
   space: Space;
-  treasuryData: SpaceMetadataTreasury;
+  disabled?: boolean;
+  strategy: StrategyWithTreasury;
   extraContacts?: Contact[];
 }>();
 
 const uiStore = useUiStore();
-const { treasury } = useTreasury(props.treasuryData);
+const { treasury } = useTreasury(props.strategy.treasury);
 
 const editedTx: Ref<number | null> = ref(null);
 const modalState: Ref<{
@@ -108,80 +106,146 @@ watch(
 <template>
   <div class="space-y-3">
     <div class="overflow-hidden border rounded-lg">
-      <ExecutionButton :disabled="!treasury" @click="openModal('sendToken')">
-        <IH-cash class="inline-block" />
-        <span>Send token</span>
-      </ExecutionButton>
-      <ExecutionButton :disabled="!treasury" @click="openModal('sendNft')">
-        <IH-photograph class="inline-block" />
-        <span>Send NFT</span>
-      </ExecutionButton>
-      <ExecutionButton @click="openModal('contractCall')">
-        <IH-code class="inline-block" />
-        <span>Contract call</span>
-      </ExecutionButton>
-    </div>
-    <div v-if="model.length > 0" class="x-block !border-x rounded-lg">
-      <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
-        <template #item="{ element: tx, index: i }">
-          <TransactionsListItem :tx="tx">
-            <template #left>
-              <div
-                v-if="model.length > 1"
-                class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
-              >
-                <IH-switch-vertical />
-              </div>
-            </template>
-            <template #right>
-              <div class="flex gap-3">
-                <button type="button" @click="editTx(i)">
-                  <IH-pencil />
-                </button>
-                <button type="button" @click="removeTx(i)">
-                  <IH-trash />
-                </button>
-              </div>
-            </template>
-          </TransactionsListItem>
-        </template>
-      </Draggable>
       <div
-        class="border-t px-4 py-2 space-x-2 flex items-center justify-between"
+        v-if="treasury && network"
+        class="w-full flex justify-between px-4 py-3 text-start"
       >
-        <div class="flex items-center max-w-[70%]">
-          {{ model.length }}
-          {{ model.length === 1 ? 'transaction' : 'transactions' }}
+        <div class="flex justify-between items-center">
+          <UiBadgeNetwork
+            :id="treasury.networkId"
+            class="mr-3"
+            :class="{
+              'opacity-40': disabled
+            }"
+          >
+            <UiStamp
+              :id="treasury.wallet"
+              type="avatar"
+              :size="32"
+              class="rounded-md"
+            />
+          </UiBadgeNetwork>
+          <div class="flex-1 leading-[22px]">
+            <h4
+              class="text-skin-link"
+              :class="{
+                'text-skin-border': disabled
+              }"
+              v-text="treasury.name || shorten(treasury.wallet)"
+            />
+            <div
+              class="text-skin-text text-[17px]"
+              :class="{
+                'text-skin-border': disabled
+              }"
+              v-text="
+                strategy.type === 'oSnap'
+                  ? 'oSnap execution'
+                  : `${network.constants.EXECUTORS[strategy.type]} execution`
+              "
+            />
+          </div>
         </div>
-        <UiTooltip
-          v-if="!network?.supportsSimulation"
-          title="Simulation not supported on this network"
-        >
-          <IH-shield-exclamation />
-        </UiTooltip>
-        <UiTooltip
-          v-else-if="simulationState === null"
-          title="Simulate execution"
-        >
-          <button type="button" class="flex" @click="handleSimulateClick">
-            <IH-shield-check class="text-skin-link" />
-          </button>
-        </UiTooltip>
-        <UiLoading v-else-if="simulationState === 'SIMULATING'" />
-        <UiTooltip
-          v-if="simulationState === 'SIMULATION_SUCCEDED'"
-          title="Execution simulation succeeded"
-        >
-          <IH-shield-check class="text-skin-success" />
-        </UiTooltip>
-        <UiTooltip
-          v-if="simulationState === 'SIMULATION_FAILED'"
-          title="Execution simulation failed"
-        >
-          <IH-shield-check class="text-skin-danger" />
-        </UiTooltip>
+        <div class="space-x-2">
+          <UiTooltip title="Send token">
+            <UiButton
+              :disabled="!treasury || disabled"
+              class="!px-0 w-[46px]"
+              @click="openModal('sendToken')"
+            >
+              <IH-cash class="inline-block" />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Send NFT">
+            <UiButton
+              :disabled="!treasury || disabled"
+              class="!px-0 w-[46px]"
+              @click="openModal('sendNft')"
+            >
+              <IH-photograph class="inline-block" />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Contract call">
+            <UiButton
+              :disabled="!treasury || disabled"
+              class="!px-0 w-[46px]"
+              @click="openModal('contractCall')"
+            >
+              <IH-code class="inline-block" />
+            </UiButton>
+          </UiTooltip>
+        </div>
       </div>
+      <template v-if="model.length > 0">
+        <UiLabel label="Transactions" class="border-t" />
+        <div>
+          <Draggable
+            v-model="model"
+            handle=".handle"
+            :item-key="() => undefined"
+          >
+            <template #item="{ element: tx, index: i }">
+              <TransactionsListItem :tx="tx">
+                <template #left>
+                  <div
+                    v-if="model.length > 1"
+                    class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+                  >
+                    <IH-switch-vertical />
+                  </div>
+                </template>
+                <template #right>
+                  <div class="flex gap-3">
+                    <button type="button" @click="editTx(i)">
+                      <IH-pencil />
+                    </button>
+                    <button type="button" @click="removeTx(i)">
+                      <IH-trash />
+                    </button>
+                  </div>
+                </template>
+              </TransactionsListItem>
+            </template>
+          </Draggable>
+          <div
+            class="border-t px-4 py-2 space-x-2 flex items-center justify-between"
+          >
+            <div class="flex items-center max-w-[70%]">
+              {{ model.length }}
+              {{ model.length === 1 ? 'transaction' : 'transactions' }}
+            </div>
+            <UiTooltip
+              v-if="!network?.supportsSimulation"
+              title="Simulation not supported on this network"
+            >
+              <IH-shield-exclamation />
+            </UiTooltip>
+            <UiTooltip
+              v-else-if="simulationState === null"
+              title="Simulate execution"
+            >
+              <button type="button" class="flex" @click="handleSimulateClick">
+                <IH-shield-check class="text-skin-link" />
+              </button>
+            </UiTooltip>
+            <UiLoading v-else-if="simulationState === 'SIMULATING'" />
+            <UiTooltip
+              v-if="simulationState === 'SIMULATION_SUCCEDED'"
+              title="Execution simulation succeeded"
+            >
+              <IH-shield-check class="text-skin-success" />
+            </UiTooltip>
+            <UiTooltip
+              v-if="simulationState === 'SIMULATION_FAILED'"
+              title="Execution simulation failed"
+            >
+              <IH-shield-check class="text-skin-danger" />
+            </UiTooltip>
+          </div>
+        </div>
+      </template>
     </div>
+
     <teleport to="#modal">
       <ModalSendToken
         v-if="treasury && treasury.networkId"

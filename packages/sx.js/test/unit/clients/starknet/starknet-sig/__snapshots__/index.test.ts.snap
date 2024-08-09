@@ -231,6 +231,7 @@ exports[`StarknetSig > should create vote envelope 1`] = `
   "data": {
     "authenticator": "0x213bb25044b189ccfda9882999dba32e011781dc11b2a6efa2b3d232824378e",
     "choice": 1,
+    "metadataUri": "ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca",
     "proposal": 1,
     "space": "0x06330d3e48f59f5411c201ee2e9e9ccdc738fb3bb192b0e77e4eda26fa1a22f8",
     "strategies": [
@@ -250,7 +251,10 @@ exports[`StarknetSig > should create vote envelope 1`] = `
     },
     "message": {
       "choice": "0x1",
-      "metadataUri": [],
+      "metadataUri": [
+        "0x697066733a2f2f516d4e726d36784b75696231544874576b694e35434b7442",
+        "0x4565725143447055746d6744716961553278446d6361",
+      ],
       "proposalId": {
         "high": "0x0",
         "low": "0x1",
@@ -261,8 +265,8 @@ exports[`StarknetSig > should create vote envelope 1`] = `
     },
     "primaryType": "Vote",
     "signature": [
-      "0x155b32bbfbb261e29f97dfae43b5423f1a205eb1ef26680e7edf1758453d63a",
-      "0x5da6c03b40c281be8686afd2d985db93fc3fc27e4c8a2856ba7c635ebf1b2d6",
+      "0xd64cf8eb4218e6b47ab1756ab850b82b5bb9eec760c8cd0c1b68bb2ea597be",
+      "0x56a47d37a6980a7f095ac54b5ce5108325333c7642234fc677423a59a027e38",
     ],
     "types": {
       "IndexedStrategy": [

@@ -4,7 +4,6 @@ import { Choice, Proposal } from '@/types';
 type ApprovalChoice = number[];
 
 const props = defineProps<{
-  sendingType: Choice | null;
   proposal: Proposal;
   defaultChoice?: Choice;
 }>();
@@ -45,7 +44,6 @@ function toggleSelectedChoice(choice: number) {
     <UiButton
       primary
       class="!h-[48px] w-full"
-      :loading="!!sendingType"
       @click="emit('vote', selectedChoices)"
     >
       Vote

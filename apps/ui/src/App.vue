@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { startIntercom } from './helpers/intercom';
+import { Transaction } from './types';
 
 const el = ref(null);
 
@@ -25,10 +26,12 @@ const hasAppNav = computed(() =>
 async function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
 
+  const executions = {} as Record<string, Transaction[]>;
+  executions[executionStrategy.value.address] = [transaction.value];
+
   const space = spaceKey.value;
   const draftId = await createDraft(space, {
-    execution: [transaction.value],
-    executionStrategy: executionStrategy.value
+    executions
   });
 
   router.push(`/${space}/create/${draftId}`);

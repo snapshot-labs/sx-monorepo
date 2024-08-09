@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { sanitizeUrl, shorten } from '@/helpers/utils';
+import { sanitizeUrl, shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { NetworkID, ProposalExecution } from '@/types';
+import { NetworkID, Proposal, ProposalExecution } from '@/types';
 
-defineProps<{ executions: ProposalExecution[] }>();
+defineProps<{
+  proposal: Proposal;
+  executions: ProposalExecution[];
+}>();
 
 function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
   if (!safeAddress) return null;
@@ -13,6 +16,17 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
 
     const url = network.helpers.getExplorerUrl(safeAddress, 'address');
     return sanitizeUrl(url);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getExecutionType(networkId: NetworkID, strategyType: string) {
+  try {
+    if (strategyType === 'oSnap') return 'oSnap execution';
+
+    const network = getNetwork(networkId);
+    return `${network.constants.EXECUTORS[strategyType]} execution`;
   } catch (e) {
     return null;
   }
@@ -31,7 +45,7 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
         undefined
       "
       target="_blank"
-      class="flex justify-between items-center px-4 py-3 border-b"
+      class="flex justify-between items-center px-4 py-3"
       :class="{
         'pointer-events-none': !getTreasuryExplorerUrl(
           execution.networkId,
@@ -54,15 +68,33 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
         />
         <div
           class="text-skin-text text-[17px]"
-          v-text="shorten(execution.safeAddress)"
+          v-text="
+            getExecutionType(execution.networkId, execution.strategyType) ||
+            shorten(execution.safeAddress)
+          "
         />
       </div>
     </a>
+    <UiLabel label="Transactions" class="border-t" />
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"
       :tx="tx"
       class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
+    />
+    <ProposalExecutionActions
+      v-if="
+        proposal.executions &&
+        proposal.executions.length > 0 &&
+        proposal.scores.length > 0 &&
+        toBigIntOrNumber(proposal.scores_total) >=
+          toBigIntOrNumber(proposal.quorum) &&
+        toBigIntOrNumber(proposal.scores[0]) >
+          toBigIntOrNumber(proposal.scores[1]) &&
+        proposal.has_execution_window_opened
+      "
+      :proposal="proposal"
+      :execution="execution"
     />
   </div>
 </template>
