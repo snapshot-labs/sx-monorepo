@@ -514,11 +514,13 @@ export function useActions() {
         votingStrategiesToAdd,
         votingStrategiesToRemove,
         validationStrategy,
-        votingDelay ? getCurrentFromDuration(space.network, votingDelay) : null,
-        minVotingDuration
+        votingDelay !== null
+          ? getCurrentFromDuration(space.network, votingDelay)
+          : null,
+        minVotingDuration !== null
           ? getCurrentFromDuration(space.network, minVotingDuration)
           : null,
-        maxVotingDuration
+        maxVotingDuration !== null
           ? getCurrentFromDuration(space.network, maxVotingDuration)
           : null
       )

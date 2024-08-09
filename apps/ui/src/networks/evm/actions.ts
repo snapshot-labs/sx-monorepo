@@ -656,9 +656,11 @@ export function createActions(
               : '0x'
           },
           proposalValidationStrategyMetadataUri,
-          votingDelay: votingDelay || undefined,
-          minVotingDuration: minVotingDuration || undefined,
-          maxVotingDuration: maxVotingDuration || undefined
+          votingDelay: votingDelay !== null ? votingDelay : undefined,
+          minVotingDuration:
+            minVotingDuration !== null ? minVotingDuration : undefined,
+          maxVotingDuration:
+            maxVotingDuration !== null ? maxVotingDuration : undefined
         }
       });
     },
