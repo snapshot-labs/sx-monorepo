@@ -84,14 +84,14 @@ const isModified = computedAsync(async () => {
     if (loading.value) return false;
 
     if (
-      votingDelay.value &&
+      votingDelay.value !== null &&
       votingDelay.value !== currentToMinutesOnly(props.space.voting_delay)
     ) {
       return true;
     }
 
     if (
-      minVotingPeriod.value &&
+      minVotingPeriod.value !== null &&
       minVotingPeriod.value !==
         currentToMinutesOnly(props.space.min_voting_period)
     ) {
@@ -99,7 +99,7 @@ const isModified = computedAsync(async () => {
     }
 
     if (
-      maxVotingPeriod.value &&
+      maxVotingPeriod.value !== null &&
       maxVotingPeriod.value !==
         currentToMinutesOnly(props.space.max_voting_period)
     ) {
@@ -555,9 +555,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
                 <h4
                   class="text-skin-link text-md"
                   v-text="
-                    votingDelay
+                    (votingDelay !== null
                       ? _d(votingDelay)
-                      : formatCurrentValue(space.voting_delay) || 'No delay'
+                      : formatCurrentValue(space.voting_delay)) || 'No delay'
                   "
                 />
               </UiEditable>
@@ -582,9 +582,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
                 <h4
                   class="text-skin-link text-md"
                   v-text="
-                    minVotingPeriod
+                    (minVotingPeriod !== null
                       ? _d(minVotingPeriod)
-                      : formatCurrentValue(space.min_voting_period) || 'No min.'
+                      : formatCurrentValue(space.min_voting_period)) ||
+                    'No min.'
                   "
                 />
               </UiEditable>
@@ -609,7 +610,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
                 <h4
                   class="text-skin-link text-md"
                   v-text="
-                    maxVotingPeriod
+                    maxVotingPeriod !== null
                       ? _d(maxVotingPeriod)
                       : formatCurrentValue(space.max_voting_period)
                   "
