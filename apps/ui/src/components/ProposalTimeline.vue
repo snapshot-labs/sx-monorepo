@@ -10,13 +10,13 @@ type ProposalTimelineValues = {
 };
 
 type State = {
-  id: string;
+  id: keyof typeof LABELS;
   value: number;
 };
 
 const props = defineProps<{ data: Proposal | Space }>();
 
-const labels = {
+const LABELS = {
   created: 'Created',
   start: 'Start',
   end: 'End',
@@ -122,7 +122,7 @@ const states: ComputedRef<State[]> = computed(() => {
         :key="state.id"
         class="mb-3 last:mb-0 h-[44px]"
       >
-        <h4 v-text="labels[state.id]" />
+        <h4 v-text="LABELS[state.id]" />
         {{ _t(state.value) }}
       </div>
     </div>
