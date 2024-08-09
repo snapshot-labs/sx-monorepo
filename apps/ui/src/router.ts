@@ -21,7 +21,6 @@ import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearch from '@/views/Space/Search.vue';
-import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
 import Space from '@/views/Space.vue';
 import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
@@ -43,7 +42,6 @@ const routes: any[] = [
       { path: '', name: 'space-overview', component: SpaceOverview },
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
       { path: 'search', name: 'space-search', component: SpaceSearch },
-      { path: 'settings', name: 'space-settings', component: SpaceSettings },
       {
         path: 'edit-settings',
         name: 'space-edit-settings',
