@@ -22,7 +22,7 @@ export const useMetaStore = defineStore('meta', () => {
     try {
       const blockNumber = await provider.getBlockNumber();
       currentBlocks.value.set(networkId, blockNumber);
-      currentTs.value.set(networkId, Math.floor(Date.now() / 1e3));
+      currentTs.value.set(networkId, Math.floor(Date.now() / 1000));
     } catch (e) {
       console.error(e);
     }
