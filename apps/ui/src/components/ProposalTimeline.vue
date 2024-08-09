@@ -24,7 +24,7 @@ const LABELS = {
   max_end: 'Max. end'
 };
 
-const { getTsFromCurrent, getDurationFromCurrentEVM } = useMetaStore();
+const { getTsFromCurrent, getDurationFromCurrent } = useMetaStore();
 
 const now = ref(parseInt((Date.now() / 1000).toFixed()));
 
@@ -50,12 +50,11 @@ function formatTimelineValues(): ProposalTimelineValues {
     };
   }
   const network = data.network;
-  const start =
-    now.value + getDurationFromCurrentEVM(network, data.voting_delay);
+  const start = now.value + getDurationFromCurrent(network, data.voting_delay);
   return {
     start,
-    min_end: start + getDurationFromCurrentEVM(network, data.min_voting_period),
-    max_end: start + getDurationFromCurrentEVM(network, data.max_voting_period)
+    min_end: start + getDurationFromCurrent(network, data.min_voting_period),
+    max_end: start + getDurationFromCurrent(network, data.max_voting_period)
   };
 }
 

@@ -44,11 +44,6 @@ export const useMetaStore = defineStore('meta', () => {
     return Math.round(current * METADATA[networkId].blockTime);
   }
 
-  function getDurationFromCurrentEVM(networkId: NetworkID, current: number) {
-    if (!evmNetworks.includes(networkId)) return current;
-    return getDurationFromCurrent(networkId, current);
-  }
-
   function getTsFromCurrent(networkId: NetworkID, current: number) {
     if (!evmNetworks.includes(networkId)) return current;
 
@@ -66,7 +61,6 @@ export const useMetaStore = defineStore('meta', () => {
     fetchBlock,
     getCurrentFromDuration,
     getDurationFromCurrent,
-    getDurationFromCurrentEVM,
     getTsFromCurrent
   };
 });
