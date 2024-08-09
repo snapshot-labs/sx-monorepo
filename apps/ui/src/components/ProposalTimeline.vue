@@ -38,7 +38,7 @@ onMounted(() => {
   });
 });
 
-const formatTimelineValues = (): ProposalTimelineValues => {
+function formatTimelineValues(): ProposalTimelineValues {
   const data = props.data;
   if ('start' in data) {
     const { network, created, start, min_end, max_end } = data;
@@ -57,7 +57,7 @@ const formatTimelineValues = (): ProposalTimelineValues => {
     min_end: start + getDurationFromCurrentEVM(network, data.min_voting_period),
     max_end: start + getDurationFromCurrentEVM(network, data.max_voting_period)
   };
-};
+}
 
 const states: ComputedRef<State[]> = computed(() => {
   const { created, start, min_end, max_end } = formatTimelineValues();
