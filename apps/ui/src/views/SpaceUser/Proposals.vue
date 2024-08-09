@@ -63,7 +63,6 @@ onMounted(() => {
 
 <template>
   <ProposalsList
-    title="Proposals"
     limit="off"
     :loading="!loaded"
     :loading-more="loadingMore"
