@@ -26,12 +26,12 @@ const labels = {
 
 const { getTsFromCurrent, getDurationFromCurrentEVM } = useMetaStore();
 
-const now = ref(parseInt((Date.now() / 1e3).toFixed()));
+const now = ref(parseInt((Date.now() / 1000).toFixed()));
 
 onMounted(() => {
   const interval = setInterval(() => {
-    now.value = parseInt((Date.now() / 1e3).toFixed());
-  }, 1e3);
+    now.value = parseInt((Date.now() / 1000).toFixed());
+  }, 1000);
 
   onUnmounted(() => {
     clearInterval(interval);
