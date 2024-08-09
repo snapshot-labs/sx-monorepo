@@ -48,7 +48,7 @@ const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
-const valuesChanged = ref(false);
+const isModified = ref(false);
 const loading = ref(true);
 const saving = ref(false);
 const authenticators = ref([] as StrategyConfig[]);
@@ -79,86 +79,97 @@ const executionStrategies = computed(() => {
   });
 });
 
-const isModified = computedAsync(async () => {
-  try {
-    if (loading.value) return false;
+watchEffect(async () => {
+  isModified.value = false;
 
-    if (
-      votingDelay.value !== null &&
-      votingDelay.value !== currentToMinutesOnly(props.space.voting_delay)
-    ) {
-      return true;
-    }
+  // NOTE: those need to be reassigned there as async watcher won't track changes after await call
+  const votingDelayValue = votingDelay.value;
+  const minVotingPeriodValue = minVotingPeriod.value;
+  const maxVotingPeriodValue = maxVotingPeriod.value;
+  const authenticatorsValue = authenticators.value;
+  const votingStrategiesValue = votingStrategies.value;
+  const validationStrategyValue = validationStrategy.value;
 
-    if (
-      minVotingPeriod.value !== null &&
-      minVotingPeriod.value !==
-        currentToMinutesOnly(props.space.min_voting_period)
-    ) {
-      return true;
-    }
-
-    if (
-      maxVotingPeriod.value !== null &&
-      maxVotingPeriod.value !==
-        currentToMinutesOnly(props.space.max_voting_period)
-    ) {
-      return true;
-    }
-
-    // NOTE: those need to be reassigned there as computedAsync won't track changes after await call
-    const authenticatorsValue = authenticators.value;
-    const votingStrategiesValue = votingStrategies.value;
-    const validationStrategyValue = validationStrategy.value;
-
-    const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
-      authenticatorsValue,
-      props.space.authenticators,
-      [],
-      []
-    );
-
-    if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
-      return true;
-    }
-
-    const [strategiesToAdd, strategiesToRemove] = await processChanges(
-      votingStrategiesValue,
-      props.space.strategies,
-      props.space.strategies_params,
-      props.space.strategies_parsed_metadata
-    );
-
-    if (strategiesToAdd.length || strategiesToRemove.length) {
-      return true;
-    }
-
-    const isUnhandledValidationStrategy =
-      !validationStrategyValue ||
-      validationStrategyValue.type !== 'VotingPower';
-
-    if (isUnhandledValidationStrategy) {
-      return true;
-    }
-
-    const rebuiltMetadata = {
-      strategies_metadata:
-        props.space.voting_power_validation_strategies_parsed_metadata.map(
-          v => `ipfs://${v.id}`
-        )
-    };
-    const hasValidationStrategyChanged = await hasStrategyChanged(
-      validationStrategyValue,
-      [props.space.validation_strategy_params],
-      rebuiltMetadata
-    );
-    if (hasValidationStrategyChanged) return true;
-
-    return false;
-  } finally {
-    valuesChanged.value = false;
+  if (loading.value) {
+    isModified.value = false;
+    return;
   }
-}, false);
+
+  if (
+    votingDelayValue !== null &&
+    votingDelayValue !== currentToMinutesOnly(props.space.voting_delay)
+  ) {
+    isModified.value = true;
+    return;
+  }
+
+  if (
+    minVotingPeriodValue !== null &&
+    minVotingPeriodValue !== currentToMinutesOnly(props.space.min_voting_period)
+  ) {
+    isModified.value = true;
+    return;
+  }
+
+  if (
+    maxVotingPeriodValue !== null &&
+    maxVotingPeriodValue !== currentToMinutesOnly(props.space.max_voting_period)
+  ) {
+    isModified.value = true;
+    return;
+  }
+
+  const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
+    authenticatorsValue,
+    props.space.authenticators,
+    [],
+    []
+  );
+
+  if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
+    isModified.value = true;
+    return;
+  }
+
+  const [strategiesToAdd, strategiesToRemove] = await processChanges(
+    votingStrategiesValue,
+    props.space.strategies,
+    props.space.strategies_params,
+    props.space.strategies_parsed_metadata
+  );
+
+  if (strategiesToAdd.length || strategiesToRemove.length) {
+    isModified.value = true;
+    return;
+  }
+
+  const isUnhandledValidationStrategy =
+    !validationStrategyValue || validationStrategyValue.type !== 'VotingPower';
+
+  if (isUnhandledValidationStrategy) {
+    isModified.value = true;
+    return;
+  }
+
+  const rebuiltMetadata = {
+    strategies_metadata:
+      props.space.voting_power_validation_strategies_parsed_metadata.map(
+        v => `ipfs://${v.id}`
+      )
+  };
+  const hasValidationStrategyChanged = await hasStrategyChanged(
+    validationStrategyValue,
+    [props.space.validation_strategy_params],
+    rebuiltMetadata
+  );
+  if (hasValidationStrategyChanged) {
+    console.log('v', hasValidationStrategyChanged);
+    isModified.value = true;
+    return;
+  }
+
+  isModified.value = false;
+});
 
 function currentToMinutesOnly(value: number) {
   const duration = getDurationFromCurrent(props.space.network, value);
@@ -373,19 +384,19 @@ function getIsMaxVotingPeriodValid(value: number) {
 }
 
 async function reset() {
-  authenticators.value = await getInitialStrategiesConfig(
+  const authenticatorsValue = await getInitialStrategiesConfig(
     props.space.authenticators,
     network.value.constants.EDITOR_AUTHENTICATORS
   );
 
-  votingStrategies.value = await getInitialStrategiesConfig(
+  const votingStrategiesValue = await getInitialStrategiesConfig(
     props.space.strategies,
     network.value.constants.EDITOR_VOTING_STRATEGIES,
     props.space.strategies_params,
     props.space.strategies_parsed_metadata
   );
 
-  validationStrategy.value = await getInitialValidationStrategy(
+  const validationStrategyValue = await getInitialValidationStrategy(
     props.space.validation_strategy,
     network.value.constants.EDITOR_PROPOSAL_VALIDATIONS,
     props.space.validation_strategy_params,
@@ -394,6 +405,9 @@ async function reset() {
     props.space.voting_power_validation_strategies_parsed_metadata
   );
 
+  authenticators.value = authenticatorsValue;
+  votingStrategies.value = votingStrategiesValue;
+  validationStrategy.value = validationStrategyValue;
   votingDelay.value = null;
   minVotingPeriod.value = null;
   maxVotingPeriod.value = null;
@@ -452,21 +466,6 @@ function handleControllerSave(value: string) {
   saving.value = true;
   executeFn.value = saveController;
 }
-
-watch(
-  () => [
-    authenticators.value,
-    votingStrategies.value,
-    validationStrategy.value,
-    votingDelay.value,
-    minVotingPeriod.value,
-    maxVotingPeriod.value
-  ],
-  () => {
-    valuesChanged.value = true;
-  },
-  { deep: true }
-);
 
 watch(
   () => props.space.controller,
@@ -675,7 +674,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           </teleport>
         </div>
         <div
-          v-if="!uiStore.sidebarOpen && isModified && !valuesChanged"
+          v-if="!uiStore.sidebarOpen && isModified"
           class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-between items-center"
         >
           <h4 class="leading-7 font-medium">You have unsaved changes</h4>
