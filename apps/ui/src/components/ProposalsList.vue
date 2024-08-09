@@ -9,13 +9,15 @@ const props = withDefaults(
     limit?: number | 'off';
     proposals: ProposalType[];
     showSpace?: boolean;
+    showAuthor?: boolean;
     route?: {
       name: string;
       linkTitle: string;
     };
   }>(),
   {
-    showSpace: false
+    showSpace: false,
+    showAuthor: true
   }
 );
 
@@ -44,6 +46,7 @@ const currentLimit = computed(() => {
           :key="i"
           :proposal="proposal"
           :show-space="showSpace"
+          :show-author="showAuthor"
         />
       </UiContainerInfiniteScroll>
       <div
