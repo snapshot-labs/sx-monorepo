@@ -3,7 +3,11 @@ import { quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Choice, Proposal as ProposalType } from '@/types';
 
-const props = defineProps<{ proposal: ProposalType; showSpace: boolean }>();
+const props = defineProps<{
+  proposal: ProposalType;
+  showSpace: boolean;
+  showAuthor: boolean;
+}>();
 
 const { getTsFromCurrent } = useMetaStore();
 const { modalAccountOpen } = useModal();
@@ -85,19 +89,21 @@ const handleVoteClick = (choice: Choice) => {
         </div>
         <div class="inline">
           {{ getProposalId(proposal) }}
-          by
-          <router-link
-            class="text-skin-text"
-            :to="{
-              name: 'space-user-statement',
-              params: {
-                id: `${proposal.network}:${proposal.space.id}`,
-                user: proposal.author.id
-              }
-            }"
-          >
-            {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-          </router-link>
+          <template v-if="showAuthor">
+            by
+            <router-link
+              class="text-skin-text"
+              :to="{
+                name: 'space-user-statement',
+                params: {
+                  id: `${proposal.network}:${proposal.space.id}`,
+                  user: proposal.author.id
+                }
+              }"
+            >
+              {{ proposal.author.name || shortenAddress(proposal.author.id) }}
+            </router-link>
+          </template>
         </div>
         <span>
           <template v-if="proposal.vote_count">
