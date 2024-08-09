@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import objectHash from 'object-hash';
-import { _d, compareAddresses, getUrl, shorten } from '@/helpers/utils';
+import { _d, compareAddresses, shorten } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import {
   GeneratedMetadata,
@@ -39,6 +39,7 @@ const TABS = [
 const props = defineProps<{ space: Space }>();
 
 const { updateSettings, transferOwnership } = useActions();
+const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const uiStore = useUiStore();
@@ -46,6 +47,7 @@ const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
 const changeControllerModalOpen = ref(false);
+const executeFn = ref(save);
 const valuesChanged = ref(false);
 const loading = ref(true);
 const saving = ref(false);
@@ -398,46 +400,57 @@ async function reset() {
 }
 
 async function save() {
-  if (!validationStrategy.value) return;
-
-  saving.value = true;
-
-  try {
-    const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
-      authenticators.value,
-      props.space.authenticators,
-      [],
-      []
-    );
-
-    const [strategiesToAdd, strategiesToRemove] = await processChanges(
-      votingStrategies.value,
-      props.space.strategies,
-      props.space.strategies_params,
-      props.space.strategies_parsed_metadata
-    );
-
-    await updateSettings(
-      props.space,
-      authenticatorsToAdd,
-      authenticatorsToRemove,
-      strategiesToAdd,
-      strategiesToRemove,
-      validationStrategy.value,
-      votingDelay.value,
-      minVotingPeriod.value,
-      maxVotingPeriod.value
-    );
-  } finally {
-    saving.value = false;
+  if (!validationStrategy.value) {
+    throw new Error('Validation strategy is missing');
   }
+
+  const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
+    authenticators.value,
+    props.space.authenticators,
+    [],
+    []
+  );
+
+  const [strategiesToAdd, strategiesToRemove] = await processChanges(
+    votingStrategies.value,
+    props.space.strategies,
+    props.space.strategies_params,
+    props.space.strategies_parsed_metadata
+  );
+
+  return updateSettings(
+    props.space,
+    authenticatorsToAdd,
+    authenticatorsToRemove,
+    strategiesToAdd,
+    strategiesToRemove,
+    validationStrategy.value,
+    votingDelay.value,
+    minVotingPeriod.value,
+    maxVotingPeriod.value
+  );
 }
 
-async function handleControllerSave(value: string) {
-  changeControllerModalOpen.value = false;
+async function saveController() {
+  return transferOwnership(props.space, controller.value);
+}
 
-  await transferOwnership(props.space, value);
+async function reloadSpaceAndReset() {
+  await spacesStore.fetchSpace(props.space.id, props.space.network);
+  await reset();
+}
+
+function handleSettingsSave() {
+  saving.value = true;
+  executeFn.value = save;
+}
+
+function handleControllerSave(value: string) {
+  changeControllerModalOpen.value = false;
   controller.value = value;
+
+  saving.value = true;
+  executeFn.value = saveController;
 }
 
 watch(
@@ -453,6 +466,13 @@ watch(
     valuesChanged.value = true;
   },
   { deep: true }
+);
+
+watch(
+  () => props.space.controller,
+  () => {
+    saving.value = false;
+  }
 );
 
 watchEffect(async () => {
@@ -662,10 +682,26 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             <button type="reset" class="text-skin-heading" @click="reset">
               Reset
             </button>
-            <UiButton :loading="saving" primary @click="save">Save</UiButton>
+            <UiButton :loading="saving" primary @click="handleSettingsSave">
+              Save
+            </UiButton>
           </div>
         </div>
       </template>
     </div>
+    <teleport to="#modal">
+      <ModalTransactionProgress
+        :open="saving"
+        :network-id="space.network"
+        :messages="{
+          approveTitle: 'Confirm your changes',
+          successTitle: 'Done!',
+          successSubtitle: 'Your changes were successfully saved'
+        }"
+        :execute="executeFn"
+        @confirmed="reloadSpaceAndReset"
+        @close="saving = false"
+      />
+    </teleport>
   </template>
 </template>
