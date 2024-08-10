@@ -88,6 +88,14 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => props.proposal,
+  toProposal => {
+    if (props.open && toProposal.state !== 'active') emit('close');
+  },
+  { immediate: true }
+);
+
 watchEffect(async () => {
   formValidated.value = false;
 
