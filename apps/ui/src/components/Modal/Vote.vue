@@ -90,8 +90,10 @@ watch(
 
 watch(
   () => props.proposal,
-  toProposal => {
-    if (props.open && toProposal.state !== 'active') emit('close');
+  (toProposal, fromProposal) => {
+    if (props.open && fromProposal?.id !== toProposal.id) {
+      emit('close');
+    }
   },
   { immediate: true }
 );
