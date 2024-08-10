@@ -47,7 +47,7 @@ describe('vote', () => {
 
 describe('propose', () => {
   it('should thrown an error when user can not create proposals', async () => {
-    const currentTime = Math.floor(Date.now() / 1e3);
+    const currentTime = Math.floor(Date.now() / 1000);
     const envelope = await testnetClient.propose({
       signer,
       data: { ...proposal, start: currentTime, end: currentTime + 60 }
