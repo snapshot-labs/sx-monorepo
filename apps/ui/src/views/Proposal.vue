@@ -103,6 +103,7 @@ watch(
   ([toProposal, toAccount, toAuthLoading], [, fromAccount]) => {
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       resetVotingPower();
+      editMode.value = false;
     }
 
     if (toAuthLoading || !toProposal || !toAccount) return;
