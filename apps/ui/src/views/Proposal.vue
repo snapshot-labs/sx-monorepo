@@ -190,6 +190,7 @@ watchEffect(() => {
       </div>
       <div
         class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
+        :class="{ 'hidden md:block': route.name === 'proposal-votes' }"
       >
         <div
           v-if="

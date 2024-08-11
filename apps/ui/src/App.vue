@@ -77,7 +77,7 @@ watch(isSwiping, () => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else class="pb-6 flex">
+    <div v-else class="flex">
       <AppSidebar
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
