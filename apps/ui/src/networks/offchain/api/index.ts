@@ -244,6 +244,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indicies: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
+    validation: proposal.validation.name,
+    validation_params: proposal.validation.params,
     tx: '',
     execution_tx: null,
     veto_tx: null,

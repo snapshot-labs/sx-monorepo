@@ -72,6 +72,7 @@ export type ApiProposal = {
   scores_total: number;
   state: 'active' | 'pending' | 'closed';
   strategies: { network: string; params: Record<string, any>; name: string }[];
+  validation: { name: string; params: Record<string, any> };
   created: number;
   updated: number | null;
   votes: number;

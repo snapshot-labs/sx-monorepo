@@ -265,7 +265,9 @@ function formatProposal(
     state: getProposalState(proposal, current),
     network: networkId,
     privacy: null,
-    quorum: +proposal.quorum
+    quorum: +proposal.quorum,
+    validation: 'any',
+    validation_params: {}
   };
 }
 

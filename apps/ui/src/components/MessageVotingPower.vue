@@ -33,7 +33,15 @@ defineEmits<{
     type="error"
     v-bind="$attrs"
   >
-    You do not have enough voting power to vote.
+    <span v-if="votingPower.threshold.vote">
+      You need at least a voting power of
+      <i>
+        {{ Number(votingPower.threshold.vote) / 10 ** votingPower.decimals }}
+        {{ votingPower.symbol }}
+      </i>
+      to vote.
+    </span>
+    <span v-else> You do not have enough voting power to vote. </span>
   </UiAlert>
   <UiAlert
     v-else-if="action === 'propose' && !votingPower.canPropose"

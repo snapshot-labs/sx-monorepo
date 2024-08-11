@@ -200,6 +200,11 @@ export type Proposal = {
   strategies_indicies: number[];
   strategies: string[];
   strategies_params: any[];
+  validation: string;
+  validation_params: {
+    minScore?: number;
+    strategies?: Record<string, any>[];
+  };
   created: number;
   edited: number | null;
   tx: string;
