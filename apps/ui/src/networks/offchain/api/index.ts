@@ -123,7 +123,7 @@ function formatSpace(
       : constants.EDITOR_VOTING_TYPES,
     min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     max_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
-    proposal_threshold: '1',
+    proposal_threshold: validationParams.minScore || '1',
     treasuries,
     delegations: space.delegationPortal
       ? [
