@@ -80,17 +80,22 @@ function handleFetchVotingPower() {
 watch(
   [() => props.open, () => web3.value.account],
   async ([open, toAccount], [, fromAccount]) => {
+    if (!open) return;
+
     if (fromAccount && toAccount && fromAccount !== toAccount) {
+      loading.value = true;
       resetVotingPower();
+      form.value.reason = '';
+      await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
 
-    if (open) {
-      handleFetchVotingPower();
-      await loadVotes(props.proposal.network, [props.proposal.space.id]);
-      form.value.reason =
-        votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
-        '';
-    }
+    handleFetchVotingPower();
+
+    form.value.reason =
+      votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
+      '';
+
+    loading.value = false;
   },
   { immediate: true }
 );
