@@ -116,6 +116,19 @@ watchEffect(() => setTitle(props.space.name));
         </div>
       </div>
     </div>
+    <div v-if="space.children.length">
+      <UiLabel :label="'Sub-spaces'" />
+      <div
+        class="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"
+      >
+        <SpacesListItem
+          v-for="child in space.children"
+          :key="child.id"
+          :space="child"
+          :show-about="false"
+        />
+      </div>
+    </div>
     <div>
       <ProposalsList
         title="Proposals"

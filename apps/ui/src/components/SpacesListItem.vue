@@ -3,14 +3,18 @@ import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const props = defineProps<{ space: Space }>();
+const props = withDefaults(
+  defineProps<{ space: Space; showAbout?: boolean }>(),
+  { showAbout: true }
+);
 const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
 <template>
   <router-link
     :to="{ name: 'space-overview', params: { id: compositeSpaceId } }"
-    class="text-skin-text border rounded-lg block h-[280px] relative group overflow-hidden"
+    class="text-skin-text border rounded-lg block relative group overflow-hidden h-[186px]"
+    :class="{ 'h-[280px]': showAbout }"
   >
     <div class="h-[68px] w-full absolute">
       <SpaceCover :space="props.space" size="sm" />
@@ -42,7 +46,11 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
         />
       </div>
 
-      <h5 class="mt-1 line-clamp-2 leading-6" v-text="space.about" />
+      <h5
+        v-if="showAbout"
+        class="mt-1 line-clamp-2 leading-6"
+        v-text="space.about"
+      />
     </div>
     <h5 class="absolute bottom-4 px-4 text-[17px]">
       <b class="text-skin-link" v-text="_n(space.proposal_count, 'compact')" />

@@ -141,6 +141,13 @@ export type Space = {
   vote_count: number;
   follower_count?: number;
   created: number;
+  children: {
+    id: string;
+    name: string;
+    avatar: string;
+    proposal_count: number;
+    vote_count: number;
+  }[];
 };
 
 export type ProposalExecution = {
