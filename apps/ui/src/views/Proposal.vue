@@ -118,6 +118,7 @@ watch(
     if (!networkId || !spaceAddress) return;
 
     proposalsStore.fetchProposal(spaceAddress, id, networkId);
+    editMode.value = false;
   },
   { immediate: true }
 );
