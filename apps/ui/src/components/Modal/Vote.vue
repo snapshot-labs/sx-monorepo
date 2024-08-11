@@ -32,10 +32,7 @@ const {
 const { votes } = useAccount();
 
 const loading = ref(false);
-const form = ref<Record<string, string>>({
-  reason:
-    votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason || ''
-});
+const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
 
@@ -87,7 +84,12 @@ watch(
       resetVotingPower();
     }
 
-    if (open) handleFetchVotingPower();
+    if (open) {
+      handleFetchVotingPower();
+      form.value.reason =
+        votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
+        '';
+    }
   },
   { immediate: true }
 );
