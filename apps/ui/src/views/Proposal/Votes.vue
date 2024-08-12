@@ -32,9 +32,8 @@ const containerWidth = ref(0);
 const el = ref<HTMLElement | null>(null);
 const { x } = useScroll(el, { behavior: 'smooth' });
 
-useResizeObserver(el, entries => {
-  const entry = entries[0];
-  const { width } = entry.contentRect;
+useResizeObserver(el, ([{ contentRect }]) => {
+  const { width } = contentRect;
   containerWidth.value = width;
 });
 
@@ -202,17 +201,17 @@ watch([sortBy, choiceFilter], () => {
           <div
             v-for="(vote, i) in votes"
             :key="i"
-            class="border-b relative flex space-x-3"
+            class="relative border-b flex space-x-3"
           >
             <div
-              class="absolute h-full"
+              class="absolute -z-10 pointer-events-none h-[76px]"
               :style="{
                 width: `${containerWidth}px`,
                 'margin-left': `${x}px`
               }"
             >
               <div
-                class="inset-y-0 left-0 -z-10 pointer-events-none absolute"
+                class="inset-y-0 left-0 absolute"
                 :style="{
                   width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
                 }"
