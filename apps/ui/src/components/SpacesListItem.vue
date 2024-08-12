@@ -8,7 +8,7 @@ const props = withDefaults(
     space: {
       id: string;
       name: string;
-      about: string;
+      about?: string;
       avatar: string;
       cover: string;
       proposal_count: number;
@@ -16,6 +16,7 @@ const props = withDefaults(
       turbo: boolean;
       verified: boolean;
       network: NetworkID;
+      snapshot_chain_id?: number;
     };
     showAbout?: boolean;
   }>(),
