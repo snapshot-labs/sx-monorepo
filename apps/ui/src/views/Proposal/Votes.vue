@@ -30,7 +30,7 @@ const modalOpen = ref(false);
 const selectedVote = ref<Vote | null>(null);
 const containerWidth = ref(0);
 const el = ref<HTMLElement | null>(null);
-const { x } = useScroll(el, { behavior: 'smooth' });
+const { x } = useScroll(el);
 
 useResizeObserver(el, ([{ contentRect }]) => {
   const { width } = contentRect;
