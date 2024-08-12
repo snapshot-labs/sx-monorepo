@@ -55,6 +55,7 @@ const SPACE_FRAGMENT = gql`
       votesCount
       turbo
       verified
+      network
     }
     parent {
       id
@@ -64,6 +65,7 @@ const SPACE_FRAGMENT = gql`
       votesCount
       turbo
       verified
+      network
     }
   }
 `;

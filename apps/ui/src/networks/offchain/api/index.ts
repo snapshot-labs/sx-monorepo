@@ -158,10 +158,12 @@ function formatSpace(
         name: child.name,
         network: networkId,
         avatar: child.avatar,
+        cover: '',
         proposal_count: child.proposalsCount,
         vote_count: child.votesCount,
         turbo: child.turbo,
-        verified: child.verified
+        verified: child.verified,
+        snapshot_chain_id: parseInt(child.network)
       };
     }),
     parent: space.parent
@@ -170,10 +172,12 @@ function formatSpace(
           name: space.parent.name,
           network: networkId,
           avatar: space.parent.avatar,
+          cover: '',
           proposal_count: space.parent.proposalsCount,
           vote_count: space.parent.votesCount,
           turbo: space.parent.turbo,
-          verified: space.parent.verified
+          verified: space.parent.verified,
+          snapshot_chain_id: parseInt(space.parent.network)
         }
       : null
   };

@@ -146,20 +146,24 @@ export type Space = {
     name: string;
     network: NetworkID;
     avatar: string;
+    cover: string;
     proposal_count: number;
     vote_count: number;
     turbo: boolean;
     verified: boolean;
+    snapshot_chain_id: number;
   }[];
   parent: {
     id: string;
     name: string;
     network: NetworkID;
     avatar: string;
+    cover: string;
     proposal_count: number;
     vote_count: number;
     turbo: boolean;
     verified: boolean;
+    snapshot_chain_id: number;
   } | null;
 };
 

@@ -1,10 +1,24 @@
 <script lang="ts" setup>
 import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
-import { Space } from '@/types';
+import { NetworkID } from '@/types';
 
 const props = withDefaults(
-  defineProps<{ space: Space; showAbout?: boolean }>(),
+  defineProps<{
+    space: {
+      id: string;
+      name: string;
+      about: string;
+      avatar: string;
+      cover: string;
+      proposal_count: number;
+      vote_count: number;
+      turbo: boolean;
+      verified: boolean;
+      network: NetworkID;
+    };
+    showAbout?: boolean;
+  }>(),
   { showAbout: true }
 );
 const compositeSpaceId = `${props.space.network}:${props.space.id}`;
