@@ -100,15 +100,6 @@ watch(
   { immediate: true }
 );
 
-watch(
-  () => props.proposal,
-  (toProposal, fromProposal) => {
-    if (props.open && fromProposal?.id !== toProposal.id) {
-      emit('close');
-    }
-  }
-);
-
 watchEffect(async () => {
   formValidated.value = false;
 
