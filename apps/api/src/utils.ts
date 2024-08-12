@@ -10,7 +10,7 @@ import {
   CallData,
   Contract,
   hash,
-  Provider,
+  RpcProvider,
   shortString,
   validateAndParseAddress
 } from 'starknet';
@@ -34,10 +34,8 @@ export const ethProvider = new JsonRpcProvider(
   process.env.L1_NETWORK_NODE_URL ??
     `https://rpc.brovider.xyz/${networkProperties.baseChainId}`
 );
-const starkProvider = new Provider({
-  rpc: {
-    nodeUrl: networkNodeUrl
-  }
+const starkProvider = new RpcProvider({
+  nodeUrl: networkNodeUrl
 });
 
 const encodersAbi = new CallData(EncodersAbi);

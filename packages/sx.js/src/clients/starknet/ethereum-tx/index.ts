@@ -1,7 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import { poseidonHashMany } from 'micro-starknet';
-import { CallData, constants, SequencerProvider, shortString } from 'starknet';
+import { CallData, shortString } from 'starknet';
 import StarknetCommitAbi from './abis/StarknetCommit.json';
 import {
   ClientConfig,
@@ -199,12 +199,10 @@ const UPDATE_PROPOSAL_SELECTOR =
   '0x1f93122f646d968b0ce8c1a4986533f8b4ed3f099122381a4f77478a480c2c3';
 
 export class EthereumTx {
-  // TODO: handle sequencerUrl in network config
-  config: ClientConfig & { sequencerUrl: string };
+  config: ClientConfig;
 
-  constructor(opts: ClientOpts & { sequencerUrl?: string }) {
+  constructor(opts: ClientOpts) {
     this.config = {
-      sequencerUrl: opts.sequencerUrl || constants.BaseUrl.SN_SEPOLIA,
       ...opts
     };
   }
@@ -213,11 +211,7 @@ export class EthereumTx {
     l2Address: string,
     payload: string[]
   ): Promise<{ overall_fee: number }> {
-    const sequencerProvider = new SequencerProvider({
-      baseUrl: this.config.sequencerUrl
-    });
-
-    const fees = await sequencerProvider.estimateMessageFee({
+    const fees = await this.config.starkProvider.estimateMessageFee({
       from_address: this.config.networkConfig.starknetCommit,
       to_address: l2Address,
       entry_point_selector: 'commit',
