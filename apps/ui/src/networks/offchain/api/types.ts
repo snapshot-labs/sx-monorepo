@@ -54,6 +54,14 @@ export type ApiSpace = {
       votesCount: number;
     }
   ];
+  parent: {
+    id: string;
+    name: string;
+    network: NetworkID;
+    avatar: string;
+    proposalsCount: number;
+    votesCount: number;
+  };
 };
 
 export type ApiProposal = {

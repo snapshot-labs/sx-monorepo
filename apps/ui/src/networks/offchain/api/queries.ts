@@ -54,6 +54,13 @@ const SPACE_FRAGMENT = gql`
       proposalsCount
       votesCount
     }
+    parent {
+      id
+      name
+      avatar
+      proposalsCount
+      votesCount
+    }
   }
 `;
 

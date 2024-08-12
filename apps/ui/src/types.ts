@@ -144,10 +144,19 @@ export type Space = {
   children: {
     id: string;
     name: string;
+    network: NetworkID;
     avatar: string;
     proposal_count: number;
     vote_count: number;
   }[];
+  parent: {
+    id: string;
+    name: string;
+    network: NetworkID;
+    avatar: string;
+    proposal_count: number;
+    vote_count: number;
+  } | null;
 };
 
 export type ProposalExecution = {

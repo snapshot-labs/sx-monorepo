@@ -153,17 +153,25 @@ function formatSpace(
     voting_power_validation_strategy_strategies_params: [validationParams],
     voting_power_validation_strategies_parsed_metadata: [],
     children: space.children.map(child => {
-      const formattedChild: any = clone(child);
-
-      formattedChild.proposal_count = formattedChild.proposalsCount;
-      formattedChild.vote_count = formattedChild.votesCount;
-      formattedChild.network = networkId;
-
-      delete formattedChild.proposalsCount;
-      delete formattedChild.votesCount;
-
-      return formattedChild;
-    })
+      return {
+        id: child.id,
+        name: child.name,
+        network: networkId,
+        avatar: child.avatar,
+        proposal_count: child.proposalsCount,
+        vote_count: child.votesCount
+      };
+    }),
+    parent: space.parent
+      ? {
+          id: space.parent.id,
+          name: space.parent.name,
+          network: networkId,
+          avatar: space.parent.avatar,
+          proposal_count: space.parent.proposalsCount,
+          vote_count: space.parent.votesCount
+        }
+      : null
   };
 }
 

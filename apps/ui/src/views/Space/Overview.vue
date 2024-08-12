@@ -85,18 +85,44 @@ watchEffect(() => setTitle(props.space.name));
             :turbo="space.turbo"
           />
         </div>
-        <div class="mb-3">
-          <b class="text-skin-link">{{ _n(space.proposal_count) }}</b> proposals
-          ·
-          <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b>
-          votes
-          <span v-if="isOffchainSpace">
-            ·
-            <b class="text-skin-link">{{
-              _n(space.follower_count, 'compact')
-            }}</b>
-            followers
-          </span>
+        <div class="mb-3 flex space-x-1 items-center">
+          <div>
+            <b class="text-skin-link">{{ _n(space.proposal_count) }}</b>
+            proposals
+          </div>
+          <div>·</div>
+          <div>
+            <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b>
+            votes
+          </div>
+          <template v-if="isOffchainSpace">
+            <div>·</div>
+            <div>
+              <b class="text-skin-link">
+                {{ _n(space.follower_count, 'compact') }}
+              </b>
+              followers
+            </div>
+          </template>
+          <template v-if="space.parent">
+            <div>·</div>
+            <router-link
+              :to="{
+                name: 'space-overview',
+                params: {
+                  id: `${space.parent.network}:${space.parent.id}`
+                }
+              }"
+              class="flex space-x-1 items-center"
+            >
+              <SpaceAvatar
+                :space="space.parent"
+                :size="22"
+                class="rounded-md"
+              />
+              <span>{{ space.parent.name }}</span>
+            </router-link>
+          </template>
         </div>
         <div
           v-if="space.about"
