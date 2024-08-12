@@ -94,8 +94,7 @@ watch(
     if (props.open && fromProposal?.id !== toProposal.id) {
       emit('close');
     }
-  },
-  { immediate: true }
+  }
 );
 
 watchEffect(async () => {
