@@ -50,7 +50,7 @@ function handleStrategySave(value: Record<string, any>) {
   };
 }
 
-onMounted(() => {
+watchEffect(() => {
   votingStrategies.value = model.value?.params?.strategies || [];
 });
 

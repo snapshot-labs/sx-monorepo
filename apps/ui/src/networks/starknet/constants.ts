@@ -261,6 +261,7 @@ export function createConstants(
   const EDITOR_VOTING_STRATEGIES = [
     {
       address: config.Strategies.MerkleWhitelist,
+      type: 'MerkleWhitelist',
       name: 'Whitelist',
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
