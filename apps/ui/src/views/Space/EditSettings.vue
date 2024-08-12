@@ -620,13 +620,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
                 />
               </UiEditable>
             </div>
-            <div v-if="space.proposal_threshold !== '0'">
-              <div class="s-label !mb-0" v-text="'Proposal threshold'" />
-              <h4
-                class="text-skin-link text-md"
-                v-text="space.proposal_threshold"
-              />
-            </div>
           </div>
         </div>
         <div v-else-if="activeTab === 'execution'" class="mb-4">
