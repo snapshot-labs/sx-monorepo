@@ -98,11 +98,12 @@ watch(
 );
 
 watch(
-  [networkId, spaceAddress, id],
-  async ([networkId, spaceAddress, id]) => {
+  [networkId, spaceAddress],
+  async ([networkId, spaceAddress]) => {
+    // NOTE: do not watch id as it's not updated in-sync with networkId and spaceAddress (those are resolved async)
     if (!networkId || !spaceAddress) return;
 
-    proposalsStore.fetchProposal(spaceAddress, id, networkId);
+    proposalsStore.fetchProposal(spaceAddress, id.value, networkId);
   },
   { immediate: true }
 );
@@ -301,6 +302,13 @@ watchEffect(() => {
             :proposal="proposal"
             :decimals="votingPowerDecimals"
           />
+        </div>
+        <div>
+          <h4 class="mb-2.5 eyebrow flex items-center">
+            <IH-clock class="inline-block mr-2" />
+            <span>Timeline</span>
+          </h4>
+          <ProposalTimeline :data="proposal" />
         </div>
       </div>
     </template>

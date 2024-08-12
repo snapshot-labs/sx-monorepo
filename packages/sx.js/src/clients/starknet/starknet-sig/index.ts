@@ -239,7 +239,7 @@ export class StarknetSig {
   }): Promise<Envelope<Alias>> {
     const message = {
       from: validateAndParseAddress(signer.address),
-      timestamp: parseInt((Date.now() / 1e3).toFixed()),
+      timestamp: parseInt((Date.now() / 1000).toFixed()),
       ...data
     };
 

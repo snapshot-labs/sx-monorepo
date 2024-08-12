@@ -96,7 +96,7 @@ export function createActions(
       choices: string[],
       executions: ExecutionInfo[]
     ) {
-      const currentTime = Math.floor(Date.now() / 1e3);
+      const currentTime = Math.floor(Date.now() / 1000);
       const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
 

@@ -48,8 +48,8 @@ describe('EthereumSig', () => {
       type: 'basic',
       discussion: 'https://snapshot.org',
       choices: ['For', 'Against', 'Abstain'],
-      start: Math.floor(Date.now() / 1e3),
-      end: Math.floor(Date.now() / 1e3) + 60 * 60,
+      start: Math.floor(Date.now() / 1000),
+      end: Math.floor(Date.now() / 1000) + 60 * 60,
       snapshot: 19283932,
       plugins: '{}',
       app: 'snapshot-v2'

@@ -466,6 +466,10 @@ export default defineComponent({
         "
       />
       <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      <div>
+        <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
+        <ProposalTimeline :data="space" />
+      </div>
     </div>
     <teleport to="#modal">
       <ModalDrafts

@@ -232,7 +232,7 @@ export function toBigIntOrNumber(value) {
 
 export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   try {
-    return dayjs(number * 1e3).format(format);
+    return dayjs(number * 1000).format(format);
   } catch (e) {
     console.log(e);
     return '';
@@ -241,7 +241,7 @@ export function _t(number, format = 'MMM D, YYYY · h:mm A') {
 
 export function _rt(number) {
   try {
-    return dayjs(number * 1e3).fromNow(false);
+    return dayjs(number * 1000).fromNow(false);
   } catch (e) {
     console.log(e);
     return '';

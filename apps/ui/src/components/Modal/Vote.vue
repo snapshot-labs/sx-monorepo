@@ -31,7 +31,7 @@ const {
   reset: resetVotingPower
 } = useVotingPower();
 const proposalsStore = useProposalsStore();
-const { loadVotes } = useAccount();
+const { loadVotes, votes } = useAccount();
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -94,12 +94,23 @@ function handleFetchVotingPower() {
 
 watch(
   [() => props.open, () => web3.value.account],
-  ([open, toAccount], [, fromAccount]) => {
+  async ([open, toAccount], [, fromAccount]) => {
+    if (!open) return;
+
     if (fromAccount && toAccount && fromAccount !== toAccount) {
+      loading.value = true;
       resetVotingPower();
+      form.value.reason = '';
+      await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
 
-    if (open) handleFetchVotingPower();
+    handleFetchVotingPower();
+
+    form.value.reason =
+      votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
+      '';
+
+    loading.value = false;
   },
   { immediate: true }
 );
