@@ -144,13 +144,21 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <template v-if="space.children.length">
       <UiLabel :label="'Sub-spaces'" />
-      <div class="px-4 py-3 flex gap-3 overflow-x-scroll no-scrollbar">
-        <SpacesListItem
-          v-for="child in space.children"
-          :key="child.id"
-          :space="child"
-          :show-about="false"
-          class="basis-[230px] shrink-0"
+      <div class="relative">
+        <div
+          class="bg-gradient-to-r from-skin-bg left-0 top-0 bottom-0 w-3 absolute z-10 pointer-events-none"
+        />
+        <div class="px-4 py-3 flex gap-3 overflow-x-scroll no-scrollbar">
+          <SpacesListItem
+            v-for="child in space.children"
+            :key="child.id"
+            :space="child"
+            :show-about="false"
+            class="basis-[230px] shrink-0"
+          />
+        </div>
+        <div
+          class="bg-gradient-to-l from-skin-bg right-0 top-0 bottom-0 w-3 absolute z-10 pointer-events-none"
         />
       </div>
     </template>
