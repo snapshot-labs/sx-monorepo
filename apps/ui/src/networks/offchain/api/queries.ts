@@ -53,6 +53,8 @@ const SPACE_FRAGMENT = gql`
       avatar
       proposalsCount
       votesCount
+      turbo
+      verified
     }
     parent {
       id
@@ -60,6 +62,8 @@ const SPACE_FRAGMENT = gql`
       avatar
       proposalsCount
       votesCount
+      turbo
+      verified
     }
   }
 `;

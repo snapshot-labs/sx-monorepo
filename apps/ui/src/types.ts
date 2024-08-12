@@ -148,6 +148,8 @@ export type Space = {
     avatar: string;
     proposal_count: number;
     vote_count: number;
+    turbo: boolean;
+    verified: boolean;
   }[];
   parent: {
     id: string;
@@ -156,6 +158,8 @@ export type Space = {
     avatar: string;
     proposal_count: number;
     vote_count: number;
+    turbo: boolean;
+    verified: boolean;
   } | null;
 };
 

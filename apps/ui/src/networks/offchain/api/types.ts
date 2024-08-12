@@ -52,6 +52,8 @@ export type ApiSpace = {
       avatar: string;
       proposalsCount: number;
       votesCount: number;
+      turbo: boolean;
+      verified: boolean;
     }
   ];
   parent: {
@@ -61,6 +63,8 @@ export type ApiSpace = {
     avatar: string;
     proposalsCount: number;
     votesCount: number;
+    turbo: boolean;
+    verified: boolean;
   };
 };
 

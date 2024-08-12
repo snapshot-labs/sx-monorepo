@@ -159,7 +159,9 @@ function formatSpace(
         network: networkId,
         avatar: child.avatar,
         proposal_count: child.proposalsCount,
-        vote_count: child.votesCount
+        vote_count: child.votesCount,
+        turbo: child.turbo,
+        verified: child.verified
       };
     }),
     parent: space.parent
@@ -169,7 +171,9 @@ function formatSpace(
           network: networkId,
           avatar: space.parent.avatar,
           proposal_count: space.parent.proposalsCount,
-          vote_count: space.parent.votesCount
+          vote_count: space.parent.votesCount,
+          turbo: space.parent.turbo,
+          verified: space.parent.verified
         }
       : null
   };
