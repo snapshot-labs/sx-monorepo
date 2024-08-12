@@ -537,7 +537,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
         <div v-else-if="activeTab === 'voting'" class="mb-4">
           <h3 class="text-md leading-6">Voting</h3>
-          <span class="mb-4 inline-block">Placeholder description</span>
+          <span class="mb-4 inline-block">
+            Set the proposal delay, minimum duration, which is the shortest time
+            needed to execute a proposal if quorum passes, and maximum duration
+            for voting.
+          </span>
           <h4 class="eyebrow mb-2 font-medium">Voting</h4>
           <div class="space-y-3">
             <div>
@@ -628,7 +632,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         <div v-else-if="activeTab === 'execution'" class="mb-4">
           <h3 class="text-md leading-6">Execution(s)</h3>
           <span class="mb-4 inline-block">
-            This data is for information purposes only
+            Execution strategies determine if a proposal passes and how it is
+            executed. This section is currently read-only.
           </span>
           <FormStrategiesStrategyActive
             v-for="strategy in executionStrategies"
@@ -640,7 +645,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         </div>
         <div v-else-if="activeTab === 'controller'" class="mb-4">
           <h3 class="text-md leading-6">Controller</h3>
-          <span class="mb-4 inline-block">Placeholder description</span>
+          <span class="mb-4 inline-block">
+            The controller is the account able to change the space settings and
+            cancel pending proposals.
+          </span>
           <div
             class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
           >
