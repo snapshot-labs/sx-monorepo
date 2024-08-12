@@ -52,7 +52,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
         v-text="space.about"
       />
     </div>
-    <h5 class="absolute bottom-4 px-4 text-[17px]">
+    <h5 class="absolute bottom-4 px-4 text-[17px] leading-5">
       <b class="text-skin-link" v-text="_n(space.proposal_count, 'compact')" />
       proposals ·
       <b class="text-skin-link" v-text="_n(space.vote_count, 'compact')" />
