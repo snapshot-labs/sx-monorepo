@@ -1,8 +1,7 @@
 import {
   LibraryError,
   ReceiptTx,
-  constants as starknetConstants,
-  TransactionExecutionStatus
+  constants as starknetConstants
 } from 'starknet';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
