@@ -97,6 +97,21 @@ function formatSpace(
     validationParams.addresses = space.members.concat(space.admins);
   }
 
+  function formatRelatedSpace(relatedSpace) {
+    return {
+      id: relatedSpace.id,
+      name: relatedSpace.name,
+      network: networkId,
+      avatar: relatedSpace.avatar,
+      cover: '',
+      proposal_count: relatedSpace.proposalsCount,
+      vote_count: relatedSpace.votesCount,
+      turbo: relatedSpace.turbo,
+      verified: relatedSpace.verified,
+      snapshot_chain_id: parseInt(relatedSpace.network)
+    };
+  }
+
   return {
     id: space.id,
     network: networkId,
@@ -152,34 +167,8 @@ function formatSpace(
     voting_power_validation_strategy_strategies: [validationName],
     voting_power_validation_strategy_strategies_params: [validationParams],
     voting_power_validation_strategies_parsed_metadata: [],
-    children: space.children.map(child => {
-      return {
-        id: child.id,
-        name: child.name,
-        network: networkId,
-        avatar: child.avatar,
-        cover: '',
-        proposal_count: child.proposalsCount,
-        vote_count: child.votesCount,
-        turbo: child.turbo,
-        verified: child.verified,
-        snapshot_chain_id: parseInt(child.network)
-      };
-    }),
-    parent: space.parent
-      ? {
-          id: space.parent.id,
-          name: space.parent.name,
-          network: networkId,
-          avatar: space.parent.avatar,
-          cover: '',
-          proposal_count: space.parent.proposalsCount,
-          vote_count: space.parent.votesCount,
-          turbo: space.parent.turbo,
-          verified: space.parent.verified,
-          snapshot_chain_id: parseInt(space.parent.network)
-        }
-      : null
+    children: space.children.map(formatRelatedSpace),
+    parent: space.parent ? formatRelatedSpace(space.parent) : null
   };
 }
 

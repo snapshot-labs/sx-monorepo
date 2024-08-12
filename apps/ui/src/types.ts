@@ -93,6 +93,19 @@ export type StrategyParsedMetadata = {
   payload: string | null;
 };
 
+export type RelatedSpace = {
+  id: string;
+  name: string;
+  network: NetworkID;
+  avatar: string;
+  cover: string;
+  proposal_count: number;
+  vote_count: number;
+  turbo: boolean;
+  verified: boolean;
+  snapshot_chain_id: number;
+};
+
 export type Space = {
   id: string;
   network: NetworkID;
@@ -141,30 +154,8 @@ export type Space = {
   vote_count: number;
   follower_count?: number;
   created: number;
-  children: {
-    id: string;
-    name: string;
-    network: NetworkID;
-    avatar: string;
-    cover: string;
-    proposal_count: number;
-    vote_count: number;
-    turbo: boolean;
-    verified: boolean;
-    snapshot_chain_id: number;
-  }[];
-  parent: {
-    id: string;
-    name: string;
-    network: NetworkID;
-    avatar: string;
-    cover: string;
-    proposal_count: number;
-    vote_count: number;
-    turbo: boolean;
-    verified: boolean;
-    snapshot_chain_id: number;
-  } | null;
+  children: RelatedSpace[];
+  parent: RelatedSpace | null;
 };
 
 export type ProposalExecution = {
