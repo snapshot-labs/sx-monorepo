@@ -1,5 +1,16 @@
 import { NetworkID, Privacy, VoteType } from '@/types';
 
+type ApiRelatedSpace = {
+  id: string;
+  name: string;
+  network: NetworkID;
+  avatar: string;
+  proposalsCount: number;
+  votesCount: number;
+  turbo: boolean;
+  verified: boolean;
+};
+
 export type ApiSpace = {
   id: string;
   verified: boolean;
@@ -44,28 +55,8 @@ export type ApiSpace = {
   proposalsCount: number;
   votesCount: number;
   followersCount: number;
-  children: [
-    {
-      id: string;
-      name: string;
-      network: NetworkID;
-      avatar: string;
-      proposalsCount: number;
-      votesCount: number;
-      turbo: boolean;
-      verified: boolean;
-    }
-  ];
-  parent: {
-    id: string;
-    name: string;
-    network: NetworkID;
-    avatar: string;
-    proposalsCount: number;
-    votesCount: number;
-    turbo: boolean;
-    verified: boolean;
-  };
+  children: [ApiRelatedSpace];
+  parent: ApiRelatedSpace | null;
 };
 
 export type ApiProposal = {
