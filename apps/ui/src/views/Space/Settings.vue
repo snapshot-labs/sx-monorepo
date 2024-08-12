@@ -51,6 +51,7 @@ const executeFn = ref(save);
 const isModified = ref(false);
 const loading = ref(true);
 const saving = ref(false);
+const initialValidationStrategyObjectHash = ref(null as string | null);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy = ref(null as StrategyConfig | null);
 const votingStrategies = ref([] as StrategyConfig[]);
@@ -89,6 +90,8 @@ watchEffect(async () => {
   const authenticatorsValue = authenticators.value;
   const votingStrategiesValue = votingStrategies.value;
   const validationStrategyValue = validationStrategy.value;
+  const initialValidationStrategyObjectHashValue =
+    initialValidationStrategyObjectHash.value;
 
   if (loading.value) {
     isModified.value = false;
@@ -143,27 +146,10 @@ watchEffect(async () => {
     return;
   }
 
-  const isUnhandledValidationStrategy =
-    !validationStrategyValue || validationStrategyValue.type !== 'VotingPower';
-
-  if (isUnhandledValidationStrategy) {
-    isModified.value = true;
-    return;
-  }
-
-  const rebuiltMetadata = {
-    strategies_metadata:
-      props.space.voting_power_validation_strategies_parsed_metadata.map(
-        v => `ipfs://${v.id}`
-      )
-  };
-  const hasValidationStrategyChanged = await hasStrategyChanged(
-    validationStrategyValue,
-    [props.space.validation_strategy_params],
-    rebuiltMetadata
-  );
+  const hasValidationStrategyChanged =
+    objectHash(validationStrategyValue) !==
+    initialValidationStrategyObjectHashValue;
   if (hasValidationStrategyChanged) {
-    console.log('v', hasValidationStrategyChanged);
     isModified.value = true;
     return;
   }
@@ -274,7 +260,19 @@ async function hasStrategyChanged(
   previousParams: any,
   previousMetadata: any = {}
 ) {
-  let params;
+  const metadata = strategy.generateMetadata
+    ? await strategy.generateMetadata(strategy.params)
+    : {};
+
+  if (objectHash(metadata) !== objectHash(previousMetadata)) return true;
+  if (strategy.type === 'MerkleWhitelist') {
+    // NOTE: MerkleWhitelist params are expensive to compute so we try to skip this step if possible.
+    // If metadata has changed then we already know strategy has changed, if metadata is the same
+    // we can assume params are the same as well as they use the same source params.
+    return false;
+  }
+
+  let params: string[] = [];
   if (evmNetworks.includes(props.space.network)) {
     params = strategy.generateParams
       ? strategy.generateParams(strategy.params)
@@ -287,14 +285,7 @@ async function hasStrategyChanged(
     previousParams = previousParams ?? [];
   }
 
-  const metadata = strategy.generateMetadata
-    ? await strategy.generateMetadata(strategy.params)
-    : {};
-
-  return (
-    objectHash(params) !== objectHash(previousParams) ||
-    objectHash(metadata) !== objectHash(previousMetadata)
-  );
+  return objectHash(params) !== objectHash(previousParams);
 }
 
 async function processChanges(
@@ -411,6 +402,9 @@ async function reset() {
   votingDelay.value = null;
   minVotingPeriod.value = null;
   maxVotingPeriod.value = null;
+  initialValidationStrategyObjectHash.value = objectHash(
+    validationStrategyValue
+  );
 }
 
 async function save() {
