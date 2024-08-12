@@ -105,7 +105,7 @@ function formatSpace(
     controller: '',
     snapshot_chain_id: parseInt(space.network),
     name: space.name,
-    avatar: '',
+    avatar: space.avatar,
     cover: '',
     about: space.about,
     external_url: space.website,
