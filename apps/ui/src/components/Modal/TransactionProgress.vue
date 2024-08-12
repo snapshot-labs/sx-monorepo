@@ -107,8 +107,9 @@ watch(
     <div
       class="flex flex-col p-4 space-y-4 text-center items-center text-skin-text"
     >
-      <TransactionProgressLoadingIcon
+      <IC-transaction-loading
         v-if="['approve', 'confirming'].includes(step)"
+        class="loading"
       />
       <div
         v-if="step === 'success'"
@@ -160,3 +161,26 @@ watch(
     </div>
   </UiModal>
 </template>
+
+<style lang="scss" scoped>
+.loading {
+  animation: rotation 0.8s linear infinite;
+
+  path {
+    stroke: rgba(var(--link));
+  }
+
+  stop {
+    stop-color: rgba(var(--link));
+  }
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
+</style>
