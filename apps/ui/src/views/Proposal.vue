@@ -113,11 +113,12 @@ watch(
 );
 
 watch(
-  [networkId, spaceAddress, id],
-  async ([networkId, spaceAddress, id]) => {
+  [networkId, spaceAddress],
+  async ([networkId, spaceAddress]) => {
+    // NOTE: do not watch id as it's not updated in-sync with networkId and spaceAddress (those are resolved async)
     if (!networkId || !spaceAddress) return;
 
-    proposalsStore.fetchProposal(spaceAddress, id, networkId);
+    proposalsStore.fetchProposal(spaceAddress, id.value, networkId);
   },
   { immediate: true }
 );
