@@ -78,7 +78,7 @@ const navigationConfig = computed<
       : undefined),
     ...(isController.value
       ? {
-          'edit-settings': {
+          settings: {
             name: 'Settings',
             icon: IHCog
           }

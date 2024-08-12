@@ -16,11 +16,11 @@ import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
-import SpaceEditSettings from '@/views/Space/EditSettings.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearch from '@/views/Space/Search.vue';
+import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
 import Space from '@/views/Space.vue';
 import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
@@ -43,9 +43,9 @@ const routes: any[] = [
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       {
-        path: 'edit-settings',
-        name: 'space-edit-settings',
-        component: SpaceEditSettings
+        path: 'settings',
+        name: 'space-settings',
+        component: SpaceSettings
       },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
       { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
