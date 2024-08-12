@@ -97,18 +97,18 @@ function formatSpace(
     validationParams.addresses = space.members.concat(space.admins);
   }
 
-  function formatRelatedSpace(relatedSpace) {
+  function formatRelatedSpace(space: any) {
     return {
-      id: relatedSpace.id,
-      name: relatedSpace.name,
+      id: space.id,
+      name: space.name,
       network: networkId,
-      avatar: relatedSpace.avatar,
+      avatar: space.avatar,
       cover: '',
-      proposal_count: relatedSpace.proposalsCount,
-      vote_count: relatedSpace.votesCount,
-      turbo: relatedSpace.turbo,
-      verified: relatedSpace.verified,
-      snapshot_chain_id: parseInt(relatedSpace.network)
+      proposal_count: space.proposalsCount,
+      vote_count: space.votesCount,
+      turbo: space.turbo,
+      verified: space.verified,
+      snapshot_chain_id: parseInt(space.network)
     };
   }
 
