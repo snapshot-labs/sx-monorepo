@@ -1,6 +1,4 @@
-<template>
-  <svg
-    class="loading"
+<svg
     xmlns="http://www.w3.org/2000/svg"
     width="64"
     height="64"
@@ -26,27 +24,3 @@
       stroke-linejoin="round"
     />
   </svg>
-</template>
-
-<style lang="scss" scoped>
-.loading {
-  animation: rotation 0.8s linear infinite;
-
-  path {
-    stroke: rgba(var(--link));
-  }
-
-  stop {
-    stop-color: rgba(var(--link));
-  }
-
-  @keyframes rotation {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-}
-</style>
