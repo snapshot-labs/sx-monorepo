@@ -59,9 +59,13 @@ const formattedVotingPower = computed(() => {
 });
 
 const navigation = computed(() => [
-  { label: 'Statement', route: 'space-user-statement' }
+  { label: 'Statement', route: 'space-user-statement' },
+  {
+    label: 'Proposals',
+    route: 'space-user-proposals',
+    count: userActivity.value?.proposal_count
+  }
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
-  // { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
   // { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
 
@@ -223,7 +227,7 @@ watchEffect(() =>
         </div>
         <div
           v-if="user.about"
-          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
+          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(user.about)"
         />
         <div v-if="socials.length" class="space-x-2 flex">
@@ -248,7 +252,11 @@ watchEffect(() =>
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
         >
-          <UiLink :is-active="route.name === item.route" :text="item.label" />
+          <UiLink
+            :is-active="route.name === item.route"
+            :text="item.label"
+            :count="item.count"
+          />
         </router-link>
       </div>
     </div>

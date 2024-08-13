@@ -3,19 +3,21 @@ import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
   defineProps<{
-    title: string;
+    title?: string;
     loading?: boolean;
     loadingMore?: boolean;
     limit?: number | 'off';
     proposals: ProposalType[];
     showSpace?: boolean;
+    showAuthor?: boolean;
     route?: {
       name: string;
       linkTitle: string;
     };
   }>(),
   {
-    showSpace: false
+    showSpace: false,
+    showAuthor: true
   }
 );
 
@@ -32,7 +34,7 @@ const currentLimit = computed(() => {
 
 <template>
   <div>
-    <UiLabel :label="title" sticky />
+    <UiLabel v-if="title" :label="title" sticky />
     <UiLoading v-if="loading" class="block px-4 py-3" />
     <div v-else>
       <UiContainerInfiniteScroll
@@ -44,6 +46,7 @@ const currentLimit = computed(() => {
           :key="i"
           :proposal="proposal"
           :show-space="showSpace"
+          :show-author="showAuthor"
         />
       </UiContainerInfiniteScroll>
       <div

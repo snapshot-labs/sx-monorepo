@@ -126,7 +126,7 @@ watchEffect(() => setTitle(props.space.name));
         </div>
         <div
           v-if="space.about"
-          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
+          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(space.about)"
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">

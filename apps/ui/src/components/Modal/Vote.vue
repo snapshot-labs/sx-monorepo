@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { offchainNetworks } from '@/networks';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -29,6 +30,8 @@ const {
   fetch: fetchVotingPower,
   reset: resetVotingPower
 } = useVotingPower();
+const proposalsStore = useProposalsStore();
+const { loadVotes, votes } = useAccount();
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -65,8 +68,21 @@ async function handleSubmit() {
 
   try {
     await vote(props.proposal, props.choice, form.value.reason);
-    emit('voted');
-    emit('close');
+
+    try {
+      // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+      if (offchainNetworks.includes(props.proposal.network)) {
+        proposalsStore.fetchProposal(
+          props.proposal.space.id,
+          props.proposal.id,
+          props.proposal.network
+        );
+        await loadVotes(props.proposal.network, [props.proposal.space.id]);
+      }
+    } finally {
+      emit('voted');
+      emit('close');
+    }
   } finally {
     loading.value = false;
   }
@@ -78,12 +94,23 @@ function handleFetchVotingPower() {
 
 watch(
   [() => props.open, () => web3.value.account],
-  ([open, toAccount], [, fromAccount]) => {
+  async ([open, toAccount], [, fromAccount]) => {
+    if (!open) return;
+
     if (fromAccount && toAccount && fromAccount !== toAccount) {
+      loading.value = true;
       resetVotingPower();
+      form.value.reason = '';
+      await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
 
-    if (open) handleFetchVotingPower();
+    handleFetchVotingPower();
+
+    form.value.reason =
+      votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
+      '';
+
+    loading.value = false;
   },
   { immediate: true }
 );
