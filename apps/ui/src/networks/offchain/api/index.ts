@@ -221,7 +221,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       id: proposal.space.id,
       name: proposal.space.name,
       snapshot_chain_id: parseInt(proposal.space.network),
-      avatar: '',
+      avatar: proposal.space.avatar,
       controller: '',
       admins: proposal.space.admins,
       moderators: proposal.space.moderators,
