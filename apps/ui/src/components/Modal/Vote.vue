@@ -37,6 +37,7 @@ const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
+const saving = ref(false);
 
 const formValidator = getValidator({
   $async: true,
@@ -64,27 +65,40 @@ const canSubmit = computed(
 async function handleSubmit() {
   loading.value = true;
 
-  if (!props.choice) return;
-
-  try {
-    await vote(props.proposal, props.choice, form.value.reason);
-
+  if (offchainNetworks.includes(props.proposal.network)) {
     try {
-      // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-      if (offchainNetworks.includes(props.proposal.network)) {
-        proposalsStore.fetchProposal(
-          props.proposal.space.id,
-          props.proposal.id,
-          props.proposal.network
-        );
-        await loadVotes(props.proposal.network, [props.proposal.space.id]);
-      }
+      await voteFn();
+      handleConfirmed();
     } finally {
-      emit('voted');
-      emit('close');
+      loading.value = false;
     }
-  } finally {
+  } else {
+    emit('close');
     loading.value = false;
+    saving.value = true;
+  }
+}
+
+async function voteFn() {
+  if (!props.choice) return null;
+
+  return vote(props.proposal, props.choice, form.value.reason);
+}
+
+async function handleConfirmed() {
+  emit('voted');
+  emit('close');
+  saving.value = false;
+  loading.value = false;
+
+  // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+  if (offchainNetworks.includes(props.proposal.network)) {
+    proposalsStore.fetchProposal(
+      props.proposal.space.id,
+      props.proposal.id,
+      props.proposal.network
+    );
+    await loadVotes(props.proposal.network, [props.proposal.space.id]);
   }
 }
 
@@ -192,4 +206,19 @@ watchEffect(async () => {
       </div>
     </template>
   </UiModal>
+
+  <teleport to="#modal">
+    <ModalTransactionProgress
+      :open="saving"
+      :network-id="proposal.network"
+      :messages="{
+        approveTitle: 'Confirm your vote',
+        successTitle: 'Done!',
+        successSubtitle: 'Your vote is in!'
+      }"
+      :execute="voteFn"
+      @confirmed="handleConfirmed"
+      @close="saving = false"
+    />
+  </teleport>
 </template>

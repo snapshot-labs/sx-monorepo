@@ -98,6 +98,7 @@ export function useActions() {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
+    let hash;
 
     if (handleSafeEnvelope(envelope)) return null;
     if (await handleCommitEnvelope(envelope, networkId)) return null;
@@ -107,7 +108,7 @@ export function useActions() {
       console.log('Receipt', envelope.signatureData);
     } else if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
-      const hash = receipt.transaction_hash || receipt.hash;
+      hash = receipt.transaction_hash || receipt.hash;
 
       console.log('Receipt', receipt);
 
@@ -126,7 +127,7 @@ export function useActions() {
       );
     }
 
-    return envelope.trasacton_hash || envelope.hash;
+    return hash || envelope.transaction_hash || envelope.hash;
   }
 
   async function forceLogin() {
@@ -243,11 +244,14 @@ export function useActions() {
   }
 
   async function vote(proposal: Proposal, choice: Choice, reason: string) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      forceLogin();
+      return null;
+    }
 
     const network = getNetwork(proposal.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
         auth.web3,
@@ -267,6 +271,10 @@ export function useActions() {
       proposalId: proposal.id,
       choice
     });
+
+    console.log(txHash);
+
+    return txHash;
   }
 
   async function propose(
