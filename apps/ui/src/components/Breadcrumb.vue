@@ -4,7 +4,6 @@ import { NetworkID } from '@/types';
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-const uiStore = useUiStore();
 
 const param = computed(() =>
   String(
@@ -16,10 +15,6 @@ const { resolved, address: spaceAddress, networkId } = useResolve(param);
 
 const showSpaceLogo = computed(() =>
   ['proposal', 'space'].includes(String(route.matched[0]?.name))
-);
-
-const isInsideAppNav = computed(() =>
-  ['space'].includes(String(route.matched[0]?.name))
 );
 
 const space = computed(() => {
@@ -43,21 +38,15 @@ const space = computed(() => {
 </script>
 
 <template>
-  <div
-    v-if="showSpaceLogo"
-    :class="{
-      'mr-4 pr-2 h-full hidden lg:flex items-center border-r': isInsideAppNav,
-      'w-[216px]': isInsideAppNav && !uiStore.sidebarOpen,
-      '!flex w-[172px]': isInsideAppNav && uiStore.sidebarOpen
-    }"
-  >
+  <template v-if="showSpaceLogo">
     <router-link
       v-if="space"
       :to="{
         name: 'space-overview',
         params: { id: `${networkId}:${spaceAddress}` }
       }"
-      class="flex space-x-2.5 truncate text-[24px]"
+      class="flex item-center space-x-2.5 truncate text-[24px]"
+      v-bind="$attrs"
     >
       <SpaceAvatar
         :space="{ ...space, network: networkId as NetworkID }"
@@ -66,6 +55,6 @@ const space = computed(() => {
       />
       <span class="truncate" v-text="space.name" />
     </router-link>
-  </div>
+  </template>
   <slot v-else />
 </template>

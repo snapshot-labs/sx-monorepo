@@ -28,7 +28,7 @@ const searchInput = ref();
 const searchValue = ref('');
 
 const hasAppNav = computed(() =>
-  ['my', 'settings'].includes(String(route.matched[0]?.name))
+  ['my', 'settings', 'space'].includes(String(route.matched[0]?.name))
 );
 const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
@@ -72,85 +72,87 @@ watch(
 
 <template>
   <nav
-    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px]"
+    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px] flex items-center justify-between h-[71px] bg-skin-bg space-x-4 pr-4"
     :class="{
       'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
     }"
   >
     <div
-      class="flex items-center justify-between h-[71px] px-4 bg-skin-bg space-x-1"
+      class="flex items-center h-full"
       :class="{
-        'lg:ml-[240px]': hasAppNav,
-        'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasAppNav
+        'lg:border-r lg:pr-4 lg:w-[240px]': hasAppNav
       }"
     >
-      <div class="flex grow items-center h-full">
-        <button
-          type="button"
-          class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
-          @click="uiStore.toggleSidebar"
+      <button
+        type="button"
+        class="inline-block text-skin-link cursor-pointer lg:hidden ml-4"
+        @click="uiStore.toggleSidebar"
+      >
+        <IH-menu-alt-2 />
+      </button>
+      <Breadcrumb
+        v-if="showBreadcrumb"
+        class="ml-4"
+        :class="{ 'hidden lg:flex': searchConfig }"
+      >
+        <router-link
+          :to="{ path: '/' }"
+          class="truncate ml-4"
+          style="font-size: 24px"
         >
-          <IH-menu-alt-2 />
-        </button>
-        <Breadcrumb v-if="showBreadcrumb">
-          <router-link
-            :to="{ path: '/' }"
-            class="flex items-center"
-            style="font-size: 24px"
-          >
-            snapshot
-          </router-link>
-        </Breadcrumb>
-        <form
-          v-if="searchConfig"
-          id="search-form"
-          class="flex flex-1 pr-2 py-3 h-full"
-          @submit="handleSearchSubmit"
-        >
-          <label class="flex items-center w-full space-x-2.5">
-            <IH-search class="shrink-0" />
-            <input
-              ref="searchInput"
-              v-model.trim="searchValue"
-              type="text"
-              :placeholder="searchConfig.placeholder"
-              class="bg-transparent text-skin-link text-[19px] w-full"
-            />
-          </label>
-        </form>
-      </div>
-      <div :key="web3.account" class="flex">
-        <UiButton
-          v-if="loading || web3.authLoading"
-          loading
-          class="!px-0 w-[46px]"
+          snapshot
+        </router-link>
+      </Breadcrumb>
+    </div>
+    <form
+      v-if="searchConfig"
+      id="search-form"
+      class="flex flex-1 py-3 h-full"
+      @submit="handleSearchSubmit"
+    >
+      <label class="flex items-center w-full space-x-2.5">
+        <IH-search class="shrink-0" />
+        <input
+          ref="searchInput"
+          v-model.trim="searchValue"
+          type="text"
+          :placeholder="searchConfig.placeholder"
+          class="bg-transparent text-skin-link text-[19px] w-full"
         />
-        <UiButton
-          v-else
-          class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
-          @click="modalAccountOpen = true"
+      </label>
+    </form>
+
+    <div class="flex space-x-2.5 shrink-0">
+      <UiButton
+        v-if="loading || web3.authLoading"
+        loading
+        class="!px-0 w-[46px]"
+      />
+      <UiButton
+        v-else
+        class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+        @click="modalAccountOpen = true"
+      >
+        <span
+          v-if="auth.isAuthenticated.value"
+          class="sm:flex items-center space-x-2"
         >
+          <UiStamp :id="web3.account" :size="18" />
           <span
-            v-if="auth.isAuthenticated.value"
-            class="sm:flex items-center space-x-2"
-          >
-            <UiStamp :id="web3.account" :size="18" />
-            <span
-              class="hidden sm:block"
-              v-text="web3.name || shorten(web3.account)"
-            />
-          </span>
-          <template v-else>
-            <span class="hidden sm:block" v-text="'Connect wallet'" />
-            <IH-login class="sm:hidden inline-block" />
-          </template>
-        </UiButton>
-        <IndicatorPendingTransactions class="ml-2" />
-        <UiButton class="!px-0 w-[46px] ml-2" @click="toggleSkin">
-          <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
-          <IH-moon v-else class="inline-block" />
-        </UiButton>
-      </div>
+            class="hidden sm:block"
+            v-text="web3.name || shorten(web3.account)"
+          />
+        </span>
+        <template v-else>
+          <span class="hidden sm:block" v-text="'Connect wallet'" />
+          <IH-login class="sm:hidden inline-block" />
+        </template>
+      </UiButton>
+      <IndicatorPendingTransactions />
+      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
+        <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
+        <IH-moon v-else class="inline-block" />
+      </UiButton>
     </div>
   </nav>
   <teleport to="#modal">
