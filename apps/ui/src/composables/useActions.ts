@@ -272,8 +272,6 @@ export function useActions() {
       choice
     });
 
-    console.log(txHash);
-
     return txHash;
   }
 
