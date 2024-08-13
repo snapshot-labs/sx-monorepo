@@ -33,9 +33,7 @@ const formValidator = getValidator({
   }
 });
 
-const form: {
-  controller: string;
-} = reactive(clone(DEFAULT_FORM_STATE));
+const form = reactive(clone(DEFAULT_FORM_STATE));
 const formValidated = ref(false);
 const showPicker = ref(false);
 const searchValue = ref('');
