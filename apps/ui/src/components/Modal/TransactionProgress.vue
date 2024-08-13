@@ -88,7 +88,7 @@ async function handleExecute() {
     emit('confirmed');
     step.value = 'success';
   } catch (e) {
-    console.warn(e);
+    console.warn('Transaction failed', e);
 
     step.value = 'fail';
   }
