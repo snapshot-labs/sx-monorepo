@@ -33,7 +33,7 @@
     "express": "^4.17.1",
     "knex": "^2.5.1",
     "pg": "^8.11.3",
-    "starknet": "5.25.0",
+    "starknet": "6.11.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
