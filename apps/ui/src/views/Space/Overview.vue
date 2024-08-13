@@ -144,7 +144,7 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <template v-if="space.children.length">
       <UiLabel :label="'Sub-spaces'" />
-      <div class="relative">
+      <div data-no-sidebar-swipe class="relative">
         <div
           class="bg-gradient-to-r from-skin-bg left-0 top-0 bottom-0 w-3 absolute z-10 pointer-events-none"
         />
