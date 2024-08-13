@@ -78,7 +78,9 @@ export function createActions(
       });
     }
 
-    plugins.oSnap = { safes };
+    if (safes.length > 0) {
+      plugins.oSnap = { safes };
+    }
 
     return plugins;
   }
