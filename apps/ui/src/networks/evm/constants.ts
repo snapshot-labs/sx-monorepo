@@ -137,10 +137,12 @@ export function createConstants(networkId: NetworkID) {
         const abiCoder = new AbiCoder();
 
         return {
-          threshold: abiCoder.decode(
-            ['uint256', 'tuple(address addr, bytes params)[]'],
-            params
-          )[0]
+          threshold: abiCoder
+            .decode(
+              ['uint256', 'tuple(address addr, bytes params)[]'],
+              params
+            )[0]
+            .toString()
         };
       },
       paramsDefinition: {
