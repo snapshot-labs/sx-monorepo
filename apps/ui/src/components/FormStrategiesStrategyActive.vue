@@ -28,7 +28,7 @@ const network = computed(() => getNetwork(props.networkId));
     class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
   >
     <div class="flex flex-col">
-      <div class="flex min-w-0">
+      <div class="flex min-w-0 leading-5 mb-1">
         <div class="whitespace-nowrap">{{ strategy.name }}</div>
         <div
           v-if="strategy.generateSummary"
