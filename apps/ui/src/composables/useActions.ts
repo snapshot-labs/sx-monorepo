@@ -94,13 +94,13 @@ export function useActions() {
     networkId: NetworkID,
     promise: Promise<any>,
     opts: { transactionNetworkId?: NetworkID } = {}
-  ) {
+  ): Promise<string | null> {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
 
-    if (handleSafeEnvelope(envelope)) return;
-    if (await handleCommitEnvelope(envelope, networkId)) return;
+    if (handleSafeEnvelope(envelope)) return null;
+    if (await handleCommitEnvelope(envelope, networkId)) return null;
 
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.payloadType === 'HIGHLIGHT_VOTE') {
@@ -125,6 +125,8 @@ export function useActions() {
         opts.transactionNetworkId || networkId
       );
     }
+
+    return envelope.trasacton_hash || envelope.hash;
   }
 
   async function forceLogin() {
@@ -465,44 +467,62 @@ export function useActions() {
   }
 
   async function transferOwnership(space: Space, owner: string) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    await wrapPromise(
+    return wrapPromise(
       space.network,
       network.actions.transferOwnership(auth.web3, space, owner)
     );
   }
 
-  async function updateStrategies(
+  async function updateSettings(
     space: Space,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
-    validationStrategy: StrategyConfig
+    validationStrategy: StrategyConfig,
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
   ) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    await wrapPromise(
+    return wrapPromise(
       space.network,
-      network.actions.updateStrategies(
+      network.actions.updateSettings(
         auth.web3,
         space,
         authenticatorsToAdd,
         authenticatorsToRemove,
         votingStrategiesToAdd,
         votingStrategiesToRemove,
-        validationStrategy
+        validationStrategy,
+        votingDelay !== null
+          ? getCurrentFromDuration(space.network, votingDelay)
+          : null,
+        minVotingDuration !== null
+          ? getCurrentFromDuration(space.network, minVotingDuration)
+          : null,
+        maxVotingDuration !== null
+          ? getCurrentFromDuration(space.network, maxVotingDuration)
+          : null
       )
     );
   }
@@ -634,7 +654,7 @@ export function useActions() {
     setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
-    updateStrategies: wrapWithErrors(updateStrategies),
+    updateSettings: wrapWithErrors(updateSettings),
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
