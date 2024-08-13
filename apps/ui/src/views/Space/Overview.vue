@@ -85,7 +85,7 @@ watchEffect(() => setTitle(props.space.name));
             :turbo="space.turbo"
           />
         </div>
-        <div class="mb-3 flex space-x-1 items-center">
+        <div class="mb-3 flex flex-wrap gap-x-1 items-center">
           <div>
             <b class="text-skin-link">{{ _n(space.proposal_count) }}</b>
             proposals
@@ -113,7 +113,7 @@ watchEffect(() => setTitle(props.space.name));
                   id: `${space.parent.network}:${space.parent.id}`
                 }
               }"
-              class="flex space-x-1 items-center"
+              class="flex space-x-1 items-center whitespace-nowrap"
             >
               <SpaceAvatar
                 :space="space.parent"
