@@ -284,6 +284,10 @@ export function abiToDefinition(abi) {
   return definition;
 }
 
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function memoize<T extends any[], U>(fn: (...args: T) => U) {
   const cache = new Map<string, any>();
 
