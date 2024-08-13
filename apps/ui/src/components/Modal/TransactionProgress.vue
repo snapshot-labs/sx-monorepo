@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { sleep } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
@@ -69,10 +70,6 @@ const text = computed(() => {
 
   throw new Error('Invalid step');
 });
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 async function handleExecute() {
   step.value = 'approve';
