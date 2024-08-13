@@ -8,7 +8,7 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
-  initialState?: any;
+  initialState?: { controller: string };
 }>();
 
 const emit = defineEmits<{
