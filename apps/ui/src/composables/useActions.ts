@@ -102,12 +102,13 @@ export function useActions() {
     if (handleSafeEnvelope(envelope)) return null;
     if (await handleCommitEnvelope(envelope, networkId)) return null;
 
+    let hash;
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.payloadType === 'HIGHLIGHT_VOTE') {
       console.log('Receipt', envelope.signatureData);
     } else if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
-      const hash = receipt.transaction_hash || receipt.hash;
+      hash = receipt.transaction_hash || receipt.hash;
 
       console.log('Receipt', receipt);
 
@@ -118,15 +119,16 @@ export function useActions() {
         );
       hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
+      hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
 
       uiStore.addPendingTransaction(
-        envelope.transaction_hash || envelope.hash,
+        hash,
         opts.transactionNetworkId || networkId
       );
     }
 
-    return envelope.trasacton_hash || envelope.hash;
+    return hash;
   }
 
   async function forceLogin() {
