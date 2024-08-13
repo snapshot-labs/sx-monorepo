@@ -14,7 +14,21 @@ defineProps<{
 
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
 const editStrategyModalOpen = ref(false);
-const votingStrategies = ref([] as StrategyConfig[]);
+
+const votingStrategies = computed({
+  get: () => model.value?.params?.strategies || [],
+  set: (value: StrategyConfig[]) => {
+    if (!model.value) return;
+
+    model.value = {
+      ...model.value,
+      params: {
+        ...model.value?.params,
+        strategies: value
+      }
+    };
+  }
+});
 
 function addStrategy(strategy: StrategyTemplate) {
   const strategyConfig = {
@@ -49,25 +63,6 @@ function handleStrategySave(value: Record<string, any>) {
     params: value
   };
 }
-
-watchEffect(() => {
-  votingStrategies.value = model.value?.params?.strategies || [];
-});
-
-watch(
-  () => votingStrategies.value,
-  to => {
-    if (!model.value) return;
-
-    model.value = {
-      ...model.value,
-      params: {
-        ...model.value?.params,
-        strategies: to
-      }
-    };
-  }
-);
 </script>
 
 <template>
