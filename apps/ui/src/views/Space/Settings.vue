@@ -672,23 +672,25 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         </teleport>
       </div>
       <div
-        v-if="error"
-        class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-between items-center leading-7 font-medium text-skin-danger"
+        v-if="!uiStore.sidebarOpen && ((isModified && isController) || error)"
+        class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
       >
-        {{ error }}
-      </div>
-      <div
-        v-else-if="!uiStore.sidebarOpen && isModified && isController"
-        class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-end xs:justify-between items-center"
-      >
-        <h4 class="leading-7 font-medium hidden xs:block">
-          You have unsaved changes
+        <h4
+          class="leading-7 font-medium truncate mb-2 xs:mb-0"
+          :class="{ 'text-skin-danger': error }"
+        >
+          {{ error || 'You have unsaved changes' }}
         </h4>
         <div class="flex space-x-3">
           <button type="reset" class="text-skin-heading" @click="reset">
             Reset
           </button>
-          <UiButton :loading="saving" primary @click="handleSettingsSave">
+          <UiButton
+            v-if="!error"
+            :loading="saving"
+            primary
+            @click="handleSettingsSave"
+          >
             Save
           </UiButton>
         </div>
