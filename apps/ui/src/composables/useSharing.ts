@@ -24,7 +24,7 @@ export function useSharing() {
     return `https://${window.location.hostname}/#/${proposal.network}:${proposal.space.id}/proposal/${proposal.proposal_id}`;
   }
 
-  function getMessage(type: ShareableType, payload: any) {
+  function getMessage(type: ShareableType, payload: User | Proposal): string {
     switch (type) {
       case 'user':
         return getUserMessage();
