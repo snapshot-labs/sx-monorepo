@@ -35,7 +35,7 @@ export function useSharing() {
     }
   }
 
-  function getUserMessage() {
+  function getUserMessage(): string {
     return encodeURIComponent(window.location.href);
   }
 
