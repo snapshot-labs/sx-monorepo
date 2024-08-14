@@ -18,6 +18,7 @@ export type ApiSpace = {
   admins: string[];
   members: string[];
   name: string;
+  avatar: string;
   network: string;
   about: string;
   website: string;
@@ -65,6 +66,7 @@ export type ApiProposal = {
   space: {
     id: string;
     name: string;
+    avatar: string;
     network: string;
     admins: string[];
     moderators: string[];

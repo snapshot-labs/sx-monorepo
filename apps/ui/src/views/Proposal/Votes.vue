@@ -102,6 +102,7 @@ watch(
     if (toId === fromId) return;
 
     reset();
+    loadVotes();
   }
 );
 

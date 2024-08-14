@@ -8,6 +8,7 @@ const SPACE_FRAGMENT = gql`
     admins
     members
     name
+    avatar
     network
     about
     website
@@ -77,6 +78,7 @@ const PROPOSAL_FRAGMENT = gql`
     space {
       id
       name
+      avatar
       network
       admins
       moderators

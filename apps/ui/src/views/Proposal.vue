@@ -98,12 +98,19 @@ watch(
 );
 
 watch(
-  [networkId, spaceAddress],
-  async ([networkId, spaceAddress]) => {
-    // NOTE: do not watch id as it's not updated in-sync with networkId and spaceAddress (those are resolved async)
+  [networkId, spaceAddress, id],
+  async ([networkId, spaceAddress, id]) => {
+    if (!resolved.value) {
+      // NOTE: id's not updated in-sync with networkId and spaceAddress (those are resolved async)
+      // we want to ignore updates if the values are not resolved yet
+      return;
+    }
+
     if (!networkId || !spaceAddress) return;
 
-    proposalsStore.fetchProposal(spaceAddress, id.value, networkId);
+    modalOpenVote.value = false;
+    editMode.value = false;
+    proposalsStore.fetchProposal(spaceAddress, id, networkId);
   },
   { immediate: true }
 );
