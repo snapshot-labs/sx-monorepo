@@ -108,6 +108,8 @@ watch(
 
     if (!networkId || !spaceAddress) return;
 
+    modalOpenVote.value = false;
+    editMode.value = false;
     proposalsStore.fetchProposal(spaceAddress, id, networkId);
   },
   { immediate: true }
