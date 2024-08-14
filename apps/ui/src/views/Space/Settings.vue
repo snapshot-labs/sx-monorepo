@@ -80,6 +80,14 @@ const executionStrategies = computed(() => {
   });
 });
 
+const error = computed(() => {
+  if (!validationStrategy.value) {
+    return 'Proposal validation strategy is required';
+  }
+
+  return null;
+});
+
 watchEffect(async () => {
   isModified.value = false;
 
@@ -664,7 +672,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         </teleport>
       </div>
       <div
-        v-if="!uiStore.sidebarOpen && isModified && isController"
+        v-if="error"
+        class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-between items-center leading-7 font-medium text-skin-danger"
+      >
+        {{ error }}
+      </div>
+      <div
+        v-else-if="!uiStore.sidebarOpen && isModified && isController"
         class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-end xs:justify-between items-center"
       >
         <h4 class="leading-7 font-medium hidden xs:block">
