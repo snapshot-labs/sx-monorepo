@@ -38,12 +38,12 @@
   color-scheme: dark;
 
   // backgrounds
-  --bg: 28, 27, 32;
+  --bg: 22, 21, 26;
   --block-bg: 28, 27, 32;
   --input-bg: 35, 34, 39;
   --hover-bg: 37, 36, 41;
   --active-bg: 41, 40, 46;
-  --border: 51, 50, 55;
+  --border: 45, 44, 49;
 
   // text
   --heading: 251, 251, 251;
@@ -249,12 +249,37 @@ input:placeholder-shown {
 
 .blocks {
   background-repeat: repeat-x;
-  background-position: top -40px center;
+  background-position: top -80px center;
   background-image: url('@/assets/blocks-light.svg');
+  animation: mymove 60s infinite;
+  animation-timing-function: linear;
 }
 
 .dark .blocks {
   background-image: url('@/assets/blocks-dark.svg');
+}
+
+.banner {
+  background-repeat: repeat-x;
+  background-position: center center;
+  background-image: url('@/assets/banner-light.svg');
+  animation: mymove 60s infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes mymove {
+  from {
+    transition: linear;
+    background-position-x: 0;
+  }
+  to {
+    transition: linear;
+    background-position-x: -1365px;
+  }
+}
+
+.dark .banner {
+  background-image: url('@/assets/banner-dark.svg');
 }
 
 .no-scrollbar::-webkit-scrollbar {

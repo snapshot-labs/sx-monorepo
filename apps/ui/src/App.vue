@@ -74,6 +74,7 @@ watch(isSwiping, () => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else class="pb-6 flex">
       <AppSidebar
+        v-if="route.name !== 'landing'"
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
       />
@@ -94,7 +95,7 @@ watch(isSwiping, () => {
           'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
         }"
       >
-        <router-view class="flex-auto mt-[72px] ml-0 lg:ml-[72px]" />
+        <router-view class="flex-auto mt-[72px] ml-0 lg:ml-[72px]" :class="route.name === 'landing' && '!ml-0'" />
       </div>
     </div>
     <AppNotifications />
