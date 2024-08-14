@@ -1,5 +1,5 @@
 import { FunctionalComponent } from 'vue';
-import { Proposal } from '@/types';
+import { Proposal, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
 import ICLens from '~icons/c/lens';
 import ICX from '~icons/c/x';
