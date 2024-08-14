@@ -482,9 +482,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <div
-    class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
-  >
+  <div class="overflow-auto z-40 sticky top-[71px] lg:top-[72px]">
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
       <button
         v-for="tab in TABS"
