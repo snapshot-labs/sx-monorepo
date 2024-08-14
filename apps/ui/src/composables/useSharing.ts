@@ -48,7 +48,7 @@ export function useSharing() {
   function getShareUrl(
     socialNetwork: SocialNetwork,
     type: ShareableType,
-    payload: any
+    payload: User | Proposal
   ): string {
     let message = getMessage(type, payload);
 
