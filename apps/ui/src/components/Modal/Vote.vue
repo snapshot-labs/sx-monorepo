@@ -212,9 +212,7 @@ watchEffect(async () => {
       :open="saving"
       :network-id="proposal.network"
       :messages="{
-        approveTitle: 'Confirm your vote',
-        successTitle: 'Done!',
-        successSubtitle: 'Your vote is in!'
+        approveTitle: 'Confirm your vote'
       }"
       :execute="voteFn"
       @confirmed="handleConfirmed"
