@@ -246,7 +246,7 @@ export function useActions() {
 
   async function vote(proposal: Proposal, choice: Choice, reason: string) {
     if (!web3.value.account) {
-      await forceLogin();
+      forceLogin();
       return null;
     }
 
@@ -417,7 +417,7 @@ export function useActions() {
       proposal.network,
       network.actions.vetoProposal(auth.web3, proposal)
     );
-
+  }
 
   async function setVotingDelay(space: Space, votingDelay: number) {
     if (!web3.value.account) return await forceLogin();
