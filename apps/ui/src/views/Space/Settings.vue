@@ -546,7 +546,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             <div class="s-label !mb-0">Voting delay</div>
             <UiEditable
               editable
-              :initial-value="currentToMinutesOnly(space.voting_delay)"
+              :initial-value="
+                votingDelay || currentToMinutesOnly(space.voting_delay)
+              "
               :definition="{
                 type: 'integer',
                 format: 'duration'
@@ -567,7 +569,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             <div class="s-label !mb-0">Min. voting period</div>
             <UiEditable
               editable
-              :initial-value="currentToMinutesOnly(space.min_voting_period)"
+              :initial-value="
+                minVotingPeriod || currentToMinutesOnly(space.min_voting_period)
+              "
               :definition="{
                 type: 'integer',
                 format: 'duration'
@@ -594,7 +598,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             <div class="s-label !mb-0">Max. voting period</div>
             <UiEditable
               editable
-              :initial-value="currentToMinutesOnly(space.max_voting_period)"
+              :initial-value="
+                maxVotingPeriod || currentToMinutesOnly(space.max_voting_period)
+              "
               :definition="{
                 type: 'integer',
                 format: 'duration'
