@@ -39,7 +39,7 @@ export function useSharing() {
     return encodeURIComponent(window.location.href);
   }
 
-  function getProposalMessage(proposal: Proposal) {
+  function getProposalMessage(proposal: Proposal): string {
     return encodeURIComponent(
       `${proposal.space.name}: ${proposal.title} ${getProposalUrl(proposal)}`
     );
