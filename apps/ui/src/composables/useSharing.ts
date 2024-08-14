@@ -49,7 +49,7 @@ export function useSharing() {
     socialNetwork: SocialNetwork,
     type: ShareableType,
     payload: any
-  ) {
+  ): string {
     let message = getMessage(type, payload);
 
     if (socialNetwork === 'lens') {
