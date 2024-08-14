@@ -13,7 +13,12 @@ const { init, app } = useApp();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
-    sidebarSwipeEnabled.value = !e.target?.closest('[data-no-sidebar-swipe]');
+    const noSideBarSwipe = (e.target as Element)?.closest(
+      '[data-no-sidebar-swipe]'
+    );
+    sidebarSwipeEnabled.value =
+      !noSideBarSwipe ||
+      (noSideBarSwipe && noSideBarSwipe.getBoundingClientRect().x === 0);
   }
 });
 const { createDraft } = useEditor();
