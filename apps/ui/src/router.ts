@@ -11,6 +11,7 @@ import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
+import ProposalDiscussion from '@/views/Proposal/Discussion.vue';
 import Proposal from '@/views/Proposal.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
@@ -92,7 +93,8 @@ const routes: any[] = [
     component: Proposal,
     children: [
       { path: '', name: 'proposal-overview', component: ProposalOverview },
-      { path: 'votes', name: 'proposal-votes', component: ProposalVotes }
+      { path: 'votes', name: 'proposal-votes', component: ProposalVotes },
+      { path: 'discussion', name: 'proposal-discussion', component: ProposalDiscussion }
     ]
   },
   { path: '/create', name: 'create', component: Create },
