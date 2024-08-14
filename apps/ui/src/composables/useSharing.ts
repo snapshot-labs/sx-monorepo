@@ -15,8 +15,8 @@ const SOCIAL_NETWORKS: {
   icon: FunctionalComponent;
 }[] = [
   { id: 'x', name: 'X', icon: ICX },
-  { id: 'lens', name: 'Hey', icon: ICLens },
-  { id: 'farcaster', name: 'Warpcast', icon: ICFarcaster }
+  { id: 'lens', name: 'Lens', icon: ICLens },
+  { id: 'farcaster', name: 'Farcaster', icon: ICFarcaster }
 ];
 
 export function useSharing() {
