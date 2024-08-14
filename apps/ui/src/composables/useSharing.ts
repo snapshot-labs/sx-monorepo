@@ -20,7 +20,7 @@ const SOCIAL_NETWORKS: {
 ];
 
 export function useSharing() {
-  function getProposalUrl(proposal: Proposal) {
+  function getProposalUrl(proposal: Proposal): string {
     return `https://${window.location.hostname}/#/${proposal.network}:${proposal.space.id}/proposal/${proposal.proposal_id}`;
   }
 
