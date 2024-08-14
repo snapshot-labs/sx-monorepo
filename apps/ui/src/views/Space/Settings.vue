@@ -665,10 +665,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </div>
       <div
         v-if="!uiStore.sidebarOpen && isModified && isController"
-        class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-between items-center"
+        class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex justify-end xs:justify-between items-center"
       >
-        <h4 class="leading-7 font-medium">You have unsaved changes</h4>
-        <div class="space-x-3">
+        <h4 class="leading-7 font-medium hidden xs:block">
+          You have unsaved changes
+        </h4>
+        <div class="flex space-x-3">
           <button type="reset" class="text-skin-heading" @click="reset">
             Reset
           </button>
