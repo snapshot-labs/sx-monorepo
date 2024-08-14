@@ -35,8 +35,6 @@ const user = computed(() => usersStore.getUser(id.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
-const shareMsg = computed(() => encodeURIComponent(window.location.href));
-
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 async function loadActivities(userId: string) {
@@ -129,7 +127,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
+        <DropdownShare :shareable="user" type="user" class="!px-0 w-[46px]" />
         <UiTooltip v-if="web3.account === user.id" title="Edit profile">
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
