@@ -130,7 +130,7 @@ watch([sortBy, choiceFilter], () => {
         class="bg-skin-bg sticky top-0 z-40 border-b flex space-x-3 font-medium"
       >
         <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
-        <div class="grow w-[20%]">
+        <div class="grow w-[40%]">
           <template v-if="offchainNetworks.includes(proposal.network)"
             >Choice</template
           >
