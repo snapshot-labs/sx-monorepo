@@ -122,7 +122,10 @@ watch([sortBy, choiceFilter], () => {
 
 <template>
   <div ref="el" class="overflow-x-auto">
-    <div class="min-w-[735px] votes-table-container overflow-x-auto">
+    <div
+      data-no-sidebar-swipe
+      class="min-w-[735px] votes-table-container overflow-x-auto"
+    >
       <div
         class="bg-skin-bg sticky top-0 z-40 border-b flex space-x-3 font-medium"
       >

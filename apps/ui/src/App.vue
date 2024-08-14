@@ -3,6 +3,7 @@ import { startIntercom } from './helpers/intercom';
 import { Transaction } from './types';
 
 const el = ref(null);
+const sidebarSwipeEnabled = ref(true);
 
 const route = useRoute();
 const router = useRouter();
@@ -10,7 +11,16 @@ const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, app } = useApp();
 const { web3 } = useWeb3();
-const { isSwiping, direction } = useSwipe(el);
+const { isSwiping, direction } = useSwipe(el, {
+  onSwipe(e: TouchEvent) {
+    const noSideBarSwipe = (e.target as Element)?.closest(
+      '[data-no-sidebar-swipe]'
+    );
+    sidebarSwipeEnabled.value =
+      !noSideBarSwipe ||
+      (noSideBarSwipe && noSideBarSwipe.getBoundingClientRect().x === 0);
+  }
+});
 const { createDraft } = useEditor();
 const { spaceKey, network, executionStrategy, transaction, reset } =
   useWalletConnectTransaction();
@@ -21,6 +31,10 @@ const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
 const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+);
+
+const noPaddingInBottom = computed(() =>
+  ['proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {
@@ -60,6 +74,7 @@ watch(route, () => {
 
 watch(isSwiping, () => {
   if (
+    sidebarSwipeEnabled.value &&
     isSwiping.value &&
     !modalOpen.value &&
     ((direction.value === 'right' && !uiStore.sidebarOpen) ||
@@ -77,7 +92,7 @@ watch(isSwiping, () => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else class="flex">
+    <div v-else :class="['flex', { 'pb-6': !noPaddingInBottom }]">
       <AppSidebar
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
