@@ -246,7 +246,7 @@ export function useActions() {
 
   async function vote(proposal: Proposal, choice: Choice, reason: string) {
     if (!web3.value.account) {
-      forceLogin();
+      await forceLogin();
       return null;
     }
 
