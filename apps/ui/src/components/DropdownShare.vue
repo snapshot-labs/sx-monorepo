@@ -39,7 +39,6 @@ function handleCopyLinkClick() {
         v-for="(network, i) in SOCIAL_NETWORKS"
         :key="i"
         v-slot="{ active }"
-        i
       >
         <a
           class="flex items-center gap-2"
