@@ -182,7 +182,7 @@ watch([sortBy, choiceFilter], () => {
         </button>
         <div class="min-w-[44px] lg:w-[60px]" />
       </div>
-      <UiLoading v-if="!loaded" class="px-4 py-3 block" />
+      <UiLoading v-if="!loaded" class="px-4 py-3 block absolute" />
       <template v-else>
         <div
           v-if="votes.length === 0"
