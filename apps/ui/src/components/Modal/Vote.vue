@@ -54,6 +54,10 @@ const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
+const offchainProposal = computed(() =>
+  offchainNetworks.includes(props.proposal.network)
+);
+
 const canSubmit = computed(
   () =>
     formValidated &&
@@ -65,7 +69,7 @@ const canSubmit = computed(
 async function handleSubmit() {
   loading.value = true;
 
-  if (offchainNetworks.includes(props.proposal.network)) {
+  if (offchainProposal.value) {
     try {
       await voteFn();
       handleConfirmed();
@@ -92,7 +96,7 @@ async function handleConfirmed() {
   loading.value = false;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-  if (offchainNetworks.includes(props.proposal.network)) {
+  if (offchainProposal.value) {
     proposalsStore.fetchProposal(
       props.proposal.space.id,
       props.proposal.id,
