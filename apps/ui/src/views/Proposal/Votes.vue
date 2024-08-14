@@ -250,7 +250,7 @@ watch([sortBy, choiceFilter], () => {
             </router-link>
             <button
               type="button"
-              class="grow w-[20%] flex flex-col items-start justify-center truncate leading-[22px]"
+              class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]"
               :disabled="!vote.reason"
               @click="handleChoiceClick(vote)"
             >
@@ -385,6 +385,6 @@ watch([sortBy, choiceFilter], () => {
 </template>
 <style scoped>
 .votes-table-container {
-  height: calc(100vh - 113px);
+  height: calc(100vh - 112px);
 }
 </style>

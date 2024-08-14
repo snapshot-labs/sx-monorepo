@@ -33,8 +33,8 @@ const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 
-const noPaddingInBottom = computed(() =>
-  ['proposal-votes'].includes(String(route.name))
+const paddingInBottom = computed(
+  () => !['proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {
@@ -92,7 +92,7 @@ watch(isSwiping, () => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else :class="['flex', { 'pb-6': !noPaddingInBottom }]">
+    <div v-else :class="['flex', { 'pb-6': paddingInBottom }]">
       <AppSidebar
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
