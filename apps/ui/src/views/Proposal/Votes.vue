@@ -121,10 +121,10 @@ watch([sortBy, choiceFilter], () => {
 </script>
 
 <template>
-  <div ref="el" class="overflow-x-auto">
+  <div ref="el" class="overflow-x-auto no-scrollbar">
     <div
       data-no-sidebar-swipe
-      class="min-w-[735px] votes-table-container overflow-x-auto"
+      class="min-w-[735px] votes-table-container overflow-x-auto no-scrollbar"
     >
       <div
         class="bg-skin-bg sticky top-0 z-40 border-b flex space-x-3 font-medium"
@@ -383,6 +383,6 @@ watch([sortBy, choiceFilter], () => {
 </template>
 <style scoped>
 .votes-table-container {
-  height: calc(100vh - 112px);
+  height: calc(100vh - 113px);
 }
 </style>
