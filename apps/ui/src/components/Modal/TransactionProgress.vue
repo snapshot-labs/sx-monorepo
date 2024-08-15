@@ -29,7 +29,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'confirmed', txId: string): void;
+  (e: 'confirmed', txId: string | null): void;
   (e: 'close'): void;
 }>();
 

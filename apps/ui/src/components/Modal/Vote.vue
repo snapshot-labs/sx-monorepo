@@ -93,7 +93,7 @@ async function voteFn() {
   return vote(props.proposal, selectedChoice.value, form.value.reason);
 }
 
-async function handleConfirmed(tx?: string) {
+async function handleConfirmed(tx?: string | null) {
   if (tx) txId.value = tx;
   modalTransactionOpen.value = false;
   modalShareOpen.value = true;
