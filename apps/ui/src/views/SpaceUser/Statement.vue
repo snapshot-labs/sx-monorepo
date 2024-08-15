@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import { Space, Statement } from '@/types';
+import { Space, Statement, User } from '@/types';
 
 const offchainNetworkId = offchainNetworks.filter(network =>
   enabledNetworks.includes(network)
 )[0];
 const offchainNetwork = getNetwork(offchainNetworkId);
 
-const props = defineProps<{ space: Space }>();
+const props = defineProps<{ user: User; space: Space }>();
 
 const route = useRoute();
+const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 
 const isEditMode = ref(false);
@@ -40,6 +41,10 @@ async function loadStatement() {
 }
 
 watch(userId, loadStatement, { immediate: true });
+
+watchEffect(() =>
+  setTitle(`${props.user.name || userId.value} ${props.space.name}'s profile`)
+);
 </script>
 
 <template>
