@@ -37,7 +37,7 @@ const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
-const saving = ref(false);
+const modalTransactionOpen = ref(false);
 
 const formValidator = getValidator({
   $async: true,
@@ -79,7 +79,7 @@ async function handleSubmit() {
   } else {
     emit('close');
     loading.value = false;
-    saving.value = true;
+    modalTransactionOpen.value = true;
   }
 }
 
@@ -92,7 +92,7 @@ async function voteFn() {
 async function handleConfirmed() {
   emit('voted');
   emit('close');
-  saving.value = false;
+  modalTransactionOpen.value = false;
   loading.value = false;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
@@ -213,14 +213,14 @@ watchEffect(async () => {
 
   <teleport to="#modal">
     <ModalTransactionProgress
-      :open="saving"
+      :open="modalTransactionOpen"
       :network-id="proposal.network"
       :messages="{
         approveTitle: 'Confirm your vote'
       }"
       :execute="voteFn"
       @confirmed="handleConfirmed"
-      @close="saving = false"
+      @close="modalTransactionOpen = false"
     />
   </teleport>
 </template>
