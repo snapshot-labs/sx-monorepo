@@ -1,10 +1,13 @@
 import { FunctionalComponent } from 'vue';
-import { Proposal, User } from '@/types';
+import { getChoiceText } from '@/helpers/utils';
+import { Choice, Proposal, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
 import ICLens from '~icons/c/lens';
 import ICX from '~icons/c/x';
 
-export type ShareableType = 'proposal' | 'user';
+export type ShareableType = 'proposal' | 'user' | 'vote';
+type Vote = { proposal: Proposal; choice: Choice };
+type PayloadType = Proposal | User | Vote;
 type SocialNetwork = 'x' | 'lens' | 'farcaster';
 
 const HASH_TAG = 'Snapshot';
@@ -24,15 +27,33 @@ export function useSharing() {
     return `https://${window.location.hostname}/#/${proposal.network}:${proposal.space.id}/proposal/${proposal.proposal_id}`;
   }
 
-  function getMessage(type: ShareableType, payload: User | Proposal): string {
+  function getMessage(type: ShareableType, payload: PayloadType): string {
     switch (type) {
       case 'user':
         return getUserMessage();
       case 'proposal':
         return getProposalMessage(payload as Proposal);
+      case 'vote':
+        return getVoteMessage(payload as Vote);
       default:
         throw new Error('Invalid shareable object');
     }
+  }
+
+  function getVoteMessage(payload: Vote) {
+    const { proposal, choice } = payload;
+    const choiceText = getChoiceText(proposal.choices, choice);
+    const isSingleChoice =
+      proposal.type === 'single-choice' || proposal.type === 'basic';
+    const isPrivate = proposal.privacy === 'shutter';
+    const votedText =
+      isSingleChoice && !isPrivate
+        ? `I just voted "${choiceText}" on`
+        : `I just voted on`;
+
+    return `${encodeURIComponent(votedText)}%20"${encodeURIComponent(
+      proposal.title
+    )}"%20${encodeURIComponent(getProposalUrl(proposal))}`;
   }
 
   function getUserMessage(): string {
@@ -48,11 +69,13 @@ export function useSharing() {
   function getShareUrl(
     socialNetwork: SocialNetwork,
     type: ShareableType,
-    payload: User | Proposal
+    payload: PayloadType
   ): string {
     let message = getMessage(type, payload);
 
-    if (socialNetwork === 'lens') {
+    if (type === 'vote' && socialNetwork === 'x') {
+      message += `%20%23${HASH_TAG}`;
+    } else if (socialNetwork === 'lens') {
       message += `&hashtags=${HASH_TAG}`;
     }
 

@@ -38,6 +38,9 @@ const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
 const modalTransactionOpen = ref(false);
+const modalShareOpen = ref(false);
+const txId = ref<string | null>(null);
+const selectedChoice = ref<Choice | null>(null);
 
 const formValidator = getValidator({
   $async: true,
@@ -68,6 +71,7 @@ const canSubmit = computed(
 
 async function handleSubmit() {
   loading.value = true;
+  selectedChoice.value = props.choice;
 
   if (offchainProposal.value) {
     try {
@@ -84,15 +88,19 @@ async function handleSubmit() {
 }
 
 async function voteFn() {
-  if (!props.choice) return null;
+  if (!selectedChoice.value) return null;
 
-  return vote(props.proposal, props.choice, form.value.reason);
+  return vote(props.proposal, selectedChoice.value, form.value.reason);
 }
 
-async function handleConfirmed() {
+async function handleConfirmed(tx?: string) {
+  if (tx) txId.value = tx;
+  modalTransactionOpen.value = false;
+  modalShareOpen.value = true;
+
   emit('voted');
   emit('close');
-  modalTransactionOpen.value = false;
+
   loading.value = false;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
@@ -221,6 +229,17 @@ watchEffect(async () => {
       :execute="voteFn"
       @confirmed="handleConfirmed"
       @close="modalTransactionOpen = false"
+    />
+    <ModalShare
+      :open="modalShareOpen"
+      :tx-id="txId"
+      :show-icon="true"
+      :shareable="{ proposal, choice: selectedChoice! }"
+      :messages="{
+        title: 'Your vote is in!',
+        subtitle: 'Thank you for participating!'
+      }"
+      @close="modalShareOpen = false"
     />
   </teleport>
 </template>

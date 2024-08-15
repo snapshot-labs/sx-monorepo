@@ -321,7 +321,7 @@ watchEffect(() => {
     </template>
     <teleport to="#modal">
       <ModalVote
-        v-if="proposal && selectedChoice"
+        v-if="proposal"
         :choice="selectedChoice"
         :proposal="proposal"
         :open="modalOpenVote"
