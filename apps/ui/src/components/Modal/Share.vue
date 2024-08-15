@@ -21,8 +21,6 @@ const props = withDefaults(
   }
 );
 
-console.log(props);
-
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
@@ -30,6 +28,14 @@ const emit = defineEmits<{
 const { SOCIAL_NETWORKS, getShareUrl } = useSharing();
 
 const network = computed(() => getNetwork(props.shareable.proposal.network));
+
+watch(
+  () => props.shareable,
+  async (to, from) => {
+    if (props.open && to.proposal.id !== from?.proposal.id) emit('close');
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
