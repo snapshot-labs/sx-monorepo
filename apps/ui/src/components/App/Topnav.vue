@@ -78,9 +78,10 @@ watch(
     }"
   >
     <div
-      class="flex items-center h-full"
+      class="flex items-center h-full shrink-0"
       :class="{
-        'lg:border-r lg:pr-4 lg:w-[240px]': hasAppNav
+        'lg:border-r lg:pr-4 lg:w-[240px]': hasAppNav,
+        'border-r pr-4 w-[240px]': hasAppNav && uiStore.sidebarOpen
       }"
     >
       <button
@@ -93,7 +94,7 @@ watch(
       <Breadcrumb
         v-if="showBreadcrumb"
         class="ml-4"
-        :class="{ 'hidden lg:flex': searchConfig }"
+        :class="{ 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }"
       >
         <router-link
           :to="{ path: '/' }"
