@@ -33,15 +33,13 @@ const cb = computed(() => getCacheHash(props.user.cover));
 
 <style lang="scss" scoped>
 .user-fallback-cover {
-  object-fit: cover;
+  @apply bg-cover bg-center w-full h-full;
 
   &::after {
+    @apply absolute h-full w-full pointer-events-none;
+
     content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
     backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
-    pointer-events: none;
   }
 }
 </style>
