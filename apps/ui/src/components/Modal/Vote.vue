@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { offchainNetworks } from '@/networks';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -29,6 +30,7 @@ const {
   fetch: fetchVotingPower,
   reset: resetVotingPower
 } = useVotingPower();
+const proposalsStore = useProposalsStore();
 const { loadVotes, votes } = useAccount();
 
 const loading = ref(false);
@@ -66,8 +68,21 @@ async function handleSubmit() {
 
   try {
     await vote(props.proposal, props.choice, form.value.reason);
-    emit('voted');
-    emit('close');
+
+    try {
+      // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+      if (offchainNetworks.includes(props.proposal.network)) {
+        proposalsStore.fetchProposal(
+          props.proposal.space.id,
+          props.proposal.id,
+          props.proposal.network
+        );
+        await loadVotes(props.proposal.network, [props.proposal.space.id]);
+      }
+    } finally {
+      emit('voted');
+      emit('close');
+    }
   } finally {
     loading.value = false;
   }

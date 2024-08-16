@@ -18,7 +18,6 @@ const usersStore = useUsersStore();
 const spacesStore = useSpacesStore();
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
-const { setTitle } = useTitle();
 const { getCurrent } = useMetaStore();
 
 const userActivity = ref<UserActivity>({
@@ -169,10 +168,6 @@ watch(
 
     spacesStore.networksMap[networkId].spaces[address];
   }
-);
-
-watchEffect(() =>
-  setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`)
 );
 </script>
 

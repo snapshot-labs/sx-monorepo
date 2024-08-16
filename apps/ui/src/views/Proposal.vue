@@ -73,23 +73,8 @@ async function handleVoteClick(choice: Choice) {
 }
 
 async function handleVoteSubmitted() {
-  if (!proposal.value) return;
-
   selectedChoice.value = null;
-
-  try {
-    // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-    if (offchainNetworks.includes(proposal.value.network)) {
-      proposalsStore.fetchProposal(
-        spaceAddress.value!,
-        id.value,
-        networkId.value!
-      );
-      await loadVotes(proposal.value.network, [proposal.value.space.id]);
-    }
-  } finally {
-    editMode.value = false;
-  }
+  editMode.value = false;
 }
 
 function handleFetchVotingPower() {
@@ -113,12 +98,19 @@ watch(
 );
 
 watch(
-  [networkId, spaceAddress],
-  async ([networkId, spaceAddress]) => {
-    // NOTE: do not watch id as it's not updated in-sync with networkId and spaceAddress (those are resolved async)
+  [networkId, spaceAddress, id],
+  async ([networkId, spaceAddress, id]) => {
+    if (!resolved.value) {
+      // NOTE: id's not updated in-sync with networkId and spaceAddress (those are resolved async)
+      // we want to ignore updates if the values are not resolved yet
+      return;
+    }
+
     if (!networkId || !spaceAddress) return;
 
-    proposalsStore.fetchProposal(spaceAddress, id.value, networkId);
+    modalOpenVote.value = false;
+    editMode.value = false;
+    proposalsStore.fetchProposal(spaceAddress, id, networkId);
   },
   { immediate: true }
 );
