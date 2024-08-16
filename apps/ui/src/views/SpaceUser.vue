@@ -201,7 +201,11 @@ watchEffect(() =>
             </UiButton>
           </router-link>
         </UiTooltip>
-        <DropdownShare :shareable="user" type="user" class="!px-0 w-[46px]" />
+        <DropdownShare
+          :shareable="{ user, space }"
+          type="space-user"
+          class="!px-0 w-[46px]"
+        />
       </div>
     </div>
     <div class="px-4">

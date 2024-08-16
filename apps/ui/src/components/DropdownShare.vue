@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ShareableType } from '@/composables/useSharing';
-import { Proposal, User } from '@/types';
+import { PayloadType, ShareableType } from '@/composables/useSharing';
 
-defineProps<{ shareable: User | Proposal; type: ShareableType }>();
+defineProps<{ shareable: PayloadType; type: ShareableType }>();
 
 const uiStore = useUiStore();
 const { copy } = useClipboard();

@@ -1,11 +1,14 @@
 import { FunctionalComponent } from 'vue';
-import { Proposal, User } from '@/types';
+import { Proposal, Space, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
 import ICLens from '~icons/c/lens';
 import ICX from '~icons/c/x';
 
-export type ShareableType = 'proposal' | 'user';
+type SpaceUser = { user: User; space: Space };
 type SocialNetwork = 'x' | 'lens' | 'farcaster';
+
+export type ShareableType = 'proposal' | 'user' | 'space-user';
+export type PayloadType = User | Proposal | SpaceUser;
 
 const HASH_TAG = 'Snapshot';
 
@@ -34,10 +37,35 @@ export function useSharing() {
     }`;
   }
 
-  function getMessage(type: ShareableType, payload: User | Proposal): string {
+  function getUserUrl(user: User): string {
+    return `${window.location.origin}/${
+      router.resolve({
+        name: 'user',
+        params: {
+          id: user.id
+        }
+      }).href
+    }`;
+  }
+
+  function getSpaceUserUrl(spaceUser: SpaceUser): string {
+    return `${window.location.origin}/${
+      router.resolve({
+        name: 'space-user',
+        params: {
+          id: `${spaceUser.space.network}:${spaceUser.space.id}`,
+          user: spaceUser.user.id
+        }
+      }).href
+    }`;
+  }
+
+  function getMessage(type: ShareableType, payload: PayloadType): string {
     switch (type) {
       case 'user':
-        return getUserMessage();
+        return getUserMessage(payload as User);
+      case 'space-user':
+        return getSpaceUserMessage(payload as SpaceUser);
       case 'proposal':
         return getProposalMessage(payload as Proposal);
       default:
@@ -45,22 +73,24 @@ export function useSharing() {
     }
   }
 
-  function getUserMessage(): string {
-    return encodeURIComponent(window.location.href);
+  function getUserMessage(user: User): string {
+    return getUserUrl(user);
+  }
+
+  function getSpaceUserMessage(spaceUser: SpaceUser): string {
+    return getSpaceUserUrl(spaceUser);
   }
 
   function getProposalMessage(proposal: Proposal): string {
-    return encodeURIComponent(
-      `${proposal.space.name}: ${proposal.title} ${getProposalUrl(proposal)}`
-    );
+    return `${proposal.space.name}: ${proposal.title} ${getProposalUrl(proposal)}`;
   }
 
   function getShareUrl(
     socialNetwork: SocialNetwork,
     type: ShareableType,
-    payload: User | Proposal
+    payload: PayloadType
   ): string {
-    let message = getMessage(type, payload);
+    let message = encodeURIComponent(getMessage(type, payload));
 
     if (socialNetwork === 'lens') {
       message += `&hashtags=${HASH_TAG}`;
