@@ -43,7 +43,7 @@ const cb = computed(() => getCacheHash(props.space.cover));
 
 <style lang="scss" scoped>
 .space-fallback-cover {
-  @apply object-cover w-full h-full;
+  @apply bg-cover bg-center w-full h-full;
 
   &::after {
     @apply absolute h-full w-full pointer-events-none;
