@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { NetworkID } from '@/types';
 
+defineOptions({ inheritAttrs: false });
+
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
