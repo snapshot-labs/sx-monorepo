@@ -20,8 +20,18 @@ const SOCIAL_NETWORKS: {
 ];
 
 export function useSharing() {
+  const router = useRouter();
+
   function getProposalUrl(proposal: Proposal): string {
-    return `https://${window.location.hostname}/#/${proposal.network}:${proposal.space.id}/proposal/${proposal.proposal_id}`;
+    return `${window.location.origin}/${
+      router.resolve({
+        name: 'proposal',
+        params: {
+          space: `${proposal.network}:${proposal.space.id}`,
+          id: proposal.proposal_id
+        }
+      }).href
+    }`;
   }
 
   function getMessage(type: ShareableType, payload: User | Proposal): string {
