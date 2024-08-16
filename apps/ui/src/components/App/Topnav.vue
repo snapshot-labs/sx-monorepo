@@ -93,8 +93,10 @@ watch(
       </button>
       <Breadcrumb
         v-if="showBreadcrumb"
-        class="ml-4"
-        :class="{ 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }"
+        :class="[
+          'ml-4',
+          { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
+        ]"
       >
         <router-link
           :to="{ path: '/' }"

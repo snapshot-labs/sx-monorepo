@@ -15,13 +15,13 @@ const param = computed(() =>
 
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 
-const showSpaceLogo = computed(() =>
+const showSpace = computed(() =>
   ['proposal', 'space'].includes(String(route.matched[0]?.name))
 );
 
 const space = computed(() => {
   if (
-    !showSpaceLogo.value ||
+    !showSpace.value ||
     !resolved.value ||
     !spaceAddress.value ||
     !networkId.value
@@ -40,23 +40,22 @@ const space = computed(() => {
 </script>
 
 <template>
-  <template v-if="showSpaceLogo">
-    <router-link
-      v-if="space"
-      :to="{
-        name: 'space-overview',
-        params: { id: `${networkId}:${spaceAddress}` }
-      }"
-      class="flex item-center space-x-2.5 truncate text-[24px]"
-      v-bind="$attrs"
-    >
-      <SpaceAvatar
-        :space="{ ...space, network: networkId as NetworkID }"
-        :size="36"
-        class="!rounded-[4px] shrink-0"
-      />
-      <span class="truncate" v-text="space.name" />
-    </router-link>
-  </template>
+  <router-link
+    v-if="space"
+    :to="{
+      name: 'space-overview',
+      params: { id: `${networkId}:${spaceAddress}` }
+    }"
+    class="flex item-center space-x-2.5 truncate text-[24px]"
+    v-bind="$attrs"
+  >
+    <SpaceAvatar
+      :space="{ ...space, network: networkId as NetworkID }"
+      :size="36"
+      class="!rounded-[4px] shrink-0"
+    />
+    <span class="truncate" v-text="space.name" />
+  </router-link>
+
   <slot v-else />
 </template>
