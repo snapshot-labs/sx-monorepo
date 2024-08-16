@@ -86,7 +86,7 @@ watch(
     >
       <button
         type="button"
-        class="inline-block text-skin-link cursor-pointer lg:hidden ml-4"
+        class="text-skin-link cursor-pointer lg:hidden ml-4"
         @click="uiStore.toggleSidebar"
       >
         <IH-menu-alt-2 />
