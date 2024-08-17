@@ -29,7 +29,8 @@ const {
   reset
 } = useDelegates(
   props.delegation.apiUrl as string,
-  props.delegation.contractAddress as string
+  props.delegation.contractAddress as string,
+  props.space
 );
 
 const currentNetwork = computed(() => {
@@ -94,9 +95,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <UiLabel label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
-        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-1"
+        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3"
       >
-        <div class="pl-4 w-[60%] flex items-center truncate">Delegatee</div>
+        <div class="pl-4 w-[20%] flex items-center truncate">Delegatee</div>
+        <div class="w-[40%] flex items-center truncate">Statement</div>
         <button
           type="button"
           class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link space-x-1 truncate"
@@ -145,9 +147,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div
             v-for="(delegate, i) in delegates"
             :key="i"
-            class="border-b flex space-x-1"
+            class="border-b flex space-x-3"
           >
-            <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
+            <div class="flex items-center w-[20%] pl-4 py-3 gap-x-3 truncate">
               <UiStamp :id="delegate.user" :size="32" />
               <router-link
                 :to="{
@@ -168,6 +170,13 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   v-text="shorten(delegate.id)"
                 />
               </router-link>
+            </div>
+            <div class="flex items-center w-[40%]">
+              <div
+                v-if="delegate.statement"
+                class="clamped-text text-sm"
+                v-text="delegate.statement.statement.slice(0, 130)"
+              />
             </div>
             <div
               class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"
@@ -205,3 +214,12 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </teleport>
   </template>
 </template>
+
+<style scoped>
+.clamped-text {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+</style>

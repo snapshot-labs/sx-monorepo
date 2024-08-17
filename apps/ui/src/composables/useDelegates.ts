@@ -5,6 +5,7 @@ import {
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
+import { Space, Statement } from '@/types';
 
 type ApiDelegate = {
   id: string;
@@ -18,6 +19,7 @@ export type Delegate = ApiDelegate & {
   name: string | null;
   delegatorsPercentage: number;
   votesPercentage: number;
+  statement?: Statement;
 };
 
 type Governance = {
@@ -82,7 +84,11 @@ function convertUrl(apiUrl: string) {
   return apiUrl;
 }
 
-export function useDelegates(delegationApiUrl: string, governance: string) {
+export function useDelegates(
+  delegationApiUrl: string,
+  governance: string,
+  space: Space
+) {
   const delegates: Ref<Delegate[]> = ref([]);
   const loading = ref(false);
   const loadingMore = ref(false);
@@ -127,7 +133,15 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
         name: names[delegate.user] || null,
         ...delegate,
         delegatorsPercentage,
-        votesPercentage
+        votesPercentage,
+        statement: {
+          about: '',
+          statement: '',
+          space: space.id,
+          network: space.network,
+          discourse: '',
+          status: 'INACTIVE'
+        }
       };
     });
   }
