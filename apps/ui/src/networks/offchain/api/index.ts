@@ -585,9 +585,11 @@ export function createApi(
       }: { data: { statements: Statement[] } } = await apollo.query({
         query: STATEMENTS_QUERY,
         variables: {
-          delegate: userId,
-          network: networkId,
-          space: spaceId
+          where: {
+            delegate: userId,
+            // network: networkId,
+            space: spaceId
+          }
         }
       });
 
@@ -605,7 +607,7 @@ export function createApi(
         variables: {
           where: {
             delegate_in: userIds,
-            network: networkId,
+            // network: networkId,
             space: spaceId
           }
         }
