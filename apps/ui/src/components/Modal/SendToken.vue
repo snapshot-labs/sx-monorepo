@@ -320,9 +320,8 @@ watchEffect(async () => {
             v-text="'max'"
           />
         </div>
-        <div class="w-full">
+        <div v-if="currentToken.price !== 0" class="w-full">
           <UiInputAmount
-            v-if="currentToken.price !== 0"
             :model-value="form.value"
             :definition="{ type: 'number', title: 'USD', examples: ['0'] }"
             @update:model-value="handleValueUpdate"
