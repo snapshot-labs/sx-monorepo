@@ -33,10 +33,9 @@ const hasAppNav = computed(() =>
 const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
-const showBreadcrumb = computed(() =>
-  ['space', 'proposal', 'landing', 'settings'].includes(
-    String(route.matched[0]?.name)
-  )
+
+const showLogo = computed(() =>
+  ['landing', 'settings'].includes(String(route.matched[0]?.name))
 );
 
 async function handleLogin(connector) {
@@ -91,20 +90,21 @@ watch(
       >
         <IH-menu-alt-2 />
       </button>
+      <router-link
+        v-if="showLogo"
+        :to="{ path: '/' }"
+        class="truncate ml-4"
+        style="font-size: 24px"
+      >
+        snapshot
+      </router-link>
       <Breadcrumb
-        v-if="showBreadcrumb"
+        v-else
         :class="[
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
         ]"
       >
-        <router-link
-          :to="{ path: '/' }"
-          class="truncate ml-4"
-          style="font-size: 24px"
-        >
-          snapshot
-        </router-link>
       </Breadcrumb>
     </div>
     <form

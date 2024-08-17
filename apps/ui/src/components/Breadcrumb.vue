@@ -56,6 +56,4 @@ const space = computed(() => {
     />
     <span class="truncate" v-text="space.name" />
   </router-link>
-
-  <slot v-else />
 </template>
