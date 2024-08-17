@@ -90,16 +90,9 @@ watch(
       >
         <IH-menu-alt-2 />
       </button>
-      <router-link
-        v-if="showLogo"
-        :to="{ path: '/' }"
-        class="truncate ml-4"
-        style="font-size: 24px"
-      >
-        snapshot
-      </router-link>
+
       <Breadcrumb
-        v-else
+        v-if="!showLogo"
         :class="[
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
@@ -107,6 +100,14 @@ watch(
       >
       </Breadcrumb>
     </div>
+    <router-link
+      v-if="showLogo"
+      :to="{ path: '/' }"
+      class="truncate grow"
+      style="font-size: 24px"
+    >
+      snapshot
+    </router-link>
     <form
       v-if="searchConfig"
       id="search-form"
