@@ -216,15 +216,20 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     </button>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
-                    <a
-                      href=""
-                      target="_blank"
+                    <router-link
+                      :to="{
+                        name: 'space-user-statement',
+                        params: {
+                          id: `${space.network}:${space.id}`,
+                          user: delegate.user
+                        }
+                      }"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
                     >
                       <IH-user-circle />
                       View profile
-                    </a>
+                    </router-link>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
                     <a
