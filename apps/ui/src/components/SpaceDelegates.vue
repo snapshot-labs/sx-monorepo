@@ -95,9 +95,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <UiLabel label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
-        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3"
+        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
       >
-        <div class="pl-4 w-[20%] flex items-center truncate">Delegatee</div>
+        <div class="w-[20%] flex items-center truncate">Delegatee</div>
         <div class="w-[40%] flex items-center truncate">Statement</div>
         <button
           type="button"
@@ -116,7 +116,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </button>
         <button
           type="button"
-          class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link pr-4 space-x-1 truncate"
+          class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -129,6 +129,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             class="shrink-0"
           />
         </button>
+        <div class="w-[20px]" />
       </div>
       <UiLoading v-if="loading" class="px-4 py-3 block" />
       <template v-else>
@@ -147,9 +148,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div
             v-for="(delegate, i) in delegates"
             :key="i"
-            class="border-b flex space-x-3"
+            class="border-b flex space-x-3 px-4"
           >
-            <div class="flex items-center w-[20%] pl-4 py-3 gap-x-3 truncate">
+            <div class="flex items-center w-[20%] py-3 gap-x-3 truncate">
               <UiStamp :id="delegate.user" :size="32" />
               <router-link
                 :to="{
@@ -191,10 +192,53 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               />
             </div>
             <div
-              class="w-[40%] md:w-[20%] flex flex-col items-end justify-center pr-4 leading-[22px] truncate"
+              class="w-[40%] md:w-[20%] flex flex-col items-end justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
               <div class="text-[17px]" v-text="_p(delegate.votesPercentage)" />
+            </div>
+            <div class="flex items-center justify-center">
+              <UiDropdown>
+                <template #button>
+                  <UiButton class="!p-0 border-0 !h-[auto] bg-transparent">
+                    <IH-dots-horizontal class="text-skin-link" />
+                  </UiButton>
+                </template>
+                <template #items>
+                  <UiDropdownItem v-slot="{ active }">
+                    <button
+                      type="button"
+                      class="flex items-center gap-2"
+                      :class="{ 'opacity-80': active }"
+                    >
+                      <IH-user-add />
+                      Delegate
+                    </button>
+                  </UiDropdownItem>
+                  <UiDropdownItem v-slot="{ active }">
+                    <a
+                      href=""
+                      target="_blank"
+                      class="flex items-center gap-2"
+                      :class="{ 'opacity-80': active }"
+                    >
+                      <IH-user-circle />
+                      View profile
+                    </a>
+                  </UiDropdownItem>
+                  <UiDropdownItem v-slot="{ active }">
+                    <a
+                      href=""
+                      target="_blank"
+                      class="flex items-center gap-2"
+                      :class="{ 'opacity-80': active }"
+                    >
+                      <IH-arrow-sm-right class="-rotate-45" />
+                      See explorer
+                    </a>
+                  </UiDropdownItem>
+                </template>
+              </UiDropdown>
             </div>
           </div>
           <template #loading>
