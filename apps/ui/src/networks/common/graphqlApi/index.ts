@@ -643,6 +643,9 @@ export function createApi(
     },
     loadStatement: async () => {
       return null;
+    },
+    loadStatements: async () => {
+      return [];
     }
   };
 }

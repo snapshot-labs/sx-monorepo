@@ -289,6 +289,11 @@ export type NetworkApi = {
     spaceId: string,
     userId: string
   ): Promise<Statement | null>;
+  loadStatements(
+    networkId: NetworkID,
+    spaceId: string,
+    userIds: string[]
+  ): Promise<Statement[]>;
 };
 
 export type NetworkConstants = {

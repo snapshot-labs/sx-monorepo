@@ -592,6 +592,26 @@ export function createApi(
       });
 
       return statements?.[0] ?? null;
+    },
+    loadStatements: async (
+      networkId: NetworkID,
+      spaceId: string,
+      userIds: string[]
+    ): Promise<Statement[]> => {
+      const {
+        data: { statements }
+      }: { data: { statements: Statement[] } } = await apollo.query({
+        query: STATEMENTS_QUERY,
+        variables: {
+          where: {
+            delegate_in: userIds,
+            network: networkId,
+            space: spaceId
+          }
+        }
+      });
+
+      return statements;
     }
   };
 }

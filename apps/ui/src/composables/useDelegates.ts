@@ -5,6 +5,7 @@ import {
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
+import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement } from '@/types';
 
 type ApiDelegate = {
@@ -72,6 +73,11 @@ const DELEGATES_QUERY = gql`
   }
 `;
 
+const offchainNetworkId = offchainNetworks.filter(network =>
+  enabledNetworks.includes(network)
+)[0];
+const offchainNetwork = getNetwork(offchainNetworkId);
+
 function convertUrl(apiUrl: string) {
   const hostedPattern =
     /https:\/\/thegraph\.com\/hosted-service\/subgraph\/([\w-]+)\/([\w-]+)/;
@@ -112,14 +118,24 @@ export function useDelegates(
     }
   });
 
-  async function formatDelegates(data: {
-    governance: Governance;
-    delegates: ApiDelegate[];
-  }): Promise<Delegate[]> {
+  async function formatDelegates(
+    data: {
+      governance: Governance;
+      delegates: ApiDelegate[];
+    },
+    statements: Statement[]
+  ): Promise<Delegate[]> {
     const governanceData = data.governance;
     const delegatesData = data.delegates;
     const addresses = delegatesData.map(delegate => delegate.user);
     const names = await getNames(addresses);
+    const indexedStatements = statements.reduce(
+      (acc, statement) => {
+        acc[statement.delegate] = statement;
+        return acc;
+      },
+      {} as Record<Statement['delegate'], Statement>
+    );
 
     return delegatesData.map((delegate: ApiDelegate) => {
       const delegatorsPercentage =
@@ -134,14 +150,7 @@ export function useDelegates(
         ...delegate,
         delegatorsPercentage,
         votesPercentage,
-        statement: {
-          about: '',
-          statement: '',
-          space: space.id,
-          network: space.network,
-          discourse: '',
-          status: 'INACTIVE'
-        }
+        statement: indexedStatements[delegate.user]
       };
     });
   }
@@ -154,7 +163,13 @@ export function useDelegates(
       variables: { ...filter, governance: governance.toLowerCase() }
     });
 
-    return formatDelegates(data);
+    const statements = await offchainNetwork.api.loadStatements(
+      space.network,
+      space.id,
+      data.delegates.map(delegate => delegate.user)
+    );
+
+    return formatDelegates(data, statements);
   }
 
   async function _fetch(overwrite: boolean, sortBy: SortOrder) {
