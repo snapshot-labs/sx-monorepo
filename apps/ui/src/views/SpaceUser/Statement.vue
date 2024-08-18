@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareAddresses } from '@/helpers/utils';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement, User } from '@/types';
 
@@ -75,7 +76,7 @@ watchEffect(() =>
             </template>
           </div>
           <UiTooltip
-            v-if="web3.account === userId"
+            v-if="compareAddresses(web3.account, userId)"
             title="Edit"
             class="!absolute right-0"
           >
