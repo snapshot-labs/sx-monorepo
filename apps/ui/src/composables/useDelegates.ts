@@ -5,7 +5,7 @@ import {
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
 import { Space, Statement } from '@/types';
 
 type ApiDelegate = {
@@ -73,10 +73,7 @@ const DELEGATES_QUERY = gql`
   }
 `;
 
-const offchainNetworkId = offchainNetworks.filter(network =>
-  enabledNetworks.includes(network)
-)[0];
-const offchainNetwork = getNetwork(offchainNetworkId);
+const metadataNetwork = getNetwork(metadataNetworkId);
 
 function convertUrl(apiUrl: string) {
   const hostedPattern =
@@ -126,7 +123,7 @@ export function useDelegates(
     const delegatesData = data.delegates;
     const addresses = delegatesData.map(delegate => delegate.user);
     const names = await getNames(addresses);
-    const statements = await offchainNetwork.api.loadStatements(
+    const statements = await metadataNetwork.api.loadStatements(
       space.network,
       space.id,
       addresses
