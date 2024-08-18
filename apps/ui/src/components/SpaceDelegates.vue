@@ -62,7 +62,7 @@ async function handleEndReached() {
   await fetchMore(sortBy.value);
 }
 
-function handleDelegateModalOpen(delegatee?: string) {
+function handleDelegateClick(delegatee?: string) {
   delegateModalOpen.value = true;
   delegateModalState.value = delegatee ? { delegatee } : null;
 }
@@ -93,7 +93,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="handleDelegateModalOpen()">
+        <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
@@ -216,7 +216,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       type="button"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
-                      @click="handleDelegateModalOpen(delegate.user)"
+                      @click="handleDelegateClick(delegate.user)"
                     >
                       <IH-user-add />
                       Delegate
