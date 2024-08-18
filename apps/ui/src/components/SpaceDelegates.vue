@@ -9,6 +9,7 @@ const props = defineProps<{
 }>();
 
 const delegateModalOpen = ref(false);
+const delegateModalState = ref<{ delegatee: string } | null>(null);
 const sortBy = ref(
   'delegatedVotes-desc' as
     | 'delegatedVotes-desc'
@@ -61,6 +62,11 @@ async function handleEndReached() {
   await fetchMore(sortBy.value);
 }
 
+function handleDelegateModalOpen(delegatee?: string) {
+  delegateModalOpen.value = true;
+  delegateModalState.value = delegatee ? { delegatee } : null;
+}
+
 onMounted(() => {
   if (!props.delegation.apiUrl) return;
 
@@ -87,7 +93,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="delegateModalOpen = true">
+        <UiButton class="!px-0 w-[46px]" @click="handleDelegateModalOpen()">
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
@@ -210,6 +216,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       type="button"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
+                      @click="handleDelegateModalOpen(delegate.user)"
                     >
                       <IH-user-add />
                       Delegate
@@ -263,6 +270,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :open="delegateModalOpen"
         :space="space"
         :delegation="delegation"
+        :initial-state="delegateModalState"
         @close="delegateModalOpen = false"
       />
     </teleport>
