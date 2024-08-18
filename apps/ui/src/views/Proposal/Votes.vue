@@ -124,7 +124,7 @@ watch([sortBy, choiceFilter], () => {
   <div
     ref="el"
     data-no-sidebar-swipe
-    class="votes-table-container overflow-x-auto no-scrollbar relative"
+    class="overflow-x-auto h-[calc(100vh-113px)] relative"
   >
     <div
       class="bg-skin-bg sticky top-0 z-40 border-b flex space-x-3 font-medium min-w-[735px]"
@@ -377,8 +377,3 @@ watch([sortBy, choiceFilter], () => {
     />
   </teleport>
 </template>
-<style scoped>
-.votes-table-container {
-  height: calc(100vh - 113px);
-}
-</style>
