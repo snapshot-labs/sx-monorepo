@@ -587,7 +587,7 @@ export function createApi(
         variables: {
           where: {
             delegate: userId,
-            // network: networkId,
+            network: networkId,
             space: spaceId
           }
         }
@@ -607,7 +607,7 @@ export function createApi(
         variables: {
           where: {
             delegate_in: userIds,
-            // network: networkId,
+            network: networkId,
             space: spaceId
           }
         }
