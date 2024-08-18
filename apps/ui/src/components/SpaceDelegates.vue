@@ -233,13 +233,18 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
                     <a
-                      href=""
+                      :href="
+                        currentNetwork.helpers.getExplorerUrl(
+                          delegate.user,
+                          'address'
+                        )
+                      "
                       target="_blank"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
                     >
                       <IH-arrow-sm-right class="-rotate-45" />
-                      See explorer
+                      View on block explorer
                     </a>
                   </UiDropdownItem>
                 </template>
