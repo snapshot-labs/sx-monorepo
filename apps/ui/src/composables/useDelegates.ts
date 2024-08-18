@@ -118,20 +118,22 @@ export function useDelegates(
     }
   });
 
-  async function formatDelegates(
-    data: {
-      governance: Governance;
-      delegates: ApiDelegate[];
-    },
-    statements: Statement[]
-  ): Promise<Delegate[]> {
+  async function formatDelegates(data: {
+    governance: Governance;
+    delegates: ApiDelegate[];
+  }): Promise<Delegate[]> {
     const governanceData = data.governance;
     const delegatesData = data.delegates;
     const addresses = delegatesData.map(delegate => delegate.user);
     const names = await getNames(addresses);
+    const statements = await offchainNetwork.api.loadStatements(
+      space.network,
+      space.id,
+      addresses
+    );
     const indexedStatements = statements.reduce(
       (acc, statement) => {
-        acc[statement.delegate] = statement;
+        acc[statement.delegate.toLowerCase()] = statement;
         return acc;
       },
       {} as Record<Statement['delegate'], Statement>
@@ -150,7 +152,7 @@ export function useDelegates(
         ...delegate,
         delegatorsPercentage,
         votesPercentage,
-        statement: indexedStatements[delegate.user]
+        statement: indexedStatements[delegate.user.toLowerCase()]
       };
     });
   }
@@ -163,13 +165,7 @@ export function useDelegates(
       variables: { ...filter, governance: governance.toLowerCase() }
     });
 
-    const statements = await offchainNetwork.api.loadStatements(
-      space.network,
-      space.id,
-      data.delegates.map(delegate => delegate.user)
-    );
-
-    return formatDelegates(data, statements);
+    return formatDelegates(data);
   }
 
   async function _fetch(overwrite: boolean, sortBy: SortOrder) {
