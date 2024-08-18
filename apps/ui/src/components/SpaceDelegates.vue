@@ -168,7 +168,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
                 <div
                   class="text-[17px] text-skin-text truncate"
-                  v-text="shorten(delegate.id)"
+                  v-text="shorten(delegate.user)"
                 />
               </router-link>
             </div>
