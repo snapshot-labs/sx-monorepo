@@ -157,25 +157,24 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           :loading-more="loadingMore"
           @end-reached="handleEndReached"
         >
-          <div
+          <router-link
             v-for="(delegate, i) in delegates"
             :key="i"
+            :to="{
+              name: 'space-user-statement',
+              params: {
+                id: `${space.network}:${space.id}`,
+                user: delegate.user
+              }
+            }"
             class="border-b flex space-x-3 px-4"
           >
             <div
-              class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 truncate"
+              class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
             >
               <UiStamp :id="delegate.user" :size="32" />
-              <router-link
-                :to="{
-                  name: 'space-user-statement',
-                  params: {
-                    id: `${space.network}:${space.id}`,
-                    user: delegate.user
-                  }
-                }"
-                class="overflow-hidden leading-[22px]"
-              >
+
+              <div class="flex flex-col truncate">
                 <h4
                   class="text-skin-link truncate"
                   v-text="delegate.name || shorten(delegate.user)"
@@ -184,7 +183,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   class="text-[17px] text-skin-text truncate"
                   v-text="shorten(delegate.user)"
                 />
-              </router-link>
+              </div>
             </div>
             <div
               class="hidden sm:flex items-center grow text-[17px] overflow-hidden leading-[22px] text-skin-heading"
@@ -267,7 +266,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 </template>
               </UiDropdown>
             </div>
-          </div>
+          </router-link>
           <template #loading>
             <UiLoading class="px-4 py-3 block" />
           </template>
