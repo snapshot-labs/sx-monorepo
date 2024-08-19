@@ -136,7 +136,7 @@ watch(
           >
             <UiStamp :id="web3.account" :size="18" />
             <span
-              class="hidden sm:block"
+              class="hidden sm:block truncate max-w-[120px]"
               v-text="web3.name || shorten(web3.account)"
             />
           </span>
