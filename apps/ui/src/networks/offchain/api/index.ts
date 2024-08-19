@@ -42,7 +42,7 @@ import {
   USER_VOTES_QUERY,
   VOTES_QUERY
 } from './queries';
-import { ApiProposal, ApiSpace, ApiVote } from './types';
+import { ApiProposal, ApiRelatedSpace, ApiSpace, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
@@ -97,7 +97,7 @@ function formatSpace(
     validationParams.addresses = space.members.concat(space.admins);
   }
 
-  function formatRelatedSpace(space: any) {
+  function formatRelatedSpace(space: ApiRelatedSpace) {
     return {
       id: space.id,
       name: space.name,

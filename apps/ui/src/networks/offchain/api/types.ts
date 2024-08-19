@@ -1,6 +1,6 @@
 import { NetworkID, Privacy, VoteType } from '@/types';
 
-type ApiRelatedSpace = {
+export type ApiRelatedSpace = {
   id: string;
   name: string;
   network: NetworkID;
