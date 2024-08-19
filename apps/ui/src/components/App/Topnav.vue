@@ -1,14 +1,25 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { shorten } from '@/helpers/utils';
+import { getCacheHash, shorten } from '@/helpers/utils';
 
 const route = useRoute();
 const router = useRouter();
+const usersStore = useUsersStore();
 const auth = getInstance();
 const uiStore = useUiStore();
 const { modalAccountOpen } = useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
+
+const user = computed(
+  () =>
+    usersStore.getUser(web3.value.account) || {
+      id: web3.value.account,
+      name: web3.value.name,
+      avatar: undefined
+    }
+);
+const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const SEARCH_CONFIG = {
   space: {
@@ -134,10 +145,10 @@ watch(
             v-if="auth.isAuthenticated.value"
             class="sm:flex items-center space-x-2"
           >
-            <UiStamp :id="web3.account" :size="18" />
+            <UiStamp :id="user.id" :size="18" :cb="cb" />
             <span
               class="hidden sm:block truncate max-w-[120px]"
-              v-text="web3.name || shorten(web3.account)"
+              v-text="user.name || shorten(user.id)"
             />
           </span>
           <template v-else>
