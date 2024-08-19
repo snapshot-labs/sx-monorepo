@@ -11,16 +11,6 @@ const { modalAccountOpen } = useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
 
-const user = computed(
-  () =>
-    usersStore.getUser(web3.value.account) || {
-      id: web3.value.account,
-      name: web3.value.name,
-      avatar: undefined
-    }
-);
-const cb = computed(() => getCacheHash(user.value?.avatar));
-
 const SEARCH_CONFIG = {
   space: {
     defaultRoute: 'space-proposals',
@@ -37,6 +27,16 @@ const SEARCH_CONFIG = {
 const loading = ref(false);
 const searchInput = ref();
 const searchValue = ref('');
+
+const user = computed(
+  () =>
+    usersStore.getUser(web3.value.account) || {
+      id: web3.value.account,
+      name: web3.value.name,
+      avatar: undefined
+    }
+);
+const cb = computed(() => getCacheHash(user.value.avatar));
 
 const hasAppNav = computed(() =>
   ['my', 'settings'].includes(String(route.matched[0]?.name))
