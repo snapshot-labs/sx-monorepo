@@ -122,12 +122,11 @@ export function useDelegates(
     const governanceData = data.governance;
     const delegatesData = data.delegates;
     const addresses = delegatesData.map(delegate => delegate.user);
-    const names = await getNames(addresses);
-    const statements = await metadataNetwork.api.loadStatements(
-      space.network,
-      space.id,
-      addresses
-    );
+
+    const [names, statements] = await Promise.all([
+      getNames(addresses),
+      metadataNetwork.api.loadStatements(space.network, space.id, addresses)
+    ]);
     const indexedStatements = statements.reduce(
       (acc, statement) => {
         acc[statement.delegate.toLowerCase()] = statement;
