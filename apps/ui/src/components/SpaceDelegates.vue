@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import removeMarkdown from 'remove-markdown';
 import { _n, _p, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space, SpaceMetadataDelegation } from '@/types';
@@ -191,7 +192,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               <div
                 v-if="delegate.statement"
                 class="clamped-text"
-                v-text="delegate.statement.statement.slice(0, 130)"
+                v-text="
+                  removeMarkdown(delegate.statement.statement).slice(0, 130)
+                "
               />
             </div>
             <div
