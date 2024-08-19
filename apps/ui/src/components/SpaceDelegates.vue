@@ -103,14 +103,20 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       <div
         class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
       >
-        <div class="w-[20%] flex items-center truncate">Delegatee</div>
-        <div class="w-[40%] flex items-center truncate">Statement</div>
+        <div
+          class="w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
+        >
+          <span class="truncate">Delegatee</span>
+        </div>
+        <div class="hidden sm:flex grow items-center truncate">
+          <span class="truncate">Statement</span>
+        </div>
         <button
           type="button"
-          class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link space-x-1 truncate"
+          class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
-          <span>Delegators</span>
+          <span class="truncate">Delegators</span>
           <IH-arrow-sm-down
             v-if="sortBy === 'tokenHoldersRepresentedAmount-desc'"
             class="shrink-0"
@@ -122,7 +128,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </button>
         <button
           type="button"
-          class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link space-x-1 truncate"
+          class="w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -156,7 +162,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             :key="i"
             class="border-b flex space-x-3 px-4"
           >
-            <div class="flex items-center w-[20%] py-3 gap-x-3 truncate">
+            <div
+              class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 truncate"
+            >
               <UiStamp :id="delegate.user" :size="32" />
               <router-link
                 :to="{
@@ -178,15 +186,17 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
               </router-link>
             </div>
-            <div class="flex items-center w-[40%]">
+            <div
+              class="hidden sm:flex items-center grow text-[17px] overflow-hidden leading-[22px] text-skin-heading"
+            >
               <div
                 v-if="delegate.statement"
-                class="clamped-text text-sm"
+                class="clamped-text"
                 v-text="delegate.statement.statement.slice(0, 130)"
               />
             </div>
             <div
-              class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"
+              class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
             >
               <h4
                 class="text-skin-link"
@@ -198,7 +208,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               />
             </div>
             <div
-              class="w-[40%] md:w-[20%] flex flex-col items-end justify-center leading-[22px] truncate"
+              class="w-[150px] flex flex-col sm:shrink-0 items-end justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
               <div class="text-[17px]" v-text="_p(delegate.votesPercentage)" />
