@@ -99,6 +99,7 @@ export type RelatedSpace = {
   network: NetworkID;
   avatar: string;
   cover: string;
+  about?: string;
   proposal_count: number;
   vote_count: number;
   turbo: boolean;

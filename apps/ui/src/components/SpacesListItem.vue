@@ -1,23 +1,11 @@
 <script lang="ts" setup>
 import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
-import { NetworkID } from '@/types';
+import { RelatedSpace, Space } from '@/types';
 
 const props = withDefaults(
   defineProps<{
-    space: {
-      id: string;
-      name: string;
-      about?: string;
-      avatar: string;
-      cover: string;
-      proposal_count: number;
-      vote_count: number;
-      turbo: boolean;
-      verified: boolean;
-      network: NetworkID;
-      snapshot_chain_id?: number;
-    };
+    space: Space | RelatedSpace;
     showAbout?: boolean;
   }>(),
   { showAbout: true }
