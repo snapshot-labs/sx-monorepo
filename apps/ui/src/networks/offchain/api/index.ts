@@ -21,6 +21,7 @@ import {
   Proposal,
   ProposalExecution,
   ProposalState,
+  RelatedSpace,
   Space,
   SpaceMetadataTreasury,
   Statement,
