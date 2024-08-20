@@ -183,7 +183,7 @@ watch([sortBy, choiceFilter], () => {
       <div class="min-w-[44px] lg:w-[60px]" />
     </div>
   </div>
-  <div ref="el" class="overflow-x-auto">
+  <div ref="el" class="overflow-x-auto no-scrollbar">
     <div data-no-sidebar-swipe class="min-w-[735px]">
       <UiLoading v-if="!loaded" class="px-4 py-3 block absolute" />
       <template v-else>
