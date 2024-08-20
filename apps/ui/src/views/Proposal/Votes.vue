@@ -121,68 +121,70 @@ watch([sortBy, choiceFilter], () => {
 </script>
 
 <template>
-  <div ref="el" class="overflow-x-auto h-[calc(100vh-113px)]">
-    <div data-no-sidebar-swipe class="min-w-[735px]">
-      <div
-        class="bg-skin-bg sticky top-0 z-40 border-b flex space-x-3 font-medium"
-      >
-        <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
-        <div class="grow w-[40%]">
-          <template v-if="offchainNetworks.includes(proposal.network)"
-            >Choice</template
-          >
-          <UiSelectDropdown
-            v-else
-            v-model="choiceFilter"
-            class="font-normal"
-            title="Choice"
-            gap="12px"
-            placement="left"
-            :items="[
-              { key: 'any', label: 'Any' },
-              { key: 'for', label: 'For', indicator: 'bg-skin-success' },
-              {
-                key: 'against',
-                label: 'Against',
-                indicator: 'bg-skin-danger'
-              },
-              { key: 'abstain', label: 'Abstain', indicator: 'bg-skin-text' }
-            ]"
-          >
-            <template #button>
-              <button
-                class="flex items-center hover:text-skin-link space-x-2"
-                type="button"
-              >
-                <span class="truncate">Choice</span>
-                <IH-adjustments-vertical class="shrink-0" />
-              </button>
-            </template>
-          </UiSelectDropdown>
-        </div>
-        <button
-          type="button"
-          class="flex max-w-[144px] w-[144px] items-center hover:text-skin-link space-x-1 truncate"
-          @click="handleSortChange('created')"
+  <div class="bg-skin-bg sticky top-[113px] z-40 border-b overflow-hidden">
+    <div
+      class="flex space-x-3 font-medium min-w-[735px]"
+      :style="{
+        marginLeft: `-${x}px`
+      }"
+    >
+      <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
+      <div class="grow w-[40%]">
+        <template v-if="offchainNetworks.includes(proposal.network)"
+          >Choice</template
         >
-          <span>Date</span>
-          <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
-          <IH-arrow-sm-up
-            v-else-if="sortBy === 'created-asc'"
-            class="shrink-0"
-          />
-        </button>
-        <button
-          type="button"
-          class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link space-x-1 truncate"
-          @click="handleSortChange('vp')"
+        <UiSelectDropdown
+          v-else
+          v-model="choiceFilter"
+          class="font-normal"
+          title="Choice"
+          gap="12px"
+          placement="left"
+          :items="[
+            { key: 'any', label: 'Any' },
+            { key: 'for', label: 'For', indicator: 'bg-skin-success' },
+            {
+              key: 'against',
+              label: 'Against',
+              indicator: 'bg-skin-danger'
+            },
+            { key: 'abstain', label: 'Abstain', indicator: 'bg-skin-text' }
+          ]"
         >
-          <span class="truncate">Voting power</span>
-          <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="shrink-0" />
-          <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="shrink-0" />
-        </button>
-        <div class="min-w-[44px] lg:w-[60px]" />
+          <template #button>
+            <button
+              class="flex items-center hover:text-skin-link space-x-2"
+              type="button"
+            >
+              <span class="truncate">Choice</span>
+              <IH-adjustments-vertical class="shrink-0" />
+            </button>
+          </template>
+        </UiSelectDropdown>
       </div>
+      <button
+        type="button"
+        class="flex max-w-[144px] w-[144px] items-center hover:text-skin-link space-x-1 truncate"
+        @click="handleSortChange('created')"
+      >
+        <span>Date</span>
+        <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
+        <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
+      </button>
+      <button
+        type="button"
+        class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link space-x-1 truncate"
+        @click="handleSortChange('vp')"
+      >
+        <span class="truncate">Voting power</span>
+        <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="shrink-0" />
+        <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="shrink-0" />
+      </button>
+      <div class="min-w-[44px] lg:w-[60px]" />
+    </div>
+  </div>
+  <div ref="el" class="overflow-x-auto">
+    <div data-no-sidebar-swipe class="min-w-[735px]">
       <UiLoading v-if="!loaded" class="px-4 py-3 block absolute" />
       <template v-else>
         <div
@@ -192,6 +194,7 @@ watch([sortBy, choiceFilter], () => {
           <IH-exclamation-circle class="inline-block" />
           <span>There are no votes here.</span>
         </div>
+
         <UiContainerInfiniteScroll
           :loading-more="loadingMore"
           @end-reached="handleEndReached"
