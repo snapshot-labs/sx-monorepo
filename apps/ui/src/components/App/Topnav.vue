@@ -67,10 +67,10 @@ watch(
 
 <template>
   <nav
+    v-if="route.name !== 'landing'"
     class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px]"
     :class="{
-      'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen,
-      '!left-0': route.name === 'landing'
+      'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
     }"
   >
     <div

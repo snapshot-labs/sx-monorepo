@@ -249,14 +249,12 @@ input:placeholder-shown {
 
 .blocks {
   background-repeat: repeat-x;
-  background-position: top -80px center;
-  background-image: url('@/assets/blocks-light.svg');
-  animation: mymove 60s infinite;
-  animation-timing-function: linear;
+  background-position: top center;
+  background-image: url('@/assets/blocks-x-light.svg');
 }
 
 .dark .blocks {
-  background-image: url('@/assets/blocks-dark.svg');
+  background-image: url('@/assets/blocks-x.svg');
 }
 
 .banner {
