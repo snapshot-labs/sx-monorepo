@@ -97,7 +97,7 @@ function formatSpace(
     validationParams.addresses = space.members.concat(space.admins);
   }
 
-  function formatRelatedSpace(space: ApiRelatedSpace) {
+  function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
     return {
       id: space.id,
       name: space.name,
