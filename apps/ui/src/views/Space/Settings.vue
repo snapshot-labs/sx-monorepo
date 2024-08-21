@@ -45,6 +45,7 @@ const { setTitle } = useTitle();
 const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
+const tabsRef = ref<HTMLElement | null>(null);
 const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
@@ -59,6 +60,8 @@ const votingDelay: Ref<number | null> = ref(null);
 const minVotingPeriod: Ref<number | null> = ref(null);
 const maxVotingPeriod: Ref<number | null> = ref(null);
 const controller = ref(props.space.controller);
+
+const canScrollTabs = ref({ canScrollLeft: false, canScrollRight: false });
 
 const network = computed(() => getNetwork(props.space.network));
 const isController = computed(() =>
@@ -471,6 +474,35 @@ function handleControllerSave(value: string) {
   executeFn.value = saveController;
 }
 
+function handleScroll(target: HTMLElement) {
+  canScrollTabs.value = {
+    canScrollLeft: target.scrollLeft > 0,
+    canScrollRight: target.scrollLeft < target.scrollWidth - target.clientWidth
+  };
+}
+
+function scroll(direction: 'left' | 'right') {
+  if (!tabsRef.value) return;
+
+  console.log('scroll', direction);
+
+  tabsRef.value.scrollBy({
+    left: direction === 'right' ? 200 : -200,
+    behavior: 'smooth'
+  });
+}
+
+onMounted(() => {
+  if (!tabsRef.value) return;
+
+  handleScroll(tabsRef.value);
+
+  new ResizeObserver(() => {
+    if (!tabsRef.value) return;
+    handleScroll(tabsRef.value);
+  }).observe(tabsRef.value);
+});
+
 watch(
   () => props.space.controller,
   () => {
@@ -498,17 +530,39 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <span>Settings are only accessible for onchain spaces.</span>
   </div>
   <template v-else>
-    <div class="overflow-auto z-40 sticky top-[71px] lg:top-[72px]">
-      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <button
-          v-for="tab in TABS"
-          :key="tab.id"
-          type="button"
-          @click="activeTab = tab.id"
-        >
-          <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-        </button>
+    <div class="relative">
+      <button
+        v-if="canScrollTabs.canScrollLeft"
+        type="button"
+        class="bg-gradient-to-r from-skin-bg via-40% via-skin-bg/95 left-0 top-[1px] bottom-[1px] w-[108px] absolute z-50 flex items-center justify-start pl-4"
+        @click="scroll('left')"
+      >
+        <IH-chevron-left />
+      </button>
+      <div
+        ref="tabsRef"
+        class="overflow-auto no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+        @scroll="e => e.target && handleScroll(e.target as HTMLElement)"
+      >
+        <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+          <button
+            v-for="tab in TABS"
+            :key="tab.id"
+            type="button"
+            @click="activeTab = tab.id"
+          >
+            <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
+          </button>
+        </div>
       </div>
+      <button
+        v-if="canScrollTabs.canScrollRight"
+        type="button"
+        class="bg-gradient-to-l from-skin-bg via-40% via-skin-bg/95 right-0 top-[1px] bottom-[1px] w-[108px] absolute z-50 flex items-center justify-end pr-4"
+        @click="scroll('right')"
+      >
+        <IH-chevron-right />
+      </button>
     </div>
     <div class="space-y-4 mx-4 pt-4">
       <UiLoading v-if="loading" />
