@@ -171,70 +171,58 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   user: delegate.user
                 }
               }"
-              class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
+              class="flex w-full"
             >
-              <UiStamp :id="delegate.user" :size="32" />
-
-              <div class="flex flex-col truncate">
-                <h4
-                  class="text-skin-link truncate"
-                  v-text="delegate.name || shorten(delegate.user)"
-                />
+              <div
+                class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
+              >
+                <UiStamp :id="delegate.user" :size="32" />
+                <div class="flex flex-col truncate">
+                  <h4
+                    class="text-skin-link truncate"
+                    v-text="delegate.name || shorten(delegate.user)"
+                  />
+                  <div
+                    class="text-[17px] text-skin-text truncate"
+                    v-text="shorten(delegate.user)"
+                  />
+                </div>
+              </div>
+              <div
+                class="hidden sm:flex items-center grow text-[17px] overflow-hidden leading-[22px] text-skin-heading"
+              >
                 <div
-                  class="text-[17px] text-skin-text truncate"
-                  v-text="shorten(delegate.user)"
+                  v-if="delegate.statement"
+                  class="clamped-text"
+                  v-text="
+                    removeMarkdown(delegate.statement.statement).slice(0, 130)
+                  "
                 />
               </div>
-            </router-link>
-            <router-link
-              :to="{
-                name: 'space-user-statement',
-                params: {
-                  id: `${space.network}:${space.id}`,
-                  user: delegate.user
-                }
-              }"
-              class="hidden sm:flex items-center grow text-[17px] overflow-hidden leading-[22px] text-skin-heading"
-            >
               <div
-                v-if="delegate.statement"
-                class="clamped-text"
-                v-text="
-                  removeMarkdown(delegate.statement.statement).slice(0, 130)
-                "
-              />
-            </router-link>
-            <router-link
-              :to="{
-                name: 'space-user-statement',
-                params: {
-                  id: `${space.network}:${space.id}`,
-                  user: delegate.user
-                }
-              }"
-              class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
-            >
-              <h4
-                class="text-skin-link"
-                v-text="_n(delegate.tokenHoldersRepresentedAmount)"
-              />
+                class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
+              >
+                <h4
+                  class="text-skin-link"
+                  v-text="_n(delegate.tokenHoldersRepresentedAmount)"
+                />
+                <div
+                  class="text-[17px]"
+                  v-text="_p(delegate.delegatorsPercentage)"
+                />
+              </div>
               <div
-                class="text-[17px]"
-                v-text="_p(delegate.delegatorsPercentage)"
-              />
-            </router-link>
-            <router-link
-              :to="{
-                name: 'space-user-statement',
-                params: {
-                  id: `${space.network}:${space.id}`,
-                  user: delegate.user
-                }
-              }"
-              class="w-[150px] flex flex-col sm:shrink-0 items-end justify-center leading-[22px] truncate"
-            >
-              <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
-              <div class="text-[17px]" v-text="_p(delegate.votesPercentage)" />
+                class="w-[150px] flex flex-col sm:shrink-0 items-end justify-center leading-[22px] truncate"
+              >
+                <h4
+                  class="text-skin-link"
+                  v-text="_n(delegate.delegatedVotes)"
+                />
+                <div
+                  class="text-[17px]"
+                  v-text="_p(delegate.votesPercentage)"
+                />
+              </div>
             </router-link>
             <div class="flex items-center justify-center">
               <UiDropdown>
