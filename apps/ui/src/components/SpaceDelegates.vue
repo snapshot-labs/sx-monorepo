@@ -158,19 +158,19 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           :loading-more="loadingMore"
           @end-reached="handleEndReached"
         >
-          <router-link
+          <div
             v-for="(delegate, i) in delegates"
             :key="i"
-            :to="{
-              name: 'space-user-statement',
-              params: {
-                id: `${space.network}:${space.id}`,
-                user: delegate.user
-              }
-            }"
             class="border-b flex space-x-3 px-4"
           >
-            <div
+            <router-link
+              :to="{
+                name: 'space-user-statement',
+                params: {
+                  id: `${space.network}:${space.id}`,
+                  user: delegate.user
+                }
+              }"
               class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
             >
               <UiStamp :id="delegate.user" :size="32" />
@@ -185,8 +185,15 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   v-text="shorten(delegate.user)"
                 />
               </div>
-            </div>
-            <div
+            </router-link>
+            <router-link
+              :to="{
+                name: 'space-user-statement',
+                params: {
+                  id: `${space.network}:${space.id}`,
+                  user: delegate.user
+                }
+              }"
               class="hidden sm:flex items-center grow text-[17px] overflow-hidden leading-[22px] text-skin-heading"
             >
               <div
@@ -196,8 +203,15 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   removeMarkdown(delegate.statement.statement).slice(0, 130)
                 "
               />
-            </div>
-            <div
+            </router-link>
+            <router-link
+              :to="{
+                name: 'space-user-statement',
+                params: {
+                  id: `${space.network}:${space.id}`,
+                  user: delegate.user
+                }
+              }"
               class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
             >
               <h4
@@ -208,13 +222,20 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 class="text-[17px]"
                 v-text="_p(delegate.delegatorsPercentage)"
               />
-            </div>
-            <div
+            </router-link>
+            <router-link
+              :to="{
+                name: 'space-user-statement',
+                params: {
+                  id: `${space.network}:${space.id}`,
+                  user: delegate.user
+                }
+              }"
               class="w-[150px] flex flex-col sm:shrink-0 items-end justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
               <div class="text-[17px]" v-text="_p(delegate.votesPercentage)" />
-            </div>
+            </router-link>
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
@@ -269,7 +290,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 </template>
               </UiDropdown>
             </div>
-          </router-link>
+          </div>
           <template #loading>
             <UiLoading class="px-4 py-3 block" />
           </template>
