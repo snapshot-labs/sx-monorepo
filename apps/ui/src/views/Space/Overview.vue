@@ -148,7 +148,7 @@ watchEffect(() => setTitle(props.space.name));
         <div
           class="bg-gradient-to-r from-skin-bg left-0 top-0 bottom-0 w-3 absolute z-10 pointer-events-none"
         />
-        <div class="overflow-x-scroll no-scrollbar">
+        <div class="overflow-x-auto no-scrollbar flex">
           <div class="px-4 py-3 flex gap-3" data-no-sidebar-swipe>
             <SpacesListItem
               v-for="child in space.children"
