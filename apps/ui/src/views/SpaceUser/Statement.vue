@@ -2,6 +2,9 @@
 import { compareAddresses, stripHtmlTags } from '@/helpers/utils';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement, User } from '@/types';
+import ICAgora from '~icons/c/agora';
+import ICKarmahq from '~icons/c/karmahq';
+import ICTally from '~icons/c/tally';
 
 const offchainNetworkId = offchainNetworks.filter(network =>
   enabledNetworks.includes(network)
@@ -20,6 +23,19 @@ const statement = ref<Statement | null>(null);
 
 const userId = computed(() => route.params.user as string);
 
+const sourceIcon = computed(() => {
+  switch (statement.value?.source) {
+    case 'agora':
+      return ICAgora;
+    case 'karmahq':
+      return ICKarmahq;
+    case 'tally':
+      return ICTally;
+    default:
+      null;
+  }
+});
+
 async function loadStatement() {
   loading.value = true;
 
@@ -34,7 +50,8 @@ async function loadStatement() {
       about: '',
       statement: '',
       status: 'INACTIVE',
-      discourse: ''
+      discourse: '',
+      source: null
     };
   } finally {
     loading.value = false;
@@ -85,11 +102,17 @@ watchEffect(() =>
             </UiButton>
           </UiTooltip>
         </div>
-        <UiMarkdown
-          v-if="statement.statement"
-          class="text-skin-heading max-w-[592px]"
-          :body="stripHtmlTags(statement.statement)"
-        />
+
+        <div v-if="statement.statement" class="flex flex-col gap-3">
+          <UiMarkdown
+            class="text-skin-heading max-w-[592px]"
+            :body="stripHtmlTags(statement.statement)"
+          />
+          <div if="statement.source">
+            <h4 class="eyebrow text-skin-text mb-2">Source</h4>
+            <component :is="sourceIcon" class="h-[20px] w-auto" />
+          </div>
+        </div>
         <div v-else class="flex items-center space-x-2">
           <IH-exclamation-circle class="inline-block shrink-0" />
           <span>This profile does not have statement.</span>

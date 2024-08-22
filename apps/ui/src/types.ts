@@ -247,6 +247,7 @@ export type Statement = {
   statement: string;
   discourse: string;
   status: 'ACTIVE' | 'INACTIVE';
+  source: string | null;
 };
 
 export type Follow = {
