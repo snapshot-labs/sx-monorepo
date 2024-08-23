@@ -67,8 +67,8 @@ watchEffect(() =>
         v-model="statement"
         @close="isEditMode = false"
       />
-      <div v-else>
-        <div class="relative mb-2.5">
+      <div v-else class="flex flex-col space-y-2.5">
+        <div class="relative">
           <div
             class="inline-block border rounded-full pl-2 pr-[10px] pb-0.5 text-skin-heading"
           >
@@ -95,21 +95,23 @@ watchEffect(() =>
             </UiButton>
           </UiTooltip>
         </div>
-
-        <div v-if="statement.statement" class="flex flex-col gap-3">
-          <UiMarkdown
-            class="text-skin-heading max-w-[592px]"
-            :body="stripHtmlTags(statement.statement)"
-          />
-          <div v-if="statement.source">
-            <h4 class="eyebrow text-skin-text mb-2">Source</h4>
-            <a :href="SOURCE_ICONS[statement.source].link" target="_blank">
-              <component
-                :is="SOURCE_ICONS[statement.source].icon"
-                class="max-h-[25px] max-w-[85px] w-auto text-skin-link"
-              />
-            </a>
-          </div>
+        <UiMarkdown
+          v-if="statement.statement"
+          class="text-skin-heading max-w-[592px]"
+          :body="stripHtmlTags(statement.statement)"
+        />
+        <div v-if="statement.source">
+          <h4 class="eyebrow text-skin-text mb-2">Source</h4>
+          <a
+            :href="SOURCE_ICONS[statement.source].link"
+            target="_blank"
+            class="inline-block"
+          >
+            <component
+              :is="SOURCE_ICONS[statement.source].icon"
+              class="max-h-[25px] max-w-[85px] w-auto text-skin-link"
+            />
+          </a>
         </div>
         <div v-else class="flex items-center space-x-2">
           <IH-exclamation-circle class="inline-block shrink-0" />
