@@ -109,6 +109,10 @@ const executionStrategies = computed(() => {
 });
 
 const error = computed(() => {
+  if (Object.values(formErrors.value).length > 0) {
+    return 'Space profile is invalid';
+  }
+
   if (!validationStrategy.value) {
     return 'Proposal validation strategy is required';
   }
