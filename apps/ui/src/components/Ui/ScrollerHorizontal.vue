@@ -13,7 +13,8 @@ const canScrollTabs = ref({ canScrollLeft: false, canScrollRight: false });
 function handleScroll(target: HTMLElement) {
   canScrollTabs.value = {
     canScrollLeft: target.scrollLeft > 0,
-    canScrollRight: target.scrollLeft < target.scrollWidth - target.clientWidth
+    canScrollRight:
+      Math.ceil(target.scrollLeft) < target.scrollWidth - target.clientWidth
   };
 }
 
