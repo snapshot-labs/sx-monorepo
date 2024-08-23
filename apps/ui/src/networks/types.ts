@@ -222,6 +222,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   updateSettings(
     web3: Web3Provider,
     space: Space,
+    metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],

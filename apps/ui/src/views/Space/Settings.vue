@@ -1,15 +1,27 @@
 <script setup lang="ts">
 import objectHash from 'object-hash';
-import { _d, compareAddresses, shorten } from '@/helpers/utils';
+import { _d, clone, compareAddresses, shorten } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import {
   GeneratedMetadata,
   StrategyConfig,
   StrategyTemplate
 } from '@/networks/types';
-import { Space, StrategyParsedMetadata } from '@/types';
+import { Space, SpaceMetadata, StrategyParsedMetadata } from '@/types';
 
 const TABS = [
+  {
+    id: 'profile',
+    name: 'Profile'
+  },
+  {
+    id: 'delegations',
+    name: 'Delegations'
+  },
+  {
+    id: 'treasuries',
+    name: 'Treasuries'
+  },
   {
     id: 'authenticators',
     name: 'Authenticators'
@@ -36,6 +48,20 @@ const TABS = [
   }
 ] as const;
 
+const DEFAULT_FORM_STATE: SpaceMetadata = {
+  name: '',
+  avatar: '',
+  cover: '',
+  description: '',
+  externalUrl: '',
+  twitter: '',
+  github: '',
+  discord: '',
+  votingPowerSymbol: '',
+  treasuries: [],
+  delegations: []
+};
+
 const props = defineProps<{ space: Space }>();
 
 const { updateSettings, transferOwnership } = useActions();
@@ -45,13 +71,15 @@ const { setTitle } = useTitle();
 const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
-const activeTab: Ref<(typeof TABS)[number]['id']> = ref('authenticators');
+const activeTab: Ref<(typeof TABS)[number]['id']> = ref('profile');
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const isModified = ref(false);
 const loading = ref(true);
 const saving = ref(false);
 const initialValidationStrategyObjectHash = ref(null as string | null);
+const form: Ref<SpaceMetadata> = ref(clone(DEFAULT_FORM_STATE));
+const formErrors = ref({} as Record<string, string>);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy = ref(null as StrategyConfig | null);
 const votingStrategies = ref([] as StrategyConfig[]);
@@ -103,6 +131,12 @@ watchEffect(async () => {
 
   if (loading.value) {
     isModified.value = false;
+    return;
+  }
+
+  const initialForm = getInitialForm(props.space);
+  if (objectHash(form.value) !== objectHash(initialForm)) {
+    isModified.value = true;
     return;
   }
 
@@ -382,7 +416,25 @@ function getIsMaxVotingPeriodValid(value: number) {
   );
 }
 
+function getInitialForm(space: Space) {
+  return {
+    name: space.name,
+    avatar: space.avatar,
+    cover: space.cover,
+    description: space.about || '',
+    externalUrl: space.external_url,
+    github: space.github,
+    discord: space.discord,
+    twitter: space.twitter,
+    votingPowerSymbol: space.voting_power_symbol,
+    treasuries: space.treasuries,
+    delegations: space.delegations
+  };
+}
+
 async function reset() {
+  form.value = getInitialForm(props.space);
+
   const authenticatorsValue = await getInitialStrategiesConfig(
     props.space.authenticators,
     network.value.constants.EDITOR_AUTHENTICATORS
@@ -436,6 +488,7 @@ async function save() {
 
   return updateSettings(
     props.space,
+    form.value,
     authenticatorsToAdd,
     authenticatorsToRemove,
     strategiesToAdd,
@@ -470,6 +523,14 @@ function handleControllerSave(value: string) {
   saving.value = true;
   executeFn.value = saveController;
 }
+
+watch(
+  () => props.space,
+  space => {
+    form.value = getInitialForm(space);
+  },
+  { immediate: true }
+);
 
 watch(
   () => props.space.controller,
@@ -513,6 +574,38 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <div class="space-y-4 mx-4 pt-4">
       <UiLoading v-if="loading" />
       <template v-else>
+        <UiContainerSettings
+          v-if="activeTab === 'profile'"
+          title="Profile"
+          description="Those settings are used to customize the appearance of the space."
+        >
+          <FormSpaceProfile
+            :id="space.id"
+            :space="space"
+            :form="form"
+            @errors="v => (formErrors = v)"
+          />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-if="activeTab === 'delegations'"
+          title="Delegations"
+          description="Delegations allow users to delegate their voting power to other users."
+        >
+          <FormSpaceDelegations
+            :delegations-value="form.delegations"
+            @delegations="v => (form.delegations = v)"
+          />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-if="activeTab === 'treasuries'"
+          title="Treasuries"
+          description="Treasuries are used to manage the funds of the space."
+        >
+          <FormSpaceTreasuries
+            :treasuries-value="form.treasuries"
+            @treasuries="v => (form.treasuries = v)"
+          />
+        </UiContainerSettings>
         <FormStrategies
           v-if="activeTab === 'authenticators'"
           v-model="authenticators"
@@ -541,13 +634,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           title="Voting strategies"
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
         />
-        <div v-else-if="activeTab === 'voting'" class="mb-4">
-          <h3 class="text-md leading-6">Voting</h3>
-          <span class="mb-4 inline-block">
-            Set the proposal delay, minimum duration, which is the shortest time
-            needed to execute a proposal if quorum passes, and maximum duration
-            for voting.
-          </span>
+        <UiContainerSettings
+          v-else-if="activeTab === 'voting'"
+          title="Voting"
+          description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
+        >
           <h4 class="eyebrow mb-2 font-medium">Voting</h4>
           <div class="space-y-3">
             <div>
@@ -635,13 +726,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
               </UiEditable>
             </div>
           </div>
-        </div>
-        <div v-else-if="activeTab === 'execution'" class="mb-4">
-          <h3 class="text-md leading-6">Execution(s)</h3>
-          <span class="mb-4 inline-block">
-            Execution strategies determine if a proposal passes and how it is
-            executed. This section is currently read-only.
-          </span>
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else-if="activeTab === 'execution'"
+          title="Execution(s)"
+          description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
+        >
           <div class="space-y-3">
             <FormStrategiesStrategyActive
               v-for="strategy in executionStrategies"
@@ -651,13 +741,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
               :strategy="strategy"
             />
           </div>
-        </div>
-        <div v-else-if="activeTab === 'controller'" class="mb-4">
-          <h3 class="text-md leading-6">Controller</h3>
-          <span class="mb-4 inline-block">
-            The controller is the account able to change the space settings and
-            cancel pending proposals.
-          </span>
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else-if="activeTab === 'controller'"
+          title="Controller"
+          description="The controller is the account able to change the space settings and cancel pending proposals."
+        >
           <div
             class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
           >
@@ -689,7 +778,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
               @save="handleControllerSave"
             />
           </teleport>
-        </div>
+        </UiContainerSettings>
         <div
           v-if="!uiStore.sidebarOpen && ((isModified && isController) || error)"
           class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
