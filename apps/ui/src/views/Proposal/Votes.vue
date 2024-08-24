@@ -181,7 +181,7 @@ watch([sortBy, choiceFilter], () => {
     </div>
   </div>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
-    <div class="min-w-[735px]">
+    <div class="min-w-[735px] min-h-[calc(100vh-141px)]">
       <UiLoading v-if="!loaded" class="px-4 py-3 block absolute" />
       <template v-else>
         <div
@@ -197,9 +197,9 @@ watch([sortBy, choiceFilter], () => {
           @end-reached="handleEndReached"
         >
           <template #loading>
-            <UiLoading class="px-4 py-3 block" />
+            <UiLoading class="px-4 py-3 block absolute" />
           </template>
-          <div class="absolute w-full">
+          <div class="absolute w-full pointer-events-none">
             <div v-for="(vote, i) in votes" :key="i">
               <div
                 class="inset-y-0 left-0 h-[76px]"
