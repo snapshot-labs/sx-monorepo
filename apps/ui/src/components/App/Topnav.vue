@@ -152,7 +152,7 @@ watch(
           v-if="auth.isAuthenticated.value"
           class="sm:flex items-center space-x-2"
         >
-          <UiStamp :id="web3.account" :size="18" />
+          <UiStamp :id="user.id" :size="18" :cb="cb" :cb="cb" />
           <span
             class="hidden sm:block truncate max-w-[120px]"
             v-text="user.name || shorten(user.id)"
