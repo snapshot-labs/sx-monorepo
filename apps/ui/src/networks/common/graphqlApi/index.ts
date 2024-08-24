@@ -218,7 +218,9 @@ function formatSpace(
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
       space.strategies_indicies
-    )
+    ),
+    children: [],
+    parent: null
   };
 }
 
