@@ -562,14 +562,17 @@ export function createActions(
         owner
       });
     },
-    updateStrategies: async (
+    updateSettings: async (
       web3: any,
       space: Space,
       authenticatorsToAdd: StrategyConfig[],
       authenticatorsToRemove: number[],
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
-      validationStrategy: StrategyConfig
+      validationStrategy: StrategyConfig,
+      votingDelay: number | null,
+      minVotingDuration: number | null,
+      maxVotingDuration: number | null
     ) => {
       const metadataUris = await Promise.all(
         votingStrategiesToAdd.map(config => buildMetadata(helpers, config))
@@ -606,7 +609,12 @@ export function createActions(
               ? validationStrategy.generateParams(validationStrategy.params)
               : []
           },
-          proposalValidationStrategyMetadataUri
+          proposalValidationStrategyMetadataUri,
+          votingDelay: votingDelay !== null ? votingDelay : undefined,
+          minVotingDuration:
+            minVotingDuration !== null ? minVotingDuration : undefined,
+          maxVotingDuration:
+            maxVotingDuration !== null ? maxVotingDuration : undefined
         }
       });
     },

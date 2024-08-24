@@ -1,4 +1,15 @@
-import { Privacy, VoteType } from '@/types';
+import { NetworkID, Privacy, VoteType } from '@/types';
+
+export type ApiRelatedSpace = {
+  id: string;
+  name: string;
+  network: NetworkID;
+  avatar: string;
+  proposalsCount: number;
+  votesCount: number;
+  turbo: boolean;
+  verified: boolean;
+};
 
 export type ApiSpace = {
   id: string;
@@ -45,6 +56,8 @@ export type ApiSpace = {
   proposalsCount: number;
   votesCount: number;
   followersCount: number;
+  children: [ApiRelatedSpace];
+  parent: ApiRelatedSpace | null;
 };
 
 export type ApiProposal = {

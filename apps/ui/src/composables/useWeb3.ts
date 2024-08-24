@@ -161,7 +161,7 @@ export function useWeb3() {
       if (!accounts.length) return;
 
       state.account = formatAddress(accounts[0]);
-      await login();
+      await login(providerName);
     });
 
     if (!STARKNET_CONNECTORS.includes(providerName)) {
