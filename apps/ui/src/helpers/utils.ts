@@ -284,6 +284,10 @@ export function abiToDefinition(abi) {
   return definition;
 }
 
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function memoize<T extends any[], U>(fn: (...args: T) => U) {
   const cache = new Map<string, any>();
 
@@ -546,4 +550,9 @@ export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
   const value = _vp(Number(totalVotingPower) / 10 ** decimals);
 
   return symbol ? `${value} ${symbol}` : value;
+}
+
+export function stripHtmlTags(text: string) {
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  return doc.body.textContent || '';
 }

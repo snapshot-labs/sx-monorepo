@@ -3,6 +3,7 @@ import {
   _n,
   _p,
   autoLinkText,
+  compareAddresses,
   getCacheHash,
   getSocialNetworksLink,
   shortenAddress
@@ -130,7 +131,10 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
-        <UiTooltip v-if="web3.account === user.id" title="Edit profile">
+        <UiTooltip
+          v-if="compareAddresses(web3.account, user.id)"
+          title="Edit profile"
+        >
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
           </UiButton>
@@ -240,7 +244,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
     </router-link>
     <teleport to="#modal">
       <ModalEditUser
-        v-if="web3.account === user.id"
+        v-if="compareAddresses(web3.account, user.id)"
         :open="modalOpenEditUser"
         :user="user"
         @close="modalOpenEditUser = false"

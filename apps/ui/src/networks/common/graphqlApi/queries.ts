@@ -39,6 +39,7 @@ const SPACE_FRAGMENT = gql`
     voting_power_validation_strategies_parsed_metadata {
       index
       data {
+        id
         name
         description
         decimals
@@ -53,6 +54,7 @@ const SPACE_FRAGMENT = gql`
     strategies_parsed_metadata {
       index
       data {
+        id
         name
         description
         decimals
@@ -96,6 +98,7 @@ const PROPOSAL_FRAGMENT = gql`
       strategies_parsed_metadata {
         index
         data {
+          id
           name
           description
           decimals
