@@ -26,7 +26,7 @@ const emit = defineEmits<{
 }>();
 
 const editing = ref(false);
-const inputValue = ref(props.initialValue);
+const inputValue: Ref<string | number> = ref(props.initialValue);
 
 const Component = computed(() => {
   switch (props.definition.type) {
@@ -61,10 +61,22 @@ const formErrors = computed(() => {
   return errors;
 });
 
+function handleEdit() {
+  editing.value = true;
+}
+
 function handleSave() {
   emit('save', inputValue.value);
   editing.value = false;
 }
+
+watch(
+  () => props.initialValue,
+  () => {
+    inputValue.value = props.initialValue;
+    editing.value = false;
+  }
+);
 </script>
 
 <template>
@@ -120,7 +132,7 @@ function handleSave() {
           v-if="editable"
           type="button"
           class="hover:opacity-80"
-          @click="editing = !editing"
+          @click="handleEdit"
         >
           <IH-pencil />
         </button>

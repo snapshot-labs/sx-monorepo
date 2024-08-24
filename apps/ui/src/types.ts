@@ -85,6 +85,7 @@ export type SpaceSettings = {
 };
 
 export type StrategyParsedMetadata = {
+  id: string;
   name: string;
   description: string;
   decimals: number;

@@ -18,7 +18,6 @@ const usersStore = useUsersStore();
 const spacesStore = useSpacesStore();
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
-const { setTitle } = useTitle();
 const { getCurrent } = useMetaStore();
 
 const userActivity = ref<UserActivity>({
@@ -168,10 +167,6 @@ watch(
     spacesStore.networksMap[networkId].spaces[address];
   }
 );
-
-watchEffect(() =>
-  setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`)
-);
 </script>
 
 <template>
@@ -245,8 +240,9 @@ watchEffect(() =>
         </div>
       </div>
     </div>
-    <div
-      class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+    <UiScrollerHorizontal
+      class="z-40 sticky top-[71px] lg:top-[72px]"
+      gradient="md"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <router-link
@@ -261,7 +257,7 @@ watchEffect(() =>
           />
         </router-link>
       </div>
-    </div>
+    </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
   </div>
 </template>

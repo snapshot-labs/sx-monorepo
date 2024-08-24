@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { stripHtmlTags } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Statement } from '@/types';
 
@@ -96,7 +97,7 @@ watchEffect(async () => {
       <UiMarkdown
         v-if="previewEnabled"
         class="px-3 py-2 mb-3 border rounded-lg min-h-[200px]"
-        :body="form.statement"
+        :body="stripHtmlTags(form.statement)"
       />
       <UiComposer
         v-else
