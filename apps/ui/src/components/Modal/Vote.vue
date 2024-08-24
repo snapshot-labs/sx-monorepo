@@ -54,16 +54,16 @@ const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
-const offchainProposal = computed(() =>
+const offchainProposal = computed<boolean>(() =>
   offchainNetworks.includes(props.proposal.network)
 );
 
-const canSubmit = computed(
+const canSubmit = computed<boolean>(
   () =>
     formValidated &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
-    votingPower.value?.canVote
+    !!votingPower.value?.canVote
 );
 
 async function handleSubmit() {
