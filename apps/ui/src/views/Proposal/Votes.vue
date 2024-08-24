@@ -28,14 +28,9 @@ const sortBy = ref(
 const choiceFilter = ref('any' as 'any' | 'for' | 'against' | 'abstain');
 const modalOpen = ref(false);
 const selectedVote = ref<Vote | null>(null);
-const containerWidth = ref(0);
-const el = ref<HTMLElement | null>(null);
-const { x } = useScroll(el);
 
-useResizeObserver(el, ([{ contentRect }]) => {
-  const { width } = contentRect;
-  containerWidth.value = width;
-});
+const votesHeader = ref<HTMLElement | null>(null);
+const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => {
@@ -100,6 +95,10 @@ function handleChoiceClick(vote: Vote | null) {
   modalOpen.value = true;
 }
 
+function handleScrollEvent(target: HTMLElement) {
+  votesHeaderX.value = target.scrollLeft;
+}
+
 onMounted(() => {
   loadVotes();
 });
@@ -121,13 +120,11 @@ watch([sortBy, choiceFilter], () => {
 </script>
 
 <template>
-  <div class="bg-skin-bg sticky top-[113px] z-40 border-b overflow-hidden">
-    <div
-      class="flex space-x-3 font-medium min-w-[735px]"
-      :style="{
-        marginLeft: `-${x}px`
-      }"
-    >
+  <div
+    ref="votesHeader"
+    class="bg-skin-bg sticky top-[113px] z-40 border-b overflow-hidden"
+  >
+    <div class="flex space-x-3 font-medium min-w-[735px]">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
       <div class="grow w-[40%]">
         <template v-if="offchainNetworks.includes(proposal.network)"
@@ -183,8 +180,8 @@ watch([sortBy, choiceFilter], () => {
       <div class="min-w-[44px] lg:w-[60px]" />
     </div>
   </div>
-  <div ref="el" class="overflow-x-auto no-scrollbar">
-    <div data-no-sidebar-swipe class="min-w-[735px]">
+  <UiScrollerHorizontal @scroll="handleScrollEvent">
+    <div class="min-w-[735px]">
       <UiLoading v-if="!loaded" class="px-4 py-3 block absolute" />
       <template v-else>
         <div
@@ -202,20 +199,10 @@ watch([sortBy, choiceFilter], () => {
           <template #loading>
             <UiLoading class="px-4 py-3 block" />
           </template>
-          <div
-            v-for="(vote, i) in votes"
-            :key="i"
-            class="relative border-b flex space-x-3"
-          >
-            <div
-              class="absolute -z-10 pointer-events-none h-[76px]"
-              :style="{
-                width: `${containerWidth}px`,
-                'margin-left': `${x}px`
-              }"
-            >
+          <div class="absolute w-full">
+            <div v-for="(vote, i) in votes" :key="i">
               <div
-                class="inset-y-0 left-0 absolute"
+                class="inset-y-0 left-0 h-[76px]"
                 :style="{
                   width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
                 }"
@@ -226,6 +213,12 @@ watch([sortBy, choiceFilter], () => {
                 "
               />
             </div>
+          </div>
+          <div
+            v-for="(vote, i) in votes"
+            :key="i"
+            class="relative border-b flex space-x-3"
+          >
             <router-link
               :to="{
                 name: 'space-user-statement',
@@ -368,8 +361,7 @@ watch([sortBy, choiceFilter], () => {
         </UiContainerInfiniteScroll>
       </template>
     </div>
-  </div>
-
+  </UiScrollerHorizontal>
   <teleport to="#modal">
     <ModalVoteReason
       :open="modalOpen"
