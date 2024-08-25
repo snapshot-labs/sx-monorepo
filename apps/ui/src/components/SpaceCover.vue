@@ -27,29 +27,18 @@ const cb = computed(() => getCacheHash(props.space.cover));
     type="space-cover-sx"
     class="object-cover !rounded-none size-full"
   />
-  <div
-    v-else
-    class="space-fallback-cover"
-    :style="{
-      'background-image': `url(${getStampUrl(
-        offchainNetworks.includes(space.network) ? 'space' : 'space-sx',
-        space.id,
-        50,
-        getCacheHash(space.avatar)
-      )}`
-    }"
-  ></div>
+  <div v-else class="w-full h-full overflow-hidden">
+    <div
+      class="bg-cover bg-center w-full h-full"
+      :style="{
+        'background-image': `url(${getStampUrl(
+          offchainNetworks.includes(space.network) ? 'space' : 'space-sx',
+          space.id,
+          50,
+          getCacheHash(space.avatar)
+        )}`,
+        filter: `blur(${size === 'lg' ? '100' : '50'}px) contrast(0.9) saturate(1.3)`
+      }"
+    />
+  </div>
 </template>
-
-<style lang="scss" scoped>
-.space-fallback-cover {
-  @apply bg-cover bg-center w-full h-full;
-
-  &::after {
-    @apply absolute h-full w-full pointer-events-none;
-
-    content: '';
-    backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
-  }
-}
-</style>
