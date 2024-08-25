@@ -64,8 +64,8 @@ async function handleEndReached() {
 }
 
 function handleDelegateClick(delegatee?: string) {
-  delegateModalOpen.value = true;
   delegateModalState.value = delegatee ? { delegatee } : null;
+  delegateModalOpen.value = true;
 }
 
 onMounted(() => {
