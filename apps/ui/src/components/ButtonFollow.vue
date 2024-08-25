@@ -30,6 +30,7 @@ const loading = computed(
     class="group"
     :class="{ 'hover:border-skin-danger': spaceFollowed }"
     :loading="loading"
+    :primary="!spaceFollowed"
     @click.prevent="followedSpacesStore.toggleSpaceFollow(spaceIdComposite)"
   >
     <span v-if="spaceFollowed" class="inline-block">
