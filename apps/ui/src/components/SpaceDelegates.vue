@@ -304,5 +304,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  /* Fallback for browsers not supporting line clamp */
+  max-height: 44px;
 }
 </style>
