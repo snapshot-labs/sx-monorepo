@@ -27,7 +27,7 @@ const modalOpenVote = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 const { loadVotes, votes } = useAccount();
 const editMode = ref(false);
-const post: Ref<Post | null> = ref(null);
+const discoursePost: Ref<Post | null> = ref(null);
 
 const id = computed(() => route.params.id as string);
 const proposal = computed(() => {
@@ -115,7 +115,7 @@ watch(
     await proposalsStore.fetchProposal(spaceAddress, id, networkId);
 
     if (discussion.value) {
-      post.value = await loadSinglePost(discussion.value);
+      discoursePost.value = await loadSinglePost(discussion.value);
     }
   },
   { immediate: true }
@@ -177,7 +177,7 @@ watchEffect(() => {
           </router-link>
           <template v-if="discussion">
             <router-link
-              v-if="post?.posts_count"
+              v-if="discoursePost?.posts_count"
               :to="{
                 name: 'proposal-discussion',
                 params: { id: proposal.proposal_id }
@@ -186,7 +186,7 @@ watchEffect(() => {
             >
               <UiLink
                 :is-active="route.name === 'proposal-discussion'"
-                :count="post.posts_count"
+                :count="discoursePost.posts_count"
                 text="Discussion"
                 class="inline-block"
               />
