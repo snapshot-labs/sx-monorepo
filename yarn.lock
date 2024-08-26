@@ -2666,6 +2666,7 @@
     "@stablelib/wipe" "^1.0.1"
 
 "@starknet-io/types-js@^0.7.7", "starknet-types-07@npm:@starknet-io/types-js@^0.7.7":
+  name starknet-types-07
   version "0.7.7"
   resolved "https://registry.yarnpkg.com/@starknet-io/types-js/-/types-js-0.7.7.tgz#444be5e4e585ec6f599d42d3407280d98b2dfdf8"
   integrity sha512-WLrpK7LIaIb8Ymxu6KF/6JkGW1sso988DweWu7p5QY/3y7waBIiPvzh27D9bX5KIJNRDyOoOVoHVEKYUYWZ/RQ==
@@ -11386,6 +11387,11 @@ remarkable@^2.0.1:
   dependencies:
     argparse "^1.0.10"
     autolinker "^3.11.0"
+
+remove-markdown@^0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/remove-markdown/-/remove-markdown-0.5.2.tgz#1e52602260cc1e65e6f0c4f9e9662141ef3bd302"
+  integrity sha512-/VOt3snBKnK66TIiomtmCptc8V0aSVDBHtihWrL1ZVrVoCtvQx7Chs4yfP37JaxZTxE3SEmJTIN8pzrO/+XPlg==
 
 request@^2.85.0:
   version "2.88.2"

@@ -137,10 +137,12 @@ export function createConstants(networkId: NetworkID) {
         const abiCoder = new AbiCoder();
 
         return {
-          threshold: abiCoder.decode(
-            ['uint256', 'tuple(address addr, bytes params)[]'],
-            params
-          )[0]
+          threshold: abiCoder
+            .decode(
+              ['uint256', 'tuple(address addr, bytes params)[]'],
+              params
+            )[0]
+            .toString()
         };
       },
       paramsDefinition: {
@@ -200,6 +202,7 @@ export function createConstants(networkId: NetworkID) {
     },
     {
       address: config.Strategies.Whitelist,
+      type: 'MerkleWhitelist',
       name: 'Whitelist',
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',

@@ -1,4 +1,4 @@
-const SIDEKICK_URL = 'https://sh5.co';
+import { SIDEKICK_URL } from '@/helpers/constants';
 
 export function useAi<T extends 'summary' | 'speech'>(
   type: T,

@@ -85,12 +85,27 @@ export type SpaceSettings = {
 };
 
 export type StrategyParsedMetadata = {
+  id: string;
   name: string;
   description: string;
   decimals: number;
   symbol: string;
   token: string | null;
   payload: string | null;
+};
+
+export type RelatedSpace = {
+  id: string;
+  name: string;
+  network: NetworkID;
+  avatar: string;
+  cover: string;
+  about?: string;
+  proposal_count: number;
+  vote_count: number;
+  turbo: boolean;
+  verified: boolean;
+  snapshot_chain_id: number;
 };
 
 export type Space = {
@@ -141,6 +156,8 @@ export type Space = {
   vote_count: number;
   follower_count?: number;
   created: number;
+  children: RelatedSpace[];
+  parent: RelatedSpace | null;
 };
 
 export type ProposalExecution = {
@@ -245,6 +262,7 @@ export type Statement = {
   network: NetworkID;
   about: string;
   statement: string;
+  delegate: string;
   discourse: string;
   status: 'ACTIVE' | 'INACTIVE';
 };
