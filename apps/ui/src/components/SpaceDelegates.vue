@@ -193,7 +193,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               >
                 <div
                   v-if="delegate.statement"
-                  class="clamped-text"
+                  class="line-clamp-2 max-h-[44px]"
                   v-text="
                     removeMarkdown(delegate.statement.statement).slice(0, 130)
                   "
@@ -297,14 +297,3 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </teleport>
   </template>
 </template>
-
-<style scoped>
-.clamped-text {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  /* Fallback for browsers not supporting line clamp */
-  max-height: 44px;
-}
-</style>
