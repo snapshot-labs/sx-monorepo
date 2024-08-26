@@ -18,8 +18,8 @@ onMounted(async () => {
     replies.value = await loadReplies(discussion.value || '');
     loading.value = false;
     loaded.value = true;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.error(e);
   }
 });
 </script>
