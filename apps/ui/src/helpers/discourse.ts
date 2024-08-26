@@ -44,7 +44,7 @@ export async function loadReplies(url: string): Promise<Reply[]> {
 
     post.name = post.display_username || post.name || post.username;
     post.like_count = post.actions_summary.find(a => a.id === 2)?.count || 0;
-    post.created_at = Date.parse(post.created_at) / 1e3;
+    post.created_at = Date.parse(post.created_at) / 1000;
     post.user_url = `${baseUrl}/u/${post.username}`;
 
     return post;
