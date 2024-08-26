@@ -195,7 +195,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   v-if="delegate.statement"
                   class="line-clamp-2 max-h-[44px]"
                   v-text="
-                    removeMarkdown(delegate.statement.statement).slice(0, 130)
+                    shorten(removeMarkdown(delegate.statement.statement), 250)
                   "
                 />
               </div>
