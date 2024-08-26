@@ -31,7 +31,7 @@ onMounted(async () => {
         <a :href="discussion" target="_blank">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <component :is="ICDiscourse" class="size-[22px]" />
-            Join discussion
+            Join the discussion
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </UiButton>
         </a>
