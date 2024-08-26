@@ -25,7 +25,7 @@ export async function loadSinglePost(url: string): Promise<Post> {
   const res = await fetch(
     `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicId}.json`)}`
   );
-  return await res.json();
+  return res.json();
 }
 
 export async function loadReplies(url: string): Promise<Reply[]> {
