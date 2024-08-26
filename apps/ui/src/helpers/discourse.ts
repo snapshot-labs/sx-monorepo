@@ -1,3 +1,7 @@
+import { SIDEKICK_URL } from '@/helpers/constants';
+
+const PROXY_URL = `${SIDEKICK_URL}/api/proxy`;
+
 export interface Post {
   posts_count: number;
 }
@@ -19,7 +23,7 @@ export async function loadSinglePost(url: string): Promise<Post> {
   const topicId = new URL(url).pathname.split('/')[3];
 
   const res = await fetch(
-    `https://corsproxy.io/?${encodeURIComponent(`${baseUrl}/t/${topicId}.json`)}`
+    `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicId}.json`)}`
   );
   return await res.json();
 }
@@ -29,7 +33,7 @@ export async function loadReplies(url: string): Promise<Reply[]> {
   const topicId = new URL(url).pathname.split('/')[3];
 
   const res = await fetch(
-    `https://corsproxy.io/?${encodeURIComponent(`${baseUrl}/t/${topicId}/posts.json`)}`
+    `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicId}/posts.json`)}`
   );
   const data = await res.json();
 
