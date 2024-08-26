@@ -548,8 +548,7 @@ export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
   return symbol ? `${value} ${symbol}` : value;
 }
 
-export function stripHtml(str) {
-  const doc = new DOMParser().parseFromString(str, 'text/html');
-
+export function stripHtmlTags(text: string) {
+  const doc = new DOMParser().parseFromString(text, 'text/html');
   return doc.body.textContent || '';
 }

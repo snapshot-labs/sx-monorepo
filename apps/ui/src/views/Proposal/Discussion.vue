@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { loadReplies, Reply } from '@/helpers/discourse';
-import { _rt, sanitizeUrl, stripHtml } from '@/helpers/utils';
+import { _rt, sanitizeUrl, stripHtmlTags } from '@/helpers/utils';
 import { Proposal } from '@/types';
 import ICDiscourse from '~icons/c/discourse';
 
@@ -61,7 +61,7 @@ onMounted(async () => {
           <div>
             <UiMarkdown
               class="text-md pt-3 pb-2"
-              :body="stripHtml(reply.cooked)"
+              :body="stripHtmlTags(reply.cooked)"
             />
             <div class="text-sm space-x-2.5 flex">
               <div class="items-center flex gap-1">
