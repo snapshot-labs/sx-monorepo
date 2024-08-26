@@ -21,6 +21,7 @@ import {
   Proposal,
   ProposalExecution,
   ProposalState,
+  RelatedSpace,
   Space,
   SpaceMetadataTreasury,
   Statement,
@@ -42,7 +43,7 @@ import {
   USER_VOTES_QUERY,
   VOTES_QUERY
 } from './queries';
-import { ApiProposal, ApiSpace, ApiVote } from './types';
+import { ApiProposal, ApiRelatedSpace, ApiSpace, ApiVote } from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
@@ -95,6 +96,21 @@ function formatSpace(
   if (space.filters.onlyMembers) {
     validationName = 'only-members';
     validationParams.addresses = space.members.concat(space.admins);
+  }
+
+  function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
+    return {
+      id: space.id,
+      name: space.name,
+      network: networkId,
+      avatar: space.avatar,
+      cover: '',
+      proposal_count: space.proposalsCount,
+      vote_count: space.votesCount,
+      turbo: space.turbo,
+      verified: space.verified,
+      snapshot_chain_id: parseInt(space.network)
+    };
   }
 
   return {
@@ -151,7 +167,9 @@ function formatSpace(
     validation_strategy_params: '',
     voting_power_validation_strategy_strategies: [validationName],
     voting_power_validation_strategy_strategies_params: [validationParams],
-    voting_power_validation_strategies_parsed_metadata: []
+    voting_power_validation_strategies_parsed_metadata: [],
+    children: space.children.map(formatRelatedSpace),
+    parent: space.parent ? formatRelatedSpace(space.parent) : null
   };
 }
 

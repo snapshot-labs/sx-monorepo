@@ -14,9 +14,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>
-  <div
+  <UiScrollerHorizontal
     v-if="space.delegations.length !== 1"
-    class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+    class="z-40 sticky top-[71px] lg:top-[72px]"
+    gradient="md"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
       <button
@@ -31,7 +32,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         />
       </button>
     </div>
-  </div>
+  </UiScrollerHorizontal>
   <SpaceDelegates
     v-if="delegateData"
     :key="activeDelegationId"
