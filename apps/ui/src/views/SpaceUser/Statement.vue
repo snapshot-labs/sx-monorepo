@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { compareAddresses } from '@/helpers/utils';
+import { compareAddresses, stripHtmlTags } from '@/helpers/utils';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement, User } from '@/types';
 
@@ -89,7 +89,7 @@ watchEffect(() =>
         <UiMarkdown
           v-if="statement.statement"
           class="text-skin-heading max-w-[592px]"
-          :body="statement.statement"
+          :body="stripHtmlTags(statement.statement)"
         />
         <div v-else class="flex items-center space-x-2">
           <IH-exclamation-circle class="inline-block shrink-0" />
