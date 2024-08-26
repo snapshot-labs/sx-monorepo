@@ -7,12 +7,17 @@ import ICDiscourse from '~icons/c/discourse';
 const props = defineProps<{ proposal: Proposal }>();
 
 const replies: Ref<Reply[]> = ref([]);
+const loading = ref(false);
+const loaded = ref(false);
 
 const discussion = computed(() => sanitizeUrl(props.proposal.discussion));
 
 onMounted(async () => {
   try {
+    loading.value = true;
     replies.value = await loadReplies(discussion.value || '');
+    loading.value = false;
+    loaded.value = true;
   } catch (error) {
     console.error(error);
   }
@@ -32,7 +37,10 @@ onMounted(async () => {
         </a>
       </div>
     </div>
-    <div class="px-4">
+    <div v-if="loading" class="text-center p-4">
+      <UiLoading />
+    </div>
+    <div v-if="loaded" class="px-4">
       <div
         v-for="(reply, i) in replies.slice(1)"
         :key="i"
