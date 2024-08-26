@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { loadSinglePost, Post } from '@/helpers/discourse';
 import {
   getCacheHash,
   getFormattedVotingPower,
@@ -26,6 +27,7 @@ const modalOpenVote = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 const { loadVotes, votes } = useAccount();
 const editMode = ref(false);
+const discoursePost: Ref<Post | null> = ref(null);
 
 const id = computed(() => route.params.id as string);
 const proposal = computed(() => {
@@ -110,7 +112,11 @@ watch(
 
     modalOpenVote.value = false;
     editMode.value = false;
-    proposalsStore.fetchProposal(spaceAddress, id, networkId);
+    await proposalsStore.fetchProposal(spaceAddress, id, networkId);
+
+    if (discussion.value) {
+      discoursePost.value = await loadSinglePost(discussion.value);
+    }
   },
   { immediate: true }
 );
@@ -169,15 +175,32 @@ watchEffect(() => {
               class="inline-block"
             />
           </router-link>
-          <a
-            v-if="discussion"
-            :href="discussion"
-            target="_blank"
-            class="flex items-center"
-          >
-            <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
-            <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-          </a>
+          <template v-if="discussion">
+            <router-link
+              v-if="discoursePost?.posts_count"
+              :to="{
+                name: 'proposal-discussion',
+                params: { id: proposal.proposal_id }
+              }"
+              class="flex items-center"
+            >
+              <UiLink
+                :is-active="route.name === 'proposal-discussion'"
+                :count="discoursePost.posts_count"
+                text="Discussion"
+                class="inline-block"
+              />
+            </router-link>
+            <a
+              v-else
+              :href="discussion"
+              target="_blank"
+              class="flex items-center"
+            >
+              <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
+              <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
+            </a>
+          </template>
         </div>
         <router-view :proposal="proposal" />
       </div>

@@ -1,5 +1,7 @@
 import { VoteType, VoteTypeInfo } from '@/types';
 
+export const SIDEKICK_URL = 'https://sh5.co';
+
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const CHAIN_IDS = {
