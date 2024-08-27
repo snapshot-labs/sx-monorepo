@@ -642,13 +642,15 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             Execution strategies determine if a proposal passes and how it is
             executed. This section is currently read-only.
           </span>
-          <FormStrategiesStrategyActive
-            v-for="strategy in executionStrategies"
-            :key="strategy.id"
-            read-only
-            :network-id="space.network"
-            :strategy="strategy"
-          />
+          <div class="space-y-3">
+            <FormStrategiesStrategyActive
+              v-for="strategy in executionStrategies"
+              :key="strategy.id"
+              read-only
+              :network-id="space.network"
+              :strategy="strategy"
+            />
+          </div>
         </div>
         <div v-else-if="activeTab === 'controller'" class="mb-4">
           <h3 class="text-md leading-6">Controller</h3>
