@@ -98,7 +98,7 @@ ajv.addFormat('int256[]', {
 });
 
 ajv.addFormat('bytes[]', {
-  validate: getArrayValidator(bytesValidator)
+  validate: bytesValidator
 });
 
 ajv.addFormat('long', {
