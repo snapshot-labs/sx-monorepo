@@ -596,7 +596,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     >
       <UiLoading v-if="loading" />
       <template v-else>
-        <div v-if="activeTab === 'profile'">
+        <div v-show="activeTab === 'profile'">
           <FormSpaceProfile
             :id="space.id"
             :space="space"
