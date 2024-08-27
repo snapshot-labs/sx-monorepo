@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { Vote } from '@/composables/useSharing';
 import { getNetwork } from '@/networks';
-import { Choice, Proposal } from '@/types';
 
 type Messages = {
   title?: string;
@@ -10,7 +10,7 @@ type Messages = {
 const props = withDefaults(
   defineProps<{
     open: boolean;
-    shareable: { proposal: Proposal; choice: Choice };
+    shareable: Vote;
     txId: string | null;
     messages?: Messages;
     showIcon?: boolean;

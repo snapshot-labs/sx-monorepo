@@ -7,8 +7,8 @@ import ICX from '~icons/c/x';
 
 type SpaceUser = { user: User; space: Space };
 type SocialNetwork = 'x' | 'lens' | 'farcaster';
-type Vote = { proposal: Proposal; choice: Choice };
 
+export type Vote = { proposal: Proposal; choice: Choice };
 export type PayloadType = 'proposal' | 'user' | 'space-user' | 'vote';
 export type Payload = Proposal | User | SpaceUser | Vote;
 
