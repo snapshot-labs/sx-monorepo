@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Topic } from '@/helpers/discourse';
 import { _n, _rt } from '@/helpers/utils';
-import ICPin from '~icons/c/pin';
 
 defineProps<{ topic: Topic }>();
 </script>
@@ -10,20 +9,15 @@ defineProps<{ topic: Topic }>();
     <div class="border-b mx-4 py-[14px] flex">
       <div class="flex-auto mr-4 w-0">
         <div class="space-x-2 flex">
-          <div class="md:flex md:min-w-0 my-1 items-center leading-6">
-            <a
-              :href="topic.url"
-              target="_blank"
-              class="md:flex md:min-w-0 space-x-1.5"
-            >
-              <component
-                :is="ICPin"
+          <div class="my-1 items-center leading-6">
+            <a :href="topic.url" target="_blank" class="space-x-1.5">
+              <IC-pin
                 v-if="topic.pinned"
-                class="size-[14px] mt-1.5"
+                class="inline-block shrink-0 size-[14px]"
               />
               <IS-lock-closed
                 v-if="topic.closed"
-                class="inline-block shrink-0 size-[16px] mt-1"
+                class="inline-block shrink-0 size-[16px] -mt-1"
               />
               <h3 class="text-[21px] inline md:truncate" v-text="topic.title" />
               <IH-arrow-sm-right

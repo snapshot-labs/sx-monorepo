@@ -48,7 +48,9 @@ export const SPACES_DISCUSSIONS = {
   's:shapeshiftdao.eth': 'https://forum.shapeshift.com/c/proposal-discussion/8',
   's:cow.eth': 'https://forum.cow.fi/c/cow-improvement-proposals-cip/6',
   's:badgerdao.eth':
-    'https://forum.badger.finance/c/badger-improvement-proposals-bip/5'
+    'https://forum.badger.finance/c/badger-improvement-proposals-bip/5',
+  'sn:0x07c251045154318a2376a3bb65be47d3c90df1740d8e35c9b9d943aa3f240e50':
+    'https://www.nostra.family/c/general/4'
 };
 
 export async function loadTopics(url: string): Promise<Topic[]> {
