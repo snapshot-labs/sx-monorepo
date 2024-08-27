@@ -499,7 +499,7 @@ export function getChoiceText(availableChoices: string[], choice: Choice) {
   }
 
   if (typeof choice === 'number') {
-    return availableChoices[choice - 1] || 'Invalid choice';
+    return availableChoices[choice - 1] ?? 'Invalid choice';
   }
 
   if (Array.isArray(choice)) {
