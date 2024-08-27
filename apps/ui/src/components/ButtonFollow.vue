@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Space } from '@/types';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
-  space: Space;
+  space: { id: string; network: NetworkID; snapshot_chain_id?: number };
 }>();
 
 const spaceIdComposite = `${props.space.network}:${props.space.id}`;
