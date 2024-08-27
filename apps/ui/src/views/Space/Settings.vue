@@ -563,7 +563,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <span>Settings are only accessible for onchain spaces.</span>
   </div>
   <template v-else>
-    <UiScrollerHorizontal with-buttons gradient="xxl">
+    <UiScrollerHorizontal
+      class="sticky top-[72px] z-10"
+      with-buttons
+      gradient="xxl"
+    >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <button
           v-for="tab in TABS"
