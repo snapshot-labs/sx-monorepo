@@ -5,12 +5,12 @@ import ICFarcaster from '~icons/c/farcaster';
 import ICLens from '~icons/c/lens';
 import ICX from '~icons/c/x';
 
-export type PayloadType = 'proposal' | 'user' | 'space-user' | 'vote';
-export type Payload = Proposal | User | SpaceUser | Vote;
-
+type SpaceUser = { user: User; space: Space };
 type SocialNetwork = 'x' | 'lens' | 'farcaster';
 type Vote = { proposal: Proposal; choice: Choice };
-type SpaceUser = { user: User; space: Space };
+
+export type PayloadType = 'proposal' | 'user' | 'space-user' | 'vote';
+export type Payload = Proposal | User | SpaceUser | Vote;
 
 const HASH_TAG = 'Snapshot';
 
@@ -97,12 +97,10 @@ export function useSharing() {
     const isPrivate = proposal.privacy === 'shutter';
     const votedText =
       isSingleChoice && !isPrivate
-        ? `I just voted "${choiceText}" on`
-        : `I just voted on`;
+        ? `I just voted "${choiceText}"`
+        : `I just voted`;
 
-    return `${encodeURIComponent(votedText)}%20"${encodeURIComponent(
-      proposal.title
-    )}"%20${encodeURIComponent(getProposalUrl(proposal))}`;
+    return `${votedText} on "${proposal.title}" ${getProposalUrl(proposal)}`;
   }
 
   function getShareUrl(
