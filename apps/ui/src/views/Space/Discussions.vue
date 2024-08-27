@@ -14,6 +14,8 @@ const discussionsUrl =
 
 onMounted(async () => {
   try {
+    if (!discussionsUrl) return;
+
     loading.value = true;
     topics.value = await loadTopics(discussionsUrl);
     loading.value = false;
@@ -27,7 +29,7 @@ watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
 
 <template>
   <div>
-    <div class="flex p-4">
+    <div v-if="discussionsUrl" class="flex p-4">
       <div class="flex-grow">
         <a :href="discussionsUrl" target="_blank" class="inline-block">
           <UiButton class="flex items-center gap-2 justify-center">
