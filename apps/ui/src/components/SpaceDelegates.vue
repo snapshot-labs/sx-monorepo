@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import removeMarkdown from 'remove-markdown';
 import { _n, _p, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space, SpaceMetadataDelegation } from '@/types';
@@ -9,6 +10,7 @@ const props = defineProps<{
 }>();
 
 const delegateModalOpen = ref(false);
+const delegateModalState = ref<{ delegatee: string } | null>(null);
 const sortBy = ref(
   'delegatedVotes-desc' as
     | 'delegatedVotes-desc'
@@ -29,7 +31,8 @@ const {
   reset
 } = useDelegates(
   props.delegation.apiUrl as string,
-  props.delegation.contractAddress as string
+  props.delegation.contractAddress as string,
+  props.space
 );
 
 const currentNetwork = computed(() => {
@@ -60,6 +63,11 @@ async function handleEndReached() {
   await fetchMore(sortBy.value);
 }
 
+function handleDelegateClick(delegatee?: string) {
+  delegateModalState.value = delegatee ? { delegatee } : null;
+  delegateModalOpen.value = true;
+}
+
 onMounted(() => {
   if (!props.delegation.apiUrl) return;
 
@@ -86,7 +94,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="delegateModalOpen = true">
+        <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
@@ -94,15 +102,22 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <UiLabel label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
-        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-1"
+        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
       >
-        <div class="pl-4 w-[60%] flex items-center truncate">Delegatee</div>
+        <div
+          class="w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
+        >
+          <span class="truncate">Delegatee</span>
+        </div>
+        <div class="hidden sm:flex grow items-center truncate">
+          <span class="truncate">Statement</span>
+        </div>
         <button
           type="button"
-          class="hidden md:flex w-[20%] items-center justify-end hover:text-skin-link space-x-1 truncate"
+          class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
-          <span>Delegators</span>
+          <span class="truncate">Delegators</span>
           <IH-arrow-sm-down
             v-if="sortBy === 'tokenHoldersRepresentedAmount-desc'"
             class="shrink-0"
@@ -114,7 +129,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </button>
         <button
           type="button"
-          class="w-[40%] md:w-[20%] flex justify-end items-center hover:text-skin-link pr-4 space-x-1 truncate"
+          class="w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -127,6 +142,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             class="shrink-0"
           />
         </button>
+        <div class="w-[20px]" />
       </div>
       <UiLoading v-if="loading" class="px-4 py-3 block" />
       <template v-else>
@@ -145,47 +161,122 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div
             v-for="(delegate, i) in delegates"
             :key="i"
-            class="border-b flex space-x-1"
+            class="border-b flex space-x-3 px-4"
           >
-            <div class="flex items-center w-[60%] pl-4 py-3 gap-x-3 truncate">
-              <UiStamp :id="delegate.user" :size="32" />
-              <router-link
-                :to="{
-                  name: 'space-user-statement',
-                  params: {
-                    id: `${space.network}:${space.id}`,
-                    user: delegate.user
-                  }
-                }"
-                class="overflow-hidden leading-[22px]"
+            <router-link
+              :to="{
+                name: 'space-user-statement',
+                params: {
+                  id: `${space.network}:${space.id}`,
+                  user: delegate.user
+                }
+              }"
+              class="flex w-full"
+            >
+              <div
+                class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
+              >
+                <UiStamp :id="delegate.user" :size="32" />
+                <div class="flex flex-col truncate">
+                  <h4
+                    class="text-skin-link truncate"
+                    v-text="delegate.name || shorten(delegate.user)"
+                  />
+                  <div
+                    class="text-[17px] text-skin-text truncate"
+                    v-text="shorten(delegate.user)"
+                  />
+                </div>
+              </div>
+              <div
+                class="hidden sm:flex items-center grow text-[17px] overflow-hidden leading-[22px] text-skin-heading"
+              >
+                <div
+                  v-if="delegate.statement"
+                  class="line-clamp-2 max-h-[44px]"
+                  v-text="
+                    shorten(removeMarkdown(delegate.statement.statement), 250)
+                  "
+                />
+              </div>
+              <div
+                class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
               >
                 <h4
-                  class="text-skin-link truncate"
-                  v-text="delegate.name || shorten(delegate.user)"
+                  class="text-skin-link"
+                  v-text="_n(delegate.tokenHoldersRepresentedAmount)"
                 />
                 <div
-                  class="text-[17px] text-skin-text truncate"
-                  v-text="shorten(delegate.id)"
+                  class="text-[17px]"
+                  v-text="_p(delegate.delegatorsPercentage)"
                 />
-              </router-link>
-            </div>
-            <div
-              class="hidden md:flex w-[20%] flex-col items-end justify-center leading-[22px] truncate"
-            >
-              <h4
-                class="text-skin-link"
-                v-text="_n(delegate.tokenHoldersRepresentedAmount)"
-              />
+              </div>
               <div
-                class="text-[17px]"
-                v-text="_p(delegate.delegatorsPercentage)"
-              />
-            </div>
-            <div
-              class="w-[40%] md:w-[20%] flex flex-col items-end justify-center pr-4 leading-[22px] truncate"
-            >
-              <h4 class="text-skin-link" v-text="_n(delegate.delegatedVotes)" />
-              <div class="text-[17px]" v-text="_p(delegate.votesPercentage)" />
+                class="w-[150px] flex flex-col sm:shrink-0 items-end justify-center leading-[22px] truncate"
+              >
+                <h4
+                  class="text-skin-link"
+                  v-text="_n(delegate.delegatedVotes)"
+                />
+                <div
+                  class="text-[17px]"
+                  v-text="_p(delegate.votesPercentage)"
+                />
+              </div>
+            </router-link>
+            <div class="flex items-center justify-center">
+              <UiDropdown>
+                <template #button>
+                  <UiButton class="!p-0 border-0 !h-[auto] bg-transparent">
+                    <IH-dots-horizontal class="text-skin-link" />
+                  </UiButton>
+                </template>
+                <template #items>
+                  <UiDropdownItem v-slot="{ active }">
+                    <button
+                      type="button"
+                      class="flex items-center gap-2"
+                      :class="{ 'opacity-80': active }"
+                      @click="handleDelegateClick(delegate.user)"
+                    >
+                      <IH-user-add />
+                      Delegate
+                    </button>
+                  </UiDropdownItem>
+                  <UiDropdownItem v-slot="{ active }">
+                    <router-link
+                      :to="{
+                        name: 'space-user-statement',
+                        params: {
+                          id: `${space.network}:${space.id}`,
+                          user: delegate.user
+                        }
+                      }"
+                      class="flex items-center gap-2"
+                      :class="{ 'opacity-80': active }"
+                    >
+                      <IH-user-circle />
+                      View profile
+                    </router-link>
+                  </UiDropdownItem>
+                  <UiDropdownItem v-slot="{ active }">
+                    <a
+                      :href="
+                        currentNetwork.helpers.getExplorerUrl(
+                          delegate.user,
+                          'address'
+                        )
+                      "
+                      target="_blank"
+                      class="flex items-center gap-2"
+                      :class="{ 'opacity-80': active }"
+                    >
+                      <IH-arrow-sm-right class="-rotate-45" />
+                      View on block explorer
+                    </a>
+                  </UiDropdownItem>
+                </template>
+              </UiDropdown>
             </div>
           </div>
           <template #loading>
@@ -200,6 +291,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :open="delegateModalOpen"
         :space="space"
         :delegation="delegation"
+        :initial-state="delegateModalState"
         @close="delegateModalOpen = false"
       />
     </teleport>

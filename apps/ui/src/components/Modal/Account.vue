@@ -4,6 +4,7 @@ import connectors, {
   getConnectorIconUrl,
   mapConnectorId
 } from '@/helpers/connectors';
+import { getCacheHash } from '@/helpers/utils';
 
 const win = window;
 
@@ -26,6 +27,7 @@ const emit = defineEmits<{
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
+const usersStore = useUsersStore();
 const step: Ref<'connect' | null> = ref(null);
 
 const availableConnectors = computed(() => {
@@ -40,6 +42,15 @@ const availableConnectors = computed(() => {
     return hasNoType || isActive;
   });
 });
+
+const user = computed(
+  () =>
+    usersStore.getUser(web3.value.account) || {
+      id: web3.value.account,
+      avatar: undefined
+    }
+);
+const cb = computed(() => getCacheHash(user.value.avatar));
 
 async function handleLogout() {
   await logout();
@@ -90,7 +101,7 @@ watch(open, () => (step.value = null));
             class="w-full flex justify-center items-center space-x-2"
             @click="emit('close')"
           >
-            <UiStamp :id="web3.account" :size="18" />
+            <UiStamp :id="user.id" :size="18" :cb="cb" />
             <span>My profile</span>
           </UiButton>
         </router-link>

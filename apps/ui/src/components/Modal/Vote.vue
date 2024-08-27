@@ -57,16 +57,16 @@ const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
-const offchainProposal = computed(() =>
+const offchainProposal = computed<boolean>(() =>
   offchainNetworks.includes(props.proposal.network)
 );
 
-const canSubmit = computed(
+const canSubmit = computed<boolean>(
   () =>
     formValidated &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
-    votingPower.value?.canVote
+    !!votingPower.value?.canVote
 );
 
 async function handleSubmit() {
@@ -229,17 +229,6 @@ watchEffect(async () => {
       :execute="voteFn"
       @confirmed="handleConfirmed"
       @close="modalTransactionOpen = false"
-    />
-    <ModalShare
-      :open="modalShareOpen"
-      :tx-id="txId"
-      :show-icon="true"
-      :shareable="{ proposal, choice: selectedChoice! }"
-      :messages="{
-        title: 'Your vote is in!',
-        subtitle: 'Thank you for participating!'
-      }"
-      @close="modalShareOpen = false"
     />
   </teleport>
 </template>

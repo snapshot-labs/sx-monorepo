@@ -244,7 +244,11 @@ export function useActions() {
     );
   }
 
-  async function vote(proposal: Proposal, choice: Choice, reason: string) {
+  async function vote(
+    proposal: Proposal,
+    choice: Choice,
+    reason: string
+  ): Promise<string | null> {
     if (!web3.value.account) {
       await forceLogin();
       return null;
