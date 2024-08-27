@@ -37,6 +37,7 @@ const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
+const modalTransactionOpen = ref(false);
 
 const formValidator = getValidator({
   $async: true,
@@ -53,38 +54,55 @@ const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
-const canSubmit = computed(
+const offchainProposal = computed<boolean>(() =>
+  offchainNetworks.includes(props.proposal.network)
+);
+
+const canSubmit = computed<boolean>(
   () =>
     formValidated &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
-    votingPower.value?.canVote
+    !!votingPower.value?.canVote
 );
 
 async function handleSubmit() {
   loading.value = true;
 
-  if (!props.choice) return;
-
-  try {
-    await vote(props.proposal, props.choice, form.value.reason);
-
+  if (offchainProposal.value) {
     try {
-      // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
-      if (offchainNetworks.includes(props.proposal.network)) {
-        proposalsStore.fetchProposal(
-          props.proposal.space.id,
-          props.proposal.id,
-          props.proposal.network
-        );
-        await loadVotes(props.proposal.network, [props.proposal.space.id]);
-      }
+      await voteFn();
+      handleConfirmed();
     } finally {
-      emit('voted');
-      emit('close');
+      loading.value = false;
     }
-  } finally {
+  } else {
+    emit('close');
     loading.value = false;
+    modalTransactionOpen.value = true;
+  }
+}
+
+async function voteFn() {
+  if (!props.choice) return null;
+
+  return vote(props.proposal, props.choice, form.value.reason);
+}
+
+async function handleConfirmed() {
+  emit('voted');
+  emit('close');
+  modalTransactionOpen.value = false;
+  loading.value = false;
+
+  // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+  if (offchainProposal.value) {
+    proposalsStore.fetchProposal(
+      props.proposal.space.id,
+      props.proposal.id,
+      props.proposal.network
+    );
+    await loadVotes(props.proposal.network, [props.proposal.space.id]);
   }
 }
 
@@ -192,4 +210,17 @@ watchEffect(async () => {
       </div>
     </template>
   </UiModal>
+
+  <teleport to="#modal">
+    <ModalTransactionProgress
+      :open="modalTransactionOpen"
+      :network-id="proposal.network"
+      :messages="{
+        approveTitle: 'Confirm your vote'
+      }"
+      :execute="voteFn"
+      @confirmed="handleConfirmed"
+      @close="modalTransactionOpen = false"
+    />
+  </teleport>
 </template>

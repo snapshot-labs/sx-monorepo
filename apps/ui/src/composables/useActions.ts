@@ -244,12 +244,19 @@ export function useActions() {
     );
   }
 
-  async function vote(proposal: Proposal, choice: Choice, reason: string) {
-    if (!web3.value.account) return await forceLogin();
+  async function vote(
+    proposal: Proposal,
+    choice: Choice,
+    reason: string
+  ): Promise<string | null> {
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
     const network = getNetwork(proposal.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
         auth.web3,
@@ -269,6 +276,8 @@ export function useActions() {
       proposalId: proposal.id,
       choice
     });
+
+    return txHash;
   }
 
   async function propose(
