@@ -40,11 +40,6 @@ watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
         </a>
       </div>
     </div>
-    <TopicsList
-      title="Topics"
-      limit="off"
-      :loading="loading"
-      :topics="topics"
-    />
+    <TopicsList title="Topics" :loading="loading" :topics="topics" />
   </div>
 </template>
