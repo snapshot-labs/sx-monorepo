@@ -17,6 +17,7 @@ import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
+import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
@@ -42,6 +43,11 @@ const routes: any[] = [
     children: [
       { path: '', name: 'space-overview', component: SpaceOverview },
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
+      {
+        path: 'discussions',
+        name: 'space-discussions',
+        component: SpaceDiscussions
+      },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       {
         path: 'settings',

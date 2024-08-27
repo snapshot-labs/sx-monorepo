@@ -1,0 +1,49 @@
+<script setup lang="ts">
+import { loadTopics, SPACES_DISCUSSIONS, Topic } from '@/helpers/discourse';
+import { Space } from '@/types';
+import ICDiscourse from '~icons/c/discourse';
+
+const props = defineProps<{ space: Space }>();
+
+const { setTitle } = useTitle();
+
+const topics: Ref<Topic[]> = ref([]);
+const loading = ref(false);
+
+const discussionsUrl =
+  SPACES_DISCUSSIONS[`${props.space.network}:${props.space.id}`];
+
+onMounted(async () => {
+  try {
+    loading.value = true;
+    topics.value = await loadTopics(discussionsUrl);
+    loading.value = false;
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
+</script>
+
+<template>
+  <div>
+    <div class="flex p-4">
+      <div class="flex-grow">
+        <a :href="discussionsUrl" target="_blank" class="inline-block">
+          <UiButton class="flex items-center gap-2 justify-center">
+            <component :is="ICDiscourse" class="size-[22px]" />
+            Join the discussion
+            <IH-arrow-sm-right class="inline-block -rotate-45" />
+          </UiButton>
+        </a>
+      </div>
+    </div>
+    <TopicsList
+      title="Topics"
+      limit="off"
+      :loading="loading"
+      :topics="topics"
+    />
+  </div>
+</template>
