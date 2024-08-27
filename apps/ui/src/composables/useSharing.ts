@@ -7,8 +7,8 @@ import ICX from '~icons/c/x';
 type SpaceUser = { user: User; space: Space };
 type SocialNetwork = 'x' | 'lens' | 'farcaster';
 
-export type ShareableType = 'proposal' | 'user' | 'space-user';
-export type PayloadType = User | Proposal | SpaceUser;
+export type PayloadType = 'proposal' | 'user' | 'space-user';
+export type Payload = User | Proposal | SpaceUser;
 
 const HASH_TAG = 'Snapshot';
 
@@ -60,7 +60,7 @@ export function useSharing() {
     }`;
   }
 
-  function getMessage(type: ShareableType, payload: PayloadType): string {
+  function getMessage(type: PayloadType, payload: Payload): string {
     switch (type) {
       case 'user':
         return getUserMessage(payload as User);
@@ -87,8 +87,8 @@ export function useSharing() {
 
   function getShareUrl(
     socialNetwork: SocialNetwork,
-    type: ShareableType,
-    payload: PayloadType
+    type: PayloadType,
+    payload: Payload
   ): string {
     let message = encodeURIComponent(getMessage(type, payload));
 
