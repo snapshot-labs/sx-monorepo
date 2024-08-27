@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
+import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
+import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
@@ -65,6 +67,14 @@ const navigationConfig = computed<
           delegates: {
             name: 'Delegates',
             icon: IHLightningBolt
+          }
+        }
+      : undefined),
+    ...(SPACES_DISCUSSIONS[`${networkId.value}:${address.value}`]
+      ? {
+          discussions: {
+            name: 'Discussions',
+            icon: IHAnnotation
           }
         }
       : undefined),

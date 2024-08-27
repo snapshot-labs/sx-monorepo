@@ -2,7 +2,6 @@
 import { loadReplies, Reply } from '@/helpers/discourse';
 import { _rt, sanitizeUrl, stripHtmlTags } from '@/helpers/utils';
 import { Proposal } from '@/types';
-import ICDiscourse from '~icons/c/discourse';
 
 const props = defineProps<{ proposal: Proposal }>();
 
@@ -30,7 +29,7 @@ onMounted(async () => {
       <div class="max-w-[680px] mx-auto">
         <a :href="discussion" target="_blank">
           <UiButton class="flex items-center gap-2 w-full justify-center">
-            <component :is="ICDiscourse" class="size-[22px]" />
+            <IC-discourse class="size-[22px]" />
             Join the discussion
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </UiButton>
