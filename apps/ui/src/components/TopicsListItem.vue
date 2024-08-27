@@ -36,7 +36,7 @@ defineProps<{ topic: Topic }>();
               v-for="(user, i) in topic.users"
               :key="i"
               :src="user.avatar_template"
-              class="rounded-full size-[22px] inline-block -ml-1.5 border-2 border-skin-bg"
+              class="rounded-full size-[22px] inline-block -ml-1.5 border-2 border-skin-bg bg-skin-border"
             />
           </span>
           by
