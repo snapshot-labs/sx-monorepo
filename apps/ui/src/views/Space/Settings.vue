@@ -437,6 +437,7 @@ function getInitialForm(space: Space) {
 }
 
 async function reset() {
+  formErrors.value = {};
   form.value = getInitialForm(props.space);
 
   const authenticatorsValue = await getInitialStrategiesConfig(
