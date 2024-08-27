@@ -588,240 +588,238 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         </button>
       </div>
     </UiScrollerHorizontal>
+    <div v-if="loading" class="p-4">
+      <UiLoading />
+    </div>
     <div
+      v-else
       class="space-y-4"
       :class="{
-        'mx-4 pt-4 max-w-[592px]': activeTab !== 'profile'
+        'mx-4 max-w-[592px]': activeTab !== 'profile'
       }"
     >
-      <UiLoading v-if="loading" />
-      <template v-else>
-        <div v-show="activeTab === 'profile'">
-          <FormSpaceProfile
-            :id="space.id"
-            :space="space"
-            :form="form"
-            @errors="v => (formErrors = v)"
-          />
-        </div>
-        <UiContainerSettings
-          v-if="activeTab === 'delegations'"
-          title="Delegations"
-          description="Delegations allow users to delegate their voting power to other users."
-        >
-          <FormSpaceDelegations
-            :delegations-value="form.delegations"
-            @delegations="v => (form.delegations = v)"
-          />
-        </UiContainerSettings>
-        <UiContainerSettings
-          v-if="activeTab === 'treasuries'"
-          title="Treasuries"
-          description="Treasuries are used to manage the funds of the space."
-        >
-          <FormSpaceTreasuries
-            :treasuries-value="form.treasuries"
-            @treasuries="v => (form.treasuries = v)"
-          />
-        </UiContainerSettings>
-        <FormStrategies
-          v-if="activeTab === 'authenticators'"
-          v-model="authenticators"
-          unique
-          :network-id="space.network"
-          :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
-          title="Authenticators"
-          description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+      <div v-show="activeTab === 'profile'">
+        <FormSpaceProfile
+          :id="space.id"
+          :space="space"
+          :form="form"
+          @errors="v => (formErrors = v)"
         />
-        <FormValidation
-          v-else-if="activeTab === 'proposal-validation'"
-          v-model="validationStrategy"
-          :network-id="space.network"
-          :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
-          :available-voting-strategies="
-            network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
-          "
-          title="Proposal validation"
-          description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
+      </div>
+      <UiContainerSettings
+        v-if="activeTab === 'delegations'"
+        title="Delegations"
+        description="Delegations allow users to delegate their voting power to other users."
+      >
+        <FormSpaceDelegations
+          :delegations-value="form.delegations"
+          @delegations="v => (form.delegations = v)"
         />
-        <FormStrategies
-          v-else-if="activeTab === 'voting-strategies'"
-          v-model="votingStrategies"
-          :network-id="space.network"
-          :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
-          title="Voting strategies"
-          description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-if="activeTab === 'treasuries'"
+        title="Treasuries"
+        description="Treasuries are used to manage the funds of the space."
+      >
+        <FormSpaceTreasuries
+          :treasuries-value="form.treasuries"
+          @treasuries="v => (form.treasuries = v)"
         />
-        <UiContainerSettings
-          v-else-if="activeTab === 'voting'"
-          title="Voting"
-          description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
-        >
-          <h4 class="eyebrow mb-2 font-medium">Voting</h4>
-          <div class="space-y-3">
-            <div>
-              <div class="s-label !mb-0">Voting delay</div>
-              <UiEditable
-                editable
-                :initial-value="
-                  votingDelay || currentToMinutesOnly(space.voting_delay)
-                "
-                :definition="{
-                  type: 'integer',
-                  format: 'duration'
-                }"
-                @save="value => (votingDelay = Number(value))"
-              >
-                <h4
-                  class="text-skin-link text-md"
-                  v-text="
-                    (votingDelay !== null
-                      ? _d(votingDelay)
-                      : formatCurrentValue(space.voting_delay)) || 'No delay'
-                  "
-                />
-              </UiEditable>
-            </div>
-            <div>
-              <div class="s-label !mb-0">Min. voting period</div>
-              <UiEditable
-                editable
-                :initial-value="
-                  minVotingPeriod ||
-                  currentToMinutesOnly(space.min_voting_period)
-                "
-                :definition="{
-                  type: 'integer',
-                  format: 'duration'
-                }"
-                :custom-error-validation="
-                  value =>
-                    !getIsMinVotingPeriodValid(Number(value))
-                      ? 'Must be equal to or lower than max. voting period'
-                      : undefined
-                "
-                @save="value => (minVotingPeriod = Number(value))"
-              >
-                <h4
-                  class="text-skin-link text-md"
-                  v-text="
-                    (minVotingPeriod !== null
-                      ? _d(minVotingPeriod)
-                      : formatCurrentValue(space.min_voting_period)) ||
-                    'No min.'
-                  "
-                />
-              </UiEditable>
-            </div>
-            <div>
-              <div class="s-label !mb-0">Max. voting period</div>
-              <UiEditable
-                editable
-                :initial-value="
-                  maxVotingPeriod ||
-                  currentToMinutesOnly(space.max_voting_period)
-                "
-                :definition="{
-                  type: 'integer',
-                  format: 'duration'
-                }"
-                :custom-error-validation="
-                  value =>
-                    !getIsMaxVotingPeriodValid(Number(value))
-                      ? 'Must be equal to or higher than min. voting period'
-                      : undefined
-                "
-                @save="value => (maxVotingPeriod = Number(value))"
-              >
-                <h4
-                  class="text-skin-link text-md"
-                  v-text="
-                    (maxVotingPeriod !== null
-                      ? _d(maxVotingPeriod)
-                      : formatCurrentValue(space.max_voting_period)) || '0m'
-                  "
-                />
-              </UiEditable>
-            </div>
-          </div>
-        </UiContainerSettings>
-        <UiContainerSettings
-          v-else-if="activeTab === 'execution'"
-          title="Execution(s)"
-          description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
-        >
-          <div class="space-y-3">
-            <FormStrategiesStrategyActive
-              v-for="strategy in executionStrategies"
-              :key="strategy.id"
-              read-only
-              :network-id="space.network"
-              :strategy="strategy"
-            />
-          </div>
-        </UiContainerSettings>
-        <UiContainerSettings
-          v-else-if="activeTab === 'controller'"
-          title="Controller"
-          description="The controller is the account able to change the space settings and cancel pending proposals."
-        >
-          <div
-            class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
-          >
-            <div class="flex flex-col">
-              <a
-                :href="network.helpers.getExplorerUrl(controller, 'contract')"
-                target="_blank"
-                class="flex items-center text-skin-text leading-5"
-              >
-                <UiStamp
-                  :id="controller"
-                  type="avatar"
-                  :size="18"
-                  class="mr-2 !rounded"
-                />
-                {{ shorten(controller) }}
-                <IH-arrow-sm-right class="-rotate-45" />
-              </a>
-            </div>
-            <button type="button" @click="changeControllerModalOpen = true">
-              <IH-pencil />
-            </button>
-          </div>
-          <teleport to="#modal">
-            <ModalChangeController
-              :open="changeControllerModalOpen"
-              :initial-state="{ controller }"
-              @close="changeControllerModalOpen = false"
-              @save="handleControllerSave"
-            />
-          </teleport>
-        </UiContainerSettings>
-        <div
-          v-if="!uiStore.sidebarOpen && ((isModified && isController) || error)"
-          class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
-        >
-          <h4
-            class="leading-7 font-medium truncate mb-2 xs:mb-0"
-            :class="{ 'text-skin-danger': error }"
-          >
-            {{ error || 'You have unsaved changes' }}
-          </h4>
-          <div class="flex space-x-3">
-            <button type="reset" class="text-skin-heading" @click="reset">
-              Reset
-            </button>
-            <UiButton
-              v-if="!error"
-              :loading="saving"
-              primary
-              @click="handleSettingsSave"
+      </UiContainerSettings>
+      <FormStrategies
+        v-if="activeTab === 'authenticators'"
+        v-model="authenticators"
+        unique
+        :network-id="space.network"
+        :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
+        title="Authenticators"
+        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+      />
+      <FormValidation
+        v-else-if="activeTab === 'proposal-validation'"
+        v-model="validationStrategy"
+        :network-id="space.network"
+        :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
+        :available-voting-strategies="
+          network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
+        "
+        title="Proposal validation"
+        description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
+      />
+      <FormStrategies
+        v-else-if="activeTab === 'voting-strategies'"
+        v-model="votingStrategies"
+        :network-id="space.network"
+        :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
+        title="Voting strategies"
+        description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+      />
+      <UiContainerSettings
+        v-else-if="activeTab === 'voting'"
+        title="Voting"
+        description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
+      >
+        <h4 class="eyebrow mb-2 font-medium">Voting</h4>
+        <div class="space-y-3">
+          <div>
+            <div class="s-label !mb-0">Voting delay</div>
+            <UiEditable
+              editable
+              :initial-value="
+                votingDelay || currentToMinutesOnly(space.voting_delay)
+              "
+              :definition="{
+                type: 'integer',
+                format: 'duration'
+              }"
+              @save="value => (votingDelay = Number(value))"
             >
-              Save
-            </UiButton>
+              <h4
+                class="text-skin-link text-md"
+                v-text="
+                  (votingDelay !== null
+                    ? _d(votingDelay)
+                    : formatCurrentValue(space.voting_delay)) || 'No delay'
+                "
+              />
+            </UiEditable>
+          </div>
+          <div>
+            <div class="s-label !mb-0">Min. voting period</div>
+            <UiEditable
+              editable
+              :initial-value="
+                minVotingPeriod || currentToMinutesOnly(space.min_voting_period)
+              "
+              :definition="{
+                type: 'integer',
+                format: 'duration'
+              }"
+              :custom-error-validation="
+                value =>
+                  !getIsMinVotingPeriodValid(Number(value))
+                    ? 'Must be equal to or lower than max. voting period'
+                    : undefined
+              "
+              @save="value => (minVotingPeriod = Number(value))"
+            >
+              <h4
+                class="text-skin-link text-md"
+                v-text="
+                  (minVotingPeriod !== null
+                    ? _d(minVotingPeriod)
+                    : formatCurrentValue(space.min_voting_period)) || 'No min.'
+                "
+              />
+            </UiEditable>
+          </div>
+          <div>
+            <div class="s-label !mb-0">Max. voting period</div>
+            <UiEditable
+              editable
+              :initial-value="
+                maxVotingPeriod || currentToMinutesOnly(space.max_voting_period)
+              "
+              :definition="{
+                type: 'integer',
+                format: 'duration'
+              }"
+              :custom-error-validation="
+                value =>
+                  !getIsMaxVotingPeriodValid(Number(value))
+                    ? 'Must be equal to or higher than min. voting period'
+                    : undefined
+              "
+              @save="value => (maxVotingPeriod = Number(value))"
+            >
+              <h4
+                class="text-skin-link text-md"
+                v-text="
+                  (maxVotingPeriod !== null
+                    ? _d(maxVotingPeriod)
+                    : formatCurrentValue(space.max_voting_period)) || '0m'
+                "
+              />
+            </UiEditable>
           </div>
         </div>
-      </template>
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'execution'"
+        title="Execution(s)"
+        description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
+      >
+        <div class="space-y-3">
+          <FormStrategiesStrategyActive
+            v-for="strategy in executionStrategies"
+            :key="strategy.id"
+            read-only
+            :network-id="space.network"
+            :strategy="strategy"
+          />
+        </div>
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'controller'"
+        title="Controller"
+        description="The controller is the account able to change the space settings and cancel pending proposals."
+      >
+        <div
+          class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
+        >
+          <div class="flex flex-col">
+            <a
+              :href="network.helpers.getExplorerUrl(controller, 'contract')"
+              target="_blank"
+              class="flex items-center text-skin-text leading-5"
+            >
+              <UiStamp
+                :id="controller"
+                type="avatar"
+                :size="18"
+                class="mr-2 !rounded"
+              />
+              {{ shorten(controller) }}
+              <IH-arrow-sm-right class="-rotate-45" />
+            </a>
+          </div>
+          <button type="button" @click="changeControllerModalOpen = true">
+            <IH-pencil />
+          </button>
+        </div>
+        <teleport to="#modal">
+          <ModalChangeController
+            :open="changeControllerModalOpen"
+            :initial-state="{ controller }"
+            @close="changeControllerModalOpen = false"
+            @save="handleControllerSave"
+          />
+        </teleport>
+      </UiContainerSettings>
+      <div
+        v-if="!uiStore.sidebarOpen && ((isModified && isController) || error)"
+        class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+      >
+        <h4
+          class="leading-7 font-medium truncate mb-2 xs:mb-0"
+          :class="{ 'text-skin-danger': error }"
+        >
+          {{ error || 'You have unsaved changes' }}
+        </h4>
+        <div class="flex space-x-3">
+          <button type="reset" class="text-skin-heading" @click="reset">
+            Reset
+          </button>
+          <UiButton
+            v-if="!error"
+            :loading="saving"
+            primary
+            @click="handleSettingsSave"
+          >
+            Save
+          </UiButton>
+        </div>
+      </div>
     </div>
     <teleport to="#modal">
       <ModalTransactionProgress
