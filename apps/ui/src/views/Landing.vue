@@ -20,10 +20,26 @@ const SOCIALS = [
     icon: ICGithub
   }
 ];
+
+const router = useRouter();
+const { web3, authInitiated } = useWeb3();
+
+watch(
+  () => web3.value.account,
+  account => {
+    if (!account) return;
+
+    router.push({ name: 'my-home' });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <div>
+  <div v-if="!authInitiated || web3.authLoading" class="p-4">
+    <UiLoading />
+  </div>
+  <div v-else>
     <div class="py-8 mb-6 border-b hero">
       <UiContainer class="!max-w-screen-md my-1">
         <h1 class="mb-4 mono max-w-[580px]">
