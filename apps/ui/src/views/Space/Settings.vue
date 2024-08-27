@@ -579,21 +579,22 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         </button>
       </div>
     </UiScrollerHorizontal>
-    <div class="space-y-4 mx-4 pt-4">
+    <div
+      class="space-y-4"
+      :class="{
+        'mx-4 pt-4 max-w-[592px]': activeTab !== 'profile'
+      }"
+    >
       <UiLoading v-if="loading" />
       <template v-else>
-        <UiContainerSettings
-          v-if="activeTab === 'profile'"
-          title="Profile"
-          description="Those settings are used to customize the appearance of the space."
-        >
+        <div v-if="activeTab === 'profile'">
           <FormSpaceProfile
             :id="space.id"
             :space="space"
             :form="form"
             @errors="v => (formErrors = v)"
           />
-        </UiContainerSettings>
+        </div>
         <UiContainerSettings
           v-if="activeTab === 'delegations'"
           title="Delegations"

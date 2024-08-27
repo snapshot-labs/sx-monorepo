@@ -93,7 +93,7 @@ onMounted(() => {
 
 <template>
   <UiInputStampCover v-model="(form as any).cover" :space="space" />
-  <div class="s-box p-4 mt-[-80px]">
+  <div class="s-box p-4 mt-[-80px] max-w-[640px]">
     <UiForm :model-value="form" :error="formErrors" :definition="definition" />
   </div>
 </template>
