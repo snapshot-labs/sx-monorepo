@@ -230,5 +230,16 @@ watchEffect(async () => {
       @confirmed="handleConfirmed"
       @close="modalTransactionOpen = false"
     />
+    <ModalShare
+      :open="modalShareOpen"
+      :tx-id="txId"
+      :show-icon="true"
+      :shareable="{ proposal, choice: selectedChoice! }"
+      :messages="{
+        title: 'Your vote is in!',
+        subtitle: 'Thank you for participating!'
+      }"
+      @close="modalShareOpen = false"
+    />
   </teleport>
 </template>
