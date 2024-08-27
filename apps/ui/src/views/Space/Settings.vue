@@ -529,6 +529,12 @@ function handleControllerSave(value: string) {
   executeFn.value = saveController;
 }
 
+function handleTabFocus(event: FocusEvent) {
+  if (!event.target) return;
+
+  (event.target as HTMLElement).scrollIntoView();
+}
+
 watch(
   () => props.space,
   space => {
@@ -574,7 +580,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           v-for="tab in TABS"
           :key="tab.id"
           type="button"
+          class="scroll-mx-8"
           @click="activeTab = tab.id"
+          @focus="handleTabFocus"
         >
           <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
         </button>

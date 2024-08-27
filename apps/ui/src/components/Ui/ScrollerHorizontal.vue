@@ -44,6 +44,7 @@ onMounted(() => {
     <button
       v-if="gradient && (!withButtons || canScrollTabs.canScrollLeft)"
       type="button"
+      tabindex="-1"
       :disabled="!withButtons"
       class="bg-gradient-to-r from-skin-bg left-0 top-[1px] bottom-[1px] absolute z-10"
       :class="{
@@ -69,6 +70,7 @@ onMounted(() => {
     <button
       v-if="gradient && (!withButtons || canScrollTabs.canScrollRight)"
       type="button"
+      tabindex="-1"
       :disabled="!withButtons"
       class="bg-gradient-to-l from-skin-bg right-0 top-[1px] bottom-[1px] absolute z-10"
       :class="{
