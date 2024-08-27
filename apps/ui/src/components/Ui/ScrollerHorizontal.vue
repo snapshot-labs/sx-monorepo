@@ -52,7 +52,7 @@ onMounted(() => {
         'pointer-events-none': !withButtons,
         'w-2': gradient === 'sm',
         'w-3': gradient === 'md',
-        'w-[108px]': gradient === 'xxl'
+        'w-[108px] via-70% via-skin-bg/85': gradient === 'xxl'
       }"
       @click="scroll('left')"
     >
@@ -78,7 +78,7 @@ onMounted(() => {
         'pointer-events-none': !withButtons,
         'w-2': gradient === 'sm',
         'w-3': gradient === 'md',
-        'w-[108px]': gradient === 'xxl'
+        'w-[108px] via-70% via-skin-bg/85': gradient === 'xxl'
       }"
       @click="scroll('right')"
     >
