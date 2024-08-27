@@ -21,7 +21,7 @@ defineProps<{ topic: Topic }>();
               />
               <IS-lock-closed
                 v-if="topic.closed"
-                class="inline-block shrink-0 size-[16px] -mt-1"
+                class="inline-block shrink-0 size-[16px] -mt-1 md:mt-1"
               />
               <h3 class="text-[21px] inline md:truncate" v-text="topic.title" />
               <IH-arrow-sm-right
