@@ -211,12 +211,23 @@ export function lsRemove(key: string) {
   return localStorage.removeItem(`${pkg.name}.${key}`);
 }
 
-export function _d(s: number) {
-  const duration = dayjs.duration(s, 'seconds');
-  const daysLeft = Math.floor(duration.asDays());
+export function _d(s: number): string {
+  const SECONDS_TO_DAYS = 60 * 60 * 24;
+  const SECONDS_TO_HOURS = 60 * 60;
+  const SECONDS_TO_MINUTES = 60;
 
-  return duration
-    .format(`[${daysLeft}d] H[h] m[m] s[s]`)
+  const days = Math.floor(s / SECONDS_TO_DAYS);
+  const hours = Math.floor((s - days * SECONDS_TO_DAYS) / SECONDS_TO_HOURS);
+  const minutes = Math.floor(
+    (s - days * SECONDS_TO_DAYS - hours * SECONDS_TO_HOURS) / SECONDS_TO_MINUTES
+  );
+  const seconds =
+    s -
+    days * SECONDS_TO_DAYS -
+    hours * SECONDS_TO_HOURS -
+    minutes * SECONDS_TO_MINUTES;
+
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`
     .replace(/\b0+[a-z]+\s*/gi, '')
     .trim();
 }
@@ -282,6 +293,10 @@ export function abiToDefinition(abi) {
     definition.properties[input.name].title = `${input.name} (${input.type})`;
   });
   return definition;
+}
+
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function memoize<T extends any[], U>(fn: (...args: T) => U) {
@@ -484,7 +499,7 @@ export function getChoiceText(availableChoices: string[], choice: Choice) {
   }
 
   if (typeof choice === 'number') {
-    return availableChoices[choice - 1] || 'Invalid choice';
+    return availableChoices[choice - 1] ?? 'Invalid choice';
   }
 
   if (Array.isArray(choice)) {

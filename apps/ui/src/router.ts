@@ -9,6 +9,7 @@ import Home from '@/views/My/Home.vue';
 import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
+import ProposalDiscussion from '@/views/Proposal/Discussion.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
 import Proposal from '@/views/Proposal.vue';
@@ -16,7 +17,7 @@ import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
-import SpaceEditSettings from '@/views/Space/EditSettings.vue';
+import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
@@ -42,12 +43,16 @@ const routes: any[] = [
     children: [
       { path: '', name: 'space-overview', component: SpaceOverview },
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
-      { path: 'search', name: 'space-search', component: SpaceSearch },
-      { path: 'settings', name: 'space-settings', component: SpaceSettings },
       {
-        path: 'edit-settings',
-        name: 'space-edit-settings',
-        component: SpaceEditSettings
+        path: 'discussions',
+        name: 'space-discussions',
+        component: SpaceDiscussions
+      },
+      { path: 'search', name: 'space-search', component: SpaceSearch },
+      {
+        path: 'settings',
+        name: 'space-settings',
+        component: SpaceSettings
       },
       { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
       { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
@@ -92,7 +97,12 @@ const routes: any[] = [
     component: Proposal,
     children: [
       { path: '', name: 'proposal-overview', component: ProposalOverview },
-      { path: 'votes', name: 'proposal-votes', component: ProposalVotes }
+      { path: 'votes', name: 'proposal-votes', component: ProposalVotes },
+      {
+        path: 'discussion',
+        name: 'proposal-discussion',
+        component: ProposalDiscussion
+      }
     ]
   },
   { path: '/create', name: 'create', component: Create },

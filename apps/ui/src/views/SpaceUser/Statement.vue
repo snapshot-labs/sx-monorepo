@@ -40,6 +40,7 @@ async function loadStatement() {
     )) || {
       space: props.space.id,
       network: props.space.network,
+      delegate: userId.value,
       about: '',
       statement: '',
       status: 'INACTIVE',
