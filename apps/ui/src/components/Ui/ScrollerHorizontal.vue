@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const emit = defineEmits(['scroll']);
+const emit = defineEmits<{
+  (e: 'scroll', target: HTMLElement);
+}>();
 
 withDefaults(
   defineProps<{
