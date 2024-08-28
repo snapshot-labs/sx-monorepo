@@ -595,7 +595,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     </div>
     <div
       v-else
-      class="space-y-4"
+      class="space-y-4 pb-8"
       :class="{
         'mx-4 max-w-[592px]': activeTab !== 'profile'
       }"
