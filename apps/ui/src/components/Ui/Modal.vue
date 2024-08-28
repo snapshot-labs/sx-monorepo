@@ -23,8 +23,8 @@ onBeforeUnmount(() => {
   modalOpen.value = false;
 });
 
-watch(open, (val, prev) => {
-  if (val !== prev) modalOpen.value = !modalOpen.value;
+watch(open, val => {
+  modalOpen.value = val;
 });
 </script>
 

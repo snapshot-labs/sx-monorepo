@@ -3,6 +3,7 @@ import { startIntercom } from './helpers/intercom';
 import { Transaction } from './types';
 
 const el = ref(null);
+const sidebarSwipeEnabled = ref(true);
 
 const route = useRoute();
 const router = useRouter();
@@ -10,7 +11,16 @@ const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, app } = useApp();
 const { web3 } = useWeb3();
-const { isSwiping, direction } = useSwipe(el);
+const { isSwiping, direction } = useSwipe(el, {
+  onSwipe(e: TouchEvent) {
+    const noSideBarSwipe = (e.target as Element)?.closest(
+      '[data-no-sidebar-swipe]'
+    );
+    sidebarSwipeEnabled.value =
+      !noSideBarSwipe ||
+      (noSideBarSwipe && noSideBarSwipe.getBoundingClientRect().x === 0);
+  }
+});
 const { createDraft } = useEditor();
 const { spaceKey, network, executionStrategy, transaction, reset } =
   useWalletConnectTransaction();
@@ -60,6 +70,7 @@ watch(route, () => {
 
 watch(isSwiping, () => {
   if (
+    sidebarSwipeEnabled.value &&
     isSwiping.value &&
     !modalOpen.value &&
     ((direction.value === 'right' && !uiStore.sidebarOpen) ||

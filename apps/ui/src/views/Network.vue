@@ -151,8 +151,8 @@ watchEffect(() => setTitle('Network'));
 
     <div class="text-center">
       <div class="eyebrow mb-4">Trusted by</div>
-      <div class="overflow-y-scroll no-scrollbar px-4">
-        <div class="w-fit mx-auto">
+      <UiScrollerHorizontal>
+        <div class="w-fit mx-auto px-4">
           <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
             <a
               v-for="(customer, i) in CUSTOMERS"
@@ -168,7 +168,7 @@ watchEffect(() => setTitle('Network'));
             </a>
           </div>
         </div>
-      </div>
+      </UiScrollerHorizontal>
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">

@@ -219,14 +219,17 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     maxVotingDuration: number
   );
   transferOwnership(web3: Web3Provider, space: Space, owner: string);
-  updateStrategies(
+  updateSettings(
     web3: Web3Provider,
     space: Space,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
-    validationStrategy: StrategyConfig
+    validationStrategy: StrategyConfig,
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
   );
   delegate(
     web3: Web3Provider,
@@ -289,6 +292,11 @@ export type NetworkApi = {
     spaceId: string,
     userId: string
   ): Promise<Statement | null>;
+  loadStatements(
+    networkId: NetworkID,
+    spaceId: string,
+    userIds: string[]
+  ): Promise<Statement[]>;
 };
 
 export type NetworkConstants = {

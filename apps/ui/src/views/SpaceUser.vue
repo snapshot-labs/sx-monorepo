@@ -37,8 +37,6 @@ const user = computed(() => usersStore.getUser(userId.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
-const shareMsg = computed(() => encodeURIComponent(window.location.href));
-
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const formattedVotingPower = computed(() => {
@@ -198,7 +196,11 @@ watch(
             </UiButton>
           </router-link>
         </UiTooltip>
-        <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
+        <DropdownShare
+          :shareable="{ user, space }"
+          type="space-user"
+          class="!px-0 w-[46px]"
+        />
       </div>
     </div>
     <div class="px-4">
@@ -238,8 +240,9 @@ watch(
         </div>
       </div>
     </div>
-    <div
-      class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+    <UiScrollerHorizontal
+      class="z-40 sticky top-[71px] lg:top-[72px]"
+      gradient="md"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <router-link
@@ -254,7 +257,7 @@ watch(
           />
         </router-link>
       </div>
-    </div>
+    </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
   </div>
 </template>
