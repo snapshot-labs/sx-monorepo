@@ -25,7 +25,9 @@ const createConfig = (
       config.Strategies.OZVotesStorageProof,
       config.Strategies.OZVotesTrace208StorageProof,
       config.Strategies.EVMSlotValue
-    ].map(strategy => validateAndParseAddress(strategy)),
+    ]
+      .filter(address => !!address)
+      .map(strategy => validateAndParseAddress(strategy)),
     startBlock
   };
 };
