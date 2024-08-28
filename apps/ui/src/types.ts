@@ -265,6 +265,7 @@ export type Statement = {
   delegate: string;
   discourse: string;
   status: 'ACTIVE' | 'INACTIVE';
+  source: string | null;
 };
 
 export type Follow = {
