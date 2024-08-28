@@ -173,28 +173,25 @@ const navigationItems = computed(() =>
 <template>
   <div
     v-if="Object.keys(navigationItems).length"
-    class="lg:visible fixed w-[240px] border-r left-[72px] inset-y-0 z-10 bg-skin-bg"
+    class="lg:visible fixed w-[240px] border-r left-[72px] top-[72px] inset-y-0 z-10 bg-skin-bg py-4"
     :class="{
       invisible: !uiStore.sidebarOpen
     }"
   >
-    <div class="h-[72px] border-b" />
-    <div class="py-4">
-      <router-link
-        v-for="(item, key) in navigationItems"
-        :key="key"
-        :to="item.link"
-        class="px-4 py-1.5 space-x-2 flex items-center"
-        :class="item.active ? 'text-skin-link' : 'text-skin-text'"
-      >
-        <component :is="item.icon" class="inline-block"></component>
-        <span class="grow" v-text="item.name" />
-        <span
-          v-if="item.count"
-          class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-          v-text="item.count"
-        />
-      </router-link>
-    </div>
+    <router-link
+      v-for="(item, key) in navigationItems"
+      :key="key"
+      :to="item.link"
+      class="px-4 py-1.5 space-x-2 flex items-center"
+      :class="item.active ? 'text-skin-link' : 'text-skin-text'"
+    >
+      <component :is="item.icon" class="inline-block"></component>
+      <span class="grow" v-text="item.name" />
+      <span
+        v-if="item.count"
+        class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
+        v-text="item.count"
+      />
+    </router-link>
   </div>
 </template>
