@@ -49,6 +49,7 @@ watchEffect(() => setTitle('Explore'));
         gap="12px"
         placement="left"
         :items="protocols"
+        class="invisible"
       />
     </div>
   </div>
