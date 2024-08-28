@@ -45,9 +45,7 @@ const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
 
-const showLogo = computed(() =>
-  ['landing', 'settings'].includes(String(route.matched[0]?.name))
-);
+const showLogo = computed(() => String(route.matched[0]?.name) === 'landing');
 
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
