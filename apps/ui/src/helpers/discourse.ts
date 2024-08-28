@@ -26,6 +26,7 @@ export interface Topic {
   posts_count: number;
   url: string;
   user_url: string;
+  users: any[];
 }
 
 export const SPACES_DISCUSSIONS = {
@@ -65,7 +66,17 @@ export async function loadTopics(url: string): Promise<Topic[]> {
     topic.username = topic.last_poster_username;
     topic.user_url = `${baseUrl}/u/${topic.username}`;
     topic.created = Date.parse(topic.created_at) / 1000;
-
+    topic.users = topic.posters.map(poster =>
+      data.users.find(user => user.id === poster.user_id)
+    );
+    topic.users = topic.posters
+      .map(poster => data.users.find(user => user.id === poster.user_id))
+      .map(user => {
+        user.avatar_template = user.avatar_template.replace('{size}', '64');
+        if (user.avatar_template.startsWith('/'))
+          user.avatar_template = `${baseUrl}${user.avatar_template}`;
+        return user;
+      });
     return topic;
   });
 }
