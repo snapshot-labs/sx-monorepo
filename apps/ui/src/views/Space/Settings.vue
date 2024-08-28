@@ -532,7 +532,9 @@ function handleControllerSave(value: string) {
 function handleTabFocus(event: FocusEvent) {
   if (!event.target) return;
 
-  (event.target as HTMLElement).scrollIntoView();
+  (event.target as HTMLElement).scrollIntoView({
+    block: 'end'
+  });
 }
 
 watch(
