@@ -262,8 +262,10 @@ export type Statement = {
   network: NetworkID;
   about: string;
   statement: string;
+  delegate: string;
   discourse: string;
   status: 'ACTIVE' | 'INACTIVE';
+  source: string | null;
 };
 
 export type Follow = {
