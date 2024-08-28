@@ -103,10 +103,7 @@ watchEffect(() =>
         />
         <div v-if="statement.source">
           <h4 class="eyebrow text-skin-text mb-2">Source</h4>
-          <a
-            :href="SOURCE_ICONS[statement.source].link"
-            target="_blank"
-          >
+          <a :href="SOURCE_ICONS[statement.source].link" target="_blank">
             <component
               :is="SOURCE_ICONS[statement.source].icon"
               class="max-h-[25px] max-w-[85px] w-auto text-skin-link"
