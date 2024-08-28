@@ -17,7 +17,8 @@ const canScrollTabs = ref({ canScrollLeft: false, canScrollRight: false });
 function handleScroll(target: HTMLElement) {
   canScrollTabs.value = {
     canScrollLeft: target.scrollLeft > 0,
-    canScrollRight: target.scrollLeft < target.scrollWidth - target.clientWidth
+    canScrollRight:
+      Math.ceil(target.scrollLeft) < target.scrollWidth - target.clientWidth
   };
   emit('scroll', target);
 }
@@ -48,6 +49,7 @@ onMounted(() => {
     <button
       v-if="gradient && (!withButtons || canScrollTabs.canScrollLeft)"
       type="button"
+      tabindex="-1"
       :disabled="!withButtons"
       class="bg-gradient-to-r from-skin-bg left-0 top-[1px] bottom-[1px] absolute z-10"
       :class="{
@@ -55,7 +57,7 @@ onMounted(() => {
         'pointer-events-none': !withButtons,
         'w-2': gradient === 'sm',
         'w-3': gradient === 'md',
-        'w-[108px]': gradient === 'xxl'
+        'w-[108px] via-70% via-skin-bg/85': gradient === 'xxl'
       }"
       @click="scroll('left')"
     >
@@ -73,6 +75,7 @@ onMounted(() => {
     <button
       v-if="gradient && (!withButtons || canScrollTabs.canScrollRight)"
       type="button"
+      tabindex="-1"
       :disabled="!withButtons"
       class="bg-gradient-to-l from-skin-bg right-0 top-[1px] bottom-[1px] absolute z-10"
       :class="{
@@ -80,7 +83,7 @@ onMounted(() => {
         'pointer-events-none': !withButtons,
         'w-2': gradient === 'sm',
         'w-3': gradient === 'md',
-        'w-[108px]': gradient === 'xxl'
+        'w-[108px] via-70% via-skin-bg/85': gradient === 'xxl'
       }"
       @click="scroll('right')"
     >

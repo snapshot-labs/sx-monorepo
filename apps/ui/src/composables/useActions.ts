@@ -496,6 +496,7 @@ export function useActions() {
 
   async function updateSettings(
     space: Space,
+    metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],
@@ -520,6 +521,7 @@ export function useActions() {
       network.actions.updateSettings(
         auth.web3,
         space,
+        metadata,
         authenticatorsToAdd,
         authenticatorsToRemove,
         votingStrategiesToAdd,
