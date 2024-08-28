@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  _n,
-  autoLinkText,
-  compareAddresses,
-  getSocialNetworksLink
-} from '@/helpers/utils';
+import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -13,10 +8,7 @@ const PROPOSALS_LIMIT = 4;
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { web3 } = useWeb3();
 const proposalsStore = useProposalsStore();
-
-const editSpaceModalOpen = ref(false);
 
 onMounted(() => {
   proposalsStore.fetchSummary(
@@ -27,10 +19,6 @@ onMounted(() => {
 });
 
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
-
-const isController = computed(() =>
-  compareAddresses(props.space.controller, web3.value.account)
-);
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
@@ -60,11 +48,6 @@ watchEffect(() => setTitle(props.space.name));
             </UiButton>
           </UiTooltip>
         </router-link>
-        <UiTooltip v-if="isController" title="Edit profile">
-          <UiButton class="!px-0 w-[46px]" @click="editSpaceModalOpen = true">
-            <IH-cog class="inline-block" />
-          </UiButton>
-        </UiTooltip>
         <ButtonFollow :space="space" />
       </div>
     </div>
@@ -177,11 +160,4 @@ watchEffect(() => setTitle(props.space.name));
       />
     </div>
   </div>
-  <teleport to="#modal">
-    <ModalEditSpace
-      :open="editSpaceModalOpen"
-      :space="space"
-      @close="editSpaceModalOpen = false"
-    />
-  </teleport>
 </template>

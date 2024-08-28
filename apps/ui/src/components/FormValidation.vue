@@ -66,41 +66,35 @@ function handleStrategySave(value: Record<string, any>) {
 </script>
 
 <template>
-  <div>
-    <div class="mb-4">
-      <h3 class="text-md leading-6">{{ title }}</h3>
+  <UiContainerSettings :title="title" :description="description">
+    <div class="mb-3">
+      <div v-if="!model">No strategy selected</div>
+      <FormStrategiesStrategyActive
+        v-else
+        :network-id="networkId"
+        :strategy="model"
+        @edit-strategy="editStrategy"
+        @delete-strategy="removeStrategy"
+      />
+    </div>
+    <div v-if="!model" class="flex flex-wrap gap-2">
+      <ButtonStrategy
+        v-for="strategy in availableStrategies"
+        :key="strategy.address"
+        :strategy="strategy"
+        @click="addStrategy(strategy)"
+      />
+    </div>
+    <div v-else-if="model.type === 'VotingPower'">
+      <h3 class="eyebrow mb-2 font-medium">Included strategies</h3>
       <span class="mb-3 inline-block">
-        {{ description }}
+        Select strategies that will be used to compute proposal
       </span>
-      <div class="mb-3">
-        <div v-if="!model">No strategy selected</div>
-        <FormStrategiesStrategyActive
-          v-else
-          :network-id="networkId"
-          :strategy="model"
-          @edit-strategy="editStrategy"
-          @delete-strategy="removeStrategy"
-        />
-      </div>
-      <div v-if="!model" class="flex flex-wrap gap-2">
-        <ButtonStrategy
-          v-for="strategy in availableStrategies"
-          :key="strategy.address"
-          :strategy="strategy"
-          @click="addStrategy(strategy)"
-        />
-      </div>
-      <div v-else-if="model.type === 'VotingPower'">
-        <h3 class="eyebrow mb-2 font-medium">Included strategies</h3>
-        <span class="mb-3 inline-block">
-          Select strategies that will be used to compute proposal
-        </span>
-        <StrategiesConfigurator
-          v-model="votingStrategies"
-          :network-id="networkId"
-          :available-strategies="availableVotingStrategies"
-        />
-      </div>
+      <StrategiesConfigurator
+        v-model="votingStrategies"
+        :network-id="networkId"
+        :available-strategies="availableVotingStrategies"
+      />
     </div>
     <teleport to="#modal">
       <ModalEditStrategy
@@ -111,5 +105,5 @@ function handleStrategySave(value: Record<string, any>) {
         @save="handleStrategySave"
       />
     </teleport>
-  </div>
+  </UiContainerSettings>
 </template>

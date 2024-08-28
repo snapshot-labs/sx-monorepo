@@ -22,11 +22,7 @@ withDefaults(
 </script>
 
 <template>
-  <div class="mb-4">
-    <h3 class="text-md leading-6">{{ title }}</h3>
-    <span class="mb-4 inline-block">
-      {{ description }}
-    </span>
+  <UiContainerSettings :title="title" :description="description">
     <StrategiesConfigurator
       :model-value="model"
       :network-id="networkId"
@@ -35,5 +31,5 @@ withDefaults(
       :default-params="defaultParams"
       @update:model-value="value => (model = value)"
     />
-  </div>
+  </UiContainerSettings>
 </template>
