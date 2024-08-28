@@ -106,7 +106,6 @@ watchEffect(() =>
           <a
             :href="SOURCE_ICONS[statement.source].link"
             target="_blank"
-            class="inline-block"
           >
             <component
               :is="SOURCE_ICONS[statement.source].icon"
