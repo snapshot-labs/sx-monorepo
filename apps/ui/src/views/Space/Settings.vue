@@ -627,9 +627,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
                 <h4
                   class="text-skin-link text-md"
                   v-text="
-                    maxVotingPeriod !== null
+                    (maxVotingPeriod !== null
                       ? _d(maxVotingPeriod)
-                      : formatCurrentValue(space.max_voting_period)
+                      : formatCurrentValue(space.max_voting_period)) || '0m'
                   "
                 />
               </UiEditable>
