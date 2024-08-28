@@ -83,14 +83,13 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>
-  <div
-    v-if="!currentNetwork || !delegation.apiUrl"
-    class="px-4 py-3 flex items-center text-skin-link space-x-2"
+  <template
+    v-if="
+      currentNetwork &&
+      props.delegation.apiUrl &&
+      props.delegation?.apiType !== 'split-delegation'
+    "
   >
-    <IH-exclamation-circle class="inline-block" />
-    <span>No delegation API configured.</span>
-  </div>
-  <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
@@ -296,4 +295,8 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       />
     </teleport>
   </template>
+  <div v-else class="px-4 py-3 flex items-center text-skin-link space-x-2">
+    <IH-exclamation-circle class="inline-block" />
+    <span>No delegation API configured.</span>
+  </div>
 </template>

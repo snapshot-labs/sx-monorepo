@@ -36,6 +36,7 @@ export type ApiSpace = {
   delegationPortal?: {
     delegationType: string;
     delegationContract: string;
+    delegationNetwork: string;
     delegationApi: string;
   };
   voting: {

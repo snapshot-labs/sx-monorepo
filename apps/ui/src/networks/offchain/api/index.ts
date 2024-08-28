@@ -48,7 +48,7 @@ import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
-const TREASURY_NETWORKS = new Map(
+const CHAIN_ID_TO_NETWORK_ID_MAP = new Map(
   Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
     chainId,
     networkId as NetworkID
@@ -77,7 +77,7 @@ function formatSpace(
 
       return {
         name: treasury.name,
-        network: TREASURY_NETWORKS.get(chainId) ?? null,
+        network: CHAIN_ID_TO_NETWORK_ID_MAP.get(chainId) ?? null,
         address: treasury.address,
         chainId
       };
@@ -147,7 +147,10 @@ function formatSpace(
             name: null,
             apiType: space.delegationPortal?.delegationType ?? null,
             apiUrl: space.delegationPortal?.delegationApi ?? null,
-            contractNetwork: null,
+            contractNetwork:
+              CHAIN_ID_TO_NETWORK_ID_MAP.get(
+                parseInt(space.delegationPortal?.delegationNetwork, 10)
+              ) ?? null,
             contractAddress: space.delegationPortal?.delegationContract ?? null
           }
         ]
