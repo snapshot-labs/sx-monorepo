@@ -108,9 +108,9 @@ watch(loading, () => {
             class="w-[48px] mb-3"
           />
           <span class="text-center mb-2">
-            <strong class="text-skin-link">{{
+            <span class="font-medium text-skin-link">{{
               proposal.proposer.metadata.name
-            }}</strong>
+            }}</span>
             <span> is connected</span>
           </span>
           <span>You can start interacting with the app.</span>
@@ -128,12 +128,12 @@ watch(loading, () => {
       >
         <img :src="proposal.proposer.metadata.icons[0]" class="w-[48px] mb-3" />
         <span class="text-center mb-2">
-          <strong class="text-skin-link">{{
+          <span class="font-medium text-skin-link">{{
             proposal.proposer.metadata.name
-          }}</strong>
+          }}</span>
           <span> wants to connect</span>
         </span>
-        <div class="text-[17px] font-bold text-skin-link">
+        <div class="text-[17px] font-medium text-skin-link">
           {{ proposal.proposer.metadata.url }}
         </div>
       </div>
