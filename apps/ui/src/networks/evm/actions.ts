@@ -40,7 +40,8 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  VoteType
 } from '@/types';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
@@ -200,10 +201,26 @@ export function createActions(
       connectorType: Connector,
       account: string,
       space: Space,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
+
+      const executionInfo = executions?.[0];
+      const pinned = await helpers.pin({
+        title,
+        body,
+        discussion,
+        type,
+        choices: choices.filter(c => !!c),
+        execution: executionInfo?.transactions ?? []
+      });
+      if (!pinned || !pinned.cid) return false;
+      console.log('IPFS', pinned);
 
       const isContract = await getIsContract(account);
 
@@ -255,7 +272,7 @@ export function createActions(
         authenticator,
         strategies: strategiesWithMetadata,
         executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${cid}`
+        metadataUri: `ipfs://${pinned.cid}`
       };
 
       if (relayerType === 'evm') {
@@ -283,10 +300,26 @@ export function createActions(
       account: string,
       space: Space,
       proposalId: number | string,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[] | null
     ) {
       await verifyNetwork(web3, chainId);
+
+      const executionInfo = executions?.[0];
+      const pinned = await helpers.pin({
+        title,
+        body,
+        discussion,
+        type,
+        choices: choices.filter(c => !!c),
+        execution: executionInfo?.transactions ?? []
+      });
+      if (!pinned || !pinned.cid) return false;
+      console.log('IPFS', pinned);
 
       const isContract = await getIsContract(account);
 
@@ -322,7 +355,7 @@ export function createActions(
         proposal: proposalId as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${cid}`
+        metadataUri: `ipfs://${pinned.cid}`
       };
 
       if (relayerType === 'evm') {
@@ -362,7 +395,8 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice
+      choice: Choice,
+      reason: string
     ) => {
       await verifyNetwork(web3, chainId);
 
@@ -394,13 +428,16 @@ export function createActions(
         })
       );
 
+      let pinned: { cid: string; provider: string } | null = null;
+      if (reason) pinned = await helpers.pin({ reason });
+
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: getSdkChoice(choice),
-        metadataUri: '',
+        metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
 
@@ -569,14 +606,17 @@ export function createActions(
 
       return votesContract.delegate(delegatee);
     },
-    updateStrategies: async (
+    updateSettings: async (
       web3: any,
       space: Space,
       authenticatorsToAdd: StrategyConfig[],
       authenticatorsToRemove: number[],
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
-      validationStrategy: StrategyConfig
+      validationStrategy: StrategyConfig,
+      votingDelay: number | null,
+      minVotingDuration: number | null,
+      maxVotingDuration: number | null
     ) => {
       await verifyNetwork(web3, chainId);
 
@@ -615,7 +655,12 @@ export function createActions(
               ? validationStrategy.generateParams(validationStrategy.params)[0]
               : '0x'
           },
-          proposalValidationStrategyMetadataUri
+          proposalValidationStrategyMetadataUri,
+          votingDelay: votingDelay !== null ? votingDelay : undefined,
+          minVotingDuration:
+            minVotingDuration !== null ? minVotingDuration : undefined,
+          maxVotingDuration:
+            maxVotingDuration !== null ? maxVotingDuration : undefined
         }
       });
     },

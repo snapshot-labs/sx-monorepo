@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { compareAddresses, stripHtmlTags } from '@/helpers/utils';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
-import { Space, Statement } from '@/types';
+import { Space, Statement, User } from '@/types';
 
 const offchainNetworkId = offchainNetworks.filter(network =>
   enabledNetworks.includes(network)
 )[0];
 const offchainNetwork = getNetwork(offchainNetworkId);
 
-const props = defineProps<{ space: Space }>();
+const props = defineProps<{ user: User; space: Space }>();
 
 const route = useRoute();
+const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 
 const isEditMode = ref(false);
@@ -29,6 +31,7 @@ async function loadStatement() {
     )) || {
       space: props.space.id,
       network: props.space.network,
+      delegate: userId.value,
       about: '',
       statement: '',
       status: 'INACTIVE',
@@ -40,6 +43,10 @@ async function loadStatement() {
 }
 
 watch(userId, loadStatement, { immediate: true });
+
+watchEffect(() =>
+  setTitle(`${props.user.name || userId.value} ${props.space.name}'s profile`)
+);
 </script>
 
 <template>
@@ -70,7 +77,7 @@ watch(userId, loadStatement, { immediate: true });
             </template>
           </div>
           <UiTooltip
-            v-if="web3.account === userId"
+            v-if="compareAddresses(web3.account, userId)"
             title="Edit"
             class="!absolute right-0"
           >
@@ -82,7 +89,7 @@ watch(userId, loadStatement, { immediate: true });
         <UiMarkdown
           v-if="statement.statement"
           class="text-skin-heading max-w-[592px]"
-          :body="statement.statement"
+          :body="stripHtmlTags(statement.statement)"
         />
         <div v-else class="flex items-center space-x-2">
           <IH-exclamation-circle class="inline-block shrink-0" />

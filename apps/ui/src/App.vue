@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { startIntercom } from './helpers/intercom';
+import { Transaction } from './types';
 
 const el = ref(null);
+const sidebarSwipeEnabled = ref(true);
 
 const route = useRoute();
 const router = useRouter();
@@ -9,7 +11,16 @@ const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, app } = useApp();
 const { web3 } = useWeb3();
-const { isSwiping, direction } = useSwipe(el);
+const { isSwiping, direction } = useSwipe(el, {
+  onSwipe(e: TouchEvent) {
+    const noSideBarSwipe = (e.target as Element)?.closest(
+      '[data-no-sidebar-swipe]'
+    );
+    sidebarSwipeEnabled.value =
+      !noSideBarSwipe ||
+      (noSideBarSwipe && noSideBarSwipe.getBoundingClientRect().x === 0);
+  }
+});
 const { createDraft } = useEditor();
 const { spaceKey, network, executionStrategy, transaction, reset } =
   useWalletConnectTransaction();
@@ -25,10 +36,12 @@ const hasAppNav = computed(() =>
 async function handleTransactionAccept() {
   if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
 
+  const executions = {} as Record<string, Transaction[]>;
+  executions[executionStrategy.value.address] = [transaction.value];
+
   const space = spaceKey.value;
   const draftId = await createDraft(space, {
-    execution: [transaction.value],
-    executionStrategy: executionStrategy.value
+    executions
   });
 
   router.push(`/${space}/create/${draftId}`);
@@ -57,6 +70,7 @@ watch(route, () => {
 
 watch(isSwiping, () => {
   if (
+    sidebarSwipeEnabled.value &&
     isSwiping.value &&
     !modalOpen.value &&
     ((direction.value === 'right' && !uiStore.sidebarOpen) ||

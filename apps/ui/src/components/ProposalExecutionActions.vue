@@ -2,9 +2,12 @@
 import dayjs from 'dayjs';
 import { compareAddresses, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { Proposal as ProposalType } from '@/types';
+import { ProposalExecution, Proposal as ProposalType } from '@/types';
 
-const props = defineProps<{ proposal: ProposalType }>();
+const props = defineProps<{
+  proposal: ProposalType;
+  execution: ProposalExecution;
+}>();
 
 const { web3 } = useWeb3();
 const {
@@ -23,13 +26,13 @@ const {
   executeProposal,
   executeQueuedProposal,
   vetoProposal
-} = useExecutionActions(props.proposal);
+} = useExecutionActions(props.proposal, props.execution);
 
 const network = computed(() => getNetwork(props.proposal.network));
 </script>
 
 <template>
-  <div class="x-block !border-x rounded-lg p-3">
+  <div class="p-3">
     <div v-if="fetchingDetails" class="flex justify-center">
       <UiLoading class="text-center" />
     </div>
@@ -60,10 +63,10 @@ const network = computed(() => getNetwork(props.proposal.network));
         <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
       </a>
     </div>
-    <template v-else>
+    <div v-else class="space-y-2">
       <UiButton
         v-if="hasFinalize"
-        class="mb-2 w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center"
         :loading="finalizeProposalSending"
         @click="finalizeProposal"
       >
@@ -72,18 +75,18 @@ const network = computed(() => getNetwork(props.proposal.network));
       </UiButton>
       <UiButton
         v-else-if="proposal.state !== 'executed'"
-        class="mb-2 w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center"
         :loading="executeProposalSending"
         @click="executeProposal"
       >
         <IH-play class="inline-block mr-2" />
-        Execute proposal
+        Execute transactions
       </UiButton>
       <UiButton
         v-if="hasExecuteQueued"
         :disabled="executionCountdown > 0"
         :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
-        class="mb-2 w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center"
         :loading="executeQueuedProposalSending"
         @click="executeQueuedProposal"
       >
@@ -105,13 +108,13 @@ const network = computed(() => getNetwork(props.proposal.network));
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
         "
         :disabled="executionCountdown === 0"
-        class="mb-2 w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center"
         :loading="vetoProposalSending"
         @click="vetoProposal"
       >
         <IH-play class="inline-block mr-2 shrink-0" />
         Veto execution
       </UiButton>
-    </template>
+    </div>
   </div>
 </template>

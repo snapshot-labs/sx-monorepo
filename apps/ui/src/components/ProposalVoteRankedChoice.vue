@@ -5,7 +5,6 @@ import { Choice, Proposal } from '@/types';
 type RankedChoice = number[];
 
 const props = defineProps<{
-  sendingType: Choice | null;
   proposal: Proposal;
   defaultChoice?: Choice;
 }>();
@@ -49,7 +48,6 @@ const selectedChoices = ref<RankedChoice>(
     <UiButton
       primary
       class="!h-[48px] w-full"
-      :loading="!!sendingType"
       @click="emit('vote', selectedChoices)"
     >
       Vote

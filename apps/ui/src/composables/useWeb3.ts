@@ -158,10 +158,13 @@ export function useWeb3() {
     if (!provider.on) return;
 
     provider.on('accountsChanged', async accounts => {
-      if (!accounts.length) return;
+      if (!accounts.length) {
+        logout();
+        return;
+      }
 
       state.account = formatAddress(accounts[0]);
-      await login();
+      await login(providerName);
     });
 
     if (!STARKNET_CONNECTORS.includes(providerName)) {

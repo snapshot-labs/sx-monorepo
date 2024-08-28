@@ -23,14 +23,14 @@
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/units": "^5.6.1",
     "@faker-js/faker": "^7.4.0",
-    "@snapshot-labs/checkpoint": "^0.1.0-beta.36",
+    "@snapshot-labs/checkpoint": "^0.1.0-beta.39",
     "@snapshot-labs/sx": "^0.1.0",
     "@types/bn.js": "^5.1.0",
     "@types/mysql": "^2.15.21",
     "@types/node": "^18.11.6",
     "cross-fetch": "^4.0.0",
     "dotenv": "^16.0.1",
-    "starknet": "^5.19.3"
+    "starknet": "6.11.0"
   },
   "devDependencies": {
     "@snapshot-labs/eslint-config": "0.1.0-beta.18",

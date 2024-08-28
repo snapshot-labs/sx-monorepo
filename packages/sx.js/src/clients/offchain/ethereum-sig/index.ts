@@ -90,7 +90,7 @@ export class EthereumSig {
     const address = await signer.getAddress();
     const EIP712Message: EIP712Message = {
       from: address,
-      timestamp: parseInt((Date.now() / 1e3).toFixed()),
+      timestamp: parseInt((Date.now() / 1000).toFixed()),
       ...message
     };
     const signature = await signer._signTypedData(domain, types, EIP712Message);
@@ -244,7 +244,7 @@ export class EthereumSig {
       space: data.space,
       proposal: data.proposal,
       choice,
-      reason: '',
+      reason: data.reason || '',
       app: '',
       metadata: ''
     };

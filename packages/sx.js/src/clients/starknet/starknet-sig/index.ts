@@ -84,7 +84,7 @@ export class StarknetSig {
       verifyingContract
     };
 
-    const data: typedData.TypedData = {
+    const data: typeof typedData.TypedData = {
       types,
       primaryType,
       domain,
@@ -212,7 +212,7 @@ export class StarknetSig {
       choice: `0x${data.choice.toString(16)}`,
       userVotingStrategies,
       metadataUri: shortString
-        .splitLongString('')
+        .splitLongString(data.metadataUri)
         .map(str => shortString.encodeShortString(str))
     };
 
@@ -239,7 +239,7 @@ export class StarknetSig {
   }): Promise<Envelope<Alias>> {
     const message = {
       from: validateAndParseAddress(signer.address),
-      timestamp: parseInt((Date.now() / 1e3).toFixed()),
+      timestamp: parseInt((Date.now() / 1000).toFixed()),
       ...data
     };
 

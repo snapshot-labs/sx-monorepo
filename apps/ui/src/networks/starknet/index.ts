@@ -1,7 +1,7 @@
 import {
   LibraryError,
-  constants as starknetConstants,
-  TransactionExecutionStatus
+  ReceiptTx,
+  constants as starknetConstants
 } from 'starknet';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
@@ -106,7 +106,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
             return;
           }
 
-          if (tx.execution_status === TransactionExecutionStatus.SUCCEEDED) {
+          const receiptTx = new ReceiptTx(tx);
+          if (receiptTx.isSuccess()) {
             resolve(tx);
           } else {
             reject(tx);

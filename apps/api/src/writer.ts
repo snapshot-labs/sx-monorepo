@@ -31,19 +31,25 @@ type Strategy = {
   params: string[];
 };
 
-export const handleSpaceDeployed: starknet.Writer = async ({
+export const handleContractDeployed: starknet.Writer = async ({
   blockNumber,
   event,
   instance
 }) => {
-  console.log('Handle space deployed');
+  console.log('Handle contract deployed');
 
   if (!event) return;
 
-  await instance.executeTemplate('Space', {
-    contract: event.contract_address,
-    start: blockNumber
-  });
+  const paddedClassHash = validateAndParseAddress(event.class_hash);
+
+  if (paddedClassHash === networkProperties.spaceClassHash) {
+    await instance.executeTemplate('Space', {
+      contract: event.contract_address,
+      start: blockNumber
+    });
+  } else {
+    console.log('Unknown class hash', paddedClassHash);
+  }
 };
 
 export const handleSpaceCreated: starknet.Writer = async ({
@@ -565,16 +571,14 @@ export const handleUpdate: starknet.Writer = async ({
     console.log('failed to update proposal metadata', e);
   }
 
-  /*
   const executionStrategy = await handleExecutionStrategy(
-    event.proposal.execution_strategy,
+    event.execution_strategy,
     event.payload
   );
   if (executionStrategy) {
     proposal.execution_strategy_type = executionStrategy.executionStrategyType;
     proposal.quorum = executionStrategy.quorum;
   }
-  */
 
   await proposal.save();
 };

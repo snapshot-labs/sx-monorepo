@@ -3,7 +3,6 @@ import { Choice } from '@/types';
 
 withDefaults(
   defineProps<{
-    sendingType: Choice | null;
     size?: number;
   }>(),
   { size: 48 }
@@ -23,7 +22,6 @@ const emit = defineEmits<{
           '!size-[48px]': size === 48,
           '!size-[40px]': size === 40
         }"
-        :loading="sendingType === 'for'"
         @click="emit('vote', 'for')"
       >
         <IH-check class="inline-block" />
@@ -36,7 +34,6 @@ const emit = defineEmits<{
           '!size-[48px]': size === 48,
           '!size-[40px]': size === 40
         }"
-        :loading="sendingType === 'against'"
         @click="emit('vote', 'against')"
       >
         <IH-x class="inline-block" />
@@ -49,7 +46,6 @@ const emit = defineEmits<{
           '!size-[48px]': size === 48,
           '!size-[40px]': size === 40
         }"
-        :loading="sendingType === 'abstain'"
         @click="emit('vote', 'abstain')"
       >
         <IH-minus-sm class="inline-block" />

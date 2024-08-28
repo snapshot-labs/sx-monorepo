@@ -3,6 +3,7 @@ import {
   _n,
   _p,
   autoLinkText,
+  compareAddresses,
   getCacheHash,
   getSocialNetworksLink,
   shortenAddress
@@ -34,8 +35,6 @@ const id = computed(() => route.params.id as string);
 const user = computed(() => usersStore.getUser(id.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
-
-const shareMsg = computed(() => encodeURIComponent(window.location.href));
 
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
@@ -129,8 +128,11 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
-        <UiTooltip v-if="web3.account === user.id" title="Edit profile">
+        <DropdownShare :shareable="user" type="user" class="!px-0 w-[46px]" />
+        <UiTooltip
+          v-if="compareAddresses(web3.account, user.id)"
+          title="Edit profile"
+        >
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
           </UiButton>
@@ -161,7 +163,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         </div>
         <div
           v-if="user.about"
-          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
+          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(user.about)"
         />
         <div v-if="socials.length" class="space-x-2 flex">
@@ -240,7 +242,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
     </router-link>
     <teleport to="#modal">
       <ModalEditUser
-        v-if="web3.account === user.id"
+        v-if="compareAddresses(web3.account, user.id)"
         :open="modalOpenEditUser"
         :user="user"
         @close="modalOpenEditUser = false"
