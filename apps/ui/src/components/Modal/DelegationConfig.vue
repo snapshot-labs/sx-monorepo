@@ -56,9 +56,9 @@ const definition = computed(() => {
         enum: [null, ...props.availableDelegationTypes],
         options: [
           { id: null, name: 'No delegation API' },
-          { id: 'governor-subgraph', name: 'Governor subgraph' }
+          { id: 'governor-subgraph', name: 'ERC-20 Votes' }
         ],
-        title: 'Delegation API type',
+        title: 'Delegation type',
         nullable: true
       },
       ...(form.value.apiType !== null
