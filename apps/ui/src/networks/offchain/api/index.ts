@@ -64,17 +64,21 @@ const DELEGATION_STRATEGIES = [
   'delegation-with-overrides'
 ];
 
-const DELEGATION_CHAINS_BY_NETWORKS = {
-  '1': 'eth',
-  '10': 'optimism',
-  '56': 'bnb',
-  '100': 'xdai',
-  '137': 'polygon',
-  '250': 'fantom',
-  '8453': 'base',
-  '42161': 'arbitrum',
-  '11155111': 'sepolia'
-};
+const SUPPORTED_DELEGATION_NETWORKS: NetworkID[] = [
+  'eth',
+  'oeth',
+  'bsc',
+  'xdai',
+  'matic',
+  'fantom',
+  'base',
+  'arb1',
+  'sep'
+];
+
+const CHAIN_IDS_TO_NETWORKS: Record<number, NetworkID> = Object.fromEntries(
+  SUPPORTED_DELEGATION_NETWORKS.map(network => [CHAIN_IDS[network], network])
+);
 
 const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
 
@@ -324,9 +328,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
       apiType: 'delegate-registry',
       apiUrl: DELEGATE_REGISTRY_URL,
       contractNetwork:
-        DELEGATION_CHAINS_BY_NETWORKS[
-          spaceDelegationStrategy.network || space.network
-        ] || null,
+        CHAIN_IDS_TO_NETWORKS[parseInt(space.network, 10)] || null,
       contractAddress: space.id
     });
   }
