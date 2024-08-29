@@ -83,14 +83,18 @@ function downloadExecution(execution: ProposalExecution) {
     </a>
     <div class="flex justify-between items-center border-y pr-3">
       <UiLabel label="Transactions" class="border-b-0" />
-      <button
+      <UiTooltip
         v-if="execution.strategyType === 'ReadOnlyExecution'"
-        type="button"
-        class="hover:text-skin-link p-2"
-        @click="downloadExecution(execution)"
+        title="Export transactions"
       >
-        <IS-arrow-down-tray />
-      </button>
+        <button
+          type="button"
+          class="hover:text-skin-link p-2"
+          @click="downloadExecution(execution)"
+        >
+          <IS-arrow-down-tray />
+        </button>
+      </UiTooltip>
     </div>
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
