@@ -13,6 +13,10 @@ const arbitrumNetwork = createEvmNetwork('arb1');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
 const sepoliaNetwork = createEvmNetwork('sep');
+const bnbNetwork = createEvmNetwork('bsc');
+const gnosisNetwork = createEvmNetwork('xdai');
+const fantomNetwork = createEvmNetwork('fantom');
+const baseNetwork = createEvmNetwork('base');
 const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env
@@ -48,6 +52,10 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'linea-testnet') return lineaTestnetNetwork;
   if (id === 'sn') return starknetNetwork;
   if (id === 'sn-sep') return starknetSepoliaNetwork;
+  if (id === 'bsc') return bnbNetwork;
+  if (id === 'xdai') return gnosisNetwork;
+  if (id === 'fantom') return fantomNetwork;
+  if (id === 'base') return baseNetwork;
 
   throw new Error(`Unknown network ${id}`);
 };

@@ -18,7 +18,11 @@ export type NetworkID =
   | 'sep'
   | 'linea-testnet'
   | 'sn'
-  | 'sn-sep';
+  | 'sn-sep'
+  | 'bsc'
+  | 'xdai'
+  | 'fantom'
+  | 'base';
 
 export type Choice =
   | 'for'
