@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { buildBatchFile } from '@/helpers/safe/ build';
 import { getExecutionName } from '@/helpers/ui';
 import { sanitizeUrl, shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
@@ -20,6 +21,21 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
   } catch (e) {
     return null;
   }
+}
+
+function downloadExecution(execution: ProposalExecution) {
+  if (!execution.chainId) return;
+
+  const batchFile = buildBatchFile(execution.chainId, execution.transactions);
+
+  const blob = new Blob([JSON.stringify(batchFile)], {
+    type: 'application/json'
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `execution-${execution.safeAddress}.json`;
+  a.click();
 }
 </script>
 
@@ -65,7 +81,17 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
         />
       </div>
     </a>
-    <UiLabel label="Transactions" class="border-t" />
+    <div class="flex justify-between items-center border-y pr-3">
+      <UiLabel label="Transactions" class="border-b-0" />
+      <button
+        v-if="execution.strategyType === 'ReadOnlyExecution'"
+        type="button"
+        class="hover:text-skin-link p-2"
+        @click="downloadExecution(execution)"
+      >
+        <IS-arrow-down-tray />
+      </button>
+    </div>
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"
