@@ -36,6 +36,7 @@ import {
 } from '@/networks/types';
 import {
   Choice,
+  DelegationType,
   NetworkID,
   Proposal,
   Space,
@@ -592,7 +593,8 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegatee: string,
-      delegationContract: string
+      delegationContract: string,
+      delegationType: DelegationType
     ) => {
       await verifyNetwork(web3, CHAIN_IDS[networkId]);
 

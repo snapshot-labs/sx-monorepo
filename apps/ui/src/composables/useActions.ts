@@ -5,6 +5,7 @@ import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   Choice,
+  DelegationType,
   NetworkID,
   Proposal,
   Space,
@@ -544,7 +545,8 @@ export function useActions() {
     space: Space,
     networkId: NetworkID,
     delegatee: string,
-    delegationContract: string
+    delegationContract: string,
+    delegationType: DelegationType
   ) {
     if (!web3.value.account) return await forceLogin();
 
@@ -557,7 +559,8 @@ export function useActions() {
         space,
         networkId,
         delegatee,
-        delegationContract
+        delegationContract,
+        delegationType
       )
     );
 
