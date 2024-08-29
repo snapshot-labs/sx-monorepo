@@ -80,7 +80,7 @@ watch(
 
 <template>
   <nav
-    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px] flex items-center justify-between h-[71px] bg-skin-bg space-x-4 pr-4"
+    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px] flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
     :class="{
       'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
     }"
