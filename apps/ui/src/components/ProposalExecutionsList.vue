@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getExecutionName } from '@/helpers/ui';
 import { sanitizeUrl, shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { NetworkID, Proposal, ProposalExecution } from '@/types';
@@ -16,17 +17,6 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
 
     const url = network.helpers.getExplorerUrl(safeAddress, 'address');
     return sanitizeUrl(url);
-  } catch (e) {
-    return null;
-  }
-}
-
-function getExecutionType(networkId: NetworkID, strategyType: string) {
-  try {
-    if (strategyType === 'oSnap') return 'oSnap execution';
-
-    const network = getNetwork(networkId);
-    return `${network.constants.EXECUTORS[strategyType]} execution`;
   } catch (e) {
     return null;
   }
@@ -69,7 +59,7 @@ function getExecutionType(networkId: NetworkID, strategyType: string) {
         <div
           class="text-skin-text text-[17px]"
           v-text="
-            getExecutionType(execution.networkId, execution.strategyType) ||
+            getExecutionName(execution.networkId, execution.strategyType) ||
             shorten(execution.safeAddress)
           "
         />
