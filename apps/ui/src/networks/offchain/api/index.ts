@@ -23,6 +23,7 @@ import {
   ProposalState,
   RelatedSpace,
   Space,
+  SpaceMetadataDelegation,
   SpaceMetadataTreasury,
   Statement,
   User,
@@ -141,17 +142,7 @@ function formatSpace(
     max_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     proposal_threshold: '1',
     treasuries,
-    delegations: space.delegationPortal
-      ? [
-          {
-            name: null,
-            apiType: space.delegationPortal?.delegationType ?? null,
-            apiUrl: space.delegationPortal?.delegationApi ?? null,
-            contractNetwork: null,
-            contractAddress: space.delegationPortal?.delegationContract ?? null
-          }
-        ]
-      : [],
+    delegations: formatDelegations(space),
     // NOTE: ignored
     created: 0,
     authenticators: [DEFAULT_AUTHENTICATOR],
@@ -287,6 +278,21 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
+function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
+  const delegations: SpaceMetadataDelegation[] = [];
+
+  if (space.delegationPortal) {
+    delegations.push({
+      name: null,
+      apiType: space.delegationPortal?.delegationType ?? null,
+      apiUrl: space.delegationPortal?.delegationApi ?? null,
+      contractNetwork: null,
+      contractAddress: space.delegationPortal?.delegationContract ?? null
+    });
+  }
+
+  return delegations;
+}
 export function createApi(
   uri: string,
   networkId: NetworkID,
