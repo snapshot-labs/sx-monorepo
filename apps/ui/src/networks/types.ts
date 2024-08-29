@@ -4,6 +4,7 @@ import { FunctionalComponent } from 'vue';
 import {
   Alias,
   Choice,
+  DelegationType,
   Follow,
   NetworkID,
   Proposal,
@@ -311,6 +312,7 @@ export type NetworkConstants = {
   EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES: StrategyTemplate[];
   EDITOR_EXECUTION_STRATEGIES: StrategyTemplate[];
   EDITOR_VOTING_TYPES: VoteType[];
+  EDITOR_DELEGATION_TYPES: DelegationType[];
   STORAGE_PROOF_STRATEGIES_TYPES?: string[];
 };
 

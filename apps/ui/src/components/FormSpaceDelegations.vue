@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { SpaceMetadataDelegation } from '@/types';
+import { DelegationType, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
   delegationsValue: SpaceMetadataDelegation[];
+  availableDelegationTypes: DelegationType[];
 }>();
 
 const emit = defineEmits<{
@@ -74,6 +75,7 @@ function deleteDelegation(index: number) {
     <ModalDelegationConfig
       :open="modalOpen"
       :initial-state="delegationInitialState ?? undefined"
+      :available-delegation-types="availableDelegationTypes"
       @close="modalOpen = false"
       @add="addDelegationConfig"
     />

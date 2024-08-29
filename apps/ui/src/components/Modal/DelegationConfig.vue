@@ -2,7 +2,7 @@
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { SpaceMetadataDelegation } from '@/types';
+import { DelegationType, SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
@@ -14,6 +14,7 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
+  availableDelegationTypes: DelegationType[];
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{
@@ -52,7 +53,7 @@ const definition = computed(() => {
       },
       apiType: {
         type: ['string', 'null'],
-        enum: [null, 'governor-subgraph'],
+        enum: [null, ...props.availableDelegationTypes],
         options: [
           { id: null, name: 'No delegation API' },
           { id: 'governor-subgraph', name: 'Governor subgraph' }

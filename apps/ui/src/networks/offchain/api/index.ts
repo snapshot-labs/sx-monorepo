@@ -16,6 +16,7 @@ import {
 } from '@/networks/types';
 import {
   Alias,
+  DelegationType,
   Follow,
   NetworkID,
   Proposal,
@@ -309,7 +310,8 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   if (space.delegationPortal) {
     delegations.push({
       name: null,
-      apiType: space.delegationPortal?.delegationType ?? null,
+      apiType:
+        (space.delegationPortal?.delegationType as DelegationType) ?? null,
       apiUrl: space.delegationPortal?.delegationApi ?? null,
       contractNetwork: null,
       contractAddress: space.delegationPortal?.delegationContract ?? null
@@ -319,7 +321,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   if (spaceDelegationStrategy) {
     delegations.push({
       name: null,
-      apiType: 'delegation-strategies',
+      apiType: 'delegate-registry',
       apiUrl: DELEGATE_REGISTRY_URL,
       contractNetwork:
         DELEGATION_CHAINS_BY_NETWORKS[

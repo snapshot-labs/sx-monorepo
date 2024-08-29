@@ -1,4 +1,4 @@
-import { VoteType } from '@/types';
+import { DelegationType, VoteType } from '@/types';
 import { Connector } from '../types';
 
 export const AUTHS = {};
@@ -28,5 +28,6 @@ export const EDITOR_VOTING_TYPES: VoteType[] = [
   'weighted',
   'quadratic'
 ];
+export const EDITOR_DELEGATION_TYPES: DelegationType[] = ['delegate-registry'];
 
 export const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 7;

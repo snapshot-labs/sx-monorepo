@@ -5,7 +5,12 @@ import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinGraph } from '@/helpers/pin';
 import { getUrl, shorten } from '@/helpers/utils';
-import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
+import {
+  DelegationType,
+  NetworkID,
+  StrategyParsedMetadata,
+  VoteType
+} from '@/types';
 import { StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';
@@ -668,6 +673,8 @@ export function createConstants(networkId: NetworkID) {
 
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
+  const EDITOR_DELEGATION_TYPES: DelegationType[] = ['governor-subgraph'];
+
   return {
     SUPPORTED_AUTHENTICATORS,
     CONTRACT_SUPPORTED_AUTHENTICATORS,
@@ -683,6 +690,7 @@ export function createConstants(networkId: NetworkID) {
     EDITOR_VOTING_STRATEGIES,
     EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
     EDITOR_EXECUTION_STRATEGIES,
-    EDITOR_VOTING_TYPES
+    EDITOR_VOTING_TYPES,
+    EDITOR_DELEGATION_TYPES
   };
 }

@@ -216,6 +216,9 @@ watchEffect(() => setTitle('Create space'));
               <FormSpaceDelegations
                 class="mt-2"
                 :delegations-value="metadataForm.delegations"
+                :available-delegation-types="
+                  selectedNetwork.constants.EDITOR_DELEGATION_TYPES
+                "
                 @delegations="v => (metadataForm.delegations = v)"
               />
             </div>
