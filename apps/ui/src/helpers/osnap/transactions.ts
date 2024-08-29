@@ -129,8 +129,10 @@ function parseOSnapTransferNFTTransaction(
     _type: 'sendNft',
     _form: {
       recipient: transaction.recipient,
+      sender: '',
       amount: '1',
       nft: {
+        type: '',
         address: transaction.collectable.address,
         id: transaction.collectable.id,
         name: transaction.collectable.name,

@@ -194,30 +194,49 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   let executions = [] as ProposalExecution[];
   let executionType = '';
 
+  const chainIdToNetworkId = Object.fromEntries(
+    Object.entries(CHAIN_IDS).map(([k, v]) => [v, k])
+  );
+
   if (proposal.plugins.oSnap) {
-    const chainIdToNetworkId = Object.fromEntries(
-      Object.entries(CHAIN_IDS).map(([k, v]) => [v, k])
-    );
-
     try {
-      executions = proposal.plugins.oSnap.safes.map(safe => {
-        const chainId = Number(safe.network);
+      executions = [
+        ...executions,
+        ...proposal.plugins.oSnap.safes.map(safe => {
+          const chainId = Number(safe.network);
 
-        return {
-          strategyType: 'oSnap',
-          safeName: safe.safeName,
-          safeAddress: safe.safeAddress,
-          networkId: chainIdToNetworkId[chainId],
-          chainId,
-          transactions: safe.transactions.map(transaction =>
-            parseOSnapTransaction(transaction)
-          )
-        };
-      });
+          return {
+            strategyType: 'oSnap',
+            safeName: safe.safeName,
+            safeAddress: safe.safeAddress,
+            networkId: chainIdToNetworkId[chainId],
+            chainId,
+            transactions: safe.transactions.map(transaction =>
+              parseOSnapTransaction(transaction)
+            )
+          };
+        })
+      ];
       executionType = 'oSnap';
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
     }
+  }
+
+  if (proposal.plugins.readOnlyExecution) {
+    executions = [
+      ...executions,
+      ...proposal.plugins.readOnlyExecution.safes.map(safe => {
+        return {
+          strategyType: 'ReadOnlyExecution',
+          safeName: safe.safeName,
+          safeAddress: safe.safeAddress,
+          networkId: chainIdToNetworkId[safe.chainId],
+          chainId: safe.chainId,
+          transactions: safe.transactions
+        };
+      })
+    ];
   }
 
   const state = getProposalState(proposal);

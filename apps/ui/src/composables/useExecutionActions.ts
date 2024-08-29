@@ -35,18 +35,12 @@ export function useExecutionActions(
   const isL1ExecutionReady = ref(false);
 
   const fetchingDetails = ref(
-    STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
-      proposal.execution_strategy_type
-    ) &&
-      (proposal.execution_strategy_type === 'EthRelayer'
-        ? proposal.execution_tx
-        : true)
+    STRATEGIES_WITH_EXTERNAL_DETAILS.includes(execution.strategyType) &&
+      (execution.strategyType === 'EthRelayer' ? proposal.execution_tx : true)
   );
   const message: Ref<string | null> = ref(null);
   const executionTx = ref<string | null>(
-    proposal.execution_strategy_type !== 'EthRelayer'
-      ? proposal.execution_tx
-      : null
+    execution.strategyType !== 'EthRelayer' ? proposal.execution_tx : null
   );
   const executionNetwork = ref<Network>(getNetwork(proposal.network));
   const finalizeProposalSending = ref(false);
@@ -65,11 +59,11 @@ export function useExecutionActions(
   const network = computed(() => getNetwork(proposal.network));
   const hasFinalize = computed(
     () =>
-      STRATEGIES_WITH_FINALIZE.includes(proposal.execution_strategy_type) &&
+      STRATEGIES_WITH_FINALIZE.includes(execution.strategyType) &&
       !proposal.execution_ready
   );
   const hasExecuteQueued = computed(() => {
-    if (proposal.execution_strategy_type === 'EthRelayer') {
+    if (execution.strategyType === 'EthRelayer') {
       return proposal.state === 'executed' ? isL1ExecutionReady.value : false;
     }
 
@@ -208,18 +202,14 @@ export function useExecutionActions(
   }
 
   onMounted(async () => {
-    if (
-      !STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
-        proposal.execution_strategy_type
-      )
-    ) {
+    if (!STRATEGIES_WITH_EXTERNAL_DETAILS.includes(execution.strategyType)) {
       return;
     }
 
     try {
-      if (proposal.execution_strategy_type === 'EthRelayer') {
+      if (execution.strategyType === 'EthRelayer') {
         await fetchEthRelayerExecutionDetails();
-      } else if (proposal.execution_strategy_type === 'oSnap') {
+      } else if (execution.strategyType === 'oSnap') {
         await fetchOSnapExecutionDetails();
       } else {
         throw new Error('Unsupported strategy');
