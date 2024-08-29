@@ -75,6 +75,8 @@ const DELEGATION_CHAINS_BY_NETWORKS = {
   '11155111': 'sepolia'
 };
 
+const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
+
 function getProposalState(proposal: ApiProposal): ProposalState {
   if (proposal.state === 'closed') {
     if (proposal.scores_total < proposal.quorum) return 'rejected';
@@ -318,7 +320,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
     delegations.push({
       name: null,
       apiType: 'delegation-strategies',
-      apiUrl: 'https://delegate-registry-api.snapshot.box',
+      apiUrl: DELEGATE_REGISTRY_URL,
       contractNetwork:
         DELEGATION_CHAINS_BY_NETWORKS[
           spaceDelegationStrategy.network || space.network
