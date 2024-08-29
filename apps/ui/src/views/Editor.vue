@@ -180,6 +180,7 @@ async function handleProposeClick() {
           strategy.treasury.chainId && strategy.transactions.length > 0
       )
       .map(strategy => ({
+        strategyType: strategy.type,
         strategyAddress: strategy.address,
         destinationAddress: strategy.destinationAddress || '',
         transactions: strategy.transactions,

@@ -82,6 +82,7 @@ export type StrategyConfig = StrategyTemplate & {
 };
 
 export type ExecutionInfo = {
+  strategyType: string;
   strategyAddress: string;
   destinationAddress: string;
   treasuryName: string;
