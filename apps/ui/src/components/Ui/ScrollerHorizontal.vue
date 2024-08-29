@@ -1,4 +1,8 @@
 <script setup lang="ts">
+const emit = defineEmits<{
+  (e: 'scroll', target: HTMLElement);
+}>();
+
 withDefaults(
   defineProps<{
     withButtons?: boolean;
@@ -16,6 +20,7 @@ function handleScroll(target: HTMLElement) {
     canScrollRight:
       Math.ceil(target.scrollLeft) < target.scrollWidth - target.clientWidth
   };
+  emit('scroll', target);
 }
 
 function scroll(direction: 'left' | 'right') {

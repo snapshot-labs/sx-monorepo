@@ -354,8 +354,10 @@ export type SendNftTransaction = BaseTransaction & {
   _type: 'sendNft';
   _form: {
     recipient: string;
+    sender: string;
     amount: string;
     nft: {
+      type: string;
       address: string;
       id: string;
       name: string;
