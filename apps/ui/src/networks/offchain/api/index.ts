@@ -56,6 +56,25 @@ const TREASURY_NETWORKS = new Map(
   ])
 );
 
+const DELEGATION_STRATEGIES = [
+  'delegation',
+  'erc20-balance-of-delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides'
+];
+
+const DELEGATION_CHAINS_BY_NETWORKS = {
+  '1': 'eth',
+  '10': 'optimism',
+  '56': 'bnb',
+  '100': 'xdai',
+  '137': 'polygon',
+  '250': 'fantom',
+  '8453': 'base',
+  '42161': 'arbitrum',
+  '11155111': 'sepolia'
+};
+
 function getProposalState(proposal: ApiProposal): ProposalState {
   if (proposal.state === 'closed') {
     if (proposal.scores_total < proposal.quorum) return 'rejected';
@@ -281,6 +300,10 @@ function formatVote(vote: ApiVote): Vote {
 function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
+  const spaceDelegationStrategy = space.strategies.find(strategy =>
+    DELEGATION_STRATEGIES.includes(strategy.name)
+  );
+
   if (space.delegationPortal) {
     delegations.push({
       name: null,
@@ -288,6 +311,19 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
       apiUrl: space.delegationPortal?.delegationApi ?? null,
       contractNetwork: null,
       contractAddress: space.delegationPortal?.delegationContract ?? null
+    });
+  }
+
+  if (spaceDelegationStrategy) {
+    delegations.push({
+      name: null,
+      apiType: 'delegation-strategies',
+      apiUrl: 'https://delegate-registry-api.snapshot.box',
+      contractNetwork:
+        DELEGATION_CHAINS_BY_NETWORKS[
+          spaceDelegationStrategy.network || space.network
+        ] || null,
+      contractAddress: space.id
     });
   }
 
