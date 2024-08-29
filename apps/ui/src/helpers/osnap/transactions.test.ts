@@ -246,9 +246,11 @@ describe('parseInternalTransaction', () => {
       value: '0',
       salt: '',
       _form: {
+        sender: '0x0',
         recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
         amount: '1',
         nft: {
+          type: 'erc721' as const,
           address: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
           id: '810',
           name: 'Weeedidit Palls #101',

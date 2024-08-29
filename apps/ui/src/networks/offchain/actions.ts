@@ -22,6 +22,7 @@ import {
   Space,
   Statement,
   StrategyParsedMetadata,
+  Transaction,
   User,
   UserProfile,
   VoteType
@@ -37,6 +38,17 @@ import {
   SnapshotInfo,
   VotingPower
 } from '../types';
+
+type ReadOnlyExecutionSafe = {
+  safeName: string;
+  safeAddress: string;
+  chainId: number;
+  transactions: Transaction[];
+};
+
+type ReadOnlyExecutionPlugin = {
+  safes: ReadOnlyExecutionSafe[];
+};
 
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
   1: offchainMainnet,
@@ -55,31 +67,50 @@ export function createActions(
   });
 
   async function getPlugins(executions: ExecutionInfo[] | null) {
-    const plugins = {} as { oSnap?: OSnapPlugin };
+    const plugins = {} as {
+      oSnap?: OSnapPlugin;
+      readOnlyExecution?: ReadOnlyExecutionPlugin;
+    };
 
     if (!executions) return plugins;
 
-    const safes = [] as OSnapPlugin['safes'];
+    const oSnapSafes = [] as OSnapPlugin['safes'];
+    const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
     for (const info of executions) {
       if (!info.transactions.length) continue;
 
-      const treasuryAddress = info.strategyAddress;
-      const moduleAddress = await getModuleAddressForTreasury(
-        info.chainId,
-        treasuryAddress
-      );
+      if (info.strategyType === 'oSnap') {
+        const treasuryAddress = info.strategyAddress;
+        const moduleAddress = await getModuleAddressForTreasury(
+          info.chainId,
+          treasuryAddress
+        );
 
-      safes.push({
-        safeName: info.treasuryName,
-        safeAddress: treasuryAddress,
-        network: info.chainId.toString(),
-        transactions: info.transactions.map(tx => parseInternalTransaction(tx)),
-        moduleAddress
-      });
+        oSnapSafes.push({
+          safeName: info.treasuryName,
+          safeAddress: treasuryAddress,
+          network: info.chainId.toString(),
+          transactions: info.transactions.map(tx =>
+            parseInternalTransaction(tx)
+          ),
+          moduleAddress
+        });
+      } else if (info.strategyType === 'ReadOnlyExecution') {
+        readOnlyExecutionSafes.push({
+          safeName: info.treasuryName,
+          safeAddress: info.strategyAddress,
+          chainId: info.chainId,
+          transactions: info.transactions
+        });
+      }
     }
 
-    if (safes.length > 0) {
-      plugins.oSnap = { safes };
+    if (oSnapSafes.length > 0) {
+      plugins.oSnap = { safes: oSnapSafes };
+    }
+
+    if (readOnlyExecutionSafes.length > 0) {
+      plugins.readOnlyExecution = { safes: readOnlyExecutionSafes };
     }
 
     return plugins;

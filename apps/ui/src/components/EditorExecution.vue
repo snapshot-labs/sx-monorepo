@@ -2,6 +2,7 @@
 import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
+import { getExecutionName } from '@/helpers/ui';
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
@@ -37,9 +38,7 @@ const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
 
-const network = computed(() =>
-  props.space ? getNetwork(props.space.network) : null
-);
+const network = computed(() => getNetwork(props.space.network));
 
 function addTx(tx: TransactionType) {
   const newValue = [...model.value];
@@ -138,11 +137,7 @@ watch(
               :class="{
                 'text-skin-border': disabled
               }"
-              v-text="
-                strategy.type === 'oSnap'
-                  ? 'oSnap execution'
-                  : `${network.constants.EXECUTORS[strategy.type]} execution`
-              "
+              v-text="getExecutionName(props.space.network, strategy.type)"
             />
           </div>
         </div>

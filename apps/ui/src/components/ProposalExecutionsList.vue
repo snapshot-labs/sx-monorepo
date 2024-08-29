@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { buildBatchFile } from '@/helpers/safe/ build';
+import { getExecutionName } from '@/helpers/ui';
 import { sanitizeUrl, shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { NetworkID, Proposal, ProposalExecution } from '@/types';
@@ -21,15 +23,19 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
   }
 }
 
-function getExecutionType(networkId: NetworkID, strategyType: string) {
-  try {
-    if (strategyType === 'oSnap') return 'oSnap execution';
+function downloadExecution(execution: ProposalExecution) {
+  if (!execution.chainId) return;
 
-    const network = getNetwork(networkId);
-    return `${network.constants.EXECUTORS[strategyType]} execution`;
-  } catch (e) {
-    return null;
-  }
+  const batchFile = buildBatchFile(execution.chainId, execution.transactions);
+
+  const blob = new Blob([JSON.stringify(batchFile)], {
+    type: 'application/json'
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `execution-${execution.safeAddress}.json`;
+  a.click();
 }
 </script>
 
@@ -69,13 +75,27 @@ function getExecutionType(networkId: NetworkID, strategyType: string) {
         <div
           class="text-skin-text text-[17px]"
           v-text="
-            getExecutionType(execution.networkId, execution.strategyType) ||
+            getExecutionName(execution.networkId, execution.strategyType) ||
             shorten(execution.safeAddress)
           "
         />
       </div>
     </a>
-    <UiLabel label="Transactions" class="border-t" />
+    <div class="flex justify-between items-center border-y pr-3">
+      <UiLabel label="Transactions" class="border-b-0" />
+      <UiTooltip
+        v-if="execution.strategyType === 'ReadOnlyExecution'"
+        title="Export transactions"
+      >
+        <button
+          type="button"
+          class="hover:text-skin-link p-2"
+          @click="downloadExecution(execution)"
+        >
+          <IS-arrow-down-tray />
+        </button>
+      </UiTooltip>
+    </div>
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"

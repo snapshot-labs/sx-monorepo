@@ -42,11 +42,11 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
 
     return space.treasuries
       .map((treasury, i) => {
-        if (offchainNetworks.includes(space.network)) {
-          if (!oSnapSupportPerTreasury || !oSnapSupportPerTreasury[i]) {
-            return null;
-          }
-
+        if (
+          offchainNetworks.includes(space.network) &&
+          oSnapSupportPerTreasury &&
+          oSnapSupportPerTreasury[i]
+        ) {
           return {
             address: treasury.address,
             destinationAddress: null,
@@ -66,7 +66,14 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
           );
         });
 
-        if (!strategy) return null;
+        if (!strategy) {
+          return {
+            address: treasury.address,
+            destinationAddress: '0x0',
+            type: 'ReadOnlyExecution',
+            treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+          };
+        }
 
         return {
           address: strategy.address,
