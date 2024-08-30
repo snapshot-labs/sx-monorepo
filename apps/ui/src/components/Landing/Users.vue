@@ -91,7 +91,7 @@ const ORGS = [
   'shinyclub.eth',
   'safe.eth',
   'eliteness.eth',
-  'sdcrv.eth',
+  'sdcrv.eth'
   /*
   'shellprotocol.eth',
   'lgcryptounicorns.eth',
