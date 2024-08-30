@@ -30,6 +30,8 @@ export interface Topic {
   users: User[];
   author_id: string;
   author: User;
+  latest_poster_id: string;
+  latest_poster: User;
 }
 
 export interface User {
@@ -78,11 +80,19 @@ export async function loadTopics(url: string): Promise<Topic[]> {
     topic.user_url = `${baseUrl}/u/${topic.username}`;
     topic.created = Date.parse(topic.created_at) / 1000;
     topic.updated = Date.parse(topic.last_posted_at) / 1000;
+
     topic.author_id = topic.posters.find(poster =>
       poster.description.includes('Original Poster')
     ).user_id;
     topic.author = data.users.find(user => user.id === topic.author_id);
-    console.log(topic.author);
+
+    topic.latest_poster_id = topic.posters.find(poster =>
+      poster.description.includes('Most Recent Poster')
+    ).user_id;
+    topic.latest_poster = data.users.find(
+      user => user.id === topic.latest_poster_id
+    );
+
     topic.users = topic.posters.map(poster =>
       data.users.find(user => user.id === poster.user_id)
     );

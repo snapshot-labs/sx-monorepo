@@ -43,7 +43,7 @@ defineProps<{ topic: Topic }>();
             :href="topic.user_url"
             target="_blank"
             class="text-skin-text"
-            v-text="topic.author.name || topic.author.username"
+            v-text="topic.latest_poster.name || topic.latest_poster.username"
           />
         </div>
         <span> · {{ _rt(topic.updated) }}</span>
