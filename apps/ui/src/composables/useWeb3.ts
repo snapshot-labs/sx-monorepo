@@ -112,7 +112,7 @@ export function useWeb3() {
       if (acc) {
         const usersStore = useUsersStore();
         try {
-          await usersStore.fetchUser(acc);
+          await usersStore.fetchUser(formatAddress(acc));
         } catch (e) {
           console.warn('failed to fetch user', e);
         }
