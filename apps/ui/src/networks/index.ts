@@ -42,8 +42,8 @@ export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
 
-export const getNetwork = (id: NetworkID) => {
-  if (!enabledNetworks.includes(id))
+export const getNetwork = (id: NetworkID, allowDisabledNetwork = false) => {
+  if (!enabledNetworks.includes(id) && !allowDisabledNetwork)
     throw new Error(`Network ${id} is not enabled`);
 
   if (id === 's') return snapshotNetwork;
@@ -64,8 +64,11 @@ export const getNetwork = (id: NetworkID) => {
   throw new Error(`Unknown network ${id}`);
 };
 
-export const getReadWriteNetwork = (id: NetworkID): ReadWriteNetwork => {
-  const network = getNetwork(id);
+export const getReadWriteNetwork = (
+  id: NetworkID,
+  allowDisabledNetwork = false
+): ReadWriteNetwork => {
+  const network = getNetwork(id, allowDisabledNetwork);
   if (network.readOnly) throw new Error(`Network ${id} is read-only`);
 
   return network;
