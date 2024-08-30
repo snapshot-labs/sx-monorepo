@@ -96,14 +96,13 @@ watchEffect(() =>
             </UiButton>
           </UiTooltip>
         </div>
-        <UiMarkdown
-          v-if="statement.statement"
-          class="text-skin-heading max-w-[592px]"
-          :body="stripHtmlTags(statement.statement)"
-        />
-        <div v-if="statement.source">
-          <h4 class="eyebrow text-skin-text mb-2">Source</h4>
-          <div class="inline-block">
+        <template v-if="statement.statement">
+          <UiMarkdown
+            class="text-skin-heading max-w-[592px]"
+            :body="stripHtmlTags(statement.statement)"
+          />
+          <div v-if="statement.source">
+            <h4 class="eyebrow text-skin-text mb-2">Source</h4>
             <a
               :href="SOURCE_ICONS[statement.source].link"
               target="_blank"
@@ -118,7 +117,7 @@ watchEffect(() =>
               />
             </a>
           </div>
-        </div>
+        </template>
         <div v-else class="flex items-center space-x-2">
           <IH-exclamation-circle class="inline-block shrink-0" />
           <span>This profile does not have statement.</span>
