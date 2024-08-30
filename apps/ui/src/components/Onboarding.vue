@@ -5,19 +5,21 @@ const followedSpacesStore = useFollowedSpacesStore();
 
 const user = computed(() => usersStore.getUser(web3.value.account));
 
-const steps = computed(() => ({
-  profile: !!user.value?.created,
-  following: followedSpacesStore.followedSpacesIds.length >= 3,
-  votes: !!user.value?.votesCount
+const tasks = computed(() => ({
+  profile: !user.value?.created,
+  following:
+    followedSpacesStore.followedSpacesLoaded &&
+    followedSpacesStore.followedSpacesIds.length < 3,
+  votes: !user.value?.votesCount
 }));
 
-const pending = computed(() => Object.values(steps.value).includes(false));
+const pendingTasks = computed(() => Object.values(tasks.value).includes(true));
 </script>
 
 <template>
-  <div v-if="user && pending">
+  <div v-if="user && pendingTasks">
     <UiLabel label="onboarding" sticky />
-    <div v-if="!steps.profile" class="border-b mx-4 py-[14px] flex gap-x-2.5">
+    <div v-if="tasks.profile" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <span>
         <IS-flag :width="20" :height="20" class="text-skin-link mt-1" />
       </span>
@@ -29,7 +31,7 @@ const pending = computed(() => Object.values(steps.value).includes(false));
       </span>
     </div>
 
-    <div v-if="!steps.following" class="border-b mx-4 py-[14px] flex gap-x-2.5">
+    <div v-if="tasks.following" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <span>
         <IS-flag :width="20" :height="20" class="text-skin-link mt-1" />
       </span>
@@ -45,7 +47,7 @@ const pending = computed(() => Object.values(steps.value).includes(false));
       </span>
     </div>
 
-    <div v-if="!steps.votes" class="border-b mx-4 py-[14px] flex gap-x-2.5">
+    <div v-if="tasks.votes" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <span>
         <IS-flag width="20" :height="20" class="text-skin-link mt-1" />
       </span>
