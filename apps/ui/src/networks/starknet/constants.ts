@@ -535,8 +535,6 @@ export function createConstants(
 
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
-  const EDITOR_DELEGATION_TYPES: DelegationType[] = ['governor-subgraph'];
-
   return {
     SUPPORTED_AUTHENTICATORS,
     CONTRACT_SUPPORTED_AUTHENTICATORS,
@@ -553,7 +551,6 @@ export function createConstants(
     EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
     EDITOR_EXECUTION_STRATEGIES,
     EDITOR_VOTING_TYPES,
-    EDITOR_DELEGATION_TYPES,
     STORAGE_PROOF_STRATEGIES_TYPES
   };
 }
