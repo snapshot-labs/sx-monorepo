@@ -40,7 +40,7 @@ const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
 
   try {
-    return getNetwork(props.delegation.contractNetwork);
+    return getNetwork(props.delegation.contractNetwork, true);
   } catch (e) {
     return null;
   }
