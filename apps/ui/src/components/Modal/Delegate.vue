@@ -54,9 +54,9 @@ async function handleSubmit() {
     await delegate(
       props.space,
       props.delegation.contractNetwork as NetworkID,
+      props.delegation.apiType!,
       form.delegatee,
-      `${props.delegation.contractNetwork}:${props.delegation.contractAddress}`,
-      props.delegation.apiType!
+      `${props.delegation.contractNetwork}:${props.delegation.contractAddress}`
     );
     emit('close');
   } catch (e) {

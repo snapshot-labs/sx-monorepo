@@ -526,9 +526,9 @@ export function useActions() {
   async function delegate(
     space: Space,
     networkId: NetworkID,
+    delegationType: DelegationType,
     delegatee: string,
-    delegationContract: string,
-    delegationType: DelegationType
+    delegationContract: string
   ) {
     if (!web3.value.account) return await forceLogin();
 
@@ -540,9 +540,9 @@ export function useActions() {
         auth.web3,
         space,
         networkId,
+        delegationType,
         delegatee,
-        delegationContract,
-        delegationType
+        delegationContract
       )
     );
   }

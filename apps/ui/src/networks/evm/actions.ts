@@ -593,9 +593,9 @@ export function createActions(
       web3: Web3Provider,
       space: Space,
       networkId: NetworkID,
+      delegationType: DelegationType,
       delegatee: string,
-      delegationContract: string,
-      delegationType: DelegationType
+      delegationContract: string
     ) => {
       await verifyNetwork(web3, CHAIN_IDS[networkId]);
 
