@@ -171,7 +171,7 @@ watch(
           </UiTooltip>
         </div>
       </div>
-      <template v-if="model.length > 0">
+      <template v-if="model.length > 0 && treasury">
         <UiLabel label="Transactions" class="border-t" />
         <div>
           <Draggable
@@ -180,7 +180,7 @@ watch(
             :item-key="() => undefined"
           >
             <template #item="{ element: tx, index: i }">
-              <TransactionsListItem :tx="tx">
+              <TransactionsListItem :tx="tx" :network-id="treasury.networkId">
                 <template #left>
                   <div
                     v-if="model.length > 1"
