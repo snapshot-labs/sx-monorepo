@@ -87,7 +87,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     v-if="!currentNetwork || !delegation.apiUrl"
     class="px-4 py-3 flex items-center text-skin-link space-x-2"
   >
-    <IH-exclamation-circle class="inline-block" />
+    <IH-exclamation-circle class="shrink-0" />
     <span>Invalid delegation settings.</span>
   </div>
   <template v-else>
@@ -150,9 +150,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           v-if="loaded && (delegates.length === 0 || failed)"
           class="px-4 py-3 flex items-center space-x-1"
         >
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span v-if="delegates.length === 0">There are no delegates.</span>
-          <span v-else-if="failed">Failed to load delegates.</span>
+          <IH-exclamation-circle class="shrink-0" />
+          <span v-if="failed">Failed to load delegates.</span>
+          <span v-else-if="delegates.length === 0">
+            There are no delegates.
+          </span>
         </div>
         <UiContainerInfiniteScroll
           :loading-more="loadingMore"
