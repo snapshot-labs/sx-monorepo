@@ -33,6 +33,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     isStrategySupported: () => true,
     isExecutorSupported: (executorType: string) => {
       if (executorType === 'oSnap') return true;
+      if (executorType === 'ReadOnlyExecution') return true;
       return false;
     },
     pin: pinPineapple,
