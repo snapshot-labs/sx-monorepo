@@ -2,7 +2,7 @@
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { DelegationType, SpaceMetadataDelegation } from '@/types';
+import { SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
@@ -14,7 +14,6 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
-  availableDelegationTypes: DelegationType[];
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{

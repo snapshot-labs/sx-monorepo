@@ -615,9 +615,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       >
         <FormSpaceDelegations
           :delegations-value="form.delegations"
-          :available-delegation-types="
-            network.constants.EDITOR_DELEGATION_TYPES
-          "
           @delegations="v => (form.delegations = v)"
         />
       </UiContainerSettings>
