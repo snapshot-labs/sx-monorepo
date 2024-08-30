@@ -32,8 +32,6 @@ import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
 import User from '@/views/User.vue';
 
-const { mixpanel } = useMixpanel();
-
 const routes: any[] = [
   { path: '/', name: 'landing', component: Landing },
   {
@@ -147,13 +145,6 @@ const router = createRouter({
     }
     return { top: 0 };
   }
-});
-
-router.afterEach(to => {
-  mixpanel.track_pageview({
-    page_name: to.name,
-    page_path: to.path
-  });
 });
 
 export default router;
