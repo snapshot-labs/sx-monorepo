@@ -114,7 +114,7 @@ watchEffect(() =>
                 class="max-h-[25px] max-w-[85px] w-auto text-skin-link"
               />
               <IH-arrow-sm-right
-                class="-rotate-45 text-skin-text relative top-[1px]"
+                class="-rotate-45 text-skin-link relative top-[1px]"
               />
             </a>
           </div>
