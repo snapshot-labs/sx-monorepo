@@ -31,22 +31,23 @@ defineProps<{ topic: Topic }>();
           </div>
         </div>
         <div class="inline">
-          <span>
+          <span class="mr-2.5">
             <img
               v-for="(user, i) in topic.users"
               :key="i"
               :src="user.avatar_template"
-              class="rounded-full size-[22px] inline-block -ml-1.5 border-2 border-skin-bg bg-skin-border"
+              class="rounded-full size-[22px] inline-block -mr-1.5 border-2 border-skin-bg bg-skin-border"
             />
           </span>
-          by
-          <a :href="topic.user_url" target="_blank" class="text-skin-text">{{
-            topic.username
-          }}</a>
+          <a
+            :href="topic.user_url"
+            target="_blank"
+            class="text-skin-text"
+            v-text="topic.author.name || topic.author.username"
+          />
         </div>
-        <span> · {{ _rt(topic.created) }}</span>
+        <span> · {{ _rt(topic.updated) }}</span>
         <span> · {{ _n(topic.posts_count) }} replies</span>
-        <span> · {{ _n(topic.views, 'compact') }} views</span>
       </div>
     </div>
   </div>

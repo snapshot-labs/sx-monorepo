@@ -19,6 +19,7 @@ export interface Topic {
   title: string;
   username: string;
   created: number;
+  updated: number;
   reply_count: number;
   views: number;
   pinned: boolean;
@@ -26,7 +27,17 @@ export interface Topic {
   posts_count: number;
   url: string;
   user_url: string;
-  users: any[];
+  users: User[];
+  author_id: string;
+  author: User;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  name: string;
+  avatar_template: string;
+  moderator: boolean;
 }
 
 export const SPACES_DISCUSSIONS = {
@@ -66,6 +77,12 @@ export async function loadTopics(url: string): Promise<Topic[]> {
     topic.username = topic.last_poster_username;
     topic.user_url = `${baseUrl}/u/${topic.username}`;
     topic.created = Date.parse(topic.created_at) / 1000;
+    topic.updated = Date.parse(topic.last_posted_at) / 1000;
+    topic.author_id = topic.posters.find(poster =>
+      poster.description.includes('Original Poster')
+    ).user_id;
+    topic.author = data.users.find(user => user.id === topic.author_id);
+    console.log(topic.author);
     topic.users = topic.posters.map(poster =>
       data.users.find(user => user.id === poster.user_id)
     );
