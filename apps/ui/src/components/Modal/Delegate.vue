@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { NetworkID, Space, SpaceMetadataDelegation } from '@/types';
+import { Space, SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   delegatee: ''
