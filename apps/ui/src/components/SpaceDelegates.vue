@@ -24,6 +24,7 @@ const {
   loadingMore,
   loaded,
   failed,
+  errorCode,
   hasMore,
   delegates,
   fetch,
@@ -151,8 +152,13 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           class="px-4 py-3 flex items-center space-x-1"
         >
           <IH-exclamation-circle class="inline-block shrink-0" />
-          <span v-if="delegates.length === 0">There are no delegates.</span>
+          <span v-if="errorCode === 'initializing'">
+            Delegates are being computed please comeback later.
+          </span>
           <span v-else-if="failed">Failed to load delegates.</span>
+          <span v-else-if="delegates.length === 0">
+            There are no delegates.
+          </span>
         </div>
         <UiContainerInfiniteScroll
           :loading-more="loadingMore"
