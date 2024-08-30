@@ -89,7 +89,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     class="px-4 py-3 flex items-center text-skin-link space-x-2"
   >
     <IH-exclamation-circle class="inline-block" />
-    <span>No delegation API configured.</span>
+    <span>Invalid delegation settings.</span>
   </div>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
