@@ -33,7 +33,9 @@ module.exports = {
 
         // accents
         'skin-primary': 'rgba(var(--primary), <alpha-value>)',
-        'skin-accent-foreground': 'rgba(var(--accent-foreground), <alpha-value>)',
+        'skin-display': 'rgba(var(--display), <alpha-value>)',
+        'skin-accent-foreground':
+          'rgba(var(--accent-foreground), <alpha-value>)',
         'skin-danger': 'rgba(var(--danger), <alpha-value>)',
         'skin-success': 'rgba(var(--success), <alpha-value>)',
 
