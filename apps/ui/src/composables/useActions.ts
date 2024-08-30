@@ -532,7 +532,9 @@ export function useActions() {
   ) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getReadWriteNetwork(networkId, true);
+    const network = getReadWriteNetwork(networkId, {
+      allowDisabledNetwork: true
+    });
 
     await wrapPromise(
       networkId,

@@ -40,7 +40,9 @@ const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
 
   try {
-    return getNetwork(props.delegation.contractNetwork, true);
+    return getNetwork(props.delegation.contractNetwork, {
+      allowDisabledNetwork: true
+    });
   } catch (e) {
     return null;
   }

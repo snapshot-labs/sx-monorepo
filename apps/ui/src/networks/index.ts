@@ -4,6 +4,8 @@ import { createOffchainNetwork } from './offchain';
 import { createStarknetNetwork } from './starknet';
 import { ExplorePageProtocol, ProtocolConfig, ReadWriteNetwork } from './types';
 
+type GetNetworkOptions = { allowDisabledNetwork: boolean };
+
 const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
 const starknetNetwork = createStarknetNetwork('sn');
@@ -42,8 +44,10 @@ export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
 
-export const getNetwork = (id: NetworkID, allowDisabledNetwork = false) => {
-  if (!enabledNetworks.includes(id) && !allowDisabledNetwork)
+export const getNetwork = (id: NetworkID, options?: GetNetworkOptions) => {
+  const opts = { allowDisabledNetwork: false, ...options };
+
+  if (!enabledNetworks.includes(id) && !opts.allowDisabledNetwork)
     throw new Error(`Network ${id} is not enabled`);
 
   if (id === 's') return snapshotNetwork;
@@ -66,9 +70,9 @@ export const getNetwork = (id: NetworkID, allowDisabledNetwork = false) => {
 
 export const getReadWriteNetwork = (
   id: NetworkID,
-  allowDisabledNetwork = false
+  options?: GetNetworkOptions
 ): ReadWriteNetwork => {
-  const network = getNetwork(id, allowDisabledNetwork);
+  const network = getNetwork(id, options);
   if (network.readOnly) throw new Error(`Network ${id} is read-only`);
 
   return network;
