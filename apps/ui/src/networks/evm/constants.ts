@@ -5,12 +5,7 @@ import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinGraph } from '@/helpers/pin';
 import { getUrl, shorten } from '@/helpers/utils';
-import {
-  DelegationType,
-  NetworkID,
-  StrategyParsedMetadata,
-  VoteType
-} from '@/types';
+import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';

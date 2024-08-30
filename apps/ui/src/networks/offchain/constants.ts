@@ -1,4 +1,4 @@
-import { DelegationType, VoteType } from '@/types';
+import { VoteType } from '@/types';
 import { Connector } from '../types';
 
 export const AUTHS = {};
