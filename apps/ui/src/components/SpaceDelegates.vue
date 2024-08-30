@@ -84,7 +84,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
 <template>
   <div
-    v-if="!currentNetwork || !delegation.apiUrl"
+    v-if="
+      !currentNetwork ||
+      !delegation.apiUrl ||
+      delegation.apiType === 'split-delegation'
+    "
     class="px-4 py-3 flex items-center text-skin-link space-x-2"
   >
     <IH-exclamation-circle class="shrink-0" />
