@@ -153,7 +153,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         >
           <IH-exclamation-circle class="inline-block shrink-0" />
           <span v-if="errorCode === 'initializing'">
-            Delegates are being computed please comeback later.
+            Delegates are being computed, please come back later.
           </span>
           <span v-else-if="failed">Failed to load delegates.</span>
           <span v-else-if="delegates.length === 0">
