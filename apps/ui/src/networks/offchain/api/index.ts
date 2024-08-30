@@ -16,6 +16,7 @@ import {
 } from '@/networks/types';
 import {
   Alias,
+  DelegationType,
   Follow,
   NetworkID,
   Proposal,
@@ -23,6 +24,7 @@ import {
   ProposalState,
   RelatedSpace,
   Space,
+  SpaceMetadataDelegation,
   SpaceMetadataTreasury,
   Statement,
   User,
@@ -54,6 +56,31 @@ const CHAIN_ID_TO_NETWORK_ID_MAP = new Map(
     networkId as NetworkID
   ])
 );
+
+const DELEGATION_STRATEGIES = [
+  'delegation',
+  'erc20-balance-of-delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides'
+];
+
+const SUPPORTED_DELEGATION_NETWORKS: NetworkID[] = [
+  'eth',
+  'oeth',
+  'bsc',
+  'xdai',
+  'matic',
+  'fantom',
+  'base',
+  'arb1',
+  'sep'
+];
+
+const CHAIN_IDS_TO_NETWORKS: Record<number, NetworkID> = Object.fromEntries(
+  SUPPORTED_DELEGATION_NETWORKS.map(network => [CHAIN_IDS[network], network])
+);
+
+const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
 
 function getProposalState(proposal: ApiProposal): ProposalState {
   if (proposal.state === 'closed') {
@@ -141,20 +168,7 @@ function formatSpace(
     max_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     proposal_threshold: '1',
     treasuries,
-    delegations: space.delegationPortal
-      ? [
-          {
-            name: null,
-            apiType: space.delegationPortal?.delegationType ?? null,
-            apiUrl: space.delegationPortal?.delegationApi ?? null,
-            contractNetwork:
-              CHAIN_ID_TO_NETWORK_ID_MAP.get(
-                parseInt(space.delegationPortal?.delegationNetwork, 10)
-              ) ?? null,
-            contractAddress: space.delegationPortal?.delegationContract ?? null
-          }
-        ]
-      : [],
+    delegations: formatDelegations(space),
     // NOTE: ignored
     created: 0,
     authenticators: [DEFAULT_AUTHENTICATOR],
@@ -309,6 +323,40 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
+function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
+  const delegations: SpaceMetadataDelegation[] = [];
+
+  const spaceDelegationStrategy = space.strategies.find(strategy =>
+    DELEGATION_STRATEGIES.includes(strategy.name)
+  );
+
+  if (space.delegationPortal) {
+    delegations.push({
+      name: null,
+      apiType:
+        (space.delegationPortal?.delegationType as DelegationType) ?? null,
+      apiUrl: space.delegationPortal?.delegationApi ?? null,
+      contractNetwork:
+        CHAIN_ID_TO_NETWORK_ID_MAP.get(
+          parseInt(space.delegationPortal?.delegationNetwork, 10)
+        ) ?? null,
+      contractAddress: space.delegationPortal?.delegationContract ?? null
+    });
+  }
+
+  if (spaceDelegationStrategy) {
+    delegations.push({
+      name: null,
+      apiType: 'delegate-registry',
+      apiUrl: DELEGATE_REGISTRY_URL,
+      contractNetwork:
+        CHAIN_IDS_TO_NETWORKS[parseInt(space.network, 10)] || null,
+      contractAddress: space.id
+    });
+  }
+
+  return delegations;
+}
 export function createApi(
   uri: string,
   networkId: NetworkID,

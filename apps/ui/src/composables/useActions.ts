@@ -5,6 +5,7 @@ import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   Choice,
+  DelegationType,
   NetworkID,
   Proposal,
   Space,
@@ -525,12 +526,13 @@ export function useActions() {
   async function delegate(
     space: Space,
     networkId: NetworkID,
+    delegationType: DelegationType,
     delegatee: string,
     delegationContract: string
   ) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getReadWriteNetwork(networkId);
+    const network = getReadWriteNetwork(networkId, true);
 
     await wrapPromise(
       networkId,
@@ -538,6 +540,7 @@ export function useActions() {
         auth.web3,
         space,
         networkId,
+        delegationType,
         delegatee,
         delegationContract
       )

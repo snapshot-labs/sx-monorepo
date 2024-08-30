@@ -24,6 +24,7 @@ const {
   loadingMore,
   loaded,
   failed,
+  errorCode,
   hasMore,
   delegates,
   fetch,
@@ -39,7 +40,7 @@ const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
 
   try {
-    return getNetwork(props.delegation.contractNetwork);
+    return getNetwork(props.delegation.contractNetwork, true);
   } catch (e) {
     return null;
   }
@@ -155,7 +156,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           class="px-4 py-3 flex items-center space-x-1"
         >
           <IH-exclamation-circle class="shrink-0" />
-          <span v-if="failed">Failed to load delegates.</span>
+          <span v-if="errorCode === 'initializing'">
+            Delegates are being computed, please come back later.
+          </span>
+          <span v-else-if="failed">Failed to load delegates.</span>
           <span v-else-if="delegates.length === 0">
             There are no delegates.
           </span>

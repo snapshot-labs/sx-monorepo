@@ -98,6 +98,7 @@ export function useDelegates(
   const loaded = ref(false);
   const failed = ref(false);
   const hasMore = ref(false);
+  const errorCode = ref<'initializing' | null>(null);
 
   const httpLink = createHttpLink({
     uri: convertUrl(delegationApiUrl)
@@ -191,6 +192,10 @@ export function useDelegates(
       loaded.value = true;
     } catch (e) {
       failed.value = true;
+
+      if (e.message.includes('Row not found')) {
+        errorCode.value = 'initializing';
+      }
     } finally {
       loading.value = false;
       loaded.value = true;
@@ -220,6 +225,7 @@ export function useDelegates(
     loadingMore,
     loaded,
     failed,
+    errorCode,
     hasMore,
     delegates,
     getDelegates,
