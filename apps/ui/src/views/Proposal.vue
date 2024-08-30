@@ -147,61 +147,64 @@ watchEffect(() => {
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 md:mr-[340px]">
-        <div
-          class="flex px-4 bg-skin-bg border-b sticky top-[71px] lg:top-[72px] z-40 space-x-3"
+        <UiScrollerHorizontal
+          class="z-40 sticky top-[71px] lg:top-[72px]"
+          gradient="md"
         >
-          <router-link
-            :to="{
-              name: 'proposal-overview',
-              params: { id: proposal.proposal_id }
-            }"
-          >
-            <UiLink
-              :is-active="route.name === 'proposal-overview'"
-              text="Overview"
-            />
-          </router-link>
-          <router-link
-            :to="{
-              name: 'proposal-votes',
-              params: { id: proposal.proposal_id }
-            }"
-            class="flex items-center"
-          >
-            <UiLink
-              :is-active="route.name === 'proposal-votes'"
-              :count="proposal.vote_count"
-              text="Votes"
-              class="inline-block"
-            />
-          </router-link>
-          <template v-if="discussion">
+          <div class="flex px-4 bg-skin-bg border-b space-x-3">
             <router-link
-              v-if="discourseTopic?.posts_count"
               :to="{
-                name: 'proposal-discussion',
+                name: 'proposal-overview',
+                params: { id: proposal.proposal_id }
+              }"
+            >
+              <UiLink
+                :is-active="route.name === 'proposal-overview'"
+                text="Overview"
+              />
+            </router-link>
+            <router-link
+              :to="{
+                name: 'proposal-votes',
                 params: { id: proposal.proposal_id }
               }"
               class="flex items-center"
             >
               <UiLink
-                :is-active="route.name === 'proposal-discussion'"
-                :count="discourseTopic.posts_count"
-                text="Discussion"
+                :is-active="route.name === 'proposal-votes'"
+                :count="proposal.vote_count"
+                text="Votes"
                 class="inline-block"
               />
             </router-link>
-            <a
-              v-else
-              :href="discussion"
-              target="_blank"
-              class="flex items-center"
-            >
-              <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
-              <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-            </a>
-          </template>
-        </div>
+            <template v-if="discussion">
+              <router-link
+                v-if="discourseTopic?.posts_count"
+                :to="{
+                  name: 'proposal-discussion',
+                  params: { id: proposal.proposal_id }
+                }"
+                class="flex items-center"
+              >
+                <UiLink
+                  :is-active="route.name === 'proposal-discussion'"
+                  :count="discourseTopic.posts_count"
+                  text="Discussion"
+                  class="inline-block"
+                />
+              </router-link>
+              <a
+                v-else
+                :href="discussion"
+                target="_blank"
+                class="flex items-center"
+              >
+                <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
+                <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
+              </a>
+            </template>
+          </div>
+        </UiScrollerHorizontal>
         <router-view :proposal="proposal" />
       </div>
       <div
