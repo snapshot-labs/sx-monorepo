@@ -24,7 +24,6 @@ const offchainToStarknetIds: Record<string, NetworkID> = {
 const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
-  const { mixpanel } = useMixpanel();
   const uiStore = useUiStore();
   const alias = useAlias();
   const { web3 } = useWeb3();
@@ -223,11 +222,6 @@ export function useActions() {
 
     console.log('Receipt', receipt);
 
-    mixpanel.track('Create space', {
-      network: networkId,
-      predictedSpaceAddress: predictSpaceAddress(networkId, salt)
-    });
-
     return receipt;
   }
 
@@ -271,13 +265,6 @@ export function useActions() {
 
     addPendingVote(proposal.id);
 
-    mixpanel.track('Vote', {
-      network: proposal.network,
-      space: proposal.space,
-      proposalId: proposal.id,
-      choice
-    });
-
     return txHash;
   }
 
@@ -312,11 +299,6 @@ export function useActions() {
         executions
       )
     );
-
-    mixpanel.track('Propose', {
-      network: space.network,
-      space: space.id
-    });
 
     return true;
   }
@@ -563,12 +545,6 @@ export function useActions() {
         delegationType
       )
     );
-
-    mixpanel.track('Delegate', {
-      network: networkId,
-      space: space.id,
-      delegatee
-    });
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {
