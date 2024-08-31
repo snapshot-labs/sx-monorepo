@@ -2,7 +2,7 @@
 import removeMarkdown from 'remove-markdown';
 import { _n, _p, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { Space, SpaceMetadataDelegation } from '@/types';
+import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
   space: Space;
@@ -31,6 +31,7 @@ const {
   fetchMore,
   reset
 } = useDelegates(
+  props.delegation.apiType as DelegationType,
   props.delegation.apiUrl as string,
   props.delegation.contractAddress as string,
   props.space
