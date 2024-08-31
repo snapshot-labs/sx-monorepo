@@ -46,6 +46,35 @@ function createStandardConfig(
   };
 }
 
+function createEmptyConfig(eip712ChainId: number) {
+  return {
+    Meta: {
+      eip712ChainId,
+      proxyFactory: '',
+      masterSpace: ''
+    },
+    Authenticators: {
+      EthSig: '',
+      EthTx: ''
+    },
+    Strategies: {
+      Vanilla: '',
+      Comp: '',
+      OZVotes: '',
+      Whitelist: ''
+    },
+    ProposalValidations: {
+      VotingPower: ''
+    },
+    ExecutionStrategies: {
+      SimpleQuorumAvatar: '',
+      SimpleQuorumTimelock: '',
+      Axiom: null,
+      Isokratia: null
+    }
+  };
+}
+
 function createEvmConfig(
   networkId: keyof typeof evmNetworks
 ): EvmNetworkConfig {
@@ -132,7 +161,11 @@ export const evmNetworks = {
       Axiom: null,
       Isokratia: null
     }
-  }
+  },
+  bsc: createEmptyConfig(56),
+  xdai: createEmptyConfig(100),
+  fantom: createEmptyConfig(250),
+  base: createEmptyConfig(8453)
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');
@@ -141,3 +174,7 @@ export const evmOptimism = createEvmConfig('oeth');
 export const evmPolygon = createEvmConfig('matic');
 export const evmArbitrum = createEvmConfig('arb1');
 export const evmLineaGoerli = createEvmConfig('linea-testnet');
+export const evmBnb = createEvmConfig('bsc');
+export const evmGnosis = createEvmConfig('xdai');
+export const evmFantom = createEvmConfig('fantom');
+export const evmBase = createEvmConfig('base');
