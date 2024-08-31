@@ -613,6 +613,13 @@ export function createActions(
           functionParams: [delegatee],
           abi: ['function delegate(address delegatee)']
         };
+      } else if (delegationType === 'compound-governor') {
+        contractParams = {
+          address: delegationContract,
+          functionName: 'delegate',
+          functionParams: [delegatee],
+          abi: ['function delegate(address delegatee)']
+        };
       } else if (delegationType == 'delegate-registry') {
         contractParams = {
           address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
