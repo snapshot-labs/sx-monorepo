@@ -332,13 +332,13 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   if (space.delegationPortal) {
     delegations.push({
       name: null,
-      apiType: space.delegationPortal?.delegationType ?? null,
-      apiUrl: space.delegationPortal?.delegationApi ?? null,
+      apiType: space.delegationPortal.delegationType,
+      apiUrl: space.delegationPortal.delegationApi,
       contractNetwork:
         CHAIN_IDS_TO_NETWORKS[
-          parseInt(space.delegationPortal?.delegationNetwork, 10)
+          parseInt(space.delegationPortal.delegationNetwork, 10)
         ] || null,
-      contractAddress: space.delegationPortal?.delegationContract ?? null
+      contractAddress: space.delegationPortal.delegationContract
     });
   }
 
