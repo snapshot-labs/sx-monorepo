@@ -16,7 +16,6 @@ import {
 } from '@/networks/types';
 import {
   Alias,
-  DelegationType,
   Follow,
   NetworkID,
   Proposal,
@@ -333,8 +332,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   if (space.delegationPortal) {
     delegations.push({
       name: null,
-      apiType:
-        (space.delegationPortal?.delegationType as DelegationType) ?? null,
+      apiType: space.delegationPortal?.delegationType ?? null,
       apiUrl: space.delegationPortal?.delegationApi ?? null,
       contractNetwork:
         CHAIN_IDS_TO_NETWORKS[
