@@ -331,7 +331,10 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
 
   if (space.delegationPortal) {
     delegations.push({
-      name: null,
+      name:
+        space.delegationPortal.delegationType === 'compound-governor'
+          ? 'ERC-20 Votes'
+          : 'Split Delegation',
       apiType: space.delegationPortal.delegationType,
       apiUrl: space.delegationPortal.delegationApi,
       contractNetwork:
@@ -344,7 +347,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
 
   if (spaceDelegationStrategy) {
     delegations.push({
-      name: null,
+      name: 'Delegate registry',
       apiType: 'delegate-registry',
       apiUrl: DELEGATE_REGISTRY_URL,
       contractNetwork:
