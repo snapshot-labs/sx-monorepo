@@ -375,7 +375,7 @@ export default defineComponent({
       </div>
     </nav>
     <div class="md:mr-[340px]">
-      <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
+      <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
           v-if="votingPower && space"
           class="mb-4"
