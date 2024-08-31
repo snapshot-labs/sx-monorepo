@@ -609,6 +609,7 @@ export function createActions(
     updateSettings: async (
       web3: any,
       space: Space,
+      metadata: SpaceMetadata,
       authenticatorsToAdd: StrategyConfig[],
       authenticatorsToRemove: number[],
       votingStrategiesToAdd: StrategyConfig[],
@@ -619,6 +620,14 @@ export function createActions(
       maxVotingDuration: number | null
     ) => {
       await verifyNetwork(web3, chainId);
+
+      const pinned = await helpers.pin(
+        createErc1155Metadata(metadata, {
+          execution_strategies: space.executors,
+          execution_strategies_types: space.executors_types,
+          execution_destinations: space.executors_destinations
+        })
+      );
 
       const metadataUris = await Promise.all(
         votingStrategiesToAdd.map(config => buildMetadata(helpers, config))
@@ -633,6 +642,7 @@ export function createActions(
         signer: web3.getSigner(),
         space: space.id,
         settings: {
+          metadataUri: `ipfs://${pinned.cid}`,
           authenticatorsToAdd: authenticatorsToAdd.map(
             config => config.address
           ),

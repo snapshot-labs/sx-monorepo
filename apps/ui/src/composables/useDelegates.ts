@@ -193,6 +193,7 @@ export function useDelegates(
       failed.value = true;
     } finally {
       loading.value = false;
+      loaded.value = true;
     }
   }
 

@@ -247,6 +247,7 @@ export const STATEMENTS_QUERY = gql`
       network
       discourse
       status
+      source
     }
   }
 `;

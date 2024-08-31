@@ -265,6 +265,7 @@ export type Statement = {
   delegate: string;
   discourse: string;
   status: 'ACTIVE' | 'INACTIVE';
+  source: string | null;
 };
 
 export type Follow = {
@@ -347,8 +348,10 @@ export type SendNftTransaction = BaseTransaction & {
   _type: 'sendNft';
   _form: {
     recipient: string;
+    sender: string;
     amount: string;
     nft: {
+      type: string;
       address: string;
       id: string;
       name: string;

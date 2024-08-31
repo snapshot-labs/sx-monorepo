@@ -39,16 +39,13 @@ const user = computed(
 const cb = computed(() => getCacheHash(user.value.avatar));
 
 const hasAppNav = computed(() =>
-  ['my', 'settings'].includes(String(route.matched[0]?.name))
+  ['my', 'settings', 'space'].includes(String(route.matched[0]?.name))
 );
 const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
-const showBreadcrumb = computed(() =>
-  ['space', 'proposal', 'landing', 'settings'].includes(
-    String(route.matched[0]?.name)
-  )
-);
+
+const showLogo = computed(() => String(route.matched[0]?.name) === 'landing');
 
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
@@ -83,85 +80,92 @@ watch(
 
 <template>
   <nav
-    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px]"
+    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px] flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
     :class="{
       'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
     }"
   >
     <div
-      class="flex items-center justify-between h-[71px] px-4 bg-skin-bg space-x-1"
+      class="flex items-center h-full shrink-0"
       :class="{
-        'lg:ml-[240px]': hasAppNav,
-        'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen && hasAppNav
+        'lg:border-r lg:pr-4 lg:w-[240px]': hasAppNav,
+        'border-r pr-4 w-[240px]': hasAppNav && uiStore.sidebarOpen
       }"
     >
-      <div class="flex grow items-center h-full">
-        <button
-          type="button"
-          class="inline-block text-skin-link mr-4 cursor-pointer lg:hidden"
-          @click="uiStore.toggleSidebar"
-        >
-          <IH-menu-alt-2 />
-        </button>
-        <Breadcrumb v-if="showBreadcrumb">
-          <router-link
-            :to="{ path: '/' }"
-            class="flex items-center"
-            style="font-size: 24px"
-          >
-            snapshot
-          </router-link>
-        </Breadcrumb>
-        <form
-          v-if="searchConfig"
-          id="search-form"
-          class="flex flex-1 pr-2 py-3 h-full"
-          @submit="handleSearchSubmit"
-        >
-          <label class="flex items-center w-full space-x-2.5">
-            <IH-search class="shrink-0" />
-            <input
-              ref="searchInput"
-              v-model.trim="searchValue"
-              type="text"
-              :placeholder="searchConfig.placeholder"
-              class="bg-transparent text-skin-link text-[19px] w-full"
-            />
-          </label>
-        </form>
-      </div>
-      <div :key="web3.account" class="flex">
-        <UiButton
-          v-if="loading || web3.authLoading"
-          loading
-          class="!px-0 w-[46px]"
+      <button
+        type="button"
+        class="text-skin-link cursor-pointer lg:hidden ml-4"
+        @click="uiStore.toggleSidebar"
+      >
+        <IH-menu-alt-2 />
+      </button>
+
+      <Breadcrumb
+        v-if="!showLogo"
+        :class="[
+          'ml-4',
+          { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
+        ]"
+      >
+      </Breadcrumb>
+    </div>
+    <router-link
+      v-if="showLogo"
+      :to="{ path: '/' }"
+      class="truncate grow"
+      style="font-size: 24px"
+    >
+      snapshot
+    </router-link>
+    <form
+      v-if="searchConfig"
+      id="search-form"
+      class="flex flex-1 py-3 h-full"
+      @submit="handleSearchSubmit"
+    >
+      <label class="flex items-center w-full space-x-2.5">
+        <IH-search class="shrink-0" />
+        <input
+          ref="searchInput"
+          v-model.trim="searchValue"
+          type="text"
+          :placeholder="searchConfig.placeholder"
+          class="bg-transparent text-skin-link text-[19px] w-full"
         />
-        <UiButton
-          v-else
-          class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
-          @click="modalAccountOpen = true"
+      </label>
+    </form>
+
+    <div class="flex space-x-2.5 shrink-0">
+      <UiButton
+        v-if="loading || web3.authLoading"
+        loading
+        class="!px-0 w-[46px]"
+      />
+      <UiButton
+        v-else
+        class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+        @click="modalAccountOpen = true"
+      >
+        <span
+          v-if="auth.isAuthenticated.value"
+          class="sm:flex items-center space-x-2"
         >
+          <UiStamp :id="user.id" :size="18" :cb="cb" />
           <span
-            v-if="auth.isAuthenticated.value"
-            class="sm:flex items-center space-x-2"
-          >
-            <UiStamp :id="user.id" :size="18" :cb="cb" />
-            <span
-              class="hidden sm:block truncate max-w-[120px]"
-              v-text="user.name || shorten(user.id)"
-            />
-          </span>
-          <template v-else>
-            <span class="hidden sm:block" v-text="'Connect wallet'" />
-            <IH-login class="sm:hidden inline-block" />
-          </template>
-        </UiButton>
-        <IndicatorPendingTransactions class="ml-2" />
-        <UiButton class="!px-0 w-[46px] ml-2" @click="toggleSkin">
-          <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
-          <IH-moon v-else class="inline-block" />
-        </UiButton>
-      </div>
+            class="hidden sm:block truncate max-w-[120px]"
+            v-text="user.name || shorten(user.id)"
+          />
+        </span>
+        <template v-else>
+          <span class="hidden sm:block" v-text="'Connect wallet'" />
+          <IH-login class="sm:hidden inline-block" />
+        </template>
+      </UiButton>
+      <IndicatorPendingTransactions />
+      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
+        <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
+        <IH-moon v-else class="inline-block" />
+      </UiButton>
     </div>
   </nav>
   <teleport to="#modal">

@@ -180,6 +180,7 @@ async function handleProposeClick() {
           strategy.treasury.chainId && strategy.transactions.length > 0
       )
       .map(strategy => ({
+        strategyType: strategy.type,
         strategyAddress: strategy.address,
         destinationAddress: strategy.destinationAddress || '',
         transactions: strategy.transactions,
@@ -374,7 +375,7 @@ export default defineComponent({
       </div>
     </nav>
     <div class="md:mr-[340px]">
-      <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto s-box">
+      <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
           v-if="votingPower && space"
           class="mb-4"
@@ -407,7 +408,7 @@ export default defineComponent({
         </div>
         <UiMarkdown
           v-if="previewEnabled"
-          class="px-3 py-2 border rounded-lg mb-[14px] min-h-[200px]"
+          class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
           :body="proposal.body"
         />
         <UiComposer

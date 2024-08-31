@@ -82,6 +82,7 @@ export type StrategyConfig = StrategyTemplate & {
 };
 
 export type ExecutionInfo = {
+  strategyType: string;
   strategyAddress: string;
   destinationAddress: string;
   treasuryName: string;
@@ -222,6 +223,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   updateSettings(
     web3: Web3Provider,
     space: Space,
+    metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],

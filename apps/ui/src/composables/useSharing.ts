@@ -1,14 +1,16 @@
 import { FunctionalComponent } from 'vue';
-import { Proposal, Space, User } from '@/types';
+import { getChoiceText } from '@/helpers/utils';
+import { Choice, Proposal, Space, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
 import ICLens from '~icons/c/lens';
 import ICX from '~icons/c/x';
 
-type SpaceUser = { user: User; space: Space };
 type SocialNetwork = 'x' | 'lens' | 'farcaster';
+type SpaceUser = { user: User; space: Space };
+export type Vote = { proposal: Proposal; choice: Choice };
 
-export type PayloadType = 'proposal' | 'user' | 'space-user';
-export type Payload = User | Proposal | SpaceUser;
+export type PayloadType = 'proposal' | 'user' | 'space-user' | 'vote';
+export type Payload = Proposal | User | SpaceUser | Vote;
 
 const HASH_TAG = 'Snapshot';
 
@@ -68,9 +70,15 @@ export function useSharing() {
         return getSpaceUserMessage(payload as SpaceUser);
       case 'proposal':
         return getProposalMessage(payload as Proposal);
+      case 'vote':
+        return getVoteMessage(payload as Vote);
       default:
         throw new Error('Invalid shareable object');
     }
+  }
+
+  function getProposalMessage(proposal: Proposal): string {
+    return `${proposal.space.name}: ${proposal.title} ${getProposalUrl(proposal)}`;
   }
 
   function getUserMessage(user: User): string {
@@ -81,8 +89,18 @@ export function useSharing() {
     return getSpaceUserUrl(spaceUser);
   }
 
-  function getProposalMessage(proposal: Proposal): string {
-    return `${proposal.space.name}: ${proposal.title} ${getProposalUrl(proposal)}`;
+  function getVoteMessage(payload: Vote) {
+    const { proposal, choice } = payload;
+    const choiceText = getChoiceText(proposal.choices, choice);
+    const isSingleChoice =
+      proposal.type === 'single-choice' || proposal.type === 'basic';
+    const isPrivate = proposal.privacy === 'shutter';
+    const votedText =
+      isSingleChoice && !isPrivate
+        ? `I just voted "${choiceText}"`
+        : `I just voted`;
+
+    return `${votedText} on "${proposal.title}" ${getProposalUrl(proposal)}`;
   }
 
   function getShareUrl(
@@ -92,7 +110,9 @@ export function useSharing() {
   ): string {
     let message = encodeURIComponent(getMessage(type, payload));
 
-    if (socialNetwork === 'lens') {
+    if (type === 'vote' && socialNetwork === 'x') {
+      message += `%20%23${HASH_TAG}`;
+    } else if (socialNetwork === 'lens') {
       message += `&hashtags=${HASH_TAG}`;
     }
 

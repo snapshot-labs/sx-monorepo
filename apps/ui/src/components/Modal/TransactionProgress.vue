@@ -29,7 +29,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'confirmed'): void;
+  (e: 'confirmed', txId: string | null): void;
   (e: 'close'): void;
 }>();
 
@@ -82,7 +82,7 @@ async function handleExecute() {
       await sleep(API_DELAY);
     }
 
-    emit('confirmed');
+    emit('confirmed', txId.value);
     step.value = 'success';
   } catch (e) {
     console.warn('Transaction failed', e);

@@ -1,12 +1,5 @@
 import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber';
-import {
-  MaxInt256,
-  MaxUint256,
-  MinInt256,
-  Zero
-} from '@ethersproject/constants';
 import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
@@ -30,40 +23,29 @@ export const addressValidator = (value: string) => {
   }
 };
 
-const bytesValidator = (value: string) =>
-  !!value.match(/^0x([0-9a-fA-F][0-9a-fA-F])+$/);
-
-const uint256Validator = (value: string) => {
-  if (!value.match(/^([0-9]|[1-9][0-9]+)$/)) return false;
+const validateType = (type: string, value: string) => {
+  if (!value) return false;
 
   try {
-    const number = BigNumber.from(value);
-    return number.gte(Zero) && number.lte(MaxUint256);
-  } catch {
+    const iface = new Interface([`function test(${type})`]);
+    iface.encodeFunctionData('test', [value]);
+    return true;
+  } catch (e) {
     return false;
   }
 };
 
-const int256Validator = (value: string) => {
-  if (!value.match(/^-?([0-9]|[1-9][0-9]+)$/)) return false;
-
-  try {
-    const number = BigNumber.from(value);
-    return number.gte(MinInt256) && number.lte(MaxInt256);
-  } catch {
-    return false;
-  }
-};
+const bytesValidator = (value: string) => validateType('bytes', value);
+const uint256Validator = (value: string) => validateType('uint256', value);
+const int256Validator = (value: string) => validateType('int256', value);
 
 const getArrayValidator =
   (valueValidator: (value: string) => boolean) => (value: string) => {
     if (!value) return false;
 
     try {
-      const parsed = JSON.parse(value);
-      if (!Array.isArray(parsed)) return false;
-
-      return parsed.every((value: string) => valueValidator(value));
+      const array = value.split(',').map(s => s.trim());
+      return array.every((value: string) => valueValidator(value));
     } catch {
       return false;
     }
