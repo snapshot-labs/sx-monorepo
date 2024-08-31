@@ -3,21 +3,33 @@ const usersStore = useUsersStore();
 const { web3 } = useWeb3();
 const followedSpacesStore = useFollowedSpacesStore();
 
-const user = computed(() => usersStore.getUser(web3.value.account));
+onMounted(async () => {
+  if (web3.value.account) await usersStore.fetchUser(web3.value.account, true);
+});
+
+const user = computed(() => {
+  if (!web3.value.authLoading) {
+    return usersStore.getUser(web3.value.account);
+  } else {
+    return null;
+  }
+});
 
 const tasks = computed(() => ({
   profile: !user.value?.created,
-  following:
-    followedSpacesStore.followedSpacesLoaded &&
-    followedSpacesStore.followedSpacesIds.length < 3,
+  following: followedSpacesStore.followedSpacesIds.length < 3,
   votes: !user.value?.votesCount
 }));
 
-const pendingTasks = computed(() => Object.values(tasks.value).includes(true));
+const hasPendingTasks = computed(() =>
+  Object.values(tasks.value).includes(true)
+);
 </script>
 
 <template>
-  <div v-if="user && pendingTasks">
+  <div
+    v-if="user && followedSpacesStore.followedSpacesLoaded && hasPendingTasks"
+  >
     <UiLabel label="onboarding" sticky />
     <div v-if="tasks.profile" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <span>
