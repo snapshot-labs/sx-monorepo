@@ -165,13 +165,14 @@ export function useDelegates(
     governance: Governance;
     delegates: ApiDelegate[];
   }): Promise<Delegate[]> {
-    if (!DELEGATIONS_PARAMS[delegationType])
-      throw new Error('Unsupported delegation type');
-    const userField = DELEGATIONS_PARAMS[delegationType].userField;
+    const delegationParams = DELEGATIONS_PARAMS[delegationType];
+    if (!delegationParams) throw new Error('Unsupported delegation type');
 
     const governanceData = data.governance;
     const delegatesData = data.delegates;
-    const addresses = delegatesData.map(delegate => delegate[userField]);
+    const addresses = delegatesData.map(
+      delegate => delegate[delegationParams.userField]
+    );
 
     const [names, statements] = await Promise.all([
       getNames(addresses),
@@ -192,7 +193,7 @@ export function useDelegates(
       const votesPercentage =
         Number(delegate.delegatedVotes) /
           Number(governanceData.delegatedVotes) || 0;
-      const delegateAddress = delegate[userField];
+      const delegateAddress = delegate[delegationParams.userField];
 
       return {
         name: names[delegateAddress] || null,
@@ -208,11 +209,11 @@ export function useDelegates(
   async function getDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
-    if (!DELEGATIONS_PARAMS[delegationType])
-      throw new Error('Unsupported delegation type');
+    const delegationParams = DELEGATIONS_PARAMS[delegationType];
+    if (!delegationParams) throw new Error('Unsupported delegation type');
 
     const { data } = await apollo.query({
-      query: DELEGATIONS_PARAMS[delegationType].query,
+      query: delegationParams.query,
       variables: { ...filter, governance: governance.toLowerCase() }
     });
 
