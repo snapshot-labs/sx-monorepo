@@ -32,38 +32,32 @@ const hasPendingTasks = computed(() =>
   >
     <UiLabel label="onboarding" sticky />
     <div v-if="tasks.profile" class="border-b mx-4 py-[14px] flex gap-x-2.5">
-      <span>
-        <IS-flag :width="20" :height="20" class="text-skin-link mt-1" />
-      </span>
-      <span class="grow">
+      <div><IS-flag class="text-skin-link mt-1" /></div>
+      <div class="grow">
         Setup your
         <router-link :to="{ name: 'user', params: { id: user.id } }">
           profile
         </router-link>
-      </span>
+      </div>
     </div>
 
     <div v-if="tasks.following" class="border-b mx-4 py-[14px] flex gap-x-2.5">
-      <span>
-        <IS-flag :width="20" :height="20" class="text-skin-link mt-1" />
-      </span>
-      <span class="grow">
+      <div><IS-flag class="text-skin-link mt-1" /></div>
+      <div class="grow">
         Check the
         <router-link :to="{ name: 'my-explore' }"> explore </router-link>
         page and follow at least 3 spaces.
-        <span
+        <div
           class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-1"
         >
           {{ followedSpacesStore.followedSpacesIds.length }}/3
-        </span>
-      </span>
+        </div>
+      </div>
     </div>
 
     <div v-if="tasks.votes" class="border-b mx-4 py-[14px] flex gap-x-2.5">
-      <span>
-        <IS-flag width="20" :height="20" class="text-skin-link mt-1" />
-      </span>
-      <span class="grow">Cast your first vote</span>
+      <div><IS-flag class="text-skin-link mt-1" /></div>
+      <div class="grow">Cast your first vote</div>
     </div>
   </div>
 </template>
