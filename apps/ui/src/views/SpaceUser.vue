@@ -240,10 +240,7 @@ watch(
         </div>
       </div>
     </div>
-    <UiScrollerHorizontal
-      class="z-40 sticky top-[71px] lg:top-[72px]"
-      gradient="md"
-    >
+    <UiScrollerHorizontal class="z-40 sticky top-[72px]" gradient="md">
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <router-link
           v-for="(item, i) in navigation"

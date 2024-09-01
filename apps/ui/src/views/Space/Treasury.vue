@@ -24,7 +24,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
   <UiScrollerHorizontal
     v-if="filteredTreasuries.length !== 1"
     gradient="md"
-    class="z-40 sticky top-[71px] lg:top-[72px]"
+    class="z-40 sticky top-[72px]"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
       <button
