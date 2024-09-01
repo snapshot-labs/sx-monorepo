@@ -16,7 +16,6 @@ import {
 } from '@/networks/types';
 import {
   Alias,
-  DelegationType,
   Follow,
   NetworkID,
   Proposal,
