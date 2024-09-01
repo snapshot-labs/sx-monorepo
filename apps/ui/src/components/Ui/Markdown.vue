@@ -152,7 +152,17 @@ html.dark {
     color: inherit;
     text-decoration: none;
   }
+  img[alt^='discourse-emoji'] {
+    display: inline;
+    width: 20px;
+    height: 20px;
+  }
 
+  img[alt^='discourse-thumbnail'] {
+    display: inline;
+    width: 35px;
+    height: 35px;
+  }
   p,
   blockquote,
   ul,

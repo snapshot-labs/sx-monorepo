@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { loadReplies, Reply } from '@/helpers/discourse';
-import { _rt, sanitizeUrl, stripHtmlTags } from '@/helpers/utils';
+import turndownService from '@/helpers/turndownService';
+import { _rt, sanitizeUrl } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
 const props = defineProps<{ proposal: Proposal }>();
@@ -21,6 +22,9 @@ onMounted(async () => {
     console.error(e);
   }
 });
+const toMarkdown = computed(() =>
+  turndownService({ discussion: discussion.value || '' })
+);
 </script>
 
 <template>
@@ -68,7 +72,7 @@ onMounted(async () => {
           <div>
             <UiMarkdown
               class="text-md pt-3 pb-2"
-              :body="stripHtmlTags(reply.cooked)"
+              :body="toMarkdown(reply.cooked)"
             />
             <div class="text-sm space-x-2.5 flex">
               <div class="items-center flex gap-1">

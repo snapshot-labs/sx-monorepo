@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { compareAddresses, stripHtmlTags } from '@/helpers/utils';
+import turndownService from '@/helpers/turndownService';
+import { compareAddresses } from '@/helpers/utils';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement, User } from '@/types';
 import ICAgora from '~icons/c/agora';
@@ -57,6 +58,8 @@ watch(userId, loadStatement, { immediate: true });
 watchEffect(() =>
   setTitle(`${props.user.name || userId.value} ${props.space.name}'s profile`)
 );
+
+const toMarkdown = computed(() => turndownService());
 </script>
 
 <template>
@@ -99,7 +102,7 @@ watchEffect(() =>
         <template v-if="statement.statement">
           <UiMarkdown
             class="text-skin-heading max-w-[592px]"
-            :body="stripHtmlTags(statement.statement)"
+            :body="toMarkdown(statement.statement)"
           />
           <div v-if="statement.source">
             <h4 class="eyebrow text-skin-text mb-2">Source</h4>
