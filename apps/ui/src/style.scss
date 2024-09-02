@@ -249,29 +249,6 @@ input:placeholder-shown {
   background-image: url('@/assets/blocks-x-dark.svg');
 }
 
-.banner {
-  background-repeat: repeat-x;
-  background-position: center center;
-  background-image: url('@/assets/banner-light.svg');
-  animation: mymove 60s infinite;
-  animation-timing-function: linear;
-}
-
-@keyframes mymove {
-  from {
-    transition: linear;
-    background-position-x: 0;
-  }
-  to {
-    transition: linear;
-    background-position-x: -1365px;
-  }
-}
-
-.dark .banner {
-  background-image: url('@/assets/banner-dark.svg');
-}
-
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
