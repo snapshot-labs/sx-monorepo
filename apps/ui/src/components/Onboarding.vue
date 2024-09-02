@@ -3,10 +3,6 @@ const usersStore = useUsersStore();
 const { web3 } = useWeb3();
 const followedSpacesStore = useFollowedSpacesStore();
 
-onMounted(async () => {
-  if (web3.value.account) await usersStore.fetchUser(web3.value.account, true);
-});
-
 const user = computed(() => {
   if (!web3.value.authLoading) {
     return usersStore.getUser(web3.value.account);
@@ -24,6 +20,10 @@ const tasks = computed(() => ({
 const hasPendingTasks = computed(() =>
   Object.values(tasks.value).includes(true)
 );
+
+onMounted(async () => {
+  if (web3.value.account) await usersStore.fetchUser(web3.value.account, true);
+});
 </script>
 
 <template>
