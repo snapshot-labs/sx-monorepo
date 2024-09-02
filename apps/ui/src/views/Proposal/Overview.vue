@@ -197,16 +197,15 @@ onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
-  <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
     <div>
-      <h1 class="mb-3 text-[36px] leading-10">
+      <h1 class="mb-3 text-[40px] leading-[1.1em]">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
-        <span class="text-skin-text">{{ getProposalId(proposal) }}</span>
       </h1>
 
-      <ProposalStatus :state="proposal.state" class="top-[7.5px]" />
+      <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
 
-      <div class="flex justify-between items-center mb-3">
+      <div class="flex justify-between items-center mb-4">
         <router-link
           :to="{
             name: 'space-user-statement',
@@ -231,8 +230,9 @@ onBeforeUnmount(() => destroyAudio());
               >
                 {{ proposal.space.name }}
               </router-link>
-              · {{ _rt(proposal.created) }}</span
-            >
+              <span> · {{ _rt(proposal.created) }}</span>
+              <span> · {{ getProposalId(proposal) }}</span>
+            </span>
           </div>
         </router-link>
         <div class="flex gap-2 items-center">
@@ -333,6 +333,7 @@ onBeforeUnmount(() => destroyAudio());
           </UiDropdown>
         </div>
       </div>
+
       <div v-if="aiSummaryOpen" class="mb-6">
         <h4 class="mb-2 eyebrow flex items-center">
           <IH-sparkles class="inline-block mr-2" />
