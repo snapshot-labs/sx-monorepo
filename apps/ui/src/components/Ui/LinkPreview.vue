@@ -48,21 +48,19 @@ debouncedWatch(
 <template>
   <div
     v-if="preview?.meta || (showDefault && !previewLoading)"
-    class="!flex items-center border rounded-lg"
+    class="flex items-center px-4 py-3 border rounded-lg"
+    :class="{ 'space-x-2': showDefault, '!space-x-4': preview?.meta?.title }"
   >
     <template v-if="preview?.meta?.title">
-      <div v-if="preview?.links?.icon?.[0]?.href" class="px-4 pr-0">
-        <div class="w-[32px]">
-          <img
-            :src="preview.links.icon[0].href"
-            width="32"
-            height="32"
-            class="bg-white rounded"
-            :alt="preview.meta.title"
-          />
-        </div>
-      </div>
-      <div class="px-4 py-3 overflow-hidden">
+      <img
+        v-if="preview?.links?.icon?.[0]?.href"
+        :src="preview.links.icon[0].href"
+        width="32"
+        height="32"
+        class="bg-white rounded shrink-0"
+        :alt="preview.meta.title"
+      />
+      <div class="flex flex-col truncate">
         <div class="text-skin-link truncate" v-text="preview.meta.title" />
         <div
           v-if="preview.meta.description"
@@ -71,12 +69,9 @@ debouncedWatch(
         />
       </div>
     </template>
-    <div
-      v-else-if="showDefault"
-      class="px-4 py-3 flex gap-2 items-center w-full"
-    >
+    <template v-else-if="showDefault">
       <IH-link class="shrink-0" />
       <div class="truncate">{{ props.url }}</div>
-    </div>
+    </template>
   </div>
 </template>
