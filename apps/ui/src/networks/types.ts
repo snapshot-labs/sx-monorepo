@@ -4,6 +4,7 @@ import { FunctionalComponent } from 'vue';
 import {
   Alias,
   Choice,
+  DelegationType,
   Follow,
   NetworkID,
   Proposal,
@@ -237,6 +238,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     web3: Web3Provider,
     space: Space,
     networkId: NetworkID,
+    delegationType: DelegationType,
     delegatee: string,
     delegationContract: string
   );

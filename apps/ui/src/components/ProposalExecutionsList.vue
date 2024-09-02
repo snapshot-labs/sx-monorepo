@@ -99,8 +99,8 @@ function downloadExecution(execution: ProposalExecution) {
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"
+      :network-id="execution.networkId"
       :tx="tx"
-      class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
     />
     <ProposalExecutionActions
       v-if="
