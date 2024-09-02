@@ -45,7 +45,7 @@ const toMarkdown = computed(() =>
     </div>
     <div v-if="loaded" class="px-4">
       <div
-        v-for="(reply, i) in replies.slice(1)"
+        v-for="(reply, i) in replies"
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
