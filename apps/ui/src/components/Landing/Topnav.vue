@@ -5,17 +5,19 @@ const { toggleSkin, currentMode } = useUserSkin();
 <template>
   <div class="px-6 py-4 flex justify-center absolute z-10 left-0 right-0">
     <div
-      class="text-[26px] text-skin-link items-center space-x-2.5 mt-0.5 flex-grow md:flex !shrink-0"
+      class="mt-0.5 flex-grow"
     >
-      <img
-        src="@/assets/snapshot.svg"
-        alt="Snapshot"
-        class="w-[24px] inline-block"
-      />
-      <span class="inline-block mb-1">snapshot</span>
+      <router-link :to="{ name: 'landing' }" class="text-[26px] text-skin-link items-center space-x-2.5">
+        <img
+          src="@/assets/snapshot.svg"
+          alt="Snapshot"
+          class="w-[24px] inline-block"
+        />
+        <span class="inline-block mb-1">snapshot</span>
+      </router-link>
     </div>
     <ul
-      class="hidden md:flex text-md text-skin-link space-x-4 mx-auto py-2 mr-6"
+      class="hidden lg:flex text-md text-skin-link space-x-4 mx-auto py-2 mr-6"
     >
       <li><router-link to="#features">Features</router-link></li>
       <li><router-link to="#ecosystem">Ecosystem</router-link></li>
