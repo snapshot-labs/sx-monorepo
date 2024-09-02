@@ -60,14 +60,14 @@ const ORGS = [
 </script>
 
 <template>
-  <div class="border-b bg-white">
+  <div class="border-b">
     <div class="py-6">
       <div class="text-center relative">
         <div
-          class="absolute z-10 top-0 bottom-0 left-0 w-[320px] max-w-[20%] bg-gradient-to-r from-white to-white/0"
+          class="absolute z-10 top-0 bottom-0 left-0 w-[320px] max-w-[20%] bg-gradient-to-r from-skin-bg to-skin-bg/0"
         />
         <div
-          class="absolute z-10 top-0 bottom-0 right-0 w-[320px] max-w-[20%] bg-gradient-to-l from-white to-white/0"
+          class="absolute z-10 top-0 bottom-0 right-0 w-[320px] max-w-[20%] bg-gradient-to-l from-skin-bg to-skin-bg/0"
         />
         <div class="relative overflow-hidden h-[60px]">
           <div class="carousel flex space-x-6 justify-center">

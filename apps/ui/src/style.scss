@@ -245,6 +245,10 @@ input:placeholder-shown {
   background-image: url('@/assets/blocks-x-light.svg');
 }
 
+.dark .blocks {
+  background-image: url('@/assets/blocks-x-dark.svg');
+}
+
 .banner {
   background-repeat: repeat-x;
   background-position: center center;
