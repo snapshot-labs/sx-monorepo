@@ -18,6 +18,7 @@ import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
 import SpaceDiscussions from '@/views/Space/Discussions.vue';
+import SpaceDiscussionsTopic from '@/views/Space/DiscussionsTopic.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
@@ -45,6 +46,11 @@ const routes: any[] = [
         path: 'discussions',
         name: 'space-discussions',
         component: SpaceDiscussions
+      },
+      {
+        path: 'discussions/:topic',
+        name: 'space-discussions-topic',
+        component: SpaceDiscussionsTopic
       },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       {

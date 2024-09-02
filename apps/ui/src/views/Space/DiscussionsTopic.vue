@@ -1,15 +1,24 @@
 <script setup lang="ts">
-import { loadReplies, Reply } from '@/helpers/discourse';
+import { loadReplies, Reply, SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { _rt, sanitizeUrl, stripHtmlTags } from '@/helpers/utils';
-import { Proposal } from '@/types';
+import router from '@/router';
+import { Space } from '@/types';
 
-const props = defineProps<{ proposal: Proposal }>();
+const props = defineProps<{ space: Space }>();
+
+const discussionsUrl = SPACES_DISCUSSIONS[
+  `${props.space.network}:${props.space.id}`
+]?.replace(
+  /\/c\/[^\/]+\/\d+$/,
+  `/t/placeholder/${router.currentRoute.value.params.topic}`
+);
+const replyUrl = discussionsUrl?.replace('/t/placeholder/', '/t/');
 
 const replies: Ref<Reply[]> = ref([]);
 const loading = ref(false);
 const loaded = ref(false);
 
-const discussion = computed(() => sanitizeUrl(props.proposal.discussion));
+const discussion = computed(() => sanitizeUrl(discussionsUrl));
 
 onMounted(async () => {
   try {
@@ -25,27 +34,16 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div v-if="discussion" class="p-4 bg-skin-bg border-b">
-      <div class="max-w-[680px] mx-auto">
-        <a :href="discussion" target="_blank">
-          <UiButton class="flex items-center gap-2 w-full justify-center">
-            <IC-discourse class="size-[22px]" />
-            Join the discussion
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </UiButton>
-        </a>
-      </div>
-    </div>
-    <div v-if="loading" class="text-center p-4">
+    <div v-if="loading" class="p-4">
       <UiLoading />
     </div>
-    <div v-if="loaded" class="px-4">
+    <div v-if="loaded" class="px-4 pl-6">
       <div
         v-for="(reply, i) in replies"
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
-        <div class="max-w-[680px] mx-auto">
+        <div class="max-w-[680px]">
           <div class="flex">
             <a
               :href="reply.user_url"
@@ -83,6 +81,15 @@ onMounted(async () => {
             </div>
           </div>
         </div>
+      </div>
+      <div class="mt-6">
+        <a :href="replyUrl" target="_blank">
+          <UiButton class="flex items-center gap-2 w-full justify-center">
+            <IC-discourse class="size-[22px]" />
+            Reply
+            <IH-arrow-sm-right class="inline-block -rotate-45" />
+          </UiButton>
+        </a>
       </div>
     </div>
   </div>
