@@ -2,7 +2,7 @@ import {
   TypedDataDomain,
   TypedDataField
 } from '@ethersproject/abstract-signer';
-import { BigNumberish, Call, RpcProvider, StarkNetType } from 'starknet';
+import { BigNumberish, Call, RpcProvider, StarknetType } from 'starknet';
 import { NetworkConfig } from './networkConfig';
 import { MetaTransaction } from '../utils/encoding';
 
@@ -135,6 +135,7 @@ export type Vote = {
   strategies: StrategyConfig[];
   proposal: number;
   choice: Choice;
+  metadataUri: string;
 };
 
 export type Alias = {
@@ -150,7 +151,7 @@ export type SignatureData = {
   signature?: string | string[] | null;
   message?: Record<string, any>;
   domain?: TypedDataDomain;
-  types?: Record<string, TypedDataField[] | StarkNetType[]>;
+  types?: Record<string, TypedDataField[] | StarknetType[]>;
   primaryType?: any;
 };
 

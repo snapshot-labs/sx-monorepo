@@ -1,40 +1,29 @@
 <script setup lang="ts">
-import { _vp } from '@/helpers/utils';
+import { getFormattedVotingPower } from '@/helpers/utils';
 import { evmNetworks } from '@/networks';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { VotingPowerItem } from '@/stores/votingPowers';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
   networkId: NetworkID;
-  status: VotingPowerStatus;
-  votingPowerSymbol: string;
-  votingPowers: VotingPower[];
+  votingPower?: VotingPowerItem;
 }>();
 
 defineEmits<{
-  (e: 'getVotingPower');
+  (e: 'fetchVotingPower');
 }>();
 
 const { web3 } = useWeb3();
 
 const modalOpen = ref(false);
 
-const votingPower = computed(() =>
-  props.votingPowers.reduce((acc, b) => acc + b.value, 0n)
+const formattedVotingPower = computed(() =>
+  getFormattedVotingPower(props.votingPower)
 );
-const decimals = computed(() =>
-  Math.max(...props.votingPowers.map(votingPower => votingPower.decimals), 0)
+
+const loading = computed(
+  () => !props.votingPower || props.votingPower.status === 'loading'
 );
-const formattedVotingPower = computed(() => {
-  const value = _vp(Number(votingPower.value) / 10 ** decimals.value);
-
-  if (props.votingPowerSymbol) {
-    return `${value} ${props.votingPowerSymbol}`;
-  }
-
-  return value;
-});
-const loading = computed(() => props.status === 'loading');
 
 function handleModalOpen() {
   modalOpen.value = true;
@@ -63,7 +52,7 @@ function handleModalOpen() {
         >
           <IH-lightning-bolt class="inline-block -ml-1" />
           <IH-exclamation
-            v-if="props.status === 'error'"
+            v-if="props.votingPower?.status === 'error'"
             class="inline-block ml-1 text-rose-500"
           />
           <span v-else class="ml-1">{{ formattedVotingPower }}</span>
@@ -74,12 +63,9 @@ function handleModalOpen() {
       <ModalVotingPower
         :open="modalOpen"
         :network-id="networkId"
-        :voting-power-symbol="votingPowerSymbol"
-        :voting-powers="props.votingPowers"
-        :voting-power-status="status"
-        :final-decimals="decimals"
+        :voting-power="props.votingPower"
         @close="modalOpen = false"
-        @get-voting-power="$emit('getVotingPower')"
+        @fetch-voting-power="$emit('fetchVotingPower')"
       />
     </teleport>
   </div>

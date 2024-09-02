@@ -101,6 +101,7 @@ function processStrategiesMetadata(
     parsedMetadata.map(metadata => [
       metadata.index,
       {
+        id: metadata.data.id,
         name: metadata.data.name,
         description: metadata.data.description,
         decimals: metadata.data.decimals,
@@ -154,6 +155,7 @@ function processExecutions(
 
   return [
     {
+      strategyType: match?.type || '',
       safeAddress: match?.treasury || '',
       safeName: matchingTreasury?.name || 'Unnamed treasury',
       networkId: matchingTreasury?.network || executionNetworkId,
@@ -216,7 +218,9 @@ function formatSpace(
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
       space.strategies_indicies
-    )
+    ),
+    children: [],
+    parent: null
   };
 }
 
@@ -642,6 +646,9 @@ export function createApi(
     },
     loadStatement: async () => {
       return null;
+    },
+    loadStatements: async () => {
+      return [];
     }
   };
 }

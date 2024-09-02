@@ -5,6 +5,8 @@ import {
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
+import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
+import { Space, Statement } from '@/types';
 
 type ApiDelegate = {
   id: string;
@@ -18,6 +20,7 @@ export type Delegate = ApiDelegate & {
   name: string | null;
   delegatorsPercentage: number;
   votesPercentage: number;
+  statement?: Statement;
 };
 
 type Governance = {
@@ -70,6 +73,8 @@ const DELEGATES_QUERY = gql`
   }
 `;
 
+const metadataNetwork = getNetwork(metadataNetworkId);
+
 function convertUrl(apiUrl: string) {
   const hostedPattern =
     /https:\/\/thegraph\.com\/hosted-service\/subgraph\/([\w-]+)\/([\w-]+)/;
@@ -82,13 +87,18 @@ function convertUrl(apiUrl: string) {
   return apiUrl;
 }
 
-export function useDelegates(delegationApiUrl: string, governance: string) {
+export function useDelegates(
+  delegationApiUrl: string,
+  governance: string,
+  space: Space
+) {
   const delegates: Ref<Delegate[]> = ref([]);
   const loading = ref(false);
   const loadingMore = ref(false);
   const loaded = ref(false);
   const failed = ref(false);
   const hasMore = ref(false);
+  const errorCode = ref<'initializing' | null>(null);
 
   const httpLink = createHttpLink({
     uri: convertUrl(delegationApiUrl)
@@ -113,7 +123,18 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
     const governanceData = data.governance;
     const delegatesData = data.delegates;
     const addresses = delegatesData.map(delegate => delegate.user);
-    const names = await getNames(addresses);
+
+    const [names, statements] = await Promise.all([
+      getNames(addresses),
+      metadataNetwork.api.loadStatements(space.network, space.id, addresses)
+    ]);
+    const indexedStatements = statements.reduce(
+      (acc, statement) => {
+        acc[statement.delegate.toLowerCase()] = statement;
+        return acc;
+      },
+      {} as Record<Statement['delegate'], Statement>
+    );
 
     return delegatesData.map((delegate: ApiDelegate) => {
       const delegatorsPercentage =
@@ -127,7 +148,8 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
         name: names[delegate.user] || null,
         ...delegate,
         delegatorsPercentage,
-        votesPercentage
+        votesPercentage,
+        statement: indexedStatements[delegate.user.toLowerCase()]
       };
     });
   }
@@ -170,8 +192,13 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
       loaded.value = true;
     } catch (e) {
       failed.value = true;
+
+      if (e.message.includes('Row not found')) {
+        errorCode.value = 'initializing';
+      }
     } finally {
       loading.value = false;
+      loaded.value = true;
     }
   }
 
@@ -198,6 +225,7 @@ export function useDelegates(delegationApiUrl: string, governance: string) {
     loadingMore,
     loaded,
     failed,
+    errorCode,
     hasMore,
     delegates,
     getDelegates,

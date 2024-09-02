@@ -10,7 +10,8 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import sha3 from 'js-sha3';
 import { validateAndParseAddress } from 'starknet';
 import networks from '@/helpers/networks.json';
-import { Proposal, SpaceMetadata } from '@/types';
+import { VotingPowerItem } from '@/stores/votingPowers';
+import { Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -210,12 +211,23 @@ export function lsRemove(key: string) {
   return localStorage.removeItem(`${pkg.name}.${key}`);
 }
 
-export function _d(s: number) {
-  const duration = dayjs.duration(s, 'seconds');
-  const daysLeft = Math.floor(duration.asDays());
+export function _d(s: number): string {
+  const SECONDS_TO_DAYS = 60 * 60 * 24;
+  const SECONDS_TO_HOURS = 60 * 60;
+  const SECONDS_TO_MINUTES = 60;
 
-  return duration
-    .format(`[${daysLeft}d] H[h] m[m] s[s]`)
+  const days = Math.floor(s / SECONDS_TO_DAYS);
+  const hours = Math.floor((s - days * SECONDS_TO_DAYS) / SECONDS_TO_HOURS);
+  const minutes = Math.floor(
+    (s - days * SECONDS_TO_DAYS - hours * SECONDS_TO_HOURS) / SECONDS_TO_MINUTES
+  );
+  const seconds =
+    s -
+    days * SECONDS_TO_DAYS -
+    hours * SECONDS_TO_HOURS -
+    minutes * SECONDS_TO_MINUTES;
+
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`
     .replace(/\b0+[a-z]+\s*/gi, '')
     .trim();
 }
@@ -231,7 +243,7 @@ export function toBigIntOrNumber(value) {
 
 export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   try {
-    return dayjs(number * 1e3).format(format);
+    return dayjs(number * 1000).format(format);
   } catch (e) {
     console.log(e);
     return '';
@@ -240,7 +252,7 @@ export function _t(number, format = 'MMM D, YYYY · h:mm A') {
 
 export function _rt(number) {
   try {
-    return dayjs(number * 1e3).fromNow(false);
+    return dayjs(number * 1000).fromNow(false);
   } catch (e) {
     console.log(e);
     return '';
@@ -269,6 +281,10 @@ export function abiToDefinition(abi) {
       definition.properties[input.name].format = 'int256';
       definition.properties[input.name].examples = ['0'];
     }
+    if (input.type === 'bytes') {
+      definition.properties[input.name].format = 'bytes';
+      definition.properties[input.name].examples = ['0x0000…'];
+    }
     if (input.type === 'address') {
       definition.properties[input.name].format = 'ens-or-address';
       definition.properties[input.name].examples = ['0x0000…'];
@@ -281,6 +297,10 @@ export function abiToDefinition(abi) {
     definition.properties[input.name].title = `${input.name} (${input.type})`;
   });
   return definition;
+}
+
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function memoize<T extends any[], U>(fn: (...args: T) => U) {
@@ -475,20 +495,23 @@ export function getChoiceWeight(
   return isNaN(percent) ? 0 : percent;
 }
 
-export function getChoiceText(
-  availableChoices: string[],
-  choice: number | number[] | Record<string, number>
-) {
+export function getChoiceText(availableChoices: string[], choice: Choice) {
+  if (typeof choice === 'string') {
+    return ['for', 'against', 'abstain'].includes(choice)
+      ? choice.charAt(0).toUpperCase() + choice.slice(1)
+      : 'Invalid choice';
+  }
+
   if (typeof choice === 'number') {
-    return availableChoices[choice - 1];
+    return availableChoices[choice - 1] ?? 'Invalid choice';
   }
 
   if (Array.isArray(choice)) {
-    return (
-      choice.map(index => availableChoices[index - 1]).join(', ') ||
-      'Blank vote'
-    );
+    if (!choice.length) return 'Blank vote';
+    return choice.map(index => availableChoices[index - 1]).join(', ');
   }
+
+  if (!Object.keys(choice).length) return 'Blank vote';
 
   const total = Object.values(choice).reduce((acc, weight) => acc + weight, 0);
 
@@ -533,4 +556,18 @@ export function getSocialNetworksLink(data: any) {
       return href ? { key, icon, href } : {};
     })
     .filter(social => social.href);
+}
+
+export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
+  if (!votingPower) return;
+
+  const { totalVotingPower, decimals, symbol } = votingPower;
+  const value = _vp(Number(totalVotingPower) / 10 ** decimals);
+
+  return symbol ? `${value} ${symbol}` : value;
+}
+
+export function stripHtmlTags(text: string) {
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  return doc.body.textContent || '';
 }

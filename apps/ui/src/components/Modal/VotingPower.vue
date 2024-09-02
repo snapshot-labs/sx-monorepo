@@ -2,21 +2,18 @@
 import { _n, shorten } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
-import { VotingPower, VotingPowerStatus } from '@/networks/types';
+import { VotingPowerItem } from '@/stores/votingPowers';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
-  votingPowerSymbol: string;
-  votingPowers: VotingPower[];
-  votingPowerStatus: VotingPowerStatus;
-  finalDecimals: number;
+  votingPower?: VotingPowerItem;
 }>();
 
 defineEmits<{
   (e: 'close');
-  (e: 'getVotingPower');
+  (e: 'fetchVotingPower');
 }>();
 
 const network = computed(() => getNetwork(props.networkId));
@@ -25,8 +22,9 @@ const baseNetwork = computed(() =>
     ? getNetwork(network.value.baseNetworkId)
     : network.value
 );
-const loading = computed(() => props.votingPowerStatus === 'loading');
-const error = computed(() => props.votingPowerStatus === 'error');
+const loading = computed(
+  () => !props.votingPower || props.votingPower.status === 'loading'
+);
 </script>
 
 <template>
@@ -35,21 +33,14 @@ const error = computed(() => props.votingPowerStatus === 'error');
       <h3>Your voting power</h3>
     </template>
     <UiLoading v-if="loading" class="p-4 block text-center" />
-    <div v-else>
-      <div v-if="error" class="p-4 flex flex-col gap-3 items-start">
-        <UiAlert type="error"
-          >There was an error fetching your voting power.</UiAlert
-        >
-        <UiButton
-          type="button"
-          class="flex items-center gap-2"
-          @click="$emit('getVotingPower')"
-        >
-          <IH-refresh />Retry
-        </UiButton>
-      </div>
+    <div v-else-if="votingPower">
+      <MessageVotingPower
+        class="p-4"
+        :voting-power="votingPower"
+        @fetch-voting-power="$emit('fetchVotingPower')"
+      />
       <div
-        v-for="(strategy, i) in votingPowers"
+        v-for="(strategy, i) in votingPower.votingPowers"
         :key="i"
         class="py-3 px-4 border-b last:border-b-0"
       >
@@ -67,12 +58,16 @@ const error = computed(() => props.votingPowerStatus === 'error');
           />
           <div class="text-skin-link shrink-0">
             {{
-              _n(Number(strategy.value) / 10 ** finalDecimals, 'compact', {
-                maximumFractionDigits: 2,
-                formatDust: true
-              })
+              _n(
+                Number(strategy.value) / 10 ** votingPower.decimals,
+                'compact',
+                {
+                  maximumFractionDigits: 2,
+                  formatDust: true
+                }
+              )
             }}
-            {{ votingPowerSymbol }}
+            {{ votingPower.symbol }}
           </div>
         </div>
         <div class="flex justify-between">

@@ -18,7 +18,6 @@ const usersStore = useUsersStore();
 const spacesStore = useSpacesStore();
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
-const { setTitle } = useTitle();
 const { getCurrent } = useMetaStore();
 
 const userActivity = ref<UserActivity>({
@@ -37,8 +36,6 @@ const userId = computed(() => route.params.user as string);
 const user = computed(() => usersStore.getUser(userId.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
-
-const shareMsg = computed(() => encodeURIComponent(window.location.href));
 
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
@@ -59,9 +56,13 @@ const formattedVotingPower = computed(() => {
 });
 
 const navigation = computed(() => [
-  { label: 'Statement', route: 'space-user-statement' }
+  { label: 'Statement', route: 'space-user-statement' },
+  {
+    label: 'Proposals',
+    route: 'space-user-proposals',
+    count: userActivity.value?.proposal_count
+  }
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
-  // { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
   // { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
 
@@ -166,10 +167,6 @@ watch(
     spacesStore.networksMap[networkId].spaces[address];
   }
 );
-
-watchEffect(() =>
-  setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`)
-);
 </script>
 
 <template>
@@ -199,7 +196,11 @@ watchEffect(() =>
             </UiButton>
           </router-link>
         </UiTooltip>
-        <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
+        <DropdownShare
+          :shareable="{ user, space }"
+          type="space-user"
+          class="!px-0 w-[46px]"
+        />
       </div>
     </div>
     <div class="px-4">
@@ -223,7 +224,7 @@ watchEffect(() =>
         </div>
         <div
           v-if="user.about"
-          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
+          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(user.about)"
         />
         <div v-if="socials.length" class="space-x-2 flex">
@@ -239,8 +240,9 @@ watchEffect(() =>
         </div>
       </div>
     </div>
-    <div
-      class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+    <UiScrollerHorizontal
+      class="z-40 sticky top-[71px] lg:top-[72px]"
+      gradient="md"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <router-link
@@ -248,10 +250,14 @@ watchEffect(() =>
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
         >
-          <UiLink :is-active="route.name === item.route" :text="item.label" />
+          <UiLink
+            :is-active="route.name === item.route"
+            :text="item.label"
+            :count="item.count"
+          />
         </router-link>
       </div>
-    </div>
+    </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
   </div>
 </template>

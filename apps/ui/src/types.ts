@@ -18,7 +18,11 @@ export type NetworkID =
   | 'sep'
   | 'linea-testnet'
   | 'sn'
-  | 'sn-sep';
+  | 'sn-sep'
+  | 'bsc'
+  | 'xdai'
+  | 'fantom'
+  | 'base';
 
 export type Choice =
   | 'for'
@@ -43,6 +47,8 @@ export type VoteTypeInfo = {
   description: string;
 };
 
+export type DelegationType = 'governor-subgraph' | 'delegate-registry';
+
 export type SelectedStrategy = {
   address: string;
   destinationAddress?: string | null;
@@ -58,7 +64,7 @@ export type SpaceMetadataTreasury = {
 
 export type SpaceMetadataDelegation = {
   name: string | null;
-  apiType: string | null;
+  apiType: DelegationType | null;
   apiUrl: string | null;
   contractNetwork: NetworkID | null;
   contractAddress: string | null;
@@ -85,12 +91,27 @@ export type SpaceSettings = {
 };
 
 export type StrategyParsedMetadata = {
+  id: string;
   name: string;
   description: string;
   decimals: number;
   symbol: string;
   token: string | null;
   payload: string | null;
+};
+
+export type RelatedSpace = {
+  id: string;
+  name: string;
+  network: NetworkID;
+  avatar: string;
+  cover: string;
+  about?: string;
+  proposal_count: number;
+  vote_count: number;
+  turbo: boolean;
+  verified: boolean;
+  snapshot_chain_id: number;
 };
 
 export type Space = {
@@ -141,13 +162,17 @@ export type Space = {
   vote_count: number;
   follower_count?: number;
   created: number;
+  children: RelatedSpace[];
+  parent: RelatedSpace | null;
 };
 
 export type ProposalExecution = {
+  strategyType: string;
   safeName: string;
   safeAddress: string;
   networkId: NetworkID;
   transactions: Transaction[];
+  chainId?: number;
 };
 
 export type Proposal = {
@@ -243,8 +268,10 @@ export type Statement = {
   network: NetworkID;
   about: string;
   statement: string;
+  delegate: string;
   discourse: string;
   status: 'ACTIVE' | 'INACTIVE';
+  source: string | null;
 };
 
 export type Follow = {
@@ -289,8 +316,7 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
-  executionStrategy: SelectedStrategy | null;
-  execution: Transaction[];
+  executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
 };
 
@@ -328,8 +354,10 @@ export type SendNftTransaction = BaseTransaction & {
   _type: 'sendNft';
   _form: {
     recipient: string;
+    sender: string;
     amount: string;
     nft: {
+      type: string;
       address: string;
       id: string;
       name: string;

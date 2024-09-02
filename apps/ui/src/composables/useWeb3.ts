@@ -38,8 +38,6 @@ const authInitiated = ref(false);
 const loadedProviders = ref(new Set<Connector>());
 
 export function useWeb3() {
-  const { mixpanel } = useMixpanel();
-
   async function login(connector: string | undefined | boolean = 'injected') {
     authInitiated.value = true;
 
@@ -50,8 +48,6 @@ export function useWeb3() {
       state.authLoading = true;
       await auth.login(connector);
       if (auth.provider.value) {
-        mixpanel.track('Connect', { connector });
-
         auth.web3 = new Web3Provider(auth.provider.value, 'any');
         await loadProvider();
       }
@@ -158,10 +154,13 @@ export function useWeb3() {
     if (!provider.on) return;
 
     provider.on('accountsChanged', async accounts => {
-      if (!accounts.length) return;
+      if (!accounts.length) {
+        logout();
+        return;
+      }
 
       state.account = formatAddress(accounts[0]);
-      await login();
+      await login(providerName);
     });
 
     if (!STARKNET_CONNECTORS.includes(providerName)) {

@@ -1,6 +1,6 @@
 {
   "name": "@snapshot-labs/sx",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publishConfig": {
     "access": "public"
   },
@@ -22,7 +22,7 @@
     "prepare": "yarn build",
     "prepublishOnly": "yarn run lint",
     "node:evm": "anvil",
-    "node:starknet": "OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES starknet-devnet --seed 1",
+    "node:starknet": "starknet-devnet --seed 1",
     "test": "SEPOLIA_NODE_URL=https://rpc.snapshotx.xyz/11155111 vitest run test/unit",
     "test:integration:starknet": "vitest run test/integration/starknet",
     "test:integration:evm": "vitest run test/integration/evm",
@@ -54,7 +54,7 @@
     "micro-starknet": "^0.2.3",
     "randombytes": "^2.1.0",
     "snake-case": "^3.0.4",
-    "starknet": "5.25.0"
+    "starknet": "6.11.0"
   },
   "devDependencies": {
     "@ethersproject/units": "^5.7.0",

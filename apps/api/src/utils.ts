@@ -10,7 +10,7 @@ import {
   CallData,
   Contract,
   hash,
-  Provider,
+  RpcProvider,
   shortString,
   validateAndParseAddress
 } from 'starknet';
@@ -34,10 +34,8 @@ export const ethProvider = new JsonRpcProvider(
   process.env.L1_NETWORK_NODE_URL ??
     `https://rpc.brovider.xyz/${networkProperties.baseChainId}`
 );
-const starkProvider = new Provider({
-  rpc: {
-    nodeUrl: networkNodeUrl
-  }
+const starkProvider = new RpcProvider({
+  nodeUrl: networkNodeUrl
 });
 
 const encodersAbi = new CallData(EncodersAbi);
@@ -111,6 +109,19 @@ export function findVariant(value: { variant: Record<string, any> }) {
   };
 }
 
+function formatAddress(type: string, address: string) {
+  if (type === 'Starknet') {
+    return validateAndParseAddress(address);
+  }
+
+  if (type === 'Ethereum') {
+    const paddedAddress = `0x${address.replace('0x', '').padStart(40, '0')}`;
+    return getAddress(paddedAddress);
+  }
+
+  return address;
+}
+
 export function formatAddressVariant({
   key,
   value
@@ -118,16 +129,9 @@ export function formatAddressVariant({
   key: string;
   value: string;
 }) {
-  const address =
-    key === 'Starknet'
-      ? validateAndParseAddress(value)
-      : key === 'Ethereum'
-        ? getAddress(value)
-        : value;
-
   return {
     type: key === 'Starknet' ? 0 : key === 'Ethereum' ? 1 : 2,
-    address
+    address: formatAddress(key, value)
   };
 }
 

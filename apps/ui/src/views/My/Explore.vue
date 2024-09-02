@@ -41,7 +41,7 @@ watchEffect(() => setTitle('Explore'));
 </script>
 
 <template>
-  <div class="flex justify-between">
+  <div class="flex justify-between hidden">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown
         v-model="protocol"
