@@ -1,28 +1,42 @@
 <script setup lang="ts">
-import { loadReplies, Reply, SPACES_DISCUSSIONS } from '@/helpers/discourse';
+import {
+  loadReplies,
+  loadSingleTopic,
+  Reply,
+  SPACES_DISCUSSIONS,
+  Topic
+} from '@/helpers/discourse';
 import { _rt, sanitizeUrl, stripHtmlTags } from '@/helpers/utils';
 import router from '@/router';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const discussionsUrl = SPACES_DISCUSSIONS[
-  `${props.space.network}:${props.space.id}`
-]?.replace(
-  /\/c\/[^\/]+\/\d+$/,
-  `/t/placeholder/${router.currentRoute.value.params.topic}`
-);
-const replyUrl = discussionsUrl?.replace('/t/placeholder/', '/t/');
-
+const topic: Ref<Topic | null> = ref(null);
 const replies: Ref<Reply[]> = ref([]);
 const loading = ref(false);
 const loaded = ref(false);
+const { setTitle } = useTitle();
 
-const discussion = computed(() => sanitizeUrl(discussionsUrl));
+const discussionsUrl = computed(() => {
+  return SPACES_DISCUSSIONS[
+    `${props.space.network}:${props.space.id}`
+  ]?.replace(
+    /\/c\/[^\/]+\/\d+$/,
+    `/t/placeholder/${router.currentRoute.value.params.topic}`
+  );
+});
+
+const replyUrl = computed(() =>
+  discussionsUrl.value?.replace('/t/placeholder/', '/t/')
+);
+
+const discussion = computed(() => sanitizeUrl(discussionsUrl.value));
 
 onMounted(async () => {
   try {
     loading.value = true;
+    topic.value = await loadSingleTopic(discussionsUrl.value || '');
     replies.value = await loadReplies(discussion.value || '');
     loading.value = false;
     loaded.value = true;
@@ -30,6 +44,9 @@ onMounted(async () => {
     console.error(e);
   }
 });
+watchEffect(() =>
+  setTitle(`${topic.value?.title || 'Discussions'} - ${props.space.name}`)
+);
 </script>
 
 <template>
@@ -37,7 +54,8 @@ onMounted(async () => {
     <div v-if="loading" class="p-4">
       <UiLoading />
     </div>
-    <div v-if="loaded" class="px-4 pl-6">
+    <div v-if="loaded" class="px-4 pl-6 pt-5">
+      <h1 class="text-[40px] leading-[1.1em]">{{ topic?.title }}</h1>
       <div
         v-for="(reply, i) in replies"
         :key="i"
