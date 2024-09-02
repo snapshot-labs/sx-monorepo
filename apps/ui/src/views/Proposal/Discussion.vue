@@ -11,6 +11,9 @@ const loading = ref(false);
 const loaded = ref(false);
 
 const discussion = computed(() => sanitizeUrl(props.proposal.discussion));
+const toMarkdown = computed(() =>
+  turndownService({ discussion: discussion.value || '' })
+);
 
 onMounted(async () => {
   try {
@@ -22,9 +25,6 @@ onMounted(async () => {
     console.error(e);
   }
 });
-const toMarkdown = computed(() =>
-  turndownService({ discussion: discussion.value || '' })
-);
 </script>
 
 <template>

@@ -29,6 +29,7 @@ const loading = ref(false);
 const statement = ref<Statement | null>(null);
 
 const userId = computed(() => route.params.user as string);
+const toMarkdown = computed(() => turndownService());
 
 async function loadStatement() {
   loading.value = true;
@@ -58,8 +59,6 @@ watch(userId, loadStatement, { immediate: true });
 watchEffect(() =>
   setTitle(`${props.user.name || userId.value} ${props.space.name}'s profile`)
 );
-
-const toMarkdown = computed(() => turndownService());
 </script>
 
 <template>
