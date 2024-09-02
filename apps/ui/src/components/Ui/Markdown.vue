@@ -227,6 +227,7 @@ html.dark {
   ul,
   ol {
     padding-left: 2em;
+    padding-bottom: 8px;
   }
 
   ul.no-list,

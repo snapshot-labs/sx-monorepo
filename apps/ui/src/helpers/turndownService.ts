@@ -6,6 +6,23 @@ const turndownService = new TurndownService({
 });
 
 export default function (options: { discussion?: string } = {}) {
+  turndownService.addRule('table', {
+    filter: ['table'],
+    replacement: function (content, node) {
+      const headers = Array.from(node.querySelectorAll('thead th')).map(
+        (th: any) => th.textContent
+      );
+      const rows = Array.from(node.querySelectorAll('tbody tr')).map(
+        (tr: any) =>
+          Array.from(tr.querySelectorAll('td')).map((td: any) => td.textContent)
+      );
+      return `
+        | ${headers.join(' | ')} |
+        | ${headers.map(() => '---').join(' | ')} |
+        | ${rows.map(row => row.join(' | ')).join('| \n |')} |
+      `;
+    }
+  });
   turndownService.addRule('handleQuote', {
     filter: ['aside'],
     replacement: function (content, node) {
@@ -56,5 +73,7 @@ export default function (options: { discussion?: string } = {}) {
       }
     });
   }
+
+  turndownService.escape = string => string;
   return turndownService.turndown.bind(turndownService);
 }
