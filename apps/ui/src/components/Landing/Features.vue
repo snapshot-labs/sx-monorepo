@@ -35,12 +35,6 @@ const FEATURES = [
     icon: ICDiscourse
   },
   {
-    title: 'Whitelabel',
-    about:
-      "Select your own branding options, creating a cohesive user experience aligned with your DAO's identity.",
-    icon: ISColorSwatch
-  },
-  {
     title: 'Delegates dashboard',
     about:
       'Enable users to delegate voting power to trusted representatives, allowing indirect participation in governance.',
@@ -63,6 +57,12 @@ const FEATURES = [
     about:
       'AI-generated concise overviews of proposals to help busy voters quickly understand key points for informed decision-making.',
     icon: ISSparkles
+  },
+  {
+    title: 'Whitelabel',
+    about:
+      "Select your own branding options, creating a cohesive user experience aligned with your DAO's identity.",
+    icon: ISColorSwatch
   }
 ];
 </script>
@@ -79,19 +79,15 @@ const FEATURES = [
     </UiContainer>
     <div class="border-t">
       <UiContainer class="!max-w-[1060px]">
-        <div class="grid grid-cols-3 -mx-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 -mx-4">
           <div
             v-for="(feature, i) in FEATURES"
             :key="i"
-            class="border-r border-b px-4 py-5 h-[260px]"
-            :class="{
-              'border-r-0': (i + 1) % 3 === 0,
-              'border-b-0': i >= FEATURES.length - 3
-            }"
+            class="px-4 py-5 md:h-[260px] border-b last:border-b-0 border-r-0 lg:border-r lg:[&:nth-child(3n)]:border-r-0 lg:[&:nth-child(n+7)]:border-b-0"
           >
             <component
               :is="feature.icon"
-              class="inline-block text-skin-link size-[22px] mb-4"
+              class="text-skin-link size-[22px] mb-4"
             />
             <h3
               class="text-skin-link disp !text-[18px] mb-2"

@@ -1,5 +1,8 @@
 <template>
-  <div class="py-8 border-b flex items-center justify-center blocks !bg-top">
+  <div class="py-9 border-b flex items-center justify-center relative">
+    <div
+      class="absolute blocks top-0 right-[50%] left-0 bottom-0 !bg-right-top -z-10"
+    />
     <UiContainer class="!max-w-[1060px]">
       <div class="text-center max-w-[600px] mx-auto">
         <div class="eyebrow mb-3">Join Snapshot</div>
@@ -9,3 +12,4 @@
     </UiContainer>
   </div>
 </template>
+<script setup lang="ts"></script>
