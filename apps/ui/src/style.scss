@@ -88,13 +88,25 @@
   src: url('./assets/fonts/StolzlDisplay-Medium.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'Stolzl';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./assets/fonts/Stolzl-Medium.woff2') format('woff2');
+}
+
 body {
   @apply font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
 }
 
 .mono {
-  font-size: 44px;
   font-family: 'Stolzl Display', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  line-height: 1.2em;
+}
+
+.disp {
+  font-family: 'Stolzl', Helvetica, Arial, sans-serif;
   font-weight: 700;
   line-height: 1.2em;
 }

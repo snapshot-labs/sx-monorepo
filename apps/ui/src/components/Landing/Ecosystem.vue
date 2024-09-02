@@ -4,7 +4,7 @@
       <div class="max-w-[600px]">
         <div class="eyebrow mb-3">Ecosystem</div>
         <h1 class="mb-4 mono !text-[44px]">
-          More than 200+ integrations to extend your governance
+          200+ integrations to supercharge your governance capabilities
         </h1>
         <router-link to="apps">
           <UiButton>Explore integrations</UiButton>

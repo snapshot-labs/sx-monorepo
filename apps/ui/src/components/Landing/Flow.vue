@@ -1,3 +1,26 @@
+<script setup lang="ts">
+const STEPS = [
+  {
+    title: 'Discuss',
+    about:
+      'Follow your ongoing community discussions from within the Snapshot app.'
+  },
+  {
+    title: 'Delegate',
+    about: 'Become a delegate and get voting power from your peers.'
+  },
+  {
+    title: 'Vote',
+    about:
+      'Exercise your decision making power to shape the future of your DAO.'
+  },
+  {
+    title: 'Execute',
+    about: 'Execute transactions onchain once a proposal is passed.'
+  }
+];
+</script>
+
 <template>
   <div>
     <UiContainer class="!max-w-[1060px]">
@@ -8,31 +31,18 @@
 
     <div class="border-y">
       <UiContainer class="!max-w-[1060px]">
-        <div class="grid grid-cols-4 text-md border-x">
-          <div class="border-r">
-            <div class="p-4">
-              <h3 class="mb-2 inline-block">Discuss</h3>
-              <div>
-                Follows the discussions from the forum without leaving the app.
-              </div>
-            </div>
-          </div>
-          <div class="border-r">
-            <div class="p-4">
-              <h3 class="mb-2 inline-block">Delegate</h3>
-              <div>Become a delegate and get voting power from your peers.</div>
-            </div>
-          </div>
-          <div class="border-r">
-            <div class="p-4">
-              <h3 class="mb-2 inline-block">Vote</h3>
-              <div>Cast your vote and get decision power within your DAO.</div>
-            </div>
-          </div>
-          <div>
-            <div class="p-4">
-              <h3 class="mb-2 inline-block">Execute</h3>
-              <div>Execute transactions onchain once a proposal pass.</div>
+        <div class="grid grid-cols-4 text-md -mx-4">
+          <div
+            v-for="(step, i) in STEPS"
+            :key="i"
+            class="border-r last:border-0"
+          >
+            <div class="px-4 py-5">
+              <h3
+                class="mb-2 inline-block disp text-[19px]"
+                v-text="step.title"
+              />
+              <div v-text="step.about" />
             </div>
           </div>
         </div>
