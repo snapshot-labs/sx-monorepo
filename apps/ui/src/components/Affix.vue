@@ -22,7 +22,7 @@ function handleScroll() {
   if (!init.value) {
     initialTopOffset.value = wrapperEl.value.getBoundingClientRect().top;
     topOffset.value = initialTopOffset.value;
-    innerEl.classList.add('relative', 'md:sticky');
+    innerEl.classList.add('static', 'md:sticky');
     init.value = true;
   }
 
