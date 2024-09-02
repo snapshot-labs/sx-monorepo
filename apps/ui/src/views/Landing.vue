@@ -2,14 +2,12 @@
   <div class="!mt-0 -mb-6 relative">
     <LandingTopnav />
     <LandingHero />
-    <LandingCounter />
     <LandingUsers />
+    <LandingCounter />
     <LandingFlow />
     <LandingFeatures />
     <LandingEcosystem />
-    <LandingValues />
     <LandingStart />
-    <LandingInvestors />
     <LandingFooter />
   </div>
 </template>

@@ -1,6 +1,6 @@
 <template>
   <div class="py-8 border-b">
-    <UiContainer class="!max-w-[1040px]">
+    <UiContainer class="!max-w-[1060px]">
       <div class="space-y-2 text-center">
         <div class="eyebrow mb-4">Backed by the best</div>
         <div class="space-x-6 flex justify-center">

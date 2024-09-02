@@ -20,7 +20,6 @@
 
   // accents
   --primary: 17, 17, 17;
-  --display: 65, 0, 244;
   --accent-foreground: 251, 251, 251;
   --danger: 235, 76, 91;
   --success: 87, 179, 117;
@@ -83,17 +82,10 @@
 }
 
 @font-face {
-  font-family: 'Space Mono';
-  font-style: normal;
-  font-weight: 400;
-  src: url('./assets/fonts/SpaceMono-Regular.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Space Mono';
+  font-family: 'Stolzl Display';
   font-style: normal;
   font-weight: 700;
-  src: url('./assets/fonts/SpaceMono-Bold.woff2') format('woff2');
+  src: url('./assets/fonts/StolzlDisplay-Medium.woff2') format('woff2');
 }
 
 body {
@@ -102,10 +94,9 @@ body {
 
 .mono {
   font-size: 44px;
-  font-family: 'Space Mono', Helvetica, Arial, sans-serif;
-  letter-spacing: -1px;
+  font-family: 'Stolzl Display', Helvetica, Arial, sans-serif;
   font-weight: 700;
-  line-height: 1.1em;
+  line-height: 1.2em;
 }
 
 h1 {
@@ -252,10 +243,6 @@ input:placeholder-shown {
   background-repeat: repeat-x;
   background-position: top center;
   background-image: url('@/assets/blocks-x-light.svg');
-}
-
-.dark .blocks {
-  background-image: url('@/assets/blocks-x.svg');
 }
 
 .banner {

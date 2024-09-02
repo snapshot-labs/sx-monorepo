@@ -1,26 +1,23 @@
 <template>
-  <div class="relative">
+  <div
+    class="relative flex justify-center min-h-[600px] pt-[80px] items-center border-b"
+  >
     <div
-      class="absolute blocks bg-skin-bg top-0 left-[50%] right-0 bottom-0 !bg-left-bottom border-l"
+      class="absolute blocks top-0 left-[50%] right-0 bottom-0 !bg-left-top border-l"
     />
-    <div class="relative pt-12 pb-8 border-b">
-      <UiContainer class="!max-w-[1040px] min-h-[540px] flex items-center">
-        <div class="max-w-[560px]">
-          <img
-            src="@/assets/landing/flow.svg"
-            class="absolute top-[200px] right-[180px]"
-          />
-          <div class="eyebrow mb-3">Turn chaos to consensus</div>
-          <h1 class="mb-6 mono !text-[56px]">
-            The governance stack for your organization
-          </h1>
-          <router-link :to="{ name: 'my-home' }">
-            <UiButton class="bg-skin-display border-skin-display text-white">
-              Get started
-            </UiButton>
-          </router-link>
-        </div>
-      </UiContainer>
-    </div>
+    <UiContainer class="relative w-full !max-w-[1060px] flex items-center py-8">
+      <div class="max-w-[560px]">
+        <div
+          class="absolute top-[200px] right-[300px] space-y-4 text-center font-bold"
+        ></div>
+        <div class="eyebrow mb-3">Turn chaos to consensus</div>
+        <h1 class="mb-5 mono !text-[56px]">
+          The governance stack for your organization
+        </h1>
+        <router-link :to="{ name: 'my-home' }">
+          <UiButton class="primary">Get started</UiButton>
+        </router-link>
+      </div>
+    </UiContainer>
   </div>
 </template>

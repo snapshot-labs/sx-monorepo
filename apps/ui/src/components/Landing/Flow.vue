@@ -1,32 +1,52 @@
 <template>
-  <div class="border-b">
-    <UiContainer class="!max-w-[1040px]">
-      <h1 class="mono max-w-[500px] py-8">
-        The whole flow of governance in your fingers.
+  <div>
+    <UiContainer class="!max-w-[1060px]">
+      <h1 class="mono max-w-[680px] py-8">
+        A fully integrated suite to manage DAO governance.
       </h1>
-      <div class="grid grid-cols-4 border border-b-0 text-md">
-        <div class="p-5 border-r h-[320px]">
-          <div class="eyebrow mb-3">1</div>
-          <h2 class="mb-2 inline-block">Discuss</h2>
-          <div>Lorem ipsum dolor sit amet consectetur adipisicing elit.</div>
-        </div>
-        <div class="p-5 border-r">
-          <div class="eyebrow mb-3">2</div>
-          <h2 class="mb-2 inline-block">Delegate</h2>
-          <div>Lorem ipsum dolor sit amet consectetur adipisicing elit.</div>
-        </div>
-        <div class="p-5 border-r">
-          <div class="eyebrow mb-3">3</div>
-          <h2 class="mb-2 inline-block">Vote</h2>
-          <div>Lorem ipsum dolor sit amet consectetur adipisicing elit.</div>
-        </div>
-        <div class="p-5">
-          <div class="eyebrow mb-3">4</div>
-          <h2 class="mb-2 inline-block">Execute</h2>
-          <div>Lorem ipsum dolor sit amet consectetur adipisicing elit.</div>
-        </div>
-      </div>
     </UiContainer>
+
+    <div class="border-y">
+      <UiContainer class="!max-w-[1060px]">
+        <div class="grid grid-cols-4 text-md border-x">
+          <div class="border-r">
+            <div class="p-4">
+              <h3 class="mb-2 inline-block">Discuss</h3>
+              <div>
+                Follows the discussions from the forum without leaving the app.
+              </div>
+            </div>
+          </div>
+          <div class="border-r">
+            <div class="p-4">
+              <h3 class="mb-2 inline-block">Delegate</h3>
+              <div>Become a delegate and get voting power from your peers.</div>
+            </div>
+          </div>
+          <div class="border-r">
+            <div class="p-4">
+              <h3 class="mb-2 inline-block">Vote</h3>
+              <div>Cast your vote and get decision power within your DAO.</div>
+            </div>
+          </div>
+          <div>
+            <div class="p-4">
+              <h3 class="mb-2 inline-block">Execute</h3>
+              <div>Execute transactions onchain once a proposal pass.</div>
+            </div>
+          </div>
+        </div>
+      </UiContainer>
+    </div>
   </div>
 </template>
+
 <script setup lang="ts"></script>
+<style lang="scss" scoped>
+.arrow {
+  @apply px-4 pt-5 pb-8 rounded-md;
+  background-repeat: no-repeat;
+  background-position: bottom 24px right;
+  background-image: url('@/assets/arrow.svg');
+}
+</style>

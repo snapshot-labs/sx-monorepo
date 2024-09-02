@@ -24,7 +24,7 @@ const SOCIALS = [
 
 <template>
   <div class="pt-6 pb-5">
-    <UiContainer class="!max-w-[1040px] space-y-7">
+    <UiContainer class="!max-w-[1060px] space-y-7">
       <div class="grid grid-cols-4">
         <div class="space-y-2">
           <div class="eyebrow">Learn more</div>
