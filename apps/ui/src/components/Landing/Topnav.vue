@@ -4,10 +4,11 @@ const { toggleSkin, currentMode } = useUserSkin();
 
 <template>
   <div class="px-6 py-4 flex justify-center absolute z-10 left-0 right-0">
-    <div
-      class="mt-0.5 flex-grow"
-    >
-      <router-link :to="{ name: 'landing' }" class="text-[26px] text-skin-link items-center space-x-2.5">
+    <div class="mt-0.5 flex-grow">
+      <router-link
+        :to="{ name: 'landing' }"
+        class="text-[26px] text-skin-link items-center space-x-2.5"
+      >
         <img
           src="@/assets/snapshot.svg"
           alt="Snapshot"
