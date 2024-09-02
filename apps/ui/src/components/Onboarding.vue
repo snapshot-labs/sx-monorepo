@@ -32,7 +32,7 @@ const hasPendingTasks = computed(() =>
   >
     <UiLabel label="onboarding" sticky />
     <div v-if="tasks.profile" class="border-b mx-4 py-[14px] flex gap-x-2.5">
-      <div><IS-flag class="text-skin-link mt-1" /></div>
+      <IS-flag class="text-skin-link mt-1 shrink-0" />
       <div class="grow">
         Setup your
         <router-link :to="{ name: 'user', params: { id: user.id } }">
