@@ -33,7 +33,8 @@ module.exports = {
 
         // accents
         'skin-primary': 'rgba(var(--primary), <alpha-value>)',
-        'skin-accent-foreground': 'rgba(var(--accent-foreground), <alpha-value>)',
+        'skin-accent-foreground':
+          'rgba(var(--accent-foreground), <alpha-value>)',
         'skin-danger': 'rgba(var(--danger), <alpha-value>)',
         'skin-success': 'rgba(var(--success), <alpha-value>)',
 
@@ -55,7 +56,9 @@ module.exports = {
       sm: '544px',
       md: '768px',
       lg: '1012px',
-      xl: '1280px'
+      xl: '1280px',
+      '2xl': '1536px',
+      '3xl': '1844px'
     },
     spacing: {
       0: '0px',
