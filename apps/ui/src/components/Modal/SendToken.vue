@@ -22,17 +22,6 @@ const RECIPIENT_DEFINITION = {
   examples: ['Address or ENS']
 };
 
-const formValidator = getValidator({
-  $async: true,
-  type: 'object',
-  title: 'TokenTransfer',
-  additionalProperties: false,
-  required: ['to'],
-  properties: {
-    to: RECIPIENT_DEFINITION
-  }
-});
-
 const props = defineProps<{
   open: boolean;
   address: string;
@@ -51,8 +40,8 @@ const searchInput: Ref<HTMLElement | null> = ref(null);
 const form: {
   to: string;
   token: string;
-  amount: string | number;
-  value: string | number;
+  amount: string;
+  value: string;
 } = reactive(clone(DEFAULT_FORM_STATE));
 
 const showPicker = ref(false);
@@ -91,6 +80,27 @@ const currentToken = computed(() => {
   return token;
 });
 
+const amountDefinition = computed(() => ({
+  type: 'string',
+  decimals: currentToken.value?.decimals ?? 0,
+  title: 'Amount',
+  examples: ['0']
+}));
+
+const formValidator = computed(() =>
+  getValidator({
+    $async: true,
+    type: 'object',
+    title: 'TokenTransfer',
+    additionalProperties: false,
+    required: ['to', 'amount'],
+    properties: {
+      to: RECIPIENT_DEFINITION,
+      amount: amountDefinition.value
+    }
+  })
+);
+
 const formValid = computed(
   () =>
     currentToken.value &&
@@ -124,23 +134,28 @@ function handlePickerClick(type: 'token' | 'contact') {
   });
 }
 
-function handleAmountUpdate(value) {
+function handleAmountUpdate(value: string) {
   form.amount = value;
 
   if (value === '') {
     form.value = '';
   } else if (currentToken.value) {
-    form.value = parseFloat((value * currentToken.value.price).toFixed(2));
+    const float = parseFloat(value.replace(',', '.'));
+    form.value = (float * currentToken.value.price).toFixed(2);
   }
 }
 
-function handleValueUpdate(value) {
+function handleValueUpdate(value: string) {
   form.value = value;
 
   if (value === '') {
     form.amount = '';
   } else if (currentToken.value) {
-    form.amount = parseFloat((value / currentToken.value.price).toFixed(6));
+    const decimals = Math.min(currentToken.value.decimals, 6);
+
+    const float = parseFloat(value.replace(',', '.'));
+    const parsed = (float / currentToken.value.price).toFixed(decimals);
+    form.amount = parseFloat(parsed) === 0 ? '0' : parsed;
   }
 }
 
@@ -195,16 +210,16 @@ watch([() => props.address, () => props.network], ([address, network]) => {
 watch(currentToken, token => {
   if (!token || form.amount === '') return;
 
-  const amount =
-    typeof form.amount === 'string' ? parseFloat(form.amount) : form.amount;
-  form.value = parseFloat((amount * token.price).toFixed(2));
+  const amount = parseFloat(form.amount.replace(',', '.'));
+  form.value = (amount * token.price).toFixed(2);
 });
 
 watchEffect(async () => {
   formValidated.value = false;
 
-  formErrors.value = await formValidator.validateAsync({
-    to: form.to
+  formErrors.value = await formValidator.value.validateAsync({
+    to: form.to,
+    amount: form.amount
   });
   formValidated.value = true;
 });
@@ -292,13 +307,10 @@ watchEffect(async () => {
       </div>
       <div class="flex gap-2.5">
         <div class="relative w-full">
-          <UiInputNumber
+          <UiInputAmount
             :model-value="form.amount"
-            :definition="{
-              type: 'number',
-              title: 'Amount',
-              examples: ['0']
-            }"
+            :definition="amountDefinition"
+            :error="formErrors.amount"
             @update:model-value="handleAmountUpdate"
           />
           <button
@@ -308,13 +320,13 @@ watchEffect(async () => {
             v-text="'max'"
           />
         </div>
-        <UiInputNumber
-          v-if="currentToken.price !== 0"
-          class="w-full"
-          :model-value="form.value"
-          :definition="{ type: 'number', title: 'USD', examples: ['0'] }"
-          @update:model-value="handleValueUpdate"
-        />
+        <div v-if="currentToken.price !== 0" class="w-full">
+          <UiInputAmount
+            :model-value="form.value"
+            :definition="{ type: 'number', title: 'USD', examples: ['0'] }"
+            @update:model-value="handleValueUpdate"
+          />
+        </div>
       </div>
     </div>
     <template v-if="!showPicker" #footer>

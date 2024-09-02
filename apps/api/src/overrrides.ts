@@ -20,11 +20,14 @@ const createConfig = (
     erc20VotesStrategy: config.Strategies.ERC20Votes,
     propositionPowerValidationStrategyAddress:
       config.ProposalValidations.VotingPower,
+    spaceClassHash: config.Meta.masterSpace,
     herodotusStrategies: [
       config.Strategies.OZVotesStorageProof,
       config.Strategies.OZVotesTrace208StorageProof,
       config.Strategies.EVMSlotValue
-    ].map(strategy => validateAndParseAddress(strategy)),
+    ]
+      .filter(address => !!address)
+      .map(strategy => validateAndParseAddress(strategy)),
     startBlock
   };
 };

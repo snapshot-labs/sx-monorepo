@@ -5,13 +5,13 @@ import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   Choice,
+  DelegationType,
   NetworkID,
   Proposal,
   Space,
   SpaceMetadata,
   SpaceSettings,
   Statement,
-  Transaction,
   User,
   VoteType
 } from '@/types';
@@ -24,7 +24,6 @@ const offchainToStarknetIds: Record<string, NetworkID> = {
 const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
-  const { mixpanel } = useMixpanel();
   const uiStore = useUiStore();
   const alias = useAlias();
   const { web3 } = useWeb3();
@@ -95,20 +94,21 @@ export function useActions() {
     networkId: NetworkID,
     promise: Promise<any>,
     opts: { transactionNetworkId?: NetworkID } = {}
-  ) {
+  ): Promise<string | null> {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
 
-    if (handleSafeEnvelope(envelope)) return;
-    if (await handleCommitEnvelope(envelope, networkId)) return;
+    if (handleSafeEnvelope(envelope)) return null;
+    if (await handleCommitEnvelope(envelope, networkId)) return null;
 
+    let hash;
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.payloadType === 'HIGHLIGHT_VOTE') {
       console.log('Receipt', envelope.signatureData);
     } else if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
-      const hash = receipt.transaction_hash || receipt.hash;
+      hash = receipt.transaction_hash || receipt.hash;
 
       console.log('Receipt', receipt);
 
@@ -119,13 +119,16 @@ export function useActions() {
         );
       hash && uiStore.addPendingTransaction(hash, networkId);
     } else {
+      hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
 
       uiStore.addPendingTransaction(
-        envelope.transaction_hash || envelope.hash,
+        hash,
         opts.transactionNetworkId || networkId
       );
     }
+
+    return hash;
   }
 
   async function forceLogin() {
@@ -219,11 +222,6 @@ export function useActions() {
 
     console.log('Receipt', receipt);
 
-    mixpanel.track('Create space', {
-      network: networkId,
-      predictedSpaceAddress: predictSpaceAddress(networkId, salt)
-    });
-
     return receipt;
   }
 
@@ -241,30 +239,33 @@ export function useActions() {
     );
   }
 
-  async function vote(proposal: Proposal, choice: Choice) {
-    if (!web3.value.account) return await forceLogin();
+  async function vote(
+    proposal: Proposal,
+    choice: Choice,
+    reason: string
+  ): Promise<string | null> {
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
     const network = getNetwork(proposal.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
         auth.web3,
         web3.value.type as Connector,
         web3.value.account,
         proposal,
-        choice
+        choice,
+        reason
       )
     );
 
     addPendingVote(proposal.id);
 
-    mixpanel.track('Vote', {
-      network: proposal.network,
-      space: proposal.space,
-      proposalId: proposal.id,
-      choice
-    });
+    return txHash;
   }
 
   async function propose(
@@ -274,7 +275,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
-    executionInfo: ExecutionInfo | null
+    executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -283,17 +284,6 @@ export function useActions() {
 
     const network = getNetwork(space.network);
 
-    const pinned = await network.helpers.pin({
-      title,
-      body,
-      discussion,
-      type,
-      choices: choices.filter(c => !!c),
-      execution: executionInfo?.transactions ?? []
-    });
-    if (!pinned || !pinned.cid) return false;
-    console.log('IPFS', pinned);
-
     await wrapPromise(
       space.network,
       network.actions.propose(
@@ -301,25 +291,14 @@ export function useActions() {
         web3.value.type as Connector,
         web3.value.account,
         space,
-        pinned.cid,
-        executionInfo === null
-          ? executionInfo
-          : {
-              ...executionInfo,
-              transactions: executionInfo.transactions.map(
-                (tx: Transaction) => ({
-                  ...tx,
-                  operation: 0
-                })
-              )
-            }
+        title,
+        body,
+        discussion,
+        type,
+        choices,
+        executions
       )
     );
-
-    mixpanel.track('Propose', {
-      network: space.network,
-      space: space.id
-    });
 
     return true;
   }
@@ -332,7 +311,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
-    executionInfo: ExecutionInfo | null
+    executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
       forceLogin();
@@ -340,17 +319,6 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
-
-    const pinned = await network.helpers.pin({
-      title,
-      body,
-      discussion,
-      type,
-      choices: choices.filter(c => !!c),
-      execution: executionInfo?.transactions ?? []
-    });
-    if (!pinned || !pinned.cid) return false;
-    console.log('IPFS', pinned);
 
     await wrapPromise(
       space.network,
@@ -360,18 +328,12 @@ export function useActions() {
         web3.value.account,
         space,
         proposalId,
-        pinned.cid,
-        executionInfo === null
-          ? executionInfo
-          : {
-              ...executionInfo,
-              transactions: executionInfo.transactions.map(
-                (tx: Transaction) => ({
-                  ...tx,
-                  operation: 0
-                })
-              )
-            }
+        title,
+        body,
+        discussion,
+        type,
+        choices,
+        executions
       )
     );
 
@@ -499,44 +461,64 @@ export function useActions() {
   }
 
   async function transferOwnership(space: Space, owner: string) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    await wrapPromise(
+    return wrapPromise(
       space.network,
       network.actions.transferOwnership(auth.web3, space, owner)
     );
   }
 
-  async function updateStrategies(
+  async function updateSettings(
     space: Space,
+    metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
-    validationStrategy: StrategyConfig
+    validationStrategy: StrategyConfig,
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
   ) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
 
-    await wrapPromise(
+    return wrapPromise(
       space.network,
-      network.actions.updateStrategies(
+      network.actions.updateSettings(
         auth.web3,
         space,
+        metadata,
         authenticatorsToAdd,
         authenticatorsToRemove,
         votingStrategiesToAdd,
         votingStrategiesToRemove,
-        validationStrategy
+        validationStrategy,
+        votingDelay !== null
+          ? getCurrentFromDuration(space.network, votingDelay)
+          : null,
+        minVotingDuration !== null
+          ? getCurrentFromDuration(space.network, minVotingDuration)
+          : null,
+        maxVotingDuration !== null
+          ? getCurrentFromDuration(space.network, maxVotingDuration)
+          : null
       )
     );
   }
@@ -544,12 +526,15 @@ export function useActions() {
   async function delegate(
     space: Space,
     networkId: NetworkID,
+    delegationType: DelegationType,
     delegatee: string,
     delegationContract: string
   ) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getReadWriteNetwork(networkId);
+    const network = getReadWriteNetwork(networkId, {
+      allowDisabledNetwork: true
+    });
 
     await wrapPromise(
       networkId,
@@ -557,16 +542,11 @@ export function useActions() {
         auth.web3,
         space,
         networkId,
+        delegationType,
         delegatee,
         delegationContract
       )
     );
-
-    mixpanel.track('Delegate', {
-      network: networkId,
-      space: space.id,
-      delegatee
-    });
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {
@@ -668,7 +648,7 @@ export function useActions() {
     setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
     setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
-    updateStrategies: wrapWithErrors(updateStrategies),
+    updateSettings: wrapWithErrors(updateSettings),
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),

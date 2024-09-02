@@ -1,5 +1,7 @@
 import { VoteType, VoteTypeInfo } from '@/types';
 
+export const SIDEKICK_URL = 'https://sh5.co';
+
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const CHAIN_IDS = {
@@ -8,7 +10,11 @@ export const CHAIN_IDS = {
   oeth: 10,
   eth: 1,
   sep: 11155111,
-  'linea-testnet': 59140
+  'linea-testnet': 59140,
+  bsc: 56,
+  xdai: 100,
+  fantom: 250,
+  base: 8453
 };
 
 export const COINGECKO_ASSET_PLATFORMS = {

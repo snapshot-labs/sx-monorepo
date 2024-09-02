@@ -10,14 +10,12 @@ import {
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Proposal } from '@/types';
-import { toBigIntOrNumber } from '../../helpers/utils';
 
 const props = defineProps<{
   proposal: Proposal;
 }>();
 
 const router = useRouter();
-const route = useRoute();
 const uiStore = useUiStore();
 const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
@@ -46,11 +44,6 @@ const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
-
-const currentUrl = `${window.location.origin}/#${route.path}`;
-const shareMsg = encodeURIComponent(
-  `${props.proposal.space.name}: ${props.proposal.title} ${currentUrl}`
-);
 
 const editable = computed(() => {
   // HACK: here we need to use snapshot instead of start because start is artifically
@@ -113,6 +106,16 @@ async function handleEditClick() {
 
   const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
 
+  const executions = Object.fromEntries(
+    props.proposal.executions.map(execution => {
+      const address = offchainNetworks.includes(props.proposal.network)
+        ? execution.safeAddress
+        : props.proposal.execution_strategy;
+
+      return [address, execution.transactions];
+    })
+  );
+
   const draftId = await createDraft(spaceId, {
     proposalId: props.proposal.proposal_id,
     title: props.proposal.title,
@@ -120,18 +123,7 @@ async function handleEditClick() {
     discussion: props.proposal.discussion,
     type: props.proposal.type,
     choices: props.proposal.choices,
-    executionStrategy:
-      props.proposal.execution_strategy_type === 'none'
-        ? null
-        : {
-            address: props.proposal.execution_strategy,
-            type: props.proposal.execution_strategy_type
-          },
-    execution:
-      !offchainNetworks.includes(props.proposal.network) &&
-      props.proposal.executions.length > 0
-        ? props.proposal.executions[0].transactions
-        : undefined
+    executions
   });
 
   router.push({
@@ -205,16 +197,15 @@ onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
-  <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
     <div>
-      <h1 class="mb-3 text-[36px] leading-10">
+      <h1 class="mb-3 text-[40px] leading-[1.1em]">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
-        <span class="text-skin-text">{{ getProposalId(proposal) }}</span>
       </h1>
 
-      <ProposalStatus :state="proposal.state" class="top-[7.5px]" />
+      <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
 
-      <div class="flex justify-between items-center mb-3">
+      <div class="flex justify-between items-center mb-4">
         <router-link
           :to="{
             name: 'space-user-statement',
@@ -239,8 +230,9 @@ onBeforeUnmount(() => destroyAudio());
               >
                 {{ proposal.space.name }}
               </router-link>
-              · {{ _rt(proposal.created) }}</span
-            >
+              <span> · {{ _rt(proposal.created) }}</span>
+              <span> · {{ getProposalId(proposal) }}</span>
+            </span>
           </div>
         </router-link>
         <div class="flex gap-2 items-center">
@@ -284,7 +276,7 @@ onBeforeUnmount(() => destroyAudio());
               <IH-play v-else class="inline-block text-skin-text size-[22px]" />
             </UiButton>
           </UiTooltip>
-          <DropdownShare :message="shareMsg">
+          <DropdownShare :shareable="proposal" type="proposal">
             <template #button>
               <UiButton class="!p-0 border-0 !h-auto">
                 <IH-share class="text-skin-text inline-block size-[22px]" />
@@ -341,6 +333,7 @@ onBeforeUnmount(() => destroyAudio());
           </UiDropdown>
         </div>
       </div>
+
       <div v-if="aiSummaryOpen" class="mb-6">
         <h4 class="mb-2 eyebrow flex items-center">
           <IH-sparkles class="inline-block mr-2" />
@@ -368,27 +361,10 @@ onBeforeUnmount(() => destroyAudio());
           <span>Execution</span>
         </h4>
         <div class="mb-4">
-          <ProposalExecutionsList :executions="proposal.executions" />
-        </div>
-      </div>
-      <div
-        v-if="
-          proposal.executions &&
-          proposal.executions.length > 0 &&
-          proposal.scores.length > 0 &&
-          toBigIntOrNumber(proposal.scores_total) >=
-            toBigIntOrNumber(proposal.quorum) &&
-          toBigIntOrNumber(proposal.scores[0]) >
-            toBigIntOrNumber(proposal.scores[1]) &&
-          proposal.has_execution_window_opened
-        "
-      >
-        <h4 class="mb-3 eyebrow flex items-center">
-          <IH-play class="inline-block mr-2" />
-          <span>Actions</span>
-        </h4>
-        <div class="mb-4">
-          <ProposalExecutionActions :proposal="proposal" />
+          <ProposalExecutionsList
+            :proposal="proposal"
+            :executions="proposal.executions"
+          />
         </div>
       </div>
       <div>

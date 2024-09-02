@@ -101,7 +101,7 @@ onMounted(() => {
         setTimeout(() => {
           copyButton.innerHTML = copySvg;
           copyButton.classList.remove('!text-skin-success');
-        }, 1e3);
+        }, 1000);
       }
     });
 

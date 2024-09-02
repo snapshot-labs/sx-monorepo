@@ -1,16 +1,31 @@
 <script setup lang="ts">
 import { NetworkID } from '@/types';
 
+defineOptions({ inheritAttrs: false });
+
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-const { param } = useRouteParser('space');
+
+const param = computed(() =>
+  String(
+    route.matched[0]?.name === 'space' ? route.params.id : route.params.space
+  )
+);
+
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 
-const show = computed(() => route.matched[0]?.name === 'proposal');
+const showSpace = computed(() =>
+  ['proposal', 'space'].includes(String(route.matched[0]?.name))
+);
 
 const space = computed(() => {
-  if (!show || !resolved.value || !spaceAddress.value || !networkId.value) {
+  if (
+    !showSpace.value ||
+    !resolved.value ||
+    !spaceAddress.value ||
+    !networkId.value
+  ) {
     return null;
   }
   return (
@@ -25,22 +40,20 @@ const space = computed(() => {
 </script>
 
 <template>
-  <template v-if="show">
-    <router-link
-      v-if="space"
-      :to="{
-        name: 'space-overview',
-        params: { id: `${networkId}:${spaceAddress}` }
-      }"
-      class="flex space-x-2.5 truncate text-[24px]"
-    >
-      <SpaceAvatar
-        :space="{ ...space, network: networkId as NetworkID }"
-        :size="36"
-        class="!rounded-[4px] shrink-0"
-      />
-      <span class="truncate" v-text="space.name" />
-    </router-link>
-  </template>
-  <slot v-else />
+  <router-link
+    v-if="space"
+    :to="{
+      name: 'space-overview',
+      params: { id: `${networkId}:${spaceAddress}` }
+    }"
+    class="flex item-center space-x-2.5 truncate text-[24px]"
+    v-bind="$attrs"
+  >
+    <SpaceAvatar
+      :space="{ ...space, network: networkId as NetworkID }"
+      :size="36"
+      class="!rounded-[4px] shrink-0"
+    />
+    <span class="truncate" v-text="space.name" />
+  </router-link>
 </template>

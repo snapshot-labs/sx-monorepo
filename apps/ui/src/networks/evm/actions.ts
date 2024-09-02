@@ -1,5 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { Provider, Web3Provider } from '@ethersproject/providers';
+import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
   evmArbitrum,
@@ -36,11 +37,13 @@ import {
 } from '@/networks/types';
 import {
   Choice,
+  DelegationType,
   NetworkID,
   Proposal,
   Space,
   SpaceMetadata,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  VoteType
 } from '@/types';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
@@ -200,10 +203,26 @@ export function createActions(
       connectorType: Connector,
       account: string,
       space: Space,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
+
+      const executionInfo = executions?.[0];
+      const pinned = await helpers.pin({
+        title,
+        body,
+        discussion,
+        type,
+        choices: choices.filter(c => !!c),
+        execution: executionInfo?.transactions ?? []
+      });
+      if (!pinned || !pinned.cid) return false;
+      console.log('IPFS', pinned);
 
       const isContract = await getIsContract(account);
 
@@ -255,7 +274,7 @@ export function createActions(
         authenticator,
         strategies: strategiesWithMetadata,
         executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${cid}`
+        metadataUri: `ipfs://${pinned.cid}`
       };
 
       if (relayerType === 'evm') {
@@ -283,10 +302,26 @@ export function createActions(
       account: string,
       space: Space,
       proposalId: number | string,
-      cid: string,
-      executionInfo: ExecutionInfo | null
+      title: string,
+      body: string,
+      discussion: string,
+      type: VoteType,
+      choices: string[],
+      executions: ExecutionInfo[] | null
     ) {
       await verifyNetwork(web3, chainId);
+
+      const executionInfo = executions?.[0];
+      const pinned = await helpers.pin({
+        title,
+        body,
+        discussion,
+        type,
+        choices: choices.filter(c => !!c),
+        execution: executionInfo?.transactions ?? []
+      });
+      if (!pinned || !pinned.cid) return false;
+      console.log('IPFS', pinned);
 
       const isContract = await getIsContract(account);
 
@@ -322,7 +357,7 @@ export function createActions(
         proposal: proposalId as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${cid}`
+        metadataUri: `ipfs://${pinned.cid}`
       };
 
       if (relayerType === 'evm') {
@@ -362,7 +397,8 @@ export function createActions(
       connectorType: Connector,
       account: string,
       proposal: Proposal,
-      choice: Choice
+      choice: Choice,
+      reason: string
     ) => {
       await verifyNetwork(web3, chainId);
 
@@ -394,13 +430,16 @@ export function createActions(
         })
       );
 
+      let pinned: { cid: string; provider: string } | null = null;
+      if (reason) pinned = await helpers.pin({ reason });
+
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: proposal.proposal_id as number,
         choice: getSdkChoice(choice),
-        metadataUri: '',
+        metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
 
@@ -554,31 +593,69 @@ export function createActions(
       web3: Web3Provider,
       space: Space,
       networkId: NetworkID,
+      delegationType: DelegationType,
       delegatee: string,
       delegationContract: string
     ) => {
       await verifyNetwork(web3, CHAIN_IDS[networkId]);
 
-      const [, contractAddress] = delegationContract.split(':');
+      let contractParams: {
+        address: string;
+        functionName: string;
+        functionParams: any[];
+        abi: string[];
+      };
+
+      if (delegationType === 'governor-subgraph') {
+        contractParams = {
+          address: delegationContract.split(':')[1],
+          functionName: 'delegate',
+          functionParams: [delegatee],
+          abi: ['function delegate(address delegatee)']
+        };
+      } else if (delegationType == 'delegate-registry') {
+        contractParams = {
+          address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+          functionName: 'setDelegate',
+          functionParams: [formatBytes32String(space.id), delegatee],
+          abi: ['function setDelegate(bytes32 id, address delegate)']
+        };
+      } else {
+        throw new Error('Unsupported delegation type');
+      }
 
       const votesContract = new Contract(
-        contractAddress,
-        ['function delegate(address delegatee)'],
+        contractParams.address,
+        contractParams.abi,
         web3.getSigner()
       );
 
-      return votesContract.delegate(delegatee);
+      return votesContract[contractParams.functionName](
+        ...contractParams.functionParams
+      );
     },
-    updateStrategies: async (
+    updateSettings: async (
       web3: any,
       space: Space,
+      metadata: SpaceMetadata,
       authenticatorsToAdd: StrategyConfig[],
       authenticatorsToRemove: number[],
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
-      validationStrategy: StrategyConfig
+      validationStrategy: StrategyConfig,
+      votingDelay: number | null,
+      minVotingDuration: number | null,
+      maxVotingDuration: number | null
     ) => {
       await verifyNetwork(web3, chainId);
+
+      const pinned = await helpers.pin(
+        createErc1155Metadata(metadata, {
+          execution_strategies: space.executors,
+          execution_strategies_types: space.executors_types,
+          execution_destinations: space.executors_destinations
+        })
+      );
 
       const metadataUris = await Promise.all(
         votingStrategiesToAdd.map(config => buildMetadata(helpers, config))
@@ -593,6 +670,7 @@ export function createActions(
         signer: web3.getSigner(),
         space: space.id,
         settings: {
+          metadataUri: `ipfs://${pinned.cid}`,
           authenticatorsToAdd: authenticatorsToAdd.map(
             config => config.address
           ),
@@ -615,7 +693,12 @@ export function createActions(
               ? validationStrategy.generateParams(validationStrategy.params)[0]
               : '0x'
           },
-          proposalValidationStrategyMetadataUri
+          proposalValidationStrategyMetadataUri,
+          votingDelay: votingDelay !== null ? votingDelay : undefined,
+          minVotingDuration:
+            minVotingDuration !== null ? minVotingDuration : undefined,
+          maxVotingDuration:
+            maxVotingDuration !== null ? maxVotingDuration : undefined
         }
       });
     },

@@ -4,6 +4,7 @@ import { FunctionalComponent } from 'vue';
 import {
   Alias,
   Choice,
+  DelegationType,
   Follow,
   NetworkID,
   Proposal,
@@ -82,6 +83,7 @@ export type StrategyConfig = StrategyTemplate & {
 };
 
 export type ExecutionInfo = {
+  strategyType: string;
   strategyAddress: string;
   destinationAddress: string;
   treasuryName: string;
@@ -122,8 +124,12 @@ export type ReadOnlyNetworkActions = {
     connectorType: Connector,
     account: string,
     space: Space,
-    cid: string,
-    executionInfo: ExecutionInfo | null
+    title: string,
+    body: string,
+    discussion: string,
+    type: VoteType,
+    choices: string[],
+    executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
     web3: Web3Provider,
@@ -131,8 +137,12 @@ export type ReadOnlyNetworkActions = {
     account: string,
     space: Space,
     proposalId: number | string,
-    cid: string,
-    executionInfo: ExecutionInfo | null
+    title: string,
+    body: string,
+    discussion: string,
+    type: VoteType,
+    choices: string[],
+    executions: ExecutionInfo[] | null
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(
@@ -140,7 +150,8 @@ export type ReadOnlyNetworkActions = {
     connectorType: Connector,
     account: string,
     proposal: Proposal,
-    choice: Choice
+    choice: Choice,
+    reason: string
   ): Promise<any>;
   followSpace(
     web3: Web3Provider | Wallet,
@@ -210,19 +221,24 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     maxVotingDuration: number
   );
   transferOwnership(web3: Web3Provider, space: Space, owner: string);
-  updateStrategies(
+  updateSettings(
     web3: Web3Provider,
     space: Space,
+    metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
-    validationStrategy: StrategyConfig
+    validationStrategy: StrategyConfig,
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
   );
   delegate(
     web3: Web3Provider,
     space: Space,
     networkId: NetworkID,
+    delegationType: DelegationType,
     delegatee: string,
     delegationContract: string
   );
@@ -280,6 +296,11 @@ export type NetworkApi = {
     spaceId: string,
     userId: string
   ): Promise<Statement | null>;
+  loadStatements(
+    networkId: NetworkID,
+    spaceId: string,
+    userIds: string[]
+  ): Promise<Statement[]>;
 };
 
 export type NetworkConstants = {

@@ -202,15 +202,24 @@ watchEffect(() => setTitle('Create space'));
       </div>
       <div class="flex-1">
         <div class="mt-8 lg:mt-0">
-          <FormProfile
-            v-if="currentPage === 'profile'"
-            :form="metadataForm"
-            :treasuries-value="metadataForm.treasuries"
-            :delegations-value="metadataForm.delegations"
-            @treasuries="v => (metadataForm.treasuries = v)"
-            @delegations="v => (metadataForm.delegations = v)"
-            @errors="v => handleErrors('profile', v)"
-          />
+          <template v-if="currentPage === 'profile'">
+            <h3 class="mb-4">Space profile</h3>
+            <FormSpaceProfile
+              :form="metadataForm"
+              @errors="v => handleErrors('profile', v)"
+            />
+            <div class="s-box p-4 -mt-6">
+              <FormSpaceTreasuries
+                :treasuries-value="metadataForm.treasuries"
+                @treasuries="v => (metadataForm.treasuries = v)"
+              />
+              <FormSpaceDelegations
+                class="mt-2"
+                :delegations-value="metadataForm.delegations"
+                @delegations="v => (metadataForm.delegations = v)"
+              />
+            </div>
+          </template>
           <FormNetwork
             v-else-if="currentPage === 'network'"
             v-model="selectedNetworkId"
@@ -218,6 +227,7 @@ watchEffect(() => setTitle('Create space'));
           <FormStrategies
             v-else-if="currentPage === 'strategies'"
             v-model="votingStrategies"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
             "
@@ -228,6 +238,7 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'auths'"
             v-model="authenticators"
             unique
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_AUTHENTICATORS
             "
@@ -237,6 +248,7 @@ watchEffect(() => setTitle('Create space'));
           <FormValidation
             v-else-if="currentPage === 'validations'"
             v-model="validationStrategy"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS
             "
@@ -250,6 +262,7 @@ watchEffect(() => setTitle('Create space'));
           <FormStrategies
             v-else-if="currentPage === 'executions'"
             v-model="executionStrategies"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES
             "

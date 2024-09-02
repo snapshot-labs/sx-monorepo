@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { _vp, createErc1155Metadata } from './utils';
+import { _d, _vp, createErc1155Metadata } from './utils';
 
 describe('utils', () => {
   describe('_vp', () => {
@@ -83,6 +83,37 @@ describe('utils', () => {
           ]
         }
       });
+    });
+  });
+
+  describe('_d', () => {
+    it('formats full duration correctly', () => {
+      expect(_d(90061)).toBe('1d 1h 1m 1s');
+    });
+
+    it('omits zero values', () => {
+      expect(_d(86400)).toBe('1d');
+      expect(_d(3600)).toBe('1h');
+      expect(_d(60)).toBe('1m');
+      expect(_d(1)).toBe('1s');
+    });
+
+    it('handles large values', () => {
+      expect(_d(3666661)).toBe('42d 10h 31m 1s');
+    });
+
+    it('handles very large values', () => {
+      expect(_d(60 * 60 * 24 * 1001)).toBe('1001d');
+    });
+
+    it('returns empty string for zero', () => {
+      expect(_d(0)).toBe('');
+    });
+
+    it('handles edge cases', () => {
+      expect(_d(86399)).toBe('23h 59m 59s');
+      expect(_d(86400)).toBe('1d');
+      expect(_d(86401)).toBe('1d 1s');
     });
   });
 });

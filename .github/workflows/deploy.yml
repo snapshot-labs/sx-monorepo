@@ -23,7 +23,7 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Deploy if files have changed
-        run: ./scripts/deploy-changed.sh apps/api ${{ vars.DIGITALOCEAN_APP_ID }}
+        run: ./scripts/deploy-api-prod.sh
 
   deploy_api_testnet:
     name: Deploy API to testnet

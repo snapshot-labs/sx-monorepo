@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { sanitizeUrl, shorten } from '@/helpers/utils';
+import { buildBatchFile } from '@/helpers/safe/ build';
+import { getExecutionName } from '@/helpers/ui';
+import { sanitizeUrl, shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { NetworkID, ProposalExecution } from '@/types';
+import { NetworkID, Proposal, ProposalExecution } from '@/types';
 
-defineProps<{ executions: ProposalExecution[] }>();
+defineProps<{
+  proposal: Proposal;
+  executions: ProposalExecution[];
+}>();
 
 function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
   if (!safeAddress) return null;
@@ -16,6 +21,21 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
   } catch (e) {
     return null;
   }
+}
+
+function downloadExecution(execution: ProposalExecution) {
+  if (!execution.chainId) return;
+
+  const batchFile = buildBatchFile(execution.chainId, execution.transactions);
+
+  const blob = new Blob([JSON.stringify(batchFile)], {
+    type: 'application/json'
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `execution-${execution.safeAddress}.json`;
+  a.click();
 }
 </script>
 
@@ -31,7 +51,7 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
         undefined
       "
       target="_blank"
-      class="flex justify-between items-center px-4 py-3 border-b"
+      class="flex justify-between items-center px-4 py-3"
       :class="{
         'pointer-events-none': !getTreasuryExplorerUrl(
           execution.networkId,
@@ -54,15 +74,47 @@ function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
         />
         <div
           class="text-skin-text text-[17px]"
-          v-text="shorten(execution.safeAddress)"
+          v-text="
+            getExecutionName(execution.networkId, execution.strategyType) ||
+            shorten(execution.safeAddress)
+          "
         />
       </div>
     </a>
+    <div class="flex justify-between items-center border-y pr-3">
+      <UiLabel label="Transactions" class="border-b-0" />
+      <UiTooltip
+        v-if="execution.strategyType === 'ReadOnlyExecution'"
+        title="Export transactions"
+      >
+        <button
+          type="button"
+          class="hover:text-skin-link p-2"
+          @click="downloadExecution(execution)"
+        >
+          <IS-arrow-down-tray />
+        </button>
+      </UiTooltip>
+    </div>
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"
+      :network-id="execution.networkId"
       :tx="tx"
-      class="border-b last:border-b-0 px-4 py-3 space-x-2 flex items-center justify-between"
+    />
+    <ProposalExecutionActions
+      v-if="
+        proposal.executions &&
+        proposal.executions.length > 0 &&
+        proposal.scores.length > 0 &&
+        toBigIntOrNumber(proposal.scores_total) >=
+          toBigIntOrNumber(proposal.quorum) &&
+        toBigIntOrNumber(proposal.scores[0]) >
+          toBigIntOrNumber(proposal.scores[1]) &&
+        proposal.has_execution_window_opened
+      "
+      :proposal="proposal"
+      :execution="execution"
     />
   </div>
 </template>

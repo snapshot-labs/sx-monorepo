@@ -1,5 +1,27 @@
 # @snapshot-labs/sx
 
+## 0.1.3
+
+### Patch Changes
+
+- bc7102e: add updateUser to OffchainEthereumSig
+- 9c23d46: use contract to map timestamp to block number in storage proof strategies instead of API
+- e088ca6: add domain and types to starknet/starknet-sig envelope
+- f49adac: add Axiom and Isokratia strategies to execution strategies instead of voting strategies
+- e088ca6: always return padded addresses in starknet/starknet-sig envelope
+- 76f59c6: overestimate fee when using nonce in StarknetTx client
+- bde32f6: support on-chain voting with Safe using relayer
+- b603a6e: add nonce management to execute call
+- b603a6e: remove deploy method from L1Executor
+- bdd30ea: add space follow and unfollow support for OffchainEthereumSig
+- 480d578: add support for statement edition when aliased from a starknet account
+- e088ca6: add support for sending starknet signed message to offchain/ethereum-sig
+- f525474: add feeEstimateOverride to networkConfig
+- 6c95391: add updateStatement to offchain ethereum-sig
+- 7c922d4: update EthRelayer to work with latest contracts
+- ffb185d: add setAlias to OffchainEthereumSig
+- e088ca6: add setAlias to starknet/starknet-sig
+
 ## 0.1.2
 
 ### Patch Changes
