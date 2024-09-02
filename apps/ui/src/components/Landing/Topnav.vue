@@ -9,8 +9,8 @@
     <ul
       class="hidden md:flex text-md text-skin-link space-x-3 mx-auto py-2 mr-6"
     >
-      <li>Features</li>
-      <li>Ecosystem</li>
+      <li><router-link to="#features">Features</router-link></li>
+      <li><router-link to="#ecosystem">Ecosystem</router-link></li>
       <li>Developers</li>
       <li>
         <a href="https://snapshot.mirror.xyz" target="_blank"> Blog </a>

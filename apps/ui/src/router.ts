@@ -140,8 +140,7 @@ const router = createRouter({
     if (savedPosition) return savedPosition;
     if (to.params.retainScrollPosition) return {};
     if (to.hash) {
-      const position = { selector: to.hash };
-      return { el: position };
+      return { el: to.hash, behavior: 'smooth' };
     }
     return { top: 0 };
   }
