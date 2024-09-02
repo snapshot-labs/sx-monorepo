@@ -33,6 +33,10 @@ const replyUrl = computed(() =>
 
 const discussion = computed(() => sanitizeUrl(discussionsUrl.value));
 
+watchEffect(() =>
+  setTitle(`${topic.value?.title || 'Discussions'} - ${props.space.name}`)
+);
+
 onMounted(async () => {
   try {
     loading.value = true;
@@ -44,9 +48,6 @@ onMounted(async () => {
     console.error(e);
   }
 });
-watchEffect(() =>
-  setTitle(`${topic.value?.title || 'Discussions'} - ${props.space.name}`)
-);
 </script>
 
 <template>
