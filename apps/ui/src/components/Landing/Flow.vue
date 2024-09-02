@@ -40,13 +40,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts"></script>
-<style lang="scss" scoped>
-.arrow {
-  @apply px-4 pt-5 pb-8 rounded-md;
-  background-repeat: no-repeat;
-  background-position: bottom 24px right;
-  background-image: url('@/assets/arrow.svg');
-}
-</style>
