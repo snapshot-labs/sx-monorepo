@@ -68,7 +68,7 @@ const FEATURES = [
 </script>
 
 <template>
-  <div class="pt-8 border-b">
+  <div id="features" class="pt-8 border-b">
     <UiContainer class="!max-w-[1060px]">
       <div class="pb-6 max-w-[600px]">
         <div class="eyebrow mb-3">Features</div>

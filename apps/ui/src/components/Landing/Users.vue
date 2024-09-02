@@ -69,17 +69,30 @@ const ORGS = [
         <div
           class="absolute z-10 top-0 bottom-0 right-0 w-[320px] max-w-[20%] bg-gradient-to-l from-skin-bg to-skin-bg/0"
         />
-        <div class="relative overflow-hidden h-[60px]">
-          <div class="carousel flex space-x-6 justify-center">
+        <div class="relative flex overflow-hidden h-[60px]">
+          <div class="carousel flex">
             <router-link
-              v-for="(org, i) in [...ORGS, ...ORGS]"
+              v-for="(org, i) in ORGS"
               :key="i"
               :to="{ name: 'space-overview', params: { id: `s:${org}` } }"
-              class="shrink-0"
+              class="w-[56px] h-[56px] ml-6"
             >
               <img
                 :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
-                class="w-[56px] h-[56px] rounded-full"
+                class="rounded-full"
+              />
+            </router-link>
+          </div>
+          <div class="carousel-follower flex">
+            <router-link
+              v-for="(org, i) in ORGS"
+              :key="i"
+              :to="{ name: 'space-overview', params: { id: `s:${org}` } }"
+              class="w-[56px] h-[56px] ml-6"
+            >
+              <img
+                :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
+                class="rounded-full"
               />
             </router-link>
           </div>
@@ -90,8 +103,16 @@ const ORGS = [
 </template>
 
 <style lang="scss" scoped>
+$duration: 90s;
+
 .carousel {
-  animation: slide 30s linear infinite;
+  animation: slide $duration linear infinite;
+  animation-delay: calc($duration * -1);
+}
+
+.carousel-follower {
+  animation: slide-follower $duration linear infinite;
+  animation-delay: calc($duration / -2);
 }
 
 @keyframes slide {
@@ -100,6 +121,15 @@ const ORGS = [
   }
   100% {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-follower {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-200%);
   }
 }
 </style>
