@@ -49,6 +49,11 @@ module.exports = {
       },
       animation: {
         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+      },
+      gridTemplateColumns: {
+        'explore-3': 'repeat(3, minmax(0, 230px))',
+        'explore-4': 'repeat(4, minmax(0, 230px))',
+        'explore-5': 'repeat(5, minmax(0, 230px))'
       }
     },
     screens: {
