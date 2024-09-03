@@ -9,14 +9,16 @@ const { toggleSkin, currentMode } = useUserSkin();
     <div class="grow">
       <router-link
         :to="{ name: 'landing' }"
-        class="text-[26px] text-skin-link flex items-center space-x-2.5"
+        class="text-[26px] text-skin-link inline-block"
       >
-        <img
-          src="@/assets/snapshot.svg"
-          alt="Snapshot"
-          class="w-[24px] relative top-[2px]"
-        />
-        <span>snapshot</span>
+        <div class="flex items-center space-x-2.5">
+          <img
+            src="@/assets/snapshot.svg"
+            alt="Snapshot"
+            class="w-[24px] relative top-[2px]"
+          />
+          <span>snapshot</span>
+        </div>
       </router-link>
     </div>
     <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
@@ -40,7 +42,7 @@ const { toggleSkin, currentMode } = useUserSkin();
         <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
-      <router-link :to="{ name: 'my-home' }">
+      <router-link :to="{ name: 'my-home' }" tabindex="-1">
         <UiButton class="primary">
           Launch
           <span class="hidden md:inline-block">app</span>
