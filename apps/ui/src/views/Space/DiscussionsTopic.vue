@@ -69,19 +69,16 @@ onMounted(async () => await loadTopic());
 </script>
 
 <template>
-  <div>
-    <div v-if="loading" class="p-4">
+  <div class="px-4 py-3">
+    <div v-if="loading">
       <UiLoading />
     </div>
-    <div
-      v-else-if="failed"
-      class="px-4 py-3 flex items-center text-skin-link space-x-2"
-    >
+    <div v-else-if="failed" class="flex items-center text-skin-link space-x-2">
       <IH-exclamation-circle class="shrink-0" />
       <span>Error while loading the topic.</span>
     </div>
-    <div v-else-if="loaded" class="px-4 pt-5">
-      <h1 class="max-w-[680px] mx-auto text-[40px] leading-[1.1em]">
+    <div v-else-if="loaded">
+      <h1 class="text-[40px] leading-[1.1em]">
         {{ topic?.title }}
       </h1>
       <div
@@ -89,13 +86,9 @@ onMounted(async () => await loadTopic());
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
-        <DiscussionTopicItem
-          :reply="reply"
-          :discussion="discussion"
-          class="max-w-[680px] mx-auto"
-        />
+        <DiscussionTopicItem :reply="reply" :discussion="discussion" />
       </div>
-      <div class="mt-6 max-w-[680px] mx-auto">
+      <div class="mt-6">
         <a :href="replyUrl" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <IC-discourse class="size-[22px] shrink-0" />
