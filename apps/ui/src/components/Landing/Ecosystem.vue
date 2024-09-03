@@ -6,7 +6,7 @@
         <h1 class="mb-5 mono !text-[44px]">
           Supercharge your governance with ecosystem integrations
         </h1>
-        <router-link to="apps">
+        <router-link to="apps" tabindex="-1">
           <UiButton>Explore integrations</UiButton>
         </router-link>
       </div>
