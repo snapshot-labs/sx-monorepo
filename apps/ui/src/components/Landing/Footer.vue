@@ -41,7 +41,7 @@ const SOCIALS = [
               </a>
             </div>
             <div>
-              <router-link :to="{ name: 'apps' }"> Ecosystem </router-link>
+              <router-link :to="{ name: 'ecosystem' }"> Ecosystem </router-link>
             </div>
             <div>
               <router-link :to="{ name: 'network' }"> Add network </router-link>
