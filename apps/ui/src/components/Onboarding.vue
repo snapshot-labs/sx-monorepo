@@ -30,8 +30,8 @@ const hasPendingTasks = computed(() =>
 watch(
   hasPendingTasks,
   value => {
-    lsSet('onboarding', {
-      ...lsGet('onboarding'),
+    lsSet('showOnboarding', {
+      ...lsGet('showOnboarding'),
       [web3.value.account]: !value ? false : undefined
     });
   },
@@ -39,7 +39,7 @@ watch(
 );
 
 onMounted(async () => {
-  const pending = lsGet('onboarding')?.[web3.value.account] ?? true;
+  const pending = lsGet('showOnboarding')?.[web3.value.account] ?? true;
   if (pending && web3.value.account)
     await usersStore.fetchUser(web3.value.account, true);
 });
