@@ -24,67 +24,67 @@ const SOCIALS = [
 
 <template>
   <div class="pt-6 pb-5">
-    <UiContainer class="!max-w-screen-lg space-y-7">
-      <div class="grid grid-cols-4">
-        <div class="space-y-2">
+    <UiContainer class="!max-w-screen-lg space-y-5 md:space-y-7">
+      <div class="flex flex-wrap">
+        <div class="space-y-2 basis-1/2 md:basis-1/4 sm:basis-1/3">
           <div class="eyebrow">Learn more</div>
-          <div class="space-y-1">
-            <div>
+          <ul class="space-y-1">
+            <li>
               <a href="https://docs.snapshot.box" target="_blank">
                 Documentation
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
-            </div>
-            <div>
+            </li>
+            <li>
               <a href="https://github.com/snapshot-labs/sx-evm" target="_blank">
                 Core contracts
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
-        <div class="space-y-2">
+        <div class="space-y-2 basis-1/2 md:basis-1/4 sm:basis-1/3">
           <div class="eyebrow">Resources</div>
-          <div class="space-y-1">
-            <div>
+          <ul class="space-y-1">
+            <li>
               <a href="https://help.snapshot.org" target="_blank">
-                Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
+                Helpdesk
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
-            </div>
-            <div>
+            </li>
+            <li>
               <a
                 href="https://docs.snapshot.box/protocol-sx-evm/audits"
                 target="_blank"
               >
                 Audits <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
-            </div>
-            <div>
+            </li>
+            <li>
               <a
                 href="https://docs.snapshot.box/services/sx.js"
                 target="_blank"
               >
                 SX.js <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
-            </div>
-            <div>
+            </li>
+            <li>
               <a
                 :href="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
                 target="_blank"
               >
-                Version {{ version
-                }}<span
-                  v-if="COMMIT_SHA"
-                  v-text="`#${COMMIT_SHA.slice(0, 7)}`"
-                />
+                Version {{ version }}
+                <span v-if="COMMIT_SHA" v-text="`#${COMMIT_SHA.slice(0, 7)}`" />
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
-        <div class="space-y-2 col-span-2 text-right">
-          <div class="eyebrow">Join the community</div>
-          <div class="flex space-x-2.5 float-right">
+        <div
+          class="space-y-2 text-right basis-full mt-5 sm:mt-0 md:basis-2/4 sm:basis-1/3"
+        >
+          <div class="eyebrow hidden sm:block">Join the community</div>
+          <div class="flex space-x-2.5 justify-center sm:justify-end">
             <a
               v-for="social in SOCIALS"
               :key="social.href"
@@ -97,7 +97,9 @@ const SOCIALS = [
           </div>
         </div>
       </div>
-      <div>© {{ new Date().getFullYear() }} Snapshot Labs</div>
+      <div class="text-center sm:text-start">
+        © {{ new Date().getFullYear() }} Snapshot Labs
+      </div>
     </UiContainer>
   </div>
 </template>
