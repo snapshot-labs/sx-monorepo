@@ -58,7 +58,7 @@ watchEffect(() => setTitle('Explore'));
     <div v-else-if="spacesStore.loaded">
       <div
         v-if="spacesStore.explorePageSpaces.length"
-        class="max-w-screen-md mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3"
+        class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3 mb-3"
       >
         <UiContainerInfiniteScroll
           :loading-more="spacesStore.loadingMore"
