@@ -1,11 +1,13 @@
 <template>
   <div
-    class="relative flex justify-center min-h-[600px] pt-[80px] items-center border-b"
+    class="relative flex justify-center min-h-[600px] pt-[94px] items-center border-b"
   >
     <div
       class="absolute blocks top-0 left-[50%] right-0 bottom-0 !bg-left-top border-l"
     />
-    <UiContainer class="relative w-full !max-w-[1060px] flex items-center py-8">
+    <UiContainer
+      class="relative w-full !max-w-screen-lg flex items-center py-8"
+    >
       <div class="max-w-[560px]">
         <div
           class="absolute top-[200px] right-[300px] space-y-4 text-center font-bold"

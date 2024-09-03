@@ -3,23 +3,23 @@ const { toggleSkin, currentMode } = useUserSkin();
 </script>
 
 <template>
-  <div class="px-6 py-4 flex justify-center absolute z-10 left-0 right-0">
-    <div class="mt-0.5 flex-grow">
+  <div
+    class="p-4 lg:px-6 flex justify-center items-center absolute z-10 left-0 right-0"
+  >
+    <div class="grow">
       <router-link
         :to="{ name: 'landing' }"
-        class="text-[26px] text-skin-link items-center space-x-2.5"
+        class="text-[26px] text-skin-link flex items-center space-x-2.5"
       >
         <img
           src="@/assets/snapshot.svg"
           alt="Snapshot"
-          class="w-[24px] inline-block"
+          class="w-[24px] relative top-[2px]"
         />
-        <span class="inline-block mb-1">snapshot</span>
+        <span>snapshot</span>
       </router-link>
     </div>
-    <ul
-      class="hidden lg:flex text-md text-skin-link space-x-4 mx-auto py-2 mr-6"
-    >
+    <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
       <li><router-link to="#features">Features</router-link></li>
       <li><router-link to="#ecosystem">Ecosystem</router-link></li>
       <li>
@@ -41,9 +41,10 @@ const { toggleSkin, currentMode } = useUserSkin();
         <IH-moon v-else class="inline-block" />
       </UiButton>
       <router-link :to="{ name: 'my-home' }">
-        <UiButton class="primary"
-          >Launch <span class="hidden md:inline-block">app</span></UiButton
-        >
+        <UiButton class="primary">
+          Launch
+          <span class="hidden md:inline-block">app</span>
+        </UiButton>
       </router-link>
     </div>
   </div>
