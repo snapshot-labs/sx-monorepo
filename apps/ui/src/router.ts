@@ -53,7 +53,7 @@ const routes: any[] = [
       },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       {
-        path: 'settings',
+        path: 'settings/:tab?',
         name: 'space-settings',
         component: SpaceSettings
       },
