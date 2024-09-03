@@ -281,10 +281,10 @@ Any dispute arising out of or in conjunction with these Terms shall be submitted
 </script>
 
 <template>
-  <div>
-    <UiContainer class="!max-w-screen-md py-6">
+  <div class="py-12">
+    <UiContainer class="!max-w-screen-md pt-6">
       <div class="mb-6">
-        <h1 class="font-display">Terms of use</h1>
+        <h1 class="font-display mb-2">Terms of use</h1>
         <div>Last updated: 1 August 2024</div>
       </div>
       <UiMarkdown :body="terms" />

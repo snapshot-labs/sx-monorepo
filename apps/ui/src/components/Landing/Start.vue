@@ -1,5 +1,5 @@
 <template>
-  <div class="py-9 border-b flex items-center justify-center relative">
+  <div class="py-9 flex items-center justify-center relative">
     <div
       class="absolute blocks-x top-0 right-[50%] left-0 bottom-0 !bg-right-top -z-10"
     />
@@ -14,4 +14,3 @@
     </UiContainer>
   </div>
 </template>
-<script setup lang="ts"></script>

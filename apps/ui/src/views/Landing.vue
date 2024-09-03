@@ -1,6 +1,5 @@
 <template>
-  <div class="!mt-0 -mb-6 relative">
-    <LandingTopnav />
+  <div class="relative">
     <LandingHero />
     <LandingUsers />
     <LandingCounter />
@@ -8,6 +7,5 @@
     <LandingFeatures />
     <LandingEcosystem />
     <LandingStart />
-    <LandingFooter />
   </div>
 </template>

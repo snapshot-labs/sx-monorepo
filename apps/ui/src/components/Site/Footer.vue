@@ -23,7 +23,7 @@ const SOCIALS = [
 </script>
 
 <template>
-  <div class="pt-6 pb-5">
+  <div class="pt-6 pb-5 border-t">
     <UiContainer class="!max-w-screen-lg space-y-7">
       <div class="grid grid-col-2 md:grid-cols-4 space-y-4 md:space-y-0">
         <div class="space-y-2">
@@ -41,10 +41,14 @@ const SOCIALS = [
               </a>
             </div>
             <div>
-              <router-link :to="{ name: 'ecosystem' }"> Ecosystem </router-link>
+              <router-link :to="{ name: 'site-ecosystem' }">
+                Ecosystem
+              </router-link>
             </div>
             <div>
-              <router-link :to="{ name: 'network' }"> Add network </router-link>
+              <router-link :to="{ name: 'site-network' }">
+                Add network
+              </router-link>
             </div>
           </div>
         </div>
@@ -96,10 +100,12 @@ const SOCIALS = [
         <div class="space-y-2">
           <div class="eyebrow">Company</div>
           <div>
-            <router-link :to="{ name: 'terms' }">Terms of use</router-link>
+            <router-link :to="{ name: 'site-terms' }">Terms of use</router-link>
           </div>
           <div>
-            <router-link :to="{ name: 'policy' }">Privacy policy</router-link>
+            <router-link :to="{ name: 'site-policy' }"
+              >Privacy policy</router-link
+            >
           </div>
           <div>
             <a class="intercom-launcher" target="_blank"> Contact us </a>

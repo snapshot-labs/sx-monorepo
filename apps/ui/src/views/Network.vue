@@ -95,11 +95,11 @@ function toggleQuestion(id) {
 watchEffect(() => setTitle('Network'));
 </script>
 <template>
-  <div class="space-y-[80px] mb-8 blocks">
+  <div class="space-y-[80px] pt-12 mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
         <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[46px]">
-          Unlock governance for your ecosystem.
+          Unlock governance for your ecosystem
         </h1>
         <a
           :href="LINK"

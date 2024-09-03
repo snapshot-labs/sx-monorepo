@@ -8,7 +8,7 @@ const { toggleSkin, currentMode } = useUserSkin();
   >
     <div class="grow">
       <router-link
-        :to="{ name: 'landing' }"
+        :to="{ name: 'site-landing' }"
         class="text-[26px] text-skin-link inline-block"
       >
         <div class="flex items-center space-x-2.5">
@@ -22,8 +22,8 @@ const { toggleSkin, currentMode } = useUserSkin();
       </router-link>
     </div>
     <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
-      <li><router-link to="#features">Features</router-link></li>
-      <li><router-link to="#ecosystem">Ecosystem</router-link></li>
+      <li><router-link to="/#features">Features</router-link></li>
+      <li><router-link to="/#ecosystem">Ecosystem</router-link></li>
       <li>
         <a href="https://docs.snapshot.org" target="_blank">
           Developers

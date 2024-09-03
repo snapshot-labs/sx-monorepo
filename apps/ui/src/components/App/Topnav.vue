@@ -45,10 +45,6 @@ const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
 
-const showLogo = computed(() =>
-  ['landing', 'ecosystem'].includes(String(route.matched[0]?.name))
-);
-
 async function handleLogin(connector) {
   modalAccountOpen.value = false;
   loading.value = true;
@@ -82,7 +78,6 @@ watch(
 
 <template>
   <nav
-    v-if="route.name !== 'landing'"
     class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px] flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
     :class="{
       'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
@@ -104,7 +99,6 @@ watch(
       </button>
 
       <Breadcrumb
-        v-if="!showLogo"
         :class="[
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
@@ -112,14 +106,6 @@ watch(
       >
       </Breadcrumb>
     </div>
-    <router-link
-      v-if="showLogo"
-      :to="{ path: '/' }"
-      class="truncate grow"
-      style="font-size: 24px"
-    >
-      snapshot
-    </router-link>
     <form
       v-if="searchConfig"
       id="search-form"

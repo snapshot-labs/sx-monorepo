@@ -102,10 +102,10 @@ Due to continuous development of our website/platform and the contents thereof, 
 </script>
 
 <template>
-  <div>
-    <UiContainer class="!max-w-screen-md py-6">
+  <div class="py-12">
+    <UiContainer class="!max-w-screen-md pt-6">
       <div class="mb-6">
-        <h1 class="font-display">Privacy policy</h1>
+        <h1 class="font-display mb-2">Privacy policy</h1>
         <div>Last updated: 9 August 2024</div>
       </div>
       <UiMarkdown :body="terms" />

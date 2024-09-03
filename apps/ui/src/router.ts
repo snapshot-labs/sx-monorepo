@@ -16,6 +16,7 @@ import Proposal from '@/views/Proposal.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
+import Site from '@/views/Site.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
 import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
@@ -35,7 +36,19 @@ import Topic from '@/views/Topic.vue';
 import User from '@/views/User.vue';
 
 const routes: any[] = [
-  { path: '/', name: 'landing', component: Landing },
+  {
+    path: '/',
+    name: 'site',
+    component: Site,
+    children: [
+      { path: '', name: 'site-landing', component: Landing },
+      { path: '/network', name: 'site-network', component: Network },
+      { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
+      { path: '/ecosystem/:id', name: 'site-app', component: App },
+      { path: '/terms-of-use', name: 'site-terms', component: Terms },
+      { path: '/privacy-policy', name: 'site-policy', component: Policy }
+    ]
+  },
   {
     path: '/:id',
     name: 'space',
@@ -134,13 +147,7 @@ const routes: any[] = [
       },
       { path: '/profile/:id', name: 'user', component: User }
     ]
-  },
-  { path: '/network', name: 'network', component: Network },
-  { path: '/ecosystem', name: 'ecosystem', component: Ecosystem },
-  { path: '/ecosystem/:id', name: 'app', component: App },
-  { path: '/network', name: 'network', component: Network },
-  { path: '/terms-of-use', name: 'terms', component: Terms },
-  { path: '/privacy-policy', name: 'policy', component: Policy }
+  }
 ];
 
 const router = createRouter({
