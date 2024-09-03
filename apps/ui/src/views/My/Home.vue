@@ -114,7 +114,7 @@ watch(
   [() => web3.value.account, () => web3.value.authLoading],
   ([account, authLoading]) => {
     if (!account && !authLoading) {
-      router.push({ name: 'my-explore' });
+      router.replace({ name: 'my-explore' });
     }
   },
   { immediate: true }
