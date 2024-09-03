@@ -9,6 +9,7 @@ const PROPOSALS_LIMIT = 20;
 
 useTitle('Home');
 
+const router = useRouter();
 const metaStore = useMetaStore();
 const followedSpacesStore = useFollowedSpacesStore();
 const { web3 } = useWeb3();
@@ -108,9 +109,20 @@ watch(
 watch(state, (toState, fromState) => {
   if (toState !== fromState && web3.value.account) fetch();
 });
+
+watch(
+  [() => web3.value.account, () => web3.value.authLoading],
+  ([account, authLoading]) => {
+    if (!account && !authLoading) {
+      router.push({ name: 'my-explore' });
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
+  <Onboarding />
   <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown

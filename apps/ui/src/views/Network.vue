@@ -98,7 +98,7 @@ watchEffect(() => setTitle('Network'));
   <div class="space-y-[80px] mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
-        <h1 class="mb-6 mono max-w-[600px] mx-auto">
+        <h1 class="mb-6 mono max-w-[600px] mx-auto text-[56px]">
           Unlock governance for your ecosystem.
         </h1>
         <a
@@ -204,7 +204,7 @@ watchEffect(() => setTitle('Network'));
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
         <button
           type="button"
-          class="flex items-center"
+          class="flex items-center w-full text-left"
           @click="toggleQuestion(i)"
         >
           <h3 class="py-3 flex-auto">

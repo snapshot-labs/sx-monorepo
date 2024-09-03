@@ -73,6 +73,8 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
+  if (route.name === 'landing') return;
+
   if (
     sidebarSwipeEnabled.value &&
     isSwiping.value &&

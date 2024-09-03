@@ -78,12 +78,12 @@ const FEATURES = [
       </div>
     </UiContainer>
     <div class="border-t">
-      <UiContainer class="!max-w-screen-lg">
-        <div class="grid grid-cols-1 lg:grid-cols-3 -mx-4">
+      <UiContainer class="!max-w-screen-lg !px-0">
+        <div class="grid grid-cols-1 lg:grid-cols-3">
           <div
             v-for="(feature, i) in FEATURES"
             :key="i"
-            class="px-4 py-5 md:h-[260px] border-b last:border-b-0 border-r-0 lg:border-r lg:[&:nth-child(3n)]:border-r-0 lg:[&:nth-child(n+7)]:border-b-0"
+            class="px-4 py-5 lg:h-[260px] border-b last:border-b-0 border-r-0 lg:border-r lg:[&:nth-child(3n)]:border-r-0 lg:[&:nth-child(n+7)]:border-b-0"
           >
             <component
               :is="feature.icon"

@@ -46,7 +46,9 @@ const cb = computed(() => getCacheHash(props.space.cover));
   @apply object-cover w-full h-full;
 
   &::after {
-    @apply absolute h-full w-full pointer-events-none;
+    // NOTE: Width and height are scaled up so that blur will always cover underlying images
+    // At certain cizes we get 1px that is not blured
+    @apply absolute h-[101%] w-[101%] pointer-events-none;
 
     content: '';
     backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);

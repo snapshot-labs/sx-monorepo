@@ -78,6 +78,7 @@
     "starknetkit": "^1.1.9",
     "stream-browserify": "^3.0.0",
     "tippy.js": "^6.3.7",
+    "turndown": "^7.2.0",
     "unplugin-auto-import": "^0.16.6",
     "util": "^0.12.5",
     "vue": "^3.4.15",

@@ -69,13 +69,14 @@ const ORGS = [
         <div
           class="absolute z-10 top-0 bottom-0 right-0 w-[320px] max-w-[20%] bg-gradient-to-l from-skin-bg to-skin-bg/0"
         />
-        <div class="relative flex overflow-hidden h-[60px]">
+        <div class="relative flex overflow-hidden h-[56px]">
           <div class="carousel flex">
             <router-link
               v-for="(org, i) in ORGS"
               :key="i"
               :to="{ name: 'space-overview', params: { id: `s:${org}` } }"
-              class="w-[56px] h-[56px] ml-6"
+              class="size-[56px] ml-6"
+              tabindex="-1"
             >
               <img
                 :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
@@ -88,7 +89,8 @@ const ORGS = [
               v-for="(org, i) in ORGS"
               :key="i"
               :to="{ name: 'space-overview', params: { id: `s:${org}` } }"
-              class="w-[56px] h-[56px] ml-6"
+              class="size-[56px] ml-6"
+              tabindex="-1"
             >
               <img
                 :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
