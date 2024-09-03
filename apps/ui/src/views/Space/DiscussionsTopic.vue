@@ -77,7 +77,7 @@ onMounted(async () => await loadTopic());
       <IH-exclamation-circle class="shrink-0" />
       <span>Error while loading the topic.</span>
     </div>
-    <div v-else-if="loaded">
+    <div v-else-if="loaded" class="max-w-[680px]">
       <h1 class="text-[40px] leading-[1.1em]">
         {{ topic?.title }}
       </h1>
