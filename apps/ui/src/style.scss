@@ -253,11 +253,21 @@ input:placeholder-shown {
 
 .blocks {
   background-repeat: repeat-x;
+  background-position: top -40px center;
+  background-image: url('@/assets/blocks-light.svg');
+}
+
+.dark .blocks {
+  background-image: url('@/assets/blocks-dark.svg');
+}
+
+.blocks-x {
+  background-repeat: repeat-x;
   background-position: top center;
   background-image: url('@/assets/blocks-x-light.svg');
 }
 
-.dark .blocks {
+.dark .blocks-x {
   background-image: url('@/assets/blocks-x-dark.svg');
 }
 
