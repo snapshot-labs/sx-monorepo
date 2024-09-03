@@ -31,11 +31,11 @@ onMounted(async () => {
   <div>
     <div v-if="discussion" class="p-4 bg-skin-bg border-b">
       <div class="max-w-[680px] mx-auto">
-        <a :href="discussion" target="_blank">
+        <a :href="discussion" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
-            <IC-discourse class="size-[22px]" />
+            <IC-discourse class="size-[22px] shrink-0" />
             Join the discussion
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
+            <IH-arrow-sm-right class="-rotate-45 shrink-0" />
           </UiButton>
         </a>
       </div>
@@ -50,15 +50,15 @@ onMounted(async () => {
         class="py-4 border-b last:border-b-0"
       >
         <div class="max-w-[680px] mx-auto">
-          <div class="flex">
+          <div class="flex gap-2.5 items-center">
             <a
               :href="reply.user_url"
               target="_blank"
-              class="w-[32px] h-[32px] shrink-0 mr-2.5 mt-0.5"
+              class="shrink-0 rounded-full"
             >
               <img
                 :src="reply.avatar_template"
-                class="rounded-full inline-block bg-skin-border w-[32px] h-[32px]"
+                class="rounded-full bg-skin-border size-[32px]"
               />
             </a>
             <div class="flex flex-col leading-4 gap-1">
@@ -73,13 +73,13 @@ onMounted(async () => {
             <UiMarkdown class="text-md py-3" :body="toMarkdown(reply.cooked)" />
             <div class="text-sm space-x-2.5 flex">
               <div class="items-center flex gap-1">
-                <IH-thumb-up class="inline-block" /> {{ reply.like_count }}
+                <IH-thumb-up /> {{ reply.like_count }}
               </div>
               <div class="items-center flex gap-1">
-                <IH-annotation class="inline-block" /> {{ reply.reply_count }}
+                <IH-annotation /> {{ reply.reply_count }}
               </div>
               <div class="items-center flex gap-1">
-                <IH-eye class="inline-block" /> {{ reply.reads }}
+                <IH-eye /> {{ reply.reads }}
               </div>
             </div>
           </div>
