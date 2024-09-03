@@ -72,7 +72,7 @@ const FEATURES = [
     <UiContainer class="!max-w-screen-lg">
       <div class="pb-6 max-w-[600px]">
         <div class="eyebrow mb-3">Features</div>
-        <h1 class="mb-4 mono !text-[44px]">
+        <h1 class="mb-4 font-display !text-[44px]">
           Everything DAOs need to make better decisions together
         </h1>
       </div>
@@ -90,7 +90,7 @@ const FEATURES = [
               class="text-skin-link size-[22px] mb-4"
             />
             <h3
-              class="text-skin-link disp !text-[18px] mb-2"
+              class="text-skin-link font-heading !text-[18px] mb-2"
               v-text="feature.title"
             />
             <div v-text="feature.about" />
