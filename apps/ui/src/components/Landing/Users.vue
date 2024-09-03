@@ -103,7 +103,7 @@ const ORGS = [
 </template>
 
 <style lang="scss" scoped>
-$duration: 90s;
+$duration: 180s;
 
 .carousel {
   animation: slide $duration linear infinite;

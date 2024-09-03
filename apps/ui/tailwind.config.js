@@ -81,7 +81,6 @@ module.exports = {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
     },
     fontSize: {
-      '2xl': ['34px'],
       xl: ['28px'],
       lg: ['22px'],
       md: ['20px'],
