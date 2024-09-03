@@ -25,8 +25,10 @@ const SOCIALS = [
 <template>
   <div class="pt-6 pb-5">
     <UiContainer class="!max-w-screen-lg space-y-5 md:space-y-7">
-      <div class="flex flex-wrap">
-        <div class="space-y-2 basis-1/2 md:basis-1/4 sm:basis-1/3">
+      <div class="flex flex-wrap gap-y-5">
+        <div
+          class="space-y-2 basis-1/2 text-center sm:text-left md:basis-1/4 sm:basis-1/3"
+        >
           <div class="eyebrow">Learn more</div>
           <ul class="space-y-1">
             <li>
@@ -43,7 +45,9 @@ const SOCIALS = [
             </li>
           </ul>
         </div>
-        <div class="space-y-2 basis-1/2 md:basis-1/4 sm:basis-1/3">
+        <div
+          class="space-y-2 basis-1/2 text-center sm:text-left md:basis-1/4 sm:basis-1/3"
+        >
           <div class="eyebrow">Resources</div>
           <ul class="space-y-1">
             <li>
@@ -80,9 +84,7 @@ const SOCIALS = [
             </li>
           </ul>
         </div>
-        <div
-          class="space-y-2 text-right basis-full mt-5 sm:mt-0 md:basis-2/4 sm:basis-1/3"
-        >
+        <div class="space-y-2 text-right basis-full md:basis-2/4 sm:basis-1/3">
           <div class="eyebrow hidden sm:block">Join the community</div>
           <div class="flex space-x-2.5 justify-center sm:justify-end">
             <a
