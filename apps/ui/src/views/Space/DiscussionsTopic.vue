@@ -56,13 +56,15 @@ onMounted(async () => {
       <UiLoading />
     </div>
     <div v-if="loaded" class="px-4 pl-6 pt-5">
-      <h1 class="text-[40px] leading-[1.1em]">{{ topic?.title }}</h1>
+      <h1 class="max-w-[680px] mx-auto text-[40px] leading-[1.1em]">
+        {{ topic?.title }}
+      </h1>
       <div
         v-for="(reply, i) in replies"
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
-        <div class="max-w-[680px]">
+        <div class="max-w-[680px] mx-auto">
           <div class="flex">
             <a
               :href="reply.user_url"
@@ -101,7 +103,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <div class="mt-6">
+      <div class="mt-6 max-w-[680px] mx-auto">
         <a :href="replyUrl" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <IC-discourse class="size-[22px] shrink-0" />
