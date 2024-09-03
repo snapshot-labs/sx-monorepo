@@ -1687,6 +1687,11 @@
     semver "^7.3.8"
     superstruct "^1.0.3"
 
+"@mixmark-io/domino@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@mixmark-io/domino/-/domino-2.2.0.tgz#4e8ec69bf1afeb7a14f0628b7e2c0f35bdb336c3"
+  integrity sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==
+
 "@motionone/animation@^10.15.1", "@motionone/animation@^10.17.0":
   version "10.17.0"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.17.0.tgz#7633c6f684b5fee2b61c405881b8c24662c68fca"
@@ -11369,6 +11374,11 @@ rehackt@0.0.5:
   resolved "https://registry.yarnpkg.com/rehackt/-/rehackt-0.0.5.tgz#184c82ea369d5b0b989ede0593ebea8b2bcfb1d6"
   integrity sha512-BI1rV+miEkaHj8zd2n+gaMgzu/fKz7BGlb4zZ6HAiY9adDmJMkaDcmuXlJFv0eyKUob+oszs3/2gdnXUrzx2Tg==
 
+remarkable-emoji@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/remarkable-emoji/-/remarkable-emoji-0.1.3.tgz#38c7dba14f725dbd2672686805ae7abb04432eb3"
+  integrity sha512-2Ls1rTm6SvBZoSNA3Op2rLTllgoL3oaT2mSQojuWPN3e+VldWXgBZ6AbMnF7HCDePWjoibcMoutVP21aj3iF0w==
+
 remarkable@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/remarkable/-/remarkable-2.0.1.tgz#280ae6627384dfb13d98ee3995627ca550a12f31"
@@ -12896,6 +12906,13 @@ turbo@^1.12.3:
     turbo-linux-arm64 "1.12.3"
     turbo-windows-64 "1.12.3"
     turbo-windows-arm64 "1.12.3"
+
+turndown@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/turndown/-/turndown-7.2.0.tgz#67d614fe8371fb511079a93345abfd156c0ffcf4"
+  integrity sha512-eCZGBN4nNNqM9Owkv9HAtWRYfLA4h909E/WGAWWBpmB275ehNhZyk87/Tpvjbp0jjNl9XwCsbe6bm6CqFsgD+A==
+  dependencies:
+    "@mixmark-io/domino" "^2.2.0"
 
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"

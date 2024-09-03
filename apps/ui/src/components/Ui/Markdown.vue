@@ -141,6 +141,7 @@ html.dark {
   }
 
   > *:last-child {
+    padding-bottom: 0 !important;
     margin-bottom: 0 !important;
   }
 
@@ -152,7 +153,17 @@ html.dark {
     color: inherit;
     text-decoration: none;
   }
+  img[alt^='discourse-emoji'] {
+    display: inline;
+    width: 20px;
+    height: 20px;
+  }
 
+  img[alt^='discourse-thumbnail'] {
+    display: inline;
+    width: 35px;
+    height: 35px;
+  }
   p,
   blockquote,
   ul,
@@ -217,6 +228,7 @@ html.dark {
   ul,
   ol {
     padding-left: 2em;
+    padding-bottom: 8px;
   }
 
   ul.no-list,

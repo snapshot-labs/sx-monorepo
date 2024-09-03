@@ -12,7 +12,7 @@ useTitle('Home');
 const router = useRouter();
 const metaStore = useMetaStore();
 const followedSpacesStore = useFollowedSpacesStore();
-const { web3, authInitiated } = useWeb3();
+const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
 
 const loaded = ref(false);
