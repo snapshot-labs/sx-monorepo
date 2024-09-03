@@ -16,7 +16,11 @@ const topic: Ref<Topic | null> = ref(null);
 const replies: Ref<Reply[]> = ref([]);
 const loading = ref(false);
 const loaded = ref(false);
+
+const route = useRoute();
 const { setTitle } = useTitle();
+
+const topicId = computed(() => route.params.topic as string);
 
 const discussionsUrl = computed(() => {
   return SPACES_DISCUSSIONS[
@@ -33,12 +37,9 @@ const replyUrl = computed(() =>
 
 const discussion = computed(() => sanitizeUrl(discussionsUrl.value));
 
-watchEffect(() =>
-  setTitle(`${topic.value?.title || 'Discussions'} - ${props.space.name}`)
-);
-
-onMounted(async () => {
+async function loadTopic() {
   try {
+    loaded.value = false;
     loading.value = true;
     topic.value = await loadSingleTopic(discussionsUrl.value || '');
     replies.value = await loadReplies(discussion.value || '');
@@ -47,7 +48,19 @@ onMounted(async () => {
   } catch (e) {
     console.error(e);
   }
+}
+
+watchEffect(() =>
+  setTitle(`${topic.value?.title || 'Discussions'} - ${props.space.name}`)
+);
+
+watch(topicId, async (newId, oldId) => {
+  if (newId == oldId) return;
+
+  await loadTopic();
 });
+
+onMounted(async () => await loadTopic());
 </script>
 
 <template>
