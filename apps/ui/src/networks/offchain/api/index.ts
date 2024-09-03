@@ -343,7 +343,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
       apiType: space.delegationPortal.delegationType,
       apiUrl: space.delegationPortal.delegationApi,
       contractNetwork: network,
-      contractAddress: `${network}:${space.delegationPortal.delegationContract}`
+      contractAddress: space.delegationPortal.delegationContract
     });
   }
 
