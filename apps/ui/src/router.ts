@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import App from '@/views/App.vue';
-import Apps from '@/views/Apps.vue';
 import Create from '@/views/Create.vue';
+import Ecosystem from '@/views/Ecosystem.vue';
 import Editor from '@/views/Editor.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
@@ -9,7 +9,6 @@ import Home from '@/views/My/Home.vue';
 import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
-import ProposalDiscussion from '@/views/Proposal/Discussion.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
 import Proposal from '@/views/Proposal.vue';
@@ -30,6 +29,7 @@ import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
+import Topic from '@/views/Topic.vue';
 import User from '@/views/User.vue';
 
 const routes: any[] = [
@@ -46,9 +46,14 @@ const routes: any[] = [
         name: 'space-discussions',
         component: SpaceDiscussions
       },
+      {
+        path: 'discussions/:topic',
+        name: 'space-discussions-topic',
+        component: Topic
+      },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       {
-        path: 'settings',
+        path: 'settings/:tab?',
         name: 'space-settings',
         component: SpaceSettings
       },
@@ -99,7 +104,7 @@ const routes: any[] = [
       {
         path: 'discussion',
         name: 'proposal-discussion',
-        component: ProposalDiscussion
+        component: Topic
       }
     ]
   },
@@ -128,8 +133,8 @@ const routes: any[] = [
       { path: '/profile/:id', name: 'user', component: User }
     ]
   },
-  { path: '/apps', name: 'apps', component: Apps },
-  { path: '/apps/:id', name: 'app', component: App },
+  { path: '/ecosystem', name: 'ecosystem', component: Ecosystem },
+  { path: '/ecosystem/:id', name: 'app', component: App },
   { path: '/network', name: 'network', component: Network }
 ];
 

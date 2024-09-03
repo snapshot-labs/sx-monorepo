@@ -10,9 +10,11 @@ defineProps<{ topic: Topic }>();
       <div class="flex-auto mr-4 w-0">
         <div class="space-x-2 flex">
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
-            <a
-              :href="topic.url"
-              target="_blank"
+            <router-link
+              :to="{
+                name: 'space-discussions-topic',
+                params: { topic: topic.id }
+              }"
               class="md:flex md:min-w-0 space-x-1.5"
             >
               <IC-pin
@@ -24,10 +26,7 @@ defineProps<{ topic: Topic }>();
                 class="inline-block shrink-0 size-[16px] -mt-1 md:mt-1"
               />
               <h3 class="text-[21px] inline md:truncate" v-text="topic.title" />
-              <IH-arrow-sm-right
-                class="-rotate-45 inline-block shrink-0 relative top-[-1px] md:top-0.5"
-              />
-            </a>
+            </router-link>
           </div>
         </div>
         <div class="inline">
