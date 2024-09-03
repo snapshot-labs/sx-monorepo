@@ -32,13 +32,13 @@ const STEPS = [
 
 <template>
   <div>
-    <UiContainer class="!max-w-[1060px]">
+    <UiContainer class="!max-w-screen-lg">
       <h1 class="mono max-w-[680px] py-9 !text-[44px]">
         A fully integrated suite to manage DAO governance.
       </h1>
     </UiContainer>
     <div class="border-y">
-      <UiContainer class="!max-w-[1060px]">
+      <UiContainer class="!max-w-screen-lg">
         <div class="grid grid-cols-1 lg:grid-cols-4 text-md -mx-4">
           <div
             v-for="(step, i) in STEPS"

@@ -69,7 +69,7 @@ const FEATURES = [
 
 <template>
   <div id="features" class="pt-8 border-b">
-    <UiContainer class="!max-w-[1060px]">
+    <UiContainer class="!max-w-screen-lg">
       <div class="pb-6 max-w-[600px]">
         <div class="eyebrow mb-3">Features</div>
         <h1 class="mb-4 mono !text-[44px]">
@@ -78,7 +78,7 @@ const FEATURES = [
       </div>
     </UiContainer>
     <div class="border-t">
-      <UiContainer class="!max-w-[1060px]">
+      <UiContainer class="!max-w-screen-lg">
         <div class="grid grid-cols-1 lg:grid-cols-3 -mx-4">
           <div
             v-for="(feature, i) in FEATURES"

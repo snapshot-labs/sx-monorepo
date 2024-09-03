@@ -1,6 +1,6 @@
 <template>
   <div class="border-b">
-    <UiContainer class="!max-w-[1060px]">
+    <UiContainer class="!max-w-screen-lg">
       <div class="grid grid-cols-4 text-md -mx-4">
         <div class="border-r">
           <div class="p-4">
