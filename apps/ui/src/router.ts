@@ -9,7 +9,6 @@ import Home from '@/views/My/Home.vue';
 import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
-import ProposalDiscussion from '@/views/Proposal/Discussion.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
 import Proposal from '@/views/Proposal.vue';
@@ -30,6 +29,7 @@ import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
+import Topic from '@/views/Topic.vue';
 import User from '@/views/User.vue';
 
 const routes: any[] = [
@@ -45,6 +45,11 @@ const routes: any[] = [
         path: 'discussions',
         name: 'space-discussions',
         component: SpaceDiscussions
+      },
+      {
+        path: 'discussions/:topic',
+        name: 'space-discussions-topic',
+        component: Topic
       },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       {
@@ -99,7 +104,7 @@ const routes: any[] = [
       {
         path: 'discussion',
         name: 'proposal-discussion',
-        component: ProposalDiscussion
+        component: Topic
       }
     ]
   },
