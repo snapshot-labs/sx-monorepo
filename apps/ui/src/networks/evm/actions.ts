@@ -606,16 +606,9 @@ export function createActions(
         abi: string[];
       };
 
-      if (delegationType === 'governor-subgraph') {
+      if (['governor-subgraph', 'compound-governor'].includes(delegationType)) {
         contractParams = {
           address: delegationContract.split(':')[1],
-          functionName: 'delegate',
-          functionParams: [delegatee],
-          abi: ['function delegate(address delegatee)']
-        };
-      } else if (delegationType === 'compound-governor') {
-        contractParams = {
-          address: delegationContract,
           functionName: 'delegate',
           functionParams: [delegatee],
           abi: ['function delegate(address delegatee)']

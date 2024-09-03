@@ -330,6 +330,11 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   );
 
   if (space.delegationPortal) {
+    const network =
+      CHAIN_IDS_TO_NETWORKS[
+        parseInt(space.delegationPortal.delegationNetwork, 10)
+      ] || null;
+
     delegations.push({
       name:
         space.delegationPortal.delegationType === 'compound-governor'
@@ -337,11 +342,8 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
           : 'Split Delegation',
       apiType: space.delegationPortal.delegationType,
       apiUrl: space.delegationPortal.delegationApi,
-      contractNetwork:
-        CHAIN_IDS_TO_NETWORKS[
-          parseInt(space.delegationPortal.delegationNetwork, 10)
-        ] || null,
-      contractAddress: space.delegationPortal.delegationContract
+      contractNetwork: network,
+      contractAddress: `${network}:${space.delegationPortal.delegationContract}`
     });
   }
 
