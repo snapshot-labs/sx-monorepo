@@ -110,7 +110,8 @@ export async function loadTopics(url: string): Promise<Topic[]> {
 
 export async function loadSingleTopic(url: string): Promise<Topic> {
   const baseUrl = new URL(url).origin;
-  const topicId = new URL(url).pathname.split('/')[3];
+  const params = new URL(url).pathname.split('/');
+  const topicId = params[params.length - 1];
 
   const res = await fetch(
     `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicId}.json`)}`
@@ -124,7 +125,8 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
 
 export async function loadReplies(url: string): Promise<Reply[]> {
   const baseUrl = new URL(url).origin;
-  const topicId = new URL(url).pathname.split('/')[3];
+  const params = new URL(url).pathname.split('/');
+  const topicId = params[params.length - 1];
 
   const res = await fetch(
     `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicId}/posts.json`)}`
