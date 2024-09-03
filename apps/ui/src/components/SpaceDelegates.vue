@@ -35,6 +35,7 @@ const {
   props.delegation.contractAddress as string,
   props.space
 );
+const { web3 } = useWeb3();
 
 const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
@@ -95,6 +96,19 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
   </div>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
+      <router-link
+        v-if="web3.account"
+        tabindex="-1"
+        :to="{
+          name: 'space-user-statement',
+          params: {
+            id: `${$props.space.network}:${props.space.id}`,
+            user: web3.account
+          }
+        }"
+      >
+        <UiButton> Edit my statement </UiButton>
+      </router-link>
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
