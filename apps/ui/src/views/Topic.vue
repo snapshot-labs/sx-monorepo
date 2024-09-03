@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  loadReplies,
   loadSingleTopic,
   Reply,
   SPACES_DISCUSSIONS,
@@ -42,7 +41,7 @@ async function loadTopic(url: string) {
     loaded.value = false;
     loading.value = true;
     topic.value = await loadSingleTopic(url);
-    replies.value = await loadReplies(url);
+    replies.value = topic.value.posts;
   } catch (e) {
     console.error(e);
     failed.value = true;

@@ -25,6 +25,7 @@ export interface Topic {
   pinned: boolean;
   closed: boolean;
   posts_count: number;
+  posts: Reply[];
   url: string;
   user_url: string;
   users: User[];
@@ -108,6 +109,21 @@ export async function loadTopics(url: string): Promise<Topic[]> {
   });
 }
 
+function formatPosts(posts, baseUrl) {
+  return posts.map(post => {
+    post.avatar_template = post.avatar_template.replace('{size}', '64');
+    if (post.avatar_template.startsWith('/'))
+      post.avatar_template = `${baseUrl}${post.avatar_template}`;
+
+    post.name = post.display_username || post.name || post.username;
+    post.like_count = post.actions_summary.find(a => a.id === 2)?.count || 0;
+    post.created_at = Date.parse(post.created_at) / 1000;
+    post.user_url = `${baseUrl}/u/${post.username}`;
+
+    return post;
+  });
+}
+
 export async function loadSingleTopic(url: string): Promise<Topic> {
   const baseUrl = new URL(url).origin;
   const params = new URL(url).pathname.split('/');
@@ -119,6 +135,7 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
   const topic = await res.json();
 
   topic.posts_count--;
+  topic.posts = formatPosts(topic.post_stream.posts, baseUrl);
 
   return topic;
 }
@@ -133,16 +150,5 @@ export async function loadReplies(url: string): Promise<Reply[]> {
   );
   const data = await res.json();
 
-  return data.post_stream.posts.map(post => {
-    post.avatar_template = post.avatar_template.replace('{size}', '64');
-    if (post.avatar_template.startsWith('/'))
-      post.avatar_template = `${baseUrl}${post.avatar_template}`;
-
-    post.name = post.display_username || post.name || post.username;
-    post.like_count = post.actions_summary.find(a => a.id === 2)?.count || 0;
-    post.created_at = Date.parse(post.created_at) / 1000;
-    post.user_url = `${baseUrl}/u/${post.username}`;
-
-    return post;
-  });
+  return formatPosts(data.post_stream.posts, baseUrl);
 }
