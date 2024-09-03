@@ -1,23 +1,25 @@
 <script setup lang="ts">
 import { Reply } from '@/helpers/discourse';
-import { _rt, stripHtmlTags } from '@/helpers/utils';
+import turndownService from '@/helpers/turndownService';
+import { _rt } from '@/helpers/utils';
 
-defineProps<{
+const props = defineProps<{
   reply: Reply;
+  discussion?: string | null;
 }>();
+
+const toMarkdown = computed(() =>
+  turndownService({ discussion: props.discussion || '' })
+);
 </script>
 
 <template>
   <div>
-    <div class="flex">
-      <a
-        :href="reply.user_url"
-        target="_blank"
-        class="w-[32px] h-[32px] shrink-0 mr-2.5 mt-0.5"
-      >
+    <div class="flex gap-2.5 items-center">
+      <a :href="reply.user_url" target="_blank" class="shrink-0 rounded-full">
         <img
           :src="reply.avatar_template"
-          class="rounded-full inline-block bg-skin-border w-[32px] h-[32px]"
+          class="rounded-full inline-block bg-skin-border size-[32px]"
         />
       </a>
       <div class="flex flex-col leading-4 gap-1">
@@ -25,17 +27,15 @@ defineProps<{
         <span class="text-skin-text text-sm" v-text="_rt(reply.created_at)" />
       </div>
     </div>
-    <UiMarkdown class="text-md pt-3 pb-2" :body="stripHtmlTags(reply.cooked)" />
+    <UiMarkdown class="text-md pt-3 pb-2" :body="toMarkdown(reply.cooked)" />
     <div class="text-sm space-x-2.5 flex">
       <div class="items-center flex gap-1">
-        <IH-thumb-up class="inline-block" /> {{ reply.like_count }}
+        <IH-thumb-up /> {{ reply.like_count }}
       </div>
       <div class="items-center flex gap-1">
-        <IH-annotation class="inline-block" /> {{ reply.reply_count }}
+        <IH-annotation /> {{ reply.reply_count }}
       </div>
-      <div class="items-center flex gap-1">
-        <IH-eye class="inline-block" /> {{ reply.reads }}
-      </div>
+      <div class="items-center flex gap-1"><IH-eye /> {{ reply.reads }}</div>
     </div>
   </div>
 </template>

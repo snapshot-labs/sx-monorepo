@@ -81,7 +81,7 @@ onMounted(async () => await loadTopic());
       <span>Error while loading the topic.</span>
     </div>
     <div v-else-if="loaded" class="px-4 pt-5">
-      <h1 class="max-w-[680px] mx-auto text-[40px] leading-[1.x1em]">
+      <h1 class="max-w-[680px] mx-auto text-[40px] leading-[1.1em]">
         {{ topic?.title }}
       </h1>
       <div
@@ -89,7 +89,11 @@ onMounted(async () => await loadTopic());
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
-        <DiscussionTopicItem :reply="reply" class="max-w-[680px] mx-auto" />
+        <DiscussionTopicItem
+          :reply="reply"
+          :discussion="discussion"
+          class="max-w-[680px] mx-auto"
+        />
       </div>
       <div class="mt-6 max-w-[680px] mx-auto">
         <a :href="replyUrl" target="_blank" tabindex="-1">

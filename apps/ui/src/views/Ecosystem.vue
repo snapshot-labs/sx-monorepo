@@ -23,7 +23,7 @@ watch(
         <input
           v-model="q"
           type="text"
-          placeholder="Search for apps"
+          placeholder="Search for integrations"
           class="py-3 bg-transparent flex-auto text-skin-link"
         />
       </UiContainer>
@@ -40,7 +40,7 @@ watch(
         </div>
         <div v-else class="flex items-center text-skin-link">
           <IH-exclamation-circle class="inline-block mr-2" />
-          <span v-text="'There are no apps here.'" />
+          <span v-text="'There are no integrations here.'" />
         </div>
       </div>
       <div v-else>

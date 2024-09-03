@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import App from '@/views/App.vue';
-import Apps from '@/views/Apps.vue';
 import Create from '@/views/Create.vue';
+import Ecosystem from '@/views/Ecosystem.vue';
 import Editor from '@/views/Editor.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
@@ -134,8 +134,8 @@ const routes: any[] = [
       { path: '/profile/:id', name: 'user', component: User }
     ]
   },
-  { path: '/apps', name: 'apps', component: Apps },
-  { path: '/apps/:id', name: 'app', component: App },
+  { path: '/ecosystem', name: 'ecosystem', component: Ecosystem },
+  { path: '/ecosystem/:id', name: 'app', component: App },
   { path: '/network', name: 'network', component: Network }
 ];
 

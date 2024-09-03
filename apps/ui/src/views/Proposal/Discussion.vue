@@ -27,11 +27,11 @@ onMounted(async () => {
   <div>
     <div v-if="discussion" class="p-4 bg-skin-bg border-b">
       <div class="max-w-[680px] mx-auto">
-        <a :href="discussion" target="_blank">
+        <a :href="discussion" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
-            <IC-discourse class="size-[22px]" />
+            <IC-discourse class="size-[22px] shrink-0" />
             Join the discussion
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
+            <IH-arrow-sm-right class="-rotate-45 shrink-0" />
           </UiButton>
         </a>
       </div>
@@ -45,7 +45,11 @@ onMounted(async () => {
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
-        <DiscussionTopicItem :reply="reply" class="max-w-[680px] mx-auto" />
+        <DiscussionTopicItem
+          :reply="reply"
+          :discussion="discussion"
+          class="max-w-[680px] mx-auto"
+        />
       </div>
     </div>
   </div>
