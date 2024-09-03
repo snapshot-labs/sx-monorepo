@@ -38,8 +38,8 @@ const STEPS = [
       </h1>
     </UiContainer>
     <div class="border-y">
-      <UiContainer class="!max-w-screen-lg">
-        <div class="grid grid-cols-1 lg:grid-cols-4 text-md -mx-4">
+      <UiContainer class="!max-w-screen-lg !px-0">
+        <div class="grid grid-cols-1 lg:grid-cols-4 text-md">
           <div
             v-for="(step, i) in STEPS"
             :key="i"
