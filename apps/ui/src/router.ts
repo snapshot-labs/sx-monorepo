@@ -9,6 +9,7 @@ import Home from '@/views/My/Home.vue';
 import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
+import Policy from '@/views/Policy.vue';
 import ProposalDiscussion from '@/views/Proposal/Discussion.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
@@ -30,6 +31,7 @@ import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
+import Terms from '@/views/Terms.vue';
 import User from '@/views/User.vue';
 
 const routes: any[] = [
@@ -130,7 +132,9 @@ const routes: any[] = [
   },
   { path: '/apps', name: 'apps', component: Apps },
   { path: '/apps/:id', name: 'app', component: App },
-  { path: '/network', name: 'network', component: Network }
+  { path: '/network', name: 'network', component: Network },
+  { path: '/terms-of-use', name: 'terms', component: Terms },
+  { path: '/privacy-policy', name: 'policy', component: Policy }
 ];
 
 const router = createRouter({
