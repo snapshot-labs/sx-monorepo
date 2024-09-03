@@ -28,7 +28,8 @@ export default function (options: { discussion?: string } = {}) {
     replacement: function (content, node) {
       if (node.classList.contains('quote')) {
         const image = node.querySelector('.title img');
-        return `> ### ![discourse-emoji](${image?.src}) ${node.querySelector('.title')?.textContent}
+        node.querySelector('.title img')?.remove();
+        return `> ### ![discourse-emoji](${image?.src}) ${turndownService.turndown(node.querySelector('.title')?.innerHTML)}
         > ${node.querySelector('blockquote')?.textContent}
          `;
       } else if (node.classList.contains('twitterstatus')) {
@@ -76,6 +77,10 @@ export default function (options: { discussion?: string } = {}) {
           const groupIdentifier = node.href.match(/\/(groups|g)\/(.*)/)?.[2];
           return `[${node.textContent}](${baseUrl}g/${groupIdentifier})`;
         }
+        if (node.classList.contains('badge-category__wrapper')) {
+          return `- [${node.textContent}](${node.href})`;
+        }
+
         if (node.querySelector('img')) {
           return `[![${node.querySelector('img').alt}](${node.querySelector('img').src}) ${node.textContent}](${node.href})`;
         }
