@@ -102,11 +102,11 @@ onMounted(async () => {
         </div>
       </div>
       <div class="mt-6">
-        <a :href="replyUrl" target="_blank">
+        <a :href="replyUrl" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
-            <IC-discourse class="size-[22px]" />
+            <IC-discourse class="size-[22px] shrink-0" />
             Reply
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
+            <IH-arrow-sm-right class="shrink-0 -rotate-45" />
           </UiButton>
         </a>
       </div>
