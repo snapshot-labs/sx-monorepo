@@ -252,6 +252,7 @@ export type UserProfile = {
   twitter: string;
   lens: string;
   farcaster: string;
+  votesCount: number;
 };
 
 export type User = {
