@@ -69,7 +69,7 @@ onMounted(async () => await loadTopic());
 </script>
 
 <template>
-  <div class="px-4 py-3">
+  <div class="px-4">
     <div v-if="loading">
       <UiLoading />
     </div>
@@ -77,7 +77,7 @@ onMounted(async () => await loadTopic());
       <IH-exclamation-circle class="shrink-0" />
       <span>Error while loading the topic.</span>
     </div>
-    <div v-else-if="loaded" class="max-w-[680px]">
+    <div v-else-if="loaded" class="max-w-[710px] mx-auto pt-5">
       <h1 class="text-[40px] leading-[1.1em]">
         {{ topic?.title }}
       </h1>
