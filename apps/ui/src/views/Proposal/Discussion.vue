@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { loadReplies, Reply } from '@/helpers/discourse';
-import { _rt, sanitizeUrl, stripHtmlTags } from '@/helpers/utils';
+import turndownService from '@/helpers/turndownService';
+import { _rt, sanitizeUrl } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
 const props = defineProps<{ proposal: Proposal }>();
@@ -10,6 +11,9 @@ const loading = ref(false);
 const loaded = ref(false);
 
 const discussion = computed(() => sanitizeUrl(props.proposal.discussion));
+const toMarkdown = computed(() =>
+  turndownService({ discussion: discussion.value || '' })
+);
 
 onMounted(async () => {
   try {
@@ -41,7 +45,7 @@ onMounted(async () => {
     </div>
     <div v-if="loaded" class="px-4">
       <div
-        v-for="(reply, i) in replies.slice(1)"
+        v-for="(reply, i) in replies"
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
@@ -66,10 +70,7 @@ onMounted(async () => {
             </div>
           </div>
           <div>
-            <UiMarkdown
-              class="text-md pt-3 pb-2"
-              :body="stripHtmlTags(reply.cooked)"
-            />
+            <UiMarkdown class="text-md py-3" :body="toMarkdown(reply.cooked)" />
             <div class="text-sm space-x-2.5 flex">
               <div class="items-center flex gap-1">
                 <IH-thumb-up /> {{ reply.like_count }}
