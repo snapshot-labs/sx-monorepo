@@ -63,7 +63,18 @@ export default function (options: { discussion?: string } = {}) {
       filter: ['a'],
       replacement: function (content, node) {
         if (node.classList.contains('mention')) {
-          return `[${node.textContent}](${options.discussion?.match(/^(https?:\/\/[^\/]+\/)/)?.[1]}u/${node.textContent.replace('@', '')})`;
+          const baseUrl = options.discussion?.match(
+            /^(https?:\/\/[^\/]+\/)/
+          )?.[1];
+          const username = node.href.match(/\/u\/(.*)/)?.[1];
+          return `[${node.textContent}](${baseUrl}u/${username})`;
+        }
+        if (node.classList.contains('mention-group')) {
+          const baseUrl = options.discussion?.match(
+            /^(https?:\/\/[^\/]+\/)/
+          )?.[1];
+          const groupIdentifier = node.href.match(/\/(groups|g)\/(.*)/)?.[2];
+          return `[${node.textContent}](${baseUrl}g/${groupIdentifier})`;
         }
         if (node.querySelector('img')) {
           return `[![${node.querySelector('img').alt}](${node.querySelector('img').src}) ${node.textContent}](${node.href})`;
