@@ -4,7 +4,7 @@ const { web3 } = useWeb3();
 const followedSpacesStore = useFollowedSpacesStore();
 
 const user = computed(() => {
-  if (!web3.value.authLoading) {
+  if (!web3.value.authLoading && web3.value.account) {
     return usersStore.getUser(web3.value.account);
   } else {
     return null;
