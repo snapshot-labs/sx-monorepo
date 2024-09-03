@@ -141,6 +141,7 @@ html.dark {
   }
 
   > *:last-child {
+    padding-bottom: 0 !important;
     margin-bottom: 0 !important;
   }
 

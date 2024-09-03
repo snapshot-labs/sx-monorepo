@@ -70,10 +70,7 @@ onMounted(async () => {
             </div>
           </div>
           <div>
-            <UiMarkdown
-              class="text-md pt-3 pb-2"
-              :body="toMarkdown(reply.cooked)"
-            />
+            <UiMarkdown class="text-md py-3" :body="toMarkdown(reply.cooked)" />
             <div class="text-sm space-x-2.5 flex">
               <div class="items-center flex gap-1">
                 <IH-thumb-up class="inline-block" /> {{ reply.like_count }}
