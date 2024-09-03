@@ -16,6 +16,7 @@ const topic: Ref<Topic | null> = ref(null);
 const replies: Ref<Reply[]> = ref([]);
 const loading = ref(false);
 const loaded = ref(false);
+const failed = ref(false);
 
 const route = useRoute();
 const { setTitle } = useTitle();
@@ -39,14 +40,18 @@ const discussion = computed(() => sanitizeUrl(discussionsUrl.value));
 
 async function loadTopic() {
   try {
+    failed.value = false;
     loaded.value = false;
     loading.value = true;
     topic.value = await loadSingleTopic(discussionsUrl.value || '');
     replies.value = await loadReplies(discussion.value || '');
     loading.value = false;
-    loaded.value = true;
   } catch (e) {
     console.error(e);
+    failed.value = true;
+  } finally {
+    loaded.value = true;
+    loading.value = false;
   }
 }
 
@@ -68,7 +73,14 @@ onMounted(async () => await loadTopic());
     <div v-if="loading" class="p-4">
       <UiLoading />
     </div>
-    <div v-if="loaded" class="px-4 pt-5">
+    <div
+      v-else-if="failed"
+      class="px-4 py-3 flex items-center text-skin-link space-x-2"
+    >
+      <IH-exclamation-circle class="shrink-0" />
+      <span>Error while loading the topic.</span>
+    </div>
+    <div v-else-if="loaded" class="px-4 pt-5">
       <h1 class="max-w-[680px] mx-auto text-[40px] leading-[1.x1em]">
         {{ topic?.title }}
       </h1>
