@@ -81,7 +81,7 @@ onMounted(async () => await loadTopic());
       <span>Error while loading the topic.</span>
     </div>
     <div v-else-if="loaded" class="px-4 pt-5">
-      <h1 class="max-w-[680px] text-[40px] leading-[1.x1em]">
+      <h1 class="max-w-[680px] text-[40px] leading-[1.1em]">
         {{ topic?.title }}
       </h1>
       <div
