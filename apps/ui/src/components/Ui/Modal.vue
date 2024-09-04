@@ -3,9 +3,15 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
-const props = defineProps<{
-  open: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    closeable?: boolean;
+  }>(),
+  {
+    closeable: true
+  }
+);
 
 const { open } = toRefs(props);
 const { modalOpen } = useModal();
@@ -31,7 +37,7 @@ watch(open, val => {
 <template>
   <transition name="fade">
     <div v-if="open" class="modal mx-auto">
-      <div class="backdrop" @click="$emit('close')" />
+      <div class="backdrop" @click="closeable ? $emit('close') : null" />
       <div class="shell overflow-hidden relative rounded-none md:rounded-lg">
         <div v-if="$slots.header" class="border-b py-3 text-center">
           <slot name="header" />
@@ -43,6 +49,7 @@ watch(open, val => {
           <slot name="footer" />
         </div>
         <button
+          v-if="closeable"
           type="button"
           class="absolute right-0 -top-1 p-4"
           @click="$emit('close')"
