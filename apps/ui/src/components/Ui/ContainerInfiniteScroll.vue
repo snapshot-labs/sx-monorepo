@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false });
+
 const props = withDefaults(
   defineProps<{
     enabled?: boolean;
@@ -61,14 +63,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="contents">
-    <div ref="container" class="contents">
-      <slot />
-    </div>
-    <slot v-if="loadingMore" name="loading">
-      <div class="flex justify-center">
-        <UiLoading class="block px-4 py-3" />
-      </div>
-    </slot>
+  <div ref="container" v-bind="$attrs">
+    <slot />
   </div>
+  <slot v-if="loadingMore" name="loading">
+    <div class="flex justify-center">
+      <UiLoading class="block px-4 py-3" />
+    </div>
+  </slot>
 </template>
