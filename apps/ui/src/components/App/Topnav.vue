@@ -7,7 +7,8 @@ const router = useRouter();
 const usersStore = useUsersStore();
 const auth = getInstance();
 const uiStore = useUiStore();
-const { modalAccountOpen } = useModal();
+const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
+  useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
 
@@ -45,10 +46,12 @@ const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
 
-const showLogo = computed(() => String(route.matched[0]?.name) === 'landing');
+const showLogo = computed(() =>
+  ['landing', 'ecosystem'].includes(String(route.matched[0]?.name))
+);
 
 async function handleLogin(connector) {
-  modalAccountOpen.value = false;
+  resetAccountModal();
   loading.value = true;
   await login(connector);
   loading.value = false;
@@ -170,7 +173,8 @@ watch(
   </nav>
   <teleport to="#modal">
     <ModalAccount
-      :open="modalAccountOpen"
+      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
+      :closeable="!modalAccountWithoutDismissOpen"
       @close="modalAccountOpen = false"
       @login="handleLogin"
     />

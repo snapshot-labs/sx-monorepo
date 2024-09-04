@@ -24,6 +24,7 @@ const {
   loadingMore,
   loaded,
   failed,
+  errorCode,
   hasMore,
   delegates,
   fetch,
@@ -34,12 +35,15 @@ const {
   props.delegation.contractAddress as string,
   props.space
 );
+const { web3 } = useWeb3();
 
 const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
 
   try {
-    return getNetwork(props.delegation.contractNetwork);
+    return getNetwork(props.delegation.contractNetwork, {
+      allowDisabledNetwork: true
+    });
   } catch (e) {
     return null;
   }
@@ -92,6 +96,19 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
   </div>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
+      <router-link
+        v-if="web3.account"
+        tabindex="-1"
+        :to="{
+          name: 'space-user-statement',
+          params: {
+            id: `${$props.space.network}:${props.space.id}`,
+            user: web3.account
+          }
+        }"
+      >
+        <UiButton> Edit my statement </UiButton>
+      </router-link>
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
@@ -151,7 +168,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           class="px-4 py-3 flex items-center space-x-1"
         >
           <IH-exclamation-circle class="shrink-0" />
-          <span v-if="failed">Failed to load delegates.</span>
+          <span v-if="errorCode === 'initializing'">
+            Delegates are being computed, please come back later.
+          </span>
+          <span v-else-if="failed">Failed to load delegates.</span>
           <span v-else-if="delegates.length === 0">
             There are no delegates.
           </span>
