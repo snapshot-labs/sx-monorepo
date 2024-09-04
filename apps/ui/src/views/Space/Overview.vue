@@ -32,7 +32,7 @@ watchEffect(() => setTitle(props.space.name));
 <template>
   <div>
     <div
-      class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
+      class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px] overflow-hidden"
     >
       <div class="size-full">
         <SpaceCover :space="props.space" />
