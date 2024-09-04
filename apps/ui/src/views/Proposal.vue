@@ -151,7 +151,7 @@ watchEffect(() => {
           class="z-40 sticky top-[71px] lg:top-[72px]"
           gradient="md"
         >
-          <div class="flex px-4 bg-skin-bg border-b space-x-3">
+          <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <router-link
               :to="{
                 name: 'proposal-overview',
