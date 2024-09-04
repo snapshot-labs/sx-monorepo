@@ -32,6 +32,7 @@ import {
 } from '@/networks/types';
 import {
   Choice,
+  DelegationType,
   NetworkID,
   Proposal,
   Space,
@@ -632,6 +633,7 @@ export function createActions(
       web3: any,
       space: Space,
       networkId: NetworkID,
+      delegationType: DelegationType,
       delegatee: string,
       delegationContract: string
     ) => {

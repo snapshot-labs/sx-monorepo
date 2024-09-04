@@ -1,5 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { Provider, Web3Provider } from '@ethersproject/providers';
+import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
   evmArbitrum,
@@ -36,6 +37,7 @@ import {
 } from '@/networks/types';
 import {
   Choice,
+  DelegationType,
   NetworkID,
   Proposal,
   Space,
@@ -591,20 +593,46 @@ export function createActions(
       web3: Web3Provider,
       space: Space,
       networkId: NetworkID,
+      delegationType: DelegationType,
       delegatee: string,
       delegationContract: string
     ) => {
       await verifyNetwork(web3, CHAIN_IDS[networkId]);
 
-      const [, contractAddress] = delegationContract.split(':');
+      let contractParams: {
+        address: string;
+        functionName: string;
+        functionParams: any[];
+        abi: string[];
+      };
+
+      if (delegationType === 'governor-subgraph') {
+        contractParams = {
+          address: delegationContract.split(':')[1],
+          functionName: 'delegate',
+          functionParams: [delegatee],
+          abi: ['function delegate(address delegatee)']
+        };
+      } else if (delegationType == 'delegate-registry') {
+        contractParams = {
+          address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+          functionName: 'setDelegate',
+          functionParams: [formatBytes32String(space.id), delegatee],
+          abi: ['function setDelegate(bytes32 id, address delegate)']
+        };
+      } else {
+        throw new Error('Unsupported delegation type');
+      }
 
       const votesContract = new Contract(
-        contractAddress,
-        ['function delegate(address delegatee)'],
+        contractParams.address,
+        contractParams.abi,
         web3.getSigner()
       );
 
-      return votesContract.delegate(delegatee);
+      return votesContract[contractParams.functionName](
+        ...contractParams.functionParams
+      );
     },
     updateSettings: async (
       web3: any,
