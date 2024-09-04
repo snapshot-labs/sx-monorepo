@@ -29,6 +29,8 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
+const isSiteRoute = computed(() => String(route.name).startsWith('site-'));
+
 const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
@@ -73,6 +75,8 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
+  if (String(route.name).startsWith('site-')) return;
+
   if (
     sidebarSwipeEnabled.value &&
     isSwiping.value &&
@@ -94,13 +98,14 @@ watch(isSwiping, () => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
       <AppSidebar
+        v-if="!isSiteRoute"
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
       />
-      <AppTopnav />
-      <AppNav />
+      <AppTopnav v-if="!isSiteRoute" />
+      <AppNav v-if="!isSiteRoute" />
       <button
-        v-if="uiStore.sidebarOpen"
+        v-if="!isSiteRoute && uiStore.sidebarOpen"
         type="button"
         class="backdrop lg:hidden"
         :style="{
@@ -114,7 +119,10 @@ watch(isSwiping, () => {
           'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
         }"
       >
-        <router-view class="flex-auto mt-[72px] ml-0 lg:ml-[72px]" />
+        <router-view
+          class="flex-auto mt-[72px] ml-0 lg:ml-[72px]"
+          :class="String(route.name).startsWith('site-') && '!ml-0'"
+        />
       </div>
     </div>
     <AppNotifications />
