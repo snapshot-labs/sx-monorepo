@@ -86,7 +86,7 @@ watch(model, () => {
           class="p-1 size-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.italic"
         >
-          <span class="mono !text-[17px] !font-normal">I</span>
+          <span class="font-display !text-[17px] !font-normal">I</span>
         </button>
       </UiTooltip>
       <UiTooltip title="Add a link" class="size-[26px]">

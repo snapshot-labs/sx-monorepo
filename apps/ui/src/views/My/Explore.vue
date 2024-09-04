@@ -56,23 +56,20 @@ watchEffect(() => setTitle('Explore'));
     <UiLabel label="Spaces" sticky />
     <UiLoading v-if="spacesStore.loading" class="block m-4" />
     <div v-else-if="spacesStore.loaded">
-      <div
+      <UiContainerInfiniteScroll
         v-if="spacesStore.explorePageSpaces.length"
-        class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3 mb-3"
+        :loading-more="spacesStore.loadingMore"
+        class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3"
+        @end-reached="
+          spacesStore.fetchMore({ searchQuery: route.query.q as string })
+        "
       >
-        <UiContainerInfiniteScroll
-          :loading-more="spacesStore.loadingMore"
-          @end-reached="
-            spacesStore.fetchMore({ searchQuery: route.query.q as string })
-          "
-        >
-          <SpacesListItem
-            v-for="space in spacesStore.explorePageSpaces"
-            :key="space.id"
-            :space="space"
-          />
-        </UiContainerInfiniteScroll>
-      </div>
+        <SpacesListItem
+          v-for="space in spacesStore.explorePageSpaces"
+          :key="space.id"
+          :space="space"
+        />
+      </UiContainerInfiniteScroll>
       <div v-else class="px-4 py-3 flex items-center space-x-2">
         <IH-exclamation-circle class="inline-block shrink-0" />
         <span>No results found for your search</span>
