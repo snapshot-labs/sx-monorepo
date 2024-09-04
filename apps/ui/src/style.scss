@@ -38,12 +38,12 @@
   color-scheme: dark;
 
   // backgrounds
-  --bg: 28, 27, 32;
+  --bg: 22, 21, 26;
   --block-bg: 28, 27, 32;
   --input-bg: 35, 34, 39;
   --hover-bg: 37, 36, 41;
   --active-bg: 41, 40, 46;
-  --border: 51, 50, 55;
+  --border: 45, 44, 49;
 
   // text
   --heading: 251, 251, 251;
@@ -82,33 +82,37 @@
 }
 
 @font-face {
-  font-family: 'Space Mono';
+  font-family: 'Stolzl Display';
   font-style: normal;
-  font-weight: 400;
-  src: url('./assets/fonts/SpaceMono-Regular.woff2') format('woff2');
+  font-weight: 700;
+  src: url('./assets/fonts/StolzlDisplay-Medium.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Space Mono';
+  font-family: 'Stolzl';
   font-style: normal;
   font-weight: 700;
-  src: url('./assets/fonts/SpaceMono-Bold.woff2') format('woff2');
+  src: url('./assets/fonts/Stolzl-Medium.woff2') format('woff2');
 }
 
 body {
   @apply font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
 }
 
-.mono {
-  font-size: 44px;
-  font-family: 'Space Mono', Helvetica, Arial, sans-serif;
-  letter-spacing: -1px;
+.font-display {
+  font-family: 'Stolzl Display', Helvetica, Arial, sans-serif;
   font-weight: 700;
-  line-height: 1.1em;
+  line-height: 1.2em;
+}
+
+.font-heading {
+  font-family: 'Stolzl', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  line-height: 1.2em;
 }
 
 h1 {
-  @apply text-2xl;
+  font-size: 44px;
   line-height: 1.3em;
 }
 
@@ -255,6 +259,16 @@ input:placeholder-shown {
 
 .dark .blocks {
   background-image: url('@/assets/blocks-dark.svg');
+}
+
+.blocks-x {
+  background-repeat: repeat-x;
+  background-position: top center;
+  background-image: url('@/assets/blocks-x-light.svg');
+}
+
+.dark .blocks-x {
+  background-image: url('@/assets/blocks-x-dark.svg');
 }
 
 .no-scrollbar::-webkit-scrollbar {

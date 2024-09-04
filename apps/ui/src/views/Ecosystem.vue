@@ -3,6 +3,8 @@ const router = useRouter();
 const route = useRoute();
 const { apps, load, search, categories, loading, loaded } = useApps();
 
+useTitle('Ecosystem');
+
 const q: Ref<string> = ref((route.query.q as string) || '');
 
 const results = computed(() => search(q.value));
@@ -16,15 +18,15 @@ watch(
 </script>
 
 <template>
-  <div>
-    <div class="border-b mb-4">
+  <div class="py-12">
+    <div class="border-y mb-4">
       <UiContainer class="!max-w-screen-lg flex items-center space-x-3">
         <IH-search />
         <input
           v-model="q"
           type="text"
           placeholder="Search for integrations"
-          class="py-3 bg-transparent flex-auto text-skin-link"
+          class="py-3 bg-transparent flex-auto text-skin-link text-md"
         />
       </UiContainer>
     </div>
