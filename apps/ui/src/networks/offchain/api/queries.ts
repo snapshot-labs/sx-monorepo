@@ -103,6 +103,10 @@ const PROPOSAL_FRAGMENT = gql`
       params
       network
     }
+    validation {
+      name
+      params
+    }
     created
     updated
     votes

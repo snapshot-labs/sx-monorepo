@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { VotingPowerItem } from '@/stores/votingPowers';
 
-defineProps<{
+const props = defineProps<{
   votingPower: VotingPowerItem;
   action?: 'vote' | 'propose';
 }>();
@@ -9,6 +9,18 @@ defineProps<{
 defineEmits<{
   (e: 'fetchVotingPower');
 }>();
+
+const insufficientVp: ComputedRef<boolean> = computed(() => {
+  return !!(
+    props.votingPower.threshold.vote && props.votingPower.totalVotingPower > 0n
+  );
+});
+
+const formattedVotingThreshold = computed(() => {
+  return (
+    Number(props.votingPower.threshold.vote) / 10 ** props.votingPower.decimals
+  );
+});
 </script>
 
 <template>
@@ -33,7 +45,12 @@ defineEmits<{
     type="error"
     v-bind="$attrs"
   >
-    You do not have enough voting power to vote.
+    <span v-if="insufficientVp">
+      You need at least a voting power of
+      <i> {{ formattedVotingThreshold }} {{ votingPower.symbol }} </i>
+      to vote.
+    </span>
+    <span v-else> You do not have enough voting power to vote. </span>
   </UiAlert>
   <UiAlert
     v-else-if="action === 'propose' && !votingPower.canPropose"
