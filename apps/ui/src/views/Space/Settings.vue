@@ -64,6 +64,7 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
 
 const props = defineProps<{ space: Space }>();
 
+const route = useRoute();
 const { updateSettings, transferOwnership } = useActions();
 const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
@@ -71,7 +72,6 @@ const { setTitle } = useTitle();
 const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
-const activeTab: Ref<(typeof TABS)[number]['id']> = ref('profile');
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const isModified = ref(false);
@@ -88,6 +88,13 @@ const minVotingPeriod: Ref<number | null> = ref(null);
 const maxVotingPeriod: Ref<number | null> = ref(null);
 const controller = ref(props.space.controller);
 
+const activeTab: Ref<(typeof TABS)[number]['id']> = computed(() => {
+  if (route.params.tab && isValidTab(route.params.tab)) {
+    return route.params.tab;
+  }
+
+  return 'profile';
+});
 const network = computed(() => getNetwork(props.space.network));
 const isController = computed(() =>
   compareAddresses(props.space.controller, web3.value.account)
@@ -202,6 +209,13 @@ watchEffect(async () => {
 
   isModified.value = false;
 });
+
+function isValidTab(
+  param: string | string[]
+): param is (typeof TABS)[number]['id'] {
+  if (Array.isArray(param)) return false;
+  return TABS.map(tab => tab.id).includes(param as any);
+}
 
 function currentToMinutesOnly(value: number) {
   const duration = getDurationFromCurrent(props.space.network, value);
@@ -578,16 +592,19 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       gradient="xxl"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <button
+        <router-link
           v-for="tab in TABS"
           :key="tab.id"
+          :to="{
+            name: 'space-settings',
+            params: { id: route.params.id, tab: tab.id }
+          }"
           type="button"
           class="scroll-mx-8"
-          @click="activeTab = tab.id"
           @focus="handleTabFocus"
         >
           <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-        </button>
+        </router-link>
       </div>
     </UiScrollerHorizontal>
     <div v-if="loading" class="p-4">

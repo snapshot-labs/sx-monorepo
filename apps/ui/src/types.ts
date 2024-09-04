@@ -18,7 +18,11 @@ export type NetworkID =
   | 'sep'
   | 'linea-testnet'
   | 'sn'
-  | 'sn-sep';
+  | 'sn-sep'
+  | 'bsc'
+  | 'xdai'
+  | 'fantom'
+  | 'base';
 
 export type Choice =
   | 'for'
@@ -43,6 +47,8 @@ export type VoteTypeInfo = {
   description: string;
 };
 
+export type DelegationType = 'governor-subgraph' | 'delegate-registry';
+
 export type SelectedStrategy = {
   address: string;
   destinationAddress?: string | null;
@@ -58,7 +64,7 @@ export type SpaceMetadataTreasury = {
 
 export type SpaceMetadataDelegation = {
   name: string | null;
-  apiType: string | null;
+  apiType: DelegationType | null;
   apiUrl: string | null;
   contractNetwork: NetworkID | null;
   contractAddress: string | null;
@@ -241,6 +247,7 @@ export type UserProfile = {
   twitter: string;
   lens: string;
   farcaster: string;
+  votesCount: number;
 };
 
 export type User = {

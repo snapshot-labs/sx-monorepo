@@ -264,6 +264,8 @@ export const USER_QUERY = gql`
       twitter
       lens
       farcaster
+      votesCount
+      created
     }
   }
 `;
