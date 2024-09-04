@@ -149,7 +149,8 @@ watchEffect(() => {
       <div class="flex-1 md:mr-[340px]">
         <UiScrollerHorizontal
           class="z-40 sticky top-[71px] lg:top-[72px]"
-          gradient="md"
+          with-buttons
+          gradient="xxl"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <router-link
