@@ -3,6 +3,8 @@ const router = useRouter();
 const route = useRoute();
 const { apps, load, search, categories, loading, loaded } = useApps();
 
+useTitle('Ecosystem');
+
 const q: Ref<string> = ref((route.query.q as string) || '');
 
 const results = computed(() => search(q.value));
