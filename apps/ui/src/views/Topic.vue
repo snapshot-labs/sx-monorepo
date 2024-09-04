@@ -117,7 +117,7 @@ onMounted(async () => {
             class="text-md pt-3 pb-2"
             :body="toMarkdown(reply.cooked)"
           />
-          <div class="text-sm space-x-2.5 flex">
+          <div class="text-sm space-x-2.5 flex mt-2">
             <div class="items-center flex gap-1">
               <IH-thumb-up /> {{ reply.like_count }}
             </div>
