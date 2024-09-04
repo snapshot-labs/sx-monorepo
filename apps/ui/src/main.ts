@@ -6,7 +6,11 @@ import options from '@/helpers/auth';
 import router from '@/router';
 import '@/style.scss';
 
-const knownHosts = ['app.safe.global', 'pilot.gnosisguild.org', 'wallet.ambire.com'];
+const knownHosts = [
+  'app.safe.global',
+  'pilot.gnosisguild.org',
+  'wallet.ambire.com'
+];
 const parentUrl =
   window.location != window.parent.location
     ? document.referrer ||
