@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import removeMarkdown from 'remove-markdown';
-import { _n, _p, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Space, SpaceMetadataDelegation } from '@/types';
 
@@ -236,10 +236,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               <div
                 class="w-[150px] flex flex-col sm:shrink-0 items-end justify-center leading-[22px] truncate"
               >
-                <h4
-                  class="text-skin-link"
-                  v-text="_n(delegate.delegatedVotes)"
-                />
+                <h4 class="text-skin-link">
+                  {{ _vp(Number(delegate.delegatedVotes)) }}
+                  {{ space.voting_power_symbol }}
+                </h4>
                 <div
                   class="text-[17px]"
                   v-text="_p(delegate.votesPercentage)"
