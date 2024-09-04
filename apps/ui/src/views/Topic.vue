@@ -84,49 +84,47 @@ onMounted(async () => {
       <IH-exclamation-circle class="shrink-0" />
       <span>Error while loading the topic.</span>
     </div>
-    <div v-if="loaded && !failed" class="pt-5 px-4">
-      <h1 class="text-[40px] leading-[1.1em] max-w-[710px] mx-auto">
+    <div v-if="loaded && !failed" class="pt-5 max-w-[710px] mx-auto px-4">
+      <h1 class="text-[40px] leading-[1.1em]">
         {{ topic?.title }}
       </h1>
       <div
         v-for="(reply, i) in replies"
         :key="i"
-        class="py-4 border-b last:border-b-0"
+        class="border-b last:border-b-0 py-4"
       >
-        <div class="max-w-[710px] mx-auto">
-          <div class="flex gap-2.5 items-center">
-            <a
-              :href="reply.user_url"
-              target="_blank"
-              class="shrink-0 rounded-full"
-            >
-              <img
-                :src="reply.avatar_template"
-                class="rounded-full inline-block bg-skin-border size-[32px]"
-              />
-            </a>
-            <div class="flex flex-col leading-4 gap-1">
-              <a :href="reply.user_url" target="_blank" v-text="reply.name" />
-              <span
-                class="text-skin-text text-sm"
-                v-text="_rt(reply.created_at)"
-              />
-            </div>
+        <div class="flex gap-2.5 items-center">
+          <a
+            :href="reply.user_url"
+            target="_blank"
+            class="shrink-0 rounded-full"
+          >
+            <img
+              :src="reply.avatar_template"
+              class="rounded-full inline-block bg-skin-border size-[32px]"
+            />
+          </a>
+          <div class="flex flex-col leading-4 gap-1">
+            <a :href="reply.user_url" target="_blank" v-text="reply.name" />
+            <span
+              class="text-skin-text text-sm"
+              v-text="_rt(reply.created_at)"
+            />
           </div>
-          <UiMarkdown
-            class="text-md pt-3 pb-2"
-            :body="toMarkdown(reply.cooked)"
-          />
-          <div class="text-sm space-x-2.5 flex mt-2">
-            <div class="items-center flex gap-1">
-              <IH-thumb-up /> {{ reply.like_count }}
-            </div>
-            <div class="items-center flex gap-1">
-              <IH-annotation /> {{ reply.reply_count }}
-            </div>
-            <div class="items-center flex gap-1">
-              <IH-eye /> {{ reply.reads }}
-            </div>
+        </div>
+        <UiMarkdown
+          class="text-md pt-3 pb-2"
+          :body="toMarkdown(reply.cooked)"
+        />
+        <div class="text-sm space-x-2.5 flex mt-2">
+          <div class="items-center flex gap-1">
+            <IH-thumb-up /> {{ reply.like_count }}
+          </div>
+          <div class="items-center flex gap-1">
+            <IH-annotation /> {{ reply.reply_count }}
+          </div>
+          <div class="items-center flex gap-1">
+            <IH-eye /> {{ reply.reads }}
           </div>
         </div>
       </div>
