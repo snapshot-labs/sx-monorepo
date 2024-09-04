@@ -9,7 +9,7 @@ const followedSpacesStore = useFollowedSpacesStore();
   <div
     class="w-[72px] flex flex-col border-r fixed left-0 inset-y-0 text-center h-screen"
   >
-    <router-link :to="{ name: 'site-landing' }" class="h-[72px] block">
+    <router-link :to="{ name: 'my-home' }" class="h-[72px] block">
       <IH-stop class="inline-block my-4 size-[32px] text-skin-link" />
     </router-link>
     <div

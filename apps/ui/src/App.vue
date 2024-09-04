@@ -121,7 +121,7 @@ watch(isSwiping, () => {
       >
         <router-view
           class="flex-auto mt-[72px] ml-0 lg:ml-[72px]"
-          :class="String(route.name).startsWith('site-') && '!ml-0'"
+          :class="isSiteRoute && '!ml-0'"
         />
       </div>
     </div>
