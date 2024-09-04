@@ -63,8 +63,8 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div v-if="discussion" class="p-4 bg-skin-bg border-b">
-      <div class="max-w-[710px] mx-auto px-4">
+    <div v-if="discussion" class="bg-skin-bg border-b">
+      <div class="max-w-[710px] mx-auto p-4">
         <a :href="discussion" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <IC-discourse class="size-[22px] shrink-0" />
@@ -84,8 +84,8 @@ onMounted(async () => {
       <IH-exclamation-circle class="shrink-0" />
       <span>Error while loading the topic.</span>
     </div>
-    <div v-if="loaded && !failed" class="px-4">
-      <h1 class="text-[40px] leading-[1.1em] max-w-[710px] mx-auto pt-5 px-4">
+    <div v-if="loaded && !failed" class="pt-5 px-4">
+      <h1 class="text-[40px] leading-[1.1em] max-w-[710px] mx-auto">
         {{ topic?.title }}
       </h1>
       <div
@@ -93,7 +93,7 @@ onMounted(async () => {
         :key="i"
         class="py-4 border-b last:border-b-0"
       >
-        <div class="max-w-[710px] mx-auto px-4">
+        <div class="max-w-[710px] mx-auto">
           <div class="flex gap-2.5 items-center">
             <a
               :href="reply.user_url"
@@ -117,7 +117,7 @@ onMounted(async () => {
             class="text-md pt-3 pb-2"
             :body="toMarkdown(reply.cooked)"
           />
-          <div class="text-sm space-x-2.5 flex mt-2">
+          <div class="text-sm space-x-2.5 flex">
             <div class="items-center flex gap-1">
               <IH-thumb-up /> {{ reply.like_count }}
             </div>
@@ -131,8 +131,8 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <div v-if="loaded && !failed && discussion" class="p-4 bg-skin-bg border-t">
-      <div class="max-w-[710px] mx-auto px-4">
+    <div v-if="loaded && !failed && discussion" class="bg-skin-bg border-t">
+      <div class="max-w-[710px] mx-auto p-4">
         <a :href="discussion" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <IC-discourse class="size-[22px] shrink-0" />
