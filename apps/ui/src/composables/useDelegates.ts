@@ -16,7 +16,7 @@ type ApiDelegate = {
   tokenHoldersRepresentedAmount: number;
 };
 
-export type Delegate = Required<ApiDelegate> & {
+export type Delegate = ApiDelegate & {
   name: string | null;
   delegatorsPercentage: number;
   votesPercentage: number;
