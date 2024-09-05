@@ -143,7 +143,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-stretch md:flex-row flex-col size-full">
+  <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="grow min-w-0">
