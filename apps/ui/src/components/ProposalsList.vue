@@ -51,9 +51,9 @@ const currentLimit = computed(() => {
       </UiContainerInfiniteScroll>
       <div
         v-if="!proposals.length"
-        class="px-4 py-3 flex items-center text-skin-link"
+        class="px-4 py-3 flex items-center text-skin-link gap-2"
       >
-        <IH-exclamation-circle class="inline-block mr-2" />
+        <IH-exclamation-circle />
         <span v-text="'There are no proposals here.'" />
       </div>
       <router-link
