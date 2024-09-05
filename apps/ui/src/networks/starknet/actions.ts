@@ -5,11 +5,22 @@ import {
   starknetMainnet,
   starknetSepolia
 } from '@snapshot-labs/sx';
-import { Account, AllowArray, Call, CallData, RpcProvider } from 'starknet';
+import {
+  Account,
+  AllowArray,
+  Call,
+  CallData,
+  RpcProvider,
+  constants as starknetConstants
+} from 'starknet';
 import { executionCall, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import {
+  createErc1155Metadata,
+  verifyNetwork,
+  verifyStarknetNetwork
+} from '@/helpers/utils';
 import {
   EVM_CONNECTORS,
   STARKNET_CONNECTORS
@@ -54,7 +65,11 @@ export function createActions(
     chainId,
     l1ChainId,
     ethUrl
-  }: { chainId: string; l1ChainId: number; ethUrl: string }
+  }: {
+    chainId: starknetConstants.StarknetChainId;
+    l1ChainId: number;
+    ethUrl: string;
+  }
 ): NetworkActions {
   const networkConfig = CONFIGS[networkId];
   if (!networkConfig) throw new Error(`Unsupported network ${networkId}`);
@@ -230,6 +245,8 @@ export function createActions(
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
         await verifyNetwork(web3, l1ChainId);
+      } else {
+        await verifyStarknetNetwork(web3, chainId);
       }
 
       let selectedExecutionStrategy;
@@ -331,6 +348,8 @@ export function createActions(
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
         await verifyNetwork(web3, l1ChainId);
+      } else {
+        await verifyStarknetNetwork(web3, chainId);
       }
 
       let selectedExecutionStrategy;
@@ -407,6 +426,8 @@ export function createActions(
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
         await verifyNetwork(web3, l1ChainId);
+      } else {
+        await verifyStarknetNetwork(web3, chainId);
       }
 
       const strategiesWithMetadata = await Promise.all(
@@ -467,7 +488,7 @@ export function createActions(
         convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
-      return executionCall('stark', chainId, 'execute', {
+      return executionCall('stark', chainId as string, 'execute', {
         space: proposal.space.id,
         proposalId: proposal.proposal_id,
         executionParams: executionData.executionParams
