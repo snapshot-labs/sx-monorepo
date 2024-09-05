@@ -66,31 +66,31 @@ const network = computed(() => getNetwork(props.proposal.network));
     <div v-else class="space-y-2">
       <UiButton
         v-if="hasFinalize"
-        class="w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center gap-2"
         :loading="finalizeProposalSending"
         @click="finalizeProposal"
       >
-        <IH-check-circle class="inline-block mr-2" />
+        <IH-check-circle />
         Finalize proposal
       </UiButton>
       <UiButton
         v-else-if="proposal.state !== 'executed'"
-        class="w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center gap-2"
         :loading="executeProposalSending"
         @click="executeProposal"
       >
-        <IH-play class="inline-block mr-2" />
+        <IH-play />
         Execute transactions
       </UiButton>
       <UiButton
         v-if="hasExecuteQueued"
         :disabled="executionCountdown > 0"
         :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
-        class="w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center gap-2"
         :loading="executeQueuedProposalSending"
         @click="executeQueuedProposal"
       >
-        <IH-play class="inline-block mr-2 shrink-0" />
+        <IH-play class="shrink-0" />
         <template v-if="executionCountdown === 0"
           >Execute queued transactions</template
         >
@@ -108,11 +108,11 @@ const network = computed(() => getNetwork(props.proposal.network));
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
         "
         :disabled="executionCountdown === 0"
-        class="w-full flex justify-center items-center"
+        class="w-full flex justify-center items-center gap-2"
         :loading="vetoProposalSending"
         @click="vetoProposal"
       >
-        <IH-play class="inline-block mr-2 shrink-0" />
+        <IH-play class="shrink-0" />
         Veto execution
       </UiButton>
     </div>

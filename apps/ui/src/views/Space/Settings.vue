@@ -256,7 +256,7 @@ async function getInitialStrategiesConfig(
   editorStrategies: StrategyTemplate[],
   params?: string[],
   metadata?: StrategyParsedMetadata[]
-) {
+): Promise<StrategyConfig[]> {
   const promises = configured.map(async (configuredAddress, i) => {
     const strategy = editorStrategies.find(({ address }) =>
       compareAddresses(address, configuredAddress)
@@ -276,9 +276,7 @@ async function getInitialStrategiesConfig(
     };
   });
 
-  return (await Promise.all(promises)).filter(
-    strategy => strategy !== null
-  ) as StrategyConfig[];
+  return (await Promise.all(promises)).filter(strategy => strategy !== null);
 }
 
 async function getInitialValidationStrategy(

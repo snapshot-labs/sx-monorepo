@@ -335,8 +335,8 @@ onBeforeUnmount(() => destroyAudio());
       </div>
 
       <div v-if="aiSummaryOpen" class="mb-6">
-        <h4 class="mb-2 eyebrow flex items-center">
-          <IH-sparkles class="inline-block mr-2" />
+        <h4 class="mb-2 eyebrow flex items-center gap-2">
+          <IH-sparkles />
           <span>AI summary</span>
         </h4>
         <div class="text-md text-skin-link mb-2">{{ aiSummaryContent }}</div>
@@ -347,8 +347,8 @@ onBeforeUnmount(() => destroyAudio());
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
       <div v-if="discussion">
-        <h4 class="mb-3 eyebrow flex items-center">
-          <IH-chat-alt class="inline-block mr-2" />
+        <h4 class="mb-3 eyebrow flex items-center gap-2">
+          <IH-chat-alt />
           <span>Discussion</span>
         </h4>
         <a :href="discussion" target="_blank" class="block mb-5">
@@ -356,8 +356,8 @@ onBeforeUnmount(() => destroyAudio());
         </a>
       </div>
       <div v-if="proposal.executions && proposal.executions.length > 0">
-        <h4 class="mb-3 eyebrow flex items-center">
-          <IH-play class="inline-block mr-2" />
+        <h4 class="mb-3 eyebrow flex items-center gap-2">
+          <IH-play />
           <span>Execution</span>
         </h4>
         <div class="mb-4">

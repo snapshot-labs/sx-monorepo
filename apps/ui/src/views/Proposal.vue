@@ -319,7 +319,6 @@ watchEffect(() => {
               />
             </ProposalVote>
           </div>
-
           <div
             v-if="
               !proposal.cancelled &&
@@ -327,9 +326,9 @@ watchEffect(() => {
               proposal.vote_count
             "
           >
-            <h4 class="mb-2.5 eyebrow flex items-center">
-              <IH-chart-square-bar class="inline-block mr-2" />
-              <span>Results</span>
+            <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <IH-chart-square-bar />
+              Results
             </h4>
             <ProposalResults
               with-details
@@ -338,9 +337,9 @@ watchEffect(() => {
             />
           </div>
           <div>
-            <h4 class="mb-2.5 eyebrow flex items-center">
-              <IH-clock class="inline-block mr-2" />
-              <span>Timeline</span>
+            <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <IH-clock />
+              Timeline
             </h4>
             <ProposalTimeline :data="proposal" />
           </div>

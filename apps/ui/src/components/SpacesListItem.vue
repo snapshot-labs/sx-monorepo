@@ -19,7 +19,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
     class="text-skin-text border rounded-lg block relative group overflow-hidden h-[186px]"
     :class="{ 'h-[280px]': showAbout }"
   >
-    <div class="h-[68px] w-full absolute">
+    <div class="h-[68px] w-full absolute overflow-hidden">
       <SpaceCover :space="props.space" size="sm" />
     </div>
     <div class="relative inline-block mx-4 mt-[34px]">
