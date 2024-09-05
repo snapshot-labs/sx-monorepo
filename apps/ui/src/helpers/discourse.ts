@@ -109,7 +109,9 @@ export async function loadTopics(url: string): Promise<Topic[]> {
   });
 }
 
-function formatPosts(posts, baseUrl) {
+function formatPosts(posts: any[], baseUrl: string): Reply[] {
+  if (!posts || !posts.length) return [];
+
   return posts.map(post => {
     post.avatar_template = post.avatar_template.replace('{size}', '64');
     if (post.avatar_template.startsWith('/'))
@@ -135,9 +137,7 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
   const topic = await res.json();
 
   topic.posts_count--;
-  topic.posts = topic?.post_stream?.posts?.length
-    ? formatPosts(topic.post_stream.posts, baseUrl)
-    : [];
+  topic.posts = formatPosts(topic.post_stream.posts, baseUrl);
   return topic;
 }
 
@@ -151,7 +151,5 @@ export async function loadReplies(url: string): Promise<Reply[]> {
   );
   const data = await res.json();
 
-  return data?.post_stream?.posts?.length
-    ? formatPosts(data.post_stream.posts, baseUrl)
-    : [];
+  return formatPosts(data.post_stream.posts, baseUrl);
 }
