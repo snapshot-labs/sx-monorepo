@@ -78,13 +78,16 @@ module.exports = {
       5: '32px',
       6: '40px',
       7: '48px',
-      8: '64px'
+      8: '64px',
+      9: '72px',
+      10: '80px',
+      11: '88px',
+      12: '96px'
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
     },
     fontSize: {
-      '2xl': ['34px'],
       xl: ['28px'],
       lg: ['22px'],
       md: ['20px'],

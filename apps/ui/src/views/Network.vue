@@ -95,11 +95,11 @@ function toggleQuestion(id) {
 watchEffect(() => setTitle('Network'));
 </script>
 <template>
-  <div class="space-y-[80px] mb-8 blocks">
+  <div class="space-y-[80px] pt-12 mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
-        <h1 class="mb-6 mono max-w-[600px] mx-auto">
-          Unlock governance for your ecosystem.
+        <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[46px]">
+          Unlock governance for your ecosystem
         </h1>
         <a
           :href="LINK"
@@ -114,7 +114,9 @@ watchEffect(() => setTitle('Network'));
 
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Key features</div>
-      <h1 class="mb-3">What the network plan offers</h1>
+      <h2 class="font-display text-[36px] mb-3">
+        What the network plan offers
+      </h2>
       <div class="text-[21px] mb-4 max-w-[500px] mx-auto">
         Our network plan is designed to provide the infrastructure and support
         needed for effective governance.
@@ -173,7 +175,7 @@ watchEffect(() => setTitle('Network'));
 
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Get started</div>
-      <h1 class="mb-5">Start your integration</h1>
+      <h2 class="font-display text-[36px] mb-5">Get network support today</h2>
       <a
         :href="LINK"
         target="_blank"
@@ -200,7 +202,7 @@ watchEffect(() => setTitle('Network'));
 
     <UiContainer class="!max-w-[880px]">
       <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
-      <h1 class="mb-3 text-center">Questions?</h1>
+      <h2 class="text-[36px] font-display mb-5 text-center">Questions?</h2>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
         <button
           type="button"

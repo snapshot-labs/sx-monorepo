@@ -46,10 +46,6 @@ const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
 
-const showLogo = computed(() =>
-  ['landing', 'ecosystem'].includes(String(route.matched[0]?.name))
-);
-
 async function handleLogin(connector) {
   resetAccountModal();
   loading.value = true;
@@ -104,7 +100,6 @@ watch(
       </button>
 
       <Breadcrumb
-        v-if="!showLogo"
         :class="[
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
@@ -112,14 +107,6 @@ watch(
       >
       </Breadcrumb>
     </div>
-    <router-link
-      v-if="showLogo"
-      :to="{ path: '/' }"
-      class="truncate grow"
-      style="font-size: 24px"
-    >
-      snapshot
-    </router-link>
     <form
       v-if="searchConfig"
       id="search-form"
