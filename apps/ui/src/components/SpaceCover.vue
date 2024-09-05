@@ -29,29 +29,15 @@ const cb = computed(() => getCacheHash(props.space.cover));
   />
   <div
     v-else
-    class="space-fallback-cover"
+    class="bg-cover bg-center w-full h-full"
     :style="{
       'background-image': `url(${getStampUrl(
         offchainNetworks.includes(space.network) ? 'space' : 'space-sx',
         space.id,
         50,
         getCacheHash(space.avatar)
-      )}`
+      )}`,
+      filter: `blur(${size === 'lg' ? '100' : '50'}px) contrast(0.9) saturate(1.3)`
     }"
-  ></div>
+  />
 </template>
-
-<style lang="scss" scoped>
-.space-fallback-cover {
-  @apply object-cover w-full h-full;
-
-  &::after {
-    // NOTE: Width and height are scaled up so that blur will always cover underlying images
-    // At certain cizes we get 1px that is not blured
-    @apply absolute h-[101%] w-[101%] pointer-events-none;
-
-    content: '';
-    backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
-  }
-}
-</style>
