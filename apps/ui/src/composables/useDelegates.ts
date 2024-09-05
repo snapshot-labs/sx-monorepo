@@ -1,7 +1,6 @@
 import {
   ApolloClient,
   createHttpLink,
-  DocumentNode,
   InMemoryCache
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
@@ -11,7 +10,7 @@ import { DelegationType, Space, Statement } from '@/types';
 
 type ApiDelegate = {
   id: string;
-  user?: string;
+  user: string;
   delegatedVotes: string;
   delegatedVotesRaw: string;
   tokenHoldersRepresentedAmount: number;
@@ -46,7 +45,7 @@ const DEFAULT_ORDER = 'delegatedVotes-desc';
 
 const DELEGATES_LIMIT = 40;
 
-const DELEGATES_QUERY_GOVERNOR_SUBGRAPH = gql`
+const DELEGATES_QUERY = gql`
   query (
     $first: Int!
     $skip: Int!
@@ -73,49 +72,6 @@ const DELEGATES_QUERY_GOVERNOR_SUBGRAPH = gql`
     }
   }
 `;
-
-const DELEGATES_QUERY_COMPOUND_GOVERNOR = gql`
-  query (
-    $first: Int!
-    $skip: Int!
-    $orderBy: Delegate_orderBy!
-    $orderDirection: OrderDirection!
-  ) {
-    delegates(
-      first: $first
-      skip: $skip
-      orderBy: $orderBy
-      orderDirection: $orderDirection
-      where: { tokenHoldersRepresentedAmount_gte: 0 }
-    ) {
-      id
-      delegatedVotes
-      delegatedVotesRaw
-      tokenHoldersRepresentedAmount
-    }
-    governance(id: "GOVERNANCE") {
-      delegatedVotes
-      totalDelegates
-    }
-  }
-`;
-
-const DELEGATIONS_PARAMS: Partial<
-  Record<DelegationType, { userField: string; query: DocumentNode }>
-> = {
-  'compound-governor': {
-    userField: 'id',
-    query: DELEGATES_QUERY_COMPOUND_GOVERNOR
-  },
-  'governor-subgraph': {
-    userField: 'user',
-    query: DELEGATES_QUERY_GOVERNOR_SUBGRAPH
-  },
-  'delegate-registry': {
-    userField: 'user',
-    query: DELEGATES_QUERY_GOVERNOR_SUBGRAPH
-  }
-};
 
 const metadataNetwork = getNetwork(metadataNetworkId);
 
@@ -165,14 +121,9 @@ export function useDelegates(
     governance: Governance;
     delegates: ApiDelegate[];
   }): Promise<Delegate[]> {
-    const delegationParams = DELEGATIONS_PARAMS[delegationType];
-    if (!delegationParams) throw new Error('Unsupported delegation type');
-
     const governanceData = data.governance;
     const delegatesData = data.delegates;
-    const addresses = delegatesData.map(
-      delegate => delegate[delegationParams.userField]
-    );
+    const addresses = delegatesData.map(delegate => delegate.user);
 
     const [names, statements] = await Promise.all([
       getNames(addresses),
@@ -193,15 +144,13 @@ export function useDelegates(
       const votesPercentage =
         Number(delegate.delegatedVotes) /
           Number(governanceData.delegatedVotes) || 0;
-      const delegateAddress = delegate[delegationParams.userField];
 
       return {
-        name: names[delegateAddress] || null,
-        user: delegateAddress,
+        name: names[delegate.user] || null,
         ...delegate,
         delegatorsPercentage,
         votesPercentage,
-        statement: indexedStatements[delegateAddress.toLowerCase()]
+        statement: indexedStatements[delegate.user.toLowerCase()]
       };
     });
   }
@@ -209,11 +158,8 @@ export function useDelegates(
   async function getDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
-    const delegationParams = DELEGATIONS_PARAMS[delegationType];
-    if (!delegationParams) throw new Error('Unsupported delegation type');
-
     const { data } = await apollo.query({
-      query: delegationParams.query,
+      query: DELEGATES_QUERY,
       variables: { ...filter, governance: governance.toLowerCase() }
     });
 
