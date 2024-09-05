@@ -24,22 +24,15 @@ const cb = computed(() => getCacheHash(props.user.cover));
   />
   <div
     v-else
-    class="user-fallback-cover"
+    class="bg-cover bg-center w-full h-full"
     :style="{
-      'background-image': `url(${getStampUrl('avatar', user.id, 50, getCacheHash(user.avatar))}`
+      'background-image': `url(${getStampUrl(
+        'avatar',
+        user.id,
+        50,
+        getCacheHash(user.avatar)
+      )}`,
+      filter: `blur(100px) contrast(0.9) saturate(1.3)`
     }"
-  ></div>
+  />
 </template>
-
-<style lang="scss" scoped>
-.user-fallback-cover {
-  @apply bg-cover bg-center w-full h-full;
-
-  &::after {
-    @apply absolute h-full w-full pointer-events-none;
-
-    content: '';
-    backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
-  }
-}
-</style>
