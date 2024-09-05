@@ -10,6 +10,7 @@ const PROPOSALS_LIMIT = 20;
 useTitle('Home');
 
 const metaStore = useMetaStore();
+const { modalAccountWithoutDismissOpen } = useModal();
 const followedSpacesStore = useFollowedSpacesStore();
 const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
@@ -108,9 +109,24 @@ watch(
 watch(state, (toState, fromState) => {
   if (toState !== fromState && web3.value.account) fetch();
 });
+
+watch(
+  [() => web3.value.account, () => web3.value.authLoading],
+  ([account, authLoading]) => {
+    if (!account && !authLoading) {
+      modalAccountWithoutDismissOpen.value = true;
+    }
+  },
+  { immediate: true }
+);
+
+onUnmounted(() => {
+  modalAccountWithoutDismissOpen.value = false;
+});
 </script>
 
 <template>
+  <Onboarding />
   <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown
