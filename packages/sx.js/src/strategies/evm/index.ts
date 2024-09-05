@@ -43,7 +43,7 @@ export async function getStrategiesWithParams(
   signerAddress: string,
   data: Propose | Vote,
   networkConfig: EvmNetworkConfig
-) {
+): Promise<IndexedConfig[]> {
   const results = await Promise.all(
     strategies.map(async strategyConfig => {
       const strategy = getStrategy(strategyConfig.address, networkConfig);
@@ -68,5 +68,5 @@ export async function getStrategiesWithParams(
     })
   );
 
-  return results.filter(Boolean) as IndexedConfig[];
+  return results.filter(result => result !== null);
 }

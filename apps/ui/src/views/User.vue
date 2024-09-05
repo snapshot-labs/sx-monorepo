@@ -84,7 +84,7 @@ async function loadActivities(userId: string) {
           vote_percentage: totalVotes > 0 ? activity.vote_count / totalVotes : 0
         };
       })
-      .filter(Boolean) as typeof activities.value;
+      .filter(activity => activity !== undefined);
   } finally {
     loadingActivities.value = false;
   }

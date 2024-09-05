@@ -30,9 +30,9 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
             const space = spacesStore.spacesMap.get(spaceId);
             if (!space) return;
 
-            return [getCompositeSpaceId(space), space];
+            return [getCompositeSpaceId(space), space] as const;
           })
-          .filter(Boolean) as [string, Space][]
+          .filter(space => space !== undefined)
       )
   );
 
@@ -40,7 +40,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     get() {
       return (followedSpacesIdsByAccount.value[web3.value.account] || [])
         .map(id => followedSpacesMap.value.get(id))
-        .filter(Boolean) as Space[];
+        .filter(space => space !== undefined);
     },
     set(spaces: Space[]) {
       followedSpacesIdsByAccount.value[web3.value.account] =
