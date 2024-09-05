@@ -40,8 +40,8 @@ watch(
         >
           <AppsListItem v-for="(app, i) in results" :key="i" :app="app" />
         </div>
-        <div v-else class="flex items-center text-skin-link">
-          <IH-exclamation-circle class="inline-block mr-2" />
+        <div v-else class="flex items-center text-skin-link gap-2">
+          <IH-exclamation-circle />
           <span v-text="'There are no integrations here.'" />
         </div>
       </div>
