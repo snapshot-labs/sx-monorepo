@@ -9,13 +9,14 @@ import Home from '@/views/My/Home.vue';
 import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
-import ProposalDiscussion from '@/views/Proposal/Discussion.vue';
+import Policy from '@/views/Policy.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
 import Proposal from '@/views/Proposal.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
+import Site from '@/views/Site.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
 import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
@@ -30,10 +31,24 @@ import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
+import Terms from '@/views/Terms.vue';
+import Topic from '@/views/Topic.vue';
 import User from '@/views/User.vue';
 
 const routes: any[] = [
-  { path: '/', name: 'landing', component: Landing },
+  {
+    path: '/',
+    name: 'site',
+    component: Site,
+    children: [
+      { path: '', name: 'site-landing', component: Landing },
+      { path: '/network', name: 'site-network', component: Network },
+      { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
+      { path: '/ecosystem/:id', name: 'site-app', component: App },
+      { path: '/terms-of-use', name: 'site-terms', component: Terms },
+      { path: '/privacy-policy', name: 'site-policy', component: Policy }
+    ]
+  },
   {
     path: '/:id',
     name: 'space',
@@ -46,9 +61,14 @@ const routes: any[] = [
         name: 'space-discussions',
         component: SpaceDiscussions
       },
+      {
+        path: 'discussions/:topic',
+        name: 'space-discussions-topic',
+        component: Topic
+      },
       { path: 'search', name: 'space-search', component: SpaceSearch },
       {
-        path: 'settings',
+        path: 'settings/:tab?',
         name: 'space-settings',
         component: SpaceSettings
       },
@@ -99,7 +119,7 @@ const routes: any[] = [
       {
         path: 'discussion',
         name: 'proposal-discussion',
-        component: ProposalDiscussion
+        component: Topic
       }
     ]
   },
@@ -127,10 +147,7 @@ const routes: any[] = [
       },
       { path: '/profile/:id', name: 'user', component: User }
     ]
-  },
-  { path: '/ecosystem', name: 'ecosystem', component: Ecosystem },
-  { path: '/ecosystem/:id', name: 'app', component: App },
-  { path: '/network', name: 'network', component: Network }
+  }
 ];
 
 const router = createRouter({
@@ -140,8 +157,7 @@ const router = createRouter({
     if (savedPosition) return savedPosition;
     if (to.params.retainScrollPosition) return {};
     if (to.hash) {
-      const position = { selector: to.hash };
-      return { el: position };
+      return { el: to.hash, behavior: 'smooth' };
     }
     return { top: 0 };
   }

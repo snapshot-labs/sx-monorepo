@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import removeMarkdown from 'remove-markdown';
-import { _n, _p, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
@@ -36,6 +36,7 @@ const {
   props.delegation.contractAddress as string,
   props.space
 );
+const { web3 } = useWeb3();
 
 const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
@@ -100,6 +101,19 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
   </div>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
+      <router-link
+        v-if="web3.account"
+        tabindex="-1"
+        :to="{
+          name: 'space-user-statement',
+          params: {
+            id: `${$props.space.network}:${props.space.id}`,
+            user: web3.account
+          }
+        }"
+      >
+        <UiButton> Edit my statement </UiButton>
+      </router-link>
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
@@ -227,10 +241,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               <div
                 class="w-[150px] flex flex-col sm:shrink-0 items-end justify-center leading-[22px] truncate"
               >
-                <h4
-                  class="text-skin-link"
-                  v-text="_n(delegate.delegatedVotes)"
-                />
+                <h4 class="text-skin-link">
+                  {{ _vp(Number(delegate.delegatedVotes)) }}
+                  {{ space.voting_power_symbol }}
+                </h4>
                 <div
                   class="text-[17px]"
                   v-text="_p(delegate.votesPercentage)"

@@ -74,7 +74,10 @@ const navigationConfig = computed<
       ? {
           discussions: {
             name: 'Discussions',
-            icon: IHAnnotation
+            icon: IHAnnotation,
+            active: ['space-discussions', 'space-discussions-topic'].includes(
+              route.name as string
+            )
           }
         }
       : undefined),
