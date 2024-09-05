@@ -197,7 +197,7 @@ onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
-  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto w-full">
     <div>
       <h1 class="mb-3 text-[40px] leading-[1.1em]">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
