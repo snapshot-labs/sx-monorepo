@@ -143,7 +143,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex md:flex-row flex-col w-full">
+  <div class="flex items-stretch md:flex-row flex-col size-full">
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="grow min-w-0">
@@ -206,7 +206,7 @@ watchEffect(() => {
       </div>
       <Affix
         :class="[
-          'shrink-0 -mb-6 md:min-h-[calc(100vh-72px)] md:w-[340px] border-l-0 md:border-l',
+          'shrink-0 md:w-[340px] border-l-0 md:border-l',
           { 'hidden md:block': route.name === 'proposal-votes' }
         ]"
       >
