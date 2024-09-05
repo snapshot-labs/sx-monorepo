@@ -135,8 +135,9 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
   const topic = await res.json();
 
   topic.posts_count--;
-  topic.posts = formatPosts(topic.post_stream.posts, baseUrl);
-
+  topic.posts = topic?.post_stream?.posts?.length
+    ? formatPosts(topic.post_stream.posts, baseUrl)
+    : [];
   return topic;
 }
 
@@ -150,5 +151,7 @@ export async function loadReplies(url: string): Promise<Reply[]> {
   );
   const data = await res.json();
 
-  return formatPosts(data.post_stream.posts, baseUrl);
+  return data?.post_stream?.posts?.length
+    ? formatPosts(data.post_stream.posts, baseUrl)
+    : [];
 }
