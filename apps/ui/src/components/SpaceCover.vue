@@ -37,7 +37,7 @@ const cb = computed(() => getCacheHash(props.space.cover));
           50,
           getCacheHash(space.avatar)
         )}`,
-        filter: `blur(${size === 'lg' ? '100' : '50'}px) saturate(1.3)`
+        filter: `blur(${size === 'lg' ? '100' : '50'}px) contrast(0.9) saturate(1.3)`
       }"
     />
   </div>
