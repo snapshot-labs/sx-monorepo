@@ -146,7 +146,7 @@ watchEffect(() => {
   <div class="flex md:flex-row flex-col w-full">
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
-      <div class="grow overflow-hidden">
+      <div class="grow min-w-0">
         <div
           class="flex px-4 bg-skin-bg border-b sticky top-[72px] z-40 space-x-3"
         >
