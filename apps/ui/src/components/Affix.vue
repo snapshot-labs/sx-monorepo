@@ -1,55 +1,68 @@
 <script lang="ts" setup>
 const wrapperEl = ref<HTMLDivElement | null>(null);
-const lastScrollY = ref(0);
 const initialTopOffset = ref<number | null>(null);
+const lastScrollY = ref(0);
 const topOffset = ref(0);
-const init = ref<boolean>(false);
+const ticking = ref<boolean>(false);
 
-function positionAffix() {
-  if (!wrapperEl.value) return;
+const innerEl = computed(
+  () => wrapperEl.value?.getElementsByTagName('div')[0] as HTMLDivElement
+);
 
-  const innerEl = wrapperEl.value.getElementsByTagName(
-    'div'
-  )[0] as HTMLDivElement;
+function updatePosition(scrollY: number) {
+  ticking.value = false;
+
+  if (!wrapperEl.value || !innerEl.value) return;
+
   const windowHeight = window.innerHeight;
-  const innerHeight = innerEl.getBoundingClientRect().height;
-  const innerBottom = innerEl.getBoundingClientRect().bottom;
-  const scrollOffset = window.scrollY - lastScrollY.value;
-  const scrollDirection = lastScrollY.value > window.scrollY ? 'up' : 'down';
+  const innerHeight = innerEl.value.getBoundingClientRect().height;
+  const innerBottom = innerEl.value.getBoundingClientRect().bottom;
+  const scrollOffset = scrollY - lastScrollY.value;
+  const scrollingDown = lastScrollY.value < scrollY;
 
-  lastScrollY.value = window.scrollY;
-
-  if (!init.value) {
-    initialTopOffset.value = wrapperEl.value.getBoundingClientRect().top;
-    topOffset.value = initialTopOffset.value;
-    innerEl.classList.add('static', 'md:sticky');
-    init.value = true;
-  }
+  lastScrollY.value = scrollY;
 
   if (innerBottom >= windowHeight) {
     const newTopOffset = topOffset.value - scrollOffset;
 
-    if (scrollDirection === 'down' && innerBottom > windowHeight) {
+    if (scrollingDown) {
       topOffset.value = Math.max(newTopOffset, -(innerHeight - windowHeight));
-    } else if (scrollDirection === 'up') {
+    } else {
       topOffset.value = Math.min(newTopOffset, initialTopOffset.value!);
     }
   } else {
     topOffset.value = initialTopOffset.value!;
   }
 
-  innerEl.style.top = `${topOffset.value}px`;
+  innerEl.value.style.top = `${topOffset.value}px`;
+}
+
+function handlePositionUpdate() {
+  if (!ticking.value) {
+    requestAnimationFrame(() => updatePosition(window.scrollY));
+  }
+  ticking.value = true;
+}
+
+function init() {
+  if (!wrapperEl.value) return;
+
+  initialTopOffset.value = wrapperEl.value.getBoundingClientRect().top;
+  topOffset.value = initialTopOffset.value;
+  innerEl.value.classList.add('static', 'md:sticky');
 }
 
 onMounted(() => {
-  positionAffix();
-  window.addEventListener('scroll', positionAffix);
-  window.addEventListener('resize', positionAffix);
+  init();
+  updatePosition(window.scrollY);
+
+  window.addEventListener('scroll', handlePositionUpdate);
+  window.addEventListener('resize', handlePositionUpdate);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', positionAffix);
-  window.removeEventListener('resize', positionAffix);
+  window.removeEventListener('scroll', handlePositionUpdate);
+  window.removeEventListener('resize', handlePositionUpdate);
 });
 </script>
 
