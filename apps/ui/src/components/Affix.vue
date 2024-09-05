@@ -26,7 +26,7 @@ function positionAffix() {
     init.value = true;
   }
 
-  if (innerHeight >= windowHeight) {
+  if (innerBottom >= windowHeight) {
     const newTopOffset = topOffset.value - scrollOffset;
 
     if (scrollDirection === 'down' && innerBottom > windowHeight) {
