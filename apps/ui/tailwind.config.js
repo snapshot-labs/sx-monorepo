@@ -33,7 +33,8 @@ module.exports = {
 
         // accents
         'skin-primary': 'rgba(var(--primary), <alpha-value>)',
-        'skin-accent-foreground': 'rgba(var(--accent-foreground), <alpha-value>)',
+        'skin-accent-foreground':
+          'rgba(var(--accent-foreground), <alpha-value>)',
         'skin-danger': 'rgba(var(--danger), <alpha-value>)',
         'skin-success': 'rgba(var(--success), <alpha-value>)',
 
@@ -48,6 +49,11 @@ module.exports = {
       },
       animation: {
         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+      },
+      gridTemplateColumns: {
+        'explore-3': 'repeat(3, minmax(0, 230px))',
+        'explore-4': 'repeat(4, minmax(0, 230px))',
+        'explore-5': 'repeat(5, minmax(0, 230px))'
       }
     },
     screens: {
@@ -55,7 +61,9 @@ module.exports = {
       sm: '544px',
       md: '768px',
       lg: '1012px',
-      xl: '1280px'
+      xl: '1280px',
+      '2xl': '1536px',
+      '3xl': '1844px'
     },
     spacing: {
       0: '0px',
@@ -70,13 +78,16 @@ module.exports = {
       5: '32px',
       6: '40px',
       7: '48px',
-      8: '64px'
+      8: '64px',
+      9: '72px',
+      10: '80px',
+      11: '88px',
+      12: '96px'
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
     },
     fontSize: {
-      '2xl': ['34px'],
       xl: ['28px'],
       lg: ['22px'],
       md: ['20px'],

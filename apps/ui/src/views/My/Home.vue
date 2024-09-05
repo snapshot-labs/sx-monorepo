@@ -9,10 +9,10 @@ const PROPOSALS_LIMIT = 20;
 
 useTitle('Home');
 
-const router = useRouter();
 const metaStore = useMetaStore();
+const { modalAccountWithoutDismissOpen } = useModal();
 const followedSpacesStore = useFollowedSpacesStore();
-const { web3, authInitiated } = useWeb3();
+const { web3 } = useWeb3();
 const { loadVotes } = useAccount();
 
 const loaded = ref(false);
@@ -114,14 +114,19 @@ watch(
   [() => web3.value.account, () => web3.value.authLoading],
   ([account, authLoading]) => {
     if (!account && !authLoading) {
-      router.push({ name: 'my-explore' });
+      modalAccountWithoutDismissOpen.value = true;
     }
   },
   { immediate: true }
 );
+
+onUnmounted(() => {
+  modalAccountWithoutDismissOpen.value = false;
+});
 </script>
 
 <template>
+  <Onboarding />
   <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown

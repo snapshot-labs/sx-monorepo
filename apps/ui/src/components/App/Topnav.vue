@@ -7,7 +7,8 @@ const router = useRouter();
 const usersStore = useUsersStore();
 const auth = getInstance();
 const uiStore = useUiStore();
-const { modalAccountOpen } = useModal();
+const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
+  useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
 
@@ -45,10 +46,8 @@ const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
 
-const showLogo = computed(() => String(route.matched[0]?.name) === 'landing');
-
 async function handleLogin(connector) {
-  modalAccountOpen.value = false;
+  resetAccountModal();
   loading.value = true;
   await login(connector);
   loading.value = false;
@@ -101,7 +100,6 @@ watch(
       </button>
 
       <Breadcrumb
-        v-if="!showLogo"
         :class="[
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
@@ -109,14 +107,6 @@ watch(
       >
       </Breadcrumb>
     </div>
-    <router-link
-      v-if="showLogo"
-      :to="{ path: '/' }"
-      class="truncate grow"
-      style="font-size: 24px"
-    >
-      snapshot
-    </router-link>
     <form
       v-if="searchConfig"
       id="search-form"
@@ -170,7 +160,8 @@ watch(
   </nav>
   <teleport to="#modal">
     <ModalAccount
-      :open="modalAccountOpen"
+      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
+      :closeable="!modalAccountWithoutDismissOpen"
       @close="modalAccountOpen = false"
       @login="handleLogin"
     />

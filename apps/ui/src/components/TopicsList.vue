@@ -16,9 +16,9 @@ defineProps<{
       <TopicsListItem v-for="(topic, i) in topics" :key="i" :topic="topic" />
       <div
         v-if="!topics.length"
-        class="px-4 py-3 flex items-center text-skin-link"
+        class="px-4 py-3 flex items-center space-x-2 text-skin-link"
       >
-        <IH-exclamation-circle class="inline-block mr-2" />
+        <IH-exclamation-circle class="shrink-0" />
         <span v-text="'There are no topics here.'" />
       </div>
     </div>

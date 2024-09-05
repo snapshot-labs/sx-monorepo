@@ -22,6 +22,10 @@ export function getIndex(space: SpaceDetails, block: number | null): string {
   return `${space.id}:${block ?? LATEST_BLOCK_NAME}`;
 }
 
+function isSpace(item: SpaceDetails | Proposal): item is Space {
+  return 'proposal_threshold' in item;
+}
+
 export const useVotingPowersStore = defineStore('votingPowers', () => {
   const votingPowers = reactive<Map<string, VotingPowerItem>>(new Map());
 
@@ -54,17 +58,31 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
     }
 
     try {
-      const vp = await network.actions.getVotingPower(
-        space.id,
-        item.strategies,
-        item.strategies_params,
-        space.strategies_parsed_metadata,
-        account,
-        {
-          at: block,
-          chainId: space.snapshot_chain_id
-        }
-      );
+      const opts = {
+        at: block,
+        chainId: space.snapshot_chain_id
+      };
+
+      const [vp, proposeVp] = await Promise.all([
+        network.actions.getVotingPower(
+          space.id,
+          item.strategies,
+          item.strategies_params,
+          space.strategies_parsed_metadata,
+          account,
+          opts
+        ),
+        isSpace(item)
+          ? network.actions.getVotingPower(
+              space.id,
+              item.voting_power_validation_strategy_strategies,
+              item.voting_power_validation_strategy_strategies_params,
+              item.voting_power_validation_strategies_parsed_metadata,
+              account,
+              opts
+            )
+          : Promise.resolve(null)
+      ]);
 
       vpItem = {
         ...vpItem,
@@ -74,9 +92,10 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
         decimals: Math.max(...vp.map(votingPower => votingPower.decimals), 0)
       };
 
-      if ('proposal_threshold' in space) {
-        vpItem.canPropose =
-          vpItem.totalVotingPower >= BigInt(space.proposal_threshold);
+      if (isSpace(item) && proposeVp) {
+        const totalProposeVp = proposeVp.reduce((acc, b) => acc + b.value, 0n);
+
+        vpItem.canPropose = totalProposeVp >= BigInt(item.proposal_threshold);
       } else {
         vpItem.canVote = vpItem.totalVotingPower > 0n;
       }
