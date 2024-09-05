@@ -148,7 +148,7 @@ watchEffect(() => {
     <template v-else>
       <div class="grow min-w-0">
         <div
-          class="flex px-4 bg-skin-bg border-b sticky top-[72px] z-40 space-x-3"
+          class="flex px-4 bg-skin-bg border-b sticky top-[71px] lg:top-[72px] z-40 space-x-3"
         >
           <router-link
             :to="{
