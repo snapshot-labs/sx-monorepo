@@ -63,21 +63,23 @@ export default function (options: { discussion?: string } = {}) {
     turndownService.addRule('mention', {
       filter: ['a'],
       replacement: function (content, node) {
-        if (node.classList.contains('mention')) {
+        const classList: string[] = Array.from(node.classList);
+        if (classList.includes('anchor')) return '';
+        if (classList.includes('mention')) {
           const baseUrl = options.discussion?.match(
             /^(https?:\/\/[^\/]+\/)/
           )?.[1];
           const username = node.href.match(/\/u\/(.*)/)?.[1];
           return `[${node.textContent}](${baseUrl}u/${username})`;
         }
-        if (node.classList.contains('mention-group')) {
+        if (classList.includes('mention-group')) {
           const baseUrl = options.discussion?.match(
             /^(https?:\/\/[^\/]+\/)/
           )?.[1];
           const groupIdentifier = node.href.match(/\/(groups|g)\/(.*)/)?.[2];
           return `[${node.textContent}](${baseUrl}g/${groupIdentifier})`;
         }
-        if (node.classList.contains('badge-category__wrapper')) {
+        if (classList.includes('badge-category__wrapper')) {
           return `- [${node.textContent}](${node.href})`;
         }
 
