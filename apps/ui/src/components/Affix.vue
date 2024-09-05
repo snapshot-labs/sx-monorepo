@@ -5,7 +5,7 @@ const initialTopOffset = ref<number | null>(null);
 const topOffset = ref(0);
 const init = ref<boolean>(false);
 
-function handleScroll() {
+function positionAffix() {
   if (!wrapperEl.value) return;
 
   const innerEl = wrapperEl.value.getElementsByTagName(
@@ -42,11 +42,15 @@ function handleScroll() {
 }
 
 onMounted(() => {
-  handleScroll();
-  window.addEventListener('scroll', handleScroll);
+  positionAffix();
+  window.addEventListener('scroll', positionAffix);
+  window.addEventListener('resize', positionAffix);
 });
 
-onUnmounted(() => window.removeEventListener('scroll', handleScroll));
+onUnmounted(() => {
+  window.removeEventListener('scroll', positionAffix);
+  window.removeEventListener('resize', positionAffix);
+});
 </script>
 
 <template>
