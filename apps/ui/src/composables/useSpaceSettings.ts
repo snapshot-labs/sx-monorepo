@@ -60,14 +60,14 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
   delegations: []
 };
 
-export function useSpaceSettings(space: Space) {
+export function useSpaceSettings(space: Ref<Space>) {
   const { getDurationFromCurrent } = useMetaStore();
   const { updateSettings, updateSettingsRaw, transferOwnership } = useActions();
 
   const loading = ref(true);
   const isModified = ref(false);
 
-  const network = computed(() => getNetwork(space.network));
+  const network = computed(() => getNetwork(space.value.network));
 
   // Common properties
   const form: Ref<SpaceMetadata> = ref(clone(DEFAULT_FORM_STATE));
@@ -81,10 +81,10 @@ export function useSpaceSettings(space: Space) {
   const validationStrategy = ref(null as StrategyConfig | null);
   const votingStrategies = ref([] as StrategyConfig[]);
   const initialValidationStrategyObjectHash = ref(null as string | null);
-  const controller = ref(space.controller);
+  const controller = ref(space.value.controller);
 
   function currentToMinutesOnly(value: number) {
-    const duration = getDurationFromCurrent(space.network, value);
+    const duration = getDurationFromCurrent(space.value.network, value);
     return Math.round(duration / 60) * 60;
   }
 
@@ -194,7 +194,7 @@ export function useSpaceSettings(space: Space) {
     }
 
     let params: string[] = [];
-    if (evmNetworks.includes(space.network)) {
+    if (evmNetworks.includes(space.value.network)) {
       params = strategy.generateParams
         ? strategy.generateParams(strategy.params)
         : ['0x'];
@@ -293,7 +293,7 @@ export function useSpaceSettings(space: Space) {
   }
 
   async function saveOffchain() {
-    if (space.additionalRawData?.type !== 'offchain') {
+    if (space.value.additionalRawData?.type !== 'offchain') {
       throw new Error('Missing raw data for offchain space');
     }
 
@@ -317,50 +317,52 @@ export function useSpaceSettings(space: Space) {
     }
 
     const saveData: OffchainSpaceSettings = {
-      name: form.value.name ?? space.name,
-      about: (form.value.description ?? space.about) || '',
-      avatar: form.value.avatar ?? space.avatar,
-      network: space.snapshot_chain_id?.toString() ?? '1',
-      symbol: form.value.votingPowerSymbol ?? space.voting_power_symbol,
-      terms: space.additionalRawData.terms,
-      website: form.value.externalUrl ?? space.external_url,
-      twitter: form.value.twitter ?? space.twitter,
-      github: form.value.github ?? space.github,
-      coingecko: space.coingecko || '',
-      parent: space.parent?.id ?? null,
-      children: space.children.map(child => child.id),
-      private: space.additionalRawData.private,
-      domain: space.additionalRawData.domain,
-      skin: space.additionalRawData.skin,
-      guidelines: space.additionalRawData.guidelines,
-      template: space.additionalRawData.template,
-      strategies: space.additionalRawData.strategies,
-      categories: space.additionalRawData.categories,
+      name: form.value.name ?? space.value.name,
+      about: (form.value.description ?? space.value.about) || '',
+      avatar: form.value.avatar ?? space.value.avatar,
+      network: space.value.snapshot_chain_id?.toString() ?? '1',
+      symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
+      terms: space.value.additionalRawData.terms,
+      website: form.value.externalUrl ?? space.value.external_url,
+      twitter: form.value.twitter ?? space.value.twitter,
+      github: form.value.github ?? space.value.github,
+      coingecko: space.value.coingecko || '',
+      parent: space.value.parent?.id ?? null,
+      children: space.value.children.map(child => child.id),
+      private: space.value.additionalRawData.private,
+      domain: space.value.additionalRawData.domain,
+      skin: space.value.additionalRawData.skin,
+      guidelines: space.value.additionalRawData.guidelines,
+      template: space.value.additionalRawData.template,
+      strategies: space.value.additionalRawData.strategies,
+      categories: space.value.additionalRawData.categories,
       treasuries: form.value.treasuries.map(treasury => ({
         address: treasury.address || '',
         name: treasury.name || '',
         network: treasury.chainId?.toString() ?? '1'
       })),
-      admins: space.additionalRawData.admins,
-      moderators: space.additionalRawData.moderators,
-      members: space.additionalRawData.members,
-      plugins: space.additionalRawData.plugins,
+      admins: space.value.additionalRawData.admins,
+      moderators: space.value.additionalRawData.moderators,
+      members: space.value.additionalRawData.members,
+      plugins: space.value.additionalRawData.plugins,
       delegationPortal: delegationPortal,
-      filters: space.additionalRawData.filters,
+      filters: space.value.additionalRawData.filters,
       voting: {
-        blind: space.additionalRawData.voting.blind,
-        aliased: space.additionalRawData.voting.aliased,
-        hideAbstain: space.additionalRawData.voting.hideAbstain,
-        quorumType: space.additionalRawData.voting.quorumType || 'default',
-        quorum: space.additionalRawData.voting.quorum,
-        type: space.additionalRawData.voting.type || '',
-        privacy: space.additionalRawData.voting.privacy,
-        delay: votingDelay.value ?? space.additionalRawData.voting.delay,
-        period: maxVotingPeriod.value ?? space.additionalRawData.voting.period
+        blind: space.value.additionalRawData.voting.blind,
+        aliased: space.value.additionalRawData.voting.aliased,
+        hideAbstain: space.value.additionalRawData.voting.hideAbstain,
+        quorumType:
+          space.value.additionalRawData.voting.quorumType || 'default',
+        quorum: space.value.additionalRawData.voting.quorum,
+        type: space.value.additionalRawData.voting.type || '',
+        privacy: space.value.additionalRawData.voting.privacy,
+        delay: votingDelay.value ?? space.value.additionalRawData.voting.delay,
+        period:
+          maxVotingPeriod.value ?? space.value.additionalRawData.voting.period
       },
-      validation: space.additionalRawData.validation,
-      voteValidation: space.additionalRawData.voteValidation,
-      boost: space.additionalRawData.boost
+      validation: space.value.additionalRawData.validation,
+      voteValidation: space.value.additionalRawData.voteValidation,
+      boost: space.value.additionalRawData.boost
     };
 
     const prunedSaveData: Partial<OffchainSpaceSettings> = clone(saveData);
@@ -381,7 +383,7 @@ export function useSpaceSettings(space: Space) {
       delete prunedSaveData.voting.quorumType;
     }
 
-    return updateSettingsRaw(space, JSON.stringify(prunedSaveData));
+    return updateSettingsRaw(space.value, JSON.stringify(prunedSaveData));
   }
 
   async function saveOnchain() {
@@ -391,20 +393,20 @@ export function useSpaceSettings(space: Space) {
 
     const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
       authenticators.value,
-      space.authenticators,
+      space.value.authenticators,
       [],
       []
     );
 
     const [strategiesToAdd, strategiesToRemove] = await processChanges(
       votingStrategies.value,
-      space.strategies,
-      space.strategies_params,
-      space.strategies_parsed_metadata
+      space.value.strategies,
+      space.value.strategies_params,
+      space.value.strategies_parsed_metadata
     );
 
     return updateSettings(
-      space,
+      space.value,
       form.value,
       authenticatorsToAdd,
       authenticatorsToRemove,
@@ -418,7 +420,7 @@ export function useSpaceSettings(space: Space) {
   }
 
   async function save() {
-    if (offchainNetworks.includes(space.network)) {
+    if (offchainNetworks.includes(space.value.network)) {
       return saveOffchain();
     } else {
       return saveOnchain();
@@ -426,33 +428,33 @@ export function useSpaceSettings(space: Space) {
   }
 
   async function saveController() {
-    return transferOwnership(space, controller.value);
+    return transferOwnership(space.value, controller.value);
   }
 
   async function reset() {
     const authenticatorsValue = await getInitialStrategiesConfig(
-      space.authenticators,
+      space.value.authenticators,
       network.value.constants.EDITOR_AUTHENTICATORS
     );
 
     const votingStrategiesValue = await getInitialStrategiesConfig(
-      space.strategies,
+      space.value.strategies,
       network.value.constants.EDITOR_VOTING_STRATEGIES,
-      space.strategies_params,
-      space.strategies_parsed_metadata
+      space.value.strategies_params,
+      space.value.strategies_parsed_metadata
     );
 
     const validationStrategyValue = await getInitialValidationStrategy(
-      space.validation_strategy,
+      space.value.validation_strategy,
       network.value.constants.EDITOR_PROPOSAL_VALIDATIONS,
-      space.validation_strategy_params,
-      space.voting_power_validation_strategy_strategies,
-      space.voting_power_validation_strategy_strategies_params,
-      space.voting_power_validation_strategies_parsed_metadata
+      space.value.validation_strategy_params,
+      space.value.voting_power_validation_strategy_strategies,
+      space.value.voting_power_validation_strategy_strategies_params,
+      space.value.voting_power_validation_strategies_parsed_metadata
     );
 
     formErrors.value = {};
-    form.value = getInitialForm(space);
+    form.value = getInitialForm(space.value);
 
     votingDelay.value = null;
     minVotingPeriod.value = null;
@@ -485,14 +487,14 @@ export function useSpaceSettings(space: Space) {
       return;
     }
 
-    if (objectHash(formValue) !== objectHash(getInitialForm(space))) {
+    if (objectHash(formValue) !== objectHash(getInitialForm(space.value))) {
       isModified.value = true;
       return;
     }
 
     if (
       votingDelayValue !== null &&
-      votingDelayValue !== currentToMinutesOnly(space.voting_delay)
+      votingDelayValue !== currentToMinutesOnly(space.value.voting_delay)
     ) {
       isModified.value = true;
       return;
@@ -500,7 +502,8 @@ export function useSpaceSettings(space: Space) {
 
     if (
       minVotingPeriodValue !== null &&
-      minVotingPeriodValue !== currentToMinutesOnly(space.min_voting_period)
+      minVotingPeriodValue !==
+        currentToMinutesOnly(space.value.min_voting_period)
     ) {
       isModified.value = true;
       return;
@@ -508,17 +511,23 @@ export function useSpaceSettings(space: Space) {
 
     if (
       maxVotingPeriodValue !== null &&
-      maxVotingPeriodValue !== currentToMinutesOnly(space.max_voting_period)
+      maxVotingPeriodValue !==
+        currentToMinutesOnly(space.value.max_voting_period)
     ) {
       isModified.value = true;
       return;
     }
 
-    if (offchainNetworks.includes(space.network)) {
+    if (offchainNetworks.includes(space.value.network)) {
       // TODO: offchain network only settings
     } else {
       const [authenticatorsToAdd, authenticatorsToRemove] =
-        await processChanges(authenticatorsValue, space.authenticators, [], []);
+        await processChanges(
+          authenticatorsValue,
+          space.value.authenticators,
+          [],
+          []
+        );
 
       if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
         isModified.value = true;
@@ -527,9 +536,9 @@ export function useSpaceSettings(space: Space) {
 
       const [strategiesToAdd, strategiesToRemove] = await processChanges(
         votingStrategiesValue,
-        space.strategies,
-        space.strategies_params,
-        space.strategies_parsed_metadata
+        space.value.strategies,
+        space.value.strategies_params,
+        space.value.strategies_parsed_metadata
       );
 
       if (strategiesToAdd.length || strategiesToRemove.length) {

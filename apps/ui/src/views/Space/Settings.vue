@@ -21,7 +21,7 @@ const {
   save,
   saveController,
   reset
-} = useSpaceSettings(props.space);
+} = useSpaceSettings(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
