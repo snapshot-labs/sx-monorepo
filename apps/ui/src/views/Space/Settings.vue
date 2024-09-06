@@ -277,7 +277,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       title="Delegations"
       description="Delegations allow users to delegate their voting power to other users."
     >
-      <FormSpaceDelegations v-model="form.delegations" />
+      <FormSpaceDelegations
+        v-model="form.delegations"
+        :limit="isOffchainNetwork ? 1 : undefined"
+      />
     </UiContainerSettings>
     <UiContainerSettings
       v-if="activeTab === 'treasuries'"
