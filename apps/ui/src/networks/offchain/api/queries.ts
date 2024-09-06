@@ -24,6 +24,7 @@ const SPACE_FRAGMENT = gql`
     delegationPortal {
       delegationType
       delegationContract
+      delegationNetwork
       delegationApi
     }
     voting {

@@ -606,7 +606,7 @@ export function createActions(
         abi: string[];
       };
 
-      if (delegationType === 'governor-subgraph') {
+      if (['governor-subgraph', 'compound-governor'].includes(delegationType)) {
         contractParams = {
           address: delegationContract.split(':')[1],
           functionName: 'delegate',
