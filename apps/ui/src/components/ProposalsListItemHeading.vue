@@ -3,11 +3,19 @@ import { quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Choice, Proposal as ProposalType } from '@/types';
 
-const props = defineProps<{
-  proposal: ProposalType;
-  showSpace: boolean;
-  showAuthor: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    proposal: ProposalType;
+    showSpace: boolean;
+    showAuthor: boolean;
+    showVotedIndicator: boolean;
+  }>(),
+  {
+    showSpace: true,
+    showAuthor: true,
+    showVotedIndicator: true
+  }
+);
 
 const { getTsFromCurrent } = useMetaStore();
 
@@ -67,7 +75,9 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <IH-check
-            v-if="votes[`${proposal.network}:${proposal.id}`]"
+            v-if="
+              showVotedIndicator && votes[`${proposal.network}:${proposal.id}`]
+            "
             class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-0.5"
           />
         </router-link>
