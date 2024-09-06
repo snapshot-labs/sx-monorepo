@@ -254,7 +254,8 @@ export type NetworkApi = {
   ): Promise<Vote[]>;
   loadUserVotes(
     spaceIds: string[],
-    voter: string
+    voter: string,
+    paginationOpts: PaginationOpts
   ): Promise<{ [key: string]: Vote }>;
   loadProposals(
     spaceIds: string[],

@@ -419,13 +419,16 @@ export function createApi(
     },
     loadUserVotes: async (
       spaceIds: string[],
-      voter: string
+      voter: string,
+      { limit, skip = 0 }: PaginationOpts
     ): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
           spaceIds,
-          voter
+          voter,
+          first: limit,
+          skip
         }
       });
 

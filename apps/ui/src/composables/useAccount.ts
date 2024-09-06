@@ -3,6 +3,8 @@ import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector } from '@/networks/types';
 import { NetworkID, Proposal, Vote } from '@/types';
 
+const VOTES_LIMIT = 1000;
+
 const { web3 } = useWeb3();
 const votes = ref<Record<Proposal['id'], Vote>>({});
 const pendingVotes = ref<Record<string, boolean>>({});
@@ -30,7 +32,9 @@ export function useAccount() {
       return;
 
     const network = getNetwork(networkId);
-    const userVotes = await network.api.loadUserVotes(spaceIds, account);
+    const userVotes = await network.api.loadUserVotes(spaceIds, account, {
+      limit: VOTES_LIMIT
+    });
 
     votes.value = { ...votes.value, ...userVotes };
   }
