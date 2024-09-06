@@ -32,6 +32,11 @@ const SPACE_FRAGMENT = gql`
       period
       quorum
       type
+      quorumType
+      blind
+      hideAbstain
+      privacy
+      aliased
     }
     strategies {
       name
@@ -68,6 +73,24 @@ const SPACE_FRAGMENT = gql`
       turbo
       verified
       network
+    }
+    # needed for settings
+    terms
+    private
+    domain
+    skin
+    guidelines
+    template
+    categories
+    moderators
+    plugins
+    boost {
+      enabled
+      bribeEnabled
+    }
+    voteValidation {
+      name
+      params
     }
   }
 `;

@@ -1,3 +1,5 @@
+import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
+
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
@@ -51,7 +53,6 @@ export type DelegationType =
   | 'governor-subgraph'
   // From v1
   | 'delegate-registry'
-  | 'compound-governor'
   | 'split-delegation';
 
 export type SelectedStrategy = {
@@ -119,6 +120,30 @@ export type RelatedSpace = {
   snapshot_chain_id: number;
 };
 
+export type OffchainAdditionalRawData = {
+  type: 'offchain';
+} & Pick<
+  OffchainApiSpace,
+  | 'terms'
+  | 'private'
+  | 'domain'
+  | 'skin'
+  | 'guidelines'
+  | 'template'
+  | 'strategies'
+  | 'categories'
+  | 'admins'
+  | 'moderators'
+  | 'members'
+  | 'plugins'
+  | 'delegationPortal'
+  | 'filters'
+  | 'voting'
+  | 'validation'
+  | 'voteValidation'
+  | 'boost'
+>;
+
 export type Space = {
   id: string;
   network: NetworkID;
@@ -169,6 +194,9 @@ export type Space = {
   created: number;
   children: RelatedSpace[];
   parent: RelatedSpace | null;
+  // only use this for settings, if it's actually used for other things
+  // move it to main space type
+  additionalRawData?: OffchainAdditionalRawData;
 };
 
 export type ProposalExecution = {

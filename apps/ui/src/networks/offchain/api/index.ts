@@ -18,6 +18,7 @@ import {
   Alias,
   Follow,
   NetworkID,
+  OffchainAdditionalRawData,
   Proposal,
   ProposalExecution,
   ProposalState,
@@ -139,6 +140,28 @@ function formatSpace(
     };
   }
 
+  const additionalRawData: OffchainAdditionalRawData = {
+    type: 'offchain',
+    terms: space.terms,
+    private: space.private,
+    domain: space.domain,
+    skin: space.skin,
+    guidelines: space.guidelines,
+    template: space.template,
+    strategies: space.strategies,
+    categories: space.categories,
+    admins: space.admins,
+    moderators: space.moderators,
+    members: space.members,
+    plugins: space.plugins,
+    delegationPortal: space.delegationPortal,
+    filters: space.filters,
+    voting: space.voting,
+    validation: space.validation,
+    voteValidation: space.voteValidation,
+    boost: space.boost
+  };
+
   return {
     id: space.id,
     network: networkId,
@@ -146,15 +169,15 @@ function formatSpace(
     turbo: space.turbo,
     controller: '',
     snapshot_chain_id: parseInt(space.network),
-    name: space.name,
-    avatar: space.avatar,
+    name: space.name || '',
+    avatar: space.avatar || '',
     cover: '',
-    about: space.about,
-    external_url: space.website,
-    github: space.github,
-    twitter: space.twitter,
+    about: space.about || '',
+    external_url: space.website || '',
+    github: space.github || '',
+    twitter: space.twitter || '',
     discord: '',
-    coingecko: space.coingecko,
+    coingecko: space.coingecko || '',
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
@@ -185,7 +208,8 @@ function formatSpace(
     voting_power_validation_strategy_strategies_params: [validationParams],
     voting_power_validation_strategies_parsed_metadata: [],
     children: space.children.map(formatRelatedSpace),
-    parent: space.parent ? formatRelatedSpace(space.parent) : null
+    parent: space.parent ? formatRelatedSpace(space.parent) : null,
+    additionalRawData
   };
 }
 
@@ -330,12 +354,14 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   );
 
   if (space.delegationPortal) {
+    const [apiType, name] =
+      space.delegationPortal.delegationType === 'compound-governor'
+        ? (['governor-subgraph', 'ERC-20 Votes'] as const)
+        : [space.delegationPortal.delegationType, 'Split Delegation'];
+
     delegations.push({
-      name:
-        space.delegationPortal.delegationType === 'compound-governor'
-          ? 'ERC-20 Votes'
-          : 'Split Delegation',
-      apiType: space.delegationPortal.delegationType,
+      name,
+      apiType,
       apiUrl: space.delegationPortal.delegationApi,
       contractNetwork:
         CHAIN_IDS_TO_NETWORKS[

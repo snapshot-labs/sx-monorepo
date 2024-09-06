@@ -17,33 +17,36 @@ export type ApiSpace = {
   turbo: boolean;
   admins: string[];
   members: string[];
-  name: string;
-  avatar: string;
+  name: string | null;
+  avatar: string | null;
   network: string;
-  about: string;
-  website: string;
-  twitter: string;
-  github: string;
-  coingecko: string;
+  about: string | null;
+  website: string | null;
+  twitter: string | null;
+  github: string | null;
+  coingecko: string | null;
   symbol: string;
-  treasuries: [
-    {
-      name: string;
-      network: string;
-      address: string;
-    }
-  ];
-  delegationPortal?: {
-    delegationType: DelegationType;
+  treasuries: {
+    name: string;
+    network: string;
+    address: string;
+  }[];
+  delegationPortal: {
+    delegationType: DelegationType | 'compound-governor';
     delegationContract: string;
     delegationNetwork: string;
     delegationApi: string;
-  };
+  } | null;
   voting: {
     delay: number | null;
     period: number | null;
     quorum: number | null;
-    type: VoteType | null;
+    type: VoteType | '' | null;
+    quorumType?: string;
+    blind: boolean;
+    hideAbstain: boolean;
+    privacy: string;
+    aliased: boolean;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];
   validation: {
@@ -59,6 +62,24 @@ export type ApiSpace = {
   followersCount: number;
   children: [ApiRelatedSpace];
   parent: ApiRelatedSpace | null;
+  // properties used for settings
+  terms: string;
+  private: boolean;
+  domain: string | null;
+  skin: string | null;
+  template: string | null;
+  guidelines: string | null;
+  categories: string[];
+  moderators: string[];
+  plugins: Record<string, any>;
+  boost: {
+    enabled: boolean;
+    bribeEnabled: boolean;
+  };
+  voteValidation: {
+    name: string;
+    params?: any;
+  };
 };
 
 export type ApiProposal = {
