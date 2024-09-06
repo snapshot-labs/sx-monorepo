@@ -72,7 +72,11 @@ const routes: any[] = [
         name: 'space-settings',
         component: SpaceSettings
       },
-      { path: 'treasury', name: 'space-treasury', component: SpaceTreasury },
+      {
+        path: 'treasury/:name?/:tab?',
+        name: 'space-treasury',
+        component: SpaceTreasury
+      },
       { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
       {
         path: 'leaderboard',

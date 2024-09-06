@@ -14,6 +14,7 @@ const props = defineProps<{
 }>();
 
 const { setTitle } = useTitle();
+const route = useRoute();
 const router = useRouter();
 const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
@@ -22,7 +23,9 @@ const { treasury } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
-const page: Ref<'tokens' | 'nfts'> = ref('tokens');
+const page: Ref<'tokens' | 'nfts'> = computed(() => {
+  return route.params.tab === 'nfts' ? 'nfts' : 'tokens';
+});
 const modalOpen = ref({
   tokens: false,
   nfts: false,
@@ -119,6 +122,16 @@ async function addTx(tx: Transaction) {
 
 onMounted(() => {
   if (!treasury.value) return;
+
+  if (!route.params.tab) {
+    return router.push({
+      name: 'space-treasury',
+      params: {
+        name: treasury.value.name,
+        tab: 'tokens'
+      }
+    });
+  }
 
   loadBalances(treasury.value.wallet, treasury.value.network);
   loadNfts(treasury.value.wallet, treasury.value.network);
@@ -240,12 +253,24 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </div>
       <div>
         <div class="flex pl-4 border-b space-x-3">
-          <button type="button" @click="page = 'tokens'">
+          <router-link
+            type="button"
+            :to="{
+              name: 'space-treasury',
+              params: { name: treasury.name, tab: 'tokens' }
+            }"
+          >
             <UiLink :is-active="page === 'tokens'" text="Tokens" />
-          </button>
-          <button type="button" @click="page = 'nfts'">
+          </router-link>
+          <router-link
+            type="button"
+            :to="{
+              name: 'space-treasury',
+              params: { name: treasury.name, tab: 'nfts' }
+            }"
+          >
             <UiLink :is-active="page === 'nfts'" text="NFTs" />
-          </button>
+          </router-link>
         </div>
         <div v-if="page === 'tokens'">
           <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
