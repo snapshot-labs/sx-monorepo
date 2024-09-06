@@ -6,9 +6,9 @@ import { Choice, Proposal as ProposalType } from '@/types';
 const props = withDefaults(
   defineProps<{
     proposal: ProposalType;
-    showSpace: boolean;
-    showAuthor: boolean;
-    showVotedIndicator: boolean;
+    showSpace?: boolean;
+    showAuthor?: boolean;
+    showVotedIndicator?: boolean;
   }>(),
   {
     showSpace: true,
