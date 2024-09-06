@@ -356,7 +356,6 @@ export function useSpaceSettings(space: Space) {
         type: space.additionalRawData.voting.type || '',
         privacy: space.additionalRawData.voting.privacy,
         delay: votingDelay.value ?? space.additionalRawData.voting.delay,
-        // TODO: only do one period for offchain
         period: maxVotingPeriod.value ?? space.additionalRawData.voting.period
       },
       validation: space.additionalRawData.validation,

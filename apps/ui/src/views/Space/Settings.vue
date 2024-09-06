@@ -47,6 +47,10 @@ type Tab = {
   visible: boolean;
 };
 
+const isOffchainNetwork = computed(() =>
+  offchainNetworks.includes(props.space.network)
+);
+
 const tabs = computed<Tab[]>(
   () =>
     [
@@ -68,17 +72,17 @@ const tabs = computed<Tab[]>(
       {
         id: 'authenticators',
         name: 'Authenticators',
-        visible: !offchainNetworks.includes(props.space.network)
+        visible: !isOffchainNetwork.value
       },
       {
         id: 'proposal-validation',
         name: 'Proposal validation',
-        visible: !offchainNetworks.includes(props.space.network)
+        visible: !isOffchainNetwork.value
       },
       {
         id: 'voting-strategies',
         name: 'Voting strategies',
-        visible: !offchainNetworks.includes(props.space.network)
+        visible: !isOffchainNetwork.value
       },
       {
         id: 'voting',
@@ -88,12 +92,12 @@ const tabs = computed<Tab[]>(
       {
         id: 'execution',
         name: 'Execution',
-        visible: !offchainNetworks.includes(props.space.network)
+        visible: !isOffchainNetwork.value
       },
       {
         id: 'controller',
         name: 'Controller',
-        visible: !offchainNetworks.includes(props.space.network)
+        visible: !isOffchainNetwork.value
       }
     ] as const
 );
@@ -106,7 +110,7 @@ const activeTab: Ref<Tab['id']> = computed(() => {
 });
 const network = computed(() => getNetwork(props.space.network));
 const isController = computed(() => {
-  if (offchainNetworks.includes(props.space.network)) return true;
+  if (isOffchainNetwork.value) return true;
 
   return compareAddresses(props.space.controller, web3.value.account);
 });
@@ -131,7 +135,7 @@ const error = computed(() => {
     return 'Space profile is invalid';
   }
 
-  if (!offchainNetworks.includes(props.space.network)) {
+  if (!isOffchainNetwork.value) {
     if (!validationStrategy.value) {
       return 'Proposal validation strategy is required';
     }
@@ -170,6 +174,8 @@ function getIsMinVotingPeriodValid(value: number) {
 }
 
 function getIsMaxVotingPeriodValid(value: number) {
+  if (isOffchainNetwork.value) return true;
+
   if (minVotingPeriod.value) {
     return value >= minVotingPeriod.value;
   }
@@ -338,7 +344,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             />
           </UiEditable>
         </div>
-        <div>
+        <div v-if="!isOffchainNetwork">
           <div class="s-label !mb-0">Min. voting period</div>
           <UiEditable
             editable
@@ -368,7 +374,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           </UiEditable>
         </div>
         <div>
-          <div class="s-label !mb-0">Max. voting period</div>
+          <div class="s-label !mb-0">
+            {{ isOffchainNetwork ? 'Voting period' : 'Max. voting period' }}
+          </div>
           <UiEditable
             editable
             :initial-value="
