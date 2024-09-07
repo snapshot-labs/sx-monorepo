@@ -14,25 +14,33 @@ const loadingMore = ref(false);
 const hasMore = ref(false);
 const failed = ref(false);
 const proposals = ref<Proposal[]>([]);
-const votes = ref<Vote[]>([]);
+const votes = ref<Record<Proposal['id'], Vote>>({});
 
 const network = computed(() => getNetwork(props.space.network));
 
 async function loadVotes() {
   try {
-    votes.value = Object.values(
-      await network.value.api.loadUserVotes([props.space.id], props.user.id, {
+    votes.value = await network.value.api.loadUserVotes(
+      [props.space.id],
+      props.user.id,
+      {
         limit: VOTES_LIMIT
-      })
+      }
     );
   } catch (e) {
     failed.value = true;
   }
 }
 
+function getProposalIds(offset = 0): string[] {
+  return Object.keys(votes.value)
+    .slice(offset, offset + PAGINATION_LIMIT)
+    .map(id => id.split(':')[1]);
+}
+
 async function fetch() {
   loaded.value = false;
-  const ids = votes.value.slice(0, PAGINATION_LIMIT).map(vote => vote.proposal);
+  const ids = getProposalIds();
 
   if (ids.length) {
     proposals.value = await network.value.api.loadProposals(
@@ -51,9 +59,7 @@ async function fetch() {
 }
 
 async function fetchMore() {
-  const ids = votes.value
-    .slice(proposals.value.length, proposals.value.length + PAGINATION_LIMIT)
-    .map(vote => vote.proposal);
+  const ids = getProposalIds(proposals.value.length);
 
   if (!ids.length) {
     hasMore.value = false;
@@ -96,7 +102,7 @@ onMounted(async () => {
   </div>
   <UiLoading v-if="!loaded" class="block px-4 py-3" />
   <div
-    v-else-if="!votes.length || failed"
+    v-else-if="!proposals.length || failed"
     class="px-4 py-3 flex items-center text-skin-link gap-2"
   >
     <IH-exclamation-circle class="shrink-0" />
@@ -124,7 +130,7 @@ onMounted(async () => {
       <div class="w-[35%] md:w-[220px] shrink-0 flex items-center">
         <ProposalVoteChoice
           :proposal="proposal"
-          :vote="votes[i]"
+          :vote="votes[`${proposal.network}:${proposal.id}`]"
           :show-reason="false"
         />
       </div>
