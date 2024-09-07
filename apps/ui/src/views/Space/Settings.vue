@@ -124,6 +124,10 @@ const error = computed(() => {
     return 'Proposal validation strategy is required';
   }
 
+  if (!authenticators.value.length) {
+    return 'At least one authenticator is required';
+  }
+
   return null;
 });
 
