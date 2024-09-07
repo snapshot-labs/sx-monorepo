@@ -8,6 +8,7 @@ const PAGINATION_LIMIT = 20;
 const VOTES_LIMIT = 1000;
 
 const metaStore = useMetaStore();
+const { setTitle } = useTitle();
 
 const loaded = ref(false);
 const loadingMore = ref(false);
@@ -91,6 +92,10 @@ onMounted(async () => {
   await loadVotes();
   fetch();
 });
+
+watchEffect(() =>
+  setTitle(`${props.user.name || props.user.id} ${props.space.name}'s votes`)
+);
 </script>
 
 <template>
