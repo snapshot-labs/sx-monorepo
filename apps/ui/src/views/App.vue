@@ -32,6 +32,7 @@ onMounted(() => load());
               <img
                 class="size-[80px] rounded-lg mr-3"
                 :src="getUrl(app.avatar)"
+                :alt="app.name"
               />
               <div class="flex-1 leading-5 mb-1">
                 <h1 v-text="app.name" />
@@ -52,6 +53,7 @@ onMounted(() => load());
                   v-for="(image, i) in app.images.split(',')"
                   :key="i"
                   :src="image"
+                  :alt="app.name"
                   class="max-w-[96%]"
                 />
               </div>
