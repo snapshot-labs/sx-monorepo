@@ -104,12 +104,11 @@ watch(
     <div
       class="flex flex-col px-4 py-5 space-y-4 text-center items-center text-skin-text"
     >
-      <div class="bg-skin-border rounded-full p-[12px]">
-        <UiLoading
-          v-if="['approve', 'confirming'].includes(step)"
-          :width="28"
-          :height="28"
-        />
+      <div
+        v-if="['approve', 'confirming'].includes(step)"
+        class="bg-skin-border rounded-full p-[12px]"
+      >
+        <UiLoading :width="28" :height="28" />
       </div>
 
       <div
