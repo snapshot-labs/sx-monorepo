@@ -31,7 +31,7 @@ onMounted(() => load());
             <div class="flex items-center flex-1 mb-3 md:mb-0">
               <img
                 class="size-[80px] rounded-lg mr-3"
-                :src="getUrl(app.avatar)"
+                :src="getUrl(app.avatar) || ''"
                 :alt="app.name"
               />
               <div class="flex-1 leading-5 mb-1">
