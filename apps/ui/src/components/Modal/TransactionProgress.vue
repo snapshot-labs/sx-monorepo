@@ -102,13 +102,16 @@ watch(
 <template>
   <UiModal :open="open" class="text-skin-heading" @close="$emit('close')">
     <div
-      class="flex flex-col p-4 space-y-4 text-center items-center text-skin-text"
+      class="flex flex-col px-4 py-5 space-y-4 text-center items-center text-skin-text"
     >
-      <UiLoading
-        v-if="['approve', 'confirming'].includes(step)"
-        :width="64"
-        :height="64"
-      />
+      <div class="bg-skin-border rounded-full p-[12px]">
+        <UiLoading
+          v-if="['approve', 'confirming'].includes(step)"
+          :width="28"
+          :height="28"
+        />
+      </div>
+
       <div
         v-if="step === 'success'"
         class="bg-skin-success rounded-full p-[18px]"
@@ -123,7 +126,7 @@ watch(
           class="font-semibold text-skin-heading text-lg"
           v-text="text.title"
         />
-        <div class="text-md font-medium" v-text="text.subtitle" />
+        <div v-text="text.subtitle" />
       </div>
     </div>
     <slot id="content" :step="step" :tx-id="txId" />
@@ -134,18 +137,14 @@ watch(
         'border-t': step === 'fail'
       }"
     >
-      <div
-        v-if="step === 'approve'"
-        class="text-md font-medium text-skin-link opacity-40"
-        v-text="'Proceed in your wallet'"
-      />
+      <div v-if="step === 'approve'" v-text="'Proceed in your wallet'" />
       <a
         v-else-if="['confirming', 'success'].includes(step) && txId"
         :href="network.helpers.getExplorerUrl(txId, 'transaction')"
         target="_blank"
-        class="text-md font-medium leading-6"
       >
-        View transaction
+        View on explorer
+        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </a>
       <div
         v-else-if="step === 'fail'"
