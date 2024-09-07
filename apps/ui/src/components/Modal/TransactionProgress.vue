@@ -114,11 +114,11 @@ watch(
 
       <div
         v-if="step === 'success'"
-        class="bg-skin-success rounded-full p-[18px]"
+        class="bg-skin-success rounded-full p-[12px]"
       >
         <IS-check :width="28" :height="28" class="text-skin-bg" />
       </div>
-      <div v-if="step === 'fail'" class="bg-skin-danger rounded-full p-[18px]">
+      <div v-if="step === 'fail'" class="bg-skin-danger rounded-full p-[12px]">
         <IS-x-mark :width="28" :height="28" class="text-skin-bg" />
       </div>
       <div class="flex flex-col space-y-1 leading-6">
