@@ -47,7 +47,12 @@ export type VoteTypeInfo = {
   description: string;
 };
 
-export type DelegationType = 'governor-subgraph' | 'delegate-registry';
+export type DelegationType =
+  | 'governor-subgraph'
+  // From v1
+  | 'delegate-registry'
+  | 'compound-governor'
+  | 'split-delegation';
 
 export type SelectedStrategy = {
   address: string;
