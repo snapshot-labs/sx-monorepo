@@ -209,8 +209,10 @@ watchEffect(() => {
           'shrink-0 md:w-[340px] border-l-0 md:border-l',
           { 'hidden md:block': route.name === 'proposal-votes' }
         ]"
+        :top="72"
+        :bottom="88"
       >
-        <div class="flex flex-col space-y-4 p-4 md:pb-[88px]">
+        <div class="flex flex-col space-y-4 p-4">
           <div
             v-if="
               !proposal.cancelled &&

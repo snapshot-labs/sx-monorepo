@@ -1,40 +1,81 @@
 <script lang="ts" setup>
-const wrapperEl = ref<HTMLDivElement | null>(null);
-const initialTopOffset = ref<number | null>(null);
-const lastScrollY = ref(0);
-const topOffset = ref(0);
-const ticking = ref<boolean>(false);
+enum StickStatus {
+  TOP,
+  SCROLL,
+  BOTTOM
+}
 
-const innerEl = computed(
+const props = withDefaults(
+  defineProps<{
+    top: number;
+    bottom: number;
+  }>(),
+  {
+    top: 0,
+    bottom: 0
+  }
+);
+
+const wrapperEl = ref<HTMLDivElement | null>(null);
+const lastScrollY = ref(0);
+const ticking = ref<boolean>(false);
+const stickStatus = ref<StickStatus>(StickStatus.SCROLL);
+
+const el = computed(
   () => wrapperEl.value?.getElementsByTagName('div')[0] as HTMLDivElement
 );
 
 function updatePosition(scrollY: number) {
   ticking.value = false;
 
-  if (!wrapperEl.value || !innerEl.value) return;
+  if (!el.value) return;
 
-  const windowHeight = window.innerHeight;
-  const innerHeight = innerEl.value.getBoundingClientRect().height;
-  const innerBottom = innerEl.value.getBoundingClientRect().bottom;
-  const scrollOffset = scrollY - lastScrollY.value;
+  const isBottomReached =
+    el.value.getBoundingClientRect().bottom <= window.innerHeight;
+  const isTopReached = el.value.getBoundingClientRect().top >= props.top;
   const scrollingDown = lastScrollY.value < scrollY;
+  const scrollingUp = lastScrollY.value > scrollY;
+  const stickedToBottom = stickStatus.value === StickStatus.BOTTOM;
+  const stickedToTop = stickStatus.value === StickStatus.TOP;
 
-  lastScrollY.value = scrollY;
-
-  if (innerBottom >= windowHeight) {
-    const newTopOffset = topOffset.value - scrollOffset;
-
-    if (scrollingDown) {
-      topOffset.value = Math.max(newTopOffset, -(innerHeight - windowHeight));
-    } else {
-      topOffset.value = Math.min(newTopOffset, initialTopOffset.value!);
-    }
-  } else {
-    topOffset.value = initialTopOffset.value!;
+  if (scrollingDown && !stickedToBottom) {
+    changeStickStatus(
+      isBottomReached ? StickStatus.BOTTOM : StickStatus.SCROLL
+    );
+  } else if (scrollingUp && !stickedToTop) {
+    changeStickStatus(isTopReached ? StickStatus.TOP : StickStatus.SCROLL);
   }
 
-  innerEl.value.style.top = `${topOffset.value}px`;
+  lastScrollY.value = scrollY;
+}
+
+function changeStickStatus(status: StickStatus) {
+  if (status === stickStatus.value) return;
+
+  if (status === StickStatus.SCROLL) unstick();
+  else if (status === StickStatus.TOP) stickToTop();
+  else if (status === StickStatus.BOTTOM) stickToBottom();
+
+  stickStatus.value = status;
+}
+
+function stickToBottom() {
+  const offset = el.value.getBoundingClientRect().top;
+
+  el.value.style.position = 'sticky';
+  el.value.style.top = `${offset}px`;
+}
+
+function stickToTop() {
+  el.value.style.position = 'sticky';
+  el.value.style.top = `${props.top}px`;
+}
+
+function unstick() {
+  const offset = el.value.offsetTop;
+
+  el.value.style.position = 'relative';
+  el.value.style.top = `${offset}px`;
 }
 
 function handlePositionUpdate() {
@@ -44,16 +85,7 @@ function handlePositionUpdate() {
   ticking.value = true;
 }
 
-function init() {
-  if (!wrapperEl.value) return;
-
-  initialTopOffset.value = wrapperEl.value.getBoundingClientRect().top;
-  topOffset.value = initialTopOffset.value;
-  innerEl.value.classList.add('static', 'md:sticky');
-}
-
 onMounted(() => {
-  init();
   updatePosition(window.scrollY);
 
   window.addEventListener('scroll', handlePositionUpdate);
@@ -67,7 +99,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="wrapperEl">
+  <div ref="wrapperEl" class="relative">
     <slot />
   </div>
 </template>
