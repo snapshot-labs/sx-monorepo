@@ -201,17 +201,19 @@ watch([sortBy, choiceFilter], () => {
           </template>
           <div class="absolute w-full pointer-events-none">
             <div v-for="(vote, i) in votes" :key="i">
-              <div
-                class="inset-y-0 left-0 h-[8px] mt-[69px]"
-                :style="{
-                  width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
-                }"
-                :class="
-                  proposal.type === 'basic'
-                    ? `choice-bg _${vote.choice}`
-                    : 'bg-skin-border'
-                "
-              />
+              <div class="h-[77px] relative">
+                <div
+                  class="left-0 bottom-0 h-[8px] absolute"
+                  :style="{
+                    width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
+                  }"
+                  :class="
+                    proposal.type === 'basic'
+                      ? `choice-bg opacity-20 _${vote.choice}`
+                      : 'bg-skin-border'
+                  "
+                />
+              </div>
             </div>
           </div>
           <div
