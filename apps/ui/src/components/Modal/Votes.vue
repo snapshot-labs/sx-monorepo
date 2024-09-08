@@ -97,14 +97,14 @@ watch(
           >
             <div
               v-if="!isEncrypted"
-              class="absolute inset-y-0 right-0 z-[-1]"
+              class="absolute inset-y-0 right-0 h-[8px] z-[-1]"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
               }"
               :class="
                 proposal.type === 'basic'
-                  ? `choice-bg opacity-10 _${vote.choice}`
-                  : 'bg-skin-border opacity-40'
+                  ? `choice-bg opacity-20 _${vote.choice}`
+                  : 'bg-skin-border'
               "
             />
             <router-link
