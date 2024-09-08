@@ -122,7 +122,7 @@ watchEffect(() =>
         </template>
         <div v-else class="flex items-center space-x-2">
           <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>This profile does not have statement.</span>
+          <span>This user does not have statement yet.</span>
         </div>
       </div>
     </template>
