@@ -571,3 +571,10 @@ export function stripHtmlTags(text: string) {
   const doc = new DOMParser().parseFromString(text, 'text/html');
   return doc.body.textContent || '';
 }
+
+export function toKebabCase(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+}

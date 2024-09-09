@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
+import { _c, _n, sanitizeUrl, shorten, toKebabCase } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
@@ -127,7 +127,7 @@ onMounted(() => {
     return router.push({
       name: 'space-treasury',
       params: {
-        name: treasury.value.name,
+        name: toKebabCase(treasury.value.name || treasury.value.wallet),
         tab: 'tokens'
       }
     });
@@ -257,7 +257,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             type="button"
             :to="{
               name: 'space-treasury',
-              params: { name: treasury.name, tab: 'tokens' }
+              params: {
+                name: toKebabCase(treasury.name || treasury.wallet),
+                tab: 'tokens'
+              }
             }"
           >
             <UiLink :is-active="page === 'tokens'" text="Tokens" />
@@ -266,7 +269,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             type="button"
             :to="{
               name: 'space-treasury',
-              params: { name: treasury.name, tab: 'nfts' }
+              params: {
+                name: toKebabCase(treasury.name || treasury.wallet),
+                tab: 'nfts'
+              }
             }"
           >
             <UiLink :is-active="page === 'nfts'" text="NFTs" />

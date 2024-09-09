@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten } from '@/helpers/utils';
+import { shorten, toKebabCase } from '@/helpers/utils';
 import { RequiredProperty, Space, SpaceMetadataTreasury } from '@/types';
 
 const props = defineProps<{ space: Space }>();
@@ -10,7 +10,7 @@ const route = useRoute();
 const activeTreasuryId = computed(() => {
   if (!route.params.name) return 0;
   const index = filteredTreasuries.value.findIndex(
-    t => t.name === route.params.name
+    t => toKebabCase(t.name) === (route.params.name as string)
   );
   return index;
 });
@@ -41,7 +41,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         type="button"
         :to="{
           name: 'space-treasury',
-          params: { name: treasury.name, tab: 'tokens' }
+          params: {
+            name: toKebabCase(treasury.name || treasury.address),
+            tab: 'tokens'
+          }
         }"
       >
         <UiLink
