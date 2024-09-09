@@ -281,7 +281,7 @@ watchEffect(() => {
                   target="_blank"
                   class="ml-1.5"
                 >
-                  <IH-exclamation-circle />
+                  <IH-question-mark-circle />
                 </a>
               </template>
             </IndicatorVotingPower>
