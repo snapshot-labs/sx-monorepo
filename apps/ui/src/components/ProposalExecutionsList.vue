@@ -75,7 +75,7 @@ function downloadExecution(execution: ProposalExecution) {
         <div
           class="text-skin-text text-[17px]"
           v-text="
-            getExecutionName(execution.networkId, execution.strategyType) ||
+            getExecutionName(proposal.network, execution.strategyType) ||
             shorten(execution.safeAddress)
           "
         />

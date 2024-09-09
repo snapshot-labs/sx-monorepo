@@ -1,4 +1,4 @@
-const DEFAULT_FAVICON = '/favicon-temp.svg';
+const DEFAULT_FAVICON = '/favicon.svg';
 
 export function useFavicon(favicon?: string) {
   const setFavicon = (newFavicon: string | null) => {

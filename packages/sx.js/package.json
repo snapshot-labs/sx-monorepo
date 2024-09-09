@@ -23,7 +23,7 @@
     "prepublishOnly": "yarn run lint",
     "node:evm": "anvil",
     "node:starknet": "starknet-devnet --seed 1",
-    "test": "SEPOLIA_NODE_URL=https://rpc.snapshotx.xyz/11155111 vitest run test/unit",
+    "test": "SEPOLIA_NODE_URL=https://rpc.snapshot.org/11155111 vitest run test/unit",
     "test:integration:starknet": "vitest run test/integration/starknet",
     "test:integration:evm": "vitest run test/integration/evm",
     "test:integration:offchain": "vitest run test/integration/offchain"
@@ -66,7 +66,7 @@
     "@types/randombytes": "^2.0.3",
     "eslint": "^8.53.0",
     "prettier": "^3.1.0",
-    "typescript": "^5.2.2",
+    "typescript": "^5.5.4",
     "vitest": "^1.2.2"
   },
   "files": [

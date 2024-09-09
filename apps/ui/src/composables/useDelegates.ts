@@ -6,7 +6,7 @@ import {
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
-import { Space, Statement } from '@/types';
+import { DelegationType, Space, Statement } from '@/types';
 
 type ApiDelegate = {
   id: string;
@@ -88,6 +88,7 @@ function convertUrl(apiUrl: string) {
 }
 
 export function useDelegates(
+  delegationType: DelegationType,
   delegationApiUrl: string,
   governance: string,
   space: Space

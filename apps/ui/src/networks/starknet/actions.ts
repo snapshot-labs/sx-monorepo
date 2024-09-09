@@ -5,11 +5,22 @@ import {
   starknetMainnet,
   starknetSepolia
 } from '@snapshot-labs/sx';
-import { Account, AllowArray, Call, CallData, RpcProvider } from 'starknet';
+import {
+  Account,
+  AllowArray,
+  Call,
+  CallData,
+  RpcProvider,
+  constants as starknetConstants
+} from 'starknet';
 import { executionCall, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import {
+  createErc1155Metadata,
+  verifyNetwork,
+  verifyStarknetNetwork
+} from '@/helpers/utils';
 import {
   EVM_CONNECTORS,
   STARKNET_CONNECTORS
@@ -54,7 +65,11 @@ export function createActions(
     chainId,
     l1ChainId,
     ethUrl
-  }: { chainId: string; l1ChainId: number; ethUrl: string }
+  }: {
+    chainId: starknetConstants.StarknetChainId;
+    l1ChainId: number;
+    ethUrl: string;
+  }
 ): NetworkActions {
   const networkConfig = CONFIGS[networkId];
   if (!networkConfig) throw new Error(`Unsupported network ${networkId}`);
@@ -93,14 +108,16 @@ export function createActions(
         saltNonce: salt
       });
     },
-    async deployDependency(
+    deployDependency: async (
       web3: any,
       params: {
         controller: string;
         spaceAddress: string;
         strategy: StrategyConfig;
       }
-    ) {
+    ) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       if (!params.strategy.deploy) {
         throw new Error('This strategy is not deployable');
       }
@@ -129,6 +146,8 @@ export function createActions(
         metadata: SpaceMetadata;
       }
     ) {
+      await verifyStarknetNetwork(web3, chainId);
+
       const pinned = await helpers.pin(
         createErc1155Metadata(params.metadata, {
           execution_strategies: params.executionStrategies.map(
@@ -178,6 +197,8 @@ export function createActions(
       });
     },
     setMetadata: async (web3: any, space: Space, metadata: SpaceMetadata) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
           execution_strategies: space.executors,
@@ -230,6 +251,8 @@ export function createActions(
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
         await verifyNetwork(web3, l1ChainId);
+      } else {
+        await verifyStarknetNetwork(web3, chainId);
       }
 
       let selectedExecutionStrategy;
@@ -331,6 +354,8 @@ export function createActions(
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
         await verifyNetwork(web3, l1ChainId);
+      } else {
+        await verifyStarknetNetwork(web3, chainId);
       }
 
       let selectedExecutionStrategy;
@@ -379,7 +404,9 @@ export function createActions(
         data
       });
     },
-    cancelProposal: (web3: any, proposal: Proposal) => {
+    cancelProposal: async (web3: any, proposal: Proposal) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       return client.cancelProposal({
         signer: web3.provider.account,
         space: proposal.space.id,
@@ -407,6 +434,8 @@ export function createActions(
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
         await verifyNetwork(web3, l1ChainId);
+      } else {
+        await verifyStarknetNetwork(web3, chainId);
       }
 
       const strategiesWithMetadata = await Promise.all(
@@ -460,6 +489,8 @@ export function createActions(
     },
     finalizeProposal: () => null,
     executeTransactions: async (web3: any, proposal: Proposal) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
@@ -467,13 +498,15 @@ export function createActions(
         convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
-      return executionCall('stark', chainId, 'execute', {
+      return executionCall('stark', chainId as string, 'execute', {
         space: proposal.space.id,
         proposalId: proposal.proposal_id,
         executionParams: executionData.executionParams
       });
     },
     executeQueuedProposal: async (web3: any, proposal: Proposal) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       if (!proposal.execution_destination)
         throw new Error('Execution destination is missing');
 
@@ -528,6 +561,8 @@ export function createActions(
     },
     vetoProposal: () => null,
     setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       return client.setVotingDelay({
         signer: web3.provider.account,
         space: space.id,
@@ -539,6 +574,8 @@ export function createActions(
       space: Space,
       minVotingDuration: number
     ) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       return client.setMinVotingDuration({
         signer: web3.provider.account,
         space: space.id,
@@ -550,6 +587,8 @@ export function createActions(
       space: Space,
       maxVotingDuration: number
     ) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       return client.setMaxVotingDuration({
         signer: web3.provider.account,
         space: space.id,
@@ -557,6 +596,8 @@ export function createActions(
       });
     },
     transferOwnership: async (web3: any, space: Space, owner: string) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       return client.transferOwnership({
         signer: web3.provider.account,
         space: space.id,
@@ -576,6 +617,8 @@ export function createActions(
       minVotingDuration: number | null,
       maxVotingDuration: number | null
     ) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
           execution_strategies: space.executors,
@@ -637,6 +680,8 @@ export function createActions(
       delegatee: string,
       delegationContract: string
     ) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       const [, contractAddress] = delegationContract.split(':');
 
       const { account }: { account: Account } = web3.provider;
@@ -712,7 +757,9 @@ export function createActions(
     },
     followSpace: () => {},
     unfollowSpace: () => {},
-    setAlias(web3: any, alias: string) {
+    setAlias: async (web3: any, alias: string) => {
+      await verifyStarknetNetwork(web3, chainId);
+
       return starkSigClient.setAlias({
         signer: web3.provider.account,
         data: { alias }

@@ -111,7 +111,7 @@ async function loadUserActivity() {
 //     )
 //   )
 //     .flat()
-//     .filter(Boolean);
+//     .filter(delegates => delegates !== undefined);
 
 //   delegatesCount.value = delegates
 //     .map(delegate => delegate.tokenHoldersRepresentedAmount || 0)

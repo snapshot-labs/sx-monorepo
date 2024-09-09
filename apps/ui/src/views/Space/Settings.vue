@@ -124,6 +124,10 @@ const error = computed(() => {
     return 'Proposal validation strategy is required';
   }
 
+  if (!authenticators.value.length) {
+    return 'At least one authenticator is required';
+  }
+
   return null;
 });
 
@@ -256,7 +260,7 @@ async function getInitialStrategiesConfig(
   editorStrategies: StrategyTemplate[],
   params?: string[],
   metadata?: StrategyParsedMetadata[]
-) {
+): Promise<StrategyConfig[]> {
   const promises = configured.map(async (configuredAddress, i) => {
     const strategy = editorStrategies.find(({ address }) =>
       compareAddresses(address, configuredAddress)
@@ -276,9 +280,7 @@ async function getInitialStrategiesConfig(
     };
   });
 
-  return (await Promise.all(promises)).filter(
-    strategy => strategy !== null
-  ) as StrategyConfig[];
+  return (await Promise.all(promises)).filter(strategy => strategy !== null);
 }
 
 async function getInitialValidationStrategy(
@@ -344,8 +346,10 @@ async function hasStrategyChanged(
       : [];
     previousParams = previousParams ?? [];
   }
-
-  return objectHash(params) !== objectHash(previousParams);
+  // NOTE: Params need to be lowercase when we compare them as once stored they will be stored
+  // as bytes (casing is lost).
+  const formattedParams = params.map(param => param.toLowerCase());
+  return objectHash(formattedParams) !== objectHash(previousParams);
 }
 
 async function processChanges(

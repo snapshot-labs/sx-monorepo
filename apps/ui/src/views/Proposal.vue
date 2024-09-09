@@ -278,7 +278,7 @@ watchEffect(() => {
                 target="_blank"
                 class="ml-1.5"
               >
-                <IH-exclamation-circle />
+                <IH-question-mark-circle />
               </a>
             </template>
           </IndicatorVotingPower>
@@ -326,8 +326,8 @@ watchEffect(() => {
             proposal.vote_count
           "
         >
-          <h4 class="mb-2.5 eyebrow flex items-center">
-            <IH-chart-square-bar class="inline-block mr-2" />
+          <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+            <IH-chart-square-bar />
             <span>Results</span>
           </h4>
           <ProposalResults
@@ -337,8 +337,8 @@ watchEffect(() => {
           />
         </div>
         <div>
-          <h4 class="mb-2.5 eyebrow flex items-center">
-            <IH-clock class="inline-block mr-2" />
+          <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+            <IH-clock />
             <span>Timeline</span>
           </h4>
           <ProposalTimeline :data="proposal" />
