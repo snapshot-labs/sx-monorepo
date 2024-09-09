@@ -224,7 +224,7 @@ watchEffect(async () => {
       :open="modalTransactionOpen"
       :network-id="proposal.network"
       :messages="{
-        approveTitle: 'Confirm your vote'
+        approveTitle: 'Confirm vote'
       }"
       :execute="voteFn"
       @confirmed="handleConfirmed"
@@ -236,8 +236,7 @@ watchEffect(async () => {
       :show-icon="true"
       :shareable="{ proposal, choice: selectedChoice! }"
       :messages="{
-        title: 'Your vote is in!',
-        subtitle: 'Thank you for participating!'
+        title: 'Vote success!'
       }"
       @close="modalShareOpen = false"
     />

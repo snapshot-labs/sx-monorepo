@@ -85,11 +85,13 @@ export function createConstants(
   const createSlotValueStrategyConfig = (
     address: string,
     name: string,
-    about: string
+    about: string,
+    link?: string
   ): StrategyTemplate => ({
     address,
     name,
     about,
+    link,
     icon: IHCode,
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
@@ -265,6 +267,7 @@ export function createConstants(
       name: 'Whitelist',
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
+      link: 'https://help.snapshot.org/en/articles/9839118-whitelist-voting-strategy',
       generateSummary: (params: Record<string, any>) => {
         const length =
           params.whitelist.trim().length === 0
@@ -372,6 +375,7 @@ export function createConstants(
       name: 'ERC-20 Votes (EIP-5805)',
       about:
         'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
+      link: 'https://help.snapshot.org/en/articles/9839125-erc-20-votes-eip-5805-voting-strategy',
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
@@ -427,7 +431,8 @@ export function createConstants(
           createSlotValueStrategyConfig(
             config.Strategies.EVMSlotValue,
             'EVM slot value',
-            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power.'
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power.',
+            'https://help.snapshot.org/en/articles/9839132-evm-slot-value-voting-strategy'
           )
         ]
       : []),
@@ -436,7 +441,8 @@ export function createConstants(
           createSlotValueStrategyConfig(
             config.Strategies.OZVotesStorageProof,
             'OZ Votes storage proof (trace 224)',
-            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 224 format).'
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 224 format).',
+            'https://help.snapshot.org/en/articles/9839152-oz-votes-storage-proof-voting-strategy'
           )
         ]
       : []),
