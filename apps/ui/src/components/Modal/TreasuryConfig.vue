@@ -46,6 +46,7 @@ const definition = computed(() => {
         type: 'string',
         title: 'Name',
         minLength: 1,
+        maxLength: 32,
         examples: ['Treasury name']
       },
       network: {
