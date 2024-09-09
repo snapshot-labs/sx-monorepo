@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { shorten, toKebabCase } from '@/helpers/utils';
+import { shorten } from '@/helpers/utils';
 import { RequiredProperty, Space, SpaceMetadataTreasury } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const route = useRoute();
+const router = useRouter();
+const treasuriesList = ref<HTMLElement | null>(null);
 
 const activeTreasuryId = computed(() => {
-  if (!route.params.name) return 0;
-  const index = filteredTreasuries.value.findIndex(
-    t => toKebabCase(t.name) === (route.params.name as string)
-  );
-  return index;
+  if (!route.params.index) return 0;
+  return parseInt(route.params.index as string) - 1;
 });
 
 const filteredTreasuries = computed(
@@ -26,11 +25,35 @@ const treasuryData = computed(
 );
 
 watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
+// scroll to treasury tab
+watch(
+  activeTreasuryId,
+  async () => {
+    await nextTick();
+    // @ts-ignore
+    const el = treasuriesList.value?.$el.querySelector(`[aria-active="true"]`);
+    if (el) el.scrollIntoView();
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  if (!route.params.index && filteredTreasuries.value.length) {
+    router.replace({
+      name: 'space-treasury',
+      params: {
+        index: 1,
+        tab: 'tokens'
+      }
+    });
+  }
+});
 </script>
 
 <template>
   <UiScrollerHorizontal
     v-if="filteredTreasuries.length !== 1"
+    ref="treasuriesList"
     gradient="md"
     class="z-40 sticky top-[71px] lg:top-[72px]"
   >
@@ -42,10 +65,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :to="{
           name: 'space-treasury',
           params: {
-            name: toKebabCase(treasury.name || treasury.address),
+            index: i + 1,
             tab: 'tokens'
           }
         }"
+        :aria-active="activeTreasuryId === i"
       >
         <UiLink
           :is-active="activeTreasuryId === i"

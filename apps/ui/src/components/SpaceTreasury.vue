@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { _c, _n, sanitizeUrl, shorten, toKebabCase } from '@/helpers/utils';
+import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
 import { evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
@@ -123,11 +123,14 @@ async function addTx(tx: Transaction) {
 onMounted(() => {
   if (!treasury.value) return;
 
-  if (!route.params.tab) {
-    return router.push({
+  if (
+    !route.params.tab ||
+    !['tokens', 'nfts'].includes(route.params.tab as string)
+  ) {
+    return router.replace({
       name: 'space-treasury',
       params: {
-        name: toKebabCase(treasury.value.name || treasury.value.wallet),
+        index: route.params.index,
         tab: 'tokens'
       }
     });
@@ -258,7 +261,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             :to="{
               name: 'space-treasury',
               params: {
-                name: toKebabCase(treasury.name || treasury.wallet),
+                index: route.params.index,
                 tab: 'tokens'
               }
             }"
@@ -270,7 +273,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             :to="{
               name: 'space-treasury',
               params: {
-                name: toKebabCase(treasury.name || treasury.wallet),
+                index: route.params.index,
                 tab: 'nfts'
               }
             }"
