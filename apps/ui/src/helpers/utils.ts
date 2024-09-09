@@ -573,7 +573,5 @@ export function stripHtmlTags(text: string) {
 }
 
 export function toKebabCase(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/\s+/g, '-');
+  return str.toLowerCase().replace(/\s+/g, '-');
 }
