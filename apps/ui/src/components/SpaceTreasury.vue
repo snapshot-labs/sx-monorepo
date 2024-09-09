@@ -363,7 +363,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             v-if="nftsLoading && !nftsLoaded"
             class="px-4 py-3 block"
           />
-          <div class="flex flex-row flex-wrap gap-4 p-4">
+          <div class="flex flex-row flex-wrap gap-4 p-4 justify-center">
             <a
               v-for="(nft, i) in nfts"
               :key="i"
