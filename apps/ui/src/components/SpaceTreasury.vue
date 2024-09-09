@@ -130,6 +130,7 @@ onMounted(() => {
     return router.replace({
       name: 'space-treasury',
       params: {
+        index: route.params.index || 1,
         tab: 'tokens'
       }
     });
