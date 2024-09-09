@@ -210,7 +210,7 @@ watchEffect(() => {
           { 'hidden md:block': route.name === 'proposal-votes' }
         ]"
         :top="72"
-        :bottom="88"
+        :bottom="64"
       >
         <div class="flex flex-col space-y-4 p-4">
           <div
