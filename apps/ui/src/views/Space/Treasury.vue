@@ -31,7 +31,7 @@ watch(
   async () => {
     await nextTick();
     // @ts-ignore
-    const el = treasuriesList.value?.$el.querySelector(`[aria-active="true"]`);
+    const el = treasuriesList.value?.$el.querySelector(`a[aria-active="true"]`);
     if (el) el.scrollIntoView();
   },
   { immediate: true }
@@ -40,7 +40,6 @@ watch(
 onMounted(() => {
   if (!route.params.index && filteredTreasuries.value.length) {
     router.replace({
-      name: 'space-treasury',
       params: {
         index: 1,
         tab: 'tokens'
@@ -61,7 +60,6 @@ onMounted(() => {
       <router-link
         v-for="(treasury, i) in filteredTreasuries"
         :key="i"
-        type="button"
         :to="{
           name: 'space-treasury',
           params: {

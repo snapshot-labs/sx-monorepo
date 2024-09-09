@@ -160,6 +160,12 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition;
     if (to.params.retainScrollPosition) return {};
+    if (
+      to.name === 'space-treasury' &&
+      to.params.index === from.params.index &&
+      to.params.tab !== from.params.tab
+    )
+      return {};
     if (to.hash) {
       return { el: to.hash, behavior: 'smooth' };
     }

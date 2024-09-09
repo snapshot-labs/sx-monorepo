@@ -257,11 +257,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <div>
         <div class="flex pl-4 border-b space-x-3">
           <router-link
-            type="button"
             :to="{
-              name: 'space-treasury',
               params: {
-                index: route.params.index,
                 tab: 'tokens'
               }
             }"
@@ -269,11 +266,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <UiLink :is-active="page === 'tokens'" text="Tokens" />
           </router-link>
           <router-link
-            type="button"
             :to="{
-              name: 'space-treasury',
               params: {
-                index: route.params.index,
                 tab: 'nfts'
               }
             }"
