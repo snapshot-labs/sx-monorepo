@@ -63,7 +63,7 @@ const navigation = computed(() => [
     count: userActivity.value?.proposal_count
   },
   {
-    label: 'Latest votes',
+    label: 'Votes',
     route: 'space-user-votes',
     count: userActivity.value?.vote_count
   }
