@@ -78,8 +78,14 @@ const SOCIALS = [
           <div class="eyebrow">Developers</div>
           <div class="space-y-1">
             <div>
+              <a href="https://docs.snapshot.org" target="_blank">
+                Snapshot docs
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </a>
+            </div>
+            <div>
               <a href="https://docs.snapshot.box" target="_blank">
-                Docs
+                Snapshot X docs
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
             </div>
