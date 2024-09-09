@@ -590,7 +590,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <span>Settings are only accessible for onchain spaces.</span>
   </div>
   <template v-else>
-    <div class="sticky top-[72px] z-50 bg-green-500">hi</div>
     <UiScrollerHorizontal
       class="sticky top-[72px] z-50"
       with-buttons
