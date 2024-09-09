@@ -8,7 +8,10 @@ import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import sha3 from 'js-sha3';
-import { validateAndParseAddress } from 'starknet';
+import {
+  constants as starknetConstants,
+  validateAndParseAddress
+} from 'starknet';
 import networks from '@/helpers/networks.json';
 import { VotingPowerItem } from '@/stores/votingPowers';
 import { Choice, Proposal, SpaceMetadata } from '@/types';
@@ -375,6 +378,26 @@ export async function verifyNetwork(
       );
       (error as any).code = 4001;
       throw error;
+    }
+  }
+}
+
+export async function verifyStarknetNetwork(
+  web3: any,
+  chainId: starknetConstants.StarknetChainId
+) {
+  if (!web3.provider.request) return;
+
+  try {
+    await web3.provider.request({
+      type: 'wallet_switchStarknetChain',
+      params: {
+        chainId
+      }
+    });
+  } catch (e) {
+    if (!e.message.toLowerCase().includes('not implemented')) {
+      throw new Error(e.message);
     }
   }
 }
