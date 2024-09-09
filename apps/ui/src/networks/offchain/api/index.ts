@@ -112,7 +112,7 @@ function formatSpace(
     .filter(treasury => !!treasury.network);
 
   let validationName = space.validation.name;
-  const validationParams = space.validation.params || {};
+  const validationParams = clone(space.validation.params) || {};
   if (space.validation.name === 'basic') {
     validationParams.minScore =
       space.validation?.params?.minScore || space.filters.minScore;
