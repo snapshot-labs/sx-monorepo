@@ -199,26 +199,22 @@ watch([sortBy, choiceFilter], () => {
           <template #loading>
             <UiLoading class="px-4 py-3 block absolute" />
           </template>
-          <div class="absolute w-full pointer-events-none">
-            <div v-for="(vote, i) in votes" :key="i">
-              <div
-                class="inset-y-0 left-0 h-[76px]"
-                :style="{
-                  width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
-                }"
-                :class="
-                  proposal.type === 'basic'
-                    ? `choice-bg opacity-[0.1] _${vote.choice}`
-                    : 'bg-skin-border opacity-40'
-                "
-              />
-            </div>
-          </div>
           <div
             v-for="(vote, i) in votes"
             :key="i"
-            class="relative border-b flex space-x-3"
+            class="border-b flex space-x-3"
           >
+            <div
+              class="right-0 h-[8px] absolute"
+              :style="{
+                width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
+              }"
+              :class="
+                proposal.type === 'basic'
+                  ? `choice-bg opacity-20 _${vote.choice}`
+                  : 'bg-skin-border'
+              "
+            />
             <router-link
               :to="{
                 name: 'space-user-statement',

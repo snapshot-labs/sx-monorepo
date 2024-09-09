@@ -53,6 +53,7 @@ export type StrategyTemplate = {
   address: string;
   name: string;
   about?: string;
+  link?: string;
   icon?: FunctionalComponent;
   type?: string;
   paramsDefinition: any;

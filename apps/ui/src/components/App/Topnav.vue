@@ -85,9 +85,9 @@ watch(
     }"
   >
     <div
-      class="flex items-center h-full shrink-0"
+      class="flex items-center h-full truncate"
       :class="{
-        'lg:border-r lg:pr-4 lg:w-[240px]': hasAppNav,
+        'lg:border-r lg:pr-4 lg:w-[240px] shrink-0': hasAppNav,
         'border-r pr-4 w-[240px]': hasAppNav && uiStore.sidebarOpen
       }"
     >
