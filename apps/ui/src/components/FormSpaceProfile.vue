@@ -38,12 +38,14 @@ const definition = computed(() => {
         type: 'string',
         title: 'Name',
         minLength: 1,
+        maxLength: 32,
         examples: ['Space name']
       },
       description: {
         type: 'string',
         format: 'long',
         title: 'About',
+        maxLength: 160,
         examples: ['Space description']
       },
       externalUrl: {
