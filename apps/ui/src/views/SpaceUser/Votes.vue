@@ -103,7 +103,7 @@ watchEffect(() =>
     class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex gap-3 font-medium leading-[18px] px-4 py-2"
   >
     <div class="grow truncate">Proposal</div>
-    <div class="shrink-0 w-[35%] md:w-[220px] truncate">Result</div>
+    <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
   </div>
   <UiLoading v-if="!loaded" class="block px-4 py-3" />
   <div
