@@ -40,7 +40,7 @@ export type OffchainSpaceSettings = {
     'delegationNetwork'
   > | null;
   filters: { minScore: number; onlyMembers: boolean };
-  voting: OffchainApiSpace['voting'];
+  voting: Partial<OffchainApiSpace['voting']>;
   boost: OffchainApiSpace['boost'];
   validation: OffchainApiSpace['validation'];
   voteValidation: OffchainApiSpace['voteValidation'];
@@ -348,17 +348,19 @@ export function useSpaceSettings(space: Ref<Space>) {
       delegationPortal: delegationPortal,
       filters: space.value.additionalRawData.filters,
       voting: {
-        blind: space.value.additionalRawData.voting.blind,
-        aliased: space.value.additionalRawData.voting.aliased,
-        hideAbstain: space.value.additionalRawData.voting.hideAbstain,
+        ...space.value.additionalRawData.voting,
+        delay:
+          (votingDelay.value ?? space.value.additionalRawData.voting.delay) ||
+          undefined,
+        period:
+          (maxVotingPeriod.value ??
+            space.value.additionalRawData.voting.period) ||
+          undefined,
+        type: space.value.additionalRawData.voting.type || undefined,
+        quorum: space.value.additionalRawData.voting.quorum || undefined,
         quorumType:
           space.value.additionalRawData.voting.quorumType || 'default',
-        quorum: space.value.additionalRawData.voting.quorum,
-        type: space.value.additionalRawData.voting.type || '',
-        privacy: space.value.additionalRawData.voting.privacy,
-        delay: votingDelay.value ?? space.value.additionalRawData.voting.delay,
-        period:
-          maxVotingPeriod.value ?? space.value.additionalRawData.voting.period
+        privacy: space.value.additionalRawData.voting.privacy || undefined
       },
       validation: space.value.additionalRawData.validation,
       voteValidation: space.value.additionalRawData.voteValidation,

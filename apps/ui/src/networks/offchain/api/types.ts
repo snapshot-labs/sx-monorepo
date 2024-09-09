@@ -40,13 +40,11 @@ export type ApiSpace = {
   voting: {
     delay: number | null;
     period: number | null;
-    quorum: number | null;
     type: VoteType | '' | null;
+    quorum: number | null;
     quorumType?: string;
-    blind: boolean;
-    hideAbstain: boolean;
     privacy: string;
-    aliased: boolean;
+    hideAbstain: boolean;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];
   validation: {

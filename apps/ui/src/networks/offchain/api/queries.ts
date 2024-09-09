@@ -30,13 +30,11 @@ const SPACE_FRAGMENT = gql`
     voting {
       delay
       period
-      quorum
       type
+      quorum
       quorumType
-      blind
-      hideAbstain
       privacy
-      aliased
+      hideAbstain
     }
     strategies {
       name
