@@ -38,8 +38,9 @@ function updatePosition(scrollY: number) {
   const scrollingUp = lastScrollY.value > scrollY;
   const stickedToBottom = stickStatus.value === StickStatus.BOTTOM;
   const stickedToTop = stickStatus.value === StickStatus.TOP;
+  const canScroll = !isTopReached || !isBottomReached;
 
-  if (scrollingDown && !stickedToBottom) {
+  if (scrollingDown && !stickedToBottom && canScroll) {
     changeStickStatus(
       isBottomReached ? StickStatus.BOTTOM : StickStatus.SCROLL
     );
@@ -61,7 +62,8 @@ function changeStickStatus(status: StickStatus) {
 }
 
 function stickToBottom() {
-  const offset = el.value.getBoundingClientRect().top;
+  const offset =
+    window.innerHeight - props.bottom - el.value.getBoundingClientRect().height;
 
   el.value.style.position = 'sticky';
   el.value.style.top = `${offset}px`;
@@ -87,6 +89,7 @@ function handlePositionUpdate() {
 }
 
 onMounted(() => {
+  changeStickStatus(StickStatus.TOP);
   updatePosition(window.scrollY);
 
   window.addEventListener('scroll', handlePositionUpdate);
