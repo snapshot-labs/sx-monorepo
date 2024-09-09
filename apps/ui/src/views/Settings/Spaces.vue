@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { explorePageProtocols } from '../../networks';
-import { ExplorePageProtocol, ProtocolConfig } from '../../networks/types';
+import { explorePageProtocols } from '@/networks';
+import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 
 useTitle('My spaces');
 
@@ -38,11 +38,9 @@ watch(
   ([protocolQuery, controller]) => {
     loaded.value = false;
 
-    const _protocol = (
+    spacesStore.protocol = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
-
-    spacesStore.protocol = _protocol;
     if (controller) {
       spacesStore.fetch({ controller });
     } else {
@@ -58,7 +56,7 @@ watch(
 </script>
 
 <template>
-  <div class="flex justify-between hidden">
+  <div class="flex justify-between">
     <div class="flex flex-row p-4 space-x-2">
       <UiSelectDropdown
         v-model="spacesStore.protocol"
