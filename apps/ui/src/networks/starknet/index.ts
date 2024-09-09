@@ -14,7 +14,7 @@ import { createApi } from '../common/graphqlApi';
 
 type Metadata = {
   name: string;
-  chainId: string;
+  chainId: starknetConstants.StarknetChainId;
   baseChainId: number;
   baseNetworkId: NetworkID;
   rpcUrl: string;
