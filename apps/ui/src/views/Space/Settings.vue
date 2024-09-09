@@ -346,8 +346,10 @@ async function hasStrategyChanged(
       : [];
     previousParams = previousParams ?? [];
   }
-
-  return objectHash(params) !== objectHash(previousParams);
+  // NOTE: Params need to be lowercase when we compare them as once stored they will be stored
+  // as bytes (casing is lost).
+  const formattedParams = params.map(param => param.toLowerCase());
+  return objectHash(formattedParams) !== objectHash(previousParams);
 }
 
 async function processChanges(
