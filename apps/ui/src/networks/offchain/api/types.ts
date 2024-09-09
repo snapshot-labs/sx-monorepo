@@ -5,6 +5,7 @@ export type ApiRelatedSpace = {
   name: string;
   network: NetworkID;
   avatar: string;
+  cover: string | null;
   proposalsCount: number;
   votesCount: number;
   turbo: boolean;
@@ -19,6 +20,7 @@ export type ApiSpace = {
   members: string[];
   name: string | null;
   avatar: string | null;
+  cover: string | null;
   network: string;
   about: string | null;
   website: string | null;

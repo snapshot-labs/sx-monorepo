@@ -14,6 +14,7 @@ export type OffchainSpaceSettings = {
   name: string;
   about: string;
   avatar: string;
+  cover: string | null;
   network: string;
   symbol: string;
   terms: string;
@@ -320,6 +321,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       name: form.value.name ?? space.value.name,
       about: (form.value.description ?? space.value.about) || '',
       avatar: form.value.avatar ?? space.value.avatar,
+      cover: form.value.cover ?? space.value.cover,
       network: space.value.snapshot_chain_id?.toString() ?? '1',
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
       terms: space.value.additionalRawData.terms,

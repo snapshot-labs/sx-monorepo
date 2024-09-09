@@ -9,6 +9,7 @@ const SPACE_FRAGMENT = gql`
     members
     name
     avatar
+    cover
     network
     about
     website
@@ -56,6 +57,7 @@ const SPACE_FRAGMENT = gql`
       id
       name
       avatar
+      cover
       proposalsCount
       votesCount
       turbo
@@ -66,6 +68,7 @@ const SPACE_FRAGMENT = gql`
       id
       name
       avatar
+      cover
       proposalsCount
       votesCount
       turbo
