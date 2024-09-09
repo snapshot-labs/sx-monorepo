@@ -289,7 +289,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
       treasuries: space.treasuries,
-      delegations: space.delegations
+      delegations: space.delegations.filter(
+        delegation => delegation.apiType !== 'delegate-registry'
+      )
     };
   }
 
