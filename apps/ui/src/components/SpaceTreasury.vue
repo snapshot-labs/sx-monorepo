@@ -367,7 +367,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <a
               v-for="(nft, i) in nfts"
               :key="i"
-              :href="sanitizeUrl(nft.permalink) || '#'"
+              :href="sanitizeUrl(nft.opensea_url) || '#'"
               target="_blank"
               class="block max-w-[120px]"
             >
