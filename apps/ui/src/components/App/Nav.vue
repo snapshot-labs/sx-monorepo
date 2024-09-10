@@ -27,7 +27,6 @@ type NavigationItem = {
 };
 
 const route = useRoute();
-const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 const { app } = useApp();
@@ -179,13 +178,7 @@ const navigationItems = computed(() =>
 <template>
   <div
     v-if="Object.keys(navigationItems).length"
-    :class="[
-      `lg:visible fixed w-[240px] border-r top-[72px] inset-y-0 z-10 bg-skin-bg py-4`,
-      {
-        invisible: !uiStore.sidebarOpen,
-        [`left-[${SIDEBAR_WIDTH}px]`]: !app.isWhiteLabel
-      }
-    ]"
+    class="w-[240px] border-r bg-skin-bg py-4"
   >
     <router-link
       v-for="(item, key) in navigationItems"

@@ -80,15 +80,9 @@ watch(
 </script>
 
 <template>
-  <nav
-    :class="[
-      `border-b fixed top-0 inset-x-0 z-50  flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4`,
-      {
-        [`lg:left-[${SIDEBAR_WIDTH}px]`]: !app.isWhiteLabel,
-        [`translate-x-[${SIDEBAR_WIDTH}px] lg:translate-x-0`]:
-          uiStore.sidebarOpen && !app.isWhiteLabel
-      }
-    ]"
+  <header
+    class="border-b flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
+    v-bind="$attrs"
   >
     <div
       class="flex items-center h-full truncate"
@@ -163,7 +157,7 @@ watch(
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>
-  </nav>
+  </header>
   <teleport to="#modal">
     <ModalAccount
       :open="modalAccountOpen || modalAccountWithoutDismissOpen"
