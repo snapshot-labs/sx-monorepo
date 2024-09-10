@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
-import { SIDEBAR_WIDTH } from '@/helpers/constants';
 import { getCacheHash, shorten } from '@/helpers/utils';
 
 const route = useRoute();
 const router = useRouter();
-const { app } = useApp();
 const usersStore = useUsersStore();
 const auth = getInstance();
 const uiStore = useUiStore();

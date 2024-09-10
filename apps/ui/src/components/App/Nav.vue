@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
-import { SIDEBAR_WIDTH } from '@/helpers/constants';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
