@@ -51,7 +51,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 
       <h5
         v-if="showAbout"
-        class="mt-1 line-clamp-2 leading-6"
+        class="mt-1 line-clamp-3 leading-6"
         v-text="space.about"
       />
     </div>
