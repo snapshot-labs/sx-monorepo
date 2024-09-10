@@ -179,7 +179,7 @@ const navigationItems = computed(() =>
   <div
     v-if="Object.keys(navigationItems).length"
     :class="[
-      `lg:visible fixed w-[240px] border-r  top-[72px] inset-y-0 z-10 bg-skin-bg py-4`,
+      `lg:visible fixed w-[240px] border-r top-[72px] inset-y-0 z-10 bg-skin-bg py-4`,
       {
         invisible: !uiStore.sidebarOpen,
         [`left-[${SIDEBAR_WIDTH}px]`]: !app.isWhiteLabel

@@ -100,8 +100,10 @@ watch(isSwiping, () => {
     <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
       <AppSidebar
         v-if="!isSiteRoute && !app.isWhiteLabel"
-        class="lg:visible"
-        :class="{ invisible: !uiStore.sidebarOpen }"
+        :class="[
+          `lg:visible w-[${SIDEBAR_WIDTH}px]`,
+          { invisible: !uiStore.sidebarOpen }
+        ]"
       />
       <AppTopnav v-if="!isSiteRoute" />
       <AppNav v-if="!isSiteRoute" />
@@ -124,7 +126,7 @@ watch(isSwiping, () => {
         <router-view
           :class="[
             `flex-auto mt-[72px] pl-0 lg:pl-[${SIDEBAR_WIDTH}px]`,
-            { '!ml-0': isSiteRoute || app.isWhiteLabel }
+            { '!pl-0': isSiteRoute || app.isWhiteLabel }
           ]"
         />
       </div>

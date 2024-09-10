@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { NavigationGuard } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
+import { SIDEBAR_WIDTH } from '@/helpers/constants';
 import { resolver } from '@/helpers/resolver';
 import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { Contact, Transaction, VoteType } from '@/types';
+import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const MAX_BODY_LENGTH = {
   default: 10000,
@@ -54,6 +55,7 @@ const {
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
 const { votingPower, fetch: fetchVotingPower } = useVotingPower();
+const { app } = useApp();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
@@ -62,7 +64,11 @@ const sending = ref(false);
 const network = computed(() =>
   networkId.value ? getNetwork(networkId.value) : null
 );
-const space = computed(() => {
+const space = computed<Space | null>(() => {
+  if (app.value.isWhiteLabel) {
+    return app.value.space;
+  }
+
   if (!resolved.value) return null;
 
   return (
@@ -333,7 +339,10 @@ export default defineComponent({
 
 <template>
   <div v-if="proposal">
-    <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
+    <nav
+      class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0"
+      :class="{ [`lg:left-[${SIDEBAR_WIDTH}px]`]: !app.isWhiteLabel }"
+    >
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
           <router-link
