@@ -591,7 +591,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </div>
   <template v-else>
     <UiScrollerHorizontal
-      class="sticky top-[72px] z-50"
+      class="sticky top-[72px] z-40"
       with-buttons
       gradient="xxl"
     >
