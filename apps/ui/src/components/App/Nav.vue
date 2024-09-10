@@ -103,7 +103,8 @@ const navigationConfig = computed<
   settings: {
     spaces: {
       name: 'My spaces',
-      icon: IHStop
+      icon: IHStop,
+      hidden: app.value.isWhiteLabel
     },
     contacts: {
       name: 'Contacts',
