@@ -123,7 +123,7 @@ watch(isSwiping, () => {
       >
         <router-view
           :class="[
-            `flex-auto mt-[72px] ml-0 lg:ml-[${SIDEBAR_WIDTH}px]`,
+            `flex-auto mt-[72px] pl-0 lg:pl-[${SIDEBAR_WIDTH}px]`,
             { '!ml-0': isSiteRoute || app.isWhiteLabel }
           ]"
         />
