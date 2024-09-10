@@ -71,8 +71,6 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
-  if (String(route.name).startsWith('site-')) return;
-
   if (
     sidebarSwipeEnabled.value &&
     isSwiping.value &&
