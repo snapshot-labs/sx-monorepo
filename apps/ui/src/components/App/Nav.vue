@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
+import { SIDEBAR_WIDTH } from '@/helpers/constants';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
@@ -29,6 +30,7 @@ const route = useRoute();
 const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
+const { app } = useApp();
 
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
@@ -176,10 +178,13 @@ const navigationItems = computed(() =>
 <template>
   <div
     v-if="Object.keys(navigationItems).length"
-    class="lg:visible fixed w-[240px] border-r left-[72px] top-[72px] inset-y-0 z-10 bg-skin-bg py-4"
-    :class="{
-      invisible: !uiStore.sidebarOpen
-    }"
+    :class="[
+      `lg:visible fixed w-[240px] border-r  top-[72px] inset-y-0 z-10 bg-skin-bg py-4`,
+      {
+        invisible: !uiStore.sidebarOpen,
+        [`left-[${SIDEBAR_WIDTH}px]`]: !app.isWhiteLabel
+      }
+    ]"
   >
     <router-link
       v-for="(item, key) in navigationItems"

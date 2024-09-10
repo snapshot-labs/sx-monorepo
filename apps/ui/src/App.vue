@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SIDEBAR_WIDTH } from './helpers/constants';
 import { startIntercom } from './helpers/intercom';
 import { Transaction } from './types';
 
@@ -98,7 +99,7 @@ watch(isSwiping, () => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
       <AppSidebar
-        v-if="!isSiteRoute"
+        v-if="!isSiteRoute && !app.isWhiteLabel"
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
       />
@@ -109,19 +110,22 @@ watch(isSwiping, () => {
         type="button"
         class="backdrop lg:hidden"
         :style="{
-          left: `${72 + (hasAppNav ? 240 : 0)}px`
+          left: `${SIDEBAR_WIDTH + (hasAppNav ? 240 : 0)}px`
         }"
         @click="uiStore.toggleSidebar"
       />
       <div
         class="flex-auto w-full"
         :class="{
-          'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
+          [`translate-x-[${SIDEBAR_WIDTH}px] lg:translate-x-0`]:
+            uiStore.sidebarOpen
         }"
       >
         <router-view
-          class="flex-auto mt-[72px] ml-0 lg:ml-[72px]"
-          :class="isSiteRoute && '!ml-0'"
+          :class="[
+            `flex-auto mt-[72px] ml-0 lg:ml-[${SIDEBAR_WIDTH}px]`,
+            { '!ml-0': isSiteRoute || app.isWhiteLabel }
+          ]"
         />
       </div>
     </div>

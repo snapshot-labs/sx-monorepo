@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { SIDEBAR_WIDTH } from '@/helpers/constants';
 import { getCacheHash, shorten } from '@/helpers/utils';
 
 const route = useRoute();
 const router = useRouter();
+const { app } = useApp();
 const usersStore = useUsersStore();
 const auth = getInstance();
 const uiStore = useUiStore();
@@ -79,10 +81,14 @@ watch(
 
 <template>
   <nav
-    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px] flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
-    :class="{
-      'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
-    }"
+    :class="[
+      `border-b fixed top-0 inset-x-0 z-50  flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4`,
+      {
+        [`lg:left-[${SIDEBAR_WIDTH}px]`]: !app.isWhiteLabel,
+        [`translate-x-[${SIDEBAR_WIDTH}px] lg:translate-x-0`]:
+          uiStore.sidebarOpen && !app.isWhiteLabel
+      }
+    ]"
   >
     <div
       class="flex items-center h-full truncate"
