@@ -56,6 +56,12 @@ const CUSTOMERS = [
     website: 'https://zklink.io'
   },
   {
+    name: 'ApeChain',
+    avatar:
+      'ipfs://bafkreicljxttjq2xkgfwwpii5xegirgq2ctrnsjnzelxudjj33qzq65apu',
+    website: 'https://apechain.com'
+  },
+  {
     name: 'Fantom',
     avatar: 'ipfs://QmVEgNeQDKnXygeGxfY9FywZpNGQu98ktZtRJ9bToYF6g7',
     website: 'https://fantom.foundation'
@@ -75,11 +81,6 @@ const FAQ = [
     question: 'How to add a network that is not EVM compatible?',
     answer:
       'Adding a non-EVM network is possible under certain conditions. Please contact us for more details.'
-  },
-  {
-    question: 'Does the network plan include Snapshot X?',
-    answer:
-      'No, this network plan does not include Snapshot X, our onchain voting protocol. If you are interested in a Snapshot X integration, please reach out.'
   }
 ];
 const LINK = 'https://tally.so/r/31ApGb';
@@ -117,37 +118,60 @@ watchEffect(() => setTitle('Network'));
       <h2 class="font-display text-[36px] mb-3">
         What the network plan offers
       </h2>
-      <div class="text-[21px] mb-4 max-w-[500px] mx-auto">
+      <div class="text-[21px] mb-5 max-w-[500px] mx-auto">
         Our network plan is designed to provide the infrastructure and support
         needed for effective governance.
       </div>
       <div
-        class="text-skin-link text-lg space-y-1.5 px-5 py-4 border text-left rounded-lg max-w-[500px] mx-auto"
+        class="text-skin-link text-lg space-y-4 px-5 py-4 text-left border rounded-lg max-w-[500px] mx-auto"
       >
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Mainnet network support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Testnet network support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Custom domain registry support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Dedicated customer support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Quick setup (~48 hours)
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Co-marketing
-        </h3>
+        <div>
+          <h3 class="font-display mb-3">Basic plan</h3>
+          <div class="text-left">
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Mainnet network support
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Custom domain registry support
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Dedicated customer support
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Quick setup (~48 hours)
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Co-marketing
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-display mb-3">Premium plan</h3>
+          <div class="text-left">
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Snapshot X integration
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Support for Safe voting
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Support for delegate registry
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Testnet network support
+            </div>
+          </div>
+        </div>
       </div>
     </UiContainer>
 
@@ -193,9 +217,9 @@ watchEffect(() => setTitle('Network'));
           Is your network already live on Snapshot?
         </h3>
         <div class="text-md">
-          Starting July 1, 2024, all networks must subscribe to the network plan
-          to maintain support on Snapshot. To ensure continuous service and
-          avoid interruptions, please contact our team today.
+          All networks must subscribe to the network plan to maintain support on
+          Snapshot. To ensure continuous service and avoid interruptions, please
+          contact our team today.
         </div>
       </div>
     </UiContainer>
