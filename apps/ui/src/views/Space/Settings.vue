@@ -346,8 +346,10 @@ async function hasStrategyChanged(
       : [];
     previousParams = previousParams ?? [];
   }
-
-  return objectHash(params) !== objectHash(previousParams);
+  // NOTE: Params need to be lowercase when we compare them as once stored they will be stored
+  // as bytes (casing is lost).
+  const formattedParams = params.map(param => param.toLowerCase());
+  return objectHash(formattedParams) !== objectHash(previousParams);
 }
 
 async function processChanges(
@@ -589,7 +591,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </div>
   <template v-else>
     <UiScrollerHorizontal
-      class="sticky top-[72px] z-50"
+      class="sticky top-[72px] z-40"
       with-buttons
       gradient="xxl"
     >
