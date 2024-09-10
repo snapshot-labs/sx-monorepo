@@ -92,27 +92,30 @@ watch(isSwiping, () => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
       <AppSidebar
-        class="lg:visible"
-        :class="{ invisible: !uiStore.sidebarOpen }"
+        :class="[
+          `hidden lg:flex sidebar h-screen w-[72px] fixed inset-y-0`,
+          { '!flex sidebar-open': uiStore.sidebarOpen }
+        ]"
       />
-      <AppTopnav />
-      <AppNav />
+      <AppTopnav class="fixed top-0 inset-x-0 z-50 lg:left-[72px]" />
+      <AppNav
+        class="top-[72px] inset-y-0 z-10 lg:block fixed lg:left-[72px] app-nav"
+        :class="{
+          hidden: !uiStore.sidebarOpen,
+          'app-nav-open': uiStore.sidebarOpen
+        }"
+      />
       <button
         v-if="uiStore.sidebarOpen"
         type="button"
         class="backdrop lg:hidden"
-        :style="{
-          left: `${72 + (hasAppNav ? 240 : 0)}px`
-        }"
         @click="uiStore.toggleSidebar"
       />
       <div
-        class="flex-auto w-full"
-        :class="{
-          'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
-        }"
+        class="flex-auto size-full lg:ml-[72px]"
+        :class="{ 'lg:ml-[312px]': hasAppNav }"
       >
-        <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
+        <router-view class="flex-auto mt-[72px]" />
       </div>
     </div>
     <AppNotifications />
@@ -127,7 +130,40 @@ watch(isSwiping, () => {
   </div>
 </template>
 
-<style>
+<style lang="scss">
+.sidebar-open {
+  ~ * {
+    @apply translate-x-[72px];
+  }
+
+  & + .backdrop {
+    left: 72px;
+  }
+}
+
+.app-nav-open {
+  ~ * {
+    @apply ml-[240px];
+  }
+}
+
+@media (min-width: 1012px) {
+  .sidebar-open {
+    ~ *,
+    ~ * header {
+      @apply translate-x-0;
+    }
+  }
+
+  .sidebar ~ * header {
+    @apply left-[72px];
+  }
+
+  .app-nav + * {
+    @apply ml-[240px];
+  }
+}
+
 .backdrop {
   position: fixed;
   top: 0;
