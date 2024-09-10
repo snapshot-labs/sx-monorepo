@@ -16,6 +16,7 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const spacesStore = useSpacesStore();
+const { app } = useApp();
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
 const { getCurrent } = useMetaStore();
@@ -186,7 +187,7 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <UiTooltip title="View profile">
+        <UiTooltip v-if="!app.isWhiteLabel" title="View profile">
           <router-link
             :to="{ name: 'user', params: { id: user.id } }"
             tabindex="-1"

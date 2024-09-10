@@ -34,7 +34,7 @@ export function useApp() {
       // TODO Remove this hardcoded test domain once domain is handled by space settings
       const spaceId = 'test.wa0x6e.eth';
       await spacesStore.fetchSpace(spaceId, 's');
-      state.space = spacesStore.spaces[spaceId];
+      state.space = spacesStore.networksMap['s'].spaces[spaceId];
     }
 
     // Auto connect with gnosis-connector when inside gnosis-safe iframe

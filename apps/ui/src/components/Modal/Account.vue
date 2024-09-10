@@ -27,6 +27,7 @@ const emit = defineEmits<{
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
+const { app } = useApp();
 const usersStore = useUsersStore();
 const step: Ref<'connect' | null> = ref(null);
 
@@ -93,7 +94,17 @@ watch(open, () => (step.value = null));
     <div v-else>
       <div class="m-4 space-y-2">
         <router-link
-          :to="{ name: 'user', params: { id: web3.account } }"
+          :to="
+            app.isWhiteLabel && app.space
+              ? {
+                  name: 'space-user-statement',
+                  params: {
+                    id: `${app.space.network}:${app.space.id}`,
+                    user: web3.account
+                  }
+                }
+              : { name: 'user', params: { id: web3.account } }
+          "
           class="block"
           tabindex="-1"
         >
