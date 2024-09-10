@@ -178,7 +178,7 @@ const navigationItems = computed(() =>
 <template>
   <div
     v-if="Object.keys(navigationItems).length"
-    class="w-[240px] border-r bg-skin-bg py-4"
+    class="border-r bg-skin-bg py-4"
   >
     <router-link
       v-for="(item, key) in navigationItems"

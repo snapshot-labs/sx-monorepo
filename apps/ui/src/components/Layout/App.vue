@@ -32,6 +32,8 @@ const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 
+const hasSidebar = computed(() => !app.value.isWhiteLabel);
+
 const bottomPadding = computed(
   () => !['proposal-votes'].includes(String(route.name))
 );
@@ -92,31 +94,30 @@ watch(isSwiping, () => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
       <AppSidebar
+        v-if="hasSidebar"
         :class="[
-          `hidden lg:flex sidebar h-screen w-[72px] fixed inset-y-0`,
-          { '!flex sidebar-open': uiStore.sidebarOpen }
+          `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
+          { '!flex app-sidebar-open': uiStore.sidebarOpen }
         ]"
       />
-      <AppTopnav class="fixed top-0 inset-x-0 z-50 lg:left-[72px]" />
+      <AppTopnav class="fixed top-0 inset-x-0 z-50" />
       <AppNav
-        class="top-[72px] inset-y-0 z-10 lg:block fixed lg:left-[72px] app-nav"
-        :class="{
-          hidden: !uiStore.sidebarOpen,
-          'app-nav-open': uiStore.sidebarOpen
-        }"
+        :class="[
+          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+          {
+            '!block app-nav-open': uiStore.sidebarOpen
+          }
+        ]"
       />
       <button
-        v-if="uiStore.sidebarOpen"
+        v-if="(hasSidebar || hasAppNav) && uiStore.sidebarOpen"
         type="button"
         class="backdrop lg:hidden"
         @click="uiStore.toggleSidebar"
       />
-      <div
-        class="flex-auto size-full lg:ml-[72px]"
-        :class="{ 'lg:ml-[312px]': hasAppNav }"
-      >
+      <main class="flex-auto size-full">
         <router-view class="flex-auto mt-[72px]" />
-      </div>
+      </main>
     </div>
     <AppNotifications />
     <ModalTransaction
@@ -131,46 +132,56 @@ watch(isSwiping, () => {
 </template>
 
 <style lang="scss">
-.sidebar-open {
-  ~ * {
-    @apply translate-x-[72px];
-  }
+$sidebarWidth: 72px;
+$navWidth: 240px;
 
-  & + .backdrop {
-    left: 72px;
+.app-sidebar {
+  width: $sidebarWidth;
+
+  &-open {
+    ~ * {
+      @apply translate-x-[#{$sidebarWidth}];
+    }
+
+    &:has(~ .app-nav) ~ .app-nav ~ * {
+      @apply translate-x-[#{$sidebarWidth + $navWidth}];
+    }
   }
 }
 
-.app-nav-open {
-  ~ * {
-    @apply ml-[240px];
+.app-nav {
+  width: $navWidth;
+
+  &-open {
+    ~ * {
+      @apply translate-x-[#{navWidth}];
+    }
   }
 }
 
 @media (min-width: 1012px) {
-  .sidebar-open {
-    ~ *,
-    ~ * header {
-      @apply translate-x-0;
+  .app-sidebar {
+    ~ * header,
+    ~ header,
+    & ~ .app-nav,
+    & ~ main {
+      @apply ml-[#{$sidebarWidth}];
+      @apply translate-x-0 #{!important};
+    }
+
+    &:has(~ .app-nav) ~ .app-nav ~ * {
+      @apply ml-[#{$sidebarWidth + $navWidth}];
     }
   }
 
-  .sidebar ~ * header {
-    @apply left-[72px];
-  }
-
-  .app-nav + * {
-    @apply ml-[240px];
+  .app-nav ~ * {
+    @apply ml-[#{navWidth}];
+    @apply translate-x-0 #{!important};
   }
 }
 
 .backdrop {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 99;
-  background: rgba(0, 0, 0, 0.4) !important;
+  @apply fixed inset-0 z-[99];
+  @apply bg-[black]/40 #{!important};
 }
 </style>
