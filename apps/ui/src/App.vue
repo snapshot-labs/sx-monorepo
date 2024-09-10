@@ -9,6 +9,6 @@ onMounted(async () => startIntercom());
 </script>
 
 <template>
-  <SiteLayout v-if="isSiteRoute" />
-  <AppLayout v-else />
+  <LayoutSite v-if="isSiteRoute" />
+  <LayoutApp v-else />
 </template>
