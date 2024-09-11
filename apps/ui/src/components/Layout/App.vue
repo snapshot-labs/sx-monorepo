@@ -79,7 +79,9 @@ watch(isSwiping, () => {
     sidebarSwipeEnabled.value &&
     isSwiping.value &&
     !modalOpen.value &&
-    ((direction.value === 'right' && !uiStore.sidebarOpen) ||
+    ((direction.value === 'right' &&
+      !uiStore.sidebarOpen &&
+      isSwippable.value) ||
       (direction.value === 'left' && uiStore.sidebarOpen))
   ) {
     uiStore.toggleSidebar();
