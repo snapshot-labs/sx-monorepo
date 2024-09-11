@@ -284,7 +284,7 @@ export class EthereumTx {
     const address = await signer.getAddress();
 
     const userVotingStrategies = await getStrategiesWithParams(
-      'propose',
+      'vote',
       data.strategies,
       address,
       data,
