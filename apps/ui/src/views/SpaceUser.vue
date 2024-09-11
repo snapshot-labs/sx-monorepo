@@ -15,9 +15,6 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const usersStore = useUsersStore();
-const spacesStore = useSpacesStore();
-const { param } = useRouteParser('id');
-const { resolved, address, networkId } = useResolve(param);
 const { getCurrent } = useMetaStore();
 
 const userActivity = ref<UserActivity>({
@@ -157,15 +154,6 @@ watch(
     loaded.value = true;
   },
   { immediate: true }
-);
-
-watch(
-  [resolved, networkId, address],
-  async ([resolved, networkId, address]) => {
-    if (!resolved || !networkId || !address) return;
-
-    spacesStore.networksMap[networkId].spaces[address];
-  }
 );
 </script>
 
