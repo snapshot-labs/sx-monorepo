@@ -129,7 +129,7 @@ watch(isSwiping, () => {
         class="backdrop lg:hidden"
         @click="uiStore.toggleSidebar"
       />
-      <main class="flex-auto size-full">
+      <main class="flex-auto w-full">
         <router-view class="flex-auto mt-[72px]" />
       </main>
     </div>
@@ -152,13 +152,15 @@ $navWidth: 240px;
 .app-sidebar {
   width: $sidebarWidth;
 
-  &-open {
-    & ~ * {
-      @apply translate-x-[#{$sidebarWidth}];
-    }
+  @media (max-width: 1011px) {
+    &-open {
+      & ~ * {
+        @apply translate-x-[#{$sidebarWidth}];
+      }
 
-    &:has(~ .app-nav) ~ .app-nav ~ * {
-      @apply translate-x-[#{$sidebarWidth + $navWidth}];
+      &:has(~ .app-nav) ~ .app-nav ~ * {
+        @apply translate-x-[#{$sidebarWidth + $navWidth}];
+      }
     }
   }
 }
@@ -166,19 +168,20 @@ $navWidth: 240px;
 .app-nav {
   width: $navWidth;
 
-  &-open ~ * {
-    @apply translate-x-[#{$navWidth}];
+  @media (max-width: 1011px) {
+    &-open ~ * {
+      @apply translate-x-[#{$navWidth}];
+    }
   }
 }
 
 @media (min-width: 1012px) {
   .app-sidebar {
-    ~ * header,
-    ~ header,
-    & ~ .app-nav,
-    & ~ main {
+    & ~ main,
+    & ~ header,
+    & ~ main header,
+    & ~ .app-nav {
       @apply ml-[#{$sidebarWidth}];
-      @apply translate-x-0 #{!important};
     }
 
     &:has(~ .app-nav) ~ .app-nav ~ * {
@@ -188,7 +191,6 @@ $navWidth: 240px;
 
   .app-nav ~ * {
     @apply ml-[#{$navWidth}];
-    @apply translate-x-0 #{!important};
   }
 }
 
