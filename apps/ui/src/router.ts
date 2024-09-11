@@ -35,6 +35,8 @@ import Terms from '@/views/Terms.vue';
 import Topic from '@/views/Topic.vue';
 import User from '@/views/User.vue';
 
+const { app } = useApp();
+
 const spaceChildrenRoutes: RouteRecordRaw[] = [
   { path: '', name: 'space-overview', component: SpaceOverview },
   { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
@@ -190,11 +192,9 @@ const whiteLabelRoutes = [
   }
 ];
 
-const routes = whiteLabelRoutes;
-
 const router = createRouter({
   history: createWebHashHistory(),
-  routes,
+  routes: app.value.isWhiteLabel ? whiteLabelRoutes : defaultRoutes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition;
     if (to.params.retainScrollPosition) return {};

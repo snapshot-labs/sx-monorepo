@@ -1,7 +1,8 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { Space } from '@/types';
 
-const DEFAULT_DOMAIN = import.meta.env.VITE_HOST;
+const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
+const domain = window.location.hostname;
 
 const state: {
   init: boolean;
@@ -19,17 +20,18 @@ const state: {
 
 const { login } = useWeb3();
 
+if (domain !== DEFAULT_DOMAIN) {
+  state.isWhiteLabel = true;
+  state.domain = domain;
+}
+
 export function useApp() {
   async function init() {
     const auth = getInstance();
     state.loading = true;
 
-    const domain = window.location.hostname;
-    if (domain !== DEFAULT_DOMAIN) {
+    if (state.isWhiteLabel) {
       const spacesStore = useSpacesStore();
-
-      state.domain = domain;
-      state.isWhiteLabel = true;
 
       // TODO Remove this hardcoded test domain once domain is handled by space settings
       const spaceId = 'test.wa0x6e.eth';
