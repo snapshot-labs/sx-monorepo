@@ -59,12 +59,19 @@ const profileLink = computed(() => {
     return {
       name: 'space-user-statement',
       params: {
-        id: `${app.value.space.network}:${app.value.space.id}`,
         user: web3.value.account
       }
     };
   } else if (!app.value.isWhiteLabel) {
     return { name: 'user', params: { id: web3.value.account } };
+  }
+});
+
+const settingsLink = computed(() => {
+  if (app.value.isWhiteLabel && app.value.space) {
+    return { name: 'settings-contacts' };
+  } else if (!app.value.isWhiteLabel) {
+    return { name: 'settings-spaces' };
   }
 });
 
@@ -119,7 +126,7 @@ watch(open, () => (step.value = null));
             My profile
           </UiButton>
         </router-link>
-        <router-link :to="{ name: 'settings-spaces' }" tabindex="-1">
+        <router-link v-if="settingsLink" :to="settingsLink" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center"
             @click="emit('close')"

@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import App from '@/views/App.vue';
 import Create from '@/views/Create.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
@@ -35,7 +35,62 @@ import Terms from '@/views/Terms.vue';
 import Topic from '@/views/Topic.vue';
 import User from '@/views/User.vue';
 
-const routes: any[] = [
+const spaceChildrenRoutes: RouteRecordRaw[] = [
+  { path: '', name: 'space-overview', component: SpaceOverview },
+  { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
+  {
+    path: 'discussions',
+    name: 'space-discussions',
+    component: SpaceDiscussions
+  },
+  {
+    path: 'discussions/:topic',
+    name: 'space-discussions-topic',
+    component: Topic
+  },
+  { path: 'search', name: 'space-search', component: SpaceSearch },
+  {
+    path: 'settings/:tab?',
+    name: 'space-settings',
+    component: SpaceSettings
+  },
+  {
+    path: 'treasury/:index?/:tab?',
+    name: 'space-treasury',
+    component: SpaceTreasury
+  },
+  { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
+  {
+    path: 'leaderboard',
+    name: 'space-leaderboard',
+    component: SpaceLeaderboard
+  },
+  {
+    path: 'profile/:user',
+    name: 'space-user',
+    component: SpaceUser,
+    children: [
+      {
+        path: '',
+        name: 'space-user-statement',
+        component: SpaceUserStatement
+      },
+      {
+        path: 'delegators',
+        name: 'space-user-delegators',
+        component: SpaceUserDelegators
+      },
+      {
+        path: 'proposals',
+        name: 'space-user-proposals',
+        component: SpaceUserProposals
+      },
+      { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
+    ]
+  }
+];
+
+const defaultRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'site',
@@ -53,60 +108,7 @@ const routes: any[] = [
     path: '/:id',
     name: 'space',
     component: Space,
-    children: [
-      { path: '', name: 'space-overview', component: SpaceOverview },
-      { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
-      {
-        path: 'discussions',
-        name: 'space-discussions',
-        component: SpaceDiscussions
-      },
-      {
-        path: 'discussions/:topic',
-        name: 'space-discussions-topic',
-        component: Topic
-      },
-      { path: 'search', name: 'space-search', component: SpaceSearch },
-      {
-        path: 'settings/:tab?',
-        name: 'space-settings',
-        component: SpaceSettings
-      },
-      {
-        path: 'treasury/:index?/:tab?',
-        name: 'space-treasury',
-        component: SpaceTreasury
-      },
-      { path: 'delegates', name: 'space-delegates', component: SpaceDelegates },
-      {
-        path: 'leaderboard',
-        name: 'space-leaderboard',
-        component: SpaceLeaderboard
-      },
-      {
-        path: 'profile/:user',
-        name: 'space-user',
-        component: SpaceUser,
-        children: [
-          {
-            path: '',
-            name: 'space-user-statement',
-            component: SpaceUserStatement
-          },
-          {
-            path: 'delegators',
-            name: 'space-user-delegators',
-            component: SpaceUserDelegators
-          },
-          {
-            path: 'proposals',
-            name: 'space-user-proposals',
-            component: SpaceUserProposals
-          },
-          { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
-        ]
-      }
-    ]
+    children: spaceChildrenRoutes
   },
   {
     path: '/:id/create/:key?',
@@ -153,6 +155,42 @@ const routes: any[] = [
     ]
   }
 ];
+
+const whiteLabelRoutes = [
+  {
+    path: '/',
+    name: 'space',
+    component: Space,
+    children: spaceChildrenRoutes
+  },
+  {
+    path: '/create/:key?',
+    name: 'editor',
+    component: Editor
+  },
+  {
+    path: '/proposal/:id?',
+    name: 'proposal',
+    component: Proposal,
+    children: [
+      { path: '', name: 'proposal-overview', component: ProposalOverview },
+      { path: 'votes', name: 'proposal-votes', component: ProposalVotes },
+      {
+        path: 'discussion',
+        name: 'proposal-discussion',
+        component: Topic
+      }
+    ]
+  },
+  {
+    path: '/contacts',
+    name: 'settings',
+    component: Settings,
+    children: [{ path: '', name: 'settings-contacts', component: Contacts }]
+  }
+];
+
+const routes = whiteLabelRoutes;
 
 const router = createRouter({
   history: createWebHashHistory(),
