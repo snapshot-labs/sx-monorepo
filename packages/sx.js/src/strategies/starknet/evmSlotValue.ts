@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
-import { CallData, Contract } from 'starknet';
+import { CallData, Contract, LibraryError } from 'starknet';
 import EVMSlotValue from './abis/EVMSlotValue.json';
 import { getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
@@ -148,17 +148,27 @@ export default function createEvmSlotValueStrategy(): Strategy {
         chainId
       );
 
-      return contract.get_voting_power(
-        timestamp,
-        getUserAddressEnum(
-          voterAddress.length === 42 ? 'ETHEREUM' : 'STARKNET',
-          voterAddress
-        ),
-        params,
-        CallData.compile({
-          storageProof
-        })
-      );
+      try {
+        return await contract.get_voting_power(
+          timestamp,
+          getUserAddressEnum(
+            voterAddress.length === 42 ? 'ETHEREUM' : 'STARKNET',
+            voterAddress
+          ),
+          params,
+          CallData.compile({
+            storageProof
+          })
+        );
+      } catch (e) {
+        if (e instanceof LibraryError) {
+          // can be removed after contracts include this
+          // https://github.com/snapshot-labs/sx-starknet/pull/624
+          if (e.message.includes('Slot is zero')) return 0n;
+        }
+
+        throw e;
+      }
     }
   };
 }
