@@ -139,7 +139,7 @@ $navWidth: 240px;
   width: $sidebarWidth;
 
   &-open {
-    ~ * {
+    & ~ * {
       @apply translate-x-[#{$sidebarWidth}];
     }
 
@@ -152,10 +152,8 @@ $navWidth: 240px;
 .app-nav {
   width: $navWidth;
 
-  &-open {
-    ~ * {
-      @apply translate-x-[#{navWidth}];
-    }
+  &-open ~ * {
+    @apply translate-x-[#{$navWidth}];
   }
 }
 
@@ -175,7 +173,7 @@ $navWidth: 240px;
   }
 
   .app-nav ~ * {
-    @apply ml-[#{navWidth}];
+    @apply ml-[#{$navWidth}];
     @apply translate-x-0 #{!important};
   }
 }
