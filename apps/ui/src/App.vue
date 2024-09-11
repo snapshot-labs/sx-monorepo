@@ -75,7 +75,8 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
-  if (String(route.name).startsWith('site-')) return;
+  if (String(route.name).startsWith('site-') || window.innerWidth > 1012)
+    return;
 
   if (
     sidebarSwipeEnabled.value &&
@@ -107,7 +108,7 @@ watch(isSwiping, () => {
       <button
         v-if="!isSiteRoute && uiStore.sidebarOpen"
         type="button"
-        class="backdrop lg:hidden"
+        class="backdrop"
         :style="{
           left: `${72 + (hasAppNav ? 240 : 0)}px`
         }"
