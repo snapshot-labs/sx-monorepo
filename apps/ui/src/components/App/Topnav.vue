@@ -89,14 +89,7 @@ watch(
         'border-r pr-4 w-[240px]': hasAppNav && uiStore.sidebarOpen
       }"
     >
-      <button
-        type="button"
-        class="text-skin-link cursor-pointer lg:hidden ml-4"
-        @click="uiStore.toggleSidebar"
-      >
-        <IH-menu-alt-2 />
-      </button>
-
+      <slot name="toggle-sidebar-button" />
       <Breadcrumb
         :class="[
           'ml-4',

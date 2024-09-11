@@ -34,6 +34,8 @@ const hasAppNav = computed(() =>
 
 const hasSidebar = computed(() => !app.value.isWhiteLabel);
 
+const isSwippable = computed(() => hasSidebar.value || hasAppNav.value);
+
 const bottomPadding = computed(
   () => !['proposal-votes'].includes(String(route.name))
 );
@@ -100,7 +102,17 @@ watch(isSwiping, () => {
           { '!flex app-sidebar-open': uiStore.sidebarOpen }
         ]"
       />
-      <AppTopnav class="fixed top-0 inset-x-0 z-50" />
+      <AppTopnav class="fixed top-0 inset-x-0 z-50">
+        <template v-if="isSwippable" #toggle-sidebar-button>
+          <button
+            type="button"
+            class="text-skin-link cursor-pointer lg:hidden ml-4"
+            @click="uiStore.toggleSidebar"
+          >
+            <IH-menu-alt-2 />
+          </button>
+        </template>
+      </AppTopnav>
       <AppNav
         :class="[
           'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
@@ -110,7 +122,7 @@ watch(isSwiping, () => {
         ]"
       />
       <button
-        v-if="(hasSidebar || hasAppNav) && uiStore.sidebarOpen"
+        v-if="isSwippable && uiStore.sidebarOpen"
         type="button"
         class="backdrop lg:hidden"
         @click="uiStore.toggleSidebar"
