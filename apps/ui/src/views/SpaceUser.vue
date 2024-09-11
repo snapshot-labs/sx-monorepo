@@ -16,6 +16,7 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { getCurrent } = useMetaStore();
+const { app } = useApp();
 
 const userActivity = ref<UserActivity>({
   vote_count: 0,
