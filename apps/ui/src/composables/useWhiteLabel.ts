@@ -1,11 +1,12 @@
 import { NetworkID, Space } from '@/types';
 
-const SIDEKICK_URL = 'https://sh5.co';
+const SIDEKICK_URL = import.meta.env.VITE_SIDEKICK_URL || 'https://sh5.co';
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
 
 const isWhiteLabel = ref(false);
 const space = ref<Space | null>(null);
+const failed = ref(false);
 
 if (domain !== DEFAULT_DOMAIN) {
   isWhiteLabel.value = true;
@@ -18,8 +19,10 @@ export function useWhiteLabel() {
     });
     const data = await result.json();
 
-    // TODO Remove hardcoded returned space ID once sidekick is returning correct space ID
-    return data?.space_id ?? 's:safe.eth';
+    // Also checking data.domain presence to avoid empty json as valid response
+    if (!result.ok || !data.domain) throw new Error('Invalid response');
+
+    return data.space_id ?? null;
   }
 
   async function init() {
@@ -29,7 +32,10 @@ export function useWhiteLabel() {
       const spacesStore = useSpacesStore();
       const id = await getSpaceId(domain);
 
-      if (!id) throw new Error('Invalid white label domain');
+      if (!id) {
+        isWhiteLabel.value = false;
+        return true;
+      }
 
       const [networkId, spaceId] = id.split(':') as [NetworkID, string];
 
@@ -38,13 +44,14 @@ export function useWhiteLabel() {
 
       return true;
     } catch (e) {
-      isWhiteLabel.value = false;
+      failed.value = true;
     }
   }
 
   return {
     init,
     isWhiteLabel,
-    space
+    space,
+    failed
   };
 }

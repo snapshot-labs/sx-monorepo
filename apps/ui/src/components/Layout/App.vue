@@ -9,7 +9,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, app } = useApp();
-const { isWhiteLabel } = useWhiteLabel();
+const { isWhiteLabel, failed: whiteLabelLoadingFailed } = useWhiteLabel();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
@@ -96,53 +96,58 @@ watch(isSwiping, () => {
     class="min-h-screen"
     :class="{ 'overflow-clip': scrollDisabled }"
   >
-    <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
-      <AppSidebar
-        v-if="hasSidebar"
-        :class="[
-          `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
-          { '!flex app-sidebar-open': uiStore.sidebarOpen }
-        ]"
-      />
-      <AppTopnav class="fixed top-0 inset-x-0 z-50">
-        <template v-if="isSwippable" #toggle-sidebar-button>
-          <button
-            type="button"
-            class="text-skin-link cursor-pointer lg:hidden ml-4"
-            @click="uiStore.toggleSidebar"
-          >
-            <IH-menu-alt-2 />
-          </button>
-        </template>
-      </AppTopnav>
-      <AppNav
-        :class="[
-          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
-          {
-            '!block app-nav-open': uiStore.sidebarOpen
-          }
-        ]"
-      />
-      <button
-        v-if="isSwippable && uiStore.sidebarOpen"
-        type="button"
-        class="backdrop lg:hidden"
-        @click="uiStore.toggleSidebar"
-      />
-      <main class="flex-auto w-full">
-        <router-view class="flex-auto mt-[72px]" />
-      </main>
-    </div>
-    <AppNotifications />
-    <ModalTransaction
-      v-if="route.name !== 'editor' && transaction && network"
-      :open="!!transaction"
-      :network="network"
-      :initial-state="transaction._form"
-      @add="handleTransactionAccept"
-      @close="handleTransactionReject"
+    <SplashScreen
+      v-if="app.loading || !app.init || whiteLabelLoadingFailed"
+      :failed="whiteLabelLoadingFailed"
     />
+    <template v-else>
+      <div :class="['flex', { 'pb-6': bottomPadding }]">
+        <AppSidebar
+          v-if="hasSidebar"
+          :class="[
+            `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
+            { '!flex app-sidebar-open': uiStore.sidebarOpen }
+          ]"
+        />
+        <AppTopnav class="fixed top-0 inset-x-0 z-50">
+          <template v-if="isSwippable" #toggle-sidebar-button>
+            <button
+              type="button"
+              class="text-skin-link cursor-pointer lg:hidden ml-4"
+              @click="uiStore.toggleSidebar"
+            >
+              <IH-menu-alt-2 />
+            </button>
+          </template>
+        </AppTopnav>
+        <AppNav
+          :class="[
+            'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+            {
+              '!block app-nav-open': uiStore.sidebarOpen
+            }
+          ]"
+        />
+        <button
+          v-if="isSwippable && uiStore.sidebarOpen"
+          type="button"
+          class="backdrop lg:hidden"
+          @click="uiStore.toggleSidebar"
+        />
+        <main class="flex-auto w-full">
+          <router-view class="flex-auto mt-[72px]" />
+        </main>
+      </div>
+      <AppNotifications />
+      <ModalTransaction
+        v-if="route.name !== 'editor' && transaction && network"
+        :open="!!transaction"
+        :network="network"
+        :initial-state="transaction._form"
+        @add="handleTransactionAccept"
+        @close="handleTransactionReject"
+      />
+    </template>
   </div>
 </template>
 
