@@ -145,7 +145,7 @@ watch(isSwiping, () => {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $sidebarWidth: 72px;
 $navWidth: 240px;
 
