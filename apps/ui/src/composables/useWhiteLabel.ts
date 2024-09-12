@@ -12,19 +12,19 @@ if (domain !== DEFAULT_DOMAIN) {
   isWhiteLabel.value = true;
 }
 
+async function getSpaceId(domain: string): Promise<string | null> {
+  const result = await fetch(`${SIDEKICK_URL}/api/domains/${domain}`, {
+    headers: { 'Content-Type': 'application/json' }
+  });
+  const data: { domain: string; space_id: string } = await result.json();
+
+  // Checking that the returned json is valid
+  if (!(domain in data)) throw new Error('Invalid response');
+
+  return data.space_id ?? null;
+}
+
 export function useWhiteLabel() {
-  async function getSpaceId(domain: string): Promise<string | null> {
-    const result = await fetch(`${SIDEKICK_URL}/api/domains/${domain}`, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const data: { domain: string; space_id: string } = await result.json();
-
-    // Checking that the returned json is valid
-    if (!(domain in data)) throw new Error('Invalid response');
-
-    return data.space_id ?? null;
-  }
-
   async function init() {
     if (!isWhiteLabel.value) return;
 
