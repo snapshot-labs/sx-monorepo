@@ -591,7 +591,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </div>
   <template v-else>
     <UiScrollerHorizontal
-      class="sticky top-[72px] z-50"
+      class="sticky top-[72px] z-40"
       with-buttons
       gradient="xxl"
     >
@@ -634,20 +634,14 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         title="Delegations"
         description="Delegations allow users to delegate their voting power to other users."
       >
-        <FormSpaceDelegations
-          :delegations-value="form.delegations"
-          @delegations="v => (form.delegations = v)"
-        />
+        <FormSpaceDelegations v-model="form.delegations" />
       </UiContainerSettings>
       <UiContainerSettings
         v-if="activeTab === 'treasuries'"
         title="Treasuries"
         description="Treasuries are used to manage the funds of the space."
       >
-        <FormSpaceTreasuries
-          :treasuries-value="form.treasuries"
-          @treasuries="v => (form.treasuries = v)"
-        />
+        <FormSpaceTreasuries v-model="form.treasuries" />
       </UiContainerSettings>
       <FormStrategies
         v-if="activeTab === 'authenticators'"
