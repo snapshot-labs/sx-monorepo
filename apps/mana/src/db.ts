@@ -18,8 +18,10 @@ export async function createTables() {
       t.boolean('failed').defaultTo(false).index();
       t.string('network').index();
       t.string('type').index();
+      t.string('sender');
       t.string('hash');
       t.json('data');
+      t.unique(['sender', 'hash']);
     });
   }
 
@@ -39,15 +41,20 @@ export async function createTables() {
 export async function registerTransaction(
   network: string,
   type: string,
+  sender: string,
   hash: string,
   data: any
 ) {
-  return knex(REGISTERED_TRANSACTIONS).insert({
-    network,
-    type,
-    hash,
-    data
-  });
+  return knex(REGISTERED_TRANSACTIONS)
+    .insert({
+      network,
+      type,
+      sender,
+      hash,
+      data
+    })
+    .onConflict()
+    .ignore();
 }
 
 export async function getTransactionsToProcess() {
