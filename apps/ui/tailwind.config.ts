@@ -53,10 +53,13 @@ export default {
       gridTemplateColumns: {
         'explore-3': 'repeat(3, minmax(0, 230px))',
         'explore-4': 'repeat(4, minmax(0, 230px))',
-        'explore-5': 'repeat(5, minmax(0, 230px))'
+        'explore-5': 'repeat(5, minmax(0, 230px))',
+        'explore-6': 'repeat(6, minmax(0, 230px))',
+        'explore-8': 'repeat(8, minmax(0, 230px))'
       }
     },
     screens: {
+      minimum: '320px',
       xs: '420px',
       sm: '544px',
       md: '768px',
