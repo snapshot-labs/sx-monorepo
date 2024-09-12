@@ -123,19 +123,6 @@ async function addTx(tx: Transaction) {
 onMounted(() => {
   if (!treasury.value) return;
 
-  if (
-    !route.params.tab ||
-    !['tokens', 'nfts'].includes(route.params.tab as string)
-  ) {
-    return router.replace({
-      name: 'space-treasury',
-      params: {
-        index: route.params.index || 1,
-        tab: 'tokens'
-      }
-    });
-  }
-
   loadBalances(treasury.value.wallet, treasury.value.network);
   loadNfts(treasury.value.wallet, treasury.value.network);
 });
