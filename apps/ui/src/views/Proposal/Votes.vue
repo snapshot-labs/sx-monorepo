@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  _n,
-  _rt,
-  _t,
-  _vp,
-  getChoiceText,
-  shortenAddress
-} from '@/helpers/utils';
+import { _n, _rt, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Proposal as ProposalType, Vote } from '@/types';
 
