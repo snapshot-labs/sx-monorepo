@@ -68,11 +68,7 @@ const profileLink = computed(() => {
 });
 
 const settingsLink = computed(() => {
-  if (isWhiteLabel.value) {
-    return { name: 'settings-contacts' };
-  }
-
-  return { name: 'settings-spaces' };
+  return { name: isWhiteLabel.value ? 'settings-contacts' : 'settings-spaces' };
 });
 
 const isLoggedOut = computed(
