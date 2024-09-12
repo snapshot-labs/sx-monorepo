@@ -62,17 +62,17 @@ const profileLink = computed(() => {
         user: web3.value.account
       }
     };
-  } else {
-    return { name: 'user', params: { id: web3.value.account } };
   }
+
+  return { name: 'user', params: { id: web3.value.account } };
 });
 
 const settingsLink = computed(() => {
   if (isWhiteLabel.value) {
     return { name: 'settings-contacts' };
-  } else {
-    return { name: 'settings-spaces' };
   }
+
+  return { name: 'settings-spaces' };
 });
 
 const isLoggedOut = computed(
@@ -112,12 +112,7 @@ watch(open, () => (step.value = null));
         </button>
       </template>
       <template v-else>
-        <router-link
-          v-if="profileLink"
-          :to="profileLink"
-          class="block"
-          tabindex="-1"
-        >
+        <router-link :to="profileLink" class="block" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center gap-2"
             @click="emit('close')"
@@ -126,7 +121,7 @@ watch(open, () => (step.value = null));
             My profile
           </UiButton>
         </router-link>
-        <router-link v-if="settingsLink" :to="settingsLink" tabindex="-1">
+        <router-link :to="settingsLink" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center"
             @click="emit('close')"
