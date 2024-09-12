@@ -34,15 +34,13 @@ export function useWhiteLabel() {
 
       if (!id) {
         isWhiteLabel.value = false;
-        return true;
+        return;
       }
 
       const [networkId, spaceId] = id.split(':') as [NetworkID, string];
 
       await spacesStore.fetchSpace(spaceId, networkId);
       space.value = spacesStore.networksMap[networkId].spaces[spaceId];
-
-      return true;
     } catch (e) {
       failed.value = true;
     }
