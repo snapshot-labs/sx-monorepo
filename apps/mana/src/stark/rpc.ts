@@ -84,11 +84,11 @@ export const createNetworkHandler = (chainId: string) => {
 
   async function registerTransaction(id: number, params: any, res: Response) {
     try {
-      const { type, hash, payload } = params;
+      const { type, sender, hash, payload } = params;
 
-      console.log('Registering transaction', type, hash, payload);
+      console.log('Registering transaction', type, sender, hash, payload);
 
-      await db.registerTransaction(chainId, type, hash, payload);
+      await db.registerTransaction(chainId, type, sender, hash, payload);
 
       return rpcSuccess(res, true, id);
     } catch (e) {

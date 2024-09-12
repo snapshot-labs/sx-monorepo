@@ -15,9 +15,6 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const usersStore = useUsersStore();
-const spacesStore = useSpacesStore();
-const { param } = useRouteParser('id');
-const { resolved, address, networkId } = useResolve(param);
 const { getCurrent } = useMetaStore();
 
 const userActivity = ref<UserActivity>({
@@ -61,9 +58,13 @@ const navigation = computed(() => [
     label: 'Proposals',
     route: 'space-user-proposals',
     count: userActivity.value?.proposal_count
+  },
+  {
+    label: 'Votes',
+    route: 'space-user-votes',
+    count: userActivity.value?.vote_count
   }
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
-  // { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
 
 async function loadUserActivity() {
@@ -158,15 +159,6 @@ watch(
   },
   { immediate: true }
 );
-
-watch(
-  [resolved, networkId, address],
-  async ([resolved, networkId, address]) => {
-    if (!resolved || !networkId || !address) return;
-
-    spacesStore.networksMap[networkId].spaces[address];
-  }
-);
 </script>
 
 <template>
@@ -242,7 +234,8 @@ watch(
     </div>
     <UiScrollerHorizontal
       class="z-40 sticky top-[71px] lg:top-[72px]"
-      gradient="md"
+      with-buttons
+      gradient="xxl"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <router-link
