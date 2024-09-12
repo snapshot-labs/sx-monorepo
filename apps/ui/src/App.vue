@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { startIntercom } from './helpers/intercom';
-import { Transaction } from './types';
+import resolveConfig from 'tailwindcss/resolveConfig';
+import { startIntercom } from '@/helpers/intercom';
+import { Transaction } from '@/types';
+import tailwindConfig from '../tailwind.config';
+
+const LG_WIDTH = Number(
+  resolveConfig(tailwindConfig).theme.screens.lg.replace('px', '')
+);
 
 const el = ref(null);
 const sidebarSwipeEnabled = ref(true);
@@ -75,8 +81,7 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
-  if (String(route.name).startsWith('site-') || window.innerWidth > 1012)
-    return;
+  if (isSiteRoute.value || window.innerWidth > LG_WIDTH) return;
 
   if (
     sidebarSwipeEnabled.value &&
