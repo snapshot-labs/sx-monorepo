@@ -3,7 +3,7 @@ import { startIntercom } from './helpers/intercom';
 
 const route = useRoute();
 
-const isSiteRoute = computed(() => String(route.name).startsWith('site-'));
+const isSiteRoute = computed(() => String(route.matched[0]?.name) === 'site');
 
 onMounted(async () => startIntercom());
 </script>
