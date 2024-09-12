@@ -17,10 +17,10 @@ export function useWhiteLabel() {
     const result = await fetch(`${SIDEKICK_URL}/api/domains/${domain}`, {
       headers: { 'Content-Type': 'application/json' }
     });
-    const data = await result.json();
+    const data: { domain: string; space_id: string } = await result.json();
 
-    // Also checking data.domain presence to avoid empty json as valid response
-    if (!result.ok || !data.domain) throw new Error('Invalid response');
+    // Checking that the returned json is valid
+    if (!(domain in data)) throw new Error('Invalid response');
 
     return data.space_id ?? null;
   }
