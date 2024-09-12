@@ -58,8 +58,9 @@ watchEffect(() => {
   <UiScrollerHorizontal
     v-if="filteredTreasuries.length !== 1"
     ref="treasuriesList"
-    gradient="md"
     class="z-40 sticky top-[71px] lg:top-[72px]"
+    with-buttons
+    gradient="xxl"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
       <router-link
