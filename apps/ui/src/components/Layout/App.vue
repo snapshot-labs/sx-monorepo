@@ -1,5 +1,11 @@
 <script lang="ts" setup>
+import resolveConfig from 'tailwindcss/resolveConfig';
 import { Transaction } from '@/types';
+import tailwindConfig from '../../../tailwind.config';
+
+const LG_WIDTH = Number(
+  resolveConfig(tailwindConfig).theme.screens.lg.replace('px', '')
+);
 
 const el = ref(null);
 const sidebarSwipeEnabled = ref(true);
@@ -71,6 +77,8 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
+  if (window.innerWidth > LG_WIDTH) return;
+
   if (
     sidebarSwipeEnabled.value &&
     isSwiping.value &&
