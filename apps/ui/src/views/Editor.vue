@@ -338,7 +338,7 @@ export default defineComponent({
 
 <template>
   <div v-if="proposal">
-    <header class="border-b bg-skin-bg fixed top-0 z-[60] inset-x-0">
+    <header class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0">
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
           <router-link
