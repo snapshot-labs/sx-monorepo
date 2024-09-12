@@ -59,9 +59,13 @@ const navigation = computed(() => [
     label: 'Proposals',
     route: 'space-user-proposals',
     count: userActivity.value?.proposal_count
+  },
+  {
+    label: 'Votes',
+    route: 'space-user-votes',
+    count: userActivity.value?.vote_count
   }
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
-  // { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
 
 async function loadUserActivity() {
@@ -231,7 +235,8 @@ watch(
     </div>
     <UiScrollerHorizontal
       class="z-40 sticky top-[71px] lg:top-[72px]"
-      gradient="md"
+      with-buttons
+      gradient="xxl"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <router-link

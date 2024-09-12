@@ -68,6 +68,7 @@ export function useActions() {
     if (envelope?.signatureData?.commitHash && network.baseNetworkId) {
       await registerTransaction(network.chainId, {
         type: envelope.signatureData.primaryType,
+        sender: envelope.signatureData.address,
         hash: envelope.signatureData.commitHash,
         payload: envelope.data
       });

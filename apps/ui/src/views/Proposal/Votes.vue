@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  _n,
-  _rt,
-  _t,
-  _vp,
-  getChoiceText,
-  shortenAddress
-} from '@/helpers/utils';
+import { _n, _rt, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Proposal as ProposalType, Vote } from '@/types';
 
@@ -243,53 +236,7 @@ watch([sortBy, choiceFilter], () => {
               :disabled="!vote.reason"
               @click="handleChoiceClick(vote)"
             >
-              <template
-                v-if="!!props.proposal.privacy && !props.proposal.completed"
-              >
-                <div class="flex gap-1 items-center">
-                  <span class="text-skin-heading leading-[22px]"
-                    >Encrypted choice</span
-                  >
-                  <IH-lock-closed class="size-[16px] shrink-0" />
-                </div>
-              </template>
-              <template v-else>
-                <UiTooltip
-                  v-if="proposal.type !== 'basic'"
-                  :title="getChoiceText(proposal.choices, vote.choice)"
-                  class="max-w-[100%] truncate"
-                >
-                  <h4 class="truncate">
-                    {{ getChoiceText(proposal.choices, vote.choice) }}
-                  </h4>
-                </UiTooltip>
-                <div v-else class="flex items-center space-x-2">
-                  <div
-                    class="rounded-full choice-bg inline-block size-[18px]"
-                    :class="`_${vote.choice}`"
-                  >
-                    <IH-check
-                      v-if="vote.choice === 1"
-                      class="text-white size-[14px] mt-0.5 ml-0.5"
-                    />
-                    <IH-x
-                      v-else-if="vote.choice === 2"
-                      class="text-white size-[14px] mt-0.5 ml-0.5"
-                    />
-                    <IH-minus-sm
-                      v-else-if="vote.choice === 3"
-                      class="text-white size-[14px] mt-0.5 ml-0.5"
-                    />
-                  </div>
-                  <h4
-                    class="truncate grow"
-                    v-text="proposal.choices[(vote.choice as number) - 1]"
-                  />
-                </div>
-                <div class="text-[17px] max-w-[100%] truncate">
-                  {{ vote.reason }}
-                </div>
-              </template>
+              <ProposalVoteChoice :proposal="proposal" :vote="vote" />
             </button>
             <div
               class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
