@@ -284,7 +284,7 @@ export class EthereumTx {
     const address = await signer.getAddress();
 
     const userVotingStrategies = await getStrategiesWithParams(
-      'propose',
+      'vote',
       data.strategies,
       address,
       data,
@@ -339,7 +339,8 @@ export class EthereumTx {
     const { overall_fee } = await this.estimateProposeFee(signer, data);
 
     const promise = commitContract.commit(data.authenticator, hash, {
-      value: overall_fee
+      value: overall_fee,
+      gasLimit: opts.noWait ? 0 : undefined
     });
     const res = opts.noWait ? null : await promise;
 
@@ -369,7 +370,8 @@ export class EthereumTx {
     const { overall_fee } = await this.estimateVoteFee(signer, data);
 
     const promise = commitContract.commit(data.authenticator, hash, {
-      value: overall_fee
+      value: overall_fee,
+      gasLimit: opts.noWait ? 0 : undefined
     });
     const res = opts.noWait ? null : await promise;
 
@@ -399,7 +401,8 @@ export class EthereumTx {
     const { overall_fee } = await this.estimateUpdateProposalFee(signer, data);
 
     const promise = commitContract.commit(data.authenticator, hash, {
-      value: overall_fee
+      value: overall_fee,
+      gasLimit: opts.noWait ? 0 : undefined
     });
     const res = opts.noWait ? null : await promise;
 

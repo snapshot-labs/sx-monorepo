@@ -24,7 +24,6 @@ const treasuryData = computed(
   () => filteredTreasuries.value[activeTreasuryId.value]
 );
 
-watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 // scroll to treasury tab
 watch(
   activeTreasuryId,
@@ -36,12 +35,18 @@ watch(
   },
   { immediate: true }
 );
+watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
+watchEffect(() => {
+  const { index, tab } = route.params;
 
-onMounted(() => {
-  if (!route.params.index && filteredTreasuries.value.length) {
+  if (!filteredTreasuries.value.length) return;
+
+  const isValidTab = ['tokens', 'nfts'].includes(tab as string);
+  if (!index || !tab || !isValidTab) {
     router.replace({
+      name: 'space-treasury',
       params: {
-        index: 1,
+        index: index || 1,
         tab: 'tokens'
       }
     });
@@ -53,8 +58,9 @@ onMounted(() => {
   <UiScrollerHorizontal
     v-if="filteredTreasuries.length !== 1"
     ref="treasuriesList"
-    gradient="md"
     class="z-40 sticky top-[71px] lg:top-[72px]"
+    with-buttons
+    gradient="xxl"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
       <router-link

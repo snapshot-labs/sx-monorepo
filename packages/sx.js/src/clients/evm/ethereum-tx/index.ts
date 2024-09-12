@@ -527,7 +527,7 @@ export class EthereumTx {
       envelope.signatureData?.address || (await signer.getAddress());
 
     const userVotingStrategies = await getStrategiesWithParams(
-      'propose',
+      'vote',
       envelope.data.strategies,
       voterAddress,
       envelope.data,
