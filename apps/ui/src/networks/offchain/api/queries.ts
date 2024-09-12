@@ -166,8 +166,12 @@ export const SPACE_QUERY = gql`
 `;
 
 export const USER_VOTES_QUERY = gql`
-  query ($first: Int, $spaceIds: [String], $voter: String) {
-    votes(first: $first, where: { space_in: $spaceIds, voter: $voter }) {
+  query ($first: Int, $skip: Int, $spaceIds: [String], $voter: String) {
+    votes(
+      first: $first
+      skip: $skip
+      where: { space_in: $spaceIds, voter: $voter }
+    ) {
       id
       voter
       space {
