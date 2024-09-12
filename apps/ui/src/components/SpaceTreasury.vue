@@ -14,6 +14,7 @@ const props = defineProps<{
 }>();
 
 const { setTitle } = useTitle();
+const route = useRoute();
 const router = useRouter();
 const { copy, copied } = useClipboard();
 const { loading, loaded, assets, loadBalances } = useBalances();
@@ -22,7 +23,9 @@ const { treasury } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
-const page: Ref<'tokens' | 'nfts'> = ref('tokens');
+const page: Ref<'tokens' | 'nfts'> = computed(() => {
+  return route.params.tab === 'nfts' ? 'nfts' : 'tokens';
+});
 const modalOpen = ref({
   tokens: false,
   nfts: false,
@@ -240,12 +243,24 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </div>
       <div>
         <div class="flex pl-4 border-b space-x-3">
-          <button type="button" @click="page = 'tokens'">
+          <router-link
+            :to="{
+              params: {
+                tab: 'tokens'
+              }
+            }"
+          >
             <UiLink :is-active="page === 'tokens'" text="Tokens" />
-          </button>
-          <button type="button" @click="page = 'nfts'">
+          </router-link>
+          <router-link
+            :to="{
+              params: {
+                tab: 'nfts'
+              }
+            }"
+          >
             <UiLink :is-active="page === 'nfts'" text="NFTs" />
-          </button>
+          </router-link>
         </div>
         <div v-if="page === 'tokens'">
           <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />

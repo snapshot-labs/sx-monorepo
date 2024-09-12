@@ -50,7 +50,12 @@ const user = computed(
       avatar: undefined
     }
 );
+
 const cb = computed(() => getCacheHash(user.value.avatar));
+
+const isLoggedOut = computed(
+  () => !web3.value.account || step.value === 'connect'
+);
 
 async function handleLogout() {
   await logout();
@@ -63,63 +68,55 @@ watch(open, () => (step.value = null));
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3
-        v-if="!web3.account || step === 'connect'"
-        v-text="'Connect wallet'"
-      />
-      <h3 v-else v-text="'Account'" />
+      <h3 v-text="isLoggedOut ? 'Connect wallet' : 'Account'" />
     </template>
-    <div v-if="!web3.account || step === 'connect'">
-      <div class="m-4 flex flex-col space-y-2">
+    <div class="m-4 flex flex-col gap-2">
+      <template v-if="isLoggedOut">
         <button
           v-for="connector in availableConnectors"
           :key="connector.id"
           type="button"
           @click="$emit('login', connector.id)"
         >
-          <UiButton class="w-full flex justify-center items-center">
+          <UiButton class="w-full flex justify-center items-center gap-2">
             <img
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
               width="28"
-              class="mr-2 -mt-1"
               :alt="connector.name"
             />
             {{ connector.name }}
           </UiButton>
         </button>
-      </div>
-    </div>
-    <div v-else>
-      <div class="m-4 space-y-2">
+      </template>
+      <template v-else>
         <router-link
           :to="{ name: 'user', params: { id: web3.account } }"
-          class="block"
           tabindex="-1"
         >
           <UiButton
-            class="w-full flex justify-center items-center space-x-2"
+            class="w-full flex justify-center items-center gap-2"
             @click="emit('close')"
           >
             <UiStamp :id="user.id" :size="18" :cb="cb" />
-            <span>My profile</span>
+            My profile
           </UiButton>
         </router-link>
-        <router-link to="/settings" class="block" tabindex="-1">
+        <router-link :to="{ name: 'settings-spaces' }" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center"
             @click="emit('close')"
           >
-            <span>Settings</span>
+            Settings
           </UiButton>
         </router-link>
-        <UiButton class="w-full" @click="step = 'connect'">
+        <UiButton @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>
-        <UiButton class="w-full !text-skin-danger" @click="handleLogout">
+        <UiButton class="!text-skin-danger" @click="handleLogout">
           Log out
         </UiButton>
-      </div>
+      </template>
     </div>
   </UiModal>
 </template>

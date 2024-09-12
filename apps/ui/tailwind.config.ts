@@ -1,6 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+import { Config } from 'tailwindcss';
 
-module.exports = {
+export default {
   future: {
     hoverOnlyWhenSupported: true
   },
@@ -88,12 +88,12 @@ module.exports = {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
     },
     fontSize: {
-      xl: ['28px'],
-      lg: ['22px'],
-      md: ['20px'],
-      base: ['18px'],
-      sm: ['16px'],
-      xs: ['14px']
+      xl: '28px',
+      lg: '22px',
+      md: '20px',
+      base: '18px',
+      sm: '16px',
+      xs: '14px'
     }
   }
-};
+} satisfies Config;
