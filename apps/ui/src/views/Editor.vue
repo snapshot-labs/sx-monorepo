@@ -54,7 +54,7 @@ const {
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
 const { votingPower, fetch: fetchVotingPower } = useVotingPower();
-const { app } = useApp();
+const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
@@ -64,8 +64,8 @@ const network = computed(() =>
   networkId.value ? getNetwork(networkId.value) : null
 );
 const space = computed<Space | null>(() => {
-  if (app.value.isWhiteLabel) {
-    return app.value.space;
+  if (isWhiteLabel.value) {
+    return whiteLabelSpace.value;
   }
 
   if (!resolved.value) return null;

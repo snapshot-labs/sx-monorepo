@@ -9,6 +9,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, app } = useApp();
+const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
@@ -32,7 +33,7 @@ const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 
-const hasSidebar = computed(() => !app.value.isWhiteLabel);
+const hasSidebar = computed(() => !isWhiteLabel.value);
 
 const isSwippable = computed(() => hasSidebar.value || hasAppNav.value);
 

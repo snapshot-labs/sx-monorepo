@@ -6,7 +6,7 @@ defineOptions({ inheritAttrs: false });
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-const { app } = useApp();
+const { isWhiteLabel } = useWhiteLabel();
 
 const param = computed(() =>
   String(
@@ -19,7 +19,7 @@ const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const showSpace = computed(
   () =>
     ['proposal', 'space'].includes(String(route.matched[0]?.name)) ||
-    app.value.isWhiteLabel
+    isWhiteLabel.value
 );
 
 const space = computed(() => {

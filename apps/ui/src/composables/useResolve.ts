@@ -6,16 +6,16 @@ export function useResolve(id: Ref<string>) {
   const networkId: Ref<NetworkID | null> = ref(null);
   const address: Ref<string | null> = ref(null);
 
-  const { app } = useApp();
+  const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
 
   watch(
     id,
     async id => {
-      if (app.value.isWhiteLabel) {
-        if (!app.value.space) return;
+      if (isWhiteLabel.value) {
+        if (!whiteLabelSpace.value) return;
 
-        networkId.value = app.value.space.network;
-        address.value = app.value.space.id;
+        networkId.value = whiteLabelSpace.value.network;
+        address.value = whiteLabelSpace.value.id;
         resolved.value = true;
 
         return true;

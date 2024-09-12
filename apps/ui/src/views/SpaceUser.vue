@@ -16,7 +16,7 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { getCurrent } = useMetaStore();
-const { app } = useApp();
+const { isWhiteLabel } = useWhiteLabel();
 
 const userActivity = ref<UserActivity>({
   vote_count: 0,
@@ -175,7 +175,7 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <UiTooltip v-if="!app.isWhiteLabel" title="View profile">
+        <UiTooltip v-if="!isWhiteLabel" title="View profile">
           <router-link
             :to="{ name: 'user', params: { id: user.id } }"
             tabindex="-1"

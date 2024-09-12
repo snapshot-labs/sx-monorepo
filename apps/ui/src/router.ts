@@ -35,7 +35,7 @@ import Terms from '@/views/Terms.vue';
 import Topic from '@/views/Topic.vue';
 import User from '@/views/User.vue';
 
-const { app } = useApp();
+const { isWhiteLabel } = useWhiteLabel();
 
 const spaceChildrenRoutes: RouteRecordRaw[] = [
   { path: '', name: 'space-overview', component: SpaceOverview },
@@ -194,7 +194,7 @@ const whiteLabelRoutes = [
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: app.value.isWhiteLabel ? whiteLabelRoutes : defaultRoutes,
+  routes: isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition;
     if (to.params.retainScrollPosition) return {};

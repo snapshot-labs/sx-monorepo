@@ -12,7 +12,7 @@ const { isSafeWallet } = useSafeWallet(
   props.space.snapshot_chain_id
 );
 const followedSpacesStore = useFollowedSpacesStore();
-const { app } = useApp();
+const { isWhiteLabel } = useWhiteLabel();
 
 const spaceFollowed = computed(() =>
   followedSpacesStore.isFollowed(spaceIdComposite)
@@ -27,7 +27,7 @@ const loading = computed(
 
 <template>
   <UiButton
-    v-if="!app.isWhiteLabel"
+    v-if="!isWhiteLabel"
     :disabled="loading || isSafeWallet"
     class="group"
     :class="{ 'hover:border-skin-danger': spaceFollowed }"

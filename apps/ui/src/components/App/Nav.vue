@@ -28,7 +28,7 @@ type NavigationItem = {
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
-const { app } = useApp();
+const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('id');
 const { resolved, address, networkId } = useResolve(param);
@@ -102,7 +102,7 @@ const navigationConfig = computed<
     spaces: {
       name: 'My spaces',
       icon: IHStop,
-      hidden: app.value.isWhiteLabel
+      hidden: isWhiteLabel.value
     },
     contacts: {
       name: 'Contacts',

@@ -27,7 +27,7 @@ const emit = defineEmits<{
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
-const { app } = useApp();
+const { isWhiteLabel } = useWhiteLabel();
 const usersStore = useUsersStore();
 const step: Ref<'connect' | null> = ref(null);
 
@@ -55,22 +55,22 @@ const user = computed(
 const cb = computed(() => getCacheHash(user.value.avatar));
 
 const profileLink = computed(() => {
-  if (app.value.isWhiteLabel && app.value.space) {
+  if (isWhiteLabel.value) {
     return {
       name: 'space-user-statement',
       params: {
         user: web3.value.account
       }
     };
-  } else if (!app.value.isWhiteLabel) {
+  } else {
     return { name: 'user', params: { id: web3.value.account } };
   }
 });
 
 const settingsLink = computed(() => {
-  if (app.value.isWhiteLabel && app.value.space) {
+  if (isWhiteLabel.value) {
     return { name: 'settings-contacts' };
-  } else if (!app.value.isWhiteLabel) {
+  } else {
     return { name: 'settings-spaces' };
   }
 });
