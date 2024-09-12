@@ -1,9 +1,6 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 
-const state: {
-  init: boolean;
-  loading: boolean;
-} = reactive({
+const state = reactive({
   init: false,
   loading: false
 });
