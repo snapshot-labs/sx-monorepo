@@ -209,14 +209,10 @@ watchEffect(() => setTitle('Create space'));
               @errors="v => handleErrors('profile', v)"
             />
             <div class="s-box p-4 -mt-6">
-              <FormSpaceTreasuries
-                :treasuries-value="metadataForm.treasuries"
-                @treasuries="v => (metadataForm.treasuries = v)"
-              />
+              <FormSpaceTreasuries v-model="metadataForm.treasuries" />
               <FormSpaceDelegations
+                v-model="metadataForm.delegations"
                 class="mt-2"
-                :delegations-value="metadataForm.delegations"
-                @delegations="v => (metadataForm.delegations = v)"
               />
             </div>
           </template>

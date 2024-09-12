@@ -24,7 +24,17 @@ defineProps<{
       />
     </div>
     <div class="py-3 px-4">
-      <h4 class="text-skin-link" v-text="strategy.name" />
+      <div class="flex items-center space-x-2">
+        <h4 class="text-skin-link inline-block" v-text="strategy.name" />
+        <a
+          v-if="strategy.link"
+          :href="strategy.link"
+          target="_blank"
+          class="inline-block"
+        >
+          <IH-question-mark-circle />
+        </a>
+      </div>
       <div
         v-if="strategy.about"
         class="text-ellipsis"

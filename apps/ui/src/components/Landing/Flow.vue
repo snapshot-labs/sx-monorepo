@@ -41,13 +41,13 @@ const STEPS = [
     </UiContainer>
     <div class="border-y">
       <UiContainer class="!max-w-screen-lg !px-0">
-        <div class="grid grid-cols-1 lg:grid-cols-2 text-md">
+        <div class="grid grid-cols-1 lg:grid-cols-2 text-md flow">
           <div
             v-for="(step, i) in STEPS"
             :key="i"
             class="border-b border-r-0 last:border-b-0 lg:border-r lg:[&:nth-child(2n)]:border-r-0 lg:[&:nth-child(n+3)]:border-b-0"
           >
-            <div class="px-4 pt-5 pb-7">
+            <div class="px-4 py-5">
               <div class="flex space-x-2.5">
                 <component
                   :is="step.icon"
@@ -58,6 +58,12 @@ const STEPS = [
                   v-text="step.title"
                 />
               </div>
+              <div class="mb-3 max-w-[457px]">
+                <div
+                  class="bg-contain flow w-full h-[260px]"
+                  :class="`step-${i + 1}`"
+                />
+              </div>
               <div v-text="step.about" />
             </div>
           </div>
@@ -66,3 +72,37 @@ const STEPS = [
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.flow {
+  .step-1 {
+    background-image: url('@/assets/site/flow-1-light.png');
+  }
+  .step-2 {
+    background-image: url('@/assets/site/flow-2-light.png');
+  }
+  .step-3 {
+    background-image: url('@/assets/site/flow-3-light.png');
+  }
+  .step-4 {
+    background-image: url('@/assets/site/flow-4-light.png');
+  }
+}
+
+.dark {
+  .flow {
+    .step-1 {
+      background-image: url('@/assets/site/flow-1-dark.png');
+    }
+    .step-2 {
+      background-image: url('@/assets/site/flow-2-dark.png');
+    }
+    .step-3 {
+      background-image: url('@/assets/site/flow-3-dark.png');
+    }
+    .step-4 {
+      background-image: url('@/assets/site/flow-4-dark.png');
+    }
+  }
+}
+</style>

@@ -16,7 +16,6 @@ import {
 } from '@/networks/types';
 import {
   Alias,
-  DelegationType,
   Follow,
   NetworkID,
   Proposal,
@@ -332,18 +331,23 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
 
   if (space.delegationPortal) {
     delegations.push({
-      name: null,
-      apiType:
-        (space.delegationPortal?.delegationType as DelegationType) ?? null,
-      apiUrl: space.delegationPortal?.delegationApi ?? null,
-      contractNetwork: null,
-      contractAddress: space.delegationPortal?.delegationContract ?? null
+      name:
+        space.delegationPortal.delegationType === 'compound-governor'
+          ? 'ERC-20 Votes'
+          : 'Split Delegation',
+      apiType: space.delegationPortal.delegationType,
+      apiUrl: space.delegationPortal.delegationApi,
+      contractNetwork:
+        CHAIN_IDS_TO_NETWORKS[
+          parseInt(space.delegationPortal.delegationNetwork, 10)
+        ] || null,
+      contractAddress: space.delegationPortal.delegationContract
     });
   }
 
   if (spaceDelegationStrategy) {
     delegations.push({
-      name: null,
+      name: 'Delegate registry',
       apiType: 'delegate-registry',
       apiUrl: DELEGATE_REGISTRY_URL,
       contractNetwork:

@@ -2,7 +2,7 @@
 import removeMarkdown from 'remove-markdown';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { Space, SpaceMetadataDelegation } from '@/types';
+import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
   space: Space;
@@ -31,6 +31,7 @@ const {
   fetchMore,
   reset
 } = useDelegates(
+  props.delegation.apiType as DelegationType,
   props.delegation.apiUrl as string,
   props.delegation.contractAddress as string,
   props.space
@@ -88,7 +89,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
 <template>
   <div
-    v-if="!currentNetwork || !delegation.apiUrl"
+    v-if="
+      !currentNetwork ||
+      !delegation.apiUrl ||
+      delegation.apiType === 'split-delegation'
+    "
     class="px-4 py-3 flex items-center text-skin-link space-x-2"
   >
     <IH-exclamation-circle class="shrink-0" />

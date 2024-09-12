@@ -167,6 +167,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'Vanilla',
       about:
         'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
+      link: 'https://help.snapshot.org/en/articles/9839150-vanilla-voting-strategy',
       icon: IHBeaker,
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'Vanilla',
@@ -206,6 +207,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'Whitelist',
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
+      link: 'https://help.snapshot.org/en/articles/9839118-whitelist-voting-strategy',
       generateSummary: (params: Record<string, any>) => {
         const length =
           params.whitelist.trim().length === 0
@@ -306,6 +308,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'ERC-20 Votes (EIP-5805)',
       about:
         'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
+      link: 'https://help.snapshot.org/en/articles/9839125-erc-20-votes-eip-5805-voting-strategy',
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
