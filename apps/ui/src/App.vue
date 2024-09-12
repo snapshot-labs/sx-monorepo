@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { startIntercom } from './helpers/intercom';
-import { Transaction } from './types';
+import resolveConfig from 'tailwindcss/resolveConfig';
+import { startIntercom } from '@/helpers/intercom';
+import { Transaction } from '@/types';
+import tailwindConfig from '../tailwind.config';
+
+const LG_WIDTH = Number(
+  resolveConfig(tailwindConfig).theme.screens.lg.replace('px', '')
+);
 
 const el = ref(null);
 const sidebarSwipeEnabled = ref(true);
@@ -75,7 +81,7 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
-  if (String(route.name).startsWith('site-')) return;
+  if (isSiteRoute.value || window.innerWidth > LG_WIDTH) return;
 
   if (
     sidebarSwipeEnabled.value &&
@@ -107,7 +113,7 @@ watch(isSwiping, () => {
       <button
         v-if="!isSiteRoute && uiStore.sidebarOpen"
         type="button"
-        class="backdrop lg:hidden"
+        class="backdrop"
         :style="{
           left: `${72 + (hasAppNav ? 240 : 0)}px`
         }"
