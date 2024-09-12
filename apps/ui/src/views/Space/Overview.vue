@@ -89,7 +89,7 @@ watchEffect(() => setTitle(props.space.name));
               followers
             </div>
           </template>
-          <template v-if="isWhiteLabel && space.parent">
+          <template v-if="!isWhiteLabel && space.parent">
             <div>·</div>
             <router-link
               :to="{
