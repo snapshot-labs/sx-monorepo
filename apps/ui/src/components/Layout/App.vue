@@ -127,7 +127,7 @@ watch(isSwiping, () => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .backdrop {
   position: fixed;
   top: 0;
