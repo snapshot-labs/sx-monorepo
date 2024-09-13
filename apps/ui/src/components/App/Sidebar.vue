@@ -8,7 +8,7 @@ const followedSpacesStore = useFollowedSpacesStore();
 <template>
   <div class="flex flex-col border-r text-center">
     <router-link :to="{ name: 'my-home' }" class="h-[72px] block">
-      <IH-stop class="inline-block my-4 size-[32px] text-skin-link" />
+      <IC-zap class="inline-block my-[18px] size-[40px] text-skin-link" />
     </router-link>
     <div
       class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10"
