@@ -199,14 +199,21 @@ $navWidth: 240px;
 @media (screen(lg)) {
   .app-sidebar {
     & ~ :deep(main),
-    & ~ :deep(header),
-    & ~ :deep(main header),
+    & ~ :deep(header.fixed),
+    & ~ :deep(main header.fixed),
+    & ~ :deep(main footer.fixed),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
     }
 
-    &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
-      @apply ml-[#{$sidebarWidth + $navWidth}];
+    &:has(~ .app-nav) ~ .app-nav {
+      & ~ :deep(main),
+      & ~ :deep(header.fixed),
+      & ~ :deep(main header.fixed),
+      & ~ :deep(main footer.fixed),
+      & ~ :deep(.app-nav) {
+        @apply ml-[#{$sidebarWidth + $navWidth}];
+      }
     }
   }
 
