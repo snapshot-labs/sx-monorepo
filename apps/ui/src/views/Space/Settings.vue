@@ -333,7 +333,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             "
             :definition="{
               type: 'integer',
-              format: 'duration'
+              format: 'duration',
+              maximum: isOffchainNetwork ? 2592000 : undefined,
+              errorMessage: {
+                maximum: 'Voting delay must be less than 30 days'
+              }
             }"
             @save="value => (votingDelay = Number(value))"
           >
@@ -387,7 +391,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             "
             :definition="{
               type: 'integer',
-              format: 'duration'
+              format: 'duration',
+              maximum: isOffchainNetwork ? 15552000 : undefined,
+              errorMessage: {
+                maximum: 'Voting period must be less than 180 days'
+              }
             }"
             :custom-error-validation="
               value =>

@@ -2,6 +2,7 @@ import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
+import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
@@ -13,6 +14,7 @@ const ajv = new Ajv({
   // https://github.com/ajv-validator/ajv/issues/1417
   strictTuples: false
 });
+ajvErrors(ajv);
 addFormats(ajv);
 
 export const addressValidator = (value: string) => {
