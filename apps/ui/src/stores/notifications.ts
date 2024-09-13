@@ -28,6 +28,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const followedSpacesStore = useFollowedSpacesStore();
   const metaStore = useMetaStore();
   const { web3 } = useWeb3();
+  const { isWhiteLabel } = useWhiteLabel();
 
   async function loadProposals(
     network: Network,
@@ -130,8 +131,12 @@ export const useNotificationsStore = defineStore('notifications', () => {
   );
 
   watch(
-    () => web3.value.account,
-    (newAccount, oldAccount) => {
+    [() => web3.value.account, () => isWhiteLabel.value],
+    ([newAccount, isWhiteLabel], [oldAccount]) => {
+      if (isWhiteLabel) return;
+
+      console.log('start watcher');
+
       if (!oldAccount && newAccount) {
         refreshNotificationInterval = window.setInterval(
           loadNotifications,
