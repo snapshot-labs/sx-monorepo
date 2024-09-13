@@ -6,7 +6,19 @@ export default class Connector extends LockConnector {
     let provider;
     try {
       const argentx = await get();
-      const starknet = await argentx.connect();
+      const starknet = await argentx.connect({
+        dappName: 'Snapshot',
+        modalMode: localStorage.getItem('starknetLastConnectedWallet')
+          ? 'neverAsk'
+          : 'alwaysAsk',
+        modalTheme:
+          (localStorage.getItem('skin') as 'light' | 'dark') || 'system',
+        argentMobileOptions: {
+          dappName: 'Snapshot',
+          url: 'https://snapshot.box',
+          icons: ['https://snapshot.box/favicon.svg']
+        }
+      });
 
       if (!starknet.wallet) {
         throw Error(
