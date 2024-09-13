@@ -82,14 +82,18 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
-  if (window.innerWidth > LG_WIDTH || !hasSwipeableContent) return;
+  if (
+    window.innerWidth > LG_WIDTH ||
+    !hasSwipeableContent ||
+    !sidebarSwipeEnabled.value ||
+    !isSwiping.value ||
+    modalOpen.value
+  )
+    return;
 
   if (
-    sidebarSwipeEnabled.value &&
-    isSwiping.value &&
-    !modalOpen.value &&
-    ((direction.value === 'right' && !uiStore.sidebarOpen) ||
-      (direction.value === 'left' && uiStore.sidebarOpen))
+    (direction.value === 'right' && !uiStore.sidebarOpen) ||
+    (direction.value === 'left' && uiStore.sidebarOpen)
   ) {
     uiStore.toggleSidebar();
   }
