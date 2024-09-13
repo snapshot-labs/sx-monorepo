@@ -85,7 +85,6 @@ const formValid = computed(() => {
 
 async function handleSubmit() {
   emit('add', form.value);
-  emit('close');
 }
 
 watch(
