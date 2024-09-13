@@ -166,6 +166,14 @@ ajv.addFormat('discord-handle', {
   }
 });
 
+ajv.addFormat('coingecko-handle', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-z0-9-]*$/);
+  }
+});
+
 ajv.addFormat('lens-handle', {
   validate: (value: string) => {
     if (!value) return false;
@@ -234,6 +242,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be a valid GitHub handle.';
       case 'discord-handle':
         return 'Must be a valid Discord handle or invite code.';
+      case 'coingecko-handle':
+        return 'Must be a valid CoinGecko handle.';
       case 'uint256':
         return 'Must be a positive integer.';
       case 'int256':

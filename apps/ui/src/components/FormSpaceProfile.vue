@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
+import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
@@ -20,11 +21,33 @@ const emit = defineEmits<{
 }>();
 
 const definition = computed(() => {
+  const isOffchainNetwork =
+    props.space && offchainNetworks.includes(props.space.network);
+
+  const onchainProperties = {
+    discord: {
+      type: 'string',
+      format: 'discord-handle',
+      title: 'Discord',
+      examples: ['Discord handle or invite code']
+    }
+  };
+
+  const offchainProperties = {
+    coingecko: {
+      type: 'string',
+      format: 'coingecko-handle',
+      title: 'Coingecko',
+      examples: ['CoinGecko handle'],
+      maxLength: 32
+    }
+  };
+
   return {
     type: 'object',
     title: 'Space',
     additionalProperties: true,
-    required: ['name'],
+    required: isOffchainNetwork ? ['name', 'votingPowerSymbol'] : ['name'],
     properties: {
       avatar: {
         type: 'string',
@@ -52,31 +75,30 @@ const definition = computed(() => {
         type: 'string',
         format: 'uri',
         title: 'Website',
-        examples: ['Website URL']
+        examples: ['Website URL'],
+        maxLength: 256
       },
       github: {
         type: 'string',
         format: 'github-handle',
         title: 'GitHub',
-        examples: ['GitHub handle']
+        examples: ['GitHub handle'],
+        maxLength: 39
       },
       twitter: {
         type: 'string',
         format: 'twitter-handle',
         title: 'X (Twitter)',
-        examples: ['X (Twitter) handle']
+        examples: ['X (Twitter) handle'],
+        maxLength: 15
       },
-      discord: {
-        type: 'string',
-        format: 'discord-handle',
-        title: 'Discord',
-        examples: ['Discord handle or invite code']
-      },
+      ...(isOffchainNetwork ? offchainProperties : onchainProperties),
       votingPowerSymbol: {
         type: 'string',
-        maxLength: MAX_SYMBOL_LENGTH,
+        maxLength: isOffchainNetwork ? 16 : MAX_SYMBOL_LENGTH,
         title: 'Voting power symbol',
-        examples: ['e.g. VP']
+        examples: ['e.g. VP'],
+        minLength: isOffchainNetwork ? 1 : undefined
       }
     }
   };

@@ -47,7 +47,9 @@ export type OffchainSpaceSettings = {
   voteValidation: OffchainApiSpace['voteValidation'];
 };
 
-const DEFAULT_FORM_STATE: SpaceMetadata = {
+type Form = SpaceMetadata & { coingecko: string };
+
+const DEFAULT_FORM_STATE: Form = {
   name: '',
   avatar: '',
   cover: '',
@@ -56,6 +58,7 @@ const DEFAULT_FORM_STATE: SpaceMetadata = {
   twitter: '',
   github: '',
   discord: '',
+  coingecko: '',
   votingPowerSymbol: '',
   treasuries: [],
   delegations: []
@@ -71,7 +74,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const network = computed(() => getNetwork(space.value.network));
 
   // Common properties
-  const form: Ref<SpaceMetadata> = ref(clone(DEFAULT_FORM_STATE));
+  const form: Ref<Form> = ref(clone(DEFAULT_FORM_STATE));
   const formErrors = ref({} as Record<string, string>);
   const votingDelay: Ref<number | null> = ref(null);
   const minVotingPeriod: Ref<number | null> = ref(null);
@@ -286,6 +289,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       externalUrl: space.external_url,
       github: space.github,
       discord: space.discord,
+      coingecko: space.coingecko || '',
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
       treasuries: space.treasuries,
@@ -330,7 +334,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       website: form.value.externalUrl ?? space.value.external_url,
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
-      coingecko: space.value.coingecko || '',
+      coingecko: form.value.coingecko ?? space.value.coingecko,
       parent: space.value.parent?.id ?? null,
       children: space.value.children.map(child => child.id),
       private: space.value.additionalRawData.private,
