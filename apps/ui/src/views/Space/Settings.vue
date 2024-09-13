@@ -287,7 +287,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       title="Treasuries"
       description="Treasuries are used to manage the funds of the space."
     >
-      <FormSpaceTreasuries v-model="form.treasuries" />
+      <FormSpaceTreasuries
+        v-model="form.treasuries"
+        :limit="isOffchainNetwork ? 10 : undefined"
+      />
     </UiContainerSettings>
     <FormStrategies
       v-if="activeTab === 'authenticators'"

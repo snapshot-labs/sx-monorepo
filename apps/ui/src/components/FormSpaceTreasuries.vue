@@ -6,6 +6,10 @@ const model = defineModel<SpaceMetadataTreasury[]>({
   required: true
 });
 
+defineProps<{
+  limit?: number;
+}>();
+
 const { addNotification } = useUiStore();
 
 const modalOpen = ref(false);
@@ -91,7 +95,12 @@ function deleteTreasury(index: number) {
       </div>
     </template>
   </Draggable>
-  <UiButton class="w-full" @click="addTreasury">Add treasury</UiButton>
+  <UiButton
+    v-if="limit ? model.length < limit : true"
+    class="w-full"
+    @click="addTreasury"
+    >Add treasury</UiButton
+  >
   <teleport to="#modal">
     <ModalTreasuryConfig
       :open="modalOpen"
