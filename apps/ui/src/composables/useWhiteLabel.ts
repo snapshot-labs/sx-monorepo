@@ -50,16 +50,16 @@ export function useWhiteLabel() {
 
       if (!id) {
         isWhiteLabel.value = false;
-        loaded.value = true;
         return;
       }
 
       const [networkId, spaceId] = id.split(':') as [NetworkID, string];
       resolver.address = spaceId;
       resolver.networkId = networkId;
-      loaded.value = true;
     } catch (e) {
       failed.value = true;
+    } finally {
+      loaded.value = true;
     }
   }
 
