@@ -131,19 +131,21 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
   watch(
     () => web3.value.account,
-    account => {
-      shownLastUnreadTs.value = account ? lastUnreadTs.value[account] ?? 0 : 0;
+    (newAccount, oldAccount) => {
+      if (!oldAccount && newAccount) {
+        refreshNotificationInterval = window.setInterval(
+          loadNotifications,
+          REFRESH_INTERVAL * 1000
+        );
+      } else if (oldAccount && !newAccount) {
+        clearInterval(refreshNotificationInterval);
+      }
+
+      shownLastUnreadTs.value = newAccount
+        ? lastUnreadTs.value[newAccount] ?? 0
+        : 0;
     }
   );
-
-  onMounted(() => {
-    refreshNotificationInterval = window.setInterval(
-      loadNotifications,
-      REFRESH_INTERVAL * 1000
-    );
-  });
-
-  onBeforeUnmount(() => clearInterval(refreshNotificationInterval));
 
   return {
     unreadNotificationsCount,
