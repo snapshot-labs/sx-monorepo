@@ -53,7 +53,7 @@ withDefaults(
   </span>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .loading {
   svg {
     animation: rotation 0.5s linear infinite;
@@ -87,21 +87,11 @@ withDefaults(
   }
 
   &.big svg {
-    width: 24px;
-    height: 24px;
+    @apply size-[24px];
   }
 
   &.overlay {
-    position: fixed;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    align-content: center;
-    top: 0;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    width: 100%;
+    @apply fixed flex items-center justify-center inset-0;
   }
 }
 </style>
