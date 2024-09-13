@@ -378,13 +378,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             v-if="nftsLoading && !nftsLoaded"
             class="px-4 py-3 block"
           />
-          <div class="justify-center grid grid-cols-1 minimum:grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-explore-5 2xl:grid-cols-explore-6 3xl:grid-cols-explore-8 p-4 gap-2">
+          <div
+            class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 place-content-center max-w-fit mx-auto p-4"
+          >
             <a
               v-for="(nft, i) in nfts"
               :key="i"
               :href="sanitizeUrl(nft.opensea_url) || '#'"
               target="_blank"
-              class="block w-[120px] mx-auto"
+              class="block w-[120px] shrink-0"
             >
               <UiNftImage :item="nft" class="w-full" />
               <div class="mt-2 text-[17px] truncate text-center">
