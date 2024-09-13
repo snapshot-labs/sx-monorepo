@@ -47,10 +47,11 @@ export type OffchainSpaceSettings = {
   voteValidation: OffchainApiSpace['voteValidation'];
 };
 
-type Form = SpaceMetadata & { coingecko: string };
+type Form = SpaceMetadata & { categories: string[]; coingecko: string };
 
 const DEFAULT_FORM_STATE: Form = {
   name: '',
+  categories: [],
   avatar: '',
   cover: '',
   description: '',
@@ -280,9 +281,10 @@ export function useSpaceSettings(space: Ref<Space>) {
     return [toAdd, toRemove];
   }
 
-  function getInitialForm(space: Space) {
+  function getInitialForm(space: Space): Form {
     return {
       name: space.name,
+      categories: space.additionalRawData?.categories || [],
       avatar: space.avatar,
       cover: space.cover,
       description: space.about || '',
@@ -326,6 +328,8 @@ export function useSpaceSettings(space: Ref<Space>) {
     const saveData: OffchainSpaceSettings = {
       name: form.value.name ?? space.value.name,
       about: (form.value.description ?? space.value.about) || '',
+      categories:
+        form.value.categories ?? space.value.additionalRawData.categories,
       avatar: form.value.avatar ?? space.value.avatar,
       cover: form.value.cover ?? space.value.cover,
       network: space.value.snapshot_chain_id?.toString() ?? '1',
@@ -343,7 +347,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       guidelines: space.value.additionalRawData.guidelines,
       template: space.value.additionalRawData.template,
       strategies: space.value.additionalRawData.strategies,
-      categories: space.value.additionalRawData.categories,
       treasuries: form.value.treasuries.map(treasury => ({
         address: treasury.address || '',
         name: treasury.name || '',
