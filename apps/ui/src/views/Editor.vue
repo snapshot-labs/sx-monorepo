@@ -5,7 +5,7 @@ import { resolver } from '@/helpers/resolver';
 import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { Contact, Space, Transaction, VoteType } from '@/types';
+import { Contact, Transaction, VoteType } from '@/types';
 
 const MAX_BODY_LENGTH = {
   default: 10000,
@@ -62,7 +62,7 @@ const sending = ref(false);
 const network = computed(() =>
   networkId.value ? getNetwork(networkId.value) : null
 );
-const space = computed<Space | null>(() => {
+const space = computed(() => {
   if (!resolved.value) return null;
 
   return (
