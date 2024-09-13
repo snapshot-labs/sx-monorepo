@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
 
-const uiStore = useUiStore();
 const followedSpacesStore = useFollowedSpacesStore();
+
+const emit = defineEmits<{
+  (e: 'close');
+}>();
 </script>
 
 <template>
@@ -31,7 +34,7 @@ const followedSpacesStore = useFollowedSpacesStore();
             params: { id: `${element.network}:${element.id}` }
           }"
           class="block"
-          @click="uiStore.sidebarOpen = false"
+          @click="emit('close')"
         >
           <UiTooltip :title="element.name" placement="right">
             <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />
