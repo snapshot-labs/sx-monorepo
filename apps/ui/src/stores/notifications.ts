@@ -135,8 +135,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
     ([newAccount, isWhiteLabel], [oldAccount]) => {
       if (isWhiteLabel) return;
 
-      console.log('start watcher');
-
       if (!oldAccount && newAccount) {
         refreshNotificationInterval = window.setInterval(
           loadNotifications,
