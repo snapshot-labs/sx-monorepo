@@ -196,7 +196,7 @@ $navWidth: 240px;
   }
 }
 
-@media (min-width: 1012px) {
+@media (screen(lg)) {
   .app-sidebar {
     & ~ :deep(main),
     & ~ :deep(header),
