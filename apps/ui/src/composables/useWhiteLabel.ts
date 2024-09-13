@@ -25,7 +25,7 @@ async function getSpaceId(domain: string): Promise<string | null> {
   const data: { domain: string; space_id: string } = await result.json();
 
   // Checking that the returned json is valid
-  if (!(domain in data)) throw new Error('Invalid response');
+  if (!('domain' in data)) throw new Error('Invalid response');
 
   return data.space_id ?? null;
 }
