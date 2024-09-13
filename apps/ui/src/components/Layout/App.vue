@@ -41,7 +41,7 @@ const hasAppNav = computed(() =>
 
 const hasSidebar = computed(() => !isWhiteLabel.value);
 
-const isSwippable = computed(() => hasSidebar.value || hasAppNav.value);
+const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
 const bottomPadding = computed(
   () => !['proposal-votes'].includes(String(route.name))
@@ -82,7 +82,7 @@ watch(route, () => {
 });
 
 watch(isSwiping, () => {
-  if (window.innerWidth > LG_WIDTH || !isSwippable) return;
+  if (window.innerWidth > LG_WIDTH || !hasSwipeableContent) return;
 
   if (
     sidebarSwipeEnabled.value &&
@@ -120,7 +120,7 @@ watch(isSwiping, () => {
           class="fixed top-0 inset-x-0 z-50"
           @navigated="uiStore.sidebarOpen = false"
         >
-          <template v-if="isSwippable" #toggle-sidebar-button>
+          <template v-if="hasSwipeableContent" #toggle-sidebar-button>
             <button
               type="button"
               class="text-skin-link cursor-pointer lg:hidden ml-4"
@@ -140,7 +140,7 @@ watch(isSwiping, () => {
           @navigated="uiStore.sidebarOpen = false"
         />
         <button
-          v-if="isSwippable && uiStore.sidebarOpen"
+          v-if="hasSwipeableContent && uiStore.sidebarOpen"
           type="button"
           class="backdrop"
           @click="uiStore.toggleSidebar"
