@@ -6,16 +6,11 @@ const state = reactive({
 });
 
 const { login } = useWeb3();
-const { isWhiteLabel, init: initWhiteLabel } = useWhiteLabel();
 
 export function useApp() {
   async function init() {
     const auth = getInstance();
     state.loading = true;
-
-    if (isWhiteLabel.value) {
-      await initWhiteLabel();
-    }
 
     // Auto connect with gnosis-connector when inside gnosis-safe iframe
     if (window?.parent === window)

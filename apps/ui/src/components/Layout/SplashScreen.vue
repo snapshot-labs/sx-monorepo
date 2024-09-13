@@ -1,0 +1,33 @@
+<script lang="ts" setup>
+const { init, isWhiteLabel, loaded, failed } = useWhiteLabel();
+import defaultRoutes from '@/routes/default';
+import whiteLabelRoutes from '@/routes/whiteLabel';
+
+const router = useRouter();
+
+watch(
+  () => loaded.value,
+  loaded => {
+    if (!loaded) return;
+
+    const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
+
+    routes.forEach(route => router.addRoute(route));
+    router.replace(router.currentRoute.value.fullPath);
+    router.removeRoute('splash-screen');
+  }
+);
+
+onMounted(() => init());
+</script>
+
+<template>
+  <div class="flex flex-col justify-center items-center h-screen gap-5">
+    <img src="@/assets/snapshot.svg" alt="Snapshot" class="w-[80px]" />
+    <div v-if="failed" class="text-center">
+      <div class="text-skin-text text-[28px]">Error while loading the site</div>
+      <div class="text-[24px]">Please try again</div>
+    </div>
+    <UiLoading v-else :width="36" :height="26" class="opacity-40" />
+  </div>
+</template>

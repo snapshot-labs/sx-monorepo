@@ -15,7 +15,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, app } = useApp();
-const { isWhiteLabel, failed: whiteLabelLoadingFailed } = useWhiteLabel();
+const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
@@ -106,10 +106,7 @@ watch(isSwiping, () => {
     class="min-h-screen"
     :class="{ 'overflow-clip': scrollDisabled }"
   >
-    <SplashScreen
-      v-if="app.loading || !app.init || whiteLabelLoadingFailed"
-      :failed="whiteLabelLoadingFailed"
-    />
+    <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <template v-else>
       <div :class="['flex', { 'pb-6': bottomPadding }]">
         <AppSidebar
