@@ -19,6 +19,14 @@ if (domain !== DEFAULT_DOMAIN) {
 }
 
 async function getSpaceId(domain: string): Promise<string | null> {
+  // Resolve white label domain locally if mapping is provided
+  // e.g. VITE_WHITE_LABEL_MAPPING='127.0.0.1;s:snapshot.eth'
+  const localMapping = import.meta.env.VITE_WHITE_LABEL_MAPPING;
+  if (localMapping) {
+    const [localDomain, localSpaceId] = localMapping.split(';');
+    if (domain === localDomain) return localSpaceId;
+  }
+
   const result = await fetch(`${SIDEKICK_URL}/api/domains/${domain}`, {
     headers: { 'Content-Type': 'application/json' }
   });
