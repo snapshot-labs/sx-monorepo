@@ -379,7 +379,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="px-4 py-3 block"
           />
           <div
-            class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 place-content-center max-w-fit mx-auto p-4"
+            class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 max-w-fit mx-auto p-4"
           >
             <a
               v-for="(nft, i) in nfts"
