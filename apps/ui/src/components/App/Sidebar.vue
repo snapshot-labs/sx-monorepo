@@ -4,13 +4,17 @@ import draggable from 'vuedraggable';
 const followedSpacesStore = useFollowedSpacesStore();
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'navigated');
 }>();
 </script>
 
 <template>
   <div class="flex flex-col border-r text-center">
-    <router-link :to="{ name: 'my-home' }" class="h-[72px] block">
+    <router-link
+      :to="{ name: 'my-home' }"
+      class="h-[72px] block"
+      @click="emit('navigated')"
+    >
       <IC-zap class="inline-block my-[18px] size-[40px] text-skin-link" />
     </router-link>
     <div
@@ -34,7 +38,7 @@ const emit = defineEmits<{
             params: { id: `${element.network}:${element.id}` }
           }"
           class="block"
-          @click="emit('close')"
+          @click="emit('navigated')"
         >
           <UiTooltip :title="element.name" placement="right">
             <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />

@@ -25,6 +25,10 @@ type NavigationItem = {
   active?: boolean;
 };
 
+const emit = defineEmits<{
+  (e: 'navigated');
+}>();
+
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
@@ -185,6 +189,7 @@ const navigationItems = computed(() =>
       :to="item.link"
       class="px-4 py-1.5 space-x-2 flex items-center"
       :class="item.active ? 'text-skin-link' : 'text-skin-text'"
+      @click="emit('navigated')"
     >
       <component :is="item.icon" class="inline-block"></component>
       <span class="grow" v-text="item.name" />

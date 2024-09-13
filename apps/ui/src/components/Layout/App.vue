@@ -114,9 +114,12 @@ watch(isSwiping, () => {
             `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
             { '!flex app-sidebar-open': uiStore.sidebarOpen }
           ]"
-          @close="uiStore.sidebarOpen = false"
+          @navigated="uiStore.sidebarOpen = false"
         />
-        <AppTopnav class="fixed top-0 inset-x-0 z-50">
+        <AppTopnav
+          class="fixed top-0 inset-x-0 z-50"
+          @navigated="uiStore.sidebarOpen = false"
+        >
           <template v-if="isSwippable" #toggle-sidebar-button>
             <button
               type="button"
@@ -134,6 +137,7 @@ watch(isSwiping, () => {
               '!block app-nav-open': uiStore.sidebarOpen
             }
           ]"
+          @navigated="uiStore.sidebarOpen = false"
         />
         <button
           v-if="isSwippable && uiStore.sidebarOpen"
