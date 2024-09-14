@@ -1,22 +1,20 @@
 <script lang="ts" setup>
-const { init, isWhiteLabel, loaded, failed } = useWhiteLabel();
 import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
+const { init, isWhiteLabel, loaded, failed } = useWhiteLabel();
+
 const router = useRouter();
 
-watch(
-  () => loaded.value,
-  loaded => {
-    if (!loaded) return;
+watch([() => loaded.value, () => failed.value], ([loaded, failed]) => {
+  if (!loaded || failed) return;
 
-    const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
+  const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
 
-    routes.forEach(route => router.addRoute(route));
-    router.replace(router.currentRoute.value.fullPath);
-    router.removeRoute('splash-screen');
-  }
-);
+  routes.forEach(route => router.addRoute(route));
+  router.replace(router.currentRoute.value.fullPath);
+  router.removeRoute('splash-screen');
+});
 
 onMounted(() => init());
 </script>
