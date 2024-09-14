@@ -13,10 +13,19 @@ function handleAddChoice() {
   nextTick(() => choices.value[proposal.value.choices.length - 1].focus());
 }
 
-function handlePressEnter(index) {
+function handlePressEnter(index: number) {
   if (!choices.value[index + 1]) return handleAddChoice();
 
   nextTick(() => choices.value[index + 1].focus());
+}
+
+function handlePressDelete(index: number) {
+  if (proposal.value.choices[index] === '') {
+    if (index !== 0) {
+      proposal.value.choices.splice(index, 1);
+      nextTick(() => choices.value[index - 1].focus());
+    }
+  }
 }
 </script>
 
@@ -55,6 +64,11 @@ function handlePressEnter(index) {
                   :placeholder="`Choice ${index + 1}`"
                   :disabled="proposal.type === 'basic'"
                   @keyup.enter="handlePressEnter(index)"
+                  @keydown.delete="
+                    proposal.choices[index] === ''
+                      ? handlePressDelete(index)
+                      : () => {}
+                  "
                 />
               </div>
               <UiButton
