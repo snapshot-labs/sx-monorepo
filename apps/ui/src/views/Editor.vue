@@ -350,7 +350,7 @@ export default defineComponent({
         </div>
         <IndicatorPendingTransactions class="mr-2" />
         <UiLoading v-if="!space" class="block p-4" />
-        <div v-else class="space-x-2">
+        <div v-else class="flex gap-2">
           <UiTooltip title="Drafts">
             <UiButton
               class="leading-3 !px-0 w-[46px]"
@@ -360,7 +360,7 @@ export default defineComponent({
             </UiButton>
           </UiTooltip>
           <UiButton
-            class="primary !px-0 min-w-[46px]"
+            class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
             :loading="
               !!web3.account &&
               (sending || !votingPower || votingPower.status === 'loading')
@@ -368,13 +368,11 @@ export default defineComponent({
             :disabled="!canSubmit"
             @click="handleProposeClick"
           >
-            <span class="pl-3.5 pr-3">
-              <span
-                class="hidden mr-2 md:inline-block"
-                v-text="proposal?.proposalId ? 'Update' : 'Publish'"
-              />
-              <IH-paper-airplane class="inline-block rotate-90" />
-            </span>
+            <span
+              class="hidden md:inline-block"
+              v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+            />
+            <IH-paper-airplane class="rotate-90 relative left-[2px]" />
           </UiButton>
         </div>
       </div>
