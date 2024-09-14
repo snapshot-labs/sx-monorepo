@@ -335,22 +335,20 @@ export default defineComponent({
 <template>
   <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
-      <div class="flex items-center h-[71px] mx-4">
-        <div class="flex-auto space-x-2">
-          <router-link
-            :to="{ name: 'space-overview', params: { id: param } }"
-            class="mr-2"
-            tabindex="-1"
-          >
-            <UiButton class="leading-3 w-[46px] !px-0">
-              <IH-arrow-narrow-left class="inline-block" />
-            </UiButton>
-          </router-link>
-          <h4 class="py-2 inline-block">New proposal</h4>
-        </div>
-        <IndicatorPendingTransactions class="mr-2" />
+      <div class="flex items-center h-[71px] mx-4 gap-2">
+        <router-link
+          :to="{ name: 'space-overview', params: { id: param } }"
+          class="mr-2"
+          tabindex="-1"
+        >
+          <UiButton class="leading-3 w-[46px] !px-0">
+            <IH-arrow-narrow-left class="inline-block" />
+          </UiButton>
+        </router-link>
+        <h4 class="grow truncate">New proposal</h4>
+        <IndicatorPendingTransactions />
         <UiLoading v-if="!space" class="block p-4" />
-        <div v-else class="flex gap-2">
+        <template v-else>
           <UiTooltip title="Drafts">
             <UiButton
               class="leading-3 !px-0 w-[46px]"
@@ -374,7 +372,7 @@ export default defineComponent({
             />
             <IH-paper-airplane class="rotate-90 relative left-[2px]" />
           </UiButton>
-        </div>
+        </template>
       </div>
     </nav>
     <div class="md:mr-[340px]">
