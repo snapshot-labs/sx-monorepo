@@ -105,8 +105,8 @@ const socialAccountsDefinition = computed(() => {
     coingecko: {
       type: 'string',
       format: 'coingecko-handle',
-      title: 'Coingecko',
-      examples: ['CoinGecko handle'],
+      title: 'CoinGecko handle',
+      examples: ['e.g. uniswap'],
       maxLength: 32
     }
   };
