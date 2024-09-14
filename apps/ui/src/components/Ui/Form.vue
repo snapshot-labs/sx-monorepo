@@ -14,6 +14,7 @@ import InputNumber from './InputNumber.vue';
 import InputStamp from './InputStamp.vue';
 import InputString from './InputString.vue';
 import Select from './Select.vue';
+import SelectMultiple from './SelectMultiple.vue';
 import Textarea from './Textarea.vue';
 
 const model = defineModel<any>({ required: true });
@@ -44,15 +45,27 @@ const getComponent = (property: {
   type: string;
   format: string;
   enum?: string[];
+  items: {
+    type: string;
+    enum?: string[];
+  };
+  maxItems?: number;
 }) => {
   let type = property.type;
   if (Array.isArray(property.type)) {
     type = property.type[0];
   }
+
   switch (type) {
     case 'object':
       return Form;
     case 'array':
+      if (property.items.enum) {
+        if (property.maxItems !== undefined) {
+          return SelectMultiple;
+        }
+      }
+
       return InputArray;
     case 'string':
       if (property.format === 'long') return Textarea;
