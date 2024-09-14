@@ -173,6 +173,7 @@ export type ReadOnlyNetworkActions = {
     statement: Statement,
     from?: string
   );
+  updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
   send(envelope: any): Promise<any>;
 };
 

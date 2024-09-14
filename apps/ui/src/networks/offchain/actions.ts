@@ -329,6 +329,16 @@ export function createActions(
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { ...statement, ...(from ? { from } : {}) }
       });
+    },
+    updateSettingsRaw: (
+      web3: Web3Provider | Wallet,
+      space: Space,
+      settings: string
+    ) => {
+      return client.updateSpace({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { space: space.id, settings }
+      });
     }
   };
 }

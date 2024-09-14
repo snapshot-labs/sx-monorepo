@@ -89,6 +89,7 @@ export function useWeb3() {
         } else if (STARKNET_CONNECTORS.includes(connector)) {
           network = {
             chainId:
+              auth.provider.value.chainId ||
               auth.provider.value.provider.chainId ||
               auth.provider.value.provider.provider.chainId
           };

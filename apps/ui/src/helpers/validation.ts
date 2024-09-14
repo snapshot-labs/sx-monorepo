@@ -2,6 +2,7 @@ import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
+import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
@@ -13,6 +14,7 @@ const ajv = new Ajv({
   // https://github.com/ajv-validator/ajv/issues/1417
   strictTuples: false
 });
+ajvErrors(ajv);
 addFormats(ajv);
 
 export const addressValidator = (value: string) => {
@@ -166,6 +168,14 @@ ajv.addFormat('discord-handle', {
   }
 });
 
+ajv.addFormat('coingecko-handle', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-z0-9-]*$/);
+  }
+});
+
 ajv.addFormat('lens-handle', {
   validate: (value: string) => {
     if (!value) return false;
@@ -234,6 +244,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be a valid GitHub handle.';
       case 'discord-handle':
         return 'Must be a valid Discord handle or invite code.';
+      case 'coingecko-handle':
+        return 'Must be a valid CoinGecko handle.';
       case 'uint256':
         return 'Must be a positive integer.';
       case 'int256':
