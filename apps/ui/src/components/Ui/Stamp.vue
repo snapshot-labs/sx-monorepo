@@ -7,6 +7,7 @@ withDefaults(
       | 'avatar'
       | 'user-cover'
       | 'space'
+      | 'space-cover'
       | 'space-sx'
       | 'space-cover-sx'
       | 'token';

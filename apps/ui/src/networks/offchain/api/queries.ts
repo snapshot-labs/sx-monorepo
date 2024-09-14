@@ -9,6 +9,7 @@ const SPACE_FRAGMENT = gql`
     members
     name
     avatar
+    cover
     network
     about
     website
@@ -30,8 +31,11 @@ const SPACE_FRAGMENT = gql`
     voting {
       delay
       period
-      quorum
       type
+      quorum
+      quorumType
+      privacy
+      hideAbstain
     }
     strategies {
       name
@@ -53,6 +57,7 @@ const SPACE_FRAGMENT = gql`
       id
       name
       avatar
+      cover
       proposalsCount
       votesCount
       turbo
@@ -63,11 +68,30 @@ const SPACE_FRAGMENT = gql`
       id
       name
       avatar
+      cover
       proposalsCount
       votesCount
       turbo
       verified
       network
+    }
+    # needed for settings
+    terms
+    private
+    domain
+    skin
+    guidelines
+    template
+    categories
+    moderators
+    plugins
+    boost {
+      enabled
+      bribeEnabled
+    }
+    voteValidation {
+      name
+      params
     }
   }
 `;

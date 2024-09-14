@@ -24,7 +24,11 @@ const cb = computed(() => getCacheHash(props.space.cover));
     :width="width"
     :height="height"
     :cb="cb"
-    type="space-cover-sx"
+    :type="
+      offchainNetworks.includes(space.network)
+        ? 'space-cover'
+        : 'space-cover-sx'
+    "
     class="object-cover !rounded-none size-full"
   />
   <div
