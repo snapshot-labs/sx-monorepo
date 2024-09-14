@@ -131,7 +131,8 @@ const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default']
+  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default'],
+  examples: ['Propose something…']
 }));
 const formErrors = computed(() => {
   if (!proposal.value) return {};
