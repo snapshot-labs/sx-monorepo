@@ -16,6 +16,7 @@ import {
   singleChoiceVoteTypes,
   unfollowSpaceTypes,
   updateProposalTypes,
+  updateSpaceTypes,
   updateStatementTypes,
   updateUserTypes,
   weightedVoteTypes
@@ -31,6 +32,7 @@ import {
   EIP712SetAliasMessage,
   EIP712UnfollowSpaceMessage,
   EIP712UpdateProposal,
+  EIP712UpdateSpaceMessage,
   EIP712UpdateStatementMessage,
   EIP712UpdateUserMessage,
   EIP712VoteMessage,
@@ -40,6 +42,7 @@ import {
   SetAlias,
   UnfollowSpace,
   UpdateProposal,
+  UpdateSpace,
   UpdateStatement,
   UpdateUser,
   Vote
@@ -82,6 +85,7 @@ export class EthereumSig {
       | EIP712SetAliasMessage
       | EIP712UpdateUserMessage
       | EIP712UpdateStatementMessage
+      | EIP712UpdateSpaceMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -336,6 +340,21 @@ export class EthereumSig {
     data: UpdateStatement;
   }) {
     const signatureData = await this.sign(signer, data, updateStatementTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async updateSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateSpace;
+  }) {
+    const signatureData = await this.sign(signer, data, updateSpaceTypes);
 
     return {
       signatureData,
