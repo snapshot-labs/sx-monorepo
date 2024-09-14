@@ -6,12 +6,31 @@ const model = defineModel<SpaceMetadataTreasury[]>({
   required: true
 });
 
+defineProps<{
+  limit?: number;
+}>();
+
+const { addNotification } = useUiStore();
+
 const modalOpen = ref(false);
 
 const editedTreasury = ref<number | null>(null);
 const treasuryInitialState = ref<any | null>(null);
 
 function addTreasuryConfig(config: SpaceMetadataTreasury) {
+  const existingTreasuries = new Map(
+    model.value.map(t => [`${t.name}-${t.network}-${t.address}`, true])
+  );
+
+  if (
+    existingTreasuries.has(`${config.name}-${config.network}-${config.address}`)
+  ) {
+    return addNotification(
+      'error',
+      'Treasury with this name and wallet already exists'
+    );
+  }
+
   const newValue = [...model.value];
 
   if (editedTreasury.value !== null) {
@@ -22,6 +41,7 @@ function addTreasuryConfig(config: SpaceMetadataTreasury) {
   }
 
   model.value = newValue;
+  modalOpen.value = false;
 }
 
 function addTreasury() {
@@ -75,7 +95,12 @@ function deleteTreasury(index: number) {
       </div>
     </template>
   </Draggable>
-  <UiButton class="w-full" @click="addTreasury">Add treasury</UiButton>
+  <UiButton
+    v-if="limit ? model.length < limit : true"
+    class="w-full"
+    @click="addTreasury"
+    >Add treasury</UiButton
+  >
   <teleport to="#modal">
     <ModalTreasuryConfig
       :open="modalOpen"
