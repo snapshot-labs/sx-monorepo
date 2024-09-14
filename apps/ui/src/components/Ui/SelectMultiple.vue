@@ -94,13 +94,14 @@ watch(model, () => {
             v-slot="{ selected, disabled }"
             :key="item.id"
             :value="item.id"
-            class="flex items-center justify-between py-2"
+            class="flex items-center justify-between"
             :disabled="isItemDisabled(item.id)"
           >
             <span
-              class="text-skin-link"
+              class="w-full py-2 text-skin-link"
               :class="{
-                'opacity-40': disabled
+                'opacity-40': disabled,
+                'cursor-pointer': !disabled
               }"
             >
               {{ item.name }}
