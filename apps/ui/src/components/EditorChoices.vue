@@ -19,8 +19,10 @@ function handlePressEnter(index: number) {
   nextTick(() => choices.value[index + 1].focus());
 }
 
-function handlePressDelete(index: number) {
+function handlePressDelete(event: KeyboardEvent, index: number) {
   if (proposal.value.choices[index] === '') {
+    event.preventDefault();
+
     if (index !== 0) {
       proposal.value.choices.splice(index, 1);
       nextTick(() => choices.value[index - 1].focus());
@@ -64,11 +66,7 @@ function handlePressDelete(index: number) {
                   :placeholder="`Choice ${index + 1}`"
                   :disabled="proposal.type === 'basic'"
                   @keyup.enter="handlePressEnter(index)"
-                  @keydown.delete="
-                    proposal.choices[index] === ''
-                      ? handlePressDelete(index)
-                      : () => {}
-                  "
+                  @keydown.delete="e => handlePressDelete(e, index)"
                 />
               </div>
               <UiButton
