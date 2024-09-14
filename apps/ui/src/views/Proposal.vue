@@ -179,7 +179,7 @@ watchEffect(() => {
               />
             </WhiteLabelAwareLink>
             <template v-if="discussion">
-              <router-link
+              <WhiteLabelAwareLink
                 v-if="discourseTopic?.posts_count"
                 :to="{
                   name: 'proposal-discussion',
@@ -193,7 +193,7 @@ watchEffect(() => {
                   text="Discussion"
                   class="inline-block"
                 />
-              </router-link>
+              </WhiteLabelAwareLink>
               <a
                 v-else
                 :href="discussion"
