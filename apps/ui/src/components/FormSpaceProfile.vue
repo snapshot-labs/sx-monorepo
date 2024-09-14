@@ -9,7 +9,7 @@ const SPACE_CATEGORIES = [
   { id: 'social', name: 'Social' },
   { id: 'investment', name: 'Investment' },
   { id: 'grant', name: 'Grant' },
-  { id: 'service', name: 'Serivce' },
+  { id: 'service', name: 'Service' },
   { id: 'media', name: 'Media' },
   { id: 'creator', name: 'Creator' },
   { id: 'collector', name: 'Collector' }
