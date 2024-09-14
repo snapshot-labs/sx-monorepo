@@ -81,7 +81,7 @@ const votingPowerDefinition = computed(() => ({
   additionalProperties: true,
   required: [],
   properties: {
-    symbol: {
+    votingPowerSymbol: {
       type: 'string',
       title: 'Voting power symbol',
       examples: ['e.g. VP'],
