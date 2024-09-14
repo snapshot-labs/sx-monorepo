@@ -153,7 +153,7 @@ watchEffect(() => {
           gradient="xxl"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
-            <router-link
+            <WhiteLabelAwareLink
               :to="{
                 name: 'proposal-overview',
                 params: { id: proposal.proposal_id }
@@ -163,8 +163,8 @@ watchEffect(() => {
                 :is-active="route.name === 'proposal-overview'"
                 text="Overview"
               />
-            </router-link>
-            <router-link
+            </WhiteLabelAwareLink>
+            <WhiteLabelAwareLink
               :to="{
                 name: 'proposal-votes',
                 params: { id: proposal.proposal_id }
@@ -177,7 +177,7 @@ watchEffect(() => {
                 text="Votes"
                 class="inline-block"
               />
-            </router-link>
+            </WhiteLabelAwareLink>
             <template v-if="discussion">
               <router-link
                 v-if="discourseTopic?.posts_count"

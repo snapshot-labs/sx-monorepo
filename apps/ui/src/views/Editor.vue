@@ -336,7 +336,7 @@ export default defineComponent({
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4">
         <div class="flex-auto space-x-2">
-          <router-link
+          <WhiteLabelAwareLink
             :to="{ name: 'space-overview', params: { id: param } }"
             class="mr-2"
             tabindex="-1"
@@ -344,7 +344,7 @@ export default defineComponent({
             <UiButton class="leading-3 w-[46px] !px-0">
               <IH-arrow-narrow-left class="inline-block" />
             </UiButton>
-          </router-link>
+          </WhiteLabelAwareLink>
           <h4 class="py-2 inline-block">New proposal</h4>
         </div>
         <IndicatorPendingTransactions class="mr-2" />

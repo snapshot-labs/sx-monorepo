@@ -107,7 +107,7 @@ watch(
                   : 'bg-skin-border'
               "
             />
-            <router-link
+            <WhiteLabelAwareLink
               :to="{
                 name: 'space-user-statement',
                 params: {
@@ -122,7 +122,7 @@ watch(
               <span>{{
                 vote.voter.name || shortenAddress(vote.voter.id)
               }}</span>
-            </router-link>
+            </WhiteLabelAwareLink>
 
             <template v-if="isEncrypted">
               <div class="flex gap-1 items-center">

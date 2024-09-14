@@ -596,7 +596,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       gradient="xxl"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <router-link
+        <WhiteLabelAwareLink
           v-for="tab in TABS"
           :key="tab.id"
           :to="{
@@ -608,7 +608,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           @focus="handleTabFocus"
         >
           <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-        </router-link>
+        </WhiteLabelAwareLink>
       </div>
     </UiScrollerHorizontal>
     <div v-if="loading" class="p-4">

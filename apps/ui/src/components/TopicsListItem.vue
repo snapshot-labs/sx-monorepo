@@ -10,7 +10,7 @@ defineProps<{ topic: Topic }>();
       <div class="flex-auto mr-4 w-0">
         <div class="space-x-2 flex">
           <div class="md:flex md:min-w-0 my-1 items-center leading-6">
-            <router-link
+            <WhiteLabelAwareLink
               :to="{
                 name: 'space-discussions-topic',
                 params: { topic: topic.id }
@@ -26,7 +26,7 @@ defineProps<{ topic: Topic }>();
                 class="inline-block shrink-0 size-[16px] -mt-1 md:mt-1"
               />
               <h3 class="text-[21px] inline md:truncate" v-text="topic.title" />
-            </router-link>
+            </WhiteLabelAwareLink>
           </div>
         </div>
         <div class="inline">

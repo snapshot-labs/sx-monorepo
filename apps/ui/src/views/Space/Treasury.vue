@@ -63,7 +63,7 @@ watchEffect(() => {
     gradient="xxl"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <router-link
+      <WhiteLabelAwareLink
         v-for="(treasury, i) in filteredTreasuries"
         :key="i"
         :to="{
@@ -79,7 +79,7 @@ watchEffect(() => {
           :is-active="activeTreasuryId === i"
           :text="treasury.name || shorten(treasury.address)"
         />
-      </router-link>
+      </WhiteLabelAwareLink>
     </div>
   </UiScrollerHorizontal>
   <SpaceTreasury

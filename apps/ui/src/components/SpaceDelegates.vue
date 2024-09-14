@@ -101,7 +101,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
   </div>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
-      <router-link
+      <WhiteLabelAwareLink
         v-if="web3.account"
         tabindex="-1"
         :to="{
@@ -113,7 +113,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         }"
       >
         <UiButton> Edit my statement </UiButton>
-      </router-link>
+      </WhiteLabelAwareLink>
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
@@ -190,7 +190,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             :key="i"
             class="border-b flex space-x-3 px-4"
           >
-            <router-link
+            <WhiteLabelAwareLink
               :to="{
                 name: 'space-user-statement',
                 params: {
@@ -250,7 +250,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   v-text="_p(delegate.votesPercentage)"
                 />
               </div>
-            </router-link>
+            </WhiteLabelAwareLink>
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
@@ -271,7 +271,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     </button>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
-                    <router-link
+                    <WhiteLabelAwareLink
                       :to="{
                         name: 'space-user-statement',
                         params: {
@@ -284,7 +284,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     >
                       <IH-user-circle />
                       View profile
-                    </router-link>
+                    </WhiteLabelAwareLink>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
                     <a
