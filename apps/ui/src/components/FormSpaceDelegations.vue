@@ -6,6 +6,10 @@ const model = defineModel<SpaceMetadataDelegation[]>({
   required: true
 });
 
+defineProps<{
+  limit?: number;
+}>();
+
 const modalOpen = ref(false);
 
 const editedDelegation = ref<number | null>(null);
@@ -48,8 +52,8 @@ function deleteDelegation(index: number) {
 
 <template>
   <h4 v-bind="$attrs" class="eyebrow mb-2 font-medium">Delegations</h4>
-  <Draggable v-model="model" handle=".handle" :item-key="() => undefined"
-    ><template #item="{ element: delegation, index: i }">
+  <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
+    <template #item="{ element: delegation, index: i }">
       <div
         class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
       >
@@ -75,7 +79,13 @@ function deleteDelegation(index: number) {
       </div>
     </template>
   </Draggable>
-  <UiButton class="w-full" @click="addDelegation">Add delegation</UiButton>
+  <UiButton
+    v-if="limit ? model.length < limit : true"
+    class="w-full"
+    @click="addDelegation"
+  >
+    Add delegation
+  </UiButton>
   <teleport to="#modal">
     <ModalDelegationConfig
       :open="modalOpen"
