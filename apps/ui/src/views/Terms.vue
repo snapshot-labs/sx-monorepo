@@ -1,4 +1,6 @@
 <script setup lang="ts">
+useTitle('Terms of use');
+
 const terms = `
 ## PREAMBLE
 

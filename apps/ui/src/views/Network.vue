@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
 
+useTitle('Network');
+
 const CUSTOMERS = [
   {
     name: 'Blast',
@@ -87,13 +89,9 @@ const LINK = 'https://tally.so/r/31ApGb';
 
 const currentQuestion = ref();
 
-const { setTitle } = useTitle();
-
 function toggleQuestion(id) {
   currentQuestion.value = currentQuestion.value === id ? '' : id;
 }
-
-watchEffect(() => setTitle('Network'));
 </script>
 <template>
   <div class="space-y-[80px] pt-12 mb-8 blocks">
