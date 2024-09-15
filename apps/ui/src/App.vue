@@ -2,8 +2,12 @@
 import { startIntercom } from './helpers/intercom';
 
 const route = useRoute();
+const { app } = useApp();
+const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
+
+watchEffect(() => setTitle(app.value.app_name));
 
 onMounted(async () => startIntercom());
 </script>

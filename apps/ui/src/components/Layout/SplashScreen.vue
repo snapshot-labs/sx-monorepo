@@ -3,6 +3,7 @@ import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
 const { init, isWhiteLabel, loaded, failed } = useWhiteLabel();
+const { setAppName } = useApp();
 
 const router = useRouter();
 
@@ -20,7 +21,10 @@ watch([() => loaded.value, () => failed.value], ([loaded, failed]) => {
   router.removeRoute('splash-screen');
 });
 
-onMounted(() => init());
+onMounted(() => {
+  init();
+  setAppName(null);
+});
 </script>
 
 <template>

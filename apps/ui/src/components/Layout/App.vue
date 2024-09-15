@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
+import { APP_NAME } from '@/helpers/constants';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -14,8 +15,10 @@ const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
-const { init, app } = useApp();
-const { isWhiteLabel } = useWhiteLabel();
+const { init, setAppName, app } = useApp();
+const { isWhiteLabel, loaded: whiteLabelLoaded } = useWhiteLabel();
+const { address, networkId } = useResolve(ref('id'));
+const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
@@ -98,6 +101,28 @@ watch(isSwiping, () => {
     uiStore.toggleSidebar();
   }
 });
+
+watch(
+  [() => isWhiteLabel.value, () => whiteLabelLoaded.value],
+  async ([isWhiteLabel, whiteLabelLoaded]) => {
+    if (!whiteLabelLoaded) return;
+
+    if (!isWhiteLabel) {
+      setAppName(APP_NAME);
+      return;
+    }
+
+    if (!address.value || !networkId.value) return;
+
+    await spacesStore.fetchSpace(address.value, networkId.value);
+    const space = spacesStore.spacesMap.get(
+      `${networkId.value}:${address.value}`
+    );
+
+    setAppName(space?.name || null);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
