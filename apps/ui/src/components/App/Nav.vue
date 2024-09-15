@@ -2,6 +2,7 @@
 import { FunctionalComponent } from 'vue';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -45,11 +46,15 @@ const space = computed(() =>
     : null
 );
 
-const isController = computed(() =>
-  space.value
-    ? compareAddresses(space.value.controller, web3.value.account)
-    : false
-);
+const isController = computedAsync(async () => {
+  if (!networkId.value || !space.value) return false;
+
+  const network = getNetwork(networkId.value);
+  const controller = await network.helpers.getSpaceController(space.value);
+
+  return compareAddresses(controller, web3.value.account);
+});
+
 const navigationConfig = computed<
   Record<string, Record<string, NavigationItem>>
 >(() => ({
