@@ -1,12 +1,12 @@
-const DEFAULT_TITLE = 'Snapshot';
-
 export function useTitle(title?: string) {
+  const { app } = useApp();
+
   const setTitle = (newTitle: string) => {
     document.title = newTitle;
   };
 
   onBeforeUnmount(() => {
-    document.title = DEFAULT_TITLE;
+    document.title = app.value.app_name;
   });
 
   if (title) {

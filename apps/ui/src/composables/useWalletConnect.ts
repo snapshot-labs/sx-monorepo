@@ -4,7 +4,7 @@ import { formatUnits } from '@ethersproject/units';
 import { Core } from '@walletconnect/core';
 import { ProposalTypes, SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
-import { Web3Wallet } from '@walletconnect/web3wallet';
+import { Web3Wallet, Web3WalletTypes } from '@walletconnect/web3wallet';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { NetworkID, SelectedStrategy } from '@/types';
@@ -18,19 +18,14 @@ type ConnectionData = {
 };
 
 let connector: Awaited<ReturnType<(typeof Web3Wallet)['init']>> | null = null;
-async function getConnector() {
+async function getConnector(metadata: Web3WalletTypes.Options['metadata']) {
   if (connector) return connector;
 
   connector = await Web3Wallet.init({
     core: new Core({
       projectId: import.meta.env.VITE_WC_PROJECT_ID
     }),
-    metadata: {
-      name: 'Snapshot',
-      description: 'Where decisions get made',
-      url: 'https://snapshot.box',
-      icons: []
-    }
+    metadata
   });
 
   return connector;
@@ -80,8 +75,21 @@ export function useWalletConnect(
   executionStrategy: SelectedStrategy | null
 ) {
   const { setTransaction } = useWalletConnectTransaction();
+  const { app } = useApp();
+
+  const connectorMetadata = computed<Web3WalletTypes.Options['metadata']>(
+    () => {
+      return {
+        name: app.value.app_name,
+        description: 'Where decisions get made',
+        url: 'https://snapshot.box',
+        icons: []
+      };
+    }
+  );
 
   const key = computed(() => `${chainId}:${account}`);
+
   const connection = computed(
     () =>
       connections.value[key.value] || {
@@ -135,7 +143,7 @@ export function useWalletConnect(
   async function logout() {
     if (!session.value) return;
 
-    const connector = await getConnector();
+    const connector = await getConnector(connectorMetadata.value);
     await connector.disconnectSession({
       topic: session.value.topic,
       reason: getSdkError('USER_DISCONNECTED')
@@ -176,7 +184,7 @@ export function useWalletConnect(
     loading.value = true;
 
     if (logged.value) await logout();
-    const connector = await getConnector();
+    const connector = await getConnector(connectorMetadata.value);
     await connector.core.pairing.pair({ uri });
 
     connector.on('session_proposal', async ({ id, params }) => {
