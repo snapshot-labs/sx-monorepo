@@ -29,7 +29,7 @@ const { loadVotes, votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
 
-const id = computed(() => route.params.id as string);
+const id = computed(() => route.params.proposal as string);
 const proposal = computed(() => {
   if (!resolved.value || !spaceAddress.value || !networkId.value) {
     return null;
@@ -156,7 +156,10 @@ watchEffect(() => {
             <router-link
               :to="{
                 name: 'proposal-overview',
-                params: { id: proposal.proposal_id }
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
               }"
             >
               <UiLink
@@ -167,7 +170,10 @@ watchEffect(() => {
             <router-link
               :to="{
                 name: 'proposal-votes',
-                params: { id: proposal.proposal_id }
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
               }"
               class="flex items-center"
             >
@@ -183,7 +189,10 @@ watchEffect(() => {
                 v-if="discourseTopic?.posts_count"
                 :to="{
                   name: 'proposal-discussion',
-                  params: { id: proposal.proposal_id }
+                  params: {
+                    proposal: proposal.proposal_id,
+                    space: `${proposal.network}:${proposal.space.id}`
+                  }
                 }"
                 class="flex items-center"
               >

@@ -31,7 +31,7 @@ const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const { web3 } = useWeb3();
 

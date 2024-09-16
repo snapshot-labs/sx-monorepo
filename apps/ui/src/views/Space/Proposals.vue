@@ -104,7 +104,13 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           :voting-power="votingPower"
           @fetch-voting-power="handleFetchVotingPower"
         />
-        <router-link :to="{ name: 'editor' }" tabindex="-1">
+        <router-link
+          :to="{
+            name: 'editor',
+            params: { space: `${space.network}:${space.id}` }
+          }"
+          tabindex="-1"
+        >
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />
