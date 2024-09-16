@@ -23,6 +23,7 @@ function normalize(to: any) {
     v-bind="$attrs"
     :href="to as string"
     target="_blank"
+    class="inline-flex items-center"
     :class="{
       button: button
     }"
@@ -53,7 +54,7 @@ function normalize(to: any) {
 
 <style lang="scss" scoped>
 .button {
-  @apply rounded-full leading-[100%] border px-3.5 h-[46px] text-skin-link bg-skin-bg inline-flex items-center justify-center;
+  @apply rounded-full leading-[100%] border px-3.5 h-[46px] text-skin-link bg-skin-bg inline-flex items-center justify-center gap-2;
 
   &.primary {
     @apply bg-skin-link text-skin-bg border-skin-link;

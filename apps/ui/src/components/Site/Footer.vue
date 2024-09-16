@@ -33,10 +33,9 @@ const SOCIALS = [
               <AppLink :to="{ name: 'my-explore' }"> Explore spaces </AppLink>
             </div>
             <div>
-              <a href="https://snapshot.org/#/setup?step=0" target="_blank">
+              <AppLink to="https://snapshot.org/#/setup?step=0">
                 Create a space
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
               <AppLink :to="{ name: 'site-ecosystem' }"> Ecosystem </AppLink>
@@ -50,21 +49,15 @@ const SOCIALS = [
           <div class="eyebrow">Resources</div>
           <div class="space-y-1">
             <div>
-              <a href="https://help.snapshot.org" target="_blank">
-                Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              <AppLink to="https://help.snapshot.org"> Helpdesk </AppLink>
             </div>
             <div>
-              <a href="https://snapshot.mirror.xyz" target="_blank">
-                Blog
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              <AppLink to="https://snapshot.mirror.xyz"> Blog </AppLink>
             </div>
             <div>
-              <a href="https://github.com/snapshot-labs/brand" target="_blank">
+              <AppLink to="https://github.com/snapshot-labs/brand">
                 Brand
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
           </div>
         </div>
@@ -72,28 +65,18 @@ const SOCIALS = [
           <div class="eyebrow">Developers</div>
           <div class="space-y-1">
             <div>
-              <a href="https://docs.snapshot.org" target="_blank">
-                Snapshot docs
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              <AppLink to="https://docs.snapshot.org"> Snapshot docs </AppLink>
             </div>
             <div>
-              <a href="https://docs.snapshot.box" target="_blank">
+              <AppLink to="https://docs.snapshot.box">
                 Snapshot X docs
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://github.com/snapshot-labs" target="_blank">
-                GitHub
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              <AppLink to="https://github.com/snapshot-labs"> GitHub </AppLink>
             </div>
             <div>
-              <a href="https://status.snapshot.org" target="_blank">
-                Status
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              <AppLink to="https://status.snapshot.org"> Status </AppLink>
             </div>
           </div>
         </div>
@@ -118,18 +101,12 @@ const SOCIALS = [
             class="w-4 inline-block mr-3"
           />
           © {{ new Date().getFullYear() }} Snapshot Labs
-          <a
-            :href="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
-            target="_blank"
+          <AppLink
+            :to="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
             class="ml-1.5"
           >
-            <span
-              v-text="
-                `v${version}${COMMIT_SHA ? `#${COMMIT_SHA.slice(0, 7)}` : ''}`
-              "
-            />
-            <IH-arrow-sm-right class="inline-block -rotate-45 ml-0.5" />
-          </a>
+            {{ `v${version}${COMMIT_SHA ? `#${COMMIT_SHA.slice(0, 7)}` : ''}` }}
+          </AppLink>
         </div>
         <div class="flex space-x-2.5">
           <a

@@ -72,8 +72,8 @@ const loading = computed(
         </div>
         <div class="flex justify-between">
           <div v-if="strategy.token" class="flex items-center gap-2">
-            <a
-              :href="
+            <AppLink
+              :to="
                 (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(
                   strategy.address
                 )
@@ -85,8 +85,7 @@ const loading = computed(
                   strategy.chainId
                 )
               "
-              target="_blank"
-              class="flex items-center text-skin-text"
+              class="text-skin-text"
             >
               <UiStamp
                 :id="strategy.token"
@@ -95,17 +94,14 @@ const loading = computed(
                 class="mr-2 rounded-sm"
               />
               {{ shorten(strategy.token) }}
-              <IH-arrow-sm-right class="ml-1 -rotate-45" />
-            </a>
-            <a
+            </AppLink>
+            <AppLink
               v-if="strategy.swapLink"
-              :href="strategy.swapLink"
-              target="_blank"
-              class="flex items-center text-skin-text"
+              :to="strategy.swapLink"
+              class="text-skin-text"
             >
               Buy
-              <IH-arrow-sm-right class="ml-1 -rotate-45" />
-            </a>
+            </AppLink>
           </div>
           <div v-else />
           <div>

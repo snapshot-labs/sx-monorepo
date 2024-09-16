@@ -137,14 +137,12 @@ watch(
       }"
     >
       <div v-if="step === 'approve'" v-text="'Proceed in your wallet'" />
-      <a
+      <AppLink
         v-else-if="['confirming', 'success'].includes(step) && txId"
-        :href="network.helpers.getExplorerUrl(txId, 'transaction')"
-        target="_blank"
+        :to="network.helpers.getExplorerUrl(txId, 'transaction')"
       >
         View on explorer
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </a>
+      </AppLink>
       <div
         v-else-if="step === 'fail'"
         class="w-full flex justify-between space-x-[10px]"

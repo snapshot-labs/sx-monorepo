@@ -25,16 +25,10 @@ const { toggleSkin, currentMode } = useUserSkin();
       <li><AppLink to="/#features">Features</AppLink></li>
       <li><AppLink to="/#ecosystem">Ecosystem</AppLink></li>
       <li>
-        <a href="https://docs.snapshot.org" target="_blank">
-          Developers
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        <AppLink to="https://docs.snapshot.org"> Developers </AppLink>
       </li>
       <li>
-        <a href="https://snapshot.mirror.xyz" target="_blank">
-          Blog
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        <Applink href="https://snapshot.mirror.xyz"> Blog </Applink>
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">
@@ -43,8 +37,10 @@ const { toggleSkin, currentMode } = useUserSkin();
         <IH-moon v-else class="inline-block" />
       </UiButton>
       <AppLink :to="{ name: 'my-home' }" button class="primary">
-        Launch
-        <span class="hidden md:inline-block">&nbsp;app</span>
+        <span>
+          Launch
+          <span class="hidden md:inline-block">&nbsp;app</span>
+        </span>
       </AppLink>
     </div>
   </div>
