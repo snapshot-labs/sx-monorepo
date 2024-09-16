@@ -2,10 +2,15 @@
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 
+defineProps<{
+  hasAppNav: boolean;
+}>();
+
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const uiStore = useUiStore();
+const route = useRoute();
 const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();
 
@@ -13,6 +18,10 @@ const space = computed(() => {
   if (!resolved.value) return null;
 
   return spacesStore.spacesMap.get(`${networkId.value}:${address.value}`);
+});
+
+const hasRightPlaceholderSidebar = computed(() => {
+  return String(route.matched[1]?.name) !== 'space-editor';
 });
 
 watch(
@@ -50,13 +59,19 @@ watchEffect(() => {
   <div>
     <div>
       <div
-        class="mx-0 lg:ml-[240px] xl:mr-[240px]"
-        :class="{ 'translate-x-[240px] lg:translate-x-0': uiStore.sidebarOpen }"
+        class="mx-0"
+        :class="{
+          'xl:mr-[240px]': hasRightPlaceholderSidebar,
+          'lg:ml-[240px]': hasAppNav,
+          'translate-x-[240px] lg:translate-x-0':
+            hasAppNav && uiStore.sidebarOpen
+        }"
       >
         <UiLoading v-if="!space" class="block p-4" />
         <router-view v-else :space="space" />
       </div>
       <div
+        v-if="hasRightPlaceholderSidebar"
         class="invisible xl:visible fixed w-[240px] border-l bottom-0 top-[72px] right-0"
       />
     </div>

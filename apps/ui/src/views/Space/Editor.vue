@@ -5,7 +5,7 @@ import { resolver } from '@/helpers/resolver';
 import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { Contact, Transaction, VoteType } from '@/types';
+import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const MAX_BODY_LENGTH = {
   default: 10000,
@@ -36,10 +36,12 @@ const CHOICES_DEFINITION = {
   additionalItems: { type: 'string', maxLength: 32 }
 };
 
+const props = defineProps<{
+  space: Space;
+}>();
+
 const { setTitle } = useTitle();
 const { proposals, createDraft } = useEditor();
-const { param } = useRouteParser('space');
-const { resolved, address, networkId } = useResolve(param);
 const route = useRoute();
 const router = useRouter();
 const { propose, updateProposal } = useActions();
@@ -51,7 +53,6 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
 const { votingPower, fetch: fetchVotingPower } = useVotingPower();
 
@@ -59,29 +60,18 @@ const modalOpen = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 
-const network = computed(() =>
-  networkId.value ? getNetwork(networkId.value) : null
-);
-const space = computed(() => {
-  if (!resolved.value) return null;
-
-  return (
-    spacesStore.spacesMap.get(`${networkId.value}:${address.value}`) ?? null
-  );
-});
-const { strategiesWithTreasuries } = useTreasuries(space);
+const network = computed(() => getNetwork(props.space.network));
+const { strategiesWithTreasuries } = useTreasuries(props.space);
 const proposalKey = computed(() => {
-  if (!resolved.value) return null;
-
   const key = route.params.key as string;
-  return `${networkId.value}:${address.value}:${key}`;
+  return `${props.space.network}:${props.space.id}:${key}`;
 });
 const proposal = computedAsync(async () => {
-  if (!proposalKey.value || !networkId.value) return null;
+  if (!proposalKey.value || !props.space.network) return null;
 
   if (!proposals[proposalKey.value]) {
     await createDraft(
-      `${networkId.value}:${address.value}`,
+      `${props.space.network}:${props.space.id}`,
       undefined,
       route.params.key as string
     );
@@ -96,9 +86,7 @@ const proposalData = computed(() => {
 });
 const enforcedVoteType = ref<VoteType | null>(null);
 const supportsMultipleTreasuries = computed(() => {
-  if (!space.value) return false;
-
-  return offchainNetworks.includes(space.value.network);
+  return offchainNetworks.includes(props.space.network);
 });
 
 const editorExecutions = computed(() => {
@@ -123,15 +111,13 @@ const hasExecution = computed(() =>
   editorExecutions.value.some(strategy => strategy.transactions.length > 0)
 );
 const extraContacts = computed(() => {
-  if (!space.value) return [];
-
-  return space.value.treasuries as Contact[];
+  return props.space.treasuries as Contact[];
 });
 const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default'],
+  maxLength: MAX_BODY_LENGTH[props.space.turbo ? 'turbo' : 'default'],
   examples: ['Propose something…']
 }));
 const formErrors = computed(() => {
@@ -170,7 +156,7 @@ const canSubmit = computed(() => {
 });
 
 async function handleProposeClick() {
-  if (!space.value || !proposal.value) return;
+  if (!proposal.value) return;
 
   sending.value = true;
 
@@ -192,7 +178,7 @@ async function handleProposeClick() {
     let result;
     if (proposal.value.proposalId) {
       result = await updateProposal(
-        space.value,
+        props.space,
         proposal.value.proposalId,
         proposal.value.title,
         proposal.value.body,
@@ -203,7 +189,7 @@ async function handleProposeClick() {
       );
     } else {
       result = await propose(
-        space.value,
+        props.space,
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
@@ -213,10 +199,10 @@ async function handleProposeClick() {
       );
     }
     if (result) {
-      proposalsStore.reset(address.value!, networkId.value!);
+      proposalsStore.reset(props.space.id!, props.space.network!);
       router.push({
         name: 'space-proposals',
-        params: { space: param.value }
+        params: { space: `${props.space.network}:${props.space.id}` }
       });
     }
   } finally {
@@ -255,24 +241,18 @@ function handleTransactionAccept() {
 }
 
 function handleFetchVotingPower() {
-  space.value && fetchVotingPower(space.value);
+  fetchVotingPower(props.space);
 }
 
 watch(
-  [networkId, address],
-  ([networkId, address]) => {
-    if (!networkId || !address) return;
+  () => web3.value.account,
+  toAccount => {
+    if (!toAccount) return;
 
-    spacesStore.fetchSpace(address, networkId);
+    handleFetchVotingPower();
   },
   { immediate: true }
 );
-
-watch([space, () => web3.value.account], ([toSpace, toAccount]) => {
-  if (!toSpace || !proposal.value || !toAccount) return;
-
-  handleFetchVotingPower();
-});
 
 watch(proposalData, () => {
   if (!proposal.value) return;
@@ -296,11 +276,9 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  if (!space.value) return;
-
   const title = proposal.value?.proposalId ? 'Update proposal' : 'New proposal';
 
-  setTitle(`${title} - ${space.value.name}`);
+  setTitle(`${title} - ${props.space.name}`);
 });
 </script>
 <script lang="ts">
@@ -337,7 +315,10 @@ export default defineComponent({
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4 gap-2">
         <router-link
-          :to="{ name: 'space-overview', params: { space: param } }"
+          :to="{
+            name: 'space-overview',
+            params: { space: `${space.network}:${space.id}` }
+          }"
           class="mr-2"
           tabindex="-1"
         >
@@ -378,7 +359,7 @@ export default defineComponent({
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
-          v-if="votingPower && space"
+          v-if="votingPower"
           class="mb-4"
           :voting-power="votingPower"
           action="propose"
@@ -429,7 +410,6 @@ export default defineComponent({
         </div>
         <div
           v-if="
-            space &&
             network &&
             strategiesWithTreasuries &&
             strategiesWithTreasuries.length > 0
@@ -458,7 +438,6 @@ export default defineComponent({
     </div>
 
     <div
-      v-if="space"
       class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
     >
       <EditorVotingType
@@ -475,10 +454,9 @@ export default defineComponent({
     </div>
     <teleport to="#modal">
       <ModalDrafts
-        v-if="networkId && address"
         :open="modalOpen"
-        :network-id="networkId"
-        :space="address"
+        :network-id="space.network"
+        :space="space.id"
         @close="modalOpen = false"
       />
       <ModalTransaction

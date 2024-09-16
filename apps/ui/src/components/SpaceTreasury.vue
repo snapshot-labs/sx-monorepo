@@ -117,7 +117,10 @@ async function addTx(tx: Transaction) {
   const draftId = await createDraft(spaceKey.value, {
     executions
   });
-  router.push(`create/${draftId}`);
+  router.push({
+    name: 'space-editor',
+    params: { key: draftId, space: spaceKey.value }
+  });
 }
 
 onMounted(() => {

@@ -34,8 +34,10 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
-const hasAppNav = computed(() =>
-  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+const hasAppNav = computed(
+  () =>
+    ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor'].includes(String(route.matched[1]?.name))
 );
 
 const bottomPadding = computed(
@@ -53,7 +55,7 @@ async function handleTransactionAccept() {
     executions
   });
 
-  router.push(`/${space}/create/${draftId}`);
+  router.push({ name: 'space-editor', params: { space, key: draftId } });
 
   reset();
 }
@@ -103,8 +105,8 @@ watch(isSwiping, () => {
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
       />
-      <AppTopnav />
-      <AppNav />
+      <AppTopnav :has-app-nav="hasAppNav" />
+      <AppNav v-if="hasAppNav" />
       <button
         v-if="uiStore.sidebarOpen"
         type="button"
@@ -120,12 +122,15 @@ watch(isSwiping, () => {
           'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
         }"
       >
-        <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
+        <router-view
+          class="flex-auto mt-[72px] pl-0 lg:pl-[72px]"
+          :has-app-nav="hasAppNav"
+        />
       </div>
     </div>
     <AppNotifications />
     <ModalTransaction
-      v-if="route.name !== 'editor' && transaction && network"
+      v-if="route.name !== 'space-editor' && transaction && network"
       :open="!!transaction"
       :network="network"
       :initial-state="transaction._form"

@@ -24,7 +24,7 @@ function handleRemoveDraft(id: string) {
   const currentId = `${props.networkId}:${props.space}:${route.params.key}`;
 
   if (currentId === id) {
-    router.replace({ name: 'editor' });
+    router.replace({ name: 'space-editor' });
   }
 
   removeDraft(id);
@@ -45,7 +45,7 @@ function handleRemoveDraft(id: string) {
         >
           <router-link
             :to="{
-              name: 'editor',
+              name: 'space-editor',
               params: { space: `${networkId}:${space}`, key: proposal.key }
             }"
             @click="$emit('close')"

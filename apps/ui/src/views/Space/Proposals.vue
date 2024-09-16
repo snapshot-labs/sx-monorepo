@@ -106,7 +106,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         />
         <router-link
           :to="{
-            name: 'editor',
+            name: 'space-editor',
             params: { space: `${space.network}:${space.id}` }
           }"
           tabindex="-1"
