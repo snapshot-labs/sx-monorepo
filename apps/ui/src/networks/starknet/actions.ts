@@ -672,6 +672,9 @@ export function createActions(
         }
       });
     },
+    updateSettingsRaw: () => {
+      throw new Error('Not implemented');
+    },
     delegate: async (
       web3: any,
       space: Space,

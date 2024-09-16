@@ -46,6 +46,7 @@ const definition = computed(() => {
         type: 'string',
         title: 'Name',
         minLength: 1,
+        maxLength: 32,
         examples: ['Treasury name']
       },
       network: {
@@ -84,7 +85,6 @@ const formValid = computed(() => {
 
 async function handleSubmit() {
   emit('add', form.value);
-  emit('close');
 }
 
 watch(
