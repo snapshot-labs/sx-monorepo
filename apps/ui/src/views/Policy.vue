@@ -1,4 +1,6 @@
 <script setup lang="ts">
+useTitle('Privacy policy');
+
 const terms = `
 This Privacy Notice (“Privacy Notice”) explains and sets out the basis for our collection of personal data when you visit our website(s), platform, use our services, interact with us in relation to a contract, communicate with us or otherwise deal with us, how we use it, the conditions under which we may disclose it to others and the measures we take to keep it secure. In addition, we may inform you about the processing of your data separately, for example in consent forms, terms and conditions, additional privacy notices, forms, and other notices. We use the word “data” here interchangeably with “personal data”.
 
