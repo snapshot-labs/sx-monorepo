@@ -44,7 +44,7 @@ export function useSharing() {
       router.resolve({
         name: 'user',
         params: {
-          id: user.id
+          user: user.id
         }
       }).href
     }`;

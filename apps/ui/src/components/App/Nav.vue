@@ -137,7 +137,7 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
       my: {
         user: {
           name: 'Profile',
-          link: { name: 'user', params: { id: web3.value.account } },
+          link: { name: 'user', params: { user: web3.value.account } },
           icon: IHUser,
           hidden: !web3.value.account,
           active:
