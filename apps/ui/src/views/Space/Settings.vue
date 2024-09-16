@@ -117,11 +117,13 @@ const activeTab: Ref<Tab['id']> = computed(() => {
 });
 const network = computed(() => getNetwork(props.space.network));
 const isController = computedAsync(async () => {
+  const { account } = web3.value;
+
   const controller = await network.value.helpers.getSpaceController(
     props.space
   );
 
-  return compareAddresses(controller, web3.value.account);
+  return compareAddresses(controller, account);
 }, false);
 const isAdmin = computed(() => {
   if (!isOffchainNetwork.value) return false;

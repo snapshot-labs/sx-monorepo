@@ -1,4 +1,4 @@
-import { namehash } from '@ethersproject/hash';
+import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call } from '@/helpers/call';
 import { getProvider } from '@/helpers/provider';
 
@@ -16,7 +16,11 @@ type ENSContracts = {
 const ENS_CONTRACTS: ENSContracts = {
   registry: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
   registryAbi: ['function owner(bytes32) view returns (address)'],
-  resolverAbi: ['function addr(bytes32 node) view returns (address r)'],
+  resolverAbi: [
+    'function addr(bytes32 node) view returns (address r)',
+    'function text(bytes32 node, string key) view returns (string)',
+    'function setText(bytes32 node, string key, string value)'
+  ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   resolvers: {
     1: '0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63',
@@ -49,6 +53,35 @@ export async function resolveName(name: string, chainId: ENSChainId) {
   return address;
 }
 
+export async function getEnsTextRecord(
+  ens: string,
+  record: string,
+  chainId: ENSChainId
+) {
+  const resolver = ENS_CONTRACTS.resolvers[chainId];
+  if (!resolver) throw new Error('Unsupported chainId');
+
+  let ensHash: string;
+
+  try {
+    ensHash = namehash(ensNormalize(ens));
+  } catch (e: any) {
+    return null;
+  }
+
+  const provider = getProvider(chainId);
+  const value: string = await call(
+    provider,
+    ENS_CONTRACTS.resolverAbi,
+    [resolver, 'text', [ensHash, record]],
+    {
+      blockTag: 'latest'
+    }
+  );
+
+  return value || null;
+}
+
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const ensHash = namehash(name);
@@ -72,4 +105,11 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
       blockTag: 'latest'
     }
   );
+}
+
+export async function getSpaceController(name: string, chainId: ENSChainId) {
+  const snapshotRecord = await getEnsTextRecord(name, 'snapshot', chainId);
+  if (snapshotRecord) return snapshotRecord;
+
+  return getNameOwner(name, chainId);
 }

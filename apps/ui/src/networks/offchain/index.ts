@@ -1,4 +1,4 @@
-import { getNameOwner } from '@/helpers/ens';
+import { getSpaceController } from '@/helpers/ens';
 import networks from '@/helpers/networks.json';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
@@ -39,7 +39,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     },
     pin: pinPineapple,
     getSpaceController: async (space: Space) =>
-      getNameOwner(space.id, l1ChainId),
+      getSpaceController(space.id, l1ChainId),
     getTransaction: () => {
       throw new Error('Not implemented');
     },
