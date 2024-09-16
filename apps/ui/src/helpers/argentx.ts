@@ -1,6 +1,6 @@
+import LockConnector from '@snapshot-labs/lock/src/connector';
 import { useUserSkin } from '@/composables/useUserSkin';
 const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
-import LockConnector from '@snapshot-labs/lock/src/connector';
 
 const { currentMode } = useUserSkin();
 
