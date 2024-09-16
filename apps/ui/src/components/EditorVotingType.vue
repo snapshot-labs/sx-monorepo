@@ -48,7 +48,7 @@ watch(
 
 <template>
   <div class="s-base mb-4">
-    <h4 class="eyebrow mb-2.5">Voting type</h4>
+    <h4 class="eyebrow mb-2.5">Voting system</h4>
     <button
       type="button"
       class="border rounded-xl py-2.5 px-3 flex text-left relative border-skin-content w-full"
