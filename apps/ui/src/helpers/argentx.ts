@@ -1,5 +1,8 @@
+import { useUserSkin } from '@/composables/useUserSkin';
 const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
 import LockConnector from '@snapshot-labs/lock/src/connector';
+
+const { currentMode } = useUserSkin();
 
 export default class Connector extends LockConnector {
   async connect() {
@@ -11,8 +14,7 @@ export default class Connector extends LockConnector {
         modalMode: localStorage.getItem('starknetLastConnectedWallet')
           ? 'neverAsk'
           : 'alwaysAsk',
-        modalTheme:
-          (localStorage.getItem('skin') as 'light' | 'dark') || 'system',
+        modalTheme: currentMode.value,
         argentMobileOptions: {
           dappName: 'Snapshot',
           url: 'https://snapshot.box',
