@@ -107,7 +107,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :to="{
           name: 'space-user-statement',
           params: {
-            space: `${$props.space.network}:${props.space.id}`,
+            space: `${space.network}:${space.id}`,
             user: web3.account
           }
         }"
