@@ -446,9 +446,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
       >
         <div class="flex flex-col">
-          <AppLink
-            :to="network.helpers.getExplorerUrl(controller, 'contract')"
-            class="text-skin-text leading-5"
+          <a
+            :href="network.helpers.getExplorerUrl(controller, 'contract')"
+            target="_blank"
+            class="flex items-center text-skin-text leading-5"
           >
             <UiStamp
               :id="controller"
@@ -457,7 +458,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
               class="mr-2 !rounded"
             />
             {{ shorten(controller) }}
-          </AppLink>
+            <IH-arrow-sm-right class="-rotate-45" />
+          </a>
         </div>
         <button type="button" @click="changeControllerModalOpen = true">
           <IH-pencil />

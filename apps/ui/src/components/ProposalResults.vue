@@ -93,9 +93,14 @@ const otherResultsSummary = computed(() => {
       is over, making the results visible.
     </div>
     <div>
-      <AppLink :to="SHUTTER_URL" class="text-skin-link">
+      <a
+        :href="SHUTTER_URL"
+        class="flex items-center text-skin-link"
+        target="_blank"
+      >
         <IC-Shutter class="w-[80px]" />
-      </AppLink>
+        <IH-arrow-sm-right class="-rotate-45" />
+      </a>
       <div v-if="proposal.quorum" class="mt-3.5">
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
@@ -181,9 +186,14 @@ const otherResultsSummary = computed(() => {
         <span class="text-skin-link">{{ _p(totalProgress) }}</span>
       </div>
       <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
-        <AppLink to="SHUTTER_URL" class="text-skin-link">
+        <a
+          :href="SHUTTER_URL"
+          class="flex items-center text-skin-link"
+          target="_blank"
+        >
           <IC-Shutter class="w-[80px]" />
-        </AppLink>
+          <IH-arrow-sm-right class="-rotate-45" />
+        </a>
       </div>
     </div>
     <div

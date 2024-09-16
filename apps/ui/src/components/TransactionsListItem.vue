@@ -178,28 +178,39 @@ const parsedTitle = computedAsync(
           call.name
         }}</code>
         on
-        <AppLink :to="network.helpers.getExplorerUrl(call.to, 'address')">
+        <a
+          class="inline-flex items-center"
+          target="_blank"
+          :href="network.helpers.getExplorerUrl(call.to, 'address')"
+        >
           {{ shorten(call.to) }}
-        </AppLink>
+          <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
+        </a>
       </div>
       <div v-else-if="interaction" class="text-skin-link">
         Interaction with
-        <AppLink
-          :to="network.helpers.getExplorerUrl(interaction.to, 'address')"
+        <a
+          class="inline-flex items-center"
+          target="_blank"
+          :href="network.helpers.getExplorerUrl(interaction.to, 'address')"
         >
           {{ shorten(interaction.to) }}
-        </AppLink>
+          <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
+        </a>
       </div>
       <template v-if="params.length > 0">
         <h4 class="font-medium mt-3">Parameters</h4>
         <div v-for="param in params" :key="param.name" class="flex space-x-2">
           <span class="text-skin-link">{{ param.name }}</span>
-          <AppLink
+          <a
             v-if="param.type === 'address'"
-            :to="network.helpers.getExplorerUrl(param.value, 'address')"
+            class="inline-flex items-center"
+            target="_blank"
+            :href="network.helpers.getExplorerUrl(param.value, 'address')"
           >
             {{ shorten(param.value) }}
-          </AppLink>
+            <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
+          </a>
           <div v-else class="truncate inline-block">{{ param.value }}</div>
         </div>
       </template>

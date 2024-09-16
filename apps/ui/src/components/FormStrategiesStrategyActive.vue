@@ -37,10 +37,11 @@ const network = computed(() => getNetwork(props.networkId));
           {{ strategy.generateSummary(strategy.params) }}
         </div>
       </div>
-      <AppLink
+      <a
         v-if="strategy.address"
-        :to="network.helpers.getExplorerUrl(strategy.address, 'contract')"
-        class="text-skin-text leading-5"
+        :href="network.helpers.getExplorerUrl(strategy.address, 'contract')"
+        target="_blank"
+        class="flex items-center text-skin-text leading-5"
       >
         <UiStamp
           :id="strategy.address"
@@ -49,7 +50,8 @@ const network = computed(() => getNetwork(props.networkId));
           class="mr-2 !rounded"
         />
         {{ shorten(strategy.address) }}
-      </AppLink>
+        <IH-arrow-sm-right class="-rotate-45" />
+      </a>
     </div>
     <div
       v-if="!readOnly"
