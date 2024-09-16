@@ -58,6 +58,8 @@ export type ApiSpace = {
     onlyMembers: boolean;
   };
   proposalsCount: number;
+  proposalsCount1d: number;
+  proposalsCount7d: number;
   votesCount: number;
   followersCount: number;
   children: [ApiRelatedSpace];

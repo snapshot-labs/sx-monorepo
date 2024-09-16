@@ -296,7 +296,9 @@ const getErrors = (errors: Partial<ErrorObject>[]) => {
     let current = output;
     for (let i = 0; i < path.length - 1; i++) {
       const subpath = path[i];
-      if (!current[subpath]) current[subpath] = {};
+      if (typeof current[subpath] !== 'object' || current[subpath] === null) {
+        current[subpath] = {};
+      }
       current = current[subpath];
     }
 

@@ -2,15 +2,16 @@
 import { NavigationGuard } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { resolver } from '@/helpers/resolver';
-import { omit } from '@/helpers/utils';
+import {
+  MAX_1D_PROPOSALS,
+  MAX_7D_PROPOSALS,
+  MAX_BODY_LENGTH,
+  MAX_CHOICES
+} from '@/helpers/turbo';
+import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Transaction, VoteType } from '@/types';
-
-const MAX_BODY_LENGTH = {
-  default: 10000,
-  turbo: 40000
-} as const;
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -25,15 +26,6 @@ const DISCUSSION_DEFINITION = {
   title: 'Discussion',
   maxLength: 256,
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
-};
-
-const CHOICES_DEFINITION = {
-  type: 'array',
-  title: 'Choices',
-  minItems: 1,
-  maxItems: 500,
-  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
-  additionalItems: { type: 'string', maxLength: 32 }
 };
 
 const { setTitle } = useTitle();
@@ -134,6 +126,15 @@ const bodyDefinition = computed(() => ({
   maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default'],
   examples: ['Propose something…']
 }));
+
+const choicesDefinition = computed(() => ({
+  type: 'array',
+  title: 'Choices',
+  minItems: 1,
+  maxItems: MAX_CHOICES[space.value?.turbo ? 'turbo' : 'default'],
+  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
+  additionalItems: { type: 'string', maxLength: 32 }
+}));
 const formErrors = computed(() => {
   if (!proposal.value) return {};
 
@@ -147,7 +148,7 @@ const formErrors = computed(() => {
         title: TITLE_DEFINITION,
         body: bodyDefinition.value,
         discussion: DISCUSSION_DEFINITION,
-        choices: CHOICES_DEFINITION
+        choices: choicesDefinition.value
       }
     },
     {
@@ -384,6 +385,14 @@ export default defineComponent({
           action="propose"
           @fetch-voting-power="handleFetchVotingPower"
         />
+        <TurboMessage
+          v-if="
+            !space?.turbo &&
+            (space?.proposal_count_1d >= MAX_1D_PROPOSALS.default ||
+              space?.proposal_count_7d >= MAX_7D_PROPOSALS.default)
+          "
+          :text="`Post up to ${MAX_1D_PROPOSALS.turbo} proposals daily and ${MAX_7D_PROPOSALS.turbo} monthly with`"
+        />
 
         <UiInputString
           :key="proposalKey || ''"
@@ -418,6 +427,11 @@ export default defineComponent({
           :definition="bodyDefinition"
           :error="formErrors.body"
         />
+        <TurboMessage
+          v-if="!space?.turbo && proposal.body.length > MAX_BODY_LENGTH.default"
+          :text="`Write up to ${_n(MAX_BODY_LENGTH.turbo, 'compact')} characters content with`"
+        />
+
         <div class="s-base mb-5">
           <UiInputString
             :key="proposalKey || ''"
@@ -467,7 +481,11 @@ export default defineComponent({
           enforcedVoteType ? [enforcedVoteType] : space.voting_types
         "
       />
-      <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      <EditorChoices v-model="proposal" :definition="choicesDefinition" />
+      <TurboMessage
+        v-if="!space?.turbo && proposal.choices.length > MAX_CHOICES.default"
+        :text="`Add up to ${_n(MAX_CHOICES.turbo, 'compact')} choices with`"
+      />
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
         <ProposalTimeline :data="space" />

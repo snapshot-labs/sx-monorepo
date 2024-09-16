@@ -179,6 +179,8 @@ function formatSpace(
     discord: '',
     coingecko: space.coingecko || '',
     proposal_count: space.proposalsCount,
+    proposal_count_1d: space.proposalsCount1d,
+    proposal_count_7d: space.proposalsCount7d,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
     voting_power_symbol: space.symbol,
