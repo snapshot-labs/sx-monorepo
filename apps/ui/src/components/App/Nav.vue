@@ -142,7 +142,7 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
           hidden: !web3.value.account,
           active:
             (route.name as string) === 'user' &&
-            route.params.id === web3.value.account
+            route.params.user === web3.value.account
         },
         settings: {
           name: 'Settings',
