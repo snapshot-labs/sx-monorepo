@@ -81,6 +81,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     isExecutorSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
     pin: pinPineapple,
+    getSpaceController: async (space: Space) => space.controller,
     getTransaction: txId => provider.getTransactionReceipt(txId),
     waitForTransaction: txId => {
       let retries = 0;

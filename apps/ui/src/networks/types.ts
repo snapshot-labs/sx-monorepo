@@ -329,6 +329,7 @@ export type NetworkHelpers = {
   isStrategySupported(strategy: string): boolean;
   isExecutorSupported(executor: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
+  getSpaceController(space: Space): Promise<string>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;

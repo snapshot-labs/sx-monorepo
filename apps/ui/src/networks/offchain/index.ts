@@ -1,7 +1,8 @@
+import { getNameOwner } from '@/helpers/ens';
 import networks from '@/helpers/networks.json';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
-import { NetworkID } from '@/types';
+import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createApi } from './api';
 import * as constants from './constants';
@@ -14,7 +15,7 @@ const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://snapshot.org',
   's-tn': 'https://testnet.snapshot.org'
 };
-const CHAIN_IDS: Partial<Record<NetworkID, number>> = {
+const CHAIN_IDS: Partial<Record<NetworkID, 1 | 11155111>> = {
   s: 1,
   's-tn': 11155111
 };
@@ -37,6 +38,8 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
       return false;
     },
     pin: pinPineapple,
+    getSpaceController: async (space: Space) =>
+      getNameOwner(space.id, l1ChainId),
     getTransaction: () => {
       throw new Error('Not implemented');
     },
