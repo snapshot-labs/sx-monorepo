@@ -24,10 +24,7 @@ onMounted(() => load());
         <UiLoading v-if="loading && !loaded" class="block" />
         <div v-else>
           <div class="flex space-x-1 items-center text-[17px] mb-5">
-            <AppLink
-              :to="{ name: 'site-ecosystem' }"
-              class="flex items-center"
-            >
+            <AppLink :to="{ name: 'site-ecosystem' }" class="flex items-center">
               <IH-view-grid class="mr-1" />
               Ecosystem
             </AppLink>
