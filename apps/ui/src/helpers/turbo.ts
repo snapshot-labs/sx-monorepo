@@ -1,7 +1,7 @@
 export const MAX_BODY_LENGTH = {
   default: 10000,
   turbo: 40000
-} as const;
+};
 
 export const MAX_CHOICES = {
   default: 500,
