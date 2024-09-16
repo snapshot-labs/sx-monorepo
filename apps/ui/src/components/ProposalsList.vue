@@ -56,13 +56,13 @@ const currentLimit = computed(() => {
         <IH-exclamation-circle />
         <span v-text="'There are no proposals here.'" />
       </div>
-      <WhiteLabelAwareLink
+      <AppLink
         v-else-if="route && proposals.length > currentLimit"
         :to="{ name: route.name }"
         class="px-4 py-2 block"
       >
         {{ route.linkTitle }}
-      </WhiteLabelAwareLink>
+      </AppLink>
     </div>
   </div>
 </template>

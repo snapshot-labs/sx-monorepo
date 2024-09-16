@@ -238,7 +238,7 @@ watch(
       gradient="xxl"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <WhiteLabelAwareLink
+        <AppLink
           v-for="(item, i) in navigation"
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
@@ -248,7 +248,7 @@ watch(
             :text="item.label"
             :count="item.count"
           />
-        </WhiteLabelAwareLink>
+        </AppLink>
       </div>
     </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />

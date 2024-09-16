@@ -104,13 +104,13 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           :voting-power="votingPower"
           @fetch-voting-power="handleFetchVotingPower"
         />
-        <WhiteLabelAwareLink :to="{ name: 'editor' }" tabindex="-1">
+        <AppLink :to="{ name: 'editor' }" tabindex="-1">
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />
             </UiButton>
           </UiTooltip>
-        </WhiteLabelAwareLink>
+        </AppLink>
       </div>
     </div>
     <ProposalsList

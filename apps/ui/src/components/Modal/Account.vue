@@ -90,7 +90,7 @@ watch(open, () => (step.value = null));
         </button>
       </template>
       <template v-else>
-        <WhiteLabelAwareLink
+        <AppLink
           :to="{ name: 'user', params: { id: web3.account } }"
           class="block"
           tabindex="-1"
@@ -102,15 +102,15 @@ watch(open, () => (step.value = null));
             <UiStamp :id="user.id" :size="18" :cb="cb" />
             My profile
           </UiButton>
-        </WhiteLabelAwareLink>
-        <WhiteLabelAwareLink :to="{ name: 'settings-spaces' }" tabindex="-1">
+        </AppLink>
+        <AppLink :to="{ name: 'settings-spaces' }" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center"
             @click="emit('close')"
           >
             Settings
           </UiButton>
-        </WhiteLabelAwareLink>
+        </AppLink>
         <UiButton @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>

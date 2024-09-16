@@ -181,7 +181,7 @@ const navigationItems = computed(() =>
       invisible: !uiStore.sidebarOpen
     }"
   >
-    <WhiteLabelAwareLink
+    <AppLink
       v-for="(item, key) in navigationItems"
       :key="key"
       :to="item.link"
@@ -195,6 +195,6 @@ const navigationItems = computed(() =>
         class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
         v-text="item.count"
       />
-    </WhiteLabelAwareLink>
+    </AppLink>
   </div>
 </template>
