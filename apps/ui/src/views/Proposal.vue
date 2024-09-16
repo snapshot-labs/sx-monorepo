@@ -194,15 +194,9 @@ watchEffect(() => {
                   class="inline-block"
                 />
               </AppLink>
-              <a
-                v-else
-                :href="discussion"
-                target="_blank"
-                class="flex items-center"
-              >
+              <AppLink v-else :to="discussion" class="text-skin-text">
                 <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
-                <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-              </a>
+              </AppLink>
             </template>
           </div>
         </UiScrollerHorizontal>

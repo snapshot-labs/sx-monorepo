@@ -41,27 +41,21 @@ const network = computed(() => getNetwork(props.proposal.network));
     </div>
     <div v-else-if="executionTx">
       Proposal has been already executed at
-      <a
-        class="inline-flex items-center"
-        target="_blank"
-        :href="
+      <AppLink
+        :to="
           executionNetwork.helpers.getExplorerUrl(executionTx, 'transaction')
         "
       >
         {{ shorten(executionTx) }}
-        <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-      </a>
+      </AppLink>
     </div>
     <div v-else-if="proposal.veto_tx">
       Proposal has been vetoed at
-      <a
-        class="inline-flex items-center"
-        target="_blank"
-        :href="network.helpers.getExplorerUrl(proposal.veto_tx, 'transaction')"
+      <AppLink
+        :to="network.helpers.getExplorerUrl(proposal.veto_tx, 'transaction')"
       >
         {{ shorten(proposal.veto_tx) }}
-        <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-      </a>
+      </AppLink>
     </div>
     <div v-else class="space-y-2">
       <UiButton

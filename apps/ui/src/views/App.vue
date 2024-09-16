@@ -88,24 +88,21 @@ onMounted(() => load());
               </div>
               <div v-if="app.website">
                 <h4 class="eyebrow" v-text="'Website'" />
-                <a :href="app.website" target="_blank">
+                <AppLink :to="app.website">
                   {{ simplifyURL(app.website) }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
-                </a>
+                </AppLink>
               </div>
               <div v-if="app.x">
                 <h4 class="eyebrow" v-text="'X (Twitter)'" />
-                <a :href="`https://twitter.com/${app.x}`" target="_blank">
+                <AppLink :to="`https://twitter.com/${app.x}`">
                   {{ app.x }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
-                </a>
+                </AppLink>
               </div>
               <div v-if="app.github">
                 <h4 class="eyebrow" v-text="'Source code'" />
-                <a :href="app.github" target="_blank">
+                <AppLink :to="app.github">
                   {{ simplifyURL(app.github) }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
-                </a>
+                </AppLink>
               </div>
             </div>
           </div>
