@@ -31,10 +31,18 @@ watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
   <div>
     <div v-if="discussionsUrl" class="flex p-4">
       <div class="flex-grow">
-        <AppLink :to="discussionsUrl" class="gap-2" button>
-          <IC-discourse class="size-[22px] shrink-0" />
-          Join the discussion
-        </AppLink>
+        <a
+          :href="discussionsUrl"
+          target="_blank"
+          class="inline-block"
+          tabindex="-1"
+        >
+          <UiButton class="flex items-center gap-2 justify-center">
+            <IC-discourse class="size-[22px] shrink-0" />
+            Join the discussion
+            <IH-arrow-sm-right class="-rotate-45 shrink-0" />
+          </UiButton>
+        </a>
       </div>
     </div>
     <TopicsList title="Topics" :loading="loading" :topics="topics" />
