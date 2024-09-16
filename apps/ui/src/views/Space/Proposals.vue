@@ -105,11 +105,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           @fetch-voting-power="handleFetchVotingPower"
         />
         <UiTooltip title="New proposal">
-          <AppLink
-            :to="{ name: 'editor' }"
-            class="!px-0 w-[46px]"
-            button
-          >
+          <AppLink :to="{ name: 'editor' }" class="!px-0 w-[46px]" button>
             <IH-pencil-alt />
           </AppLink>
         </UiTooltip>
