@@ -22,7 +22,7 @@ function handleSelect(type: VoteType) {
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3>Select voting type</h3>
+      <h3>Select voting system</h3>
     </template>
     <div class="p-4 flex flex-col gap-2.5">
       <UiSelector

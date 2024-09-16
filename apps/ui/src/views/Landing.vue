@@ -1,3 +1,7 @@
+<script setup lang="ts">
+useTitle('Snapshot');
+</script>
+
 <template>
   <div class="relative">
     <LandingHero />
