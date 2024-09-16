@@ -1,5 +1,6 @@
 import objectHash from 'object-hash';
 import { Ref } from 'vue';
+import { getNameOwner } from '@/helpers/ens';
 import { clone, compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
@@ -66,6 +67,7 @@ const DEFAULT_FORM_STATE: Form = {
 };
 
 export function useSpaceSettings(space: Ref<Space>) {
+  const { web3 } = useWeb3();
   const { getDurationFromCurrent } = useMetaStore();
   const { updateSettings, updateSettingsRaw, transferOwnership } = useActions();
 
@@ -73,6 +75,43 @@ export function useSpaceSettings(space: Ref<Space>) {
   const isModified = ref(false);
 
   const network = computed(() => getNetwork(space.value.network));
+  const isController = computedAsync(async () => {
+    const { account } = web3.value;
+
+    const controller = await network.value.helpers.getSpaceController(
+      space.value
+    );
+
+    return compareAddresses(controller, account);
+  });
+  const isOwner = computedAsync(async () => {
+    if (!offchainNetworks.includes(space.value.network)) {
+      return isController.value;
+    }
+
+    const { account } = web3.value;
+
+    const owner = await getNameOwner(
+      space.value.id,
+      network.value.chainId as 1 | 11155111
+    );
+
+    return compareAddresses(owner, account);
+  });
+  const isAdmin = computed(() => {
+    if (!offchainNetworks.includes(space.value.network)) return false;
+
+    if (space.value.additionalRawData?.type === 'offchain') {
+      const admins = space.value.additionalRawData.admins.map(admin =>
+        admin.toLowerCase()
+      );
+
+      return admins.includes(web3.value.account.toLowerCase());
+    }
+
+    return false;
+  });
+  const canModifySettings = computed(() => isController.value || isAdmin.value);
 
   // Common properties
   const form: Ref<Form> = ref(clone(DEFAULT_FORM_STATE));
@@ -494,6 +533,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.voting_power_validation_strategies_parsed_metadata
     );
 
+    controller.value = await network.value.helpers.getSpaceController(
+      space.value
+    );
+
     formErrors.value = {};
     form.value = getInitialForm(space.value);
 
@@ -615,6 +658,10 @@ export function useSpaceSettings(space: Ref<Space>) {
   return {
     loading,
     isModified,
+    isController,
+    isOwner,
+    isAdmin,
+    canModifySettings,
     form,
     formErrors,
     votingDelay,

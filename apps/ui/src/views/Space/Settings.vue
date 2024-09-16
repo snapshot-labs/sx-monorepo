@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _d, compareAddresses, shorten } from '@/helpers/utils';
+import { _d, shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -9,6 +9,10 @@ const route = useRoute();
 const {
   loading,
   isModified,
+  isController,
+  isOwner,
+  isAdmin,
+  canModifySettings,
   form,
   formErrors,
   votingDelay,
@@ -24,7 +28,6 @@ const {
   reset
 } = useSpaceSettings(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
-const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
@@ -104,7 +107,7 @@ const tabs = computed<Tab[]>(
       {
         id: 'controller',
         name: 'Controller',
-        visible: !isOffchainNetwork.value
+        visible: true
       }
     ] as const
 );
@@ -116,29 +119,6 @@ const activeTab: Ref<Tab['id']> = computed(() => {
   return 'profile';
 });
 const network = computed(() => getNetwork(props.space.network));
-const isController = computedAsync(async () => {
-  const { account } = web3.value;
-
-  const controller = await network.value.helpers.getSpaceController(
-    props.space
-  );
-
-  return compareAddresses(controller, account);
-}, false);
-const isAdmin = computed(() => {
-  if (!isOffchainNetwork.value) return false;
-
-  if (props.space.additionalRawData?.type === 'offchain') {
-    const admins = props.space.additionalRawData.admins.map(admin =>
-      admin.toLowerCase()
-    );
-
-    return admins.includes(web3.value.account.toLowerCase());
-  }
-
-  return false;
-});
-const canModifySettings = computed(() => isController.value || isAdmin.value);
 
 const executionStrategies = computed(() => {
   return props.space.executors.map((executor, i) => {
@@ -224,7 +204,7 @@ function handleSettingsSave() {
 function handleControllerSave(value: string) {
   changeControllerModalOpen.value = false;
 
-  if (!isController.value) return;
+  if (!isOwner.value) return;
   controller.value = value;
 
   saving.value = true;

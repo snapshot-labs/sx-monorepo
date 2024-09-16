@@ -1,3 +1,5 @@
+import { Signer } from '@ethersproject/abstract-signer';
+import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call } from '@/helpers/call';
 import { getProvider } from '@/helpers/provider';
@@ -80,6 +82,23 @@ export async function getEnsTextRecord(
   );
 
   return value || null;
+}
+
+export async function setEnsTextRecord(
+  signer: Signer,
+  ens: string,
+  record: string,
+  value: string,
+  chainId: ENSChainId
+) {
+  const resolver = ENS_CONTRACTS.resolvers[chainId];
+  if (!resolver) throw new Error('Unsupported chainId');
+
+  const ensHash = namehash(ensNormalize(ens));
+
+  const contract = new Contract(resolver, ENS_CONTRACTS.resolverAbi, signer);
+
+  return contract.setText(ensHash, record, value);
 }
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
