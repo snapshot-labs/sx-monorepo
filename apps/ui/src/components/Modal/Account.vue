@@ -92,24 +92,19 @@ watch(open, () => (step.value = null));
       <template v-else>
         <AppLink
           :to="{ name: 'user', params: { id: web3.account } }"
-          class="block"
-          tabindex="-1"
+          button
+          class="gap-2"
+          @click="emit('close')"
         >
-          <UiButton
-            class="w-full flex justify-center items-center gap-2"
-            @click="emit('close')"
-          >
-            <UiStamp :id="user.id" :size="18" :cb="cb" />
-            My profile
-          </UiButton>
+          <UiStamp :id="user.id" :size="18" :cb="cb" />
+          My profile
         </AppLink>
-        <AppLink :to="{ name: 'settings-spaces' }" tabindex="-1">
-          <UiButton
-            class="w-full flex justify-center items-center"
-            @click="emit('close')"
-          >
-            Settings
-          </UiButton>
+        <AppLink
+          :to="{ name: 'settings-spaces' }"
+          button
+          @click="emit('close')"
+        >
+          Settings
         </AppLink>
         <UiButton @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}

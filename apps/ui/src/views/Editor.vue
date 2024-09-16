@@ -338,12 +338,10 @@ export default defineComponent({
       <div class="flex items-center h-[71px] mx-4 gap-2">
         <AppLink
           :to="{ name: 'space-overview', params: { id: param } }"
-          class="mr-2"
-          tabindex="-1"
+          class="w-[46px] !px-0 mr-2 shrink-0"
+          button
         >
-          <UiButton class="leading-3 w-[46px] !px-0">
-            <IH-arrow-narrow-left class="inline-block" />
-          </UiButton>
+          <IH-arrow-narrow-left />
         </AppLink>
         <h4 class="grow truncate">New proposal</h4>
         <IndicatorPendingTransactions />

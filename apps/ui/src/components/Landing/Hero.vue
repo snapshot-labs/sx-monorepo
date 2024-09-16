@@ -13,8 +13,8 @@
         <h1 class="mb-5 font-display !text-[56px]">
           The governance stack for your organization
         </h1>
-        <AppLink :to="{ name: 'my-home' }" tabindex="-1">
-          <UiButton class="primary">Get started</UiButton>
+        <AppLink :to="{ name: 'my-home' }" button class="primary">
+          Get started
         </AppLink>
       </div>
     </UiContainer>

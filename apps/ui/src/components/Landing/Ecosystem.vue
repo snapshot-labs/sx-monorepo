@@ -6,8 +6,8 @@
         <h1 class="mb-5 font-display !text-[44px]">
           Supercharge your governance with integrations
         </h1>
-        <AppLink to="ecosystem" tabindex="-1">
-          <UiButton>Explore integrations</UiButton>
+        <AppLink :to="{ name: 'site-ecosystem' }" button>
+          Explore integrations
         </AppLink>
       </div>
     </UiContainer>

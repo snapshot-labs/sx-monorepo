@@ -181,11 +181,10 @@ watch(
         <UiTooltip title="View profile">
           <AppLink
             :to="{ name: 'user', params: { id: user.id } }"
-            tabindex="-1"
+            class="!px-0 w-[46px]"
+            button
           >
-            <UiButton class="!px-0 w-[46px]">
-              <IH-user-circle class="inline-block" />
-            </UiButton>
+            <IH-user-circle />
           </AppLink>
         </UiTooltip>
         <DropdownShare
