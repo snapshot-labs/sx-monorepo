@@ -7,7 +7,7 @@ const { toggleSkin, currentMode } = useUserSkin();
     class="p-4 lg:px-6 flex justify-center items-center absolute z-10 left-0 right-0"
   >
     <div class="grow">
-      <router-link
+      <AppLink
         :to="{ name: 'site-landing' }"
         class="text-[26px] text-skin-link inline-block"
       >
@@ -19,11 +19,11 @@ const { toggleSkin, currentMode } = useUserSkin();
           />
           <span>snapshot</span>
         </div>
-      </router-link>
+      </AppLink>
     </div>
     <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
-      <li><router-link to="/#features">Features</router-link></li>
-      <li><router-link to="/#ecosystem">Ecosystem</router-link></li>
+      <li><AppLink to="/#features">Features</AppLink></li>
+      <li><AppLink to="/#ecosystem">Ecosystem</AppLink></li>
       <li>
         <a href="https://docs.snapshot.org" target="_blank">
           Developers
@@ -42,12 +42,12 @@ const { toggleSkin, currentMode } = useUserSkin();
         <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
-      <router-link :to="{ name: 'my-home' }" tabindex="-1">
+      <AppLink :to="{ name: 'my-home' }" tabindex="-1">
         <UiButton class="primary">
           Launch
           <span class="hidden md:inline-block">app</span>
         </UiButton>
-      </router-link>
+      </AppLink>
     </div>
   </div>
 </template>

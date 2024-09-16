@@ -30,9 +30,9 @@ const SOCIALS = [
           <div class="eyebrow">Snapshot</div>
           <div class="space-y-1">
             <div>
-              <router-link :to="{ name: 'my-explore' }">
+              <AppLink :to="{ name: 'my-explore' }">
                 Explore spaces
-              </router-link>
+              </AppLink>
             </div>
             <div>
               <a href="https://snapshot.org/#/setup?step=0" target="_blank">
@@ -41,14 +41,14 @@ const SOCIALS = [
               </a>
             </div>
             <div>
-              <router-link :to="{ name: 'site-ecosystem' }">
+              <AppLink :to="{ name: 'site-ecosystem' }">
                 Ecosystem
-              </router-link>
+              </AppLink>
             </div>
             <div>
-              <router-link :to="{ name: 'site-network' }">
+              <AppLink :to="{ name: 'site-network' }">
                 Add network
-              </router-link>
+              </AppLink>
             </div>
           </div>
         </div>
@@ -106,11 +106,11 @@ const SOCIALS = [
         <div class="space-y-2">
           <div class="eyebrow">Company</div>
           <div>
-            <router-link :to="{ name: 'site-terms' }">Terms of use</router-link>
+            <AppLink :to="{ name: 'site-terms' }">Terms of use</AppLink>
           </div>
           <div>
-            <router-link :to="{ name: 'site-policy' }"
-              >Privacy policy</router-link
+            <AppLink :to="{ name: 'site-policy' }"
+              >Privacy policy</AppLink
             >
           </div>
           <div>

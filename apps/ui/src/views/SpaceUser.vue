@@ -179,14 +179,14 @@ watch(
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <UiTooltip title="View profile">
-          <router-link
+          <AppLink
             :to="{ name: 'user', params: { id: user.id } }"
             tabindex="-1"
           >
             <UiButton class="!px-0 w-[46px]">
               <IH-user-circle class="inline-block" />
             </UiButton>
-          </router-link>
+          </AppLink>
         </UiTooltip>
         <DropdownShare
           :shareable="{ user, space }"
