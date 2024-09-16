@@ -189,8 +189,8 @@ export type Space = {
     treasury_chain: number | null;
   }[];
   proposal_count: number;
-  proposal_count_1d: number;
-  proposal_count_7d: number;
+  proposal_count_1d?: number;
+  proposal_count_7d?: number;
   vote_count: number;
   follower_count?: number;
   created: number;

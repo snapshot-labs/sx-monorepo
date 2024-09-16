@@ -170,6 +170,15 @@ const canSubmit = computed(() => {
     : !web3.value.authLoading;
 });
 
+const isProposalLimitReached = computed(() => {
+  if (!space.value) return false;
+
+  return (
+    (space.value.proposal_count_1d || 0) >= MAX_1D_PROPOSALS.default ||
+    (space.value.proposal_count_7d || 0) >= MAX_7D_PROPOSALS.default
+  );
+});
+
 async function handleProposeClick() {
   if (!space.value || !proposal.value) return;
 
@@ -386,11 +395,7 @@ export default defineComponent({
           @fetch-voting-power="handleFetchVotingPower"
         />
         <TurboMessage
-          v-if="
-            !space?.turbo &&
-            (space?.proposal_count_1d >= MAX_1D_PROPOSALS.default ||
-              space?.proposal_count_7d >= MAX_7D_PROPOSALS.default)
-          "
+          v-if="!space?.turbo && isProposalLimitReached"
           :text="`Post up to ${MAX_1D_PROPOSALS.turbo} proposals daily and ${MAX_7D_PROPOSALS.turbo} monthly with`"
         />
 
