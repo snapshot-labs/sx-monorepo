@@ -29,7 +29,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
 <template>
   <div v-bind="$attrs">
     <div class="space-x-2 flex">
-      <router-link
+      <AppLink
         :to="{
           name: 'proposal-overview',
           params: {
@@ -44,10 +44,10 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           :state="proposal.state"
           class="top-1.5"
         />
-      </router-link>
+      </AppLink>
 
       <div class="md:flex md:min-w-0 my-1 items-center leading-6">
-        <router-link
+        <AppLink
           v-if="showSpace"
           :to="{
             name: 'space-overview',
@@ -58,9 +58,9 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0"
         >
           {{ proposal.space.name }}
-        </router-link>
+        </AppLink>
 
-        <router-link
+        <AppLink
           :to="{
             name: 'proposal-overview',
             params: {
@@ -80,14 +80,14 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             "
             class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-0.5"
           />
-        </router-link>
+        </AppLink>
       </div>
     </div>
     <div class="inline">
       {{ getProposalId(proposal) }}
       <template v-if="showAuthor">
         by
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-user-statement',
@@ -98,7 +98,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-        </router-link>
+        </AppLink>
       </template>
     </div>
     <span>

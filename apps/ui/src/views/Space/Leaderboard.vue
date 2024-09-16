@@ -166,7 +166,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
         >
           <UiStamp :id="user.id" :size="32" />
-          <router-link
+          <AppLink
             :to="{
               name: 'space-user-statement',
               params: { id: `${space.network}:${space.id}`, user: user.id }
@@ -181,7 +181,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
               class="text-[17px] text-skin-text truncate"
               v-text="shorten(user.id)"
             />
-          </router-link>
+          </AppLink>
         </div>
         <div
           class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"

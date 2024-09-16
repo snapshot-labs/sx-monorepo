@@ -108,7 +108,7 @@ watch(open, () => (step.value = null));
         </button>
       </template>
       <template v-else>
-        <router-link :to="profileLink" class="block" tabindex="-1">
+        <AppLink :to="profileLink" class="block" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center gap-2"
             @click="emit('close')"
@@ -116,15 +116,15 @@ watch(open, () => (step.value = null));
             <UiStamp :id="user.id" :size="18" :cb="cb" />
             My profile
           </UiButton>
-        </router-link>
-        <router-link :to="settingsLink" tabindex="-1">
+        </AppLink>
+        <AppLink :to="settingsLink" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center"
             @click="emit('close')"
           >
             Settings
           </UiButton>
-        </router-link>
+        </AppLink>
         <UiButton @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>

@@ -180,14 +180,14 @@ watch(
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
-          <router-link
+          <AppLink
             :to="{ name: 'user', params: { id: user.id } }"
             tabindex="-1"
           >
             <UiButton class="!px-0 w-[46px]">
               <IH-user-circle class="inline-block" />
             </UiButton>
-          </router-link>
+          </AppLink>
         </UiTooltip>
         <DropdownShare
           :shareable="{ user, space }"
@@ -239,7 +239,7 @@ watch(
       gradient="xxl"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <router-link
+        <AppLink
           v-for="(item, i) in navigation"
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
@@ -249,7 +249,7 @@ watch(
             :text="item.label"
             :count="item.count"
           />
-        </router-link>
+        </AppLink>
       </div>
     </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />

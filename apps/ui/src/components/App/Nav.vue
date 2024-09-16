@@ -188,7 +188,7 @@ const navigationItems = computed(() =>
     v-if="Object.keys(navigationItems).length"
     class="border-r bg-skin-bg py-4"
   >
-    <router-link
+    <AppLink
       v-for="(item, key) in navigationItems"
       :key="key"
       :to="item.link"
@@ -203,6 +203,6 @@ const navigationItems = computed(() =>
         class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
         v-text="item.count"
       />
-    </router-link>
+    </AppLink>
   </div>
 </template>

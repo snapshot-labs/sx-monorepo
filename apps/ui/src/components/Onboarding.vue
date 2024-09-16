@@ -52,9 +52,9 @@ onMounted(async () => {
       <IS-flag class="text-skin-link mt-1 shrink-0" />
       <div class="grow">
         Setup your
-        <router-link :to="{ name: 'user', params: { id: user.id } }">
+        <AppLink :to="{ name: 'user', params: { id: user.id } }">
           profile
-        </router-link>
+        </AppLink>
       </div>
     </div>
 
@@ -62,7 +62,7 @@ onMounted(async () => {
       <div><IS-flag class="text-skin-link mt-1" /></div>
       <div class="grow">
         Check the
-        <router-link :to="{ name: 'my-explore' }"> explore </router-link>
+        <AppLink :to="{ name: 'my-explore' }"> explore </AppLink>
         page and follow at least 3 spaces.
         <div
           class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-1"

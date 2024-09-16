@@ -206,7 +206,7 @@ onBeforeUnmount(() => destroyAudio());
       <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
 
       <div class="flex justify-between items-center mb-4">
-        <router-link
+        <AppLink
           :to="{
             name: 'space-user-statement',
             params: {
@@ -221,7 +221,7 @@ onBeforeUnmount(() => destroyAudio());
             {{ proposal.author.name || shortenAddress(proposal.author.id) }}
             <span class="text-skin-text text-sm">
               In
-              <router-link
+              <AppLink
                 :to="{
                   name: 'space-overview',
                   params: { id: `${proposal.network}:${proposal.space.id}` }
@@ -229,12 +229,12 @@ onBeforeUnmount(() => destroyAudio());
                 class="text-skin-text"
               >
                 {{ proposal.space.name }}
-              </router-link>
+              </AppLink>
               <span> · {{ _rt(proposal.created) }}</span>
               <span> · {{ getProposalId(proposal) }}</span>
             </span>
           </div>
-        </router-link>
+        </AppLink>
         <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
