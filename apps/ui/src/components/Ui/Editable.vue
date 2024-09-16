@@ -8,6 +8,8 @@ type Definition = {
   type: 'string' | 'number' | 'integer';
   format?: string;
   examples?: string[];
+  maximum?: number;
+  errorMessage?: Record<string, string>;
 };
 
 const props = withDefaults(

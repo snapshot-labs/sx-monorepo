@@ -129,6 +129,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     isExecutorSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
     pin: pinGraph,
+    getSpaceController: async (space: Space) => space.controller,
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>

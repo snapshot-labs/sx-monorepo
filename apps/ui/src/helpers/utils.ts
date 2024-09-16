@@ -465,6 +465,7 @@ export function getStampUrl(
     | 'avatar'
     | 'user-cover'
     | 'space'
+    | 'space-cover'
     | 'space-sx'
     | 'space-cover-sx'
     | 'token',

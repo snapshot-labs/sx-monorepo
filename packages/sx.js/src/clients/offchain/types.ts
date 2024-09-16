@@ -122,6 +122,13 @@ export type EIP712UpdateStatementMessage = {
   status: string;
 };
 
+export type EIP712UpdateSpaceMessage = {
+  from?: string;
+  timestamp?: number;
+  space: string;
+  settings: string;
+};
+
 export type EIP712Message = Required<
   | EIP712VoteMessage
   | EIP712ProposeMessage
@@ -131,6 +138,8 @@ export type EIP712Message = Required<
   | EIP712UnfollowSpaceMessage
   | EIP712SetAliasMessage
   | EIP712UpdateUserMessage
+  | EIP712UpdateStatementMessage
+  | EIP712UpdateSpaceMessage
 >;
 
 export type Vote = {
@@ -213,4 +222,11 @@ export type UpdateStatement = {
   statement: string;
   discourse: string;
   status: string;
+};
+
+export type UpdateSpace = {
+  from?: string;
+  timestamp?: number;
+  space: string;
+  settings: string;
 };

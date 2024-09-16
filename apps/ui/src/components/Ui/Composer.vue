@@ -119,7 +119,12 @@ watch(model, () => {
         </label>
       </UiTooltip>
     </div>
-    <textarea ref="editorRef" v-model.trim="model" class="s-input h-[260px]" />
+    <textarea
+      ref="editorRef"
+      v-model.trim="model"
+      :placeholder="definition?.examples ? definition.examples[0] : ''"
+      class="s-input h-[260px]"
+    />
     <div v-if="showError" class="s-input-error-message" v-text="error" />
   </div>
 </template>

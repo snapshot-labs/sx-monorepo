@@ -488,11 +488,13 @@ export function createApi(
           .catch(() => null)
       ]);
 
-      if (data.proposal.metadata === null) return null;
+      if (data.proposal?.metadata === null) return null;
       data.proposal = joinHighlightProposal(
         data.proposal,
         highlightResult?.data.sxproposal
       );
+
+      if (!data.proposal) return null;
 
       return formatProposal(
         data.proposal,
