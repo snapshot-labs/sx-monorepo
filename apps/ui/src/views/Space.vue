@@ -2,10 +2,6 @@
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 
-defineProps<{
-  hasAppNav: boolean;
-}>();
-
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
