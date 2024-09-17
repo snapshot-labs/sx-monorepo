@@ -6,13 +6,7 @@ defineOptions({ inheritAttrs: false });
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const proposalsStore = useProposalsStore();
-
-const param = computed(() =>
-  String(
-    route.matched[0]?.name === 'space' ? route.params.id : route.params.space
-  )
-);
-
+const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 
 const showSpace = computed(() =>
@@ -32,7 +26,7 @@ const space = computed(() => {
     spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`) ||
     proposalsStore.getProposal(
       spaceAddress.value,
-      route.params.id as string,
+      route.params.proposal as string,
       networkId.value
     )?.space
   );
@@ -44,7 +38,7 @@ const space = computed(() => {
     v-if="space"
     :to="{
       name: 'space-overview',
-      params: { id: `${networkId}:${spaceAddress}` }
+      params: { space: `${networkId}:${spaceAddress}` }
     }"
     class="flex item-center space-x-2.5 truncate text-[24px]"
     v-bind="$attrs"

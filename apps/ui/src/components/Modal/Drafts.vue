@@ -46,7 +46,7 @@ function handleRemoveDraft(id: string) {
           <router-link
             :to="{
               name: 'editor',
-              params: { id: `${networkId}:${space}`, key: proposal.key }
+              params: { space: `${networkId}:${space}`, key: proposal.key }
             }"
             @click="$emit('close')"
           >

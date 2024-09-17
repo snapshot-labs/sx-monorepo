@@ -44,13 +44,13 @@ const routes: any[] = [
       { path: '', name: 'site-landing', component: Landing },
       { path: '/network', name: 'site-network', component: Network },
       { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
-      { path: '/ecosystem/:id', name: 'site-app', component: App },
+      { path: '/ecosystem/:app', name: 'site-app', component: App },
       { path: '/terms-of-use', name: 'site-terms', component: Terms },
       { path: '/privacy-policy', name: 'site-policy', component: Policy }
     ]
   },
   {
-    path: '/:id',
+    path: '/:space',
     name: 'space',
     component: Space,
     children: [
@@ -109,12 +109,12 @@ const routes: any[] = [
     ]
   },
   {
-    path: '/:id/create/:key?',
+    path: '/:space/create/:key?',
     name: 'editor',
     component: Editor
   },
   {
-    path: '/:space/proposal/:id?',
+    path: '/:space/proposal/:proposal?',
     name: 'proposal',
     component: Proposal,
     children: [
@@ -149,7 +149,7 @@ const routes: any[] = [
         name: 'my-notifications',
         component: Notifications
       },
-      { path: '/profile/:id', name: 'user', component: User }
+      { path: '/profile/:user', name: 'user', component: User }
     ]
   }
 ];

@@ -52,7 +52,7 @@ onMounted(async () => {
       <IS-flag class="text-skin-link mt-1 shrink-0" />
       <div class="grow">
         Setup your
-        <router-link :to="{ name: 'user', params: { id: user.id } }">
+        <router-link :to="{ name: 'user', params: { user: user.id } }">
           profile
         </router-link>
       </div>
