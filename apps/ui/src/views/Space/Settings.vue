@@ -241,7 +241,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     gradient="xxl"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <Applink
+      <AppLink
         v-for="tab in tabs.filter(tab => tab.visible)"
         :key="tab.id"
         :to="{
@@ -253,7 +253,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         @focus="handleTabFocus"
       >
         <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-      </Applink>
+      </AppLink>
     </div>
   </UiScrollerHorizontal>
   <div v-if="loading" class="p-4">
