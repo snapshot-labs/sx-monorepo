@@ -122,7 +122,21 @@ const isController = computedAsync(async () => {
   );
 
   return compareAddresses(controller, web3.value.account);
+}, false);
+const isAdmin = computed(() => {
+  if (!isOffchainNetwork.value) return false;
+
+  if (props.space.additionalRawData?.type === 'offchain') {
+    const admins = props.space.additionalRawData.admins.map(admin =>
+      admin.toLowerCase()
+    );
+
+    return admins.includes(web3.value.account.toLowerCase());
+  }
+
+  return false;
 });
+const canModifySettings = computed(() => isController.value || isAdmin.value);
 
 const executionStrategies = computed(() => {
   return props.space.executors.map((executor, i) => {
@@ -434,7 +448,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       title="Members"
       description="Members have different roles and permissions within the space."
     >
-      <FormSpaceMembers v-model="members" :network-id="space.network" />
+      <FormSpaceMembers
+        v-model="members"
+        :network-id="space.network"
+        :is-controller="isController"
+        :is-admin="isAdmin"
+      />
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="activeTab === 'execution'"
@@ -489,7 +508,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </teleport>
     </UiContainerSettings>
     <div
-      v-if="!uiStore.sidebarOpen && ((isModified && isController) || error)"
+      v-if="
+        !uiStore.sidebarOpen && ((isModified && canModifySettings) || error)
+      "
       class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4

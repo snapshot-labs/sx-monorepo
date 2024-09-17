@@ -10,6 +10,7 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
+  isController: boolean;
   currentMembers: Member[];
 }>();
 
@@ -18,47 +19,57 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
-const definition = {
-  type: 'object',
-  title: 'AddMembers',
-  additionalProperties: false,
-  required: ['addresses', 'role'],
-  properties: {
-    addresses: {
-      type: 'string',
-      title: 'Addresses',
-      format: 'address[]',
-      minLength: 1,
-      examples: [
-        '0x3901D0fDe202aF1427216b79f5243f8A022d68cf, 0x3901D0fDe202aF1427216b79f5243f8A022d68cf'
-      ]
-    },
-    role: {
-      type: ['string'],
-      enum: ['admin', 'moderator', 'author'],
-      options: [
-        {
-          id: 'admin',
-          name: 'Admin'
-        },
-        {
-          id: 'moderator',
-          name: 'Moderator'
-        },
-        {
-          id: 'author',
-          name: 'Author'
-        }
-      ],
-      title: 'Role'
-    }
-  }
-};
-
 const form: Ref<{
   addresses: string;
   role: Member['role'];
 }> = ref(clone(DEFAULT_FORM_STATE));
+
+const definition = computed(() => {
+  const options: { id: string; name: string }[] = [];
+  if (props.isController) {
+    options.push({
+      id: 'admin',
+      name: 'Admin'
+    });
+  }
+
+  options.push(
+    {
+      id: 'moderator',
+      name: 'Moderator'
+    },
+    {
+      id: 'author',
+      name: 'Author'
+    }
+  );
+
+  return {
+    type: 'object',
+    title: 'AddMembers',
+    additionalProperties: false,
+    required: ['addresses', 'role'],
+    properties: {
+      addresses: {
+        type: 'string',
+        title: 'Addresses',
+        format: 'address[]',
+        minLength: 1,
+        examples: [
+          '0x3901D0fDe202aF1427216b79f5243f8A022d68cf, 0x3901D0fDe202aF1427216b79f5243f8A022d68cf'
+        ]
+      },
+      role: {
+        type: ['string'],
+        enum: props.isController
+          ? ['admin', 'moderator', 'author']
+          : ['moderator', 'author'],
+        options,
+        title: 'Role'
+      }
+    }
+  };
+});
 
 const uniqueAddresses = computed(() =>
   uniqBy(form.value.addresses.split(','), (address: string) =>
@@ -67,7 +78,7 @@ const uniqueAddresses = computed(() =>
 );
 
 const formErrors = computed(() => {
-  const errors = validateForm(definition, form.value);
+  const errors = validateForm(definition.value, form.value);
 
   const existingAddresses = new Map(
     props.currentMembers.map(member => [

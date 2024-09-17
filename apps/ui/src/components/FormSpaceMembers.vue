@@ -9,11 +9,14 @@ const model = defineModel<Member[]>({
 
 const props = defineProps<{
   networkId: NetworkID;
+  isController: boolean;
+  isAdmin: boolean;
 }>();
 
 const modalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.networkId));
+const isAbleToChangeAdmins = computed(() => props.isController);
 
 function addMembers(members: Member[]) {
   model.value = [...model.value, ...members];
@@ -26,6 +29,8 @@ function getRoleName(role: Member['role']) {
 }
 
 function changeMemberRole(index: number, role: Member['role']) {
+  if (role === 'admin' && !isAbleToChangeAdmins.value) return;
+
   const newValue = [...model.value];
   newValue[index] = { ...newValue[index], role };
   model.value = newValue;
@@ -63,19 +68,32 @@ function deleteMember(index: number) {
         </a>
       </div>
       <div class="flex gap-3">
-        <UiDropdown>
+        <UiDropdown
+          :disabled="member.role === 'admin' && !isAbleToChangeAdmins"
+        >
           <template #button>
-            <UiButton class="!p-0 border-0 !h-[auto] bg-transparent flex gap-2">
+            <button
+              type="button"
+              class="flex items-center gap-2"
+              :class="{
+                'opacity-40 !cursor-not-allowed':
+                  member.role === 'admin' && !isAbleToChangeAdmins
+              }"
+            >
               {{ getRoleName(member.role) }}
               <IH-chevron-down class="text-skin-link" />
-            </UiButton>
+            </button>
           </template>
           <template #items>
             <UiDropdownItem v-slot="{ active }">
               <button
                 type="button"
                 class="flex items-center gap-2 lg:min-w-[200px]"
-                :class="{ 'opacity-80': active }"
+                :disabled="!isAbleToChangeAdmins"
+                :class="{
+                  'opacity-80': active && isAbleToChangeAdmins,
+                  'opacity-40 cursor-not-allowed': !isAbleToChangeAdmins
+                }"
                 @click="changeMemberRole(i, 'admin')"
               >
                 Admin
@@ -118,7 +136,15 @@ function deleteMember(index: number) {
             </UiDropdownItem>
           </template>
         </UiDropdown>
-        <button type="button" @click="deleteMember(i)">
+        <button
+          type="button"
+          :disabled="member.role === 'admin' && !isAbleToChangeAdmins"
+          :class="{
+            'opacity-40 cursor-not-allowed':
+              member.role === 'admin' && !isAbleToChangeAdmins
+          }"
+          @click="deleteMember(i)"
+        >
           <IH-trash />
         </button>
       </div>
@@ -128,6 +154,7 @@ function deleteMember(index: number) {
   <teleport to="#modal">
     <ModalAddMembers
       :open="modalOpen"
+      :is-controller="isController"
       :current-members="model"
       @close="modalOpen = false"
       @add="addMembers"
