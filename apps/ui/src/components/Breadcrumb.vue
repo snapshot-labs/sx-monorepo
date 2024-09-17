@@ -34,7 +34,7 @@ const space = computed(() => {
 </script>
 
 <template>
-  <router-link
+  <AppLink
     v-if="space"
     :to="{
       name: 'space-overview',
@@ -49,5 +49,5 @@ const space = computed(() => {
       class="!rounded-[4px] shrink-0"
     />
     <span class="truncate" v-text="space.name" />
-  </router-link>
+  </AppLink>
 </template>

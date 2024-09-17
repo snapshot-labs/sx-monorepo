@@ -41,7 +41,7 @@ watchEffect(() => setTitle(props.space.name));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2">
-        <router-link
+        <AppLink
           :to="{
             name: 'editor',
             params: { space: `${space.network}:${space.id}` }
@@ -53,19 +53,19 @@ watchEffect(() => setTitle(props.space.name));
               <IH-pencil-alt class="inline-block" />
             </UiButton>
           </UiTooltip>
-        </router-link>
+        </AppLink>
         <ButtonFollow :space="space" />
       </div>
     </div>
     <div class="px-4">
       <div class="mb-4 relative">
-        <router-link :to="{ name: 'space-overview' }">
+        <AppLink :to="{ name: 'space-overview' }">
           <SpaceAvatar
             :space="space"
             :size="90"
             class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
           />
-        </router-link>
+        </AppLink>
         <div class="flex items-center">
           <h1 v-text="space.name" />
           <UiBadgeVerified
@@ -95,7 +95,7 @@ watchEffect(() => setTitle(props.space.name));
           </template>
           <template v-if="space.parent">
             <div>·</div>
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-overview',
                 params: {
@@ -110,7 +110,7 @@ watchEffect(() => setTitle(props.space.name));
                 class="rounded-md"
               />
               <span>{{ space.parent.name }}</span>
-            </router-link>
+            </AppLink>
           </template>
         </div>
         <div

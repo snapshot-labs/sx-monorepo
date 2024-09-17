@@ -153,7 +153,7 @@ watchEffect(() => {
           gradient="xxl"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
-            <router-link
+            <AppLink
               :to="{
                 name: 'proposal-overview',
                 params: {
@@ -166,8 +166,8 @@ watchEffect(() => {
                 :is-active="route.name === 'proposal-overview'"
                 text="Overview"
               />
-            </router-link>
-            <router-link
+            </AppLink>
+            <AppLink
               :to="{
                 name: 'proposal-votes',
                 params: {
@@ -183,9 +183,9 @@ watchEffect(() => {
                 text="Votes"
                 class="inline-block"
               />
-            </router-link>
+            </AppLink>
             <template v-if="discussion">
-              <router-link
+              <AppLink
                 v-if="discourseTopic?.posts_count"
                 :to="{
                   name: 'proposal-discussion',
@@ -202,7 +202,7 @@ watchEffect(() => {
                   text="Discussion"
                   class="inline-block"
                 />
-              </router-link>
+              </AppLink>
               <a
                 v-else
                 :href="discussion"
