@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { RouterLinkProps } from 'vue-router';
+import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
 defineOptions({
   inheritAttrs: false
@@ -7,8 +7,16 @@ defineOptions({
 
 const props = defineProps<RouterLinkProps>();
 
+const { isWhiteLabel } = useWhiteLabel();
+
 // NOTE cleanup and use correct link when it's a white label site
-function normalize(to: any) {
+function normalize(to: RouteLocationRaw) {
+  if (!isWhiteLabel.value || typeof to === 'string') return to;
+
+  if ('name' in to && to.name?.toString().startsWith('space-')) {
+    delete to.params?.space;
+  }
+
   return to;
 }
 </script>
