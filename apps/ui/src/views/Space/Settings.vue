@@ -18,6 +18,7 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  members,
   save,
   saveController,
   reset
@@ -41,6 +42,7 @@ type Tab = {
     | 'proposal-validation'
     | 'voting-strategies'
     | 'voting'
+    | 'members'
     | 'execution'
     | 'controller';
   name: string;
@@ -88,6 +90,11 @@ const tabs = computed<Tab[]>(
         id: 'voting',
         name: 'Voting',
         visible: true
+      },
+      {
+        id: 'members',
+        name: 'Members',
+        visible: isOffchainNetwork.value
       },
       {
         id: 'execution',
@@ -421,6 +428,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           </UiEditable>
         </div>
       </div>
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="activeTab === 'members'"
+      title="Members"
+      description="Members have different roles and permissions within the space."
+    >
+      <FormSpaceMembers v-model="members" :network-id="space.network" />
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="activeTab === 'execution'"
