@@ -4,7 +4,6 @@ import metamaskIcon from '@/assets/connectors/metamask.png';
 import starknetIcon from '@/assets/connectors/starknet.png';
 import walletconnectIcon from '@/assets/connectors/walletconnect.png';
 import { getUrl } from '@/helpers/utils';
-import { APP_NAME } from './constants';
 
 export default {
   injected: {
