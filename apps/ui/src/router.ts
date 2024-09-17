@@ -62,6 +62,28 @@ const routes: any[] = [
       },
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
       {
+        path: 'proposal/:proposal?',
+        name: 'space-proposal',
+        component: Proposal,
+        children: [
+          {
+            path: '',
+            name: 'space-proposal-overview',
+            component: ProposalOverview
+          },
+          {
+            path: 'votes',
+            name: 'space-proposal-votes',
+            component: ProposalVotes
+          },
+          {
+            path: 'discussion',
+            name: 'space-proposal-discussion',
+            component: Topic
+          }
+        ]
+      },
+      {
         path: 'discussions',
         name: 'space-discussions',
         component: SpaceDiscussions
@@ -110,20 +132,6 @@ const routes: any[] = [
           },
           { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
         ]
-      }
-    ]
-  },
-  {
-    path: '/:space/proposal/:proposal?',
-    name: 'proposal',
-    component: Proposal,
-    children: [
-      { path: '', name: 'proposal-overview', component: ProposalOverview },
-      { path: 'votes', name: 'proposal-votes', component: ProposalVotes },
-      {
-        path: 'discussion',
-        name: 'proposal-discussion',
-        component: Topic
       }
     ]
   },
