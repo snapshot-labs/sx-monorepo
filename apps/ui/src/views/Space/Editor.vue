@@ -63,19 +63,16 @@ const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
 const network = computed(() => getNetwork(props.space.network));
+const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 const proposalKey = computed(() => {
   const key = route.params.key as string;
-  return `${props.space.network}:${props.space.id}:${key}`;
+  return `${spaceKey.value}:${key}`;
 });
 const proposal = computedAsync(async () => {
   if (!proposalKey.value || !props.space.network) return null;
 
   if (!proposals[proposalKey.value]) {
-    await createDraft(
-      `${props.space.network}:${props.space.id}`,
-      undefined,
-      route.params.key as string
-    );
+    await createDraft(spaceKey.value, undefined, route.params.key as string);
   }
 
   return proposals[proposalKey.value];
@@ -201,7 +198,7 @@ async function handleProposeClick() {
       proposalsStore.reset(props.space.id!, props.space.network!);
       router.push({
         name: 'space-proposals',
-        params: { space: `${props.space.network}:${props.space.id}` }
+        params: { space: spaceKey.value }
       });
     }
   } finally {
@@ -316,7 +313,7 @@ export default defineComponent({
         <router-link
           :to="{
             name: 'space-overview',
-            params: { space: `${space.network}:${space.id}` }
+            params: { space: spaceKey }
           }"
           class="mr-2"
           tabindex="-1"
