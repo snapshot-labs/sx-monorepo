@@ -1,10 +1,10 @@
-import { RouteRecordRaw, RouteRecordSingleView } from 'vue-router';
-import Editor from '@/views/Editor.vue';
+import { RouteRecordRaw } from 'vue-router';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
 import Proposal from '@/views/Proposal.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
 import SpaceDiscussions from '@/views/Space/Discussions.vue';
+import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
@@ -19,8 +19,31 @@ import SpaceUser from '@/views/SpaceUser.vue';
 import Topic from '@/views/Topic.vue';
 
 export const spaceChildrenRoutes: RouteRecordRaw[] = [
+  {
+    path: 'create/:key?',
+    name: 'space-editor',
+    component: SpaceEditor
+  },
   { path: '', name: 'space-overview', component: SpaceOverview },
   { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
+  {
+    path: 'proposal/:proposal?',
+    name: 'space-proposal',
+    component: Proposal,
+    children: [
+      {
+        path: '',
+        name: 'space-proposal-overview',
+        component: ProposalOverview
+      },
+      { path: 'votes', name: 'space-proposal-votes', component: ProposalVotes },
+      {
+        path: 'discussion',
+        name: 'space-proposal-discussion',
+        component: Topic
+      }
+    ]
+  },
   {
     path: 'discussions',
     name: 'space-discussions',
@@ -72,24 +95,3 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
     ]
   }
 ];
-
-export const SpaceProposalCreate: RouteRecordSingleView = {
-  path: '/create/:key?',
-  name: 'editor',
-  component: Editor
-};
-
-export const SpaceProposal = {
-  path: '/proposal/:id?',
-  name: 'proposal',
-  component: Proposal,
-  children: [
-    { path: '', name: 'proposal-overview', component: ProposalOverview },
-    { path: 'votes', name: 'proposal-votes', component: ProposalVotes },
-    {
-      path: 'discussion',
-      name: 'proposal-discussion',
-      component: Topic
-    }
-  ]
-};

@@ -1,11 +1,7 @@
 import Contacts from '@/views/Settings/Contacts.vue';
 import Settings from '@/views/Settings.vue';
 import Space from '@/views/Space.vue';
-import {
-  spaceChildrenRoutes,
-  SpaceProposal,
-  SpaceProposalCreate
-} from './common';
+import { spaceChildrenRoutes } from './common';
 
 export default [
   {
@@ -19,7 +15,5 @@ export default [
     name: 'settings',
     component: Settings,
     children: [{ path: '', name: 'settings-contacts', component: Contacts }]
-  },
-  SpaceProposalCreate,
-  SpaceProposal
+  }
 ];

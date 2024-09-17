@@ -15,11 +15,7 @@ import Site from '@/views/Site.vue';
 import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
 import User from '@/views/User.vue';
-import {
-  spaceChildrenRoutes,
-  SpaceProposal,
-  SpaceProposalCreate
-} from './common';
+import { spaceChildrenRoutes } from './common';
 
 export default [
   {
@@ -30,13 +26,13 @@ export default [
       { path: '', name: 'site-landing', component: Landing },
       { path: '/network', name: 'site-network', component: Network },
       { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
-      { path: '/ecosystem/:id', name: 'site-app', component: App },
+      { path: '/ecosystem/:app', name: 'site-app', component: App },
       { path: '/terms-of-use', name: 'site-terms', component: Terms },
       { path: '/privacy-policy', name: 'site-policy', component: Policy }
     ]
   },
   {
-    path: '/:id',
+    path: '/:space',
     name: 'space',
     component: Space,
     children: spaceChildrenRoutes
@@ -64,15 +60,7 @@ export default [
         name: 'my-notifications',
         component: Notifications
       },
-      { path: '/profile/:id', name: 'user', component: User }
+      { path: '/profile/:user', name: 'user', component: User }
     ]
-  },
-  {
-    ...SpaceProposalCreate,
-    path: '/:id/create/:key?'
-  },
-  {
-    ...SpaceProposal,
-    path: '/:space/proposal/:id?'
   }
 ];
