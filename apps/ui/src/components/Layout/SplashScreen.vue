@@ -2,7 +2,7 @@
 import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
-const { init, isWhiteLabel, loaded, failed } = useWhiteLabel();
+const { init, isWhiteLabel, resolved, failed } = useWhiteLabel();
 const { setAppName } = useApp();
 
 const router = useRouter();
@@ -11,8 +11,8 @@ function handleReloadClick() {
   window.location.reload();
 }
 
-watch([() => loaded.value, () => failed.value], ([loaded, failed]) => {
-  if (!loaded || failed) return;
+watch([() => resolved.value, () => failed.value], ([resolved, failed]) => {
+  if (!resolved || failed) return;
 
   const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
 

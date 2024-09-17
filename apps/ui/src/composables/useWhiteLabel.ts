@@ -6,7 +6,7 @@ const domain = window.location.hostname;
 
 const isWhiteLabel = ref(false);
 const failed = ref(false);
-const loaded = ref(false);
+const resolved = ref(false);
 const resolver = reactive<{
   address: string | null;
   networkId: NetworkID | null;
@@ -18,7 +18,7 @@ const resolver = reactive<{
 if (domain !== DEFAULT_DOMAIN) {
   isWhiteLabel.value = true;
 } else {
-  loaded.value = true;
+  resolved.value = true;
 }
 
 async function getSpaceId(domain: string): Promise<string | null> {
@@ -43,7 +43,7 @@ async function getSpaceId(domain: string): Promise<string | null> {
 
 export function useWhiteLabel() {
   async function init() {
-    if (!isWhiteLabel.value || loaded.value) return;
+    if (!isWhiteLabel.value || resolved.value) return;
 
     try {
       const id = await getSpaceId(domain);
@@ -59,7 +59,7 @@ export function useWhiteLabel() {
     } catch (e) {
       failed.value = true;
     } finally {
-      loaded.value = true;
+      resolved.value = true;
     }
   }
 
@@ -67,7 +67,7 @@ export function useWhiteLabel() {
     init,
     isWhiteLabel,
     failed,
-    loaded,
+    resolved,
     resolver: computed(() => resolver)
   };
 }

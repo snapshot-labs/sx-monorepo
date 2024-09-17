@@ -3,7 +3,7 @@ import { startIntercom } from './helpers/intercom';
 
 const route = useRoute();
 const { app } = useApp();
-const { isWhiteLabel, loaded: whiteLabelLoaded } = useWhiteLabel();
+const { isWhiteLabel, resolved: whiteLabelResolved } = useWhiteLabel();
 const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
@@ -11,9 +11,9 @@ const routeName = computed(() => String(route.matched[0]?.name));
 watchEffect(() => setTitle(app.value.app_name));
 
 watch(
-  [() => isWhiteLabel.value, () => whiteLabelLoaded.value],
-  ([isWhiteLabel, whiteLabelLoaded]) => {
-    if (isWhiteLabel || !whiteLabelLoaded) return;
+  [() => isWhiteLabel.value, () => whiteLabelResolved.value],
+  ([isWhiteLabel, whiteLabelResolved]) => {
+    if (isWhiteLabel || !whiteLabelResolved) return;
 
     startIntercom();
   },
