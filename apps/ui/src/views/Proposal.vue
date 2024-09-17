@@ -155,7 +155,7 @@ watchEffect(() => {
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <router-link
               :to="{
-                name: 'proposal-overview',
+                name: 'space-proposal-overview',
                 params: {
                   proposal: proposal.proposal_id,
                   space: `${proposal.network}:${proposal.space.id}`
@@ -169,7 +169,7 @@ watchEffect(() => {
             </router-link>
             <router-link
               :to="{
-                name: 'proposal-votes',
+                name: 'space-proposal-votes',
                 params: {
                   proposal: proposal.proposal_id,
                   space: `${proposal.network}:${proposal.space.id}`
@@ -188,7 +188,7 @@ watchEffect(() => {
               <router-link
                 v-if="discourseTopic?.posts_count"
                 :to="{
-                  name: 'proposal-discussion',
+                  name: 'space-proposal-discussion',
                   params: {
                     proposal: proposal.proposal_id,
                     space: `${proposal.network}:${proposal.space.id}`

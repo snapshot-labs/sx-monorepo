@@ -31,7 +31,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
     <div class="space-x-2 flex">
       <router-link
         :to="{
-          name: 'proposal-overview',
+          name: 'space-proposal-overview',
           params: {
             proposal: proposal.proposal_id,
             space: `${proposal.network}:${proposal.space.id}`
@@ -62,7 +62,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
 
         <router-link
           :to="{
-            name: 'proposal-overview',
+            name: 'space-proposal-overview',
             params: {
               proposal: proposal.proposal_id,
               space: `${proposal.network}:${proposal.space.id}`

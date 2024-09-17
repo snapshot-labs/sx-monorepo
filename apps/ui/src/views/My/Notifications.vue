@@ -49,7 +49,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
             {{ _rt(notification.timestamp) }}
             <router-link
               :to="{
-                name: 'proposal-overview',
+                name: 'space-proposal-overview',
                 params: {
                   proposal: notification.proposal.proposal_id,
                   space: `${notification.proposal.network}:${notification.proposal.space.id}`
