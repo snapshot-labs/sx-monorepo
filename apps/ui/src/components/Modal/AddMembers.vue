@@ -53,7 +53,7 @@ const definition = computed(() => {
       addresses: {
         type: 'string',
         title: 'Addresses',
-        format: 'address[]',
+        format: 'ethAddress[]',
         minLength: 1,
         examples: [
           '0x3901D0fDe202aF1427216b79f5243f8A022d68cf, 0x3901D0fDe202aF1427216b79f5243f8A022d68cf'
