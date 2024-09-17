@@ -14,7 +14,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
 <template>
-  <router-link
+  <AppLink
     :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
     class="text-skin-text border rounded-lg block relative group overflow-hidden h-[186px]"
     :class="{ 'h-[280px]': showAbout }"
@@ -61,5 +61,5 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
       <b class="text-skin-link" v-text="_n(space.vote_count, 'compact')" />
       votes
     </h5>
-  </router-link>
+  </AppLink>
 </template>
