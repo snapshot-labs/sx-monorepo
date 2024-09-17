@@ -46,7 +46,7 @@ function handleRemoveDraft(id: string) {
           <AppLink
             :to="{
               name: 'editor',
-              params: { id: `${networkId}:${space}`, key: proposal.key }
+              params: { space: `${networkId}:${space}`, key: proposal.key }
             }"
             @click="$emit('close')"
           >

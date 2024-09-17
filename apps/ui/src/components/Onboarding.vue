@@ -52,7 +52,7 @@ onMounted(async () => {
       <IS-flag class="text-skin-link mt-1 shrink-0" />
       <div class="grow">
         Setup your
-        <AppLink :to="{ name: 'user', params: { id: user.id } }">
+        <AppLink :to="{ name: 'user', params: { user: user.id } }">
           profile
         </AppLink>
       </div>

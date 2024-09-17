@@ -5,7 +5,7 @@ defineOptions({
   inheritAttrs: false
 });
 
-defineProps<{ button?: boolean } & RouterLinkProps>();
+const props = defineProps<{ button?: boolean } & RouterLinkProps>();
 
 // NOTE cleanup and use correct link when it's a white label site
 function normalize(to: any) {
@@ -16,8 +16,8 @@ function normalize(to: any) {
 <template>
   <router-link
     v-slot="{ isActive, href, navigate }"
-    v-bind="$props"
-    :to="normalize($props.to)"
+    v-bind="props"
+    :to="normalize(props.to)"
     custom
   >
     <a

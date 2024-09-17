@@ -50,6 +50,8 @@ const currentNetwork = computed(() => {
   }
 });
 
+const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
+
 function handleSortChange(
   type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
 ) {
@@ -106,7 +108,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :to="{
           name: 'space-user-statement',
           params: {
-            id: `${$props.space.network}:${props.space.id}`,
+            space: spaceKey,
             user: web3.account
           }
         }"
@@ -194,7 +196,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               :to="{
                 name: 'space-user-statement',
                 params: {
-                  id: `${space.network}:${space.id}`,
+                  space: spaceKey,
                   user: delegate.user
                 }
               }"
@@ -275,7 +277,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       :to="{
                         name: 'space-user-statement',
                         params: {
-                          id: `${space.network}:${space.id}`,
+                          space: spaceKey,
                           user: delegate.user
                         }
                       }"

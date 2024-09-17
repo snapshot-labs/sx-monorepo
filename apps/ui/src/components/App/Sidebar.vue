@@ -30,7 +30,7 @@ const followedSpacesStore = useFollowedSpacesStore();
         <AppLink
           :to="{
             name: 'space-overview',
-            params: { id: `${element.network}:${element.id}` }
+            params: { space: `${element.network}:${element.id}` }
           }"
           class="block"
           @click="uiStore.sidebarOpen = false"
