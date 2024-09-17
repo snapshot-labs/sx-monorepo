@@ -241,7 +241,11 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'uri':
         return 'Must be a valid URL.';
       case 'address':
+      case 'ethAddress':
         return 'Must be a valid address.';
+      case 'address[]':
+      case 'ethAddress[]':
+        return 'Must be comma separated list of valid addresses.';
       case 'ens-or-address':
         return 'Must be a valid ENS domain or address.';
       case 'abi':
