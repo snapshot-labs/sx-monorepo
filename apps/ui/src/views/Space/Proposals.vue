@@ -104,7 +104,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           :voting-power="votingPower"
           @fetch-voting-power="handleFetchVotingPower"
         />
-        <router-link
+        <AppLink
           :to="{
             name: 'space-editor',
             params: { space: `${space.network}:${space.id}` }
@@ -116,7 +116,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               <IH-pencil-alt class="inline-block" />
             </UiButton>
           </UiTooltip>
-        </router-link>
+        </AppLink>
       </div>
     </div>
     <ProposalsList

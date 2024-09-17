@@ -246,7 +246,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </div>
       <div>
         <div class="flex pl-4 border-b space-x-3">
-          <router-link
+          <AppLink
             :to="{
               params: {
                 tab: 'tokens'
@@ -254,8 +254,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             }"
           >
             <UiLink :is-active="page === 'tokens'" text="Tokens" />
-          </router-link>
-          <router-link
+          </AppLink>
+          <AppLink
             :to="{
               params: {
                 tab: 'nfts'
@@ -263,7 +263,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             }"
           >
             <UiLink :is-active="page === 'nfts'" text="NFTs" />
-          </router-link>
+          </AppLink>
         </div>
         <div v-if="page === 'tokens'">
           <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
