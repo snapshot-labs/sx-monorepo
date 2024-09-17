@@ -9,12 +9,25 @@ const props = defineProps<RouterLinkProps>();
 
 const { isWhiteLabel } = useWhiteLabel();
 
-// NOTE cleanup and use correct link when it's a white label site
 function normalize(to: RouteLocationRaw) {
-  if (!isWhiteLabel.value || typeof to === 'string') return to;
+  if (
+    !isWhiteLabel.value ||
+    typeof to === 'string' ||
+    !('name' in to) ||
+    !to.name
+  )
+    return to;
 
-  if ('name' in to && to.name?.toString().startsWith('space-')) {
+  if (to.name.toString().startsWith('space-')) {
     delete to.params?.space;
+  }
+
+  if (to.name.toString() === 'user') {
+    to.name = 'space-user-statement';
+  }
+
+  if (to.name.toString() === 'settings-spaces') {
+    to.name = 'settings-contacts';
   }
 
   return to;

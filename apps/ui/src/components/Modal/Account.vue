@@ -27,7 +27,6 @@ const emit = defineEmits<{
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
-const { isWhiteLabel } = useWhiteLabel();
 const usersStore = useUsersStore();
 const step: Ref<'connect' | null> = ref(null);
 
@@ -53,23 +52,6 @@ const user = computed(
 );
 
 const cb = computed(() => getCacheHash(user.value.avatar));
-
-const profileLink = computed(() => {
-  if (isWhiteLabel.value) {
-    return {
-      name: 'space-user-statement',
-      params: {
-        user: web3.value.account
-      }
-    };
-  }
-
-  return { name: 'user', params: { id: web3.value.account } };
-});
-
-const settingsLink = computed(() => {
-  return { name: isWhiteLabel.value ? 'settings-contacts' : 'settings-spaces' };
-});
 
 const isLoggedOut = computed(
   () => !web3.value.account || step.value === 'connect'
@@ -108,7 +90,11 @@ watch(open, () => (step.value = null));
         </button>
       </template>
       <template v-else>
-        <AppLink :to="profileLink" class="block" tabindex="-1">
+        <AppLink
+          :to="{ name: 'user', params: { user: web3.account } }"
+          class="block"
+          tabindex="-1"
+        >
           <UiButton
             class="w-full flex justify-center items-center gap-2"
             @click="emit('close')"
@@ -117,7 +103,7 @@ watch(open, () => (step.value = null));
             My profile
           </UiButton>
         </AppLink>
-        <AppLink :to="settingsLink" tabindex="-1">
+        <AppLink :to="{ name: 'settings-spaces' }" tabindex="-1">
           <UiButton
             class="w-full flex justify-center items-center"
             @click="emit('close')"
