@@ -39,7 +39,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
               :to="{
                 name: 'space-overview',
                 params: {
-                  id: `${notification.proposal.network}:${notification.proposal.space.id}`
+                  space: `${notification.proposal.network}:${notification.proposal.space.id}`
                 }
               }"
             >
@@ -51,7 +51,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
               :to="{
                 name: 'proposal-overview',
                 params: {
-                  id: notification.proposal.proposal_id,
+                  proposal: notification.proposal.proposal_id,
                   space: `${notification.proposal.network}:${notification.proposal.space.id}`
                 }
               }"

@@ -41,7 +41,13 @@ watchEffect(() => setTitle(props.space.name));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2">
-        <AppLink :to="{ name: 'editor' }" tabindex="-1">
+        <AppLink
+          :to="{
+            name: 'editor',
+            params: { space: `${space.network}:${space.id}` }
+          }"
+          tabindex="-1"
+        >
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />
@@ -93,7 +99,7 @@ watchEffect(() => setTitle(props.space.name));
               :to="{
                 name: 'space-overview',
                 params: {
-                  id: `${space.parent.network}:${space.parent.id}`
+                  space: `${space.parent.network}:${space.parent.id}`
                 }
               }"
               class="flex space-x-1 items-center whitespace-nowrap"

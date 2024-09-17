@@ -180,7 +180,7 @@ watch(
       <div class="absolute right-4 top-4 space-x-2 flex">
         <UiTooltip title="View profile">
           <AppLink
-            :to="{ name: 'user', params: { id: user.id } }"
+            :to="{ name: 'user', params: { user: user.id } }"
             tabindex="-1"
           >
             <UiButton class="!px-0 w-[46px]">

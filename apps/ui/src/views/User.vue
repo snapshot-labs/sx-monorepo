@@ -30,7 +30,7 @@ const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
 const loaded = ref(false);
 
-const id = computed(() => route.params.id as string);
+const id = computed(() => route.params.user as string);
 
 const user = computed(() => usersStore.getUser(id.value));
 
@@ -202,7 +202,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       :to="{
         name: 'space-user-statement',
         params: {
-          id: activity.spaceId,
+          space: activity.spaceId,
           user: user.id
         }
       }"

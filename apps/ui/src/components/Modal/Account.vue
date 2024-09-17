@@ -91,7 +91,7 @@ watch(open, () => (step.value = null));
       </template>
       <template v-else>
         <AppLink
-          :to="{ name: 'user', params: { id: web3.account } }"
+          :to="{ name: 'user', params: { user: web3.account } }"
           class="block"
           tabindex="-1"
         >

@@ -15,7 +15,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 
 <template>
   <AppLink
-    :to="{ name: 'space-overview', params: { id: compositeSpaceId } }"
+    :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
     class="text-skin-text border rounded-lg block relative group overflow-hidden h-[186px]"
     :class="{ 'h-[280px]': showAbout }"
   >
