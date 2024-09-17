@@ -46,7 +46,7 @@ const hasAppNav = computed(
 );
 
 const bottomPadding = computed(
-  () => !['proposal-votes'].includes(String(route.name))
+  () => !['space-proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {

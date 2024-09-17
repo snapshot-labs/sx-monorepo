@@ -163,7 +163,7 @@ watchEffect(() => {
               }"
             >
               <UiLink
-                :is-active="route.name === 'proposal-overview'"
+                :is-active="route.name === 'space-proposal-overview'"
                 text="Overview"
               />
             </router-link>
@@ -178,7 +178,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLink
-                :is-active="route.name === 'proposal-votes'"
+                :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
                 class="inline-block"
@@ -197,7 +197,7 @@ watchEffect(() => {
                 class="flex items-center"
               >
                 <UiLink
-                  :is-active="route.name === 'proposal-discussion'"
+                  :is-active="route.name === 'space-proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
                   class="inline-block"
@@ -220,7 +220,7 @@ watchEffect(() => {
       <Affix
         :class="[
           'shrink-0 md:w-[340px] border-l-0 md:border-l',
-          { 'hidden md:block': route.name === 'proposal-votes' }
+          { 'hidden md:block': route.name === 'space-proposal-votes' }
         ]"
         :top="72"
         :bottom="64"
