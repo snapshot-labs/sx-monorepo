@@ -44,7 +44,7 @@ watchEffect(() => setTitle(props.space.name));
       <div class="absolute right-4 top-4 space-x-2">
         <AppLink
           :to="{
-            name: 'editor',
+            name: 'space-editor',
             params: { space: `${space.network}:${space.id}` }
           }"
           tabindex="-1"

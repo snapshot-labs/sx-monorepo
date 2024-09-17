@@ -106,7 +106,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         />
         <AppLink
           :to="{
-            name: 'editor',
+            name: 'space-editor',
             params: { space: `${space.network}:${space.id}` }
           }"
           tabindex="-1"

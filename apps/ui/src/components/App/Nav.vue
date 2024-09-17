@@ -184,10 +184,7 @@ const navigationItems = computed(() =>
 </script>
 
 <template>
-  <div
-    v-if="Object.keys(navigationItems).length"
-    class="border-r bg-skin-bg py-4"
-  >
+  <div class="border-r bg-skin-bg py-4">
     <AppLink
       v-for="(item, key) in navigationItems"
       :key="key"

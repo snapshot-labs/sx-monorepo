@@ -127,7 +127,7 @@ async function handleEditClick() {
   });
 
   router.push({
-    name: 'editor',
+    name: 'space-editor',
     params: {
       space: spaceId,
       key: draftId

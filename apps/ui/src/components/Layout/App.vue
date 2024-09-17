@@ -31,15 +31,22 @@ const { isSwiping, direction } = useSwipe(el, {
   }
 });
 const { createDraft } = useEditor();
-const { spaceKey, network, executionStrategy, transaction, reset } =
-  useWalletConnectTransaction();
+const {
+  spaceKey: walletSpaceKey,
+  network,
+  executionStrategy,
+  transaction,
+  reset
+} = useWalletConnectTransaction();
 
 provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
-const hasAppNav = computed(() =>
-  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+const hasAppNav = computed(
+  () =>
+    ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
 const hasSidebar = computed(() => !isWhiteLabel.value);
@@ -47,21 +54,25 @@ const hasSidebar = computed(() => !isWhiteLabel.value);
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
 const bottomPadding = computed(
-  () => !['proposal-votes'].includes(String(route.name))
+  () => !['space-proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {
-  if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
+  if (!walletSpaceKey.value || !executionStrategy.value || !transaction.value)
+    return;
 
   const executions = {} as Record<string, Transaction[]>;
   executions[executionStrategy.value.address] = [transaction.value];
 
-  const space = spaceKey.value;
-  const draftId = await createDraft(space, {
+  const spaceKey = walletSpaceKey.value;
+  const draftId = await createDraft(spaceKey, {
     executions
   });
 
-  router.push(`/${space}/create/${draftId}`);
+  router.push({
+    name: 'space-editor',
+    params: { space: walletSpaceKey.value, key: draftId }
+  });
 
   reset();
 }
@@ -144,6 +155,7 @@ watch(
         />
         <AppTopnav
           class="fixed top-0 inset-x-0 z-50"
+          :has-app-nav="hasAppNav"
           @navigated="uiStore.sidebarOpen = false"
         >
           <template v-if="hasSwipeableContent" #toggle-sidebar-button>
@@ -157,6 +169,7 @@ watch(
           </template>
         </AppTopnav>
         <AppNav
+          v-if="hasAppNav"
           :class="[
             'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
             {
@@ -177,7 +190,7 @@ watch(
       </div>
       <AppNotifications />
       <ModalTransaction
-        v-if="route.name !== 'editor' && transaction && network"
+        v-if="route.name !== 'space-editor' && transaction && network"
         :open="!!transaction"
         :network="network"
         :initial-state="transaction._form"
