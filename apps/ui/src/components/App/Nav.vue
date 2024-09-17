@@ -180,7 +180,6 @@ const navigationItems = computed(() =>
 
 <template>
   <div
-    v-if="Object.keys(navigationItems).length"
     class="lg:visible fixed w-[240px] border-r left-[72px] top-[72px] inset-y-0 z-10 bg-skin-bg py-4"
     :class="{
       invisible: !uiStore.sidebarOpen
