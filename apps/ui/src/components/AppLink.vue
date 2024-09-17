@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { RouterLink, RouterLinkProps } from 'vue-router';
+import { RouterLinkProps } from 'vue-router';
 
 defineOptions({
   inheritAttrs: false
