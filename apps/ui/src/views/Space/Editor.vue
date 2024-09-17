@@ -62,17 +62,15 @@ const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
+const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
-const proposalKey = computed(() => {
-  const key = route.params.key as string;
-  return `${spaceKey.value}:${key}`;
-});
+const proposalKey = computed(() => `${spaceKey.value}:${draftId.value}`);
 const proposal = computedAsync(async () => {
   if (!proposalKey.value) return null;
 
   if (!proposals[proposalKey.value]) {
-    await createDraft(spaceKey.value, undefined, route.params.key as string);
+    await createDraft(spaceKey.value, undefined, draftId.value);
   }
 
   return proposals[proposalKey.value];
@@ -250,6 +248,21 @@ watch(
   { immediate: true }
 );
 
+watch(
+  draftId,
+  async id => {
+    if (id) return true;
+
+    const newId = await createDraft(spaceKey.value);
+
+    router.replace({
+      name: 'space-editor',
+      params: { space: spaceKey.value, key: newId }
+    });
+  },
+  { immediate: true }
+);
+
 watch(proposalData, () => {
   if (!proposal.value) return;
 
@@ -277,35 +290,6 @@ watchEffect(() => {
   setTitle(`${title} - ${props.space.name}`);
 });
 </script>
-<script lang="ts">
-const { createDraft } = useEditor();
-const handleRouteChange: NavigationGuard = async to => {
-  if (to.params.key) {
-    return true;
-  }
-
-  const resolved = await resolver.resolveName(to.params.space as string);
-  if (!resolved) return false;
-
-  const draftId = await createDraft(
-    `${resolved.networkId}:${resolved.address}`
-  );
-
-  return {
-    ...to,
-    params: {
-      ...to.params,
-      key: draftId
-    }
-  };
-};
-
-export default defineComponent({
-  beforeRouteEnter: handleRouteChange,
-  beforeRouteUpdate: handleRouteChange
-});
-</script>
-
 <template>
   <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
