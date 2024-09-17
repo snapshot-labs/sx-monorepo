@@ -83,7 +83,6 @@ export function useWalletConnect(
   const { setTransaction } = useWalletConnectTransaction();
 
   const key = computed(() => `${chainId}:${account}`);
-
   const connection = computed(
     () =>
       connections.value[key.value] || {
