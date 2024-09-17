@@ -33,7 +33,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
         :to="{
           name: 'proposal-overview',
           params: {
-            id: proposal.proposal_id,
+            proposal: proposal.proposal_id,
             space: `${proposal.network}:${proposal.space.id}`
           }
         }"
@@ -52,7 +52,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           :to="{
             name: 'space-overview',
             params: {
-              id: `${proposal.network}:${proposal.space.id}`
+              space: `${proposal.network}:${proposal.space.id}`
             }
           }"
           class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0"
@@ -64,7 +64,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           :to="{
             name: 'proposal-overview',
             params: {
-              id: proposal.proposal_id,
+              proposal: proposal.proposal_id,
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
@@ -92,7 +92,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           :to="{
             name: 'space-user-statement',
             params: {
-              id: `${proposal.network}:${proposal.space.id}`,
+              space: `${proposal.network}:${proposal.space.id}`,
               user: proposal.author.id
             }
           }"

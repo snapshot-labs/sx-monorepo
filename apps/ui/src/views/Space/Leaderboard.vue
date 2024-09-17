@@ -169,7 +169,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           <AppLink
             :to="{
               name: 'space-user-statement',
-              params: { id: `${space.network}:${space.id}`, user: user.id }
+              params: { space: `${space.network}:${space.id}`, user: user.id }
             }"
             class="overflow-hidden"
           >

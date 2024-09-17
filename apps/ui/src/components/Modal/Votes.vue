@@ -111,7 +111,7 @@ watch(
               :to="{
                 name: 'space-user-statement',
                 params: {
-                  id: `${proposal.network}:${proposal.space.id}`,
+                  space: `${proposal.network}:${proposal.space.id}`,
                   user: vote.voter.id
                 }
               }"

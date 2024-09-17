@@ -35,7 +35,7 @@ const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
 
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const { web3 } = useWeb3();
 
@@ -142,12 +142,12 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
       my: {
         user: {
           name: 'Profile',
-          link: { name: 'user', params: { id: web3.value.account } },
+          link: { name: 'user', params: { user: web3.value.account } },
           icon: IHUser,
           hidden: !web3.value.account,
           active:
             (route.name as string) === 'user' &&
-            route.params.id === web3.value.account
+            route.params.user === web3.value.account
         },
         settings: {
           name: 'Settings',

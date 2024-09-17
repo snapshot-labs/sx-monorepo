@@ -3,7 +3,7 @@ import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 
 const { setFavicon } = useFavicon();
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();

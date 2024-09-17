@@ -278,7 +278,7 @@ onMounted(() => deploy());
       <AppLink
         :to="{
           name: 'space-overview',
-          params: { id: `${networkId}:${predictedSpaceAddress}` }
+          params: { space: `${networkId}:${predictedSpaceAddress}` }
         }"
         text="here"
       />.

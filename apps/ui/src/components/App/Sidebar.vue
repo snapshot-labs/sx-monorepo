@@ -35,7 +35,7 @@ const emit = defineEmits<{
         <AppLink
           :to="{
             name: 'space-overview',
-            params: { id: `${element.network}:${element.id}` }
+            params: { space: `${element.network}:${element.id}` }
           }"
           class="block"
           @click="emit('navigated')"
