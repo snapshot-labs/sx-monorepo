@@ -47,7 +47,7 @@ const router = useRouter();
 const { propose, updateProposal } = useActions();
 const { web3 } = useWeb3();
 const {
-  spaceKey,
+  spaceKey: walletSpaceKey,
   network: walletConnectNetwork,
   transaction,
   executionStrategy: walletConnectTransactionExecutionStrategy,
@@ -55,13 +55,14 @@ const {
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
 const { votingPower, fetch: fetchVotingPower } = useVotingPower();
+const { strategiesWithTreasuries } = useTreasuries(props.space);
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
+const enforcedVoteType = ref<VoteType | null>(null);
 
 const network = computed(() => getNetwork(props.space.network));
-const { strategiesWithTreasuries } = useTreasuries(props.space);
 const proposalKey = computed(() => {
   const key = route.params.key as string;
   return `${props.space.network}:${props.space.id}:${key}`;
@@ -84,11 +85,9 @@ const proposalData = computed(() => {
 
   return JSON.stringify(omit(proposal.value, ['updatedAt']));
 });
-const enforcedVoteType = ref<VoteType | null>(null);
 const supportsMultipleTreasuries = computed(() => {
   return offchainNetworks.includes(props.space.network);
 });
-
 const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
@@ -221,7 +220,7 @@ function handleExecutionUpdated(
 
 function handleTransactionAccept() {
   if (
-    !spaceKey.value ||
+    !walletSpaceKey.value ||
     !walletConnectTransactionExecutionStrategy.value ||
     !transaction.value ||
     !proposal.value
