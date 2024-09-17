@@ -1,15 +1,11 @@
 <script lang="ts" setup>
-import { RouterLink } from 'vue-router';
+import { RouterLinkProps } from 'vue-router';
 
 defineOptions({
   inheritAttrs: false
 });
 
-defineProps({
-  // @ts-ignore
-  ...RouterLink.props,
-  inactiveClass: String
-});
+const props = defineProps<RouterLinkProps>();
 
 // NOTE cleanup and use correct link when it's a white label site
 function normalize(to: any) {
@@ -20,14 +16,14 @@ function normalize(to: any) {
 <template>
   <router-link
     v-slot="{ isActive, href, navigate }"
-    v-bind="$props"
-    :to="normalize($props.to)"
+    v-bind="props"
+    :to="normalize(props.to)"
     custom
   >
     <a
       v-bind="$attrs"
       :href="href"
-      :class="isActive ? activeClass : inactiveClass"
+      :class="{ [`${activeClass}`]: isActive }"
       @click="navigate"
     >
       <slot />
