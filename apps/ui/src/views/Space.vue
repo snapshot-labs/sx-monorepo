@@ -9,7 +9,6 @@ defineProps<{
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
-const uiStore = useUiStore();
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();
@@ -57,23 +56,18 @@ watchEffect(() => {
 
 <template>
   <div>
-    <div>
-      <div
-        class="mx-0"
-        :class="{
-          'xl:mr-[240px]': hasRightPlaceholderSidebar,
-          'lg:ml-[240px]': hasAppNav,
-          'translate-x-[240px] lg:translate-x-0':
-            hasAppNav && uiStore.sidebarOpen
-        }"
-      >
-        <UiLoading v-if="!space" class="block p-4" />
-        <router-view v-else :space="space" />
-      </div>
-      <div
-        v-if="hasRightPlaceholderSidebar"
-        class="invisible xl:visible fixed w-[240px] border-l bottom-0 top-[72px] right-0"
-      />
+    <div
+      class="mx-0"
+      :class="{
+        'xl:mr-[240px]': hasRightPlaceholderSidebar
+      }"
+    >
+      <UiLoading v-if="!space" class="block p-4" />
+      <router-view v-else :space="space" />
     </div>
+    <div
+      v-if="hasRightPlaceholderSidebar"
+      class="invisible xl:visible fixed w-[240px] border-l bottom-0 top-[72px] right-0"
+    />
   </div>
 </template>

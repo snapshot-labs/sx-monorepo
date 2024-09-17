@@ -131,10 +131,15 @@ watch(isSwiping, () => {
           'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
         }"
       >
-        <router-view
-          class="flex-auto mt-[72px] pl-0 lg:pl-[72px]"
-          :has-app-nav="hasAppNav"
-        />
+        <div
+          :class="{
+            'lg:ml-[240px]': hasAppNav,
+            'translate-x-[240px] lg:translate-x-0':
+              uiStore.sidebarOpen && hasAppNav
+          }"
+        >
+          <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
+        </div>
       </div>
     </div>
     <AppNotifications />
