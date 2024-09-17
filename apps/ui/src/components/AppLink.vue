@@ -5,7 +5,9 @@ defineOptions({
   inheritAttrs: false
 });
 
-const props = defineProps<{ button?: boolean } & RouterLinkProps>();
+const props = defineProps<
+  { button?: boolean; primary?: boolean } & RouterLinkProps
+>();
 
 // NOTE cleanup and use correct link when it's a white label site
 function normalize(to: any) {
@@ -25,7 +27,8 @@ function normalize(to: any) {
       :href="href"
       :class="{
         [activeClass!]: isActive && activeClass,
-        button: button
+        button: button,
+        primary: primary
       }"
       @click="navigate"
     >
