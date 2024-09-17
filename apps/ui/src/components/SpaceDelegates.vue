@@ -109,7 +109,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :to="{
           name: 'space-user-statement',
           params: {
-            space: `${$props.space.network}:${props.space.id}`,
+            space: spaceKey,
             user: web3.account
           }
         }"
@@ -196,7 +196,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               :to="{
                 name: 'space-user-statement',
                 params: {
-                  space: `${space.network}:${space.id}`,
+                  space: spaceKey,
                   user: delegate.user
                 }
               }"
@@ -277,7 +277,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       :to="{
                         name: 'space-user-statement',
                         params: {
-                          space: `${space.network}:${space.id}`,
+                          space: spaceKey,
                           user: delegate.user
                         }
                       }"
