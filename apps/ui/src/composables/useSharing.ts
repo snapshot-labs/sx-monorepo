@@ -44,7 +44,7 @@ export function useSharing() {
       router.resolve({
         name: 'user',
         params: {
-          id: user.id
+          user: user.id
         }
       }).href
     }`;
@@ -55,7 +55,7 @@ export function useSharing() {
       router.resolve({
         name: 'space-user',
         params: {
-          id: `${spaceUser.space.network}:${spaceUser.space.id}`,
+          space: `${spaceUser.space.network}:${spaceUser.space.id}`,
           user: spaceUser.user.id
         }
       }).href

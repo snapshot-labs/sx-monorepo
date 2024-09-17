@@ -5,7 +5,7 @@ const route = useRoute();
 const { load, get, loading, loaded } = useApps();
 const { setTitle } = useTitle();
 
-const id = route.params.id as string;
+const id = route.params.app as string;
 const app = computed(() => get(id));
 
 watchEffect(() => {
