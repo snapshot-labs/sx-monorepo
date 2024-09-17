@@ -33,7 +33,7 @@ export default {
     network: '1',
     icon: coinbaseIcon,
     options: {
-      appName: APP_NAME,
+      appName: 'Snapshot',
       darkMode: false,
       chainId: 1,
       ethJsonrpcUrl: 'https://cloudflare-eth.com'
