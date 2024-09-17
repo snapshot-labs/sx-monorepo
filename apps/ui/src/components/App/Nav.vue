@@ -31,7 +31,7 @@ const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const { web3 } = useWeb3();
 
@@ -137,12 +137,12 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
       my: {
         user: {
           name: 'Profile',
-          link: { name: 'user', params: { id: web3.value.account } },
+          link: { name: 'user', params: { user: web3.value.account } },
           icon: IHUser,
           hidden: !web3.value.account,
           active:
             (route.name as string) === 'user' &&
-            route.params.id === web3.value.account
+            route.params.user === web3.value.account
         },
         settings: {
           name: 'Settings',
@@ -186,7 +186,7 @@ const navigationItems = computed(() =>
       invisible: !uiStore.sidebarOpen
     }"
   >
-    <router-link
+    <AppLink
       v-for="(item, key) in navigationItems"
       :key="key"
       :to="item.link"
@@ -200,6 +200,6 @@ const navigationItems = computed(() =>
         class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
         v-text="item.count"
       />
-    </router-link>
+    </AppLink>
   </div>
 </template>

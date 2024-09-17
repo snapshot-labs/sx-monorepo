@@ -241,19 +241,19 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     gradient="xxl"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <router-link
+      <Applink
         v-for="tab in tabs.filter(tab => tab.visible)"
         :key="tab.id"
         :to="{
           name: 'space-settings',
-          params: { id: route.params.id, tab: tab.id }
+          params: { space: route.params.space, tab: tab.id }
         }"
         type="button"
         class="scroll-mx-8"
         @focus="handleTabFocus"
       >
         <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-      </router-link>
+      </Applink>
     </div>
   </UiScrollerHorizontal>
   <div v-if="loading" class="p-4">
