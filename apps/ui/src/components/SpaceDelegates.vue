@@ -50,6 +50,8 @@ const currentNetwork = computed(() => {
   }
 });
 
+const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
+
 function handleSortChange(
   type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
 ) {
@@ -136,7 +138,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </div>
         <button
           type="button"
-          class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
+          class="hidden md:flex w-[120px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span class="truncate">Delegators</span>
@@ -227,7 +229,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
               </div>
               <div
-                class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
+                class="hidden md:flex shrink-0 w-[120px] flex-col items-end justify-center leading-[22px] truncate"
               >
                 <h4
                   class="text-skin-link"
