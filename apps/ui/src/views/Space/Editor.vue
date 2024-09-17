@@ -69,7 +69,7 @@ const proposalKey = computed(() => {
   return `${spaceKey.value}:${key}`;
 });
 const proposal = computedAsync(async () => {
-  if (!proposalKey.value || !props.space.network) return null;
+  if (!proposalKey.value) return null;
 
   if (!proposals[proposalKey.value]) {
     await createDraft(spaceKey.value, undefined, route.params.key as string);
@@ -195,7 +195,7 @@ async function handleProposeClick() {
       );
     }
     if (result) {
-      proposalsStore.reset(props.space.id!, props.space.network!);
+      proposalsStore.reset(props.space.id, props.space.network);
       router.push({
         name: 'space-proposals',
         params: { space: spaceKey.value }
@@ -324,32 +324,27 @@ export default defineComponent({
         </router-link>
         <h4 class="grow truncate">New proposal</h4>
         <IndicatorPendingTransactions />
-        <UiLoading v-if="!space" class="block p-4" />
-        <template v-else>
-          <UiTooltip title="Drafts">
-            <UiButton
-              class="leading-3 !px-0 w-[46px]"
-              @click="modalOpen = true"
-            >
-              <IH-collection class="inline-block" />
-            </UiButton>
-          </UiTooltip>
-          <UiButton
-            class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-            :loading="
-              !!web3.account &&
-              (sending || !votingPower || votingPower.status === 'loading')
-            "
-            :disabled="!canSubmit"
-            @click="handleProposeClick"
-          >
-            <span
-              class="hidden md:inline-block"
-              v-text="proposal?.proposalId ? 'Update' : 'Publish'"
-            />
-            <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+
+        <UiTooltip title="Drafts">
+          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+            <IH-collection class="inline-block" />
           </UiButton>
-        </template>
+        </UiTooltip>
+        <UiButton
+          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          :loading="
+            !!web3.account &&
+            (sending || !votingPower || votingPower.status === 'loading')
+          "
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
+        >
+          <span
+            class="hidden md:inline-block"
+            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
       </div>
     </nav>
     <div class="md:mr-[340px]">
