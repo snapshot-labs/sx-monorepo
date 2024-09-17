@@ -1,4 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
+import { isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call, multicall } from '@/helpers/call';
@@ -146,7 +147,14 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
 
 export async function getSpaceController(name: string, chainId: ENSChainId) {
   const snapshotRecord = await getEnsTextRecord(name, 'snapshot', chainId);
-  if (snapshotRecord) return snapshotRecord;
+  if (snapshotRecord) {
+    if (isAddress(snapshotRecord)) return snapshotRecord;
+
+    const uriParts = snapshotRecord.split('/');
+    const position = uriParts.includes('testnet') ? 5 : 4;
+    const address = uriParts[position];
+    if (isAddress(address)) return address;
+  }
 
   return getNameOwner(name, chainId);
 }
