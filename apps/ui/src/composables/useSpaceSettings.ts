@@ -1,6 +1,6 @@
 import objectHash from 'object-hash';
 import { Ref } from 'vue';
-import { getNameOwner } from '@/helpers/ens';
+import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { clone, compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
@@ -93,7 +93,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     const owner = await getNameOwner(
       space.value.id,
-      network.value.chainId as 1 | 11155111
+      network.value.chainId as ENSChainId
     );
 
     return compareAddresses(owner, account);

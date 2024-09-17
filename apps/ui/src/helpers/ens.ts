@@ -4,7 +4,7 @@ import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call } from '@/helpers/call';
 import { getProvider } from '@/helpers/provider';
 
-type ENSChainId = 1 | 11155111;
+export type ENSChainId = 1 | 11155111;
 
 type ENSContracts = {
   registry: string;
