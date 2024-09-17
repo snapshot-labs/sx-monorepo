@@ -507,8 +507,13 @@ export async function imageUpload(file: File) {
 }
 
 export function simplifyURL(fullURL: string): string {
-  const url = new URL(fullURL);
-  return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+  try {
+    const url = new URL(fullURL);
+    return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+  } catch (error) {
+    console.log('Error simplifying URL', error);
+    return '';
+  }
 }
 
 export function getChoiceWeight(

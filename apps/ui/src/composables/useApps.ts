@@ -47,7 +47,20 @@ export function useApps() {
   }
 
   function get(id: string) {
-    return apps.value.find(app => app.id === id) || {};
+    const app = apps.value.find(app => app.id === id);
+    if (!app) {
+      return {};
+    }
+
+    if (app.github && !app.github.startsWith('https://')) {
+      app.github = `https://github.com/${app.github}`;
+    }
+
+    if (app.x?.startsWith('@')) {
+      app.x = app.x.slice(1);
+    }
+
+    return app;
   }
 
   function search(q: string) {
