@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { NavigationGuard } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { resolver } from '@/helpers/resolver';
 import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
