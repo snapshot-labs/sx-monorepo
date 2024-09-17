@@ -72,8 +72,9 @@ const definition = computed(() => {
 });
 
 const uniqueAddresses = computed(() =>
-  uniqBy(form.value.addresses.split(','), (address: string) =>
-    address.trim().toLocaleLowerCase()
+  uniqBy(
+    form.value.addresses.split(',').map(v => v.trim()),
+    address => address.toLocaleLowerCase()
   )
 );
 
