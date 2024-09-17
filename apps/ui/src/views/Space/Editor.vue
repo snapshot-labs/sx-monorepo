@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { NavigationGuard } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { resolver } from '@/helpers/resolver';
 import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
@@ -47,7 +45,7 @@ const router = useRouter();
 const { propose, updateProposal } = useActions();
 const { web3 } = useWeb3();
 const {
-  spaceKey,
+  spaceKey: walletSpaceKey,
   network: walletConnectNetwork,
   transaction,
   executionStrategy: walletConnectTransactionExecutionStrategy,
@@ -55,26 +53,22 @@ const {
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
 const { votingPower, fetch: fetchVotingPower } = useVotingPower();
+const { strategiesWithTreasuries } = useTreasuries(props.space);
 
 const modalOpen = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
+const enforcedVoteType = ref<VoteType | null>(null);
 
+const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
-const { strategiesWithTreasuries } = useTreasuries(props.space);
-const proposalKey = computed(() => {
-  const key = route.params.key as string;
-  return `${props.space.network}:${props.space.id}:${key}`;
-});
+const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
+const proposalKey = computed(() => `${spaceKey.value}:${draftId.value}`);
 const proposal = computedAsync(async () => {
-  if (!proposalKey.value || !props.space.network) return null;
+  if (!proposalKey.value) return null;
 
   if (!proposals[proposalKey.value]) {
-    await createDraft(
-      `${props.space.network}:${props.space.id}`,
-      undefined,
-      route.params.key as string
-    );
+    await createDraft(spaceKey.value, undefined, draftId.value);
   }
 
   return proposals[proposalKey.value];
@@ -84,11 +78,9 @@ const proposalData = computed(() => {
 
   return JSON.stringify(omit(proposal.value, ['updatedAt']));
 });
-const enforcedVoteType = ref<VoteType | null>(null);
 const supportsMultipleTreasuries = computed(() => {
   return offchainNetworks.includes(props.space.network);
 });
-
 const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
@@ -199,10 +191,10 @@ async function handleProposeClick() {
       );
     }
     if (result) {
-      proposalsStore.reset(props.space.id!, props.space.network!);
+      proposalsStore.reset(props.space.id, props.space.network);
       router.push({
         name: 'space-proposals',
-        params: { space: `${props.space.network}:${props.space.id}` }
+        params: { space: spaceKey.value }
       });
     }
   } finally {
@@ -221,7 +213,7 @@ function handleExecutionUpdated(
 
 function handleTransactionAccept() {
   if (
-    !spaceKey.value ||
+    !walletSpaceKey.value ||
     !walletConnectTransactionExecutionStrategy.value ||
     !transaction.value ||
     !proposal.value
@@ -254,6 +246,21 @@ watch(
   { immediate: true }
 );
 
+watch(
+  draftId,
+  async id => {
+    if (id) return true;
+
+    const newId = await createDraft(spaceKey.value);
+
+    router.replace({
+      name: 'space-editor',
+      params: { space: spaceKey.value, key: newId }
+    });
+  },
+  { immediate: true }
+);
+
 watch(proposalData, () => {
   if (!proposal.value) return;
 
@@ -281,35 +288,6 @@ watchEffect(() => {
   setTitle(`${title} - ${props.space.name}`);
 });
 </script>
-<script lang="ts">
-const { createDraft } = useEditor();
-const handleRouteChange: NavigationGuard = async to => {
-  if (to.params.key) {
-    return true;
-  }
-
-  const resolved = await resolver.resolveName(to.params.space as string);
-  if (!resolved) return false;
-
-  const draftId = await createDraft(
-    `${resolved.networkId}:${resolved.address}`
-  );
-
-  return {
-    ...to,
-    params: {
-      ...to.params,
-      key: draftId
-    }
-  };
-};
-
-export default defineComponent({
-  beforeRouteEnter: handleRouteChange,
-  beforeRouteUpdate: handleRouteChange
-});
-</script>
-
 <template>
   <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
@@ -317,7 +295,7 @@ export default defineComponent({
         <router-link
           :to="{
             name: 'space-overview',
-            params: { space: `${space.network}:${space.id}` }
+            params: { space: spaceKey }
           }"
           class="mr-2"
           tabindex="-1"
@@ -328,32 +306,27 @@ export default defineComponent({
         </router-link>
         <h4 class="grow truncate">New proposal</h4>
         <IndicatorPendingTransactions />
-        <UiLoading v-if="!space" class="block p-4" />
-        <template v-else>
-          <UiTooltip title="Drafts">
-            <UiButton
-              class="leading-3 !px-0 w-[46px]"
-              @click="modalOpen = true"
-            >
-              <IH-collection class="inline-block" />
-            </UiButton>
-          </UiTooltip>
-          <UiButton
-            class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-            :loading="
-              !!web3.account &&
-              (sending || !votingPower || votingPower.status === 'loading')
-            "
-            :disabled="!canSubmit"
-            @click="handleProposeClick"
-          >
-            <span
-              class="hidden md:inline-block"
-              v-text="proposal?.proposalId ? 'Update' : 'Publish'"
-            />
-            <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+
+        <UiTooltip title="Drafts">
+          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+            <IH-collection class="inline-block" />
           </UiButton>
-        </template>
+        </UiTooltip>
+        <UiButton
+          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          :loading="
+            !!web3.account &&
+            (sending || !votingPower || votingPower.status === 'loading')
+          "
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
+        >
+          <span
+            class="hidden md:inline-block"
+            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
       </div>
     </nav>
     <div class="md:mr-[340px]">

@@ -27,8 +27,13 @@ const { isSwiping, direction } = useSwipe(el, {
   }
 });
 const { createDraft } = useEditor();
-const { spaceKey, network, executionStrategy, transaction, reset } =
-  useWalletConnectTransaction();
+const {
+  spaceKey: walletSpaceKey,
+  network,
+  executionStrategy,
+  transaction,
+  reset
+} = useWalletConnectTransaction();
 
 provide('web3', web3);
 
@@ -45,17 +50,21 @@ const bottomPadding = computed(
 );
 
 async function handleTransactionAccept() {
-  if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
+  if (!walletSpaceKey.value || !executionStrategy.value || !transaction.value)
+    return;
 
   const executions = {} as Record<string, Transaction[]>;
   executions[executionStrategy.value.address] = [transaction.value];
 
-  const space = spaceKey.value;
-  const draftId = await createDraft(space, {
+  const spaceKey = walletSpaceKey.value;
+  const draftId = await createDraft(spaceKey, {
     executions
   });
 
-  router.push({ name: 'space-editor', params: { space, key: draftId } });
+  router.push({
+    name: 'space-editor',
+    params: { space: walletSpaceKey.value, key: draftId }
+  });
 
   reset();
 }
@@ -122,10 +131,15 @@ watch(isSwiping, () => {
           'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
         }"
       >
-        <router-view
-          class="flex-auto mt-[72px] pl-0 lg:pl-[72px]"
-          :has-app-nav="hasAppNav"
-        />
+        <div
+          :class="{
+            'lg:ml-[240px]': hasAppNav,
+            'translate-x-[240px] lg:translate-x-0':
+              uiStore.sidebarOpen && hasAppNav
+          }"
+        >
+          <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
+        </div>
       </div>
     </div>
     <AppNotifications />
