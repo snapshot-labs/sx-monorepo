@@ -38,7 +38,7 @@ const CHOICES_DEFINITION = {
 
 const { setTitle } = useTitle();
 const { proposals, createDraft } = useEditor();
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const route = useRoute();
 const router = useRouter();
@@ -131,7 +131,8 @@ const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default']
+  maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default'],
+  examples: ['Propose something…']
 }));
 const formErrors = computed(() => {
   if (!proposal.value) return {};
@@ -215,7 +216,7 @@ async function handleProposeClick() {
       proposalsStore.reset(address.value!, networkId.value!);
       router.push({
         name: 'space-proposals',
-        params: { id: param.value }
+        params: { space: param.value }
       });
     }
   } finally {
@@ -309,7 +310,7 @@ const handleRouteChange: NavigationGuard = async to => {
     return true;
   }
 
-  const resolved = await resolver.resolveName(to.params.id as string);
+  const resolved = await resolver.resolveName(to.params.space as string);
   if (!resolved) return false;
 
   const draftId = await createDraft(
@@ -334,30 +335,30 @@ export default defineComponent({
 <template>
   <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
-      <div class="flex items-center h-[71px] mx-4">
-        <div class="flex-auto space-x-2">
-          <router-link
-            :to="{ name: 'space-overview', params: { id: param } }"
-            class="mr-2"
-            tabindex="-1"
-          >
-            <UiButton class="leading-3 w-[46px] !px-0">
-              <IH-arrow-narrow-left class="inline-block" />
-            </UiButton>
-          </router-link>
-          <h4 class="py-2 inline-block">New proposal</h4>
-        </div>
-        <IndicatorPendingTransactions class="mr-2" />
-        <UiLoading v-if="!space" class="block p-4" />
-        <div v-else class="space-x-2">
-          <UiButton
-            class="float-left leading-3 !pl-3 !pr-2.5 rounded-r-none"
-            @click="modalOpen = true"
-          >
-            <IH-collection class="inline-block" />
+      <div class="flex items-center h-[71px] mx-4 gap-2">
+        <AppLink
+          :to="{ name: 'space-overview', params: { space: param } }"
+          class="mr-2"
+          tabindex="-1"
+        >
+          <UiButton class="leading-3 w-[46px] !px-0">
+            <IH-arrow-narrow-left class="inline-block" />
           </UiButton>
+        </AppLink>
+        <h4 class="grow truncate">New proposal</h4>
+        <IndicatorPendingTransactions />
+        <UiLoading v-if="!space" class="block p-4" />
+        <template v-else>
+          <UiTooltip title="Drafts">
+            <UiButton
+              class="leading-3 !px-0 w-[46px]"
+              @click="modalOpen = true"
+            >
+              <IH-collection class="inline-block" />
+            </UiButton>
+          </UiTooltip>
           <UiButton
-            class="rounded-l-none border-l-0 float-left !m-0 !px-3"
+            class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
             :loading="
               !!web3.account &&
               (sending || !votingPower || votingPower.status === 'loading')
@@ -366,12 +367,12 @@ export default defineComponent({
             @click="handleProposeClick"
           >
             <span
-              class="hidden mr-2 md:inline-block"
+              class="hidden md:inline-block"
               v-text="proposal?.proposalId ? 'Update' : 'Publish'"
             />
-            <IH-paper-airplane class="inline-block rotate-90" />
+            <IH-paper-airplane class="rotate-90 relative left-[2px]" />
           </UiButton>
-        </div>
+        </template>
       </div>
     </nav>
     <div class="md:mr-[340px]">

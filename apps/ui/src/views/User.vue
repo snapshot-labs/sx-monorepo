@@ -30,7 +30,7 @@ const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
 const loaded = ref(false);
 
-const id = computed(() => route.params.id as string);
+const id = computed(() => route.params.user as string);
 
 const user = computed(() => usersStore.getUser(id.value));
 
@@ -195,14 +195,14 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       <IH-exclamation-circle class="inline-block" />
       <span>This user does not have any activities yet.</span>
     </div>
-    <router-link
+    <AppLink
       v-for="(activity, i) in activities"
       v-else
       :key="i"
       :to="{
         name: 'space-user-statement',
         params: {
-          id: activity.spaceId,
+          space: activity.spaceId,
           user: user.id
         }
       }"
@@ -239,7 +239,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-text="_p(activity.vote_percentage)"
         />
       </div>
-    </router-link>
+    </AppLink>
     <teleport to="#modal">
       <ModalEditUser
         v-if="compareAddresses(web3.account, user.id)"

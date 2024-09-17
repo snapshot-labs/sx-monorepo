@@ -208,11 +208,11 @@ watch([sortBy, choiceFilter], () => {
                   : 'bg-skin-border'
               "
             />
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-user-statement',
                 params: {
-                  id: `${proposal.network}:${proposal.space.id}`,
+                  space: `${proposal.network}:${proposal.space.id}`,
                   user: vote.voter.id
                 }
               }"
@@ -229,7 +229,7 @@ watch([sortBy, choiceFilter], () => {
                   v-text="shortenAddress(vote.voter.id)"
                 />
               </div>
-            </router-link>
+            </AppLink>
             <button
               type="button"
               class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px]"
