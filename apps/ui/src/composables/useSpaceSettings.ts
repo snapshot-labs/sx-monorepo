@@ -8,7 +8,7 @@ import {
   StrategyConfig,
   StrategyTemplate
 } from '@/networks/types';
-import { Space, SpaceMetadata, StrategyParsedMetadata } from '@/types';
+import { Member, Space, SpaceMetadata, StrategyParsedMetadata } from '@/types';
 
 export type OffchainSpaceSettings = {
   name: string;
@@ -87,6 +87,9 @@ export function useSpaceSettings(space: Ref<Space>) {
   const votingStrategies = ref([] as StrategyConfig[]);
   const initialValidationStrategyObjectHash = ref(null as string | null);
   const controller = ref(space.value.controller);
+
+  // Offchain properties
+  const members = ref([] as Member[]);
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -301,6 +304,25 @@ export function useSpaceSettings(space: Ref<Space>) {
     };
   }
 
+  function getInitialMembers(space: Space): Member[] {
+    if (space.additionalRawData?.type !== 'offchain') return [];
+
+    return [
+      ...space.additionalRawData.admins.map(address => ({
+        address,
+        role: 'admin' as const
+      })),
+      ...space.additionalRawData.moderators.map((address: string) => ({
+        address,
+        role: 'moderator' as const
+      })),
+      ...space.additionalRawData.members.map((address: string) => ({
+        address,
+        role: 'author' as const
+      }))
+    ];
+  }
+
   async function saveOffchain() {
     if (space.value.additionalRawData?.type !== 'offchain') {
       throw new Error('Missing raw data for offchain space');
@@ -352,9 +374,15 @@ export function useSpaceSettings(space: Ref<Space>) {
         name: treasury.name || '',
         network: treasury.chainId?.toString() ?? '1'
       })),
-      admins: space.value.additionalRawData.admins,
-      moderators: space.value.additionalRawData.moderators,
-      members: space.value.additionalRawData.members,
+      admins: members.value
+        .filter(member => member.role === 'admin')
+        .map(member => member.address),
+      moderators: members.value
+        .filter(member => member.role === 'moderator')
+        .map(member => member.address),
+      members: members.value
+        .filter(member => member.role === 'author')
+        .map(member => member.address),
       plugins: space.value.additionalRawData.plugins,
       delegationPortal: delegationPortal,
       filters: space.value.additionalRawData.filters,
@@ -479,6 +507,10 @@ export function useSpaceSettings(space: Ref<Space>) {
     initialValidationStrategyObjectHash.value = objectHash(
       validationStrategyValue
     );
+
+    if (offchainNetworks.includes(space.value.network)) {
+      members.value = getInitialMembers(space.value);
+    }
   }
 
   watchEffect(async () => {
@@ -494,6 +526,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const validationStrategyValue = validationStrategy.value;
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
+    const membersValue = members.value;
 
     if (loading.value) {
       isModified.value = false;
@@ -532,7 +565,15 @@ export function useSpaceSettings(space: Ref<Space>) {
     }
 
     if (offchainNetworks.includes(space.value.network)) {
-      // TODO: offchain network only settings
+      const ignoreOrderOpts = { unorderedArrays: true };
+
+      if (
+        objectHash(membersValue, ignoreOrderOpts) !==
+        objectHash(getInitialMembers(space.value), ignoreOrderOpts)
+      ) {
+        isModified.value = true;
+        return;
+      }
     } else {
       const [authenticatorsToAdd, authenticatorsToRemove] =
         await processChanges(
@@ -583,6 +624,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     authenticators,
     validationStrategy,
     votingStrategies,
+    members,
     save,
     saveController,
     reset
