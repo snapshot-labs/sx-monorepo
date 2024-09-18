@@ -26,6 +26,8 @@ const {
   parent,
   children,
   termsOfServices,
+  customDomain,
+  isPrivate,
   save,
   saveController,
   reset
@@ -507,6 +509,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:parent="parent"
         v-model:children="children"
         v-model:terms-of-services="termsOfServices"
+        v-model:custom-domain="customDomain"
+        v-model:is-private="isPrivate"
         :network-id="space.network"
       />
     </UiContainerSettings>

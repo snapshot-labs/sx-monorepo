@@ -132,6 +132,8 @@ export function useSpaceSettings(space: Ref<Space>) {
   const parent = ref('');
   const children = ref([] as string[]);
   const termsOfServices = ref('');
+  const customDomain = ref('');
+  const isPrivate = ref(false);
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -405,10 +407,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
       coingecko: form.value.coingecko ?? space.value.coingecko,
-      parent: parent.value || null,
+      parent: parent.value,
       children: children.value,
-      private: space.value.additionalRawData.private,
-      domain: space.value.additionalRawData.domain,
+      private: isPrivate.value,
+      domain: customDomain.value,
       skin: space.value.additionalRawData.skin,
       guidelines: space.value.additionalRawData.guidelines,
       template: space.value.additionalRawData.template,
@@ -561,6 +563,8 @@ export function useSpaceSettings(space: Ref<Space>) {
       parent.value = space.value.parent?.id ?? '';
       children.value = space.value.children.map(child => child.id);
       termsOfServices.value = space.value.additionalRawData?.terms ?? '';
+      customDomain.value = space.value.additionalRawData?.domain ?? '';
+      isPrivate.value = space.value.additionalRawData?.private ?? false;
     }
   }
 
@@ -581,6 +585,8 @@ export function useSpaceSettings(space: Ref<Space>) {
     const parentValue = parent.value;
     const childrenValue = children.value;
     const termsOfServicesValue = termsOfServices.value;
+    const customDomainValue = customDomain.value;
+    const isPrivateValue = isPrivate.value;
 
     if (loading.value) {
       isModified.value = false;
@@ -651,6 +657,16 @@ export function useSpaceSettings(space: Ref<Space>) {
         isModified.value = true;
         return;
       }
+
+      if (customDomainValue !== (space.value.additionalRawData?.domain ?? '')) {
+        isModified.value = true;
+        return;
+      }
+
+      if (isPrivateValue !== space.value.additionalRawData?.private) {
+        isModified.value = true;
+        return;
+      }
     } else {
       const [authenticatorsToAdd, authenticatorsToRemove] =
         await processChanges(
@@ -709,6 +725,8 @@ export function useSpaceSettings(space: Ref<Space>) {
     parent,
     children,
     termsOfServices,
+    customDomain,
+    isPrivate,
     save,
     saveController,
     reset

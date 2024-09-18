@@ -25,11 +25,21 @@ const TERMS_OF_SERVICES_DEFINITION = {
   examples: ['https://example.com/terms']
 };
 
+const CUSTOM_DOMAIN_DEFINITION = {
+  type: 'string',
+  format: 'uri',
+  title: 'Domain name',
+  maxLength: 64,
+  examples: ['vote.balancer.fi']
+};
+
 const parent = defineModel<string>('parent', { required: true });
 const children = defineModel<string[]>('children', { required: true });
 const termsOfServices = defineModel<string>('termsOfServices', {
   required: true
 });
+const customDomain = defineModel<string>('customDomain', { required: true });
+const isPrivate = defineModel<boolean>('isPrivate', { required: true });
 
 const props = defineProps<{
   networkId: NetworkID;
@@ -95,7 +105,7 @@ function deleteChild(i: number) {
 <template>
   <h4 class="eyebrow mb-2 font-medium">Sub-spaces</h4>
   <UiMessage
-    :type="'info'"
+    type="info"
     :learn-more-link="'https://docs.snapshot.org/user-guides/spaces/sub-spaces'"
   >
     Add a sub-space to display its proposals within your space. If you want the
@@ -150,5 +160,21 @@ function deleteChild(i: number) {
       :definition="TERMS_OF_SERVICES_DEFINITION"
       :error="formErrors.termsOfServices"
     />
+  </div>
+  <h4 class="eyebrow mb-2 font-medium mt-4">Custom domain</h4>
+  <UiMessage
+    type="info"
+    :learn-more-link="'https://docs.snapshot.org/spaces/add-custom-domain'"
+  >
+    To setup a custom domain you additionally need to open a pull request on
+    github after you have created the space.
+  </UiMessage>
+  <div class="s-box mt-3">
+    <UiInputString
+      v-model="customDomain"
+      :definition="CUSTOM_DOMAIN_DEFINITION"
+      :error="formErrors.customDomain"
+    />
+    <UiSwitch v-model="isPrivate" title="Hide space from homepage" />
   </div>
 </template>
