@@ -131,6 +131,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const members = ref([] as Member[]);
   const parent = ref('');
   const children = ref([] as string[]);
+  const termsOfServices = ref('');
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -399,7 +400,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       cover: form.value.cover ?? space.value.cover,
       network: space.value.snapshot_chain_id?.toString() ?? '1',
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
-      terms: space.value.additionalRawData.terms,
+      terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
@@ -559,6 +560,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       members.value = getInitialMembers(space.value);
       parent.value = space.value.parent?.id ?? '';
       children.value = space.value.children.map(child => child.id);
+      termsOfServices.value = space.value.additionalRawData?.terms ?? '';
     }
   }
 
@@ -578,6 +580,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const membersValue = members.value;
     const parentValue = parent.value;
     const childrenValue = children.value;
+    const termsOfServicesValue = termsOfServices.value;
 
     if (loading.value) {
       isModified.value = false;
@@ -641,6 +644,13 @@ export function useSpaceSettings(space: Ref<Space>) {
         isModified.value = true;
         return;
       }
+
+      if (
+        termsOfServicesValue !== (space.value.additionalRawData?.terms ?? '')
+      ) {
+        isModified.value = true;
+        return;
+      }
     } else {
       const [authenticatorsToAdd, authenticatorsToRemove] =
         await processChanges(
@@ -698,6 +708,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     members,
     parent,
     children,
+    termsOfServices,
     save,
     saveController,
     reset

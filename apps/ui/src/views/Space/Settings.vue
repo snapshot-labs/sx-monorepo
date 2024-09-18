@@ -25,6 +25,7 @@ const {
   members,
   parent,
   children,
+  termsOfServices,
   save,
   saveController,
   reset
@@ -505,6 +506,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       <FormSpaceAdvanced
         v-model:parent="parent"
         v-model:children="children"
+        v-model:terms-of-services="termsOfServices"
         :network-id="space.network"
       />
     </UiContainerSettings>

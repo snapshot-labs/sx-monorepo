@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
@@ -7,19 +8,28 @@ const CHILDREN_LIMIT = 16;
 const PARENT_SPACE_DEFINITION = {
   type: 'string',
   title: 'Main space',
-  minLength: 1,
   examples: ['pistachiodao.eth']
 };
 
 const SUB_SPACE_DEFINITION = {
   type: 'string',
   title: 'Sub-space(s)',
-  minLength: 1,
   examples: ['pistachiodao.eth']
+};
+
+const TERMS_OF_SERVICES_DEFINITION = {
+  type: 'string',
+  format: 'uri',
+  title: 'Terms of services',
+  maxLength: 256,
+  examples: ['https://example.com/terms']
 };
 
 const parent = defineModel<string>('parent', { required: true });
 const children = defineModel<string[]>('children', { required: true });
+const termsOfServices = defineModel<string>('termsOfServices', {
+  required: true
+});
 
 const props = defineProps<{
   networkId: NetworkID;
@@ -33,6 +43,30 @@ const isAddingChild = ref(false);
 const network = computed(() => getNetwork(props.networkId));
 const canAddParentSpace = computed(() => children.value.length === 0);
 const canAddChildSpace = computed(() => parent.value.length === 0);
+const formErrors = computed(() => {
+  const validator = getValidator({
+    type: 'object',
+    title: 'Advanced',
+    additionalProperties: false,
+    required: [],
+    properties: {
+      parent: PARENT_SPACE_DEFINITION,
+      childInput: SUB_SPACE_DEFINITION,
+      termsOfServices: TERMS_OF_SERVICES_DEFINITION
+    }
+  });
+
+  return validator.validate(
+    {
+      parent: parent.value,
+      childInput: childInput.value,
+      termsOfServices: termsOfServices.value
+    },
+    {
+      skipEmptyOptionalFields: true
+    }
+  );
+});
 
 async function addChild() {
   try {
@@ -76,6 +110,7 @@ function deleteChild(i: number) {
         'cursor-not-allowed': !canAddParentSpace
       }"
       :definition="PARENT_SPACE_DEFINITION"
+      :error="formErrors.parent"
     />
     <UiInputString
       v-model="childInput"
@@ -84,6 +119,7 @@ function deleteChild(i: number) {
         'cursor-not-allowed': !canAddChildSpace
       }"
       :definition="SUB_SPACE_DEFINITION"
+      :error="formErrors.childInput"
     />
     <UiButton
       v-if="children.length < CHILDREN_LIMIT"
@@ -106,5 +142,13 @@ function deleteChild(i: number) {
         <IH-x-mark class="w-[16px]" />
       </button>
     </div>
+  </div>
+  <h4 class="eyebrow mb-2 font-medium mt-4">Terms of services</h4>
+  <div class="s-box">
+    <UiInputString
+      v-model="termsOfServices"
+      :definition="TERMS_OF_SERVICES_DEFINITION"
+      :error="formErrors.termsOfServices"
+    />
   </div>
 </template>
