@@ -23,6 +23,8 @@ const {
   validationStrategy,
   votingStrategies,
   members,
+  parent,
+  children,
   save,
   saveController,
   reset
@@ -47,7 +49,8 @@ type Tab = {
     | 'voting'
     | 'members'
     | 'execution'
-    | 'controller';
+    | 'controller'
+    | 'advanced';
   name: string;
   visible: boolean;
 };
@@ -108,6 +111,11 @@ const tabs = computed<Tab[]>(
         id: 'controller',
         name: 'Controller',
         visible: true
+      },
+      {
+        id: 'advanced',
+        name: 'Advanced',
+        visible: isOffchainNetwork.value
       }
     ] as const
 );
@@ -488,6 +496,17 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           @save="handleControllerSave"
         />
       </teleport>
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="activeTab === 'advanced'"
+      title="Advanced"
+      description="Office ipsum you must be muted. Boy ocean define crank new."
+    >
+      <FormSpaceAdvanced
+        v-model:parent="parent"
+        v-model:children="children"
+        :network-id="space.network"
+      />
     </UiContainerSettings>
     <div
       v-if="

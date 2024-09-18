@@ -129,6 +129,8 @@ export function useSpaceSettings(space: Ref<Space>) {
 
   // Offchain properties
   const members = ref([] as Member[]);
+  const parent = ref('');
+  const children = ref([] as string[]);
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -402,8 +404,8 @@ export function useSpaceSettings(space: Ref<Space>) {
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
       coingecko: form.value.coingecko ?? space.value.coingecko,
-      parent: space.value.parent?.id ?? null,
-      children: space.value.children.map(child => child.id),
+      parent: parent.value || null,
+      children: children.value,
       private: space.value.additionalRawData.private,
       domain: space.value.additionalRawData.domain,
       skin: space.value.additionalRawData.skin,
@@ -555,6 +557,8 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (offchainNetworks.includes(space.value.network)) {
       members.value = getInitialMembers(space.value);
+      parent.value = space.value.parent?.id ?? '';
+      children.value = space.value.children.map(child => child.id);
     }
   }
 
@@ -572,6 +576,8 @@ export function useSpaceSettings(space: Ref<Space>) {
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
     const membersValue = members.value;
+    const parentValue = parent.value;
+    const childrenValue = children.value;
 
     if (loading.value) {
       isModified.value = false;
@@ -615,6 +621,22 @@ export function useSpaceSettings(space: Ref<Space>) {
       if (
         objectHash(membersValue, ignoreOrderOpts) !==
         objectHash(getInitialMembers(space.value), ignoreOrderOpts)
+      ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (parentValue !== (space.value.parent?.id ?? '')) {
+        isModified.value = true;
+        return;
+      }
+
+      if (
+        objectHash(childrenValue, ignoreOrderOpts) !==
+        objectHash(
+          space.value.children.map(child => child.id),
+          ignoreOrderOpts
+        )
       ) {
         isModified.value = true;
         return;
@@ -674,6 +696,8 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy,
     votingStrategies,
     members,
+    parent,
+    children,
     save,
     saveController,
     reset
