@@ -95,7 +95,7 @@ onMounted(() => load());
               </div>
               <div v-if="app.x">
                 <h4 class="eyebrow" v-text="'X (Twitter)'" />
-                <a :href="`https://twitter.com/${app.x}`" target="_blank">
+                <a :href="`https://x.com/${app.x}`" target="_blank">
                   {{ app.x }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </a>
