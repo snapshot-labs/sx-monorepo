@@ -38,12 +38,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           }
         }"
       >
-        <ProposalIconStatus
-          width="17"
-          height="17"
-          :state="proposal.state"
-          class="top-1.5"
-        />
+        <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
       </AppLink>
 
       <div class="md:flex md:min-w-0 my-1 items-center leading-6">

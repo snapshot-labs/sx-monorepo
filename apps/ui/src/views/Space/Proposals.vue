@@ -17,8 +17,7 @@ const proposalsStore = useProposalsStore();
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const selectIconBaseProps = {
-  width: 16,
-  height: 16
+  size: 16
 };
 
 const proposalsRecord = computed(
