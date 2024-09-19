@@ -13,15 +13,44 @@ async function getSpreadsheet(id: string, gid: string = '0'): Promise<any[]> {
 }
 
 function csvToJson(csv: string): any[] {
-  const [header, ...lines] = csv
-    .split('\n')
-    .map(line =>
-      line
-        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-        .map(field => field.trim().replace(/^"|"$/g, ''))
-    );
+  const lines: string[][] = [];
+  let currentLine: string[] = [];
+  let currentField = '';
+  let insideQuotes = false;
 
-  return lines
+  for (let i = 0; i < csv.length; i++) {
+    const char = csv[i];
+    const nextChar = csv[i + 1];
+
+    if (char === '"' && insideQuotes && nextChar === '"') {
+      // Handle escaped quotes
+      currentField += '"';
+      i++;
+    } else if (char === '"') {
+      // Toggle insideQuotes
+      insideQuotes = !insideQuotes;
+    } else if (char === ',' && !insideQuotes) {
+      // End of field
+      currentLine.push(currentField);
+      currentField = '';
+    } else if (char === '\n' && !insideQuotes) {
+      // End of line
+      currentLine.push(currentField);
+      lines.push(currentLine);
+      currentLine = [];
+      currentField = '';
+    } else {
+      // Regular character
+      currentField += char;
+    }
+  }
+
+  currentLine.push(currentField);
+  lines.push(currentLine);
+
+  const [header, ...data] = lines;
+
+  return data
     .filter(line => line.length > 1)
     .map(line =>
       Object.fromEntries(header.map((key, i) => [key, line[i] || '']))
