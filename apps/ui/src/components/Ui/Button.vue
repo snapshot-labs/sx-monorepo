@@ -19,8 +19,12 @@ withDefaults(
   <button
     :type="type"
     :disabled="disabled || loading"
-    :class="{ primary: primary, 'w-[46px] px-0': loading }"
-    class="rounded-full leading-[100%] border button px-3.5 h-[46px] text-skin-link bg-skin-bg"
+    :class="{
+      primary: primary,
+      'w-[46px] px-0': loading,
+      'px-3.5': !loading || $attrs.class?.includes('w-full')
+    }"
+    class="rounded-full leading-[100%] border button h-[46px] text-skin-link bg-skin-bg"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />
