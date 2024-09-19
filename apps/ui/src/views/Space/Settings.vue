@@ -30,6 +30,7 @@ const {
   isPrivate,
   save,
   saveController,
+  deleteSpace,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
@@ -220,6 +221,11 @@ function handleControllerSave(value: string) {
 
   saving.value = true;
   executeFn.value = saveController;
+}
+
+function handleSpaceDelete() {
+  saving.value = true;
+  executeFn.value = () => deleteSpace(props.space.id);
 }
 
 function handleTabFocus(event: FocusEvent) {
@@ -512,6 +518,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:custom-domain="customDomain"
         v-model:is-private="isPrivate"
         :network-id="space.network"
+        :space-id="space.id"
+        :is-controller="isController"
+        @delete-space="handleSpaceDelete"
       />
     </UiContainerSettings>
     <div

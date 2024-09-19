@@ -43,12 +43,19 @@ const isPrivate = defineModel<boolean>('isPrivate', { required: true });
 
 const props = defineProps<{
   networkId: NetworkID;
+  spaceId: string;
+  isController: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'deleteSpace');
 }>();
 
 const { addNotification } = useUiStore();
 
 const childInput = ref('');
 const isAddingChild = ref(false);
+const isDeleteSpaceModalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.networkId));
 const canAddParentSpace = computed(() => children.value.length === 0);
@@ -177,4 +184,31 @@ function deleteChild(i: number) {
     />
     <UiSwitch v-model="isPrivate" title="Hide space from homepage" />
   </div>
+  <h4 class="eyebrow mb-2 font-medium mt-4">Danger zone</h4>
+  <div
+    class="flex flex-col md:flex-row gap-3 md:gap-1 items-center border rounded-md px-4 py-3"
+  >
+    <div class="flex flex-col">
+      <h4 class="text-base">Delete space</h4>
+      <span class="leading-5">
+        Delete this space and all its content. This cannot be undone and you
+        will not be able to create a new space with the same ENS domain name.
+      </span>
+    </div>
+    <UiButton
+      :disabled="!isController"
+      class="w-full md:w-auto flex-shrink-0 border-skin-danger !text-skin-danger"
+      @click="isDeleteSpaceModalOpen = true"
+    >
+      Delete space
+    </UiButton>
+  </div>
+  <teleport to="#modal">
+    <ModalDeleteSpace
+      :open="isDeleteSpaceModalOpen"
+      :space-id="spaceId"
+      @confirm="emit('deleteSpace')"
+      @close="isDeleteSpaceModalOpen = false"
+    />
+  </teleport>
 </template>

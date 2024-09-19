@@ -518,6 +518,11 @@ export function useSpaceSettings(space: Ref<Space>) {
     return transferOwnership(space.value, controller.value);
   }
 
+  async function deleteSpace(id: string) {
+    console.log('deleting space', id);
+    return null;
+  }
+
   async function reset() {
     const authenticatorsValue = await getInitialStrategiesConfig(
       space.value.authenticators,
@@ -729,6 +734,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     isPrivate,
     save,
     saveController,
+    deleteSpace,
     reset
   };
 }
