@@ -49,10 +49,12 @@ const space = computed(() =>
 const isController = computedAsync(async () => {
   if (!networkId.value || !space.value) return false;
 
+  const { account } = web3.value;
+
   const network = getNetwork(networkId.value);
   const controller = await network.helpers.getSpaceController(space.value);
 
-  return compareAddresses(controller, web3.value.account);
+  return compareAddresses(controller, account);
 });
 
 const canSeeSettings = computed(() => {
