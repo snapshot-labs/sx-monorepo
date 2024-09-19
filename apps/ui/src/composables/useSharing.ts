@@ -12,8 +12,6 @@ export type Vote = { proposal: Proposal; choice: Choice };
 export type PayloadType = 'proposal' | 'user' | 'space-user' | 'vote';
 export type Payload = Proposal | User | SpaceUser | Vote;
 
-const HASH_TAG = 'Snapshot';
-
 const SOCIAL_NETWORKS: {
   id: SocialNetwork;
   name: string;
@@ -26,6 +24,7 @@ const SOCIAL_NETWORKS: {
 
 export function useSharing() {
   const router = useRouter();
+  const { app } = useApp();
 
   function getProposalUrl(proposal: Proposal): string {
     return `${window.location.origin}/${
@@ -111,9 +110,9 @@ export function useSharing() {
     let message = encodeURIComponent(getMessage(type, payload));
 
     if (type === 'vote' && socialNetwork === 'x') {
-      message += `%20%23${HASH_TAG}`;
+      message += `%20%23${app.value.app_name}`;
     } else if (socialNetwork === 'lens') {
-      message += `&hashtags=${HASH_TAG}`;
+      message += `&hashtags=${app.value.app_name}`;
     }
 
     let url: string;

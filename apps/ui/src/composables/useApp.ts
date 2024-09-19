@@ -1,8 +1,10 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { APP_NAME } from '@/helpers/constants';
 
 const state = reactive({
   init: false,
-  loading: false
+  loading: false,
+  app_name: APP_NAME
 });
 
 const { login } = useWeb3();

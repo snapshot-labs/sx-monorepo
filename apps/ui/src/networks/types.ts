@@ -173,6 +173,7 @@ export type ReadOnlyNetworkActions = {
     statement: Statement,
     from?: string
   );
+  transferOwnership(web3: Web3Provider, space: Space, owner: string);
   updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
   send(envelope: any): Promise<any>;
 };
@@ -222,7 +223,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     space: Space,
     maxVotingDuration: number
   );
-  transferOwnership(web3: Web3Provider, space: Space, owner: string);
   updateSettings(
     web3: Web3Provider,
     space: Space,

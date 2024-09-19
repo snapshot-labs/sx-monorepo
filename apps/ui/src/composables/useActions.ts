@@ -467,7 +467,7 @@ export function useActions() {
       return null;
     }
 
-    const network = getReadWriteNetwork(space.network);
+    const network = getNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
       throw new Error(`${web3.value.type} is not supported for this actions`);
     }
