@@ -69,7 +69,12 @@ const DEFAULT_FORM_STATE: Form = {
 export function useSpaceSettings(space: Ref<Space>) {
   const { web3 } = useWeb3();
   const { getDurationFromCurrent } = useMetaStore();
-  const { updateSettings, updateSettingsRaw, transferOwnership } = useActions();
+  const {
+    updateSettings,
+    updateSettingsRaw,
+    transferOwnership,
+    deleteSpace: deleteSpaceAction
+  } = useActions();
 
   const loading = ref(true);
   const isModified = ref(false);
@@ -518,9 +523,8 @@ export function useSpaceSettings(space: Ref<Space>) {
     return transferOwnership(space.value, controller.value);
   }
 
-  async function deleteSpace(id: string) {
-    console.log('deleting space', id);
-    return null;
+  async function deleteSpace() {
+    return deleteSpaceAction(space.value);
   }
 
   async function reset() {

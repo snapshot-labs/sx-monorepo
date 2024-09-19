@@ -541,6 +541,23 @@ export function useActions() {
     );
   }
 
+  async function deleteSpace(space: Space) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
+
+    const network = getNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this actions`);
+    }
+
+    return wrapPromise(
+      space.network,
+      network.actions.deleteSpace(auth.web3, space)
+    );
+  }
+
   async function delegate(
     space: Space,
     networkId: NetworkID,
@@ -668,6 +685,7 @@ export function useActions() {
     transferOwnership: wrapWithErrors(transferOwnership),
     updateSettings: wrapWithErrors(updateSettings),
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
+    deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),

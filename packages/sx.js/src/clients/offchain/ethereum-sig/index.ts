@@ -8,6 +8,7 @@ import {
   approvalVoteTypes,
   basicVoteTypes,
   cancelProposalTypes,
+  deleteSpaceTypes,
   domain,
   encryptedVoteTypes,
   followSpaceTypes,
@@ -25,7 +26,9 @@ import { offchainGoerli } from '../../../offchainNetworks';
 import { OffchainNetworkConfig, SignatureData } from '../../../types';
 import {
   CancelProposal,
+  DeleteSpace,
   EIP712CancelProposalMessage,
+  EIP712DeleteSpaceMessage,
   EIP712FollowSpaceMessage,
   EIP712Message,
   EIP712ProposeMessage,
@@ -86,6 +89,7 @@ export class EthereumSig {
       | EIP712UpdateUserMessage
       | EIP712UpdateStatementMessage
       | EIP712UpdateSpaceMessage
+      | EIP712DeleteSpaceMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -355,6 +359,21 @@ export class EthereumSig {
     data: UpdateSpace;
   }) {
     const signatureData = await this.sign(signer, data, updateSpaceTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async deleteSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: DeleteSpace;
+  }) {
+    const signatureData = await this.sign(signer, data, deleteSpaceTypes);
 
     return {
       signatureData,

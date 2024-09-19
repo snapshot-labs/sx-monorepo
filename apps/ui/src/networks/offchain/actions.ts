@@ -353,6 +353,12 @@ export function createActions(
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { space: space.id, settings }
       });
+    },
+    deleteSpace: (web3: Web3Provider | Wallet, space: Space) => {
+      return client.deleteSpace({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { space: space.id }
+      });
     }
   };
 }

@@ -5,6 +5,7 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
+const router = useRouter();
 const route = useRoute();
 const {
   loading,
@@ -225,7 +226,12 @@ function handleControllerSave(value: string) {
 
 function handleSpaceDelete() {
   saving.value = true;
-  executeFn.value = () => deleteSpace(props.space.id);
+  executeFn.value = async () => {
+    await deleteSpace();
+    router.push({ name: 'my-home' });
+
+    return null;
+  };
 }
 
 function handleTabFocus(event: FocusEvent) {
