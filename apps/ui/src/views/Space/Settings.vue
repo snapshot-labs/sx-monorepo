@@ -39,6 +39,7 @@ const { setTitle } = useTitle();
 const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
+const hasAdvancedErrors = ref(false);
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const saving = ref(false);
@@ -527,11 +528,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :space-id="space.id"
         :is-controller="isController"
         @delete-space="handleSpaceDelete"
+        @update-validity="v => (hasAdvancedErrors = !v)"
       />
     </UiContainerSettings>
     <div
       v-if="
-        !uiStore.sidebarOpen && ((isModified && canModifySettings) || error)
+        !uiStore.sidebarOpen &&
+        ((isModified && canModifySettings && !hasAdvancedErrors) || error)
       "
       class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >

@@ -48,11 +48,15 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  (e: 'updateValidity', valid: boolean): void;
   (e: 'deleteSpace');
 }>();
 
 const { addNotification } = useUiStore();
 
+const parentSpaceValidationResult = ref(
+  null as { value: string; valid: boolean } | null
+);
 const childInput = ref('');
 const isAddingChild = ref(false);
 const isDeleteSpaceModalOpen = ref(false);
@@ -84,6 +88,15 @@ const formErrors = computed(() => {
     }
   );
 });
+const parentSpaceError = computed(() => {
+  if (formErrors.value.parent) return formErrors.value.parent as string;
+
+  if (parentSpaceValidationResult.value === null) return null;
+  if (parentSpaceValidationResult.value.value !== parent.value) return null;
+  if (parentSpaceValidationResult.value.valid) return null;
+
+  return `Space ${parentSpaceValidationResult.value.value} not found`;
+});
 
 async function addChild() {
   try {
@@ -107,6 +120,30 @@ async function addChild() {
 function deleteChild(i: number) {
   children.value = children.value.filter((_, index) => index !== i);
 }
+
+watchDebounced(
+  parent,
+  async parent => {
+    if (!parent) return;
+
+    const space = await network.value.api.loadSpace(parent);
+
+    parentSpaceValidationResult.value = {
+      value: parent,
+      valid: !!space
+    };
+  },
+  { debounce: 500 }
+);
+
+watchEffect(() => {
+  const valid =
+    Object.keys(formErrors.value).length === 0 &&
+    parentSpaceValidationResult.value?.valid &&
+    parentSpaceValidationResult.value?.value === parent.value;
+
+  emit('updateValidity', !!valid);
+});
 </script>
 
 <template>
@@ -127,7 +164,7 @@ function deleteChild(i: number) {
         'cursor-not-allowed': !canAddParentSpace
       }"
       :definition="PARENT_SPACE_DEFINITION"
-      :error="formErrors.parent"
+      :error="parentSpaceError ?? undefined"
     />
     <UiInputString
       v-model="childInput"
