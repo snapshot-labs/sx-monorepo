@@ -246,7 +246,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :key="tab.id"
         :to="{
           name: 'space-settings',
-          params: { id: route.params.id, tab: tab.id }
+          params: { space: route.params.space, tab: tab.id }
         }"
         type="button"
         class="scroll-mx-8"

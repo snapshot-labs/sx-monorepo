@@ -1,11 +1,13 @@
 <script lang="ts" setup>
-import { RouterLink, RouterLinkProps } from 'vue-router';
+import { RouterLinkProps } from 'vue-router';
 
 defineOptions({
   inheritAttrs: false
 });
 
-defineProps<{ button?: boolean } & RouterLinkProps>();
+const props = defineProps<
+  { button?: boolean; primary?: boolean } & RouterLinkProps
+>();
 
 // NOTE cleanup and use correct link when it's a white label site
 function normalize(to: any) {
@@ -16,8 +18,8 @@ function normalize(to: any) {
 <template>
   <router-link
     v-slot="{ isActive, href, navigate }"
-    v-bind="$props"
-    :to="normalize($props.to)"
+    v-bind="props"
+    :to="normalize(props.to)"
     custom
   >
     <a
@@ -25,7 +27,8 @@ function normalize(to: any) {
       :href="href"
       :class="{
         [activeClass!]: isActive && activeClass,
-        button: button
+        button: button,
+        primary: primary
       }"
       @click="navigate"
     >

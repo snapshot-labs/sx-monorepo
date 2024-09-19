@@ -13,7 +13,7 @@
         <h1 class="mb-5 font-display !text-[56px]">
           The governance stack for your organization
         </h1>
-        <AppLink :to="{ name: 'my-home' }" button class="primary">
+        <AppLink :to="{ name: 'my-home' }" button primary>
           Get started
         </AppLink>
       </div>

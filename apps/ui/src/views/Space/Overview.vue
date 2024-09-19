@@ -91,7 +91,7 @@ watchEffect(() => setTitle(props.space.name));
               :to="{
                 name: 'space-overview',
                 params: {
-                  id: `${space.parent.network}:${space.parent.id}`
+                  space: `${space.parent.network}:${space.parent.id}`
                 }
               }"
               class="flex space-x-1 items-center whitespace-nowrap"

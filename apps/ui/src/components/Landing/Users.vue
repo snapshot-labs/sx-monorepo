@@ -74,7 +74,7 @@ const ORGS = [
             <AppLink
               v-for="(org, i) in ORGS"
               :key="i"
-              :to="{ name: 'space-overview', params: { id: `s:${org}` } }"
+              :to="{ name: 'space-overview', params: { space: `s:${org}` } }"
               class="size-[56px] ml-6"
               tabindex="-1"
             >
@@ -88,7 +88,7 @@ const ORGS = [
             <AppLink
               v-for="(org, i) in ORGS"
               :key="i"
-              :to="{ name: 'space-overview', params: { id: `s:${org}` } }"
+              :to="{ name: 'space-overview', params: { space: `s:${org}` } }"
               class="size-[56px] ml-6"
               tabindex="-1"
             >

@@ -129,7 +129,7 @@ async function handleEditClick() {
   router.push({
     name: 'editor',
     params: {
-      id: spaceId,
+      space: spaceId,
       key: draftId
     }
   });
@@ -145,7 +145,7 @@ async function handleCancelClick() {
       router.push({
         name: 'space-overview',
         params: {
-          id: `${props.proposal.network}:${props.proposal.space.id}`
+          space: `${props.proposal.network}:${props.proposal.space.id}`
         }
       });
     }
@@ -210,7 +210,7 @@ onBeforeUnmount(() => destroyAudio());
           :to="{
             name: 'space-user-statement',
             params: {
-              id: `${proposal.network}:${proposal.space.id}`,
+              space: `${proposal.network}:${proposal.space.id}`,
               user: proposal.author.id
             }
           }"
@@ -224,7 +224,7 @@ onBeforeUnmount(() => destroyAudio());
               <AppLink
                 :to="{
                   name: 'space-overview',
-                  params: { id: `${proposal.network}:${proposal.space.id}` }
+                  params: { space: `${proposal.network}:${proposal.space.id}` }
                 }"
                 class="text-skin-text"
               >
