@@ -22,7 +22,7 @@ withDefaults(
     :class="{
       primary: primary,
       'w-[46px] px-0': loading,
-      'px-3.5': !loading || $attrs.class?.includes('w-full')
+      'px-3.5': !loading || ($attrs.class as 'string')?.includes('w-full')
     }"
     class="rounded-full leading-[100%] border button h-[46px] text-skin-link bg-skin-bg"
   >
