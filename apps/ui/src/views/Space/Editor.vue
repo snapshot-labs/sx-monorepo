@@ -293,7 +293,10 @@ watchEffect(() => {
     <header class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0">
       <div class="flex items-center h-[71px] mx-4 gap-2">
         <AppLink
-          :to="{ name: 'space-overview', params: { space: spaceKey } }"
+          :to="{
+            name: 'space-overview',
+            params: { space: spaceKey }
+          }"
           class="mr-2"
           tabindex="-1"
         >
