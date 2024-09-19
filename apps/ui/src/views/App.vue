@@ -63,15 +63,24 @@ onMounted(() => load());
               </div>
               <div>
                 <div class="eyebrow mb-2">Overview</div>
-                <div class="text-md text-skin-link" v-text="app.overview" />
+                <div
+                  class="text-md text-skin-link whitespace-pre-line"
+                  v-text="app.overview"
+                />
               </div>
               <div v-if="app.how">
                 <div class="eyebrow mb-2">How it works</div>
-                <div class="text-md text-skin-link" v-text="app.how" />
+                <div
+                  class="text-md text-skin-link whitespace-pre-line"
+                  v-text="app.how"
+                />
               </div>
               <div v-if="app.start">
                 <div class="eyebrow mb-2">Get started</div>
-                <div class="text-md text-skin-link" v-text="app.start" />
+                <div
+                  class="text-md text-skin-link whitespace-pre-line"
+                  v-text="app.start"
+                />
               </div>
               <div v-if="app.form">
                 <a :href="app.form" target="_blank" class="text-skin-text">
@@ -95,7 +104,7 @@ onMounted(() => load());
               </div>
               <div v-if="app.x">
                 <h4 class="eyebrow" v-text="'X (Twitter)'" />
-                <a :href="`https://twitter.com/${app.x}`" target="_blank">
+                <a :href="`https://x.com/${app.x}`" target="_blank">
                   {{ app.x }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </a>

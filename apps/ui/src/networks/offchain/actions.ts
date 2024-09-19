@@ -8,6 +8,7 @@ import {
   offchainMainnet,
   OffchainNetworkConfig
 } from '@snapshot-labs/sx';
+import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
 import {
   getModuleAddressForTreasury,
@@ -58,7 +59,7 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
-  chainId: number
+  chainId: 1 | 11155111
 ): ReadOnlyNetworkActions {
   const networkConfig = CONFIGS[chainId];
 
@@ -329,6 +330,19 @@ export function createActions(
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { ...statement, ...(from ? { from } : {}) }
       });
+    },
+    transferOwnership: async (
+      web3: Web3Provider,
+      space: Space,
+      owner: string
+    ) => {
+      return setEnsTextRecord(
+        web3.getSigner(),
+        space.id,
+        'snapshot',
+        owner,
+        chainId
+      );
     },
     updateSettingsRaw: (
       web3: Web3Provider | Wallet,

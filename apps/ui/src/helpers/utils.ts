@@ -335,6 +335,25 @@ export function omit<T extends Record<string, unknown>, K extends keyof T>(
   >;
 }
 
+export function uniqBy<T>(arr: T[], predicate: keyof T | ((o: T) => any)): T[] {
+  const cb = typeof predicate === 'function' ? predicate : o => o[predicate];
+
+  const pickedObjects = arr
+    .filter(item => item)
+    .reduce((map, item) => {
+      const key = cb(item);
+
+      if (!key) {
+        return map;
+      }
+
+      return map.has(key) ? map : map.set(key, item);
+    }, new Map())
+    .values();
+
+  return [...pickedObjects];
+}
+
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
@@ -507,8 +526,13 @@ export async function imageUpload(file: File) {
 }
 
 export function simplifyURL(fullURL: string): string {
-  const url = new URL(fullURL);
-  return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+  try {
+    const url = new URL(fullURL);
+    return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+  } catch (error) {
+    console.log('Error simplifying URL', error);
+    return '';
+  }
 }
 
 export function getChoiceWeight(
