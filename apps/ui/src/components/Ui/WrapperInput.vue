@@ -22,9 +22,13 @@ const showError = computed(() => props.error && props.dirty);
       <label
         v-if="definition.title"
         :for="id"
-        class="truncate"
-        v-text="definition.title"
-      />
+        class="truncate flex items-center gap-1"
+      >
+        {{ definition.title }}
+        <UiTooltip v-if="definition.tooltip" :title="definition.tooltip">
+          <IH-question-mark-circle class="shrink-0" />
+        </UiTooltip>
+      </label>
       <div
         v-if="inputValueLength >= 0 && definition.maxLength"
         class="text-sm hidden grow text-right s-label-char-count whitespace-nowrap"

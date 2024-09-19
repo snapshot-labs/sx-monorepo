@@ -8,13 +8,16 @@ const CHILDREN_LIMIT = 16;
 const PARENT_SPACE_DEFINITION = {
   type: 'string',
   title: 'Main space',
-  examples: ['pistachiodao.eth']
+  examples: ['pistachiodao.eth'],
+  tooltip:
+    'The space that this space is a sub-space of will be displayed on the space page'
 };
 
 const SUB_SPACE_DEFINITION = {
   type: 'string',
   title: 'Sub-space(s)',
-  examples: ['pistachiodao.eth']
+  examples: ['pistachiodao.eth'],
+  tooltip: 'Related Sub-spaces listed here will be displayed on the space page'
 };
 
 const TERMS_OF_SERVICES_DEFINITION = {
@@ -22,7 +25,9 @@ const TERMS_OF_SERVICES_DEFINITION = {
   format: 'uri',
   title: 'Terms of services',
   maxLength: 256,
-  examples: ['https://example.com/terms']
+  examples: ['https://example.com/terms'],
+  tooltip:
+    'Users will be required to accept these terms once before they can create a proposal or cast a vote'
 };
 
 const CUSTOM_DOMAIN_DEFINITION = {

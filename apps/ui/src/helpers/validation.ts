@@ -230,6 +230,7 @@ ajv.addKeyword({
   }
 });
 ajv.addKeyword('options');
+ajv.addKeyword('tooltip');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';
