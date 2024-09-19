@@ -253,9 +253,11 @@ export function useSpaceSettings(space: Ref<Space>) {
       previousParams = previousParams ?? [];
     }
 
-    // NOTE: Params need to be lowercase when we compare them as once stored they will be stored
-    // as bytes (casing is lost).
-    const formattedParams = params.map(param => param.toLowerCase());
+    // NOTE: Params need to be kept in raw bytes when we compare them as once stored they will be stored
+    // as bytes (casing and padding are lost).
+    const formattedParams = params.map(param =>
+      param === '0x' ? param : `0x${BigInt(param).toString(16)}`
+    );
     return objectHash(formattedParams) !== objectHash(previousParams);
   }
 
