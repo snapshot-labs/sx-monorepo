@@ -127,11 +127,7 @@ watch(
     </form>
 
     <div class="flex space-x-2.5 shrink-0">
-      <UiButton
-        v-if="loading || web3.authLoading"
-        loading
-        class="!px-0 w-[46px]"
-      />
+      <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
         class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
