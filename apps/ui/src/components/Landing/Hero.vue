@@ -13,9 +13,9 @@
         <h1 class="mb-5 font-display !text-[56px]">
           The governance stack for your organization
         </h1>
-        <router-link :to="{ name: 'my-home' }" tabindex="-1">
+        <AppLink :to="{ name: 'my-home' }" tabindex="-1">
           <UiButton class="primary">Get started</UiButton>
-        </router-link>
+        </AppLink>
       </div>
     </UiContainer>
   </div>

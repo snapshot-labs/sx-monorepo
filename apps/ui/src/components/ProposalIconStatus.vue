@@ -11,19 +11,17 @@ const titles: Record<ProposalState, string> = {
 
 const props = withDefaults(
   defineProps<{
-    width?: number | string;
-    height?: number | string;
+    size?: number | string;
     state: ProposalState;
   }>(),
   {
-    width: 24,
-    height: 24
+    size: 24
   }
 );
 
 const style = computed(() => ({
-  width: `${props.width}px`,
-  height: `${props.height}px`
+  width: `${props.size}px`,
+  height: `${props.size}px`
 }));
 </script>
 

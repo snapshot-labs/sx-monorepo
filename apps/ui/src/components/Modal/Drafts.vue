@@ -43,16 +43,16 @@ function handleRemoveDraft(id: string) {
           :key="proposal.id"
           class="py-3 px-4 border-b last:border-b-0 flex justify-between items-center space-x-2"
         >
-          <router-link
+          <AppLink
             :to="{
               name: 'editor',
-              params: { id: `${networkId}:${space}`, key: proposal.key }
+              params: { space: `${networkId}:${space}`, key: proposal.key }
             }"
             @click="$emit('close')"
           >
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ proposal.key }}</span>
-          </router-link>
+          </AppLink>
           <button type="button" @click="handleRemoveDraft(proposal.id)">
             <IH-trash />
           </button>

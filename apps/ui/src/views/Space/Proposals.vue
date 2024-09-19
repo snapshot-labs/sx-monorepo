@@ -17,8 +17,7 @@ const proposalsStore = useProposalsStore();
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const selectIconBaseProps = {
-  width: 16,
-  height: 16
+  size: 16
 };
 
 const proposalsRecord = computed(
@@ -104,13 +103,19 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           :voting-power="votingPower"
           @fetch-voting-power="handleFetchVotingPower"
         />
-        <router-link :to="{ name: 'editor' }" tabindex="-1">
+        <AppLink
+          :to="{
+            name: 'editor',
+            params: { space: `${space.network}:${space.id}` }
+          }"
+          tabindex="-1"
+        >
           <UiTooltip title="New proposal">
             <UiButton class="!px-0 w-[46px]">
               <IH-pencil-alt class="inline-block" />
             </UiButton>
           </UiTooltip>
-        </router-link>
+        </AppLink>
       </div>
     </div>
     <ProposalsList

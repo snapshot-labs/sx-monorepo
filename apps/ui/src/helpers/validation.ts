@@ -25,6 +25,10 @@ export const addressValidator = (value: string) => {
   }
 };
 
+export const ethAddressValidator = (value: string) => {
+  return isAddress(value);
+};
+
 const validateType = (type: string, value: string) => {
   if (!value) return false;
 
@@ -57,6 +61,10 @@ ajv.addFormat('address', {
   validate: addressValidator
 });
 
+ajv.addFormat('ethAddress', {
+  validate: ethAddressValidator
+});
+
 ajv.addFormat('uint256', {
   validate: uint256Validator
 });
@@ -69,8 +77,8 @@ ajv.addFormat('bytes', {
   validate: bytesValidator
 });
 
-ajv.addFormat('address[]', {
-  validate: getArrayValidator(addressValidator)
+ajv.addFormat('ethAddress[]', {
+  validate: getArrayValidator(ethAddressValidator)
 });
 
 ajv.addFormat('uint256[]', {
@@ -233,7 +241,11 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'uri':
         return 'Must be a valid URL.';
       case 'address':
+      case 'ethAddress':
         return 'Must be a valid address.';
+      case 'address[]':
+      case 'ethAddress[]':
+        return 'Must be comma separated list of valid addresses.';
       case 'ens-or-address':
         return 'Must be a valid ENS domain or address.';
       case 'abi':

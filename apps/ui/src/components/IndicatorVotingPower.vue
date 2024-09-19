@@ -45,9 +45,6 @@ function handleModalOpen() {
           "
           :loading="loading"
           class="flex flex-row items-center justify-center"
-          :class="{
-            '!px-0 w-[46px]': loading
-          }"
           @click="handleModalOpen"
         >
           <IH-lightning-bolt class="inline-block -ml-1" />

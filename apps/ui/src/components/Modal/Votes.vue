@@ -107,11 +107,11 @@ watch(
                   : 'bg-skin-border'
               "
             />
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-user-statement',
                 params: {
-                  id: `${proposal.network}:${proposal.space.id}`,
+                  space: `${proposal.network}:${proposal.space.id}`,
                   user: vote.voter.id
                 }
               }"
@@ -122,7 +122,7 @@ watch(
               <span>{{
                 vote.voter.name || shortenAddress(vote.voter.id)
               }}</span>
-            </router-link>
+            </AppLink>
 
             <template v-if="isEncrypted">
               <div class="flex gap-1 items-center">

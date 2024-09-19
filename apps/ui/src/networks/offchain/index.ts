@@ -1,6 +1,7 @@
-import { getNameOwner } from '@/helpers/ens';
+import { getSpaceController } from '@/helpers/ens';
 import networks from '@/helpers/networks.json';
 import { pinPineapple } from '@/helpers/pin';
+import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -25,6 +26,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const hubUrl = HUB_URLS[networkId];
   if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);
 
+  const provider = getProvider(l1ChainId);
   const api = createApi(hubUrl, networkId, constants);
 
   const helpers = {
@@ -39,13 +41,11 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     },
     pin: pinPineapple,
     getSpaceController: async (space: Space) =>
-      getNameOwner(space.id, l1ChainId),
+      getSpaceController(space.id, l1ChainId),
     getTransaction: () => {
       throw new Error('Not implemented');
     },
-    waitForTransaction: () => {
-      throw new Error('Not implemented');
-    },
+    waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
     waitForSpace: () => {
       throw new Error('Not implemented');
     },
@@ -54,15 +54,21 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
       type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
       chainId?: number
     ) => {
+      chainId = chainId || l1ChainId;
+      const network = networks[chainId.toString()];
+
       switch (type) {
         case 'transaction':
+          if (id.startsWith('0x')) {
+            return `${network.explorer}/tx/${id}`;
+          }
+
           return `https://signator.io/view?ipfs=${id}`;
         case 'strategy':
           return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
-        case 'contract': {
-          const network = chainId && networks[chainId.toString()];
+        case 'contract':
+        case 'address':
           return network ? `${network.explorer}/address/${id}` : '';
-        }
         default:
           throw new Error('Not implemented');
       }
