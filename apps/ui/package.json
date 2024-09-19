@@ -46,7 +46,7 @@
     "@openzeppelin/merkle-tree": "^1.0.5",
     "@snapshot-labs/eslint-config-vue": "^0.1.0-beta.18",
     "@snapshot-labs/highlight": "^0.1.0-beta.2",
-    "@snapshot-labs/lock": "^0.2.6",
+    "@snapshot-labs/lock": "^0.2.7",
     "@snapshot-labs/pineapple": "^1.1.0",
     "@snapshot-labs/prettier-config": "^0.1.0-beta.18",
     "@snapshot-labs/sx": "^0.1.0",

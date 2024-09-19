@@ -54,15 +54,17 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
       type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
       chainId?: number
     ) => {
+      chainId = chainId || l1ChainId;
+      const network = networks[chainId.toString()];
+
       switch (type) {
         case 'transaction':
           return `https://signator.io/view?ipfs=${id}`;
         case 'strategy':
           return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
-        case 'contract': {
-          const network = chainId && networks[chainId.toString()];
+        case 'contract':
+        case 'address':
           return network ? `${network.explorer}/address/${id}` : '';
-        }
         default:
           throw new Error('Not implemented');
       }
