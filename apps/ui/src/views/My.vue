@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mx-0 xl:mr-[240px]">
+    <div class="xl:mr-[240px]">
       <router-view />
     </div>
     <div
