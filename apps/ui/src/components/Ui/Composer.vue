@@ -111,8 +111,7 @@ watch(model, () => {
           />
           <UiLoading
             v-if="editor.uploading.value"
-            :width="14"
-            :height="14"
+            :size="14"
             class="inline-block"
           />
           <IS-photo v-else class="size-[18px]" />

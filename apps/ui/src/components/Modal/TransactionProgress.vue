@@ -108,7 +108,7 @@ watch(
         v-if="['approve', 'confirming'].includes(step)"
         class="bg-skin-border rounded-full p-[12px]"
       >
-        <UiLoading :width="28" :height="28" />
+        <UiLoading :size="28" />
       </div>
 
       <div
