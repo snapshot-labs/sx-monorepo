@@ -47,7 +47,7 @@ watchEffect(() => {
 
 <template>
   <div>
-    <div class="mx-0 xl:mr-[240px]">
+    <div class="xl:mr-[240px]">
       <UiLoading v-if="!space" class="block p-4" />
       <router-view v-else :space="space" />
     </div>

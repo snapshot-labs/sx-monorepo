@@ -4,7 +4,7 @@ const { web3Account } = useWeb3();
 
 <template>
   <div>
-    <div class="mx-0 xl:mr-[240px]">
+    <div class="xl:mr-[240px]">
       <router-view :key="web3Account.toLowerCase()" />
     </div>
     <div
