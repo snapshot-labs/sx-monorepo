@@ -51,6 +51,18 @@ const isController = computedAsync(async () => {
   return compareAddresses(controller, web3.value.account);
 });
 
+const canSeeSettings = computed(() => {
+  if (isController.value) return true;
+
+  if (space.value?.additionalRawData?.type === 'offchain') {
+    const admins = space.value?.additionalRawData?.admins.map((admin: string) =>
+      admin.toLowerCase()
+    );
+
+    return admins.includes(web3.value.account.toLowerCase());
+  }
+});
+
 const navigationConfig = computed<
   Record<string, Record<string, NavigationItem>>
 >(() => ({
@@ -94,7 +106,7 @@ const navigationConfig = computed<
           }
         }
       : undefined),
-    ...(isController.value
+    ...(canSeeSettings.value
       ? {
           settings: {
             name: 'Settings',
