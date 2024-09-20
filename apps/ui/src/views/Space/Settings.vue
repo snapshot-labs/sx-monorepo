@@ -28,6 +28,7 @@ const {
   votingType,
   privacy,
   ignoreAbstainVotes,
+  snapshotChainId,
   members,
   parent,
   children,
@@ -52,6 +53,7 @@ type Tab = {
     | 'profile'
     | 'delegations'
     | 'treasuries'
+    | 'strategies'
     | 'authenticators'
     | 'proposal-validation'
     | 'voting-strategies'
@@ -90,6 +92,11 @@ const tabs = computed<Tab[]>(
         id: 'authenticators',
         name: 'Authenticators',
         visible: !isOffchainNetwork.value
+      },
+      {
+        id: 'strategies',
+        name: 'Strategies',
+        visible: isOffchainNetwork.value
       },
       {
         id: 'proposal-validation',
@@ -289,6 +296,16 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       <FormSpaceTreasuries
         v-model="form.treasuries"
         :limit="isOffchainNetwork ? 10 : undefined"
+      />
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="activeTab === 'strategies'"
+      title="Strategies"
+      description="Office ipsum you must be muted. Boy ocean define crank new."
+    >
+      <FormSpaceStrategies
+        v-model:snapshot-chain-id="snapshotChainId"
+        :network-id="space.network"
       />
     </UiContainerSettings>
     <FormStrategies

@@ -1,9 +1,10 @@
 <script setup lang="ts" generic="T extends string | number, U extends Item<T>">
 import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions
 } from '@headlessui/vue';
 import { VNode } from 'vue';
 
@@ -15,19 +16,25 @@ export type Item<T extends string | number> = {
 
 defineOptions({ inheritAttrs: false });
 
-const model = defineModel<T[]>({ required: true });
+const model = defineModel<T>({ required: true });
 
 const props = defineProps<{
   error?: string;
   definition: {
     options: U[];
-    maxItems: number;
-    default?: T[];
+    default?: T;
     examples?: string[];
-  };
+  } & any;
 }>();
 
 const dirty = ref(false);
+const query = ref('');
+
+const filteredOptions = computed(() => {
+  return props.definition.options.filter(option =>
+    option.name.toLowerCase().includes(query.value.toLowerCase())
+  );
+});
 
 const inputValue = computed({
   get() {
@@ -37,30 +44,15 @@ const inputValue = computed({
 
     return model.value;
   },
-  set(newValue: T[]) {
+  set(newValue: T) {
     dirty.value = true;
     model.value = newValue;
   }
 });
 
-const currentValue = computed(() => {
-  if (inputValue.value.length === 0) {
-    return (
-      props.definition.examples?.[0] ||
-      `Select up to ${props.definition.maxItems} items`
-    );
-  }
-
-  const currentItems = props.definition.options.filter(option =>
-    inputValue.value.includes(option.id)
-  );
-
-  return currentItems.map(item => item.name).join(', ');
-});
-
-function isItemDisabled(item: T) {
-  if (inputValue.value.length < props.definition.maxItems) return false;
-  return !inputValue.value.some(selectedItem => selectedItem === item);
+function getDisplayValue(value: T) {
+  const option = props.definition.options.find(option => option.id === value);
+  return option ? option.name : '';
 }
 
 watch(model, () => {
@@ -69,35 +61,39 @@ watch(model, () => {
 </script>
 
 <template>
-  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
-    <Listbox v-slot="{ open }" v-model="inputValue" multiple>
-      <ListboxButton
-        class="s-input !flex items-center justify-between"
-        :class="{
-          '!rounded-b-none': open
-        }"
-      >
-        <span
+  <UiWrapperInput
+    :definition="definition"
+    :error="error"
+    :dirty="dirty"
+    class="relative mb-[14px]"
+  >
+    <Combobox v-slot="{ open }" v-model="inputValue">
+      <ComboboxButton class="w-full">
+        <ComboboxInput
+          class="s-input !flex items-center justify-between !mb-0"
           :class="{
-            '!text-skin-text/40': inputValue.length === 0
+            '!rounded-b-none': open
           }"
-        >
-          {{ currentValue }}
-        </span>
+          autocomplete="off"
+          :placeholder="definition.examples?.[0]"
+          :display-value="item => getDisplayValue(item as T)"
+          @change="e => (query = e.target.value)"
+        />
+      </ComboboxButton>
+      <ComboboxButton class="absolute right-3 bottom-[14px]">
         <IH-chevron-up v-if="open" />
         <IH-chevron-down v-else />
-      </ListboxButton>
-      <ListboxOptions
+      </ComboboxButton>
+      <ComboboxOptions
         class="top-[59px] overflow-hidden bg-skin-border rounded-b-lg border-t-skin-text/10 border absolute z-30 w-full shadow-xl"
       >
         <div class="max-h-[208px] overflow-y-auto px-3">
-          <ListboxOption
-            v-for="item in definition.options"
+          <ComboboxOption
+            v-for="item in filteredOptions"
             v-slot="{ selected, disabled }"
             :key="item.id"
             :value="item.id"
             class="flex items-center justify-between"
-            :disabled="isItemDisabled(item.id)"
           >
             <component :is="item.icon" class="size-[20px] mr-2" />
             <span
@@ -110,9 +106,9 @@ watch(model, () => {
               {{ item.name }}
             </span>
             <IH-check v-if="selected" class="text-skin-success" />
-          </ListboxOption>
+          </ComboboxOption>
         </div>
-      </ListboxOptions>
-    </Listbox>
+      </ComboboxOptions>
+    </Combobox>
   </UiWrapperInput>
 </template>

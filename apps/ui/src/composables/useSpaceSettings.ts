@@ -150,6 +150,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   );
   const privacy = ref('none' as 'none' | 'shutter');
   const ignoreAbstainVotes = ref(false);
+  const snapshotChainId = ref('');
   const members = ref([] as Member[]);
   const parent = ref('');
   const children = ref([] as string[]);
@@ -436,7 +437,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         form.value.categories ?? space.value.additionalRawData.categories,
       avatar: form.value.avatar ?? space.value.avatar,
       cover: form.value.cover ?? space.value.cover,
-      network: space.value.snapshot_chain_id?.toString() ?? '1',
+      network: snapshotChainId.value,
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
       terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
@@ -608,6 +609,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       privacy.value = initialVotingProperties.privacy;
       ignoreAbstainVotes.value = initialVotingProperties.ignoreAbstainVotes;
 
+      snapshotChainId.value = space.value.snapshot_chain_id?.toString() ?? '1';
       members.value = getInitialMembers(space.value);
       parent.value = space.value.parent?.id ?? '';
       children.value = space.value.children.map(child => child.id);
@@ -635,6 +637,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const votingTypeValue = voteType.value;
     const privacyValue = privacy.value;
     const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
+    const snapshotChainIdValue = snapshotChainId.value;
     const membersValue = members.value;
     const parentValue = parent.value;
     const childrenValue = children.value;
@@ -705,6 +708,14 @@ export function useSpaceSettings(space: Ref<Space>) {
 
       if (
         ignoreAbstainVotesValue !== initialVotingProperties.ignoreAbstainVotes
+      ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (
+        snapshotChainIdValue !==
+        (space.value.snapshot_chain_id?.toString() ?? '1')
       ) {
         isModified.value = true;
         return;
@@ -809,6 +820,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     votingType: voteType,
     privacy,
     ignoreAbstainVotes,
+    snapshotChainId,
     members,
     parent,
     children,
