@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { TURBO_URL, VERIFIED_URL } from '@/helpers/turbo';
 
-withDefaults(
-  defineProps<{
-    text: string;
-    type?: 'get-turbo' | 'get-verified';
-  }>(),
-  {
-    type: 'get-turbo'
-  }
-);
+defineProps<{
+  text: string;
+  type: 'get-turbo' | 'get-verified';
+}>();
 </script>
 
 <template>
@@ -35,7 +30,7 @@ withDefaults(
           class="text-purple-400 underline font-semibold"
           >verified</a
         >
-        {{ text }}.
+        to increase the limit to {{ text }}.
       </span>
       <span v-else>{{ text }}</span>
     </div>

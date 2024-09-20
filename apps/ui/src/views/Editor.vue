@@ -405,10 +405,11 @@ export default defineComponent({
         <EditorHint
           v-if="spaceType === 'default' && proposalLimitReached"
           type="get-verified"
-          :text="`to increase the limit to ${MAX_1D_PROPOSALS.verified} daily and ${MAX_30D_PROPOSALS.verified} monthly`"
+          :text="`${MAX_1D_PROPOSALS.verified} daily and ${MAX_30D_PROPOSALS.verified} monthly`"
         />
         <EditorHint
           v-else-if="spaceType !== 'turbo' && proposalLimitReached"
+          type="get-turbo"
           :text="`Post up to ${MAX_1D_PROPOSALS.turbo} proposals daily and ${MAX_30D_PROPOSALS.turbo} monthly`"
         />
 
@@ -447,6 +448,7 @@ export default defineComponent({
         />
         <EditorHint
           v-if="!space?.turbo && proposal.body.length > MAX_BODY_LENGTH.default"
+          type="get-turbo"
           :text="`Write up to ${_n(MAX_BODY_LENGTH.turbo, 'compact')} characters content`"
         />
 
@@ -502,6 +504,7 @@ export default defineComponent({
       <EditorChoices v-model="proposal" :definition="choicesDefinition" />
       <EditorHint
         v-if="!space?.turbo && proposal.choices.length > MAX_CHOICES.default"
+        type="get-turbo"
         :text="`Add up to ${_n(MAX_CHOICES.turbo, 'compact')} choices`"
       />
       <div>
