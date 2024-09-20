@@ -1,7 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { _d, _vp, createErc1155Metadata } from './utils';
+import { _d, _vp, createErc1155Metadata, uniqBy } from './utils';
 
 describe('utils', () => {
+  describe('uniqBy', () => {
+    it('should return unique values by key', () => {
+      const arr = [
+        { id: 1, value: 'a' },
+        { id: 2, value: 'b' },
+        { id: 3, value: 'a' }
+      ];
+
+      const result = uniqBy(arr, 'value');
+      expect(result).toEqual([
+        { id: 1, value: 'a' },
+        { id: 2, value: 'b' }
+      ]);
+    });
+
+    it('should return unique values by predicate function', () => {
+      const arr = [2.1, 1.2, 2.3];
+
+      const result = uniqBy(arr, Math.floor);
+      expect(result).toEqual([2.1, 1.2]);
+    });
+  });
+
   describe('_vp', () => {
     it('should format dust', () => {
       expect(_vp(0.001)).toBe('~0');

@@ -343,6 +343,11 @@ export type Vote = {
   tx: string;
 };
 
+export type Member = {
+  address: string;
+  role: 'admin' | 'moderator' | 'author';
+};
+
 export type Draft = {
   proposalId: number | string | null;
   title: string;

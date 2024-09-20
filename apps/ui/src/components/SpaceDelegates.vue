@@ -50,6 +50,8 @@ const currentNetwork = computed(() => {
   }
 });
 
+const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
+
 function handleSortChange(
   type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
 ) {
@@ -101,19 +103,19 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
   </div>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
-      <router-link
+      <AppLink
         v-if="web3.account"
         tabindex="-1"
         :to="{
           name: 'space-user-statement',
           params: {
-            id: `${$props.space.network}:${props.space.id}`,
+            space: spaceKey,
             user: web3.account
           }
         }"
       >
         <UiButton> Edit my statement </UiButton>
-      </router-link>
+      </AppLink>
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
@@ -136,7 +138,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </div>
         <button
           type="button"
-          class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
+          class="hidden md:flex w-[120px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span class="truncate">Delegators</span>
@@ -190,11 +192,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             :key="i"
             class="border-b flex space-x-3 px-4"
           >
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-user-statement',
                 params: {
-                  id: `${space.network}:${space.id}`,
+                  space: spaceKey,
                   user: delegate.user
                 }
               }"
@@ -227,7 +229,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
               </div>
               <div
-                class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
+                class="hidden md:flex shrink-0 w-[120px] flex-col items-end justify-center leading-[22px] truncate"
               >
                 <h4
                   class="text-skin-link"
@@ -250,7 +252,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   v-text="_p(delegate.votesPercentage)"
                 />
               </div>
-            </router-link>
+            </AppLink>
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
@@ -271,11 +273,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     </button>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
-                    <router-link
+                    <AppLink
                       :to="{
                         name: 'space-user-statement',
                         params: {
-                          id: `${space.network}:${space.id}`,
+                          space: spaceKey,
                           user: delegate.user
                         }
                       }"
@@ -284,7 +286,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     >
                       <IH-user-circle />
                       View profile
-                    </router-link>
+                    </AppLink>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
                     <a

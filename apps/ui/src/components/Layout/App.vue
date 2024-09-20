@@ -103,8 +103,8 @@ watch(isSwiping, () => {
         class="lg:visible"
         :class="{ invisible: !uiStore.sidebarOpen }"
       />
-      <AppTopnav />
-      <AppNav />
+      <AppTopnav :has-app-nav="hasAppNav" />
+      <AppNav v-if="hasAppNav" />
       <button
         v-if="uiStore.sidebarOpen"
         type="button"
@@ -120,7 +120,15 @@ watch(isSwiping, () => {
           'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
         }"
       >
-        <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
+        <div
+          :class="{
+            'lg:ml-[240px]': hasAppNav,
+            'translate-x-[240px] lg:translate-x-0':
+              uiStore.sidebarOpen && hasAppNav
+          }"
+        >
+          <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
+        </div>
       </div>
     </div>
     <AppNotifications />

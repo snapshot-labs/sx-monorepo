@@ -38,7 +38,7 @@ const CHOICES_DEFINITION = {
 
 const { setTitle } = useTitle();
 const { proposals, createDraft } = useEditor();
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const route = useRoute();
 const router = useRouter();
@@ -216,7 +216,7 @@ async function handleProposeClick() {
       proposalsStore.reset(address.value!, networkId.value!);
       router.push({
         name: 'space-proposals',
-        params: { id: param.value }
+        params: { space: param.value }
       });
     }
   } finally {
@@ -310,7 +310,7 @@ const handleRouteChange: NavigationGuard = async to => {
     return true;
   }
 
-  const resolved = await resolver.resolveName(to.params.id as string);
+  const resolved = await resolver.resolveName(to.params.space as string);
   if (!resolved) return false;
 
   const draftId = await createDraft(
@@ -336,15 +336,15 @@ export default defineComponent({
   <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4 gap-2">
-        <router-link
-          :to="{ name: 'space-overview', params: { id: param } }"
+        <AppLink
+          :to="{ name: 'space-overview', params: { space: param } }"
           class="mr-2"
           tabindex="-1"
         >
           <UiButton class="leading-3 w-[46px] !px-0">
             <IH-arrow-narrow-left class="inline-block" />
           </UiButton>
-        </router-link>
+        </AppLink>
         <h4 class="grow truncate">New proposal</h4>
         <IndicatorPendingTransactions />
         <UiLoading v-if="!space" class="block p-4" />

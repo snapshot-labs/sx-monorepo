@@ -29,42 +29,37 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
 <template>
   <div v-bind="$attrs">
     <div class="space-x-2 flex">
-      <router-link
+      <AppLink
         :to="{
           name: 'proposal-overview',
           params: {
-            id: proposal.proposal_id,
+            proposal: proposal.proposal_id,
             space: `${proposal.network}:${proposal.space.id}`
           }
         }"
       >
-        <ProposalIconStatus
-          width="17"
-          height="17"
-          :state="proposal.state"
-          class="top-1.5"
-        />
-      </router-link>
+        <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
+      </AppLink>
 
       <div class="md:flex md:min-w-0 my-1 items-center leading-6">
-        <router-link
+        <AppLink
           v-if="showSpace"
           :to="{
             name: 'space-overview',
             params: {
-              id: `${proposal.network}:${proposal.space.id}`
+              space: `${proposal.network}:${proposal.space.id}`
             }
           }"
           class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0"
         >
           {{ proposal.space.name }}
-        </router-link>
+        </AppLink>
 
-        <router-link
+        <AppLink
           :to="{
             name: 'proposal-overview',
             params: {
-              id: proposal.proposal_id,
+              proposal: proposal.proposal_id,
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
@@ -80,25 +75,25 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             "
             class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-0.5"
           />
-        </router-link>
+        </AppLink>
       </div>
     </div>
     <div class="inline">
       {{ getProposalId(proposal) }}
       <template v-if="showAuthor">
         by
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-user-statement',
             params: {
-              id: `${proposal.network}:${proposal.space.id}`,
+              space: `${proposal.network}:${proposal.space.id}`,
               user: proposal.author.id
             }
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-        </router-link>
+        </AppLink>
       </template>
     </div>
     <span>

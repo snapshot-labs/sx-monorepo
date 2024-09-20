@@ -35,23 +35,23 @@ onUnmounted(() => notificationsStore.markAllAsRead());
           :class="{ 'bg-skin-border/20': notification.unread }"
         >
           <div>
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-overview',
                 params: {
-                  id: `${notification.proposal.network}:${notification.proposal.space.id}`
+                  space: `${notification.proposal.network}:${notification.proposal.space.id}`
                 }
               }"
             >
               {{ notification.proposal.space.name }}
-            </router-link>
+            </AppLink>
             proposal has {{ notification.type }}
             {{ _rt(notification.timestamp) }}
-            <router-link
+            <AppLink
               :to="{
                 name: 'proposal-overview',
                 params: {
-                  id: notification.proposal.proposal_id,
+                  proposal: notification.proposal.proposal_id,
                   space: `${notification.proposal.network}:${notification.proposal.space.id}`
                 }
               }"
@@ -63,7 +63,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
                   `#${notification.proposal.proposal_id}`
                 "
               />
-            </router-link>
+            </AppLink>
           </div>
         </div>
       </div>

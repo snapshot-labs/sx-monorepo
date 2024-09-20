@@ -29,7 +29,7 @@ const { loadVotes, votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
 
-const id = computed(() => route.params.id as string);
+const id = computed(() => route.params.proposal as string);
 const proposal = computed(() => {
   if (!resolved.value || !spaceAddress.value || !networkId.value) {
     return null;
@@ -153,21 +153,27 @@ watchEffect(() => {
           gradient="xxl"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
-            <router-link
+            <AppLink
               :to="{
                 name: 'proposal-overview',
-                params: { id: proposal.proposal_id }
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
               }"
             >
               <UiLink
                 :is-active="route.name === 'proposal-overview'"
                 text="Overview"
               />
-            </router-link>
-            <router-link
+            </AppLink>
+            <AppLink
               :to="{
                 name: 'proposal-votes',
-                params: { id: proposal.proposal_id }
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
               }"
               class="flex items-center"
             >
@@ -177,13 +183,16 @@ watchEffect(() => {
                 text="Votes"
                 class="inline-block"
               />
-            </router-link>
+            </AppLink>
             <template v-if="discussion">
-              <router-link
+              <AppLink
                 v-if="discourseTopic?.posts_count"
                 :to="{
                   name: 'proposal-discussion',
-                  params: { id: proposal.proposal_id }
+                  params: {
+                    proposal: proposal.proposal_id,
+                    space: `${proposal.network}:${proposal.space.id}`
+                  }
                 }"
                 class="flex items-center"
               >
@@ -193,7 +202,7 @@ watchEffect(() => {
                   text="Discussion"
                   class="inline-block"
                 />
-              </router-link>
+              </AppLink>
               <a
                 v-else
                 :href="discussion"

@@ -275,10 +275,10 @@ onMounted(() => deploy());
     </div>
     <div v-if="completed" class="mt-4">
       You can now access your space
-      <router-link
+      <AppLink
         :to="{
           name: 'space-overview',
-          params: { id: `${networkId}:${predictedSpaceAddress}` }
+          params: { space: `${networkId}:${predictedSpaceAddress}` }
         }"
         text="here"
       />.

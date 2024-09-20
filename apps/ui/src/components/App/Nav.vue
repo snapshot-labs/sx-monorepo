@@ -31,7 +31,7 @@ const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const { web3 } = useWeb3();
 
@@ -45,10 +45,24 @@ const space = computed(() =>
 const isController = computedAsync(async () => {
   if (!networkId.value || !space.value) return false;
 
+  const { account } = web3.value;
+
   const network = getNetwork(networkId.value);
   const controller = await network.helpers.getSpaceController(space.value);
 
-  return compareAddresses(controller, web3.value.account);
+  return compareAddresses(controller, account);
+});
+
+const canSeeSettings = computed(() => {
+  if (isController.value) return true;
+
+  if (space.value?.additionalRawData?.type === 'offchain') {
+    const admins = space.value?.additionalRawData?.admins.map((admin: string) =>
+      admin.toLowerCase()
+    );
+
+    return admins.includes(web3.value.account.toLowerCase());
+  }
 });
 
 const navigationConfig = computed<
@@ -94,7 +108,7 @@ const navigationConfig = computed<
           }
         }
       : undefined),
-    ...(isController.value
+    ...(canSeeSettings.value
       ? {
           settings: {
             name: 'Settings',
@@ -137,12 +151,12 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
       my: {
         user: {
           name: 'Profile',
-          link: { name: 'user', params: { id: web3.value.account } },
+          link: { name: 'user', params: { user: web3.value.account } },
           icon: IHUser,
           hidden: !web3.value.account,
           active:
             (route.name as string) === 'user' &&
-            route.params.id === web3.value.account
+            route.params.user === web3.value.account
         },
         settings: {
           name: 'Settings',
@@ -180,13 +194,12 @@ const navigationItems = computed(() =>
 
 <template>
   <div
-    v-if="Object.keys(navigationItems).length"
     class="lg:visible fixed w-[240px] border-r left-[72px] top-[72px] inset-y-0 z-10 bg-skin-bg py-4"
     :class="{
       invisible: !uiStore.sidebarOpen
     }"
   >
-    <router-link
+    <AppLink
       v-for="(item, key) in navigationItems"
       :key="key"
       :to="item.link"
@@ -200,6 +213,6 @@ const navigationItems = computed(() =>
         class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
         v-text="item.count"
       />
-    </router-link>
+    </AppLink>
   </div>
 </template>

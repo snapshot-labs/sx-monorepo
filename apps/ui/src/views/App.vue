@@ -5,7 +5,7 @@ const route = useRoute();
 const { load, get, loading, loaded } = useApps();
 const { setTitle } = useTitle();
 
-const id = route.params.id as string;
+const id = route.params.app as string;
 const app = computed(() => get(id));
 
 watchEffect(() => {
@@ -24,13 +24,10 @@ onMounted(() => load());
         <UiLoading v-if="loading && !loaded" class="block" />
         <div v-else>
           <div class="flex space-x-1 items-center text-[17px] mb-5">
-            <router-link
-              :to="{ name: 'site-ecosystem' }"
-              class="flex items-center"
-            >
+            <AppLink :to="{ name: 'site-ecosystem' }" class="flex items-center">
               <IH-view-grid class="mr-1" />
               Ecosystem
-            </router-link>
+            </AppLink>
             <IH-chevron-right class="size-[14px]" />
             <div v-text="app.name" />
           </div>
@@ -66,15 +63,24 @@ onMounted(() => load());
               </div>
               <div>
                 <div class="eyebrow mb-2">Overview</div>
-                <div class="text-md text-skin-link" v-text="app.overview" />
+                <div
+                  class="text-md text-skin-link whitespace-pre-line"
+                  v-text="app.overview"
+                />
               </div>
               <div v-if="app.how">
                 <div class="eyebrow mb-2">How it works</div>
-                <div class="text-md text-skin-link" v-text="app.how" />
+                <div
+                  class="text-md text-skin-link whitespace-pre-line"
+                  v-text="app.how"
+                />
               </div>
               <div v-if="app.start">
                 <div class="eyebrow mb-2">Get started</div>
-                <div class="text-md text-skin-link" v-text="app.start" />
+                <div
+                  class="text-md text-skin-link whitespace-pre-line"
+                  v-text="app.start"
+                />
               </div>
               <div v-if="app.form">
                 <a :href="app.form" target="_blank" class="text-skin-text">
@@ -98,7 +104,7 @@ onMounted(() => load());
               </div>
               <div v-if="app.x">
                 <h4 class="eyebrow" v-text="'X (Twitter)'" />
-                <a :href="`https://twitter.com/${app.x}`" target="_blank">
+                <a :href="`https://x.com/${app.x}`" target="_blank">
                   {{ app.x }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </a>

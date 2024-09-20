@@ -2,6 +2,10 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getCacheHash, shorten } from '@/helpers/utils';
 
+defineProps<{
+  hasAppNav: boolean;
+}>();
+
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
@@ -39,9 +43,6 @@ const user = computed(
 );
 const cb = computed(() => getCacheHash(user.value.avatar));
 
-const hasAppNav = computed(() =>
-  ['my', 'settings', 'space'].includes(String(route.matched[0]?.name))
-);
 const searchConfig = computed(
   () => SEARCH_CONFIG[route.matched[0]?.name || '']
 );
@@ -126,11 +127,7 @@ watch(
     </form>
 
     <div class="flex space-x-2.5 shrink-0">
-      <UiButton
-        v-if="loading || web3.authLoading"
-        loading
-        class="!px-0 w-[46px]"
-      />
+      <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
         class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
