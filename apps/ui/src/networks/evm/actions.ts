@@ -606,7 +606,7 @@ export function createActions(
         abi: string[];
       };
 
-      if (['governor-subgraph', 'compound-governor'].includes(delegationType)) {
+      if (delegationType === 'governor-subgraph') {
         contractParams = {
           address: delegationContract.split(':')[1],
           functionName: 'delegate',
@@ -701,6 +701,9 @@ export function createActions(
             maxVotingDuration !== null ? maxVotingDuration : undefined
         }
       });
+    },
+    updateSettingsRaw: () => {
+      throw new Error('Not implemented');
     },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (

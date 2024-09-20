@@ -147,3 +147,12 @@ export const updateStatementTypes = {
     { name: 'network', type: 'string' }
   ]
 };
+
+export const updateSpaceTypes = {
+  Space: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'settings', type: 'string' }
+  ]
+};

@@ -3,9 +3,16 @@ import { getUrl, simplifyURL } from '@/helpers/utils';
 
 const route = useRoute();
 const { load, get, loading, loaded } = useApps();
+const { setTitle } = useTitle();
 
 const id = route.params.id as string;
 const app = computed(() => get(id));
+
+watchEffect(() => {
+  if (!app.value.name) return;
+
+  setTitle(app.value.name);
+});
 
 onMounted(() => load());
 </script>
