@@ -181,6 +181,7 @@ function formatSpace(
     proposal_count: space.proposalsCount,
     proposal_count_1d: space.proposalsCount1d,
     proposal_count_7d: space.proposalsCount7d,
+    proposal_count_30d: space.proposalsCount30d,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
     voting_power_symbol: space.symbol,

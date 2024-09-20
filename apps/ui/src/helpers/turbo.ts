@@ -9,14 +9,18 @@ export const MAX_CHOICES = {
 };
 
 export const MAX_1D_PROPOSALS = {
-  default: 20,
+  default: 3,
+  verified: 20,
   turbo: 40
 };
 
-export const MAX_7D_PROPOSALS = {
-  default: 100,
+export const MAX_30D_PROPOSALS = {
+  default: 15,
+  verified: 100,
   turbo: 200
 };
 
 export const TURBO_URL =
   'https://docs.snapshot.org/user-guides/spaces/turbo-plan';
+export const VERIFIED_URL =
+  'https://docs.snapshot.org/user-guides/spaces/get-verified';

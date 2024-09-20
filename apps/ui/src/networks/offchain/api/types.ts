@@ -60,6 +60,7 @@ export type ApiSpace = {
   proposalsCount: number;
   proposalsCount1d: number;
   proposalsCount7d: number;
+  proposalsCount30d: number;
   votesCount: number;
   followersCount: number;
   children: [ApiRelatedSpace];

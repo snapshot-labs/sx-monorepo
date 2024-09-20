@@ -4,7 +4,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { resolver } from '@/helpers/resolver';
 import {
   MAX_1D_PROPOSALS,
-  MAX_7D_PROPOSALS,
+  MAX_30D_PROPOSALS,
   MAX_BODY_LENGTH,
   MAX_CHOICES
 } from '@/helpers/turbo';
@@ -170,12 +170,20 @@ const canSubmit = computed(() => {
     : !web3.value.authLoading;
 });
 
-const isProposalLimitReached = computed(() => {
-  if (!space.value) return false;
+const spaceType = computed(() => {
+  if (!space.value) return 'default';
+  return space.value.turbo
+    ? 'turbo'
+    : space.value.verified
+      ? 'verified'
+      : 'default';
+});
 
+const proposalLimitReached = computed(() => {
+  if (!space.value) return false;
   return (
-    (space.value.proposal_count_1d || 0) >= MAX_1D_PROPOSALS.default ||
-    (space.value.proposal_count_7d || 0) >= MAX_7D_PROPOSALS.default
+    (space.value.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
+    (space.value.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
   );
 });
 
@@ -394,9 +402,14 @@ export default defineComponent({
           action="propose"
           @fetch-voting-power="handleFetchVotingPower"
         />
-        <TurboMessage
-          v-if="!space?.turbo && isProposalLimitReached"
-          :text="`Post up to ${MAX_1D_PROPOSALS.turbo} proposals daily and ${MAX_7D_PROPOSALS.turbo} monthly with`"
+        <EditorHint
+          v-if="spaceType === 'default' && proposalLimitReached"
+          type="get-verified"
+          :text="`to increase the limit to ${MAX_1D_PROPOSALS.verified} daily and ${MAX_30D_PROPOSALS.verified} monthly`"
+        />
+        <EditorHint
+          v-else-if="spaceType !== 'turbo' && proposalLimitReached"
+          :text="`Post up to ${MAX_1D_PROPOSALS.turbo} proposals daily and ${MAX_30D_PROPOSALS.turbo} monthly`"
         />
 
         <UiInputString
@@ -432,9 +445,9 @@ export default defineComponent({
           :definition="bodyDefinition"
           :error="formErrors.body"
         />
-        <TurboMessage
+        <EditorHint
           v-if="!space?.turbo && proposal.body.length > MAX_BODY_LENGTH.default"
-          :text="`Write up to ${_n(MAX_BODY_LENGTH.turbo, 'compact')} characters content with`"
+          :text="`Write up to ${_n(MAX_BODY_LENGTH.turbo, 'compact')} characters content`"
         />
 
         <div class="s-base mb-5">
@@ -487,9 +500,9 @@ export default defineComponent({
         "
       />
       <EditorChoices v-model="proposal" :definition="choicesDefinition" />
-      <TurboMessage
+      <EditorHint
         v-if="!space?.turbo && proposal.choices.length > MAX_CHOICES.default"
-        :text="`Add up to ${_n(MAX_CHOICES.turbo, 'compact')} choices with`"
+        :text="`Add up to ${_n(MAX_CHOICES.turbo, 'compact')} choices`"
       />
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />

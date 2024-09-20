@@ -53,6 +53,7 @@ const SPACE_FRAGMENT = gql`
     proposalsCount
     proposalsCount1d
     proposalsCount7d
+    proposalsCount30d
     votesCount
     followersCount
     children {
