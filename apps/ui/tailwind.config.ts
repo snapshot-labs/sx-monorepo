@@ -57,6 +57,7 @@ export default {
       }
     },
     screens: {
+      minimum: '320px',
       xs: '420px',
       sm: '544px',
       md: '768px',
