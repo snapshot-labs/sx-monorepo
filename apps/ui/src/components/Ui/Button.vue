@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { RouteLocationRaw } from 'vue-router';
+
 withDefaults(
   defineProps<{
     type?: 'button' | 'submit' | 'reset';
     primary?: boolean;
     loading?: boolean;
     disabled?: boolean;
+    to?: RouteLocationRaw;
   }>(),
   {
     type: 'button',
@@ -16,7 +19,18 @@ withDefaults(
 </script>
 
 <template>
+  <AppLink
+    v-if="to"
+    :to="to"
+    :class="{
+      primary: primary
+    }"
+    class="button inline-flex items-center justify-center px-3.5"
+  >
+    <slot />
+  </AppLink>
   <button
+    v-else
     :type="type"
     :disabled="disabled || loading"
     :class="{
@@ -24,7 +38,7 @@ withDefaults(
       'w-[46px] px-0': loading,
       'px-3.5': !loading || ($attrs.class as 'string')?.includes('w-full')
     }"
-    class="rounded-full leading-[100%] border button h-[46px] text-skin-link bg-skin-bg"
+    class="button"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />
@@ -33,6 +47,8 @@ withDefaults(
 
 <style lang="scss" scoped>
 .button {
+  @apply rounded-full leading-[100%] border h-[46px] text-skin-link bg-skin-bg;
+
   &:disabled:deep() {
     color: rgba(var(--border)) !important;
     cursor: not-allowed;

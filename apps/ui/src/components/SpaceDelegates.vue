@@ -103,7 +103,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
   </div>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
-      <AppLink
+      <UiButton
         v-if="web3.account"
         :to="{
           name: 'space-user-statement',
@@ -112,10 +112,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             user: web3.account
           }
         }"
-        button
       >
         Edit my statement
-      </AppLink>
+      </UiButton>
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
         <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
