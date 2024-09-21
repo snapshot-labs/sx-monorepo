@@ -193,8 +193,7 @@ async function handleProposeClick() {
     if (result) {
       proposalsStore.reset(props.space.id, props.space.network);
       router.push({
-        name: 'space-proposals',
-        params: { space: spaceKey.value }
+        name: 'space-proposals'
       });
     }
   } finally {

@@ -71,7 +71,10 @@ async function handleTransactionAccept() {
 
   router.push({
     name: 'space-editor',
-    params: { space: walletSpaceKey.value, key: draftId }
+    params: {
+      ...(!isWhiteLabel.value ? { space: walletSpaceKey.value } : {}),
+      key: draftId
+    }
   });
 
   reset();
