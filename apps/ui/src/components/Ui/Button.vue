@@ -7,29 +7,25 @@ withDefaults(
     primary?: boolean;
     loading?: boolean;
     disabled?: boolean;
-    as?: 'button' | 'a';
     to?: RouteLocationRaw;
   }>(),
   {
     type: 'button',
     primary: false,
     loading: false,
-    disabled: false,
-    as: 'button'
+    disabled: false
   }
 );
 </script>
 
 <template>
   <AppLink
-    v-if="as === 'a' && to"
+    v-if="to"
     :to="to"
     :class="{
-      primary: primary,
-      'w-[46px] px-0': loading,
-      'px-3.5': !loading || ($attrs.class as 'string')?.includes('w-full')
+      primary: primary
     }"
-    class="rounded-full leading-[100%] border button h-[46px] text-skin-link bg-skin-bg"
+    class="button inline-flex items-center justify-center px-3.5"
   >
     <slot />
   </AppLink>
@@ -42,7 +38,7 @@ withDefaults(
       'w-[46px] px-0': loading,
       'px-3.5': !loading || ($attrs.class as 'string')?.includes('w-full')
     }"
-    class="rounded-full leading-[100%] border button h-[46px] text-skin-link bg-skin-bg"
+    class="button"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />
@@ -51,6 +47,8 @@ withDefaults(
 
 <style lang="scss" scoped>
 .button {
+  @apply rounded-full leading-[100%] border h-[46px] text-skin-link bg-skin-bg;
+
   &:disabled:deep() {
     color: rgba(var(--border)) !important;
     cursor: not-allowed;
