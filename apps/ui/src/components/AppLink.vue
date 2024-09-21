@@ -23,9 +23,7 @@ function normalize(to: any) {
     <a
       v-bind="$attrs"
       :href="href"
-      :class="{
-        [activeClass!]: isActive && activeClass
-      }"
+      :class="{ [`${activeClass}`]: isActive }"
       @click="navigate"
     >
       <slot />
