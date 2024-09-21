@@ -336,13 +336,12 @@ export default defineComponent({
   <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4 gap-2">
-        <AppLink
+        <UiButton
           :to="{ name: 'space-overview', params: { space: param } }"
           class="w-[46px] !px-0 mr-2 shrink-0"
-          button
         >
           <IH-arrow-narrow-left />
-        </AppLink>
+        </UiButton>
         <h4 class="grow truncate">New proposal</h4>
         <IndicatorPendingTransactions />
         <UiLoading v-if="!space" class="block p-4" />

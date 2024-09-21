@@ -1,22 +1,40 @@
 <script setup lang="ts">
+import { RouteLocationRaw } from 'vue-router';
+
 withDefaults(
   defineProps<{
     type?: 'button' | 'submit' | 'reset';
     primary?: boolean;
     loading?: boolean;
     disabled?: boolean;
+    as?: 'button' | 'a';
+    to?: RouteLocationRaw;
   }>(),
   {
     type: 'button',
     primary: false,
     loading: false,
-    disabled: false
+    disabled: false,
+    as: 'button'
   }
 );
 </script>
 
 <template>
+  <AppLink
+    v-if="as === 'a' && to"
+    :to="to"
+    :class="{
+      primary: primary,
+      'w-[46px] px-0': loading,
+      'px-3.5': !loading || ($attrs.class as 'string')?.includes('w-full')
+    }"
+    class="rounded-full leading-[100%] border button h-[46px] text-skin-link bg-skin-bg"
+  >
+    <slot />
+  </AppLink>
   <button
+    v-else
     :type="type"
     :disabled="disabled || loading"
     :class="{

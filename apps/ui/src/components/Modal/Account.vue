@@ -90,22 +90,17 @@ watch(open, () => (step.value = null));
         </button>
       </template>
       <template v-else>
-        <AppLink
+        <UiButton
           :to="{ name: 'user', params: { user: web3.account } }"
-          button
           class="gap-2"
           @click="emit('close')"
         >
           <UiStamp :id="user.id" :size="18" :cb="cb" />
           My profile
-        </AppLink>
-        <AppLink
-          :to="{ name: 'settings-spaces' }"
-          button
-          @click="emit('close')"
-        >
+        </UiButton>
+        <UiButton :to="{ name: 'settings-spaces' }" @click="emit('close')">
           Settings
-        </AppLink>
+        </UiButton>
         <UiButton @click="step = 'connect'">
           {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
         </UiButton>

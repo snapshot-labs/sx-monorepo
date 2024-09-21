@@ -5,9 +5,7 @@ defineOptions({
   inheritAttrs: false
 });
 
-const props = defineProps<
-  { button?: boolean; primary?: boolean } & RouterLinkProps
->();
+const props = defineProps<RouterLinkProps>();
 
 // NOTE cleanup and use correct link when it's a white label site
 function normalize(to: any) {
@@ -26,9 +24,7 @@ function normalize(to: any) {
       v-bind="$attrs"
       :href="href"
       :class="{
-        [activeClass!]: isActive && activeClass,
-        button: button,
-        primary: primary
+        [activeClass!]: isActive && activeClass
       }"
       @click="navigate"
     >
@@ -36,13 +32,3 @@ function normalize(to: any) {
     </a>
   </router-link>
 </template>
-
-<style lang="scss" scoped>
-.button {
-  @apply rounded-full leading-[100%] border px-3.5 h-[46px] text-skin-link bg-skin-bg inline-flex items-center justify-center;
-
-  &.primary {
-    @apply bg-skin-link text-skin-bg border-skin-link;
-  }
-}
-</style>
