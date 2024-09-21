@@ -386,7 +386,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               :key="i"
               :href="sanitizeUrl(nft.opensea_url) || '#'"
               target="_blank"
-              class="block w-full max-w-[160px] md:max-w-[120px] mx-auto shrink-0"
+              class="block w-full minimum:max-w-[160px] md:max-w-[120px] mx-auto shrink-0"
             >
               <UiNftImage :item="nft" class="w-full" />
               <div class="mt-2 text-[17px] truncate text-center">
