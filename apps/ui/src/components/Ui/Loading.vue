@@ -2,13 +2,11 @@
 withDefaults(
   defineProps<{
     inverse?: boolean;
-    width?: number;
-    height?: number;
+    size?: number;
   }>(),
   {
     inverse: false,
-    width: 20,
-    height: 20
+    size: 20
   }
 );
 </script>
@@ -17,8 +15,8 @@ withDefaults(
   <span class="loading" :class="{ inverse: !!inverse }">
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      :width="width"
-      :height="height"
+      :width="size"
+      :height="size"
       class="inline-block align-middle"
       viewBox="0 0 24 24"
     >
