@@ -489,11 +489,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </teleport>
     </UiContainerSettings>
-    <div
+    <footer
       v-if="
         !uiStore.sidebarOpen && ((isModified && canModifySettings) || error)
       "
-      class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+      class="fixed bg-skin-bg bottom-0 left-0 right-0 xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
@@ -514,7 +514,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           Save
         </UiButton>
       </div>
-    </div>
+    </footer>
   </div>
   <teleport to="#modal">
     <ModalTransactionProgress

@@ -98,38 +98,48 @@ watch(isSwiping, () => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
+    <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
       <AppSidebar
-        class="lg:visible"
-        :class="{ invisible: !uiStore.sidebarOpen }"
+        :class="[
+          `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
+          { '!flex app-sidebar-open': uiStore.sidebarOpen }
+        ]"
+        @navigated="uiStore.sidebarOpen = false"
       />
-      <AppTopnav :has-app-nav="hasAppNav" />
-      <AppNav v-if="hasAppNav" />
+      <AppTopnav
+        :has-app-nav="hasAppNav"
+        class="fixed top-0 inset-x-0 z-50"
+        @navigated="uiStore.sidebarOpen = false"
+      >
+        <template #toggle-sidebar-button>
+          <button
+            type="button"
+            class="text-skin-link cursor-pointer lg:hidden ml-4"
+            @click="uiStore.toggleSidebar"
+          >
+            <IH-menu-alt-2 />
+          </button>
+        </template>
+      </AppTopnav>
+      <AppNav
+        v-if="hasAppNav"
+        :class="[
+          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+          {
+            '!block app-nav-open': uiStore.sidebarOpen
+          }
+        ]"
+        @navigated="uiStore.sidebarOpen = false"
+      />
       <button
         v-if="uiStore.sidebarOpen"
         type="button"
-        class="backdrop lg:hidden"
-        :style="{
-          left: `${72 + (hasAppNav ? 240 : 0)}px`
-        }"
-        @click="uiStore.toggleSidebar"
+        class="backdrop"
+        @click="uiStore.sidebarOpen = false"
       />
-      <div
-        class="flex-auto w-full"
-        :class="{
-          'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
-        }"
-      >
-        <div
-          :class="{
-            'lg:ml-[240px]': hasAppNav,
-            'translate-x-[240px] lg:translate-x-0':
-              uiStore.sidebarOpen && hasAppNav
-          }"
-        >
-          <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
-        </div>
-      </div>
+      <main class="flex-auto w-full">
+        <router-view class="flex-auto mt-[72px]" />
+      </main>
     </div>
     <AppNotifications />
     <ModalTransaction
@@ -143,14 +153,66 @@ watch(isSwiping, () => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+$sidebarWidth: 72px;
+$navWidth: 240px;
+
+.app-sidebar {
+  width: $sidebarWidth;
+
+  @media (max-width: 1011px) {
+    &-open {
+      & ~ :deep(*) {
+        @apply translate-x-[#{$sidebarWidth}];
+      }
+
+      &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
+        @apply translate-x-[#{$sidebarWidth + $navWidth}];
+      }
+    }
+  }
+}
+
+.app-nav {
+  width: $navWidth;
+
+  @media (max-width: 1011px) {
+    &-open ~ :deep(*) {
+      @apply translate-x-[#{$navWidth}];
+    }
+  }
+}
+
+@media (screen(lg)) {
+  .app-sidebar {
+    & ~ :deep(main),
+    & ~ .backdrop,
+    & ~ :deep(header.fixed),
+    & ~ :deep(main header.fixed),
+    & ~ :deep(main footer.fixed),
+    & ~ :deep(.app-nav) {
+      @apply ml-[#{$sidebarWidth}];
+    }
+
+    &:has(~ .app-nav) ~ .app-nav {
+      & ~ :deep(main),
+      & ~ .backdrop,
+      & ~ :deep(header.fixed),
+      & ~ :deep(main header.fixed),
+      & ~ :deep(main footer.fixed),
+      & ~ :deep(.app-nav) {
+        @apply ml-[#{$sidebarWidth + $navWidth}];
+      }
+    }
+  }
+
+  .app-nav ~ :deep(*) {
+    @apply ml-[#{$navWidth}];
+  }
+}
+
 .backdrop {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 99;
-  background: rgba(0, 0, 0, 0.4) !important;
+  @apply fixed inset-0 z-[99];
+  @apply bg-[black]/40 #{!important};
 }
 </style>

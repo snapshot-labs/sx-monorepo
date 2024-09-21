@@ -26,8 +26,11 @@ type NavigationItem = {
   active?: boolean;
 };
 
+const emit = defineEmits<{
+  (e: 'navigated');
+}>();
+
 const route = useRoute();
-const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 
@@ -193,18 +196,14 @@ const navigationItems = computed(() =>
 </script>
 
 <template>
-  <div
-    class="lg:visible fixed w-[240px] border-r left-[72px] top-[72px] inset-y-0 z-10 bg-skin-bg py-4"
-    :class="{
-      invisible: !uiStore.sidebarOpen
-    }"
-  >
+  <div class="border-r bg-skin-bg py-4">
     <AppLink
       v-for="(item, key) in navigationItems"
       :key="key"
       :to="item.link"
       class="px-4 py-1.5 space-x-2 flex items-center"
       :class="item.active ? 'text-skin-link' : 'text-skin-text'"
+      @click="emit('navigated')"
     >
       <component :is="item.icon" class="inline-block"></component>
       <span class="grow" v-text="item.name" />

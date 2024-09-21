@@ -6,6 +6,10 @@ defineProps<{
   hasAppNav: boolean;
 }>();
 
+const emit = defineEmits<{
+  (e: 'navigated');
+}>();
+
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
@@ -79,11 +83,9 @@ watch(
 </script>
 
 <template>
-  <nav
-    class="border-b fixed top-0 inset-x-0 z-50 lg:left-[72px] flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
-    :class="{
-      'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
-    }"
+  <header
+    class="border-b flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
+    v-bind="$attrs"
   >
     <div
       class="flex items-center h-full truncate"
@@ -92,19 +94,13 @@ watch(
         'border-r pr-4 w-[240px]': hasAppNav && uiStore.sidebarOpen
       }"
     >
-      <button
-        type="button"
-        class="text-skin-link cursor-pointer lg:hidden ml-4"
-        @click="uiStore.toggleSidebar"
-      >
-        <IH-menu-alt-2 />
-      </button>
-
+      <slot name="toggle-sidebar-button" />
       <Breadcrumb
         :class="[
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
         ]"
+        @click="emit('navigated')"
       >
       </Breadcrumb>
     </div>
@@ -154,7 +150,7 @@ watch(
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>
-  </nav>
+  </header>
   <teleport to="#modal">
     <ModalAccount
       :open="modalAccountOpen || modalAccountWithoutDismissOpen"

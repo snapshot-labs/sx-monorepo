@@ -334,7 +334,7 @@ export default defineComponent({
 
 <template>
   <div v-if="proposal">
-    <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
+    <header class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0">
       <div class="flex items-center h-[71px] mx-4 gap-2">
         <AppLink
           :to="{ name: 'space-overview', params: { space: param } }"
@@ -374,7 +374,7 @@ export default defineComponent({
           </UiButton>
         </template>
       </div>
-    </nav>
+    </header>
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
