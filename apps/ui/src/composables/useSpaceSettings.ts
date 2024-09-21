@@ -1,5 +1,6 @@
 import objectHash from 'object-hash';
 import { Ref } from 'vue';
+import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { clone, compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
@@ -8,7 +9,7 @@ import {
   StrategyConfig,
   StrategyTemplate
 } from '@/networks/types';
-import { Space, SpaceMetadata, StrategyParsedMetadata } from '@/types';
+import { Member, Space, SpaceMetadata, StrategyParsedMetadata } from '@/types';
 
 export type OffchainSpaceSettings = {
   name: string;
@@ -66,6 +67,7 @@ const DEFAULT_FORM_STATE: Form = {
 };
 
 export function useSpaceSettings(space: Ref<Space>) {
+  const { web3 } = useWeb3();
   const { getDurationFromCurrent } = useMetaStore();
   const { updateSettings, updateSettingsRaw, transferOwnership } = useActions();
 
@@ -73,6 +75,43 @@ export function useSpaceSettings(space: Ref<Space>) {
   const isModified = ref(false);
 
   const network = computed(() => getNetwork(space.value.network));
+  const isController = computedAsync(async () => {
+    const { account } = web3.value;
+
+    const controller = await network.value.helpers.getSpaceController(
+      space.value
+    );
+
+    return compareAddresses(controller, account);
+  });
+  const isOwner = computedAsync(async () => {
+    if (!offchainNetworks.includes(space.value.network)) {
+      return isController.value;
+    }
+
+    const { account } = web3.value;
+
+    const owner = await getNameOwner(
+      space.value.id,
+      network.value.chainId as ENSChainId
+    );
+
+    return compareAddresses(owner, account);
+  });
+  const isAdmin = computed(() => {
+    if (!offchainNetworks.includes(space.value.network)) return false;
+
+    if (space.value.additionalRawData?.type === 'offchain') {
+      const admins = space.value.additionalRawData.admins.map(admin =>
+        admin.toLowerCase()
+      );
+
+      return admins.includes(web3.value.account.toLowerCase());
+    }
+
+    return false;
+  });
+  const canModifySettings = computed(() => isController.value || isAdmin.value);
 
   // Common properties
   const form: Ref<Form> = ref(clone(DEFAULT_FORM_STATE));
@@ -87,6 +126,9 @@ export function useSpaceSettings(space: Ref<Space>) {
   const votingStrategies = ref([] as StrategyConfig[]);
   const initialValidationStrategyObjectHash = ref(null as string | null);
   const controller = ref(space.value.controller);
+
+  // Offchain properties
+  const members = ref([] as Member[]);
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -211,9 +253,11 @@ export function useSpaceSettings(space: Ref<Space>) {
       previousParams = previousParams ?? [];
     }
 
-    // NOTE: Params need to be lowercase when we compare them as once stored they will be stored
-    // as bytes (casing is lost).
-    const formattedParams = params.map(param => param.toLowerCase());
+    // NOTE: Params need to be kept in raw bytes when we compare them as once stored they will be stored
+    // as bytes (casing and padding are lost).
+    const formattedParams = params.map(param =>
+      param === '0x' ? param : `0x${BigInt(param).toString(16)}`
+    );
     return objectHash(formattedParams) !== objectHash(previousParams);
   }
 
@@ -301,6 +345,25 @@ export function useSpaceSettings(space: Ref<Space>) {
     };
   }
 
+  function getInitialMembers(space: Space): Member[] {
+    if (space.additionalRawData?.type !== 'offchain') return [];
+
+    return [
+      ...space.additionalRawData.admins.map(address => ({
+        address,
+        role: 'admin' as const
+      })),
+      ...space.additionalRawData.moderators.map((address: string) => ({
+        address,
+        role: 'moderator' as const
+      })),
+      ...space.additionalRawData.members.map((address: string) => ({
+        address,
+        role: 'author' as const
+      }))
+    ];
+  }
+
   async function saveOffchain() {
     if (space.value.additionalRawData?.type !== 'offchain') {
       throw new Error('Missing raw data for offchain space');
@@ -352,9 +415,15 @@ export function useSpaceSettings(space: Ref<Space>) {
         name: treasury.name || '',
         network: treasury.chainId?.toString() ?? '1'
       })),
-      admins: space.value.additionalRawData.admins,
-      moderators: space.value.additionalRawData.moderators,
-      members: space.value.additionalRawData.members,
+      admins: members.value
+        .filter(member => member.role === 'admin')
+        .map(member => member.address),
+      moderators: members.value
+        .filter(member => member.role === 'moderator')
+        .map(member => member.address),
+      members: members.value
+        .filter(member => member.role === 'author')
+        .map(member => member.address),
       plugins: space.value.additionalRawData.plugins,
       delegationPortal: delegationPortal,
       filters: space.value.additionalRawData.filters,
@@ -466,6 +535,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.voting_power_validation_strategies_parsed_metadata
     );
 
+    controller.value = await network.value.helpers.getSpaceController(
+      space.value
+    );
+
     formErrors.value = {};
     form.value = getInitialForm(space.value);
 
@@ -479,6 +552,10 @@ export function useSpaceSettings(space: Ref<Space>) {
     initialValidationStrategyObjectHash.value = objectHash(
       validationStrategyValue
     );
+
+    if (offchainNetworks.includes(space.value.network)) {
+      members.value = getInitialMembers(space.value);
+    }
   }
 
   watchEffect(async () => {
@@ -494,6 +571,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const validationStrategyValue = validationStrategy.value;
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
+    const membersValue = members.value;
 
     if (loading.value) {
       isModified.value = false;
@@ -532,7 +610,15 @@ export function useSpaceSettings(space: Ref<Space>) {
     }
 
     if (offchainNetworks.includes(space.value.network)) {
-      // TODO: offchain network only settings
+      const ignoreOrderOpts = { unorderedArrays: true };
+
+      if (
+        objectHash(membersValue, ignoreOrderOpts) !==
+        objectHash(getInitialMembers(space.value), ignoreOrderOpts)
+      ) {
+        isModified.value = true;
+        return;
+      }
     } else {
       const [authenticatorsToAdd, authenticatorsToRemove] =
         await processChanges(
@@ -574,6 +660,10 @@ export function useSpaceSettings(space: Ref<Space>) {
   return {
     loading,
     isModified,
+    isController,
+    isOwner,
+    isAdmin,
+    canModifySettings,
     form,
     formErrors,
     votingDelay,
@@ -583,6 +673,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     authenticators,
     validationStrategy,
     votingStrategies,
+    members,
     save,
     saveController,
     reset

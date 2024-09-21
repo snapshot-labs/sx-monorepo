@@ -3,10 +3,12 @@ import { Menu, MenuButton, MenuItems } from '@headlessui/vue';
 
 withDefaults(
   defineProps<{
+    disabled?: boolean;
     gap?: string;
     placement?: 'left' | 'right';
   }>(),
   {
+    disabled: false,
     gap: '8px',
     placement: 'right'
   }
@@ -15,7 +17,7 @@ withDefaults(
 
 <template>
   <Menu as="div" class="relative">
-    <MenuButton as="template" class="cursor-pointer">
+    <MenuButton :disabled="disabled" as="template" class="cursor-pointer">
       <slot name="button" />
     </MenuButton>
     <transition

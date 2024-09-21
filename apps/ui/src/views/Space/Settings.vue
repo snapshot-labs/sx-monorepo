@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _d, compareAddresses, shorten } from '@/helpers/utils';
+import { _d, shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -9,6 +9,10 @@ const route = useRoute();
 const {
   loading,
   isModified,
+  isController,
+  isOwner,
+  isAdmin,
+  canModifySettings,
   form,
   formErrors,
   votingDelay,
@@ -18,12 +22,12 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  members,
   save,
   saveController,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
-const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
@@ -41,6 +45,7 @@ type Tab = {
     | 'proposal-validation'
     | 'voting-strategies'
     | 'voting'
+    | 'members'
     | 'execution'
     | 'controller';
   name: string;
@@ -90,6 +95,11 @@ const tabs = computed<Tab[]>(
         visible: true
       },
       {
+        id: 'members',
+        name: 'Members',
+        visible: isOffchainNetwork.value
+      },
+      {
         id: 'execution',
         name: 'Execution',
         visible: !isOffchainNetwork.value
@@ -97,7 +107,7 @@ const tabs = computed<Tab[]>(
       {
         id: 'controller',
         name: 'Controller',
-        visible: !isOffchainNetwork.value
+        visible: true
       }
     ] as const
 );
@@ -109,13 +119,6 @@ const activeTab: Ref<Tab['id']> = computed(() => {
   return 'profile';
 });
 const network = computed(() => getNetwork(props.space.network));
-const isController = computedAsync(async () => {
-  const controller = await network.value.helpers.getSpaceController(
-    props.space
-  );
-
-  return compareAddresses(controller, web3.value.account);
-});
 
 const executionStrategies = computed(() => {
   return props.space.executors.map((executor, i) => {
@@ -201,7 +204,7 @@ function handleSettingsSave() {
 function handleControllerSave(value: string) {
   changeControllerModalOpen.value = false;
 
-  if (!isController.value) return;
+  if (!isOwner.value) return;
   controller.value = value;
 
   saving.value = true;
@@ -241,7 +244,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     gradient="xxl"
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <Applink
+      <AppLink
         v-for="tab in tabs.filter(tab => tab.visible)"
         :key="tab.id"
         :to="{
@@ -253,7 +256,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         @focus="handleTabFocus"
       >
         <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-      </Applink>
+      </AppLink>
     </div>
   </UiScrollerHorizontal>
   <div v-if="loading" class="p-4">
@@ -423,6 +426,18 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </div>
     </UiContainerSettings>
     <UiContainerSettings
+      v-else-if="activeTab === 'members'"
+      title="Members"
+      description="Members have different roles and permissions within the space."
+    >
+      <FormSpaceMembers
+        v-model="members"
+        :network-id="space.network"
+        :is-controller="isController"
+        :is-admin="isAdmin"
+      />
+    </UiContainerSettings>
+    <UiContainerSettings
       v-else-if="activeTab === 'execution'"
       title="Execution(s)"
       description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
@@ -475,7 +490,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </teleport>
     </UiContainerSettings>
     <div
-      v-if="!uiStore.sidebarOpen && ((isModified && isController) || error)"
+      v-if="
+        !uiStore.sidebarOpen && ((isModified && canModifySettings) || error)
+      "
       class="fixed bg-skin-bg bottom-0 left-0 right-0 lg:left-[312px] xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4
