@@ -62,4 +62,13 @@ const handleVoteClick = (choice: Choice) => {
       </div>
     </div>
   </div>
+  <teleport to="#modal">
+    <ModalVote
+      :choice="selectedChoice"
+      :proposal="proposal"
+      :open="modalOpenVote"
+      @close="modalOpenVote = false"
+      @voted="selectedChoice = null"
+    />
+  </teleport>
 </template>
