@@ -71,7 +71,7 @@ const ORGS = [
         />
         <div class="relative flex overflow-hidden h-[56px]">
           <div class="carousel flex">
-            <router-link
+            <AppLink
               v-for="(org, i) in ORGS"
               :key="i"
               :to="{ name: 'space-overview', params: { space: `s:${org}` } }"
@@ -82,10 +82,10 @@ const ORGS = [
                 :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
                 class="rounded-full"
               />
-            </router-link>
+            </AppLink>
           </div>
           <div class="carousel-follower flex">
-            <router-link
+            <AppLink
               v-for="(org, i) in ORGS"
               :key="i"
               :to="{ name: 'space-overview', params: { space: `s:${org}` } }"
@@ -96,7 +96,7 @@ const ORGS = [
                 :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
                 class="rounded-full"
               />
-            </router-link>
+            </AppLink>
           </div>
         </div>
       </div>

@@ -55,7 +55,6 @@ watchEffect(() => {
 <template>
   <div>
     <div
-      class="mx-0"
       :class="{
         'xl:mr-[240px]': hasRightPlaceholderSidebar
       }"

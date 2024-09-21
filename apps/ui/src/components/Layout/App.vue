@@ -28,7 +28,7 @@ const { isSwiping, direction } = useSwipe(el, {
 });
 const { createDraft } = useEditor();
 const {
-  spaceKey: walletSpaceKey,
+  spaceKey: walletConnectSpaceKey,
   network,
   executionStrategy,
   transaction,
@@ -50,20 +50,24 @@ const bottomPadding = computed(
 );
 
 async function handleTransactionAccept() {
-  if (!walletSpaceKey.value || !executionStrategy.value || !transaction.value)
+  if (
+    !walletConnectSpaceKey.value ||
+    !executionStrategy.value ||
+    !transaction.value
+  )
     return;
 
   const executions = {} as Record<string, Transaction[]>;
   executions[executionStrategy.value.address] = [transaction.value];
 
-  const spaceKey = walletSpaceKey.value;
+  const spaceKey = walletConnectSpaceKey.value;
   const draftId = await createDraft(spaceKey, {
     executions
   });
 
   router.push({
     name: 'space-editor',
-    params: { space: walletSpaceKey.value, key: draftId }
+    params: { space: walletConnectSpaceKey.value, key: draftId }
   });
 
   reset();

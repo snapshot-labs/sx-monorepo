@@ -35,7 +35,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
           :class="{ 'bg-skin-border/20': notification.unread }"
         >
           <div>
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-overview',
                 params: {
@@ -44,10 +44,10 @@ onUnmounted(() => notificationsStore.markAllAsRead());
               }"
             >
               {{ notification.proposal.space.name }}
-            </router-link>
+            </AppLink>
             proposal has {{ notification.type }}
             {{ _rt(notification.timestamp) }}
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-proposal-overview',
                 params: {
@@ -63,7 +63,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
                   `#${notification.proposal.proposal_id}`
                 "
               />
-            </router-link>
+            </AppLink>
           </div>
         </div>
       </div>
