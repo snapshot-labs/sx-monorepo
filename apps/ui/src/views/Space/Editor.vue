@@ -45,7 +45,7 @@ const router = useRouter();
 const { propose, updateProposal } = useActions();
 const { web3 } = useWeb3();
 const {
-  spaceKey: walletSpaceKey,
+  spaceKey: walletConnectSpaceKey,
   network: walletConnectNetwork,
   transaction,
   executionStrategy: walletConnectTransactionExecutionStrategy,
@@ -213,7 +213,7 @@ function handleExecutionUpdated(
 
 function handleTransactionAccept() {
   if (
-    !walletSpaceKey.value ||
+    !walletConnectSpaceKey.value ||
     !walletConnectTransactionExecutionStrategy.value ||
     !transaction.value ||
     !proposal.value
