@@ -166,6 +166,10 @@ $navWidth: 240px;
         @apply translate-x-[#{$sidebarWidth}];
       }
 
+      & ~ :deep(main) {
+        @apply z-[51];
+      }
+
       &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
         @apply translate-x-[#{$sidebarWidth + $navWidth}];
       }
@@ -177,8 +181,14 @@ $navWidth: 240px;
   width: $navWidth;
 
   @media (max-width: 1011px) {
-    &-open ~ :deep(*) {
-      @apply translate-x-[#{$navWidth}];
+    &-open {
+      & ~ :deep(*) {
+        @apply translate-x-[#{$navWidth}];
+      }
+
+      & ~ :deep(main) {
+        @apply z-[51];
+      }
     }
   }
 }
