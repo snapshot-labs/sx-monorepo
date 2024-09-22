@@ -41,7 +41,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
         <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
       </AppLink>
 
-      <div class="md:flex md:min-w-0 my-1 items-center leading-6">
+      <div class="flex min-w-0 my-1 items-center leading-6">
         <AppLink
           v-if="showSpace"
           :to="{
@@ -63,10 +63,10 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="md:flex md:min-w-0"
+          class="flex min-w-0"
         >
           <h3
-            class="text-[21px] inline break-all md:truncate mr-2"
+            class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <IH-check

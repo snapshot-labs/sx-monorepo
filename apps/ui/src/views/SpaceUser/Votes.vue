@@ -130,7 +130,7 @@ watchEffect(() =>
         :show-author="true"
         :show-space="false"
         :show-voted-indicator="false"
-        class="grow truncate"
+        class="grow truncate w-[65%]"
       />
       <div class="w-[35%] md:w-[220px] shrink-0 flex items-center">
         <ProposalVoteChoice
