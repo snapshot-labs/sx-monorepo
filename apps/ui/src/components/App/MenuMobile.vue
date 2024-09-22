@@ -9,6 +9,7 @@ const emit = defineEmits<{
 }>();
 
 const { web3 } = useWeb3();
+const route = useRoute();
 
 const menu = [
   {
@@ -46,6 +47,9 @@ const menu = [
       <AppLink
         :to="item.link"
         class="inline-flex flex-col text-center gap-1 truncate"
+        :class="
+          route.name === item.link.name ? 'text-skin-link' : 'text-skin-text'
+        "
         @click="emit('navigated')"
       >
         <component :is="item.icon" class="mx-auto" />
