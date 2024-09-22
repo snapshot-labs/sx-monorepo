@@ -134,6 +134,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
         }
       } else if (!followedSpacesIds.length && refreshNotificationInterval) {
         clearInterval(refreshNotificationInterval);
+        refreshNotificationInterval = 0;
       }
     },
     { immediate: true }
