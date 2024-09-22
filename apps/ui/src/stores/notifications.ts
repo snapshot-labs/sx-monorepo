@@ -118,32 +118,31 @@ export const useNotificationsStore = defineStore('notifications', () => {
       () => followedSpacesStore.followedSpacesIds
     ],
     async ([followedSpacesLoaded, followedSpacesIds]) => {
-      if (!followedSpacesLoaded || followedSpacesIds.length === 0) return;
+      if (!followedSpacesLoaded) return;
 
-      loading.value = true;
-      notifications.value = [];
-      await loadNotifications();
+      if (followedSpacesIds.length > 0) {
+        loading.value = true;
+        notifications.value = [];
+        await loadNotifications();
+        loading.value = false;
 
-      loading.value = false;
+        if (!refreshNotificationInterval) {
+          refreshNotificationInterval = window.setInterval(
+            loadNotifications,
+            REFRESH_INTERVAL * 1000
+          );
+        }
+      } else if (!followedSpacesIds.length && refreshNotificationInterval) {
+        clearInterval(refreshNotificationInterval);
+      }
     },
     { immediate: true }
   );
 
   watch(
     () => web3.value.account,
-    (newAccount, oldAccount) => {
-      if (!oldAccount && newAccount) {
-        refreshNotificationInterval = window.setInterval(
-          loadNotifications,
-          REFRESH_INTERVAL * 1000
-        );
-      } else if (oldAccount && !newAccount) {
-        clearInterval(refreshNotificationInterval);
-      }
-
-      shownLastUnreadTs.value = newAccount
-        ? lastUnreadTs.value[newAccount] ?? 0
-        : 0;
+    account => {
+      shownLastUnreadTs.value = account ? lastUnreadTs.value[account] ?? 0 : 0;
     }
   );
 
