@@ -99,9 +99,17 @@ watch(isSwiping, () => {
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
+      <AppMenuMobile
+        v-if="web3.account"
+        :class="[
+          `fixed bottom-0 inset-x-0 hidden app-mobile-menu z-[100]`,
+          { 'app-mobile-menu-open': uiStore.sidebarOpen }
+        ]"
+        @navigated="uiStore.sidebarOpen = false"
+      />
       <AppSidebar
         :class="[
-          `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
+          `hidden lg:flex app-sidebar fixed inset-y-0`,
           { '!flex app-sidebar-open': uiStore.sidebarOpen }
         ]"
         @navigated="uiStore.sidebarOpen = false"
@@ -155,15 +163,22 @@ watch(isSwiping, () => {
 
 <style lang="scss" scoped>
 $sidebarWidth: 72px;
+$mobileMenuHeight: 72px;
 $navWidth: 240px;
 
 .app-sidebar {
   width: $sidebarWidth;
 
+  @media (max-width: 767px) {
+    &-open {
+      @apply bottom-[#{$mobileMenuHeight}];
+    }
+  }
+
   @media (max-width: 1011px) {
     &-open {
       & ~ :deep(*) {
-        @apply translate-x-[#{$sidebarWidth}];
+        @apply translate-x-[#{$sidebarWidth}] z-0;
       }
 
       &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
@@ -176,9 +191,25 @@ $navWidth: 240px;
 .app-nav {
   width: $navWidth;
 
+  @media (max-width: 767px) {
+    &-open {
+      @apply bottom-[#{$mobileMenuHeight}];
+    }
+  }
+
   @media (max-width: 1011px) {
     &-open ~ :deep(*) {
-      @apply translate-x-[#{$navWidth}];
+      @apply translate-x-[#{$navWidth}] z-0;
+    }
+  }
+}
+
+.app-mobile-menu {
+  height: $mobileMenuHeight;
+
+  @media (max-width: 767px) {
+    &-open {
+      @apply grid;
     }
   }
 }
@@ -214,5 +245,9 @@ $navWidth: 240px;
 .backdrop {
   @apply fixed inset-0 z-[99];
   @apply bg-[black]/40 #{!important};
+
+  @media (max-width: 767px) {
+    @apply bottom-[#{$mobileMenuHeight}];
+  }
 }
 </style>
