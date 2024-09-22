@@ -216,7 +216,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           :size="32"
           class="!rounded-[4px]"
         />
-        <span class="truncate" v-text="activity.space.name" />
+        <span class="flex-auto w-0 truncate" v-text="activity.space.name" />
       </div>
       <div
         class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
