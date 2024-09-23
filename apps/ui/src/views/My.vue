@@ -1,5 +1,3 @@
 <template>
-  <UiContainerPage>
-    <router-view />
-  </UiContainerPage>
+  <router-view />
 </template>

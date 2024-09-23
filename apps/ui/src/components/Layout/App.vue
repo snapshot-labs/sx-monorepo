@@ -38,6 +38,11 @@ const hasAppNav = computed(() =>
   ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
 );
 
+const hasPlaceHolderSidebar = computed(
+  () =>
+    !['editor', 'proposal', 'create'].includes(String(route.matched[0]?.name))
+);
+
 const bottomPadding = computed(
   () => !['proposal-votes'].includes(String(route.name))
 );
@@ -136,8 +141,13 @@ watch(isSwiping, () => {
         class="backdrop"
         @click="uiStore.sidebarOpen = false"
       />
-      <main class="flex-auto w-full">
-        <router-view class="flex-auto mt-[72px]" />
+      <main class="flex-auto w-full flex">
+        <div class="flex-auto w-0 mt-[72px]">
+          <router-view />
+        </div>
+        <div v-if="hasPlaceHolderSidebar" class="hidden xl:block w-[240px]">
+          <div class="w-[240px] fixed border-l top-[72px] bottom-0 right-0" />
+        </div>
       </main>
     </div>
     <AppNotifications />

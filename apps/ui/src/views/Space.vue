@@ -46,7 +46,6 @@ watchEffect(() => {
 </script>
 
 <template>
-  <UiContainerPage :loading="!space">
-    <router-view :space="space" />
-  </UiContainerPage>
+  <UiLoading v-if="!space" class="block p-4" />
+  <router-view v-else :space="space" />
 </template>
