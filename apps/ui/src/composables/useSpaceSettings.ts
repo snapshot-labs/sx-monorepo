@@ -88,7 +88,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     return compareAddresses(controller, account);
-  });
+  }, false);
   const isOwner = computedAsync(async () => {
     if (!offchainNetworks.includes(space.value.network)) {
       return isController.value;
@@ -102,7 +102,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     return compareAddresses(owner, account);
-  });
+  }, false);
   const isAdmin = computed(() => {
     if (!offchainNetworks.includes(space.value.network)) return false;
 
