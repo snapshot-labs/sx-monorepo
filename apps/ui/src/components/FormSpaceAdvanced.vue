@@ -101,6 +101,10 @@ const formErrors = computed(() => {
     errors.childInput = 'Space cannot be a sub-space of itself';
   }
 
+  if (children.value.includes(childInput.value)) {
+    errors.childInput = 'Space already configured as sub-space';
+  }
+
   return errors;
 });
 const parentSpaceError = computed(() => {
@@ -198,7 +202,7 @@ watchEffect(() => {
     />
     <UiButton
       v-if="children.length < CHILDREN_LIMIT"
-      :disabled="!canAddChildSpace || formErrors.childInput"
+      :disabled="!canAddChildSpace || !!formErrors.childInput"
       :loading="isAddingChild"
       class="w-full"
       @click="addChild"
