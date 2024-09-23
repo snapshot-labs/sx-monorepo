@@ -513,7 +513,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </teleport>
     </UiContainerSettings>
-    <UiContainerSettings v-else-if="activeTab === 'advanced'" title="Advanced">
+    <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
       <FormSpaceAdvanced
         v-model:parent="parent"
         v-model:children="children"
