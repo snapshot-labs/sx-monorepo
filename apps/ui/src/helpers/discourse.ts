@@ -136,6 +136,10 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
   );
   const topic = await res.json();
 
+  if (topic.errors) {
+    throw new Error(topic.error_type);
+  }
+
   topic.posts_count--;
   topic.posts = formatPosts(topic.post_stream?.posts, baseUrl);
   return topic;

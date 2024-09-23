@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
-import { Choice, Proposal as ProposalType } from '@/types';
+import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
   defineProps<{
@@ -21,8 +21,6 @@ const { getTsFromCurrent } = useMetaStore();
 
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
-const modalOpenVote = ref(false);
-const selectedChoice = ref<Choice | null>(null);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
 </script>
@@ -66,7 +64,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           class="md:flex md:min-w-0"
         >
           <h3
-            class="text-[21px] inline md:truncate mr-2"
+            class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <IH-check
