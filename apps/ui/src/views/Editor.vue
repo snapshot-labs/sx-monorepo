@@ -190,11 +190,7 @@ const spaceType = computed(() => {
 
 const proposalLimitReached = computed(() => {
   if (!space.value) return false;
-  console.log(space.value.proposal_count_1d, MAX_1D_PROPOSALS[spaceType.value]);
-  console.log(
-    space.value.proposal_count_30d,
-    MAX_30D_PROPOSALS[spaceType.value]
-  );
+
   return (
     (space.value.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
     (space.value.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
@@ -426,7 +422,7 @@ export default defineComponent({
             <a
               :href="VERIFIED_URL"
               target="_blank"
-              class="text-rose-500 font-semibold"
+              class="text-rose-500 dark:text-neutral-100 font-semibold"
               >Verify space</a
             >.</span
           >
@@ -444,7 +440,7 @@ export default defineComponent({
             <a
               :href="TURBO_URL"
               target="_blank"
-              class="text-rose-500 font-semibold"
+              class="text-rose-500 dark:text-neutral-100 font-semibold"
               >Increase limit</a
             >.</span
           >
