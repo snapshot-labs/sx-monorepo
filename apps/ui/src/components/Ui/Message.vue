@@ -7,12 +7,12 @@ defineProps<{
 
 <template>
   <div
-    class="border rounded-md p-[20px] flex gap-1"
+    class="border rounded-md p-[20px]"
     :class="{
       'text-skin-danger border-skin-danger': type === 'danger'
     }"
   >
-    <IH-information-circle class="shrink-0" />
+    <IH-information-circle class="float-left mr-1" />
     <div class="leading-5">
       <slot />
       <a
