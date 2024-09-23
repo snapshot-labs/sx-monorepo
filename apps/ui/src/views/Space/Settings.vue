@@ -513,11 +513,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </teleport>
     </UiContainerSettings>
-    <UiContainerSettings
-      v-else-if="activeTab === 'advanced'"
-      title="Advanced"
-      description="Office ipsum you must be muted. Boy ocean define crank new."
-    >
+    <UiContainerSettings v-else-if="activeTab === 'advanced'" title="Advanced">
       <FormSpaceAdvanced
         v-model:parent="parent"
         v-model:children="children"
