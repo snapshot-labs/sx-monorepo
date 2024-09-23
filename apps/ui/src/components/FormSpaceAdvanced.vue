@@ -31,6 +31,7 @@ const TERMS_OF_SERVICES_DEFINITION = {
 
 const CUSTOM_DOMAIN_DEFINITION = {
   type: 'string',
+  format: 'domain',
   title: 'Domain name',
   maxLength: 64,
   examples: ['vote.balancer.fi']
