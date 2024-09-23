@@ -31,7 +31,6 @@ const TERMS_OF_SERVICES_DEFINITION = {
 
 const CUSTOM_DOMAIN_DEFINITION = {
   type: 'string',
-  format: 'uri',
   title: 'Domain name',
   maxLength: 64,
   examples: ['vote.balancer.fi']
@@ -89,7 +88,8 @@ const formErrors = computed(() => {
     properties: {
       parent: PARENT_SPACE_DEFINITION,
       child: CHILD_DEFINITION,
-      termsOfServices: TERMS_OF_SERVICES_DEFINITION
+      termsOfServices: TERMS_OF_SERVICES_DEFINITION,
+      customDomain: CUSTOM_DOMAIN_DEFINITION
     }
   });
 
@@ -97,7 +97,8 @@ const formErrors = computed(() => {
     {
       parent: parent.value,
       child: child.value,
-      termsOfServices: termsOfServices.value
+      termsOfServices: termsOfServices.value,
+      customDomain: customDomain.value
     },
     {
       skipEmptyOptionalFields: true
