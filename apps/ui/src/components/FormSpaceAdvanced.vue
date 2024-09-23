@@ -106,7 +106,7 @@ const formErrors = computed(() => {
   );
 
   if (parent.value === props.spaceId) {
-    errors.parent = 'Space cannot be a sub-space of itself';
+    errors.parent = 'Space cannot be a parent of itself';
   }
 
   if (child.value === props.spaceId) {
