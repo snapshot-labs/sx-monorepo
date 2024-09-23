@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { TURBO_URL } from '@/helpers/turbo';
 import { _n } from '@/helpers/utils';
 
 const model = defineModel<string>({ required: true });
 
 const props = defineProps<{
   error?: string;
+  errorSuffix?: boolean;
   definition: any;
 }>();
 
@@ -124,7 +126,17 @@ watch(model, () => {
       :placeholder="definition?.examples ? definition.examples[0] : ''"
       class="s-input h-[260px]"
     />
-    <div v-if="showError" class="s-input-error-message" v-text="error" />
+    <div v-if="showError" class="s-input-error-message leading-6 mt-2">
+      <span v-text="error" />
+      <span v-if="errorSuffix" class="ml-1">
+        <a
+          :href="TURBO_URL"
+          target="_blank"
+          class="text-skin-danger font-semibold"
+          >Increase limit</a
+        >.
+      </span>
+    </div>
   </div>
 </template>
 

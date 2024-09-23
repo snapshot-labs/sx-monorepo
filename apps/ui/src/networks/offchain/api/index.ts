@@ -178,6 +178,8 @@ function formatSpace(
     twitter: space.twitter || '',
     discord: '',
     coingecko: space.coingecko || '',
+    proposal_count_1d: space.proposalsCount1d,
+    proposal_count_30d: space.proposalsCount30d,
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,

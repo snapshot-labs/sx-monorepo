@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
+import { TURBO_URL } from '@/helpers/turbo';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
 
-defineProps<{ definition: any }>();
+const props = defineProps<{
+  error?: string;
+  errorSuffix?: boolean;
+  definition: any;
+}>();
 
 const choices: Ref<any[]> = ref([]);
+const showError = computed<boolean>(() => !!props.error);
 
 function handleAddChoice() {
   proposal.value.choices.push('');
@@ -32,7 +38,12 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
 </script>
 
 <template>
-  <div class="s-base mb-5">
+  <div
+    class="s-base mb-5"
+    :class="{
+      's-error': showError
+    }"
+  >
     <h4 class="eyebrow mb-2.5">Choices</h4>
     <div class="flex flex-col">
       <Draggable
@@ -88,6 +99,17 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
         <IH-plus-sm />
         <span>Add choice</span>
       </UiButton>
+    </div>
+    <div v-if="showError" class="s-input-error-message leading-6 mt-2">
+      <span v-text="error" />
+      <span v-if="errorSuffix" class="ml-1">
+        <a
+          :href="TURBO_URL"
+          target="_blank"
+          class="text-skin-danger font-semibold"
+          >Increase limit</a
+        >.
+      </span>
     </div>
   </div>
 </template>

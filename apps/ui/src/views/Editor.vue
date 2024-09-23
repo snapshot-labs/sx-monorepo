@@ -2,15 +2,18 @@
 import { NavigationGuard } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { resolver } from '@/helpers/resolver';
+import {
+  MAX_1D_PROPOSALS,
+  MAX_30D_PROPOSALS,
+  MAX_BODY_LENGTH,
+  MAX_CHOICES,
+  TURBO_URL,
+  VERIFIED_URL
+} from '@/helpers/turbo';
 import { omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Transaction, VoteType } from '@/types';
-
-const MAX_BODY_LENGTH = {
-  default: 10000,
-  turbo: 40000
-} as const;
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -25,15 +28,6 @@ const DISCUSSION_DEFINITION = {
   title: 'Discussion',
   maxLength: 256,
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
-};
-
-const CHOICES_DEFINITION = {
-  type: 'array',
-  title: 'Choices',
-  minItems: 1,
-  maxItems: 500,
-  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
-  additionalItems: { type: 'string', maxLength: 32 }
 };
 
 const { setTitle } = useTitle();
@@ -127,6 +121,7 @@ const extraContacts = computed(() => {
 
   return space.value.treasuries as Contact[];
 });
+
 const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
@@ -134,6 +129,16 @@ const bodyDefinition = computed(() => ({
   maxLength: MAX_BODY_LENGTH[space.value?.turbo ? 'turbo' : 'default'],
   examples: ['Propose something…']
 }));
+
+const choicesDefinition = computed(() => ({
+  type: 'array',
+  title: 'Choices',
+  minItems: 1,
+  maxItems: MAX_CHOICES[space.value?.turbo ? 'turbo' : 'default'],
+  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
+  additionalItems: { type: 'string', maxLength: 32 }
+}));
+
 const formErrors = computed(() => {
   if (!proposal.value) return {};
 
@@ -147,7 +152,7 @@ const formErrors = computed(() => {
         title: TITLE_DEFINITION,
         body: bodyDefinition.value,
         discussion: DISCUSSION_DEFINITION,
-        choices: CHOICES_DEFINITION
+        choices: choicesDefinition.value
       }
     },
     {
@@ -167,6 +172,33 @@ const canSubmit = computed(() => {
   return web3.value.account
     ? votingPower.value?.canPropose
     : !web3.value.authLoading;
+});
+
+const isOffchainSpace = computed(() => {
+  if (!space.value) return false;
+  return offchainNetworks.includes(space.value.network);
+});
+
+const spaceType = computed(() => {
+  if (!space.value) return 'default';
+  return space.value.turbo
+    ? 'turbo'
+    : space.value.verified
+      ? 'verified'
+      : 'default';
+});
+
+const proposalLimitReached = computed(() => {
+  if (!space.value) return false;
+  console.log(space.value.proposal_count_1d, MAX_1D_PROPOSALS[spaceType.value]);
+  console.log(
+    space.value.proposal_count_30d,
+    MAX_30D_PROPOSALS[spaceType.value]
+  );
+  return (
+    (space.value.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
+    (space.value.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
+  );
 });
 
 async function handleProposeClick() {
@@ -384,7 +416,39 @@ export default defineComponent({
           action="propose"
           @fetch-voting-power="handleFetchVotingPower"
         />
-
+        <UiAlert
+          v-if="votingPower && spaceType === 'default' && proposalLimitReached"
+          type="error"
+          class="mb-4"
+        >
+          <span
+            >Please verify your space to publish more proposals.
+            <a
+              :href="VERIFIED_URL"
+              target="_blank"
+              class="text-rose-500 font-semibold"
+              >Verify space</a
+            >.</span
+          >
+        </UiAlert>
+        <UiAlert
+          v-else-if="
+            votingPower && spaceType !== 'turbo' && proposalLimitReached
+          "
+          type="error"
+          class="mb-4"
+        >
+          <span
+            >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals per
+            day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="text-rose-500 font-semibold"
+              >Increase limit</a
+            >.</span
+          >
+        </UiAlert>
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.title"
@@ -417,6 +481,11 @@ export default defineComponent({
           v-model="proposal.body"
           :definition="bodyDefinition"
           :error="formErrors.body"
+          :error-suffix="
+            !space?.turbo &&
+            isOffchainSpace &&
+            formErrors.body?.startsWith('Must not have more than')
+          "
         />
         <div class="s-base mb-5">
           <UiInputString
@@ -467,7 +536,20 @@ export default defineComponent({
           enforcedVoteType ? [enforcedVoteType] : space.voting_types
         "
       />
-      <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      <EditorChoices
+        v-model="proposal"
+        :definition="choicesDefinition"
+        :error="
+          typeof formErrors.choices === 'string' ? formErrors.choices : ''
+        "
+        :error-suffix="
+          !space?.turbo &&
+          isOffchainSpace &&
+          typeof formErrors.choices === 'string' &&
+          formErrors.choices?.startsWith('Must not have more than')
+        "
+      />
+
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
         <ProposalTimeline :data="space" />
