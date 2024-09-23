@@ -334,47 +334,42 @@ export default defineComponent({
 
 <template>
   <div v-if="proposal">
-    <header class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0">
-      <div class="flex items-center h-[71px] mx-4 gap-2">
-        <AppLink
-          :to="{ name: 'space-overview', params: { space: param } }"
-          class="mr-2"
-          tabindex="-1"
+    <UiTopnav class="gap-2 px-4">
+      <AppLink
+        :to="{ name: 'space-overview', params: { space: param } }"
+        class="mr-2"
+        tabindex="-1"
+      >
+        <UiButton class="leading-3 w-[46px] !px-0">
+          <IH-arrow-narrow-left class="inline-block" />
+        </UiButton>
+      </AppLink>
+      <h4 class="grow truncate">New proposal</h4>
+      <IndicatorPendingTransactions />
+      <UiLoading v-if="!space" class="block p-4" />
+      <template v-else>
+        <UiTooltip title="Drafts">
+          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+            <IH-collection class="inline-block" />
+          </UiButton>
+        </UiTooltip>
+        <UiButton
+          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          :loading="
+            !!web3.account &&
+            (sending || !votingPower || votingPower.status === 'loading')
+          "
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
         >
-          <UiButton class="leading-3 w-[46px] !px-0">
-            <IH-arrow-narrow-left class="inline-block" />
-          </UiButton>
-        </AppLink>
-        <h4 class="grow truncate">New proposal</h4>
-        <IndicatorPendingTransactions />
-        <UiLoading v-if="!space" class="block p-4" />
-        <template v-else>
-          <UiTooltip title="Drafts">
-            <UiButton
-              class="leading-3 !px-0 w-[46px]"
-              @click="modalOpen = true"
-            >
-              <IH-collection class="inline-block" />
-            </UiButton>
-          </UiTooltip>
-          <UiButton
-            class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-            :loading="
-              !!web3.account &&
-              (sending || !votingPower || votingPower.status === 'loading')
-            "
-            :disabled="!canSubmit"
-            @click="handleProposeClick"
-          >
-            <span
-              class="hidden md:inline-block"
-              v-text="proposal?.proposalId ? 'Update' : 'Publish'"
-            />
-            <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-          </UiButton>
-        </template>
-      </div>
-    </header>
+          <span
+            class="hidden md:inline-block"
+            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
+      </template>
+    </UiTopnav>
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower

@@ -108,13 +108,12 @@ watch(isSwiping, () => {
       />
       <AppTopnav
         :has-app-nav="hasAppNav"
-        class="fixed top-0 inset-x-0 z-50"
         @navigated="uiStore.sidebarOpen = false"
       >
         <template #toggle-sidebar-button>
           <button
             type="button"
-            class="text-skin-link cursor-pointer lg:hidden ml-4"
+            class="text-skin-link lg:hidden ml-4"
             @click="uiStore.toggleSidebar"
           >
             <IH-menu-alt-2 />

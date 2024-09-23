@@ -83,10 +83,7 @@ watch(
 </script>
 
 <template>
-  <header
-    class="border-b flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
-    v-bind="$attrs"
-  >
+  <UiTopnav v-bind="$attrs" class="gap-4 pr-4">
     <div
       class="flex items-center h-full truncate"
       :class="{
@@ -101,8 +98,7 @@ watch(
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
         ]"
         @click="emit('navigated')"
-      >
-      </Breadcrumb>
+      />
     </div>
     <form
       v-if="searchConfig"
@@ -150,7 +146,7 @@ watch(
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>
-  </header>
+  </UiTopnav>
   <teleport to="#modal">
     <ModalAccount
       :open="modalAccountOpen || modalAccountWithoutDismissOpen"
