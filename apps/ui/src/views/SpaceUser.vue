@@ -203,7 +203,7 @@ watch(
           :cb="cb"
           class="relative mb-2 border-4 border-skin-bg !bg-skin-border !rounded-full -left-1"
         />
-        <h1 v-text="user.name || shortenAddress(user.id)" />
+        <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 text-skin-text">
           <span class="text-skin-link" v-text="userActivity.proposal_count" />
           proposals ·
