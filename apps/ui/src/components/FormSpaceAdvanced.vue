@@ -129,7 +129,13 @@ function deleteChild(i: number) {
 watchDebounced(
   parent,
   async parent => {
-    if (!parent) return;
+    if (!parent) {
+      parentSpaceValidationResult.value = {
+        value: '',
+        valid: true
+      };
+      return;
+    }
 
     const space = await network.value.api.loadSpace(parent);
 
@@ -138,7 +144,7 @@ watchDebounced(
       valid: !!space
     };
   },
-  { debounce: 500 }
+  { debounce: 500, immediate: true }
 );
 
 watchEffect(() => {
