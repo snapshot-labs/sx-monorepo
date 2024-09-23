@@ -71,8 +71,6 @@ const {
 
 const isDeleteSpaceModalOpen = ref(false);
 
-const canAddParentSpace = computed(() => children.value.length === 0);
-const canAddChildSpace = computed(() => parent.value.length === 0);
 const addSubSpaceButtonEnabled = computed(() => {
   if (!child.value) return false;
 
@@ -153,29 +151,19 @@ watchEffect(() => {
   <div class="s-box my-3">
     <UiInputString
       v-model="parent"
-      :disabled="!canAddParentSpace"
       :loading="isParentLoading"
-      :class="{
-        'cursor-not-allowed': !canAddParentSpace
-      }"
       :definition="PARENT_SPACE_DEFINITION"
       :error="formErrors.parent ?? parentValidationError"
     />
     <UiInputString
       v-model="child"
-      :disabled="!canAddChildSpace"
       :loading="isChildLoading"
-      :class="{
-        'cursor-not-allowed': !canAddChildSpace
-      }"
       :definition="CHILD_DEFINITION"
       :error="formErrors.child ?? childValidationError"
     />
     <UiButton
       v-if="children.length < CHILDREN_LIMIT"
-      :disabled="
-        !canAddChildSpace || !!formErrors.child || !addSubSpaceButtonEnabled
-      "
+      :disabled="!!formErrors.child || !addSubSpaceButtonEnabled"
       class="w-full"
       @click="addChild"
     >
