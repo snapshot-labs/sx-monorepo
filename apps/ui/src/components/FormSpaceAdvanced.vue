@@ -236,7 +236,7 @@ watchEffect(() => {
     :learn-more-link="'https://docs.snapshot.org/spaces/add-custom-domain'"
   >
     To setup a custom domain you additionally need to open a pull request on
-    github after you have created the space.
+    GitHub after you have created the space.
   </UiMessage>
   <div class="s-box mt-3">
     <UiInputString
