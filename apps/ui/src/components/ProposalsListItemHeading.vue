@@ -64,7 +64,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           class="md:flex md:min-w-0"
         >
           <h3
-            class="text-[21px] inline md:truncate mr-2"
+            class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <IH-check
