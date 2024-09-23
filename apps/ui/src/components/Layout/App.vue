@@ -163,6 +163,10 @@ $navWidth: 240px;
     &-open {
       & ~ :deep(*) {
         @apply translate-x-[#{$sidebarWidth}];
+
+        .app-toolbar-bottom {
+          @apply hidden;
+        }
       }
 
       &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
@@ -178,6 +182,10 @@ $navWidth: 240px;
   @media (max-width: 1011px) {
     &-open ~ :deep(*) {
       @apply translate-x-[#{$navWidth}];
+
+      .app-toolbar-bottom {
+        @apply hidden;
+      }
     }
   }
 }
@@ -188,7 +196,7 @@ $navWidth: 240px;
     & ~ .backdrop,
     & ~ :deep(header.fixed),
     & ~ :deep(main header.fixed),
-    & ~ :deep(main footer.fixed),
+    & ~ :deep(main .app-toolbar-bottom),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
     }
@@ -198,7 +206,7 @@ $navWidth: 240px;
       & ~ .backdrop,
       & ~ :deep(header.fixed),
       & ~ :deep(main header.fixed),
-      & ~ :deep(main footer.fixed),
+      & ~ :deep(main .app-toolbar-bottom),
       & ~ :deep(.app-nav) {
         @apply ml-[#{$sidebarWidth + $navWidth}];
       }

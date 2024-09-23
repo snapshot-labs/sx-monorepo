@@ -29,7 +29,6 @@ const {
 } = useSpaceSettings(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
-const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const changeControllerModalOpen = ref(false);
@@ -489,11 +488,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </teleport>
     </UiContainerSettings>
-    <footer
-      v-if="
-        !uiStore.sidebarOpen && ((isModified && canModifySettings) || error)
-      "
-      class="fixed bg-skin-bg bottom-0 left-0 right-0 xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+    <UiToolbarBottom
+      v-if="(isModified && canModifySettings) || error"
+      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center xl:right-[240px]"
     >
       <h4
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
@@ -514,7 +511,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           Save
         </UiButton>
       </div>
-    </footer>
+    </UiToolbarBottom>
   </div>
   <teleport to="#modal">
     <ModalTransactionProgress
