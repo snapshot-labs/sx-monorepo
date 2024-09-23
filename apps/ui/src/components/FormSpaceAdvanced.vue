@@ -259,7 +259,10 @@ watchEffect(() => {
     </div>
     <UiButton
       :disabled="!isController"
-      class="w-full md:w-auto flex-shrink-0 border-skin-danger !text-skin-danger"
+      class="w-full md:w-auto flex-shrink-0"
+      :class="{
+        'border-skin-danger !text-skin-danger': isController
+      }"
       @click="isDeleteSpaceModalOpen = true"
     >
       Delete space
