@@ -22,7 +22,7 @@ defineProps<{
         class="flex items-center text-skin-link mt-1 gap-1 w-fit"
       >
         Learn more
-        <IH-arrow-top-right-on-square />
+        <IH-arrow-sm-right class="-rotate-45" />
       </a>
     </div>
   </div>
