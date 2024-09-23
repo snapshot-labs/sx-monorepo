@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getValidator } from '@/helpers/validation';
-import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
 const CHILDREN_LIMIT = 16;
@@ -13,7 +12,7 @@ const PARENT_SPACE_DEFINITION = {
     'The space that this space is a sub-space of will be displayed on the space page'
 };
 
-const SUB_SPACE_DEFINITION = {
+const CHILD_DEFINITION = {
   type: 'string',
   title: 'Sub-space(s)',
   examples: ['pistachiodao.eth'],
@@ -57,18 +56,32 @@ const emit = defineEmits<{
   (e: 'deleteSpace');
 }>();
 
-const { addNotification } = useUiStore();
+const {
+  loading: isParentLoading,
+  validationResult: parentSpaceValidationResult,
+  error: parentValidationError
+} = useSpaceInputValidation(toRef(props, 'networkId'), parent);
 
-const parentSpaceValidationResult = ref(
-  null as { value: string; valid: boolean } | null
-);
-const childInput = ref('');
-const isAddingChild = ref(false);
+const child = ref('');
+const {
+  loading: isChildLoading,
+  validationResult: childValidationResult,
+  error: childValidationError
+} = useSpaceInputValidation(toRef(props, 'networkId'), child);
+
 const isDeleteSpaceModalOpen = ref(false);
 
-const network = computed(() => getNetwork(props.networkId));
 const canAddParentSpace = computed(() => children.value.length === 0);
 const canAddChildSpace = computed(() => parent.value.length === 0);
+const addSubSpaceButtonEnabled = computed(() => {
+  if (!child.value) return false;
+
+  if (childValidationResult.value === null) return true;
+  if (childValidationResult.value.value !== child.value) return false;
+  if (!childValidationResult.value.valid) return false;
+
+  return true;
+});
 const formErrors = computed(() => {
   const validator = getValidator({
     type: 'object',
@@ -77,7 +90,7 @@ const formErrors = computed(() => {
     required: [],
     properties: {
       parent: PARENT_SPACE_DEFINITION,
-      childInput: SUB_SPACE_DEFINITION,
+      child: CHILD_DEFINITION,
       termsOfServices: TERMS_OF_SERVICES_DEFINITION
     }
   });
@@ -85,7 +98,7 @@ const formErrors = computed(() => {
   const errors = validator.validate(
     {
       parent: parent.value,
-      childInput: childInput.value,
+      child: child.value,
       termsOfServices: termsOfServices.value
     },
     {
@@ -97,69 +110,25 @@ const formErrors = computed(() => {
     errors.parent = 'Space cannot be a sub-space of itself';
   }
 
-  if (childInput.value === props.spaceId) {
-    errors.childInput = 'Space cannot be a sub-space of itself';
+  if (child.value === props.spaceId) {
+    errors.child = 'Space cannot be a sub-space of itself';
   }
 
-  if (children.value.includes(childInput.value)) {
-    errors.childInput = 'Space already configured as sub-space';
+  if (children.value.includes(child.value)) {
+    errors.child = 'Space already configured as sub-space';
   }
 
   return errors;
 });
-const parentSpaceError = computed(() => {
-  if (formErrors.value.parent) return formErrors.value.parent as string;
 
-  if (parentSpaceValidationResult.value === null) return null;
-  if (parentSpaceValidationResult.value.value !== parent.value) return null;
-  if (parentSpaceValidationResult.value.valid) return null;
-
-  return `Space ${parentSpaceValidationResult.value.value} not found`;
-});
-
-async function addChild() {
-  try {
-    isAddingChild.value = true;
-
-    const space = await network.value.api.loadSpace(childInput.value);
-
-    if (!space) {
-      throw new Error('Space not found');
-    }
-
-    children.value.push(childInput.value);
-    childInput.value = '';
-  } catch (e) {
-    addNotification('error', `Space ${childInput.value} not found`);
-  } finally {
-    isAddingChild.value = false;
-  }
+function addChild() {
+  children.value.push(child.value);
+  child.value = '';
 }
 
 function deleteChild(i: number) {
   children.value = children.value.filter((_, index) => index !== i);
 }
-
-watchDebounced(
-  parent,
-  async parent => {
-    if (!parent) {
-      parentSpaceValidationResult.value = {
-        value: '',
-        valid: true
-      };
-      return;
-    }
-
-    const space = await network.value.api.loadSpace(parent);
-
-    parentSpaceValidationResult.value = {
-      value: parent,
-      valid: !!space
-    };
-  },
-  { debounce: 500, immediate: true }
-);
 
 watchEffect(() => {
   const valid =
@@ -185,25 +154,28 @@ watchEffect(() => {
     <UiInputString
       v-model="parent"
       :disabled="!canAddParentSpace"
+      :loading="isParentLoading"
       :class="{
         'cursor-not-allowed': !canAddParentSpace
       }"
       :definition="PARENT_SPACE_DEFINITION"
-      :error="parentSpaceError ?? undefined"
+      :error="formErrors.parent ?? parentValidationError"
     />
     <UiInputString
-      v-model="childInput"
+      v-model="child"
       :disabled="!canAddChildSpace"
+      :loading="isChildLoading"
       :class="{
         'cursor-not-allowed': !canAddChildSpace
       }"
-      :definition="SUB_SPACE_DEFINITION"
-      :error="formErrors.childInput"
+      :definition="CHILD_DEFINITION"
+      :error="formErrors.child ?? childValidationError"
     />
     <UiButton
       v-if="children.length < CHILDREN_LIMIT"
-      :disabled="!canAddChildSpace || !!formErrors.childInput"
-      :loading="isAddingChild"
+      :disabled="
+        !canAddChildSpace || !!formErrors.child || !addSubSpaceButtonEnabled
+      "
       class="w-full"
       @click="addChild"
     >
@@ -212,11 +184,11 @@ watchEffect(() => {
   </div>
   <div class="flex flex-wrap gap-2">
     <div
-      v-for="(child, i) in children"
-      :key="child"
+      v-for="(space, i) in children"
+      :key="space"
       class="flex items-center gap-2 rounded-lg border px-3 py-2 w-fit"
     >
-      <span>{{ child }}</span>
+      <span>{{ space }}</span>
       <button type="button" @click="deleteChild(i)">
         <IH-x-mark class="w-[16px]" />
       </button>
