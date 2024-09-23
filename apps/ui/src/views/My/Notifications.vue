@@ -57,7 +57,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
               }"
             >
               <h3
-                class="font-normal text-[21px]"
+                class="font-normal text-[21px] break-all"
                 v-text="
                   notification.proposal.title ||
                   `#${notification.proposal.proposal_id}`
