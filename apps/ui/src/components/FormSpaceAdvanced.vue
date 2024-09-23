@@ -82,7 +82,7 @@ const formErrors = computed(() => {
     }
   });
 
-  return validator.validate(
+  const errors = validator.validate(
     {
       parent: parent.value,
       childInput: childInput.value,
@@ -92,6 +92,16 @@ const formErrors = computed(() => {
       skipEmptyOptionalFields: true
     }
   );
+
+  if (parent.value === props.spaceId) {
+    errors.parent = 'Space cannot be a sub-space of itself';
+  }
+
+  if (childInput.value === props.spaceId) {
+    errors.childInput = 'Space cannot be a sub-space of itself';
+  }
+
+  return errors;
 });
 const parentSpaceError = computed(() => {
   if (formErrors.value.parent) return formErrors.value.parent as string;
@@ -188,7 +198,7 @@ watchEffect(() => {
     />
     <UiButton
       v-if="children.length < CHILDREN_LIMIT"
-      :disabled="!canAddChildSpace"
+      :disabled="!canAddChildSpace || formErrors.childInput"
       :loading="isAddingChild"
       class="w-full"
       @click="addChild"
