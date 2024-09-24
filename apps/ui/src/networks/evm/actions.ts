@@ -705,6 +705,9 @@ export function createActions(
     updateSettingsRaw: () => {
       throw new Error('Not implemented');
     },
+    deleteSpace: () => {
+      throw new Error('Not implemented');
+    },
     send: (envelope: any) => ethSigClient.send(envelope),
     getVotingPower: async (
       spaceId: string,

@@ -201,6 +201,14 @@ ajv.addFormat('farcaster-handle', {
   }
 });
 
+ajv.addFormat('domain', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-zA-Z0-9\-\.]+$/);
+  }
+});
+
 ajv.addFormat('ethValue', {
   validate: value => {
     if (!value.match(/^([0-9]|[1-9][0-9]+)(\.[0-9]+)?$/)) return false;
@@ -231,6 +239,7 @@ ajv.addKeyword({
   }
 });
 ajv.addKeyword('options');
+ajv.addKeyword('tooltip');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';
@@ -241,6 +250,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     switch (errorObject.params.format) {
       case 'uri':
         return 'Must be a valid URL.';
+      case 'domain':
+        return 'Must be a valid domain.';
       case 'address':
       case 'ethAddress':
         return 'Must be a valid address.';
