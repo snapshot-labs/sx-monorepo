@@ -292,18 +292,12 @@ watchEffect(() => {
   <div v-if="proposal">
     <nav class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0 lg:left-[72px]">
       <div class="flex items-center h-[71px] mx-4 gap-2">
-        <AppLink
-          :to="{
-            name: 'space-overview',
-            params: { space: spaceKey }
-          }"
-          class="mr-2"
-          tabindex="-1"
+        <UiButton
+          :to="{ name: 'space-overview', params: { space: spaceKey } }"
+          class="w-[46px] !px-0 mr-2 shrink-0"
         >
-          <UiButton class="leading-3 w-[46px] !px-0">
-            <IH-arrow-narrow-left class="inline-block" />
-          </UiButton>
-        </AppLink>
+          <IH-arrow-narrow-left />
+        </UiButton>
         <h4
           class="grow truncate"
           v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
