@@ -8,6 +8,7 @@ export default {
 const model = defineModel<string>();
 
 const props = defineProps<{
+  loading?: boolean;
   error?: string;
   definition: any;
 }>();
@@ -37,6 +38,7 @@ watch(model, () => {
   <UiWrapperInput
     v-slot="{ id }"
     :definition="definition"
+    :loading="loading"
     :error="error"
     :dirty="dirty"
     :input-value-length="inputValue?.length"

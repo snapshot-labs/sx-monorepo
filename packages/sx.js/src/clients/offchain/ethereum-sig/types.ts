@@ -156,3 +156,11 @@ export const updateSpaceTypes = {
     { name: 'settings', type: 'string' }
   ]
 };
+
+export const deleteSpaceTypes = {
+  DeleteSpace: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
+  ]
+};
