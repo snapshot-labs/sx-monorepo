@@ -82,8 +82,8 @@ watch(model, () => {
         >
           {{ currentValue }}
         </span>
-        <IH-chevron-down v-if="open" />
-        <IH-chevron-up v-else />
+        <IH-chevron-up v-if="open" />
+        <IH-chevron-down v-else />
       </ListboxButton>
       <ListboxOptions
         class="top-[59px] overflow-hidden bg-skin-border rounded-b-lg border-t-skin-text/10 border absolute z-30 w-full shadow-xl"

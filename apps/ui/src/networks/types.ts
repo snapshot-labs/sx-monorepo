@@ -175,6 +175,7 @@ export type ReadOnlyNetworkActions = {
   );
   transferOwnership(web3: Web3Provider, space: Space, owner: string);
   updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
+  deleteSpace(web3: Web3Provider, space: Space);
   send(envelope: any): Promise<any>;
 };
 

@@ -304,7 +304,10 @@ watchEffect(() => {
             <IH-arrow-narrow-left class="inline-block" />
           </UiButton>
         </AppLink>
-        <h4 class="grow truncate">New proposal</h4>
+        <h4
+          class="grow truncate"
+          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
+        />
         <IndicatorPendingTransactions />
 
         <UiTooltip title="Drafts">
