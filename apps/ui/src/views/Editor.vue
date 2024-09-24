@@ -10,7 +10,7 @@ import {
   TURBO_URL,
   VERIFIED_URL
 } from '@/helpers/turbo';
-import { omit } from '@/helpers/utils';
+import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Transaction, VoteType } from '@/types';
@@ -477,12 +477,23 @@ export default defineComponent({
           v-model="proposal.body"
           :definition="bodyDefinition"
           :error="formErrors.body"
-          :error-suffix="
-            !space?.turbo &&
-            isOffchainSpace &&
-            formErrors.body?.startsWith('Must not have more than')
-          "
-        />
+        >
+          <template
+            v-if="
+              !space?.turbo &&
+              isOffchainSpace &&
+              formErrors.body?.startsWith('Must not have more than')
+            "
+            #error-suffix
+          >
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="ml-1 text-skin-danger font-semibold"
+              >Increase limit</a
+            >.
+          </template>
+        </UiComposer>
         <div class="s-base mb-5">
           <UiInputString
             :key="proposalKey || ''"
@@ -536,16 +547,27 @@ export default defineComponent({
         v-model="proposal"
         :definition="choicesDefinition"
         :error="
-          typeof formErrors.choices === 'string' ? formErrors.choices : ''
+          proposal.choices.length > choicesDefinition.maxItems
+            ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
+            : ''
         "
-        :error-suffix="
-          !space?.turbo &&
-          isOffchainSpace &&
-          typeof formErrors.choices === 'string' &&
-          formErrors.choices?.startsWith('Must not have more than')
-        "
-      />
-
+      >
+        <template
+          v-if="
+            !space?.turbo &&
+            isOffchainSpace &&
+            proposal.choices.length > choicesDefinition.maxItems
+          "
+          #error-suffix
+        >
+          <a
+            :href="TURBO_URL"
+            target="_blank"
+            class="ml-1 text-skin-danger font-semibold"
+            >Increase limit</a
+          >.
+        </template>
+      </EditorChoices>
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
         <ProposalTimeline :data="space" />

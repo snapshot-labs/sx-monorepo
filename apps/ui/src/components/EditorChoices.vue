@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { TURBO_URL } from '@/helpers/turbo';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  errorSuffix?: boolean;
   definition: any;
 }>();
 
@@ -102,14 +100,7 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
     </div>
     <div v-if="showError" class="s-input-error-message leading-6 mt-2">
       <span v-text="error" />
-      <span v-if="errorSuffix" class="ml-1">
-        <a
-          :href="TURBO_URL"
-          target="_blank"
-          class="text-skin-danger font-semibold"
-          >Increase limit</a
-        >.
-      </span>
+      <slot name="error-suffix" />
     </div>
   </div>
 </template>

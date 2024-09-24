@@ -287,10 +287,6 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     if (!errorObject.params) return 'Invalid format.';
     return `Must not have more than ${_n(errorObject.params.limit)} characters.`;
   }
-  if (errorObject.keyword === 'maxItems') {
-    if (!errorObject.params) return 'Invalid format.';
-    return `Must not have more than ${_n(errorObject.params.limit)} items.`;
-  }
   return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
     .slice(1)
     .toLocaleLowerCase()}.`;
