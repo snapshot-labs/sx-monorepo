@@ -2,12 +2,12 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getCacheHash, shorten } from '@/helpers/utils';
 
-const emit = defineEmits<{
-  (e: 'navigated');
-}>();
-
 defineProps<{
   hasAppNav: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'navigated');
 }>();
 
 const route = useRoute();
@@ -25,7 +25,7 @@ const SEARCH_CONFIG = {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-search',
     placeholder: 'Search for a proposal',
-    exclude: ['space-editor', 'space-proposal']
+    exclude: ['space-editor']
   },
   my: {
     defaultRoute: 'my-explore',
@@ -92,10 +92,7 @@ watch(
 </script>
 
 <template>
-  <header
-    class="border-b flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
-    v-bind="$attrs"
-  >
+  <UiTopnav v-bind="$attrs" class="gap-4 pr-4">
     <div
       class="flex items-center h-full truncate"
       :class="{
@@ -110,8 +107,7 @@ watch(
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
         ]"
         @click="emit('navigated')"
-      >
-      </Breadcrumb>
+      />
     </div>
     <form
       v-if="searchConfig"
@@ -159,7 +155,7 @@ watch(
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>
-  </header>
+  </UiTopnav>
   <teleport to="#modal">
     <ModalAccount
       :open="modalAccountOpen || modalAccountWithoutDismissOpen"

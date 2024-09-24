@@ -147,7 +147,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           :cb="cb"
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
-        <h1 v-text="user.name || shortenAddress(user.id)" />
+        <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
@@ -216,7 +216,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           :size="32"
           class="!rounded-[4px]"
         />
-        <span class="truncate" v-text="activity.space.name" />
+        <span class="flex-auto w-0 truncate" v-text="activity.space.name" />
       </div>
       <div
         class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"

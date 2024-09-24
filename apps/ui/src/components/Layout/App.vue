@@ -32,7 +32,7 @@ const { isSwiping, direction } = useSwipe(el, {
 });
 const { createDraft } = useEditor();
 const {
-  spaceKey: walletSpaceKey,
+  spaceKey: walletConnectSpaceKey,
   network,
   executionStrategy,
   transaction,
@@ -53,18 +53,28 @@ const hasSidebar = computed(() => !isWhiteLabel.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
+const hasPlaceHolderSidebar = computed(
+  () =>
+    !['proposal', 'create'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor'].includes(String(route.matched[1]?.name))
+);
+
 const bottomPadding = computed(
   () => !['space-proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {
-  if (!walletSpaceKey.value || !executionStrategy.value || !transaction.value)
+  if (
+    !walletConnectSpaceKey.value ||
+    !executionStrategy.value ||
+    !transaction.value
+  )
     return;
 
   const executions = {} as Record<string, Transaction[]>;
   executions[executionStrategy.value.address] = [transaction.value];
 
-  const spaceKey = walletSpaceKey.value;
+  const spaceKey = walletConnectSpaceKey.value;
   const draftId = await createDraft(spaceKey, {
     executions
   });
@@ -72,7 +82,7 @@ async function handleTransactionAccept() {
   router.push({
     name: 'space-editor',
     params: {
-      ...(!isWhiteLabel.value ? { space: walletSpaceKey.value } : {}),
+      ...(!isWhiteLabel.value ? { space: walletConnectSpaceKey.value } : {}),
       key: draftId
     }
   });
@@ -147,7 +157,7 @@ watch(
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <template v-else>
-      <div :class="['flex', { 'pb-6': bottomPadding }]">
+      <div :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
         <AppSidebar
           v-if="hasSidebar"
           :class="[
@@ -157,14 +167,13 @@ watch(
           @navigated="uiStore.sidebarOpen = false"
         />
         <AppTopnav
-          class="fixed top-0 inset-x-0 z-50"
           :has-app-nav="hasAppNav"
           @navigated="uiStore.sidebarOpen = false"
         >
           <template v-if="hasSwipeableContent" #toggle-sidebar-button>
             <button
               type="button"
-              class="text-skin-link cursor-pointer lg:hidden ml-4"
+              class="text-skin-link lg:hidden ml-4"
               @click="uiStore.toggleSidebar"
             >
               <IH-menu-alt-2 />
@@ -187,8 +196,14 @@ watch(
           class="backdrop"
           @click="uiStore.toggleSidebar"
         />
-        <main class="flex-auto w-full">
-          <router-view class="flex-auto mt-[72px]" />
+        <main class="flex-auto w-full flex">
+          <div class="flex-auto w-0 mt-[72px]">
+            <router-view />
+          </div>
+          <div
+            v-if="hasPlaceHolderSidebar"
+            class="app-placeholder-sidebar hidden xl:block"
+          />
         </main>
       </div>
       <AppNotifications />
@@ -207,14 +222,19 @@ watch(
 <style lang="scss" scoped>
 $sidebarWidth: 72px;
 $navWidth: 240px;
+$placeholderSidebarWidth: 240px;
 
 .app-sidebar {
-  width: $sidebarWidth;
+  @apply w-[#{$sidebarWidth}];
 
   @media (max-width: 1011px) {
     &-open {
       & ~ :deep(*) {
         @apply translate-x-[#{$sidebarWidth}];
+
+        .app-toolbar-bottom {
+          @apply hidden;
+        }
       }
 
       &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
@@ -225,30 +245,52 @@ $navWidth: 240px;
 }
 
 .app-nav {
-  width: $navWidth;
+  @apply w-[#{$navWidth}];
 
   @media (max-width: 1011px) {
     &-open ~ :deep(*) {
       @apply translate-x-[#{$navWidth}];
+
+      .app-toolbar-bottom {
+        @apply hidden;
+      }
     }
+  }
+}
+
+.app-placeholder-sidebar {
+  @apply w-[#{$placeholderSidebarWidth}];
+
+  &::before {
+    @apply block fixed border-l top-[72px] bottom-0 right-0 w-[#{$placeholderSidebarWidth}];
+
+    content: '';
+  }
+}
+
+@media (screen(xl)) {
+  main > div:has(+ .app-placeholder-sidebar) :deep(.app-toolbar-bottom) {
+    @apply right-[#{$placeholderSidebarWidth}];
   }
 }
 
 @media (screen(lg)) {
   .app-sidebar {
     & ~ :deep(main),
+    & ~ .backdrop,
     & ~ :deep(header.fixed),
     & ~ :deep(main header.fixed),
-    & ~ :deep(main footer.fixed),
+    & ~ :deep(main .app-toolbar-bottom),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
     }
 
     &:has(~ .app-nav) ~ .app-nav {
       & ~ :deep(main),
+      & ~ .backdrop,
       & ~ :deep(header.fixed),
       & ~ :deep(main header.fixed),
-      & ~ :deep(main footer.fixed),
+      & ~ :deep(main .app-toolbar-bottom),
       & ~ :deep(.app-nav) {
         @apply ml-[#{$sidebarWidth + $navWidth}];
       }

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
 
-const followedSpacesStore = useFollowedSpacesStore();
-
 const emit = defineEmits<{
   (e: 'navigated');
 }>();
+
+const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>

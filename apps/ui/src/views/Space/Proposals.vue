@@ -103,19 +103,17 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           :voting-power="votingPower"
           @fetch-voting-power="handleFetchVotingPower"
         />
-        <AppLink
-          :to="{
-            name: 'space-editor',
-            params: { space: `${space.network}:${space.id}` }
-          }"
-          tabindex="-1"
-        >
-          <UiTooltip title="New proposal">
-            <UiButton class="!px-0 w-[46px]">
-              <IH-pencil-alt class="inline-block" />
-            </UiButton>
-          </UiTooltip>
-        </AppLink>
+        <UiTooltip title="New proposal">
+          <UiButton
+            :to="{
+              name: 'space-editor',
+              params: { space: `${space.network}:${space.id}` }
+            }"
+            class="!px-0 w-[46px]"
+          >
+            <IH-pencil-alt />
+          </UiButton>
+        </UiTooltip>
       </div>
     </div>
     <ProposalsList

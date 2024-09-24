@@ -45,7 +45,7 @@ const router = useRouter();
 const { propose, updateProposal } = useActions();
 const { web3 } = useWeb3();
 const {
-  spaceKey: walletSpaceKey,
+  spaceKey: walletConnectSpaceKey,
   network: walletConnectNetwork,
   transaction,
   executionStrategy: walletConnectTransactionExecutionStrategy,
@@ -212,7 +212,7 @@ function handleExecutionUpdated(
 
 function handleTransactionAccept() {
   if (
-    !walletSpaceKey.value ||
+    !walletConnectSpaceKey.value ||
     !walletConnectTransactionExecutionStrategy.value ||
     !transaction.value ||
     !proposal.value
@@ -289,45 +289,40 @@ watchEffect(() => {
 </script>
 <template>
   <div v-if="proposal">
-    <header class="border-b bg-skin-bg fixed top-0 z-50 inset-x-0">
-      <div class="flex items-center h-[71px] mx-4 gap-2">
-        <AppLink
-          :to="{
-            name: 'space-overview',
-            params: { space: spaceKey }
-          }"
-          class="mr-2"
-          tabindex="-1"
-        >
-          <UiButton class="leading-3 w-[46px] !px-0">
-            <IH-arrow-narrow-left class="inline-block" />
-          </UiButton>
-        </AppLink>
-        <h4 class="grow truncate">New proposal</h4>
-        <IndicatorPendingTransactions />
+    <UiTopnav class="gap-2 px-4">
+      <UiButton
+        :to="{ name: 'space-overview', params: { space: spaceKey } }"
+        class="w-[46px] !px-0 mr-2 shrink-0"
+      >
+        <IH-arrow-narrow-left />
+      </UiButton>
+      <h4
+        class="grow truncate"
+        v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
+      />
+      <IndicatorPendingTransactions />
 
-        <UiTooltip title="Drafts">
-          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-            <IH-collection class="inline-block" />
-          </UiButton>
-        </UiTooltip>
-        <UiButton
-          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-          :loading="
-            !!web3.account &&
-            (sending || !votingPower || votingPower.status === 'loading')
-          "
-          :disabled="!canSubmit"
-          @click="handleProposeClick"
-        >
-          <span
-            class="hidden md:inline-block"
-            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
-          />
-          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+      <UiTooltip title="Drafts">
+        <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+          <IH-collection class="inline-block" />
         </UiButton>
-      </div>
-    </header>
+      </UiTooltip>
+      <UiButton
+        class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+        :loading="
+          !!web3.account &&
+          (sending || !votingPower || votingPower.status === 'loading')
+        "
+        :disabled="!canSubmit"
+        @click="handleProposeClick"
+      >
+        <span
+          class="hidden md:inline-block"
+          v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+        />
+        <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+      </UiButton>
+    </UiTopnav>
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
