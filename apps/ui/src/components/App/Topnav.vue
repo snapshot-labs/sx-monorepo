@@ -25,7 +25,7 @@ const SEARCH_CONFIG = {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-search',
     placeholder: 'Search for a proposal',
-    exclude: ['space-editor']
+    exclude: ['space-editor', 'space-proposal']
   },
   my: {
     defaultRoute: 'my-explore',

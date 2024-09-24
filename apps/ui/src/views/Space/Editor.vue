@@ -301,7 +301,6 @@ watchEffect(() => {
         v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
       />
       <IndicatorPendingTransactions />
-
       <UiTooltip title="Drafts">
         <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
           <IH-collection class="inline-block" />
