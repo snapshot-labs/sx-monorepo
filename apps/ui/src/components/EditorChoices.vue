@@ -6,7 +6,6 @@ const proposal = defineModel<Draft>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  definition: any;
 }>();
 
 const choices: Ref<any[]> = ref([]);

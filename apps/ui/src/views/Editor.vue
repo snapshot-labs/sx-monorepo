@@ -552,14 +552,7 @@ export default defineComponent({
             : ''
         "
       >
-        <template
-          v-if="
-            !space?.turbo &&
-            isOffchainSpace &&
-            proposal.choices.length > choicesDefinition.maxItems
-          "
-          #error-suffix
-        >
+        <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
           <a
             :href="TURBO_URL"
             target="_blank"
