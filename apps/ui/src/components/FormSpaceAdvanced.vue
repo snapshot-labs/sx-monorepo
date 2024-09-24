@@ -118,7 +118,7 @@ const formErrors = computed(() => {
     errors.child = 'Space already configured as sub-space';
   }
 
-  if (children.value.length >= CHILDREN_LIMIT) {
+  if (child.value && children.value.length >= CHILDREN_LIMIT) {
     errors.child = 'Maximum number of sub-spaces reached';
   }
 
