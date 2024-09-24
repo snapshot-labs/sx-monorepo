@@ -29,6 +29,7 @@ const {
   privacy,
   ignoreAbstainVotes,
   snapshotChainId,
+  strategies,
   members,
   parent,
   children,
@@ -305,6 +306,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     >
       <FormSpaceStrategies
         v-model:snapshot-chain-id="snapshotChainId"
+        v-model:strategies="strategies"
         :network-id="space.network"
       />
     </UiContainerSettings>

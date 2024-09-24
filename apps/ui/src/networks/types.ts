@@ -80,6 +80,7 @@ export type StrategyTemplate = {
 
 export type StrategyConfig = StrategyTemplate & {
   id: string;
+  chainId?: string;
   params: Record<string, any>;
 };
 

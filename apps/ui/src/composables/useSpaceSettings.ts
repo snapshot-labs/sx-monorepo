@@ -151,6 +151,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const privacy = ref('none' as 'none' | 'shutter');
   const ignoreAbstainVotes = ref(false);
   const snapshotChainId = ref('');
+  const strategies = ref([] as StrategyConfig[]);
   const members = ref([] as Member[]);
   const parent = ref('');
   const children = ref([] as string[]);
@@ -610,6 +611,20 @@ export function useSpaceSettings(space: Ref<Space>) {
       ignoreAbstainVotes.value = initialVotingProperties.ignoreAbstainVotes;
 
       snapshotChainId.value = space.value.snapshot_chain_id?.toString() ?? '1';
+
+      if (space.value.additionalRawData?.type === 'offchain') {
+        strategies.value = space.value.additionalRawData.strategies.map(
+          strategy => ({
+            id: crypto.randomUUID(),
+            chainId: strategy.network,
+            address: strategy.name,
+            name: strategy.name,
+            paramsDefinition: null,
+            params: strategy.params
+          })
+        );
+      }
+
       members.value = getInitialMembers(space.value);
       parent.value = space.value.parent?.id ?? '';
       children.value = space.value.children.map(child => child.id);
@@ -821,6 +836,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     privacy,
     ignoreAbstainVotes,
     snapshotChainId,
+    strategies,
     members,
     parent,
     children,

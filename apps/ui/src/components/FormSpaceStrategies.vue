@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
+import { StrategyConfig } from '@/networks/types';
 import { NetworkID } from '@/types';
 
 const snapshotChainId = defineModel<string>('snapshotChainId', {
+  required: true
+});
+const strategies = defineModel<StrategyConfig[]>('strategies', {
   required: true
 });
 
@@ -47,6 +51,13 @@ const SPACE_CATEGORIES = Object.entries(networks)
     title="Select up to 8 strategies"
     description="(Voting power is cumulative)"
   >
+    <FormStrategiesStrategyActive
+      v-for="strategy in strategies"
+      :key="strategy.id"
+      class="mb-3"
+      :network-id="networkId"
+      :strategy="strategy"
+    />
     <UiButton class="w-full flex items-center justify-center gap-1">
       <IH-plus class="shrink-0 size-[16px]" />
       Add strategy
