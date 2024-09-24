@@ -136,7 +136,7 @@ watchEffect(() => setTitle(props.space.name));
               :key="child.id"
               :space="child"
               :show-about="false"
-              class="basis-[230px] shrink-0"
+              class="basis-[240px] shrink-0"
             />
           </div>
         </div>

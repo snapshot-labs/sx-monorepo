@@ -342,7 +342,10 @@ export default defineComponent({
         >
           <IH-arrow-narrow-left />
         </UiButton>
-        <h4 class="grow truncate">New proposal</h4>
+        <h4
+          class="grow truncate"
+          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
+        />
         <IndicatorPendingTransactions />
         <UiLoading v-if="!space" class="block p-4" />
         <template v-else>

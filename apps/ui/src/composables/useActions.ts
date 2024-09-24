@@ -199,7 +199,7 @@ export function useActions() {
 
     const network = getReadWriteNetwork(networkId);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     const receipt = await network.actions.createSpace(auth.web3, salt, {
@@ -231,7 +231,7 @@ export function useActions() {
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     await wrapPromise(
@@ -349,7 +349,7 @@ export function useActions() {
 
     const network = getNetwork(proposal.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     await wrapPromise(
@@ -412,7 +412,7 @@ export function useActions() {
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     await wrapPromise(
@@ -430,7 +430,7 @@ export function useActions() {
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     await wrapPromise(
@@ -448,7 +448,7 @@ export function useActions() {
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     await wrapPromise(
@@ -469,7 +469,7 @@ export function useActions() {
 
     const network = getNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     return wrapPromise(
@@ -497,7 +497,7 @@ export function useActions() {
 
     const network = getReadWriteNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     return wrapPromise(
@@ -532,12 +532,29 @@ export function useActions() {
 
     const network = getNetwork(space.network);
     if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this actions`);
+      throw new Error(`${web3.value.type} is not supported for this action`);
     }
 
     return wrapPromise(
       space.network,
       network.actions.updateSettingsRaw(auth.web3, space, settings)
+    );
+  }
+
+  async function deleteSpace(space: Space) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
+
+    const network = getNetwork(space.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this action`);
+    }
+
+    return wrapPromise(
+      space.network,
+      network.actions.deleteSpace(auth.web3, space)
     );
   }
 
@@ -668,6 +685,7 @@ export function useActions() {
     transferOwnership: wrapWithErrors(transferOwnership),
     updateSettings: wrapWithErrors(updateSettings),
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
+    deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
