@@ -42,7 +42,13 @@ watchEffect(() => setTitle(props.space.name));
       />
       <div class="absolute right-4 top-4 flex gap-2">
         <UiTooltip title="New proposal">
-          <UiButton :to="{ name: 'editor' }" class="!px-0 w-[46px]">
+          <UiButton
+            :to="{
+              name: 'space-editor',
+              params: { space: `${space.network}:${space.id}` }
+            }"
+            class="!px-0 w-[46px]"
+          >
             <IH-pencil-alt />
           </UiButton>
         </UiTooltip>

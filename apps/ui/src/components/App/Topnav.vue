@@ -20,7 +20,8 @@ const SEARCH_CONFIG = {
   space: {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-search',
-    placeholder: 'Search for a proposal'
+    placeholder: 'Search for a proposal',
+    exclude: ['space-editor']
   },
   my: {
     defaultRoute: 'my-explore',
@@ -43,9 +44,17 @@ const user = computed(
 );
 const cb = computed(() => getCacheHash(user.value.avatar));
 
-const searchConfig = computed(
-  () => SEARCH_CONFIG[route.matched[0]?.name || '']
-);
+const searchConfig = computed(() => {
+  const rootName = route.matched[0]?.name || '';
+  const subRootName = route.matched[1]?.name || '';
+  const exclusions = SEARCH_CONFIG[rootName]?.exclude || [];
+
+  if (SEARCH_CONFIG[rootName] && !exclusions.includes(subRootName)) {
+    return SEARCH_CONFIG[rootName];
+  }
+
+  return null;
+});
 
 async function handleLogin(connector) {
   resetAccountModal();
