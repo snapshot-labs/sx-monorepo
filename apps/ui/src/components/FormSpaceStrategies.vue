@@ -15,6 +15,10 @@ const props = defineProps<{
   networkId: NetworkID;
 }>();
 
+function removeStrategy(strategy: StrategyConfig) {
+  strategies.value = strategies.value.filter(s => s.id !== strategy.id);
+}
+
 const SPACE_CATEGORIES = Object.entries(networks)
   .filter(([, network]) => {
     if (props.networkId === 's' && 'testnet' in network && network.testnet) {
@@ -51,13 +55,17 @@ const SPACE_CATEGORIES = Object.entries(networks)
     title="Select up to 8 strategies"
     description="(Voting power is cumulative)"
   >
-    <FormStrategiesStrategyActive
-      v-for="strategy in strategies"
-      :key="strategy.id"
-      class="mb-3"
-      :network-id="networkId"
-      :strategy="strategy"
-    />
+    <div class="space-y-3 mb-3">
+      <div v-if="strategies.length === 0">No strategies selected</div>
+      <FormStrategiesStrategyActive
+        v-for="strategy in strategies"
+        :key="strategy.id"
+        class="mb-3"
+        :network-id="networkId"
+        :strategy="strategy"
+        @delete-strategy="removeStrategy"
+      />
+    </div>
     <UiButton class="w-full flex items-center justify-center gap-1">
       <IH-plus class="shrink-0 size-[16px]" />
       Add strategy

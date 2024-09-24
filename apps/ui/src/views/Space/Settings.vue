@@ -173,6 +173,10 @@ const error = computed(() => {
     if (!authenticators.value.length) {
       return 'At least one authenticator is required';
     }
+  } else {
+    if (!strategies.value.length) {
+      return 'At least one strategy is required';
+    }
   }
 
   return null;
