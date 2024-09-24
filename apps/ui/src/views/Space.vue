@@ -5,7 +5,6 @@ import { offchainNetworks } from '@/networks';
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
-const route = useRoute();
 const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();
 
@@ -13,10 +12,6 @@ const space = computed(() => {
   if (!resolved.value) return null;
 
   return spacesStore.spacesMap.get(`${networkId.value}:${address.value}`);
-});
-
-const hasRightPlaceholderSidebar = computed(() => {
-  return String(route.matched[1]?.name) !== 'space-editor';
 });
 
 watch(

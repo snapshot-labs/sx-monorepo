@@ -47,7 +47,8 @@ const hasAppNav = computed(
 
 const hasPlaceHolderSidebar = computed(
   () =>
-    !['editor', 'proposal', 'create'].includes(String(route.matched[0]?.name))
+    !['proposal', 'create'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor'].includes(String(route.matched[1]?.name))
 );
 
 const bottomPadding = computed(
