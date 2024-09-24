@@ -145,9 +145,10 @@ watch(isSwiping, () => {
         <div class="flex-auto w-0 mt-[72px]">
           <router-view />
         </div>
-        <div v-if="hasPlaceHolderSidebar" class="hidden xl:block w-[240px]">
-          <div class="w-[240px] fixed border-l top-[72px] bottom-0 right-0" />
-        </div>
+        <div
+          v-if="hasPlaceHolderSidebar"
+          class="app-placeholder-sidebar hidden xl:block"
+        />
       </main>
     </div>
     <AppNotifications />
@@ -165,9 +166,10 @@ watch(isSwiping, () => {
 <style lang="scss" scoped>
 $sidebarWidth: 72px;
 $navWidth: 240px;
+$placeholderSidebarWidth: 240px;
 
 .app-sidebar {
-  width: $sidebarWidth;
+  @apply w-[#{$sidebarWidth}];
 
   @media (max-width: 1011px) {
     &-open {
@@ -187,7 +189,7 @@ $navWidth: 240px;
 }
 
 .app-nav {
-  width: $navWidth;
+  @apply w-[#{$navWidth}];
 
   @media (max-width: 1011px) {
     &-open ~ :deep(*) {
@@ -197,6 +199,22 @@ $navWidth: 240px;
         @apply hidden;
       }
     }
+  }
+}
+
+.app-placeholder-sidebar {
+  @apply w-[#{$placeholderSidebarWidth}];
+
+  &::before {
+    @apply block fixed border-l top-[72px] bottom-0 right-0 w-[#{$placeholderSidebarWidth}];
+
+    content: '';
+  }
+}
+
+@media (screen(xl)) {
+  main > div:has(+ .app-placeholder-sidebar) :deep(.app-toolbar-bottom) {
+    @apply right-[#{$placeholderSidebarWidth}];
   }
 }
 

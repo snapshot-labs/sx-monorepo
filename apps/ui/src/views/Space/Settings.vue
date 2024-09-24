@@ -528,7 +528,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     </UiContainerSettings>
     <UiToolbarBottom
       v-if="(isModified && canModifySettings) || error"
-      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center xl:right-[240px]"
+      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
