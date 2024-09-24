@@ -72,9 +72,12 @@ const proposalData = computed(() => {
 
   return JSON.stringify(omit(proposal.value, ['updatedAt']));
 });
-const supportsMultipleTreasuries = computed(() => {
-  return offchainNetworks.includes(props.space.network);
-});
+const isOffchainSpace = computed(() =>
+  offchainNetworks.includes(props.space.network)
+);
+
+const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
+
 const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
@@ -151,25 +154,15 @@ const canSubmit = computed(() => {
     ? votingPower.value?.canPropose
     : !web3.value.authLoading;
 });
-
-const isOffchainSpace = computed(() =>
-  offchainNetworks.includes(props.space.network)
+const spaceType = computed(() =>
+  props.space.turbo ? 'turbo' : props.space.verified ? 'verified' : 'default'
 );
 
-const spaceType = computed(() => {
-  return props.space.turbo
-    ? 'turbo'
-    : props.space.verified
-      ? 'verified'
-      : 'default';
-});
-
-const proposalLimitReached = computed(() => {
-  return (
+const proposalLimitReached = computed(
+  () =>
     (props.space.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
     (props.space.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
-  );
-});
+);
 
 async function handleProposeClick() {
   if (!proposal.value) return;
