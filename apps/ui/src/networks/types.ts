@@ -53,6 +53,9 @@ export type StrategyTemplate = {
   address: string;
   name: string;
   about?: string;
+  author?: string;
+  version?: string;
+  spaceCount?: number;
   link?: string;
   icon?: FunctionalComponent;
   type?: string;
@@ -306,6 +309,7 @@ export type NetworkApi = {
     spaceId: string,
     userIds: string[]
   ): Promise<Statement[]>;
+  loadStrategies(): Promise<StrategyTemplate[]>;
 };
 
 export type NetworkConstants = {

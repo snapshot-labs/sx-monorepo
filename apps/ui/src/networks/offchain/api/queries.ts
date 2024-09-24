@@ -323,3 +323,14 @@ export const LEADERBOARD_QUERY = gql`
     }
   }
 `;
+
+export const STRATEGIES_QUERY = gql`
+  query Strategies {
+    strategies {
+      id
+      author
+      version
+      spacesCount
+    }
+  }
+`;

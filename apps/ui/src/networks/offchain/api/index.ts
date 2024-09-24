@@ -40,6 +40,7 @@ import {
   SPACE_QUERY,
   SPACES_QUERY,
   STATEMENTS_QUERY,
+  STRATEGIES_QUERY,
   USER_FOLLOWS_QUERY,
   USER_QUERY,
   USER_VOTES_QUERY,
@@ -740,6 +741,19 @@ export function createApi(
       });
 
       return statements;
+    },
+    loadStrategies: async () => {
+      const { data } = await apollo.query({
+        query: STRATEGIES_QUERY
+      });
+
+      return data.strategies.map((strategy: any) => ({
+        address: strategy.id,
+        name: strategy.id,
+        author: strategy.author,
+        version: `v${strategy.version}`,
+        spaceCount: strategy.spacesCount
+      }));
     }
   };
 }

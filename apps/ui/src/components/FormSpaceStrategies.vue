@@ -15,6 +15,8 @@ const props = defineProps<{
   networkId: NetworkID;
 }>();
 
+const isStrategiesModalOpen = ref(false);
+
 function removeStrategy(strategy: StrategyConfig) {
   strategies.value = strategies.value.filter(s => s.id !== strategy.id);
 }
@@ -66,9 +68,19 @@ const SPACE_CATEGORIES = Object.entries(networks)
         @delete-strategy="removeStrategy"
       />
     </div>
-    <UiButton class="w-full flex items-center justify-center gap-1">
+    <UiButton
+      class="w-full flex items-center justify-center gap-1"
+      @click="isStrategiesModalOpen = true"
+    >
       <IH-plus class="shrink-0 size-[16px]" />
       Add strategy
     </UiButton>
   </UiContainerSettings>
+  <teleport to="#modal">
+    <ModalStrategies
+      :open="isStrategiesModalOpen"
+      :network-id="networkId"
+      @close="isStrategiesModalOpen = false"
+    />
+  </teleport>
 </template>
