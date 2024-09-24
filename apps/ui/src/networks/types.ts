@@ -59,6 +59,7 @@ export type StrategyTemplate = {
   link?: string;
   icon?: FunctionalComponent;
   type?: string;
+  defaultParams?: any;
   paramsDefinition: any;
   validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
@@ -310,6 +311,7 @@ export type NetworkApi = {
     userIds: string[]
   ): Promise<Statement[]>;
   loadStrategies(): Promise<StrategyTemplate[]>;
+  loadStrategy(address: string): Promise<StrategyTemplate | null>;
 };
 
 export type NetworkConstants = {

@@ -1,25 +1,43 @@
 <script setup lang="ts">
 import { validateForm } from '@/helpers/validation';
+import { NetworkID } from '@/types';
 
-const props = defineProps<{
-  open: boolean;
-  initialState?: any;
-  definition: any;
-}>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    networkId: NetworkID;
+    initialState?: any;
+    initialNetwork?: string;
+    definition: any;
+    withNetworkSelector?: boolean;
+  }>(),
+  {
+    withNetworkSelector: false
+  }
+);
 
 const emit = defineEmits<{
   (e: 'close');
   (e: 'save', value: Record<string, any>);
 }>();
 
+const networkValue = ref('');
 const showPicker = ref(false);
 const pickerField: Ref<string | null> = ref(null);
 const searchValue = ref('');
 const form: Ref<Record<string, any>> = ref({});
 
-const formErrors = computed(() =>
-  validateForm(props.definition, form.value, { skipEmptyOptionalFields: true })
-);
+const formErrors = computed(() => {
+  const errors = validateForm(props.definition, form.value, {
+    skipEmptyOptionalFields: true
+  });
+
+  if (props.withNetworkSelector && !networkValue.value) {
+    errors.network = 'Network is required';
+  }
+
+  return errors;
+});
 
 function handlePickerClick(field: string) {
   showPicker.value = true;
@@ -41,9 +59,13 @@ async function handleSubmit() {
 watch(
   () => props.open,
   () => {
-    if (!props.initialState) return;
+    if (props.initialNetwork) {
+      networkValue.value = props.initialNetwork;
+    }
 
-    form.value = props.initialState;
+    if (props.initialState) {
+      form.value = props.initialState;
+    }
   }
 );
 </script>
@@ -79,6 +101,11 @@ watch(
       @pick="handlePickerSelect"
     />
     <div v-else class="s-box p-4">
+      <UiSelectorNetwork
+        v-if="withNetworkSelector"
+        v-model="networkValue"
+        :network-id="networkId"
+      />
       <UiForm
         v-model="form"
         :error="formErrors"

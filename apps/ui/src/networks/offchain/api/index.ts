@@ -33,6 +33,7 @@ import {
 } from '@/types';
 import {
   ALIASES_QUERY,
+  EXTENDED_STRATEGY_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
@@ -754,6 +755,52 @@ export function createApi(
         version: `v${strategy.version}`,
         spaceCount: strategy.spacesCount
       }));
+    },
+    loadStrategy: async (id: string) => {
+      const { data } = await apollo.query({
+        query: EXTENDED_STRATEGY_QUERY,
+        variables: { id }
+      });
+
+      const hasDefinition = data.strategy.schema;
+
+      const defaultParams = !hasDefinition
+        ? {
+            params: JSON.stringify(
+              data.strategy.examples?.[0]?.strategy?.params || {
+                symbol: 'DAI',
+                address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+                decimals: 18
+              },
+              null,
+              4
+            )
+          }
+        : {};
+
+      const paramsDefinition = hasDefinition
+        ? data.strategy.schema.definitions.Strategy
+        : {
+            title: 'Raw config',
+            type: 'object',
+            properties: {
+              params: {
+                title: 'Strategy parameters',
+                type: 'string',
+                format: 'long'
+              }
+            }
+          };
+
+      return {
+        address: data.strategy.id,
+        name: data.strategy.id,
+        about: data.strategy.about,
+        author: data.strategy.author,
+        version: `v${data.strategy.version}`,
+        defaultParams,
+        paramsDefinition
+      };
     }
   };
 }

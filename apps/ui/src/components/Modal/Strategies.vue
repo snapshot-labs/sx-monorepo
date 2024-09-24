@@ -9,11 +9,12 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  (e: 'addStrategy', strategy: StrategyTemplate);
   (e: 'close');
 }>();
 
 const searchValue = ref('');
-const isLoading = ref(true);
+const isLoading = ref(false);
 const hasError = ref(false);
 const strategies = ref([] as StrategyTemplate[]);
 
@@ -27,6 +28,22 @@ const filteredStrategies = computed(() => {
       .includes(searchValue.value.toLowerCase());
   });
 });
+
+async function handleStrategySelected(strategy: StrategyTemplate) {
+  isLoading.value = true;
+
+  try {
+    const extended = await network.value.api.loadStrategy(strategy.address);
+    if (!extended) throw new Error('Failed to load strategy details');
+
+    emit('addStrategy', extended);
+    emit('close');
+  } catch (e) {
+    console.log('failed to load strategy', e);
+  } finally {
+    isLoading.value = false;
+  }
+}
 
 watchEffect(async () => {
   if (!props.open) return;
@@ -56,7 +73,10 @@ watch(
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Add strategy</h3>
-      <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+      <div
+        v-if="!isLoading"
+        class="flex items-center border-t px-2 py-3 mt-3 -mb-3"
+      >
         <IH-search class="mx-2" />
         <input
           ref="searchInput"
@@ -82,6 +102,7 @@ watch(
           :key="strategy.address"
           type="button"
           class="flex flex-col gap-2 p-[20px] border rounded-md"
+          @click="handleStrategySelected(strategy)"
         >
           <div class="flex items-center gap-1">
             <span class="text-skin-link font-semibold leading-5 truncate">

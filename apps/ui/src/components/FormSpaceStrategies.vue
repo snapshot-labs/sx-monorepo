@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { getUrl } from '@/helpers/utils';
-import { StrategyConfig } from '@/networks/types';
+import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { NetworkID } from '@/types';
 
 const snapshotChainId = defineModel<string>('snapshotChainId', {
@@ -11,47 +9,32 @@ const strategies = defineModel<StrategyConfig[]>('strategies', {
   required: true
 });
 
-const props = defineProps<{
+defineProps<{
   networkId: NetworkID;
 }>();
 
 const isStrategiesModalOpen = ref(false);
+const isEditStrategyModalOpen = ref(false);
+const editedStrategy: Ref<StrategyConfig | null> = ref(null);
+
+function addStrategy(strategy: StrategyTemplate) {
+  editedStrategy.value = {
+    id: crypto.randomUUID(),
+    params: strategy.defaultParams || {},
+    ...strategy
+  };
+  isEditStrategyModalOpen.value = true;
+}
 
 function removeStrategy(strategy: StrategyConfig) {
   strategies.value = strategies.value.filter(s => s.id !== strategy.id);
 }
-
-const SPACE_CATEGORIES = Object.entries(networks)
-  .filter(([, network]) => {
-    if (props.networkId === 's' && 'testnet' in network && network.testnet) {
-      return false;
-    }
-
-    return true;
-  })
-  .map(([id, network]) => ({
-    id,
-    name: network.name,
-    icon: h('img', {
-      src: getUrl(network.logo),
-      alt: network.name
-    })
-  }));
 </script>
 
 <template>
   <h4 class="eyebrow mb-2 font-medium">Strategies</h4>
   <div class="s-box mb-4">
-    <Combobox
-      v-model="snapshotChainId"
-      :definition="{
-        type: 'string',
-        enum: SPACE_CATEGORIES.map(c => c.id),
-        title: 'Network',
-        options: SPACE_CATEGORIES,
-        examples: ['Select network']
-      }"
-    />
+    <UiSelectorNetwork v-model="snapshotChainId" :network-id="networkId" />
   </div>
   <UiContainerSettings
     title="Select up to 8 strategies"
@@ -80,7 +63,17 @@ const SPACE_CATEGORIES = Object.entries(networks)
     <ModalStrategies
       :open="isStrategiesModalOpen"
       :network-id="networkId"
+      @add-strategy="strategy => addStrategy(strategy)"
       @close="isStrategiesModalOpen = false"
+    />
+    <ModalEditStrategy
+      with-network-selector
+      :open="isEditStrategyModalOpen"
+      :network-id="networkId"
+      :initial-network="snapshotChainId"
+      :definition="editedStrategy?.paramsDefinition"
+      :initial-state="editedStrategy?.params"
+      @close="isEditStrategyModalOpen = false"
     />
   </teleport>
 </template>

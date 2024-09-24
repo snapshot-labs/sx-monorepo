@@ -657,6 +657,9 @@ export function createApi(
     },
     loadStrategies: async () => {
       return [];
+    },
+    loadStrategy: async () => {
+      return null;
     }
   };
 }

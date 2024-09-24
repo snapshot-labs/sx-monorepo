@@ -106,6 +106,7 @@ function handleStrategySave(value: Record<string, any>) {
     <teleport to="#modal">
       <ModalEditStrategy
         :open="editStrategyModalOpen"
+        :network-id="networkId"
         :definition="editedStrategy?.paramsDefinition"
         :initial-state="editedStrategy?.params"
         @close="editStrategyModalOpen = false"
