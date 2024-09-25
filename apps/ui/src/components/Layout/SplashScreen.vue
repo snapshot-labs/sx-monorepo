@@ -29,11 +29,15 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col justify-center items-center h-screen gap-5">
-    <img src="@/assets/snapshot.svg" alt="Snapshot" class="w-[80px]" />
+    <IC-zap
+      class="size-[120px] fill-skin-border"
+      :class="{ 'animate-pulse': !failed }"
+    />
     <div v-if="failed" class="text-center space-y-3">
-      <div class="text-skin-text text-[28px]">Error while loading the site</div>
-      <UiButton primary @click="handleReloadClick"> Please try again </UiButton>
+      <div class="text-skin-text">Error while loading the site</div>
+      <UiButton class="!text-skin-text" @click="handleReloadClick">
+        Please try again
+      </UiButton>
     </div>
-    <UiLoading v-else :width="36" :height="26" class="opacity-40" />
   </div>
 </template>
