@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { omit } from '@/helpers/utils';
+import {
+  MAX_1D_PROPOSALS,
+  MAX_30D_PROPOSALS,
+  MAX_BODY_LENGTH,
+  MAX_CHOICES,
+  TURBO_URL,
+  VERIFIED_URL
+} from '@/helpers/turbo';
+import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
-
-const MAX_BODY_LENGTH = {
-  default: 10000,
-  turbo: 40000
-} as const;
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -23,15 +26,6 @@ const DISCUSSION_DEFINITION = {
   title: 'Discussion',
   maxLength: 256,
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
-};
-
-const CHOICES_DEFINITION = {
-  type: 'array',
-  title: 'Choices',
-  minItems: 1,
-  maxItems: 500,
-  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
-  additionalItems: { type: 'string', maxLength: 32 }
 };
 
 const props = defineProps<{
@@ -78,9 +72,12 @@ const proposalData = computed(() => {
 
   return JSON.stringify(omit(proposal.value, ['updatedAt']));
 });
-const supportsMultipleTreasuries = computed(() => {
-  return offchainNetworks.includes(props.space.network);
-});
+const isOffchainSpace = computed(() =>
+  offchainNetworks.includes(props.space.network)
+);
+
+const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
+
 const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
@@ -105,6 +102,7 @@ const hasExecution = computed(() =>
 const extraContacts = computed(() => {
   return props.space.treasuries as Contact[];
 });
+
 const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
@@ -112,6 +110,16 @@ const bodyDefinition = computed(() => ({
   maxLength: MAX_BODY_LENGTH[props.space.turbo ? 'turbo' : 'default'],
   examples: ['Propose something…']
 }));
+
+const choicesDefinition = computed(() => ({
+  type: 'array',
+  title: 'Choices',
+  minItems: 1,
+  maxItems: MAX_CHOICES[props.space.turbo ? 'turbo' : 'default'],
+  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
+  additionalItems: { type: 'string', maxLength: 32 }
+}));
+
 const formErrors = computed(() => {
   if (!proposal.value) return {};
 
@@ -125,7 +133,7 @@ const formErrors = computed(() => {
         title: TITLE_DEFINITION,
         body: bodyDefinition.value,
         discussion: DISCUSSION_DEFINITION,
-        choices: CHOICES_DEFINITION
+        choices: choicesDefinition.value
       }
     },
     {
@@ -146,6 +154,15 @@ const canSubmit = computed(() => {
     ? votingPower.value?.canPropose
     : !web3.value.authLoading;
 });
+const spaceType = computed(() =>
+  props.space.turbo ? 'turbo' : props.space.verified ? 'verified' : 'default'
+);
+
+const proposalLimitReached = computed(
+  () =>
+    (props.space.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
+    (props.space.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
+);
 
 async function handleProposeClick() {
   if (!proposal.value) return;
@@ -335,7 +352,39 @@ watchEffect(() => {
           action="propose"
           @fetch-voting-power="handleFetchVotingPower"
         />
-
+        <UiAlert
+          v-if="votingPower && spaceType === 'default' && proposalLimitReached"
+          type="error"
+          class="mb-4"
+        >
+          <span
+            >Please verify your space to publish more proposals.
+            <a
+              :href="VERIFIED_URL"
+              target="_blank"
+              class="text-rose-500 dark:text-neutral-100 font-semibold"
+              >Verify space</a
+            >.</span
+          >
+        </UiAlert>
+        <UiAlert
+          v-else-if="
+            votingPower && spaceType !== 'turbo' && proposalLimitReached
+          "
+          type="error"
+          class="mb-4"
+        >
+          <span
+            >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals per
+            day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="text-rose-500 dark:text-neutral-100 font-semibold"
+              >Increase limit</a
+            >.</span
+          >
+        </UiAlert>
         <UiInputString
           :key="proposalKey || ''"
           v-model="proposal.title"
@@ -368,7 +417,23 @@ watchEffect(() => {
           v-model="proposal.body"
           :definition="bodyDefinition"
           :error="formErrors.body"
-        />
+        >
+          <template
+            v-if="
+              !space?.turbo &&
+              isOffchainSpace &&
+              formErrors.body?.startsWith('Must not have more than')
+            "
+            #error-suffix
+          >
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="ml-1 text-skin-danger font-semibold"
+              >Increase limit</a
+            >.
+          </template>
+        </UiComposer>
         <div class="s-base mb-5">
           <UiInputString
             :key="proposalKey || ''"
@@ -416,7 +481,24 @@ watchEffect(() => {
           enforcedVoteType ? [enforcedVoteType] : space.voting_types
         "
       />
-      <EditorChoices v-model="proposal" :definition="CHOICES_DEFINITION" />
+      <EditorChoices
+        v-model="proposal"
+        :definition="choicesDefinition"
+        :error="
+          proposal.choices.length > choicesDefinition.maxItems
+            ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
+            : ''
+        "
+      >
+        <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
+          <a
+            :href="TURBO_URL"
+            target="_blank"
+            class="ml-1 text-skin-danger font-semibold"
+            >Increase limit</a
+          >.
+        </template>
+      </EditorChoices>
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
         <ProposalTimeline :data="space" />
