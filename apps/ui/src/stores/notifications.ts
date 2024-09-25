@@ -28,7 +28,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const followedSpacesStore = useFollowedSpacesStore();
   const metaStore = useMetaStore();
   const { web3 } = useWeb3();
-  const { isWhiteLabel } = useWhiteLabel();
 
   async function loadProposals(
     network: Network,
