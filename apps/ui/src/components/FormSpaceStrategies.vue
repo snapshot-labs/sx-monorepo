@@ -63,7 +63,11 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
 <template>
   <h4 class="eyebrow mb-2 font-medium">Strategies</h4>
   <div class="s-box mb-4">
-    <UiSelectorNetwork v-model="snapshotChainId" :network-id="networkId" />
+    <UiSelectorNetwork
+      v-model="snapshotChainId"
+      :network-id="networkId"
+      tooltip="The default network used for this space. Networks can also be specified in individual strategies"
+    />
   </div>
   <UiContainerSettings
     title="Select up to 8 strategies"

@@ -8,6 +8,7 @@ const network = defineModel<string>({
 
 const props = defineProps<{
   networkId: string;
+  tooltip?: string;
 }>();
 
 const spaceCategories = computed(() =>
@@ -38,6 +39,7 @@ const spaceCategories = computed(() =>
       enum: spaceCategories.map(c => c.id),
       title: 'Network',
       options: spaceCategories,
+      tooltip,
       examples: ['Select network']
     }"
   />
