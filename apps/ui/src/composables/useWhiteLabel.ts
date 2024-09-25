@@ -1,6 +1,8 @@
+import { getNetwork } from '@/networks';
+import { useSpacesStore } from '@/stores/spaces';
 import { NetworkID } from '@/types';
 
-const SIDEKICK_URL = import.meta.env.VITE_SIDEKICK_URL || 'https://sh5.co';
+const NETWORK = 's';
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
 
@@ -23,6 +25,7 @@ if (domain !== DEFAULT_DOMAIN) {
 
 async function getSpaceId(domain: string): Promise<string | null> {
   // Resolve white label domain locally if mapping is provided
+  // for easier local testing
   // e.g. VITE_WHITE_LABEL_MAPPING='127.0.0.1;s:snapshot.eth'
   const localMapping = import.meta.env.VITE_WHITE_LABEL_MAPPING;
   if (localMapping) {
@@ -30,15 +33,18 @@ async function getSpaceId(domain: string): Promise<string | null> {
     if (domain === localDomain) return localSpaceId;
   }
 
-  const result = await fetch(`${SIDEKICK_URL}/api/domains/${domain}`, {
-    headers: { 'Content-Type': 'application/json' }
-  });
-  const data: { domain: string; space_id: string } = await result.json();
+  const spacesStore = useSpacesStore();
+  const network = getNetwork(NETWORK);
+  const space = (await network.api.loadSpaces({ limit: 1 }, { domain }))[0];
 
-  // Checking that the returned json is valid
-  if (!('domain' in data)) throw new Error('Invalid response');
+  if (!space) return null;
 
-  return data.space_id ?? null;
+  spacesStore.networksMap[space.network].spaces = {
+    ...spacesStore.networksMap[space.network].spaces,
+    [space.id]: space
+  };
+
+  return space.id;
 }
 
 export function useWhiteLabel() {
@@ -57,6 +63,7 @@ export function useWhiteLabel() {
       resolver.address = spaceId;
       resolver.networkId = networkId;
     } catch (e) {
+      console.log(e);
       failed.value = true;
     } finally {
       resolved.value = true;

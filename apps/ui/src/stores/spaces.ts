@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
+import { SpacesFilter } from '@/networks/types';
 import { NetworkID } from '@/types';
 
 export const useSpacesStore = defineStore('spaces', () => {
@@ -34,10 +35,10 @@ export const useSpacesStore = defineStore('spaces', () => {
     };
   }
 
-  async function fetchSpaces(spaceIds: string[]) {
-    const spaces = await getSpaces({
-      id_in: spaceIds
-    });
+  async function fetchSpaces(input: string[] | SpacesFilter) {
+    const spaces = await getSpaces(
+      Array.isArray(input) ? { id_in: input } : input
+    );
 
     if (!spaces.length) return;
 
