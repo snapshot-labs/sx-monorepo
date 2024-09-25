@@ -145,7 +145,7 @@ watch(
           />
         </span>
         <template v-else>
-          <span class="hidden sm:block" v-text="'Connect wallet'" />
+          <span class="hidden sm:block" v-text="'Log in'" />
           <IH-login class="sm:hidden inline-block" />
         </template>
       </UiButton>
