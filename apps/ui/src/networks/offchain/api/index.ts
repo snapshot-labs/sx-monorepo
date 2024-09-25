@@ -12,7 +12,8 @@ import {
   NetworkConstants,
   PaginationOpts,
   ProposalsFilter,
-  SpacesFilter
+  SpacesFilter,
+  StrategyTemplate
 } from '@/networks/types';
 import {
   Alias,
@@ -33,7 +34,6 @@ import {
 } from '@/types';
 import {
   ALIASES_QUERY,
-  EXTENDED_STRATEGY_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
@@ -42,12 +42,19 @@ import {
   SPACES_QUERY,
   STATEMENTS_QUERY,
   STRATEGIES_QUERY,
+  STRATEGY_QUERY,
   USER_FOLLOWS_QUERY,
   USER_QUERY,
   USER_VOTES_QUERY,
   VOTES_QUERY
 } from './queries';
-import { ApiProposal, ApiRelatedSpace, ApiSpace, ApiVote } from './types';
+import {
+  ApiProposal,
+  ApiRelatedSpace,
+  ApiSpace,
+  ApiStrategy,
+  ApiVote
+} from './types';
 import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
@@ -388,6 +395,29 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
 
   return delegations;
 }
+
+function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
+  const hasDefinition = 'schema' in strategy && strategy.schema;
+
+  return {
+    address: strategy.id,
+    name: strategy.id,
+    author: strategy.author,
+    version: `v${strategy.version}`,
+    defaultParams: !hasDefinition
+      ? strategy.examples?.[0]?.strategy?.params || {
+          symbol: 'DAI',
+          address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+          decimals: 18
+        }
+      : {},
+    spaceCount: strategy.spacesCount,
+    paramsDefinition: hasDefinition
+      ? strategy.schema.definitions?.Strategy
+      : null
+  };
+}
+
 export function createApi(
   uri: string,
   networkId: NetworkID,
@@ -748,59 +778,19 @@ export function createApi(
         query: STRATEGIES_QUERY
       });
 
-      return data.strategies.map((strategy: any) => ({
-        address: strategy.id,
-        name: strategy.id,
-        author: strategy.author,
-        version: `v${strategy.version}`,
-        spaceCount: strategy.spacesCount
-      }));
+      return data.strategies.map((strategy: ApiStrategy) =>
+        formatStrategy(strategy)
+      );
     },
     loadStrategy: async (id: string) => {
       const { data } = await apollo.query({
-        query: EXTENDED_STRATEGY_QUERY,
+        query: STRATEGY_QUERY,
         variables: { id }
       });
 
-      const hasDefinition = data.strategy.schema;
+      if (!data.strategy) return null;
 
-      const defaultParams = !hasDefinition
-        ? {
-            params: JSON.stringify(
-              data.strategy.examples?.[0]?.strategy?.params || {
-                symbol: 'DAI',
-                address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-                decimals: 18
-              },
-              null,
-              4
-            )
-          }
-        : {};
-
-      const paramsDefinition = hasDefinition
-        ? data.strategy.schema.definitions.Strategy
-        : {
-            title: 'Raw config',
-            type: 'object',
-            properties: {
-              params: {
-                title: 'Strategy parameters',
-                type: 'string',
-                format: 'long'
-              }
-            }
-          };
-
-      return {
-        address: data.strategy.id,
-        name: data.strategy.id,
-        about: data.strategy.about,
-        author: data.strategy.author,
-        version: `v${data.strategy.version}`,
-        defaultParams,
-        paramsDefinition
-      };
+      return formatStrategy(data.strategy as ApiStrategy);
     }
   };
 }

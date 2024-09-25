@@ -30,19 +30,8 @@ const filteredStrategies = computed(() => {
 });
 
 async function handleStrategySelected(strategy: StrategyTemplate) {
-  isLoading.value = true;
-
-  try {
-    const extended = await network.value.api.loadStrategy(strategy.address);
-    if (!extended) throw new Error('Failed to load strategy details');
-
-    emit('addStrategy', extended);
-    emit('close');
-  } catch (e) {
-    console.log('failed to load strategy', e);
-  } finally {
-    isLoading.value = false;
-  }
+  emit('addStrategy', strategy);
+  emit('close');
 }
 
 watchEffect(async () => {

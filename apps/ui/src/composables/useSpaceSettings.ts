@@ -407,6 +407,48 @@ export function useSpaceSettings(space: Ref<Space>) {
     } as const;
   }
 
+  function getInitialStrategies(space: Space): StrategyConfig[] {
+    if (space.additionalRawData?.type !== 'offchain') return [];
+
+    return space.additionalRawData.strategies.map(strategy => ({
+      id: crypto.randomUUID(),
+      chainId: strategy.network,
+      address: strategy.name,
+      name: strategy.name,
+      paramsDefinition: null,
+      params: clone(strategy.params)
+    }));
+  }
+
+  function hasStrategiesChanged(
+    currentStrategies: StrategyConfig[],
+    existingStrategies: StrategyConfig[]
+  ) {
+    const hasNewStrategy =
+      currentStrategies.findIndex(current => {
+        return !existingStrategies.find(
+          existing =>
+            current.address === existing.address &&
+            current.chainId === existing.chainId &&
+            objectHash(current.params) === objectHash(existing.params)
+        );
+      }) !== -1;
+
+    if (hasNewStrategy) return true;
+
+    const hasRemovedStrategy =
+      existingStrategies.findIndex(existing => {
+        return !currentStrategies.find(
+          current =>
+            current.address === existing.address &&
+            current.chainId === existing.chainId &&
+            objectHash(current.params) === objectHash(existing.params)
+        );
+      }) !== -1;
+
+    return hasRemovedStrategy;
+  }
+
   async function saveOffchain() {
     if (space.value.additionalRawData?.type !== 'offchain') {
       throw new Error('Missing raw data for offchain space');
@@ -452,7 +494,11 @@ export function useSpaceSettings(space: Ref<Space>) {
       skin: space.value.additionalRawData.skin,
       guidelines: space.value.additionalRawData.guidelines,
       template: space.value.additionalRawData.template,
-      strategies: space.value.additionalRawData.strategies,
+      strategies: strategies.value.map(strategy => ({
+        name: strategy.name,
+        network: strategy.chainId?.toString() ?? snapshotChainId.value,
+        params: strategy.params
+      })),
       treasuries: form.value.treasuries.map(treasury => ({
         address: treasury.address || '',
         name: treasury.name || '',
@@ -613,16 +659,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       snapshotChainId.value = space.value.snapshot_chain_id?.toString() ?? '1';
 
       if (space.value.additionalRawData?.type === 'offchain') {
-        strategies.value = space.value.additionalRawData.strategies.map(
-          strategy => ({
-            id: crypto.randomUUID(),
-            chainId: strategy.network,
-            address: strategy.name,
-            name: strategy.name,
-            paramsDefinition: null,
-            params: strategy.params
-          })
-        );
+        strategies.value = getInitialStrategies(space.value);
       }
 
       members.value = getInitialMembers(space.value);
@@ -653,6 +690,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const privacyValue = privacy.value;
     const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
     const snapshotChainIdValue = snapshotChainId.value;
+    const strategiesValue = strategies.value;
     const membersValue = members.value;
     const parentValue = parent.value;
     const childrenValue = children.value;
@@ -731,6 +769,13 @@ export function useSpaceSettings(space: Ref<Space>) {
       if (
         snapshotChainIdValue !==
         (space.value.snapshot_chain_id?.toString() ?? '1')
+      ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (
+        hasStrategiesChanged(strategiesValue, getInitialStrategies(space.value))
       ) {
         isModified.value = true;
         return;

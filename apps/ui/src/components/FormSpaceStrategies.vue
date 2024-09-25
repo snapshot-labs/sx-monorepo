@@ -17,16 +17,45 @@ const isStrategiesModalOpen = ref(false);
 const isEditStrategyModalOpen = ref(false);
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
 
-function addStrategy(strategy: StrategyTemplate) {
+function handleAddStrategy(strategy: StrategyTemplate) {
   editedStrategy.value = {
     id: crypto.randomUUID(),
     params: strategy.defaultParams || {},
     ...strategy
   };
+
   isEditStrategyModalOpen.value = true;
 }
 
-function removeStrategy(strategy: StrategyConfig) {
+async function handleEditStrategy(strategy: StrategyConfig) {
+  editedStrategy.value = strategy;
+  isEditStrategyModalOpen.value = true;
+}
+
+function handleSaveStrategy(params: Record<string, any>, network: string) {
+  const editedStrategyValue = editedStrategy.value;
+
+  if (editedStrategyValue === null) return;
+
+  isEditStrategyModalOpen.value = false;
+
+  let allStrategies = [...strategies.value];
+  if (!allStrategies.find(s => s.id === editedStrategyValue.id)) {
+    allStrategies.push(editedStrategyValue);
+  }
+
+  strategies.value = allStrategies.map(strategy => {
+    if (strategy.id !== editedStrategyValue.id) return strategy;
+
+    return {
+      ...strategy,
+      chainId: network,
+      params
+    };
+  });
+}
+
+function handleRemoveStrategy(strategy: StrategyConfig) {
   strategies.value = strategies.value.filter(s => s.id !== strategy.id);
 }
 </script>
@@ -48,7 +77,8 @@ function removeStrategy(strategy: StrategyConfig) {
         class="mb-3"
         :network-id="networkId"
         :strategy="strategy"
-        @delete-strategy="removeStrategy"
+        @edit-strategy="handleEditStrategy"
+        @delete-strategy="handleRemoveStrategy"
       />
     </div>
     <UiButton
@@ -63,16 +93,19 @@ function removeStrategy(strategy: StrategyConfig) {
     <ModalStrategies
       :open="isStrategiesModalOpen"
       :network-id="networkId"
-      @add-strategy="strategy => addStrategy(strategy)"
+      @add-strategy="handleAddStrategy"
       @close="isStrategiesModalOpen = false"
     />
     <ModalEditStrategy
+      v-if="editedStrategy"
       with-network-selector
       :open="isEditStrategyModalOpen"
       :network-id="networkId"
-      :initial-network="snapshotChainId"
-      :definition="editedStrategy?.paramsDefinition"
-      :initial-state="editedStrategy?.params"
+      :initial-network="editedStrategy.chainId ?? snapshotChainId"
+      :strategy-address="editedStrategy.address"
+      :definition="editedStrategy.paramsDefinition"
+      :initial-state="editedStrategy.params"
+      @save="handleSaveStrategy"
       @close="isEditStrategyModalOpen = false"
     />
   </teleport>
