@@ -2,6 +2,8 @@
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { NetworkID } from '@/types';
 
+const LIMIT = 8;
+
 const snapshotChainId = defineModel<string>('snapshotChainId', {
   required: true
 });
@@ -70,7 +72,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
     />
   </div>
   <UiContainerSettings
-    title="Select up to 8 strategies"
+    :title="`Select up to ${LIMIT} strategies`"
     description="(Voting power is cumulative)"
   >
     <div class="space-y-3 mb-3">
@@ -86,6 +88,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
       />
     </div>
     <UiButton
+      v-if="strategies.length < LIMIT"
       class="w-full flex items-center justify-center gap-1"
       @click="isStrategiesModalOpen = true"
     >
