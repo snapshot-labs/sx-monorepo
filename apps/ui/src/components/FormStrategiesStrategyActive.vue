@@ -31,7 +31,7 @@ defineEmits<{
 }>();
 
 const network = computed(() => getNetwork(props.networkId));
-
+const hasAddress = computed(() => props.strategy.address.startsWith('0x'));
 const strategyNetworkDetails = computed<NetworkDetails>(() => {
   if (!props.strategy.chainId) return null;
   if (!(props.strategy.chainId in networks)) return null;
@@ -66,7 +66,7 @@ const strategyNetworkDetails = computed<NetworkDetails>(() => {
           <IH-trash />
         </button>
         <a
-          v-if="strategy.address"
+          v-if="!hasAddress"
           :href="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
           target="_blank"
           class="text-skin-link"
@@ -75,6 +75,21 @@ const strategyNetworkDetails = computed<NetworkDetails>(() => {
         </a>
       </div>
     </div>
+    <a
+      v-if="hasAddress"
+      :href="network.helpers.getExplorerUrl(strategy.address, 'contract')"
+      target="_blank"
+      class="flex items-center text-skin-text leading-5 mt-1"
+    >
+      <UiStamp
+        :id="strategy.address"
+        type="avatar"
+        :size="18"
+        class="mr-2 !rounded"
+      />
+      {{ shorten(strategy.address) }}
+      <IH-arrow-sm-right class="-rotate-45" />
+    </a>
     <div class="flex flex-col gap-2 mt-3 empty:mt-0">
       <div
         v-if="strategyNetworkDetails"
