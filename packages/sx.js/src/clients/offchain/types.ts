@@ -129,6 +129,12 @@ export type EIP712UpdateSpaceMessage = {
   settings: string;
 };
 
+export type EIP712DeleteSpaceMessage = {
+  from?: string;
+  space: string;
+  timestamp?: number;
+};
+
 export type EIP712Message = Required<
   | EIP712VoteMessage
   | EIP712ProposeMessage
@@ -140,6 +146,7 @@ export type EIP712Message = Required<
   | EIP712UpdateUserMessage
   | EIP712UpdateStatementMessage
   | EIP712UpdateSpaceMessage
+  | EIP712DeleteSpaceMessage
 >;
 
 export type Vote = {
@@ -229,4 +236,10 @@ export type UpdateSpace = {
   timestamp?: number;
   space: string;
   settings: string;
+};
+
+export type DeleteSpace = {
+  from?: string;
+  timestamp?: number;
+  space: string;
 };

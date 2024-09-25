@@ -5,6 +5,7 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
+const router = useRouter();
 const route = useRoute();
 const {
   loading,
@@ -23,15 +24,21 @@ const {
   validationStrategy,
   votingStrategies,
   members,
+  parent,
+  children,
+  termsOfServices,
+  customDomain,
+  isPrivate,
   save,
   saveController,
+  deleteSpace,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
-const uiStore = useUiStore();
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
+const hasAdvancedErrors = ref(false);
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const saving = ref(false);
@@ -47,7 +54,8 @@ type Tab = {
     | 'voting'
     | 'members'
     | 'execution'
-    | 'controller';
+    | 'controller'
+    | 'advanced';
   name: string;
   visible: boolean;
 };
@@ -108,6 +116,11 @@ const tabs = computed<Tab[]>(
         id: 'controller',
         name: 'Controller',
         visible: true
+      },
+      {
+        id: 'advanced',
+        name: 'Advanced',
+        visible: isOffchainNetwork.value
       }
     ] as const
 );
@@ -209,6 +222,16 @@ function handleControllerSave(value: string) {
 
   saving.value = true;
   executeFn.value = saveController;
+}
+
+function handleSpaceDelete() {
+  saving.value = true;
+  executeFn.value = async () => {
+    await deleteSpace();
+    router.push({ name: 'my-home' });
+
+    return null;
+  };
 }
 
 function handleTabFocus(event: FocusEvent) {
@@ -489,11 +512,23 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </teleport>
     </UiContainerSettings>
-    <footer
-      v-if="
-        !uiStore.sidebarOpen && ((isModified && canModifySettings) || error)
-      "
-      class="fixed bg-skin-bg bottom-0 left-0 right-0 xl:right-[240px] border-y px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+    <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
+      <FormSpaceAdvanced
+        v-model:parent="parent"
+        v-model:children="children"
+        v-model:terms-of-services="termsOfServices"
+        v-model:custom-domain="customDomain"
+        v-model:is-private="isPrivate"
+        :network-id="space.network"
+        :space-id="space.id"
+        :is-controller="isController"
+        @delete-space="handleSpaceDelete"
+        @update-validity="v => (hasAdvancedErrors = !v)"
+      />
+    </UiContainerSettings>
+    <UiToolbarBottom
+      v-if="(isModified && canModifySettings) || error"
+      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
@@ -514,7 +549,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           Save
         </UiButton>
       </div>
-    </footer>
+    </UiToolbarBottom>
   </div>
   <teleport to="#modal">
     <ModalTransactionProgress

@@ -262,7 +262,7 @@ watch([sortBy, choiceFilter], () => {
             >
               <UiDropdown>
                 <template #button>
-                  <UiButton class="!p-0 border-0 !h-[auto] bg-transparent">
+                  <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
                     <IH-dots-horizontal class="text-skin-link" />
                   </UiButton>
                 </template>

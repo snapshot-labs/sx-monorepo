@@ -308,7 +308,8 @@ input:placeholder-shown {
   }
 
   textarea.s-input {
-    &, :focus {
+    &,
+    :focus {
       @apply outline outline-1 outline-offset-[-1px] outline-skin-danger border-transparent;
     }
   }
@@ -326,7 +327,7 @@ input:placeholder-shown {
   // Adding the gradient fade to the top of the input
   .s-label:has(+ textarea),
   .s-base:has(textarea:only-child) {
-     &::before {
+    &::before {
       @apply block bg-gradient-to-b from-skin-border to-transparent h-[8px] absolute top-3.5 left-[1px] right-[1px];
 
       content: '';

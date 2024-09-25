@@ -672,9 +672,6 @@ export function createActions(
         }
       });
     },
-    updateSettingsRaw: () => {
-      throw new Error('Not implemented');
-    },
     delegate: async (
       web3: any,
       space: Space,
@@ -770,6 +767,12 @@ export function createActions(
     },
     updateUser: () => {},
     updateStatement: () => {},
+    updateSettingsRaw: () => {
+      throw new Error('Not implemented');
+    },
+    deleteSpace: () => {
+      throw new Error('Not implemented');
+    },
     send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper
   };
 }

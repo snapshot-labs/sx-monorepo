@@ -27,33 +27,54 @@ const { isSwiping, direction } = useSwipe(el, {
   }
 });
 const { createDraft } = useEditor();
-const { spaceKey, network, executionStrategy, transaction, reset } =
-  useWalletConnectTransaction();
+const {
+  spaceKey: walletConnectSpaceKey,
+  network,
+  executionStrategy,
+  transaction,
+  reset
+} = useWalletConnectTransaction();
 
 provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
-const hasAppNav = computed(() =>
-  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+const hasAppNav = computed(
+  () =>
+    ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+);
+
+const hasPlaceHolderSidebar = computed(
+  () =>
+    !['space-proposal', 'create'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
 const bottomPadding = computed(
-  () => !['proposal-votes'].includes(String(route.name))
+  () => !['space-proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {
-  if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
+  if (
+    !walletConnectSpaceKey.value ||
+    !executionStrategy.value ||
+    !transaction.value
+  )
+    return;
 
   const executions = {} as Record<string, Transaction[]>;
   executions[executionStrategy.value.address] = [transaction.value];
 
-  const space = spaceKey.value;
-  const draftId = await createDraft(space, {
+  const spaceKey = walletConnectSpaceKey.value;
+  const draftId = await createDraft(spaceKey, {
     executions
   });
 
-  router.push(`/${space}/create/${draftId}`);
+  router.push({
+    name: 'space-editor',
+    params: { space: walletConnectSpaceKey.value, key: draftId }
+  });
 
   reset();
 }
@@ -108,13 +129,12 @@ watch(isSwiping, () => {
       />
       <AppTopnav
         :has-app-nav="hasAppNav"
-        class="fixed top-0 inset-x-0 z-50"
         @navigated="uiStore.sidebarOpen = false"
       >
         <template #toggle-sidebar-button>
           <button
             type="button"
-            class="text-skin-link cursor-pointer lg:hidden ml-4"
+            class="text-skin-link lg:hidden ml-4"
             @click="uiStore.toggleSidebar"
           >
             <IH-menu-alt-2 />
@@ -137,13 +157,19 @@ watch(isSwiping, () => {
         class="backdrop"
         @click="uiStore.sidebarOpen = false"
       />
-      <main class="flex-auto w-full">
-        <router-view class="flex-auto mt-[72px]" />
+      <main class="flex-auto w-full flex">
+        <div class="flex-auto w-0 mt-[72px]">
+          <router-view />
+        </div>
+        <div
+          v-if="hasPlaceHolderSidebar"
+          class="app-placeholder-sidebar hidden xl:block"
+        />
       </main>
     </div>
     <AppNotifications />
     <ModalTransaction
-      v-if="route.name !== 'editor' && transaction && network"
+      v-if="route.name !== 'space-editor' && transaction && network"
       :open="!!transaction"
       :network="network"
       :initial-state="transaction._form"
@@ -156,14 +182,19 @@ watch(isSwiping, () => {
 <style lang="scss" scoped>
 $sidebarWidth: 72px;
 $navWidth: 240px;
+$placeholderSidebarWidth: 240px;
 
 .app-sidebar {
-  width: $sidebarWidth;
+  @apply w-[#{$sidebarWidth}];
 
   @media (max-width: 1011px) {
     &-open {
       & ~ :deep(*) {
         @apply translate-x-[#{$sidebarWidth}];
+
+        .app-toolbar-bottom {
+          @apply hidden;
+        }
       }
 
       & ~ :deep(main) {
@@ -178,12 +209,16 @@ $navWidth: 240px;
 }
 
 .app-nav {
-  width: $navWidth;
+  @apply w-[#{$navWidth}];
 
   @media (max-width: 1011px) {
     &-open {
       & ~ :deep(*) {
         @apply translate-x-[#{$navWidth}];
+
+        .app-toolbar-bottom {
+          @apply hidden;
+        }
       }
 
       & ~ :deep(main) {
@@ -193,13 +228,29 @@ $navWidth: 240px;
   }
 }
 
+.app-placeholder-sidebar {
+  @apply w-[#{$placeholderSidebarWidth}];
+
+  &::before {
+    @apply block fixed border-l top-[72px] bottom-0 right-0 w-[#{$placeholderSidebarWidth}];
+
+    content: '';
+  }
+}
+
+@media (screen(xl)) {
+  main > div:has(+ .app-placeholder-sidebar) :deep(.app-toolbar-bottom) {
+    @apply right-[#{$placeholderSidebarWidth}];
+  }
+}
+
 @media (screen(lg)) {
   .app-sidebar {
     & ~ :deep(main),
     & ~ .backdrop,
     & ~ :deep(header.fixed),
     & ~ :deep(main header.fixed),
-    & ~ :deep(main footer.fixed),
+    & ~ :deep(main .app-toolbar-bottom),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
     }
@@ -209,7 +260,7 @@ $navWidth: 240px;
       & ~ .backdrop,
       & ~ :deep(header.fixed),
       & ~ :deep(main header.fixed),
-      & ~ :deep(main footer.fixed),
+      & ~ :deep(main .app-toolbar-bottom),
       & ~ :deep(.app-nav) {
         @apply ml-[#{$sidebarWidth + $navWidth}];
       }

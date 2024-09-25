@@ -24,7 +24,8 @@ const SEARCH_CONFIG = {
   space: {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-search',
-    placeholder: 'Search for a proposal'
+    placeholder: 'Search for a proposal',
+    exclude: ['space-editor', 'space-proposal']
   },
   my: {
     defaultRoute: 'my-explore',
@@ -47,9 +48,17 @@ const user = computed(
 );
 const cb = computed(() => getCacheHash(user.value.avatar));
 
-const searchConfig = computed(
-  () => SEARCH_CONFIG[route.matched[0]?.name || '']
-);
+const searchConfig = computed(() => {
+  const rootName = route.matched[0]?.name || '';
+  const subRootName = route.matched[1]?.name || '';
+  const exclusions = SEARCH_CONFIG[rootName]?.exclude || [];
+
+  if (SEARCH_CONFIG[rootName] && !exclusions.includes(subRootName)) {
+    return SEARCH_CONFIG[rootName];
+  }
+
+  return null;
+});
 
 async function handleLogin(connector) {
   resetAccountModal();
@@ -83,10 +92,7 @@ watch(
 </script>
 
 <template>
-  <header
-    class="border-b flex items-center justify-between h-[72px] bg-skin-bg space-x-4 pr-4"
-    v-bind="$attrs"
-  >
+  <UiTopnav v-bind="$attrs" class="gap-4 pr-4">
     <div
       class="flex items-center h-full truncate"
       :class="{
@@ -101,8 +107,7 @@ watch(
           { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
         ]"
         @click="emit('navigated')"
-      >
-      </Breadcrumb>
+      />
     </div>
     <form
       v-if="searchConfig"
@@ -140,7 +145,7 @@ watch(
           />
         </span>
         <template v-else>
-          <span class="hidden sm:block" v-text="'Connect wallet'" />
+          <span class="hidden sm:block" v-text="'Log in'" />
           <IH-login class="sm:hidden inline-block" />
         </template>
       </UiButton>
@@ -150,7 +155,7 @@ watch(
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>
-  </header>
+  </UiTopnav>
   <teleport to="#modal">
     <ModalAccount
       :open="modalAccountOpen || modalAccountWithoutDismissOpen"

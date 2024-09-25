@@ -68,7 +68,7 @@ watch(open, () => (step.value = null));
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3 v-text="isLoggedOut ? 'Connect wallet' : 'Account'" />
+      <h3 v-text="isLoggedOut ? 'Log in' : 'Account'" />
     </template>
     <div class="m-4 flex flex-col gap-2">
       <template v-if="isLoggedOut">
@@ -90,29 +90,19 @@ watch(open, () => (step.value = null));
         </button>
       </template>
       <template v-else>
-        <AppLink
+        <UiButton
           :to="{ name: 'user', params: { user: web3.account } }"
-          class="block"
-          tabindex="-1"
+          class="gap-2"
+          @click="emit('close')"
         >
-          <UiButton
-            class="w-full flex justify-center items-center gap-2"
-            @click="emit('close')"
-          >
-            <UiStamp :id="user.id" :size="18" :cb="cb" />
-            My profile
-          </UiButton>
-        </AppLink>
-        <AppLink :to="{ name: 'settings-spaces' }" tabindex="-1">
-          <UiButton
-            class="w-full flex justify-center items-center"
-            @click="emit('close')"
-          >
-            Settings
-          </UiButton>
-        </AppLink>
+          <UiStamp :id="user.id" :size="18" :cb="cb" />
+          My profile
+        </UiButton>
+        <UiButton :to="{ name: 'settings-spaces' }" @click="emit('close')">
+          Settings
+        </UiButton>
         <UiButton @click="step = 'connect'">
-          {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
+          {{ web3.account ? 'Change wallet' : 'Log in' }}
         </UiButton>
         <UiButton class="!text-skin-danger" @click="handleLogout">
           Log out
