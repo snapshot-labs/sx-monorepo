@@ -80,7 +80,7 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
               </div>
               <UiButton
                 v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
-                class="border-0 rounded-l-none rounded-r-lg bg-transparent !size-[40px] !px-0 text-center text-skin-text shrink-0"
+                class="!border-0 !rounded-l-none !rounded-r-lg !bg-transparent !size-[40px] !px-0 !text-skin-text shrink-0"
                 @click="proposal.choices.splice(index, 1)"
               >
                 <IH-trash class="inline-block" />
