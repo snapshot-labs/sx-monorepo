@@ -36,17 +36,13 @@ const menu = [
 </script>
 
 <template>
-  <nav
-    class="bg-skin-bg grid grid-cols-4 gap-2 border-t text-xs px-3 items-center"
-  >
-    <div
-      v-for="(item, i) in menu"
-      :key="i"
-      class="flex justify-center truncate"
-    >
+  <nav class="bg-skin-bg border-t text-xs">
+    <div class="flex gap-2 px-3 justify-center">
       <AppLink
+        v-for="(item, i) in menu"
+        :key="i"
         :to="item.link"
-        class="inline-flex flex-col text-center gap-1 truncate"
+        class="inline-flex flex-col text-center gap-1 truncate justify-center w-[25%] max-w-[120px]"
         :class="
           route.name === item.link.name ? 'text-skin-link' : 'text-skin-text'
         "
