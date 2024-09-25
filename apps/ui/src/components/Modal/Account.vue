@@ -68,7 +68,7 @@ watch(open, () => (step.value = null));
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3 v-text="isLoggedOut ? 'Connect wallet' : 'Account'" />
+      <h3 v-text="isLoggedOut ? 'Log in' : 'Account'" />
     </template>
     <div class="m-4 flex flex-col gap-2">
       <template v-if="isLoggedOut">
@@ -102,7 +102,7 @@ watch(open, () => (step.value = null));
           Settings
         </UiButton>
         <UiButton @click="step = 'connect'">
-          {{ web3.account ? 'Change wallet' : 'Connect wallet' }}
+          {{ web3.account ? 'Change wallet' : 'Log in' }}
         </UiButton>
         <UiButton class="!text-skin-danger" @click="handleLogout">
           Log out
