@@ -49,7 +49,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
             {{ _rt(notification.timestamp) }}
             <AppLink
               :to="{
-                name: 'proposal-overview',
+                name: 'space-proposal-overview',
                 params: {
                   proposal: notification.proposal.proposal_id,
                   space: `${notification.proposal.network}:${notification.proposal.space.id}`
@@ -57,7 +57,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
               }"
             >
               <h3
-                class="font-normal text-[21px] break-all"
+                class="font-normal text-[21px] [overflow-wrap:anywhere]"
                 v-text="
                   notification.proposal.title ||
                   `#${notification.proposal.proposal_id}`

@@ -7,9 +7,9 @@
       <div class="text-center max-w-[600px] mx-auto">
         <div class="eyebrow mb-3">Join Snapshot</div>
         <h1 class="mb-4 font-display !text-[44px]">Ready to govern?</h1>
-        <AppLink :to="{ name: 'my-home' }" tabindex="-1">
-          <UiButton class="primary">Get started</UiButton>
-        </AppLink>
+        <UiButton :to="{ name: 'my-home' }" class="primary">
+          Get started
+        </UiButton>
       </div>
     </UiContainer>
   </div>

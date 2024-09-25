@@ -46,7 +46,7 @@ const availableConnectors = computed(() => {
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="'Connect wallet'" />
+      <h3 v-text="'Log in'" />
     </template>
     <div>
       <div class="m-4 space-y-2 flex flex-col">

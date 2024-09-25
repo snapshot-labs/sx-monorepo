@@ -25,7 +25,9 @@ export function useVotingPower() {
   const proposalSnapshot = computed(() => {
     if (!proposal.value) return null;
 
-    return proposal.value.state === 'pending' ? null : proposal.value.snapshot;
+    return proposal.value.state === 'pending'
+      ? latestBlock(proposal.value)
+      : proposal.value.snapshot;
   });
 
   const votingPower = computed(
@@ -36,10 +38,10 @@ export function useVotingPower() {
       )
   );
 
-  function latestBlock(space: Space) {
-    return supportsNullCurrent(space.network)
+  function latestBlock(spaceOrProposal: Space | Proposal) {
+    return supportsNullCurrent(spaceOrProposal.network)
       ? null
-      : getCurrent(space.network) ?? 0;
+      : getCurrent(spaceOrProposal.network) ?? 0;
   }
 
   function reset() {
