@@ -25,7 +25,7 @@ const SEARCH_CONFIG = {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-search',
     placeholder: 'Search for a proposal',
-    exclude: ['space-editor']
+    exclude: ['space-editor', 'space-proposal']
   },
   my: {
     defaultRoute: 'my-explore',
@@ -145,7 +145,7 @@ watch(
           />
         </span>
         <template v-else>
-          <span class="hidden sm:block" v-text="'Connect wallet'" />
+          <span class="hidden sm:block" v-text="'Log in'" />
           <IH-login class="sm:hidden inline-block" />
         </template>
       </UiButton>

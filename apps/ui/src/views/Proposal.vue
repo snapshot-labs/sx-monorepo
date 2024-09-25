@@ -155,7 +155,7 @@ watchEffect(() => {
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
               :to="{
-                name: 'proposal-overview',
+                name: 'space-proposal-overview',
                 params: {
                   proposal: proposal.proposal_id,
                   space: `${proposal.network}:${proposal.space.id}`
@@ -163,13 +163,13 @@ watchEffect(() => {
               }"
             >
               <UiLink
-                :is-active="route.name === 'proposal-overview'"
+                :is-active="route.name === 'space-proposal-overview'"
                 text="Overview"
               />
             </AppLink>
             <AppLink
               :to="{
-                name: 'proposal-votes',
+                name: 'space-proposal-votes',
                 params: {
                   proposal: proposal.proposal_id,
                   space: `${proposal.network}:${proposal.space.id}`
@@ -178,7 +178,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLink
-                :is-active="route.name === 'proposal-votes'"
+                :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
                 class="inline-block"
@@ -188,7 +188,7 @@ watchEffect(() => {
               <AppLink
                 v-if="discourseTopic?.posts_count"
                 :to="{
-                  name: 'proposal-discussion',
+                  name: 'space-proposal-discussion',
                   params: {
                     proposal: proposal.proposal_id,
                     space: `${proposal.network}:${proposal.space.id}`
@@ -197,7 +197,7 @@ watchEffect(() => {
                 class="flex items-center"
               >
                 <UiLink
-                  :is-active="route.name === 'proposal-discussion'"
+                  :is-active="route.name === 'space-proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
                   class="inline-block"
@@ -220,7 +220,7 @@ watchEffect(() => {
       <Affix
         :class="[
           'shrink-0 md:w-[340px] border-l-0 md:border-l',
-          { 'hidden md:block': route.name === 'proposal-votes' }
+          { 'hidden md:block': route.name === 'space-proposal-votes' }
         ]"
         :top="72"
         :bottom="64"

@@ -29,7 +29,7 @@ export function useSharing() {
   function getProposalUrl(proposal: Proposal): string {
     return `${window.location.origin}/${
       router.resolve({
-        name: 'proposal',
+        name: 'space-proposal',
         params: {
           space: `${proposal.network}:${proposal.space.id}`,
           id: proposal.proposal_id
