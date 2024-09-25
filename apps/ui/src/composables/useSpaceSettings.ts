@@ -124,13 +124,14 @@ export function useSpaceSettings(space: Ref<Space>) {
   const votingDelay: Ref<number | null> = ref(null);
   const minVotingPeriod: Ref<number | null> = ref(null);
   const maxVotingPeriod: Ref<number | null> = ref(null);
+  const initialController = ref('');
+  const controller = ref('');
 
   // Onchain properties
   const authenticators = ref([] as StrategyConfig[]);
   const validationStrategy = ref(null as StrategyConfig | null);
   const votingStrategies = ref([] as StrategyConfig[]);
   const initialValidationStrategyObjectHash = ref(null as string | null);
-  const controller = ref(space.value.controller);
 
   // Offchain properties
   const members = ref([] as Member[]);
@@ -527,7 +528,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     return deleteSpaceAction(space.value);
   }
 
-  async function reset() {
+  async function reset({ force = false } = {}) {
     const authenticatorsValue = await getInitialStrategiesConfig(
       space.value.authenticators,
       network.value.constants.EDITOR_AUTHENTICATORS
@@ -549,9 +550,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.voting_power_validation_strategies_parsed_metadata
     );
 
-    controller.value = await network.value.helpers.getSpaceController(
-      space.value
-    );
+    controller.value = force
+      ? await network.value.helpers.getSpaceController(space.value)
+      : initialController.value;
+    initialController.value = controller.value;
 
     formErrors.value = {};
     form.value = getInitialForm(space.value);
