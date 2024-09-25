@@ -16,7 +16,9 @@ const space = computed(() => {
 });
 
 const hasRightPlaceholderSidebar = computed(() => {
-  return String(route.matched[1]?.name) !== 'space-editor';
+  return !['space-editor', 'space-proposal'].includes(
+    String(route.matched[1]?.name)
+  );
 });
 
 watch(

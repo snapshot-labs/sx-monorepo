@@ -42,11 +42,11 @@ const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 const hasAppNav = computed(
   () =>
     ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
-    !['space-editor'].includes(String(route.matched[1]?.name))
+    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
 const bottomPadding = computed(
-  () => !['proposal-votes'].includes(String(route.name))
+  () => !['space-proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {
