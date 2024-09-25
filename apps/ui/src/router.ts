@@ -2,7 +2,6 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import App from '@/views/App.vue';
 import Create from '@/views/Create.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
-import Editor from '@/views/Editor.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
 import Home from '@/views/My/Home.vue';
@@ -19,6 +18,7 @@ import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
 import SpaceDiscussions from '@/views/Space/Discussions.vue';
+import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
@@ -55,7 +55,34 @@ const routes: any[] = [
     component: Space,
     children: [
       { path: '', name: 'space-overview', component: SpaceOverview },
+      {
+        path: 'create/:key?',
+        name: 'space-editor',
+        component: SpaceEditor
+      },
       { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
+      {
+        path: 'proposal/:proposal?',
+        name: 'space-proposal',
+        component: Proposal,
+        children: [
+          {
+            path: '',
+            name: 'space-proposal-overview',
+            component: ProposalOverview
+          },
+          {
+            path: 'votes',
+            name: 'space-proposal-votes',
+            component: ProposalVotes
+          },
+          {
+            path: 'discussion',
+            name: 'space-proposal-discussion',
+            component: Topic
+          }
+        ]
+      },
       {
         path: 'discussions',
         name: 'space-discussions',
@@ -105,25 +132,6 @@ const routes: any[] = [
           },
           { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
         ]
-      }
-    ]
-  },
-  {
-    path: '/:space/create/:key?',
-    name: 'editor',
-    component: Editor
-  },
-  {
-    path: '/:space/proposal/:proposal?',
-    name: 'proposal',
-    component: Proposal,
-    children: [
-      { path: '', name: 'proposal-overview', component: ProposalOverview },
-      { path: 'votes', name: 'proposal-votes', component: ProposalVotes },
-      {
-        path: 'discussion',
-        name: 'proposal-discussion',
-        component: Topic
       }
     ]
   },

@@ -51,6 +51,8 @@ const SPACE_FRAGMENT = gql`
       onlyMembers
     }
     proposalsCount
+    proposalsCount1d
+    proposalsCount30d
     votesCount
     followersCount
     children {

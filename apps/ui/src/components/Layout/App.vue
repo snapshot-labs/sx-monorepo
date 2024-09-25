@@ -27,33 +27,48 @@ const { isSwiping, direction } = useSwipe(el, {
   }
 });
 const { createDraft } = useEditor();
-const { spaceKey, network, executionStrategy, transaction, reset } =
-  useWalletConnectTransaction();
+const {
+  spaceKey: walletConnectSpaceKey,
+  network,
+  executionStrategy,
+  transaction,
+  reset
+} = useWalletConnectTransaction();
 
 provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
 
-const hasAppNav = computed(() =>
-  ['space', 'my', 'settings'].includes(String(route.matched[0]?.name))
+const hasAppNav = computed(
+  () =>
+    ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
 const bottomPadding = computed(
-  () => !['proposal-votes'].includes(String(route.name))
+  () => !['space-proposal-votes'].includes(String(route.name))
 );
 
 async function handleTransactionAccept() {
-  if (!spaceKey.value || !executionStrategy.value || !transaction.value) return;
+  if (
+    !walletConnectSpaceKey.value ||
+    !executionStrategy.value ||
+    !transaction.value
+  )
+    return;
 
   const executions = {} as Record<string, Transaction[]>;
   executions[executionStrategy.value.address] = [transaction.value];
 
-  const space = spaceKey.value;
-  const draftId = await createDraft(space, {
+  const spaceKey = walletConnectSpaceKey.value;
+  const draftId = await createDraft(spaceKey, {
     executions
   });
 
-  router.push(`/${space}/create/${draftId}`);
+  router.push({
+    name: 'space-editor',
+    params: { space: walletConnectSpaceKey.value, key: draftId }
+  });
 
   reset();
 }
@@ -133,7 +148,7 @@ watch(isSwiping, () => {
     </div>
     <AppNotifications />
     <ModalTransaction
-      v-if="route.name !== 'editor' && transaction && network"
+      v-if="route.name !== 'space-editor' && transaction && network"
       :open="!!transaction"
       :network="network"
       :initial-state="transaction._form"

@@ -69,7 +69,12 @@ const DEFAULT_FORM_STATE: Form = {
 export function useSpaceSettings(space: Ref<Space>) {
   const { web3 } = useWeb3();
   const { getDurationFromCurrent } = useMetaStore();
-  const { updateSettings, updateSettingsRaw, transferOwnership } = useActions();
+  const {
+    updateSettings,
+    updateSettingsRaw,
+    transferOwnership,
+    deleteSpace: deleteSpaceAction
+  } = useActions();
 
   const loading = ref(true);
   const isModified = ref(false);
@@ -83,7 +88,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     return compareAddresses(controller, account);
-  });
+  }, false);
   const isOwner = computedAsync(async () => {
     if (!offchainNetworks.includes(space.value.network)) {
       return isController.value;
@@ -97,7 +102,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     return compareAddresses(owner, account);
-  });
+  }, false);
   const isAdmin = computed(() => {
     if (!offchainNetworks.includes(space.value.network)) return false;
 
@@ -119,16 +124,22 @@ export function useSpaceSettings(space: Ref<Space>) {
   const votingDelay: Ref<number | null> = ref(null);
   const minVotingPeriod: Ref<number | null> = ref(null);
   const maxVotingPeriod: Ref<number | null> = ref(null);
+  const initialController = ref('');
+  const controller = ref('');
 
   // Onchain properties
   const authenticators = ref([] as StrategyConfig[]);
   const validationStrategy = ref(null as StrategyConfig | null);
   const votingStrategies = ref([] as StrategyConfig[]);
   const initialValidationStrategyObjectHash = ref(null as string | null);
-  const controller = ref(space.value.controller);
 
   // Offchain properties
   const members = ref([] as Member[]);
+  const parent = ref('');
+  const children = ref([] as string[]);
+  const termsOfServices = ref('');
+  const customDomain = ref('');
+  const isPrivate = ref(false);
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -397,15 +408,15 @@ export function useSpaceSettings(space: Ref<Space>) {
       cover: form.value.cover ?? space.value.cover,
       network: space.value.snapshot_chain_id?.toString() ?? '1',
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
-      terms: space.value.additionalRawData.terms,
+      terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
       coingecko: form.value.coingecko ?? space.value.coingecko,
-      parent: space.value.parent?.id ?? null,
-      children: space.value.children.map(child => child.id),
-      private: space.value.additionalRawData.private,
-      domain: space.value.additionalRawData.domain,
+      parent: parent.value,
+      children: children.value,
+      private: isPrivate.value,
+      domain: customDomain.value,
       skin: space.value.additionalRawData.skin,
       guidelines: space.value.additionalRawData.guidelines,
       template: space.value.additionalRawData.template,
@@ -513,7 +524,11 @@ export function useSpaceSettings(space: Ref<Space>) {
     return transferOwnership(space.value, controller.value);
   }
 
-  async function reset() {
+  async function deleteSpace() {
+    return deleteSpaceAction(space.value);
+  }
+
+  async function reset({ force = false } = {}) {
     const authenticatorsValue = await getInitialStrategiesConfig(
       space.value.authenticators,
       network.value.constants.EDITOR_AUTHENTICATORS
@@ -535,9 +550,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.voting_power_validation_strategies_parsed_metadata
     );
 
-    controller.value = await network.value.helpers.getSpaceController(
-      space.value
-    );
+    controller.value = force
+      ? await network.value.helpers.getSpaceController(space.value)
+      : initialController.value;
+    initialController.value = controller.value;
 
     formErrors.value = {};
     form.value = getInitialForm(space.value);
@@ -555,6 +571,11 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (offchainNetworks.includes(space.value.network)) {
       members.value = getInitialMembers(space.value);
+      parent.value = space.value.parent?.id ?? '';
+      children.value = space.value.children.map(child => child.id);
+      termsOfServices.value = space.value.additionalRawData?.terms ?? '';
+      customDomain.value = space.value.additionalRawData?.domain ?? '';
+      isPrivate.value = space.value.additionalRawData?.private ?? false;
     }
   }
 
@@ -572,6 +593,11 @@ export function useSpaceSettings(space: Ref<Space>) {
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
     const membersValue = members.value;
+    const parentValue = parent.value;
+    const childrenValue = children.value;
+    const termsOfServicesValue = termsOfServices.value;
+    const customDomainValue = customDomain.value;
+    const isPrivateValue = isPrivate.value;
 
     if (loading.value) {
       isModified.value = false;
@@ -616,6 +642,39 @@ export function useSpaceSettings(space: Ref<Space>) {
         objectHash(membersValue, ignoreOrderOpts) !==
         objectHash(getInitialMembers(space.value), ignoreOrderOpts)
       ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (parentValue !== (space.value.parent?.id ?? '')) {
+        isModified.value = true;
+        return;
+      }
+
+      if (
+        objectHash(childrenValue, ignoreOrderOpts) !==
+        objectHash(
+          space.value.children.map(child => child.id),
+          ignoreOrderOpts
+        )
+      ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (
+        termsOfServicesValue !== (space.value.additionalRawData?.terms ?? '')
+      ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (customDomainValue !== (space.value.additionalRawData?.domain ?? '')) {
+        isModified.value = true;
+        return;
+      }
+
+      if (isPrivateValue !== space.value.additionalRawData?.private) {
         isModified.value = true;
         return;
       }
@@ -674,8 +733,14 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy,
     votingStrategies,
     members,
+    parent,
+    children,
+    termsOfServices,
+    customDomain,
+    isPrivate,
     save,
     saveController,
+    deleteSpace,
     reset
   };
 }

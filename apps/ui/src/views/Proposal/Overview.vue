@@ -127,7 +127,7 @@ async function handleEditClick() {
   });
 
   router.push({
-    name: 'editor',
+    name: 'space-editor',
     params: {
       space: spaceId,
       key: draftId
@@ -199,7 +199,7 @@ onBeforeUnmount(() => destroyAudio());
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
     <div>
-      <h1 class="mb-3 text-[40px] leading-[1.1em]">
+      <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>
 
@@ -244,7 +244,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="'AI summary'"
           >
             <UiButton
-              class="!p-0 border-0 !h-auto"
+              class="!p-0 !border-0 !h-auto"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
@@ -264,7 +264,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
           >
             <UiButton
-              class="!p-0 border-0 !h-auto"
+              class="!p-0 !border-0 !h-auto"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
@@ -278,14 +278,14 @@ onBeforeUnmount(() => destroyAudio());
           </UiTooltip>
           <DropdownShare :shareable="proposal" type="proposal">
             <template #button>
-              <UiButton class="!p-0 border-0 !h-auto">
+              <UiButton class="!p-0 !border-0 !h-auto">
                 <IH-share class="text-skin-text inline-block size-[22px]" />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
-              <UiButton class="!p-0 border-0 !h-auto">
+              <UiButton class="!p-0 !border-0 !h-auto">
                 <IH-dots-vertical
                   class="text-skin-text inline-block size-[22px]"
                 />

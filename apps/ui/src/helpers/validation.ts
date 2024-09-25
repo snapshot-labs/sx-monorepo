@@ -6,6 +6,7 @@ import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
+import { _n } from './utils';
 
 type Opts = { skipEmptyOptionalFields: boolean };
 
@@ -200,6 +201,14 @@ ajv.addFormat('farcaster-handle', {
   }
 });
 
+ajv.addFormat('domain', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-zA-Z0-9\-\.]+$/);
+  }
+});
+
 ajv.addFormat('ethValue', {
   validate: value => {
     if (!value.match(/^([0-9]|[1-9][0-9]+)(\.[0-9]+)?$/)) return false;
@@ -230,6 +239,7 @@ ajv.addKeyword({
   }
 });
 ajv.addKeyword('options');
+ajv.addKeyword('tooltip');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';
@@ -240,6 +250,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     switch (errorObject.params.format) {
       case 'uri':
         return 'Must be a valid URL.';
+      case 'domain':
+        return 'Must be a valid domain.';
       case 'address':
       case 'ethAddress':
         return 'Must be a valid address.';
@@ -271,6 +283,10 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     }
   }
 
+  if (errorObject.keyword === 'maxLength') {
+    if (!errorObject.params) return 'Invalid format.';
+    return `Must not have more than ${_n(errorObject.params.limit)} characters.`;
+  }
   return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
     .slice(1)
     .toLocaleLowerCase()}.`;
@@ -308,7 +324,9 @@ const getErrors = (errors: Partial<ErrorObject>[]) => {
     let current = output;
     for (let i = 0; i < path.length - 1; i++) {
       const subpath = path[i];
-      if (!current[subpath]) current[subpath] = {};
+      if (typeof current[subpath] !== 'object' || current[subpath] === null) {
+        current[subpath] = {};
+      }
       current = current[subpath];
     }
 

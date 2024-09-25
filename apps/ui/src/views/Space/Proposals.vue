@@ -106,7 +106,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         <UiTooltip title="New proposal">
           <UiButton
             :to="{
-              name: 'editor',
+              name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }
             }"
             class="!px-0 w-[46px]"
