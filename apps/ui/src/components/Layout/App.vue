@@ -41,7 +41,7 @@ const {
 
 provide('web3', web3);
 
-const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
+const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const hasAppNav = computed(
   () =>
@@ -105,7 +105,7 @@ watch(scrollDisabled, val => {
 });
 
 watch(route, () => {
-  uiStore.sidebarOpen = false;
+  uiStore.sideMenuOpen = false;
 });
 
 watch(isSwiping, () => {
@@ -119,8 +119,8 @@ watch(isSwiping, () => {
     return;
 
   if (
-    (direction.value === 'right' && !uiStore.sidebarOpen) ||
-    (direction.value === 'left' && uiStore.sidebarOpen)
+    (direction.value === 'right' && !uiStore.sideMenuOpen) ||
+    (direction.value === 'left' && uiStore.sideMenuOpen)
   ) {
     uiStore.toggleSidebar();
   }
@@ -156,66 +156,64 @@ watch(
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <template v-else>
-      <div :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
-        <AppSidebar
-          v-if="hasSidebar"
-          :class="[
-            `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
-            { '!flex app-sidebar-open': uiStore.sidebarOpen }
-          ]"
-          @navigated="uiStore.sidebarOpen = false"
-        />
-        <AppTopnav
-          :has-app-nav="hasAppNav"
-          @navigated="uiStore.sidebarOpen = false"
-        >
-          <template v-if="hasSwipeableContent" #toggle-sidebar-button>
-            <button
-              type="button"
-              class="text-skin-link lg:hidden ml-4"
-              @click="uiStore.toggleSidebar"
-            >
-              <IH-menu-alt-2 />
-            </button>
-          </template>
-        </AppTopnav>
-        <AppNav
-          v-if="hasAppNav"
-          :class="[
-            'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
-            {
-              '!block app-nav-open': uiStore.sidebarOpen
-            }
-          ]"
-          @navigated="uiStore.sidebarOpen = false"
-        />
-        <button
-          v-if="hasSwipeableContent && uiStore.sidebarOpen"
-          type="button"
-          class="backdrop"
-          @click="uiStore.toggleSidebar"
-        />
-        <main class="flex-auto w-full flex">
-          <div class="flex-auto w-0 mt-[72px]">
-            <router-view />
-          </div>
-          <div
-            v-if="hasPlaceHolderSidebar"
-            class="app-placeholder-sidebar hidden xl:block"
-          />
-        </main>
-      </div>
-      <AppNotifications />
-      <ModalTransaction
-        v-if="route.name !== 'space-editor' && transaction && network"
-        :open="!!transaction"
-        :network="network"
-        :initial-state="transaction._form"
-        @add="handleTransactionAccept"
-        @close="handleTransactionReject"
+    <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
+      <AppSidebar
+        v-if="hasSidebar"
+        :class="[
+          `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
+          { '!flex app-sidebar-open': uiStore.sideMenuOpen }
+        ]"
+        @navigated="uiStore.sideMenuOpen = false"
       />
-    </template>
+      <AppTopnav
+        :has-app-nav="hasAppNav"
+        @navigated="uiStore.sideMenuOpen = false"
+      >
+        <template #toggle-sidebar-button>
+          <button
+            type="button"
+            class="text-skin-link lg:hidden ml-4"
+            @click="uiStore.toggleSidebar"
+          >
+            <IH-menu-alt-2 />
+          </button>
+        </template>
+      </AppTopnav>
+      <AppNav
+        v-if="hasAppNav"
+        :class="[
+          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+          {
+            '!block app-nav-open': uiStore.sideMenuOpen
+          }
+        ]"
+        @navigated="uiStore.sideMenuOpen = false"
+      />
+      <button
+        v-if="hasSwipeableContent && uiStore.sideMenuOpen"
+        type="button"
+        class="backdrop"
+        @click="uiStore.toggleSidebar"
+      />
+      <main class="flex-auto w-full flex">
+        <div class="flex-auto w-0 mt-[72px]">
+          <router-view />
+        </div>
+        <div
+          v-if="hasPlaceHolderSidebar"
+          class="app-placeholder-sidebar hidden xl:block"
+        />
+      </main>
+    </div>
+    <AppNotifications />
+    <ModalTransaction
+      v-if="route.name !== 'space-editor' && transaction && network"
+      :open="!!transaction"
+      :network="network"
+      :initial-state="transaction._form"
+      @add="handleTransactionAccept"
+      @close="handleTransactionReject"
+    />
   </div>
 </template>
 

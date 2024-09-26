@@ -124,7 +124,10 @@ watch(model, () => {
       :placeholder="definition?.examples ? definition.examples[0] : ''"
       class="s-input h-[260px]"
     />
-    <div v-if="showError" class="s-input-error-message" v-text="error" />
+    <div v-if="showError" class="s-input-error-message leading-6 mt-2">
+      <span v-text="error" />
+      <slot name="error-suffix" />
+    </div>
   </div>
 </template>
 

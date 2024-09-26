@@ -161,12 +161,12 @@ const parsedTitle = computedAsync(
       class="w-full px-4 py-3 space-x-2 flex items-center justify-between"
       @click="expanded = !expanded"
     >
-      <div class="flex items-center max-w-[70%]">
+      <div class="flex items-center overflow-hidden">
         <slot name="left" />
-        <IH-cash v-if="tx._type === 'sendToken'" />
-        <IH-photograph v-else-if="tx._type === 'sendNft'" />
-        <IC-stake v-else-if="tx._type === 'stakeToken'" />
-        <IH-code v-else />
+        <IH-cash v-if="tx._type === 'sendToken'" class="shrink-0" />
+        <IH-photograph v-else-if="tx._type === 'sendNft'" class="shrink-0" />
+        <IC-stake v-else-if="tx._type === 'stakeToken'" class="shrink-0" />
+        <IH-code v-else class="shrink-0" />
         <div class="ml-2 truncate text-skin-link" v-html="parsedTitle" />
       </div>
       <slot name="right" />

@@ -183,8 +183,8 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
     <div class="border-b w-full">
       <div class="flex space-x-1 px-4 leading-8">
         <span class="w-[60%] lg:w-[50%] truncate">Space</span>
-        <span class="w-[20%] lg:w-[25%] text-end truncate">Proposals</span>
-        <span class="w-[20%] lg:w-[25%] text-end truncate">Votes</span>
+        <span class="w-[20%] lg:w-[25%] text-right truncate">Proposals</span>
+        <span class="w-[20%] lg:w-[25%] text-right truncate">Votes</span>
       </div>
     </div>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
@@ -219,7 +219,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <span class="flex-auto w-0 truncate" v-text="activity.space.name" />
       </div>
       <div
-        class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
+        class="flex flex-col justify-center text-right w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
         <h4
           class="text-skin-link truncate"
@@ -231,7 +231,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         />
       </div>
       <div
-        class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
+        class="flex flex-col justify-center text-right w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div

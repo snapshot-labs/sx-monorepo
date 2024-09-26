@@ -9,7 +9,13 @@ import '@/style.scss';
 const knownHosts = [
   'app.safe.global',
   'pilot.gnosisguild.org',
-  'wallet.ambire.com'
+  'metissafe.tech',
+  'multisig.mantle.xyz',
+  'wallet.ambire.com',
+  'multisig.moonbeam.network',
+  'worldassociation.org',
+  'safe.mainnet.frax.com',
+  'horizen-eon.safe.onchainden.com'
 ];
 const parentUrl =
   window.location != window.parent.location

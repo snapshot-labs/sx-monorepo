@@ -4,9 +4,13 @@ import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
 
-defineProps<{ definition: any }>();
+const props = defineProps<{
+  error?: string;
+  definition: any;
+}>();
 
 const choices: Ref<any[]> = ref([]);
+const showError = computed<boolean>(() => !!props.error);
 
 function handleAddChoice() {
   proposal.value.choices.push('');
@@ -32,7 +36,12 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
 </script>
 
 <template>
-  <div class="s-base mb-5">
+  <div
+    class="s-base mb-5"
+    :class="{
+      's-error': showError
+    }"
+  >
     <h4 class="eyebrow mb-2.5">Choices</h4>
     <div class="flex flex-col">
       <Draggable
@@ -71,7 +80,7 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
               </div>
               <UiButton
                 v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
-                class="border-0 rounded-l-none rounded-r-lg bg-transparent !size-[40px] !px-0 text-center text-skin-text shrink-0"
+                class="!border-0 !rounded-l-none !rounded-r-lg !bg-transparent !size-[40px] !px-0 !text-skin-text shrink-0"
                 @click="proposal.choices.splice(index, 1)"
               >
                 <IH-trash class="inline-block" />
@@ -88,6 +97,10 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
         <IH-plus-sm />
         <span>Add choice</span>
       </UiButton>
+    </div>
+    <div v-if="showError" class="s-input-error-message leading-6 mt-2">
+      <span v-text="error" />
+      <slot name="error-suffix" />
     </div>
   </div>
 </template>

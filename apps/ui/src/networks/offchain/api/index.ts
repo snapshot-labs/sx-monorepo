@@ -178,6 +178,8 @@ function formatSpace(
     twitter: space.twitter || '',
     discord: '',
     coingecko: space.coingecko || '',
+    proposal_count_1d: space.proposalsCount1d,
+    proposal_count_30d: space.proposalsCount30d,
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
@@ -524,7 +526,13 @@ export function createApi(
         variables: { id: proposalId }
       });
 
-      if (!data.proposal || data.proposal?.metadata === null) return null;
+      if (
+        !data.proposal ||
+        data.proposal.metadata === null ||
+        data.proposal.space?.id !== spaceId
+      ) {
+        return null;
+      }
 
       return formatProposal(data.proposal, networkId);
     },

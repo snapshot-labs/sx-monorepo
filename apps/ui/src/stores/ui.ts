@@ -24,13 +24,13 @@ function updateStorage(pendingTransactions: PendingTransaction[]) {
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
-    sidebarOpen: false,
+    sideMenuOpen: false,
     notifications: [] as Notification[],
     pendingTransactions: [] as PendingTransaction[]
   }),
   actions: {
     async toggleSidebar() {
-      this.sidebarOpen = !this.sidebarOpen;
+      this.sideMenuOpen = !this.sideMenuOpen;
     },
     addNotification(type: NotificationType, message: string, timeout = 5000) {
       const id = crypto.randomUUID();
