@@ -51,13 +51,6 @@ export const useProposalsStore = defineStore('proposals', () => {
     proposalId: number | string,
     networkId: NetworkID
   ): Proposal | undefined => {
-    console.log(
-      'getting proposal',
-      spaceId,
-      proposalId,
-      networkId,
-      getUniqueSpaceId(spaceId, networkId)
-    );
     console.log(proposals.value);
     const record = proposals.value[getUniqueSpaceId(spaceId, networkId)];
     if (!record) return undefined;
