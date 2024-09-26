@@ -88,7 +88,7 @@ export function useEditor() {
     const spacesStore = useSpacesStore();
     const newIds = spaceIds.filter(id => !spaceVoteType.has(id));
 
-    if (!newIds) return;
+    if (!newIds.length) return;
 
     await spacesStore.fetchSpaces(newIds);
 
