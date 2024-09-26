@@ -127,7 +127,10 @@ watch(isSwiping, () => {
         ]"
         @navigated="uiStore.sideMenuOpen = false"
       />
-      <AppTopnav :has-app-nav="hasAppNav" @navigated="uiStore.sideMenuOpen = false">
+      <AppTopnav
+        :has-app-nav="hasAppNav"
+        @navigated="uiStore.sideMenuOpen = false"
+      >
         <template #toggle-sidebar-button>
           <button
             type="button"
