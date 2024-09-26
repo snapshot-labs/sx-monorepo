@@ -247,7 +247,7 @@ watch([sortBy, choiceFilter], () => {
               </div>
             </div>
             <div
-              class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center text-end truncate"
+              class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center text-right truncate"
             >
               <h4 class="text-skin-link truncate">
                 {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
