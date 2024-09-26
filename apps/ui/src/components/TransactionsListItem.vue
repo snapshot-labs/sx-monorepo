@@ -157,11 +157,11 @@ const parsedTitle = computedAsync(
 
 <template>
   <div class="w-full border-b last:border-b-0">
-    <div class="w-full px-4 py-3 space-x-2 flex items-center justify-between">
-      <div class="flex items-center max-w-[70%]">
+    <div class="w-full px-4 py-3 gap-2 flex items-center">
+      <div class="flex items-center grow gap-2">
         <slot name="left" />
         <button
-          class="flex items-center gap-2 truncate"
+          class="flex items-center gap-2 truncate flex-auto"
           @click="expanded = !expanded"
         >
           <IH-cash v-if="tx._type === 'sendToken'" />
