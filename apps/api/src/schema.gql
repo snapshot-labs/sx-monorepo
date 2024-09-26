@@ -5,6 +5,8 @@ scalar BigDecimalVP
 
 type Space {
   id: String!
+  verified: Boolean!
+  turbo: Boolean!
   metadata: SpaceMetadataItem
   controller: String!
   voting_delay: Int!
@@ -16,7 +18,8 @@ type Space {
   strategies: [String]!
   strategies_params: [String]!
   strategies_metadata: [String]!
-  strategies_parsed_metadata: [StrategiesParsedMetadataItem]! @derivedFrom(field: "space")
+  strategies_parsed_metadata: [StrategiesParsedMetadataItem]!
+    @derivedFrom(field: "space")
   authenticators: [String]!
   validation_strategy: String!
   validation_strategy_params: Text!
