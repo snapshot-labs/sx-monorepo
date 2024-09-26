@@ -120,7 +120,7 @@ watch(isSwiping, () => {
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
-      <AppMenuMobile
+      <AppBottomNav
         v-if="web3.account"
         :class="[
           `fixed bottom-0 inset-x-0 hidden app-mobile-menu z-[100]`,
