@@ -40,8 +40,7 @@ const space = computed(() => {
   <AppLink
     v-if="space"
     :to="{
-      name: 'space-overview',
-      params: { space: `${networkId}:${spaceAddress}` }
+      name: 'space-overview'
     }"
     class="flex item-center space-x-2.5 truncate text-[24px]"
     v-bind="$attrs"
