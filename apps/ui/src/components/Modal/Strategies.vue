@@ -1,3 +1,7 @@
+<script lang="ts">
+const strategies = ref([] as StrategyTemplate[]);
+</script>
+
 <script setup lang="ts">
 import { getNetwork } from '@/networks';
 import { StrategyTemplate } from '@/networks/types';
@@ -16,7 +20,6 @@ const emit = defineEmits<{
 const searchValue = ref('');
 const isLoading = ref(false);
 const hasError = ref(false);
-const strategies = ref([] as StrategyTemplate[]);
 
 const network = computed(() => getNetwork(props.networkId));
 const filteredStrategies = computed(() => {
@@ -36,6 +39,7 @@ async function handleStrategySelected(strategy: StrategyTemplate) {
 
 watchEffect(async () => {
   if (!props.open) return;
+  if (strategies.value.length) return;
 
   isLoading.value = true;
   hasError.value = false;
