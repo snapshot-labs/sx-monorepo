@@ -134,6 +134,20 @@ export function useSpaceSettings(space: Ref<Space>) {
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
+  const quorumType = ref('default' as 'default' | 'rejection');
+  const quorum = ref(0);
+  const voteType = ref(
+    'any' as
+      | 'any'
+      | 'single-choice'
+      | 'approval'
+      | 'quadratic'
+      | 'ranked-choice'
+      | 'weighted'
+      | 'basic'
+  );
+  const privacy = ref('none' as 'none' | 'shutter');
+  const ignoreAbstainVotes = ref(false);
   const members = ref([] as Member[]);
   const parent = ref('');
   const children = ref([] as string[]);
@@ -375,6 +389,20 @@ export function useSpaceSettings(space: Ref<Space>) {
     ];
   }
 
+  function getInitialVotingProperties(space: Space) {
+    const spaceVoteType = space.additionalRawData?.voting.type;
+    const privacyValue = space.additionalRawData?.voting.privacy;
+
+    return {
+      quorumType: space.additionalRawData?.voting.quorumType ?? 'default',
+      quorum: space.additionalRawData?.voting.quorum ?? 1,
+      votingType:
+        !spaceVoteType || spaceVoteType === 'custom' ? 'any' : spaceVoteType,
+      privacy: privacyValue === 'shutter' ? 'shutter' : 'none',
+      ignoreAbstainVotes: space.additionalRawData?.voting.hideAbstain ?? false
+    } as const;
+  }
+
   async function saveOffchain() {
     if (space.value.additionalRawData?.type !== 'offchain') {
       throw new Error('Missing raw data for offchain space');
@@ -447,11 +475,11 @@ export function useSpaceSettings(space: Ref<Space>) {
           (maxVotingPeriod.value ??
             space.value.additionalRawData.voting.period) ||
           undefined,
-        type: space.value.additionalRawData.voting.type || undefined,
-        quorum: space.value.additionalRawData.voting.quorum || undefined,
-        quorumType:
-          space.value.additionalRawData.voting.quorumType || 'default',
-        privacy: space.value.additionalRawData.voting.privacy || undefined
+        type: voteType.value === 'any' ? '' : voteType.value,
+        quorum: quorum.value,
+        quorumType: quorumType.value,
+        privacy: privacy.value === 'none' ? '' : privacy.value,
+        hideAbstain: ignoreAbstainVotes.value
       },
       validation: space.value.additionalRawData.validation,
       voteValidation: space.value.additionalRawData.voteValidation,
@@ -570,6 +598,14 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     if (offchainNetworks.includes(space.value.network)) {
+      const initialVotingProperties = getInitialVotingProperties(space.value);
+
+      quorumType.value = initialVotingProperties.quorumType;
+      quorum.value = initialVotingProperties.quorum;
+      voteType.value = initialVotingProperties.votingType;
+      privacy.value = initialVotingProperties.privacy;
+      ignoreAbstainVotes.value = initialVotingProperties.ignoreAbstainVotes;
+
       members.value = getInitialMembers(space.value);
       parent.value = space.value.parent?.id ?? '';
       children.value = space.value.children.map(child => child.id);
@@ -592,6 +628,11 @@ export function useSpaceSettings(space: Ref<Space>) {
     const validationStrategyValue = validationStrategy.value;
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
+    const quorumTypeValue = quorumType.value;
+    const quorumValue = quorum.value;
+    const votingTypeValue = voteType.value;
+    const privacyValue = privacy.value;
+    const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
     const membersValue = members.value;
     const parentValue = parent.value;
     const childrenValue = children.value;
@@ -637,6 +678,35 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (offchainNetworks.includes(space.value.network)) {
       const ignoreOrderOpts = { unorderedArrays: true };
+
+      const initialVotingProperties = getInitialVotingProperties(space.value);
+
+      if (quorumTypeValue !== initialVotingProperties.quorumType) {
+        isModified.value = true;
+        return;
+      }
+
+      if (quorumValue !== initialVotingProperties.quorum) {
+        isModified.value = true;
+        return;
+      }
+
+      if (votingTypeValue !== initialVotingProperties.votingType) {
+        isModified.value = true;
+        return;
+      }
+
+      if (privacyValue !== initialVotingProperties.privacy) {
+        isModified.value = true;
+        return;
+      }
+
+      if (
+        ignoreAbstainVotesValue !== initialVotingProperties.ignoreAbstainVotes
+      ) {
+        isModified.value = true;
+        return;
+      }
 
       if (
         objectHash(membersValue, ignoreOrderOpts) !==
@@ -732,6 +802,11 @@ export function useSpaceSettings(space: Ref<Space>) {
     authenticators,
     validationStrategy,
     votingStrategies,
+    quorumType,
+    quorum,
+    votingType: voteType,
+    privacy,
+    ignoreAbstainVotes,
     members,
     parent,
     children,

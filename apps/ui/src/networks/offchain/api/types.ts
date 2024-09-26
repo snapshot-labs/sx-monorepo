@@ -44,7 +44,7 @@ export type ApiSpace = {
     period: number | null;
     type: VoteType | '' | null;
     quorum: number | null;
-    quorumType?: string;
+    quorumType?: 'default' | 'rejection';
     privacy: string;
     hideAbstain: boolean;
   };

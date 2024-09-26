@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _d, shorten } from '@/helpers/utils';
+import { shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -23,6 +23,11 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  quorumType,
+  quorum,
+  votingType,
+  privacy,
+  ignoreAbstainVotes,
   members,
   parent,
   children,
@@ -36,7 +41,6 @@ const {
 } = useSpaceSettings(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
-const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const hasAdvancedErrors = ref(false);
 const changeControllerModalOpen = ref(false);
@@ -169,39 +173,6 @@ const error = computed(() => {
 function isValidTab(param: string | string[]): param is Tab['id'] {
   if (Array.isArray(param)) return false;
   return tabs.value.map(tab => tab.id).includes(param as any);
-}
-
-function currentToMinutesOnly(value: number) {
-  const duration = getDurationFromCurrent(props.space.network, value);
-  return Math.round(duration / 60) * 60;
-}
-
-function formatCurrentValue(value: number) {
-  return _d(currentToMinutesOnly(value));
-}
-
-function getIsMinVotingPeriodValid(value: number) {
-  if (maxVotingPeriod.value) {
-    return value <= maxVotingPeriod.value;
-  }
-
-  return (
-    getCurrentFromDuration(props.space.network, value) <=
-    props.space.max_voting_period
-  );
-}
-
-function getIsMaxVotingPeriodValid(value: number) {
-  if (isOffchainNetwork.value) return true;
-
-  if (minVotingPeriod.value) {
-    return value >= minVotingPeriod.value;
-  }
-
-  return (
-    getCurrentFromDuration(props.space.network, value) >=
-    props.space.min_voting_period
-  );
 }
 
 async function reloadSpaceAndReset() {
@@ -353,100 +324,17 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       title="Voting"
       description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
     >
-      <h4 class="eyebrow mb-2 font-medium">Voting</h4>
-      <div class="space-y-3">
-        <div>
-          <div class="s-label !mb-0">Voting delay</div>
-          <UiEditable
-            editable
-            :initial-value="
-              votingDelay || currentToMinutesOnly(space.voting_delay)
-            "
-            :definition="{
-              type: 'integer',
-              format: 'duration',
-              maximum: isOffchainNetwork ? 2592000 : undefined,
-              errorMessage: {
-                maximum: 'Voting delay must be less than 30 days'
-              }
-            }"
-            @save="value => (votingDelay = Number(value))"
-          >
-            <h4
-              class="text-skin-link text-md"
-              v-text="
-                (votingDelay !== null
-                  ? _d(votingDelay)
-                  : formatCurrentValue(space.voting_delay)) || 'No delay'
-              "
-            />
-          </UiEditable>
-        </div>
-        <div v-if="!isOffchainNetwork">
-          <div class="s-label !mb-0">Min. voting period</div>
-          <UiEditable
-            editable
-            :initial-value="
-              minVotingPeriod || currentToMinutesOnly(space.min_voting_period)
-            "
-            :definition="{
-              type: 'integer',
-              format: 'duration'
-            }"
-            :custom-error-validation="
-              value =>
-                !getIsMinVotingPeriodValid(Number(value))
-                  ? 'Must be equal to or lower than max. voting period'
-                  : undefined
-            "
-            @save="value => (minVotingPeriod = Number(value))"
-          >
-            <h4
-              class="text-skin-link text-md"
-              v-text="
-                (minVotingPeriod !== null
-                  ? _d(minVotingPeriod)
-                  : formatCurrentValue(space.min_voting_period)) || 'No min.'
-              "
-            />
-          </UiEditable>
-        </div>
-        <div>
-          <div class="s-label !mb-0">
-            {{ isOffchainNetwork ? 'Voting period' : 'Max. voting period' }}
-          </div>
-          <UiEditable
-            editable
-            :initial-value="
-              maxVotingPeriod || currentToMinutesOnly(space.max_voting_period)
-            "
-            :definition="{
-              type: 'integer',
-              format: 'duration',
-              maximum: isOffchainNetwork ? 15552000 : undefined,
-              errorMessage: {
-                maximum: 'Voting period must be less than 180 days'
-              }
-            }"
-            :custom-error-validation="
-              value =>
-                !getIsMaxVotingPeriodValid(Number(value))
-                  ? 'Must be equal to or higher than min. voting period'
-                  : undefined
-            "
-            @save="value => (maxVotingPeriod = Number(value))"
-          >
-            <h4
-              class="text-skin-link text-md"
-              v-text="
-                (maxVotingPeriod !== null
-                  ? _d(maxVotingPeriod)
-                  : formatCurrentValue(space.max_voting_period)) || '0m'
-              "
-            />
-          </UiEditable>
-        </div>
-      </div>
+      <FormSpaceVoting
+        v-model:voting-delay="votingDelay"
+        v-model:min-voting-period="minVotingPeriod"
+        v-model:max-voting-period="maxVotingPeriod"
+        v-model:quorum-type="quorumType"
+        v-model:quorum="quorum"
+        v-model:voting-type="votingType"
+        v-model:privacy="privacy"
+        v-model:ignore-abstain-votes="ignoreAbstainVotes"
+        :space="space"
+      />
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="activeTab === 'members'"
