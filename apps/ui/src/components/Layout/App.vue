@@ -37,7 +37,7 @@ const {
 
 provide('web3', web3);
 
-const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
+const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenu);
 
 const hasAppNav = computed(
   () =>
@@ -94,7 +94,7 @@ watch(scrollDisabled, val => {
 });
 
 watch(route, () => {
-  uiStore.sidebarOpen = false;
+  uiStore.sideMenu = false;
 });
 
 watch(isSwiping, () => {
@@ -104,8 +104,8 @@ watch(isSwiping, () => {
     sidebarSwipeEnabled.value &&
     isSwiping.value &&
     !modalOpen.value &&
-    ((direction.value === 'right' && !uiStore.sidebarOpen) ||
-      (direction.value === 'left' && uiStore.sidebarOpen))
+    ((direction.value === 'right' && !uiStore.sideMenu) ||
+      (direction.value === 'left' && uiStore.sideMenu))
   ) {
     uiStore.toggleSidebar();
   }
@@ -123,14 +123,11 @@ watch(isSwiping, () => {
       <AppSidebar
         :class="[
           `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
-          { '!flex app-sidebar-open': uiStore.sidebarOpen }
+          { '!flex app-sidebar-open': uiStore.sideMenu }
         ]"
-        @navigated="uiStore.sidebarOpen = false"
+        @navigated="uiStore.sideMenu = false"
       />
-      <AppTopnav
-        :has-app-nav="hasAppNav"
-        @navigated="uiStore.sidebarOpen = false"
-      >
+      <AppTopnav :has-app-nav="hasAppNav" @navigated="uiStore.sideMenu = false">
         <template #toggle-sidebar-button>
           <button
             type="button"
@@ -146,16 +143,16 @@ watch(isSwiping, () => {
         :class="[
           'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
           {
-            '!block app-nav-open': uiStore.sidebarOpen
+            '!block app-nav-open': uiStore.sideMenu
           }
         ]"
-        @navigated="uiStore.sidebarOpen = false"
+        @navigated="uiStore.sideMenu = false"
       />
       <button
-        v-if="uiStore.sidebarOpen"
+        v-if="uiStore.sideMenu"
         type="button"
         class="backdrop"
-        @click="uiStore.sidebarOpen = false"
+        @click="uiStore.sideMenu = false"
       />
       <main class="flex-auto w-full flex">
         <div class="flex-auto w-0 mt-[72px]">
