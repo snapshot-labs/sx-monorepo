@@ -171,6 +171,7 @@ watch(
       >
         <template #toggle-sidebar-button>
           <button
+            v-if="hasSwipeableContent"
             type="button"
             class="text-skin-link lg:hidden ml-4"
             @click="uiStore.toggleSidebar"
