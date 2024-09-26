@@ -97,14 +97,14 @@ watch(
       class="flex items-center h-full truncate"
       :class="{
         'lg:border-r lg:pr-4 lg:w-[240px] shrink-0': hasAppNav,
-        'border-r pr-4 w-[240px]': hasAppNav && uiStore.sidebarOpen
+        'border-r pr-4 w-[240px]': hasAppNav && uiStore.sideMenuOpen
       }"
     >
       <slot name="toggle-sidebar-button" />
       <Breadcrumb
         :class="[
           'ml-4',
-          { 'hidden lg:flex': searchConfig && !uiStore.sidebarOpen }
+          { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
         ]"
         @click="emit('navigated')"
       />

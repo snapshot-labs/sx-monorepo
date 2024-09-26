@@ -206,7 +206,7 @@ function getIsMaxVotingPeriodValid(value: number) {
 
 async function reloadSpaceAndReset() {
   await spacesStore.fetchSpace(props.space.id, props.space.network);
-  await reset();
+  await reset({ force: true });
 }
 
 function handleSettingsSave() {
@@ -252,7 +252,7 @@ watch(
 watchEffect(async () => {
   loading.value = true;
 
-  await reset();
+  await reset({ force: true });
 
   loading.value = false;
 });
@@ -527,7 +527,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       />
     </UiContainerSettings>
     <UiToolbarBottom
-      v-if="(isModified && canModifySettings) || error"
+      v-if="(isModified && canModifySettings && !hasAdvancedErrors) || error"
       class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4
@@ -537,7 +537,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         {{ error || 'You have unsaved changes' }}
       </h4>
       <div class="flex space-x-3">
-        <button type="reset" class="text-skin-heading" @click="reset">
+        <button type="reset" class="text-skin-heading" @click="reset()">
           Reset
         </button>
         <UiButton
