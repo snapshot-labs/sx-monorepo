@@ -90,7 +90,10 @@ export function useEditor() {
 
     if (!newIds.length) return;
 
-    await spacesStore.fetchSpaces(newIds);
+    const spacesToFetch = newIds.filter(id => !spacesStore.spacesMap.has(id));
+    if (spacesToFetch.length) {
+      await spacesStore.fetchSpaces(spacesToFetch);
+    }
 
     for (const id of newIds) {
       const space = spacesStore.spacesMap.get(id);
