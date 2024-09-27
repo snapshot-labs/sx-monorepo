@@ -1,8 +1,7 @@
 <script setup lang="ts">
+import { MAX_STRATEGIES } from '@/helpers/turbo';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
-import { NetworkID } from '@/types';
-
-const LIMIT = 8;
+import { NetworkID, Space } from '@/types';
 
 const snapshotChainId = defineModel<string>('snapshotChainId', {
   required: true
@@ -11,13 +10,24 @@ const strategies = defineModel<StrategyConfig[]>('strategies', {
   required: true
 });
 
-defineProps<{
+const props = defineProps<{
   networkId: NetworkID;
+  space: Space;
 }>();
 
 const isStrategiesModalOpen = ref(false);
 const isEditStrategyModalOpen = ref(false);
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
+
+const strategiesLimit = computed(() => {
+  const spaceType = props.space.turbo
+    ? 'turbo'
+    : props.space.verified
+      ? 'verified'
+      : 'default';
+
+  return MAX_STRATEGIES[spaceType];
+});
 
 function handleAddStrategy(strategy: StrategyTemplate) {
   editedStrategy.value = {
@@ -72,7 +82,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
     />
   </div>
   <UiContainerSettings
-    :title="`Select up to ${LIMIT} strategies`"
+    :title="`Select up to ${strategiesLimit} strategies`"
     description="(Voting power is cumulative)"
   >
     <div class="space-y-3 mb-3">
@@ -88,7 +98,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
       />
     </div>
     <UiButton
-      v-if="strategies.length < LIMIT"
+      v-if="strategies.length < strategiesLimit"
       class="w-full flex items-center justify-center gap-1"
       @click="isStrategiesModalOpen = true"
     >

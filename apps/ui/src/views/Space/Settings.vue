@@ -312,6 +312,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:snapshot-chain-id="snapshotChainId"
         v-model:strategies="strategies"
         :network-id="space.network"
+        :space="space"
       />
     </UiContainerSettings>
     <FormStrategies
