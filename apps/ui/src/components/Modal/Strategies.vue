@@ -45,7 +45,9 @@ watchEffect(async () => {
   hasError.value = false;
 
   try {
-    strategies.value = await network.value.api.loadStrategies();
+    strategies.value = (await network.value.api.loadStrategies()).sort(
+      (a, b) => (b.spaceCount || 0) - (a.spaceCount || 0)
+    );
   } catch (e) {
     console.log('failed to load strategies', e);
     hasError.value = true;
