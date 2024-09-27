@@ -98,7 +98,9 @@ watch(
           @click="handleStrategySelected(strategy)"
         >
           <div class="flex items-center gap-1">
-            <span class="text-skin-link font-semibold leading-5 truncate">
+            <span
+              class="text-md text-skin-link font-semibold leading-5 truncate"
+            >
               {{ strategy.name }}
             </span>
             <span v-if="strategy.version" class="leading-[18px]">
