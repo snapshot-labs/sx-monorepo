@@ -104,10 +104,6 @@ watch(scrollDisabled, val => {
   el.classList[val ? 'add' : 'remove']('overflow-hidden');
 });
 
-watch(route, () => {
-  uiStore.sideMenuOpen = false;
-});
-
 watch(isSwiping, () => {
   if (
     window.innerWidth > LG_WIDTH ||
@@ -147,6 +143,10 @@ watch(
   },
   { immediate: true }
 );
+
+router.afterEach(() => {
+  uiStore.sideMenuOpen = false;
+});
 </script>
 
 <template>
@@ -163,12 +163,8 @@ watch(
           `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
-        @navigated="uiStore.sideMenuOpen = false"
       />
-      <AppTopnav
-        :has-app-nav="hasAppNav"
-        @navigated="uiStore.sideMenuOpen = false"
-      >
+      <AppTopnav :has-app-nav="hasAppNav">
         <template #toggle-sidebar-button>
           <button
             v-if="hasSwipeableContent"
@@ -188,13 +184,12 @@ watch(
             '!block app-nav-open': uiStore.sideMenuOpen
           }
         ]"
-        @navigated="uiStore.sideMenuOpen = false"
       />
       <button
-        v-if="hasSwipeableContent && uiStore.sideMenuOpen"
+        v-if="uiStore.sideMenuOpen"
         type="button"
         class="backdrop"
-        @click="uiStore.toggleSidebar"
+        @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
         <div class="flex-auto w-0 mt-[72px]">
