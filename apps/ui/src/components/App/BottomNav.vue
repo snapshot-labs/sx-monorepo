@@ -4,10 +4,6 @@ import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
 import IHUser from '~icons/heroicons-outline/user';
 
-const emit = defineEmits<{
-  (e: 'navigated');
-}>();
-
 const { web3 } = useWeb3();
 const route = useRoute();
 
@@ -46,7 +42,6 @@ const menu = [
         :class="
           route.name === item.link.name ? 'text-skin-link' : 'text-skin-text'
         "
-        @click="emit('navigated')"
       >
         <component :is="item.icon" class="mx-auto" />
         <span class="truncate" v-text="item.label" />
