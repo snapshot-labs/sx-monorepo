@@ -31,6 +31,7 @@ defineProps<{
           :href="strategy.link"
           target="_blank"
           class="inline-block"
+          @click.stop
         >
           <IH-question-mark-circle />
         </a>
