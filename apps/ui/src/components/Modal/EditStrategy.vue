@@ -171,3 +171,9 @@ watchEffect(() => {
     </template>
   </UiModal>
 </template>
+
+<style lang="scss" scoped>
+:deep(textarea) {
+  min-height: 140px !important;
+}
+</style>
