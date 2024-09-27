@@ -99,7 +99,7 @@ const strategyNetworkDetails = computed<NetworkDetails>(() => {
         <div class="flex gap-1 items-center">
           <img
             :src="getUrl(strategyNetworkDetails.logo) || undefined"
-            class="size-3"
+            class="size-3 rounded-full"
           />
           <span class="text-skin-text truncate">
             {{ strategyNetworkDetails.name }}

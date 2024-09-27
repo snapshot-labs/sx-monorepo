@@ -25,7 +25,8 @@ const spaceCategories = computed(() =>
       name: network.name,
       icon: h('img', {
         src: getUrl(network.logo),
-        alt: network.name
+        alt: network.name,
+        class: 'rounded-full'
       })
     }))
 );
