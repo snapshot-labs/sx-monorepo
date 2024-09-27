@@ -231,6 +231,10 @@ $placeholderSidebarWidth: 240px;
         }
       }
 
+      & ~ :deep(main) {
+        @apply z-[51];
+      }
+
       &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
         @apply translate-x-[#{$sidebarWidth + $navWidth}];
       }
@@ -242,11 +246,17 @@ $placeholderSidebarWidth: 240px;
   @apply w-[#{$navWidth}];
 
   @media (max-width: 1011px) {
-    &-open ~ :deep(*) {
-      @apply translate-x-[#{$navWidth}];
+    &-open {
+      & ~ :deep(*) {
+        @apply translate-x-[#{$navWidth}];
 
-      .app-toolbar-bottom {
-        @apply hidden;
+        .app-toolbar-bottom {
+          @apply hidden;
+        }
+      }
+
+      & ~ :deep(main) {
+        @apply z-[51];
       }
     }
   }
