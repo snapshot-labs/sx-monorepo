@@ -50,6 +50,12 @@ const inputValue = computed({
   }
 });
 
+function handleFocus(event: FocusEvent, open: boolean) {
+  if (!event.target || open) return;
+
+  (event.target as HTMLInputElement).select();
+}
+
 function getDisplayValue(value: T) {
   const option = props.definition.options.find(option => option.id === value);
   return option ? option.name : '';
@@ -78,6 +84,7 @@ watch(model, () => {
           :placeholder="definition.examples?.[0]"
           :display-value="item => getDisplayValue(item as T)"
           @change="e => (query = e.target.value)"
+          @focus="event => handleFocus(event, open)"
         />
       </ComboboxButton>
       <ComboboxButton class="absolute right-3 bottom-[14px]">
