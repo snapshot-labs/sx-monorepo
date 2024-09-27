@@ -22,6 +22,8 @@ export type ApiExecutorStrategy = {
 
 export type ApiSpace = {
   id: string;
+  verified: boolean;
+  turbo: boolean;
   metadata: {
     name: string;
     avatar: string;
