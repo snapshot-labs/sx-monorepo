@@ -3,7 +3,6 @@ import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
-import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
 
@@ -182,7 +181,7 @@ watch(
                 <template #left>
                   <div
                     v-if="model.length > 1"
-                    class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+                    class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
                   </div>
