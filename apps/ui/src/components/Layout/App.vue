@@ -93,13 +93,6 @@ watch(scrollDisabled, val => {
   el.classList[val ? 'add' : 'remove']('overflow-hidden');
 });
 
-<<<<<<< HEAD
-watch(route, () => {
-  uiStore.sideMenuOpen = false;
-});
-
-=======
->>>>>>> master
 watch(isSwiping, () => {
   if (window.innerWidth > LG_WIDTH) return;
 
