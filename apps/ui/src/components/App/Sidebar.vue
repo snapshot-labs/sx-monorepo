@@ -1,20 +1,12 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
 
-const emit = defineEmits<{
-  (e: 'navigated');
-}>();
-
 const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>
   <div class="flex flex-col border-r text-center">
-    <AppLink
-      :to="{ name: 'my-home' }"
-      class="h-[72px] block"
-      @click="emit('navigated')"
-    >
+    <AppLink :to="{ name: 'my-home' }" class="h-[72px] block">
       <IC-zap class="inline-block my-[18px] size-[40px] text-skin-link" />
     </AppLink>
     <div
@@ -38,7 +30,6 @@ const followedSpacesStore = useFollowedSpacesStore();
             params: { space: `${element.network}:${element.id}` }
           }"
           class="block"
-          @click="emit('navigated')"
         >
           <UiTooltip :title="element.name" placement="right">
             <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />

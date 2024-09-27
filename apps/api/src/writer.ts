@@ -71,7 +71,11 @@ export const handleSpaceCreated: starknet.Writer = async ({
     (array: string[]) => longStringToText(array)
   );
 
-  const space = new Space(validateAndParseAddress(event.space));
+  const id = validateAndParseAddress(event.space);
+
+  const space = new Space(id);
+  space.verified = networkProperties.verifiedSpaces.includes(id);
+  space.turbo = false;
   space.metadata = null;
   space.controller = validateAndParseAddress(event.owner);
   space.voting_delay = Number(BigInt(event.voting_delay).toString());
