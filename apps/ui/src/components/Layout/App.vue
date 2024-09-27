@@ -37,7 +37,7 @@ const {
 
 provide('web3', web3);
 
-const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
+const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const hasAppNav = computed(
   () =>
@@ -93,10 +93,6 @@ watch(scrollDisabled, val => {
   el.classList[val ? 'add' : 'remove']('overflow-hidden');
 });
 
-watch(route, () => {
-  uiStore.sidebarOpen = false;
-});
-
 watch(isSwiping, () => {
   if (window.innerWidth > LG_WIDTH) return;
 
@@ -104,11 +100,15 @@ watch(isSwiping, () => {
     sidebarSwipeEnabled.value &&
     isSwiping.value &&
     !modalOpen.value &&
-    ((direction.value === 'right' && !uiStore.sidebarOpen) ||
-      (direction.value === 'left' && uiStore.sidebarOpen))
+    ((direction.value === 'right' && !uiStore.sideMenuOpen) ||
+      (direction.value === 'left' && uiStore.sideMenuOpen))
   ) {
     uiStore.toggleSidebar();
   }
+});
+
+router.afterEach(() => {
+  uiStore.sideMenuOpen = false;
 });
 </script>
 
@@ -124,21 +124,16 @@ watch(isSwiping, () => {
         v-if="web3.account"
         :class="[
           `fixed bottom-0 inset-x-0 hidden app-mobile-menu z-[100]`,
-          { 'app-mobile-menu-open': uiStore.sidebarOpen }
+          { 'app-mobile-menu-open': uiStore.sideMenuOpen }
         ]"
-        @navigated="uiStore.sidebarOpen = false"
       />
       <AppSidebar
         :class="[
           `hidden lg:flex app-sidebar fixed inset-y-0`,
-          { '!flex app-sidebar-open': uiStore.sidebarOpen }
+          { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
-        @navigated="uiStore.sidebarOpen = false"
       />
-      <AppTopnav
-        :has-app-nav="hasAppNav"
-        @navigated="uiStore.sidebarOpen = false"
-      >
+      <AppTopnav :has-app-nav="hasAppNav">
         <template #toggle-sidebar-button>
           <button
             type="button"
@@ -154,16 +149,15 @@ watch(isSwiping, () => {
         :class="[
           'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
           {
-            '!block app-nav-open': uiStore.sidebarOpen
+            '!block app-nav-open': uiStore.sideMenuOpen
           }
         ]"
-        @navigated="uiStore.sidebarOpen = false"
       />
       <button
-        v-if="uiStore.sidebarOpen"
+        v-if="uiStore.sideMenuOpen"
         type="button"
         class="backdrop"
-        @click="uiStore.sidebarOpen = false"
+        @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
         <div class="flex-auto w-0 mt-[72px]">
@@ -205,7 +199,7 @@ $placeholderSidebarWidth: 240px;
   @media (max-width: 1011px) {
     &-open {
       & ~ :deep(*) {
-        @apply translate-x-[#{$sidebarWidth}] z-0;
+        @apply translate-x-[#{$sidebarWidth}];
 
         .app-toolbar-bottom {
           @apply hidden;

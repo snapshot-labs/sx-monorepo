@@ -1,5 +1,7 @@
 type Space @entity {
   id: ID!
+  verified: Boolean!
+  turbo: Boolean!
   metadata: SpaceMetadata
   controller: String!
   voting_delay: Int!
