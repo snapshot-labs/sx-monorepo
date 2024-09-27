@@ -152,6 +152,8 @@ export function handleProxyDeployed(event: ProxyDeployed): void {
 
 export function handleSpaceCreated(event: SpaceCreated): void {
   let space = new Space(toChecksumAddress(event.params.space.toHexString()))
+  space.verified = false
+  space.turbo = false
   space.controller = toChecksumAddress(event.params.input.owner.toHexString())
   space.voting_delay = event.params.input.votingDelay.toI32()
   space.min_voting_period = event.params.input.minVotingDuration.toI32()
