@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { PRIVACY_TYPES_INFO, VOTING_TYPES_INFO } from '@/helpers/constants';
 import { _d } from '@/helpers/utils';
+import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space, VoteType } from '@/types';
 
@@ -17,7 +18,7 @@ const maxVotingPeriod = defineModel<number | null>('maxVotingPeriod', {
 const quorumType = defineModel<'default' | 'rejection'>('quorumType', {
   required: true
 });
-const quorum = defineModel<number>('quorum', {
+const quorum = defineModel<string | number>('quorum', {
   required: true
 });
 const votingType = defineModel<VoteType | 'any'>('votingType', {
@@ -34,6 +35,14 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const QUORUM_DEFINITION = {
+  type: 'integer',
+  title: 'Quorum',
+  minimum: 1,
+  tooltip:
+    'The minimum amount of voting power required for the proposal to pass'
+};
+
 const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const isSelectVotingTypeModalOpen = ref(false);
@@ -43,6 +52,20 @@ const network = computed(() => getNetwork(props.space.network));
 const isOffchainNetwork = computed(() =>
   offchainNetworks.includes(props.space.network)
 );
+const errors = computed(() => {
+  const validator = getValidator({
+    type: 'object',
+    title: 'Voting',
+    required: ['quorum'],
+    properties: {
+      quorum: QUORUM_DEFINITION
+    }
+  });
+
+  return validator.validate({
+    quorum: quorum.value
+  });
+});
 
 function currentToMinutesOnly(value: number) {
   const duration = getDurationFromCurrent(props.space.network, value);
@@ -185,11 +208,8 @@ function getIsMaxVotingPeriodValid(value: number) {
       />
       <UiInputNumber
         v-model="quorum"
-        :definition="{
-          title: 'Quorum',
-          tooltip:
-            'The minimum amount of voting power required for the proposal to pass'
-        }"
+        :definition="QUORUM_DEFINITION"
+        :error="errors.quorum"
       />
       <UiWrapperInput
         :definition="{

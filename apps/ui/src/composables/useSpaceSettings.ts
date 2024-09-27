@@ -135,7 +135,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
   // Offchain properties
   const quorumType = ref('default' as 'default' | 'rejection');
-  const quorum = ref(0);
+  const quorum = ref(1 as string | number);
   const voteType = ref(
     'any' as
       | 'any'
@@ -476,7 +476,7 @@ export function useSpaceSettings(space: Ref<Space>) {
             space.value.additionalRawData.voting.period) ||
           undefined,
         type: voteType.value === 'any' ? '' : voteType.value,
-        quorum: quorum.value,
+        quorum: Number(quorum.value),
         quorumType: quorumType.value,
         privacy: privacy.value === 'none' ? '' : privacy.value,
         hideAbstain: ignoreAbstainVotes.value
