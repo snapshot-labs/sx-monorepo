@@ -134,7 +134,9 @@ export function useSpaceSettings(space: Ref<Space>) {
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
-  const quorumType = ref('default' as 'default' | 'rejection');
+  const quorumType = ref(
+    'default' as NonNullable<OffchainApiSpace['voting']['quorumType']>
+  );
   const quorum = ref(1 as string | number);
   const voteType = ref(
     'any' as
