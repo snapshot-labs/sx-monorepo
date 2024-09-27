@@ -59,7 +59,7 @@ function downloadExecution(execution: ProposalExecution) {
         )
       }"
     >
-      <UiBadgeNetwork :id="execution.networkId" class="mr-3">
+      <UiBadgeNetwork :id="execution.networkId" class="mr-3 shrink-0">
         <UiStamp
           :id="execution.safeAddress"
           type="avatar"
@@ -67,13 +67,13 @@ function downloadExecution(execution: ProposalExecution) {
           class="rounded-md"
         />
       </UiBadgeNetwork>
-      <div class="flex-1 leading-[22px]">
+      <div class="flex-1 leading-[22px] overflow-hidden">
         <h4
-          class="text-skin-link"
+          class="text-skin-link truncate"
           v-text="execution.safeName || shorten(execution.safeAddress)"
         />
         <div
-          class="text-skin-text text-[17px]"
+          class="text-skin-text text-[17px] truncate"
           v-text="
             getExecutionName(proposal.network, execution.strategyType) ||
             shorten(execution.safeAddress)
@@ -82,7 +82,7 @@ function downloadExecution(execution: ProposalExecution) {
       </div>
     </a>
     <div class="flex justify-between items-center border-y pr-3">
-      <UiLabel label="Transactions" class="border-b-0" />
+      <UiLabel label="Transactions" class="border-b-0 pr-0 truncate" />
       <UiTooltip
         v-if="execution.strategyType === 'ReadOnlyExecution'"
         title="Export transactions"

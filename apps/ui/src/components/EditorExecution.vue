@@ -3,7 +3,6 @@ import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
-import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
 
@@ -107,41 +106,39 @@ watch(
     <div class="overflow-hidden border rounded-lg">
       <div
         v-if="treasury && network"
-        class="w-full flex justify-between px-4 py-3 text-start"
+        class="w-full flex justify-between items-center px-4 py-3"
       >
-        <div class="flex justify-between items-center">
-          <UiBadgeNetwork
-            :id="treasury.networkId"
-            class="mr-3"
+        <UiBadgeNetwork
+          :id="treasury.networkId"
+          class="mr-3 shrink-0 size-fit"
+          :class="{
+            'opacity-40': disabled
+          }"
+        >
+          <UiStamp
+            :id="treasury.wallet"
+            type="avatar"
+            :size="32"
+            class="rounded-md"
+          />
+        </UiBadgeNetwork>
+        <div class="flex-1 leading-[22px] overflow-hidden">
+          <h4
+            class="text-skin-link truncate"
             :class="{
-              'opacity-40': disabled
+              'text-skin-border': disabled
             }"
-          >
-            <UiStamp
-              :id="treasury.wallet"
-              type="avatar"
-              :size="32"
-              class="rounded-md"
-            />
-          </UiBadgeNetwork>
-          <div class="flex-1 leading-[22px]">
-            <h4
-              class="text-skin-link"
-              :class="{
-                'text-skin-border': disabled
-              }"
-              v-text="treasury.name || shorten(treasury.wallet)"
-            />
-            <div
-              class="text-skin-text text-[17px]"
-              :class="{
-                'text-skin-border': disabled
-              }"
-              v-text="getExecutionName(props.space.network, strategy.type)"
-            />
-          </div>
+            v-text="getExecutionName(props.space.network, strategy.type)"
+          />
+          <div
+            class="text-skin-text text-[17px] truncate"
+            :class="{
+              'text-skin-border': disabled
+            }"
+            v-text="getExecutionName(props.space.network, strategy.type)"
+          />
         </div>
-        <div class="space-x-2">
+        <div class="space-x-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
               :disabled="!treasury || disabled"
@@ -184,7 +181,7 @@ watch(
                 <template #left>
                   <div
                     v-if="model.length > 1"
-                    class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+                    class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
                   </div>

@@ -27,7 +27,6 @@ type NavigationItem = {
 };
 
 const route = useRoute();
-const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 
@@ -193,12 +192,7 @@ const navigationItems = computed(() =>
 </script>
 
 <template>
-  <div
-    class="lg:visible fixed w-[240px] border-r left-[72px] top-[72px] inset-y-0 z-10 bg-skin-bg py-4"
-    :class="{
-      invisible: !uiStore.sidebarOpen
-    }"
-  >
+  <div class="border-r bg-skin-bg py-4">
     <AppLink
       v-for="(item, key) in navigationItems"
       :key="key"
