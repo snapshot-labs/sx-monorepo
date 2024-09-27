@@ -6,10 +6,6 @@ defineProps<{
   hasAppNav: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: 'navigated');
-}>();
-
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
@@ -106,7 +102,6 @@ watch(
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
         ]"
-        @click="emit('navigated')"
       />
     </div>
     <form
