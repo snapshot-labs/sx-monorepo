@@ -45,6 +45,7 @@ const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
 const hasAdvancedErrors = ref(false);
+const hasStrategiesErrors = ref(false);
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const saving = ref(false);
@@ -176,6 +177,10 @@ const error = computed(() => {
   } else {
     if (!strategies.value.length) {
       return 'At least one strategy is required';
+    }
+
+    if (hasStrategiesErrors.value) {
+      return 'Strategies are invalid';
     }
   }
 
@@ -313,6 +318,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:strategies="strategies"
         :network-id="space.network"
         :space="space"
+        @update-validity="v => (hasStrategiesErrors = !v)"
       />
     </UiContainerSettings>
     <FormStrategies
@@ -439,7 +445,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       />
     </UiContainerSettings>
     <UiToolbarBottom
-      v-if="(isModified && canModifySettings && !hasAdvancedErrors) || error"
+      v-if="
+        (isModified &&
+          canModifySettings &&
+          !hasAdvancedErrors &&
+          !hasStrategiesErrors) ||
+        error
+      "
       class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4

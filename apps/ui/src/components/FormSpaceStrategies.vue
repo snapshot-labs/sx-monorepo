@@ -15,6 +15,10 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const emit = defineEmits<{
+  (e: 'updateValidity', valid: boolean): void;
+}>();
+
 const isStrategiesModalOpen = ref(false);
 const isEditStrategyModalOpen = ref(false);
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
@@ -27,6 +31,13 @@ const strategiesLimit = computed(() => {
       : 'default';
 
   return MAX_STRATEGIES[spaceType];
+});
+
+const isTicketValid = computed(() => {
+  return !(
+    strategies.value.some(s => s.address === 'ticket') &&
+    props.space.additionalRawData?.voteValidation.name === 'any'
+  );
 });
 
 function handleAddStrategy(strategy: StrategyTemplate) {
@@ -70,6 +81,10 @@ function handleSaveStrategy(params: Record<string, any>, network: string) {
 function handleRemoveStrategy(strategy: StrategyConfig) {
   strategies.value = strategies.value.filter(s => s.id !== strategy.id);
 }
+
+watchEffect(() => {
+  emit('updateValidity', isTicketValid.value);
+});
 </script>
 
 <template>
@@ -87,6 +102,15 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
   >
     <div class="space-y-3 mb-3">
       <div v-if="strategies.length === 0">No strategies selected</div>
+      <UiMessage
+        v-else-if="!isTicketValid"
+        type="danger"
+        learn-more-link="https://snapshot.mirror.xyz/-uSylOUP82hGAyWUlVn4lCg9ESzKX9QCvsUgvv-ng84"
+      >
+        In order to use the "ticket" strategy you are required to set a voting
+        validation strategy. This combination reduces the risk of spam and sybil
+        attacks.
+      </UiMessage>
       <FormStrategiesStrategyActive
         v-for="strategy in strategies"
         :key="strategy.id"
