@@ -9,6 +9,7 @@ import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
 import InputArray from './InputArray.vue';
 import InputCheckbox from './InputCheckbox.vue';
+import InputColor from './InputColor.vue';
 import InputDuration from './InputDuration.vue';
 import InputNumber from './InputNumber.vue';
 import InputStamp from './InputStamp.vue';
@@ -73,6 +74,7 @@ const getComponent = (property: {
       if (property.format === 'address') return InputAddress;
       if (property.format === 'ens-or-address') return InputAddress;
       if (property.format === 'stamp') return InputStamp;
+      if (property.format === 'color') return InputColor;
       if (property.enum) return Select;
       return InputString;
     case 'number':

@@ -54,6 +54,7 @@ type Tab = {
     | 'voting-strategies'
     | 'voting'
     | 'members'
+    | 'labels'
     | 'execution'
     | 'controller'
     | 'advanced';
@@ -106,6 +107,11 @@ const tabs = computed<Tab[]>(
       {
         id: 'members',
         name: 'Members',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'labels',
+        name: 'Labels',
         visible: isOffchainNetwork.value
       },
       {
@@ -460,6 +466,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :is-controller="isController"
         :is-admin="isAdmin"
       />
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="activeTab === 'labels'"
+      title="Labels"
+      description="Labels are used to categorize proposals."
+    >
+      <FormSpaceLabelsList v-model="form.labels" />
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="activeTab === 'execution'"

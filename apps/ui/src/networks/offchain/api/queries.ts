@@ -22,6 +22,12 @@ const SPACE_FRAGMENT = gql`
       network
       address
     }
+    labels {
+      id
+      name
+      description
+      color
+    }
     delegationPortal {
       delegationType
       delegationContract

@@ -68,6 +68,13 @@ export type SpaceMetadataTreasury = {
   chainId?: number;
 };
 
+export type SpaceMetadataLabel = {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+};
+
 export type SpaceMetadataDelegation = {
   name: string | null;
   apiType: DelegationType | null;
@@ -87,6 +94,7 @@ export type SpaceMetadata = {
   discord: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
+  labels: SpaceMetadataLabel[];
   delegations: SpaceMetadataDelegation[];
 };
 
@@ -156,6 +164,7 @@ export type Space = {
   about?: string;
   external_url: string;
   treasuries: SpaceMetadataTreasury[];
+  labels: SpaceMetadataLabel[];
   delegations: SpaceMetadataDelegation[];
   twitter: string;
   github: string;

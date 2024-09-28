@@ -192,6 +192,7 @@ function formatSpace(
     max_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
     proposal_threshold: '1',
     treasuries,
+    labels: space.labels,
     delegations: formatDelegations(space),
     // NOTE: ignored
     created: 0,

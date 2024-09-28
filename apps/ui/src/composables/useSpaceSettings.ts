@@ -33,6 +33,7 @@ export type OffchainSpaceSettings = {
   strategies: any[];
   categories: string[];
   treasuries: OffchainApiSpace['treasuries'];
+  labels: OffchainApiSpace['labels'];
   admins: string[];
   moderators: string[];
   members: string[];
@@ -63,6 +64,7 @@ const DEFAULT_FORM_STATE: Form = {
   coingecko: '',
   votingPowerSymbol: '',
   treasuries: [],
+  labels: [],
   delegations: []
 };
 
@@ -350,6 +352,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
       treasuries: space.treasuries,
+      labels: space.labels,
       delegations: space.delegations.filter(
         delegation => delegation.apiType !== 'delegate-registry'
       )
@@ -426,6 +429,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         name: treasury.name || '',
         network: treasury.chainId?.toString() ?? '1'
       })),
+      labels: form.value.labels,
       admins: members.value
         .filter(member => member.role === 'admin')
         .map(member => member.address),

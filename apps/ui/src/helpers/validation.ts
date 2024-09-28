@@ -98,6 +98,13 @@ ajv.addFormat('long', {
   validate: () => true
 });
 
+ajv.addFormat('color', {
+  validate: (value: string) => {
+    if (!value) return false;
+    return !!value.match(/^#[0-9A-F]{6}$/);
+  }
+});
+
 ajv.addFormat('ens-or-address', {
   async: true,
   validate: async (value: string) => {
