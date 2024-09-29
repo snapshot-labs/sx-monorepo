@@ -157,20 +157,22 @@ const parsedTitle = computedAsync(
 
 <template>
   <div class="w-full border-b last:border-b-0">
-    <button
-      class="w-full px-4 py-3 space-x-2 flex items-center justify-between"
-      @click="expanded = !expanded"
-    >
-      <div class="flex items-center max-w-[70%]">
+    <div class="w-full px-4 py-3 gap-2 flex items-center">
+      <div class="shrink-0">
         <slot name="left" />
-        <IH-cash v-if="tx._type === 'sendToken'" />
-        <IH-photograph v-else-if="tx._type === 'sendNft'" />
-        <IC-stake v-else-if="tx._type === 'stakeToken'" />
-        <IH-code v-else />
-        <div class="ml-2 truncate text-skin-link" v-html="parsedTitle" />
       </div>
+      <button
+        class="flex gap-2 truncate items-center flex-auto"
+        @click="expanded = !expanded"
+      >
+        <IH-cash v-if="tx._type === 'sendToken'" class="shrink-0" />
+        <IH-photograph v-else-if="tx._type === 'sendNft'" class="shrink-0" />
+        <IC-stake v-else-if="tx._type === 'stakeToken'" class="shrink-0" />
+        <IH-code v-else class="shrink-0" />
+        <div class="truncate text-skin-link" v-html="parsedTitle" />
+      </button>
       <slot name="right" />
-    </button>
+    </div>
     <div v-if="expanded" class="border-y last:border-b-0 px-4 py-3">
       <div v-if="call" class="text-skin-link">
         Call

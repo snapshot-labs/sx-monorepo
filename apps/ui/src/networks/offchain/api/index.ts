@@ -527,7 +527,13 @@ export function createApi(
         variables: { id: proposalId }
       });
 
-      if (!data.proposal || data.proposal?.metadata === null) return null;
+      if (
+        !data.proposal ||
+        data.proposal.metadata === null ||
+        data.proposal.space?.id !== spaceId
+      ) {
+        return null;
+      }
 
       return formatProposal(data.proposal, networkId);
     },

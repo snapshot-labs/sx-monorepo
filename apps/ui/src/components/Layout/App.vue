@@ -37,11 +37,17 @@ const {
 
 provide('web3', web3);
 
-const scrollDisabled = computed(() => modalOpen.value || uiStore.sidebarOpen);
+const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const hasAppNav = computed(
   () =>
     ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
+    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+);
+
+const hasPlaceHolderSidebar = computed(
+  () =>
+    !['space-proposal', 'create'].includes(String(route.matched[0]?.name)) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
@@ -87,10 +93,6 @@ watch(scrollDisabled, val => {
   el.classList[val ? 'add' : 'remove']('overflow-hidden');
 });
 
-watch(route, () => {
-  uiStore.sidebarOpen = false;
-});
-
 watch(isSwiping, () => {
   if (window.innerWidth > LG_WIDTH) return;
 
@@ -98,11 +100,15 @@ watch(isSwiping, () => {
     sidebarSwipeEnabled.value &&
     isSwiping.value &&
     !modalOpen.value &&
-    ((direction.value === 'right' && !uiStore.sidebarOpen) ||
-      (direction.value === 'left' && uiStore.sidebarOpen))
+    ((direction.value === 'right' && !uiStore.sideMenuOpen) ||
+      (direction.value === 'left' && uiStore.sideMenuOpen))
   ) {
     uiStore.toggleSidebar();
   }
+});
+
+router.afterEach(() => {
+  uiStore.sideMenuOpen = false;
 });
 </script>
 
@@ -113,38 +119,48 @@ watch(isSwiping, () => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else :class="['flex', { 'pb-6': bottomPadding }]">
+    <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
       <AppSidebar
-        class="lg:visible"
-        :class="{ invisible: !uiStore.sidebarOpen }"
+        :class="[
+          `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
+          { '!flex app-sidebar-open': uiStore.sideMenuOpen }
+        ]"
       />
-      <AppTopnav :has-app-nav="hasAppNav" />
-      <AppNav v-if="hasAppNav" />
+      <AppTopnav :has-app-nav="hasAppNav">
+        <template #toggle-sidebar-button>
+          <button
+            type="button"
+            class="text-skin-link lg:hidden ml-4"
+            @click="uiStore.toggleSidebar"
+          >
+            <IH-menu-alt-2 />
+          </button>
+        </template>
+      </AppTopnav>
+      <AppNav
+        v-if="hasAppNav"
+        :class="[
+          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+          {
+            '!block app-nav-open': uiStore.sideMenuOpen
+          }
+        ]"
+      />
       <button
-        v-if="uiStore.sidebarOpen"
+        v-if="uiStore.sideMenuOpen"
         type="button"
-        class="backdrop lg:hidden"
-        :style="{
-          left: `${72 + (hasAppNav ? 240 : 0)}px`
-        }"
-        @click="uiStore.toggleSidebar"
+        class="backdrop"
+        @click="uiStore.sideMenuOpen = false"
       />
-      <div
-        class="flex-auto w-full"
-        :class="{
-          'translate-x-[72px] lg:translate-x-0': uiStore.sidebarOpen
-        }"
-      >
-        <div
-          :class="{
-            'lg:ml-[240px]': hasAppNav,
-            'translate-x-[240px] lg:translate-x-0':
-              uiStore.sidebarOpen && hasAppNav
-          }"
-        >
-          <router-view class="flex-auto mt-[72px] pl-0 lg:pl-[72px]" />
+      <main class="flex-auto w-full flex">
+        <div class="flex-auto w-0 mt-[72px]">
+          <router-view />
         </div>
-      </div>
+        <div
+          v-if="hasPlaceHolderSidebar"
+          class="app-placeholder-sidebar hidden xl:block"
+        />
+      </main>
     </div>
     <AppNotifications />
     <ModalTransaction
@@ -158,14 +174,101 @@ watch(isSwiping, () => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+$sidebarWidth: 72px;
+$navWidth: 240px;
+$placeholderSidebarWidth: 240px;
+
+.app-sidebar {
+  @apply w-[#{$sidebarWidth}];
+
+  @media (max-width: 1011px) {
+    &-open {
+      & ~ :deep(*) {
+        @apply translate-x-[#{$sidebarWidth}];
+
+        .app-toolbar-bottom {
+          @apply hidden;
+        }
+      }
+
+      & ~ :deep(main) {
+        @apply z-[51];
+      }
+
+      &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
+        @apply translate-x-[#{$sidebarWidth + $navWidth}];
+      }
+    }
+  }
+}
+
+.app-nav {
+  @apply w-[#{$navWidth}];
+
+  @media (max-width: 1011px) {
+    &-open {
+      & ~ :deep(*) {
+        @apply translate-x-[#{$navWidth}];
+
+        .app-toolbar-bottom {
+          @apply hidden;
+        }
+      }
+
+      & ~ :deep(main) {
+        @apply z-[51];
+      }
+    }
+  }
+}
+
+.app-placeholder-sidebar {
+  @apply w-[#{$placeholderSidebarWidth}];
+
+  &::before {
+    @apply block fixed border-l top-[72px] bottom-0 right-0 w-[#{$placeholderSidebarWidth}];
+
+    content: '';
+  }
+}
+
+@media (screen(xl)) {
+  main > div:has(+ .app-placeholder-sidebar) :deep(.app-toolbar-bottom) {
+    @apply right-[#{$placeholderSidebarWidth}];
+  }
+}
+
+@media (screen(lg)) {
+  .app-sidebar {
+    & ~ :deep(main),
+    & ~ .backdrop,
+    & ~ :deep(header.fixed),
+    & ~ :deep(main header.fixed),
+    & ~ :deep(main .app-toolbar-bottom),
+    & ~ :deep(.app-nav) {
+      @apply ml-[#{$sidebarWidth}];
+    }
+
+    &:has(~ .app-nav) ~ .app-nav {
+      & ~ :deep(main),
+      & ~ .backdrop,
+      & ~ :deep(header.fixed),
+      & ~ :deep(main header.fixed),
+      & ~ :deep(main .app-toolbar-bottom),
+      & ~ :deep(.app-nav) {
+        @apply ml-[#{$sidebarWidth + $navWidth}];
+      }
+    }
+  }
+
+  .app-nav ~ :deep(*) {
+    @apply ml-[#{$navWidth}];
+  }
+}
+
 .backdrop {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 99;
-  background: rgba(0, 0, 0, 0.4) !important;
+  @apply fixed inset-0 z-[99];
+  @apply bg-[black]/40 #{!important};
 }
 </style>
