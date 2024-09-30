@@ -311,7 +311,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <UiContainerSettings
       v-else-if="activeTab === 'strategies'"
       title="Strategies"
-      description="Office ipsum you must be muted. Boy ocean define crank new."
+      description="Strategies are sets of conditions used to calculate user's voting power."
     >
       <FormSpaceStrategies
         v-model:snapshot-chain-id="snapshotChainId"
