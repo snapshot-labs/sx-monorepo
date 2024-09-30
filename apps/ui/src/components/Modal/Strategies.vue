@@ -99,7 +99,7 @@ watch(
           class="flex flex-col gap-2 p-[20px] border rounded-md"
           @click="handleStrategySelected(strategy)"
         >
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-1 w-full">
             <span
               class="text-md text-skin-link font-semibold leading-5 truncate"
             >
