@@ -57,7 +57,7 @@ function generateRandomColor() {
   >
     <div class="flex">
       <div
-        class="absolute size-[18px] mt-[31px] ml-3 rounded"
+        class="absolute size-[18px] mt-[30px] ml-3 rounded"
         :style="{
           backgroundColor: inputValue || '#eb4c5b'
         }"
@@ -70,7 +70,7 @@ function generateRandomColor() {
         v-bind="$attrs"
         :placeholder="definition.examples && definition.examples[0]"
       />
-      <button class="absolute right-3 mt-[21px]" @click="generateRandomColor">
+      <button class="absolute right-3 mt-[20px]" @click="generateRandomColor">
         <IH-refresh class="text-skin-link" />
       </button>
     </div>

@@ -1,69 +1,74 @@
 <script setup lang="ts">
 import { SpaceMetadataLabel } from '@/types';
 
-const model = defineModel<SpaceMetadataLabel[]>({
+const labels = defineModel<SpaceMetadataLabel[]>({
   required: true
 });
 
 const { addNotification } = useUiStore();
-const showAddLabel = ref(false);
-const editId = ref<string | null>(null);
+const newLabelFormVisible = ref(false);
+const editLabelId = ref<string | null>(null);
 
-function addLabel() {
-  if (model.value.length >= 10) {
+function initiateLabelCreation() {
+  if (labels.value.length >= 10) {
     return addNotification('error', 'Cannot add more than 10 labels');
   }
 
-  showAddLabel.value = true;
-  editId.value = null;
+  newLabelFormVisible.value = true;
+  editLabelId.value = null;
 }
 
-function handleSubmit(form) {
-  if (
-    model.value
-      .filter(label => label.id !== form.id)
-      .some(label => label.name === form.name)
-  ) {
+function checkLabelExists(newLabel) {
+  return labels.value
+    .filter(label => label.id !== newLabel.id)
+    .some(label => label.name.toLowerCase() === newLabel.name.toLowerCase());
+}
+
+function handleSubmit(labelData) {
+  const { id } = labelData;
+
+  if (checkLabelExists(labelData)) {
     return addNotification('error', 'Label with this name already exists');
   }
 
-  const id = form.id;
-  const existingLabel = model.value.findIndex(label => label.id === id);
-  if (existingLabel === -1) {
-    model.value = [form, ...model.value];
-  } else {
-    model.value = model.value.map(label => (label.id === id ? form : label));
-  }
-  editId.value = null;
-  showAddLabel.value = false;
+  const existingLabelIndex = labels.value.findIndex(label => label.id === id);
+  labels.value =
+    existingLabelIndex === -1
+      ? [labelData, ...labels.value]
+      : labels.value.map(label => (label.id === id ? labelData : label));
+
+  setActiveEditLabel(null);
 }
 
-function handleEditForm(id) {
-  showAddLabel.value = false;
-  editId.value = id;
+function setActiveEditLabel(id) {
+  newLabelFormVisible.value = false;
+  editLabelId.value = id;
 }
 
 function handleDeleteLabel(id) {
-  model.value = model.value.filter(label => label.id !== id);
+  labels.value = labels.value.filter(label => label.id !== id);
 }
 </script>
 
 <template>
   <div class="flex flex-col gap-3">
-    <UiButton class="w-full" :disabled="showAddLabel" @click="addLabel">
+    <UiButton
+      class="w-full"
+      :disabled="newLabelFormVisible || !!editLabelId"
+      @click="initiateLabelCreation"
+    >
       Add label
     </UiButton>
     <FormSpaceLabel
-      v-if="showAddLabel"
-      :edit-mode="true"
-      @edit-label="handleEditForm"
+      v-if="newLabelFormVisible"
+      @toggle-edit-mode="setActiveEditLabel"
       @submit="handleSubmit"
     />
-    <div v-for="(label, i) in model" :key="i">
+    <div v-for="(label, i) in labels" :key="i">
       <FormSpaceLabel
+        :open="editLabelId === label.id"
         :initial-state="label"
-        :edit-mode="editId === label.id"
-        @edit-label="handleEditForm"
+        @toggle-edit-mode="setActiveEditLabel"
         @delete-label="handleDeleteLabel"
         @submit="handleSubmit"
       />
