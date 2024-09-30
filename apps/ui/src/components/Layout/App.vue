@@ -123,8 +123,8 @@ router.afterEach(() => {
       <AppBottomNav
         v-if="web3.account"
         :class="[
-          `fixed bottom-0 inset-x-0 hidden app-mobile-menu z-[100]`,
-          { 'app-mobile-menu-open': uiStore.sideMenuOpen }
+          `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
+          { 'app-bottom-nav-open': uiStore.sideMenuOpen }
         ]"
       />
       <AppSidebar
@@ -190,12 +190,6 @@ $placeholderSidebarWidth: 240px;
 .app-sidebar {
   @apply w-[#{$sidebarWidth}];
 
-  @media (max-width: 767px) {
-    &-open {
-      @apply bottom-[#{$mobileMenuHeight}];
-    }
-  }
-
   @media (max-width: 1011px) {
     &-open {
       & ~ :deep(*) {
@@ -220,12 +214,6 @@ $placeholderSidebarWidth: 240px;
 .app-nav {
   @apply w-[#{$navWidth}];
 
-  @media (max-width: 767px) {
-    &-open {
-      @apply bottom-[#{$mobileMenuHeight}];
-    }
-  }
-
   @media (max-width: 1011px) {
     &-open {
       & ~ :deep(*) {
@@ -243,12 +231,18 @@ $placeholderSidebarWidth: 240px;
   }
 }
 
-.app-mobile-menu {
+.app-bottom-nav {
   height: $mobileMenuHeight;
 
   @media (max-width: 767px) {
     &-open {
       @apply grid;
+
+      & ~ .backdrop,
+      & ~ .app-nav-open,
+      & ~ .app-sidebar-open {
+        @apply bottom-[#{$mobileMenuHeight}];
+      }
     }
   }
 }
@@ -300,9 +294,5 @@ $placeholderSidebarWidth: 240px;
 .backdrop {
   @apply fixed inset-0 z-[99];
   @apply bg-[black]/40 #{!important};
-
-  @media (max-width: 767px) {
-    @apply bottom-[#{$mobileMenuHeight}];
-  }
 }
 </style>
