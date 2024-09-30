@@ -454,7 +454,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       treasuries: form.value.treasuries.map(treasury => ({
         address: treasury.address || '',
         name: treasury.name || '',
-        network: treasury.chainId?.toString() ?? '1'
+        network: treasury.network
+          ? String(getNetwork(treasury.network).chainId)
+          : '1'
       })),
       admins: members.value
         .filter(member => member.role === 'admin')
