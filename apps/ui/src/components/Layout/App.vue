@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { APP_NAME } from '@/helpers/constants';
+import { whiteLabelAwareParams } from '@/helpers/utils';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -82,10 +83,10 @@ async function handleTransactionAccept() {
 
   router.push({
     name: 'space-editor',
-    params: {
-      ...(!isWhiteLabel.value ? { space: walletConnectSpaceKey.value } : {}),
+    params: whiteLabelAwareParams(isWhiteLabel.value, {
+      space: walletConnectSpaceKey.value,
       key: draftId
-    }
+    })
   });
 
   reset();

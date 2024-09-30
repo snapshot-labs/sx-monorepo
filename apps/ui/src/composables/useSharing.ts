@@ -1,6 +1,5 @@
 import { FunctionalComponent } from 'vue';
-import { RouteParamsRaw } from 'vue-router';
-import { getChoiceText } from '@/helpers/utils';
+import { getChoiceText, whiteLabelAwareParams } from '@/helpers/utils';
 import { Choice, Proposal, Space, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
 import ICLens from '~icons/c/lens';
@@ -28,17 +27,11 @@ export function useSharing() {
   const { app } = useApp();
   const { isWhiteLabel } = useWhiteLabel();
 
-  function whiteLabelAwareParams(params: RouteParamsRaw) {
-    if (isWhiteLabel) delete params.space;
-
-    return params;
-  }
-
   function getProposalUrl(proposal: Proposal): string {
     return `${window.location.origin}/${
       router.resolve({
         name: 'space-proposal',
-        params: whiteLabelAwareParams({
+        params: whiteLabelAwareParams(isWhiteLabel.value, {
           space: `${proposal.network}:${proposal.space.id}`,
           proposal: proposal.proposal_id
         })
@@ -50,7 +43,7 @@ export function useSharing() {
     return `${window.location.origin}/${
       router.resolve({
         name: 'user',
-        params: whiteLabelAwareParams({
+        params: whiteLabelAwareParams(isWhiteLabel.value, {
           user: user.id
         })
       }).href
@@ -61,7 +54,7 @@ export function useSharing() {
     return `${window.location.origin}/${
       router.resolve({
         name: 'space-user',
-        params: whiteLabelAwareParams({
+        params: whiteLabelAwareParams(isWhiteLabel.value, {
           space: `${spaceUser.space.network}:${spaceUser.space.id}`,
           user: spaceUser.user.id
         })
