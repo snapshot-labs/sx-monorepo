@@ -107,7 +107,7 @@ watch(scrollDisabled, val => {
 watch(isSwiping, () => {
   if (
     window.innerWidth > LG_WIDTH ||
-    !hasSwipeableContent ||
+    !hasSwipeableContent.value ||
     !sidebarSwipeEnabled.value ||
     !isSwiping.value ||
     modalOpen.value
