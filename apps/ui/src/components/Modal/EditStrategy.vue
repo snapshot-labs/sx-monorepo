@@ -60,25 +60,28 @@ const formErrors = computed(() => {
     errors.network = 'Network is required';
   }
 
-  const value = definition.value ? form.value : JSON.parse(rawParams.value);
-  const customError = props.customErrorValidation?.(value, network.value);
-  if (customError) errors[CUSTOM_ERROR_SYMBOL] = customError;
-
   if (!props.definition) {
     try {
       JSON.parse(rawParams.value);
-      return errors;
     } catch (e) {
       return { rawParams: 'Invalid JSON' };
     }
   }
 
-  return {
-    ...errors,
-    ...validateForm(props.definition, form.value, {
-      skipEmptyOptionalFields: true
-    })
-  };
+  const value = definition.value ? form.value : JSON.parse(rawParams.value);
+  const customError = props.customErrorValidation?.(value, network.value);
+  if (customError) errors[CUSTOM_ERROR_SYMBOL] = customError;
+
+  if (props.definition) {
+    return {
+      ...errors,
+      ...validateForm(props.definition, form.value, {
+        skipEmptyOptionalFields: true
+      })
+    };
+  }
+
+  return errors;
 });
 
 function handlePickerClick(field: string) {
