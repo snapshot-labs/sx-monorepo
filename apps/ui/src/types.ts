@@ -94,7 +94,6 @@ export type SpaceMetadata = {
   discord: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
-  labels: SpaceMetadataLabel[];
   delegations: SpaceMetadataDelegation[];
 };
 
@@ -164,7 +163,7 @@ export type Space = {
   about?: string;
   external_url: string;
   treasuries: SpaceMetadataTreasury[];
-  labels: SpaceMetadataLabel[];
+  labels?: SpaceMetadataLabel[];
   delegations: SpaceMetadataDelegation[];
   twitter: string;
   github: string;

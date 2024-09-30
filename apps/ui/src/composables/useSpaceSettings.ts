@@ -9,7 +9,13 @@ import {
   StrategyConfig,
   StrategyTemplate
 } from '@/networks/types';
-import { Member, Space, SpaceMetadata, StrategyParsedMetadata } from '@/types';
+import {
+  Member,
+  Space,
+  SpaceMetadata,
+  SpaceMetadataLabel,
+  StrategyParsedMetadata
+} from '@/types';
 
 export type OffchainSpaceSettings = {
   name: string;
@@ -49,7 +55,11 @@ export type OffchainSpaceSettings = {
   voteValidation: OffchainApiSpace['voteValidation'];
 };
 
-type Form = SpaceMetadata & { categories: string[]; coingecko: string };
+type Form = SpaceMetadata & {
+  labels: SpaceMetadataLabel[];
+  categories: string[];
+  coingecko: string;
+};
 
 const DEFAULT_FORM_STATE: Form = {
   name: '',
@@ -352,7 +362,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
       treasuries: space.treasuries,
-      labels: space.labels,
+      labels: space.labels || [],
       delegations: space.delegations.filter(
         delegation => delegation.apiType !== 'delegate-registry'
       )
