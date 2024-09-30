@@ -1,4 +1,5 @@
 import { FunctionalComponent } from 'vue';
+import { RouteParamsRaw } from 'vue-router';
 import { getChoiceText } from '@/helpers/utils';
 import { Choice, Proposal, Space, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
@@ -25,15 +26,22 @@ const SOCIAL_NETWORKS: {
 export function useSharing() {
   const router = useRouter();
   const { app } = useApp();
+  const { isWhiteLabel } = useWhiteLabel();
+
+  function whiteLabelAwareParams(params: RouteParamsRaw) {
+    if (isWhiteLabel) delete params.space;
+
+    return params;
+  }
 
   function getProposalUrl(proposal: Proposal): string {
     return `${window.location.origin}/${
       router.resolve({
         name: 'space-proposal',
-        params: {
+        params: whiteLabelAwareParams({
           space: `${proposal.network}:${proposal.space.id}`,
-          id: proposal.proposal_id
-        }
+          proposal: proposal.proposal_id
+        })
       }).href
     }`;
   }
@@ -42,9 +50,9 @@ export function useSharing() {
     return `${window.location.origin}/${
       router.resolve({
         name: 'user',
-        params: {
+        params: whiteLabelAwareParams({
           user: user.id
-        }
+        })
       }).href
     }`;
   }
@@ -53,10 +61,10 @@ export function useSharing() {
     return `${window.location.origin}/${
       router.resolve({
         name: 'space-user',
-        params: {
+        params: whiteLabelAwareParams({
           space: `${spaceUser.space.network}:${spaceUser.space.id}`,
           user: spaceUser.user.id
-        }
+        })
       }).href
     }`;
   }
