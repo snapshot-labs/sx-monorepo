@@ -13,9 +13,9 @@ import InputDuration from './InputDuration.vue';
 import InputNumber from './InputNumber.vue';
 import InputStamp from './InputStamp.vue';
 import InputString from './InputString.vue';
+import Select from './Select.vue';
 import SelectMultiple from './SelectMultiple.vue';
 import Textarea from './Textarea.vue';
-import Combobox from '../Combobox.vue';
 
 const model = defineModel<any>({ required: true });
 
@@ -73,7 +73,7 @@ const getComponent = (property: {
       if (property.format === 'address') return InputAddress;
       if (property.format === 'ens-or-address') return InputAddress;
       if (property.format === 'stamp') return InputStamp;
-      if (property.enum) return Combobox;
+      if (property.enum) return Select;
       return InputString;
     case 'number':
     case 'integer':
