@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { APP_NAME } from '@/helpers/constants';
-import { whiteLabelAwareParams } from '@/helpers/utils';
+import {
+  getCacheHash,
+  getStampUrl,
+  whiteLabelAwareParams
+} from '@/helpers/utils';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -21,6 +25,7 @@ const { init, setAppName, app } = useApp();
 const { isWhiteLabel } = useWhiteLabel();
 const { param } = useRouteParser('space');
 const { address, networkId } = useResolve(param);
+const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
@@ -139,7 +144,17 @@ watch(
       `${networkId.value}:${address.value}`
     );
 
-    setAppName(space?.name || null);
+    if (!space) return;
+
+    const faviconUrl = getStampUrl(
+      'space',
+      space.id,
+      16,
+      getCacheHash(space.avatar)
+    );
+    setFavicon(faviconUrl);
+
+    setAppName(space.name);
   },
   { immediate: true }
 );

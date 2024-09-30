@@ -7,6 +7,7 @@ const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();
+const { isWhiteLabel } = useWhiteLabel();
 
 const spaceKey = computed(() => `${networkId.value}:${address.value}`);
 
@@ -37,7 +38,9 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  if (!space.value) return setFavicon(null);
+  if (!space.value) {
+    return setFavicon(null);
+  }
 
   const faviconUrl = getStampUrl(
     offchainNetworks.includes(space.value.network) ? 'space' : 'space-sx',
@@ -46,6 +49,10 @@ watchEffect(() => {
     getCacheHash(space.value.avatar)
   );
   setFavicon(faviconUrl);
+});
+
+onUnmounted(() => {
+  if (!isWhiteLabel.value) setFavicon(null);
 });
 </script>
 
