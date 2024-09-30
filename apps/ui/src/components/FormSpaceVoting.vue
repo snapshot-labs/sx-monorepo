@@ -36,9 +36,9 @@ const props = defineProps<{
 }>();
 
 const QUORUM_DEFINITION = {
-  type: 'integer',
+  type: 'number',
   title: 'Quorum',
-  minimum: 1,
+  minimum: 0,
   tooltip:
     'The minimum amount of voting power required for the proposal to pass'
 };
