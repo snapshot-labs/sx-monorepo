@@ -1,11 +1,6 @@
 <script lang="ts" setup>
-import defaultRoutes from '@/routes/default';
-import whiteLabelRoutes from '@/routes/whiteLabel';
-
-const { init, isWhiteLabel, resolved, failed } = useWhiteLabel();
+const { init, mountRoutes, resolved, failed } = useWhiteLabel();
 const { setAppName } = useApp();
-
-const router = useRouter();
 
 function handleReloadClick() {
   window.location.reload();
@@ -14,11 +9,7 @@ function handleReloadClick() {
 watch([() => resolved.value, () => failed.value], ([resolved, failed]) => {
   if (!resolved || failed) return;
 
-  const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
-
-  routes.forEach(route => router.addRoute(route));
-  router.replace(router.currentRoute.value.fullPath);
-  router.removeRoute('splash-screen');
+  mountRoutes();
 });
 
 onMounted(() => {

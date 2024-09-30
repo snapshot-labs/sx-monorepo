@@ -1,4 +1,6 @@
 import { getNetwork } from '@/networks';
+import defaultRoutes from '@/routes/default';
+import whiteLabelRoutes from '@/routes/whiteLabel';
 import { useSpacesStore } from '@/stores/spaces';
 import { NetworkID } from '@/types';
 
@@ -48,6 +50,8 @@ async function getSpaceId(domain: string): Promise<string | null> {
 }
 
 export function useWhiteLabel() {
+  const router = useRouter();
+
   async function init() {
     if (!isWhiteLabel.value || resolved.value) return;
 
@@ -70,8 +74,17 @@ export function useWhiteLabel() {
     }
   }
 
+  function mountRoutes() {
+    const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
+
+    routes.forEach(route => router.addRoute(route));
+    router.replace(router.currentRoute.value.fullPath);
+    router.removeRoute('splash-screen');
+  }
+
   return {
     init,
+    mountRoutes,
     isWhiteLabel,
     failed,
     resolved,
