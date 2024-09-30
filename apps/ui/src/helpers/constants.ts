@@ -45,9 +45,13 @@ export const SUPPORTED_VOTING_TYPES: VoteType[] = [
   'quadratic'
 ] as const;
 export const VOTING_TYPES_INFO: Record<
-  Exclude<VoteType, 'custom'>,
+  Exclude<VoteType, 'custom'> | 'any',
   VoteTypeInfo
 > = {
+  any: {
+    label: 'Any',
+    description: 'Any type of voting.'
+  },
   basic: {
     label: 'Basic voting',
     description:
@@ -76,5 +80,19 @@ export const VOTING_TYPES_INFO: Record<
     label: 'Quadratic voting',
     description:
       'Each voter may spread voting power across any number of choices. Results are calculated quadratically.'
+  }
+};
+
+export const PRIVACY_TYPES_INFO: Record<
+  'none' | 'shutter',
+  { label: string; description?: string }
+> = {
+  none: {
+    label: 'No privacy'
+  },
+  shutter: {
+    label: 'Shutter',
+    description:
+      'Choices are encrypted and only visible once the voting period is over.'
   }
 };

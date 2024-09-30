@@ -72,7 +72,7 @@ watch(
       :open="modalOpen"
       :voting-types="votingTypes"
       :initial-state="proposal.type"
-      @save="handleVoteTypeSelected"
+      @save="voteType => handleVoteTypeSelected(voteType as VoteType)"
       @close="modalOpen = false"
     />
   </teleport>
