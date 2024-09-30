@@ -53,9 +53,13 @@ export type StrategyTemplate = {
   address: string;
   name: string;
   about?: string;
+  author?: string;
+  version?: string;
+  spaceCount?: number;
   link?: string;
   icon?: FunctionalComponent;
   type?: string;
+  defaultParams?: any;
   paramsDefinition: any;
   validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
@@ -80,6 +84,7 @@ export type StrategyTemplate = {
 
 export type StrategyConfig = StrategyTemplate & {
   id: string;
+  chainId?: string;
   params: Record<string, any>;
 };
 
@@ -305,6 +310,8 @@ export type NetworkApi = {
     spaceId: string,
     userIds: string[]
   ): Promise<Statement[]>;
+  loadStrategies(): Promise<StrategyTemplate[]>;
+  loadStrategy(address: string): Promise<StrategyTemplate | null>;
 };
 
 export type NetworkConstants = {

@@ -105,9 +105,12 @@ function handleStrategySave(value: Record<string, any>) {
     </div>
     <teleport to="#modal">
       <ModalEditStrategy
+        v-if="editedStrategy"
         :open="editStrategyModalOpen"
-        :definition="editedStrategy?.paramsDefinition"
-        :initial-state="editedStrategy?.params"
+        :network-id="networkId"
+        :strategy-address="editedStrategy.address"
+        :definition="editedStrategy.paramsDefinition"
+        :initial-state="editedStrategy.params"
         @close="editStrategyModalOpen = false"
         @save="handleStrategySave"
       />
