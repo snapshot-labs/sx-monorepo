@@ -5,10 +5,12 @@ import {
   ListboxOption,
   ListboxOptions
 } from '@headlessui/vue';
+import { VNode } from 'vue';
 
 export type Item<T extends string | number> = {
   id: T;
   name: string;
+  icon?: VNode;
 };
 
 defineOptions({ inheritAttrs: false });
@@ -97,6 +99,7 @@ watch(model, () => {
             class="flex items-center justify-between"
             :disabled="isItemDisabled(item.id)"
           >
+            <component :is="item.icon" class="size-[20px] mr-2" />
             <span
               class="w-full py-2 text-skin-link"
               :class="{

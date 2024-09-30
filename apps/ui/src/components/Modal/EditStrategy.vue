@@ -1,25 +1,88 @@
 <script setup lang="ts">
+import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
+import { getNetwork } from '@/networks';
+import { NetworkID } from '@/types';
 
-const props = defineProps<{
-  open: boolean;
-  initialState?: any;
-  definition: any;
-}>();
+const CUSTOM_ERROR_SYMBOL = Symbol('customError');
+
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    networkId: NetworkID;
+    strategyAddress: string;
+    initialState?: any;
+    initialNetwork?: string;
+    definition?: any;
+    customErrorValidation?: (
+      value: Record<string, any>,
+      network: string
+    ) => string | undefined;
+    withNetworkSelector?: boolean;
+  }>(),
+  {
+    withNetworkSelector: false
+  }
+);
 
 const emit = defineEmits<{
   (e: 'close');
-  (e: 'save', value: Record<string, any>);
+  (e: 'save', value: Record<string, any>, network: string);
 }>();
 
+const network = ref('');
 const showPicker = ref(false);
+const isDefinitionLoading = ref(false);
 const pickerField: Ref<string | null> = ref(null);
 const searchValue = ref('');
 const form: Ref<Record<string, any>> = ref({});
+const rawParams = ref('');
 
-const formErrors = computed(() =>
-  validateForm(props.definition, form.value, { skipEmptyOptionalFields: true })
+const definition = computedAsync(
+  async () => {
+    if (props.definition) return props.definition;
+
+    const network = getNetwork(props.networkId);
+
+    const strategy = await network.api.loadStrategy(props.strategyAddress);
+    if (!strategy) return null;
+
+    return strategy.paramsDefinition;
+  },
+  null,
+  { evaluating: isDefinitionLoading }
 );
+
+const formErrors = computed(() => {
+  let errors = {} as Record<string | symbol, string>;
+
+  if (props.withNetworkSelector && !network.value) {
+    errors.network = 'Network is required';
+  }
+
+  if (!props.definition) {
+    try {
+      JSON.parse(rawParams.value);
+    } catch (e) {
+      return { rawParams: 'Invalid JSON' };
+    }
+  }
+
+  const value = definition.value ? form.value : JSON.parse(rawParams.value);
+  const customError = props.customErrorValidation?.(value, network.value);
+  if (customError) errors[CUSTOM_ERROR_SYMBOL] = customError;
+
+  if (props.definition) {
+    return {
+      ...errors,
+      ...validateForm(props.definition, form.value, {
+        skipEmptyOptionalFields: true
+      })
+    };
+  }
+
+  return errors;
+});
 
 function handlePickerClick(field: string) {
   showPicker.value = true;
@@ -35,17 +98,23 @@ function handlePickerSelect(value: string) {
 }
 
 async function handleSubmit() {
-  emit('save', form.value);
+  const value = definition.value ? form.value : JSON.parse(rawParams.value);
+
+  emit('save', value, network.value);
 }
 
-watch(
-  () => props.open,
-  () => {
-    if (!props.initialState) return;
-
-    form.value = props.initialState;
+watchEffect(() => {
+  if (props.open && props.initialNetwork) {
+    network.value = props.initialNetwork;
   }
-);
+});
+
+watchEffect(() => {
+  if (props.open && props.initialState) {
+    form.value = clone(props.initialState);
+    rawParams.value = JSON.stringify(props.initialState, null, 2);
+  }
+});
 </script>
 
 <template>
@@ -78,18 +147,46 @@ watch(
       :search-value="searchValue"
       @pick="handlePickerSelect"
     />
+    <div v-if="isDefinitionLoading" class="p-4 flex">
+      <UiLoading class="m-auto" />
+    </div>
     <div v-else class="s-box p-4">
+      <UiMessage
+        v-if="formErrors[CUSTOM_ERROR_SYMBOL]"
+        type="danger"
+        class="mb-3"
+      >
+        {{ formErrors[CUSTOM_ERROR_SYMBOL] }}
+      </UiMessage>
+      <UiSelectorNetwork
+        v-if="withNetworkSelector"
+        v-model="network"
+        :network-id="networkId"
+      />
       <UiForm
+        v-if="definition"
         v-model="form"
         :error="formErrors"
         :definition="definition"
         @pick="handlePickerClick"
       />
+      <UiTextarea
+        v-else
+        v-model:model-value="rawParams"
+        :definition="{
+          type: 'string',
+          title: 'Strategy parameters'
+        }"
+        :error="formErrors.rawParams"
+      />
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!showPicker && !isDefinitionLoading" #footer>
       <UiButton
         class="w-full"
-        :disabled="Object.keys(formErrors).length > 0"
+        :disabled="
+          Object.keys(formErrors).length > 0 ||
+          !!formErrors[CUSTOM_ERROR_SYMBOL]
+        "
         @click="handleSubmit"
       >
         Confirm
@@ -97,3 +194,9 @@ watch(
     </template>
   </UiModal>
 </template>
+
+<style lang="scss" scoped>
+:deep(textarea) {
+  min-height: 140px !important;
+}
+</style>
