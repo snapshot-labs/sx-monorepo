@@ -1,32 +1,51 @@
 <script setup lang="ts">
+import defaultRoutes from '@/routes/default';
+import whiteLabelRoutes from '@/routes/whiteLabel';
 import { startIntercom } from './helpers/intercom';
 
 const route = useRoute();
+const router = useRouter();
 const { app } = useApp();
-const { init, isWhiteLabel, resolved: whiteLabelResolved } = useWhiteLabel();
+const {
+  init: initWhiteLabel,
+  isWhiteLabel,
+  isCustomDomain,
+  resolved: whiteLabelResolved
+} = useWhiteLabel();
 const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
 
+function mountCustomDomainRoutes() {
+  const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
+
+  routes.forEach(route => router.addRoute(route));
+  router.replace(router.currentRoute.value.fullPath);
+  router.removeRoute('splash-screen');
+}
+
 watchEffect(() => setTitle(app.value.app_name));
 
 watch(
-  [() => isWhiteLabel.value, () => whiteLabelResolved.value],
-  ([isWhiteLabel, whiteLabelResolved]) => {
-    if (isWhiteLabel || !whiteLabelResolved) return;
+  () => whiteLabelResolved.value,
+  resolved => {
+    if (!resolved) return;
 
-    startIntercom();
+    if (!isWhiteLabel.value) startIntercom();
+    if (isCustomDomain.value) mountCustomDomainRoutes();
   },
   { immediate: true }
 );
 
 onMounted(() => {
-  init();
+  initWhiteLabel();
 });
 </script>
 
 <template>
-  <LayoutSite v-if="routeName === 'site'" />
-  <LayoutSplashScreen v-else-if="routeName == 'splash-screen'" />
+  <LayoutSplashScreen
+    v-if="routeName == 'splash-screen' || !whiteLabelResolved"
+  />
+  <LayoutSite v-else-if="routeName === 'site'" />
   <LayoutApp v-else />
 </template>

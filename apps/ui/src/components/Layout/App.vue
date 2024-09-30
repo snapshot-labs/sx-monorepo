@@ -16,7 +16,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
-const { isWhiteLabel, resolved: whiteLabelResolved } = useWhiteLabel();
+const { isWhiteLabel } = useWhiteLabel();
 const { address, networkId } = useResolve(ref('id'));
 const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
@@ -123,10 +123,8 @@ watch(isSwiping, () => {
 });
 
 watch(
-  [() => isWhiteLabel.value, () => whiteLabelResolved.value],
-  async ([isWhiteLabel, whiteLabelResolved]) => {
-    if (!whiteLabelResolved) return;
-
+  () => isWhiteLabel.value,
+  async isWhiteLabel => {
     if (!isWhiteLabel) {
       setAppName(APP_NAME);
       return;

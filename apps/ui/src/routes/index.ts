@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import SplashScreen from '@/components/Layout/SplashScreen.vue';
 import defaultRoutes from './default';
 
-const { isWhiteLabel } = useWhiteLabel();
+const { resolved } = useWhiteLabel();
 
 const splashScreenRoute = {
   path: '/:catchAll(.*)*',
@@ -10,8 +10,8 @@ const splashScreenRoute = {
   component: SplashScreen
 };
 
-// At this stage, we're not sure if a custom domain is truly a white label
-const routes = isWhiteLabel.value ? [splashScreenRoute] : defaultRoutes;
+// At this stage, we're not sure whether the app is a white label
+const routes = !resolved.value ? [splashScreenRoute] : defaultRoutes;
 
 const router = createRouter({
   history: createWebHashHistory(),

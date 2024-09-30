@@ -1,6 +1,4 @@
 import { getNetwork } from '@/networks';
-import defaultRoutes from '@/routes/default';
-import whiteLabelRoutes from '@/routes/whiteLabel';
 import { useSpacesStore } from '@/stores/spaces';
 import { NetworkID } from '@/types';
 
@@ -9,8 +7,9 @@ const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
 
 const isWhiteLabel = ref(false);
+const isCustomDomain = ref(domain !== DEFAULT_DOMAIN);
 const failed = ref(false);
-const resolved = ref(false);
+const resolved = ref(domain === DEFAULT_DOMAIN);
 const resolver = reactive<{
   address: string | null;
   networkId: NetworkID | null;
@@ -18,12 +17,6 @@ const resolver = reactive<{
   address: null,
   networkId: null
 });
-
-if (domain !== DEFAULT_DOMAIN) {
-  isWhiteLabel.value = true;
-} else {
-  resolved.value = true;
-}
 
 async function getSpaceId(domain: string): Promise<string | null> {
   // Resolve white label domain locally if mapping is provided
@@ -50,42 +43,31 @@ async function getSpaceId(domain: string): Promise<string | null> {
 }
 
 export function useWhiteLabel() {
-  const router = useRouter();
-
   async function init() {
-    if (!isWhiteLabel.value || resolved.value) return;
+    if (resolved.value) return;
 
     try {
       const id = await getSpaceId(domain);
 
-      if (!id) {
-        isWhiteLabel.value = false;
-        return;
-      }
+      if (!id) return;
 
       const [networkId, spaceId] = id.split(':') as [NetworkID, string];
+
       resolver.address = spaceId;
       resolver.networkId = networkId;
+      isWhiteLabel.value = true;
     } catch (e) {
       console.log(e);
       failed.value = true;
     } finally {
       resolved.value = true;
-      mountRoutes();
     }
-  }
-
-  function mountRoutes() {
-    const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
-
-    routes.forEach(route => router.addRoute(route));
-    router.replace(router.currentRoute.value.fullPath);
-    router.removeRoute('splash-screen');
   }
 
   return {
     init,
     isWhiteLabel,
+    isCustomDomain,
     failed,
     resolved,
     resolver: computed(() => resolver)
