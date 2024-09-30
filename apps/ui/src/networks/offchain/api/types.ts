@@ -44,7 +44,7 @@ export type ApiSpace = {
     period: number | null;
     type: VoteType | '' | null;
     quorum: number | null;
-    quorumType?: string;
+    quorumType?: 'default' | 'rejection';
     privacy: string;
     hideAbstain: boolean;
   };
@@ -132,4 +132,13 @@ export type ApiVote = {
   vp: number;
   reason: string;
   created: number;
+};
+
+export type ApiStrategy = {
+  id: string;
+  author: string;
+  version: string;
+  spacesCount: number;
+  examples: any;
+  schema: any;
 };
