@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import objectHash from 'object-hash';
 import { MAX_STRATEGIES } from '@/helpers/turbo';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -78,6 +79,24 @@ function handleSaveStrategy(params: Record<string, any>, network: string) {
   });
 }
 
+function validateStrategy(params: Record<string, any>, network: string) {
+  const editedStrategyValue = editedStrategy.value;
+  if (editedStrategyValue === null) return;
+
+  const otherStrategies = strategies.value.filter(
+    s => s.id !== editedStrategyValue.id
+  );
+
+  const hasDuplicates = otherStrategies.some(
+    s =>
+      s.address === editedStrategyValue.address &&
+      s.chainId === network &&
+      objectHash(s.params) === objectHash(params)
+  );
+
+  if (hasDuplicates) return 'Two identical strategies are not allowed.';
+}
+
 function handleRemoveStrategy(strategy: StrategyConfig) {
   strategies.value = strategies.value.filter(s => s.id !== strategy.id);
 }
@@ -146,6 +165,7 @@ watchEffect(() => {
       :strategy-address="editedStrategy.address"
       :definition="editedStrategy.paramsDefinition"
       :initial-state="editedStrategy.params"
+      :custom-error-validation="validateStrategy"
       @save="handleSaveStrategy"
       @close="isEditStrategyModalOpen = false"
     />

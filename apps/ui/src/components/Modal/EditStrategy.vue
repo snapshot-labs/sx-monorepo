@@ -4,6 +4,8 @@ import { validateForm } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
+const CUSTOM_ERROR_SYMBOL = Symbol('customError');
+
 const props = withDefaults(
   defineProps<{
     open: boolean;
@@ -12,6 +14,10 @@ const props = withDefaults(
     initialState?: any;
     initialNetwork?: string;
     definition?: any;
+    customErrorValidation?: (
+      value: Record<string, any>,
+      network: string
+    ) => string | undefined;
     withNetworkSelector?: boolean;
   }>(),
   {
@@ -48,16 +54,20 @@ const definition = computedAsync(
 );
 
 const formErrors = computed(() => {
-  let errors = {} as Record<string, string>;
+  let errors = {} as Record<string | symbol, string>;
 
   if (props.withNetworkSelector && !network.value) {
     errors.network = 'Network is required';
   }
 
+  const value = definition.value ? form.value : JSON.parse(rawParams.value);
+  const customError = props.customErrorValidation?.(value, network.value);
+  if (customError) errors[CUSTOM_ERROR_SYMBOL] = customError;
+
   if (!props.definition) {
     try {
       JSON.parse(rawParams.value);
-      return {};
+      return errors;
     } catch (e) {
       return { rawParams: 'Invalid JSON' };
     }
@@ -138,6 +148,13 @@ watchEffect(() => {
       <UiLoading class="m-auto" />
     </div>
     <div v-else class="s-box p-4">
+      <UiMessage
+        v-if="formErrors[CUSTOM_ERROR_SYMBOL]"
+        type="danger"
+        class="mb-3"
+      >
+        {{ formErrors[CUSTOM_ERROR_SYMBOL] }}
+      </UiMessage>
       <UiSelectorNetwork
         v-if="withNetworkSelector"
         v-model="network"
@@ -163,7 +180,10 @@ watchEffect(() => {
     <template v-if="!showPicker && !isDefinitionLoading" #footer>
       <UiButton
         class="w-full"
-        :disabled="Object.keys(formErrors).length > 0"
+        :disabled="
+          Object.keys(formErrors).length > 0 ||
+          !!formErrors[CUSTOM_ERROR_SYMBOL]
+        "
         @click="handleSubmit"
       >
         Confirm
