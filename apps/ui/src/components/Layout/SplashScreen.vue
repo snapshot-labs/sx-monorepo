@@ -1,10 +1,21 @@
 <script lang="ts" setup>
-const { failed } = useWhiteLabel();
+const { resolved: whiteLabelResolved, failed } = useWhiteLabel();
 const { setAppName } = useApp();
+const router = useRouter();
 
 function handleReloadClick() {
   window.location.reload();
 }
+
+watch(
+  () => whiteLabelResolved.value,
+  resolved => {
+    if (!resolved) return;
+
+    router.replace(router.currentRoute.value.fullPath);
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   setAppName(null);

@@ -20,7 +20,6 @@ function mountCustomDomainRoutes() {
   const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
 
   routes.forEach(route => router.addRoute(route));
-  router.replace(router.currentRoute.value.fullPath);
   router.removeRoute('splash-screen');
 }
 
