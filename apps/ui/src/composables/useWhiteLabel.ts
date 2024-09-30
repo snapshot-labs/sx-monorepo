@@ -71,6 +71,7 @@ export function useWhiteLabel() {
       failed.value = true;
     } finally {
       resolved.value = true;
+      mountRoutes();
     }
   }
 
@@ -84,7 +85,6 @@ export function useWhiteLabel() {
 
   return {
     init,
-    mountRoutes,
     isWhiteLabel,
     failed,
     resolved,

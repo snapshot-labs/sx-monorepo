@@ -3,7 +3,7 @@ import { startIntercom } from './helpers/intercom';
 
 const route = useRoute();
 const { app } = useApp();
-const { isWhiteLabel, resolved: whiteLabelResolved } = useWhiteLabel();
+const { init, isWhiteLabel, resolved: whiteLabelResolved } = useWhiteLabel();
 const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
@@ -19,6 +19,10 @@ watch(
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <template>

@@ -1,19 +1,12 @@
 <script lang="ts" setup>
-const { init, mountRoutes, resolved, failed } = useWhiteLabel();
+const { failed } = useWhiteLabel();
 const { setAppName } = useApp();
 
 function handleReloadClick() {
   window.location.reload();
 }
 
-watch([() => resolved.value, () => failed.value], ([resolved, failed]) => {
-  if (!resolved || failed) return;
-
-  mountRoutes();
-});
-
 onMounted(() => {
-  init();
   setAppName(null);
 });
 </script>
