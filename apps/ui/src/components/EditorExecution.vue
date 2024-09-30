@@ -181,7 +181,7 @@ watch(
                 <template #left>
                   <div
                     v-if="model.length > 1"
-                    class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+                    class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
                   </div>
