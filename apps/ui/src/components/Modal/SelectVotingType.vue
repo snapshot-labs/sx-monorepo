@@ -2,18 +2,30 @@
 import { VOTING_TYPES_INFO } from '@/helpers/constants';
 import { VoteType } from '@/types';
 
-defineProps<{
-  open: boolean;
-  initialState?: VoteType;
-  votingTypes: VoteType[];
-}>();
+type AvailableVotingTypes = 'any' | VoteType;
+
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    withAny?: boolean;
+    initialState?: AvailableVotingTypes;
+    votingTypes: AvailableVotingTypes[];
+  }>(),
+  {
+    withAny: false
+  }
+);
 
 const emit = defineEmits<{
-  (e: 'save', type: VoteType);
+  (e: 'save', type: AvailableVotingTypes);
   (e: 'close');
 }>();
 
-function handleSelect(type: VoteType) {
+const availableVotingTypes = computed(() =>
+  props.withAny ? (['any', ...props.votingTypes] as const) : props.votingTypes
+);
+
+function handleSelect(type: AvailableVotingTypes) {
   emit('save', type);
   emit('close');
 }
@@ -26,7 +38,7 @@ function handleSelect(type: VoteType) {
     </template>
     <div class="p-4 flex flex-col gap-2.5">
       <UiSelector
-        v-for="(type, index) in votingTypes"
+        v-for="(type, index) in availableVotingTypes"
         :key="index"
         :is-active="initialState === type"
         @click="handleSelect(type)"
