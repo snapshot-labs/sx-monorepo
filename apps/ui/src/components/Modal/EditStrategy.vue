@@ -91,13 +91,13 @@ async function handleSubmit() {
 }
 
 watchEffect(() => {
-  if (props.initialNetwork) {
+  if (props.open && props.initialNetwork) {
     network.value = props.initialNetwork;
   }
 });
 
 watchEffect(() => {
-  if (props.initialState) {
+  if (props.open && props.initialState) {
     form.value = clone(props.initialState);
     rawParams.value = JSON.stringify(props.initialState, null, 2);
   }
