@@ -5,7 +5,6 @@ defineOptions({ inheritAttrs: false });
 
 const route = useRoute();
 const spacesStore = useSpacesStore();
-const proposalsStore = useProposalsStore();
 const { isWhiteLabel } = useWhiteLabel();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
@@ -25,14 +24,8 @@ const space = computed(() => {
   ) {
     return null;
   }
-  return (
-    spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`) ||
-    proposalsStore.getProposal(
-      spaceAddress.value,
-      route.params.proposal as string,
-      networkId.value
-    )?.space
-  );
+
+  return spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`);
 });
 </script>
 

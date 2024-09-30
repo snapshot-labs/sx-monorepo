@@ -8,10 +8,12 @@ const { resolved, address, networkId } = useResolve(param);
 const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();
 
+const spaceKey = computed(() => `${networkId.value}:${address.value}`);
+
 const space = computed(() => {
   if (!resolved.value) return null;
 
-  return spacesStore.spacesMap.get(`${networkId.value}:${address.value}`);
+  return spacesStore.spacesMap.get(spaceKey.value);
 });
 
 watch(
@@ -19,7 +21,9 @@ watch(
   async ([resolved, networkId, address]) => {
     if (!resolved || !networkId || !address) return;
 
-    spacesStore.fetchSpace(address, networkId);
+    if (!spacesStore.spacesMap.has(spaceKey.value)) {
+      spacesStore.fetchSpace(address, networkId);
+    }
   },
   {
     immediate: true
