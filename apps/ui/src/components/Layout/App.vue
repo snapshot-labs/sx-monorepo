@@ -14,11 +14,12 @@ const sidebarSwipeEnabled = ref(true);
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
+const spacesStore = useSpacesStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
 const { isWhiteLabel } = useWhiteLabel();
-const { address, networkId } = useResolve(ref('id'));
-const spacesStore = useSpacesStore();
+const { param } = useRouteParser('space');
+const { address, networkId } = useResolve(param);
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
