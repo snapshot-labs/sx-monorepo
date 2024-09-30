@@ -23,6 +23,9 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  onlyMembers,
+  guidelines,
+  template,
   quorumType,
   quorum,
   votingType,
@@ -46,6 +49,7 @@ const { setTitle } = useTitle();
 
 const hasAdvancedErrors = ref(false);
 const hasStrategiesErrors = ref(false);
+const hasProposalErrors = ref(false);
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const saving = ref(false);
@@ -59,6 +63,7 @@ type Tab = {
     | 'authenticators'
     | 'proposal-validation'
     | 'voting-strategies'
+    | 'proposal'
     | 'voting'
     | 'members'
     | 'execution'
@@ -109,6 +114,11 @@ const tabs = computed<Tab[]>(
         id: 'voting-strategies',
         name: 'Voting strategies',
         visible: !isOffchainNetwork.value
+      },
+      {
+        id: 'proposal',
+        name: 'Proposal',
+        visible: isOffchainNetwork.value
       },
       {
         id: 'voting',
@@ -350,6 +360,18 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
     />
     <UiContainerSettings
+      v-else-if="activeTab === 'proposal'"
+      title="Proposal"
+      description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
+    >
+      <FormSpaceProposal
+        v-model:only-members="onlyMembers"
+        v-model:guidelines="guidelines"
+        v-model:template="template"
+        @update-validity="v => (hasProposalErrors = !v)"
+      />
+    </UiContainerSettings>
+    <UiContainerSettings
       v-else-if="activeTab === 'voting'"
       title="Voting"
       description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
@@ -449,6 +471,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         (isModified &&
           canModifySettings &&
           !hasAdvancedErrors &&
+          !hasProposalErrors &&
           !hasStrategiesErrors) ||
         error
       "
