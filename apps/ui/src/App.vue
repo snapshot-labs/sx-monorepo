@@ -10,7 +10,8 @@ const {
   init: initWhiteLabel,
   isWhiteLabel,
   isCustomDomain,
-  resolved: whiteLabelResolved
+  resolved: whiteLabelResolved,
+  failed: whiteLabelFailed
 } = useWhiteLabel();
 const { setTitle } = useTitle();
 
@@ -31,7 +32,9 @@ watch(
     if (!resolved) return;
 
     if (!isWhiteLabel.value) startIntercom();
-    if (isCustomDomain.value) mountCustomDomainRoutes();
+    if (isCustomDomain.value && !whiteLabelFailed.value) {
+      mountCustomDomainRoutes();
+    }
   },
   { immediate: true }
 );
