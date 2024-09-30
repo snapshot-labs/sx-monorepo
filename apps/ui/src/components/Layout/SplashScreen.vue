@@ -10,7 +10,7 @@ function handleReloadClick() {
 watch(
   () => whiteLabelResolved.value,
   resolved => {
-    if (!resolved) return;
+    if (!resolved || failed.value) return;
 
     router.replace(router.currentRoute.value.fullPath);
   },
@@ -29,9 +29,9 @@ onMounted(() => {
       :class="{ 'animate-pulse': !failed }"
     />
     <div v-if="failed" class="text-center space-y-3">
-      <div class="text-skin-text">Error while loading the site</div>
+      <div class="text-skin-text">Error while loading the app</div>
       <UiButton class="!text-skin-text" @click="handleReloadClick">
-        Please try again
+        Try again
       </UiButton>
     </div>
   </div>
