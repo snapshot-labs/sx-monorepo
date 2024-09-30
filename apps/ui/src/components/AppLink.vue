@@ -11,8 +11,9 @@ function normalize(to: RouteLocationRaw) {
     typeof to === 'string' ||
     !('name' in to) ||
     !to.name
-  )
+  ) {
     return to;
+  }
 
   if (to.name.toString().startsWith('space-')) {
     delete to.params?.space;
