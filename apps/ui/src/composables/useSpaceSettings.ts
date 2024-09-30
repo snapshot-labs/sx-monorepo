@@ -424,29 +424,23 @@ export function useSpaceSettings(space: Ref<Space>) {
     currentStrategies: StrategyConfig[],
     existingStrategies: StrategyConfig[]
   ) {
-    const hasNewStrategy =
-      currentStrategies.findIndex(current => {
-        return !existingStrategies.find(
-          existing =>
-            current.address === existing.address &&
-            current.chainId === existing.chainId &&
-            objectHash(current.params) === objectHash(existing.params)
-        );
-      }) !== -1;
+    const existing = [...existingStrategies];
+    for (const current of currentStrategies) {
+      const matchingStrategy = existing.findIndex(
+        existing =>
+          current.address === existing.address &&
+          current.chainId === existing.chainId &&
+          objectHash(current.params) === objectHash(existing.params)
+      );
 
-    if (hasNewStrategy) return true;
+      if (matchingStrategy !== -1) {
+        existing.splice(matchingStrategy, 1);
+      } else {
+        return true;
+      }
+    }
 
-    const hasRemovedStrategy =
-      existingStrategies.findIndex(existing => {
-        return !currentStrategies.find(
-          current =>
-            current.address === existing.address &&
-            current.chainId === existing.chainId &&
-            objectHash(current.params) === objectHash(existing.params)
-        );
-      }) !== -1;
-
-    return hasRemovedStrategy;
+    return existing.length > 0;
   }
 
   async function saveOffchain() {
