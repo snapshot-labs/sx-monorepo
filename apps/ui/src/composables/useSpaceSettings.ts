@@ -37,10 +37,7 @@ export type OffchainSpaceSettings = {
   moderators: string[];
   members: string[];
   plugins: OffchainApiSpace['plugins'];
-  delegationPortal: Omit<
-    NonNullable<OffchainApiSpace['delegationPortal']>,
-    'delegationNetwork'
-  > | null;
+  delegationPortal: NonNullable<OffchainApiSpace['delegationPortal']> | null;
   filters: { minScore: number; onlyMembers: boolean };
   voting: Partial<OffchainApiSpace['voting']>;
   boost: OffchainApiSpace['boost'];
@@ -413,6 +410,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     let delegationPortal: OffchainSpaceSettings['delegationPortal'] = null;
     if (
       form.value.delegations.length > 0 &&
+      form.value.delegations[0].contractNetwork &&
       form.value.delegations[0].contractAddress &&
       form.value.delegations[0].apiUrl &&
       form.value.delegations[0].apiType
@@ -423,6 +421,9 @@ export function useSpaceSettings(space: Ref<Space>) {
           : form.value.delegations[0].apiType;
 
       delegationPortal = {
+        delegationNetwork: String(
+          getNetwork(form.value.delegations[0].contractNetwork).chainId
+        ),
         delegationContract: form.value.delegations[0].contractAddress,
         delegationApi: form.value.delegations[0].apiUrl,
         delegationType: apiType
@@ -454,7 +455,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       treasuries: form.value.treasuries.map(treasury => ({
         address: treasury.address || '',
         name: treasury.name || '',
-        network: treasury.chainId?.toString() ?? '1'
+        network: treasury.network
+          ? String(getNetwork(treasury.network).chainId)
+          : '1'
       })),
       admins: members.value
         .filter(member => member.role === 'admin')
