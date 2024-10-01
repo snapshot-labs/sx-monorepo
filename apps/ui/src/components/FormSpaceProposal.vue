@@ -1,16 +1,6 @@
 <script setup lang="ts">
 import { getValidator } from '@/helpers/validation';
 
-const onlyMembers = defineModel<boolean>('onlyMembers', {
-  required: true
-});
-const guidelines = defineModel<string>('guidelines', {
-  required: true
-});
-const template = defineModel<string>('template', {
-  required: true
-});
-
 const GUIDELINES_DEFINITION = {
   type: 'string',
   format: 'uri',
@@ -29,6 +19,20 @@ const TEMPLATE_DEFINITION = {
   tooltip:
     'Start every proposal with a template to help users understand what information is required'
 };
+
+const onlyMembers = defineModel<boolean>('onlyMembers', {
+  required: true
+});
+const guidelines = defineModel<string>('guidelines', {
+  required: true
+});
+const template = defineModel<string>('template', {
+  required: true
+});
+
+const emit = defineEmits<{
+  (e: 'updateValidity', valid: boolean): void;
+}>();
 
 const errors = computed(() => {
   const validator = getValidator({
@@ -50,10 +54,6 @@ const errors = computed(() => {
     { skipEmptyOptionalFields: true }
   );
 });
-
-const emit = defineEmits<{
-  (e: 'updateValidity', valid: boolean): void;
-}>();
 
 watchEffect(() => {
   emit('updateValidity', Object.values(errors.value).length === 0);
