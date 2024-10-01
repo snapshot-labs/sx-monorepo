@@ -173,7 +173,7 @@ router.afterEach(() => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
       <AppBottomNav
-        v-if="web3.account"
+        v-if="web3.account && !isWhiteLabel"
         :class="[
           `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
           { 'app-bottom-nav-open': uiStore.sideMenuOpen }
