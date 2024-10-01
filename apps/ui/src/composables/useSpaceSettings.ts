@@ -131,6 +131,9 @@ export function useSpaceSettings(space: Ref<Space>) {
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
+  const onlyMembers = ref(false);
+  const guidelines = ref('');
+  const template = ref('');
   const quorumType = ref(
     'default' as NonNullable<OffchainApiSpace['voting']['quorumType']>
   );
@@ -487,8 +490,8 @@ export function useSpaceSettings(space: Ref<Space>) {
       private: isPrivate.value,
       domain: customDomain.value,
       skin: space.value.additionalRawData.skin,
-      guidelines: space.value.additionalRawData.guidelines,
-      template: space.value.additionalRawData.template,
+      guidelines: guidelines.value,
+      template: template.value,
       strategies: strategies.value.map(strategy => ({
         name: strategy.name,
         network: strategy.chainId?.toString() ?? snapshotChainId.value,
@@ -512,7 +515,10 @@ export function useSpaceSettings(space: Ref<Space>) {
         .map(member => member.address),
       plugins: space.value.additionalRawData.plugins,
       delegationPortal: delegationPortal,
-      filters: space.value.additionalRawData.filters,
+      filters: {
+        ...space.value.additionalRawData.filters,
+        onlyMembers: onlyMembers.value
+      },
       voting: {
         ...space.value.additionalRawData.voting,
         delay:
@@ -645,8 +651,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     if (offchainNetworks.includes(space.value.network)) {
-      const initialVotingProperties = getInitialVotingProperties(space.value);
+      onlyMembers.value =
+        space.value.additionalRawData?.filters.onlyMembers ?? false;
+      guidelines.value = space.value.additionalRawData?.guidelines ?? '';
+      template.value = space.value.additionalRawData?.template ?? '';
 
+      const initialVotingProperties = getInitialVotingProperties(space.value);
       quorumType.value = initialVotingProperties.quorumType;
       quorum.value = initialVotingProperties.quorum;
       voteType.value = initialVotingProperties.votingType;
@@ -681,6 +691,9 @@ export function useSpaceSettings(space: Ref<Space>) {
     const validationStrategyValue = validationStrategy.value;
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
+    const onlyMembersValue = onlyMembers.value;
+    const guidelinesValue = guidelines.value;
+    const templateValue = template.value;
     const quorumTypeValue = quorumType.value;
     const quorumValue = quorum.value;
     const votingTypeValue = voteType.value;
@@ -733,6 +746,26 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (offchainNetworks.includes(space.value.network)) {
       const ignoreOrderOpts = { unorderedArrays: true };
+
+      if (
+        onlyMembersValue !==
+        (space.value.additionalRawData?.filters.onlyMembers ?? false)
+      ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (
+        guidelinesValue !== (space.value.additionalRawData?.guidelines ?? '')
+      ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (templateValue !== (space.value.additionalRawData?.template ?? '')) {
+        isModified.value = true;
+        return;
+      }
 
       const initialVotingProperties = getInitialVotingProperties(space.value);
 
@@ -872,6 +905,9 @@ export function useSpaceSettings(space: Ref<Space>) {
     authenticators,
     validationStrategy,
     votingStrategies,
+    onlyMembers,
+    guidelines,
+    template,
     quorumType,
     quorum,
     votingType: voteType,
