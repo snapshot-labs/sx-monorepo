@@ -1,6 +1,6 @@
 import { getNetwork } from '@/networks';
 import { useSpacesStore } from '@/stores/spaces';
-import { NetworkID } from '@/types';
+import { Space } from '@/types';
 
 const NETWORK = 's';
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
@@ -10,27 +10,29 @@ const isWhiteLabel = ref(false);
 const isCustomDomain = ref(domain !== DEFAULT_DOMAIN);
 const failed = ref(false);
 const resolved = ref(domain === DEFAULT_DOMAIN);
-const resolver = reactive<{
-  address: string | null;
-  networkId: NetworkID | null;
-}>({
-  address: null,
-  networkId: null
-});
+const space = ref<Space | null>(null);
 
-async function getSpaceId(domain: string): Promise<string | null> {
+async function getSpace(domain: string): Promise<Space | null> {
+  const loadSpacesParams: Record<string, string> = {};
+
   // Resolve white label domain locally if mapping is provided
   // for easier local testing
-  // e.g. VITE_WHITE_LABEL_MAPPING='127.0.0.1;s:snapshot.eth'
+  // e.g. VITE_WHITE_LABEL_MAPPING='127.0.0.1;snapshot.eth'
   const localMapping = import.meta.env.VITE_WHITE_LABEL_MAPPING;
   if (localMapping) {
     const [localDomain, localSpaceId] = localMapping.split(';');
-    if (domain === localDomain) return localSpaceId;
+    if (domain === localDomain) {
+      loadSpacesParams.id = localSpaceId;
+    }
+  } else {
+    loadSpacesParams.domain = domain;
   }
 
   const spacesStore = useSpacesStore();
   const network = getNetwork(NETWORK);
-  const space = (await network.api.loadSpaces({ limit: 1 }, { domain }))[0];
+  const space = (
+    await network.api.loadSpaces({ limit: 1 }, loadSpacesParams)
+  )[0];
 
   if (!space) return null;
 
@@ -39,7 +41,7 @@ async function getSpaceId(domain: string): Promise<string | null> {
     [space.id]: space
   };
 
-  return space.id;
+  return space;
 }
 
 export function useWhiteLabel() {
@@ -47,15 +49,11 @@ export function useWhiteLabel() {
     if (resolved.value) return;
 
     try {
-      const id = await getSpaceId(domain);
+      space.value = await getSpace(domain);
 
-      if (!id) return;
-
-      const [networkId, spaceId] = id.split(':') as [NetworkID, string];
-
-      resolver.address = spaceId;
-      resolver.networkId = networkId;
-      isWhiteLabel.value = true;
+      if (space.value) {
+        isWhiteLabel.value = true;
+      }
     } catch (e) {
       console.log(e);
       failed.value = true;
@@ -69,7 +67,7 @@ export function useWhiteLabel() {
     isWhiteLabel,
     isCustomDomain,
     failed,
-    resolved,
-    resolver: computed(() => resolver)
+    space,
+    resolved
   };
 }

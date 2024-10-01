@@ -19,12 +19,9 @@ const sidebarSwipeEnabled = ref(true);
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
-const spacesStore = useSpacesStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
-const { isWhiteLabel } = useWhiteLabel();
-const { param } = useRouteParser('space');
-const { address, networkId } = useResolve(param);
+const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
@@ -137,24 +134,17 @@ watch(
       return;
     }
 
-    if (!address.value || !networkId.value) return;
-
-    await spacesStore.fetchSpace(address.value, networkId.value);
-    const space = spacesStore.spacesMap.get(
-      `${networkId.value}:${address.value}`
-    );
-
-    if (!space) return;
+    if (!whiteLabelSpace.value) return;
 
     const faviconUrl = getStampUrl(
       'space',
-      space.id,
+      whiteLabelSpace.value.id,
       16,
-      getCacheHash(space.avatar)
+      getCacheHash(whiteLabelSpace.value.avatar)
     );
     setFavicon(faviconUrl);
 
-    setAppName(space.name);
+    setAppName(whiteLabelSpace.value.name);
   },
   { immediate: true }
 );
