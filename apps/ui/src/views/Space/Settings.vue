@@ -23,6 +23,9 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  onlyMembers,
+  guidelines,
+  template,
   quorumType,
   quorum,
   votingType,
@@ -44,8 +47,11 @@ const {
 const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
-const hasAdvancedErrors = ref(false);
+const isAdvancedFormResolved = ref(false);
 const hasStrategiesErrors = ref(false);
+const hasVotingErrors = ref(false);
+const hasProposalErrors = ref(false);
+const hasAdvancedErrors = ref(false);
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const saving = ref(false);
@@ -59,6 +65,7 @@ type Tab = {
     | 'authenticators'
     | 'proposal-validation'
     | 'voting-strategies'
+    | 'proposal'
     | 'voting'
     | 'members'
     | 'execution'
@@ -109,6 +116,11 @@ const tabs = computed<Tab[]>(
         id: 'voting-strategies',
         name: 'Voting strategies',
         visible: !isOffchainNetwork.value
+      },
+      {
+        id: 'proposal',
+        name: 'Proposal',
+        visible: isOffchainNetwork.value
       },
       {
         id: 'voting',
@@ -181,6 +193,18 @@ const error = computed(() => {
 
     if (hasStrategiesErrors.value) {
       return 'Strategies are invalid';
+    }
+
+    if (hasProposalErrors.value) {
+      return 'Proposal settings are invalid';
+    }
+
+    if (hasVotingErrors.value) {
+      return 'Voting settings are invalid';
+    }
+
+    if (hasAdvancedErrors.value && isAdvancedFormResolved.value) {
+      return 'Advanced settings are invalid';
     }
   }
 
@@ -350,6 +374,18 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
     />
     <UiContainerSettings
+      v-else-if="activeTab === 'proposal'"
+      title="Proposal"
+      description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
+    >
+      <FormSpaceProposal
+        v-model:only-members="onlyMembers"
+        v-model:guidelines="guidelines"
+        v-model:template="template"
+        @update-validity="v => (hasProposalErrors = !v)"
+      />
+    </UiContainerSettings>
+    <UiContainerSettings
       v-else-if="activeTab === 'voting'"
       title="Voting"
       description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
@@ -364,6 +400,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:privacy="privacy"
         v-model:ignore-abstain-votes="ignoreAbstainVotes"
         :space="space"
+        @update-validity="v => (hasVotingErrors = !v)"
       />
     </UiContainerSettings>
     <UiContainerSettings
@@ -441,16 +478,17 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :space-id="space.id"
         :is-controller="isController"
         @delete-space="handleSpaceDelete"
-        @update-validity="v => (hasAdvancedErrors = !v)"
+        @update-validity="
+          (valid, resolved) => {
+            hasAdvancedErrors = !valid;
+            isAdvancedFormResolved = resolved;
+          }
+        "
       />
     </UiContainerSettings>
     <UiToolbarBottom
       v-if="
-        (isModified &&
-          canModifySettings &&
-          !hasAdvancedErrors &&
-          !hasStrategiesErrors) ||
-        error
+        (isModified && isAdvancedFormResolved && canModifySettings) || error
       "
       class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
