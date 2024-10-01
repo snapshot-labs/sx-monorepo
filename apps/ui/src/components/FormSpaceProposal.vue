@@ -35,17 +35,20 @@ const errors = computed(() => {
     type: 'object',
     title: 'Proposal',
     additionalProperties: false,
-    required: ['guidelines', 'template'],
+    required: [],
     properties: {
       guidelines: GUIDELINES_DEFINITION,
       template: TEMPLATE_DEFINITION
     }
   });
 
-  return validator.validate({
-    guidelines: guidelines.value,
-    template: template.value
-  });
+  return validator.validate(
+    {
+      guidelines: guidelines.value,
+      template: template.value
+    },
+    { skipEmptyOptionalFields: true }
+  );
 });
 
 const emit = defineEmits<{
