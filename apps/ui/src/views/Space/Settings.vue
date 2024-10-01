@@ -47,6 +47,7 @@ const {
 const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
+const isAdvancedFormResolved = ref(false);
 const hasAdvancedErrors = ref(false);
 const hasStrategiesErrors = ref(false);
 const hasProposalErrors = ref(false);
@@ -191,6 +192,14 @@ const error = computed(() => {
 
     if (hasStrategiesErrors.value) {
       return 'Strategies are invalid';
+    }
+
+    if (hasAdvancedErrors.value && isAdvancedFormResolved.value) {
+      return 'Advanced settings are invalid';
+    }
+
+    if (hasProposalErrors.value) {
+      return 'Proposal settings are invalid';
     }
   }
 
@@ -463,17 +472,17 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :space-id="space.id"
         :is-controller="isController"
         @delete-space="handleSpaceDelete"
-        @update-validity="v => (hasAdvancedErrors = !v)"
+        @update-validity="
+          (valid, resolved) => {
+            hasAdvancedErrors = !valid;
+            isAdvancedFormResolved = resolved;
+          }
+        "
       />
     </UiContainerSettings>
     <UiToolbarBottom
       v-if="
-        (isModified &&
-          canModifySettings &&
-          !hasAdvancedErrors &&
-          !hasProposalErrors &&
-          !hasStrategiesErrors) ||
-        error
+        (isModified && isAdvancedFormResolved && canModifySettings) || error
       "
       class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
