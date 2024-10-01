@@ -48,9 +48,10 @@ const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
 const isAdvancedFormResolved = ref(false);
-const hasAdvancedErrors = ref(false);
 const hasStrategiesErrors = ref(false);
+const hasVotingErrors = ref(false);
 const hasProposalErrors = ref(false);
+const hasAdvancedErrors = ref(false);
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
 const saving = ref(false);
@@ -194,12 +195,16 @@ const error = computed(() => {
       return 'Strategies are invalid';
     }
 
-    if (hasAdvancedErrors.value && isAdvancedFormResolved.value) {
-      return 'Advanced settings are invalid';
-    }
-
     if (hasProposalErrors.value) {
       return 'Proposal settings are invalid';
+    }
+
+    if (hasVotingErrors.value) {
+      return 'Voting settings are invalid';
+    }
+
+    if (hasAdvancedErrors.value && isAdvancedFormResolved.value) {
+      return 'Advanced settings are invalid';
     }
   }
 
@@ -395,6 +400,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:privacy="privacy"
         v-model:ignore-abstain-votes="ignoreAbstainVotes"
         :space="space"
+        @update-validity="v => (hasVotingErrors = !v)"
       />
     </UiContainerSettings>
     <UiContainerSettings
