@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends string | number, U extends Item<T>">
+<script setup lang="ts" generic="T extends string | number">
 import {
   Combobox,
   ComboboxButton,
@@ -7,13 +7,7 @@ import {
   ComboboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
-import { VNode } from 'vue';
-
-export type Item<T extends string | number> = {
-  id: T;
-  name: string;
-  icon?: VNode;
-};
+import { DefinitionWithOptions } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -21,11 +15,7 @@ const model = defineModel<T>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  definition: {
-    options: U[];
-    default?: T;
-    examples?: string[];
-  } & any;
+  definition: DefinitionWithOptions<T>;
 }>();
 
 const dirty = ref(false);
@@ -33,7 +23,9 @@ const query = ref('');
 
 const filteredOptions = computed(() => {
   return props.definition.options.filter(option =>
-    option.name.toLowerCase().includes(query.value.toLowerCase())
+    (option.name || String(option.id))
+      .toLowerCase()
+      .includes(query.value.toLowerCase())
   );
 });
 
@@ -59,7 +51,7 @@ function handleFocus(event: FocusEvent, open: boolean) {
 
 function getDisplayValue(value: T) {
   const option = props.definition.options.find(option => option.id === value);
-  return option ? option.name : '';
+  return option ? option.name || String(option.id) : '';
 }
 
 watch(model, () => {
@@ -114,7 +106,7 @@ watch(model, () => {
                   'cursor-pointer': !disabled
                 }"
               >
-                {{ item.name }}
+                {{ item.name || item.id }}
               </span>
               <IH-check v-if="selected" class="text-skin-success" />
             </ComboboxOption>

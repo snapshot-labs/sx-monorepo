@@ -60,7 +60,7 @@ const definition = computed(() => {
         ]
       },
       role: {
-        type: ['string'],
+        type: 'string',
         enum: props.isController
           ? ['admin', 'moderator', 'author']
           : ['moderator', 'author'],

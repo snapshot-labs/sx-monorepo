@@ -1,17 +1,11 @@
-<script setup lang="ts" generic="T extends string | number, U extends Item<T>">
+<script setup lang="ts" generic="T extends string | number">
 import {
   Listbox,
   ListboxButton,
   ListboxOption,
   ListboxOptions
 } from '@headlessui/vue';
-import { VNode } from 'vue';
-
-export type Item<T extends string | number> = {
-  id: T;
-  name: string;
-  icon?: VNode;
-};
+import { DefinitionWithMultipleOptions } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -19,11 +13,8 @@ const model = defineModel<T[]>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  definition: {
-    options: U[];
-    maxItems: number;
-    default?: T[];
-    examples?: string[];
+  definition: DefinitionWithMultipleOptions<T> & {
+    maxItems?: number;
   };
 }>();
 
@@ -35,7 +26,7 @@ const inputValue = computed({
       return props.definition.default;
     }
 
-    return model.value;
+    return model.value || [];
   },
   set(newValue: T[]) {
     dirty.value = true;
@@ -45,20 +36,24 @@ const inputValue = computed({
 
 const currentValue = computed(() => {
   if (inputValue.value.length === 0) {
-    return (
-      props.definition.examples?.[0] ||
-      `Select up to ${props.definition.maxItems} items`
-    );
+    const fallbackText =
+      props.definition.maxItems !== undefined
+        ? `Select up to ${props.definition.maxItems} items`
+        : 'Select one or more items';
+
+    return props.definition.examples?.[0] || fallbackText;
   }
 
   const currentItems = props.definition.options.filter(option =>
     inputValue.value.includes(option.id)
   );
 
-  return currentItems.map(item => item.name).join(', ');
+  return currentItems.map(item => item.name || item.id).join(', ');
 });
 
 function isItemDisabled(item: T) {
+  if (props.definition.maxItems === undefined) return false;
+
   if (inputValue.value.length < props.definition.maxItems) return false;
   return !inputValue.value.some(selectedItem => selectedItem === item);
 }
@@ -107,7 +102,7 @@ watch(model, () => {
                 'cursor-pointer': !disabled
               }"
             >
-              {{ item.name }}
+              {{ item.name || item.id }}
             </span>
             <IH-check v-if="selected" class="text-skin-success" />
           </ListboxOption>
