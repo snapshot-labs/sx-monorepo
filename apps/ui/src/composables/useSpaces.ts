@@ -3,7 +3,8 @@ import {
   DEFAULT_SPACES_LIMIT,
   enabledNetworks,
   explorePageProtocols,
-  getNetwork
+  getNetwork,
+  offchainNetworks
 } from '@/networks';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -98,11 +99,11 @@ export function useSpaces() {
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
     const { networks, limit } = explorePageProtocols[protocol.value];
-    if (overwrite) explorePageSpaces.value = [];
+    let unsortedExplorePageSpaces = overwrite ? [] : explorePageSpaces.value;
 
     const results = await Promise.all(
       networks.map(async id => {
-        const network = getNetwork(id as NetworkID);
+        const network = getNetwork(id);
 
         const record = networksMap.value[id];
         if (!overwrite && !record.hasMoreSpaces) {
@@ -121,7 +122,7 @@ export function useSpaces() {
           filter
         );
 
-        explorePageSpaces.value = [...explorePageSpaces.value, ...spaces];
+        unsortedExplorePageSpaces = [...unsortedExplorePageSpaces, ...spaces];
 
         return {
           id,
@@ -130,6 +131,18 @@ export function useSpaces() {
         };
       })
     );
+
+    // this only works, because we fetch 1000 spaces per network
+    // to have proper handling of this we would need unified API
+    explorePageSpaces.value = offchainNetworks.includes(networks[0])
+      ? unsortedExplorePageSpaces
+      : unsortedExplorePageSpaces.sort((a, b) => {
+          return (
+            Number(b.turbo) - Number(a.turbo) ||
+            Number(b.verified) - Number(a.verified) ||
+            b.vote_count - a.vote_count
+          );
+        });
 
     networksMap.value = {
       ...networksMap.value,
