@@ -56,10 +56,10 @@ async function fetchValidations() {
 
 const filteredValidations = computed(() => {
   const apiValidations = validations.value.filter(validation => {
-    if (props.type === 'proposal') return true;
-
     // TODO: add support for basic
     if (validation.key === 'basic') return false;
+
+    if (props.type === 'proposal') return true;
 
     return !validation.proposalValidationOnly;
   });

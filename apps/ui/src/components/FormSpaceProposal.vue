@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
+import { Validation } from '@/types';
 
 const GUIDELINES_DEFINITION = {
   type: 'string',
@@ -20,6 +22,9 @@ const TEMPLATE_DEFINITION = {
     'Start every proposal with a template to help users understand what information is required'
 };
 
+const proposalValidation = defineModel<Validation>('proposalValidation', {
+  required: true
+});
 const onlyMembers = defineModel<boolean>('onlyMembers', {
   required: true
 });
@@ -33,6 +38,8 @@ const template = defineModel<string>('template', {
 const emit = defineEmits<{
   (e: 'updateValidity', valid: boolean): void;
 }>();
+
+const isSelectValidationModalOpen = ref(false);
 
 const errors = computed(() => {
   const validator = getValidator({
@@ -63,6 +70,34 @@ watchEffect(() => {
 <template>
   <h4 class="eyebrow mb-2 font-medium">Proposal Validation</h4>
   <div class="s-box mb-4">
+    <UiWrapperInput
+      :definition="{
+        title: 'Validation',
+        tooltip:
+          'The type of validation used to determine if a user can create a proposal. (Enforced on all future proposals)'
+      }"
+    >
+      <button
+        :disabled="onlyMembers"
+        type="button"
+        class="s-input !flex flex-row justify-between items-center"
+        :class="{
+          'opacity-50 cursor-not-allowed': onlyMembers
+        }"
+        @click="isSelectValidationModalOpen = true"
+      >
+        <div>
+          {{
+            VALIDATION_TYPES_INFO[
+              proposalValidation.name === 'any'
+                ? 'any-proposal'
+                : proposalValidation.name
+            ].label
+          }}
+        </div>
+        <IH-chevron-down />
+      </button>
+    </UiWrapperInput>
     <UiSwitch
       v-model="onlyMembers"
       title="Allow only authors to submit a proposal"
@@ -82,4 +117,13 @@ watchEffect(() => {
       class="!min-h-[140px]"
     />
   </div>
+  <teleport to="#modal">
+    <ModalSelectValidation
+      type="proposal"
+      :open="isSelectValidationModalOpen"
+      :current="proposalValidation"
+      @close="isSelectValidationModalOpen = false"
+      @save="value => (proposalValidation = value)"
+    />
+  </teleport>
 </template>

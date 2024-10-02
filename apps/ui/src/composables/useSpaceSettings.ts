@@ -144,6 +144,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
+  const proposalValidation = ref({ name: 'any', params: {} } as Validation);
   const onlyMembers = ref(false);
   const guidelines = ref('');
   const template = ref('');
@@ -548,7 +549,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         privacy: privacy.value === 'none' ? '' : privacy.value,
         hideAbstain: ignoreAbstainVotes.value
       },
-      validation: space.value.additionalRawData.validation,
+      validation: proposalValidation.value,
       voteValidation: voteValidation.value,
       boost: space.value.additionalRawData.boost
     };
@@ -665,6 +666,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     if (offchainNetworks.includes(space.value.network)) {
+      proposalValidation.value = clone(
+        space.value.additionalRawData?.validation ?? {
+          name: 'any',
+          params: {}
+        }
+      );
       onlyMembers.value =
         space.value.additionalRawData?.filters.onlyMembers ?? false;
       guidelines.value = space.value.additionalRawData?.guidelines ?? '';
@@ -712,6 +719,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const validationStrategyValue = validationStrategy.value;
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
+    const proposalValidationValue = proposalValidation.value;
     const onlyMembersValue = onlyMembers.value;
     const guidelinesValue = guidelines.value;
     const templateValue = template.value;
@@ -768,6 +776,20 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (offchainNetworks.includes(space.value.network)) {
       const ignoreOrderOpts = { unorderedArrays: true };
+
+      const initialProposalValidation = space.value.additionalRawData
+        ?.validation ?? {
+        name: 'any',
+        params: {}
+      };
+
+      if (
+        objectHash(proposalValidationValue) !==
+        objectHash(initialProposalValidation)
+      ) {
+        isModified.value = true;
+        return;
+      }
 
       if (
         onlyMembersValue !==
@@ -937,6 +959,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     authenticators,
     validationStrategy,
     votingStrategies,
+    proposalValidation,
     onlyMembers,
     guidelines,
     template,

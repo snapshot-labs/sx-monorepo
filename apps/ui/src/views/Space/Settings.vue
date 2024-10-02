@@ -25,6 +25,7 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  proposalValidation,
   onlyMembers,
   guidelines,
   template,
@@ -395,6 +396,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
     >
       <FormSpaceProposal
+        v-model:proposal-validation="proposalValidation"
         v-model:only-members="onlyMembers"
         v-model:guidelines="guidelines"
         v-model:template="template"
