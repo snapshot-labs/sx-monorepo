@@ -21,6 +21,8 @@ import { getValidator } from '@/helpers/validation';
 import { StrategyConfig } from '@/networks/types';
 import { ChainId, NetworkID, Space, Validation } from '@/types';
 
+const SCORE_API_URL = 'https://score.snapshot.org/api/validations';
+
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
@@ -50,7 +52,7 @@ async function fetchValidations() {
   hasError.value = false;
 
   try {
-    const response = await fetch('https://score.snapshot.org/api/validations');
+    const response = await fetch(SCORE_API_URL);
     validations.value = Object.values(await response.json());
   } catch (e) {
     console.log('failed to load validations', e);
