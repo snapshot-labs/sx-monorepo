@@ -35,6 +35,10 @@ const template = defineModel<string>('template', {
   required: true
 });
 
+defineProps<{
+  isProposalValidationValid: boolean;
+}>();
+
 const emit = defineEmits<{
   (e: 'updateValidity', valid: boolean): void;
 }>();
@@ -102,6 +106,11 @@ watchEffect(() => {
       v-model="onlyMembers"
       title="Allow only authors to submit a proposal"
     />
+    <UiMessage v-if="!isProposalValidationValid" type="danger" class="mt-3">
+      Proposal validation is required to prevent unauthorized proposals and
+      spam. If you don't want proposal validation you can toggle only the "Allow
+      only authors to submit a proposal" option.
+    </UiMessage>
   </div>
   <h4 class="eyebrow mb-2 font-medium">Proposal</h4>
   <div class="s-box mb-4">
