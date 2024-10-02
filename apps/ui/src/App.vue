@@ -45,9 +45,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <LayoutSplashScreen
-    v-if="routeName == 'splash-screen' || !whiteLabelResolved"
-  />
+  <LayoutSplashScreen v-if="!whiteLabelResolved" />
   <LayoutSite v-else-if="routeName === 'site'" />
   <LayoutApp v-else />
 </template>
