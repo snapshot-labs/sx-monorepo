@@ -23,11 +23,16 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  onlyMembers,
+  guidelines,
+  template,
   quorumType,
   quorum,
   votingType,
   privacy,
   ignoreAbstainVotes,
+  snapshotChainId,
+  strategies,
   members,
   parent,
   children,
@@ -42,6 +47,10 @@ const {
 const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
+const isAdvancedFormResolved = ref(false);
+const hasStrategiesErrors = ref(false);
+const hasVotingErrors = ref(false);
+const hasProposalErrors = ref(false);
 const hasAdvancedErrors = ref(false);
 const changeControllerModalOpen = ref(false);
 const executeFn = ref(save);
@@ -52,9 +61,11 @@ type Tab = {
     | 'profile'
     | 'delegations'
     | 'treasuries'
+    | 'strategies'
     | 'authenticators'
     | 'proposal-validation'
     | 'voting-strategies'
+    | 'proposal'
     | 'voting'
     | 'members'
     | 'labels'
@@ -93,6 +104,11 @@ const tabs = computed<Tab[]>(
         visible: !isOffchainNetwork.value
       },
       {
+        id: 'strategies',
+        name: 'Strategies',
+        visible: isOffchainNetwork.value
+      },
+      {
         id: 'proposal-validation',
         name: 'Proposal validation',
         visible: !isOffchainNetwork.value
@@ -101,6 +117,11 @@ const tabs = computed<Tab[]>(
         id: 'voting-strategies',
         name: 'Voting strategies',
         visible: !isOffchainNetwork.value
+      },
+      {
+        id: 'proposal',
+        name: 'Proposal',
+        visible: isOffchainNetwork.value
       },
       {
         id: 'voting',
@@ -170,6 +191,26 @@ const error = computed(() => {
 
     if (!authenticators.value.length) {
       return 'At least one authenticator is required';
+    }
+  } else {
+    if (!strategies.value.length) {
+      return 'At least one strategy is required';
+    }
+
+    if (hasStrategiesErrors.value) {
+      return 'Strategies are invalid';
+    }
+
+    if (hasProposalErrors.value) {
+      return 'Proposal settings are invalid';
+    }
+
+    if (hasVotingErrors.value) {
+      return 'Voting settings are invalid';
+    }
+
+    if (hasAdvancedErrors.value && isAdvancedFormResolved.value) {
+      return 'Advanced settings are invalid';
     }
   }
 
@@ -297,6 +338,19 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :limit="isOffchainNetwork ? 10 : undefined"
       />
     </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="activeTab === 'strategies'"
+      title="Strategies"
+      description="Strategies are sets of conditions used to calculate user's voting power."
+    >
+      <FormSpaceStrategies
+        v-model:snapshot-chain-id="snapshotChainId"
+        v-model:strategies="strategies"
+        :network-id="space.network"
+        :space="space"
+        @update-validity="v => (hasStrategiesErrors = !v)"
+      />
+    </UiContainerSettings>
     <FormStrategies
       v-if="activeTab === 'authenticators'"
       v-model="authenticators"
@@ -326,6 +380,18 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
     />
     <UiContainerSettings
+      v-else-if="activeTab === 'proposal'"
+      title="Proposal"
+      description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
+    >
+      <FormSpaceProposal
+        v-model:only-members="onlyMembers"
+        v-model:guidelines="guidelines"
+        v-model:template="template"
+        @update-validity="v => (hasProposalErrors = !v)"
+      />
+    </UiContainerSettings>
+    <UiContainerSettings
       v-else-if="activeTab === 'voting'"
       title="Voting"
       description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
@@ -340,6 +406,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:privacy="privacy"
         v-model:ignore-abstain-votes="ignoreAbstainVotes"
         :space="space"
+        @update-validity="v => (hasVotingErrors = !v)"
       />
     </UiContainerSettings>
     <UiContainerSettings
@@ -424,11 +491,18 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :space-id="space.id"
         :is-controller="isController"
         @delete-space="handleSpaceDelete"
-        @update-validity="v => (hasAdvancedErrors = !v)"
+        @update-validity="
+          (valid, resolved) => {
+            hasAdvancedErrors = !valid;
+            isAdvancedFormResolved = resolved;
+          }
+        "
       />
     </UiContainerSettings>
     <UiToolbarBottom
-      v-if="(isModified && canModifySettings && !hasAdvancedErrors) || error"
+      v-if="
+        (isModified && isAdvancedFormResolved && canModifySettings) || error
+      "
       class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
       <h4

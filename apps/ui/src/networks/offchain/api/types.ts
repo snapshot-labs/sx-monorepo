@@ -140,3 +140,12 @@ export type ApiVote = {
   reason: string;
   created: number;
 };
+
+export type ApiStrategy = {
+  id: string;
+  author: string;
+  version: string;
+  spacesCount: number;
+  examples: any;
+  schema: any;
+};

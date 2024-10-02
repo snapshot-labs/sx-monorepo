@@ -20,6 +20,12 @@ export const MAX_30D_PROPOSALS = {
   turbo: 200
 };
 
+export const MAX_STRATEGIES = {
+  default: 8,
+  verified: 8,
+  turbo: 10
+};
+
 export const TURBO_URL =
   'https://docs.snapshot.org/user-guides/spaces/turbo-plan';
 export const VERIFIED_URL =

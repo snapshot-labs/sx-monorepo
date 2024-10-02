@@ -52,7 +52,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'updateValidity', valid: boolean): void;
+  (e: 'updateValidity', valid: boolean, resolved: boolean): void;
   (e: 'deleteSpace');
 }>();
 
@@ -135,12 +135,12 @@ function deleteChild(i: number) {
 }
 
 watchEffect(() => {
+  const resolved = parentSpaceValidationResult.value?.value === parent.value;
   const valid =
     Object.keys(formErrors.value).length === 0 &&
-    parentSpaceValidationResult.value?.valid &&
-    parentSpaceValidationResult.value?.value === parent.value;
+    parentSpaceValidationResult.value?.valid;
 
-  emit('updateValidity', !!valid);
+  emit('updateValidity', !!valid, resolved);
 });
 </script>
 

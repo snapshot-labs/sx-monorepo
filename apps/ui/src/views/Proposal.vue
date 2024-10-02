@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
-import {
-  getCacheHash,
-  getFormattedVotingPower,
-  getStampUrl,
-  sanitizeUrl
-} from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
-import { Choice } from '@/types';
+import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
+import { Choice, Space } from '@/types';
+
+const props = defineProps<{
+  space: Space;
+}>();
 
 const route = useRoute();
 const proposalsStore = useProposalsStore();
@@ -16,29 +14,22 @@ const {
   fetch: fetchVotingPower,
   reset: resetVotingPower
 } = useVotingPower();
-const { setFavicon } = useFavicon();
-const { param } = useRouteParser('space');
-const { resolved, address: spaceAddress, networkId } = useResolve(param);
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
 
 const modalOpenVote = ref(false);
 const selectedChoice = ref<Choice | null>(null);
-const { loadVotes, votes } = useAccount();
+const { votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
 
 const id = computed(() => route.params.proposal as string);
 const proposal = computed(() => {
-  if (!resolved.value || !spaceAddress.value || !networkId.value) {
-    return null;
-  }
-
   return proposalsStore.getProposal(
-    spaceAddress.value,
+    props.space.id,
     id.value,
-    networkId.value
+    props.space.network
   );
 });
 
@@ -100,19 +91,11 @@ watch(
 );
 
 watch(
-  [networkId, spaceAddress, id],
-  async ([networkId, spaceAddress, id]) => {
-    if (!resolved.value) {
-      // NOTE: id's not updated in-sync with networkId and spaceAddress (those are resolved async)
-      // we want to ignore updates if the values are not resolved yet
-      return;
-    }
-
-    if (!networkId || !spaceAddress) return;
-
+  id,
+  async id => {
     modalOpenVote.value = false;
     editMode.value = false;
-    await proposalsStore.fetchProposal(spaceAddress, id, networkId);
+    await proposalsStore.fetchProposal(props.space.id, id, props.space.network);
 
     if (discussion.value) {
       discourseTopic.value = await loadSingleTopic(discussion.value);
@@ -122,22 +105,8 @@ watch(
 );
 
 watchEffect(() => {
-  if (!resolved.value || !networkId.value || !spaceAddress.value) return;
-
-  loadVotes(networkId.value, [spaceAddress.value]);
-});
-
-watchEffect(() => {
   if (!proposal.value) return;
 
-  const faviconUrl = getStampUrl(
-    offchainNetworks.includes(proposal.value.network) ? 'space' : 'space-sx',
-    proposal.value.space.id,
-    16,
-    getCacheHash(proposal.value.space.avatar)
-  );
-
-  setFavicon(faviconUrl);
   setTitle(proposal.value.title || `Proposal #${proposal.value.proposal_id}`);
 });
 </script>
@@ -247,9 +216,9 @@ watchEffect(() => {
               </template>
             </h4>
             <IndicatorVotingPower
-              v-if="web3.account && networkId && (!currentVote || editMode)"
-              v-slot="props"
-              :network-id="networkId"
+              v-if="web3.account && (!currentVote || editMode)"
+              v-slot="votingPowerProps"
+              :network-id="proposal.network"
               :voting-power="votingPower"
               class="mb-2 flex items-center"
               @fetch-voting-power="handleFetchVotingPower"
@@ -271,7 +240,7 @@ watchEffect(() => {
               </div>
               <template v-else>
                 <span class="mr-1.5">Voting power:</span>
-                <button type="button" @click="props.onClick">
+                <button type="button" @click="votingPowerProps.onClick">
                   <UiLoading
                     v-if="!votingPower || votingPower.status === 'loading'"
                   />

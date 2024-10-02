@@ -329,3 +329,33 @@ export const LEADERBOARD_QUERY = gql`
     }
   }
 `;
+
+const STRATEGY_FRAGMENT = gql`
+  fragment offchainStrategyFragment on StrategyItem {
+    id
+    author
+    about
+    version
+    spacesCount
+    examples
+    schema
+  }
+`;
+
+export const STRATEGIES_QUERY = gql`
+  query Strategies {
+    strategies {
+      ...offchainStrategyFragment
+    }
+  }
+  ${STRATEGY_FRAGMENT}
+`;
+
+export const STRATEGY_QUERY = gql`
+  query Strategy($id: String!) {
+    strategy(id: $id) {
+      ...offchainStrategyFragment
+    }
+  }
+  ${STRATEGY_FRAGMENT}
+`;

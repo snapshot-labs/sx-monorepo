@@ -35,6 +35,10 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const emit = defineEmits<{
+  (e: 'updateValidity', valid: boolean): void;
+}>();
+
 const QUORUM_DEFINITION = {
   type: 'number',
   title: 'Quorum',
@@ -99,6 +103,10 @@ function getIsMaxVotingPeriodValid(value: number) {
     props.space.min_voting_period
   );
 }
+
+watchEffect(() => {
+  emit('updateValidity', Object.values(errors.value).length === 0);
+});
 </script>
 
 <template>

@@ -120,9 +120,16 @@ router.afterEach(() => {
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
+      <AppBottomNav
+        v-if="web3.account"
+        :class="[
+          `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
+          { 'app-bottom-nav-open': uiStore.sideMenuOpen }
+        ]"
+      />
       <AppSidebar
         :class="[
-          `hidden lg:flex app-sidebar h-screen fixed inset-y-0`,
+          `hidden lg:flex app-sidebar fixed inset-y-0`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
@@ -176,6 +183,7 @@ router.afterEach(() => {
 
 <style lang="scss" scoped>
 $sidebarWidth: 72px;
+$mobileMenuHeight: 72px;
 $navWidth: 240px;
 $placeholderSidebarWidth: 240px;
 
@@ -218,6 +226,22 @@ $placeholderSidebarWidth: 240px;
 
       & ~ :deep(main) {
         @apply z-[51];
+      }
+    }
+  }
+}
+
+.app-bottom-nav {
+  height: $mobileMenuHeight;
+
+  @media (max-width: 767px) {
+    &-open {
+      @apply grid;
+
+      & ~ .backdrop,
+      & ~ .app-nav-open,
+      & ~ .app-sidebar-open {
+        @apply bottom-[#{$mobileMenuHeight}];
       }
     }
   }
