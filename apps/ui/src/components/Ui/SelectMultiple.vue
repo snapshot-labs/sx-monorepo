@@ -5,6 +5,7 @@ import {
   ListboxOption,
   ListboxOptions
 } from '@headlessui/vue';
+import { Float } from '@headlessui-float/vue';
 import { DefinitionWithMultipleOptions } from '@/types';
 
 defineOptions({ inheritAttrs: false });
@@ -64,50 +65,57 @@ watch(model, () => {
 </script>
 
 <template>
-  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
-    <Listbox v-slot="{ open }" v-model="inputValue" multiple>
-      <ListboxButton
-        class="s-input !flex items-center justify-between"
-        :class="{
-          '!rounded-b-none': open
-        }"
-      >
-        <span
+  <UiWrapperInput
+    :definition="definition"
+    :error="error"
+    :dirty="dirty"
+    class="relative"
+  >
+    <Listbox v-slot="{ open }" v-model="inputValue" multiple as="div">
+      <Float adaptive-width strategy="fixed" placement="bottom-end">
+        <ListboxButton
+          class="s-input !flex items-center justify-between"
           :class="{
-            '!text-skin-text/40': inputValue.length === 0
+            '!rounded-b-none': open
           }"
         >
-          {{ currentValue }}
-        </span>
-        <IH-chevron-up v-if="open" />
-        <IH-chevron-down v-else />
-      </ListboxButton>
-      <ListboxOptions
-        class="top-[59px] overflow-hidden bg-skin-border rounded-b-lg border-t-skin-text/10 border absolute z-30 w-full shadow-xl"
-      >
-        <div class="max-h-[208px] overflow-y-auto px-3">
-          <ListboxOption
-            v-for="item in definition.options"
-            v-slot="{ selected, disabled }"
-            :key="item.id"
-            :value="item.id"
-            class="flex items-center justify-between"
-            :disabled="isItemDisabled(item.id)"
+          <span
+            :class="{
+              '!text-skin-text/40': inputValue.length === 0
+            }"
           >
-            <component :is="item.icon" class="size-[20px] mr-2" />
-            <span
-              class="w-full py-2 text-skin-link"
-              :class="{
-                'opacity-40': disabled,
-                'cursor-pointer': !disabled
-              }"
+            {{ currentValue }}
+          </span>
+          <IH-chevron-up v-if="open" />
+          <IH-chevron-down v-else />
+        </ListboxButton>
+        <ListboxOptions
+          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl"
+        >
+          <div class="max-h-[208px] overflow-y-auto px-3">
+            <ListboxOption
+              v-for="item in definition.options"
+              v-slot="{ selected, disabled }"
+              :key="item.id"
+              :value="item.id"
+              class="flex items-center justify-between"
+              :disabled="isItemDisabled(item.id)"
             >
-              {{ item.name || item.id }}
-            </span>
-            <IH-check v-if="selected" class="text-skin-success" />
-          </ListboxOption>
-        </div>
-      </ListboxOptions>
+              <component :is="item.icon" class="size-[20px] mr-2" />
+              <span
+                class="w-full py-2 text-skin-link"
+                :class="{
+                  'opacity-40': disabled,
+                  'cursor-pointer': !disabled
+                }"
+              >
+                {{ item.name || item.id }}
+              </span>
+              <IH-check v-if="selected" class="text-skin-success" />
+            </ListboxOption>
+          </div>
+        </ListboxOptions>
+      </Float>
     </Listbox>
   </UiWrapperInput>
 </template>
