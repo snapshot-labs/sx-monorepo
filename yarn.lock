@@ -2364,7 +2364,7 @@
   resolved "https://registry.yarnpkg.com/@safe-global/safe-gateway-typescript-sdk/-/safe-gateway-typescript-sdk-3.14.0.tgz#9581c524c1ea4956555f40761eb6b4007392aa82"
   integrity sha512-/dqU66RvHw50n+7x3nwnJedq8V6iLQyoWitNdjx5cFTBmae+rpP+LvHq+LqZfXJVkB1qNytMdjFjdyES0t79gQ==
 
-"@scure/base@^1.1.3", "@scure/base@~1.1.0", "@scure/base@~1.1.2", "@scure/base@~1.1.3", "@scure/base@~1.1.4":
+"@scure/base@~1.1.0", "@scure/base@~1.1.2", "@scure/base@~1.1.3", "@scure/base@~1.1.4":
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.5.tgz#1d85d17269fe97694b9c592552dd9e5e33552157"
   integrity sha512-Brj9FiG2W1MRQSTB212YVPRrcbjkv48FoZi/u4l/zds/ieRrqsh7aUf6CLwkAq61oKXr/ZlTzlY66gLIj3TFTQ==
@@ -2419,14 +2419,6 @@
   dependencies:
     "@noble/hashes" "~1.3.2"
     "@scure/base" "~1.1.4"
-
-"@scure/starknet@~0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@scure/starknet/-/starknet-0.3.0.tgz#b8273a42fc721025f8098b1f1d96368a7067e1c4"
-  integrity sha512-Ma66yZlwa5z00qI5alSxdWtIpky5LBhy22acVFdoC5kwwbd9uDyMWEYzWHdNyKmQg9t5Y2UOXzINMeb3yez+Gw==
-  dependencies:
-    "@noble/curves" "~1.2.0"
-    "@noble/hashes" "~1.3.2"
 
 "@scure/starknet@~1.0.0":
   version "1.0.0"
@@ -2551,10 +2543,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.18.tgz#fcbd86d4557821bff774d60e5c636ad47ed85d77"
   integrity sha512-v6tj7l19KJUWjBbsWpwxaYO2mlIDBFyAG0OMSPhUgrhltO7b6R4Ejxn2k4Qgi/NtlnOrj+3Gt3eQRry8Jfgjrg==
 
-"@snapshot-labs/snapshot.js@^0.12.13":
-  version "0.12.13"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.13.tgz#40b6cbf20ec4f1222bb231d1b3e26e5f702bf912"
-  integrity sha512-e9pXdQA45tO5+af42PkOYI01WAPPR7IrQDejjUdhz3y98e7m/Na9Foqlbj6nIksnTJ4GubcmOZV7iQzcrNw/kw==
+"@snapshot-labs/snapshot.js@^0.12.19":
+  version "0.12.19"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.19.tgz#f292406065c4b26072512e2f74be85b9bf5f07b6"
+  integrity sha512-UeT8g+kOVqjvcKPL9Kttw7Tg2JUrFlDa0H0UOgjT0uwasmLWY1ZG27856X8jOCqIRjTj/erPPhjRbr8SfCurtQ==
   dependencies:
     "@ensdomains/eth-ens-namehash" "^2.0.15"
     "@ethersproject/abi" "^5.6.4"
@@ -4161,17 +4153,7 @@ ajv@^6.12.3, ajv@^6.12.4:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.0, ajv@^8.12.0:
-  version "8.12.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
-  integrity sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==
-  dependencies:
-    fast-deep-equal "^3.1.1"
-    json-schema-traverse "^1.0.0"
-    require-from-string "^2.0.2"
-    uri-js "^4.2.2"
-
-ajv@^8.11.0:
+ajv@^8.0.0, ajv@^8.11.0, ajv@^8.12.0:
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.17.1.tgz#37d9a5c776af6bc92d7f4f9510eba4c0a60d11a6"
   integrity sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==
@@ -12136,20 +12118,7 @@ starknet@6.11.0:
     ts-mixer "^6.0.3"
     url-join "^4.0.1"
 
-starknet@^5.19.3:
-  version "5.24.3"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.24.3.tgz#1d8a84047783ea122a6cf4f2dac59bfa6d628154"
-  integrity sha512-v0TuaNc9iNtHdbIRzX372jfQH1vgx2rwBHQDMqK4DqjJbwFEE5dog8Go6rGiZVW750NqRSWrZ7ahqyRNc3bscg==
-  dependencies:
-    "@noble/curves" "~1.2.0"
-    "@scure/base" "^1.1.3"
-    "@scure/starknet" "~0.3.0"
-    isomorphic-fetch "^3.0.0"
-    lossless-json "^2.0.8"
-    pako "^2.0.4"
-    url-join "^4.0.1"
-
-starknet@^5.24.3:
+starknet@^5.19.3, starknet@^5.24.3:
   version "5.29.0"
   resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.29.0.tgz#26d8074340f26a2da4bc373169a1a5ed6dc9bedf"
   integrity sha512-eEcd6uiYIwGvl8MtHOsXGBhREqjJk84M/qUkvPLQ3n/JAMkbKBGnygDlh+HAsvXJsGlMQfwrcVlm6KpDoPha7w==
