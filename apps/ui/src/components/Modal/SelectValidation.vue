@@ -18,10 +18,14 @@ const validations = ref([] as ValidationDetails[]);
 import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { Validation } from '@/types';
+import { StrategyConfig } from '@/networks/types';
+import { ChainId, NetworkID, Space, Validation } from '@/types';
 
 const props = defineProps<{
   open: boolean;
+  networkId: NetworkID;
+  defaultChainId: ChainId;
+  space: Space;
   type: 'voting' | 'proposal';
   current?: Validation;
 }>();
@@ -36,6 +40,8 @@ const hasError = ref(false);
 const selectedValidation = ref(null as ValidationDetails | null);
 const form = ref({} as Record<string, any>);
 const rawParams = ref('{}');
+const useCustomStrategies = ref(false);
+const customStrategies = ref([] as StrategyConfig[]);
 
 async function fetchValidations() {
   if (isLoading.value || validations.value.length) return;
@@ -56,9 +62,6 @@ async function fetchValidations() {
 
 const filteredValidations = computed(() => {
   const apiValidations = validations.value.filter(validation => {
-    // TODO: add support for basic
-    if (validation.key === 'basic') return false;
-
     if (props.type === 'proposal') return true;
 
     return !validation.proposalValidationOnly;
@@ -155,7 +158,27 @@ function handleSelect(validationDetails: ValidationDetails) {
   }
 
   selectedValidation.value = validationDetails;
-  if (selectedValidation.value.key === 'passport-gated') {
+  if (selectedValidation.value.key !== props.current?.name) {
+    form.value = {};
+    rawParams.value = '{}';
+  }
+
+  if (selectedValidation.value.key === 'basic') {
+    if (form.value.strategies) {
+      useCustomStrategies.value = true;
+
+      customStrategies.value = form.value.strategies.map(strategy => ({
+        id: crypto.randomUUID(),
+        chainId: strategy.network,
+        address: strategy.name,
+        name: strategy.name,
+        paramsDefinition: null,
+        params: clone(strategy.params)
+      }));
+    }
+
+    form.value.strategies ??= [];
+  } else if (selectedValidation.value.key === 'passport-gated') {
     form.value.scoreThreshold ??= 0;
     form.value.operator ??= 'NONE';
     form.value.stamps ??= [];
@@ -166,6 +189,19 @@ function handleApply() {
   if (!selectedValidation.value) return;
 
   const params = definition.value ? form.value : JSON.parse(rawParams.value);
+
+  if (selectedValidation.value.key === 'basic') {
+    if (useCustomStrategies.value) {
+      params.strategies = customStrategies.value.map(strategy => ({
+        name: strategy.name,
+        network: strategy.chainId,
+        params: strategy.params
+      }));
+    } else {
+      delete params.strategies;
+    }
+  }
+
   emit('save', { name: selectedValidation.value.key, params });
   emit('close');
 }
@@ -220,6 +256,22 @@ watch(
           }"
           :error="formErrors.rawParams"
         />
+        <template v-if="selectedValidation.key === 'basic'">
+          <UiSwitch
+            v-model="useCustomStrategies"
+            title="Use custom strategies"
+            tooltip="Calculate the score with a different configuration of Voting Strategies"
+          />
+          <UiStrategiesConfiguratorOffchain
+            v-if="useCustomStrategies"
+            v-model="customStrategies"
+            class="mt-3"
+            allow-duplicates
+            hide-empty-message
+            :network-id="networkId"
+            :default-chain-id="defaultChainId"
+          />
+        </template>
       </div>
       <UiSelector
         v-for="validation in filteredValidations"

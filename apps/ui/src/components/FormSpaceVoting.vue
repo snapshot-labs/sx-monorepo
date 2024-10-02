@@ -7,7 +7,7 @@ import {
 import { _d } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { Space, Validation, VoteType } from '@/types';
+import { ChainId, Space, Validation, VoteType } from '@/types';
 
 const votingDelay = defineModel<number | null>('votingDelay', {
   required: true
@@ -39,6 +39,7 @@ const ignoreAbstainVotes = defineModel<boolean>('ignoreAbstainVotes', {
 });
 
 const props = defineProps<{
+  snapshotChainId: ChainId;
   space: Space;
 }>();
 
@@ -308,6 +309,9 @@ watchEffect(() => {
     <ModalSelectValidation
       type="voting"
       :open="isSelectValidationModalOpen"
+      :network-id="space.network"
+      :default-chain-id="snapshotChainId"
+      :space="space"
       :current="voteValidation"
       @close="isSelectValidationModalOpen = false"
       @save="value => (voteValidation = value)"

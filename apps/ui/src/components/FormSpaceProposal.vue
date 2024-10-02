@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
-import { Validation } from '@/types';
+import { ChainId, NetworkID, Space, Validation } from '@/types';
 
 const GUIDELINES_DEFINITION = {
   type: 'string',
@@ -36,6 +36,9 @@ const template = defineModel<string>('template', {
 });
 
 defineProps<{
+  networkId: NetworkID;
+  space: Space;
+  snapshotChainId: ChainId;
   isProposalValidationValid: boolean;
 }>();
 
@@ -130,6 +133,9 @@ watchEffect(() => {
     <ModalSelectValidation
       type="proposal"
       :open="isSelectValidationModalOpen"
+      :network-id="networkId"
+      :default-chain-id="snapshotChainId"
+      :space="space"
       :current="proposalValidation"
       @close="isSelectValidationModalOpen = false"
       @save="value => (proposalValidation = value)"
