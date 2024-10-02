@@ -13,11 +13,8 @@ const strategies = defineModel<StrategyConfig[]>('strategies', {
 
 const props = defineProps<{
   networkId: NetworkID;
+  isTicketValid: boolean;
   space: Space;
-}>();
-
-const emit = defineEmits<{
-  (e: 'updateValidity', valid: boolean): void;
 }>();
 
 const isStrategiesModalOpen = ref(false);
@@ -32,13 +29,6 @@ const strategiesLimit = computed(() => {
       : 'default';
 
   return MAX_STRATEGIES[spaceType];
-});
-
-const isTicketValid = computed(() => {
-  return !(
-    strategies.value.some(s => s.address === 'ticket') &&
-    props.space.additionalRawData?.voteValidation.name === 'any'
-  );
 });
 
 function handleAddStrategy(strategy: StrategyTemplate) {
@@ -100,10 +90,6 @@ function validateStrategy(params: Record<string, any>, network: ChainId) {
 function handleRemoveStrategy(strategy: StrategyConfig) {
   strategies.value = strategies.value.filter(s => s.id !== strategy.id);
 }
-
-watchEffect(() => {
-  emit('updateValidity', isTicketValid.value);
-});
 </script>
 
 <template>

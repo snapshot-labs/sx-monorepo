@@ -51,7 +51,6 @@ const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
 const isAdvancedFormResolved = ref(false);
-const hasStrategiesErrors = ref(false);
 const hasVotingErrors = ref(false);
 const hasProposalErrors = ref(false);
 const hasAdvancedErrors = ref(false);
@@ -182,6 +181,13 @@ const executionStrategies = computed(() => {
   });
 });
 
+const isTicketValid = computed(() => {
+  return !(
+    strategies.value.some(s => s.address === 'ticket') &&
+    voteValidation.value.name === 'any'
+  );
+});
+
 const error = computed(() => {
   if (Object.values(formErrors.value).length > 0) {
     return 'Space profile is invalid';
@@ -200,7 +206,7 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (hasStrategiesErrors.value) {
+    if (!isTicketValid.value) {
       return 'Strategies are invalid';
     }
 
@@ -351,8 +357,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:snapshot-chain-id="snapshotChainId"
         v-model:strategies="strategies"
         :network-id="space.network"
+        :is-ticket-valid="isTicketValid"
         :space="space"
-        @update-validity="v => (hasStrategiesErrors = !v)"
       />
     </UiContainerSettings>
     <FormStrategies
