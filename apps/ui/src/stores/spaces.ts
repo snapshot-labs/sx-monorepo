@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { getNetwork } from '@/networks';
-import { SpacesFilter } from '@/networks/types';
 import { NetworkID } from '@/types';
 
 export const useSpacesStore = defineStore('spaces', () => {
