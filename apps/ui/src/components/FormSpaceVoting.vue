@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { PRIVACY_TYPES_INFO, VOTING_TYPES_INFO } from '@/helpers/constants';
+import {
+  PRIVACY_TYPES_INFO,
+  VALIDATION_TYPES_INFO,
+  VOTING_TYPES_INFO
+} from '@/helpers/constants';
 import { _d } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { Space, VoteType } from '@/types';
+import { Space, Validation, VoteType } from '@/types';
 
 const votingDelay = defineModel<number | null>('votingDelay', {
   required: true
@@ -25,6 +29,9 @@ const votingType = defineModel<VoteType | 'any'>('votingType', {
   required: true
 });
 const privacy = defineModel<'none' | 'shutter'>('privacy', {
+  required: true
+});
+const voteValidation = defineModel<Validation>('voteValidation', {
   required: true
 });
 const ignoreAbstainVotes = defineModel<boolean>('ignoreAbstainVotes', {
@@ -51,6 +58,7 @@ const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
 
 const isSelectVotingTypeModalOpen = ref(false);
 const isSelectPrivacyModalOpen = ref(false);
+const isSelectValidationModalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.space.network));
 const isOffchainNetwork = computed(() =>
@@ -252,6 +260,30 @@ watchEffect(() => {
           <IH-chevron-down />
         </button>
       </UiWrapperInput>
+      <UiWrapperInput
+        :definition="{
+          title: 'Validation',
+          tooltip:
+            'The type of validation used to determine if a user can vote. (Enforced on all future proposals)'
+        }"
+      >
+        <button
+          type="button"
+          class="s-input !flex flex-row justify-between items-center"
+          @click="isSelectValidationModalOpen = true"
+        >
+          <div>
+            {{
+              VALIDATION_TYPES_INFO[
+                voteValidation.name === 'any'
+                  ? 'any-voting'
+                  : voteValidation.name
+              ].label
+            }}
+          </div>
+          <IH-chevron-down />
+        </button>
+      </UiWrapperInput>
       <UiSwitch
         v-model="ignoreAbstainVotes"
         title="Ignore abstain votes in basic voting results"
@@ -272,6 +304,13 @@ watchEffect(() => {
       :initial-state="privacy"
       @save="value => (privacy = value)"
       @close="isSelectPrivacyModalOpen = false"
+    />
+    <ModalSelectValidation
+      type="voting"
+      :open="isSelectValidationModalOpen"
+      :current="voteValidation"
+      @close="isSelectValidationModalOpen = false"
+      @save="value => (voteValidation = value)"
     />
   </teleport>
 </template>

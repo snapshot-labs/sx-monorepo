@@ -32,6 +32,7 @@ const {
   quorum,
   votingType,
   privacy,
+  voteValidation,
   ignoreAbstainVotes,
   snapshotChainId,
   strategies,
@@ -407,6 +408,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:quorum="quorum"
         v-model:voting-type="votingType"
         v-model:privacy="privacy"
+        v-model:vote-validation="voteValidation"
         v-model:ignore-abstain-votes="ignoreAbstainVotes"
         :space="space"
         @update-validity="v => (hasVotingErrors = !v)"
