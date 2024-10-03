@@ -7,14 +7,15 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { _n, shorten } from '@/helpers/utils';
+import { ChainId, NetworkID } from '@/types';
 
 const props = defineProps<{
   searchValue: string;
   loading: boolean;
   assets: Token[];
   address: string;
-  network: number;
-  networkId: string;
+  network: ChainId;
+  networkId: NetworkID;
 }>();
 
 const emit = defineEmits<{
@@ -61,6 +62,11 @@ function handlePick(token: Token) {
 
 async function fetchCustomToken(address) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
+
+  if (typeof props.network === 'string') {
+    console.log('network is not a number (starknet is not supported)');
+    return;
+  }
 
   customTokenLoading.value = true;
 

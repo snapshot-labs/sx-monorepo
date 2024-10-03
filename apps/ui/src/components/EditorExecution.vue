@@ -3,6 +3,7 @@ import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
+import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
 
@@ -75,7 +76,13 @@ function editTx(index: number) {
 }
 
 async function handleSimulateClick() {
-  if (simulationState.value !== null || !treasury.value) return;
+  if (
+    simulationState.value !== null ||
+    !treasury.value ||
+    typeof treasury.value.network === 'string'
+  ) {
+    return;
+  }
 
   simulationState.value = 'SIMULATING';
 
@@ -128,7 +135,7 @@ watch(
             :class="{
               'text-skin-border': disabled
             }"
-            v-text="getExecutionName(props.space.network, strategy.type)"
+            v-text="treasury.name || shorten(treasury.wallet)"
           />
           <div
             class="text-skin-text text-[17px] truncate"
@@ -168,7 +175,7 @@ watch(
           </UiTooltip>
         </div>
       </div>
-      <template v-if="model.length > 0 && treasury">
+      <template v-if="model.length > 0 && treasury && treasury.networkId">
         <UiLabel label="Transactions" class="border-t" />
         <div>
           <Draggable
@@ -251,7 +258,7 @@ watch(
         @add="addTx"
       />
       <ModalSendNft
-        v-if="treasury"
+        v-if="treasury && treasury.networkId"
         :open="modalOpen.sendNft"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -261,7 +268,7 @@ watch(
         @add="addTx"
       />
       <ModalStakeToken
-        v-if="treasury"
+        v-if="treasury && treasury.networkId"
         :open="modalOpen.stakeToken"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -271,7 +278,7 @@ watch(
         @add="addTx"
       />
       <ModalTransaction
-        v-if="treasury"
+        v-if="treasury && treasury.networkId"
         :open="modalOpen.contractCall"
         :network="treasury.network"
         :extra-contacts="extraContacts"

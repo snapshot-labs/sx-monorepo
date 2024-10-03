@@ -27,6 +27,8 @@ export type NetworkID =
   | 'fantom'
   | 'base';
 
+export type ChainId = number | string;
+
 export type Choice =
   | 'for'
   | 'against'
@@ -63,10 +65,10 @@ export type SelectedStrategy = {
 };
 
 export type SpaceMetadataTreasury = {
-  name: string | null;
-  network: NetworkID | null;
-  address: string | null;
-  chainId?: number;
+  name: string;
+  network: Exclude<NetworkID, 's' | 's-tn'> | null;
+  address: string;
+  chainId?: ChainId;
 };
 
 export type SpaceMetadataLabel = {
