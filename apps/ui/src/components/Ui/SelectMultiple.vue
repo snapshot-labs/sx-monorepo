@@ -1,17 +1,12 @@
-<script setup lang="ts" generic="T extends string | number, U extends Item<T>">
+<script setup lang="ts" generic="T extends string | number">
 import {
   Listbox,
   ListboxButton,
   ListboxOption,
   ListboxOptions
 } from '@headlessui/vue';
-import { VNode } from 'vue';
-
-export type Item<T extends string | number> = {
-  id: T;
-  name: string;
-  icon?: VNode;
-};
+import { Float } from '@headlessui-float/vue';
+import { DefinitionWithMultipleOptions } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -19,11 +14,8 @@ const model = defineModel<T[]>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  definition: {
-    options: U[];
-    maxItems: number;
-    default?: T[];
-    examples?: string[];
+  definition: DefinitionWithMultipleOptions<T> & {
+    maxItems?: number;
   };
 }>();
 
@@ -35,7 +27,7 @@ const inputValue = computed({
       return props.definition.default;
     }
 
-    return model.value;
+    return model.value || [];
   },
   set(newValue: T[]) {
     dirty.value = true;
@@ -45,20 +37,24 @@ const inputValue = computed({
 
 const currentValue = computed(() => {
   if (inputValue.value.length === 0) {
-    return (
-      props.definition.examples?.[0] ||
-      `Select up to ${props.definition.maxItems} items`
-    );
+    const fallbackText =
+      props.definition.maxItems !== undefined
+        ? `Select up to ${props.definition.maxItems} items`
+        : 'Select one or more items';
+
+    return props.definition.examples?.[0] || fallbackText;
   }
 
   const currentItems = props.definition.options.filter(option =>
     inputValue.value.includes(option.id)
   );
 
-  return currentItems.map(item => item.name).join(', ');
+  return currentItems.map(item => item.name || item.id).join(', ');
 });
 
 function isItemDisabled(item: T) {
+  if (props.definition.maxItems === undefined) return false;
+
   if (inputValue.value.length < props.definition.maxItems) return false;
   return !inputValue.value.some(selectedItem => selectedItem === item);
 }
@@ -69,50 +65,64 @@ watch(model, () => {
 </script>
 
 <template>
-  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
-    <Listbox v-slot="{ open }" v-model="inputValue" multiple>
-      <ListboxButton
-        class="s-input !flex items-center justify-between"
-        :class="{
-          '!rounded-b-none': open
-        }"
-      >
-        <span
+  <UiWrapperInput
+    :definition="definition"
+    :error="error"
+    :dirty="dirty"
+    class="relative"
+  >
+    <Listbox v-slot="{ open }" v-model="inputValue" multiple as="div">
+      <Float adaptive-width strategy="fixed" placement="bottom-end">
+        <ListboxButton
+          class="s-input !flex items-center justify-between"
           :class="{
-            '!text-skin-text/40': inputValue.length === 0
+            '!rounded-b-none': open
           }"
         >
-          {{ currentValue }}
-        </span>
-        <IH-chevron-up v-if="open" />
-        <IH-chevron-down v-else />
-      </ListboxButton>
-      <ListboxOptions
-        class="top-[59px] overflow-hidden bg-skin-border rounded-b-lg border-t-skin-text/10 border absolute z-30 w-full shadow-xl"
-      >
-        <div class="max-h-[208px] overflow-y-auto px-3">
-          <ListboxOption
-            v-for="item in definition.options"
-            v-slot="{ selected, disabled }"
-            :key="item.id"
-            :value="item.id"
-            class="flex items-center justify-between"
-            :disabled="isItemDisabled(item.id)"
+          <span
+            :class="{
+              '!text-skin-text/40': inputValue.length === 0
+            }"
           >
-            <component :is="item.icon" class="size-[20px] mr-2" />
-            <span
-              class="w-full py-2 text-skin-link"
-              :class="{
-                'opacity-40': disabled,
-                'cursor-pointer': !disabled
-              }"
+            {{ currentValue }}
+          </span>
+          <IH-chevron-up v-if="open" />
+          <IH-chevron-down v-else />
+        </ListboxButton>
+        <ListboxOptions
+          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
+        >
+          <div class="max-h-[208px] overflow-y-auto">
+            <ListboxOption
+              v-for="item in definition.options"
+              v-slot="{ active, selected, disabled }"
+              :key="item.id"
+              :value="item.id"
+              :disabled="isItemDisabled(item.id)"
+              as="template"
             >
-              {{ item.name }}
-            </span>
-            <IH-check v-if="selected" class="text-skin-success" />
-          </ListboxOption>
-        </div>
-      </ListboxOptions>
+              <li
+                class="flex items-center justify-between px-3"
+                :class="{
+                  'bg-skin-bg/25': active
+                }"
+              >
+                <component :is="item.icon" class="size-[20px] mr-2" />
+                <span
+                  class="w-full py-2 text-skin-link"
+                  :class="{
+                    'opacity-40': disabled,
+                    'cursor-pointer': !disabled
+                  }"
+                >
+                  {{ item.name || item.id }}
+                </span>
+                <IH-check v-if="selected" class="text-skin-success" />
+              </li>
+            </ListboxOption>
+          </div>
+        </ListboxOptions>
+      </Float>
     </Listbox>
   </UiWrapperInput>
 </template>

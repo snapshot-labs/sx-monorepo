@@ -23,6 +23,7 @@ const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
 
 const STATUS_DEFINITION = {
+  type: 'string',
   enum: ['ACTIVE', 'INACTIVE'],
   options: [
     { id: 'ACTIVE', name: 'Active' },
