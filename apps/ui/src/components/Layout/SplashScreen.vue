@@ -8,7 +8,7 @@ function handleReloadClick() {
 }
 
 watch(
-  () => whiteLabelResolved.value,
+  whiteLabelResolved,
   resolved => {
     if (!resolved || failed.value) return;
 
