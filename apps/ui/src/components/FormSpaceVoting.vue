@@ -205,6 +205,7 @@ watchEffect(() => {
       <UiSelect
         v-model="quorumType"
         :definition="{
+          type: 'string',
           title: 'Quorum type',
           enum: ['default', 'rejection'],
           options: [

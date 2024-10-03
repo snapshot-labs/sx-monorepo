@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends string | number, U extends Item<T>">
+<script setup lang="ts" generic="T extends string | number">
 import {
   Combobox,
   ComboboxButton,
@@ -7,13 +7,7 @@ import {
   ComboboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
-import { VNode } from 'vue';
-
-export type Item<T extends string | number> = {
-  id: T;
-  name: string;
-  icon?: VNode;
-};
+import { DefinitionWithOptions } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -21,11 +15,7 @@ const model = defineModel<T>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  definition: {
-    options: U[];
-    default?: T;
-    examples?: string[];
-  } & any;
+  definition: DefinitionWithOptions<T>;
 }>();
 
 const dirty = ref(false);
@@ -33,7 +23,9 @@ const query = ref('');
 
 const filteredOptions = computed(() => {
   return props.definition.options.filter(option =>
-    option.name.toLowerCase().includes(query.value.toLowerCase())
+    (option.name || String(option.id))
+      .toLowerCase()
+      .includes(query.value.toLowerCase())
   );
 });
 
@@ -59,7 +51,7 @@ function handleFocus(event: FocusEvent, open: boolean) {
 
 function getDisplayValue(value: T) {
   const option = props.definition.options.find(option => option.id === value);
-  return option ? option.name : '';
+  return option ? option.name || String(option.id) : '';
 }
 
 watch(model, () => {
@@ -96,27 +88,34 @@ watch(model, () => {
           </ComboboxButton>
         </div>
         <ComboboxOptions
-          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl"
+          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
         >
-          <div class="max-h-[208px] px-3 overflow-y-auto">
+          <div class="max-h-[208px] overflow-y-auto">
             <ComboboxOption
               v-for="item in filteredOptions"
-              v-slot="{ selected, disabled }"
+              v-slot="{ selected, disabled, active }"
               :key="item.id"
               :value="item.id"
-              class="flex items-center justify-between"
+              as="template"
             >
-              <component :is="item.icon" class="size-[20px] mr-2" />
-              <span
-                class="w-full py-2 text-skin-link"
+              <li
+                class="flex items-center justify-between px-3"
                 :class="{
-                  'opacity-40': disabled,
-                  'cursor-pointer': !disabled
+                  'bg-skin-bg/25': active
                 }"
               >
-                {{ item.name }}
-              </span>
-              <IH-check v-if="selected" class="text-skin-success" />
+                <component :is="item.icon" class="size-[20px] mr-2" />
+                <span
+                  class="w-full py-2 text-skin-link"
+                  :class="{
+                    'opacity-40': disabled,
+                    'cursor-pointer': !disabled
+                  }"
+                >
+                  {{ item.name || item.id }}
+                </span>
+                <IH-check v-if="selected" class="text-skin-success" />
+              </li>
             </ComboboxOption>
           </div>
         </ComboboxOptions>

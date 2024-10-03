@@ -1,3 +1,4 @@
+import { VNode } from 'vue';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 
 // UI
@@ -452,4 +453,31 @@ export type Transaction =
 // Utils
 export type RequiredProperty<T> = {
   [P in keyof T]: Required<NonNullable<T[P]>>;
+};
+
+// UI
+export type BaseDefinition<T> = {
+  type: string;
+  format?: string;
+  title: string;
+  description?: string;
+  default?: T;
+  examples?: string[];
+  tooltip?: string;
+};
+
+export type DefinitionWithOptions<T> = BaseDefinition<T> & {
+  enum: T[];
+  options: SelectItem<T>[];
+};
+
+export type DefinitionWithMultipleOptions<T> = BaseDefinition<T[]> & {
+  enum: T[];
+  options: SelectItem<T>[];
+};
+
+export type SelectItem<T> = {
+  id: T;
+  name?: string;
+  icon?: VNode;
 };
