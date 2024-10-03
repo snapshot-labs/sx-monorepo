@@ -1,8 +1,7 @@
-import { getNetwork } from '@/networks';
+import { getNetwork, metadataNetwork } from '@/networks';
 import { useSpacesStore } from '@/stores/spaces';
 import { Space } from '@/types';
 
-const NETWORK = 's';
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
 
@@ -29,7 +28,7 @@ async function getSpace(domain: string): Promise<Space | null> {
   }
 
   const spacesStore = useSpacesStore();
-  const network = getNetwork(NETWORK);
+  const network = getNetwork(metadataNetwork);
   const space = (
     await network.api.loadSpaces({ limit: 1 }, loadSpacesParams)
   )[0];
