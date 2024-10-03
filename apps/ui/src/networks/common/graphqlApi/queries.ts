@@ -3,6 +3,8 @@ import gql from 'graphql-tag';
 const SPACE_FRAGMENT = gql`
   fragment spaceFragment on Space {
     id
+    verified
+    turbo
     metadata {
       name
       avatar
