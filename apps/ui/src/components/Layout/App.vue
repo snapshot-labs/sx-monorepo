@@ -127,7 +127,7 @@ watch(isSwiping, () => {
 });
 
 watch(
-  () => isWhiteLabel.value,
+  isWhiteLabel,
   async isWhiteLabel => {
     if (!isWhiteLabel) {
       setAppName(APP_NAME);
