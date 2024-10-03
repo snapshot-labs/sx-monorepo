@@ -426,7 +426,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       title="Labels"
       description="Labels are used to categorize proposals."
     >
-      <FormSpaceLabelsList v-model="form.labels" />
+      <FormSpaceLabels v-model="form.labels" />
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="activeTab === 'execution'"

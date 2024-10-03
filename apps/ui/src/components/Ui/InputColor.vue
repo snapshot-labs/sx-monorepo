@@ -5,13 +5,15 @@ export default {
 </script>
 
 <script setup lang="ts">
-const model = defineModel<string>();
-
 const props = defineProps<{
   loading?: boolean;
   error?: string;
   definition: any;
 }>();
+
+const model = defineModel<string>();
+
+const { currentMode } = useUserSkin();
 
 const dirty = ref(false);
 
@@ -20,18 +22,40 @@ const inputValue = computed({
     if (!model.value && !dirty.value && props.definition.default) {
       return props.definition.default;
     }
-
     return model.value;
   },
   set(newValue: string) {
     dirty.value = true;
-    model.value = newValue;
+    model.value = newValue.toUpperCase();
   }
 });
+
+const backgroundColor = computed(() => {
+  const color = inputValue.value;
+  return /^#[0-9A-F]{6}$/i.test(color)
+    ? color
+    : currentMode.value === 'dark'
+      ? '#000000'
+      : '#FFFFFF';
+});
+
+function generateRandomColor() {
+  model.value = `#${Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, '0')}`.toUpperCase();
+}
 
 watch(model, () => {
   dirty.value = true;
 });
+
+debouncedWatch(
+  () => model.value,
+  newColor => {
+    model.value = validateAndConvertColor(newColor || '');
+  },
+  { debounce: 1000 }
+);
 
 onMounted(() => {
   if (!model.value) {
@@ -39,10 +63,27 @@ onMounted(() => {
   }
 });
 
-function generateRandomColor() {
-  model.value = `#${Math.floor(Math.random() * 16777215)
-    .toString(16)
-    .padStart(6, '0')}`.toUpperCase();
+function validateAndConvertColor(color: string): string {
+  if (!color) return color;
+  if (color === 'BLACK') return '#000000';
+
+  // If color is not a hex color, convert it to hex
+  if (!color.startsWith('#')) {
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return color;
+    ctx.fillStyle = color;
+    const hexColor = ctx.fillStyle.toUpperCase();
+    if (hexColor !== '#000000') {
+      color = hexColor;
+    }
+  } else {
+    // If color is a 3-digit hex color, convert it to 6-digit hex color
+    if (/^#[0-9a-fA-F]{3}$/i.test(color)) {
+      const [r, g, b] = [color[1], color[2], color[3]];
+      color = `#${r}${r}${g}${g}${b}${b}`;
+    }
+  }
+  return color.toUpperCase();
 }
 </script>
 
@@ -57,10 +98,8 @@ function generateRandomColor() {
   >
     <div class="flex">
       <div
-        class="absolute size-[18px] mt-[30px] ml-3 rounded"
-        :style="{
-          backgroundColor: inputValue || '#eb4c5b'
-        }"
+        class="absolute size-[18px] mt-[30px] ml-3 rounded border border-skin-text border-opacity-20"
+        :style="{ backgroundColor: backgroundColor }"
       />
       <input
         :id="id"
