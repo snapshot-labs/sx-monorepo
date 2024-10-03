@@ -41,7 +41,6 @@ const hasError = ref(false);
 const selectedValidation = ref(null as ValidationDetails | null);
 const form = ref({} as Record<string, any>);
 const rawParams = ref('{}');
-const useCustomStrategies = ref(false);
 const customStrategies = ref([] as StrategyConfig[]);
 
 async function fetchValidations() {
@@ -163,8 +162,6 @@ function handleSelect(validationDetails: ValidationDetails) {
 
   if (selectedValidation.value.key === 'basic') {
     if (form.value.strategies) {
-      useCustomStrategies.value = true;
-
       customStrategies.value = form.value.strategies.map(strategy => ({
         id: crypto.randomUUID(),
         chainId: strategy.network,
@@ -189,7 +186,7 @@ function handleApply() {
   const params = definition.value ? form.value : JSON.parse(rawParams.value);
 
   if (selectedValidation.value.key === 'basic') {
-    if (useCustomStrategies.value) {
+    if (customStrategies.value.length) {
       params.strategies = customStrategies.value.map(strategy => ({
         name: strategy.name,
         network: strategy.chainId,
@@ -255,20 +252,28 @@ watch(
           :error="formErrors.rawParams"
         />
         <template v-if="selectedValidation.key === 'basic'">
-          <UiSwitch
-            v-model="useCustomStrategies"
-            title="Use custom strategies"
-            tooltip="Calculate the score with a different configuration of Voting Strategies"
-          />
+          <div class="flex items-center gap-1 mb-2">
+            <h4 class="eyebrow font-medium">Custom strategies</h4>
+            <UiTooltip
+              title="Calculate the score with a different configuration of Voting Strategies"
+            >
+              <IH-question-mark-circle class="shrink-0" />
+            </UiTooltip>
+          </div>
           <UiStrategiesConfiguratorOffchain
-            v-if="useCustomStrategies"
             v-model="customStrategies"
             class="mt-3"
             allow-duplicates
-            hide-empty-message
             :network-id="networkId"
             :default-chain-id="defaultChainId"
-          />
+          >
+            <template #empty>
+              <div class="p-3 border border-dashed rounded-lg text-center">
+                No custom strategies added, space voting strategies will be used
+                to compute score.
+              </div>
+            </template>
+          </UiStrategiesConfiguratorOffchain>
         </template>
       </div>
       <UiSelector

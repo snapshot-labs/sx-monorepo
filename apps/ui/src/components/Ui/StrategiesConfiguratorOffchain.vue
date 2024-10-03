@@ -9,7 +9,6 @@ const strategies = defineModel<StrategyConfig[]>({
 
 const props = defineProps<{
   networkId: NetworkID;
-  hideEmptyMessage?: boolean;
   allowDuplicates?: boolean;
   defaultChainId?: ChainId;
   limit?: number;
@@ -85,9 +84,9 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
 <template>
   <div>
     <div class="space-y-3 mb-3">
-      <div v-if="strategies.length === 0 && !hideEmptyMessage">
-        No strategies selected
-      </div>
+      <slot v-if="strategies.length === 0" name="empty">
+        <div>No strategies selected</div>
+      </slot>
       <FormStrategiesStrategyActive
         v-for="strategy in strategies"
         :key="strategy.id"
