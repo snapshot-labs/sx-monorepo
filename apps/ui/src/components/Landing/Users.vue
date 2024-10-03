@@ -56,50 +56,27 @@ const ORGS = [
   'frax.eth',
   'veyfi.eth',
   'ethenagovernance.eth'
-]; //.sort(() => 0.5 - Math.random());
+].sort(() => 0.5 - Math.random());
 </script>
 
 <template>
   <div class="border-b">
     <div class="py-6">
-      <div class="text-center relative">
-        <div
-          class="absolute z-10 top-0 bottom-0 left-0 w-[320px] max-w-[20%] bg-gradient-to-r from-skin-bg to-skin-bg/0"
-        />
-        <div
-          class="absolute z-10 top-0 bottom-0 right-0 w-[320px] max-w-[20%] bg-gradient-to-l from-skin-bg to-skin-bg/0"
-        />
-        <div class="relative flex overflow-hidden h-[56px]">
-          <div class="carousel flex">
-            <AppLink
-              v-for="(org, i) in ORGS"
-              :key="i"
-              :to="{ name: 'space-overview', params: { space: `s:${org}` } }"
-              class="size-[56px] ml-6"
-              tabindex="-1"
-            >
-              <img
-                :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
-                class="rounded-full"
-              />
-            </AppLink>
-          </div>
-          <div class="carousel-follower flex">
-            <AppLink
-              v-for="(org, i) in ORGS"
-              :key="i"
-              :to="{ name: 'space-overview', params: { space: `s:${org}` } }"
-              class="size-[56px] ml-6"
-              tabindex="-1"
-            >
-              <img
-                :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
-                class="rounded-full"
-              />
-            </AppLink>
-          </div>
-        </div>
-      </div>
+      <UiCarousel>
+        <AppLink
+          v-for="(org, i) in ORGS"
+          :key="i"
+          :to="{ name: 'space-overview', params: { space: `s:${org}` } }"
+          class="size-[56px] ml-6"
+          tabindex="-1"
+        >
+          <img
+            :alt="org"
+            :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
+            class="rounded-full"
+          />
+        </AppLink>
+      </UiCarousel>
     </div>
   </div>
 </template>
