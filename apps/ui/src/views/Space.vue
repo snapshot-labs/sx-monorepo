@@ -38,8 +38,9 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  if (!space.value) {
-    return setFavicon(null);
+  if (!space.value || isWhiteLabel) {
+    setFavicon(null);
+    return;
   }
 
   const faviconUrl = getStampUrl(
