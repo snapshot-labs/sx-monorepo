@@ -9,7 +9,7 @@ const { addNotification } = useUiStore();
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
 
-function toggleModal(open: boolean = false, labelId: string | null = null) {
+function setModalStatus(open: boolean = false, labelId: string | null = null) {
   modalOpen.value = open;
   activeLabelId.value = labelId;
 }
@@ -33,7 +33,7 @@ function handleSubmit(labelData) {
       ? [...labels.value, labelData]
       : labels.value.map(label => (label.id === id ? labelData : label));
 
-  toggleModal();
+  setModalStatus();
 }
 
 function handleDeleteLabel(id) {
@@ -57,7 +57,7 @@ function handleDeleteLabel(id) {
           </div>
         </div>
         <div class="flex gap-3">
-          <button type="button" @click="() => toggleModal(true, label.id)">
+          <button type="button" @click="() => setModalStatus(true, label.id)">
             <IH-pencil />
           </button>
           <button type="button" @click="() => handleDeleteLabel(label.id)">
@@ -69,7 +69,7 @@ function handleDeleteLabel(id) {
     <UiButton
       v-if="labels.length < 10"
       class="w-full flex items-center justify-center gap-1"
-      @click="() => toggleModal(true)"
+      @click="() => setModalStatus(true)"
     >
       <IH-plus class="shrink-0 size-[16px]" />
       Add label
@@ -79,7 +79,7 @@ function handleDeleteLabel(id) {
     <ModalLabelConfig
       :open="modalOpen"
       :initial-state="labels.find(l => l.id === activeLabelId)"
-      @close="toggleModal"
+      @close="setModalStatus"
       @add="handleSubmit"
     />
   </teleport>

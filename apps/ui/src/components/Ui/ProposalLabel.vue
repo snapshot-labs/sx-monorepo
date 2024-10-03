@@ -47,7 +47,7 @@ function checkColorProximity(color: string): {
 
 <template>
   <div
-    class="px-2 py-[6px] rounded-full leading-3 whitespace-nowrap"
+    class="px-2 py-[6px] rounded-full leading-3 whitespace-nowrap w-fit"
     :class="{
       border: colorProperties.showBorder
     }"

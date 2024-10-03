@@ -54,13 +54,6 @@ const formValid = computed(() => {
   return Object.keys(formErrors.value).length === 0;
 });
 
-watch(
-  () => props.open,
-  () => {
-    form.value = clone(props.initialState || generateDefaultState());
-  }
-);
-
 function generateDefaultState(): SpaceMetadataLabel {
   return {
     id: crypto.randomUUID().substring(0, 8),
@@ -73,6 +66,13 @@ function generateDefaultState(): SpaceMetadataLabel {
 function handleSubmit() {
   emit('add', form.value);
 }
+
+watch(
+  () => props.open,
+  () => {
+    form.value = clone(props.initialState || generateDefaultState());
+  }
+);
 </script>
 
 <template>
