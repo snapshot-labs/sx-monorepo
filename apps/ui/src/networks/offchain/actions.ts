@@ -128,6 +128,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      labels: string[],
       executions: ExecutionInfo[]
     ) {
       const currentTime = Math.floor(Date.now() / 1000);
@@ -143,6 +144,7 @@ export function createActions(
         type,
         discussion,
         choices,
+        labels,
         start: startTime,
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
@@ -164,6 +166,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      labels: string[],
       executions: ExecutionInfo[]
     ) {
       const plugins = await getPlugins(executions);
@@ -176,6 +179,7 @@ export function createActions(
         type,
         discussion,
         choices,
+        labels,
         plugins: JSON.stringify(plugins)
       };
 

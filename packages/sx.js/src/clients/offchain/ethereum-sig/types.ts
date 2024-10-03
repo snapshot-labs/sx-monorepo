@@ -69,6 +69,7 @@ export const proposeTypes = {
     { name: 'body', type: 'string' },
     { name: 'discussion', type: 'string' },
     { name: 'choices', type: 'string[]' },
+    { name: 'labels', type: 'string[]' },
     { name: 'start', type: 'uint64' },
     { name: 'end', type: 'uint64' },
     { name: 'snapshot', type: 'uint64' },

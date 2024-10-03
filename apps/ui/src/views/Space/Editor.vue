@@ -194,6 +194,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
+        proposal.value.labels,
         executions
       );
     } else {
@@ -204,6 +205,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         proposal.value.choices,
+        proposal.value.labels,
         executions
       );
     }
@@ -497,6 +499,9 @@ watchEffect(() => {
           >.
         </template>
       </EditorChoices>
+      <div v-if="space.labels?.length">
+        <EditorLabels v-model="proposal" :labels="space.labels" />
+      </div>
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
         <ProposalTimeline :data="space" />

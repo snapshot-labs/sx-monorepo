@@ -135,6 +135,7 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
@@ -148,6 +149,7 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   cancelProposal(web3: Web3Provider, proposal: Proposal);

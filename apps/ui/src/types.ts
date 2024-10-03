@@ -366,6 +366,7 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
+  labels: string[];
   executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
 };
