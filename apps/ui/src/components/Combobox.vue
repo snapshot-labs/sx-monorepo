@@ -90,25 +90,32 @@ watch(model, () => {
         <ComboboxOptions
           class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
         >
-          <div class="max-h-[208px] px-3 overflow-y-auto">
+          <div class="max-h-[208px] overflow-y-auto">
             <ComboboxOption
               v-for="item in filteredOptions"
-              v-slot="{ selected, disabled }"
+              v-slot="{ selected, disabled, active }"
               :key="item.id"
               :value="item.id"
-              class="flex items-center justify-between"
+              as="template"
             >
-              <component :is="item.icon" class="size-[20px] mr-2" />
-              <span
-                class="w-full py-2 text-skin-link"
+              <li
+                class="flex items-center justify-between px-3"
                 :class="{
-                  'opacity-40': disabled,
-                  'cursor-pointer': !disabled
+                  'bg-skin-bg/25': active
                 }"
               >
-                {{ item.name || item.id }}
-              </span>
-              <IH-check v-if="selected" class="text-skin-success" />
+                <component :is="item.icon" class="size-[20px] mr-2" />
+                <span
+                  class="w-full py-2 text-skin-link"
+                  :class="{
+                    'opacity-40': disabled,
+                    'cursor-pointer': !disabled
+                  }"
+                >
+                  {{ item.name || item.id }}
+                </span>
+                <IH-check v-if="selected" class="text-skin-success" />
+              </li>
             </ComboboxOption>
           </div>
         </ComboboxOptions>
