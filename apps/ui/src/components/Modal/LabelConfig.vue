@@ -70,7 +70,7 @@ function generateDefaultState(): SpaceMetadataLabel {
   };
 }
 
-async function handleSubmit() {
+function handleSubmit() {
   emit('add', form.value);
 }
 </script>
