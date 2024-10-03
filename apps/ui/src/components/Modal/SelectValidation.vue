@@ -1,8 +1,7 @@
 <script lang="ts">
 type ValidationDetails = {
   key:
-    | 'any-voting'
-    | 'any-proposal'
+    | 'any'
     | 'basic'
     | 'passport-gated'
     | 'arbitrum'
@@ -71,10 +70,7 @@ const filteredValidations = computed(() => {
 
   return [
     {
-      key:
-        props.type === 'proposal'
-          ? ('any-proposal' as const)
-          : ('any-voting' as const),
+      key: 'any' as const,
       schema: null
     },
     ...apiValidations
@@ -153,8 +149,8 @@ const formErrors = computed(() => {
 });
 
 function handleSelect(validationDetails: ValidationDetails) {
-  if (['any-voting', 'any-proposal'].includes(validationDetails.key)) {
-    emit('save', { name: 'any', params: {} });
+  if (validationDetails.key === 'any') {
+    emit('save', { name: validationDetails.key, params: {} });
     emit('close');
     return;
   }
@@ -286,7 +282,11 @@ watch(
           <div class="flex items-center gap-1 overflow-hidden">
             <h4
               class="text-skin-link truncate"
-              v-text="VALIDATION_TYPES_INFO[validation.key].label"
+              v-text="
+                VALIDATION_TYPES_INFO[
+                  validation.key === 'any' ? `any-${type}` : validation.key
+                ].label
+              "
             />
             <span
               v-if="validation.key === 'passport-gated'"
@@ -295,7 +295,13 @@ watch(
               Beta
             </span>
           </div>
-          <div v-text="VALIDATION_TYPES_INFO[validation.key].description" />
+          <div
+            v-text="
+              VALIDATION_TYPES_INFO[
+                validation.key === 'any' ? `any-${type}` : validation.key
+              ].description
+            "
+          />
         </div>
       </UiSelector>
     </div>
