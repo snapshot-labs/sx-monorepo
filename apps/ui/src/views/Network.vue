@@ -1,74 +1,6 @@
 <script setup lang="ts">
-import { getUrl } from '@/helpers/utils';
-
 useTitle('Network');
 
-const CUSTOMERS = [
-  {
-    name: 'Blast',
-    avatar:
-      'ipfs://bafkreicqhrimt2zyp2kvhmbpvffxlmxovkg5vw6zkissyzibcfy45kbvrm',
-    website: 'https://blast.io'
-  },
-  {
-    name: 'Starknet',
-    avatar:
-      'ipfs://bafkreib5g7a6ufzpo5ebeosetgzoy5geduwcgmch7vighsbasth3wty77q',
-    website: 'https://starknet.io'
-  },
-  {
-    name: 'Linea',
-    avatar:
-      'ipfs://bafkreihtyzolub3sejuwc32hpdpjnt7ksowaguni2yuho3kyihhcqrtqce',
-    website: 'https://linea.build'
-  },
-  {
-    name: 'Merlin',
-    avatar:
-      'ipfs://bafkreicew2qv3m756m7xs2nrjezinghps7rlessrqjqetvox74w4hov2xe',
-    website: 'https://merlinchain.io'
-  },
-  {
-    name: 'Immutable zkEVM',
-    avatar:
-      'ipfs://bafkreiepnhfv3hgexddjpyaeemxo3byhtxxit6t4zsponyczee6ddjqxwi',
-    website: 'https://www.immutable.com'
-  },
-  {
-    name: 'Cyber',
-    avatar:
-      'ipfs://bafkreifm2bbehoqpz4454o7gixnxfi6cgvqlxigqr3f6ipj7l2omtgfgnm',
-    website: 'https://cyber.co'
-  },
-  {
-    name: 'Sei',
-    avatar:
-      'ipfs://bafkreiammyt7uztbztqbcqv4bydnczsh2fqmnjf6jxj4xnskzzl6sjrigq',
-    website: 'https://www.sei.io'
-  },
-  {
-    name: 'Gravity',
-    avatar:
-      'ipfs://bafkreia7lrda6v2fc5dthazn3qdost4yd2qrn3r4ntrd6lgmc2gvtvvhoa',
-    website: 'https://gravity.xyz'
-  },
-  {
-    name: 'zkLink',
-    avatar: 'bafkreic6c3iems5235qapyhyrygha7akqrsfact2nok3y2uhljpzxrdu74',
-    website: 'https://zklink.io'
-  },
-  {
-    name: 'ApeChain',
-    avatar:
-      'ipfs://bafkreicljxttjq2xkgfwwpii5xegirgq2ctrnsjnzelxudjj33qzq65apu',
-    website: 'https://apechain.com'
-  },
-  {
-    name: 'Fantom',
-    avatar: 'ipfs://QmVEgNeQDKnXygeGxfY9FywZpNGQu98ktZtRJ9bToYF6g7',
-    website: 'https://fantom.foundation'
-  }
-];
 const FAQ = [
   {
     question: 'What payment methods does Snapshot accept?',
@@ -85,6 +17,7 @@ const FAQ = [
       'Adding a non-EVM network is possible under certain conditions. Please contact us for more details.'
   }
 ];
+
 const LINK = 'https://tally.so/r/31ApGb';
 
 const currentQuestion = ref();
@@ -175,24 +108,47 @@ function toggleQuestion(id) {
 
     <div class="text-center">
       <div class="eyebrow mb-4">Trusted by</div>
-      <UiScrollerHorizontal>
-        <div class="w-fit mx-auto px-4">
-          <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
-            <a
-              v-for="(customer, i) in CUSTOMERS"
-              :key="i"
-              target="_blank"
-              :href="customer.website"
-            >
-              <img
-                :alt="customer.name"
-                :src="getUrl(customer.avatar) ?? undefined"
-                class="size-[54px] rounded-lg"
-              />
-            </a>
-          </div>
+      <UiCarousel>
+        <div class="customer">
+          <IC-blast />
         </div>
-      </UiScrollerHorizontal>
+        <div class="customer">
+          <IC-gravity />
+        </div>
+        <div class="customer">
+          <IC-linea />
+        </div>
+        <div class="customer">
+          <IC-optimism />
+        </div>
+        <div class="customer">
+          <IC-sei />
+        </div>
+        <div class="customer">
+          <IC-sonic />
+        </div>
+        <div class="customer">
+          <IC-immutable />
+        </div>
+        <div class="customer">
+          <IC-zklink />
+        </div>
+        <div class="customer">
+          <IC-manta />
+        </div>
+        <div class="customer">
+          <IC-bnb />
+        </div>
+        <div class="customer">
+          <IC-base />
+        </div>
+        <div class="customer">
+          <IC-snaxchain />
+        </div>
+        <div class="customer">
+          <IC-starkware />
+        </div>
+      </UiCarousel>
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">
@@ -231,9 +187,7 @@ function toggleQuestion(id) {
           class="flex items-center w-full text-left"
           @click="toggleQuestion(i)"
         >
-          <h3 class="py-3 flex-auto">
-            {{ question.question }}
-          </h3>
+          <h3 class="py-3 flex-auto h3" v-text="question.question" />
           <IH-minus-sm v-if="currentQuestion === i" class="text-skin-text" />
           <IH-plus-sm v-else class="text-skin-text" />
         </button>
@@ -244,3 +198,13 @@ function toggleQuestion(id) {
     </UiContainer>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.customer {
+  @apply text-center w-[140px] h-[40px] mx-4 my-2 inline-block items-center justify-center;
+
+  svg {
+    @apply w-[140px] h-[40px] object-contain;
+  }
+}
+</style>
