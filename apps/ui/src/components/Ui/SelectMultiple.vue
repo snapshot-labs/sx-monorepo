@@ -90,7 +90,7 @@ watch(model, () => {
           <IH-chevron-down v-else />
         </ListboxButton>
         <ListboxOptions
-          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl"
+          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
         >
           <div class="max-h-[208px] overflow-y-auto px-3">
             <ListboxOption

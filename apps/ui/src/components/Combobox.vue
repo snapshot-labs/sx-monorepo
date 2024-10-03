@@ -88,7 +88,7 @@ watch(model, () => {
           </ComboboxButton>
         </div>
         <ComboboxOptions
-          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl"
+          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
         >
           <div class="max-h-[208px] px-3 overflow-y-auto">
             <ComboboxOption
