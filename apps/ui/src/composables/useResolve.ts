@@ -9,7 +9,7 @@ export function useResolve(id: Ref<string>) {
   const { isWhiteLabel, resolved: whiteLabelResolved, space } = useWhiteLabel();
 
   watch(
-    [id, () => whiteLabelResolved.value],
+    [id, whiteLabelResolved],
     async ([id, whiteLabelResolved]) => {
       if (whiteLabelResolved && isWhiteLabel.value && space.value) {
         networkId.value = space.value.network;
