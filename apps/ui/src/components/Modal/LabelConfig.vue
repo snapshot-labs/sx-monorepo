@@ -86,7 +86,7 @@ async function handleSubmit() {
         :color="form.color"
       />
       <div class="truncate">
-        {{ form.description || (open ? 'This is a description preview' : '') }}
+        {{ form.description || 'This is a description preview' }}
       </div>
     </div>
     <div class="s-box p-4">
