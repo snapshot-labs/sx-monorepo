@@ -244,7 +244,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="'AI summary'"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto w-[22px]"
+              class="!p-0 !border-0 !h-auto !w-[22px]"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
@@ -264,7 +264,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto w-[22px]"
+              class="!p-0 !border-0 !h-auto !w-[22px]"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
