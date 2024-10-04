@@ -27,7 +27,7 @@ function mountCustomDomainRoutes() {
 watchEffect(() => setTitle(app.value.app_name));
 
 watch(
-  () => whiteLabelResolved.value,
+  whiteLabelResolved,
   resolved => {
     if (!resolved) return;
 
