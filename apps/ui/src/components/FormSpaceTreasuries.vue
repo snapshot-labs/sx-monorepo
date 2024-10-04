@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { SpaceMetadataTreasury } from '@/types';
+import { offchainNetworks } from '@/networks';
+import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
 const model = defineModel<SpaceMetadataTreasury[]>({
   required: true
 });
 
-defineProps<{
+const props = defineProps<{
+  networkId: NetworkID;
   limit?: number;
 }>();
 
@@ -18,13 +20,26 @@ const editedTreasury = ref<number | null>(null);
 const treasuryInitialState = ref<any | null>(null);
 
 function addTreasuryConfig(config: SpaceMetadataTreasury) {
+  const otherTreasuries =
+    editedTreasury.value !== null
+      ? model.value
+          .slice(0, editedTreasury.value)
+          .concat(model.value.slice(editedTreasury.value + 1))
+      : model.value;
+
+  const getId = (t: SpaceMetadataTreasury) => {
+    const networkIdentifeir = offchainNetworks.includes(props.networkId)
+      ? t.chainId
+      : t.network;
+
+    return `${t.name}-${networkIdentifeir}-${t.address}`;
+  };
+
   const existingTreasuries = new Map(
-    model.value.map(t => [`${t.name}-${t.network}-${t.address}`, true])
+    otherTreasuries.map(t => [getId(t), true])
   );
 
-  if (
-    existingTreasuries.has(`${config.name}-${config.network}-${config.address}`)
-  ) {
+  if (existingTreasuries.has(getId(config))) {
     return addNotification(
       'error',
       'Treasury with this name and wallet already exists'
@@ -104,6 +119,7 @@ function deleteTreasury(index: number) {
   <teleport to="#modal">
     <ModalTreasuryConfig
       :open="modalOpen"
+      :network-id="networkId"
       :initial-state="treasuryInitialState ?? undefined"
       @close="modalOpen = false"
       @add="addTreasuryConfig"

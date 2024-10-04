@@ -78,6 +78,7 @@ const getComponent = (property: {
       return InputString;
     case 'number':
     case 'integer':
+      if (property.format === 'network') return SelectorNetwork;
       if (property.format === 'duration') return InputDuration;
       return InputNumber;
     case 'boolean':

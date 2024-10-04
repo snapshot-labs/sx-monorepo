@@ -68,7 +68,7 @@ export type SpaceMetadataTreasury = {
   name: string;
   network: Exclude<NetworkID, 's' | 's-tn'> | null;
   address: string;
-  chainId?: ChainId;
+  chainId?: ChainId | null;
 };
 
 export type SpaceMetadataLabel = {
@@ -459,7 +459,7 @@ export type RequiredProperty<T> = {
 
 // UI
 export type BaseDefinition<T> = {
-  type: string;
+  type: string | string[];
   format?: string;
   title: string;
   description?: string;

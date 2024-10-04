@@ -2,7 +2,7 @@
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
-import { NetworkID } from '@/types';
+import { ChainId, NetworkID } from '@/types';
 
 const CUSTOM_ERROR_SYMBOL = Symbol('customError');
 
@@ -12,11 +12,11 @@ const props = withDefaults(
     networkId: NetworkID;
     strategyAddress: string;
     initialState?: any;
-    initialNetwork?: string;
+    initialNetwork?: ChainId;
     definition?: any;
     customErrorValidation?: (
       value: Record<string, any>,
-      network: string
+      network: ChainId
     ) => string | undefined;
     withNetworkSelector?: boolean;
   }>(),
@@ -27,10 +27,10 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'close');
-  (e: 'save', value: Record<string, any>, network: string);
+  (e: 'save', value: Record<string, any>, network: ChainId);
 }>();
 
-const network = ref('');
+const network: Ref<ChainId> = ref('');
 const showPicker = ref(false);
 const isDefinitionLoading = ref(false);
 const pickerField: Ref<string | null> = ref(null);
@@ -162,7 +162,7 @@ watchEffect(() => {
         v-if="withNetworkSelector"
         v-model="network"
         :definition="{
-          type: 'string',
+          type: ['string', 'number'],
           title: 'Network',
           examples: ['Select network'],
           networkId

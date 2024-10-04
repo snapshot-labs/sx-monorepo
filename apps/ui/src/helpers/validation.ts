@@ -13,7 +13,8 @@ type Opts = { skipEmptyOptionalFields: boolean };
 const ajv = new Ajv({
   allErrors: true,
   // https://github.com/ajv-validator/ajv/issues/1417
-  strictTuples: false
+  strictTuples: false,
+  allowUnionTypes: true
 });
 ajvErrors(ajv);
 addFormats(ajv);
