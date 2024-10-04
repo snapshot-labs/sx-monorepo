@@ -111,8 +111,14 @@ watchEffect(() => {
   <div class="s-box mb-4">
     <UiSelectorNetwork
       v-model="snapshotChainId"
-      :network-id="networkId"
-      tooltip="The default network used for this space. Networks can also be specified in individual strategies"
+      :definition="{
+        type: 'string',
+        title: 'Network',
+        tooltip:
+          'The default network used for this space. Networks can also be specified in individual strategies',
+        examples: ['Select network'],
+        networkId
+      }"
     />
   </div>
   <UiContainerSettings

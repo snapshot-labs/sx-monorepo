@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
+import { BaseDefinition } from '@/types';
 
 const network = defineModel<string>({
   required: true
 });
 
 const props = defineProps<{
-  networkId: string;
-  tooltip?: string;
+  definition: BaseDefinition<string | null> & {
+    networkId: string;
+  };
 }>();
 
 const spaceCategories = computed(() =>
   Object.entries(networks)
     .filter(([, network]) => {
-      if (props.networkId === 's' && 'testnet' in network && network.testnet) {
+      if (
+        props.definition.networkId === 's' &&
+        'testnet' in network &&
+        network.testnet
+      ) {
         return false;
       }
 
@@ -36,11 +42,9 @@ const spaceCategories = computed(() =>
   <Combobox
     v-model="network"
     :definition="{
-      type: 'string',
+      ...definition,
       enum: spaceCategories.map(c => c.id),
-      title: 'Network',
       options: spaceCategories,
-      tooltip,
       examples: ['Select network']
     }"
   />

@@ -161,7 +161,12 @@ watchEffect(() => {
       <UiSelectorNetwork
         v-if="withNetworkSelector"
         v-model="network"
-        :network-id="networkId"
+        :definition="{
+          type: 'string',
+          title: 'Network',
+          examples: ['Select network'],
+          networkId
+        }"
       />
       <UiForm
         v-if="definition"
