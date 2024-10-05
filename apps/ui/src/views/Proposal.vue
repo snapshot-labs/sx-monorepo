@@ -259,7 +259,7 @@ watchEffect(() => {
                     votingPower?.status === 'success' &&
                     votingPower.totalVotingPower === BigInt(0)
                   "
-                  href="https://help.snapshot.org/en/articles/9566904-why-do-i-have-0-voting-power"
+                  href="https://help.snapshot.box/en/articles/9566904-why-do-i-have-0-voting-power"
                   target="_blank"
                   class="ml-1.5"
                 >

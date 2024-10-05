@@ -50,7 +50,7 @@ const SOCIALS = [
           <div class="eyebrow">Resources</div>
           <div class="space-y-1">
             <div>
-              <a href="https://help.snapshot.org" target="_blank">
+              <a href="https://help.snapshot.box" target="_blank">
                 Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
             </div>
