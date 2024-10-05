@@ -3,6 +3,8 @@ import { shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
+const IS_DEV = import.meta.env.MODE === 'development';
+
 const props = defineProps<{ space: Space }>();
 
 const router = useRouter();
@@ -68,6 +70,7 @@ type Tab = {
     | 'proposal'
     | 'voting'
     | 'members'
+    | 'labels'
     | 'execution'
     | 'controller'
     | 'advanced';
@@ -131,6 +134,11 @@ const tabs = computed<Tab[]>(
         id: 'members',
         name: 'Members',
         visible: isOffchainNetwork.value
+      },
+      {
+        id: 'labels',
+        name: 'Labels',
+        visible: isOffchainNetwork.value && IS_DEV
       },
       {
         id: 'execution',
@@ -414,6 +422,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :is-controller="isController"
         :is-admin="isAdmin"
       />
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="activeTab === 'labels'"
+      title="Labels"
+      description="Labels are used to categorize proposals."
+    >
+      <FormSpaceLabels v-model="form.labels" />
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="activeTab === 'execution'"
