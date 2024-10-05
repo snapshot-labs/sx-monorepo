@@ -6,7 +6,7 @@ export function startIntercom() {
   const w: any = window;
   w.intercomSettings = {
     app_id: APP_ID,
-    custom_launcher_selector: '.intercom-launcher hidden md:block'
+    custom_launcher_selector: '.intercom-launcher.hidden.md:block'
   };
   const ic = w.Intercom;
   if (typeof ic === 'function') {
