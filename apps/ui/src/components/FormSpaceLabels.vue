@@ -14,13 +14,13 @@ function setModalStatus(open: boolean = false, labelId: string | null = null) {
   activeLabelId.value = labelId;
 }
 
-function checkLabelExists(newLabel) {
+function checkLabelExists(newLabel: SpaceMetadataLabel) {
   return labels.value
     .filter(label => label.id !== newLabel.id)
     .some(label => label.name.toLowerCase() === newLabel.name.toLowerCase());
 }
 
-function handleSubmit(labelData) {
+function handleSubmit(labelData: SpaceMetadataLabel) {
   const { id } = labelData;
 
   if (checkLabelExists(labelData)) {
@@ -36,7 +36,7 @@ function handleSubmit(labelData) {
   setModalStatus();
 }
 
-function handleDeleteLabel(id) {
+function handleDeleteLabel(id: string) {
   labels.value = labels.value.filter(label => label.id !== id);
 }
 </script>
