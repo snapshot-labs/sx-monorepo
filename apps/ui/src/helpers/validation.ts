@@ -98,6 +98,13 @@ ajv.addFormat('long', {
   validate: () => true
 });
 
+ajv.addFormat('color', {
+  validate: (value: string) => {
+    if (!value) return false;
+    return !!value.match(/^#[0-9A-F]{6}$/);
+  }
+});
+
 ajv.addFormat('ens-or-address', {
   async: true,
   validate: async (value: string) => {
@@ -278,6 +285,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be a number.';
       case 'addresses-with-voting-power':
         return 'Must be a valid list of addresses with voting power.';
+      case 'color':
+        return 'Must be a valid hex color. ex: #EB4C5B';
       default:
         return 'Invalid format.';
     }
