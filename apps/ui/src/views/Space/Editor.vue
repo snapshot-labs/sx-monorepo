@@ -255,6 +255,16 @@ function handleFetchVotingPower() {
   fetchVotingPower(props.space);
 }
 
+function handleLabelClick(id: string) {
+  if (!proposal.value) return;
+  const index = proposal.value.labels.indexOf(id);
+  if (index === -1) {
+    proposal.value.labels.push(id);
+  } else {
+    proposal.value.labels.splice(index, 1);
+  }
+}
+
 watch(
   () => web3.value.account,
   toAccount => {
@@ -500,7 +510,12 @@ watchEffect(() => {
         </template>
       </EditorChoices>
       <div v-if="space.labels?.length">
-        <EditorLabels v-model="proposal" :labels="space.labels" />
+        <ProposalLabels
+          :proposal="proposal"
+          :labels="space.labels"
+          show-edit
+          @update-proposal-labels="handleLabelClick"
+        />
       </div>
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
