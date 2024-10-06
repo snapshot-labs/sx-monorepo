@@ -38,4 +38,8 @@ export function startIntercom() {
       w.addEventListener('load', l, false);
     }
   }
+
+  document.body
+    .querySelectorAll('.intercom-launcher')[0]
+    .classList.add('hidden', 'md:block');
 }
