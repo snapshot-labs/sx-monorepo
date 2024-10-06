@@ -408,3 +408,10 @@ input:placeholder-shown {
     color: rgba(var(--border));
   }
 }
+
+// Intercom
+// Hide the launcher button on small screen
+
+div.intercom-launcher {
+  @apply hidden md:block
+}
