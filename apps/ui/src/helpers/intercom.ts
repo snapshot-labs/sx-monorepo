@@ -1,7 +1,7 @@
 const APP_ID = import.meta.env.VITE_INTERCOM_APP_ID;
 
 export function startIntercom() {
-  if (!APP_ID || document.body.clientWidth < 768) return;
+  if (!APP_ID) return;
 
   const w: any = window;
   w.intercomSettings = {
