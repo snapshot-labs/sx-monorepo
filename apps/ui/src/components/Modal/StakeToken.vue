@@ -4,7 +4,7 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { createStakeTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { NetworkID, Transaction } from '@/types';
+import { ChainId, NetworkID, Transaction } from '@/types';
 
 const STAKING_CONTRACTS = {
   eth: {
@@ -42,7 +42,7 @@ const validator = getValidator({
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: number;
+  network: ChainId;
   networkId: NetworkID;
   initialState?: any;
 }>();

@@ -1,16 +1,13 @@
+import { SUPPORTED_CHAIN_IDS as ALCHEMY_SUPPORTED_CHAIN_IDS } from '@/helpers/alchemy';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { SUPPORTED_CHAIN_IDS as OPENSEA_SUPPORTED_CHAIN_IDS } from '@/helpers/opensea';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import {
-  RequiredProperty,
-  SelectedStrategy,
-  Space,
-  SpaceMetadataTreasury
-} from '@/types';
+import { SelectedStrategy, Space, SpaceMetadataTreasury } from '@/types';
 
 export type StrategyWithTreasury = SelectedStrategy & {
-  treasury: RequiredProperty<SpaceMetadataTreasury>;
+  treasury: SpaceMetadataTreasury;
 };
 
 type InputType = Space | null;
@@ -33,7 +30,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
           }
 
           return getIsOsnapEnabled(
-            CHAIN_IDS[treasury.network],
+            CHAIN_IDS[treasury.network] as number,
             treasury.address
           );
         })
@@ -51,7 +48,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
             address: treasury.address,
             destinationAddress: null,
             type: 'oSnap',
-            treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+            treasury
           };
         }
 
@@ -71,7 +68,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
             address: treasury.address,
             destinationAddress: '0x0',
             type: 'ReadOnlyExecution',
-            treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+            treasury
           };
         }
 
@@ -79,14 +76,39 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
           address: strategy.address,
           destinationAddress: strategy.destination_address,
           type: strategy.type,
-          treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+          treasury
         };
       })
-      .filter(
-        strategy =>
+      .filter(strategy => {
+        // Editor will only show strategies that are:
+        // - Supported by the Alchemy API
+        // - Supported by the OpenSea API
+        // - Have network
+        // in the future we can make it more granular
+        if (strategy.treasury.chainId) {
+          if (
+            !ALCHEMY_SUPPORTED_CHAIN_IDS.includes(
+              strategy.treasury.chainId as any
+            )
+          ) {
+            return false;
+          }
+
+          if (
+            !OPENSEA_SUPPORTED_CHAIN_IDS.includes(
+              strategy.treasury.chainId as any
+            )
+          ) {
+            return false;
+          }
+        }
+
+        return (
           strategy &&
+          strategy.treasury.network &&
           getNetwork(space.network).helpers.isExecutorSupported(strategy.type)
-      ) as StrategyWithTreasury[];
+        );
+      }) as StrategyWithTreasury[];
   }, null);
 
   return {

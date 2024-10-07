@@ -12,7 +12,7 @@ import {
   constants as starknetConstants,
   validateAndParseAddress
 } from 'starknet';
-import networks from '@/helpers/networks.json';
+import { RouteParamsRaw } from 'vue-router';
 import { VotingPowerItem } from '@/stores/votingPowers';
 import { Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
@@ -123,11 +123,6 @@ export function formatAddress(address: string) {
   } catch {
     return address;
   }
-}
-
-export function explorerUrl(network, str: string, type = 'address'): string {
-  if (network === 'starknet') type = 'contract';
-  return `${networks[network].explorer}/${type}/${str}`;
 }
 
 export function getProposalId(proposal: Proposal) {
@@ -620,4 +615,13 @@ export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
 export function stripHtmlTags(text: string) {
   const doc = new DOMParser().parseFromString(text, 'text/html');
   return doc.body.textContent || '';
+}
+
+export function whiteLabelAwareParams(
+  isWhiteLabel: boolean,
+  params: RouteParamsRaw
+) {
+  if (isWhiteLabel) delete params.space;
+
+  return params;
 }

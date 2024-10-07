@@ -6,8 +6,8 @@ import { SpaceMetadataTreasury } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
-  network: null,
-  address: null
+  address: '',
+  network: null
 };
 
 const props = defineProps<{

@@ -6,13 +6,17 @@ import {
   ETH_CONTRACT
 } from '@/helpers/constants';
 import { METADATA } from '@/networks/evm';
+import { ChainId } from '@/types';
 
 const COINGECKO_API_KEY = 'CG-1z19sMoCC6LoqR4b6avyLi3U';
 const COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3/simple';
 const COINGECKO_PARAMS = '&vs_currencies=usd&include_24hr_change=true';
 
 export const METADATA_BY_CHAIN_ID = new Map(
-  Object.entries(METADATA).map(([, metadata]) => [metadata.chainId, metadata])
+  Object.entries(METADATA).map(([, metadata]) => [
+    metadata.chainId as ChainId,
+    metadata
+  ])
 );
 
 export function useBalances() {
@@ -47,21 +51,21 @@ export function useBalances() {
     };
   }
 
-  async function loadBalances(address: string, networkId: number) {
-    const metadata = METADATA_BY_CHAIN_ID.get(networkId);
+  async function loadBalances(address: string, chainId: ChainId) {
+    const metadata = METADATA_BY_CHAIN_ID.get(chainId);
     const baseToken = metadata?.ticker
       ? { name: metadata.name, symbol: metadata.ticker }
       : { name: 'Ether', symbol: 'ETH' };
 
-    const data = await getBalances(address, networkId, baseToken);
+    const data = await getBalances(address, chainId, baseToken);
     const tokensWithBalance = data.filter(
       asset =>
         formatUnits(asset.tokenBalance, asset.decimals) !== '0.0' ||
         asset.symbol === baseToken.symbol
     );
 
-    const coingeckoAssetPlatform = COINGECKO_ASSET_PLATFORMS[networkId];
-    const coingeckoBaseAsset = COINGECKO_BASE_ASSETS[networkId];
+    const coingeckoAssetPlatform = COINGECKO_ASSET_PLATFORMS[chainId];
+    const coingeckoBaseAsset = COINGECKO_BASE_ASSETS[chainId];
 
     const coins =
       coingeckoBaseAsset && coingeckoAssetPlatform

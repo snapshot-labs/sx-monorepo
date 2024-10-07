@@ -5,12 +5,14 @@ defineOptions({ inheritAttrs: false });
 
 const route = useRoute();
 const spacesStore = useSpacesStore();
-const proposalsStore = useProposalsStore();
+const { isWhiteLabel } = useWhiteLabel();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 
-const showSpace = computed(() =>
-  ['proposal', 'space'].includes(String(route.matched[0]?.name))
+const showSpace = computed(
+  () =>
+    ['proposal', 'space'].includes(String(route.matched[0]?.name)) ||
+    isWhiteLabel.value
 );
 
 const space = computed(() => {
@@ -22,14 +24,8 @@ const space = computed(() => {
   ) {
     return null;
   }
-  return (
-    spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`) ||
-    proposalsStore.getProposal(
-      spaceAddress.value,
-      route.params.proposal as string,
-      networkId.value
-    )?.space
-  );
+
+  return spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`);
 });
 </script>
 
@@ -37,8 +33,7 @@ const space = computed(() => {
   <AppLink
     v-if="space"
     :to="{
-      name: 'space-overview',
-      params: { space: `${networkId}:${spaceAddress}` }
+      name: 'space-overview'
     }"
     class="flex item-center space-x-2.5 truncate text-[24px]"
     v-bind="$attrs"
