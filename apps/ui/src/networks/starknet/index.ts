@@ -21,6 +21,7 @@ type Metadata = {
   ethRpcUrl: string;
   explorerUrl: string;
   apiUrl: string;
+  avatar: string;
 };
 
 export const METADATA: Partial<Record<NetworkID, Metadata>> = {
@@ -32,7 +33,8 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     apiUrl: 'https://api.snapshot.box',
-    explorerUrl: 'https://starkscan.co'
+    explorerUrl: 'https://starkscan.co',
+    avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   },
   'sn-sep': {
     name: 'Starknet Sepolia',
@@ -44,7 +46,8 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     apiUrl:
       import.meta.env.VITE_STARKNET_SEPOLIA_API ??
       'https://testnet-api.snapshot.box',
-    explorerUrl: 'https://sepolia.starkscan.co'
+    explorerUrl: 'https://sepolia.starkscan.co',
+    avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   }
 };
 
@@ -60,7 +63,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     rpcUrl,
     ethRpcUrl,
     apiUrl,
-    explorerUrl
+    explorerUrl,
+    avatar
   } = metadata;
 
   const provider = createProvider(rpcUrl);
@@ -140,8 +144,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
   return {
     name,
-    avatar:
-      'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m',
+    avatar,
     currentUnit: 'second',
     chainId,
     baseChainId,

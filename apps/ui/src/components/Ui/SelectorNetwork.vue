@@ -2,6 +2,7 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { BaseDefinition, NetworkID } from '@/types';
 
 const network = defineModel<string | number | null>({
@@ -16,7 +17,7 @@ const props = defineProps<{
 
 const options = computed(() => {
   if (offchainNetworks.includes(props.definition.networkId)) {
-    return Object.entries(networks)
+    const baseNetworks = Object.entries(networks)
       .filter(([, network]) => {
         if (
           props.definition.networkId === 's' &&
@@ -37,6 +38,19 @@ const options = computed(() => {
           class: 'rounded-full'
         })
       }));
+
+    return [
+      ...baseNetworks,
+      ...Object.entries(STARKNET_NETWORK_METADATA).map(([key, metadata]) => ({
+        id: key,
+        name: metadata.name,
+        icon: h('img', {
+          src: getUrl(metadata.avatar),
+          alt: metadata.name,
+          class: 'rounded-full'
+        })
+      }))
+    ];
   }
 
   return enabledNetworks
