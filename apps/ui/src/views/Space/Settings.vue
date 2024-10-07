@@ -3,8 +3,6 @@ import { shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const IS_DEV = import.meta.env.MODE === 'development';
-
 const props = defineProps<{ space: Space }>();
 
 const router = useRouter();
