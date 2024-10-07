@@ -95,6 +95,13 @@ watch(model, () => {
           class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
         >
           <div class="max-h-[208px] overflow-y-auto">
+            <div
+              v-if="filteredOptions.length === 0 && query !== ''"
+              class="relative cursor-default select-none text-center py-2"
+            >
+              No result for your search query
+            </div>
+
             <ComboboxOption
               v-for="item in filteredOptions"
               v-slot="{ selected, disabled, active }"
