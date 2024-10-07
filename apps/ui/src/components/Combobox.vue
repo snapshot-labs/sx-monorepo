@@ -80,6 +80,7 @@ watch(model, () => {
               autocomplete="off"
               :placeholder="definition.examples?.[0]"
               :display-value="item => getDisplayValue(item as T)"
+              @keydown.enter="() => (query = '')"
               @change="e => (query = e.target.value)"
               @focus="event => handleFocus(event, open)"
             />
