@@ -2510,10 +2510,10 @@
     "@snapshot-labs/pineapple" "^0.2.0"
     cross-fetch "^3.1.5"
 
-"@snapshot-labs/lock@^0.2.7":
-  version "0.2.7"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.7.tgz#4727ea082ced4958061bb643462049f767e8b6d2"
-  integrity sha512-wkUiuOEJxYYUgFyZ83xRrCl897m/o08y8UCHg3TlBh12OkfCeV7XnaIdumRCgSp+Wh35fR2pd27y83Ev9A88Ow==
+"@snapshot-labs/lock@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.8.tgz#4eb81af37e57c6eac6135e7db3acfbb511e9ab1c"
+  integrity sha512-5Izr4uAIU1lf2CHa155SW4oqZhyndFQf7AQNpyazk0AtffgDmEa6T5KxU7ktRXL9SwuRyAlo7MJrnjxMDmqZWA==
   dependencies:
     "@coinbase/wallet-sdk" "^4.0.4"
     "@portis/web3" "^4.0.6"
@@ -2543,10 +2543,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.18.tgz#fcbd86d4557821bff774d60e5c636ad47ed85d77"
   integrity sha512-v6tj7l19KJUWjBbsWpwxaYO2mlIDBFyAG0OMSPhUgrhltO7b6R4Ejxn2k4Qgi/NtlnOrj+3Gt3eQRry8Jfgjrg==
 
-"@snapshot-labs/snapshot.js@^0.12.19":
-  version "0.12.19"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.19.tgz#f292406065c4b26072512e2f74be85b9bf5f07b6"
-  integrity sha512-UeT8g+kOVqjvcKPL9Kttw7Tg2JUrFlDa0H0UOgjT0uwasmLWY1ZG27856X8jOCqIRjTj/erPPhjRbr8SfCurtQ==
+"@snapshot-labs/snapshot.js@^0.12.21":
+  version "0.12.21"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.21.tgz#c8ed9b5e4658648d9013721dea8489ed73768eb0"
+  integrity sha512-n/A+5YfyFU33FED2Qxz2a/APDD/Mo33EKWNQurSPC8u47Z4TNCa9yQxd+7EnLHgYsyg2zeXBjy2d3oV3oVKphw==
   dependencies:
     "@ensdomains/eth-ens-namehash" "^2.0.15"
     "@ethersproject/abi" "^5.6.4"
