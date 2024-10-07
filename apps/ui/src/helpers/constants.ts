@@ -103,7 +103,6 @@ export const PRIVACY_TYPES_INFO: Record<
 
 export const VALIDATION_TYPES_INFO: Record<
   | 'any-voting'
-  | 'any-proposal'
   | 'basic'
   | 'passport-gated'
   | 'arbitrum'
@@ -113,10 +112,6 @@ export const VALIDATION_TYPES_INFO: Record<
   'any-voting': {
     label: 'Anyone can vote',
     description: 'Anyone with voting power can cast a vote.'
-  },
-  'any-proposal': {
-    label: 'Anyone can propose',
-    description: 'Anyone can create a proposal.'
   },
   basic: {
     label: 'Basic',

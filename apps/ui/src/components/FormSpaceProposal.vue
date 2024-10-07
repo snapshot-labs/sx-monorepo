@@ -39,7 +39,6 @@ defineProps<{
   networkId: NetworkID;
   space: Space;
   snapshotChainId: ChainId;
-  isProposalValidationValid: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -76,7 +75,12 @@ watchEffect(() => {
 
 <template>
   <h4 class="eyebrow mb-2 font-medium">Proposal Validation</h4>
-  <div class="s-box mb-4">
+  <UiSwitch
+    v-model="onlyMembers"
+    title="Allow only authors to submit a proposal"
+    class="mb-[14px]"
+  />
+  <div v-if="!onlyMembers" class="s-box">
     <UiWrapperInput
       :definition="{
         title: 'Validation',
@@ -94,26 +98,11 @@ watchEffect(() => {
         @click="isSelectValidationModalOpen = true"
       >
         <div>
-          {{
-            VALIDATION_TYPES_INFO[
-              proposalValidation.name === 'any'
-                ? 'any-proposal'
-                : proposalValidation.name
-            ].label
-          }}
+          {{ VALIDATION_TYPES_INFO[proposalValidation.name].label }}
         </div>
         <IH-chevron-down />
       </button>
     </UiWrapperInput>
-    <UiSwitch
-      v-model="onlyMembers"
-      title="Allow only authors to submit a proposal"
-    />
-    <UiMessage v-if="!isProposalValidationValid" type="danger" class="mt-3">
-      Proposal validation is required to prevent unauthorized proposals and
-      spam. If you don't want proposal validation you can toggle only the "Allow
-      only authors to submit a proposal" option.
-    </UiMessage>
   </div>
   <h4 class="eyebrow mb-2 font-medium">Proposal</h4>
   <div class="s-box mb-4">

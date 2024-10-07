@@ -189,10 +189,6 @@ const isTicketValid = computed(() => {
   );
 });
 
-const isProposalValidationValid = computed(
-  () => proposalValidation.value.name !== 'any' || onlyMembers.value === true
-);
-
 const error = computed(() => {
   if (Object.values(formErrors.value).length > 0) {
     return 'Space profile is invalid';
@@ -215,7 +211,7 @@ const error = computed(() => {
       return 'Strategies are invalid';
     }
 
-    if (hasProposalErrors.value || !isProposalValidationValid.value) {
+    if (hasProposalErrors.value) {
       return 'Proposal settings are invalid';
     }
 
@@ -407,7 +403,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         :network-id="space.network"
         :snapshot-chain-id="snapshotChainId"
         :space="space"
-        :is-proposal-validation-valid="isProposalValidationValid"
         @update-validity="v => (hasProposalErrors = !v)"
       />
     </UiContainerSettings>

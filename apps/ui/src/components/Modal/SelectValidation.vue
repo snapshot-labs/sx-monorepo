@@ -67,6 +67,8 @@ const filteredValidations = computed(() => {
     return !validation.proposalValidationOnly;
   });
 
+  if (props.type === 'proposal') return apiValidations;
+
   return [
     {
       key: 'any' as const,
