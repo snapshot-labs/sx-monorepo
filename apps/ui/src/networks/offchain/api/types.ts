@@ -1,4 +1,10 @@
-import { DelegationType, NetworkID, Privacy, VoteType } from '@/types';
+import {
+  DelegationType,
+  NetworkID,
+  Privacy,
+  SpaceMetadataLabel,
+  VoteType
+} from '@/types';
 
 export type ApiRelatedSpace = {
   id: string;
@@ -33,6 +39,7 @@ export type ApiSpace = {
     network: string;
     address: string;
   }[];
+  labels: SpaceMetadataLabel[];
   delegationPortal: {
     delegationType: DelegationType | 'compound-governor';
     delegationContract: string;

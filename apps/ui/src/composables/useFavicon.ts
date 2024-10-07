@@ -9,10 +9,6 @@ export function useFavicon(favicon?: string) {
       .forEach(el => (el.href = newFavicon));
   };
 
-  onBeforeUnmount(() => {
-    setFavicon(DEFAULT_FAVICON);
-  });
-
   if (favicon) {
     setFavicon(favicon);
   }

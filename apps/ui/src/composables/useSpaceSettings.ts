@@ -9,7 +9,13 @@ import {
   StrategyConfig,
   StrategyTemplate
 } from '@/networks/types';
-import { Member, Space, SpaceMetadata, StrategyParsedMetadata } from '@/types';
+import {
+  Member,
+  Space,
+  SpaceMetadata,
+  SpaceMetadataLabel,
+  StrategyParsedMetadata
+} from '@/types';
 
 export type OffchainSpaceSettings = {
   name: string;
@@ -33,6 +39,7 @@ export type OffchainSpaceSettings = {
   strategies: any[];
   categories: string[];
   treasuries: OffchainApiSpace['treasuries'];
+  labels: OffchainApiSpace['labels'];
   admins: string[];
   moderators: string[];
   members: string[];
@@ -45,7 +52,11 @@ export type OffchainSpaceSettings = {
   voteValidation: OffchainApiSpace['voteValidation'];
 };
 
-type Form = SpaceMetadata & { categories: string[]; coingecko: string };
+type Form = SpaceMetadata & {
+  labels: SpaceMetadataLabel[];
+  categories: string[];
+  coingecko: string;
+};
 
 const DEFAULT_FORM_STATE: Form = {
   name: '',
@@ -60,6 +71,7 @@ const DEFAULT_FORM_STATE: Form = {
   coingecko: '',
   votingPowerSymbol: '',
   treasuries: [],
+  labels: [],
   delegations: []
 };
 
@@ -368,6 +380,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
       treasuries: space.treasuries,
+      labels: space.labels || [],
       delegations: space.delegations.filter(
         delegation => delegation.apiType !== 'delegate-registry'
       )
@@ -504,6 +517,7 @@ export function useSpaceSettings(space: Ref<Space>) {
           ? String(getNetwork(treasury.network).chainId)
           : '1'
       })),
+      labels: form.value.labels,
       admins: members.value
         .filter(member => member.role === 'admin')
         .map(member => member.address),

@@ -13,6 +13,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   const spacesStore = useSpacesStore();
   const actions = useActions();
   const { web3, authInitiated } = useWeb3();
+  const { isWhiteLabel } = useWhiteLabel();
 
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
@@ -129,10 +130,11 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     [
       () => web3.value.account,
       () => web3.value.authLoading,
-      () => authInitiated.value
+      () => authInitiated.value,
+      () => isWhiteLabel.value
     ],
-    async ([web3, authLoading, authInitiated]) => {
-      if (!authInitiated || authLoading) return;
+    async ([web3, authLoading, authInitiated, isWhiteLabel]) => {
+      if (!authInitiated || authLoading || isWhiteLabel) return;
 
       followedSpacesLoaded.value = false;
 

@@ -12,6 +12,7 @@ import {
   constants as starknetConstants,
   validateAndParseAddress
 } from 'starknet';
+import { RouteParamsRaw } from 'vue-router';
 import networks from '@/helpers/networks.json';
 import { VotingPowerItem } from '@/stores/votingPowers';
 import { Choice, Proposal, SpaceMetadata } from '@/types';
@@ -620,4 +621,13 @@ export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
 export function stripHtmlTags(text: string) {
   const doc = new DOMParser().parseFromString(text, 'text/html');
   return doc.body.textContent || '';
+}
+
+export function whiteLabelAwareParams(
+  isWhiteLabel: boolean,
+  params: RouteParamsRaw
+) {
+  if (isWhiteLabel) delete params.space;
+
+  return params;
 }

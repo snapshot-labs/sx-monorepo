@@ -4,6 +4,7 @@ import metamaskIcon from '@/assets/connectors/metamask.png';
 import starknetIcon from '@/assets/connectors/starknet.png';
 import walletconnectIcon from '@/assets/connectors/walletconnect.png';
 import { getUrl } from '@/helpers/utils';
+import { APP_NAME } from './constants';
 
 export default {
   injected: {
@@ -32,7 +33,7 @@ export default {
     network: '1',
     icon: coinbaseIcon,
     options: {
-      appName: 'Snapshot',
+      appName: APP_NAME,
       darkMode: false,
       chainId: 1,
       ethJsonrpcUrl: 'https://cloudflare-eth.com'

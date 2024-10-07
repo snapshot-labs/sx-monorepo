@@ -129,7 +129,6 @@ async function handleEditClick() {
   router.push({
     name: 'space-editor',
     params: {
-      space: spaceId,
       key: draftId
     }
   });
@@ -143,10 +142,7 @@ async function handleCancelClick() {
     if (result) {
       proposalsStore.reset(props.proposal.space.id, props.proposal.network);
       router.push({
-        name: 'space-overview',
-        params: {
-          space: `${props.proposal.network}:${props.proposal.space.id}`
-        }
+        name: 'space-overview'
       });
     }
   } finally {
@@ -244,7 +240,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="'AI summary'"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto"
+              class="!p-0 !border-0 !h-auto !w-[22px]"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
@@ -264,7 +260,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto"
+              class="!p-0 !border-0 !h-auto !w-[22px]"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"

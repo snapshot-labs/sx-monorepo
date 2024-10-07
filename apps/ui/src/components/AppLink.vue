@@ -1,10 +1,32 @@
 <script lang="ts" setup>
-import { RouterLinkProps } from 'vue-router';
+import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
 const props = defineProps<RouterLinkProps>();
 
-// NOTE cleanup and use correct link when it's a white label site
-function normalize(to: any) {
+const { isWhiteLabel } = useWhiteLabel();
+
+function normalize(to: RouteLocationRaw) {
+  if (
+    !isWhiteLabel.value ||
+    typeof to === 'string' ||
+    !('name' in to) ||
+    !to.name
+  ) {
+    return to;
+  }
+
+  if (to.name.toString().startsWith('space-')) {
+    delete to.params?.space;
+  }
+
+  if (to.name.toString() === 'user') {
+    to.name = 'space-user-statement';
+  }
+
+  if (to.name.toString() === 'settings-spaces') {
+    to.name = 'settings-contacts';
+  }
+
   return to;
 }
 </script>

@@ -1,5 +1,11 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
+import { APP_NAME } from '@/helpers/constants';
+import {
+  getCacheHash,
+  getStampUrl,
+  whiteLabelAwareParams
+} from '@/helpers/utils';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -14,7 +20,9 @@ const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
-const { init, app } = useApp();
+const { init, setAppName, app } = useApp();
+const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
+const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
@@ -45,6 +53,10 @@ const hasAppNav = computed(
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
+const hasSidebar = computed(() => !isWhiteLabel.value);
+
+const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
+
 const hasPlaceHolderSidebar = computed(
   () =>
     !['space-proposal', 'create'].includes(String(route.matched[0]?.name)) &&
@@ -73,7 +85,10 @@ async function handleTransactionAccept() {
 
   router.push({
     name: 'space-editor',
-    params: { space: walletConnectSpaceKey.value, key: draftId }
+    params: whiteLabelAwareParams(isWhiteLabel.value, {
+      space: walletConnectSpaceKey.value,
+      key: draftId
+    })
   });
 
   reset();
@@ -94,18 +109,45 @@ watch(scrollDisabled, val => {
 });
 
 watch(isSwiping, () => {
-  if (window.innerWidth > LG_WIDTH) return;
+  if (
+    window.innerWidth > LG_WIDTH ||
+    !hasSwipeableContent.value ||
+    !sidebarSwipeEnabled.value ||
+    !isSwiping.value ||
+    modalOpen.value
+  )
+    return;
 
   if (
-    sidebarSwipeEnabled.value &&
-    isSwiping.value &&
-    !modalOpen.value &&
-    ((direction.value === 'right' && !uiStore.sideMenuOpen) ||
-      (direction.value === 'left' && uiStore.sideMenuOpen))
+    (direction.value === 'right' && !uiStore.sideMenuOpen) ||
+    (direction.value === 'left' && uiStore.sideMenuOpen)
   ) {
     uiStore.toggleSidebar();
   }
 });
+
+watch(
+  isWhiteLabel,
+  isWhiteLabel => {
+    if (!isWhiteLabel) {
+      setAppName(APP_NAME);
+      return;
+    }
+
+    if (!whiteLabelSpace.value) return;
+
+    const faviconUrl = getStampUrl(
+      'space',
+      whiteLabelSpace.value.id,
+      16,
+      getCacheHash(whiteLabelSpace.value.avatar)
+    );
+    setFavicon(faviconUrl);
+
+    setAppName(whiteLabelSpace.value.name);
+  },
+  { immediate: true }
+);
 
 router.afterEach(() => {
   uiStore.sideMenuOpen = false;
@@ -121,13 +163,14 @@ router.afterEach(() => {
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
       <AppBottomNav
-        v-if="web3.account"
+        v-if="web3.account && !isWhiteLabel"
         :class="[
           `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
           { 'app-bottom-nav-open': uiStore.sideMenuOpen }
         ]"
       />
       <AppSidebar
+        v-if="hasSidebar"
         :class="[
           `hidden lg:flex app-sidebar fixed inset-y-0`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
@@ -136,6 +179,7 @@ router.afterEach(() => {
       <AppTopnav :has-app-nav="hasAppNav">
         <template #toggle-sidebar-button>
           <button
+            v-if="hasSwipeableContent"
             type="button"
             class="text-skin-link lg:hidden ml-4"
             @click="uiStore.toggleSidebar"

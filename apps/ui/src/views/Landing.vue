@@ -1,5 +1,7 @@
 <script setup lang="ts">
-useTitle('Snapshot');
+import { APP_NAME } from '@/helpers/constants';
+
+useTitle(APP_NAME);
 </script>
 
 <template>
