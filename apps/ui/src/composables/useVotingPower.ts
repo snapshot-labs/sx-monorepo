@@ -22,7 +22,7 @@ export function useVotingPower() {
       : undefined
   );
 
-  const proposalSnapshot = computed(() => {
+  const proposalSnapshot = computed<number | null>(() => {
     if (!proposal.value) return null;
 
     return proposal.value.state === 'pending'
@@ -50,7 +50,6 @@ export function useVotingPower() {
 
   function fetch(spaceOrProposal: Space | Proposal) {
     if (!web3.value.account) return;
-
     item.value = spaceOrProposal;
     block.value = proposal.value
       ? proposalSnapshot.value

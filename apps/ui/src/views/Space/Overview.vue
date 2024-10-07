@@ -8,6 +8,7 @@ const PROPOSALS_LIMIT = 4;
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
+const { isWhiteLabel } = useWhiteLabel();
 const proposalsStore = useProposalsStore();
 
 onMounted(() => {
@@ -67,6 +68,7 @@ watchEffect(() => setTitle(props.space.name));
         <div class="flex items-center">
           <h1 v-text="space.name" />
           <UiBadgeVerified
+            v-if="!isWhiteLabel"
             class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
@@ -91,7 +93,7 @@ watchEffect(() => setTitle(props.space.name));
               followers
             </div>
           </template>
-          <template v-if="space.parent">
+          <template v-if="!isWhiteLabel && space.parent">
             <div>·</div>
             <AppLink
               :to="{
@@ -129,7 +131,7 @@ watchEffect(() => setTitle(props.space.name));
         </div>
       </div>
     </div>
-    <template v-if="space.children.length">
+    <template v-if="!isWhiteLabel && space.children.length">
       <UiLabel :label="'Sub-spaces'" />
       <UiScrollerHorizontal gradient="md">
         <div class="px-4 py-3 flex gap-3 min-w-max">

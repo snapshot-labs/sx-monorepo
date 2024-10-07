@@ -212,8 +212,7 @@ async function handleProposeClick() {
     if (result) {
       proposalsStore.reset(props.space.id, props.space.network);
       router.push({
-        name: 'space-proposals',
-        params: { space: spaceKey.value }
+        name: 'space-proposals'
       });
     }
   } finally {
@@ -284,7 +283,7 @@ watch(
 
     router.replace({
       name: 'space-editor',
-      params: { space: spaceKey.value, key: newId }
+      params: { key: newId }
     });
   },
   { immediate: true }
@@ -331,7 +330,6 @@ watchEffect(() => {
         v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
       />
       <IndicatorPendingTransactions />
-
       <UiTooltip title="Drafts">
         <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
           <IH-collection class="inline-block" />
