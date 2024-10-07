@@ -46,8 +46,8 @@ watchEffect(() => setTitle('Explore'));
       <UiSelectDropdown
         v-model="protocol"
         title="Protocol"
-        gap="12px"
-        placement="left"
+        gap="12"
+        placement="start"
         :items="protocols"
       />
     </div>

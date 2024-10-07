@@ -17,7 +17,7 @@ const props = defineProps<{
   title: string;
   items: U;
   gap?: string;
-  placement?: 'left' | 'right';
+  placement?: 'start' | 'end';
 }>();
 
 const currentItem = computed(() =>
