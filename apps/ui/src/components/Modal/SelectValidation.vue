@@ -124,6 +124,10 @@ const definition = computed(() => {
     delete updated.properties.stamps;
   }
 
+  if (selectedValidation.value.key === 'basic') {
+    updated.properties.minScore.examples = ['e.g. 1.23'];
+  }
+
   return updated;
 });
 
