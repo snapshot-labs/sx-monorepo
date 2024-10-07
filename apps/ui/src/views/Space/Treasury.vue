@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { shorten } from '@/helpers/utils';
-import { RequiredProperty, Space, SpaceMetadataTreasury } from '@/types';
+import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
@@ -14,14 +14,8 @@ const activeTreasuryId = computed(() => {
   return parseInt(route.params.index as string) - 1;
 });
 
-const filteredTreasuries = computed(
-  () =>
-    props.space.treasuries.filter(
-      t => t.address && t.network
-    ) as RequiredProperty<SpaceMetadataTreasury>[]
-);
 const treasuryData = computed(
-  () => filteredTreasuries.value[activeTreasuryId.value]
+  () => props.space.treasuries[activeTreasuryId.value]
 );
 
 // scroll to treasury tab
@@ -39,7 +33,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 watchEffect(() => {
   const { index, tab } = route.params;
 
-  if (!filteredTreasuries.value.length) return;
+  if (!props.space.treasuries.length) return;
 
   const isValidTab = ['tokens', 'nfts'].includes(tab as string);
   if (!index || !tab || !isValidTab) {
@@ -56,7 +50,7 @@ watchEffect(() => {
 
 <template>
   <UiScrollerHorizontal
-    v-if="filteredTreasuries.length !== 1"
+    v-if="props.space.treasuries.length !== 1"
     ref="treasuriesList"
     class="z-40 sticky top-[71px] lg:top-[72px]"
     with-buttons
@@ -64,7 +58,7 @@ watchEffect(() => {
   >
     <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
       <AppLink
-        v-for="(treasury, i) in filteredTreasuries"
+        v-for="(treasury, i) in props.space.treasuries"
         :key="i"
         :to="{
           name: 'space-treasury',
@@ -87,7 +81,7 @@ watchEffect(() => {
     :key="activeTreasuryId"
     :space="space"
     :treasury-data="treasuryData"
-    :extra-contacts="filteredTreasuries"
+    :extra-contacts="props.space.treasuries"
   />
   <div v-else class="flex items-center px-4 py-3 text-skin-link gap-2">
     <IH-exclamation-circle />
