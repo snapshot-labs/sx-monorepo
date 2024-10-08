@@ -59,35 +59,12 @@ import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
-const TREASURY_NETWORKS = new Map(
-  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
-    chainId,
-    networkId as keyof typeof CHAIN_IDS
-  ])
-);
-
 const DELEGATION_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
   'delegation-with-cap',
   'delegation-with-overrides'
 ];
-
-const SUPPORTED_DELEGATION_NETWORKS: NetworkID[] = [
-  'eth',
-  'oeth',
-  'bsc',
-  'xdai',
-  'matic',
-  'fantom',
-  'base',
-  'arb1',
-  'sep'
-];
-
-const CHAIN_IDS_TO_NETWORKS: Record<number, NetworkID> = Object.fromEntries(
-  SUPPORTED_DELEGATION_NETWORKS.map(network => [CHAIN_IDS[network], network])
-);
 
 const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
 
@@ -112,7 +89,7 @@ function formatSpace(
 
     return {
       name: treasury.name,
-      network: TREASURY_NETWORKS.get(chainId) ?? null,
+      network: null,
       address: treasury.address,
       chainId
     };
@@ -375,7 +352,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
       name,
       apiType,
       apiUrl: space.delegationPortal.delegationApi,
-      contractNetwork: CHAIN_IDS_TO_NETWORKS[chainId] || null,
+      contractNetwork: null,
       contractAddress: space.delegationPortal.delegationContract,
       chainId
     });
@@ -388,7 +365,7 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
       name: 'Delegate registry',
       apiType: 'delegate-registry',
       apiUrl: DELEGATE_REGISTRY_URL,
-      contractNetwork: CHAIN_IDS_TO_NETWORKS[chainId] || null,
+      contractNetwork: null,
       contractAddress: space.id,
       chainId
     });
