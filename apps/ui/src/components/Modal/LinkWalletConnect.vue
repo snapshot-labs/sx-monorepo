@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { NetworkID, SelectedStrategy } from '@/types';
+import { ChainId, NetworkID, SelectedStrategy } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   pairingCode: ''
@@ -27,7 +27,7 @@ const definition = {
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: number;
+  network: ChainId;
   networkId: NetworkID;
   spaceKey: string;
   executionStrategy: SelectedStrategy | null;
@@ -40,7 +40,7 @@ const emit = defineEmits<{
 const { transaction } = useWalletConnectTransaction();
 const { loading, logged, proposal, connect, logout } = useWalletConnect(
   props.networkId,
-  props.network,
+  Number(props.network),
   props.address,
   props.spaceKey,
   props.executionStrategy

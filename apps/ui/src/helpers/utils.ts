@@ -13,7 +13,6 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
-import networks from '@/helpers/networks.json';
 import { VotingPowerItem } from '@/stores/votingPowers';
 import { Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
@@ -124,11 +123,6 @@ export function formatAddress(address: string) {
   } catch {
     return address;
   }
-}
-
-export function explorerUrl(network, str: string, type = 'address'): string {
-  if (network === 'starknet') type = 'contract';
-  return `${networks[network].explorer}/${type}/${str}`;
 }
 
 export function getProposalId(proposal: Proposal) {

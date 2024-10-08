@@ -1,4 +1,5 @@
 import { ETH_CONTRACT } from '@/helpers/constants';
+import { ChainId } from '@/types';
 import {
   GetBalancesResponse,
   GetTokenBalancesResponse,
@@ -8,26 +9,37 @@ export * from './types';
 
 const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
 
-const NETWORKS = {
+export const SUPPORTED_CHAIN_IDS = [
+  1, // Ethereum,
+  10, // Optimism,
+  137, // Polygon,
+  324, // ZkSync Era
+  8453, // Base
+  42161, // Arbitrum
+  42170, // Arbitrum Nova
+  11155111 // Sepolia
+] as const;
+
+const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], string> = {
   1: 'eth-mainnet',
-  11155111: 'eth-sepolia',
   10: 'opt-mainnet',
   137: 'polygon-mainnet',
-  42161: 'arb-mainnet'
+  324: 'zksync-mainnet',
+  8453: 'base-mainnet',
+  42161: 'arb-mainnet',
+  42170: 'arbnova-mainnet',
+  11155111: 'eth-sepolia'
 };
 
-function getApiUrl(networkId: number) {
-  const network = NETWORKS[networkId] ?? 'mainnet';
+function getApiUrl(chainId: ChainId) {
+  const network = NETWORKS[chainId];
+  if (!network) throw new Error('Unsupported chain for Alchemy API');
 
   return `https://${network}.g.alchemy.com/v2/${apiKey}`;
 }
 
-export async function request(
-  method: string,
-  params: any[],
-  networkId: number
-) {
-  const res = await fetch(getApiUrl(networkId), {
+export async function request(method: string, params: any[], chainId: ChainId) {
+  const res = await fetch(getApiUrl(chainId), {
     method: 'POST',
     body: JSON.stringify({
       id: 1,
@@ -44,9 +56,9 @@ export async function request(
 
 export async function batchRequest(
   requests: { method: string; params: any[] }[],
-  networkId: number
+  chainId: ChainId
 ) {
-  const res = await fetch(getApiUrl(networkId), {
+  const res = await fetch(getApiUrl(chainId), {
     method: 'POST',
     body: JSON.stringify(
       requests.map((request, i) => ({
@@ -66,26 +78,26 @@ export async function batchRequest(
 /**
  * Gets Ethereum balance as hex encoded string.
  * @param address Ethereum address to fetch ETH balance for
- * @param networkId Network ID
+ * @param chainId ChainId
  * @returns Hex encoded ETH balance
  */
 export async function getBalance(
   address: string,
-  networkId: number
+  chainId: ChainId
 ): Promise<string> {
-  return request('eth_getBalance', [address], networkId);
+  return request('eth_getBalance', [address, 'latest'], chainId);
 }
 
 /**
  * Gets ERC20 balances of tokens that provided address interacted with.
  * Response might include 0 balances.
  * @param address Ethereum address to fetch token balances for
- * @param networkId Network ID
+ * @param chainId ChainId
  * @returns Token balances
  */
 export async function getTokenBalances(
   address: string,
-  networkId: number
+  chainId: ChainId
 ): Promise<GetTokenBalancesResponse> {
   const results = { address, tokenBalances: [], pageKey: null };
   let pageKey = null;
@@ -94,7 +106,7 @@ export async function getTokenBalances(
     const pageResult = await request(
       'alchemy_getTokenBalances',
       [address, 'erc20', { pageKey }],
-      networkId
+      chainId
     );
 
     results.tokenBalances = results.tokenBalances.concat(
@@ -112,42 +124,42 @@ export async function getTokenBalances(
 /**
  * Gets ERC20 tokens metadata (name, symbol, decimals, logo).
  * @param addresses Array of ERC20 tokens addresses
- * @param networkId Network ID
+ * @param chainId ChainId
  * @returns Array of token metadata
  */
 export async function getTokensMetadata(
   addresses: string[],
-  networkId: number
+  chainId: ChainId
 ): Promise<GetTokensMetadataResponse> {
   return batchRequest(
     addresses.map(address => ({
       method: 'alchemy_getTokenMetadata',
       params: [address]
     })),
-    networkId
+    chainId
   );
 }
 
 /**
  * Gets Ethereum and ERC20 balances including metadata for tokens.
  * @param address Ethereum address to fetch balances for
- * @param networkId Network ID
+ * @param chainId ChainId
  * @returns Array of balances
  */
 export async function getBalances(
   address: string,
-  networkId: number,
+  chainId: ChainId,
   baseToken: { name: string; symbol: string; logo?: string }
 ): Promise<GetBalancesResponse> {
   const [ethBalance, { tokenBalances }] = await Promise.all([
-    getBalance(address, networkId),
-    getTokenBalances(address, networkId)
+    getBalance(address, chainId),
+    getTokenBalances(address, chainId)
   ]);
 
   const contractAddresses = tokenBalances.map(
     balance => balance.contractAddress
   );
-  const metadata = await getTokensMetadata(contractAddresses, networkId);
+  const metadata = await getTokensMetadata(contractAddresses, chainId);
 
   return [
     {

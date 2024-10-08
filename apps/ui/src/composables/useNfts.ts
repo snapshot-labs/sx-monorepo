@@ -1,11 +1,12 @@
 import { getNfts } from '@/helpers/opensea';
+import { ChainId } from '@/types';
 
 export function useNfts() {
   const nfts: Ref<any[]> = ref([]);
   const loading = ref(true);
   const loaded = ref(false);
 
-  async function loadNfts(address: string, chainId: number) {
+  async function loadNfts(address: string, chainId: ChainId) {
     loading.value = true;
 
     nfts.value = await getNfts(address, chainId);
