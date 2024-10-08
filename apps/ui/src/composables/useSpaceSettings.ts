@@ -144,7 +144,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
-  const proposalValidation = ref({ name: 'any', params: {} } as Validation);
+  const proposalValidation = ref({ name: 'basic', params: {} } as Validation);
   const onlyMembers = ref(false);
   const guidelines = ref('');
   const template = ref('');
@@ -423,6 +423,24 @@ export function useSpaceSettings(space: Ref<Space>) {
     } as const;
   }
 
+  function getInitialProposalValidation(space: Space): Validation {
+    const validation = clone(
+      space.additionalRawData?.validation ?? {
+        name: 'basic',
+        params: {}
+      }
+    );
+
+    if (validation.name === 'any') {
+      validation.name = 'basic';
+      validation.params = {
+        minScore: 1
+      };
+    }
+
+    return validation;
+  }
+
   function getInitialStrategies(space: Space): StrategyConfig[] {
     if (space.additionalRawData?.type !== 'offchain') return [];
 
@@ -666,12 +684,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     if (offchainNetworks.includes(space.value.network)) {
-      proposalValidation.value = clone(
-        space.value.additionalRawData?.validation ?? {
-          name: 'any',
-          params: {}
-        }
-      );
+      proposalValidation.value = getInitialProposalValidation(space.value);
       onlyMembers.value =
         space.value.additionalRawData?.filters.onlyMembers ?? false;
       guidelines.value = space.value.additionalRawData?.guidelines ?? '';
@@ -777,11 +790,9 @@ export function useSpaceSettings(space: Ref<Space>) {
     if (offchainNetworks.includes(space.value.network)) {
       const ignoreOrderOpts = { unorderedArrays: true };
 
-      const initialProposalValidation = space.value.additionalRawData
-        ?.validation ?? {
-        name: 'any',
-        params: {}
-      };
+      const initialProposalValidation = getInitialProposalValidation(
+        space.value
+      );
 
       if (
         objectHash(proposalValidationValue) !==
