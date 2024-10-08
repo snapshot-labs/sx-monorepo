@@ -464,7 +464,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     let delegationPortal: OffchainSpaceSettings['delegationPortal'] = null;
     if (
       form.value.delegations.length > 0 &&
-      form.value.delegations[0].contractNetwork &&
       form.value.delegations[0].contractAddress &&
       form.value.delegations[0].apiUrl &&
       form.value.delegations[0].apiType
@@ -475,9 +474,7 @@ export function useSpaceSettings(space: Ref<Space>) {
           : form.value.delegations[0].apiType;
 
       delegationPortal = {
-        delegationNetwork: String(
-          getNetwork(form.value.delegations[0].contractNetwork).chainId
-        ),
+        delegationNetwork: String(form.value.delegations[0].chainId ?? '1'),
         delegationContract: form.value.delegations[0].contractAddress,
         delegationApi: form.value.delegations[0].apiUrl,
         delegationType: apiType

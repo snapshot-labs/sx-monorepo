@@ -327,6 +327,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     >
       <FormSpaceDelegations
         v-model="form.delegations"
+        :network-id="space.network"
         :limit="isOffchainNetwork ? 1 : undefined"
       />
     </UiContainerSettings>
