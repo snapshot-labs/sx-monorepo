@@ -209,7 +209,10 @@ watchEffect(() => setTitle('Create space'));
               @errors="v => handleErrors('profile', v)"
             />
             <div class="s-box p-4 -mt-6">
-              <FormSpaceTreasuries v-model="metadataForm.treasuries" />
+              <FormSpaceTreasuries
+                v-model="metadataForm.treasuries"
+                :network-id="selectedNetworkId"
+              />
               <FormSpaceDelegations
                 v-model="metadataForm.delegations"
                 class="mt-2"

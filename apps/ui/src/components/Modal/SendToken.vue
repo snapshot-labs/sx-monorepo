@@ -6,7 +6,7 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { Contact, Transaction } from '@/types';
+import { ChainId, Contact, NetworkID, Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -25,8 +25,8 @@ const RECIPIENT_DEFINITION = {
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: number;
-  networkId: string;
+  network: ChainId;
+  networkId: NetworkID;
   extraContacts?: Contact[];
   initialState?: any;
 }>();

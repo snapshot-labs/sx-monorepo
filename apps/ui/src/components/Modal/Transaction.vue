@@ -19,7 +19,7 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
-  network: number;
+  network: number | string;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
@@ -156,6 +156,11 @@ async function handleToChange(to: string) {
 
   if (!isAddress(contractAddress)) {
     console.log('not an address');
+    return;
+  }
+
+  if (typeof props.network === 'string') {
+    console.log('network is not a number (starknet is not supported)');
     return;
   }
 

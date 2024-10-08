@@ -9,13 +9,15 @@ import {
 import { Float } from '@headlessui-float/vue';
 import { DefinitionWithOptions } from '@/types';
 
+const NULL_SYMBOL = Symbol('null');
+
 defineOptions({ inheritAttrs: false });
 
-const model = defineModel<T>({ required: true });
+const model = defineModel<T | null>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  definition: DefinitionWithOptions<T>;
+  definition: DefinitionWithOptions<T | null>;
 }>();
 
 const dirty = ref(false);
@@ -37,7 +39,7 @@ const inputValue = computed({
 
     return model.value;
   },
-  set(newValue: T) {
+  set(newValue: T | null) {
     dirty.value = true;
     model.value = newValue;
   }
@@ -46,6 +48,7 @@ const inputValue = computed({
 function handleFocus(event: FocusEvent, open: boolean) {
   if (!event.target || open) return;
 
+  query.value = '';
   (event.target as HTMLInputElement).select();
 }
 
@@ -66,7 +69,7 @@ watch(model, () => {
     :dirty="dirty"
     class="relative mb-[14px]"
   >
-    <Combobox v-slot="{ open }" v-model="inputValue" as="div">
+    <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>
       <Float adaptive-width strategy="fixed" placement="bottom-end">
         <div>
           <ComboboxButton class="w-full">
@@ -78,6 +81,7 @@ watch(model, () => {
               autocomplete="off"
               :placeholder="definition.examples?.[0]"
               :display-value="item => getDisplayValue(item as T)"
+              @keydown.enter="() => (query = '')"
               @change="e => (query = e.target.value)"
               @focus="event => handleFocus(event, open)"
             />
@@ -91,10 +95,17 @@ watch(model, () => {
           class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
         >
           <div class="max-h-[208px] overflow-y-auto">
+            <div
+              v-if="filteredOptions.length === 0 && query !== ''"
+              class="relative cursor-default select-none text-center py-2"
+            >
+              No result for your search query
+            </div>
+
             <ComboboxOption
               v-for="item in filteredOptions"
               v-slot="{ selected, disabled, active }"
-              :key="item.id"
+              :key="item.id ?? NULL_SYMBOL"
               :value="item.id"
               as="template"
             >

@@ -162,7 +162,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   );
   const privacy = ref('none' as 'none' | 'shutter');
   const ignoreAbstainVotes = ref(false);
-  const snapshotChainId = ref('');
+  const snapshotChainId: Ref<number> = ref(1);
   const strategies = ref([] as StrategyConfig[]);
   const members = ref([] as Member[]);
   const parent = ref('');
@@ -425,7 +425,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     return space.additionalRawData.strategies.map(strategy => ({
       id: crypto.randomUUID(),
-      chainId: strategy.network,
+      chainId: Number(strategy.network),
       address: strategy.name,
       name: strategy.name,
       paramsDefinition: null,
@@ -491,7 +491,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         form.value.categories ?? space.value.additionalRawData.categories,
       avatar: form.value.avatar ?? space.value.avatar,
       cover: form.value.cover ?? space.value.cover,
-      network: snapshotChainId.value,
+      network: String(snapshotChainId.value),
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
       terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
@@ -513,9 +513,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       treasuries: form.value.treasuries.map(treasury => ({
         address: treasury.address || '',
         name: treasury.name || '',
-        network: treasury.network
-          ? String(getNetwork(treasury.network).chainId)
-          : '1'
+        network: String(treasury.chainId ?? '1')
       })),
       labels: form.value.labels,
       admins: members.value
@@ -677,7 +675,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       privacy.value = initialVotingProperties.privacy;
       ignoreAbstainVotes.value = initialVotingProperties.ignoreAbstainVotes;
 
-      snapshotChainId.value = space.value.snapshot_chain_id?.toString() ?? '1';
+      snapshotChainId.value = space.value.snapshot_chain_id ?? 1;
 
       if (space.value.additionalRawData?.type === 'offchain') {
         strategies.value = getInitialStrategies(space.value);
@@ -810,10 +808,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         return;
       }
 
-      if (
-        snapshotChainIdValue !==
-        (space.value.snapshot_chain_id?.toString() ?? '1')
-      ) {
+      if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? 1)) {
         isModified.value = true;
         return;
       }

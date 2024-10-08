@@ -62,7 +62,7 @@ const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 const TREASURY_NETWORKS = new Map(
   Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
     chainId,
-    networkId as NetworkID
+    networkId as keyof typeof CHAIN_IDS
   ])
 );
 
@@ -107,18 +107,16 @@ function formatSpace(
   networkId: NetworkID,
   constants: NetworkConstants
 ): Space {
-  const treasuries: SpaceMetadataTreasury[] = space.treasuries
-    .map(treasury => {
-      const chainId = parseInt(treasury.network, 10);
+  const treasuries: SpaceMetadataTreasury[] = space.treasuries.map(treasury => {
+    const chainId = parseInt(treasury.network, 10);
 
-      return {
-        name: treasury.name,
-        network: TREASURY_NETWORKS.get(chainId) ?? null,
-        address: treasury.address,
-        chainId
-      };
-    })
-    .filter(treasury => !!treasury.network);
+    return {
+      name: treasury.name,
+      network: TREASURY_NETWORKS.get(chainId) ?? null,
+      address: treasury.address,
+      chainId
+    };
+  });
 
   let validationName = space.validation.name;
   const validationParams = clone(space.validation.params) || {};

@@ -1,4 +1,4 @@
-import { VoteType, VoteTypeInfo } from '@/types';
+import { ChainId, NetworkID, VoteType, VoteTypeInfo } from '@/types';
 
 export const APP_NAME = 'Snapshot';
 
@@ -6,17 +6,21 @@ export const SIDEKICK_URL = 'https://sh5.co';
 
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
-export const CHAIN_IDS = {
-  matic: 137,
-  arb1: 42161,
-  oeth: 10,
+export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
+  // EVM
   eth: 1,
-  sep: 11155111,
-  'linea-testnet': 59140,
+  oeth: 10,
   bsc: 56,
   xdai: 100,
+  matic: 137,
   fantom: 250,
-  base: 8453
+  base: 8453,
+  arb1: 42161,
+  'linea-testnet': 59140,
+  sep: 11155111,
+  // Starknet
+  sn: '0x534e5f4d41494e',
+  'sn-sep': '0x534e5f5345504f4c4941'
 };
 
 export const COINGECKO_ASSET_PLATFORMS = {

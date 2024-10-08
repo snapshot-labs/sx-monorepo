@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { enabledNetworks, getNetwork } from '@/networks';
-import { SpaceMetadataTreasury } from '@/types';
+import { offchainNetworks } from '@/networks';
+import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
+  address: '',
   network: null,
-  address: null
+  chainId: null
 };
 
 const props = defineProps<{
   open: boolean;
+  networkId: NetworkID;
   initialState?: SpaceMetadataTreasury;
 }>();
 const emit = defineEmits<{
@@ -23,17 +25,9 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataTreasury> = ref(clone(DEFAULT_FORM_STATE));
 
-const availableNetworks = enabledNetworks
-  .map(id => {
-    const { name, readOnly } = getNetwork(id);
-
-    return {
-      id,
-      name,
-      readOnly
-    };
-  })
-  .filter(network => !network.readOnly);
+const networkField = computed(() =>
+  offchainNetworks.includes(props.networkId) ? 'chainId' : 'network'
+);
 
 const definition = computed(() => {
   return {
@@ -49,14 +43,14 @@ const definition = computed(() => {
         maxLength: 32,
         examples: ['Treasury name']
       },
-      network: {
-        type: ['string', 'null'],
-        enum: [null, ...availableNetworks.map(network => network.id)],
-        options: [{ id: null, name: 'No treasury' }, ...availableNetworks],
+      [networkField.value]: {
+        type: ['string', 'number', 'null'],
+        format: 'network',
+        networkId: props.networkId,
         title: 'Treasury network',
         nullable: true
       },
-      ...(form.value.network !== null
+      ...(form.value[networkField.value] !== null
         ? {
             address: {
               type: 'string',
@@ -78,7 +72,7 @@ const formErrors = computed(() =>
 const formValid = computed(() => {
   return (
     Object.keys(formErrors.value).length === 0 &&
-    form.value.network !== null &&
+    form.value[networkField.value] !== null &&
     form.value.address !== ''
   );
 });
