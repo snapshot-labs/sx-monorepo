@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { sanitizeUrl } from '@braintree/sanitize-url';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import removeMarkdown from 'remove-markdown';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
@@ -42,15 +44,26 @@ const currentNetwork = computed(() => {
   if (!props.delegation.contractNetwork) return null;
 
   try {
-    return getNetwork(props.delegation.contractNetwork, {
-      allowDisabledNetwork: true
-    });
+    return getNetwork(props.delegation.contractNetwork);
   } catch (e) {
     return null;
   }
 });
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
+
+function getExplorerUrl(address: string, type: 'address' | 'token') {
+  let url = '';
+  if (currentNetwork.value) {
+    url = currentNetwork.value.helpers.getExplorerUrl(address, type);
+  } else if (props.delegation.chainId) {
+    url = `${networks[props.delegation.chainId].explorer.url}/${type}/${address}`;
+  } else {
+    return null;
+  }
+
+  return sanitizeUrl(url);
+}
 
 function handleSortChange(
   type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
@@ -91,11 +104,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
 <template>
   <div
-    v-if="
-      !currentNetwork ||
-      !delegation.apiUrl ||
-      delegation.apiType === 'split-delegation'
-    "
+    v-if="!delegation.apiUrl || delegation.apiType === 'split-delegation'"
     class="px-4 py-3 flex items-center text-skin-link space-x-2"
   >
     <IH-exclamation-circle class="shrink-0" />
@@ -289,12 +298,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
                     <a
-                      :href="
-                        currentNetwork.helpers.getExplorerUrl(
-                          delegate.user,
-                          'address'
-                        )
-                      "
+                      :href="getExplorerUrl(delegate.user, 'address') || ''"
                       target="_blank"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"

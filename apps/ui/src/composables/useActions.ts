@@ -4,6 +4,7 @@ import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
+  ChainId,
   Choice,
   DelegationType,
   NetworkID,
@@ -560,26 +561,30 @@ export function useActions() {
 
   async function delegate(
     space: Space,
-    networkId: NetworkID,
+    networkId: NetworkID | null,
     delegationType: DelegationType,
     delegatee: string,
-    delegationContract: string
+    delegationContract: string,
+    chainIdOverride?: ChainId
   ) {
     if (!web3.value.account) return await forceLogin();
 
-    const network = getReadWriteNetwork(networkId, {
-      allowDisabledNetwork: true
-    });
+    const isEvmNetwork = typeof chainIdOverride === 'number';
+    const actionNetwork = networkId ?? isEvmNetwork ? 'eth' : null;
+    if (!actionNetwork) throw new Error('Failed to detect action network');
+
+    const network = getReadWriteNetwork(actionNetwork);
 
     await wrapPromise(
-      networkId,
+      actionNetwork,
       network.actions.delegate(
         auth.web3,
         space,
-        networkId,
+        actionNetwork,
         delegationType,
         delegatee,
-        delegationContract
+        delegationContract,
+        chainIdOverride
       )
     );
   }

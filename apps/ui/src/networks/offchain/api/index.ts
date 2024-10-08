@@ -369,26 +369,28 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
         ? (['governor-subgraph', 'ERC-20 Votes'] as const)
         : [space.delegationPortal.delegationType, 'Split Delegation'];
 
+    const chainId = parseInt(space.delegationPortal.delegationNetwork, 10);
+
     delegations.push({
       name,
       apiType,
       apiUrl: space.delegationPortal.delegationApi,
-      contractNetwork:
-        CHAIN_IDS_TO_NETWORKS[
-          parseInt(space.delegationPortal.delegationNetwork, 10)
-        ] || null,
-      contractAddress: space.delegationPortal.delegationContract
+      contractNetwork: CHAIN_IDS_TO_NETWORKS[chainId] || null,
+      contractAddress: space.delegationPortal.delegationContract,
+      chainId
     });
   }
 
   if (spaceDelegationStrategy) {
+    const chainId = parseInt(space.network, 10);
+
     delegations.push({
       name: 'Delegate registry',
       apiType: 'delegate-registry',
       apiUrl: DELEGATE_REGISTRY_URL,
-      contractNetwork:
-        CHAIN_IDS_TO_NETWORKS[parseInt(space.network, 10)] || null,
-      contractAddress: space.id
+      contractNetwork: CHAIN_IDS_TO_NETWORKS[chainId] || null,
+      contractAddress: space.id,
+      chainId
     });
   }
 
