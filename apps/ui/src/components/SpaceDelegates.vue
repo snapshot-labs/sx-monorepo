@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import removeMarkdown from 'remove-markdown';
-import { _n, _p, _vp, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, getGenericExplorerUrl, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
@@ -53,14 +52,17 @@ const currentNetwork = computed(() => {
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
-  let url = '';
+  let url: string | null = null;
   if (currentNetwork.value) {
     url = currentNetwork.value.helpers.getExplorerUrl(address, type);
   } else if (props.delegation.chainId) {
-    url = `${networks[props.delegation.chainId].explorer.url}/${type}/${address}`;
+    url = getGenericExplorerUrl(props.delegation.chainId, address, type);
+    console.log('generic', url);
   } else {
     return null;
   }
+
+  if (!url) return null;
 
   return sanitizeUrl(url);
 }
