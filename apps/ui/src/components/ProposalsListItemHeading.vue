@@ -66,7 +66,7 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="md:flex md:min-w-0 flex-wrap gap-y-2"
+          class="md:flex md:min-w-0 flex-wrap"
         >
           <h3
             class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"

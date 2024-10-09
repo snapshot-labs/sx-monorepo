@@ -51,7 +51,11 @@ function handleLabelClick(id: string) {
 </script>
 <template>
   <div v-if="inline" class="contents">
-    <div v-for="label in selectedLabels" :key="label.id" class="mr-2">
+    <div
+      v-for="label in selectedLabels"
+      :key="label.id"
+      class="mr-2 my-2 md:mt-0"
+    >
       <UiProposalLabel :label="label.name" :color="label.color" />
     </div>
   </div>
