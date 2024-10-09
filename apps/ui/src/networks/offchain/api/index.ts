@@ -85,7 +85,9 @@ function formatSpace(
   constants: NetworkConstants
 ): Space {
   const treasuries: SpaceMetadataTreasury[] = space.treasuries.map(treasury => {
-    const chainId = parseInt(treasury.network, 10);
+    const chainId = treasury.network.startsWith('0x')
+      ? treasury.network
+      : parseInt(treasury.network, 10);
 
     return {
       name: treasury.name,
@@ -346,7 +348,9 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
         ? (['governor-subgraph', 'ERC-20 Votes'] as const)
         : [space.delegationPortal.delegationType, 'Split Delegation'];
 
-    const chainId = parseInt(space.delegationPortal.delegationNetwork, 10);
+    const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
+      ? space.delegationPortal.delegationNetwork
+      : parseInt(space.delegationPortal.delegationNetwork, 10);
 
     delegations.push({
       name,
