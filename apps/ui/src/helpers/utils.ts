@@ -490,12 +490,11 @@ export function getStampUrl(
 
   const cacheParam = hash ? `&cb=${hash}` : '';
   const [entryNetwork] = id.split(':') as [NetworkID, string];
-
-  const formattedId =
-    ['avatar', 'space', 'space-cover'].includes(type) &&
-    !offchainNetworks.includes(entryNetwork)
-      ? formatAddress(id)
-      : id;
+  const isAddress =
+    type === 'avatar' ||
+    (['space', 'space-cover'].includes(type) &&
+      !offchainNetworks.includes(entryNetwork));
+  const formattedId = isAddress ? formatAddress(id) : id;
 
   return `https://cdn.stamp.fyi/${type}/${formattedId}${sizeParam}${cacheParam}`;
 }
