@@ -2,6 +2,7 @@
 type ValidationDetails = {
   key:
     | 'any'
+    | 'only-members'
     | 'basic'
     | 'passport-gated'
     | 'arbitrum'
@@ -21,6 +22,10 @@ import { StrategyConfig } from '@/networks/types';
 import { ChainId, NetworkID, Space, Validation } from '@/types';
 
 const SCORE_API_URL = 'https://score.snapshot.org/api/validations';
+const STRATEGIES_WITHOUT_PARAMS: ValidationDetails['key'][] = [
+  'any',
+  'only-members'
+];
 
 const props = defineProps<{
   open: boolean;
@@ -67,7 +72,15 @@ const filteredValidations = computed(() => {
     return !validation.proposalValidationOnly;
   });
 
-  if (props.type === 'proposal') return apiValidations;
+  if (props.type === 'proposal') {
+    return [
+      {
+        key: 'only-members' as const,
+        schema: null
+      },
+      ...apiValidations
+    ];
+  }
 
   return [
     {
@@ -154,7 +167,7 @@ const formErrors = computed(() => {
 });
 
 function handleSelect(validationDetails: ValidationDetails) {
-  if (validationDetails.key === 'any') {
+  if (STRATEGIES_WITHOUT_PARAMS.includes(validationDetails.key)) {
     emit('save', { name: validationDetails.key, params: {} });
     emit('close');
     return;

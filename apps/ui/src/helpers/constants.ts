@@ -103,6 +103,7 @@ export const PRIVACY_TYPES_INFO: Record<
 
 export const VALIDATION_TYPES_INFO: Record<
   | 'any-voting'
+  | 'only-members'
   | 'basic'
   | 'passport-gated'
   | 'arbitrum'
@@ -112,6 +113,10 @@ export const VALIDATION_TYPES_INFO: Record<
   'any-voting': {
     label: 'Anyone can vote',
     description: 'Anyone with voting power can cast a vote.'
+  },
+  'only-members': {
+    label: 'Only authors can propose',
+    description: 'Allow only authors to submit a proposal'
   },
   basic: {
     label: 'Basic',

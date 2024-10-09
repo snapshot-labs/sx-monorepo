@@ -26,7 +26,6 @@ const {
   validationStrategy,
   votingStrategies,
   proposalValidation,
-  onlyMembers,
   guidelines,
   template,
   quorumType,
@@ -397,7 +396,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     >
       <FormSpaceProposal
         v-model:proposal-validation="proposalValidation"
-        v-model:only-members="onlyMembers"
         v-model:guidelines="guidelines"
         v-model:template="template"
         :network-id="space.network"

@@ -25,9 +25,6 @@ const TEMPLATE_DEFINITION = {
 const proposalValidation = defineModel<Validation>('proposalValidation', {
   required: true
 });
-const onlyMembers = defineModel<boolean>('onlyMembers', {
-  required: true
-});
 const guidelines = defineModel<string>('guidelines', {
   required: true
 });
@@ -75,12 +72,7 @@ watchEffect(() => {
 
 <template>
   <h4 class="eyebrow mb-2 font-medium">Proposal Validation</h4>
-  <UiSwitch
-    v-model="onlyMembers"
-    title="Allow only authors to submit a proposal"
-    class="mb-[14px]"
-  />
-  <div v-if="!onlyMembers" class="s-box">
+  <div class="s-box">
     <UiWrapperInput
       :definition="{
         title: 'Validation',
@@ -89,12 +81,8 @@ watchEffect(() => {
       }"
     >
       <button
-        :disabled="onlyMembers"
         type="button"
         class="s-input !flex flex-row justify-between items-center"
-        :class="{
-          'opacity-50 cursor-not-allowed': onlyMembers
-        }"
         @click="isSelectValidationModalOpen = true"
       >
         <div>

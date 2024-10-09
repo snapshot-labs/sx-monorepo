@@ -145,7 +145,6 @@ export function useSpaceSettings(space: Ref<Space>) {
 
   // Offchain properties
   const proposalValidation = ref({ name: 'basic', params: {} } as Validation);
-  const onlyMembers = ref(false);
   const guidelines = ref('');
   const template = ref('');
   const quorumType = ref(
@@ -431,7 +430,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       }
     );
 
-    if (validation.name === 'any') {
+    if (space.additionalRawData?.filters.onlyMembers) {
+      validation.name = 'only-members';
+      validation.params = { minScore: 1 };
+    } else if (validation.name === 'any') {
       validation.name = 'basic';
       validation.params = {
         minScore: 1
@@ -550,7 +552,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       delegationPortal: delegationPortal,
       filters: {
         ...space.value.additionalRawData.filters,
-        onlyMembers: onlyMembers.value
+        onlyMembers: proposalValidation.value.name === 'only-members'
       },
       voting: {
         ...space.value.additionalRawData.voting,
@@ -567,7 +569,10 @@ export function useSpaceSettings(space: Ref<Space>) {
         privacy: privacy.value === 'none' ? '' : privacy.value,
         hideAbstain: ignoreAbstainVotes.value
       },
-      validation: proposalValidation.value,
+      validation:
+        proposalValidation.value.name === 'only-members'
+          ? space.value.additionalRawData.validation
+          : proposalValidation.value,
       voteValidation: voteValidation.value,
       boost: space.value.additionalRawData.boost
     };
@@ -685,8 +690,6 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (offchainNetworks.includes(space.value.network)) {
       proposalValidation.value = getInitialProposalValidation(space.value);
-      onlyMembers.value =
-        space.value.additionalRawData?.filters.onlyMembers ?? false;
       guidelines.value = space.value.additionalRawData?.guidelines ?? '';
       template.value = space.value.additionalRawData?.template ?? '';
 
@@ -733,7 +736,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
     const proposalValidationValue = proposalValidation.value;
-    const onlyMembersValue = onlyMembers.value;
     const guidelinesValue = guidelines.value;
     const templateValue = template.value;
     const quorumTypeValue = quorumType.value;
@@ -797,14 +799,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       if (
         objectHash(proposalValidationValue) !==
         objectHash(initialProposalValidation)
-      ) {
-        isModified.value = true;
-        return;
-      }
-
-      if (
-        onlyMembersValue !==
-        (space.value.additionalRawData?.filters.onlyMembers ?? false)
       ) {
         isModified.value = true;
         return;
@@ -971,7 +965,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy,
     votingStrategies,
     proposalValidation,
-    onlyMembers,
     guidelines,
     template,
     quorumType,
