@@ -1342,10 +1342,10 @@
     "@floating-ui/dom" "^1.5.4"
     "@floating-ui/vue" "^1.0.3"
 
-"@headlessui/vue@^1.7.16":
-  version "1.7.18"
-  resolved "https://registry.yarnpkg.com/@headlessui/vue/-/vue-1.7.18.tgz#1c61473fa232053a3d90f83e1ccf661fcb52abb1"
-  integrity sha512-N9EUJY0sHhuJQ81oQlk+vmB80NwUXsyJjxOaBrzUyO+VHIZz7v/ffFICAlrtM4TxZaZFMCzehe74yEPSqkEJ9g==
+"@headlessui/vue@^1.7.23":
+  version "1.7.23"
+  resolved "https://registry.yarnpkg.com/@headlessui/vue/-/vue-1.7.23.tgz#7fe19dbeca35de9e6270c82c78c4864e6a6f7391"
+  integrity sha512-JzdCNqurrtuu0YW6QaDtR2PIYCKPUWq28csDyMvN4zmGccmE7lz40Is6hc3LA4HFeCI7sekZ/PQMTNmn9I/4Wg==
   dependencies:
     "@tanstack/vue-virtual" "^3.0.0-beta.60"
 
@@ -2543,10 +2543,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.18.tgz#fcbd86d4557821bff774d60e5c636ad47ed85d77"
   integrity sha512-v6tj7l19KJUWjBbsWpwxaYO2mlIDBFyAG0OMSPhUgrhltO7b6R4Ejxn2k4Qgi/NtlnOrj+3Gt3eQRry8Jfgjrg==
 
-"@snapshot-labs/snapshot.js@^0.12.21":
-  version "0.12.21"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.21.tgz#c8ed9b5e4658648d9013721dea8489ed73768eb0"
-  integrity sha512-n/A+5YfyFU33FED2Qxz2a/APDD/Mo33EKWNQurSPC8u47Z4TNCa9yQxd+7EnLHgYsyg2zeXBjy2d3oV3oVKphw==
+"@snapshot-labs/snapshot.js@^0.12.23":
+  version "0.12.23"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.23.tgz#31fea49f8cb1d3fccf9d5898f05edd9c68500d69"
+  integrity sha512-n3qJUblvZFhaGzqW+TUL32YkNnPl7uAKwrofx1rG6em3E/LjE9Wr2HdbFtdBzIK0QiZQPYdHzQNokjE6jJJ+tw==
   dependencies:
     "@ensdomains/eth-ens-namehash" "^2.0.15"
     "@ethersproject/abi" "^5.6.4"

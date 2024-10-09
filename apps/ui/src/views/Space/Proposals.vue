@@ -69,8 +69,8 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         <UiSelectDropdown
           v-model="state"
           title="Status"
-          gap="12px"
-          placement="left"
+          gap="12"
+          placement="start"
           :items="[
             {
               key: 'any',

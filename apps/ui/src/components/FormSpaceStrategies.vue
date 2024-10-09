@@ -2,9 +2,9 @@
 import objectHash from 'object-hash';
 import { MAX_STRATEGIES } from '@/helpers/turbo';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
-import { NetworkID, Space } from '@/types';
+import { ChainId, NetworkID, Space } from '@/types';
 
-const snapshotChainId = defineModel<string>('snapshotChainId', {
+const snapshotChainId = defineModel<number>('snapshotChainId', {
   required: true
 });
 const strategies = defineModel<StrategyConfig[]>('strategies', {
@@ -56,7 +56,7 @@ async function handleEditStrategy(strategy: StrategyConfig) {
   isEditStrategyModalOpen.value = true;
 }
 
-function handleSaveStrategy(params: Record<string, any>, network: string) {
+function handleSaveStrategy(params: Record<string, any>, network: ChainId) {
   const editedStrategyValue = editedStrategy.value;
 
   if (editedStrategyValue === null) return;
@@ -79,7 +79,7 @@ function handleSaveStrategy(params: Record<string, any>, network: string) {
   });
 }
 
-function validateStrategy(params: Record<string, any>, network: string) {
+function validateStrategy(params: Record<string, any>, network: ChainId) {
   const editedStrategyValue = editedStrategy.value;
   if (editedStrategyValue === null) return;
 
@@ -111,8 +111,14 @@ watchEffect(() => {
   <div class="s-box mb-4">
     <UiSelectorNetwork
       v-model="snapshotChainId"
-      :network-id="networkId"
-      tooltip="The default network used for this space. Networks can also be specified in individual strategies"
+      :definition="{
+        type: 'number',
+        title: 'Network',
+        tooltip:
+          'The default network used for this space. Networks can also be specified in individual strategies',
+        examples: ['Select network'],
+        networkId
+      }"
     />
   </div>
   <UiContainerSettings

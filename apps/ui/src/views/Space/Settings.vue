@@ -337,6 +337,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     >
       <FormSpaceTreasuries
         v-model="form.treasuries"
+        :network-id="space.network"
         :limit="isOffchainNetwork ? 10 : undefined"
       />
     </UiContainerSettings>
