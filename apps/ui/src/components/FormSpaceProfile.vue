@@ -166,7 +166,7 @@ onMounted(() => {
   <UiInputStampCover v-model="(form as any).cover" :space="space" />
   <div class="s-box p-4 mt-[-80px] max-w-[640px]">
     <UiInputStamp
-      :model-value="(form as any).avatar"
+      v-model="(form as any).avatar"
       :definition="{
         type: 'string',
         format: 'stamp',
