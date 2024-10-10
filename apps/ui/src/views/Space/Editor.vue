@@ -507,14 +507,13 @@ watchEffect(() => {
           >.
         </template>
       </EditorChoices>
-      <div v-if="space.labels?.length">
-        <ProposalLabels
-          :proposal="proposal"
-          :labels="space.labels"
-          show-edit
-          @update-proposal-labels="handleLabelClick"
-        />
-      </div>
+      <ProposalLabels
+        v-if="space.labels?.length"
+        :proposal="proposal"
+        :labels="space.labels"
+        show-edit
+        @update-proposal-labels="handleLabelClick"
+      />
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
         <ProposalTimeline :data="space" />

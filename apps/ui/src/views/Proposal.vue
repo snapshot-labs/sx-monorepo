@@ -320,9 +320,11 @@ watchEffect(() => {
               :decimals="votingPowerDecimals"
             />
           </div>
-          <div v-if="space.labels?.length && proposal.labels?.length">
-            <ProposalLabels :proposal="proposal" :labels="space.labels" />
-          </div>
+          <ProposalLabels
+            v-if="space.labels?.length && proposal.labels?.length"
+            :proposal="proposal"
+            :labels="space.labels"
+          />
           <div>
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
               <IH-clock />
