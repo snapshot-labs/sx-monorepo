@@ -76,35 +76,6 @@ export const METADATA: Record<string, Metadata> = {
     avatar:
       'ipfs://bafkreibn4mjs54bnmvkrkiaiwp47gvcz6bervg2kr5ubknytfyz6l5wbs4',
     blockTime: 13.52926
-  },
-  bsc: {
-    name: 'BNB Smart Chain',
-    chainId: 56,
-    apiUrl: '',
-    avatar:
-      'ipfs://bafkreibll4la7wqerzs7zwxjne2j7ayynbg2wlenemssoahxxj5rbt6c64',
-    blockTime: 0
-  },
-  xdai: {
-    name: 'Gnosis Chain',
-    chainId: 100,
-    apiUrl: '',
-    avatar: 'ipfs://QmZeiy8Ax4133wzxUQM9ky8z5XFVf6YLFjJMmTWbWVniZR',
-    blockTime: 0
-  },
-  fantom: {
-    name: 'Fantom Opera',
-    chainId: 250,
-    apiUrl: '',
-    avatar: 'ipfs://QmVEgNeQDKnXygeGxfY9FywZpNGQu98ktZtRJ9bToYF6g7',
-    blockTime: 0
-  },
-  base: {
-    name: 'Base',
-    chainId: 8453,
-    apiUrl: '',
-    avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
-    blockTime: 0
   }
 };
 
