@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
 
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
@@ -44,8 +43,8 @@ watchEffect(() => {
   }
 
   const faviconUrl = getStampUrl(
-    offchainNetworks.includes(space.value.network) ? 'space' : 'space-sx',
-    space.value.id,
+    'space',
+    `${space.value.network}:${space.value.id}`,
     16,
     getCacheHash(space.value.avatar)
   );

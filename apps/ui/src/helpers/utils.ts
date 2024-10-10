@@ -13,8 +13,9 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
+import { offchainNetworks } from '@/networks';
 import { VotingPowerItem } from '@/stores/votingPowers';
-import { Choice, Proposal, SpaceMetadata } from '@/types';
+import { Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -475,14 +476,7 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type:
-    | 'avatar'
-    | 'user-cover'
-    | 'space'
-    | 'space-cover'
-    | 'space-sx'
-    | 'space-cover-sx'
-    | 'token',
+  type: 'avatar' | 'user-cover' | 'space' | 'space-cover' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string
@@ -495,10 +489,12 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
-
-  const formattedId = ['avatar', 'space-sx', 'space-cover-sx'].includes(type)
-    ? formatAddress(id)
-    : id;
+  const [entryNetwork] = id.split(':') as [NetworkID, string];
+  const isAddress =
+    type === 'avatar' ||
+    (['space', 'space-cover'].includes(type) &&
+      !offchainNetworks.includes(entryNetwork));
+  const formattedId = isAddress ? formatAddress(id) : id;
 
   return `https://cdn.stamp.fyi/${type}/${formattedId}${sizeParam}${cacheParam}`;
 }

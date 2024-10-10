@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getCacheHash } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
 
 const props = withDefaults(
@@ -18,10 +17,10 @@ const cb = computed(() => getCacheHash(props.space.avatar));
 
 <template>
   <UiStamp
-    :id="space.id"
+    :id="`${space.network}:${space.id}`"
     :size="size"
     :cb="cb"
     class="!bg-skin-bg"
-    :type="offchainNetworks.includes(space.network) ? 'space' : 'space-sx'"
+    type="space"
   />
 </template>

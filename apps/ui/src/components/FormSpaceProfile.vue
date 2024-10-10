@@ -171,9 +171,7 @@ onMounted(() => {
         type: 'string',
         format: 'stamp',
         title: 'Avatar',
-        default:
-          props.id ||
-          '0x2121212121212121212121212121212121212121212121212121212121212121'
+        default: `${space?.network || 'eth'}:${props.id || '0x2121212121212121212121212121212121212121212121212121212121212121'}`
       }"
     />
     <h4 class="eyebrow mb-2 font-medium">Profile</h4>
