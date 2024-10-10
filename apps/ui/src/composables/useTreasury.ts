@@ -1,8 +1,8 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { SUPPORTED_CHAIN_IDS as TOKENS_SUPPORTED_CHAIN_IDS } from '@/helpers/alchemy';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { SUPPORTED_CHAIN_IDS as NFTS_SUPPORTED_CHAIN_IDS } from '@/helpers/opensea';
-import { getGenericExplorerUrl } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { SpaceMetadataTreasury } from '@/types';
 

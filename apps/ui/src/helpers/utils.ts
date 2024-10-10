@@ -2,7 +2,6 @@ import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress, isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import Autolinker from 'autolinker';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -14,10 +13,8 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
-import { getNetwork } from '@/networks';
-import { METADATA } from '@/networks/starknet';
 import { VotingPowerItem } from '@/stores/votingPowers';
-import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
+import { Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -354,29 +351,6 @@ export function uniqBy<T>(arr: T[], predicate: keyof T | ((o: T) => any)): T[] {
 
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
-}
-
-export function getGenericExplorerUrl(
-  chainId: ChainId,
-  address: string,
-  type: 'address' | 'token'
-) {
-  if (typeof chainId === 'number') {
-    return `${networks[chainId].explorer.url}/${type}/${address}`;
-  }
-
-  const starknetNetwork = Object.entries(METADATA).find(
-    ([, { chainId: starknetChainId }]) => starknetChainId === chainId
-  )?.[0];
-
-  if (!starknetNetwork) return null;
-
-  try {
-    const network = getNetwork(starknetNetwork as NetworkID);
-    return network.helpers.getExplorerUrl(address, type);
-  } catch {
-    return null;
-  }
 }
 
 export async function verifyNetwork(

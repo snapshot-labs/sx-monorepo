@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import removeMarkdown from 'remove-markdown';
-import { _n, _p, _vp, getGenericExplorerUrl, shorten } from '@/helpers/utils';
+import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
@@ -57,7 +58,6 @@ function getExplorerUrl(address: string, type: 'address' | 'token') {
     url = currentNetwork.value.helpers.getExplorerUrl(address, type);
   } else if (props.delegation.chainId) {
     url = getGenericExplorerUrl(props.delegation.chainId, address, type);
-    console.log('generic', url);
   } else {
     return null;
   }
