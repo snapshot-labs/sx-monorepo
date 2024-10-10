@@ -141,15 +141,16 @@ watchEffect(() => {
         </div>
       </template>
     </template>
+    <div v-if="isDefinitionLoading" class="p-4 flex">
+      <UiLoading class="m-auto" />
+    </div>
     <PickerContact
-      v-if="showPicker"
+      v-else-if="showPicker"
       :loading="false"
       :search-value="searchValue"
       @pick="handlePickerSelect"
     />
-    <div v-if="isDefinitionLoading" class="p-4 flex">
-      <UiLoading class="m-auto" />
-    </div>
+
     <div v-else class="s-box p-4">
       <UiMessage
         v-if="formErrors[CUSTOM_ERROR_SYMBOL]"
