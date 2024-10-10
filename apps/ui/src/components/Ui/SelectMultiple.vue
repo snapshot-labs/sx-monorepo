@@ -74,20 +74,23 @@ watch(model, () => {
     <Listbox v-slot="{ open }" v-model="inputValue" multiple as="div">
       <Float adaptive-width strategy="fixed" placement="bottom-end">
         <ListboxButton
-          class="s-input !flex items-center justify-between"
+          class="s-input !flex items-start justify-between"
           :class="{
             '!rounded-b-none': open
           }"
         >
           <span
+            class="text-left"
             :class="{
               '!text-skin-text/40': inputValue.length === 0
             }"
           >
             {{ currentValue }}
           </span>
-          <IH-chevron-up v-if="open" />
-          <IH-chevron-down v-else />
+          <div class="shrink-0 relative top-1">
+            <IH-chevron-up v-if="open" />
+            <IH-chevron-down v-else />
+          </div>
         </ListboxButton>
         <ListboxOptions
           class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"

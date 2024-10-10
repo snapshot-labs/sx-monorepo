@@ -5,6 +5,7 @@ const enabled = defineModel<boolean>({ required: true });
 
 defineProps<{
   title: string;
+  tooltip?: string;
 }>();
 </script>
 
@@ -24,8 +25,11 @@ defineProps<{
           <IC-switch-disabled v-else class="text-skin-text" />
         </span>
       </Switch>
-      <SwitchLabel class="text-skin-link">
+      <SwitchLabel class="text-skin-link truncate flex items-center gap-1">
         {{ title }}
+        <UiTooltip v-if="tooltip" :title="tooltip">
+          <IH-question-mark-circle class="shrink-0" />
+        </UiTooltip>
       </SwitchLabel>
     </div>
   </SwitchGroup>

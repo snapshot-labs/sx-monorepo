@@ -215,6 +215,7 @@ watchEffect(() => setTitle('Create space'));
               />
               <FormSpaceDelegations
                 v-model="metadataForm.delegations"
+                :network-id="selectedNetworkId"
                 class="mt-2"
               />
             </div>
