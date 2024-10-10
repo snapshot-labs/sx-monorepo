@@ -58,7 +58,7 @@ export type ApiSpace = {
   strategies: { network: string; params: Record<string, any>; name: string }[];
   validation: {
     name: string;
-    params?: any;
+    params: Record<string, any>;
   };
   filters: {
     minScore: number;
@@ -87,7 +87,7 @@ export type ApiSpace = {
   };
   voteValidation: {
     name: string;
-    params?: any;
+    params: Record<string, any>;
   };
 };
 

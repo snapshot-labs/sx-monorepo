@@ -37,7 +37,7 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  if (!space.value || isWhiteLabel) {
+  if (!space.value || isWhiteLabel.value) {
     setFavicon(null);
     return;
   }
