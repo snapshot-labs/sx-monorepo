@@ -52,7 +52,7 @@ export type ApiSpace = {
   voting_power_validation_strategy_strategies: string[];
   voting_power_validation_strategy_strategies_params: string[];
   voting_power_validation_strategies_parsed_metadata: ApiStrategyParsedMetadata[];
-  strategies_indicies: number[];
+  strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
   strategies_parsed_metadata: ApiStrategyParsedMetadata[];
@@ -107,7 +107,7 @@ export type ApiProposal = {
   execution_strategy_type: string;
   execution_destination: string | null;
   timelock_veto_guardian: string | null;
-  strategies_indicies: number[];
+  strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
   created: number;

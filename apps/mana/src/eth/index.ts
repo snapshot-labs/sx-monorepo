@@ -3,7 +3,7 @@ import z from 'zod';
 import {
   DEFAULT_INDEX,
   getEthereumWallet,
-  SPACES_INDICIES
+  SPACES_INDICES
 } from './dependencies';
 import { createNetworkHandler, NETWORKS } from './rpc';
 import { rpcError } from '../utils';
@@ -47,7 +47,7 @@ router.get('/relayers', (req, res) => {
 
   const defaultRelayer = getEthereumWallet(mnemonic, DEFAULT_INDEX).address;
   const relayers = Object.fromEntries(
-    Array.from(SPACES_INDICIES).map(([spaceAddress, index]) => {
+    Array.from(SPACES_INDICES).map(([spaceAddress, index]) => {
       const { address } = getEthereumWallet(mnemonic, index);
       return [spaceAddress, address];
     })

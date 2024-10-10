@@ -86,7 +86,7 @@ export const handleSpaceCreated: starknet.Writer = async ({
     BigInt(event.max_voting_duration).toString()
   );
   space.proposal_threshold = '0';
-  space.strategies_indicies = strategies.map((_, i) => i);
+  space.strategies_indices = strategies.map((_, i) => i);
   space.strategies = strategies;
   space.next_strategy_index = strategies.length;
   space.strategies_params = strategiesParams;
@@ -296,8 +296,8 @@ export const handleVotingStrategiesAdded: starknet.Writer = async ({
     (array: string[]) => longStringToText(array)
   );
 
-  space.strategies_indicies = [
-    ...space.strategies_indicies,
+  space.strategies_indices = [
+    ...space.strategies_indices,
     ...strategies.map((_, i) => space.next_strategy_index + i)
   ];
   space.strategies = [...space.strategies, ...strategies];
@@ -334,21 +334,21 @@ export const handleVotingStrategiesRemoved: starknet.Writer = async ({
   const space = await Space.loadEntity(spaceId);
   if (!space) return;
 
-  const indiciesToRemove = event.voting_strategy_indices.map((index: string) =>
-    space.strategies_indicies.indexOf(parseInt(index))
+  const indicesToRemove = event.voting_strategy_indices.map((index: string) =>
+    space.strategies_indices.indexOf(parseInt(index))
   );
 
-  space.strategies_indicies = space.strategies_indicies.filter(
-    (_, i) => !indiciesToRemove.includes(i)
+  space.strategies_indices = space.strategies_indices.filter(
+    (_, i) => !indicesToRemove.includes(i)
   );
   space.strategies = space.strategies.filter(
-    (_, i) => !indiciesToRemove.includes(i)
+    (_, i) => !indicesToRemove.includes(i)
   );
   space.strategies_params = space.strategies_params.filter(
-    (_, i) => !indiciesToRemove.includes(i)
+    (_, i) => !indicesToRemove.includes(i)
   );
   space.strategies_metadata = space.strategies_metadata.filter(
-    (_, i) => !indiciesToRemove.includes(i)
+    (_, i) => !indicesToRemove.includes(i)
   );
 
   await space.save();
@@ -438,7 +438,7 @@ export const handlePropose: starknet.Writer = async ({
   proposal.scores_3 = '0';
   proposal.scores_total = '0';
   proposal.quorum = 0n;
-  proposal.strategies_indicies = space.strategies_indicies;
+  proposal.strategies_indices = space.strategies_indices;
   proposal.strategies = space.strategies;
   proposal.strategies_params = space.strategies_params;
   proposal.created = parseInt(created.toString());

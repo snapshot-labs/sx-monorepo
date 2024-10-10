@@ -14,7 +14,7 @@ type Space {
   max_voting_period: Int!
   proposal_threshold: BigDecimalVP!
   next_strategy_index: Int!
-  strategies_indicies: [Int]!
+  strategies_indices: [Int]!
   strategies: [String]!
   strategies_params: [String]!
   strategies_metadata: [String]!
@@ -114,7 +114,7 @@ type Proposal {
   timelock_delay: Int
   axiom_snapshot_address: String
   axiom_snapshot_slot: BigInt
-  strategies_indicies: [Int]!
+  strategies_indices: [Int]!
   strategies: [String]!
   strategies_params: [String]!
   scores_1: BigDecimalVP!
