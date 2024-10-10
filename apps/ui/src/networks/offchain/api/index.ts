@@ -194,7 +194,9 @@ function formatSpace(
     validation_strategy: '',
     validation_strategy_params: '',
     voting_power_validation_strategy_strategies: [validationName],
-    voting_power_validation_strategy_strategies_params: [validationParams],
+    voting_power_validation_strategy_strategies_params: [
+      validationParams as any
+    ],
     voting_power_validation_strategies_parsed_metadata: [],
     children: space.children.map(formatRelatedSpace),
     parent: space.parent ? formatRelatedSpace(space.parent) : null,

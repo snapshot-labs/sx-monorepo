@@ -127,6 +127,11 @@ export type RelatedSpace = {
   snapshot_chain_id: number;
 };
 
+export type Validation = {
+  name: string;
+  params: Record<string, any>;
+};
+
 export type OffchainAdditionalRawData = {
   type: 'offchain';
 } & Pick<
