@@ -5,11 +5,10 @@ const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
 const { currentMode } = useUserSkin();
 
 export default class Connector extends LockConnector {
-  async connect() {
-    let provider;
+  async connect(): Promise<any> {
     try {
       const argentx = await get();
-      const starknet = await argentx.connect({
+      const { wallet } = await argentx.connect({
         dappName: 'Snapshot',
         modalMode: localStorage.getItem('starknetLastConnectedWallet')
           ? 'neverAsk'
@@ -22,19 +21,24 @@ export default class Connector extends LockConnector {
         }
       });
 
-      if (!starknet.wallet) {
+      if (!wallet) {
         throw Error(
           'User rejected wallet selection or silent connect found nothing'
         );
       }
 
-      if (!starknet.wallet.isConnected) {
+      // @ts-ignore
+      await wallet?.enable();
+
+      // @ts-ignore
+      if (!wallet.isConnected) {
         throw new Error('Connector was not connected');
       }
 
-      provider = starknet.wallet;
-      provider.connectorName = 'argentx';
-      return provider;
+      return {
+        ...wallet,
+        connectorName: 'argentx'
+      };
     } catch (e) {
       console.error(e);
       return false;
