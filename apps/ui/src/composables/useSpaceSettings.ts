@@ -432,7 +432,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (space.additionalRawData?.filters.onlyMembers) {
       validation.name = 'only-members';
-      validation.params = { minScore: 1 };
+      validation.params = {};
     } else if (validation.name === 'any') {
       validation.name = 'basic';
       validation.params = {
