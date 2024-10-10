@@ -114,6 +114,7 @@ export type ApiProposal = {
   end: number;
   snapshot: number;
   choices: string[];
+  labels: string[];
   scores: number[];
   scores_total: number;
   state: 'active' | 'pending' | 'closed';

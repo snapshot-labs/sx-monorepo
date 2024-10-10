@@ -208,6 +208,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      labels: string[],
       executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
@@ -307,6 +308,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      labels: string[],
       executions: ExecutionInfo[] | null
     ) {
       await verifyNetwork(web3, chainId);

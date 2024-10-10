@@ -128,6 +128,7 @@ const PROPOSAL_FRAGMENT = gql`
     end
     snapshot
     choices
+    labels
     scores
     scores_total
     state

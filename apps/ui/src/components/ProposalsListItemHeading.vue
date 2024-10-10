@@ -18,11 +18,16 @@ const props = withDefaults(
 );
 
 const { getTsFromCurrent } = useMetaStore();
-
+const spacesStore = useSpacesStore();
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+const space = computed(() =>
+  spacesStore.spacesMap.get(
+    `${props.proposal.network}:${props.proposal.space.id}`
+  )
+);
 </script>
 <template>
   <div v-bind="$attrs">
@@ -61,11 +66,17 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="md:flex md:min-w-0"
+          class="md:flex md:min-w-0 flex-wrap gap-y-2"
         >
           <h3
             class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
+          />
+          <ProposalLabels
+            v-if="space?.labels"
+            :proposal="proposal"
+            :labels="space.labels"
+            inline
           />
           <IH-check
             v-if="

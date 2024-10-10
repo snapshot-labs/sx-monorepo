@@ -278,6 +278,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
+    labels: string[],
     executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
@@ -299,6 +300,7 @@ export function useActions() {
         discussion,
         type,
         choices,
+        labels,
         executions
       )
     );
@@ -314,6 +316,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
+    labels: string[],
     executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
@@ -336,6 +339,7 @@ export function useActions() {
         discussion,
         type,
         choices,
+        labels,
         executions
       )
     );

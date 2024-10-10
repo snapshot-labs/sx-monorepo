@@ -169,6 +169,7 @@ export type Propose = {
   body: string;
   discussion: string;
   choices: string[];
+  labels: string[];
   start: number;
   end: number;
   snapshot: number;
@@ -185,6 +186,7 @@ export type UpdateProposal = {
   body: string;
   discussion: string;
   choices: string[];
+  labels: string[];
   plugins: string;
 };
 
