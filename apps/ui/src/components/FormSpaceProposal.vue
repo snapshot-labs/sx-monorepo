@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
+import { ChainId, NetworkID, Space, Validation } from '@/types';
 
 const GUIDELINES_DEFINITION = {
   type: 'string',
@@ -20,7 +22,7 @@ const TEMPLATE_DEFINITION = {
     'Start every proposal with a template to help users understand what information is required'
 };
 
-const onlyMembers = defineModel<boolean>('onlyMembers', {
+const proposalValidation = defineModel<Validation>('proposalValidation', {
   required: true
 });
 const guidelines = defineModel<string>('guidelines', {
@@ -30,9 +32,17 @@ const template = defineModel<string>('template', {
   required: true
 });
 
+defineProps<{
+  networkId: NetworkID;
+  space: Space;
+  snapshotChainId: ChainId;
+}>();
+
 const emit = defineEmits<{
   (e: 'updateValidity', valid: boolean): void;
 }>();
+
+const isSelectValidationModalOpen = ref(false);
 
 const errors = computed(() => {
   const validator = getValidator({
@@ -62,11 +72,25 @@ watchEffect(() => {
 
 <template>
   <h4 class="eyebrow mb-2 font-medium">Proposal Validation</h4>
-  <div class="s-box mb-4">
-    <UiSwitch
-      v-model="onlyMembers"
-      title="Allow only authors to submit a proposal"
-    />
+  <div class="s-box">
+    <UiWrapperInput
+      :definition="{
+        title: 'Validation',
+        tooltip:
+          'The type of validation used to determine if a user can create a proposal. (Enforced on all future proposals)'
+      }"
+    >
+      <button
+        type="button"
+        class="s-input !flex flex-row justify-between items-center"
+        @click="isSelectValidationModalOpen = true"
+      >
+        <div>
+          {{ VALIDATION_TYPES_INFO[proposalValidation.name].label }}
+        </div>
+        <IH-chevron-down />
+      </button>
+    </UiWrapperInput>
   </div>
   <h4 class="eyebrow mb-2 font-medium">Proposal</h4>
   <div class="s-box mb-4">
@@ -82,4 +106,16 @@ watchEffect(() => {
       class="!min-h-[140px]"
     />
   </div>
+  <teleport to="#modal">
+    <ModalSelectValidation
+      type="proposal"
+      :open="isSelectValidationModalOpen"
+      :network-id="networkId"
+      :default-chain-id="snapshotChainId"
+      :space="space"
+      :current="proposalValidation"
+      @close="isSelectValidationModalOpen = false"
+      @save="value => (proposalValidation = value)"
+    />
+  </teleport>
 </template>

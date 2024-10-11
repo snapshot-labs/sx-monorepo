@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { enabledNetworks, getNetwork } from '@/networks';
-import { SpaceMetadataDelegation } from '@/types';
+import { offchainNetworks } from '@/networks';
+import { NetworkID, SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
   apiType: null,
   apiUrl: null,
   contractNetwork: null,
-  contractAddress: null
+  contractAddress: null,
+  chainId: null
 };
 
 const props = defineProps<{
   open: boolean;
+  networkId: NetworkID;
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{
@@ -25,17 +27,9 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataDelegation> = ref(clone(DEFAULT_FORM_STATE));
 
-const availableNetworks = enabledNetworks
-  .map(id => {
-    const { name, readOnly } = getNetwork(id);
-
-    return {
-      id,
-      name,
-      readOnly
-    };
-  })
-  .filter(network => !network.readOnly);
+const networkField = computed(() =>
+  offchainNetworks.includes(props.networkId) ? 'chainId' : 'contractNetwork'
+);
 
 const definition = computed(() => {
   return {
@@ -71,17 +65,14 @@ const definition = computed(() => {
                 'https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2'
               ]
             },
-            contractNetwork: {
-              type: 'string',
-              enum: [null, ...availableNetworks.map(network => network.id)],
-              options: [
-                { id: null, name: 'No delegation contract' },
-                ...availableNetworks
-              ],
+            [networkField.value]: {
+              type: ['string', 'number', 'null'],
+              format: 'network',
+              networkId: props.networkId,
               title: 'Delegation contract network',
               nullable: true
             },
-            ...(form.value.contractNetwork !== null
+            ...(form.value[networkField.value] !== null
               ? {
                   contractAddress: {
                     type: 'string',

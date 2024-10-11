@@ -41,8 +41,8 @@ const options = computed(() => {
 
     return [
       ...baseNetworks,
-      ...Object.entries(STARKNET_NETWORK_METADATA).map(([key, metadata]) => ({
-        id: key,
+      ...Object.values(STARKNET_NETWORK_METADATA).map(metadata => ({
+        id: metadata.chainId,
         name: metadata.name,
         icon: h('img', {
           src: getUrl(metadata.avatar),

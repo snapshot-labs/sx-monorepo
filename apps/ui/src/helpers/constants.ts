@@ -10,11 +10,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   // EVM
   eth: 1,
   oeth: 10,
-  bsc: 56,
-  xdai: 100,
   matic: 137,
-  fantom: 250,
-  base: 8453,
   arb1: 42161,
   'linea-testnet': 59140,
   sep: 11155111,
@@ -98,5 +94,43 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'Shutter',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
+  }
+};
+
+export const VALIDATION_TYPES_INFO: Record<
+  | 'any-voting'
+  | 'only-members'
+  | 'basic'
+  | 'passport-gated'
+  | 'arbitrum'
+  | 'karma-eas-attestation',
+  { label: string; description: string }
+> = {
+  'any-voting': {
+    label: 'Anyone can vote',
+    description: 'Anyone with voting power can cast a vote.'
+  },
+  'only-members': {
+    label: 'Only authors can propose',
+    description: 'Allow only authors to submit a proposal'
+  },
+  basic: {
+    label: 'Basic',
+    description:
+      'Use a minimum score along with any strategy to determine if a user can create a proposal.'
+  },
+  'passport-gated': {
+    label: 'Gitcoin Passport gated',
+    description:
+      'Protect your space from spam by requiring users to have a Gitcoin Passport to create a proposal.'
+  },
+  arbitrum: {
+    label: 'Arbitrum DAO votable supply',
+    description:
+      'Use with erc20-votes to validate by percentage of votable supply.'
+  },
+  'karma-eas-attestation': {
+    label: 'Karma EAS Attestation',
+    description: 'Use EAS attest.sh to determine if user can create a proposal.'
   }
 };
