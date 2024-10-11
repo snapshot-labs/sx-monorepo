@@ -70,6 +70,7 @@ const metadataForm: SpaceMetadata = reactive(
     discord: '',
     votingPowerSymbol: '',
     treasuries: [],
+    labels: [],
     delegations: []
   })
 );

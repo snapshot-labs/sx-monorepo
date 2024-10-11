@@ -65,6 +65,7 @@ describe('utils', () => {
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
+        labels: [],
         delegations: [
           {
             name: 'sample',
