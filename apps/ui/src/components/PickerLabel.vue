@@ -47,16 +47,16 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-10 left-0 mt-5 mx-4 pb-3 bg-skin-bg"
+        class="absolute z-10 left-0 mt-5 mx-4 pb-3"
         style="width: calc(100% - 48px)"
       >
         <Combobox
           v-slot="{ activeOption }"
           v-model="selectedLabels"
           multiple
-          :nullable="true"
+          nullable
         >
-          <div class="rounded-xl overflow-hidden shadow-bottom">
+          <div class=" bg-skin-bg rounded-xl overflow-hidden shadow-bottom">
             <div
               class="flex items-center px-3 py-[14px] bg-skin-border border-b border-skin-heading border-opacity-5"
             >
