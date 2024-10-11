@@ -12,7 +12,6 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
-import { CHAIN_IDS } from '@/helpers/constants';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, MANA_URL } from '@/helpers/mana';
@@ -36,6 +35,7 @@ import {
   VotingPower
 } from '@/networks/types';
 import {
+  ChainId,
   Choice,
   DelegationType,
   NetworkID,
@@ -595,9 +595,15 @@ export function createActions(
       networkId: NetworkID,
       delegationType: DelegationType,
       delegatee: string,
-      delegationContract: string
+      delegationContract: string,
+      chainIdOverride?: ChainId
     ) => {
-      await verifyNetwork(web3, CHAIN_IDS[networkId]);
+      if (typeof chainIdOverride === 'string') {
+        throw new Error('Chain ID must be a number for EVM networks');
+      }
+
+      const currentChainId = chainIdOverride || chainId;
+      await verifyNetwork(web3, currentChainId);
 
       let contractParams: {
         address: string;

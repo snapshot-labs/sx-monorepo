@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { SpaceMetadataDelegation } from '@/types';
+import { NetworkID, SpaceMetadataDelegation } from '@/types';
 
 const model = defineModel<SpaceMetadataDelegation[]>({
   required: true
 });
 
 defineProps<{
+  networkId: NetworkID;
   limit?: number;
 }>();
 
@@ -89,6 +90,7 @@ function deleteDelegation(index: number) {
   <teleport to="#modal">
     <ModalDelegationConfig
       :open="modalOpen"
+      :network-id="networkId"
       :initial-state="delegationInitialState ?? undefined"
       @close="modalOpen = false"
       @add="addDelegationConfig"

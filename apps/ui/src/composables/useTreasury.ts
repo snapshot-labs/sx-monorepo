@@ -1,7 +1,7 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { SUPPORTED_CHAIN_IDS as TOKENS_SUPPORTED_CHAIN_IDS } from '@/helpers/alchemy';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { SUPPORTED_CHAIN_IDS as NFTS_SUPPORTED_CHAIN_IDS } from '@/helpers/opensea';
 import { getNetwork } from '@/networks';
 import { SpaceMetadataTreasury } from '@/types';
@@ -39,14 +39,14 @@ export function useTreasury(treasuryData: SpaceMetadataTreasury) {
   function getExplorerUrl(address: string, type: 'address' | 'token') {
     if (!treasury.value) return null;
 
-    let url = '';
+    let url: string | null = null;
     if (currentNetwork.value) {
       url = currentNetwork.value.helpers.getExplorerUrl(address, type);
     } else if (treasury.value.network) {
-      url = `${networks[treasury.value.network].explorer.url}/${type}/${address}`;
-    } else {
-      return null;
+      url = getGenericExplorerUrl(treasury.value.network, address, type);
     }
+
+    if (!url) return null;
 
     return sanitizeUrl(url);
   }
