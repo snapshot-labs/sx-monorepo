@@ -13,7 +13,8 @@ type Opts = { skipEmptyOptionalFields: boolean };
 const ajv = new Ajv({
   allErrors: true,
   // https://github.com/ajv-validator/ajv/issues/1417
-  strictTuples: false
+  strictTuples: false,
+  allowUnionTypes: true
 });
 ajvErrors(ajv);
 addFormats(ajv);
@@ -248,6 +249,12 @@ ajv.addKeyword({
 ajv.addKeyword('options');
 ajv.addKeyword('tooltip');
 
+// UiSelectorNetwork
+ajv.addFormat('network', {
+  validate: () => true
+});
+ajv.addKeyword('networkId');
+
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';
 
@@ -300,6 +307,11 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (errorObject.keyword === 'minimum') {
     if (!errorObject.params) return 'Invalid format.';
     return `Must be at least ${_n(errorObject.params.limit)}.`;
+  }
+
+  if (errorObject.keyword === 'maximum') {
+    if (!errorObject.params) return 'Invalid format.';
+    return `Must be at most ${_n(errorObject.params.limit)}.`;
   }
 
   return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message

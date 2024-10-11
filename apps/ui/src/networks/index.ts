@@ -4,8 +4,6 @@ import { createOffchainNetwork } from './offchain';
 import { createStarknetNetwork } from './starknet';
 import { ExplorePageProtocol, ProtocolConfig, ReadWriteNetwork } from './types';
 
-type GetNetworkOptions = { allowDisabledNetwork: boolean };
-
 const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
 const starknetNetwork = createStarknetNetwork('sn');
@@ -15,10 +13,6 @@ const arbitrumNetwork = createEvmNetwork('arb1');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
 const sepoliaNetwork = createEvmNetwork('sep');
-const bnbNetwork = createEvmNetwork('bsc');
-const gnosisNetwork = createEvmNetwork('xdai');
-const fantomNetwork = createEvmNetwork('fantom');
-const baseNetwork = createEvmNetwork('base');
 const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env
@@ -32,11 +26,7 @@ export const evmNetworks: NetworkID[] = [
   'arb1',
   'oeth',
   'sep',
-  'linea-testnet',
-  'bsc',
-  'xdai',
-  'fantom',
-  'base'
+  'linea-testnet'
 ];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
@@ -44,10 +34,8 @@ export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
 
-export const getNetwork = (id: NetworkID, options?: GetNetworkOptions) => {
-  const opts = { allowDisabledNetwork: false, ...options };
-
-  if (!enabledNetworks.includes(id) && !opts.allowDisabledNetwork)
+export const getNetwork = (id: NetworkID) => {
+  if (!enabledNetworks.includes(id))
     throw new Error(`Network ${id} is not enabled`);
 
   if (id === 's') return snapshotNetwork;
@@ -60,19 +48,12 @@ export const getNetwork = (id: NetworkID, options?: GetNetworkOptions) => {
   if (id === 'linea-testnet') return lineaTestnetNetwork;
   if (id === 'sn') return starknetNetwork;
   if (id === 'sn-sep') return starknetSepoliaNetwork;
-  if (id === 'bsc') return bnbNetwork;
-  if (id === 'xdai') return gnosisNetwork;
-  if (id === 'fantom') return fantomNetwork;
-  if (id === 'base') return baseNetwork;
 
   throw new Error(`Unknown network ${id}`);
 };
 
-export const getReadWriteNetwork = (
-  id: NetworkID,
-  options?: GetNetworkOptions
-): ReadWriteNetwork => {
-  const network = getNetwork(id, options);
+export const getReadWriteNetwork = (id: NetworkID): ReadWriteNetwork => {
+  const network = getNetwork(id);
   if (network.readOnly) throw new Error(`Network ${id} is read-only`);
 
   return network;

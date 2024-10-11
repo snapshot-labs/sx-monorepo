@@ -21,11 +21,7 @@ export type NetworkID =
   | 'sep'
   | 'linea-testnet'
   | 'sn'
-  | 'sn-sep'
-  | 'bsc'
-  | 'xdai'
-  | 'fantom'
-  | 'base';
+  | 'sn-sep';
 
 export type ChainId = number | string;
 
@@ -68,7 +64,7 @@ export type SpaceMetadataTreasury = {
   name: string;
   network: Exclude<NetworkID, 's' | 's-tn'> | null;
   address: string;
-  chainId?: ChainId;
+  chainId?: ChainId | null;
 };
 
 export type SpaceMetadataLabel = {
@@ -84,6 +80,7 @@ export type SpaceMetadataDelegation = {
   apiUrl: string | null;
   contractNetwork: NetworkID | null;
   contractAddress: string | null;
+  chainId?: ChainId | null;
 };
 
 export type SpaceMetadata = {
@@ -128,6 +125,11 @@ export type RelatedSpace = {
   turbo: boolean;
   verified: boolean;
   snapshot_chain_id: number;
+};
+
+export type Validation = {
+  name: string;
+  params: Record<string, any>;
 };
 
 export type OffchainAdditionalRawData = {
@@ -459,7 +461,7 @@ export type RequiredProperty<T> = {
 
 // UI
 export type BaseDefinition<T> = {
-  type: string;
+  type: string | string[];
   format?: string;
   title: string;
   description?: string;
