@@ -73,9 +73,9 @@ const space = computed(() =>
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <ProposalLabels
-            v-if="space?.labels"
-            :proposal="proposal"
-            :labels="space.labels"
+            v-if="space?.labels && proposal.labels.length"
+            :proposal-labels="proposal.labels"
+            :space-labels="space.labels"
             inline
           />
           <IH-check
