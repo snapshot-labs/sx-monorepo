@@ -56,7 +56,7 @@ const filteredLabels = computed(() =>
           multiple
           nullable
         >
-          <div class=" bg-skin-bg rounded-xl overflow-hidden shadow-bottom">
+          <div class="bg-skin-bg rounded-xl overflow-hidden shadow-bottom">
             <div
               class="flex items-center px-3 py-[14px] bg-skin-border border-b border-skin-heading border-opacity-5"
             >
