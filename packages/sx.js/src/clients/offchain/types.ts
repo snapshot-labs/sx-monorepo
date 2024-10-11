@@ -56,6 +56,7 @@ export type EIP712ProposeMessage = {
   body: string;
   discussion: string;
   choices: string[];
+  labels: string[];
   start: number;
   end: number;
   snapshot: number;
@@ -73,6 +74,7 @@ export type EIP712UpdateProposal = {
   body: string;
   discussion: string;
   choices: string[];
+  labels: string[];
   plugins: string;
   timestamp?: number;
   from?: string;
