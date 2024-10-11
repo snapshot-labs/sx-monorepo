@@ -8,7 +8,6 @@ import {
   PopoverButton,
   PopoverPanel
 } from '@headlessui/vue';
-import { ref } from 'vue';
 import { SpaceMetadataLabel } from '@/types';
 
 const props = defineProps<{
@@ -20,11 +19,13 @@ const selectedLabels = defineModel<string[]>({
 });
 
 const searchValue = ref('');
+
 const filteredLabels = computed(() =>
   props.labels.filter(label => {
+    const search = searchValue.value.toLowerCase();
     return (
-      label.name.toLowerCase().includes(searchValue.value.toLowerCase()) ||
-      label.description.toLowerCase().includes(searchValue.value.toLowerCase())
+      label.name.toLowerCase().includes(search) ||
+      label.description.toLowerCase().includes(search)
     );
   })
 );
@@ -32,7 +33,7 @@ const filteredLabels = computed(() =>
 
 <template>
   <Popover v-slot="{ open }" class="relative contents">
-    <PopoverButton :class="open ? 'text-white' : ''">
+    <PopoverButton :class="open ? 'text-skin-link' : 'text-skin-text'">
       <IH-pencil />
     </PopoverButton>
 
@@ -46,7 +47,7 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-10 left-0 mt-5 mx-4 w-full pb-3 bg-skin-bg"
+        class="absolute z-10 left-0 mt-5 mx-4 pb-3 bg-skin-bg"
         style="width: calc(100% - 48px)"
       >
         <Combobox
@@ -57,7 +58,7 @@ const filteredLabels = computed(() =>
         >
           <div class="rounded-xl overflow-hidden shadow-bottom">
             <div
-              class="flex items-center px-3 py-[14px] border-b bottom-line bg-skin-border"
+              class="flex items-center px-3 py-[14px] bg-skin-border border-b border-skin-heading border-opacity-5"
             >
               <IH-search class="mr-2" />
               <ComboboxInput
@@ -74,15 +75,15 @@ const filteredLabels = computed(() =>
                   v-for="label in filteredLabels"
                   :key="label.id"
                   :value="label.id"
-                  class="px-3 py-[11.5px] cursor-pointer flex justify-between items-center bg-skin-border"
+                  class="flex justify-between items-center bg-skin-border px-3 py-[11.5px] cursor-pointer w-full"
                   :class="activeOption === label.id ? 'bg-opacity-70' : ''"
                 >
-                  <div>
+                  <div class="w-11/12">
                     <UiProposalLabel
                       :label="label.name || 'label preview'"
                       :color="label.color"
                     />
-                    <div class="mt-2 truncate leading-[18px]">
+                    <div class="mt-2 truncate leading-[18px] text-sm">
                       {{ label.description || 'No description' }}
                     </div>
                   </div>
@@ -98,11 +99,9 @@ const filteredLabels = computed(() =>
     </transition>
   </Popover>
 </template>
+
 <style lang="scss" scoped>
 .shadow-bottom {
   box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
-  .bottom-line {
-    border-bottom-color: #1111110d;
-  }
 }
 </style>

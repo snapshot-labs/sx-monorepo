@@ -44,7 +44,7 @@ const space = computed(() =>
         <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
       </AppLink>
 
-      <div class="md:flex md:min-w-0 my-1 items-center leading-6">
+      <div class="md:min-w-0 my-1 items-center leading-6">
         <AppLink
           v-if="showSpace"
           :to="{
@@ -66,7 +66,7 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="md:flex md:min-w-0 flex-wrap"
+          class="md:min-w-0"
         >
           <h3
             class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
