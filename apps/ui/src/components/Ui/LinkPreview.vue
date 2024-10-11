@@ -17,7 +17,7 @@ type Preview = {
 };
 
 const preview = ref<Preview | null>(null);
-const previewIconResolving = ref<boolean>(false);
+const previewIconResolved = ref<boolean>(false);
 const previewLoading = ref<boolean>(true);
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
@@ -39,7 +39,7 @@ async function update(val: string) {
         method: 'HEAD'
       });
 
-      previewIconResolving.value = image.ok;
+      previewIconResolved.value = image.ok;
     }
   } catch (e) {
   } finally {
@@ -62,7 +62,7 @@ debouncedWatch(
   >
     <template v-if="preview?.meta?.title">
       <img
-        v-if="previewIconResolving"
+        v-if="previewIconResolved"
         :src="preview.links.icon[0].href"
         width="32"
         height="32"
