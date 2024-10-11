@@ -3,6 +3,8 @@ import { useUserSkin } from '@/composables/useUserSkin';
 import { APP_NAME } from './constants';
 const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
 
+const CONNECTOR_NAME = 'argentx';
+
 const { currentMode } = useUserSkin();
 
 export default class Connector extends LockConnector {
@@ -34,11 +36,30 @@ export default class Connector extends LockConnector {
       if (!wallet.isConnected) await wallet?.enable();
 
       provider = wallet;
-      provider.connectorName = 'argentx';
+      provider.connectorName = CONNECTOR_NAME;
 
       return provider;
     } catch (e) {
       console.error(e);
+      return false;
+    }
+  }
+
+  async autoConnect() {
+    let provider: any = null;
+
+    try {
+      const argentx = await get();
+      const { wallet } = await argentx.connect({ modalMode: 'neverAsk' });
+
+      // @ts-ignore
+      if (!wallet.isConnected) await wallet?.enable();
+
+      provider = wallet;
+      provider.connectorName = CONNECTOR_NAME;
+
+      return provider;
+    } catch (e) {
       return false;
     }
   }
