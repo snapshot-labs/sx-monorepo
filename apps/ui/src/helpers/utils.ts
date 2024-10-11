@@ -451,6 +451,12 @@ export function createErc1155Metadata(
         network: treasury.network,
         address: treasury.address
       })),
+      labels: metadata.labels?.map(label => ({
+        id: label.id,
+        name: label.name,
+        description: label.description,
+        color: label.color
+      })),
       delegations: metadata.delegations.map(delegation => ({
         name: delegation.name,
         api_type: delegation.apiType,

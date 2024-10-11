@@ -25,12 +25,14 @@ export function handleSpaceMetadata(content: Bytes): void {
   spaceMetadata.external_url = externalUrl ? externalUrl.toString() : ''
   spaceMetadata.wallet = ''
   spaceMetadata.treasuries = []
+  spaceMetadata.labels = []
   spaceMetadata.delegations = []
 
   if (properties) {
     const propertiesObj = properties.toObject()
 
     let treasuries = propertiesObj.get('treasuries')
+    let labels = propertiesObj.get('labels')
     let delegations = propertiesObj.get('delegations')
     let cover = propertiesObj.get('cover')
     let github = propertiesObj.get('github')
@@ -48,6 +50,19 @@ export function handleSpaceMetadata(content: Bytes): void {
         let jsonTreasuriesArr = jsonPropertiesObj.getArr('treasuries')
         if (jsonTreasuriesArr) {
           spaceMetadata.treasuries = jsonTreasuriesArr._arr.map<string>((treasury) =>
+            treasury.toString()
+          )
+        }
+      }
+    }
+
+    if (labels) {
+      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
+      let jsonPropertiesObj = jsonObj.getObj('properties')
+      if (jsonPropertiesObj) {
+        let jsonTreasuriesArr = jsonPropertiesObj.getArr('labels')
+        if (jsonTreasuriesArr) {
+          spaceMetadata.labels = jsonTreasuriesArr._arr.map<string>((treasury) =>
             treasury.toString()
           )
         }

@@ -40,6 +40,7 @@ export type ApiSpace = {
     executors_destinations: string[];
     executors_strategies: ApiExecutorStrategy[];
     treasuries: string[];
+    labels: string[];
     delegations: string[];
   };
   controller: string;
@@ -80,6 +81,7 @@ export type ApiProposal = {
       avatar: string;
       voting_power_symbol: string;
       treasuries: string[];
+      labels: string[];
       executors: string[];
       executors_types: string[];
       executors_strategies: ApiExecutorStrategy[];

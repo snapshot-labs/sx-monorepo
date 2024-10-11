@@ -138,7 +138,7 @@ const tabs = computed<Tab[]>(
       {
         id: 'labels',
         name: 'Labels',
-        visible: isOffchainNetwork.value && IS_DEV
+        visible: IS_DEV
       },
       {
         id: 'execution',
