@@ -14,7 +14,8 @@ import {
   Space,
   SpaceMetadata,
   SpaceMetadataLabel,
-  StrategyParsedMetadata
+  StrategyParsedMetadata,
+  Validation
 } from '@/types';
 
 export type OffchainSpaceSettings = {
@@ -143,7 +144,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
-  const onlyMembers = ref(false);
+  const proposalValidation = ref({ name: 'basic', params: {} } as Validation);
   const guidelines = ref('');
   const template = ref('');
   const quorumType = ref(
@@ -161,8 +162,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       | 'basic'
   );
   const privacy = ref('none' as 'none' | 'shutter');
+  const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
-  const snapshotChainId = ref('');
+  const snapshotChainId: Ref<number> = ref(1);
   const strategies = ref([] as StrategyConfig[]);
   const members = ref([] as Member[]);
   const parent = ref('');
@@ -420,12 +422,33 @@ export function useSpaceSettings(space: Ref<Space>) {
     } as const;
   }
 
+  function getInitialProposalValidation(space: Space): Validation {
+    const validation = clone(
+      space.additionalRawData?.validation ?? {
+        name: 'basic',
+        params: {}
+      }
+    );
+
+    if (space.additionalRawData?.filters.onlyMembers) {
+      validation.name = 'only-members';
+      validation.params = {};
+    } else if (validation.name === 'any') {
+      validation.name = 'basic';
+      validation.params = {
+        minScore: 1
+      };
+    }
+
+    return validation;
+  }
+
   function getInitialStrategies(space: Space): StrategyConfig[] {
     if (space.additionalRawData?.type !== 'offchain') return [];
 
     return space.additionalRawData.strategies.map(strategy => ({
       id: crypto.randomUUID(),
-      chainId: strategy.network,
+      chainId: Number(strategy.network),
       address: strategy.name,
       name: strategy.name,
       paramsDefinition: null,
@@ -464,7 +487,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     let delegationPortal: OffchainSpaceSettings['delegationPortal'] = null;
     if (
       form.value.delegations.length > 0 &&
-      form.value.delegations[0].contractNetwork &&
       form.value.delegations[0].contractAddress &&
       form.value.delegations[0].apiUrl &&
       form.value.delegations[0].apiType
@@ -475,9 +497,7 @@ export function useSpaceSettings(space: Ref<Space>) {
           : form.value.delegations[0].apiType;
 
       delegationPortal = {
-        delegationNetwork: String(
-          getNetwork(form.value.delegations[0].contractNetwork).chainId
-        ),
+        delegationNetwork: String(form.value.delegations[0].chainId ?? '1'),
         delegationContract: form.value.delegations[0].contractAddress,
         delegationApi: form.value.delegations[0].apiUrl,
         delegationType: apiType
@@ -491,7 +511,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         form.value.categories ?? space.value.additionalRawData.categories,
       avatar: form.value.avatar ?? space.value.avatar,
       cover: form.value.cover ?? space.value.cover,
-      network: snapshotChainId.value,
+      network: String(snapshotChainId.value),
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
       terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
@@ -513,9 +533,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       treasuries: form.value.treasuries.map(treasury => ({
         address: treasury.address || '',
         name: treasury.name || '',
-        network: treasury.network
-          ? String(getNetwork(treasury.network).chainId)
-          : '1'
+        network: String(treasury.chainId ?? '1')
       })),
       labels: form.value.labels,
       admins: members.value
@@ -531,7 +549,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       delegationPortal: delegationPortal,
       filters: {
         ...space.value.additionalRawData.filters,
-        onlyMembers: onlyMembers.value
+        onlyMembers: proposalValidation.value.name === 'only-members'
       },
       voting: {
         ...space.value.additionalRawData.voting,
@@ -548,8 +566,11 @@ export function useSpaceSettings(space: Ref<Space>) {
         privacy: privacy.value === 'none' ? '' : privacy.value,
         hideAbstain: ignoreAbstainVotes.value
       },
-      validation: space.value.additionalRawData.validation,
-      voteValidation: space.value.additionalRawData.voteValidation,
+      validation:
+        proposalValidation.value.name === 'only-members'
+          ? space.value.additionalRawData.validation
+          : proposalValidation.value,
+      voteValidation: voteValidation.value,
       boost: space.value.additionalRawData.boost
     };
 
@@ -665,8 +686,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     if (offchainNetworks.includes(space.value.network)) {
-      onlyMembers.value =
-        space.value.additionalRawData?.filters.onlyMembers ?? false;
+      proposalValidation.value = getInitialProposalValidation(space.value);
       guidelines.value = space.value.additionalRawData?.guidelines ?? '';
       template.value = space.value.additionalRawData?.template ?? '';
 
@@ -677,7 +697,14 @@ export function useSpaceSettings(space: Ref<Space>) {
       privacy.value = initialVotingProperties.privacy;
       ignoreAbstainVotes.value = initialVotingProperties.ignoreAbstainVotes;
 
-      snapshotChainId.value = space.value.snapshot_chain_id?.toString() ?? '1';
+      voteValidation.value = clone(
+        space.value.additionalRawData?.voteValidation ?? {
+          name: 'any',
+          params: {}
+        }
+      );
+
+      snapshotChainId.value = space.value.snapshot_chain_id ?? 1;
 
       if (space.value.additionalRawData?.type === 'offchain') {
         strategies.value = getInitialStrategies(space.value);
@@ -705,7 +732,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const validationStrategyValue = validationStrategy.value;
     const initialValidationStrategyObjectHashValue =
       initialValidationStrategyObjectHash.value;
-    const onlyMembersValue = onlyMembers.value;
+    const proposalValidationValue = proposalValidation.value;
     const guidelinesValue = guidelines.value;
     const templateValue = template.value;
     const quorumTypeValue = quorumType.value;
@@ -713,6 +740,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     const votingTypeValue = voteType.value;
     const privacyValue = privacy.value;
     const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
+    const voteValidationValue = voteValidation.value;
     const snapshotChainIdValue = snapshotChainId.value;
     const strategiesValue = strategies.value;
     const membersValue = members.value;
@@ -761,9 +789,13 @@ export function useSpaceSettings(space: Ref<Space>) {
     if (offchainNetworks.includes(space.value.network)) {
       const ignoreOrderOpts = { unorderedArrays: true };
 
+      const initialProposalValidation = getInitialProposalValidation(
+        space.value
+      );
+
       if (
-        onlyMembersValue !==
-        (space.value.additionalRawData?.filters.onlyMembers ?? false)
+        objectHash(proposalValidationValue) !==
+        objectHash(initialProposalValidation)
       ) {
         isModified.value = true;
         return;
@@ -810,10 +842,20 @@ export function useSpaceSettings(space: Ref<Space>) {
         return;
       }
 
+      const initialVoteValidation = space.value.additionalRawData
+        ?.voteValidation ?? {
+        name: 'any',
+        params: {}
+      };
+
       if (
-        snapshotChainIdValue !==
-        (space.value.snapshot_chain_id?.toString() ?? '1')
+        objectHash(voteValidationValue) !== objectHash(initialVoteValidation)
       ) {
+        isModified.value = true;
+        return;
+      }
+
+      if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? 1)) {
         isModified.value = true;
         return;
       }
@@ -919,13 +961,14 @@ export function useSpaceSettings(space: Ref<Space>) {
     authenticators,
     validationStrategy,
     votingStrategies,
-    onlyMembers,
+    proposalValidation,
     guidelines,
     template,
     quorumType,
     quorum,
     votingType: voteType,
     privacy,
+    voteValidation,
     ignoreAbstainVotes,
     snapshotChainId,
     strategies,

@@ -1,4 +1,4 @@
-import { VoteType, VoteTypeInfo } from '@/types';
+import { ChainId, NetworkID, VoteType, VoteTypeInfo } from '@/types';
 
 export const APP_NAME = 'Snapshot';
 
@@ -6,17 +6,17 @@ export const SIDEKICK_URL = 'https://sh5.co';
 
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
-export const CHAIN_IDS = {
+export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
+  // EVM
+  eth: 1,
+  oeth: 10,
   matic: 137,
   arb1: 42161,
-  oeth: 10,
-  eth: 1,
-  sep: 11155111,
   'linea-testnet': 59140,
-  bsc: 56,
-  xdai: 100,
-  fantom: 250,
-  base: 8453
+  sep: 11155111,
+  // Starknet
+  sn: '0x534e5f4d41494e',
+  'sn-sep': '0x534e5f5345504f4c4941'
 };
 
 export const COINGECKO_ASSET_PLATFORMS = {
@@ -94,5 +94,43 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'Shutter',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
+  }
+};
+
+export const VALIDATION_TYPES_INFO: Record<
+  | 'any-voting'
+  | 'only-members'
+  | 'basic'
+  | 'passport-gated'
+  | 'arbitrum'
+  | 'karma-eas-attestation',
+  { label: string; description: string }
+> = {
+  'any-voting': {
+    label: 'Anyone can vote',
+    description: 'Anyone with voting power can cast a vote.'
+  },
+  'only-members': {
+    label: 'Only authors can propose',
+    description: 'Allow only authors to submit a proposal'
+  },
+  basic: {
+    label: 'Basic',
+    description:
+      'Use a minimum score along with any strategy to determine if a user can create a proposal.'
+  },
+  'passport-gated': {
+    label: 'Gitcoin Passport gated',
+    description:
+      'Protect your space from spam by requiring users to have a Gitcoin Passport to create a proposal.'
+  },
+  arbitrum: {
+    label: 'Arbitrum DAO votable supply',
+    description:
+      'Use with erc20-votes to validate by percentage of votable supply.'
+  },
+  'karma-eas-attestation': {
+    label: 'Karma EAS Attestation',
+    description: 'Use EAS attest.sh to determine if user can create a proposal.'
   }
 };

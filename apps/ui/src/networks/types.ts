@@ -3,6 +3,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
+  ChainId,
   Choice,
   DelegationType,
   Follow,
@@ -85,7 +86,7 @@ export type StrategyTemplate = {
 
 export type StrategyConfig = StrategyTemplate & {
   id: string;
-  chainId?: string;
+  chainId?: ChainId;
   params: Record<string, any>;
 };
 
@@ -249,7 +250,8 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     networkId: NetworkID,
     delegationType: DelegationType,
     delegatee: string,
-    delegationContract: string
+    delegationContract: string,
+    chainIdOverride?: ChainId
   );
 };
 

@@ -2,7 +2,7 @@
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { Contact } from '@/types';
+import { ChainId, Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -20,7 +20,7 @@ const RECIPIENT_DEFINITION = {
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: number;
+  network: ChainId;
   extraContacts?: Contact[];
   initialState?: any;
 }>();

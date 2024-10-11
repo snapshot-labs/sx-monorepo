@@ -47,10 +47,7 @@ export function useWeb3() {
       auth = getInstance();
       state.authLoading = true;
       await auth.login(connector);
-      if (auth.provider.value) {
-        auth.web3 = new Web3Provider(auth.provider.value, 'any');
-        await loadProvider();
-      }
+      await registerProvider();
 
       // NOTE: Handle case where metamask stays locked after user ignored
       // the unlock request on subsequent page loads
@@ -65,6 +62,21 @@ export function useWeb3() {
     }
   }
 
+  async function autoLogin(preferredConnector?: string) {
+    auth = getInstance();
+    const connector: boolean | string =
+      preferredConnector || (await auth.getConnector());
+
+    authInitiated.value = true;
+
+    if (!connector) return;
+
+    state.authLoading = true;
+    await auth.autoLogin(connector as string);
+    await registerProvider();
+    state.authLoading = false;
+  }
+
   function logout() {
     auth = getInstance();
     removeProviderEvents(auth.provider.value);
@@ -75,11 +87,20 @@ export function useWeb3() {
     state.walletconnect = '';
   }
 
-  async function loadProvider() {
-    const connector = auth.provider.value?.connectorName;
+  async function registerProvider() {
+    if (!auth.provider.value) return;
+
+    auth.web3 = new Web3Provider(auth.provider.value, 'any');
+    await loadProvider(auth.provider.value);
+  }
+
+  async function loadProvider(provider) {
+    if (!provider) return;
+
+    const connector = provider.connectorName;
 
     try {
-      attachProviderEvents(auth.provider.value);
+      attachProviderEvents(provider);
       let network, accounts;
       try {
         if (connector === 'gnosis') {
@@ -89,11 +110,11 @@ export function useWeb3() {
         } else if (STARKNET_CONNECTORS.includes(connector)) {
           network = {
             chainId:
-              auth.provider.value.chainId ||
-              auth.provider.value.provider.chainId ||
-              auth.provider.value.provider.provider.chainId
+              provider.chainId ||
+              provider.provider.chainId ||
+              provider.provider.provider.chainId
           };
-          accounts = [auth.provider.value.selectedAddress];
+          accounts = [provider.selectedAddress];
         } else {
           [network, accounts] = await Promise.all([
             auth.web3.getNetwork(),
@@ -184,6 +205,7 @@ export function useWeb3() {
   return {
     login,
     logout,
+    autoLogin,
     authInitiated,
     web3: computed(() => state),
     web3Account: computed(() => state.account)

@@ -1342,10 +1342,10 @@
     "@floating-ui/dom" "^1.5.4"
     "@floating-ui/vue" "^1.0.3"
 
-"@headlessui/vue@^1.7.16":
-  version "1.7.18"
-  resolved "https://registry.yarnpkg.com/@headlessui/vue/-/vue-1.7.18.tgz#1c61473fa232053a3d90f83e1ccf661fcb52abb1"
-  integrity sha512-N9EUJY0sHhuJQ81oQlk+vmB80NwUXsyJjxOaBrzUyO+VHIZz7v/ffFICAlrtM4TxZaZFMCzehe74yEPSqkEJ9g==
+"@headlessui/vue@^1.7.23":
+  version "1.7.23"
+  resolved "https://registry.yarnpkg.com/@headlessui/vue/-/vue-1.7.23.tgz#7fe19dbeca35de9e6270c82c78c4864e6a6f7391"
+  integrity sha512-JzdCNqurrtuu0YW6QaDtR2PIYCKPUWq28csDyMvN4zmGccmE7lz40Is6hc3LA4HFeCI7sekZ/PQMTNmn9I/4Wg==
   dependencies:
     "@tanstack/vue-virtual" "^3.0.0-beta.60"
 
@@ -2510,10 +2510,10 @@
     "@snapshot-labs/pineapple" "^0.2.0"
     cross-fetch "^3.1.5"
 
-"@snapshot-labs/lock@^0.2.7":
-  version "0.2.7"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.7.tgz#4727ea082ced4958061bb643462049f767e8b6d2"
-  integrity sha512-wkUiuOEJxYYUgFyZ83xRrCl897m/o08y8UCHg3TlBh12OkfCeV7XnaIdumRCgSp+Wh35fR2pd27y83Ev9A88Ow==
+"@snapshot-labs/lock@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.8.tgz#4eb81af37e57c6eac6135e7db3acfbb511e9ab1c"
+  integrity sha512-5Izr4uAIU1lf2CHa155SW4oqZhyndFQf7AQNpyazk0AtffgDmEa6T5KxU7ktRXL9SwuRyAlo7MJrnjxMDmqZWA==
   dependencies:
     "@coinbase/wallet-sdk" "^4.0.4"
     "@portis/web3" "^4.0.6"
@@ -2543,10 +2543,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.18.tgz#fcbd86d4557821bff774d60e5c636ad47ed85d77"
   integrity sha512-v6tj7l19KJUWjBbsWpwxaYO2mlIDBFyAG0OMSPhUgrhltO7b6R4Ejxn2k4Qgi/NtlnOrj+3Gt3eQRry8Jfgjrg==
 
-"@snapshot-labs/snapshot.js@^0.12.19":
-  version "0.12.19"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.19.tgz#f292406065c4b26072512e2f74be85b9bf5f07b6"
-  integrity sha512-UeT8g+kOVqjvcKPL9Kttw7Tg2JUrFlDa0H0UOgjT0uwasmLWY1ZG27856X8jOCqIRjTj/erPPhjRbr8SfCurtQ==
+"@snapshot-labs/snapshot.js@^0.12.24":
+  version "0.12.24"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.24.tgz#9a10e76297571b3c5eb31b2881a6b7514dbfc1e8"
+  integrity sha512-ggkMhVUzokOXwrHpdLjmnwhm33g7lqkjcx8aBbu4Jvhit2ZYq2SRnZUUCa+Tn5bP6cf7TdnUvvPIS78LCdZstw==
   dependencies:
     "@ensdomains/eth-ens-namehash" "^2.0.15"
     "@ethersproject/abi" "^5.6.4"

@@ -128,8 +128,8 @@ watch([sortBy, choiceFilter], () => {
           v-model="choiceFilter"
           class="font-normal"
           title="Choice"
-          gap="12px"
-          placement="left"
+          gap="12"
+          placement="start"
           :items="[
             { key: 'any', label: 'Any' },
             { key: 'for', label: 'For', indicator: 'bg-skin-success' },

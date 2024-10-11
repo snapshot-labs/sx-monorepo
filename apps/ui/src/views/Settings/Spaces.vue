@@ -61,8 +61,8 @@ watch(
       <UiSelectDropdown
         v-model="spacesStore.protocol"
         title="Protocol"
-        gap="12px"
-        placement="left"
+        gap="12"
+        placement="start"
         :items="protocols"
       />
     </div>

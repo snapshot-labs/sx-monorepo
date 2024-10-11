@@ -25,13 +25,14 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
-  onlyMembers,
+  proposalValidation,
   guidelines,
   template,
   quorumType,
   quorum,
   votingType,
   privacy,
+  voteValidation,
   ignoreAbstainVotes,
   snapshotChainId,
   strategies,
@@ -50,7 +51,6 @@ const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
 const isAdvancedFormResolved = ref(false);
-const hasStrategiesErrors = ref(false);
 const hasVotingErrors = ref(false);
 const hasProposalErrors = ref(false);
 const hasAdvancedErrors = ref(false);
@@ -181,6 +181,13 @@ const executionStrategies = computed(() => {
   });
 });
 
+const isTicketValid = computed(() => {
+  return !(
+    strategies.value.some(s => s.address === 'ticket') &&
+    voteValidation.value.name === 'any'
+  );
+});
+
 const error = computed(() => {
   if (Object.values(formErrors.value).length > 0) {
     return 'Space profile is invalid';
@@ -199,7 +206,7 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (hasStrategiesErrors.value) {
+    if (!isTicketValid.value) {
       return 'Strategies are invalid';
     }
 
@@ -327,6 +334,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     >
       <FormSpaceDelegations
         v-model="form.delegations"
+        :network-id="space.network"
         :limit="isOffchainNetwork ? 1 : undefined"
       />
     </UiContainerSettings>
@@ -337,6 +345,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     >
       <FormSpaceTreasuries
         v-model="form.treasuries"
+        :network-id="space.network"
         :limit="isOffchainNetwork ? 10 : undefined"
       />
     </UiContainerSettings>
@@ -349,8 +358,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:snapshot-chain-id="snapshotChainId"
         v-model:strategies="strategies"
         :network-id="space.network"
+        :is-ticket-valid="isTicketValid"
         :space="space"
-        @update-validity="v => (hasStrategiesErrors = !v)"
       />
     </UiContainerSettings>
     <FormStrategies
@@ -387,9 +396,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
     >
       <FormSpaceProposal
-        v-model:only-members="onlyMembers"
+        v-model:proposal-validation="proposalValidation"
         v-model:guidelines="guidelines"
         v-model:template="template"
+        :network-id="space.network"
+        :snapshot-chain-id="snapshotChainId"
+        :space="space"
         @update-validity="v => (hasProposalErrors = !v)"
       />
     </UiContainerSettings>
@@ -406,7 +418,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-model:quorum="quorum"
         v-model:voting-type="votingType"
         v-model:privacy="privacy"
+        v-model:vote-validation="voteValidation"
         v-model:ignore-abstain-votes="ignoreAbstainVotes"
+        :snapshot-chain-id="snapshotChainId"
         :space="space"
         @update-validity="v => (hasVotingErrors = !v)"
       />
