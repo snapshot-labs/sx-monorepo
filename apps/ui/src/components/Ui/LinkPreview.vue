@@ -17,6 +17,7 @@ type Preview = {
 };
 
 const preview = ref<Preview | null>(null);
+const previewIconResolved = ref<boolean>(false);
 const previewLoading = ref<boolean>(true);
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
@@ -32,6 +33,14 @@ async function update(val: string) {
     )}&api_key=${IFRAMELY_API_KEY}`;
     const result = await fetch(url);
     preview.value = await result.json();
+
+    if (preview.value?.links?.icon[0]?.href) {
+      const image = await fetch(preview.value.links.icon[0].href, {
+        method: 'HEAD'
+      });
+
+      previewIconResolved.value = image.ok;
+    }
   } catch (e) {
   } finally {
     previewLoading.value = false;
@@ -49,11 +58,11 @@ debouncedWatch(
   <div
     v-if="preview?.meta || (showDefault && !previewLoading)"
     class="flex items-center px-4 py-3 border rounded-lg"
-    :class="{ 'space-x-2': showDefault, '!space-x-4': preview?.meta?.title }"
+    :class="{ 'gap-2': showDefault, '!gap-4': preview?.meta?.title }"
   >
     <template v-if="preview?.meta?.title">
       <img
-        v-if="preview?.links?.icon?.[0]?.href"
+        v-if="previewIconResolved"
         :src="preview.links.icon[0].href"
         width="32"
         height="32"
