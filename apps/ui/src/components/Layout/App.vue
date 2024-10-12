@@ -138,7 +138,7 @@ watch(
 
     const faviconUrl = getStampUrl(
       'space',
-      whiteLabelSpace.value.id,
+      `${whiteLabelSpace.value.network}:${whiteLabelSpace.value.id}`,
       16,
       getCacheHash(whiteLabelSpace.value.avatar)
     );
