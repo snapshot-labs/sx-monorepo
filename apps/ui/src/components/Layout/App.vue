@@ -63,6 +63,10 @@ const hasPlaceHolderSidebar = computed(
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
+const hasTopNav = computed(() => {
+  return 'space-editor' !== String(route.matched[1]?.name);
+});
+
 const bottomPadding = computed(
   () => !['space-proposal-votes'].includes(String(route.name))
 );
@@ -176,7 +180,7 @@ router.afterEach(() => {
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
-      <AppTopnav :has-app-nav="hasAppNav">
+      <AppTopnav v-if="hasTopNav" :has-app-nav="hasAppNav">
         <template #toggle-sidebar-button>
           <button
             v-if="hasSwipeableContent"
@@ -244,10 +248,6 @@ $placeholderSidebarWidth: 240px;
         }
       }
 
-      & ~ :deep(main) {
-        @apply z-[51];
-      }
-
       &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
         @apply translate-x-[#{$sidebarWidth + $navWidth}];
       }
@@ -266,10 +266,6 @@ $placeholderSidebarWidth: 240px;
         .app-toolbar-bottom {
           @apply hidden;
         }
-      }
-
-      & ~ :deep(main) {
-        @apply z-[51];
       }
     }
   }
