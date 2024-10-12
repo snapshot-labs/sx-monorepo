@@ -2,7 +2,7 @@ import { BASIC_CHOICES } from '@/helpers/constants';
 import { lsGet, lsSet, omit } from '@/helpers/utils';
 import { Draft, Drafts, VoteType } from '@/types';
 
-const PREFERRED_VOTE_TYPE = 'single-choice';
+const PREFERRED_VOTE_TYPE = 'basic';
 
 const storedProposals = lsGet('proposals', {});
 const processedProposals = Object.fromEntries(

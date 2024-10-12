@@ -62,6 +62,25 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
               >
                 <IC-drag />
               </div>
+              <div v-else class="mt-1.5">
+                <div
+                  class="shrink-0 rounded-full choice-bg inline-block size-[18px]"
+                  :class="`_${index + 1}`"
+                >
+                  <IH-check
+                    v-if="index === 0"
+                    class="text-white size-[14px] mt-0.5 ml-0.5"
+                  />
+                  <IH-x
+                    v-else-if="index === 1"
+                    class="text-white size-[14px] mt-0.5 ml-0.5"
+                  />
+                  <IH-minus-sm
+                    v-else-if="index === 2"
+                    class="text-white size-[14px] mt-0.5 ml-0.5"
+                  />
+                </div>
+              </div>
               <div class="grow">
                 <input
                   :ref="el => (choices[index] = el)"
@@ -69,11 +88,7 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
                   type="text"
                   :maxLength="definition.items[0].maxLength"
                   class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
-                  :class="{
-                    '!cursor-not-allowed ml-1': proposal.type === 'basic'
-                  }"
                   :placeholder="`Choice ${index + 1}`"
-                  :disabled="proposal.type === 'basic'"
                   @keyup.enter="handlePressEnter(index)"
                   @keydown.delete="e => handlePressDelete(e, index)"
                 />
