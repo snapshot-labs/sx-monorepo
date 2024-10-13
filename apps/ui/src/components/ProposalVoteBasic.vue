@@ -4,6 +4,7 @@ import { Choice } from '@/types';
 withDefaults(
   defineProps<{
     size?: number;
+    choices: string[];
   }>(),
   { size: 48 }
 );
@@ -15,7 +16,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex space-x-2">
-    <UiTooltip title="For">
+    <UiTooltip :title="choices[0]">
       <UiButton
         class="!text-skin-success !border-skin-success !px-0"
         :class="{
@@ -27,7 +28,7 @@ const emit = defineEmits<{
         <IH-check class="inline-block" />
       </UiButton>
     </UiTooltip>
-    <UiTooltip title="Against">
+    <UiTooltip :title="choices[1]">
       <UiButton
         class="!text-skin-danger !border-skin-danger !px-0"
         :class="{
@@ -39,7 +40,7 @@ const emit = defineEmits<{
         <IH-x class="inline-block" />
       </UiButton>
     </UiTooltip>
-    <UiTooltip title="Abstain">
+    <UiTooltip :title="choices[2]">
       <UiButton
         class="!text-gray-500 !border-gray-500 !px-0"
         :class="{
