@@ -30,7 +30,7 @@ const inputValue = computed({
 });
 
 // From AJV string length validation
-// See https://github.com/ajv-validator/ajv/blob/master/lib/vocabularies/validation/limitLength.ts
+// See https://github.com/ajv-validator/ajv/blob/master/lib/runtime/ucs2length.ts
 const inputLength = computed(() => {
   const str = inputValue.value || '';
   const len = str.length;
