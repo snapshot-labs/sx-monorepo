@@ -127,6 +127,7 @@ export function useEditor() {
       discussion: '',
       type,
       choices,
+      labels: [],
       executions: Object.create(null),
       updatedAt: Date.now(),
       proposalId: null,
