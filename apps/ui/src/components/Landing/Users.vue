@@ -72,7 +72,7 @@ const ORGS = [
         >
           <img
             :alt="org"
-            :src="`https://cdn.stamp.fyi/space/${org}?s=120`"
+            :src="`https://cdn.stamp.fyi/space/s:${org}?s=120`"
             class="rounded-full"
           />
         </AppLink>

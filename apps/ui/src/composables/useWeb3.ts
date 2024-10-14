@@ -176,7 +176,7 @@ export function useWeb3() {
     if (!provider.on) return;
 
     provider.on('accountsChanged', async accounts => {
-      if (!accounts.length) {
+      if (!accounts?.length) {
         logout();
         return;
       }
