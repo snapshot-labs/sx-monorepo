@@ -261,6 +261,7 @@ export type Proposal = {
   max_end: number;
   snapshot: number;
   choices: string[];
+  labels: string[];
   scores: number[];
   scores_total: number;
   execution_time: number;
@@ -370,6 +371,7 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
+  labels: string[];
   executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
 };
