@@ -35,7 +35,7 @@ watch(
 );
 </script>
 <template>
-  <div v-if="inline" class="contents">
+  <div v-if="inline" class="flex items-center">
     <div
       v-for="label in validLabels"
       :key="label.id"

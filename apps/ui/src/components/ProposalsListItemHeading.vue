@@ -66,10 +66,10 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="md:min-w-0"
+          class="md:flex"
         >
           <h3
-            class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
+            class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2 min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <ProposalLabels
@@ -77,6 +77,7 @@ const space = computed(() =>
             :proposal-labels="proposal.labels"
             :space-labels="space.labels"
             inline
+            class="inline-flex md:flex"
           />
           <IH-check
             v-if="
