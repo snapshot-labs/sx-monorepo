@@ -145,12 +145,18 @@ export function handleProposalMetadata(content: Bytes): void {
   proposalMetadata.body = body ? body.toString() : ''
   proposalMetadata.discussion = discussion ? discussion.toString() : ''
   proposalMetadata.execution = ''
+  proposalMetadata.labels = ''
 
   // Using different parser for execution to overcome limitations in graph-ts
   let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
   let execution = jsonObj.getArr('execution')
   if (execution) {
     proposalMetadata.execution = execution.toString()
+  }
+
+  let labels = jsonObj.getArr('labels')
+  if (labels) {
+    proposalMetadata.labels = labels.toString()
   }
 
   proposalMetadata.save()

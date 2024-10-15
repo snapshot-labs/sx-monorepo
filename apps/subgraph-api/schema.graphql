@@ -141,6 +141,7 @@ type ProposalMetadata @entity {
   body: String!
   discussion: String!
   execution: String!
+  labels: String!
 }
 
 type Vote @entity {

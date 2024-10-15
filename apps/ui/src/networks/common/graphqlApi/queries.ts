@@ -123,6 +123,7 @@ const PROPOSAL_FRAGMENT = gql`
       body
       discussion
       execution
+      labels
     }
     start
     min_end

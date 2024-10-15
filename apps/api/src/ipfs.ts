@@ -153,6 +153,8 @@ export async function handleProposalMetadata(metadataUri: string) {
     proposalMetadataItem.discussion = metadata.discussion;
   if (metadata.execution)
     proposalMetadataItem.execution = JSON.stringify(metadata.execution);
+  if (metadata.labels)
+    proposalMetadataItem.labels = JSON.stringify(metadata.labels);
 
   await proposalMetadataItem.save();
 }

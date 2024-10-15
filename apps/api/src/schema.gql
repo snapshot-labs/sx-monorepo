@@ -142,6 +142,7 @@ type ProposalMetadataItem {
   body: Text
   discussion: Text
   execution: Text
+  labels: Text
 }
 
 type Vote {
