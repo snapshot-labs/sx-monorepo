@@ -5,11 +5,11 @@ const props = withDefaults(
   defineProps<{
     spaceLabels: SpaceMetadataLabel[];
     proposalLabels?: string[];
-    showEdit?: boolean;
+    viewOnly?: boolean;
     inline?: boolean;
   }>(),
   {
-    showEdit: false,
+    viewOnly: true,
     inline: false
   }
 );
@@ -45,13 +45,13 @@ watch(
     </div>
   </div>
   <div v-else>
-    <div class="flex justify-between mb-3">
-      <h4 class="eyebrow" v-text="'Labels'" />
-      <PickerLabel v-if="showEdit" v-model="labels" :labels="spaceLabels" />
-    </div>
+    <h4 v-if="viewOnly" class="eyebrow mb-3" v-text="'Labels'" />
+    <PickerLabel v-else v-model="labels" :labels="spaceLabels" />
     <div v-if="validLabels.length" class="flex flex-wrap">
       <div v-for="label in validLabels" :key="label.id" class="mr-2 mb-2">
-        <UiProposalLabel :label="label.name" :color="label.color" />
+        <UiTooltip :title="label.description" class="inline">
+          <UiProposalLabel :label="label.name" :color="label.color" />
+        </UiTooltip>
       </div>
     </div>
     <div v-else class="mt-1">No labels yet</div>

@@ -33,8 +33,14 @@ const filteredLabels = computed(() =>
 
 <template>
   <Popover v-slot="{ open }" class="relative contents">
-    <PopoverButton :class="open ? 'text-skin-link' : 'text-skin-text'">
-      <IH-pencil />
+    <PopoverButton
+      class="outline-none focus-within:text-skin-link w-full"
+      :class="open ? 'text-skin-link' : 'text-skin-text'"
+    >
+      <div class="flex justify-between mb-3">
+        <h4 class="eyebrow" v-text="'Labels'" />
+        <IH-pencil />
+      </div>
     </PopoverButton>
 
     <transition
@@ -47,7 +53,7 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-10 left-0 mt-5 mx-4 pb-3"
+        class="absolute z-10 left-0 -mt-2 mx-4 pb-3"
         style="width: calc(100% - 48px)"
       >
         <Combobox
