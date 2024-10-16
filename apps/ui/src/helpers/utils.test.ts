@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { _d, _vp, createErc1155Metadata, uniqBy } from './utils';
+import {
+  _d,
+  _vp,
+  createErc1155Metadata,
+  formatAddress,
+  getStampUrl,
+  uniqBy
+} from './utils';
 
 describe('utils', () => {
   describe('uniqBy', () => {
@@ -137,6 +144,77 @@ describe('utils', () => {
       expect(_d(86399)).toBe('23h 59m 59s');
       expect(_d(86400)).toBe('1d');
       expect(_d(86401)).toBe('1d 1s');
+    });
+  });
+
+  describe('formatAddress', () => {
+    it('returns a checksummed evm address', () => {
+      expect(formatAddress('0x556b14cbda79a36dc33fcd461a04a5bcb5dc2a70')).toBe(
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
+      );
+    });
+
+    it('returns a padded starknet address', () => {
+      expect(formatAddress('0x4c5dda09742520fdf5c2bbfa4aede8fb9fe6781')).toBe(
+        '0x00000000000000000000000004c5dda09742520fdf5c2bbfa4aede8fb9fe6781'
+      );
+    });
+
+    it('returns the input if it is not a valid address', () => {
+      expect(formatAddress('ens.eth')).toBe('ens.eth');
+      expect(formatAddress('')).toBe('');
+    });
+  });
+
+  describe('getStampUrl', () => {
+    it('returns a stamp url with a formatted ID', () => {
+      expect(
+        getStampUrl('avatar', '0x556b14cbda79a36dc33fcd461a04a5bcb5dc2a70', 32)
+      ).toBe(
+        'https://cdn.stamp.fyi/avatar/0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70?s=64'
+      );
+
+      expect(
+        getStampUrl('avatar', '0x4c5dda09742520fdf5c2bbfa4aede8fb9fe6781', 32)
+      ).toBe(
+        'https://cdn.stamp.fyi/avatar/0x00000000000000000000000004c5dda09742520fdf5c2bbfa4aede8fb9fe6781?s=64'
+      );
+
+      expect(getStampUrl('space', 'ens.eth', 32)).toBe(
+        'https://cdn.stamp.fyi/space/ens.eth?s=64'
+      );
+    });
+
+    it('returns a stamp with x2 size when given a single number', () => {
+      expect(
+        getStampUrl('space', '0x000000000000000000000000000000000000dead', 32)
+      ).toBe(
+        'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64'
+      );
+    });
+
+    it('returns a stamp url with the given width and height', () => {
+      expect(
+        getStampUrl('space', '0x000000000000000000000000000000000000dEaD', {
+          width: 1,
+          height: 2
+        })
+      ).toBe(
+        'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?w=1&h=2'
+      );
+    });
+
+    it('returns a stamp url with the given hash if available', () => {
+      expect(
+        getStampUrl(
+          'space',
+          '0x000000000000000000000000000000000000dead',
+          32,
+          '1234'
+        )
+      ).toBe(
+        'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64&cb=1234'
+      );
     });
   });
 });
