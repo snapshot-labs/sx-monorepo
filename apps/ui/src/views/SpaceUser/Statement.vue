@@ -4,12 +4,17 @@ import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement, User } from '@/types';
 import ICAgora from '~icons/c/agora';
 import ICKarmahq from '~icons/c/karmahq';
+import ICSafe from '~icons/c/safe';
 import ICTally from '~icons/c/tally';
 
 const SOURCE_ICONS = {
   agora: { icon: ICAgora, link: 'https://www.agora.xyz' },
   karmahq: { icon: ICKarmahq, link: 'https://karmahq.xyz' },
-  tally: { icon: ICTally, link: 'https://www.tally.xyz' }
+  tally: { icon: ICTally, link: 'https://www.tally.xyz' },
+  safe: {
+    icon: ICSafe,
+    link: 'https://safe-claiming-app-data.safe.global/guardians/guardians.json'
+  }
 };
 
 const offchainNetworkId = offchainNetworks.filter(network =>
