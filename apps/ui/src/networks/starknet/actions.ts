@@ -223,6 +223,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      labels: string[],
       executions: ExecutionInfo[] | null
     ) => {
       const executionInfo = executions?.[0];
@@ -327,6 +328,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      labels: string[],
       executions: ExecutionInfo[] | null
     ) {
       const executionInfo = executions?.[0];

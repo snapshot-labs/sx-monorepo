@@ -18,11 +18,16 @@ const props = withDefaults(
 );
 
 const { getTsFromCurrent } = useMetaStore();
-
+const spacesStore = useSpacesStore();
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+const space = computed(() =>
+  spacesStore.spacesMap.get(
+    `${props.proposal.network}:${props.proposal.space.id}`
+  )
+);
 </script>
 <template>
   <div v-bind="$attrs">
@@ -39,7 +44,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
         <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
       </AppLink>
 
-      <div class="md:flex md:min-w-0 my-1 items-center leading-6">
+      <div class="min-w-0 my-1 items-center leading-6">
         <AppLink
           v-if="showSpace"
           :to="{
@@ -61,17 +66,22 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="md:flex md:min-w-0"
         >
           <h3
-            class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
+            class="text-[21px] inline [overflow-wrap:anywhere] mr-2 min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
+          />
+          <ProposalLabels
+            v-if="space?.labels && proposal.labels.length"
+            :proposal-labels="proposal.labels"
+            :space-labels="space.labels"
+            inline
           />
           <IH-check
             v-if="
               showVotedIndicator && votes[`${proposal.network}:${proposal.id}`]
             "
-            class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-0.5"
+            class="text-skin-success inline-block shrink-0 relative"
           />
         </AppLink>
       </div>

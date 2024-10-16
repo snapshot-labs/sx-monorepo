@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import turndownService from '@/helpers/turndownService';
 import { compareAddresses } from '@/helpers/utils';
 import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement, User } from '@/types';
@@ -29,7 +28,11 @@ const loading = ref(false);
 const statement = ref<Statement | null>(null);
 
 const userId = computed(() => route.params.user as string);
-const toMarkdown = computed(() => turndownService());
+const shouldShowSource = computed(() => {
+  if (!statement.value?.source) return false;
+
+  return statement.value.source in SOURCE_ICONS;
+});
 
 async function loadStatement() {
   loading.value = true;
@@ -101,9 +104,9 @@ watchEffect(() =>
         <template v-if="statement.statement">
           <UiMarkdown
             class="text-skin-heading max-w-[592px]"
-            :body="toMarkdown(statement.statement)"
+            :body="statement.statement"
           />
-          <div v-if="statement.source">
+          <div v-if="shouldShowSource && statement.source">
             <h4 class="eyebrow text-skin-text mb-2">Source</h4>
             <a
               :href="SOURCE_ICONS[statement.source].link"

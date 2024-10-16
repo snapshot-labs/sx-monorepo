@@ -50,7 +50,7 @@
     "@snapshot-labs/lock": "^0.2.8",
     "@snapshot-labs/pineapple": "^1.1.0",
     "@snapshot-labs/prettier-config": "^0.1.0-beta.18",
-    "@snapshot-labs/snapshot.js": "^0.12.24",
+    "@snapshot-labs/snapshot.js": "^0.12.26",
     "@snapshot-labs/sx": "^0.1.0",
     "@vueuse/core": "^10.4.1",
     "@walletconnect/core": "^2.11.0",
