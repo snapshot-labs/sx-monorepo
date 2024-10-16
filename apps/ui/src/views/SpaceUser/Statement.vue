@@ -4,17 +4,12 @@ import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space, Statement, User } from '@/types';
 import ICAgora from '~icons/c/agora';
 import ICKarmahq from '~icons/c/karmahq';
-import ICSafe from '~icons/c/safe';
 import ICTally from '~icons/c/tally';
 
 const SOURCE_ICONS = {
   agora: { icon: ICAgora, link: 'https://www.agora.xyz' },
   karmahq: { icon: ICKarmahq, link: 'https://karmahq.xyz' },
-  tally: { icon: ICTally, link: 'https://www.tally.xyz' },
-  safe: {
-    icon: ICSafe,
-    link: 'https://safe-claiming-app-data.safe.global/guardians/guardians.json'
-  }
+  tally: { icon: ICTally, link: 'https://www.tally.xyz' }
 };
 
 const offchainNetworkId = offchainNetworks.filter(network =>
@@ -33,6 +28,11 @@ const loading = ref(false);
 const statement = ref<Statement | null>(null);
 
 const userId = computed(() => route.params.user as string);
+const shouldShowSource = computed(() => {
+  if (!statement.value?.source) return false;
+
+  return statement.value.source in SOURCE_ICONS;
+});
 
 async function loadStatement() {
   loading.value = true;
@@ -106,7 +106,7 @@ watchEffect(() =>
             class="text-skin-heading max-w-[592px]"
             :body="statement.statement"
           />
-          <div v-if="statement.source">
+          <div v-if="shouldShowSource">
             <h4 class="eyebrow text-skin-text mb-2">Source</h4>
             <a
               :href="SOURCE_ICONS[statement.source].link"
