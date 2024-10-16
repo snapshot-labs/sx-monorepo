@@ -224,6 +224,7 @@ export function createActions(
       type: VoteType,
       choices: string[],
       labels: string[],
+      app: string | null,
       executions: ExecutionInfo[] | null
     ) => {
       const executionInfo = executions?.[0];

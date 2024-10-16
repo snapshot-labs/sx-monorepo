@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
   MAX_1D_PROPOSALS,
@@ -206,6 +207,7 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.labels,
+        route.query?.app as LocationQueryValue,
         executions
       );
     }

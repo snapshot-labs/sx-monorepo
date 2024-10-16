@@ -129,6 +129,7 @@ export function createActions(
       type: VoteType,
       choices: string[],
       labels: string[],
+      app: string | null,
       executions: ExecutionInfo[]
     ) {
       const currentTime = Math.floor(Date.now() / 1000);
@@ -149,7 +150,7 @@ export function createActions(
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: JSON.stringify(plugins),
-        app: EDITOR_APP_NAME,
+        app: app || EDITOR_APP_NAME,
         timestamp: currentTime
       };
 
