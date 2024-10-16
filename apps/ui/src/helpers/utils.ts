@@ -117,9 +117,10 @@ export function shorten(
 }
 
 export function formatAddress(address: string) {
-  if (address.length === 42) return getAddress(address);
   try {
-    return validateAndParseAddress(address);
+    return address.length === 42
+      ? getAddress(address)
+      : validateAndParseAddress(address);
   } catch {
     return address;
   }
@@ -475,14 +476,7 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type:
-    | 'avatar'
-    | 'user-cover'
-    | 'space'
-    | 'space-cover'
-    | 'space-sx'
-    | 'space-cover-sx'
-    | 'token',
+  type: 'avatar' | 'user-cover' | 'space' | 'space-cover' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string
@@ -496,11 +490,7 @@ export function getStampUrl(
 
   const cacheParam = hash ? `&cb=${hash}` : '';
 
-  const formattedId = ['avatar', 'space-sx', 'space-cover-sx'].includes(type)
-    ? formatAddress(id)
-    : id;
-
-  return `https://cdn.stamp.fyi/${type}/${formattedId}${sizeParam}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}`;
 }
 
 export async function imageUpload(file: File) {

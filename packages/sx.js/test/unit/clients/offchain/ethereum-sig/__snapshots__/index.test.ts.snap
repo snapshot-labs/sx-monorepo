@@ -55,6 +55,9 @@ exports[`EthereumSig > should create propose envelope 1`] = `
     ],
     "discussion": "https://snapshot.org",
     "end": 1705798800,
+    "labels": [
+      "1234e",
+    ],
     "plugins": "{}",
     "snapshot": 19283932,
     "space": "wan-test.eth",
@@ -79,6 +82,9 @@ exports[`EthereumSig > should create propose envelope 1`] = `
       "discussion": "https://snapshot.org",
       "end": 1705798800,
       "from": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+      "labels": [
+        "1234e",
+      ],
       "plugins": "{}",
       "snapshot": 19283932,
       "space": "wan-test.eth",
@@ -87,7 +93,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
       "title": "Creation test",
       "type": "basic",
     },
-    "signature": "0x648a4293936cdd3ed331b9b0a182a134db83d3ba28fb1076981d39461c590afd1930b758555cd50de95e20573fd1ab1148e21e880d23983fa621149d2ac6a1be1b",
+    "signature": "0x33482a4ebefdcc7c5dc006a8766e1b0dc5c653360b894d49a0c7819d97f16b6b67f4b78a9c4cd46f551fef61e4de97be9140bb32d5a43f7b0e52b4936a08c5f41c",
     "types": {
       "Proposal": [
         {
@@ -120,6 +126,10 @@ exports[`EthereumSig > should create propose envelope 1`] = `
         },
         {
           "name": "choices",
+          "type": "string[]",
+        },
+        {
+          "name": "labels",
           "type": "string[]",
         },
         {

@@ -64,7 +64,7 @@ async function handleFileChange(e: Event) {
       :id="definition.default"
       :size="80"
       class="pointer-events-none !rounded-none group-hover:opacity-80"
-      type="space-sx"
+      type="space"
       :class="{
         'opacity-80': isUploadingImage
       }"
