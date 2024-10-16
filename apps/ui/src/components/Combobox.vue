@@ -7,6 +7,7 @@ import {
   ComboboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
+import { omit } from '@/helpers/utils';
 import { DefinitionWithOptions } from '@/types';
 
 const NULL_SYMBOL = Symbol('null');
@@ -17,6 +18,7 @@ const model = defineModel<T | null>({ required: true });
 
 const props = defineProps<{
   error?: string;
+  inline?: boolean;
   definition: DefinitionWithOptions<T | null>;
 }>();
 
@@ -64,14 +66,14 @@ watch(model, () => {
 
 <template>
   <UiWrapperInput
-    :definition="definition"
+    :definition="inline ? omit(definition, ['title']) : definition"
     :error="error"
     :dirty="dirty"
-    class="relative mb-[14px]"
+    class="relative mb-[14px] w-auto"
   >
     <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>
       <Float adaptive-width strategy="fixed" placement="bottom-end">
-        <div>
+        <div class="relative">
           <ComboboxButton class="w-full">
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
@@ -86,10 +88,16 @@ watch(model, () => {
               @focus="event => handleFocus(event, open)"
             />
           </ComboboxButton>
-          <ComboboxButton class="absolute right-3 bottom-[14px]">
+          <ComboboxButton v-if="!inline" class="absolute right-3 bottom-[14px]">
             <IH-chevron-up v-if="open" />
             <IH-chevron-down v-else />
           </ComboboxButton>
+          <div
+            v-if="inline"
+            class="absolute top-[-7px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text leading-4"
+          >
+            {{ definition.title }}
+          </div>
         </div>
         <ComboboxOptions
           class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"

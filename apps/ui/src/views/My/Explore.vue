@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import snapshotNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { Item } from '@/components/Ui/SelectDropdown.vue';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { getUrl } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
+import { SelectItem } from '@/types';
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
@@ -39,7 +39,7 @@ const category = ref<SpaceCategory>(DEFAULT_CATEGORY);
 const networks = computed(() => {
   const explorePageNetworks = explorePageProtocols[protocol.value].networks;
 
-  let protocolNetworks: Item<string>[] = [];
+  let protocolNetworks: SelectItem<string>[] = [];
   if (protocol.value === 'snapshot') {
     const shouldShowTestnetNetworks = explorePageNetworks.includes('s-tn');
 
@@ -56,9 +56,9 @@ const networks = computed(() => {
         return true;
       })
       .map(([id, network]) => ({
-        key: id,
-        label: network.name,
-        component: h('img', {
+        id,
+        name: network.name,
+        icon: h('img', {
           src: getUrl(network.logo),
           alt: network.name,
           class: 'rounded-full size-3.5'
@@ -69,9 +69,9 @@ const networks = computed(() => {
       const network = getNetwork(networkId);
 
       return {
-        key: networkId,
-        label: network.name,
-        component: h('img', {
+        id: networkId,
+        name: network.name,
+        icon: h('img', {
           src: getUrl(network.avatar),
           alt: network.name,
           class: 'rounded-full size-3.5'
@@ -80,11 +80,11 @@ const networks = computed(() => {
     });
   }
 
-  return [{ key: 'all', label: 'All networks' }, ...protocolNetworks];
+  return [{ id: 'all', name: 'All networks' }, ...protocolNetworks];
 });
 
 function isValidNetwork(network: string): network is string {
-  return network === 'all' || networks.value.some(n => n.key === network);
+  return network === 'all' || networks.value.some(n => n.id === network);
 }
 
 function isValidCategory(category: string): category is SpaceCategory {
@@ -147,12 +147,16 @@ watchEffect(() => setTitle('Explore'));
         placement="start"
         :items="protocols"
       />
-      <UiSelectDropdown
+      <Combobox
         v-model="network"
-        title="Network"
-        gap="12"
-        placement="start"
-        :items="networks"
+        inline
+        :definition="{
+          type: 'string',
+          title: 'Network',
+          enum: networks.map(c => c.id),
+          options: networks,
+          examples: ['Select network']
+        }"
       />
       <UiSelectDropdown
         v-if="protocol === 'snapshot'"
