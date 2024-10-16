@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import snapshotNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { Item } from '@/components/Ui/SelectDropdown.vue';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
-import { explorePageProtocols } from '@/networks';
+import { getUrl } from '@/helpers/utils';
+import { explorePageProtocols, getNetwork } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
 const DEFAULT_PROTOCOL = 'snapshot';
+const DEFAULT_NETWORK = 'all';
 const DEFAULT_CATEGORY = 'all';
 
 const protocols = Object.values(explorePageProtocols).map(
@@ -14,8 +18,9 @@ const protocols = Object.values(explorePageProtocols).map(
     label
   })
 );
+
 const categories = [
-  { key: 'all', label: 'All' },
+  { key: 'all', label: 'All categories' },
   ...SPACE_CATEGORIES.map(category => ({
     key: category.id,
     label: category.name
@@ -28,14 +33,71 @@ const route = useRoute();
 const router = useRouter();
 
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
+const network = ref<string>(DEFAULT_NETWORK);
 const category = ref<SpaceCategory>(DEFAULT_CATEGORY);
+
+const networks = computed(() => {
+  const explorePageNetworks = explorePageProtocols[protocol.value].networks;
+
+  let protocolNetworks: Item<string>[] = [];
+  if (protocol.value === 'snapshot') {
+    const shouldShowTestnetNetworks = explorePageNetworks.includes('s-tn');
+
+    protocolNetworks = Object.entries(snapshotNetworks)
+      .filter(([, network]) => {
+        if (
+          shouldShowTestnetNetworks &&
+          'testnet' in network &&
+          network.testnet
+        ) {
+          return false;
+        }
+
+        return true;
+      })
+      .map(([id, network]) => ({
+        key: id,
+        label: network.name,
+        component: h('img', {
+          src: getUrl(network.logo),
+          alt: network.name,
+          class: 'rounded-full size-3.5'
+        })
+      }));
+  } else {
+    protocolNetworks = explorePageNetworks.map(networkId => {
+      const network = getNetwork(networkId);
+
+      return {
+        key: networkId,
+        label: network.name,
+        component: h('img', {
+          src: getUrl(network.avatar),
+          alt: network.name,
+          class: 'rounded-full size-3.5'
+        })
+      };
+    });
+  }
+
+  return [{ key: 'all', label: 'All networks' }, ...protocolNetworks];
+});
+
+function isValidNetwork(network: string): network is string {
+  return network === 'all' || networks.value.some(n => n.key === network);
+}
 
 function isValidCategory(category: string): category is SpaceCategory {
   return category === 'all' || SPACE_CATEGORIES.some(c => c.id === category);
 }
 
-watch([protocol, category], ([p, c]) => {
-  const props: { p?: string; c?: string } = { ...route.query, p, c };
+watch([protocol, category, network], ([p, c, n]) => {
+  const props: { p?: string; c?: string; n?: string } = {
+    ...route.query,
+    p,
+    c,
+    n
+  };
   if (p !== 'snapshot') delete props.c;
 
   router.push({ query: props });
@@ -45,19 +107,27 @@ watch(
   [
     () => route.query.q as string,
     () => route.query.p as string,
-    () => route.query.c as string
+    () => route.query.c as string,
+    () => route.query.n as string
   ],
-  ([searchQuery, protocolQuery, categoryQuery]) => {
+  ([searchQuery, protocolQuery, categoryQuery, networkQuery]) => {
     const _protocol = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
 
     protocol.value = _protocol;
+    network.value = isValidNetwork(networkQuery)
+      ? networkQuery
+      : DEFAULT_NETWORK;
     category.value = isValidCategory(categoryQuery)
       ? categoryQuery
       : DEFAULT_CATEGORY;
     spacesStore.protocol = _protocol;
-    spacesStore.fetch({ searchQuery, category: categoryQuery });
+    spacesStore.fetch({
+      searchQuery,
+      category: category.value,
+      network: network.value
+    });
   },
   {
     immediate: true
@@ -76,6 +146,13 @@ watchEffect(() => setTitle('Explore'));
         gap="12"
         placement="start"
         :items="protocols"
+      />
+      <UiSelectDropdown
+        v-model="network"
+        title="Network"
+        gap="12"
+        placement="start"
+        :items="networks"
       />
       <UiSelectDropdown
         v-if="protocol === 'snapshot'"

@@ -532,6 +532,7 @@ export function createApi(
       }
       delete _filter.searchQuery;
       delete _filter.category;
+      delete _filter.network;
 
       const { data } = await apollo.query({
         query: SPACES_QUERY,

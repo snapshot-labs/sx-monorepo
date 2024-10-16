@@ -27,6 +27,7 @@ export type SpacesFilter = {
   searchQuery?: string;
   domain?: string;
   category?: string;
+  network?: string;
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';

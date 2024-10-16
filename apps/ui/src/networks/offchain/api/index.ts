@@ -567,11 +567,15 @@ export function createApi(
       if (
         !filter ||
         filter.hasOwnProperty('searchQuery') ||
-        filter.hasOwnProperty('category')
+        filter.hasOwnProperty('category') ||
+        filter.hasOwnProperty('network')
       ) {
         const where = {};
         if (filter?.searchQuery) where['search'] = filter.searchQuery;
         if (filter?.category) where['category'] = filter.category;
+        if (filter?.network && filter.network !== 'all') {
+          where['network'] = filter.network;
+        }
 
         const { data } = await apollo.query({
           query: RANKING_QUERY,
