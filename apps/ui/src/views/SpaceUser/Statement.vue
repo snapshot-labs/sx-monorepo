@@ -28,6 +28,11 @@ const loading = ref(false);
 const statement = ref<Statement | null>(null);
 
 const userId = computed(() => route.params.user as string);
+const shouldShowSource = computed(() => {
+  if (!statement.value?.source) return false;
+
+  return statement.value.source in SOURCE_ICONS;
+});
 
 async function loadStatement() {
   loading.value = true;
@@ -101,7 +106,7 @@ watchEffect(() =>
             class="text-skin-heading max-w-[592px]"
             :body="statement.statement"
           />
-          <div v-if="statement.source">
+          <div v-if="shouldShowSource">
             <h4 class="eyebrow text-skin-text mb-2">Source</h4>
             <a
               :href="SOURCE_ICONS[statement.source].link"
