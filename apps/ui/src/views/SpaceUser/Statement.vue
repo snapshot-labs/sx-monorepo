@@ -106,7 +106,7 @@ watchEffect(() =>
             class="text-skin-heading max-w-[592px]"
             :body="statement.statement"
           />
-          <div v-if="shouldShowSource">
+          <div v-if="shouldShowSource && statement.source">
             <h4 class="eyebrow text-skin-text mb-2">Source</h4>
             <a
               :href="SOURCE_ICONS[statement.source].link"
