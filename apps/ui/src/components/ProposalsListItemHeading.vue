@@ -44,7 +44,7 @@ const space = computed(() =>
         <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
       </AppLink>
 
-      <div class="md:min-w-0 my-1 items-center leading-6">
+      <div class="min-w-0 my-1 items-center leading-6">
         <AppLink
           v-if="showSpace"
           :to="{
@@ -66,10 +66,9 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="md:min-w-0"
         >
           <h3
-            class="text-[21px] inline [overflow-wrap:anywhere] md:truncate mr-2"
+            class="text-[21px] inline [overflow-wrap:anywhere] mr-2 min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <ProposalLabels
@@ -82,7 +81,7 @@ const space = computed(() =>
             v-if="
               showVotedIndicator && votes[`${proposal.network}:${proposal.id}`]
             "
-            class="text-skin-success inline-block shrink-0 relative top-[-1px] md:top-0.5"
+            class="text-skin-success inline-block shrink-0 relative"
           />
         </AppLink>
       </div>
