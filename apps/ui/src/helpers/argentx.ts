@@ -1,39 +1,41 @@
 import LockConnector from '@snapshot-labs/lock/src/connector';
 import { useUserSkin } from '@/composables/useUserSkin';
+import { APP_NAME } from './constants';
 const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
 
 const { currentMode } = useUserSkin();
 
 export default class Connector extends LockConnector {
-  async connect() {
-    let provider;
+  async connect(): Promise<any> {
+    let provider: any;
+
     try {
       const argentx = await get();
-      const starknet = await argentx.connect({
-        dappName: 'Snapshot',
+      const { wallet } = await argentx.connect({
+        dappName: APP_NAME,
         modalMode: localStorage.getItem('starknetLastConnectedWallet')
           ? 'neverAsk'
           : 'alwaysAsk',
         modalTheme: currentMode.value,
         argentMobileOptions: {
-          dappName: 'Snapshot',
+          dappName: APP_NAME,
           url: 'https://snapshot.box',
           icons: ['https://snapshot.box/favicon.svg']
         }
       });
 
-      if (!starknet.wallet) {
+      if (!wallet) {
         throw Error(
           'User rejected wallet selection or silent connect found nothing'
         );
       }
 
-      if (!starknet.wallet.isConnected) {
-        throw new Error('Connector was not connected');
-      }
+      // @ts-ignore
+      if (!wallet.isConnected) await wallet?.enable();
 
-      provider = starknet.wallet;
+      provider = wallet;
       provider.connectorName = 'argentx';
+
       return provider;
     } catch (e) {
       console.error(e);

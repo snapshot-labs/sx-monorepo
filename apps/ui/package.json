@@ -78,7 +78,7 @@
     "remove-markdown": "^0.5.2",
     "scrollmonitor": "^1.2.11",
     "starknet": "6.11.0",
-    "starknetkit": "^1.1.9",
+    "starknetkit": "^2.3.2",
     "stream-browserify": "^3.0.0",
     "tippy.js": "^6.3.7",
     "turndown": "^7.2.0",
