@@ -531,6 +531,7 @@ export function createApi(
         _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
       }
       delete _filter.searchQuery;
+      delete _filter.category;
 
       const { data } = await apollo.query({
         query: SPACES_QUERY,

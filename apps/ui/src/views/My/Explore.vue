@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { explorePageProtocols } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
+
+type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
+
+const DEFAULT_PROTOCOL = 'snapshot';
+const DEFAULT_CATEGORY = 'all';
 
 const protocols = Object.values(explorePageProtocols).map(
   ({ key, label }: ProtocolConfig) => ({
@@ -8,7 +14,13 @@ const protocols = Object.values(explorePageProtocols).map(
     label
   })
 );
-const DEFAULT_PROTOCOL = 'snapshot';
+const categories = [
+  { key: 'all', label: 'All' },
+  ...SPACE_CATEGORIES.map(category => ({
+    key: category.id,
+    label: category.name
+  }))
+];
 
 const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
@@ -16,21 +28,36 @@ const route = useRoute();
 const router = useRouter();
 
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
+const category = ref<SpaceCategory>(DEFAULT_CATEGORY);
 
-watch(protocol, value => {
-  router.push({ query: { ...route.query, p: value } });
+function isValidCategory(category: string): category is SpaceCategory {
+  return category === 'all' || SPACE_CATEGORIES.some(c => c.id === category);
+}
+
+watch([protocol, category], ([p, c]) => {
+  const props: { p?: string; c?: string } = { ...route.query, p, c };
+  if (p !== 'snapshot') delete props.c;
+
+  router.push({ query: props });
 });
 
 watch(
-  [() => route.query.q as string, () => route.query.p as string],
-  ([searchQuery, protocolQuery]) => {
+  [
+    () => route.query.q as string,
+    () => route.query.p as string,
+    () => route.query.c as string
+  ],
+  ([searchQuery, protocolQuery, categoryQuery]) => {
     const _protocol = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
 
     protocol.value = _protocol;
+    category.value = isValidCategory(categoryQuery)
+      ? categoryQuery
+      : DEFAULT_CATEGORY;
     spacesStore.protocol = _protocol;
-    spacesStore.fetch({ searchQuery });
+    spacesStore.fetch({ searchQuery, category: categoryQuery });
   },
   {
     immediate: true
@@ -49,6 +76,14 @@ watchEffect(() => setTitle('Explore'));
         gap="12"
         placement="start"
         :items="protocols"
+      />
+      <UiSelectDropdown
+        v-if="protocol === 'snapshot'"
+        v-model="category"
+        title="Category"
+        gap="12"
+        placement="start"
+        :items="categories"
       />
     </div>
   </div>

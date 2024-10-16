@@ -564,13 +564,21 @@ export function createApi(
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
-      if (!filter || filter.hasOwnProperty('searchQuery')) {
+      if (
+        !filter ||
+        filter.hasOwnProperty('searchQuery') ||
+        filter.hasOwnProperty('category')
+      ) {
+        const where = {};
+        if (filter?.searchQuery) where['search'] = filter.searchQuery;
+        if (filter?.category) where['category'] = filter.category;
+
         const { data } = await apollo.query({
           query: RANKING_QUERY,
           variables: {
             first: Math.min(limit, 20),
             skip,
-            where: filter?.searchQuery ? { search: filter.searchQuery } : {}
+            where
           }
         });
         return data.ranking.items.map(space =>
