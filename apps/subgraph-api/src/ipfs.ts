@@ -43,29 +43,23 @@ export function handleSpaceMetadata(content: Bytes): void {
     let executionStrategiesTypes = propertiesObj.get('execution_strategies_types')
     let executionDestinations = propertiesObj.get('execution_destinations')
 
-    if (treasuries) {
-      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
-      let jsonPropertiesObj = jsonObj.getObj('properties')
-      if (jsonPropertiesObj) {
-        let jsonTreasuriesArr = jsonPropertiesObj.getArr('treasuries')
-        if (jsonTreasuriesArr) {
-          spaceMetadata.treasuries = jsonTreasuriesArr._arr.map<string>((treasury) =>
-            treasury.toString()
-          )
-        }
+    let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
+    let jsonPropertiesObj = jsonObj.getObj('properties')
+    if (jsonPropertiesObj && treasuries) {
+      let jsonTreasuriesArr = jsonPropertiesObj.getArr('treasuries')
+      if (jsonTreasuriesArr) {
+        spaceMetadata.treasuries = jsonTreasuriesArr._arr.map<string>((treasury) =>
+          treasury.toString()
+        )
       }
     }
 
-    if (labels) {
-      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
-      let jsonPropertiesObj = jsonObj.getObj('properties')
-      if (jsonPropertiesObj) {
-        let jsonTreasuriesArr = jsonPropertiesObj.getArr('labels')
-        if (jsonTreasuriesArr) {
-          spaceMetadata.labels = jsonTreasuriesArr._arr.map<string>((treasury) =>
-            treasury.toString()
-          )
-        }
+    if (jsonPropertiesObj && labels) {
+      let jsonLabelsArr = jsonPropertiesObj.getArr('labels')
+      if (jsonLabelsArr) {
+        spaceMetadata.labels = jsonLabelsArr._arr.map<string>((label) =>
+          label.toString()
+        )
       }
     }
 
@@ -145,7 +139,7 @@ export function handleProposalMetadata(content: Bytes): void {
   proposalMetadata.body = body ? body.toString() : ''
   proposalMetadata.discussion = discussion ? discussion.toString() : ''
   proposalMetadata.execution = ''
-  proposalMetadata.labels = ''
+  proposalMetadata.labels = []
 
   // Using different parser for execution to overcome limitations in graph-ts
   let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
@@ -156,7 +150,7 @@ export function handleProposalMetadata(content: Bytes): void {
 
   let labels = jsonObj.getArr('labels')
   if (labels) {
-    proposalMetadata.labels = labels.toString()
+    proposalMetadata.labels = labels._arr.map<string>((label) => label.toString())
   }
 
   proposalMetadata.save()
