@@ -18,7 +18,12 @@ withDefaults(
 
 <template>
   <Menu as="div" class="relative">
-    <Float :placement="`bottom-${placement}`" :offset="Number(gap)" portal>
+    <Float
+      :placement="`bottom-${placement}`"
+      :offset="Number(gap)"
+      portal
+      z-index="10"
+    >
       <MenuButton :disabled="disabled" as="template" class="cursor-pointer">
         <slot name="button" />
       </MenuButton>
