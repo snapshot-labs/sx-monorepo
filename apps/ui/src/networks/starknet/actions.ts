@@ -51,6 +51,7 @@ import {
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
+import { EDITOR_APP_NAME } from '../common/constants';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
@@ -233,6 +234,7 @@ export function createActions(
         body,
         discussion,
         type,
+        app: app || EDITOR_APP_NAME,
         choices: choices.filter(c => !!c),
         execution: executionInfo?.transactions ?? []
       });

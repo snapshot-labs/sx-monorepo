@@ -28,8 +28,9 @@ import {
   UserProfile,
   VoteType
 } from '@/types';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
+import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
+import { EDITOR_APP_NAME } from '../common/constants';
 import {
   Connector,
   ExecutionInfo,

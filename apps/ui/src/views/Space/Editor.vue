@@ -199,6 +199,8 @@ async function handleProposeClick() {
         executions
       );
     } else {
+      const appName = (route.query.app as LocationQueryValue) || '';
+
       result = await propose(
         props.space,
         proposal.value.title,
@@ -207,7 +209,7 @@ async function handleProposeClick() {
         proposal.value.type,
         proposal.value.choices,
         proposal.value.labels,
-        route.query?.app as LocationQueryValue,
+        appName.length <= 128 ? appName : '',
         executions
       );
     }

@@ -8,3 +8,4 @@ export const EVM_CONNECTORS: Connector[] = [
 ];
 
 export const STARKNET_CONNECTORS: Connector[] = ['argentx'];
+export const EDITOR_APP_NAME = 'snapshot-v2';
