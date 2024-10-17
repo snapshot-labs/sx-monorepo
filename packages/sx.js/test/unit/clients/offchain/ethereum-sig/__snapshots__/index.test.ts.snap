@@ -161,6 +161,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
 exports[`EthereumSig > should create vote envelope 1`] = `
 {
   "data": {
+    "app": "snapshot-v2",
     "authenticator": "",
     "choice": 1,
     "metadataUri": "",
@@ -176,7 +177,7 @@ exports[`EthereumSig > should create vote envelope 1`] = `
       "version": "0.1.4",
     },
     "message": {
-      "app": "",
+      "app": "snapshot-v2",
       "choice": 1,
       "from": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
       "metadata": "",
@@ -185,7 +186,7 @@ exports[`EthereumSig > should create vote envelope 1`] = `
       "space": "wan-test.eth",
       "timestamp": 1705795200,
     },
-    "signature": "0x08dc521d9d8334fecb2f35f56db4536420865e35749425c2ed88219bdb230cd96e6302baf1881eb00e66631cbed3ed53bd237598a88b51980067ef7a090db35b1c",
+    "signature": "0x92df2e1de71e2f0cdf04d7fd5d028fe0d38b990aa896ad677c4627bfd303cd386b17ad4c403dade15f2508b5fa444d2e8b4b1bed8ca63d341006a4d5d2e64bac1b",
     "types": {
       "Vote": [
         {
