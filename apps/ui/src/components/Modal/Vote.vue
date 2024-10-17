@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { offchainNetworks } from '@/networks';
@@ -32,6 +33,7 @@ const {
 } = useVotingPower();
 const proposalsStore = useProposalsStore();
 const { loadVotes, votes } = useAccount();
+const route = useRoute();
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -90,7 +92,14 @@ async function handleSubmit() {
 async function voteFn() {
   if (!selectedChoice.value) return null;
 
-  return vote(props.proposal, selectedChoice.value, form.value.reason);
+  const appName = (route.query.app as LocationQueryValue) || '';
+
+  return vote(
+    props.proposal,
+    selectedChoice.value,
+    form.value.reason,
+    appName.length <= 128 ? appName : ''
+  );
 }
 
 async function handleConfirmed(tx?: string | null) {
