@@ -35,15 +35,15 @@ watch(
 );
 </script>
 <template>
-  <div v-if="inline" class="contents">
-    <div
-      v-for="label in validLabels"
-      :key="label.id"
-      class="inline-flex mr-2 mb-2"
-    >
-      <UiProposalLabel :label="label.name" :color="label.color" />
+  <template v-if="inline">
+    <div v-for="label in validLabels" :key="label.id" class="inline-flex mr-2">
+      <UiProposalLabel
+        :label="label.name"
+        :color="label.color"
+        class="mb-1 max-w-[160px]"
+      />
     </div>
-  </div>
+  </template>
   <div v-else>
     <h4 v-if="viewOnly" class="eyebrow mb-3" v-text="'Labels'" />
     <PickerLabel v-else v-model="labels" :labels="spaceLabels" />
