@@ -37,7 +37,7 @@ const filteredLabels = computed(() =>
       class="outline-none focus-within:text-skin-link w-full"
       :class="open ? 'text-skin-link' : 'text-skin-text'"
     >
-      <div class="flex justify-between mb-3">
+      <div class="flex justify-between mb-2.5 items-center">
         <h4 class="eyebrow" v-text="'Labels'" />
         <IH-pencil />
       </div>
@@ -89,9 +89,11 @@ const filteredLabels = computed(() =>
                       :label="label.name || 'label preview'"
                       :color="label.color"
                     />
-                    <div class="mt-2 truncate leading-[18px] text-sm">
-                      {{ label.description || 'No description' }}
-                    </div>
+                    <div
+                      v-if="label.description"
+                      class="mt-2 truncate leading-[18px] text-sm"
+                      v-text="label.description"
+                    />
                   </div>
                   <div v-if="selectedLabels.includes(label.id)">
                     <IH-check class="text-skin-success" />
