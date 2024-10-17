@@ -203,7 +203,7 @@ export function createActions(
       proposal: Proposal,
       choice: Choice,
       reason: string,
-      app: string | null
+      app: string
     ): Promise<any> {
       const data = {
         space: proposal.space.id,

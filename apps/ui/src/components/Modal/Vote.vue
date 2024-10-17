@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import kebabcase from 'lodash.kebabcase';
 import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
@@ -93,11 +92,13 @@ async function handleSubmit() {
 async function voteFn() {
   if (!selectedChoice.value) return null;
 
+  const appName = (route.query.app as LocationQueryValue) || '';
+
   return vote(
     props.proposal,
     selectedChoice.value,
     form.value.reason,
-    kebabcase(route.query?.app as LocationQueryValue)
+    appName.length <= 128 ? appName : ''
   );
 }
 

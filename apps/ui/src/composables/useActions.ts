@@ -246,7 +246,7 @@ export function useActions() {
     proposal: Proposal,
     choice: Choice,
     reason: string,
-    app: string | null
+    app: string
   ): Promise<string | null> {
     if (!web3.value.account) {
       await forceLogin();

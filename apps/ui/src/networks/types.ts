@@ -163,7 +163,7 @@ export type ReadOnlyNetworkActions = {
     proposal: Proposal,
     choice: Choice,
     reason: string,
-    app: string | null
+    app: string
   ): Promise<any>;
   followSpace(
     web3: Web3Provider | Wallet,
