@@ -16,6 +16,7 @@ const SPACE_FRAGMENT = gql`
       discord
       voting_power_symbol
       treasuries
+      labels
       delegations
       executors
       executors_types
@@ -122,6 +123,7 @@ const PROPOSAL_FRAGMENT = gql`
       body
       discussion
       execution
+      labels
     }
     start
     min_end
