@@ -13,9 +13,8 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
-import { offchainNetworks } from '@/networks';
 import { VotingPowerItem } from '@/stores/votingPowers';
-import { Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
+import { Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -118,9 +117,10 @@ export function shorten(
 }
 
 export function formatAddress(address: string) {
-  if (address.length === 42) return getAddress(address);
   try {
-    return validateAndParseAddress(address);
+    return address.length === 42
+      ? getAddress(address)
+      : validateAndParseAddress(address);
   } catch {
     return address;
   }
@@ -489,14 +489,8 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
-  const [entryNetwork] = id.split(':') as [NetworkID, string];
-  const isAddress =
-    type === 'avatar' ||
-    (['space', 'space-cover'].includes(type) &&
-      !offchainNetworks.includes(entryNetwork));
-  const formattedId = isAddress ? formatAddress(id) : id;
 
-  return `https://cdn.stamp.fyi/${type}/${formattedId}${sizeParam}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}`;
 }
 
 export async function imageUpload(file: File) {
