@@ -31,8 +31,10 @@ export const createNetworkHandler = (chainId: string) => {
           console.log('Propose');
           receipt = await client.propose(account, params.envelope, { nonce });
         } else if (primaryType === 'UpdateProposal') {
-          console.log('Propose');
-          receipt = await client.propose(account, params.envelope, { nonce });
+          console.log('UpdateProposal');
+          receipt = await client.updateProposal(account, params.envelope, {
+            nonce
+          });
         } else if (primaryType === 'Vote') {
           console.log('Vote');
           receipt = await client.vote(account, params.envelope, { nonce });
