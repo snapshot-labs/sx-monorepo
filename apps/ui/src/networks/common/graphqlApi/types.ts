@@ -67,10 +67,10 @@ export type ApiProposal = {
   proposal_id: number;
   metadata: {
     id: string;
-    title: string;
-    body: string;
-    discussion: string;
-    execution: string;
+    title: string | null;
+    body: string | null;
+    discussion: string | null;
+    execution: string | null;
   };
   space: {
     id: string;

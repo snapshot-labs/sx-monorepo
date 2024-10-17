@@ -19,7 +19,15 @@ export type VotingPowerItem = {
 };
 
 export function getIndex(space: SpaceDetails, block: number | null): string {
-  return `${space.id}:${block ?? LATEST_BLOCK_NAME}`;
+  // NOTE: this splits the cache for spaces and proposals
+  // having it combined casues issues (if we fetch VP for proposal first and then
+  // space, canPropose will never be updated).
+  // we probably should separate it entirely (no more multipurpose VotingPowerItem)
+  // as it it's causing bugs and it's hard to understand
+
+  const prefix = isSpace(space) ? 'space' : 'proposal';
+
+  return `${prefix}:${space.id}:${block ?? LATEST_BLOCK_NAME}`;
 }
 
 function isSpace(item: SpaceDetails | Proposal): item is Space {
