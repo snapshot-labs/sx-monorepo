@@ -39,6 +39,7 @@ type SpaceMetadata @entity {
   cover: String!
   external_url: String!
   treasuries: [String!]!
+  labels: [String!]!
   delegations: [String!]!
   github: String!
   twitter: String!
@@ -140,6 +141,7 @@ type ProposalMetadata @entity {
   body: String!
   discussion: String!
   execution: String!
+  labels: [String!]!
 }
 
 type Vote @entity {
