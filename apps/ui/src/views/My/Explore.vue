@@ -152,6 +152,7 @@ watchEffect(() => setTitle('Explore'));
         v-model="network"
         class="mb-0"
         inline
+        :gap="12"
         :definition="{
           type: 'string',
           title: 'Network',

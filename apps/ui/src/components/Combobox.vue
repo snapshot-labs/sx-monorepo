@@ -18,6 +18,7 @@ const props = defineProps<{
   error?: string;
   inline?: boolean;
   definition: DefinitionWithOptions<T | null>;
+  gap?: number;
 }>();
 
 const dirty = ref(false);
@@ -73,7 +74,12 @@ watch(model, () => {
     class="relative mb-[14px] w-auto"
   >
     <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>
-      <Float adaptive-width strategy="fixed" placement="bottom-end">
+      <Float
+        adaptive-width
+        strategy="fixed"
+        placement="bottom-end"
+        :offset="gap && inline ? gap : 0"
+      >
         <div
           :class="{
             relative: inline
@@ -83,7 +89,7 @@ watch(model, () => {
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
               :class="{
-                '!rounded-b-none': open,
+                '!rounded-b-none': !gap && open,
                 'h-[42px]': inline
               }"
               autocomplete="off"
@@ -106,7 +112,8 @@ watch(model, () => {
           </div>
         </div>
         <ComboboxOptions
-          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
+          class="w-full bg-skin-border border-t-skin-text/10 border shadow-xl overflow-hidden"
+          :class="inline ? 'rounded-lg' : 'rounded-b-lg'"
         >
           <div class="max-h-[208px] overflow-y-auto">
             <div
