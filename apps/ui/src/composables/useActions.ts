@@ -279,7 +279,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     labels: string[],
-    app: string | null,
+    app: string,
     executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
