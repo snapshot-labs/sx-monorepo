@@ -19,7 +19,6 @@ export const EDITOR_VOTING_STRATEGIES = [];
 export const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = [];
 export const EDITOR_EXECUTION_STRATEGIES = [];
 export const EDITOR_SNAPSHOT_OFFSET = 4;
-export const EDITOR_APP_NAME = 'snapshot-v2';
 export const EDITOR_VOTING_TYPES: VoteType[] = [
   'basic',
   'single-choice',

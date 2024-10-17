@@ -138,6 +138,7 @@ export type ReadOnlyNetworkActions = {
     type: VoteType,
     choices: string[],
     labels: string[],
+    app: string,
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
