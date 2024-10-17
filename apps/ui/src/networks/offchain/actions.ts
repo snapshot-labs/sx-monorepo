@@ -200,7 +200,8 @@ export function createActions(
       account: string,
       proposal: Proposal,
       choice: Choice,
-      reason: string
+      reason: string,
+      app: string | null
     ): Promise<any> {
       const data = {
         space: proposal.space.id,
@@ -211,7 +212,8 @@ export function createActions(
         strategies: [],
         metadataUri: '',
         privacy: proposal.privacy,
-        reason
+        reason,
+        app: app || EDITOR_APP_NAME
       };
 
       return client.vote({
