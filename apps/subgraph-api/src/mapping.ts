@@ -396,7 +396,7 @@ export function handleProposalCancelled(event: ProposalCancelled): void {
 export function _handleVoteCreated(
   event: ethereum.Event,
   proposalId: BigInt,
-  choice: i32,
+  rawChoice: i32,
   voter: Address,
   votingPower: BigInt,
   metadataUri: string | null
@@ -407,10 +407,18 @@ export function _handleVoteCreated(
   }
 
   // Swap For/Against
-  choice = choice
-  if (choice === 0) choice = 2
-  if (choice === 1) choice = 1
-  if (choice === 2) choice = 3
+  // On chain:
+  // 0 - Against
+  // 1 - For
+  // 2 - Abstain
+  // Everywhere else
+  // 1 - For
+  // 2 - Against
+  // 3 - Abstain
+  let choice = rawChoice
+  if (rawChoice === 0) choice = 2
+  if (rawChoice === 1) choice = 1
+  if (rawChoice === 2) choice = 3
 
   let vp = votingPower.toBigDecimal()
 
