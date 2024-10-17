@@ -49,7 +49,10 @@ function handleFocus(event: FocusEvent, open: boolean) {
   if (!event.target || open) return;
 
   query.value = '';
-  (event.target as HTMLInputElement).select();
+
+  requestAnimationFrame(() => {
+    (event.target as HTMLInputElement).select();
+  });
 }
 
 function getDisplayValue(value: T) {
