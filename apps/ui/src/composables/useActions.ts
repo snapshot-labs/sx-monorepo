@@ -281,6 +281,7 @@ export function useActions() {
     type: VoteType,
     choices: string[],
     labels: string[],
+    app: string | null,
     executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
@@ -303,6 +304,7 @@ export function useActions() {
         type,
         choices,
         labels,
+        app,
         executions
       )
     );
