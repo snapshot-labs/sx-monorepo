@@ -158,6 +158,7 @@ watch(
         :model-value="form"
         :error="formErrors"
         :definition="definition"
+        @pick="showPicker = true"
       />
     </div>
     <template #footer>
