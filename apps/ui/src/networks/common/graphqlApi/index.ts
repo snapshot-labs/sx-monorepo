@@ -126,6 +126,8 @@ function processExecutions(
   // We should persist those values on proposal directly so it's stable.
   // Right now we can't really update subgraphs because of TheGraph issue.
 
+  if (!proposal.metadata.execution) return [];
+
   const transactions = formatExecution(proposal.metadata.execution);
   if (transactions.length === 0) return [];
 
@@ -255,9 +257,9 @@ function formatProposal(
     choices: BASIC_CHOICES,
     labels: [],
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    title: proposal.metadata.title,
-    body: proposal.metadata.body,
-    discussion: proposal.metadata.discussion,
+    title: proposal.metadata.title ?? '',
+    body: proposal.metadata.body ?? '',
+    discussion: proposal.metadata.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(

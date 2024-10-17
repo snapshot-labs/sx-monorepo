@@ -118,9 +118,9 @@ async function handleEditClick() {
 
   const draftId = await createDraft(spaceId, {
     proposalId: props.proposal.proposal_id,
-    title: props.proposal.title ?? '',
-    body: props.proposal.body ?? '',
-    discussion: props.proposal.discussion ?? '',
+    title: props.proposal.title,
+    body: props.proposal.body,
+    discussion: props.proposal.discussion,
     type: props.proposal.type,
     choices: props.proposal.choices,
     executions
