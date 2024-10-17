@@ -139,9 +139,10 @@ watchEffect(() => setTitle('Explore'));
 
 <template>
   <div class="flex justify-between">
-    <div class="flex flex-row p-4 space-x-2">
+    <div class="flex flex-row flex-wrap p-4 gap-2">
       <UiSelectDropdown
         v-model="protocol"
+        class="min-h-[46px]"
         title="Protocol"
         gap="12"
         placement="start"
@@ -149,6 +150,7 @@ watchEffect(() => setTitle('Explore'));
       />
       <Combobox
         v-model="network"
+        class="mb-0"
         inline
         :definition="{
           type: 'string',
@@ -161,6 +163,7 @@ watchEffect(() => setTitle('Explore'));
       <UiSelectDropdown
         v-if="protocol === 'snapshot'"
         v-model="category"
+        class="min-h-[46px]"
         title="Category"
         gap="12"
         placement="start"

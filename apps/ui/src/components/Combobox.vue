@@ -12,8 +12,6 @@ import { DefinitionWithOptions } from '@/types';
 
 const NULL_SYMBOL = Symbol('null');
 
-defineOptions({ inheritAttrs: false });
-
 const model = defineModel<T | null>({ required: true });
 
 const props = defineProps<{
@@ -82,7 +80,8 @@ watch(model, () => {
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
               :class="{
-                '!rounded-b-none': open
+                '!rounded-b-none': open,
+                'h-[42px]': inline
               }"
               autocomplete="off"
               :placeholder="definition.examples?.[0]"
