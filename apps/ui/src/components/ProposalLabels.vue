@@ -40,7 +40,7 @@ watch(
       <UiProposalLabel
         :label="label.name"
         :color="label.color"
-        class="text-sm mb-1 max-w-[160px]"
+        class="mb-1 max-w-[160px]"
       />
     </div>
   </template>
