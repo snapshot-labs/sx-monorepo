@@ -3,7 +3,7 @@ import z from 'zod';
 import {
   DEFAULT_INDEX,
   getStarknetAccount,
-  SPACES_INDICIES
+  SPACES_INDICES
 } from './dependencies';
 import { NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
@@ -47,7 +47,7 @@ router.get('/relayers', (req, res) => {
 
   const defaultRelayer = getStarknetAccount(mnemonic, DEFAULT_INDEX).address;
   const relayers = Object.fromEntries(
-    Array.from(SPACES_INDICIES).map(([spaceAddress, index]) => {
+    Array.from(SPACES_INDICES).map(([spaceAddress, index]) => {
       const { address } = getStarknetAccount(mnemonic, index);
       return [spaceAddress, address];
     })

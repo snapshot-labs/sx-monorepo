@@ -218,7 +218,7 @@ function formatSpace(
       ),
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
-      space.strategies_indicies
+      space.strategies_indices
     ),
     children: [],
     parent: null
@@ -249,7 +249,7 @@ function formatProposal(
       executors_types: proposal.space.metadata.executors_types,
       strategies_parsed_metadata: processStrategiesMetadata(
         proposal.space.strategies_parsed_metadata,
-        proposal.strategies_indicies
+        proposal.strategies_indices
       )
     },
     metadata_uri: proposal.metadata.id,
