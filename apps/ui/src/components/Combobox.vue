@@ -73,7 +73,11 @@ watch(model, () => {
   >
     <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>
       <Float adaptive-width strategy="fixed" placement="bottom-end">
-        <div class="relative">
+        <div
+          :class="{
+            relative: inline
+          }"
+        >
           <ComboboxButton class="w-full">
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
