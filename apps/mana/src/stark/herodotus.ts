@@ -55,8 +55,8 @@ function getApi(accumulatesChainId: string) {
   }
 
   return {
-    apiUrl: 'https://staging.api.herodotus.cloud',
-    indexerUrl: 'https://staging.rs-indexer.api.herodotus.cloud',
+    apiUrl: 'https://api.herodotus.cloud',
+    indexerUrl: 'https://rs-indexer.api.herodotus.cloud',
     apiKey: HERODOTUS_API_KEY
   };
 }
@@ -69,7 +69,12 @@ async function getStatus(id: string, accumulatesChainId: string) {
   const { apiUrl, apiKey } = getApi(accumulatesChainId);
 
   const res = await fetch(
-    `${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`
+    `${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`,
+    {
+      headers: {
+        'api-key': apiKey
+      }
+    }
   );
 
   const { queryStatus, error } = await res.json();
@@ -104,7 +109,8 @@ async function submitBatch(proposal: ApiProposal) {
   const res = await fetch(`${apiUrl}/submit-batch-query?apiKey=${apiKey}`, {
     method: 'post',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'api-key': apiKey
     },
     body: JSON.stringify(body)
   });

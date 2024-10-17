@@ -1,7 +1,7 @@
 import objectHash from 'object-hash';
 import { Ref } from 'vue';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
-import { clone, compareAddresses } from '@/helpers/utils';
+import { clone, compareAddresses, omit } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 import {
@@ -275,7 +275,16 @@ export function useSpaceSettings(space: Ref<Space>) {
       ? await strategy.generateMetadata(strategy.params)
       : {};
 
-    if (objectHash(metadata) !== objectHash(previousMetadata)) return true;
+    const coreMetadata =
+      'name' in metadata ? omit(metadata, ['name']) : metadata;
+    const previousCoreMetadata =
+      'name' in previousMetadata
+        ? omit(previousMetadata, ['name'])
+        : previousMetadata;
+
+    if (objectHash(coreMetadata) !== objectHash(previousCoreMetadata)) {
+      return true;
+    }
     if (strategy.type === 'MerkleWhitelist') {
       // NOTE: MerkleWhitelist params are expensive to compute so we try to skip this step if possible.
       // If metadata has changed then we already know strategy has changed, if metadata is the same
