@@ -55,8 +55,8 @@ function getApi(accumulatesChainId: string) {
   }
 
   return {
-    apiUrl: 'https://staging.api.herodotus.cloud',
-    indexerUrl: 'https://staging.rs-indexer.api.herodotus.cloud',
+    apiUrl: 'https://api.herodotus.cloud',
+    indexerUrl: 'https://rs-indexer.api.herodotus.cloud',
     apiKey: HERODOTUS_API_KEY
   };
 }
