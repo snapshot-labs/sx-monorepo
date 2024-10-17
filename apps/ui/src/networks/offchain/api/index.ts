@@ -59,6 +59,13 @@ import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
+const TREASURY_NETWORKS = new Map(
+  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
+    chainId,
+    networkId as keyof typeof CHAIN_IDS
+  ])
+);
+
 const DELEGATION_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
@@ -91,7 +98,7 @@ function formatSpace(
 
     return {
       name: treasury.name,
-      network: null,
+      network: TREASURY_NETWORKS.get(chainId) ?? null,
       address: treasury.address,
       chainId
     };
