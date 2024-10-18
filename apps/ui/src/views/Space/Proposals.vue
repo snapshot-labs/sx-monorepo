@@ -15,6 +15,7 @@ const { web3 } = useWeb3();
 const proposalsStore = useProposalsStore();
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
+const labels = ref<string[]>([]);
 
 const selectIconBaseProps = {
   size: 16
@@ -34,12 +35,25 @@ function handleFetchVotingPower() {
   fetchVotingPower(props.space);
 }
 
+function handleLabelToggle(label: string) {
+  if (labels.value.includes(label)) {
+    labels.value = labels.value.filter(l => l !== label);
+  } else {
+    labels.value = [...labels.value, label];
+  }
+}
+
 watch(
-  [props.space, state],
-  ([toSpace, toState], [fromSpace, fromState]) => {
-    if (toSpace.id !== fromSpace?.id || toState !== fromState) {
+  [props.space, state, labels],
+  ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
+    console.log(labels.value);
+    if (
+      toSpace.id !== fromSpace?.id ||
+      toState !== fromState ||
+      toLabels !== fromLabels
+    ) {
       proposalsStore.reset(toSpace.id, toSpace.network);
-      proposalsStore.fetch(toSpace.id, toSpace.network, toState);
+      proposalsStore.fetch(toSpace.id, toSpace.network, toState, toLabels);
     }
   },
   { immediate: true }
@@ -115,6 +129,19 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           </UiButton>
         </UiTooltip>
       </div>
+    </div>
+    <UiLabel label="Label" />
+    <div class="inline-flex flex-wrap gap-1 p-3">
+      <a v-for="label in space.labels" :key="label.id">
+        <UiProposalLabel
+          :label="label.name"
+          :color="label.color"
+          :class="{
+            '!opacity-40': !labels.includes(label.id) && labels.length > 0
+          }"
+          @click="handleLabelToggle(label.id)"
+        />
+      </a>
     </div>
     <ProposalsList
       title="Proposals"
