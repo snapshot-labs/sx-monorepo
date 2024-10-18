@@ -56,7 +56,7 @@ export function useEditor() {
 
   function removeEmpty(proposals: Drafts): Drafts {
     return Object.entries(proposals).reduce((acc, [id, proposal]) => {
-      const { executions, type, choices, ...rest } = omit(proposal, [
+      const { executions, type, choices, labels, ...rest } = omit(proposal, [
         'updatedAt'
       ]);
       const hasFormValues = Object.values(rest).some(val => !!val);
@@ -66,6 +66,7 @@ export function useEditor() {
 
       if (
         Object.keys(executions).length === 0 &&
+        labels.length === 0 &&
         !hasFormValues &&
         !hasChangedVotingType &&
         !hasFormChoices
