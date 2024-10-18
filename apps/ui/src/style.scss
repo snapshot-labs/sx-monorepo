@@ -415,3 +415,9 @@ input:placeholder-shown {
 div.intercom-launcher {
   @apply hidden md:block
 }
+
+// tippy.js
+// Fix for long text in tippy.js
+div[data-tippy-root] {
+  @apply break-words;
+}
