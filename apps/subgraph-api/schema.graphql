@@ -10,6 +10,8 @@ type Space @entity {
   proposal_threshold: BigDecimal!
   quorum: BigDecimal!
   next_strategy_index: Int!
+  strategies_indices: [Int]!
+  # Deprecated
   strategies_indicies: [Int]!
   strategies: [String!]!
   strategies_params: [String!]!
@@ -39,6 +41,7 @@ type SpaceMetadata @entity {
   cover: String!
   external_url: String!
   treasuries: [String!]!
+  labels: [String!]!
   delegations: [String!]!
   github: String!
   twitter: String!
@@ -113,6 +116,8 @@ type Proposal @entity {
   timelock_delay: BigInt!
   axiom_snapshot_address: String
   axiom_snapshot_slot: BigInt
+  strategies_indices: [Int]!
+  # Deprecated
   strategies_indicies: [Int]!
   strategies: [String!]!
   strategies_params: [String!]!
@@ -140,6 +145,7 @@ type ProposalMetadata @entity {
   body: String!
   discussion: String!
   execution: String!
+  labels: [String!]!
 }
 
 type Vote @entity {

@@ -14,6 +14,8 @@ type Space {
   max_voting_period: Int!
   proposal_threshold: BigDecimalVP!
   next_strategy_index: Int!
+  strategies_indices: [Int]!
+  # Deprecated
   strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
@@ -45,6 +47,7 @@ type SpaceMetadataItem {
   cover: String!
   external_url: String!
   treasuries: [String]!
+  labels: [String]!
   delegations: [String]!
   github: String!
   twitter: String!
@@ -114,6 +117,8 @@ type Proposal {
   timelock_delay: Int
   axiom_snapshot_address: String
   axiom_snapshot_slot: BigInt
+  strategies_indices: [Int]!
+  # Deprecated
   strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
@@ -141,6 +146,7 @@ type ProposalMetadataItem {
   body: Text
   discussion: Text
   execution: Text
+  labels: [String]!
 }
 
 type Vote {
@@ -157,7 +163,7 @@ type Vote {
 
 type VoteMetadataItem {
   id: String!
-  reason: String!
+  reason: Text!
 }
 
 type User {

@@ -32,6 +32,7 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
   spaceMetadataItem.executors_types = [];
   spaceMetadataItem.executors_destinations = [];
   spaceMetadataItem.treasuries = [];
+  spaceMetadataItem.labels = [];
   spaceMetadataItem.delegations = [];
 
   const metadata: any = metadataUri ? await getJSON(metadataUri) : {};
@@ -49,6 +50,11 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
     if (metadata.properties.treasuries) {
       spaceMetadataItem.treasuries = metadata.properties.treasuries.map(
         (treasury: any) => JSON.stringify(treasury)
+      );
+    }
+    if (metadata.properties.labels) {
+      spaceMetadataItem.labels = metadata.properties.labels.map((label: any) =>
+        JSON.stringify(label)
       );
     }
     if (metadata.properties.delegations) {
@@ -139,6 +145,7 @@ export async function handleProposalMetadata(metadataUri: string) {
   if (exists) return;
 
   const proposalMetadataItem = new ProposalMetadataItem(dropIpfs(metadataUri));
+  proposalMetadataItem.labels = [];
 
   const metadata: any = await getJSON(metadataUri);
   if (metadata.title) proposalMetadataItem.title = metadata.title;
@@ -147,6 +154,12 @@ export async function handleProposalMetadata(metadataUri: string) {
     proposalMetadataItem.discussion = metadata.discussion;
   if (metadata.execution)
     proposalMetadataItem.execution = JSON.stringify(metadata.execution);
+  if (
+    Array.isArray(metadata.labels) &&
+    metadata.labels.every((label: string) => typeof label === 'string')
+  ) {
+    proposalMetadataItem.labels = metadata.labels;
+  }
 
   await proposalMetadataItem.save();
 }

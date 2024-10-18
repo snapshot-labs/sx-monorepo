@@ -277,7 +277,8 @@ watch(
 
     router.replace({
       name: 'space-editor',
-      params: { key: newId }
+      params: { key: newId },
+      query: route.query
     });
   },
   { immediate: true }
