@@ -28,8 +28,9 @@ import {
   UserProfile,
   VoteType
 } from '@/types';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
+import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
+import { EDITOR_APP_NAME } from '../common/constants';
 import {
   Connector,
   ExecutionInfo,
@@ -129,6 +130,7 @@ export function createActions(
       type: VoteType,
       choices: string[],
       labels: string[],
+      app: string,
       executions: ExecutionInfo[]
     ) {
       const currentTime = Math.floor(Date.now() / 1000);
@@ -149,7 +151,7 @@ export function createActions(
         end: startTime + space.min_voting_period,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: JSON.stringify(plugins),
-        app: EDITOR_APP_NAME,
+        app: app || EDITOR_APP_NAME,
         timestamp: currentTime
       };
 

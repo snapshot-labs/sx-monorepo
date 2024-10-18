@@ -145,6 +145,7 @@ export async function handleProposalMetadata(metadataUri: string) {
   if (exists) return;
 
   const proposalMetadataItem = new ProposalMetadataItem(dropIpfs(metadataUri));
+  proposalMetadataItem.labels = [];
 
   const metadata: any = await getJSON(metadataUri);
   if (metadata.title) proposalMetadataItem.title = metadata.title;
