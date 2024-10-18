@@ -253,7 +253,7 @@ export class EthereumSig {
       proposal: data.proposal,
       choice,
       reason: data.reason || '',
-      app: '',
+      app: data.app,
       metadata: ''
     };
 
