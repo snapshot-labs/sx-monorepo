@@ -49,7 +49,7 @@ watch(
       <h4 class="eyebrow" v-text="'Labels'" />
       <PickerLabel v-if="showEdit" v-model="labels" :labels="spaceLabels" />
     </div>
-    <ul v-if="validLabels.length" class="flex flex-wrap gap-x-1 gap-y-2">
+    <ul v-if="validLabels.length" class="flex flex-wrap gap-1">
       <li v-for="label in validLabels" :key="label.id">
         <UiProposalLabel :label="label.name" :color="label.color" />
       </li>
