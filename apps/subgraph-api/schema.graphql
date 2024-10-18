@@ -121,6 +121,8 @@ type Proposal @entity {
   strategies_indicies: [Int]!
   strategies: [String!]!
   strategies_params: [String!]!
+  type: String!
+  choices: [String!]!
   scores_1: BigDecimal!
   scores_2: BigDecimal!
   scores_3: BigDecimal!
