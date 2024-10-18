@@ -39,13 +39,14 @@ function handleLabelToggle(label: string) {
   if (labels.value.includes(label)) {
     labels.value = labels.value.filter(l => l !== label);
   } else {
-    labels.value.push(label);
+    labels.value = [...labels.value, label];
   }
 }
 
 watch(
   [props.space, state, labels],
   ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
+    console.log(labels.value);
     if (
       toSpace.id !== fromSpace?.id ||
       toState !== fromState ||
