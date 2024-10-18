@@ -163,7 +163,7 @@ type Vote {
 
 type VoteMetadataItem {
   id: String!
-  reason: String!
+  reason: Text!
 }
 
 type User {
