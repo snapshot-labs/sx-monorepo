@@ -45,6 +45,7 @@ import {
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
+import { EDITOR_APP_NAME } from '../common/constants';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
@@ -209,6 +210,7 @@ export function createActions(
       type: VoteType,
       choices: string[],
       labels: string[],
+      app: string,
       executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
@@ -219,6 +221,7 @@ export function createActions(
         body,
         discussion,
         type,
+        app: app || EDITOR_APP_NAME,
         choices: choices.filter(c => !!c),
         execution: executionInfo?.transactions ?? []
       });
