@@ -39,7 +39,7 @@ watch(
     <UiProposalLabel
       v-for="label in validLabels"
       :key="label.id"
-      class="inline-flex mr-1 mb-1 max-w-[160px]"
+      class="inline-flex mr-1 mb-1 !max-w-[160px]"
       :label="label.name"
       :color="label.color"
     />

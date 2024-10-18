@@ -47,7 +47,7 @@ function checkColorProximity(color: string): {
 
 <template>
   <div
-    class="px-2 py-[6px] rounded-full leading-3 whitespace-nowrap truncate w-fit max-w-[220px] shrink-0 text-sm"
+    class="rounded-full w-fit max-w-[220px] shrink-0 flex"
     :class="{
       border: colorProperties.showBorder
     }"
@@ -55,6 +55,10 @@ function checkColorProximity(color: string): {
       backgroundColor: colorProperties.backgroundColor,
       color: colorProperties.textColor
     }"
-    v-text="props.label"
-  />
+  >
+    <span
+      class="truncate text-sm leading-3 whitespace-nowrap px-2 py-[6px]"
+      v-text="label"
+    />
+  </div>
 </template>
