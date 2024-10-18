@@ -50,6 +50,7 @@ import {
   updateStrategiesParsedMetadata,
   updateProposalValidationStrategy,
   toChecksumAddress,
+  convertChoice,
 } from './helpers'
 
 const MASTER_SPACE = Address.fromString('0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D')
@@ -159,7 +160,9 @@ export function handleSpaceCreated(event: SpaceCreated): void {
   space.min_voting_period = event.params.input.minVotingDuration.toI32()
   space.max_voting_period = event.params.input.maxVotingDuration.toI32()
   space.quorum = new BigDecimal(new BigInt(0))
-  space.strategies_indicies = event.params.input.votingStrategies.map<i32>((_, i) => i32(i))
+  space.strategies_indices = event.params.input.votingStrategies.map<i32>((_, i) => i32(i))
+  // NOTE: deprecated
+  space.strategies_indicies = space.strategies_indices
   space.next_strategy_index = event.params.input.votingStrategies.length
   space.strategies = event.params.input.votingStrategies.map<string>((strategy) =>
     toChecksumAddress(strategy.addr.toHexString())
@@ -220,7 +223,9 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.min_end = event.params.proposal.minEndBlockNumber.toI32()
   proposal.max_end = event.params.proposal.maxEndBlockNumber.toI32()
   proposal.snapshot = event.params.proposal.startBlockNumber.toI32()
-  proposal.strategies_indicies = space.strategies_indicies
+  proposal.strategies_indices = space.strategies_indices
+  // NOTE: deprecated
+  proposal.strategies_indicies = proposal.strategies_indices
   proposal.strategies = space.strategies
   proposal.strategies_params = space.strategies_params
   proposal.scores_1 = BigDecimal.fromString('0')
@@ -396,7 +401,7 @@ export function handleProposalCancelled(event: ProposalCancelled): void {
 export function _handleVoteCreated(
   event: ethereum.Event,
   proposalId: BigInt,
-  choice: i32,
+  rawChoice: i32,
   voter: Address,
   votingPower: BigInt,
   metadataUri: string | null
@@ -406,11 +411,11 @@ export function _handleVoteCreated(
     return
   }
 
-  // Swap For/Against
-  choice = choice
-  if (choice === 0) choice = 2
-  if (choice === 1) choice = 1
-  if (choice === 2) choice = 3
+  const choice = convertChoice(rawChoice)
+  if (choice === -1) {
+    // Unknown choice value, ignoring vote
+    return
+  }
 
   let vp = votingPower.toBigDecimal()
 
@@ -603,9 +608,9 @@ export function handleVotingStrategiesAdded(event: VotingStrategiesAdded): void 
   )
   let strategiesMetadataUris = event.params.newVotingStrategyMetadataURIs
 
-  let newIndicies = [] as i32[]
+  let newIndices = [] as i32[]
   for (let i = 0; i < strategies.length; i++) {
-    newIndicies.push(i32(initialNextStrategy + i))
+    newIndices.push(i32(initialNextStrategy + i))
   }
 
   let newStrategies = space.strategies
@@ -624,7 +629,9 @@ export function handleVotingStrategiesAdded(event: VotingStrategiesAdded): void 
   }
 
   space.next_strategy_index += strategies.length
-  space.strategies_indicies = space.strategies_indicies.concat(newIndicies)
+  space.strategies_indices = space.strategies_indices.concat(newIndices)
+  // NOTE: deprecated
+  space.strategies_indicies = space.strategies_indices
   space.strategies = newStrategies
   space.strategies_params = newStrategiesParams
   space.strategies_metadata = newStrategiesMetadata
@@ -646,25 +653,27 @@ export function handleVotingStrategiesRemoved(event: VotingStrategiesRemoved): v
     return
   }
 
-  let indiciesToRemove = [] as i32[]
+  let indicesToRemove = [] as i32[]
   for (let i = 0; i < event.params.votingStrategyIndices.length; i++) {
-    indiciesToRemove.push(space.strategies_indicies.indexOf(event.params.votingStrategyIndices[i]))
+    indicesToRemove.push(space.strategies_indices.indexOf(event.params.votingStrategyIndices[i]))
   }
 
-  let newIndicies = [] as i32[]
+  let newIndices = [] as i32[]
   let newStrategies = [] as string[]
   let newStrategiesParams = [] as string[]
   let newStrategiesMetadata = [] as string[]
-  for (let i = 0; i < space.strategies_indicies.length; i++) {
-    if (!indiciesToRemove.includes(i)) {
-      newIndicies.push(space.strategies_indicies[i])
+  for (let i = 0; i < space.strategies_indices.length; i++) {
+    if (!indicesToRemove.includes(i)) {
+      newIndices.push(space.strategies_indices[i])
       newStrategies.push(space.strategies[i])
       newStrategiesParams.push(space.strategies_params[i])
       newStrategiesMetadata.push(space.strategies_metadata[i])
     }
   }
 
-  space.strategies_indicies = newIndicies
+  space.strategies_indices = newIndices
+  // NOTE: deprecated
+  space.strategies_indicies = space.strategies_indices
   space.strategies = newStrategies
   space.strategies_params = newStrategiesParams
   space.strategies_metadata = newStrategiesMetadata
