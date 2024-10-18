@@ -9,7 +9,7 @@ import { createApi } from './api';
 import * as constants from './constants';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
-  s: 'https://hub.snapshot.org/graphql',
+  s: 'http://localhost:3000/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
 const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
