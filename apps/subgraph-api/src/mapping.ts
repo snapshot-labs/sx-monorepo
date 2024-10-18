@@ -50,6 +50,7 @@ import {
   updateStrategiesParsedMetadata,
   updateProposalValidationStrategy,
   toChecksumAddress,
+  convertChoice,
 } from './helpers'
 
 const MASTER_SPACE = Address.fromString('0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D')
@@ -406,19 +407,11 @@ export function _handleVoteCreated(
     return
   }
 
-  // Swap For/Against
-  // On chain:
-  // 0 - Against
-  // 1 - For
-  // 2 - Abstain
-  // Everywhere else
-  // 1 - For
-  // 2 - Against
-  // 3 - Abstain
-  let choice = rawChoice
-  if (rawChoice === 0) choice = 2
-  if (rawChoice === 1) choice = 1
-  if (rawChoice === 2) choice = 3
+  const choice = convertChoice(rawChoice)
+  if (choice === -1) {
+    // Unknown choice value, ignoring vote
+    return
+  }
 
   let vp = votingPower.toBigDecimal()
 

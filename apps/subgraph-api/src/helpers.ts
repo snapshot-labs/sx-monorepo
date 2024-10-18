@@ -40,6 +40,21 @@ export function toChecksumAddress(address: string): string {
   return ret
 }
 
+/**
+ * Convert EVM onchain choice value to common format.
+ * EVM uses 0 for Against, 1 for For, 2 for Abstain.
+ * Common format uses 1 for For, 2 for Against, 3 for Abstain.
+ * @param rawChoice onchain choice value
+ * @returns common format choice value or -1 if unknown
+ */
+export function convertChoice(rawChoice: i32): i32 {
+  if (rawChoice === 0) return 2
+  if (rawChoice === 1) return 1
+  if (rawChoice === 2) return 3
+
+  return -1
+}
+
 export function decodeProposalValidationParams(params: Bytes): ethereum.Value | null {
   let paramsBytes = Bytes.fromByteArray(
     Bytes.fromHexString(TUPLE_PREFIX + params.toHexString().slice(2))
