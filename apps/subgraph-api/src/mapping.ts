@@ -50,6 +50,7 @@ import {
   updateStrategiesParsedMetadata,
   updateProposalValidationStrategy,
   toChecksumAddress,
+  convertChoice,
 } from './helpers'
 
 const MASTER_SPACE = Address.fromString('0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D')
@@ -396,7 +397,7 @@ export function handleProposalCancelled(event: ProposalCancelled): void {
 export function _handleVoteCreated(
   event: ethereum.Event,
   proposalId: BigInt,
-  choice: i32,
+  rawChoice: i32,
   voter: Address,
   votingPower: BigInt,
   metadataUri: string | null
@@ -406,11 +407,11 @@ export function _handleVoteCreated(
     return
   }
 
-  // Swap For/Against
-  choice = choice
-  if (choice === 0) choice = 2
-  if (choice === 1) choice = 1
-  if (choice === 2) choice = 3
+  const choice = convertChoice(rawChoice)
+  if (choice === -1) {
+    // Unknown choice value, ignoring vote
+    return
+  }
 
   let vp = votingPower.toBigDecimal()
 
