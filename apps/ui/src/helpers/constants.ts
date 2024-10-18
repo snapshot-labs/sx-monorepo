@@ -35,6 +35,17 @@ export const COINGECKO_BASE_ASSETS = {
 
 export const MAX_SYMBOL_LENGTH = 12;
 
+export const SPACE_CATEGORIES = [
+  { id: 'protocol', name: 'Protocol' },
+  { id: 'social', name: 'Social' },
+  { id: 'investment', name: 'Investment' },
+  { id: 'grant', name: 'Grant' },
+  { id: 'service', name: 'Service' },
+  { id: 'media', name: 'Media' },
+  { id: 'creator', name: 'Creator' },
+  { id: 'collector', name: 'Collector' }
+] as const;
+
 export const BASIC_CHOICES = ['For', 'Against', 'Abstain'];
 export const SUPPORTED_VOTING_TYPES: VoteType[] = [
   'basic',
