@@ -64,8 +64,8 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
 
 <template>
   <div>
-    <div class="flex justify-between">
-      <div class="flex flex-row p-4 space-x-2">
+    <div class="flex justify-between p-4 gap-2">
+      <div class="flex gap-2">
         <UiSelectDropdown
           v-model="state"
           title="Status"
@@ -97,7 +97,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           ]"
         />
       </div>
-      <div class="flex flex-row p-4 space-x-2">
+      <div class="flex gap-2 truncate">
         <IndicatorVotingPower
           :network-id="space.network"
           :voting-power="votingPower"
