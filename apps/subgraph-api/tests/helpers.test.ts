@@ -1,5 +1,5 @@
 import { assert, describe, test } from 'matchstick-as'
-import { toChecksumAddress } from '../src/helpers'
+import { convertChoice, toChecksumAddress } from '../src/helpers'
 import { log } from '@graphprotocol/graph-ts'
 
 describe('toChecksumAddress', () => {
@@ -42,5 +42,20 @@ describe('toChecksumAddress', () => {
       toChecksumAddress('0xd1220a0cf47c7b9be7a2e6ba89f429762e7b9adb'),
       '0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb'
     )
+  })
+})
+
+describe('convertChoice', () => {
+  test('converts raw choice values to common format', () => {
+    // Against
+    assert.i32Equals(convertChoice(0), 2)
+    // For
+    assert.i32Equals(convertChoice(1), 1)
+    // Abstain
+    assert.i32Equals(convertChoice(2), 3)
+  })
+
+  test('returns -1 for unknown choice values', () => {
+    assert.i32Equals(convertChoice(10), -1)
   })
 })

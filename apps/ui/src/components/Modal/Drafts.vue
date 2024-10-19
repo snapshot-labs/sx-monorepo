@@ -46,7 +46,8 @@ function handleRemoveDraft(id: string) {
           <AppLink
             :to="{
               name: 'space-editor',
-              params: { space: `${networkId}:${space}`, key: proposal.key }
+              params: { space: `${networkId}:${space}`, key: proposal.key },
+              query: route.query
             }"
             @click="$emit('close')"
           >

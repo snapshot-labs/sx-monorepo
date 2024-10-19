@@ -36,24 +36,26 @@ watch(
 </script>
 <template>
   <template v-if="inline">
-    <div v-for="label in validLabels" :key="label.id" class="inline-flex mr-2">
-      <UiProposalLabel
-        :label="label.name"
-        :color="label.color"
-        class="mb-1 max-w-[160px]"
-      />
-    </div>
+    <UiProposalLabel
+      v-for="label in validLabels"
+      :key="label.id"
+      class="inline-flex mr-1 mb-1 !max-w-[160px]"
+      :label="label.name"
+      :color="label.color"
+    />
   </template>
   <div v-else>
-    <h4 v-if="viewOnly" class="eyebrow mb-3" v-text="'Labels'" />
-    <PickerLabel v-else v-model="labels" :labels="spaceLabels" />
-    <div v-if="validLabels.length" class="flex flex-wrap">
-      <div v-for="label in validLabels" :key="label.id" class="mr-2 mb-2">
+    <div class="flex justify-between mb-2.5">
+      <h4 v-if="viewOnly" class="eyebrow" v-text="'Labels'" />
+      <PickerLabel v-else v-model="labels" :labels="spaceLabels" />
+    </div>
+    <ul v-if="validLabels.length" class="flex flex-wrap gap-1">
+      <li v-for="label in validLabels" :key="label.id">
         <UiTooltip :title="label.description" class="inline">
           <UiProposalLabel :label="label.name" :color="label.color" />
         </UiTooltip>
-      </div>
-    </div>
+      </li>
+    </ul>
     <div v-else class="mt-1">No labels yet</div>
   </div>
 </template>

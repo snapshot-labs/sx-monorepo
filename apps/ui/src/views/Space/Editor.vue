@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
   MAX_1D_PROPOSALS,
@@ -170,6 +171,7 @@ async function handleProposeClick() {
   sending.value = true;
 
   try {
+    const choices = proposal.value.choices.filter(choice => !!choice);
     const executions = editorExecutions.value
       .filter(
         strategy =>
@@ -193,19 +195,22 @@ async function handleProposeClick() {
         proposal.value.body,
         proposal.value.discussion,
         proposal.value.type,
-        proposal.value.choices,
+        choices,
         proposal.value.labels,
         executions
       );
     } else {
+      const appName = (route.query.app as LocationQueryValue) || '';
+
       result = await propose(
         props.space,
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
         proposal.value.type,
-        proposal.value.choices,
+        choices,
         proposal.value.labels,
+        appName.length <= 128 ? appName : '',
         executions
       );
     }
@@ -273,7 +278,8 @@ watch(
 
     router.replace({
       name: 'space-editor',
-      params: { key: newId }
+      params: { key: newId },
+      query: route.query
     });
   },
   { immediate: true }
