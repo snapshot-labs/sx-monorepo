@@ -18,10 +18,8 @@ const router = useRouter();
 const route = useRoute();
 const proposalsStore = useProposalsStore();
 
-const state = ref<NonNullable<ProposalsFilter['state']>>(
-  (route.query?.state as ProposalsFilter['state']) || 'any'
-);
-const labels = ref<string[]>((route.query['labels[]'] as string[]) || []);
+const state = ref<NonNullable<ProposalsFilter['state']>>('any');
+const labels = ref<string[]>([]);
 
 const selectIconBaseProps = {
   size: 16
@@ -52,6 +50,22 @@ function handleFetchVotingPower() {
 }
 
 watch(
+  [() => route.query.state as string],
+  ([toState]) => {
+    state.value = toState || 'any';
+
+    proposalsStore.reset(props.space.id, props.space.network);
+    proposalsStore.fetch(
+      props.space.id,
+      props.space.network,
+      state.value,
+      labels.value
+    );
+  },
+  { immediate: true }
+);
+
+watch(
   [props.space, state, labels],
   ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
     if (
@@ -59,9 +73,6 @@ watch(
       toState !== fromState ||
       toLabels !== fromLabels
     ) {
-      proposalsStore.reset(toSpace.id, toSpace.network);
-      proposalsStore.fetch(toSpace.id, toSpace.network, toState, toLabels);
-      console.log(route.query);
       const query: any = {
         ...route.query,
         state: toState,
@@ -75,8 +86,7 @@ watch(
       }
       router.push({ query });
     }
-  },
-  { immediate: true }
+  }
 );
 
 watch(
