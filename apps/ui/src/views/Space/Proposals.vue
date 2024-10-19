@@ -3,6 +3,8 @@ import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
 import { Space } from '@/types';
 
+const MAX_SHOWN_LABELS_FILTER = 2;
+
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
@@ -12,10 +14,14 @@ const {
   reset: resetVotingPower
 } = useVotingPower();
 const { web3 } = useWeb3();
+const router = useRouter();
+const route = useRoute();
 const proposalsStore = useProposalsStore();
 
-const state = ref<NonNullable<ProposalsFilter['state']>>('any');
-const labels = ref<string[]>([]);
+const state = ref<NonNullable<ProposalsFilter['state']>>(
+  (route.query?.state as ProposalsFilter['state']) || 'any'
+);
+const labels = ref<string[]>((route.query['labels[]'] as string[]) || []);
 
 const selectIconBaseProps = {
   size: 16
@@ -55,6 +61,19 @@ watch(
     ) {
       proposalsStore.reset(toSpace.id, toSpace.network);
       proposalsStore.fetch(toSpace.id, toSpace.network, toState, toLabels);
+      console.log(route.query);
+      const query: any = {
+        ...route.query,
+        state: toState,
+        'labels[]': toLabels
+      };
+      if (toState === 'any') {
+        delete query.state;
+      }
+      if (!toLabels.length) {
+        delete query['labels[]'];
+      }
+      router.push({ query });
     }
   },
   { immediate: true }
@@ -130,15 +149,21 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               </div>
               <div v-if="labels.length" class="flex gap-2 px-2.5 items-center">
                 <ul v-if="labels.length" class="flex gap-1">
-                  <li v-for="id in labels.slice(0, 2)" :key="id">
+                  <li
+                    v-for="id in labels.slice(0, MAX_SHOWN_LABELS_FILTER)"
+                    :key="id"
+                  >
                     <UiProposalLabel
                       :label="spaceLabels[id].name"
                       :color="spaceLabels[id].color"
                     />
                   </li>
                 </ul>
-                <div v-if="labels.length > 2" class="text-skin-link">
-                  +{{ labels.length - 2 }}
+                <div
+                  v-if="labels.length > MAX_SHOWN_LABELS_FILTER"
+                  class="bg-gradient-to-l via-skin-bg from-skin-bg text-skin-link py-2 pl-4 -ml-6"
+                >
+                  +{{ labels.length - MAX_SHOWN_LABELS_FILTER }}
                 </div>
                 <button
                   v-if="labels.length"
