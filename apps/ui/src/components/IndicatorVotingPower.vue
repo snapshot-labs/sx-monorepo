@@ -35,6 +35,7 @@ function handleModalOpen() {
     :voting-power="votingPower"
     :formatted-voting-power="formattedVotingPower"
     :on-click="handleModalOpen"
+    v-bind="$attrs"
   >
     <UiTooltip title="Your voting power" class="flex truncate">
       <UiButton
