@@ -25,6 +25,16 @@ const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
 
+const spaceLabels = computed(() => {
+  if (!props.space.labels) return {};
+
+  return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
+});
+
+function handleClearLabelsFilter() {
+  labels.value = [];
+}
+
 async function handleEndReached() {
   if (!proposalsRecord.value?.hasMoreProposals) return;
 
@@ -35,18 +45,9 @@ function handleFetchVotingPower() {
   fetchVotingPower(props.space);
 }
 
-function handleLabelToggle(label: string) {
-  if (labels.value.includes(label)) {
-    labels.value = labels.value.filter(l => l !== label);
-  } else {
-    labels.value = [...labels.value, label];
-  }
-}
-
 watch(
   [props.space, state, labels],
   ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
-    console.log(labels.value);
     if (
       toSpace.id !== fromSpace?.id ||
       toState !== fromState ||
@@ -110,6 +111,49 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
             }
           ]"
         />
+
+        <div v-if="space.labels?.length" class="relative shrink-1">
+          <PickerLabel
+            v-model="labels"
+            :labels="space.labels"
+            :button-props="{
+              class:
+                'flex items-center gap-2 relative rounded-full leading-[100%] border button min-w-[76px] h-[42px] top-1 text-skin-link bg-skin-bg'
+            }"
+            :panel-props="{ class: 'min-w-[290px] !mx-0 !mt-3' }"
+          >
+            <template #button>
+              <div
+                class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
+              >
+                Labels
+              </div>
+              <div v-if="labels.length" class="flex gap-2 px-2.5 items-center">
+                <ul v-if="labels.length" class="flex gap-1">
+                  <li v-for="id in labels.slice(0, 2)" :key="id">
+                    <UiProposalLabel
+                      :label="spaceLabels[id].name"
+                      :color="spaceLabels[id].color"
+                    />
+                  </li>
+                </ul>
+                <div v-if="labels.length > 2" class="text-skin-link">
+                  +{{ labels.length - 2 }}
+                </div>
+                <button
+                  v-if="labels.length"
+                  class="text-skin-text rounded-full hover:text-skin-link"
+                  title="Clear all labels filter"
+                  @click.stop="handleClearLabelsFilter"
+                  @keydown.enter="handleClearLabelsFilter"
+                >
+                  <IH-x-circle size="16" />
+                </button>
+              </div>
+              <span v-else class="px-3 text-skin-link">Any</span>
+            </template>
+          </PickerLabel>
+        </div>
       </div>
       <div class="flex gap-2 truncate">
         <IndicatorVotingPower
@@ -129,19 +173,6 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           </UiButton>
         </UiTooltip>
       </div>
-    </div>
-    <UiLabel label="Label" />
-    <div class="inline-flex flex-wrap gap-1 p-3">
-      <a v-for="label in space.labels" :key="label.id">
-        <UiProposalLabel
-          :label="label.name"
-          :color="label.color"
-          :class="{
-            '!opacity-40': !labels.includes(label.id) && labels.length > 0
-          }"
-          @click="handleLabelToggle(label.id)"
-        />
-      </a>
     </div>
     <ProposalsList
       title="Proposals"
