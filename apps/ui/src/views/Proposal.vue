@@ -326,7 +326,7 @@ watchEffect(() => {
           <ProposalLabels
             v-if="space.labels?.length && proposal.labels?.length"
             :proposal-labels="proposal.labels"
-            :space-labels="space.labels"
+            :space="space"
           />
           <div>
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">

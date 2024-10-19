@@ -506,7 +506,7 @@ watchEffect(() => {
       <ProposalLabels
         v-if="space.labels?.length"
         v-model="proposal.labels"
-        :space-labels="space.labels"
+        :space="space"
         show-edit
       />
       <div>
