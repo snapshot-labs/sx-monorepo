@@ -50,9 +50,19 @@ function handleFetchVotingPower() {
 }
 
 watch(
-  [() => route.query.state as string],
-  ([toState]) => {
+  [
+    () => route.query.state as string,
+    () => route.query['labels[]'] as string[] | string
+  ],
+  ([toState, toLabels]) => {
+    const normalizedLabels = Array.isArray(toLabels)
+      ? toLabels
+      : toLabels
+        ? [toLabels]
+        : [];
+
     state.value = toState || 'any';
+    labels.value = normalizedLabels;
 
     proposalsStore.reset(props.space.id, props.space.network);
     proposalsStore.fetch(
