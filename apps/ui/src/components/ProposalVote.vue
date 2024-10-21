@@ -56,7 +56,7 @@ const isEditable = computed(() => {
 
 <template>
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
-    <div class="py-2">
+    <div v-bind="$attrs">
       <UiButton
         class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2"
         :disabled="!isEditable"
@@ -112,7 +112,7 @@ const isEditable = computed(() => {
   <slot v-else-if="isInvalidNetwork" name="wrong-safe-network">
     Safe's network should be same as space's network
   </slot>
-  <div v-else class="py-2">
+  <div v-else v-bind="$attrs">
     <slot />
   </div>
 </template>
