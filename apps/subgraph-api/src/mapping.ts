@@ -229,7 +229,6 @@ export function handleProposalCreated(event: ProposalCreated): void {
   proposal.strategies = space.strategies
   proposal.strategies_params = space.strategies_params
   proposal.type = 'basic'
-  proposal.choices = ['For', 'Against', 'Abstain']
   proposal.scores_1 = BigDecimal.fromString('0')
   proposal.scores_2 = BigDecimal.fromString('0')
   proposal.scores_3 = BigDecimal.fromString('0')

@@ -122,7 +122,6 @@ type Proposal @entity {
   strategies: [String!]!
   strategies_params: [String!]!
   type: String!
-  choices: [String!]!
   scores_1: BigDecimal!
   scores_2: BigDecimal!
   scores_3: BigDecimal!
@@ -147,6 +146,7 @@ type ProposalMetadata @entity {
   body: String!
   discussion: String!
   execution: String!
+  choices: [String!]!
   labels: [String!]!
 }
 

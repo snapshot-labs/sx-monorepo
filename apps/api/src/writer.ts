@@ -440,7 +440,6 @@ export const handlePropose: starknet.Writer = async ({
   );
   proposal.execution_strategy_type = 'none';
   proposal.type = 'basic';
-  proposal.choices = ['For', 'Against', 'Abstain'];
   proposal.scores_1 = '0';
   proposal.scores_2 = '0';
   proposal.scores_3 = '0';
