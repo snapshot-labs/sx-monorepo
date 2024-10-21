@@ -161,6 +161,13 @@ export async function handleProposalMetadata(metadataUri: string) {
   ) {
     proposalMetadataItem.labels = metadata.labels;
   }
+  if (
+    Array.isArray(metadata.choices) &&
+    metadata.choices.length === 3 &&
+    metadata.choices.every((choice: string) => typeof choice === 'string')
+  ) {
+    proposalMetadataItem.choices = metadata.choices;
+  }
 
   await proposalMetadataItem.save();
 }

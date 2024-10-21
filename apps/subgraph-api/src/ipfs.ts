@@ -152,6 +152,11 @@ export function handleProposalMetadata(content: Bytes): void {
     proposalMetadata.labels = labels._arr.map<string>((label) => label.toString())
   }
 
+  let choices = jsonObj.getArr('choices')
+  if (choices) {
+    proposalMetadata.choices = choices._arr.map<string>((label) => label.toString())
+  }
+
   proposalMetadata.save()
 }
 
