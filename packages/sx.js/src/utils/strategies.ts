@@ -61,6 +61,7 @@ export async function getStrategiesWithParams(
           params
         };
       } catch (e) {
+        console.log('failed with', e);
         return null;
       }
     })

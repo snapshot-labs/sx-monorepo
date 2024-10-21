@@ -238,9 +238,13 @@ watchEffect(() => {
                 Please allow few minutes for the voting power to be collected
                 from Ethereum.
               </div>
-              <template v-else>
-                <span class="mr-1.5">Voting power:</span>
-                <button type="button" @click="votingPowerProps.onClick">
+              <div v-else class="flex gap-1.5 items-center">
+                <span class="shrink-0">Voting power:</span>
+                <button
+                  type="button"
+                  class="truncate"
+                  @click="votingPowerProps.onClick"
+                >
                   <UiLoading
                     v-if="!votingPower || votingPower.status === 'loading'"
                   />
@@ -261,11 +265,10 @@ watchEffect(() => {
                   "
                   href="https://help.snapshot.box/en/articles/9566904-why-do-i-have-0-voting-power"
                   target="_blank"
-                  class="ml-1.5"
                 >
                   <IH-question-mark-circle />
                 </a>
-              </template>
+              </div>
             </IndicatorVotingPower>
             <ProposalVote
               v-if="proposal"
