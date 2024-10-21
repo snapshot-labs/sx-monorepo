@@ -47,7 +47,7 @@ watch(
 </script>
 
 <template>
-  <div class="s-base mb-4">
+  <div class="s-base">
     <h4 class="eyebrow mb-2.5">Voting system</h4>
     <button
       type="button"
