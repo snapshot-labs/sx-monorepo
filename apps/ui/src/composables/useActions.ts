@@ -578,11 +578,12 @@ export function useActions() {
 
     const isEvmNetwork = typeof chainIdOverride === 'number';
     const actionNetwork =
-      networkId ?? isEvmNetwork
+      networkId ??
+      (isEvmNetwork
         ? 'eth'
         : (Object.entries(METADATA).find(
             ([, metadata]) => metadata.chainId === chainIdOverride
-          )?.[0] as NetworkID);
+          )?.[0] as NetworkID));
     if (!actionNetwork) throw new Error('Failed to detect action network');
 
     const network = getReadWriteNetwork(actionNetwork);
