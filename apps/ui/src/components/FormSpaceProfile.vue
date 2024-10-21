@@ -1,19 +1,8 @@
 <script setup lang="ts">
-import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import { MAX_SYMBOL_LENGTH, SPACE_CATEGORIES } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
 import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
-
-const SPACE_CATEGORIES = [
-  { id: 'protocol', name: 'Protocol' },
-  { id: 'social', name: 'Social' },
-  { id: 'investment', name: 'Investment' },
-  { id: 'grant', name: 'Grant' },
-  { id: 'service', name: 'Service' },
-  { id: 'media', name: 'Media' },
-  { id: 'creator', name: 'Creator' },
-  { id: 'collector', name: 'Collector' }
-];
 
 const props = defineProps<{
   form: any;
