@@ -12,6 +12,8 @@ import { SpaceMetadataLabel } from '@/types';
 
 const props = defineProps<{
   labels: SpaceMetadataLabel[];
+  buttonProps?: Record<string, any>;
+  panelProps?: Record<string, any>;
 }>();
 
 const selectedLabels = defineModel<string[]>({
@@ -33,8 +35,13 @@ const filteredLabels = computed(() =>
 
 <template>
   <Popover v-slot="{ open }" class="relative contents">
-    <PopoverButton :class="open ? 'text-skin-link' : 'text-skin-text'">
-      <IH-pencil />
+    <PopoverButton
+      :class="open ? 'text-skin-link' : 'text-skin-text'"
+      v-bind="buttonProps"
+    >
+      <slot name="button">
+        <IH-pencil />
+      </slot>
     </PopoverButton>
 
     <transition
@@ -47,8 +54,9 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-10 left-0 mt-5 mx-4 pb-3"
+        class="absolute z-[9999] left-0 mt-5 mx-4 pb-3"
         style="width: calc(100% - 48px)"
+        v-bind="panelProps"
       >
         <Combobox
           v-slot="{ activeOption }"
