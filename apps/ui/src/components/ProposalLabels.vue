@@ -31,17 +31,16 @@ const validLabels = computed(() => {
       class="inline-flex !max-w-[160px] mr-1 last:mr-0"
     />
   </div>
-  <div
+  <ul
     v-else-if="validLabels.length"
     class="flex flex-wrap gap-1"
     v-bind="$attrs"
   >
-    <UiProposalLabel
-      v-for="label in validLabels"
-      :key="label.id"
-      :label="label.name"
-      :color="label.color"
-    />
-  </div>
+    <li v-for="label in validLabels" :key="label.id">
+      <UiTooltip :title="label.description" class="inline">
+        <UiProposalLabel :label="label.name" :color="label.color" />
+      </UiTooltip>
+    </li>
+  </ul>
   <div v-else>No labels yet</div>
 </template>

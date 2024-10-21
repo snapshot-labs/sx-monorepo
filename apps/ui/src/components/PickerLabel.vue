@@ -37,13 +37,13 @@ const filteredLabels = computed(() =>
   <Popover v-slot="{ open }" class="relative contents">
     <PopoverButton
       :class="open ? 'text-skin-link' : 'text-skin-text'"
+      class="outline-none focus-within:text-skin-link w-full"
       v-bind="buttonProps"
     >
       <slot name="button">
         <IH-pencil />
       </slot>
     </PopoverButton>
-
     <transition
       enter-active-class="transition duration-200 ease-out"
       enter-from-class="translate-y-1 opacity-0"
@@ -54,7 +54,7 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-[9999] left-0 mt-5 mx-4 pb-3"
+        class="absolute z-[9999] left-0 mt-2 mx-4 pb-3"
         style="width: calc(100% - 48px)"
         v-bind="panelProps"
       >
@@ -91,9 +91,11 @@ const filteredLabels = computed(() =>
                       :label="label.name || 'label preview'"
                       :color="label.color"
                     />
-                    <div class="mt-2 truncate leading-[18px] text-sm">
-                      {{ label.description || 'No description' }}
-                    </div>
+                    <div
+                      v-if="label.description"
+                      class="mt-2 truncate leading-[18px] text-sm"
+                      v-text="label.description"
+                    />
                   </div>
                   <div v-if="selectedLabels.includes(label.id)">
                     <IH-check class="text-skin-success" />

@@ -29,7 +29,8 @@ describe('EthereumSig', () => {
         '0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801',
       choice: 1,
       metadataUri: '',
-      type: 'basic'
+      type: 'basic',
+      app: 'snapshot-v2'
     };
 
     const envelope = await client.vote({
