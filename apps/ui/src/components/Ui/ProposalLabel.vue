@@ -57,7 +57,7 @@ function checkColorProximity(color: string): {
     }"
   >
     <span
-      class="truncate text-sm leading-3 whitespace-nowrap px-2 py-[6px]"
+      class="truncate text-sm leading-[11px] whitespace-nowrap px-2 py-[6px]"
       v-text="label"
     />
   </div>
