@@ -1,4 +1,4 @@
-import { Bytes, dataSource, json } from '@graphprotocol/graph-ts'
+import { Bytes, dataSource, json, JSONValueKind } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
 import {
   SpaceMetadata,
@@ -202,7 +202,7 @@ export function handleVotingPowerValidationStrategyMetadata(content: Bytes): voi
 
   updateStrategiesParsedMetadata(
     spaceId,
-    strategies_metadata.toArray().map<string>((metadata) => metadata.toString()),
+    strategies_metadata.toArray().filter(metadata => metadata.kind === JSONValueKind.STRING).map<string>((metadata) => metadata.toString()),
     0,
     blockNumber,
     'VotingPowerValidationStrategiesParsedMetadata'
