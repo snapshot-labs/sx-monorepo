@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
 import { Space } from '@/types';
@@ -55,14 +56,13 @@ watch(
     () => route.query['labels[]'] as string[] | string
   ],
   ([toState, toLabels]) => {
-    const normalizedLabels = Array.isArray(toLabels)
-      ? toLabels
-      : toLabels
-        ? [toLabels]
-        : [];
-
-    state.value = toState || 'any';
-    labels.value = normalizedLabels;
+    state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
+      ? (toState as NonNullable<ProposalsFilter['state']>)
+      : 'any';
+    const normalizedLabels = toLabels || [];
+    labels.value = Array.isArray(normalizedLabels)
+      ? normalizedLabels
+      : [normalizedLabels];
 
     proposalsStore.reset(props.space.id, props.space.network);
     proposalsStore.fetch(
@@ -71,6 +71,26 @@ watch(
       state.value,
       labels.value
     );
+  },
+  { immediate: true }
+);
+
+watch(
+  [props.space, state, labels],
+  ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
+    if (
+      toSpace.id !== fromSpace?.id ||
+      toState !== fromState ||
+      toLabels !== fromLabels
+    ) {
+      const query: LocationQueryRaw = {
+        ...route.query,
+        state: toState === 'any' ? undefined : toState,
+        'labels[]': !toLabels?.length ? undefined : toLabels
+      };
+
+      router.push({ query });
+    }
   },
   { immediate: true }
 );
