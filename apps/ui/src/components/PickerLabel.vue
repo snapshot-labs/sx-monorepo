@@ -36,8 +36,8 @@ const filteredLabels = computed(() =>
 <template>
   <Popover v-slot="{ open }" class="relative contents">
     <PopoverButton
-      :class="open ? 'text-skin-link' : 'text-skin-text'"
       class="outline-none focus-within:text-skin-link w-full"
+      :class="open ? 'text-skin-link' : 'text-skin-text'"
       v-bind="buttonProps"
     >
       <slot name="button">
@@ -54,7 +54,7 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-[9999] left-0 mt-2 mx-4 pb-3"
+        class="absolute z-[9999] left-0 -mt-2 mx-4 pb-3"
         style="width: calc(100% - 48px)"
         v-bind="panelProps"
       >
