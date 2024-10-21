@@ -57,9 +57,7 @@ export function handleSpaceMetadata(content: Bytes): void {
     if (jsonPropertiesObj && labels) {
       let jsonLabelsArr = jsonPropertiesObj.getArr('labels')
       if (jsonLabelsArr) {
-        spaceMetadata.labels = jsonLabelsArr._arr.map<string>((label) =>
-          label.toString()
-        )
+        spaceMetadata.labels = jsonLabelsArr._arr.map<string>((label) => label.toString())
       }
     }
 
@@ -139,6 +137,7 @@ export function handleProposalMetadata(content: Bytes): void {
   proposalMetadata.body = body ? body.toString() : ''
   proposalMetadata.discussion = discussion ? discussion.toString() : ''
   proposalMetadata.execution = ''
+  proposalMetadata.choices = ['For', 'Against', 'Abstain']
   proposalMetadata.labels = []
 
   // Using different parser for execution to overcome limitations in graph-ts
@@ -151,6 +150,11 @@ export function handleProposalMetadata(content: Bytes): void {
   let labels = jsonObj.getArr('labels')
   if (labels) {
     proposalMetadata.labels = labels._arr.map<string>((label) => label.toString())
+  }
+
+  let choices = jsonObj.getArr('choices')
+  if (choices) {
+    proposalMetadata.choices = choices._arr.map<string>((label) => label.toString())
   }
 
   proposalMetadata.save()
