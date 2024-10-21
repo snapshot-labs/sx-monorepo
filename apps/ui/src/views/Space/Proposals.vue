@@ -96,30 +96,6 @@ watch(
 );
 
 watch(
-  [props.space, state, labels],
-  ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
-    if (
-      toSpace.id !== fromSpace?.id ||
-      toState !== fromState ||
-      toLabels !== fromLabels
-    ) {
-      const query: any = {
-        ...route.query,
-        state: toState,
-        'labels[]': toLabels
-      };
-      if (toState === 'any') {
-        delete query.state;
-      }
-      if (!toLabels.length) {
-        delete query['labels[]'];
-      }
-      router.push({ query });
-    }
-  }
-);
-
-watch(
   [props.space, () => web3.value.account, () => web3.value.authLoading],
   ([toSpace, toAccount, toAuthLoading], [, fromAccount]) => {
     if (fromAccount && toAccount && fromAccount !== toAccount) {
