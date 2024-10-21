@@ -245,7 +245,8 @@ export function useActions() {
   async function vote(
     proposal: Proposal,
     choice: Choice,
-    reason: string
+    reason: string,
+    app: string
   ): Promise<string | null> {
     if (!web3.value.account) {
       await forceLogin();
@@ -262,7 +263,8 @@ export function useActions() {
         web3.value.account,
         proposal,
         choice,
-        reason
+        reason,
+        app
       )
     );
 
@@ -578,11 +580,12 @@ export function useActions() {
 
     const isEvmNetwork = typeof chainIdOverride === 'number';
     const actionNetwork =
-      networkId ?? isEvmNetwork
+      networkId ??
+      (isEvmNetwork
         ? 'eth'
         : (Object.entries(METADATA).find(
             ([, metadata]) => metadata.chainId === chainIdOverride
-          )?.[0] as NetworkID);
+          )?.[0] as NetworkID));
     if (!actionNetwork) throw new Error('Failed to detect action network');
 
     const network = getReadWriteNetwork(actionNetwork);

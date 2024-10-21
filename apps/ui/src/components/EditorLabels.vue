@@ -12,10 +12,14 @@ const labels = defineModel<string[]>({
 
 <template>
   <div v-if="space.labels?.length">
-    <div class="flex justify-between mb-2.5">
-      <h4 class="eyebrow" v-text="'Labels'" />
-      <PickerLabel v-model="labels" :labels="space.labels" />
-    </div>
+    <PickerLabel v-model="labels" :labels="space.labels">
+      <template #button>
+        <div class="flex justify-between items-center mb-2.5">
+          <h4 class="eyebrow" v-text="'Labels'" />
+          <IH-pencil />
+        </div>
+      </template>
+    </PickerLabel>
     <ProposalLabels :labels="labels" :space="space" />
   </div>
 </template>
