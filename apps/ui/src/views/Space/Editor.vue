@@ -503,11 +503,10 @@ watchEffect(() => {
           >.
         </template>
       </EditorChoices>
-      <ProposalLabels
+      <EditorLabels
         v-if="space.labels?.length"
         v-model="proposal.labels"
-        :space-labels="space.labels"
-        show-edit
+        :space="space"
       />
       <div>
         <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
