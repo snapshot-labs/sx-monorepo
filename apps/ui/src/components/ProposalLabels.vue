@@ -1,59 +1,46 @@
 <script setup lang="ts">
-import { SpaceMetadataLabel } from '@/types';
+import { Space } from '@/types';
 
 const props = withDefaults(
   defineProps<{
-    spaceLabels: SpaceMetadataLabel[];
-    proposalLabels?: string[];
-    viewOnly?: boolean;
+    space: Space;
+    labels: string[];
     inline?: boolean;
   }>(),
   {
-    viewOnly: true,
     inline: false
   }
 );
 
-const labels = defineModel<string[]>({
-  default: []
-});
-
 const validLabels = computed(() => {
-  return labels.value
-    .map(label => props.spaceLabels.find(l => l.id === label))
+  if (!props.space.labels?.length || !props.labels?.length) return [];
+
+  return props.labels
+    .map(label => props.space.labels?.find(l => l.id === label))
     .filter(l => l !== undefined);
 });
-
-watch(
-  () => props.proposalLabels,
-  () => {
-    if (props.proposalLabels) {
-      labels.value = props.proposalLabels;
-    }
-  },
-  { immediate: true }
-);
 </script>
 <template>
-  <template v-if="inline">
+  <div v-if="inline" class="inline space-y-1">
     <UiProposalLabel
       v-for="label in validLabels"
       :key="label.id"
-      class="inline-flex mr-1 mb-1 !max-w-[160px]"
       :label="label.name"
       :color="label.color"
+      v-bind="$attrs"
+      class="inline-flex !max-w-[160px] mr-1 last:mr-0"
     />
-  </template>
-  <div v-else>
-    <h4 v-if="viewOnly" class="eyebrow mb-2.5" v-text="'Labels'" />
-    <PickerLabel v-else v-model="labels" :labels="spaceLabels" />
-    <ul v-if="validLabels.length" class="flex flex-wrap gap-1">
-      <li v-for="label in validLabels" :key="label.id">
-        <UiTooltip :title="label.description" class="inline">
-          <UiProposalLabel :label="label.name" :color="label.color" />
-        </UiTooltip>
-      </li>
-    </ul>
-    <div v-else>No labels yet</div>
   </div>
+  <ul
+    v-else-if="validLabels.length"
+    class="flex flex-wrap gap-1"
+    v-bind="$attrs"
+  >
+    <li v-for="label in validLabels" :key="label.id">
+      <UiTooltip :title="label.description" class="inline">
+        <UiProposalLabel :label="label.name" :color="label.color" />
+      </UiTooltip>
+    </li>
+  </ul>
+  <div v-else>No labels yet</div>
 </template>
