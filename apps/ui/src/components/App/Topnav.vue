@@ -122,7 +122,7 @@ watch(
       </label>
     </form>
 
-    <div class="flex space-x-2.5 shrink-0">
+    <div class="flex space-x-2 shrink-0">
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
