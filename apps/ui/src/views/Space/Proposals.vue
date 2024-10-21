@@ -187,7 +187,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               >
                 Labels
               </div>
-              <div v-if="labels.length" class="flex gap-2 px-2.5 items-center">
+              <div v-if="labels.length" class="flex gap-1 px-2.5 items-center">
                 <ul v-if="labels.length" class="flex gap-1">
                   <li
                     v-for="id in labels.slice(0, MAX_SHOWN_LABELS_FILTER)"
