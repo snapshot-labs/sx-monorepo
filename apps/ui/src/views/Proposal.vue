@@ -278,6 +278,7 @@ watchEffect(() => {
             >
               <ProposalVoteBasic
                 v-if="proposal.type === 'basic'"
+                :choices="proposal.choices"
                 @vote="handleVoteClick"
               />
               <ProposalVoteSingleChoice
