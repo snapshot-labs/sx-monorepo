@@ -245,7 +245,8 @@ export function useActions() {
   async function vote(
     proposal: Proposal,
     choice: Choice,
-    reason: string
+    reason: string,
+    app: string
   ): Promise<string | null> {
     if (!web3.value.account) {
       await forceLogin();
@@ -262,7 +263,8 @@ export function useActions() {
         web3.value.account,
         proposal,
         choice,
-        reason
+        reason,
+        app
       )
     );
 
