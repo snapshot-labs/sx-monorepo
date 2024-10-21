@@ -37,7 +37,7 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
 
 <template>
   <div
-    class="s-base mb-5"
+    class="s-base"
     :class="{
       's-error': showError
     }"
