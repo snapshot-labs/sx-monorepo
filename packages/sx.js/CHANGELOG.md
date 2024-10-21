@@ -1,5 +1,21 @@
 # @snapshot-labs/sx
 
+## 0.2.0
+
+### Minor Changes
+
+- 797f5e3: Support labels on proposals
+
+### Patch Changes
+
+- ce35884: fix evm slot value strategy cached_timestamps lookup
+- e4ccc72: remove networks with empty config
+- 1bbd2c3: set ethsig offchain vote app property
+- 94652af: disable estimation for initialize EthTx calls
+- 4627095: add updateSettings method to offchain EthereumSig client
+- aa87e0c: add deleteSpace method to offchain ethSig client
+- ef1429d: fix ethSig updateProposal call to properly include author
+
 ## 0.1.4
 
 ### Patch Changes
