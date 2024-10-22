@@ -19,6 +19,10 @@ function handleAddChoice() {
 }
 
 function handlePressEnter(index: number) {
+  if (proposal.value.type === 'basic' && proposal.value.choices.length === 3) {
+    return;
+  }
+
   if (!choices.value[index + 1]) return handleAddChoice();
 
   nextTick(() => choices.value[index + 1].focus());
