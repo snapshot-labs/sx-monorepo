@@ -195,7 +195,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                 </ul>
 
                 <div
-                  class="flex gap-1 items-center absolute rounded-r-full right-2 top-0 bottom-0 bg-gradient-to-l via-skin-bg from-skin-bg"
+                  class="flex gap-1 items-center absolute rounded-r-full right-2 top-[1px] bottom-[1px] bg-gradient-to-l via-skin-bg from-skin-bg"
                   :class="{ 'pl-6': labels.length >= MAX_SHOWN_LABELS_FILTER }"
                 >
                   <span
