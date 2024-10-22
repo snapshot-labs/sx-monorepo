@@ -46,6 +46,30 @@ const inputValue = computed({
   }
 });
 
+const inputWidth = computed(() => {
+  if (!props.inline) return null;
+
+  const PADDING = 32;
+  const BORDER_WIDTH = 2;
+
+  const contents = query.value || getDisplayValue(model.value);
+
+  const temp = document.createElement('span');
+  temp.style.font = 'inherit';
+  temp.style.fontSize = 'inherit';
+  temp.style.padding = '0';
+  temp.style.position = 'absolute';
+  temp.style.visibility = 'hidden';
+  temp.style.whiteSpace = 'pre';
+  temp.textContent = contents;
+
+  document.body.appendChild(temp);
+  const width = temp.getBoundingClientRect().width;
+  document.body.removeChild(temp);
+
+  return Math.max(width + PADDING + BORDER_WIDTH, 90);
+});
+
 function handleFocus(event: FocusEvent, open: boolean) {
   if (!event.target || open) return;
 
@@ -56,7 +80,9 @@ function handleFocus(event: FocusEvent, open: boolean) {
   });
 }
 
-function getDisplayValue(value: T) {
+function getDisplayValue(value: T | null) {
+  if (value === null) return '';
+
   const option = props.definition.options.find(option => option.id === value);
   return option ? option.name || String(option.id) : '';
 }
@@ -91,6 +117,9 @@ watch(model, () => {
               :class="{
                 '!rounded-b-none': !gap && open,
                 'h-[42px]': inline
+              }"
+              :style="{
+                width: inputWidth ? `${inputWidth}px` : '100%'
               }"
               autocomplete="off"
               :placeholder="definition.examples?.[0]"
