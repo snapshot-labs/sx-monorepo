@@ -481,7 +481,14 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             <IH-arrow-sm-right class="-rotate-45" />
           </a>
         </div>
-        <button type="button" @click="changeControllerModalOpen = true">
+        <button
+          type="button"
+          :disabled="!isController"
+          :class="{
+            'opacity-40 cursor-not-allowed text-skin-text': !isController
+          }"
+          @click="changeControllerModalOpen = true"
+        >
           <IH-pencil />
         </button>
       </div>
