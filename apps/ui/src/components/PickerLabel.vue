@@ -37,10 +37,9 @@ const filteredLabels = computed(() =>
       class="outline-none focus-within:text-skin-link w-full"
       :class="open ? 'text-skin-link' : 'text-skin-text'"
     >
-      <div class="flex justify-between items-center mb-2.5">
-        <h4 class="eyebrow" v-text="'Labels'" />
+      <slot name="button">
         <IH-pencil />
-      </div>
+      </slot>
     </PopoverButton>
 
     <transition
