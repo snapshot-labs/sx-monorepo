@@ -63,9 +63,7 @@ watch(
     normalizedLabels = Array.isArray(normalizedLabels)
       ? normalizedLabels
       : [normalizedLabels];
-    labels.value = normalizedLabels.filter(label =>
-      props.space.labels?.find(l => l.id === label)
-    );
+    labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
 
     proposalsStore.reset(props.space.id, props.space.network);
     proposalsStore.fetch(
