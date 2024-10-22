@@ -56,29 +56,27 @@ const isEditable = computed(() => {
 
 <template>
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
-    <div v-bind="$attrs">
-      <UiButton
-        class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2"
-        :disabled="!isEditable"
-        @click="$emit('enterEditMode')"
+    <UiButton
+      class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2"
+      :disabled="!isEditable"
+      @click="$emit('enterEditMode')"
+    >
+      <div
+        v-if="proposal.privacy"
+        class="flex space-x-2 items-center grow truncate"
+        :class="{ 'text-skin-text': !isEditable }"
       >
-        <div
-          v-if="proposal.privacy"
-          class="flex space-x-2 items-center grow truncate"
-          :class="{ 'text-skin-text': !isEditable }"
-        >
-          <IH-lock-closed class="size-[16px] shrink-0" />
-          <span class="truncate">Encrypted choice</span>
-        </div>
-        <div
-          v-else
-          class="grow truncate"
-          :class="{ 'text-skin-text': !isEditable }"
-          v-text="getChoiceText(proposal.choices, currentVote.choice)"
-        />
-        <IH-pencil v-if="isEditable" class="shrink-0" />
-      </UiButton>
-    </div>
+        <IH-lock-closed class="size-[16px] shrink-0" />
+        <span class="truncate">Encrypted choice</span>
+      </div>
+      <div
+        v-else
+        class="grow truncate"
+        :class="{ 'text-skin-text': !isEditable }"
+        v-text="getChoiceText(proposal.choices, currentVote.choice)"
+      />
+      <IH-pencil v-if="isEditable" class="shrink-0" />
+    </UiButton>
   </slot>
   <slot
     v-else-if="
@@ -112,7 +110,7 @@ const isEditable = computed(() => {
   <slot v-else-if="isInvalidNetwork" name="wrong-safe-network">
     Safe's network should be same as space's network
   </slot>
-  <div v-else v-bind="$attrs">
+  <div v-else>
     <slot />
   </div>
 </template>
