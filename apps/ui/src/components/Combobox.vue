@@ -46,29 +46,7 @@ const inputValue = computed({
   }
 });
 
-const inputWidth = computed(() => {
-  if (!props.inline) return null;
-
-  const PADDING = 32;
-  const BORDER_WIDTH = 2;
-
-  const contents = query.value || getDisplayValue(model.value);
-
-  const temp = document.createElement('span');
-  temp.style.font = 'inherit';
-  temp.style.fontSize = 'inherit';
-  temp.style.padding = '0';
-  temp.style.position = 'absolute';
-  temp.style.visibility = 'hidden';
-  temp.style.whiteSpace = 'pre';
-  temp.textContent = contents;
-
-  document.body.appendChild(temp);
-  const width = temp.getBoundingClientRect().width;
-  document.body.removeChild(temp);
-
-  return Math.max(width + PADDING + BORDER_WIDTH, 90);
-});
+const content = computed(() => query.value || getDisplayValue(model.value));
 
 function handleFocus(event: FocusEvent, open: boolean) {
   if (!event.target || open) return;
@@ -111,16 +89,21 @@ watch(model, () => {
             relative: inline
           }"
         >
-          <ComboboxButton class="w-full" as="div">
+          <ComboboxButton
+            class="w-full"
+            as="div"
+            :data-value="content"
+            :class="{
+              sizer: inline
+            }"
+          >
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
               :class="{
                 '!rounded-b-none': !gap && open,
-                'h-[42px]': inline
+                'h-[42px] min-w-11': inline
               }"
-              :style="{
-                width: inputWidth ? `${inputWidth}px` : '100%'
-              }"
+              :size="'1'"
               autocomplete="off"
               :placeholder="definition.examples?.[0]"
               :display-value="item => getDisplayValue(item as T)"
@@ -186,3 +169,20 @@ watch(model, () => {
     </Combobox>
   </UiWrapperInput>
 </template>
+
+<style lang="scss" scoped>
+.sizer {
+  @apply inline-grid items-center;
+
+  input {
+    @apply col-start-1 row-start-1;
+  }
+
+  &::after {
+    content: attr(data-value);
+    @apply px-3 border-x col-start-1 row-start-1;
+    visibility: hidden;
+    white-space: pre-wrap;
+  }
+}
+</style>

@@ -157,8 +157,7 @@ watchEffect(() => setTitle('Explore'));
           type: 'string',
           title: 'Network',
           enum: networks.map(c => c.id),
-          options: networks,
-          examples: ['Select network']
+          options: networks
         }"
       />
       <UiSelectDropdown
