@@ -114,7 +114,10 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
 
 <template>
   <div>
-    <div class="flex justify-between p-4 gap-2">
+    <div
+      class="flex justify-between p-4 gap-2 gap-y-3 flex-row"
+      :class="{ 'flex-col-reverse sm:flex-row': space.labels?.length }"
+    >
       <div class="flex gap-2">
         <UiSelectDropdown
           v-model="state"
@@ -146,16 +149,19 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
             }
           ]"
         />
-
-        <div v-if="space.labels?.length" class="relative shrink-1">
+        <div v-if="space.labels?.length" class="sm:relative">
           <PickerLabel
             v-model="labels"
             :labels="space.labels"
             :button-props="{
-              class:
-                'flex items-center gap-2 relative rounded-full leading-[100%] border button min-w-[76px] h-[42px] top-1 text-skin-link bg-skin-bg'
+              class: [
+                'flex items-center gap-2 relative rounded-full leading-[100%] border button h-[42px] top-1 text-skin-link bg-skin-bg',
+                {
+                  'max-w-[230px]': labels.length >= MAX_SHOWN_LABELS_FILTER
+                }
+              ]
             }"
-            :panel-props="{ class: 'min-w-[290px] !mx-0 !mt-3' }"
+            :panel-props="{ class: 'min-w-[290px] !sm:mx-0 !mt-3' }"
           >
             <template #button>
               <div
@@ -163,8 +169,17 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               >
                 Labels
               </div>
-              <div v-if="labels.length" class="flex gap-1 px-2.5 items-center">
-                <ul v-if="labels.length" class="flex gap-1">
+              <div
+                v-if="labels.length"
+                class="flex mx-2.5 overflow-hidden items-center"
+              >
+                <ul
+                  v-if="labels.length"
+                  class="flex gap-1 mr-4"
+                  :class="{
+                    'mr-[50px]': labels.length >= MAX_SHOWN_LABELS_FILTER
+                  }"
+                >
                   <li
                     v-for="id in labels.slice(0, MAX_SHOWN_LABELS_FILTER)"
                     :key="id"
@@ -175,21 +190,26 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                     />
                   </li>
                 </ul>
+
                 <div
-                  v-if="labels.length > MAX_SHOWN_LABELS_FILTER"
-                  class="bg-gradient-to-l via-skin-bg from-skin-bg text-skin-link py-2 pl-4 -ml-6"
+                  class="flex gap-1 items-center absolute rounded-r-full right-2 top-0 bottom-0 bg-gradient-to-l via-skin-bg from-skin-bg"
+                  :class="{ 'pl-6': labels.length >= MAX_SHOWN_LABELS_FILTER }"
                 >
-                  +{{ labels.length - MAX_SHOWN_LABELS_FILTER }}
+                  <span
+                    v-if="labels.length >= MAX_SHOWN_LABELS_FILTER"
+                    class="text-skin-link text-sm"
+                    v-text="`(${labels.length})`"
+                  />
+                  <button
+                    v-if="labels.length"
+                    class="text-skin-text rounded-full hover:text-skin-link"
+                    title="Clear all labels filter"
+                    @click.stop="handleClearLabelsFilter"
+                    @keydown.enter="handleClearLabelsFilter"
+                  >
+                    <IH-x-circle size="16" />
+                  </button>
                 </div>
-                <button
-                  v-if="labels.length"
-                  class="text-skin-text rounded-full hover:text-skin-link"
-                  title="Clear all labels filter"
-                  @click.stop="handleClearLabelsFilter"
-                  @keydown.enter="handleClearLabelsFilter"
-                >
-                  <IH-x-circle size="16" />
-                </button>
               </div>
               <span v-else class="px-3 text-skin-link">Any</span>
             </template>
