@@ -24,17 +24,13 @@ watch(
     if (!spacesStore.spacesMap.has(spaceKey.value)) {
       spacesStore.fetchSpace(address, networkId);
     }
+
+    loadVotes(networkId, [address]);
   },
   {
     immediate: true
   }
 );
-
-watchEffect(() => {
-  if (!resolved.value || !networkId.value || !address.value) return;
-
-  loadVotes(networkId.value, [address.value]);
-});
 
 watchEffect(() => {
   if (!space.value || isWhiteLabel.value) {
