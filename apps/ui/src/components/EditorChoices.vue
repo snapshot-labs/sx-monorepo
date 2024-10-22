@@ -5,6 +5,7 @@ import { Draft } from '@/types';
 const proposal = defineModel<Draft>({ required: true });
 
 const props = defineProps<{
+  minimumBasicChoices: number;
   error?: string;
   definition: any;
 }>();
@@ -27,7 +28,12 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
   if (proposal.value.choices[index] === '') {
     event.preventDefault();
 
-    if (index !== 0) {
+    const canDelete =
+      proposal.value.type === 'basic'
+        ? proposal.value.choices.length > props.minimumBasicChoices
+        : true;
+
+    if (canDelete && index !== 0) {
       proposal.value.choices.splice(index, 1);
       nextTick(() => choices.value[index - 1].focus());
     }
