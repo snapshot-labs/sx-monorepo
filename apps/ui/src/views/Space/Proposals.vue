@@ -164,7 +164,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                 }
               ]
             }"
-            :panel-props="{ class: 'min-w-[290px] !sm:mx-0 !mt-3' }"
+            :panel-props="{ class: 'min-w-[290px] sm:ml-0 !mt-3' }"
           >
             <template #button>
               <div
