@@ -111,7 +111,7 @@ watch(model, () => {
             relative: inline
           }"
         >
-          <ComboboxButton class="w-full">
+          <ComboboxButton class="w-full" as="div">
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
               :class="{
