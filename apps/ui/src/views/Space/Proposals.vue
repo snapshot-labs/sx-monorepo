@@ -59,10 +59,13 @@ watch(
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
       ? (toState as NonNullable<ProposalsFilter['state']>)
       : 'any';
-    const normalizedLabels = toLabels || [];
-    labels.value = Array.isArray(normalizedLabels)
+    let normalizedLabels = toLabels || [];
+    normalizedLabels = Array.isArray(normalizedLabels)
       ? normalizedLabels
       : [normalizedLabels];
+    labels.value = normalizedLabels.filter(label =>
+      props.space.labels?.find(l => l.id === label)
+    );
 
     proposalsStore.reset(props.space.id, props.space.network);
     proposalsStore.fetch(
