@@ -538,8 +538,14 @@ export function getChoiceWeight(
 
 export function getChoiceText(availableChoices: string[], choice: Choice) {
   if (typeof choice === 'string') {
-    return ['for', 'against', 'abstain'].includes(choice)
-      ? choice.charAt(0).toUpperCase() + choice.slice(1)
+    const basicChoices = {
+      for: 0,
+      against: 1,
+      abstain: 2
+    };
+
+    return basicChoices[choice] !== undefined
+      ? availableChoices[basicChoices[choice]]
       : 'Invalid choice';
   }
 
