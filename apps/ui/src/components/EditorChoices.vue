@@ -43,6 +43,14 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
     }
   }
 }
+
+function shouldHaveDeleteButton(index: number) {
+  if (proposal.value.type === 'basic') {
+    return index > props.minimumBasicChoices - 1;
+  }
+
+  return proposal.value.choices.length > 1;
+}
 </script>
 
 <template>
@@ -104,7 +112,7 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
                 />
               </div>
               <UiButton
-                v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
+                v-if="shouldHaveDeleteButton(index)"
                 class="!border-0 !rounded-l-none !rounded-r-lg !bg-transparent !size-[40px] !px-0 !text-skin-text shrink-0"
                 @click="proposal.choices.splice(index, 1)"
               >
