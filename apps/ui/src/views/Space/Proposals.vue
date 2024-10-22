@@ -206,7 +206,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                     class="text-skin-text rounded-full hover:text-skin-link"
                     title="Clear all labels filter"
                     @click.stop="handleClearLabelsFilter"
-                    @keydown.enter="handleClearLabelsFilter"
+                    @keydown.enter.stop="handleClearLabelsFilter"
                   >
                     <IH-x-circle size="16" />
                   </button>
