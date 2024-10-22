@@ -149,9 +149,9 @@ watch(model, () => {
           <div class="max-h-[208px] overflow-y-auto">
             <div
               v-if="filteredOptions.length === 0 && query !== ''"
-              class="relative cursor-default select-none text-center py-2"
+              class="relative cursor-default select-none text-center py-2 px-3"
             >
-              No result for your search query
+              No results for your search
             </div>
 
             <ComboboxOption
