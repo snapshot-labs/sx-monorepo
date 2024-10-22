@@ -33,7 +33,7 @@ const handleVoteClick = (choice: Choice) => {
         class="flex-auto mr-4 w-0"
       />
       <div class="hidden md:block">
-        <ProposalVote :proposal="proposal">
+        <ProposalVote :proposal="proposal" class="py-2">
           <template #wrong-safe-network><div /></template>
           <template #unsupported><div /></template>
           <template #waiting><div /></template>

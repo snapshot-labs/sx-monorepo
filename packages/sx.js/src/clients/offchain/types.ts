@@ -162,6 +162,7 @@ export type Vote = {
   privacy?: Privacy;
   timestamp?: number;
   reason?: string;
+  app: string;
 };
 
 export type Propose = {

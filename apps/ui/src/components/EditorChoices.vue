@@ -43,12 +43,12 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
     }"
   >
     <h4 class="eyebrow mb-2.5">Choices</h4>
-    <div class="flex flex-col">
+    <div class="flex flex-col space-y-3">
       <Draggable
         v-model="proposal.choices"
         v-bind="{ animation: 200 }"
         handle=".handle"
-        class="flex flex-col gap-2 mb-3"
+        class="flex flex-col gap-2"
         item-key="index"
       >
         <template #item="{ index }">
