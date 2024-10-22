@@ -43,8 +43,11 @@ export default class Connector extends LockConnector {
 
   async logout() {
     const argentx = await get();
-    await argentx.disconnect({
-      clearLastWallet: true
-    });
+
+    try {
+      await argentx.disconnect({
+        clearLastWallet: true
+      });
+    } catch (e) {}
   }
 }
