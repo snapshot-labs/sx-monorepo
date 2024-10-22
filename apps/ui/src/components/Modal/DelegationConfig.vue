@@ -38,13 +38,17 @@ const definition = computed(() => {
     additionalProperties: true,
     required: ['name', 'apiType', 'apiUrl'],
     properties: {
-      name: {
-        type: 'string',
-        title: 'Name',
-        minLength: 1,
-        maxLength: 32,
-        examples: ['Delegation API name']
-      },
+      ...(!offchainNetworks.includes(props.networkId)
+        ? {
+            name: {
+              type: 'string',
+              title: 'Name',
+              minLength: 1,
+              maxLength: 32,
+              examples: ['Delegation API name']
+            }
+          }
+        : {}),
       apiType: {
         type: ['string', 'null'],
         enum: [null, 'governor-subgraph'],
