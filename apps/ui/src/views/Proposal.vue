@@ -330,7 +330,11 @@ watchEffect(() => {
               <IH-tag />
               Labels
             </h4>
-            <ProposalLabels :labels="proposal.labels" :space="space" />
+            <ProposalLabels
+              :labels="proposal.labels"
+              :space="space"
+              with-link
+            />
           </div>
           <div>
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
