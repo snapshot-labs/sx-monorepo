@@ -169,7 +169,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               </div>
               <div
                 v-if="labels.length"
-                class="flex mx-2.5 overflow-hidden items-center"
+                class="flex gap-1 mx-2.5 overflow-hidden items-center"
               >
                 <ul
                   v-if="labels.length"
@@ -189,14 +189,14 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                   </li>
                 </ul>
                 <div
-                  class="flex gap-1 pl-2 items-center absolute rounded-r-full right-2 top-[1px] bottom-[1px] bg-gradient-to-l via-skin-bg via-60% from-skin-bg"
-                  :class="{
-                    'pl-3 !via-80%': labels.length >= MAX_SHOWN_LABELS_FILTER
-                  }"
+                  class="flex items-center absolute rounded-r-full right-0 pr-2 h-[23px] bg-skin-bg"
                 >
+                  <div
+                    class="block w-2 -ml-2 h-full bg-gradient-to-l from-skin-bg"
+                  />
                   <span
                     v-if="labels.length >= MAX_SHOWN_LABELS_FILTER"
-                    class="text-skin-link text-sm"
+                    class="text-skin-link text-sm mx-1"
                     v-text="`(${labels.length})`"
                   />
                   <button
