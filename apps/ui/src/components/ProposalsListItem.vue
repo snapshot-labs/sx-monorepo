@@ -55,6 +55,7 @@ const handleVoteClick = (choice: Choice) => {
           </template>
           <ProposalVoteBasic
             v-if="proposal.type === 'basic'"
+            :choices="proposal.choices"
             :size="40"
             @vote="handleVoteClick"
           />

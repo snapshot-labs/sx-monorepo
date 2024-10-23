@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
+import { BASIC_CHOICES } from '@/helpers/constants';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
 
 const props = defineProps<{
+  minimumBasicChoices: number;
   error?: string;
   definition: any;
 }>();
@@ -18,6 +20,10 @@ function handleAddChoice() {
 }
 
 function handlePressEnter(index: number) {
+  if (proposal.value.type === 'basic' && proposal.value.choices.length === 3) {
+    return;
+  }
+
   if (!choices.value[index + 1]) return handleAddChoice();
 
   nextTick(() => choices.value[index + 1].focus());
@@ -27,11 +33,32 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
   if (proposal.value.choices[index] === '') {
     event.preventDefault();
 
-    if (index !== 0) {
+    const canDelete =
+      proposal.value.type === 'basic'
+        ? proposal.value.choices.length > props.minimumBasicChoices
+        : true;
+
+    if (canDelete && index !== 0) {
       proposal.value.choices.splice(index, 1);
       nextTick(() => choices.value[index - 1].focus());
     }
   }
+}
+
+function getPlaceholderText(index: number) {
+  if (proposal.value.type === 'basic' && index < 3) {
+    return BASIC_CHOICES[index];
+  }
+
+  return `Choice ${index + 1}`;
+}
+
+function shouldHaveDeleteButton(index: number) {
+  if (proposal.value.type === 'basic') {
+    return index > props.minimumBasicChoices - 1;
+  }
+
+  return proposal.value.choices.length > 1;
 }
 </script>
 
@@ -62,6 +89,25 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
               >
                 <IC-drag />
               </div>
+              <div v-else class="mt-1.5">
+                <div
+                  class="shrink-0 rounded-full choice-bg inline-block size-[18px]"
+                  :class="`_${index + 1}`"
+                >
+                  <IH-check
+                    v-if="index === 0"
+                    class="text-white size-[14px] mt-0.5 ml-0.5"
+                  />
+                  <IH-x
+                    v-else-if="index === 1"
+                    class="text-white size-[14px] mt-0.5 ml-0.5"
+                  />
+                  <IH-minus-sm
+                    v-else-if="index === 2"
+                    class="text-white size-[14px] mt-0.5 ml-0.5"
+                  />
+                </div>
+              </div>
               <div class="grow">
                 <input
                   :ref="el => (choices[index] = el)"
@@ -69,17 +115,13 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
                   type="text"
                   :maxLength="definition.items[0].maxLength"
                   class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
-                  :class="{
-                    '!cursor-not-allowed ml-1': proposal.type === 'basic'
-                  }"
-                  :placeholder="`Choice ${index + 1}`"
-                  :disabled="proposal.type === 'basic'"
+                  :placeholder="getPlaceholderText(index)"
                   @keyup.enter="handlePressEnter(index)"
                   @keydown.delete="e => handlePressDelete(e, index)"
                 />
               </div>
               <UiButton
-                v-if="proposal.choices.length > 1 && proposal.type !== 'basic'"
+                v-if="shouldHaveDeleteButton(index)"
                 class="!border-0 !rounded-l-none !rounded-r-lg !bg-transparent !size-[40px] !px-0 !text-skin-text shrink-0"
                 @click="proposal.choices.splice(index, 1)"
               >
