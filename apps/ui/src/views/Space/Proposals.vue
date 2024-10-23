@@ -203,7 +203,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                   <button
                     v-if="labels.length"
                     class="text-skin-text rounded-full hover:text-skin-link"
-                    title="Clear all labels filter"
+                    title="Clear all labels"
                     @click.stop="handleClearLabelsFilter(close)"
                     @keydown.enter.stop="handleClearLabelsFilter(close)"
                   >
