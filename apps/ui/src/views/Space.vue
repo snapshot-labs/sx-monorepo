@@ -20,13 +20,15 @@ const space = computed(() => {
 watch(
   [resolved, networkId, address, () => web3.value.account],
   async ([resolved, networkId, address, account]) => {
-    if (!resolved || !networkId || !address || !account) return;
+    if (!resolved || !networkId || !address) return;
 
     if (!spacesStore.spacesMap.has(spaceKey.value)) {
       spacesStore.fetchSpace(address, networkId);
     }
 
-    loadVotes(networkId, [address]);
+    if (account) {
+      loadVotes(networkId, [address]);
+    }
   },
   {
     immediate: true
