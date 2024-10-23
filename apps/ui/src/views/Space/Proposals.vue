@@ -192,8 +192,10 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                   </li>
                 </ul>
                 <div
-                  class="flex gap-1 items-center absolute rounded-r-full right-2 top-[1px] bottom-[1px] bg-gradient-to-l via-skin-bg from-skin-bg"
-                  :class="{ 'pl-6': labels.length >= MAX_SHOWN_LABELS_FILTER }"
+                  class="flex gap-1 pl-2 items-center absolute rounded-r-full right-2 top-[1px] bottom-[1px] bg-gradient-to-l via-skin-bg via-60% from-skin-bg"
+                  :class="{
+                    'pl-3 !via-80%': labels.length >= MAX_SHOWN_LABELS_FILTER
+                  }"
                 >
                   <span
                     v-if="labels.length >= MAX_SHOWN_LABELS_FILTER"
