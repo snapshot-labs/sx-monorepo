@@ -53,9 +53,12 @@ const handleVoteClick = (choice: Choice) => {
             />
             <div v-else />
           </template>
-          <div v-if="proposal.type === 'basic'" class="py-2">
-            <ProposalVoteBasic :size="40" @vote="handleVoteClick" />
-          </div>
+          <ProposalVoteBasic
+            v-if="proposal.type === 'basic'"
+            :size="40"
+            class="py-2"
+            @vote="handleVoteClick"
+          />
         </ProposalVote>
       </div>
     </div>
