@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
+import { BASIC_CHOICES } from '@/helpers/constants';
 import { Draft } from '@/types';
 
 const proposal = defineModel<Draft>({ required: true });
@@ -42,6 +43,14 @@ function handlePressDelete(event: KeyboardEvent, index: number) {
       nextTick(() => choices.value[index - 1].focus());
     }
   }
+}
+
+function getPlaceholderText(index: number) {
+  if (proposal.value.type === 'basic' && index < 3) {
+    return BASIC_CHOICES[index];
+  }
+
+  return `Choice ${index + 1}`;
 }
 
 function shouldHaveDeleteButton(index: number) {
@@ -106,7 +115,7 @@ function shouldHaveDeleteButton(index: number) {
                   type="text"
                   :maxLength="definition.items[0].maxLength"
                   class="w-full h-[40px] py-[10px] bg-transparent text-skin-heading"
-                  :placeholder="`Choice ${index + 1}`"
+                  :placeholder="getPlaceholderText(index)"
                   @keyup.enter="handlePressEnter(index)"
                   @keydown.delete="e => handlePressDelete(e, index)"
                 />

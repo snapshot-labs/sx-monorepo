@@ -1,5 +1,5 @@
 import { BASIC_CHOICES } from '@/helpers/constants';
-import { lsGet, lsSet, omit } from '@/helpers/utils';
+import { clone, lsGet, lsSet, omit } from '@/helpers/utils';
 import { Draft, Drafts, VoteType } from '@/types';
 
 const PREFERRED_VOTE_TYPE = 'basic';
@@ -117,7 +117,7 @@ export function useEditor() {
     await setSpacesVoteType([spaceId]);
 
     const type = payload?.type || spaceVoteType.get(spaceId)!;
-    const choices = type === 'basic' ? BASIC_CHOICES : Array(2).fill('');
+    const choices = type === 'basic' ? clone(BASIC_CHOICES) : Array(2).fill('');
 
     const id = draftKey ?? generateId();
     const key = `${spaceId}:${id}`;
