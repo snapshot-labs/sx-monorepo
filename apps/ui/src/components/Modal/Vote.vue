@@ -10,7 +10,7 @@ const REASON_DEFINITION = {
   type: 'string',
   format: 'long',
   examples: ['Share you reason (optional)'],
-  maxLength: 1000
+  maxLength: 5000
 };
 
 const props = defineProps<{
