@@ -413,14 +413,14 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indicies,
+          strategiesIndicies: proposal.strategies_indices,
           connectorType,
           isContract
         });
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
-          const metadataIndex = proposal.strategies_indicies.indexOf(
+          const metadataIndex = proposal.strategies_indices.indexOf(
             strategy.index
           );
 
@@ -695,7 +695,7 @@ export function createActions(
               : '0x'
           })),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
-            index => space.strategies_indicies[index]
+            index => space.strategies_indices[index]
           ),
           votingStrategyMetadataUrisToAdd: metadataUris,
           proposalValidationStrategy: {
