@@ -156,10 +156,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
             :labels="space.labels"
             :button-props="{
               class: [
-                'flex items-center gap-2 relative rounded-full leading-[100%] border button h-[42px] top-1 text-skin-link bg-skin-bg',
-                {
-                  'max-w-[230px]': labels.length >= MAX_SHOWN_LABELS_FILTER
-                }
+                'flex items-center gap-2 relative rounded-full leading-[100%] max-w-[230px] border button h-[42px] top-1 text-skin-link bg-skin-bg'
               ]
             }"
             :panel-props="{ class: 'sm:min-w-[290px] sm:ml-0 !mt-3' }"
