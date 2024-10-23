@@ -49,7 +49,7 @@ export default class Connector extends LockConnector {
         clearLastWallet: true
       });
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 }
