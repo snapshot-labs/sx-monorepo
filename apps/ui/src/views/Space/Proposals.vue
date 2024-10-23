@@ -54,7 +54,7 @@ function handleFetchVotingPower() {
 watch(
   [
     () => route.query.state as string,
-    () => route.query['labels[]'] as string[] | string
+    () => route.query.labels as string[] | string
   ],
   ([toState, toLabels]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
@@ -88,7 +88,7 @@ watch(
       const query: LocationQueryRaw = {
         ...route.query,
         state: toState === 'any' ? undefined : toState,
-        'labels[]': !toLabels?.length ? undefined : toLabels
+        labels: !toLabels?.length ? undefined : toLabels
       };
 
       router.push({ query });
