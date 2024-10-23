@@ -1,59 +1,46 @@
 <script setup lang="ts">
-import { SpaceMetadataLabel } from '@/types';
+import { Space } from '@/types';
 
 const props = withDefaults(
   defineProps<{
-    spaceLabels: SpaceMetadataLabel[];
-    proposalLabels?: string[];
-    showEdit?: boolean;
+    space: Space;
+    labels: string[];
     inline?: boolean;
   }>(),
   {
-    showEdit: false,
     inline: false
   }
 );
 
-const labels = defineModel<string[]>({
-  default: []
-});
-
 const validLabels = computed(() => {
-  return labels.value
-    .map(label => props.spaceLabels.find(l => l.id === label))
+  if (!props.space.labels?.length || !props.labels?.length) return [];
+
+  return props.labels
+    .map(label => props.space.labels?.find(l => l.id === label))
     .filter(l => l !== undefined);
 });
-
-watch(
-  () => props.proposalLabels,
-  () => {
-    if (props.proposalLabels) {
-      labels.value = props.proposalLabels;
-    }
-  },
-  { immediate: true }
-);
 </script>
 <template>
-  <template v-if="inline">
-    <div v-for="label in validLabels" :key="label.id" class="inline-flex mr-2">
-      <UiProposalLabel
-        :label="label.name"
-        :color="label.color"
-        class="text-sm mb-1 max-w-[160px]"
-      />
-    </div>
-  </template>
-  <div v-else>
-    <div class="flex justify-between mb-3">
-      <h4 class="eyebrow" v-text="'Labels'" />
-      <PickerLabel v-if="showEdit" v-model="labels" :labels="spaceLabels" />
-    </div>
-    <div v-if="validLabels.length" class="flex flex-wrap">
-      <div v-for="label in validLabels" :key="label.id" class="mr-2 mb-2">
-        <UiProposalLabel :label="label.name" :color="label.color" />
-      </div>
-    </div>
-    <div v-else class="mt-1">No labels yet</div>
+  <div v-if="inline" class="inline space-y-1">
+    <UiProposalLabel
+      v-for="label in validLabels"
+      :key="label.id"
+      :label="label.name"
+      :color="label.color"
+      v-bind="$attrs"
+      class="inline-flex !max-w-[160px] mr-1 last:mr-0"
+    />
   </div>
+  <ul
+    v-else-if="validLabels.length"
+    class="flex flex-wrap gap-1"
+    v-bind="$attrs"
+  >
+    <li v-for="label in validLabels" :key="label.id">
+      <UiTooltip :title="label.description" class="inline">
+        <UiProposalLabel :label="label.name" :color="label.color" />
+      </UiTooltip>
+    </li>
+  </ul>
+  <div v-else>No labels yet</div>
 </template>

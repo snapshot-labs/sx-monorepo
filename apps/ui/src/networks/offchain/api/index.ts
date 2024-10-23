@@ -59,6 +59,13 @@ import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
+const TREASURY_NETWORKS = new Map(
+  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
+    chainId,
+    networkId as keyof typeof CHAIN_IDS
+  ])
+);
+
 const DELEGATION_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
@@ -91,7 +98,7 @@ function formatSpace(
 
     return {
       name: treasury.name,
-      network: null,
+      network: TREASURY_NETWORKS.get(chainId) ?? null,
       address: treasury.address,
       chainId
     };
@@ -188,7 +195,7 @@ function formatSpace(
     executors_destinations: [],
     executors_strategies: [],
     strategies: space.strategies.map(strategy => strategy.name),
-    strategies_indicies: [],
+    strategies_indices: [],
     strategies_params: space.strategies.map(strategy => strategy),
     strategies_parsed_metadata: [],
     validation_strategy: '',
@@ -311,7 +318,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     execution_destination: '',
     timelock_veto_guardian: null,
     strategies: proposal.strategies.map(strategy => strategy.name),
-    strategies_indicies: [],
+    strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
     tx: '',
     execution_tx: null,

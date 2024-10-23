@@ -58,9 +58,12 @@ debouncedWatch(
   <div
     v-if="preview?.meta || (showDefault && !previewLoading)"
     class="flex items-center px-4 py-3 border rounded-lg"
-    :class="{ 'gap-2': showDefault, '!gap-4': preview?.meta?.title }"
+    :class="{
+      'gap-2': showDefault,
+      '!gap-4': preview?.meta?.title || previewIconResolved
+    }"
   >
-    <template v-if="preview?.meta?.title">
+    <template v-if="preview && (preview?.meta?.title || previewIconResolved)">
       <img
         v-if="previewIconResolved"
         :src="preview.links.icon[0].href"
@@ -70,7 +73,10 @@ debouncedWatch(
         :alt="preview.meta.title"
       />
       <div class="flex flex-col truncate">
-        <div class="text-skin-link truncate" v-text="preview.meta.title" />
+        <div
+          class="text-skin-link truncate"
+          v-text="preview.meta.title || props.url"
+        />
         <div
           v-if="preview.meta.description"
           class="text-[17px] text-skin-text truncate"

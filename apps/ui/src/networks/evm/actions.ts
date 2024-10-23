@@ -45,6 +45,7 @@ import {
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
+import { EDITOR_APP_NAME } from '../common/constants';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
@@ -209,6 +210,7 @@ export function createActions(
       type: VoteType,
       choices: string[],
       labels: string[],
+      app: string,
       executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
@@ -219,6 +221,7 @@ export function createActions(
         body,
         discussion,
         type,
+        app: app || EDITOR_APP_NAME,
         choices: choices.filter(c => !!c),
         labels,
         execution: executionInfo?.transactions ?? []
@@ -412,14 +415,14 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indicies,
+          strategiesIndicies: proposal.strategies_indices,
           connectorType,
           isContract
         });
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
-          const metadataIndex = proposal.strategies_indicies.indexOf(
+          const metadataIndex = proposal.strategies_indices.indexOf(
             strategy.index
           );
 
@@ -694,7 +697,7 @@ export function createActions(
               : '0x'
           })),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
-            index => space.strategies_indicies[index]
+            index => space.strategies_indices[index]
           ),
           votingStrategyMetadataUrisToAdd: metadataUris,
           proposalValidationStrategy: {

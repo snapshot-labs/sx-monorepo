@@ -1,4 +1,4 @@
-import { Bytes, dataSource, json } from '@graphprotocol/graph-ts'
+import { Bytes, dataSource, json, JSONValueKind } from '@graphprotocol/graph-ts'
 import { JSON } from 'assemblyscript-json'
 import {
   SpaceMetadata,
@@ -25,12 +25,14 @@ export function handleSpaceMetadata(content: Bytes): void {
   spaceMetadata.external_url = externalUrl ? externalUrl.toString() : ''
   spaceMetadata.wallet = ''
   spaceMetadata.treasuries = []
+  spaceMetadata.labels = []
   spaceMetadata.delegations = []
 
   if (properties) {
     const propertiesObj = properties.toObject()
 
     let treasuries = propertiesObj.get('treasuries')
+    let labels = propertiesObj.get('labels')
     let delegations = propertiesObj.get('delegations')
     let cover = propertiesObj.get('cover')
     let github = propertiesObj.get('github')
@@ -41,16 +43,21 @@ export function handleSpaceMetadata(content: Bytes): void {
     let executionStrategiesTypes = propertiesObj.get('execution_strategies_types')
     let executionDestinations = propertiesObj.get('execution_destinations')
 
-    if (treasuries) {
-      let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
-      let jsonPropertiesObj = jsonObj.getObj('properties')
-      if (jsonPropertiesObj) {
-        let jsonTreasuriesArr = jsonPropertiesObj.getArr('treasuries')
-        if (jsonTreasuriesArr) {
-          spaceMetadata.treasuries = jsonTreasuriesArr._arr.map<string>((treasury) =>
-            treasury.toString()
-          )
-        }
+    let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
+    let jsonPropertiesObj = jsonObj.getObj('properties')
+    if (jsonPropertiesObj && treasuries) {
+      let jsonTreasuriesArr = jsonPropertiesObj.getArr('treasuries')
+      if (jsonTreasuriesArr) {
+        spaceMetadata.treasuries = jsonTreasuriesArr._arr.map<string>((treasury) =>
+          treasury.toString()
+        )
+      }
+    }
+
+    if (jsonPropertiesObj && labels) {
+      let jsonLabelsArr = jsonPropertiesObj.getArr('labels')
+      if (jsonLabelsArr) {
+        spaceMetadata.labels = jsonLabelsArr._arr.map<string>((label) => label.toString())
       }
     }
 
@@ -130,12 +137,24 @@ export function handleProposalMetadata(content: Bytes): void {
   proposalMetadata.body = body ? body.toString() : ''
   proposalMetadata.discussion = discussion ? discussion.toString() : ''
   proposalMetadata.execution = ''
+  proposalMetadata.choices = ['For', 'Against', 'Abstain']
+  proposalMetadata.labels = []
 
   // Using different parser for execution to overcome limitations in graph-ts
   let jsonObj: JSON.Obj = <JSON.Obj>JSON.parse(content)
   let execution = jsonObj.getArr('execution')
   if (execution) {
     proposalMetadata.execution = execution.toString()
+  }
+
+  let labels = jsonObj.getArr('labels')
+  if (labels) {
+    proposalMetadata.labels = labels._arr.map<string>((label) => label.toString())
+  }
+
+  let choices = jsonObj.getArr('choices')
+  if (choices) {
+    proposalMetadata.choices = choices._arr.map<string>((label) => label.toString())
   }
 
   proposalMetadata.save()
@@ -187,7 +206,7 @@ export function handleVotingPowerValidationStrategyMetadata(content: Bytes): voi
 
   updateStrategiesParsedMetadata(
     spaceId,
-    strategies_metadata.toArray().map<string>((metadata) => metadata.toString()),
+    strategies_metadata.toArray().filter(metadata => metadata.kind === JSONValueKind.STRING).map<string>((metadata) => metadata.toString()),
     0,
     blockNumber,
     'VotingPowerValidationStrategiesParsedMetadata'

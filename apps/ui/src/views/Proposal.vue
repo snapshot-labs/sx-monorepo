@@ -201,7 +201,7 @@ watchEffect(() => {
               ['pending', 'active'].includes(proposal.state)
             "
           >
-            <h4 class="mb-2 eyebrow flex items-center space-x-2">
+            <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
               <template v-if="editMode">
                 <IH-cursor-click />
                 <span>Edit your vote</span>
@@ -215,93 +215,98 @@ watchEffect(() => {
                 <span>Cast your vote</span>
               </template>
             </h4>
-            <IndicatorVotingPower
-              v-if="web3.account && (!currentVote || editMode)"
-              v-slot="votingPowerProps"
-              :network-id="proposal.network"
-              :voting-power="votingPower"
-              class="mb-2 flex items-center"
-              @fetch-voting-power="handleFetchVotingPower"
-            >
-              <div
-                v-if="
-                  votingPower?.error &&
-                  votingPower.error.details === 'NOT_READY_YET' &&
-                  ['evmSlotValue', 'ozVotesStorageProof'].includes(
-                    votingPower.error.source
-                  )
-                "
+            <div class="space-y-2">
+              <IndicatorVotingPower
+                v-if="web3.account && (!currentVote || editMode)"
+                v-slot="votingPowerProps"
+                :network-id="proposal.network"
+                :voting-power="votingPower"
+                class="mb-2 flex items-center"
+                @fetch-voting-power="handleFetchVotingPower"
               >
-                <span class="inline-flex align-top h-[27px] items-center">
-                  <IH-exclamation-circle class="mr-1" />
-                </span>
-                Please allow few minutes for the voting power to be collected
-                from Ethereum.
-              </div>
-              <template v-else>
-                <span class="mr-1.5">Voting power:</span>
-                <button type="button" @click="votingPowerProps.onClick">
-                  <UiLoading
-                    v-if="!votingPower || votingPower.status === 'loading'"
-                  />
-                  <IH-exclamation
-                    v-else-if="votingPower.status === 'error'"
-                    class="inline-block text-rose-500"
-                  />
-                  <span
-                    v-else
-                    class="text-skin-link"
-                    v-text="getFormattedVotingPower(votingPower)"
-                  />
-                </button>
-                <a
+                <div
                   v-if="
-                    votingPower?.status === 'success' &&
-                    votingPower.totalVotingPower === BigInt(0)
+                    votingPower?.error &&
+                    votingPower.error.details === 'NOT_READY_YET' &&
+                    ['evmSlotValue', 'ozVotesStorageProof'].includes(
+                      votingPower.error.source
+                    )
                   "
-                  href="https://help.snapshot.box/en/articles/9566904-why-do-i-have-0-voting-power"
-                  target="_blank"
-                  class="ml-1.5"
                 >
-                  <IH-question-mark-circle />
-                </a>
-              </template>
-            </IndicatorVotingPower>
-            <ProposalVote
-              v-if="proposal"
-              :proposal="proposal"
-              :edit-mode="editMode"
-              @enter-edit-mode="editMode = true"
-            >
-              <ProposalVoteBasic
-                v-if="proposal.type === 'basic'"
-                @vote="handleVoteClick"
-              />
-              <ProposalVoteSingleChoice
-                v-else-if="proposal.type === 'single-choice'"
+                  <span class="inline-flex align-top h-[27px] items-center">
+                    <IH-exclamation-circle class="mr-1" />
+                  </span>
+                  Please allow few minutes for the voting power to be collected
+                  from Ethereum.
+                </div>
+                <div v-else class="flex gap-1.5 items-center">
+                  <span class="shrink-0">Voting power:</span>
+                  <button
+                    type="button"
+                    class="truncate"
+                    @click="votingPowerProps.onClick"
+                  >
+                    <UiLoading
+                      v-if="!votingPower || votingPower.status === 'loading'"
+                    />
+                    <IH-exclamation
+                      v-else-if="votingPower.status === 'error'"
+                      class="inline-block text-rose-500"
+                    />
+                    <span
+                      v-else
+                      class="text-skin-link"
+                      v-text="getFormattedVotingPower(votingPower)"
+                    />
+                  </button>
+                  <a
+                    v-if="
+                      votingPower?.status === 'success' &&
+                      votingPower.totalVotingPower === BigInt(0)
+                    "
+                    href="https://help.snapshot.box/en/articles/9566904-why-do-i-have-0-voting-power"
+                    target="_blank"
+                  >
+                    <IH-question-mark-circle />
+                  </a>
+                </div>
+              </IndicatorVotingPower>
+              <ProposalVote
+                v-if="proposal"
                 :proposal="proposal"
-                :default-choice="currentVote?.choice"
-                @vote="handleVoteClick"
-              />
-              <ProposalVoteApproval
-                v-else-if="proposal.type === 'approval'"
-                :proposal="proposal"
-                :default-choice="currentVote?.choice"
-                @vote="handleVoteClick"
-              />
-              <ProposalVoteRankedChoice
-                v-else-if="proposal.type === 'ranked-choice'"
-                :proposal="proposal"
-                :default-choice="currentVote?.choice"
-                @vote="handleVoteClick"
-              />
-              <ProposalVoteWeighted
-                v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
-                :proposal="proposal"
-                :default-choice="currentVote?.choice"
-                @vote="handleVoteClick"
-              />
-            </ProposalVote>
+                :edit-mode="editMode"
+                @enter-edit-mode="editMode = true"
+              >
+                <ProposalVoteBasic
+                  v-if="proposal.type === 'basic'"
+                  @vote="handleVoteClick"
+                />
+                <ProposalVoteSingleChoice
+                  v-else-if="proposal.type === 'single-choice'"
+                  :proposal="proposal"
+                  :default-choice="currentVote?.choice"
+                  @vote="handleVoteClick"
+                />
+                <ProposalVoteApproval
+                  v-else-if="proposal.type === 'approval'"
+                  :proposal="proposal"
+                  :default-choice="currentVote?.choice"
+                  @vote="handleVoteClick"
+                />
+                <ProposalVoteRankedChoice
+                  v-else-if="proposal.type === 'ranked-choice'"
+                  :proposal="proposal"
+                  :default-choice="currentVote?.choice"
+                  @vote="handleVoteClick"
+                />
+                <ProposalVoteWeighted
+                  v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
+                  :proposal="proposal"
+                  :default-choice="currentVote?.choice"
+                  @vote="handleVoteClick"
+                />
+              </ProposalVote>
+            </div>
           </div>
           <div
             v-if="
@@ -320,11 +325,13 @@ watchEffect(() => {
               :decimals="votingPowerDecimals"
             />
           </div>
-          <ProposalLabels
-            v-if="space.labels?.length && proposal.labels?.length"
-            :proposal-labels="proposal.labels"
-            :space-labels="space.labels"
-          />
+          <div v-if="space.labels?.length && proposal.labels?.length">
+            <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <IH-tag />
+              Labels
+            </h4>
+            <ProposalLabels :labels="proposal.labels" :space="space" />
+          </div>
           <div>
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
               <IH-clock />

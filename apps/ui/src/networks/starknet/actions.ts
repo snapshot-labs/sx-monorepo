@@ -51,6 +51,7 @@ import {
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
+import { EDITOR_APP_NAME } from '../common/constants';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
@@ -224,6 +225,7 @@ export function createActions(
       type: VoteType,
       choices: string[],
       labels: string[],
+      app: string,
       executions: ExecutionInfo[] | null
     ) => {
       const executionInfo = executions?.[0];
@@ -232,6 +234,7 @@ export function createActions(
         body,
         discussion,
         type,
+        app: app || EDITOR_APP_NAME,
         choices: choices.filter(c => !!c),
         labels,
         execution: executionInfo?.transactions ?? []
@@ -431,7 +434,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indicies,
+          strategiesIndicies: proposal.strategies_indices,
           connectorType,
           isContract
         });
@@ -444,7 +447,7 @@ export function createActions(
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
-          const metadataIndex = proposal.strategies_indicies.indexOf(
+          const metadataIndex = proposal.strategies_indices.indexOf(
             strategy.index
           );
 
@@ -514,7 +517,7 @@ export function createActions(
       if (!proposal.execution_destination)
         throw new Error('Execution destination is missing');
 
-      const activeVotingStrategies = proposal.strategies_indicies.reduce(
+      const activeVotingStrategies = proposal.strategies_indices.reduce(
         (acc, index) => {
           return acc | (1 << index);
         },
@@ -658,7 +661,7 @@ export function createActions(
               : []
           })),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
-            index => space.strategies_indicies[index]
+            index => space.strategies_indices[index]
           ),
           votingStrategyMetadataUrisToAdd: metadataUris,
           proposalValidationStrategy: {

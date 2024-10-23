@@ -138,6 +138,7 @@ export type ReadOnlyNetworkActions = {
     type: VoteType,
     choices: string[],
     labels: string[],
+    app: string,
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
@@ -161,7 +162,8 @@ export type ReadOnlyNetworkActions = {
     account: string,
     proposal: Proposal,
     choice: Choice,
-    reason: string
+    reason: string,
+    app: string
   ): Promise<any>;
   followSpace(
     web3: Web3Provider | Wallet,

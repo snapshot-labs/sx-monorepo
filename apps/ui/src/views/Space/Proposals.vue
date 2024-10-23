@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
 import { Space } from '@/types';
@@ -12,6 +13,8 @@ const {
   reset: resetVotingPower
 } = useVotingPower();
 const { web3 } = useWeb3();
+const router = useRouter();
+const route = useRoute();
 const proposalsStore = useProposalsStore();
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
@@ -35,11 +38,27 @@ function handleFetchVotingPower() {
 }
 
 watch(
+  [() => route.query.state as string],
+  ([toState]) => {
+    state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
+      ? (toState as NonNullable<ProposalsFilter['state']>)
+      : 'any';
+    proposalsStore.reset(props.space.id, props.space.network);
+    proposalsStore.fetch(props.space.id, props.space.network, state.value);
+  },
+  { immediate: true }
+);
+
+watch(
   [props.space, state],
   ([toSpace, toState], [fromSpace, fromState]) => {
     if (toSpace.id !== fromSpace?.id || toState !== fromState) {
-      proposalsStore.reset(toSpace.id, toSpace.network);
-      proposalsStore.fetch(toSpace.id, toSpace.network, toState);
+      const query: LocationQueryRaw = {
+        ...route.query,
+        state: toState === 'any' ? undefined : toState
+      };
+
+      router.push({ query });
     }
   },
   { immediate: true }
@@ -64,8 +83,8 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
 
 <template>
   <div>
-    <div class="flex justify-between">
-      <div class="flex flex-row p-4 space-x-2">
+    <div class="flex justify-between p-4 gap-2">
+      <div class="flex gap-2">
         <UiSelectDropdown
           v-model="state"
           title="Status"
@@ -97,7 +116,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
           ]"
         />
       </div>
-      <div class="flex flex-row p-4 space-x-2">
+      <div class="flex gap-2 truncate">
         <IndicatorVotingPower
           :network-id="space.network"
           :voting-power="votingPower"
