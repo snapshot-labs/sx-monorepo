@@ -439,6 +439,7 @@ export const handlePropose: starknet.Writer = async ({
     event.proposal.execution_strategy
   );
   proposal.execution_strategy_type = 'none';
+  proposal.type = 'basic';
   proposal.scores_1 = '0';
   proposal.scores_2 = '0';
   proposal.scores_3 = '0';

@@ -145,6 +145,7 @@ export async function handleProposalMetadata(metadataUri: string) {
   if (exists) return;
 
   const proposalMetadataItem = new ProposalMetadataItem(dropIpfs(metadataUri));
+  proposalMetadataItem.choices = ['For', 'Against', 'Abstain'];
   proposalMetadataItem.labels = [];
 
   const metadata: any = await getJSON(metadataUri);
@@ -159,6 +160,13 @@ export async function handleProposalMetadata(metadataUri: string) {
     metadata.labels.every((label: string) => typeof label === 'string')
   ) {
     proposalMetadataItem.labels = metadata.labels;
+  }
+  if (
+    Array.isArray(metadata.choices) &&
+    metadata.choices.length === 3 &&
+    metadata.choices.every((choice: string) => typeof choice === 'string')
+  ) {
+    proposalMetadataItem.choices = metadata.choices;
   }
 
   await proposalMetadataItem.save();

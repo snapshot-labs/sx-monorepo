@@ -122,6 +122,7 @@ type Proposal {
   strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
+  type: String!
   scores_1: BigDecimalVP!
   scores_2: BigDecimalVP!
   scores_3: BigDecimalVP!
@@ -146,6 +147,7 @@ type ProposalMetadataItem {
   body: Text
   discussion: Text
   execution: Text
+  choices: [String]!
   labels: [String]!
 }
 
