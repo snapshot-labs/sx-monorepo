@@ -54,7 +54,7 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-[9999] left-0 -mt-2 mx-4 pb-3"
+        class="absolute z-[11] left-0 -mt-2 mx-4 pb-3"
         style="width: calc(100% - 48px)"
         v-bind="panelProps"
       >
