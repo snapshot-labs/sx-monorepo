@@ -50,7 +50,7 @@ const SPACE_FRAGMENT = gql`
         payload
       }
     }
-    strategies_indicies
+    strategies_indices
     strategies
     strategies_params
     strategies_parsed_metadata {
@@ -136,7 +136,7 @@ const PROPOSAL_FRAGMENT = gql`
     execution_strategy_type
     execution_destination
     timelock_veto_guardian
-    strategies_indicies
+    strategies_indices
     strategies
     strategies_params
     created
