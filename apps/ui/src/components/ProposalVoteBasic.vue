@@ -40,7 +40,7 @@ const emit = defineEmits<{
         <IH-x class="inline-block" />
       </UiButton>
     </UiTooltip>
-    <UiTooltip :title="choices[2]">
+    <UiTooltip v-if="choices.length === 3" :title="choices[2]">
       <UiButton
         class="!text-gray-500 !border-gray-500 !px-0"
         :class="{
