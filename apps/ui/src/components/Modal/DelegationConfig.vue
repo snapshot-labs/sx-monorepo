@@ -106,7 +106,12 @@ const formValid = computed(() => {
 });
 
 async function handleSubmit() {
-  emit('add', form.value);
+  const config = clone(form.value);
+  if (offchainNetworks.includes(props.networkId)) {
+    config.name = 'ERC-20 Votes';
+  }
+
+  emit('add', config);
   emit('close');
 }
 
