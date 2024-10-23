@@ -34,13 +34,13 @@ const filteredLabels = computed(() =>
 </script>
 
 <template>
-  <Popover v-slot="{ open }" class="relative contents">
+  <Popover v-slot="{ open, close }" class="relative contents">
     <PopoverButton
       class="w-full"
       :class="open ? 'text-skin-link' : 'text-skin-text'"
       v-bind="buttonProps"
     >
-      <slot name="button">
+      <slot name="button" :close="close">
         <IH-pencil />
       </slot>
     </PopoverButton>

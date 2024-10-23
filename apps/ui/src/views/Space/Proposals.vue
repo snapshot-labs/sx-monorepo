@@ -36,8 +36,9 @@ const spaceLabels = computed(() => {
   return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
 });
 
-function handleClearLabelsFilter() {
+function handleClearLabelsFilter(close: any) {
   labels.value = [];
+  close();
 }
 
 async function handleEndReached() {
@@ -161,7 +162,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
             }"
             :panel-props="{ class: 'sm:min-w-[290px] sm:ml-0 !mt-3' }"
           >
-            <template #button>
+            <template #button="{ close }">
               <div
                 class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
               >
@@ -189,7 +190,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                   </li>
                 </ul>
                 <div
-                  class="flex items-center absolute rounded-r-full right-0 pr-2 h-[23px] bg-skin-bg"
+                  class="flex items-center absolute rounded-r-full right-[1px] pr-2 h-[23px] bg-skin-bg"
                 >
                   <div
                     class="block w-2 -ml-2 h-full bg-gradient-to-l from-skin-bg"
@@ -203,8 +204,8 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                     v-if="labels.length"
                     class="text-skin-text rounded-full hover:text-skin-link"
                     title="Clear all labels filter"
-                    @click.stop="handleClearLabelsFilter"
-                    @keydown.enter.stop="handleClearLabelsFilter"
+                    @click.stop="handleClearLabelsFilter(close)"
+                    @keydown.enter.stop="handleClearLabelsFilter(close)"
                   >
                     <IH-x-circle size="16" />
                   </button>
