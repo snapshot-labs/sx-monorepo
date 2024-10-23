@@ -48,6 +48,8 @@ export default class Connector extends LockConnector {
       await argentx.disconnect({
         clearLastWallet: true
       });
-    } catch (e) {}
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
