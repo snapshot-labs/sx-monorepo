@@ -46,18 +46,16 @@ const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
 
 const editable = computed(() => {
-  if (!compareAddresses(props.proposal.author.id, web3.value.account))
-    return false;
-
-  if (offchainNetworks.includes(props.proposal.network)) {
-    return props.proposal.start > Math.floor(Date.now() / 1000);
-  }
-
-  // HACK: here we need to use snapshot instead of start because start is artifically
+  // HACK: here we need to use snapshot instead of start because start is artificially
   // shifted for Starknet's proposals with ERC20Votes strategies.
+  const pivotName = offchainNetworks.includes(props.proposal.network)
+    ? 'start'
+    : 'snapshot';
+
   return (
-    props.proposal.snapshot >
-    (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
+    compareAddresses(props.proposal.author.id, web3.value.account) &&
+    props.proposal[pivotName] >
+      (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
 
