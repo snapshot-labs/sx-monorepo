@@ -168,10 +168,10 @@ export async function handleExecutionStrategy(
       const [l1Destination] = payload;
       if (!l1Destination)
         throw new Error('Invalid payload for EthRelayer execution strategy');
-      destinationAddress = l1Destination;
+      destinationAddress = formatAddress('Ethereum', l1Destination);
 
       const SimpleQuorumExecutionStrategyContract = new EthContract(
-        l1Destination,
+        destinationAddress,
         SimpleQuorumExecutionStrategyAbi,
         ethProvider
       );

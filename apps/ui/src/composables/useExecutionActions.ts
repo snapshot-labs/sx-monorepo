@@ -75,6 +75,11 @@ export function useExecutionActions(
   });
 
   async function fetchEthRelayerExecutionDetails() {
+    if (currentTimestamp.value < proposal.max_end * 1000) {
+      message.value =
+        'This execution strategy requires max end time to be reached.';
+    }
+
     if (!proposal.execution_tx) return;
 
     const tx = await network.value.helpers.getTransaction(
