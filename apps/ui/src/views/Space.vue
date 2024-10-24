@@ -7,6 +7,7 @@ const { resolved, address, networkId } = useResolve(param);
 const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();
 const { isWhiteLabel } = useWhiteLabel();
+const { web3 } = useWeb3();
 
 const spaceKey = computed(() => `${networkId.value}:${address.value}`);
 
@@ -17,24 +18,22 @@ const space = computed(() => {
 });
 
 watch(
-  [resolved, networkId, address],
-  async ([resolved, networkId, address]) => {
+  [resolved, networkId, address, () => web3.value.account],
+  async ([resolved, networkId, address, account]) => {
     if (!resolved || !networkId || !address) return;
 
     if (!spacesStore.spacesMap.has(spaceKey.value)) {
       spacesStore.fetchSpace(address, networkId);
+    }
+
+    if (account) {
+      loadVotes(networkId, [address]);
     }
   },
   {
     immediate: true
   }
 );
-
-watchEffect(() => {
-  if (!resolved.value || !networkId.value || !address.value) return;
-
-  loadVotes(networkId.value, [address.value]);
-});
 
 watchEffect(() => {
   if (!space.value || isWhiteLabel.value) {
