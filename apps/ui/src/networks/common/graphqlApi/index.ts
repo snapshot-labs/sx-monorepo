@@ -260,7 +260,7 @@ function formatProposal(
     metadata_uri: proposal.metadata.id,
     type: 'basic',
     choices: BASIC_CHOICES,
-    labels: proposal.metadata.labels || [],
+    labels: proposal.metadata.labels,
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
     title: proposal.metadata.title ?? '',
     body: proposal.metadata.body ?? '',
