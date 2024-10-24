@@ -223,6 +223,7 @@ export function createActions(
         type,
         app: app || EDITOR_APP_NAME,
         choices: choices.filter(c => !!c),
+        labels,
         execution: executionInfo?.transactions ?? []
       });
       if (!pinned || !pinned.cid) return false;
@@ -323,6 +324,7 @@ export function createActions(
         discussion,
         type,
         choices: choices.filter(c => !!c),
+        labels,
         execution: executionInfo?.transactions ?? []
       });
       if (!pinned || !pinned.cid) return false;

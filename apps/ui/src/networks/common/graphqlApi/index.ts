@@ -194,6 +194,10 @@ function formatSpace(
         chainId: CHAIN_IDS[network]
       };
     }),
+    labels: space.metadata.labels.map(label => {
+      const { id, name, description, color } = JSON.parse(label);
+      return { id, name, description, color };
+    }),
     delegations: space.metadata.delegations.map(delegation => {
       const { name, api_type, api_url, contract } = JSON.parse(delegation);
 
@@ -255,7 +259,7 @@ function formatProposal(
     metadata_uri: proposal.metadata.id,
     type: 'basic',
     choices: BASIC_CHOICES,
-    labels: [],
+    labels: proposal.metadata.labels,
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
     title: proposal.metadata.title ?? '',
     body: proposal.metadata.body ?? '',
