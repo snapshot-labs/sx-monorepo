@@ -175,11 +175,15 @@ export function useActions() {
     }
 
     const network = getReadWriteNetwork(networkId);
-    return network.actions.deployDependency(auth.web3, {
-      controller,
-      spaceAddress,
-      strategy: dependencyConfig
-    });
+    return network.actions.deployDependency(
+      auth.web3,
+      web3.value.type as Connector,
+      {
+        controller,
+        spaceAddress,
+        strategy: dependencyConfig
+      }
+    );
   }
 
   async function createSpace(

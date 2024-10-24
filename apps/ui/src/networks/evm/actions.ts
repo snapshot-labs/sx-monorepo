@@ -90,6 +90,7 @@ export function createActions(
     },
     async deployDependency(
       web3: Web3Provider,
+      connectorType: Connector,
       params: {
         controller: string;
         spaceAddress: string;
