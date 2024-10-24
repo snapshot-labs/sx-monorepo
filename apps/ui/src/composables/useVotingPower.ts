@@ -1,61 +1,57 @@
 import { supportsNullCurrent } from '@/networks';
-import { getIndex as getVotingPowerIndex } from '@/stores/votingPowers';
-import { Proposal, Space } from '@/types';
+import { getIndex } from '@/stores/votingPowers';
+import { NetworkID, Proposal, Space } from '@/types';
 
 export function useVotingPower() {
   const votingPowersStore = useVotingPowersStore();
   const { web3 } = useWeb3();
   const { getCurrent } = useMetaStore();
 
-  const item = ref<Space | Proposal | undefined>();
-  const block = ref<number | null>(null);
+  function latestBlock(network: NetworkID) {
+    return supportsNullCurrent(network) ? null : getCurrent(network) || 0;
+  }
 
-  const space = computed(() =>
-    item.value && 'space' in item.value
-      ? (item.value?.space as Space)
-      : item.value
-  );
+  function proposalSnapshot(proposal: Proposal) {
+    return (
+      (proposal.state === 'pending' ? null : proposal.snapshot) ||
+      latestBlock(proposal.network)
+    );
+  }
 
-  const proposal = computed(() =>
-    item.value && 'snapshot' in item.value
-      ? (item.value as Proposal)
-      : undefined
-  );
+  function fetchProposalVp(proposal: Proposal) {
+    if (!web3.value.account) return;
 
-  const proposalSnapshot = computed<number | null>(() => {
-    if (!proposal.value) return null;
+    votingPowersStore.fetch(
+      proposal,
+      web3.value.account,
+      proposalSnapshot(proposal)
+    );
+  }
 
-    return proposal.value.state === 'pending'
-      ? latestBlock(proposal.value)
-      : proposal.value.snapshot;
-  });
+  function fetchSpaceVp(space: Space) {
+    if (!web3.value.account) return;
 
-  const votingPower = computed(
-    () =>
-      space.value &&
-      votingPowersStore.votingPowers.get(
-        getVotingPowerIndex(space.value, block.value)
-      )
-  );
+    votingPowersStore.fetch(
+      space,
+      web3.value.account,
+      latestBlock(space.network)
+    );
+  }
 
-  function latestBlock(spaceOrProposal: Space | Proposal) {
-    return supportsNullCurrent(spaceOrProposal.network)
-      ? null
-      : getCurrent(spaceOrProposal.network) ?? 0;
+  function getProposalVp(proposal: Proposal) {
+    return votingPowersStore.votingPowers.get(
+      getIndex(proposal.space, proposalSnapshot(proposal))
+    );
+  }
+
+  function getSpaceVp(space: Space) {
+    return votingPowersStore.votingPowers.get(
+      getIndex(space, latestBlock(space.network))
+    );
   }
 
   function reset() {
     votingPowersStore.reset();
-  }
-
-  function fetch(spaceOrProposal: Space | Proposal) {
-    if (!web3.value.account) return;
-    item.value = spaceOrProposal;
-    block.value = proposal.value
-      ? proposalSnapshot.value
-      : latestBlock(space.value as Space);
-
-    votingPowersStore.fetch(item.value, web3.value.account, block.value);
   }
 
   watch(
@@ -65,5 +61,5 @@ export function useVotingPower() {
     }
   );
 
-  return { votingPower, fetch, reset };
+  return { getProposalVp, getSpaceVp, fetchProposalVp, fetchSpaceVp, reset };
 }

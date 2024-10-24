@@ -7,11 +7,7 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const {
-  votingPower,
-  fetch: fetchVotingPower,
-  reset: resetVotingPower
-} = useVotingPower();
+const { getSpaceVp, fetchSpaceVp, reset: resetVotingPower } = useVotingPower();
 const { web3 } = useWeb3();
 const router = useRouter();
 const route = useRoute();
@@ -27,6 +23,8 @@ const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
 
+const votingPower = computed(() => getSpaceVp(props.space));
+
 async function handleEndReached() {
   if (!proposalsRecord.value?.hasMoreProposals) return;
 
@@ -34,7 +32,7 @@ async function handleEndReached() {
 }
 
 function handleFetchVotingPower() {
-  fetchVotingPower(props.space);
+  fetchSpaceVp(props.space);
 }
 
 watch(
