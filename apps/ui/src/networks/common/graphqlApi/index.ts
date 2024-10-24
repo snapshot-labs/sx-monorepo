@@ -194,11 +194,10 @@ function formatSpace(
         chainId: CHAIN_IDS[network]
       };
     }),
-    labels:
-      space.metadata.labels?.map(label => {
-        const { id, name, description, color } = JSON.parse(label);
-        return { id, name, description, color };
-      }) || [],
+    labels: space.metadata.labels.map(label => {
+      const { id, name, description, color } = JSON.parse(label);
+      return { id, name, description, color };
+    }),
     delegations: space.metadata.delegations.map(delegation => {
       const { name, api_type, api_url, contract } = JSON.parse(delegation);
 
