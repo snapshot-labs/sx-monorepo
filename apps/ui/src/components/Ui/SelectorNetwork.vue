@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { enabledNetworks, getNetwork } from '@/networks';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { BaseDefinition, NetworkID } from '@/types';
 
@@ -12,11 +12,12 @@ const network = defineModel<string | number | null>({
 const props = defineProps<{
   definition: BaseDefinition<string | number | null> & {
     networkId: NetworkID;
+    networksListKind?: 'full' | 'builtin';
   };
 }>();
 
 const options = computed(() => {
-  if (offchainNetworks.includes(props.definition.networkId)) {
+  if (props.definition.networksListKind === 'full') {
     const baseNetworks = Object.entries(networks)
       .filter(([, network]) => {
         if (

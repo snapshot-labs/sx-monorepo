@@ -366,7 +366,6 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
       name,
       apiType,
       apiUrl: space.delegationPortal.delegationApi,
-      contractNetwork: null,
       contractAddress: space.delegationPortal.delegationContract,
       chainId
     });
@@ -379,7 +378,6 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
       name: 'Delegate registry',
       apiType: 'delegate-registry',
       apiUrl: DELEGATE_REGISTRY_URL,
-      contractNetwork: null,
       contractAddress: space.id,
       chainId
     });

@@ -78,9 +78,8 @@ export type SpaceMetadataDelegation = {
   name: string | null;
   apiType: DelegationType | null;
   apiUrl: string | null;
-  contractNetwork: NetworkID | null;
   contractAddress: string | null;
-  chainId?: ChainId | null;
+  chainId: ChainId | null;
 };
 
 export type SpaceMetadata = {
