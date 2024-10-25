@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import snapshotNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { getUrl } from '@/helpers/utils';
-import { explorePageProtocols, getNetwork } from '@/networks';
+import { explorePageProtocols, getNetwork, metadataNetwork } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 import { SelectItem } from '@/types';
 
@@ -36,6 +35,11 @@ const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 const network = ref<string>(DEFAULT_NETWORK);
 const category = ref<SpaceCategory>(DEFAULT_CATEGORY);
 
+const { networks: offchainNetworks, getUsage } = useOffchainNetworksList(
+  metadataNetwork,
+  true
+);
+
 const networks = computed(() => {
   const explorePageNetworks = explorePageProtocols[protocol.value].networks;
 
@@ -43,8 +47,8 @@ const networks = computed(() => {
   if (protocol.value === 'snapshot') {
     const shouldShowTestnetNetworks = explorePageNetworks.includes('s-tn');
 
-    protocolNetworks = Object.entries(snapshotNetworks)
-      .filter(([, network]) => {
+    protocolNetworks = offchainNetworks.value
+      .filter(network => {
         if (
           shouldShowTestnetNetworks &&
           'testnet' in network &&
@@ -55,8 +59,8 @@ const networks = computed(() => {
 
         return true;
       })
-      .map(([id, network]) => ({
-        id,
+      .map(network => ({
+        id: network.key,
         name: network.name,
         icon: h('img', {
           src: getUrl(network.logo),
@@ -135,6 +139,10 @@ watch(
 );
 
 watchEffect(() => setTitle('Explore'));
+
+onMounted(() => {
+  getUsage();
+});
 </script>
 
 <template>

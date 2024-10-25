@@ -35,6 +35,7 @@ import {
 import {
   ALIASES_QUERY,
   LEADERBOARD_QUERY,
+  NETWORKS_USAGE_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
@@ -795,6 +796,18 @@ export function createApi(
       if (!data.strategy) return null;
 
       return formatStrategy(data.strategy as ApiStrategy);
+    },
+    getNetworksUsage: async () => {
+      const { data } = await apollo.query({
+        query: NETWORKS_USAGE_QUERY
+      });
+
+      return Object.fromEntries(
+        data.networks.map((network: any) => [
+          Number(network.id),
+          network.spacesCount
+        ])
+      );
     }
   };
 }
