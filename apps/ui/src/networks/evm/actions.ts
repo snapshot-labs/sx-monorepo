@@ -4,7 +4,6 @@ import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
   evmArbitrum,
-  evmLineaGoerli,
   evmMainnet,
   EvmNetworkConfig,
   evmOptimism,
@@ -52,8 +51,7 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   137: evmPolygon,
   42161: evmArbitrum,
   1: evmMainnet,
-  11155111: evmSepolia,
-  59140: evmLineaGoerli
+  11155111: evmSepolia
 };
 
 export function createActions(

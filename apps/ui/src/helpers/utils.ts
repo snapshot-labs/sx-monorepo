@@ -28,16 +28,16 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 const IPFS_GATEWAY: string =
   import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
-  59140: {
-    chainName: 'Linea Goerli test network',
-    nativeCurrency: {
-      name: 'LineaETH',
-      symbol: 'ETH',
-      decimals: 18
-    },
-    rpcUrls: ['https://rpc.goerli.linea.build'],
-    blockExplorerUrls: ['https://goerli.lineascan.build']
-  }
+  //   12345: {
+  //     chainName: 'My network name',
+  //     nativeCurrency: {
+  //       name: 'MyNetwork',
+  //       symbol: 'NTW',
+  //       decimals: 18
+  //     },
+  //     rpcUrls: ['https://...'],
+  //     blockExplorerUrls: ['https://...']
+  //   }
 };
 
 dayjs.extend(relativeTime);
@@ -371,7 +371,8 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS) throw new Error(err.message);
+    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId])
+      throw new Error(err.message);
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',

@@ -106,33 +106,7 @@ export const evmNetworks = {
     }
   }),
   matic: createStandardConfig(137),
-  arb1: createStandardConfig(42161),
-  'linea-testnet': {
-    Meta: {
-      eip712ChainId: 59140,
-      proxyFactory: '0x12A1FfFFfd70677939D61d641eA043bc9060c718',
-      masterSpace: '0x7cC62f8E9BF2b44ce704D2cdCd4aa8021d5A6f4B'
-    },
-    Authenticators: {
-      EthSig: '0x3e3a68e0e70dbf78051109a9f379b7a7adec82f4',
-      EthTx: '0xddb36b865a1021524b936fb29fcba5fac073db74'
-    },
-    Strategies: {
-      Vanilla: '0x3e3A68e0e70dBF78051109a9f379B7A7adec82f4',
-      Comp: '0x343Baf4b44F7f79b14301CFA8068E3F8BE7470De',
-      OZVotes: '0x4aAa33b4367dc5657854bD40738201651eC0cC7B',
-      Whitelist: '0x54449c058bBf0B777745944ea1A7b79786FBC958'
-    },
-    ProposalValidations: {
-      VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
-    },
-    ExecutionStrategies: {
-      SimpleQuorumAvatar: '0x177F163F8f789F0d9C5c7993728ADB106a7b12d4',
-      SimpleQuorumTimelock: '0xdb86512e7E3a2d0B93b74b8FE3fFE8AD780791BE',
-      Axiom: null,
-      Isokratia: null
-    }
-  }
+  arb1: createStandardConfig(42161)
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');
@@ -140,4 +114,3 @@ export const evmSepolia = createEvmConfig('sep');
 export const evmOptimism = createEvmConfig('oeth');
 export const evmPolygon = createEvmConfig('matic');
 export const evmArbitrum = createEvmConfig('arb1');
-export const evmLineaGoerli = createEvmConfig('linea-testnet');
