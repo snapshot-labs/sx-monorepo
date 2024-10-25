@@ -69,12 +69,31 @@ const isEditable = computed(() => {
         <IH-lock-closed class="size-[16px] shrink-0" />
         <span class="truncate">Encrypted choice</span>
       </div>
-      <div
-        v-else
-        class="grow truncate"
-        :class="{ 'text-skin-text': !isEditable }"
-        v-text="getChoiceText(proposal.choices, currentVote.choice)"
-      />
+      <div v-else class="flex items-center gap-2">
+        <div
+          v-if="proposal.type === 'basic'"
+          class="shrink-0 rounded-full choice-bg inline-block size-[18px]"
+          :class="`_${currentVote.choice}`"
+        >
+          <IH-check
+            v-if="currentVote.choice === 1"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
+          />
+          <IH-x
+            v-else-if="currentVote.choice === 2"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
+          />
+          <IH-minus-sm
+            v-else-if="currentVote.choice === 3"
+            class="text-white size-[14px] mt-0.5 ml-0.5"
+          />
+        </div>
+        <div
+          class="grow truncate"
+          :class="{ 'text-skin-text': !isEditable }"
+          v-text="getChoiceText(proposal.choices, currentVote.choice)"
+        />
+      </div>
       <IH-pencil v-if="isEditable" class="shrink-0" />
     </UiButton>
   </slot>

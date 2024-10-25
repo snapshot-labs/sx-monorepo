@@ -67,15 +67,6 @@ export const METADATA: Record<string, Metadata> = {
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816
-  },
-  'linea-testnet': {
-    name: 'Linea testnet',
-    chainId: 59140,
-    apiUrl:
-      'https://thegraph.goerli.zkevm.consensys.net/subgraphs/name/snapshot-labs/sx-subgraph',
-    avatar:
-      'ipfs://bafkreibn4mjs54bnmvkrkiaiwp47gvcz6bervg2kr5ubknytfyz6l5wbs4',
-    blockTime: 13.52926
   }
 };
 

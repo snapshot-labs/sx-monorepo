@@ -4,7 +4,6 @@ export async function getABI(chainId: number, address: string) {
   else if (chainId === 10) apiHost = 'https://api-optimistic.etherscan.io';
   else if (chainId === 137) apiHost = 'https://api.polygonscan.com';
   else if (chainId === 42161) apiHost = 'https://api.arbiscan.io';
-  else if (chainId === 59140) apiHost = 'https://api.lineascan.build';
   else if (chainId === 11155111) apiHost = 'https://api-sepolia.etherscan.io';
   else throw new Error('Unsupported chainId');
 

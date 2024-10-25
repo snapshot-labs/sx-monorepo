@@ -13,21 +13,13 @@ const arbitrumNetwork = createEvmNetwork('arb1');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
 const sepoliaNetwork = createEvmNetwork('sep');
-const lineaTestnetNetwork = createEvmNetwork('linea-testnet');
 
 export const enabledNetworks: NetworkID[] = import.meta.env
   .VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
   : ['s', 's-tn', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
 
-export const evmNetworks: NetworkID[] = [
-  'eth',
-  'matic',
-  'arb1',
-  'oeth',
-  'sep',
-  'linea-testnet'
-];
+export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'oeth', 'sep'];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 // This network is used for aliases/follows/profiles/explore page.
@@ -45,7 +37,6 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
   if (id === 'sep') return sepoliaNetwork;
-  if (id === 'linea-testnet') return lineaTestnetNetwork;
   if (id === 'sn') return starknetNetwork;
   if (id === 'sn-sep') return starknetSepoliaNetwork;
 

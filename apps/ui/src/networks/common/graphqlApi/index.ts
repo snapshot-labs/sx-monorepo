@@ -3,7 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import { CHAIN_IDS } from '@/helpers/constants';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
 import {
@@ -258,7 +258,7 @@ function formatProposal(
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',
-    choices: BASIC_CHOICES,
+    choices: proposal.metadata.choices,
     labels: proposal.metadata.labels,
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
     title: proposal.metadata.title ?? '',
