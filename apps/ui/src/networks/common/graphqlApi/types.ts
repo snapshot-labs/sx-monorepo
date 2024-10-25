@@ -72,6 +72,7 @@ export type ApiProposal = {
     body: string | null;
     discussion: string | null;
     execution: string | null;
+    choices: string[];
     labels: string[];
   };
   space: {
