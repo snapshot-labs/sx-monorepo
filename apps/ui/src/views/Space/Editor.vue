@@ -115,7 +115,7 @@ const bodyDefinition = computed(() => ({
 const choicesDefinition = computed(() => ({
   type: 'array',
   title: 'Choices',
-  minItems: 1,
+  minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
   maxItems: MAX_CHOICES[props.space.turbo ? 'turbo' : 'default'],
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
@@ -141,7 +141,7 @@ const formErrors = computed(() => {
       title: proposal.value.title,
       body: proposal.value.body,
       discussion: proposal.value.discussion,
-      choices: proposal.value.choices
+      choices: proposal.value.choices.filter(choice => !!choice)
     },
     {
       skipEmptyOptionalFields: true
@@ -498,6 +498,9 @@ watchEffect(() => {
       />
       <EditorChoices
         v-model="proposal"
+        :minimum-basic-choices="
+          offchainNetworks.includes(space.network) ? 2 : 3
+        "
         :definition="choicesDefinition"
         :error="
           proposal.choices.length > choicesDefinition.maxItems

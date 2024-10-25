@@ -27,6 +27,18 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
 const IPFS_GATEWAY: string =
   import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
+const ADDABLE_NETWORKS = {
+  //   12345: {
+  //     chainName: 'My network name',
+  //     nativeCurrency: {
+  //       name: 'MyNetwork',
+  //       symbol: 'NTW',
+  //       decimals: 18
+  //     },
+  //     rpcUrls: ['https://...'],
+  //     blockExplorerUrls: ['https://...']
+  //   }
+};
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -359,7 +371,21 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902) throw new Error(err.message);
+    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId])
+      throw new Error(err.message);
+
+    await web3Provider.provider.request({
+      method: 'wallet_addEthereumChain',
+      params: [
+        {
+          chainId: encodedChainId,
+          chainName: ADDABLE_NETWORKS[chainId].chainName,
+          nativeCurrency: ADDABLE_NETWORKS[chainId].nativeCurrency,
+          rpcUrls: ADDABLE_NETWORKS[chainId].rpcUrls,
+          blockExplorerUrls: ADDABLE_NETWORKS[chainId].blockExplorerUrls
+        }
+      ]
+    });
 
     const network = await web3Provider.getNetwork();
     if (network.chainId !== chainId) {
@@ -513,8 +539,14 @@ export function getChoiceWeight(
 
 export function getChoiceText(availableChoices: string[], choice: Choice) {
   if (typeof choice === 'string') {
-    return ['for', 'against', 'abstain'].includes(choice)
-      ? choice.charAt(0).toUpperCase() + choice.slice(1)
+    const basicChoices = {
+      for: 0,
+      against: 1,
+      abstain: 2
+    };
+
+    return basicChoices[choice] !== undefined
+      ? availableChoices[basicChoices[choice]]
       : 'Invalid choice';
   }
 
