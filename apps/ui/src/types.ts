@@ -19,7 +19,6 @@ export type NetworkID =
   | 'arb1'
   | 'oeth'
   | 'sep'
-  | 'linea-testnet'
   | 'sn'
   | 'sn-sep';
 
