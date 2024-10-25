@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
-import { startIntercom } from './helpers/intercom';
 
 const route = useRoute();
 const router = useRouter();
@@ -31,7 +30,6 @@ watch(
   resolved => {
     if (!resolved) return;
 
-    if (!isWhiteLabel.value) startIntercom();
     if (isCustomDomain.value && !whiteLabelFailed.value) {
       mountCustomDomainRoutes();
     }
@@ -48,4 +46,5 @@ onMounted(() => {
   <LayoutSplashScreen v-if="!whiteLabelResolved" />
   <LayoutSite v-else-if="routeName === 'site'" />
   <LayoutApp v-else />
+  <Messenger />
 </template>

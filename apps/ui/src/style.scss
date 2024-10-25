@@ -409,13 +409,6 @@ input:placeholder-shown {
   }
 }
 
-// Intercom
-// Hide the launcher button on small screen
-
-div.intercom-launcher {
-  @apply hidden md:block
-}
-
 // tippy.js
 // Fix for long text in tippy.js
 div[data-tippy-root] {
