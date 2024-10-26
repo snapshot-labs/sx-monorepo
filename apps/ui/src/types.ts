@@ -19,7 +19,6 @@ export type NetworkID =
   | 'arb1'
   | 'oeth'
   | 'sep'
-  | 'linea-testnet'
   | 'sn'
   | 'sn-sep';
 
@@ -94,6 +93,7 @@ export type SpaceMetadata = {
   discord: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
+  labels: SpaceMetadataLabel[];
   delegations: SpaceMetadataDelegation[];
 };
 

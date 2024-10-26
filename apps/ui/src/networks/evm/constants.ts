@@ -2,7 +2,7 @@ import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
-import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinGraph } from '@/helpers/pin';
 import { getUrl, shorten } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
@@ -167,7 +167,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'Vanilla',
       about:
         'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
-      link: 'https://help.snapshot.box/en/articles/9839150-vanilla-voting-strategy',
+      link: `${HELPDESK_URL}/en/articles/9839150-vanilla-voting-strategy`,
       icon: IHBeaker,
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'Vanilla',
@@ -207,7 +207,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'Whitelist',
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
-      link: 'https://help.snapshot.box/en/articles/9839118-whitelist-voting-strategy',
+      link: `${HELPDESK_URL}/en/articles/9839118-whitelist-voting-strategy`,
       generateSummary: (params: Record<string, any>) => {
         const length =
           params.whitelist.trim().length === 0
@@ -308,7 +308,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'ERC-20 Votes (EIP-5805)',
       about:
         'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
-      link: 'https://help.snapshot.box/en/articles/9839125-erc-20-votes-eip-5805-voting-strategy',
+      link: `${HELPDESK_URL}/en/articles/9839125-erc-20-votes-eip-5805-voting-strategy`,
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,

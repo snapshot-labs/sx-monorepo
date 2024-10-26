@@ -72,6 +72,14 @@ describe('utils', () => {
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
+        labels: [
+          {
+            id: 'test',
+            name: 'Test',
+            description: 'Test description',
+            color: '#000000'
+          }
+        ],
         delegations: [
           {
             name: 'sample',
@@ -100,6 +108,14 @@ describe('utils', () => {
               name: 'treasury 1',
               network: 'sep',
               address: '0x000000000000000000000000000000000000dead'
+            }
+          ],
+          labels: [
+            {
+              id: 'test',
+              name: 'Test',
+              description: 'Test description',
+              color: '#000000'
             }
           ],
           delegations: [

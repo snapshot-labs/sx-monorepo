@@ -111,13 +111,16 @@ export function createActions(
     },
     deployDependency: async (
       web3: any,
+      connectorType: Connector,
       params: {
         controller: string;
         spaceAddress: string;
         strategy: StrategyConfig;
       }
     ) => {
-      await verifyStarknetNetwork(web3, chainId);
+      if (STARKNET_CONNECTORS.includes(connectorType)) {
+        await verifyStarknetNetwork(web3, chainId);
+      }
 
       if (!params.strategy.deploy) {
         throw new Error('This strategy is not deployable');
@@ -236,6 +239,7 @@ export function createActions(
         type,
         app: app || EDITOR_APP_NAME,
         choices: choices.filter(c => !!c),
+        labels,
         execution: executionInfo?.transactions ?? []
       });
       if (!pinned || !pinned.cid) return false;
@@ -341,6 +345,7 @@ export function createActions(
         discussion,
         type,
         choices: choices.filter(c => !!c),
+        labels,
         execution: executionInfo?.transactions ?? []
       });
       if (!pinned || !pinned.cid) return false;
@@ -494,8 +499,6 @@ export function createActions(
     },
     finalizeProposal: () => null,
     executeTransactions: async (web3: any, proposal: Proposal) => {
-      await verifyStarknetNetwork(web3, chainId);
-
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
@@ -510,8 +513,6 @@ export function createActions(
       });
     },
     executeQueuedProposal: async (web3: any, proposal: Proposal) => {
-      await verifyStarknetNetwork(web3, chainId);
-
       if (!proposal.execution_destination)
         throw new Error('Execution destination is missing');
 

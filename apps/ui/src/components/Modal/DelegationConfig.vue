@@ -38,13 +38,17 @@ const definition = computed(() => {
     additionalProperties: true,
     required: ['name', 'apiType', 'apiUrl'],
     properties: {
-      name: {
-        type: 'string',
-        title: 'Name',
-        minLength: 1,
-        maxLength: 32,
-        examples: ['Delegation API name']
-      },
+      ...(!offchainNetworks.includes(props.networkId)
+        ? {
+            name: {
+              type: 'string',
+              title: 'Name',
+              minLength: 1,
+              maxLength: 32,
+              examples: ['Delegation API name']
+            }
+          }
+        : {}),
       apiType: {
         type: ['string', 'null'],
         enum: [null, 'governor-subgraph'],
@@ -102,7 +106,12 @@ const formValid = computed(() => {
 });
 
 async function handleSubmit() {
-  emit('add', form.value);
+  const config = clone(form.value);
+  if (offchainNetworks.includes(props.networkId)) {
+    config.name = 'ERC-20 Votes';
+  }
+
+  emit('add', config);
   emit('close');
 }
 
