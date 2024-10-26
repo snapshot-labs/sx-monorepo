@@ -4,8 +4,6 @@ import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
 import { Space } from '@/types';
 
-const MAX_SHOWN_LABELS_FILTER = 2;
-
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
@@ -172,17 +170,8 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                 v-if="labels.length"
                 class="flex gap-1 mx-2.5 overflow-hidden items-center"
               >
-                <ul
-                  v-if="labels.length"
-                  class="flex gap-1 mr-4"
-                  :class="{
-                    'mr-[50px]': labels.length >= MAX_SHOWN_LABELS_FILTER
-                  }"
-                >
-                  <li
-                    v-for="id in labels.slice(0, MAX_SHOWN_LABELS_FILTER)"
-                    :key="id"
-                  >
+                <ul v-if="labels.length" class="flex gap-1 mr-4">
+                  <li v-for="id in labels" :key="id">
                     <UiProposalLabel
                       :label="spaceLabels[id].name"
                       :color="spaceLabels[id].color"
@@ -194,11 +183,6 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                 >
                   <div
                     class="block w-2 -ml-2 h-full bg-gradient-to-l from-skin-bg"
-                  />
-                  <span
-                    v-if="labels.length >= MAX_SHOWN_LABELS_FILTER"
-                    class="text-skin-link text-sm mx-1"
-                    v-text="`(${labels.length})`"
                   />
                   <button
                     v-if="labels.length"
