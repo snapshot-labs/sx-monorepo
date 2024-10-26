@@ -49,7 +49,7 @@ function handleFetchVotingPower() {
   fetchVotingPower(props.space);
 }
 
-watch(
+watchThrottled(
   [
     () => route.query.state as string,
     () => route.query.labels as string[] | string
@@ -72,7 +72,7 @@ watch(
       labels.value
     );
   },
-  { immediate: true }
+  { throttle: 1000, immediate: true }
 );
 
 watch(
