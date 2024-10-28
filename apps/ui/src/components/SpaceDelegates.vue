@@ -3,7 +3,6 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
