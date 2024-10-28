@@ -65,7 +65,7 @@ const definition = computed(() => {
               ]
             },
             chainId: {
-              type: ['number', 'null'],
+              type: ['string', 'number', 'null'],
               format: 'network',
               networkId: props.networkId,
               networksListKind: 'full',
