@@ -163,7 +163,7 @@ onUnmounted(() => {
   <ProposalsList
     title="Proposals"
     limit="off"
-    :loading="!loaded"
+    :loading="!followedSpacesStore.followedSpacesLoaded || !loaded"
     :loading-more="loadingMore"
     :proposals="proposals"
     show-space
