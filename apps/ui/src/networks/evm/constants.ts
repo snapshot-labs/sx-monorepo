@@ -154,6 +154,7 @@ export function createConstants(networkId: NetworkID) {
           threshold: {
             type: 'integer',
             title: 'Proposal threshold',
+            minimum: 1,
             examples: ['1']
           }
         }
