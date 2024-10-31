@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
+import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { getNames } from '@/helpers/stamp';
 import { _n, shorten } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
-import { NetworkID, Transaction } from '@/types';
+import { ChainId, Transaction } from '@/types';
 
-const props = defineProps<{ networkId: NetworkID; tx: Transaction }>();
+const props = defineProps<{ chainId: ChainId; tx: Transaction }>();
 
 const expanded = ref(false);
-
-const network = computed(() => {
-  return getNetwork(props.networkId);
-});
 
 const title = computed(() => {
   if (props.tx._type === 'sendToken') {
@@ -183,7 +179,9 @@ const parsedTitle = computedAsync(
         <a
           class="inline-flex items-center"
           target="_blank"
-          :href="network.helpers.getExplorerUrl(call.to, 'address')"
+          :href="
+            getGenericExplorerUrl(chainId, call.to, 'address') || undefined
+          "
         >
           {{ shorten(call.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -194,7 +192,10 @@ const parsedTitle = computedAsync(
         <a
           class="inline-flex items-center"
           target="_blank"
-          :href="network.helpers.getExplorerUrl(interaction.to, 'address')"
+          :href="
+            getGenericExplorerUrl(chainId, interaction.to, 'address') ||
+            undefined
+          "
         >
           {{ shorten(interaction.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -208,7 +209,10 @@ const parsedTitle = computedAsync(
             v-if="param.type === 'address'"
             class="inline-flex items-center"
             target="_blank"
-            :href="network.helpers.getExplorerUrl(param.value, 'address')"
+            :href="
+              getGenericExplorerUrl(chainId, param.value, 'address') ||
+              undefined
+            "
           >
             {{ shorten(param.value) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />

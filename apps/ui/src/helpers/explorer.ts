@@ -9,10 +9,17 @@ import { ChainId, NetworkID } from '@/types';
 export function getGenericExplorerUrl(
   chainId: ChainId,
   address: string,
-  type: 'address' | 'token'
+  type: 'address' | 'token' | 'transaction'
 ) {
   if (typeof chainId === 'number') {
-    return `${networks[chainId].explorer.url}/${type}/${address}`;
+    let mappedType = 'tx';
+    if (type === 'address') {
+      mappedType = 'address';
+    } else if (type === 'token') {
+      mappedType = 'token';
+    }
+
+    return `${networks[chainId].explorer.url}/${mappedType}/${address}`;
   }
 
   const starknetNetwork = Object.entries(STARKNET_NETWORKS_METADATA).find(

@@ -68,7 +68,7 @@ describe('utils', () => {
         treasuries: [
           {
             name: 'treasury 1',
-            network: 'sep',
+            chainId: 11155111,
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
@@ -106,7 +106,7 @@ describe('utils', () => {
           treasuries: [
             {
               name: 'treasury 1',
-              network: 'sep',
+              chain_id: 11155111,
               address: '0x000000000000000000000000000000000000dead'
             }
           ],
