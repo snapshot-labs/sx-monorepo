@@ -71,7 +71,8 @@ const DELEGATION_STRATEGIES = [
   'erc20-balance-of-delegation',
   'delegation-with-cap',
   'delegation-with-overrides',
-  'with-delegation'
+  'with-delegation',
+  'erc20-balance-of-with-delegation'
 ];
 
 const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
