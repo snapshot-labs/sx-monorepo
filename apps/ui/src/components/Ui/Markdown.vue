@@ -227,7 +227,7 @@ html.dark {
 
   ul,
   ol {
-    padding-left: 2em;
+    padding-left: 1em;
     padding-bottom: 8px;
   }
 
