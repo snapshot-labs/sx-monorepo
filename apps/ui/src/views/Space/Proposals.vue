@@ -34,7 +34,7 @@ const spaceLabels = computed(() => {
   return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
 });
 
-function handleClearLabelsFilter(close: any) {
+function handleClearLabelsFilter(close: () => void) {
   labels.value = [];
   close();
 }

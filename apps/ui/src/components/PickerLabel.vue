@@ -16,6 +16,10 @@ const props = defineProps<{
   panelProps?: Record<string, any>;
 }>();
 
+defineSlots<{
+  button(props: { close: () => void }): any;
+}>();
+
 const selectedLabels = defineModel<string[]>({
   required: true
 });
