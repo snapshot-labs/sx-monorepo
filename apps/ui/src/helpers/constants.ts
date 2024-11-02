@@ -92,7 +92,7 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'No privacy'
   },
   shutter: {
-    label: 'Shutter',
+    label: 'Shielded voting',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
   }
