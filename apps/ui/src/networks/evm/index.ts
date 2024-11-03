@@ -1,4 +1,4 @@
-import networks from '@/helpers/networks.json';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { pinGraph } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
@@ -110,7 +110,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'address';
 
-      return `${networks[chainId].explorer}/${dataType}/${id}`;
+      return `${networks[chainId].explorer.url}/${dataType}/${id}`;
     }
   };
 
