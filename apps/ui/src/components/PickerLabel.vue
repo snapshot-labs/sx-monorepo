@@ -16,6 +16,10 @@ const props = defineProps<{
   panelProps?: Record<string, any>;
 }>();
 
+defineSlots<{
+  button(props: { close: () => void }): any;
+}>();
+
 const selectedLabels = defineModel<string[]>({
   required: true
 });
@@ -34,13 +38,13 @@ const filteredLabels = computed(() =>
 </script>
 
 <template>
-  <Popover v-slot="{ open }" class="relative contents">
+  <Popover v-slot="{ open, close }" class="relative contents">
     <PopoverButton
       class="w-full"
       :class="open ? 'text-skin-link' : 'text-skin-text'"
       v-bind="buttonProps"
     >
-      <slot name="button">
+      <slot name="button" :close="close">
         <IH-pencil />
       </slot>
     </PopoverButton>
@@ -54,7 +58,7 @@ const filteredLabels = computed(() =>
     >
       <PopoverPanel
         focus
-        class="absolute z-[9999] left-0 -mt-2 mx-4 pb-3"
+        class="absolute z-[11] left-0 -mt-2 mx-4 pb-3"
         style="width: calc(100% - 48px)"
         v-bind="panelProps"
       >

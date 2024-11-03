@@ -33,7 +33,7 @@ const handleVoteClick = (choice: Choice) => {
         class="flex-auto mr-4 w-0"
       />
       <div class="hidden md:block">
-        <ProposalVote :proposal="proposal" class="py-2">
+        <ProposalVote :proposal="proposal">
           <template #wrong-safe-network><div /></template>
           <template #unsupported><div /></template>
           <template #waiting><div /></template>
@@ -55,7 +55,9 @@ const handleVoteClick = (choice: Choice) => {
           </template>
           <ProposalVoteBasic
             v-if="proposal.type === 'basic'"
+            :choices="proposal.choices"
             :size="40"
+            class="py-2"
             @vote="handleVoteClick"
           />
         </ProposalVote>

@@ -4,7 +4,6 @@ import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
   evmArbitrum,
-  evmLineaGoerli,
   evmMainnet,
   EvmNetworkConfig,
   evmOptimism,
@@ -52,8 +51,7 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   137: evmPolygon,
   42161: evmArbitrum,
   1: evmMainnet,
-  11155111: evmSepolia,
-  59140: evmLineaGoerli
+  11155111: evmSepolia
 };
 
 export function createActions(
@@ -90,6 +88,7 @@ export function createActions(
     },
     async deployDependency(
       web3: Web3Provider,
+      connectorType: Connector,
       params: {
         controller: string;
         spaceAddress: string;
@@ -223,6 +222,7 @@ export function createActions(
         type,
         app: app || EDITOR_APP_NAME,
         choices: choices.filter(c => !!c),
+        labels,
         execution: executionInfo?.transactions ?? []
       });
       if (!pinned || !pinned.cid) return false;
@@ -323,6 +323,7 @@ export function createActions(
         discussion,
         type,
         choices: choices.filter(c => !!c),
+        labels,
         execution: executionInfo?.transactions ?? []
       });
       if (!pinned || !pinned.cid) return false;
@@ -413,14 +414,14 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indicies,
+          strategiesIndicies: proposal.strategies_indices,
           connectorType,
           isContract
         });
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
-          const metadataIndex = proposal.strategies_indicies.indexOf(
+          const metadataIndex = proposal.strategies_indices.indexOf(
             strategy.index
           );
 
@@ -695,7 +696,7 @@ export function createActions(
               : '0x'
           })),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
-            index => space.strategies_indicies[index]
+            index => space.strategies_indices[index]
           ),
           votingStrategyMetadataUrisToAdd: metadataUris,
           proposalValidationStrategy: {

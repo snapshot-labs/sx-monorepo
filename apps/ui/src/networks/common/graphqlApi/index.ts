@@ -3,7 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import { CHAIN_IDS } from '@/helpers/constants';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
 import {
@@ -194,6 +194,10 @@ function formatSpace(
         chainId: CHAIN_IDS[network]
       };
     }),
+    labels: space.metadata.labels.map(label => {
+      const { id, name, description, color } = JSON.parse(label);
+      return { id, name, description, color };
+    }),
     delegations: space.metadata.delegations.map(delegation => {
       const { name, api_type, api_url, contract } = JSON.parse(delegation);
 
@@ -218,7 +222,7 @@ function formatSpace(
       ),
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
-      space.strategies_indicies
+      space.strategies_indices
     ),
     children: [],
     parent: null
@@ -249,13 +253,13 @@ function formatProposal(
       executors_types: proposal.space.metadata.executors_types,
       strategies_parsed_metadata: processStrategiesMetadata(
         proposal.space.strategies_parsed_metadata,
-        proposal.strategies_indicies
+        proposal.strategies_indices
       )
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',
-    choices: BASIC_CHOICES,
-    labels: [],
+    choices: proposal.metadata.choices,
+    labels: proposal.metadata.labels,
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
     title: proposal.metadata.title ?? '',
     body: proposal.metadata.body ?? '',

@@ -25,12 +25,6 @@ const props = withDefaults(
   }
 );
 
-const LABELS = {
-  0: 'For',
-  1: 'Against',
-  2: 'Abstain'
-};
-
 const displayAllChoices = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
@@ -209,7 +203,7 @@ const otherResultsSummary = computed(() => {
         <div
           v-for="result in results"
           :key="result.choice"
-          :title="LABELS[result.choice - 1]"
+          :title="props.proposal.choices[result.choice - 1]"
           class="choice-bg float-left h-full"
           :style="{
             width: `${quorumChoiceProgress(props.proposal.quorum_type, result, totalProgress).toFixed(3)}%`

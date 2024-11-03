@@ -4,8 +4,6 @@ import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
 import { Space } from '@/types';
 
-const MAX_SHOWN_LABELS_FILTER = 2;
-
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
@@ -36,8 +34,9 @@ const spaceLabels = computed(() => {
   return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
 });
 
-function handleClearLabelsFilter() {
+function handleClearLabelsFilter(close: () => void) {
   labels.value = [];
+  close();
 }
 
 async function handleEndReached() {
@@ -50,10 +49,10 @@ function handleFetchVotingPower() {
   fetchVotingPower(props.space);
 }
 
-watch(
+watchThrottled(
   [
     () => route.query.state as string,
-    () => route.query['labels[]'] as string[] | string
+    () => route.query.labels as string[] | string
   ],
   ([toState, toLabels]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
@@ -73,7 +72,7 @@ watch(
       labels.value
     );
   },
-  { immediate: true }
+  { throttle: 1000, immediate: true }
 );
 
 watch(
@@ -87,7 +86,7 @@ watch(
       const query: LocationQueryRaw = {
         ...route.query,
         state: toState === 'any' ? undefined : toState,
-        'labels[]': !toLabels?.length ? undefined : toLabels
+        labels: !toLabels?.length ? undefined : toLabels
       };
 
       router.push({ query });
@@ -156,15 +155,12 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
             :labels="space.labels"
             :button-props="{
               class: [
-                'flex items-center gap-2 relative rounded-full leading-[100%] border button h-[42px] top-1 text-skin-link bg-skin-bg',
-                {
-                  'max-w-[230px]': labels.length >= MAX_SHOWN_LABELS_FILTER
-                }
+                'flex items-center gap-2 relative rounded-full leading-[100%] min-w-[75px] max-w-[230px] border button h-[42px] top-1 text-skin-link bg-skin-bg'
               ]
             }"
             :panel-props="{ class: 'sm:min-w-[290px] sm:ml-0 !mt-3' }"
           >
-            <template #button>
+            <template #button="{ close }">
               <div
                 class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
               >
@@ -172,19 +168,10 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               </div>
               <div
                 v-if="labels.length"
-                class="flex mx-2.5 overflow-hidden items-center"
+                class="flex gap-1 mx-2.5 overflow-hidden items-center"
               >
-                <ul
-                  v-if="labels.length"
-                  class="flex gap-1 mr-4"
-                  :class="{
-                    'mr-[50px]': labels.length >= MAX_SHOWN_LABELS_FILTER
-                  }"
-                >
-                  <li
-                    v-for="id in labels.slice(0, MAX_SHOWN_LABELS_FILTER)"
-                    :key="id"
-                  >
+                <ul v-if="labels.length" class="flex gap-1 mr-4">
+                  <li v-for="id in labels" :key="id">
                     <UiProposalLabel
                       :label="spaceLabels[id].name"
                       :color="spaceLabels[id].color"
@@ -192,20 +179,17 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
                   </li>
                 </ul>
                 <div
-                  class="flex gap-1 items-center absolute rounded-r-full right-2 top-[1px] bottom-[1px] bg-gradient-to-l via-skin-bg from-skin-bg"
-                  :class="{ 'pl-6': labels.length >= MAX_SHOWN_LABELS_FILTER }"
+                  class="flex items-center absolute rounded-r-full right-[1px] pr-2 h-[23px] bg-skin-bg"
                 >
-                  <span
-                    v-if="labels.length >= MAX_SHOWN_LABELS_FILTER"
-                    class="text-skin-link text-sm"
-                    v-text="`(${labels.length})`"
+                  <div
+                    class="block w-2 -ml-2 h-full bg-gradient-to-l from-skin-bg"
                   />
                   <button
                     v-if="labels.length"
                     class="text-skin-text rounded-full hover:text-skin-link"
-                    title="Clear all labels filter"
-                    @click.stop="handleClearLabelsFilter"
-                    @keydown.enter.stop="handleClearLabelsFilter"
+                    title="Clear all labels"
+                    @click.stop="handleClearLabelsFilter(close)"
+                    @keydown.enter.stop="handleClearLabelsFilter(close)"
                   >
                     <IH-x-circle size="16" />
                   </button>

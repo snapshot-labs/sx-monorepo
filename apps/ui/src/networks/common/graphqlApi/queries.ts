@@ -16,6 +16,7 @@ const SPACE_FRAGMENT = gql`
       discord
       voting_power_symbol
       treasuries
+      labels
       delegations
       executors
       executors_types
@@ -50,7 +51,7 @@ const SPACE_FRAGMENT = gql`
         payload
       }
     }
-    strategies_indicies
+    strategies_indices
     strategies
     strategies_params
     strategies_parsed_metadata {
@@ -122,6 +123,8 @@ const PROPOSAL_FRAGMENT = gql`
       body
       discussion
       execution
+      choices
+      labels
     }
     start
     min_end
@@ -136,7 +139,7 @@ const PROPOSAL_FRAGMENT = gql`
     execution_strategy_type
     execution_destination
     timelock_veto_guardian
-    strategies_indicies
+    strategies_indices
     strategies
     strategies_params
     created

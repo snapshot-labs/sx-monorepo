@@ -70,7 +70,9 @@ const DELEGATION_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
   'delegation-with-cap',
-  'delegation-with-overrides'
+  'delegation-with-overrides',
+  'with-delegation',
+  'erc20-balance-of-with-delegation'
 ];
 
 const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
@@ -195,7 +197,7 @@ function formatSpace(
     executors_destinations: [],
     executors_strategies: [],
     strategies: space.strategies.map(strategy => strategy.name),
-    strategies_indicies: [],
+    strategies_indices: [],
     strategies_params: space.strategies.map(strategy => strategy),
     strategies_parsed_metadata: [],
     validation_strategy: '',
@@ -318,7 +320,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     execution_destination: '',
     timelock_veto_guardian: null,
     strategies: proposal.strategies.map(strategy => strategy.name),
-    strategies_indicies: [],
+    strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
     tx: '',
     execution_tx: null,

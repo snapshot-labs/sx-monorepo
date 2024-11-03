@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { Choice, Space } from '@/types';
@@ -264,7 +265,7 @@ watchEffect(() => {
                       votingPower?.status === 'success' &&
                       votingPower.totalVotingPower === BigInt(0)
                     "
-                    href="https://help.snapshot.box/en/articles/9566904-why-do-i-have-0-voting-power"
+                    :href="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
                     target="_blank"
                   >
                     <IH-question-mark-circle />
@@ -279,6 +280,7 @@ watchEffect(() => {
               >
                 <ProposalVoteBasic
                   v-if="proposal.type === 'basic'"
+                  :choices="proposal.choices"
                   @vote="handleVoteClick"
                 />
                 <ProposalVoteSingleChoice
