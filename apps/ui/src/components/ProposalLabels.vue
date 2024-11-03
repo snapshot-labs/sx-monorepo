@@ -34,7 +34,7 @@ const validLabels = computed(() => {
           ? {
               name: 'space-proposals',
               params: { space: `${space.network}:${space.id}` },
-              query: { 'labels[]': label.id }
+              query: { labels: label.id }
             }
           : undefined
       "
@@ -57,7 +57,7 @@ const validLabels = computed(() => {
               ? {
                   name: 'space-proposals',
                   params: { space: `${space.network}:${space.id}` },
-                  query: { 'labels[]': label.id }
+                  query: { labels: label.id }
                 }
               : undefined
           "
