@@ -47,6 +47,9 @@ const definition = computed(() => {
         type: ['string', 'number', 'null'],
         format: 'network',
         networkId: props.networkId,
+        networksListKind: offchainNetworks.includes(props.networkId)
+          ? 'full'
+          : 'builtin',
         title: 'Treasury network',
         nullable: true
       },

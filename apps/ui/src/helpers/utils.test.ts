@@ -86,7 +86,7 @@ describe('utils', () => {
             apiType: 'governor-subgraph',
             apiUrl:
               'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            contractNetwork: 'sep',
+            chainId: 11155111,
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]
@@ -124,7 +124,8 @@ describe('utils', () => {
               api_type: 'governor-subgraph',
               api_url:
                 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-              contract: 'sep:0x000000000000000000000000000000000000dead'
+              contract: '0x000000000000000000000000000000000000dead',
+              chain_id: 11155111
             }
           ]
         }
