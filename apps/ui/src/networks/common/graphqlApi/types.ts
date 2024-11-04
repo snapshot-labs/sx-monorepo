@@ -33,6 +33,7 @@ export type ApiSpace = {
     twitter: string;
     github: string;
     discord: string;
+    terms: string;
     voting_power_symbol: string;
     wallet: string;
     executors: string[];
