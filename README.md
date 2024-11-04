@@ -19,12 +19,15 @@ yarn
 
 ### Compiles and hot-reloads for development
 
+#### UI only
+
 ```sh
 yarn dev
-
-# if you want to run full stack (including backend services)
-yarn dev:full
 ```
+
+#### UI with backend services
+
+[See here.](./README.md#running-local-services)
 
 ### Compiles and minifies for production
 
