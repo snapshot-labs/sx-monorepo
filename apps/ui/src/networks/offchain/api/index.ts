@@ -307,7 +307,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
       executors_types: [],
-      strategies_parsed_metadata: []
+      strategies_parsed_metadata: [],
+      terms: proposal.space.terms
     },
     execution_strategy_type: executionType,
     has_execution_window_opened: state === 'passed',

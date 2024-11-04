@@ -116,6 +116,7 @@ const PROPOSAL_FRAGMENT = gql`
       admins
       moderators
       symbol
+      terms
     }
     type
     title

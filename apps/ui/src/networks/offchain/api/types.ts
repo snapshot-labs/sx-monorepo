@@ -102,6 +102,7 @@ export type ApiProposal = {
     admins: string[];
     moderators: string[];
     symbol: string;
+    terms: string;
   };
   type: VoteType;
   title: string;

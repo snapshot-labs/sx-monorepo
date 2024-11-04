@@ -236,6 +236,7 @@ export type Proposal = {
     name: string;
     snapshot_chain_id?: number;
     avatar: string;
+    terms: string;
     controller: string;
     admins?: string[];
     moderators?: string[];
