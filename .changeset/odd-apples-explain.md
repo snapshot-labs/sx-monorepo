@@ -2,4 +2,4 @@
 "@snapshot-labs/sx": minor
 ---
 
-Use `address` instead of `signer` for methods of the ethereum-tx client
+Use `address` instead of `signer` for following methods in Starknet EthereumTx client: `estimateProposeFee`, `estimateVoteFee`, `estimateUpdateProposalFee`, `getProposeHash`, `getVoteHash`, `getUpdateProposalHash`.
