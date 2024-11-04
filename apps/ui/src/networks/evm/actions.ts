@@ -620,7 +620,7 @@ export function createActions(
 
       if (delegationType === 'governor-subgraph') {
         contractParams = {
-          address: delegationContract.split(':')[1],
+          address: delegationContract,
           functionName: 'delegate',
           functionParams: [delegatee],
           abi: ['function delegate(address delegatee)']
