@@ -42,15 +42,26 @@ const options = computed(() => {
 
     return [
       ...baseNetworks,
-      ...Object.values(STARKNET_NETWORK_METADATA).map(metadata => ({
-        id: metadata.chainId,
-        name: metadata.name,
-        icon: h('img', {
-          src: getUrl(metadata.avatar),
-          alt: metadata.name,
-          class: 'rounded-full'
+      ...Object.values(STARKNET_NETWORK_METADATA)
+        .filter(metadata => {
+          if (
+            props.definition.networkId === 's' &&
+            metadata.name.includes('Sepolia')
+          ) {
+            return false;
+          }
+
+          return true;
         })
-      }))
+        .map(metadata => ({
+          id: metadata.chainId,
+          name: metadata.name,
+          icon: h('img', {
+            src: getUrl(metadata.avatar),
+            alt: metadata.name,
+            class: 'rounded-full'
+          })
+        }))
     ];
   }
 
