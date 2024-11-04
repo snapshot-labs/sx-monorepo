@@ -47,7 +47,11 @@ const sending = ref(false);
 const formErrors = ref({} as Record<string, any>);
 
 async function handleSubmit() {
-  if (!props.delegation.apiType || !props.delegation.contractAddress) {
+  if (
+    !props.delegation.apiType ||
+    !props.delegation.contractAddress ||
+    !props.delegation.chainId
+  ) {
     return;
   }
 
@@ -56,11 +60,10 @@ async function handleSubmit() {
   try {
     await delegate(
       props.space,
-      props.delegation.contractNetwork,
       props.delegation.apiType,
       form.delegatee,
-      `${props.delegation.contractNetwork}:${props.delegation.contractAddress}`,
-      props.delegation.chainId ?? undefined
+      props.delegation.contractAddress,
+      props.delegation.chainId
     );
     emit('close');
   } catch (e) {

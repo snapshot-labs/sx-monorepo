@@ -3,7 +3,6 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
@@ -40,23 +39,11 @@ const {
 );
 const { web3 } = useWeb3();
 
-const currentNetwork = computed(() => {
-  if (!props.delegation.contractNetwork) return null;
-
-  try {
-    return getNetwork(props.delegation.contractNetwork);
-  } catch (e) {
-    return null;
-  }
-});
-
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
   let url: string | null = null;
-  if (currentNetwork.value) {
-    url = currentNetwork.value.helpers.getExplorerUrl(address, type);
-  } else if (props.delegation.chainId) {
+  if (props.delegation.chainId) {
     url = getGenericExplorerUrl(props.delegation.chainId, address, type);
   } else {
     return null;
