@@ -71,8 +71,8 @@ export type ApiSpace = {
   followersCount: number;
   children: [ApiRelatedSpace];
   parent: ApiRelatedSpace | null;
-  // properties used for settings
   terms: string;
+  // properties used for settings
   private: boolean;
   domain: string | null;
   skin: string | null;

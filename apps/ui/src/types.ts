@@ -136,7 +136,6 @@ export type OffchainAdditionalRawData = {
   type: 'offchain';
 } & Pick<
   OffchainApiSpace,
-  | 'terms'
   | 'private'
   | 'domain'
   | 'skin'
@@ -174,6 +173,7 @@ export type Space = {
   github: string;
   discord: string;
   coingecko?: string;
+  terms: string;
   voting_power_symbol: string;
   controller: string;
   voting_delay: number;

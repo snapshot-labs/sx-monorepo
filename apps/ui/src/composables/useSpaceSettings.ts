@@ -722,7 +722,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       members.value = getInitialMembers(space.value);
       parent.value = space.value.parent?.id ?? '';
       children.value = space.value.children.map(child => child.id);
-      termsOfServices.value = space.value.additionalRawData?.terms ?? '';
+      termsOfServices.value = space.value.terms ?? '';
       customDomain.value = space.value.additionalRawData?.domain ?? '';
       isPrivate.value = space.value.additionalRawData?.private ?? false;
     }
@@ -900,9 +900,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         return;
       }
 
-      if (
-        termsOfServicesValue !== (space.value.additionalRawData?.terms ?? '')
-      ) {
+      if (termsOfServicesValue !== (space.value.terms ?? '')) {
         isModified.value = true;
         return;
       }
