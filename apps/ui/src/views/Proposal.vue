@@ -17,7 +17,7 @@ const {
 } = useVotingPower();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
-const { modalAccountOpen, modalTermsOpen } = useModal();
+const { modalAccountOpen, modalOpen } = useModal();
 const termStore = useTermStore();
 
 const modalOpenVote = ref(false);
@@ -69,7 +69,7 @@ async function handleVoteClick(choice: Choice) {
     props.space.additionalRawData?.terms &&
     !termStore.isAccepted(props.space)
   ) {
-    modalTermsOpen.value = true;
+    modalOpen.value = true;
     return;
   }
 
@@ -362,9 +362,9 @@ watchEffect(() => {
     <teleport to="#modal">
       <ModalTerms
         v-if="space.additionalRawData?.terms"
-        :open="modalTermsOpen"
+        :open="modalOpen"
         :space="space"
-        @close="modalTermsOpen = false"
+        @close="modalOpen = false"
         @accept="handleAcceptTerms"
       />
       <ModalVote
