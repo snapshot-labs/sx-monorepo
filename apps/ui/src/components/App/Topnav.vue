@@ -85,6 +85,10 @@ watch(
   searchQuery => (searchValue.value = searchQuery),
   { immediate: true }
 );
+
+onUnmounted(() => {
+  resetAccountModal();
+});
 </script>
 
 <template>
