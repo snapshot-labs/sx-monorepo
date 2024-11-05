@@ -38,7 +38,7 @@ describe('EthereumTx', () => {
       metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
     };
 
-    const result = await ethereumTx.getProposeHash(wallet, data);
+    const result = await ethereumTx.getProposeHash(wallet.address, data);
     expect(result).toEqual(
       '0x6ad6a7880f1ed8213c56ce9fcc0fc50eaca6fffbbd8546ff211825519bc9032'
     );
@@ -60,7 +60,7 @@ describe('EthereumTx', () => {
       metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
     };
 
-    const result = await ethereumTx.getVoteHash(wallet, data);
+    const result = await ethereumTx.getVoteHash(wallet.address, data);
     expect(result).toEqual(
       '0x15c3ec5ebb1e82803db2d695eb12a902d5bb0d52c63e1536015e6d3debe70'
     );
@@ -79,7 +79,7 @@ describe('EthereumTx', () => {
       metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
     };
 
-    const result = await ethereumTx.getUpdateProposalHash(wallet, data);
+    const result = await ethereumTx.getUpdateProposalHash(wallet.address, data);
     expect(result).toEqual(
       '0x612204abe7ec1f8975360b848882b53578bbc03bf2bac834c9566cc828a2ab4'
     );
