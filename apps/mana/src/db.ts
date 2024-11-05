@@ -116,7 +116,7 @@ export async function getProposal(id: string) {
 
 export async function getDataByMessageHash(hash: string) {
   return knex(REGISTERED_TRANSACTIONS)
-    .select(['type', 'data', 'hash', 'network'])
+    .select(['sender', 'type', 'data', 'hash', 'network'])
     .where({ hash })
     .first();
 }
