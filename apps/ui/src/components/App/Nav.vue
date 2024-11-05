@@ -10,6 +10,7 @@ import IHCog from '~icons/heroicons-outline/cog';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
+import IHIdentification from '~icons/heroicons-outline/identification';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHStop from '~icons/heroicons-outline/stop';
@@ -63,6 +64,17 @@ const canSeeSettings = computed(() => {
 
     return admins.includes(web3.value.account.toLowerCase());
   }
+  return false;
+});
+
+const canSeeMembers = computed(() => {
+  const data = space.value?.additionalRawData;
+
+  return (
+    (data?.admins?.length ?? 0) > 0 ||
+    (data?.moderators?.length ?? 0) > 0 ||
+    (data?.members?.length ?? 0) > 0
+  );
 });
 
 const navigationConfig = computed<
@@ -81,6 +93,14 @@ const navigationConfig = computed<
       name: 'Leaderboard',
       icon: IHUserGroup
     },
+    ...(canSeeMembers.value
+      ? {
+          members: {
+            name: 'Members',
+            icon: IHIdentification
+          }
+        }
+      : undefined),
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
           delegates: {

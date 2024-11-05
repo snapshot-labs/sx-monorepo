@@ -360,3 +360,18 @@ export const STRATEGY_QUERY = gql`
   }
   ${STRATEGY_FRAGMENT}
 `;
+
+export const STATEMENTS_AND_USERS_QUERY = gql`
+  query ($where: StatementsWhere, $userIds: [String!]) {
+    statements(where: $where) {
+      delegate
+      space
+      network
+      statement
+    }
+    users(where: { id_in: $userIds }) {
+      id
+      about
+    }
+  }
+`;
