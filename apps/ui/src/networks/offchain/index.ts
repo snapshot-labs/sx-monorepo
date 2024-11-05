@@ -1,5 +1,5 @@
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getSpaceController } from '@/helpers/ens';
-import networks from '@/helpers/networks.json';
 import { pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
@@ -60,7 +60,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
       switch (type) {
         case 'transaction':
           if (id.startsWith('0x')) {
-            return `${network.explorer}/tx/${id}`;
+            return network ? `${network.explorer.url}/tx/${id}` : '';
           }
 
           return `https://signator.io/view?ipfs=${id}`;
@@ -68,7 +68,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
           return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
         case 'contract':
         case 'address':
-          return network ? `${network.explorer}/address/${id}` : '';
+          return network ? `${network.explorer.url}/address/${id}` : '';
         default:
           throw new Error('Not implemented');
       }

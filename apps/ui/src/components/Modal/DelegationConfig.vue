@@ -8,7 +8,6 @@ const DEFAULT_FORM_STATE = {
   name: '',
   apiType: null,
   apiUrl: null,
-  contractNetwork: null,
   contractAddress: null,
   chainId: null
 };
@@ -26,10 +25,6 @@ const emit = defineEmits<{
 const showPicker = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataDelegation> = ref(clone(DEFAULT_FORM_STATE));
-
-const networkField = computed(() =>
-  offchainNetworks.includes(props.networkId) ? 'chainId' : 'contractNetwork'
-);
 
 const definition = computed(() => {
   return {
@@ -69,14 +64,15 @@ const definition = computed(() => {
                 'https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2'
               ]
             },
-            [networkField.value]: {
+            chainId: {
               type: ['string', 'number', 'null'],
               format: 'network',
               networkId: props.networkId,
+              networksListKind: 'full',
               title: 'Delegation contract network',
               nullable: true
             },
-            ...(form.value[networkField.value] !== null
+            ...(form.value.chainId !== null
               ? {
                   contractAddress: {
                     type: 'string',
