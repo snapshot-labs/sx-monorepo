@@ -1,5 +1,5 @@
 ---
-"@snapshot-labs/sx": minor
+"@snapshot-labs/sx": patch
 ---
 
 Support labels on proposals
