@@ -45,12 +45,10 @@ const networks = computed(() => {
 
   let protocolNetworks: SelectItem<string>[] = [];
   if (protocol.value === 'snapshot') {
-    const shouldShowTestnetNetworks = explorePageNetworks.includes('s-tn');
-
     protocolNetworks = offchainNetworks.value
       .filter(network => {
         if (
-          shouldShowTestnetNetworks &&
+          metadataNetwork === 's' &&
           'testnet' in network &&
           network.testnet
         ) {
