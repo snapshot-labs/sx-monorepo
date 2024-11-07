@@ -457,7 +457,8 @@ export function createErc1155Metadata(
         name: delegation.name,
         api_type: delegation.apiType,
         api_url: delegation.apiUrl,
-        contract: `${delegation.contractNetwork}:${delegation.contractAddress}`
+        contract: delegation.contractAddress,
+        chain_id: delegation.chainId
       })),
       ...extraProperties
     }

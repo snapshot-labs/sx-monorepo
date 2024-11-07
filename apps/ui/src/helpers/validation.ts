@@ -254,6 +254,7 @@ ajv.addFormat('network', {
   validate: () => true
 });
 ajv.addKeyword('networkId');
+ajv.addKeyword('networksListKind');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';

@@ -574,22 +574,19 @@ export function useActions() {
 
   async function delegate(
     space: Space,
-    networkId: NetworkID | null,
     delegationType: DelegationType,
     delegatee: string,
     delegationContract: string,
-    chainIdOverride?: ChainId
+    chainId: ChainId
   ) {
     if (!web3.value.account) return await forceLogin();
 
-    const isEvmNetwork = typeof chainIdOverride === 'number';
-    const actionNetwork =
-      networkId ??
-      (isEvmNetwork
-        ? 'eth'
-        : (Object.entries(METADATA).find(
-            ([, metadata]) => metadata.chainId === chainIdOverride
-          )?.[0] as NetworkID));
+    const isEvmNetwork = typeof chainId === 'number';
+    const actionNetwork = isEvmNetwork
+      ? 'eth'
+      : (Object.entries(METADATA).find(
+          ([, metadata]) => metadata.chainId === chainId
+        )?.[0] as NetworkID);
     if (!actionNetwork) throw new Error('Failed to detect action network');
 
     const network = getReadWriteNetwork(actionNetwork);
@@ -603,7 +600,7 @@ export function useActions() {
         delegationType,
         delegatee,
         delegationContract,
-        chainIdOverride
+        chainId
       )
     );
   }

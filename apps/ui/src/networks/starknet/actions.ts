@@ -688,12 +688,10 @@ export function createActions(
     ) => {
       await verifyStarknetNetwork(web3, chainId);
 
-      const [, contractAddress] = delegationContract.split(':');
-
       const { account }: { account: Account } = web3.provider;
 
       let calls: AllowArray<Call> = {
-        contractAddress,
+        contractAddress: delegationContract,
         entrypoint: 'delegate',
         calldata: CallData.compile({ delegatee })
       };
