@@ -138,7 +138,6 @@ function formatSpace(
 
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
-    terms: space.terms,
     private: space.private,
     domain: space.domain,
     skin: space.skin,
@@ -210,6 +209,7 @@ function formatSpace(
     voting_power_validation_strategies_parsed_metadata: [],
     children: space.children.map(formatRelatedSpace),
     parent: space.parent ? formatRelatedSpace(space.parent) : null,
+    terms: space.terms,
     additionalRawData
   };
 }
