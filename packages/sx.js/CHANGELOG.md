@@ -1,5 +1,19 @@
 # @snapshot-labs/sx
 
+## 0.1.5
+
+### Patch Changes
+
+- ce35884: fix evm slot value strategy cached_timestamps lookup
+- e4ccc72: remove networks with empty config
+- 1bbd2c3: set ethsig offchain vote app property
+- 94652af: disable estimation for initialize EthTx calls
+- cc81127: Use `address` instead of `signer` for following methods in Starknet EthereumTx client: `estimateProposeFee`, `estimateVoteFee`, `estimateUpdateProposalFee`, `getProposeHash`, `getVoteHash`, `getUpdateProposalHash`.
+- 4627095: add updateSettings method to offchain EthereumSig client
+- 797f5e3: Support labels on proposals
+- aa87e0c: add deleteSpace method to offchain ethSig client
+- ef1429d: fix ethSig updateProposal call to properly include author
+
 ## 0.1.4
 
 ### Patch Changes

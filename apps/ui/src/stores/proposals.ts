@@ -64,8 +64,7 @@ export const useProposalsStore = defineStore('proposals', () => {
   async function fetch(
     spaceId: string,
     networkId: NetworkID,
-    state?: ProposalsFilter['state'],
-    labels?: string[]
+    state?: ProposalsFilter['state']
   ) {
     await metaStore.fetchBlock(networkId);
 
@@ -97,7 +96,7 @@ export const useProposalsStore = defineStore('proposals', () => {
           limit: PROPOSALS_LIMIT
         },
         metaStore.getCurrent(networkId) || 0,
-        { state, labels_in: labels }
+        { state }
       )
     );
 
