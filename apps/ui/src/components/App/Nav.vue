@@ -43,15 +43,17 @@ const space = computed(() =>
     : null
 );
 
-const isController = computedAsync(async () => {
-  if (!networkId.value || !space.value) return false;
-
-  const { account } = web3.value;
+const controller = computedAsync(async () => {
+  if (!networkId.value || !space.value) return null;
 
   const network = getNetwork(networkId.value);
-  const controller = await network.helpers.getSpaceController(space.value);
+  return await network.helpers.getSpaceController(space.value);
+});
 
-  return compareAddresses(controller, account);
+const isController = computed(() => {
+  const { account } = web3.value;
+
+  return compareAddresses(controller.value ?? '', account);
 });
 
 const canSeeSettings = computed(() => {
@@ -71,6 +73,7 @@ const canSeeMembers = computed(() => {
   const data = space.value?.additionalRawData;
 
   return (
+    controller.value ||
     (data?.admins?.length ?? 0) > 0 ||
     (data?.moderators?.length ?? 0) > 0 ||
     (data?.members?.length ?? 0) > 0
