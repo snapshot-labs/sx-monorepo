@@ -101,7 +101,7 @@ onMounted(loadMembersData);
               class="text-skin-link truncate"
               v-text="names[user] || shorten(user)"
             />
-            <h4
+            <div
               class="text-[17px] text-skin-text truncate"
               v-text="shorten(user)"
             />
