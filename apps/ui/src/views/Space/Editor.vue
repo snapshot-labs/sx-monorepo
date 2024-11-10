@@ -49,10 +49,10 @@ const {
 const proposalsStore = useProposalsStore();
 const { votingPower, fetch: fetchVotingPower } = useVotingPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
-const termStore = useTermStore();
+const termsStore = useTermsStore();
 
 const modalOpen = ref(false);
-const modalOpenTerm = ref(false);
+const modalOpenTerms = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -170,8 +170,8 @@ const proposalLimitReached = computed(
 async function handleProposeClick() {
   if (!proposal.value) return;
 
-  if (props.space.terms && !termStore.isAccepted(props.space)) {
-    modalOpenTerm.value = true;
+  if (props.space.terms && !termsStore.areAccepted(props.space)) {
+    modalOpenTerms.value = true;
     return;
   }
 
@@ -244,7 +244,7 @@ async function handleProposeClick() {
 }
 
 function handleAcceptTerms() {
-  termStore.accept(props.space);
+  termsStore.accept(props.space);
   handleProposeClick();
 }
 
@@ -542,9 +542,9 @@ watchEffect(() => {
     <teleport to="#modal">
       <ModalTerms
         v-if="space.terms"
-        :open="modalOpenTerm"
+        :open="modalOpenTerms"
         :space="space"
-        @close="modalOpenTerm = false"
+        @close="modalOpenTerms = false"
         @accept="handleAcceptTerms"
       />
       <ModalDrafts

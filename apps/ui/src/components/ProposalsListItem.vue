@@ -9,10 +9,10 @@ const props = defineProps<{
 
 const { modalAccountOpen } = useModal();
 const { web3 } = useWeb3();
-const termStore = useTermStore();
+const termsStore = useTermsStore();
 
 const modalOpenVote = ref(false);
-const modalOpenTerm = ref(false);
+const modalOpenTerms = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 
 const space = computed(() => ({
@@ -28,8 +28,8 @@ const handleVoteClick = (choice: Choice) => {
 
   selectedChoice.value = choice;
 
-  if (props.proposal.space.terms && !termStore.isAccepted(space.value)) {
-    modalOpenTerm.value = true;
+  if (props.proposal.space.terms && !termsStore.areAccepted(space.value)) {
+    modalOpenTerms.value = true;
     return;
   }
 
@@ -37,7 +37,7 @@ const handleVoteClick = (choice: Choice) => {
 };
 
 function handleAcceptTerms() {
-  termStore.accept(space.value);
+  termsStore.accept(space.value);
   handleVoteClick(selectedChoice.value!);
 }
 </script>
@@ -85,9 +85,9 @@ function handleAcceptTerms() {
   <teleport to="#modal">
     <ModalTerms
       v-if="proposal.space.terms"
-      :open="modalOpenTerm"
+      :open="modalOpenTerms"
       :space="proposal.space"
-      @close="modalOpenTerm = false"
+      @close="modalOpenTerms = false"
       @accept="handleAcceptTerms"
     />
     <ModalVote

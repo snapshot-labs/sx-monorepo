@@ -8,19 +8,19 @@ function getCompositeSpaceId(space: SpaceLikeEntity) {
   return `${space.network}:${space.id}`;
 }
 
-export const useTermStore = defineStore('term', () => {
-  const termAcceptedIds = useStorage(`${pkg.name}.term`, [] as string[]);
+export const useTermsStore = defineStore('terms', () => {
+  const termsAcceptedIds = useStorage(`${pkg.name}.terms`, [] as string[]);
 
   function accept(space: SpaceLikeEntity) {
-    termAcceptedIds.value.push(getCompositeSpaceId(space));
+    termsAcceptedIds.value.push(getCompositeSpaceId(space));
   }
 
-  function isAccepted(space: SpaceLikeEntity) {
-    return termAcceptedIds.value.includes(getCompositeSpaceId(space));
+  function areAccepted(space: SpaceLikeEntity) {
+    return termsAcceptedIds.value.includes(getCompositeSpaceId(space));
   }
 
   return {
     accept,
-    isAccepted
+    areAccepted
   };
 });

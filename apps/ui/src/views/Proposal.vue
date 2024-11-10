@@ -18,10 +18,10 @@ const {
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
-const termStore = useTermStore();
+const termsStore = useTermsStore();
 
 const modalOpenVote = ref(false);
-const modalOpenTerm = ref(false);
+const modalOpenTerms = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
@@ -66,8 +66,8 @@ async function handleVoteClick(choice: Choice) {
 
   selectedChoice.value = choice;
 
-  if (props.space.terms && !termStore.isAccepted(props.space)) {
-    modalOpenTerm.value = true;
+  if (props.space.terms && !termsStore.areAccepted(props.space)) {
+    modalOpenTerms.value = true;
     return;
   }
 
@@ -75,7 +75,7 @@ async function handleVoteClick(choice: Choice) {
 }
 
 function handleAcceptTerms() {
-  termStore.accept(props.space);
+  termsStore.accept(props.space);
   handleVoteClick(selectedChoice.value!);
 }
 
@@ -360,9 +360,9 @@ watchEffect(() => {
     <teleport to="#modal">
       <ModalTerms
         v-if="space.terms"
-        :open="modalOpenTerm"
+        :open="modalOpenTerms"
         :space="space"
-        @close="modalOpenTerm = false"
+        @close="modalOpenTerms = false"
         @accept="handleAcceptTerms"
       />
       <ModalVote
