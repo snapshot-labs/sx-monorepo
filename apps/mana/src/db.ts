@@ -113,3 +113,10 @@ export async function markProposalProcessed(id: string) {
 export async function getProposal(id: string) {
   return knex(REGISTERED_PROPOSALS).select('*').where({ id }).first();
 }
+
+export async function getDataByMessageHash(hash: string) {
+  return knex(REGISTERED_TRANSACTIONS)
+    .select(['sender', 'type', 'data', 'hash', 'network'])
+    .where({ hash })
+    .first();
+}

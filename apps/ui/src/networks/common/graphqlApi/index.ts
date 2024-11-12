@@ -200,17 +200,28 @@ function formatSpace(
       return { id, name, description, color };
     }),
     delegations: space.metadata.delegations.map(delegation => {
-      const { name, api_type, api_url, contract } = JSON.parse(delegation);
+      const { name, api_type, api_url, contract, chain_id } =
+        JSON.parse(delegation);
 
-      const [network, address] = contract.split(':');
+      if (contract.includes(':')) {
+        // NOTE: Legacy format
+        const [network, address] = contract.split(':');
+
+        return {
+          name: name,
+          apiType: api_type,
+          apiUrl: api_url,
+          contractAddress: address === 'null' ? null : address,
+          chainId: CHAIN_IDS[network]
+        };
+      }
 
       return {
         name: name,
         apiType: api_type,
         apiUrl: api_url,
-        contractNetwork: network === 'null' ? null : network,
-        contractAddress: address === 'null' ? null : address,
-        chainId: CHAIN_IDS[network]
+        contractAddress: contract,
+        chainId: chain_id
       };
     }),
     executors: space.metadata.executors,

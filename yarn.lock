@@ -2445,10 +2445,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.6.0.tgz#3c7c9c46e678feefe7a2e5bb609d3dbd665ffb3f"
   integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
 
-"@snapshot-labs/checkpoint@^0.1.0-beta.39":
-  version "0.1.0-beta.39"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.39.tgz#a0d76887e1456a519f6567bcb76380229610dbb4"
-  integrity sha512-VQ2ZAkrAlH8Zl1jrXS9Hlm4iODtytbFdSG6a/Tejj3KRiic2SHiXDYCy/DDRnazpKy+qQ3qqwe+QYUQF+wtBGw==
+"@snapshot-labs/checkpoint@^0.1.0-beta.43":
+  version "0.1.0-beta.43"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.43.tgz#56118320a17ff7cda46364ad70b399fd3b8ec869"
+  integrity sha512-GIGEx6OQlDyfxfLapyXsWMVhEvzRJ51V9cIAvjG1htrVBhnuFmo321SxAdioMcsk98K0yU4qQWxcv4IFPmYB0w==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/address" "^5.7.0"
