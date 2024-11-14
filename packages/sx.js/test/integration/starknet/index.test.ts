@@ -10,6 +10,7 @@ import {
   increaseTime,
   setTime,
   setup,
+  sleep,
   TestConfig
 } from './utils';
 import {
@@ -36,7 +37,10 @@ describe('sx-starknet', () => {
   const privateKey = '0x9c7d498a8f76dc87564274036988f668';
 
   const starkProvider = new RpcProvider({
-    nodeUrl: 'http://127.0.0.1:5050/rpc'
+    nodeUrl: 'http://127.0.0.1:5050/rpc',
+    // default is 5s and for some reason each call with call it 2 times (one before looking for receipt, and once after)
+    // this way it's quick (20s instead of 9 minutes)
+    transactionRetryIntervalFallback: 100
   });
 
   const provider = new JsonRpcProvider(ethUrl);
@@ -145,7 +149,8 @@ describe('sx-starknet', () => {
             }
           ],
           proposal: 1,
-          choice: Choice.For
+          choice: Choice.For,
+          metadataUri: ''
         }
       };
 
@@ -197,7 +202,8 @@ describe('sx-starknet', () => {
           }
         ],
         proposal: 2,
-        choice: Choice.For
+        choice: Choice.For,
+        metadataUri: ''
       };
 
       const envelope = await ethSigClient.vote({ signer: wallet, data });
@@ -256,7 +262,8 @@ describe('sx-starknet', () => {
           }
         ],
         proposal: 3,
-        choice: Choice.For
+        choice: Choice.For,
+        metadataUri: ''
       };
 
       await ethTxClient.initializeVote(wallet, data);
@@ -315,7 +322,8 @@ describe('sx-starknet', () => {
           }
         ],
         proposal: 4,
-        choice: Choice.For
+        choice: Choice.For,
+        metadataUri: ''
       };
 
       const envelope = await starkSigClient.vote({ signer: account, data });
@@ -375,7 +383,8 @@ describe('sx-starknet', () => {
             }
           ],
           proposal: 5,
-          choice: Choice.For
+          choice: Choice.For,
+          metadataUri: ''
         }
       };
 
@@ -436,7 +445,8 @@ describe('sx-starknet', () => {
             }
           ],
           proposal: 6,
-          choice: Choice.For
+          choice: Choice.For,
+          metadataUri: ''
         }
       };
 
@@ -495,9 +505,13 @@ describe('sx-starknet', () => {
             }
           ],
           proposal: 7,
-          choice: Choice.For
+          choice: Choice.For,
+          metadataUri: ''
         }
       };
+
+      // NOTE: to avoid Votes: future lookup
+      await sleep(10000);
 
       const receipt = await client.vote(account, envelope);
       console.log('Receipt', receipt);

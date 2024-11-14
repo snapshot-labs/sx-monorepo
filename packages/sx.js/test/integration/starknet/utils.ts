@@ -539,3 +539,7 @@ export function loadL1MessagingContract(networkUrl: string, address: string) {
 export function flush() {
   return postDevnet('postman/flush', {});
 }
+
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
