@@ -13,8 +13,13 @@ jobs:
         with:
           node-version: "18.x"
           cache: "yarn"
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
       - run: yarn --frozen-lockfile
       - run: yarn build
       - run: yarn typecheck
       - run: yarn lint
       - run: yarn test
+      - run: yarn test:integration
