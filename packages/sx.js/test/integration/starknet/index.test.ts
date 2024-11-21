@@ -10,7 +10,6 @@ import {
   increaseTime,
   setTime,
   setup,
-  sleep,
   TestConfig
 } from './utils';
 import {
@@ -510,8 +509,7 @@ describe('sx-starknet', () => {
         }
       };
 
-      // NOTE: to avoid Votes: future lookup
-      await sleep(10000);
+      await increaseTime(1000);
 
       const receipt = await client.vote(account, envelope);
       console.log('Receipt', receipt);
@@ -586,6 +584,7 @@ describe('sx-starknet', () => {
 
     it('should execute', async () => {
       await increaseTime(86400);
+      await provider.send('evm_increaseTime', [86400]);
 
       const { executionParams } = getExecutionData(
         'EthRelayer',
