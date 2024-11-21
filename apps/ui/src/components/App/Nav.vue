@@ -126,6 +126,10 @@ const navigationConfig = computed<
     contacts: {
       name: 'Contacts',
       icon: IHUsers
+    },
+    'email-notifications': {
+      name: 'Email notifications',
+      icon: IHBell
     }
   },
   my: {
