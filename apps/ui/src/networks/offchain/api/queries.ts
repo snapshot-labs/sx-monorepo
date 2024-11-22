@@ -360,3 +360,12 @@ export const STRATEGY_QUERY = gql`
   }
   ${STRATEGY_FRAGMENT}
 `;
+
+export const NETWORKS_USAGE_QUERY = gql`
+  query Networks {
+    networks {
+      id
+      spacesCount
+    }
+  }
+`;

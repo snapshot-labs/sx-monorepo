@@ -26,6 +26,8 @@ export type SpacesFilter = {
   id_in?: string[];
   searchQuery?: string;
   domain?: string;
+  category?: string;
+  network?: string;
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
@@ -320,6 +322,7 @@ export type NetworkApi = {
   ): Promise<Statement[]>;
   loadStrategies(): Promise<StrategyTemplate[]>;
   loadStrategy(address: string): Promise<StrategyTemplate | null>;
+  getNetworksUsage(): Promise<Record<ChainId, number | undefined>>;
 };
 
 export type NetworkConstants = {

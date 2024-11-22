@@ -35,6 +35,7 @@ import {
 import {
   ALIASES_QUERY,
   LEADERBOARD_QUERY,
+  NETWORKS_USAGE_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
@@ -564,13 +565,25 @@ export function createApi(
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
-      if (!filter || filter.hasOwnProperty('searchQuery')) {
+      if (
+        !filter ||
+        filter.hasOwnProperty('searchQuery') ||
+        filter.hasOwnProperty('category') ||
+        filter.hasOwnProperty('network')
+      ) {
+        const where = {};
+        if (filter?.searchQuery) where['search'] = filter.searchQuery;
+        if (filter?.category) where['category'] = filter.category;
+        if (filter?.network && filter.network !== 'all') {
+          where['network'] = filter.network;
+        }
+
         const { data } = await apollo.query({
           query: RANKING_QUERY,
           variables: {
             first: Math.min(limit, 20),
             skip,
-            where: filter?.searchQuery ? { search: filter.searchQuery } : {}
+            where
           }
         });
         return data.ranking.items.map(space =>
@@ -783,6 +796,18 @@ export function createApi(
       if (!data.strategy) return null;
 
       return formatStrategy(data.strategy as ApiStrategy);
+    },
+    getNetworksUsage: async () => {
+      const { data } = await apollo.query({
+        query: NETWORKS_USAGE_QUERY
+      });
+
+      return Object.fromEntries(
+        data.networks.map((network: any) => [
+          Number(network.id),
+          network.spacesCount
+        ])
+      );
     }
   };
 }
