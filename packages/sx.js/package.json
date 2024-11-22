@@ -24,6 +24,7 @@
     "node:evm": "anvil",
     "node:starknet": "starknet-devnet --seed 1",
     "test": "SEPOLIA_NODE_URL=https://rpc.snapshot.org/11155111 vitest run test/unit",
+    "test:integration": "./test/run-integration-tests.sh",
     "test:integration:starknet": "vitest run test/integration/starknet",
     "test:integration:evm": "vitest run test/integration/evm",
     "test:integration:offchain": "vitest run test/integration/offchain"

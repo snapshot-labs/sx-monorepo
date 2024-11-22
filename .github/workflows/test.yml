@@ -2,6 +2,9 @@ name: CI
 
 on: [push]
 
+env:
+  STARKNET_DEVNET_VERSION: 0.2.3
+
 jobs:
   lint-build-test:
     runs-on: ubuntu-22.04
@@ -13,8 +16,20 @@ jobs:
         with:
           node-version: "18.x"
           cache: "yarn"
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Restore Cargo
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ env.STARKNET_DEVNET_VERSION }}
+      - name: Install Starknet Devnet
+        run: cargo install starknet-devnet@${{ env.STARKNET_DEVNET_VERSION }}
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
       - run: yarn --frozen-lockfile
       - run: yarn build
       - run: yarn typecheck
       - run: yarn lint
       - run: yarn test
+      - run: yarn test:integration
