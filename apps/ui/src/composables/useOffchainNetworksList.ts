@@ -18,7 +18,10 @@ export function useOffchainNetworksList(
   }
 
   const networks = computed(() => {
-    const rawNetworks = Object.values(snapshotJsNetworks);
+    const rawNetworks = Object.values(snapshotJsNetworks).filter(
+      ({ chainId }) => typeof chainId === 'number'
+    );
+
     const usageValue = usage.value;
     if (!usageValue) return rawNetworks;
 
