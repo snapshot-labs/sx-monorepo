@@ -5,7 +5,7 @@ import { EmailSubscriptionType } from '@/types';
 
 useTitle('Email notifications');
 
-const CREATE_SUBSCRIBE_FORM_STATE = {
+const SUBSCRIBE_FORM_STATE = {
   email: '',
   subscriptions: []
 };
@@ -15,12 +15,13 @@ const DEFINITION = {
   type: 'object',
   title: 'Email subscription',
   additionalProperties: false,
-  required: ['email'],
+  required: [],
   properties: {
     email: {
       type: 'string',
       format: 'email',
       title: 'Email',
+      maxLength: 256,
       examples: ['e.g. me@snapshot.box']
     },
     subscriptions: {
@@ -39,7 +40,7 @@ const SUBSCRIPTIONS_TYPE = [
     key: 'summary',
     title: 'Weekly summary',
     description:
-      'Get a weekly report detailing the activity in your followed spaces.'
+      'Get a weekly report detailing the activities in your followed spaces.'
   },
   {
     key: 'newProposal',
@@ -59,24 +60,25 @@ const SUBSCRIPTIONS_TYPE = [
 const usersStore = useUsersStore();
 const { web3 } = useWeb3();
 
-const user = computed(() => usersStore.getUser(web3.value.account));
-const loading = computed(
-  () => web3.value.authLoading || usersStore.users[web3.value.account]?.loading
-);
-
-const form: Ref<{
+const form = ref<{
   email: string;
   subscriptions: EmailSubscriptionType[];
-}> = ref(clone(CREATE_SUBSCRIBE_FORM_STATE));
+}>(clone(SUBSCRIBE_FORM_STATE));
+const formErrors = ref<Record<string, any>>({});
+const formValidated = ref(false);
 const subscriptions = reactive<Record<EmailSubscriptionType, boolean>>({
   summary: true,
   newProposal: true,
   closedProposal: true
 });
-const formErrors = ref({} as Record<string, any>);
-const formValidated = ref(false);
 
-function handleCreateSubscribeClick() {}
+const user = computed(() => usersStore.getUser(web3.value.account));
+
+const loading = computed(
+  () => web3.value.authLoading || usersStore.users[web3.value.account]?.loading
+);
+
+function handleCreateSubscriptionClick() {}
 
 function handleResendConfirmationClick() {}
 
@@ -123,17 +125,17 @@ watchEffect(async () => {
         Stay updated with the latest and important updates directly on your
         inbox.
       </div>
-
       <div class="s-box">
-        <UiForm
-          :error="formErrors"
-          :model-value="form"
-          :definition="DEFINITION"
+        <UiInputString
+          v-model="form.email"
+          :error="formErrors.email"
+          :definition="DEFINITION.properties.email"
         />
-        <UiButton @click="handleCreateSubscribeClick">Subscribe now</UiButton>
+        <UiButton @click="handleCreateSubscriptionClick">
+          Subscribe now
+        </UiButton>
       </div>
     </template>
-
     <template v-else-if="user.emailSubscription?.status === 'UNVERIFIED'">
       <h3 class="text-md leading-6">Confirm your email</h3>
       <div class="mb-3">
@@ -146,29 +148,28 @@ watchEffect(async () => {
         Resend confirmation email
       </UiButton>
     </template>
-    <template v-else-if="user.emailSubscription?.status === 'VERIFIED'">
-      <div class="space-y-3">
-        <div>
-          <h3 class="text-md leading-6">Email notifications</h3>
-          Choose the notifications you'd like to receive - and those you don't.
-        </div>
-
-        <UiSwitch
-          v-for="type in SUBSCRIPTIONS_TYPE"
-          :key="type.key"
-          v-model="subscriptions[type.key]"
-          class="gap-2.5 !items-start"
-        >
-          <div class="space-y-1 leading-[18px]">
-            <h4 class="text-base font-normal" v-text="type.title" />
-            <div class="text-skin-text" v-text="type.description" />
-          </div>
-        </UiSwitch>
-
-        <UiButton @click="handleUpdateSubscriptionClick">
-          Update subscriptions
-        </UiButton>
+    <div
+      v-else-if="user.emailSubscription?.status === 'VERIFIED'"
+      class="space-y-3"
+    >
+      <div>
+        <h3 class="text-md leading-6">Email notifications</h3>
+        Choose the notifications you'd like to receive - and those you don't.
       </div>
-    </template>
+      <UiSwitch
+        v-for="type in SUBSCRIPTIONS_TYPE"
+        :key="type.key"
+        v-model="subscriptions[type.key]"
+        class="gap-2.5 !items-start"
+      >
+        <div class="space-y-1 leading-[18px]">
+          <h4 class="text-base font-normal" v-text="type.title" />
+          <div class="text-skin-text" v-text="type.description" />
+        </div>
+      </UiSwitch>
+      <UiButton @click="handleUpdateSubscriptionClick">
+        Update subscriptions
+      </UiButton>
+    </div>
   </div>
 </template>
