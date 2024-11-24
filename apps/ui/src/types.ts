@@ -296,6 +296,7 @@ export type UserProfile = {
   lens: string;
   farcaster: string;
   votesCount: number;
+  emailSubscription: EmailSubscription;
 };
 
 export type User = {
@@ -303,6 +304,11 @@ export type User = {
   created: number | null;
   follows?: string[];
 } & Partial<UserProfile>;
+
+export type EmailSubscription = {
+  status: string;
+  subscriptions: string[];
+};
 
 export type UserActivity = {
   id: string;

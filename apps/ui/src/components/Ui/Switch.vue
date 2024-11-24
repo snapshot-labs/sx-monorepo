@@ -4,7 +4,7 @@ import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue';
 const enabled = defineModel<boolean>({ required: true });
 
 defineProps<{
-  title: string;
+  title?: string;
   tooltip?: string;
 }>();
 </script>
@@ -26,10 +26,13 @@ defineProps<{
         </span>
       </Switch>
       <SwitchLabel class="text-skin-link truncate flex items-center gap-1">
-        {{ title }}
-        <UiTooltip v-if="tooltip" :title="tooltip">
-          <IH-question-mark-circle class="shrink-0" />
-        </UiTooltip>
+        <template v-if="title">
+          {{ title }}
+          <UiTooltip v-if="tooltip" :title="tooltip">
+            <IH-question-mark-circle class="shrink-0" />
+          </UiTooltip>
+        </template>
+        <slot v-else />
       </SwitchLabel>
     </div>
   </SwitchGroup>
