@@ -80,6 +80,8 @@ function handleCreateSubscribeClick() {}
 
 function handleResendConfirmationClick() {}
 
+function handleUpdateSubscriptionClick() {}
+
 const formValidator = getValidator(DEFINITION);
 
 watch(
@@ -155,6 +157,10 @@ onUnmounted(() => {
             <div class="text-skin-text" v-text="type.description" />
           </div>
         </UiSwitch>
+
+        <UiButton @click="handleUpdateSubscriptionClick">
+          Update subscriptions
+        </UiButton>
       </div>
     </template>
     <template v-else>
