@@ -4,6 +4,11 @@ import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
+export type EmailSubscriptionType =
+  | 'summary'
+  | 'newProposal'
+  | 'closedProposal';
+
 export type ProposalState =
   | 'pending'
   | 'active'
@@ -306,8 +311,8 @@ export type User = {
 } & Partial<UserProfile>;
 
 export type EmailSubscription = {
-  status: string;
-  subscriptions: string[];
+  status: 'NOT_SUBSCRIBED' | 'UNVERIFIED' | 'VERIFIED';
+  subscriptions: EmailSubscriptionType[];
 };
 
 export type UserActivity = {

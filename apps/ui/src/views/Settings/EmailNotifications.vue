@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { EmailSubscriptionType } from '@/types';
 
 useTitle('Email notifications');
 
@@ -56,7 +57,6 @@ const SUBSCRIPTIONS_TYPE = [
 ];
 
 const usersStore = useUsersStore();
-const { modalAccountWithoutDismissOpen } = useModal();
 const { web3 } = useWeb3();
 
 const user = computed(() => usersStore.getUser(web3.value.account));
@@ -66,9 +66,9 @@ const loading = computed(
 
 const form: Ref<{
   email: string;
-  subscriptions: string[];
+  subscriptions: EmailSubscriptionType[];
 }> = ref(clone(CREATE_SUBSCRIBE_FORM_STATE));
-const subscriptions = reactive({
+const subscriptions = reactive<Record<EmailSubscriptionType, boolean>>({
   summary: true,
   newProposal: true,
   closedProposal: true
@@ -94,18 +94,10 @@ watch(
     if (user.value?.emailSubscription?.subscriptions) {
       Object.keys(subscriptions).forEach(key => {
         subscriptions[key] =
-          user.value?.emailSubscription?.subscriptions.includes(key);
+          user.value?.emailSubscription?.subscriptions.includes(
+            key as EmailSubscriptionType
+          );
       });
-    }
-  },
-  { immediate: true }
-);
-
-watch(
-  [() => web3.value.account, () => web3.value.authLoading],
-  ([account, authLoading]) => {
-    if (!account && !authLoading) {
-      modalAccountWithoutDismissOpen.value = true;
     }
   },
   { immediate: true }
@@ -117,17 +109,32 @@ watchEffect(async () => {
   formErrors.value = await formValidator.validateAsync(form);
   formValidated.value = true;
 });
-
-onUnmounted(() => {
-  modalAccountWithoutDismissOpen.value = false;
-});
 </script>
 
 <template>
   <UiLabel label="Email notifications" />
-  <UiLoading v-if="loading" class="p-4 block" />
-  <div v-else-if="user" class="p-4 max-w-[640px]">
-    <template v-if="user.emailSubscription?.status === 'UNVERIFIED'">
+  <div class="p-4 max-w-[640px]">
+    <UiLoading v-if="loading" class="block" />
+    <template
+      v-else-if="!user || user.emailSubscription?.status === 'NOT_SUBSCRIBED'"
+    >
+      <h3 class="text-md leading-6">Receive email notifications</h3>
+      <div class="mb-3">
+        Stay updated with the latest and important updates directly on your
+        inbox.
+      </div>
+
+      <div class="s-box">
+        <UiForm
+          :error="formErrors"
+          :model-value="form"
+          :definition="DEFINITION"
+        />
+        <UiButton @click="handleCreateSubscribeClick">Subscribe now</UiButton>
+      </div>
+    </template>
+
+    <template v-else-if="user.emailSubscription?.status === 'UNVERIFIED'">
       <h3 class="text-md leading-6">Confirm your email</h3>
       <div class="mb-3">
         We've sent an email to your email address.
@@ -161,22 +168,6 @@ onUnmounted(() => {
         <UiButton @click="handleUpdateSubscriptionClick">
           Update subscriptions
         </UiButton>
-      </div>
-    </template>
-    <template v-else>
-      <h3 class="text-md leading-6">Receive email notifications</h3>
-      <div class="mb-3">
-        Stay updated with the latest and important updates directly on your
-        inbox.
-      </div>
-
-      <div class="s-box">
-        <UiForm
-          :error="formErrors"
-          :model-value="form"
-          :definition="DEFINITION"
-        />
-        <UiButton @click="handleCreateSubscribeClick">Subscribe now</UiButton>
       </div>
     </template>
   </div>
