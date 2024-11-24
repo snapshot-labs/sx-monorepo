@@ -129,7 +129,8 @@ const navigationConfig = computed<
     },
     'email-notifications': {
       name: 'Email notifications',
-      icon: IHBell
+      icon: IHBell,
+      hidden: true
     }
   },
   my: {
