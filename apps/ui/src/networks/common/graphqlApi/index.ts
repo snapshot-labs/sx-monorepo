@@ -532,6 +532,8 @@ export function createApi(
         _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
       }
       delete _filter.searchQuery;
+      delete _filter.category;
+      delete _filter.network;
 
       const { data } = await apollo.query({
         query: SPACES_QUERY,
@@ -679,6 +681,9 @@ export function createApi(
     },
     loadStrategy: async () => {
       return null;
+    },
+    getNetworksUsage: async () => {
+      return {};
     }
   };
 }
