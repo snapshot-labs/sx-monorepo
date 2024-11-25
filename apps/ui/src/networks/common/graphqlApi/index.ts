@@ -266,7 +266,8 @@ function formatProposal(
       strategies_parsed_metadata: processStrategiesMetadata(
         proposal.space.strategies_parsed_metadata,
         proposal.strategies_indices
-      )
+      ),
+      terms: ''
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',
