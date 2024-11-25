@@ -2,10 +2,19 @@
 import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
-import { evmNetworks } from '@/networks';
-import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
+import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
+import {
+  ChainId,
+  Contact,
+  Space,
+  SpaceMetadataTreasury,
+  Transaction
+} from '@/types';
 
-const ETHEREUM_NETWORKS = ['eth', 'sep'];
+const STAKING_CHAIN_IDS: ChainId[] = [1, 11155111];
+const EVM_CHAIN_IDS: ChainId[] = evmNetworks
+  .filter(network => enabledNetworks.includes(network))
+  .map(network => getNetwork(network).chainId);
 
 const props = defineProps<{
   space: Space;
@@ -33,10 +42,6 @@ const modalOpen = ref({
   walletConnectLink: false
 });
 
-const currentNetworkId = computed(() => {
-  return treasury.value?.networkId ?? null;
-});
-
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 const executionStrategy = computed(
   () =>
@@ -47,7 +52,6 @@ const executionStrategy = computed(
 const isReadOnly = computed(
   () =>
     executionStrategy.value === null ||
-    !currentNetworkId.value ||
     !treasury.value?.supportsTokens ||
     !treasury.value?.supportsNfts
 );
@@ -90,10 +94,9 @@ const treasuryExplorerUrl = computed(() => {
 const hasStakeableAssets = computed(() => {
   return (
     treasury.value &&
-    treasury.value.networkId &&
     !isReadOnly.value &&
     assets.value.some(asset => asset.contractAddress === ETH_CONTRACT) &&
-    ETHEREUM_NETWORKS.includes(treasury.value.networkId)
+    STAKING_CHAIN_IDS.includes(treasury.value.network)
   );
 });
 
@@ -141,11 +144,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       <div class="flex-auto" />
 
       <UiTooltip
-        v-if="
-          !isReadOnly &&
-          currentNetworkId &&
-          evmNetworks.includes(currentNetworkId)
-        "
+        v-if="!isReadOnly && EVM_CHAIN_IDS.includes(treasury.network)"
         title="Connect to apps"
       >
         <UiButton
@@ -192,11 +191,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             'pointer-events-none': !treasuryExplorerUrl
           }"
         >
-          <UiBadgeNetwork
-            :id="treasury.networkId"
-            :chain-id="treasury.network"
-            class="mr-3"
-          >
+          <UiBadgeNetwork :chain-id="treasury.network" class="mr-3">
             <UiStamp
               :id="treasury.wallet"
               type="avatar"
@@ -296,12 +291,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0 space-x-3">
-              <UiBadgeNetwork
-                :id="treasury.networkId"
-                :chain-id="treasury.network"
-              >
+              <UiBadgeNetwork :chain-id="treasury.network">
                 <UiStamp
-                  :id="`${treasury.networkId}:${asset.contractAddress}`"
+                  :id="`eip155:${treasury.network}:${asset.contractAddress}`"
                   type="token"
                   :size="32"
                 />
@@ -409,17 +401,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     </div>
     <teleport to="#modal">
       <ModalSendToken
-        v-if="!isReadOnly && currentNetworkId && treasury.supportsTokens"
+        v-if="!isReadOnly && treasury.supportsTokens"
         :open="modalOpen.tokens"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="currentNetworkId"
         :extra-contacts="extraContacts"
         @close="modalOpen.tokens = false"
         @add="addTx"
       />
       <ModalSendNft
-        v-if="currentNetworkId"
         :open="modalOpen.nfts"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -428,20 +418,19 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         @add="addTx"
       />
       <ModalStakeToken
-        v-if="hasStakeableAssets && currentNetworkId"
+        v-if="hasStakeableAssets"
         :open="modalOpen.stake"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="currentNetworkId"
         @close="modalOpen.stake = false"
         @add="addTx"
       />
       <ModalLinkWalletConnect
-        v-if="executionStrategy && currentNetworkId"
+        v-if="executionStrategy"
         :open="modalOpen.walletConnectLink"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="currentNetworkId"
+        :network-id="space.network"
         :space-key="spaceKey"
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"

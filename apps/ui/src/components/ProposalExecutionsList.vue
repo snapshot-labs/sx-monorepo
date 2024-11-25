@@ -1,32 +1,22 @@
 <script setup lang="ts">
+import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { buildBatchFile } from '@/helpers/safe/ build';
 import { getExecutionName } from '@/helpers/ui';
-import { sanitizeUrl, shorten, toBigIntOrNumber } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
-import { NetworkID, Proposal, ProposalExecution } from '@/types';
+import { shorten, toBigIntOrNumber } from '@/helpers/utils';
+import { Proposal, ProposalExecution } from '@/types';
 
 defineProps<{
   proposal: Proposal;
   executions: ProposalExecution[];
 }>();
 
-function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
-  if (!safeAddress) return null;
-
-  try {
-    const network = getNetwork(networkId);
-
-    const url = network.helpers.getExplorerUrl(safeAddress, 'address');
-    return sanitizeUrl(url);
-  } catch (e) {
-    return null;
-  }
-}
-
 function downloadExecution(execution: ProposalExecution) {
   if (!execution.chainId) return;
 
-  const batchFile = buildBatchFile(execution.chainId, execution.transactions);
+  const batchFile = buildBatchFile(
+    execution.chainId as number,
+    execution.transactions
+  );
 
   const blob = new Blob([JSON.stringify(batchFile)], {
     type: 'application/json'
@@ -42,24 +32,28 @@ function downloadExecution(execution: ProposalExecution) {
 <template>
   <div
     v-for="execution in executions"
-    :key="`${execution.networkId}:${execution.safeAddress}`"
+    :key="`${execution.chainId}:${execution.safeAddress}`"
     class="x-block !border-x rounded-lg mb-3 last:mb-0"
   >
     <a
       :href="
-        getTreasuryExplorerUrl(execution.networkId, execution.safeAddress) ||
-        undefined
+        getGenericExplorerUrl(
+          execution.chainId,
+          execution.safeAddress,
+          'address'
+        ) || undefined
       "
       target="_blank"
       class="flex justify-between items-center px-4 py-3"
       :class="{
-        'pointer-events-none': !getTreasuryExplorerUrl(
-          execution.networkId,
-          execution.safeAddress
+        'pointer-events-none': !getGenericExplorerUrl(
+          execution.chainId,
+          execution.safeAddress,
+          'address'
         )
       }"
     >
-      <UiBadgeNetwork :id="execution.networkId" class="mr-3 shrink-0">
+      <UiBadgeNetwork :chain-id="execution.chainId" class="mr-3 shrink-0">
         <UiStamp
           :id="execution.safeAddress"
           type="avatar"
@@ -99,7 +93,7 @@ function downloadExecution(execution: ProposalExecution) {
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"
-      :network-id="execution.networkId"
+      :chain-id="execution.chainId"
       :tx="tx"
     />
     <ProposalExecutionActions
