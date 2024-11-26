@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { quorumLabel, quorumProgress } from '@/helpers/quorum';
-import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
+import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
+import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -110,7 +110,8 @@ const space = computed(() =>
         {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
       </template>
       <span v-if="proposal.quorum" class="lowercase">
-        · {{ _p(totalProgress) }} {{ quorumLabel(proposal.quorum_type) }}
+        · {{ formatQuorum(totalProgress) }}
+        {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
       <button
