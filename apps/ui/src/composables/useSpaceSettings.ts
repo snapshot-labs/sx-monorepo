@@ -442,6 +442,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     if (space.additionalRawData?.filters.onlyMembers) {
       validation.name = 'only-members';
       validation.params = {};
+    } else if (
+      space.additionalRawData?.filters.minScore &&
+      validation.name === 'basic' &&
+      !validation.params.minScore
+    ) {
+      validation.params.minScore = space.additionalRawData.filters.minScore;
     } else if (validation.name === 'any') {
       validation.name = 'basic';
       validation.params = {
