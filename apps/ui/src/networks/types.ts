@@ -31,6 +31,7 @@ export type SpacesFilter = {
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
+  labels?: string[];
 } & Record<string, any>;
 export type Connector =
   | 'argentx'
