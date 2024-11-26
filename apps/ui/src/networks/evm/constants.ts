@@ -466,7 +466,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
-            title: 'Avatar address',
+            title: 'Safe address',
             examples: ['0x0000…']
           }
         }
