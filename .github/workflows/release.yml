@@ -14,10 +14,10 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
-      - name: Setup Node.js 16
+      - name: Setup Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       - name: Install Dependencies
         run: yarn
       - name: Create Release Pull Request or Publish to npm
