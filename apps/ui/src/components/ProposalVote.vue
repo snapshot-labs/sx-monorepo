@@ -69,7 +69,7 @@ const isEditable = computed(() => {
         <IH-lock-closed class="size-[16px] shrink-0" />
         <span class="truncate">Encrypted choice</span>
       </div>
-      <div v-else class="flex items-center gap-2">
+      <div v-else class="flex items-center gap-2 overflow-hidden">
         <div
           v-if="proposal.type === 'basic'"
           class="shrink-0 rounded-full choice-bg inline-block size-[18px]"
