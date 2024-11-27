@@ -66,8 +66,7 @@ const isEditable = computed(() => {
     >
       <div
         v-if="proposal.privacy"
-        class="flex space-x-2 items-center grow truncate"
-        :class="{ 'text-skin-text': !isEditable }"
+        class="flex space-x-2 items-center grow truncate text-skin-link"
       >
         <IH-lock-closed class="size-[16px] shrink-0" />
         <span class="truncate">Encrypted choice</span>
@@ -92,8 +91,7 @@ const isEditable = computed(() => {
           />
         </div>
         <div
-          class="grow truncate"
-          :class="{ 'text-skin-text': !isEditable }"
+          class="grow truncate text-skin-link"
           v-text="getChoiceText(proposal.choices, currentVote.choice)"
         />
       </div>
