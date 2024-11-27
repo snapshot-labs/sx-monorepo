@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { PRIVACY_TYPES_INFO } from '@/helpers/constants';
 
-type Privacy = 'none' | 'shutter' | 'any';
+type Privacy = '' | 'shutter' | 'any';
 
-const votingTypes = ['none', 'shutter', 'any'] as const;
+const votingTypes = ['', 'shutter', 'any'] as const;
 
 defineProps<{
   open: boolean;

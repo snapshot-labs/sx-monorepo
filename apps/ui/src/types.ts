@@ -172,6 +172,7 @@ export type Space = {
   discord: string;
   coingecko?: string;
   terms: string;
+  privacy: '' | 'shutter' | 'any';
   voting_power_symbol: string;
   controller: string;
   voting_delay: number;

@@ -543,7 +543,7 @@ watchEffect(() => {
         </template>
       </EditorChoices>
       <UiSwitch
-        v-if="isOffchainSpace"
+        v-if="isOffchainSpace && space.privacy === 'any'"
         v-model="privacy"
         title="Shielded voting"
         tooltip="Choices will be encrypted and only visible once the voting period is over."
