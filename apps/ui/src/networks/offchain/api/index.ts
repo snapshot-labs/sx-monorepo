@@ -496,7 +496,7 @@ export function createApi(
       filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: Record<string, any> = clone(filters || {});
+      const _filters: ProposalsFilter = clone(filters || {});
       const state = _filters.state;
 
       if (state === 'active') {
@@ -516,6 +516,12 @@ export function createApi(
         });
 
       delete _filters.state;
+
+      if (_filters.labels?.length) {
+        _filters.labels_in = _filters.labels;
+      }
+
+      delete _filters.labels;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
