@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Choice, Proposal as ProposalType } from '@/types';
 
-defineProps<{
+const props = defineProps<{
   proposal: ProposalType;
   showSpace: boolean;
   showAuthor: boolean;
@@ -9,9 +9,16 @@ defineProps<{
 
 const { modalAccountOpen } = useModal();
 const { web3 } = useWeb3();
+const termsStore = useTermsStore();
 
 const modalOpenVote = ref(false);
+const modalOpenTerms = ref(false);
 const selectedChoice = ref<Choice | null>(null);
+
+const space = computed(() => ({
+  network: props.proposal.network,
+  ...props.proposal.space
+}));
 
 const handleVoteClick = (choice: Choice) => {
   if (!web3.value.account) {
@@ -20,8 +27,19 @@ const handleVoteClick = (choice: Choice) => {
   }
 
   selectedChoice.value = choice;
+
+  if (props.proposal.space.terms && !termsStore.areAccepted(space.value)) {
+    modalOpenTerms.value = true;
+    return;
+  }
+
   modalOpenVote.value = true;
 };
+
+function handleAcceptTerms() {
+  termsStore.accept(space.value);
+  handleVoteClick(selectedChoice.value!);
+}
 </script>
 <template>
   <div>
@@ -65,6 +83,13 @@ const handleVoteClick = (choice: Choice) => {
     </div>
   </div>
   <teleport to="#modal">
+    <ModalTerms
+      v-if="proposal.space.terms"
+      :open="modalOpenTerms"
+      :space="proposal.space"
+      @close="modalOpenTerms = false"
+      @accept="handleAcceptTerms"
+    />
     <ModalVote
       :choice="selectedChoice"
       :proposal="proposal"

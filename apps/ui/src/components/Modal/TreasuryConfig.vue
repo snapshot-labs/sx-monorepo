@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { offchainNetworks } from '@/networks';
 import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
   address: '',
-  network: null,
   chainId: null
 };
 
@@ -25,16 +23,12 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataTreasury> = ref(clone(DEFAULT_FORM_STATE));
 
-const networkField = computed(() =>
-  offchainNetworks.includes(props.networkId) ? 'chainId' : 'network'
-);
-
 const definition = computed(() => {
   return {
     type: 'object',
     title: 'Space',
     additionalProperties: true,
-    required: ['name', 'network', 'address'],
+    required: ['name', 'chainId', 'address'],
     properties: {
       name: {
         type: 'string',
@@ -43,17 +37,15 @@ const definition = computed(() => {
         maxLength: 32,
         examples: ['Treasury name']
       },
-      [networkField.value]: {
+      chainId: {
         type: ['string', 'number', 'null'],
         format: 'network',
         networkId: props.networkId,
-        networksListKind: offchainNetworks.includes(props.networkId)
-          ? 'full'
-          : 'builtin',
+        networksListKind: 'full',
         title: 'Treasury network',
         nullable: true
       },
-      ...(form.value[networkField.value] !== null
+      ...(form.value.chainId !== null
         ? {
             address: {
               type: 'string',
@@ -75,7 +67,7 @@ const formErrors = computed(() =>
 const formValid = computed(() => {
   return (
     Object.keys(formErrors.value).length === 0 &&
-    form.value[networkField.value] !== null &&
+    form.value.chainId !== null &&
     form.value.address !== ''
   );
 });

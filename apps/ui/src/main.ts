@@ -15,7 +15,8 @@ const knownHosts = [
   'multisig.moonbeam.network',
   'worldassociation.org',
   'safe.mainnet.frax.com',
-  'horizen-eon.safe.onchainden.com'
+  'horizen-eon.safe.onchainden.com',
+  'safe.fantom.network'
 ];
 const parentUrl =
   window.location != window.parent.location

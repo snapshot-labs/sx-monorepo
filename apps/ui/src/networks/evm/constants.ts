@@ -425,7 +425,7 @@ export function createConstants(networkId: NetworkID) {
       type: 'SimpleQuorumAvatar',
       name: EXECUTORS.SimpleQuorumAvatar,
       about:
-        'An execution strategy that allows proposals to execute transactions from a specified target Avatar contract, the most popular one being a Safe.',
+        'An execution strategy that allows proposals to execute transactions from a specified target Safe contract.',
       icon: IHUserCircle,
       generateSummary: (params: Record<string, any>) =>
         `(${params.quorum}, ${shorten(params.contractAddress)})`,
@@ -466,7 +466,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
-            title: 'Avatar address',
+            title: 'Safe address',
             examples: ['0x0000…']
           }
         }

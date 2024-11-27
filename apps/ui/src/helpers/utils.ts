@@ -444,7 +444,7 @@ export function createErc1155Metadata(
       discord: metadata.discord,
       treasuries: metadata.treasuries.map(treasury => ({
         name: treasury.name,
-        network: treasury.network,
+        chain_id: treasury.chainId,
         address: treasury.address
       })),
       labels: metadata.labels?.map(label => ({

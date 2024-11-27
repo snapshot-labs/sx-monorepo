@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
-const props = defineProps<RouterLinkProps>();
+const props = defineProps<
+  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw }
+>();
 
 const { isWhiteLabel } = useWhiteLabel();
 
@@ -32,7 +34,10 @@ function normalize(to: RouteLocationRaw) {
 </script>
 
 <template>
-  <router-link :to="normalize(props.to)">
+  <router-link v-if="props.to" :to="normalize(props.to)">
     <slot />
   </router-link>
+  <div v-else>
+    <slot />
+  </div>
 </template>

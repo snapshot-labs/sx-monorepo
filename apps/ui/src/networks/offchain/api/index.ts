@@ -35,6 +35,7 @@ import {
 import {
   ALIASES_QUERY,
   LEADERBOARD_QUERY,
+  NETWORKS_USAGE_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
@@ -58,13 +59,6 @@ import {
 import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
-
-const TREASURY_NETWORKS = new Map(
-  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
-    chainId,
-    networkId as keyof typeof CHAIN_IDS
-  ])
-);
 
 const DELEGATION_STRATEGIES = [
   'delegation',
@@ -100,7 +94,6 @@ function formatSpace(
 
     return {
       name: treasury.name,
-      network: TREASURY_NETWORKS.get(chainId) ?? null,
       address: treasury.address,
       chainId
     };
@@ -307,7 +300,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
       executors_types: [],
-      strategies_parsed_metadata: []
+      strategies_parsed_metadata: [],
+      terms: proposal.space.terms
     },
     execution_strategy_type: executionType,
     has_execution_window_opened: state === 'passed',
@@ -502,7 +496,7 @@ export function createApi(
       filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: Record<string, any> = clone(filters || {});
+      const _filters: ProposalsFilter = clone(filters || {});
       const state = _filters.state;
 
       if (state === 'active') {
@@ -522,6 +516,12 @@ export function createApi(
         });
 
       delete _filters.state;
+
+      if (_filters.labels?.length) {
+        _filters.labels_in = _filters.labels;
+      }
+
+      delete _filters.labels;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -564,13 +564,25 @@ export function createApi(
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
-      if (!filter || filter.hasOwnProperty('searchQuery')) {
+      if (
+        !filter ||
+        filter.hasOwnProperty('searchQuery') ||
+        filter.hasOwnProperty('category') ||
+        filter.hasOwnProperty('network')
+      ) {
+        const where = {};
+        if (filter?.searchQuery) where['search'] = filter.searchQuery;
+        if (filter?.category) where['category'] = filter.category;
+        if (filter?.network && filter.network !== 'all') {
+          where['network'] = filter.network;
+        }
+
         const { data } = await apollo.query({
           query: RANKING_QUERY,
           variables: {
             first: Math.min(limit, 20),
             skip,
-            where: filter?.searchQuery ? { search: filter.searchQuery } : {}
+            where
           }
         });
         return data.ranking.items.map(space =>
@@ -783,6 +795,18 @@ export function createApi(
       if (!data.strategy) return null;
 
       return formatStrategy(data.strategy as ApiStrategy);
+    },
+    getNetworksUsage: async () => {
+      const { data } = await apollo.query({
+        query: NETWORKS_USAGE_QUERY
+      });
+
+      return Object.fromEntries(
+        data.networks.map((network: any) => [
+          Number(network.id),
+          network.spacesCount
+        ])
+      );
     }
   };
 }

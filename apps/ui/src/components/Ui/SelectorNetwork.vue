@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
 import { enabledNetworks, getNetwork } from '@/networks';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
@@ -16,10 +15,14 @@ const props = defineProps<{
   };
 }>();
 
+const { networks, getUsage } = useOffchainNetworksList(
+  props.definition.networkId
+);
+
 const options = computed(() => {
   if (props.definition.networksListKind === 'full') {
-    const baseNetworks = Object.entries(networks)
-      .filter(([, network]) => {
+    const baseNetworks = networks.value
+      .filter(network => {
         if (
           props.definition.networkId === 's' &&
           'testnet' in network &&
@@ -30,8 +33,8 @@ const options = computed(() => {
 
         return true;
       })
-      .map(([id, network]) => ({
-        id: Number(id),
+      .map(network => ({
+        id: network.chainId,
         name: network.name,
         icon: h('img', {
           src: getUrl(network.logo),
@@ -81,6 +84,10 @@ const options = computed(() => {
       };
     })
     .filter(network => !network.readOnly);
+});
+
+onMounted(() => {
+  getUsage();
 });
 </script>
 

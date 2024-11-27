@@ -98,8 +98,17 @@ export function useSpaces() {
   }
 
   async function _fetchSpaces(overwrite: boolean, filter?: SpacesFilter) {
-    const { networks, limit } = explorePageProtocols[protocol.value];
+    const { limit } = explorePageProtocols[protocol.value];
+    let { networks } = explorePageProtocols[protocol.value];
     let unsortedExplorePageSpaces = overwrite ? [] : explorePageSpaces.value;
+
+    if (
+      protocol.value === 'snapshotx' &&
+      filter?.network &&
+      filter.network !== 'all'
+    ) {
+      networks = [filter.network as NetworkID];
+    }
 
     const results = await Promise.all(
       networks.map(async id => {
