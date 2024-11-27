@@ -452,7 +452,8 @@ export function createConstants(
           createSlotValueStrategyConfig(
             config.Strategies.OZVotesTrace208StorageProof,
             'OZ Votes storage proof (trace 208)',
-            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 208 format).'
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 208 format).',
+            `${HELPDESK_URL}/en/articles/9839152-oz-votes-storage-proof-voting-strategy`
           )
         ]
       : [])
