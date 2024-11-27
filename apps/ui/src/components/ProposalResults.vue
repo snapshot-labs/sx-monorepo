@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  formatQuorum,
   quorumChoiceProgress,
   quorumLabel,
   quorumProgress
@@ -97,7 +98,7 @@ const otherResultsSummary = computed(() => {
       </a>
       <div v-if="proposal.quorum" class="mt-3.5">
         {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
     </div>
   </div>
@@ -177,7 +178,7 @@ const otherResultsSummary = computed(() => {
       </button>
       <div v-if="proposal.quorum">
         {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
       <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
         <a
