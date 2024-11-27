@@ -56,8 +56,8 @@ watch(
 </script>
 
 <template>
-  <div class="flex justify-between">
-    <div class="flex flex-row p-4 space-x-2">
+  <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
+    <div class="flex flex-row space-x-2">
       <UiSelectDropdown
         v-model="spacesStore.protocol"
         title="Protocol"
@@ -66,6 +66,18 @@ watch(
         :items="protocols"
       />
     </div>
+    <UiTooltip title="Create new space">
+      <UiButton
+        :to="
+          spacesStore.protocol === 'snapshot'
+            ? 'https://snapshot.org/#/setup'
+            : 'create'
+        "
+        class="!px-0 w-[46px]"
+      >
+        <IH-plus-sm />
+      </UiButton>
+    </UiTooltip>
   </div>
   <UiLabel label="My spaces" sticky />
   <UiLoading v-if="loading" class="block m-4" />
