@@ -7,7 +7,7 @@ const props = defineProps<
 
 const { isWhiteLabel } = useWhiteLabel();
 
-function isExternalLink(to: RouteLocationRaw) {
+function isExternalLink(to: RouteLocationRaw | undefined): to is string {
   return typeof to === 'string' && to.startsWith('http');
 }
 
