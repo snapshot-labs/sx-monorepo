@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, ref, watchEffect } from 'vue';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
@@ -57,6 +58,16 @@ const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
+const privacy = computed({
+  get() {
+    return proposal.value?.privacy === 'shutter';
+  },
+  set(value) {
+    if (proposal.value) {
+      proposal.value.privacy = value ? 'shutter' : '';
+    }
+  }
+});
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -203,6 +214,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         executions
       );
@@ -216,6 +228,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
         executions
@@ -531,7 +544,7 @@ watchEffect(() => {
       </EditorChoices>
       <UiSwitch
         v-if="isOffchainSpace"
-        v-model="proposal.privacy"
+        v-model="privacy"
         title="Shielded voting"
         tooltip="Choices will be encrypted and only visible once the voting period is over."
       />

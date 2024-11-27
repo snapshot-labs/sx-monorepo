@@ -30,6 +30,7 @@ import {
 } from '@/types';
 import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
+import { Privacy } from '../../types';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
   Connector,
@@ -129,6 +130,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       app: string,
       executions: ExecutionInfo[]
@@ -138,7 +140,6 @@ export function createActions(
       const provider = getProvider(space.snapshot_chain_id as number);
 
       const plugins = await getPlugins(executions);
-
       const data = {
         space: space.id,
         title,
@@ -146,6 +147,7 @@ export function createActions(
         type,
         discussion,
         choices,
+        privacy,
         labels,
         start: startTime,
         end: startTime + space.min_voting_period,
@@ -155,6 +157,7 @@ export function createActions(
         timestamp: currentTime
       };
 
+      console.log(data);
       return client.propose({ signer: web3.getSigner(), data });
     },
     async updateProposal(
@@ -168,6 +171,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       executions: ExecutionInfo[]
     ) {
@@ -181,6 +185,7 @@ export function createActions(
         type,
         discussion,
         choices,
+        privacy,
         labels,
         plugins: JSON.stringify(plugins)
       };

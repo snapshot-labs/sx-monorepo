@@ -32,7 +32,7 @@ export type Choice =
   | number[]
   | Record<string, number>;
 
-export type Privacy = 'shutter' | null;
+export type Privacy = 'shutter' | '';
 
 export type VoteType =
   | 'basic'
@@ -369,7 +369,7 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
-  privacy: boolean;
+  privacy: Privacy;
   labels: string[];
   executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
