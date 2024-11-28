@@ -7,6 +7,10 @@ const props = defineProps<
 
 const { isWhiteLabel } = useWhiteLabel();
 
+function isExternalLink(to: RouteLocationRaw | undefined): to is string {
+  return typeof to === 'string' && to.startsWith('http');
+}
+
 function normalize(to: RouteLocationRaw) {
   if (
     !isWhiteLabel.value ||
@@ -34,7 +38,10 @@ function normalize(to: RouteLocationRaw) {
 </script>
 
 <template>
-  <router-link v-if="props.to" :to="normalize(props.to)">
+  <a v-if="isExternalLink(props.to)" :href="props.to" target="_blank">
+    <slot />
+  </a>
+  <router-link v-else-if="props.to" :to="normalize(props.to)">
     <slot />
   </router-link>
   <div v-else>
