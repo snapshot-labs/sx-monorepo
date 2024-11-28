@@ -47,7 +47,8 @@ const {
   reset
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
-const { votingPower, fetch: fetchVotingPower } = useVotingPower();
+const { get: getPropositionPower, fetch: fetchPropositionPower } =
+  usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 
@@ -154,7 +155,7 @@ const canSubmit = computed(() => {
   if (Object.keys(formErrors.value).length > 0) return false;
 
   return web3.value.account
-    ? votingPower.value?.canPropose
+    ? propositionPower.value?.canPropose
     : !web3.value.authLoading;
 });
 const spaceType = computed(() =>
@@ -166,6 +167,8 @@ const proposalLimitReached = computed(
     (props.space.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
     (props.space.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
 );
+
+const propositionPower = computed(() => getPropositionPower(props.space));
 
 async function handleProposeClick() {
   if (!proposal.value) return;
@@ -278,8 +281,8 @@ function handleTransactionAccept() {
   reset();
 }
 
-function handleFetchVotingPower() {
-  fetchVotingPower(props.space);
+function handleFetchPropositionPower() {
+  fetchPropositionPower(props.space);
 }
 
 watch(
@@ -287,7 +290,7 @@ watch(
   toAccount => {
     if (!toAccount) return;
 
-    handleFetchVotingPower();
+    handleFetchPropositionPower();
   },
   { immediate: true }
 );
@@ -358,7 +361,9 @@ watchEffect(() => {
         class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
         :loading="
           !!web3.account &&
-          (sending || !votingPower || votingPower.status === 'loading')
+          (sending ||
+            !propositionPower ||
+            propositionPower.status === 'loading')
         "
         :disabled="!canSubmit"
         @click="handleProposeClick"
@@ -373,14 +378,16 @@ watchEffect(() => {
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
-          v-if="votingPower"
+          v-if="propositionPower"
           class="mb-4"
-          :voting-power="votingPower"
+          :voting-power="propositionPower"
           action="propose"
-          @fetch-voting-power="handleFetchVotingPower"
+          @fetch-voting-power="handleFetchPropositionPower"
         />
         <UiAlert
-          v-if="votingPower && spaceType === 'default' && proposalLimitReached"
+          v-if="
+            propositionPower && spaceType === 'default' && proposalLimitReached
+          "
           type="error"
           class="mb-4"
         >
@@ -396,7 +403,7 @@ watchEffect(() => {
         </UiAlert>
         <UiAlert
           v-else-if="
-            votingPower && spaceType !== 'turbo' && proposalLimitReached
+            propositionPower && spaceType !== 'turbo' && proposalLimitReached
           "
           type="error"
           class="mb-4"
