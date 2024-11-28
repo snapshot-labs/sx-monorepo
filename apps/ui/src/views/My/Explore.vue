@@ -144,8 +144,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex justify-between">
-    <div class="flex flex-row flex-wrap p-4 gap-2">
+  <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
+    <div class="flex flex-row flex-wrap gap-2">
       <UiSelectDropdown
         v-model="protocol"
         class="min-h-[46px]"
@@ -176,6 +176,16 @@ onMounted(() => {
         :items="categories"
       />
     </div>
+    <UiTooltip title="Create new space">
+      <UiButton
+        :to="
+          protocol === 'snapshot' ? 'https://snapshot.org/#/setup' : 'create'
+        "
+        class="!px-0 w-[46px]"
+      >
+        <IH-plus-sm />
+      </UiButton>
+    </UiTooltip>
   </div>
   <div>
     <UiLabel label="Spaces" sticky />
