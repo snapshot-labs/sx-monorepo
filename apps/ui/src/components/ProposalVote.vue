@@ -57,19 +57,21 @@ const isEditable = computed(() => {
 <template>
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
     <UiButton
-      class="!h-[48px] text-left w-full flex items-center rounded-lg space-x-2"
+      class="!h-[48px] text-left w-full flex items-center justify-between rounded-lg space-x-2"
+      :class="{
+        'border-skin-link': isEditable
+      }"
       :disabled="!isEditable"
       @click="$emit('enterEditMode')"
     >
       <div
         v-if="proposal.privacy"
-        class="flex space-x-2 items-center grow truncate"
-        :class="{ 'text-skin-text': !isEditable }"
+        class="flex space-x-2 items-center grow truncate text-skin-link"
       >
         <IH-lock-closed class="size-[16px] shrink-0" />
         <span class="truncate">Encrypted choice</span>
       </div>
-      <div v-else class="flex items-center gap-2">
+      <div v-else class="flex items-center gap-2 overflow-hidden">
         <div
           v-if="proposal.type === 'basic'"
           class="shrink-0 rounded-full choice-bg inline-block size-[18px]"
@@ -89,8 +91,7 @@ const isEditable = computed(() => {
           />
         </div>
         <div
-          class="grow truncate"
-          :class="{ 'text-skin-text': !isEditable }"
+          class="grow truncate text-skin-link"
           v-text="getChoiceText(proposal.choices, currentVote.choice)"
         />
       </div>
