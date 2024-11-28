@@ -125,6 +125,7 @@ export type ApiProposal = {
   votes: number;
   privacy: Privacy;
   plugins: Record<string, any>;
+  flagged: boolean;
 };
 
 export type ApiVote = {
