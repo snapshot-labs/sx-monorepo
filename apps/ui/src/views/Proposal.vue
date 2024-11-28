@@ -202,7 +202,7 @@ watchEffect(() => {
       </div>
       <Affix
         :class="[
-          'shrink-0 md:w-[340px] border-l-0 md:border-l',
+          'shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6',
           { 'hidden md:block': route.name === 'space-proposal-votes' }
         ]"
         :top="72"
