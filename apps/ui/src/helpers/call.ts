@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
-import networks from '@/helpers/networks.json';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 
 export async function call(provider, abi: any[], call: any[], options?) {
   const contract = new Contract(call[0], abi, provider);

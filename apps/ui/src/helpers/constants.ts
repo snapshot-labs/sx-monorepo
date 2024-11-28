@@ -4,6 +4,8 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
+export const HELPDESK_URL = 'https://help.snapshot.box';
+
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
@@ -12,7 +14,6 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   oeth: 10,
   matic: 137,
   arb1: 42161,
-  'linea-testnet': 59140,
   sep: 11155111,
   // Starknet
   sn: '0x534e5f4d41494e',
@@ -34,6 +35,17 @@ export const COINGECKO_BASE_ASSETS = {
 };
 
 export const MAX_SYMBOL_LENGTH = 12;
+
+export const SPACE_CATEGORIES = [
+  { id: 'protocol', name: 'Protocol' },
+  { id: 'social', name: 'Social' },
+  { id: 'investment', name: 'Investment' },
+  { id: 'grant', name: 'Grant' },
+  { id: 'service', name: 'Service' },
+  { id: 'media', name: 'Media' },
+  { id: 'creator', name: 'Creator' },
+  { id: 'collector', name: 'Collector' }
+] as const;
 
 export const BASIC_CHOICES = ['For', 'Against', 'Abstain'];
 export const SUPPORTED_VOTING_TYPES: VoteType[] = [
@@ -91,7 +103,7 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'No privacy'
   },
   shutter: {
-    label: 'Shutter',
+    label: 'Shielded voting',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
   }

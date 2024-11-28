@@ -47,10 +47,13 @@ const {
   reset
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
-const { votingPower, fetch: fetchVotingPower } = useVotingPower();
+const { get: getPropositionPower, fetch: fetchPropositionPower } =
+  usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
+const termsStore = useTermsStore();
 
 const modalOpen = ref(false);
+const modalOpenTerms = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -115,7 +118,7 @@ const bodyDefinition = computed(() => ({
 const choicesDefinition = computed(() => ({
   type: 'array',
   title: 'Choices',
-  minItems: 1,
+  minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
   maxItems: MAX_CHOICES[props.space.turbo ? 'turbo' : 'default'],
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
@@ -141,7 +144,7 @@ const formErrors = computed(() => {
       title: proposal.value.title,
       body: proposal.value.body,
       discussion: proposal.value.discussion,
-      choices: proposal.value.choices
+      choices: proposal.value.choices.filter(choice => !!choice)
     },
     {
       skipEmptyOptionalFields: true
@@ -152,7 +155,7 @@ const canSubmit = computed(() => {
   if (Object.keys(formErrors.value).length > 0) return false;
 
   return web3.value.account
-    ? votingPower.value?.canPropose
+    ? propositionPower.value?.canPropose
     : !web3.value.authLoading;
 });
 const spaceType = computed(() =>
@@ -165,8 +168,15 @@ const proposalLimitReached = computed(
     (props.space.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
 );
 
+const propositionPower = computed(() => getPropositionPower(props.space));
+
 async function handleProposeClick() {
   if (!proposal.value) return;
+
+  if (props.space.terms && !termsStore.areAccepted(props.space)) {
+    modalOpenTerms.value = true;
+    return;
+  }
 
   sending.value = true;
 
@@ -216,13 +226,29 @@ async function handleProposeClick() {
     }
     if (result) {
       proposalsStore.reset(props.space.id, props.space.network);
-      router.push({
-        name: 'space-proposals'
-      });
+
+      if (
+        proposal.value.proposalId &&
+        offchainNetworks.includes(props.space.network)
+      ) {
+        router.push({
+          name: 'space-proposal-overview',
+          params: {
+            proposal: proposal.value.proposalId
+          }
+        });
+      } else {
+        router.push({ name: 'space-proposals' });
+      }
     }
   } finally {
     sending.value = false;
   }
+}
+
+function handleAcceptTerms() {
+  termsStore.accept(props.space);
+  handleProposeClick();
 }
 
 function handleExecutionUpdated(
@@ -255,8 +281,8 @@ function handleTransactionAccept() {
   reset();
 }
 
-function handleFetchVotingPower() {
-  fetchVotingPower(props.space);
+function handleFetchPropositionPower() {
+  fetchPropositionPower(props.space);
 }
 
 watch(
@@ -264,7 +290,7 @@ watch(
   toAccount => {
     if (!toAccount) return;
 
-    handleFetchVotingPower();
+    handleFetchPropositionPower();
   },
   { immediate: true }
 );
@@ -335,7 +361,9 @@ watchEffect(() => {
         class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
         :loading="
           !!web3.account &&
-          (sending || !votingPower || votingPower.status === 'loading')
+          (sending ||
+            !propositionPower ||
+            propositionPower.status === 'loading')
         "
         :disabled="!canSubmit"
         @click="handleProposeClick"
@@ -350,14 +378,16 @@ watchEffect(() => {
     <div class="md:mr-[340px]">
       <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
         <MessageVotingPower
-          v-if="votingPower"
+          v-if="propositionPower"
           class="mb-4"
-          :voting-power="votingPower"
+          :voting-power="propositionPower"
           action="propose"
-          @fetch-voting-power="handleFetchVotingPower"
+          @fetch-voting-power="handleFetchPropositionPower"
         />
         <UiAlert
-          v-if="votingPower && spaceType === 'default' && proposalLimitReached"
+          v-if="
+            propositionPower && spaceType === 'default' && proposalLimitReached
+          "
           type="error"
           class="mb-4"
         >
@@ -373,7 +403,7 @@ watchEffect(() => {
         </UiAlert>
         <UiAlert
           v-else-if="
-            votingPower && spaceType !== 'turbo' && proposalLimitReached
+            propositionPower && spaceType !== 'turbo' && proposalLimitReached
           "
           type="error"
           class="mb-4"
@@ -487,6 +517,9 @@ watchEffect(() => {
       />
       <EditorChoices
         v-model="proposal"
+        :minimum-basic-choices="
+          offchainNetworks.includes(space.network) ? 2 : 3
+        "
         :definition="choicesDefinition"
         :error="
           proposal.choices.length > choicesDefinition.maxItems
@@ -514,6 +547,13 @@ watchEffect(() => {
       </div>
     </div>
     <teleport to="#modal">
+      <ModalTerms
+        v-if="space.terms"
+        :open="modalOpenTerms"
+        :space="space"
+        @close="modalOpenTerms = false"
+        @accept="handleAcceptTerms"
+      />
       <ModalDrafts
         :open="modalOpen"
         :network-id="space.network"

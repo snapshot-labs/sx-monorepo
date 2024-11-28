@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { offchainNetworks } from '@/networks';
 import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
 const model = defineModel<SpaceMetadataTreasury[]>({
   required: true
 });
 
-const props = defineProps<{
+defineProps<{
   networkId: NetworkID;
   limit?: number;
 }>();
@@ -28,11 +27,7 @@ function addTreasuryConfig(config: SpaceMetadataTreasury) {
       : model.value;
 
   const getId = (t: SpaceMetadataTreasury) => {
-    const networkIdentifeir = offchainNetworks.includes(props.networkId)
-      ? t.chainId
-      : t.network;
-
-    return `${t.name}-${networkIdentifeir}-${t.address}`;
+    return `${t.name}-${t.chainId}-${t.address}`;
   };
 
   const existingTreasuries = new Map(

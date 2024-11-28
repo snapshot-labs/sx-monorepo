@@ -1,4 +1,4 @@
-import networks from '@/helpers/networks.json';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { pinGraph } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
@@ -67,15 +67,6 @@ export const METADATA: Record<string, Metadata> = {
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816
-  },
-  'linea-testnet': {
-    name: 'Linea testnet',
-    chainId: 59140,
-    apiUrl:
-      'https://thegraph.goerli.zkevm.consensys.net/subgraphs/name/snapshot-labs/sx-subgraph',
-    avatar:
-      'ipfs://bafkreibn4mjs54bnmvkrkiaiwp47gvcz6bervg2kr5ubknytfyz6l5wbs4',
-    blockTime: 13.52926
   }
 };
 
@@ -119,7 +110,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'address';
 
-      return `${networks[chainId].explorer}/${dataType}/${id}`;
+      return `${networks[chainId].explorer.url}/${dataType}/${id}`;
     }
   };
 

@@ -19,7 +19,6 @@ export type NetworkID =
   | 'arb1'
   | 'oeth'
   | 'sep'
-  | 'linea-testnet'
   | 'sn'
   | 'sn-sep';
 
@@ -62,9 +61,8 @@ export type SelectedStrategy = {
 
 export type SpaceMetadataTreasury = {
   name: string;
-  network: Exclude<NetworkID, 's' | 's-tn'> | null;
   address: string;
-  chainId?: ChainId | null;
+  chainId: ChainId | null;
 };
 
 export type SpaceMetadataLabel = {
@@ -78,9 +76,8 @@ export type SpaceMetadataDelegation = {
   name: string | null;
   apiType: DelegationType | null;
   apiUrl: string | null;
-  contractNetwork: NetworkID | null;
   contractAddress: string | null;
-  chainId?: ChainId | null;
+  chainId: ChainId | null;
 };
 
 export type SpaceMetadata = {
@@ -137,7 +134,6 @@ export type OffchainAdditionalRawData = {
   type: 'offchain';
 } & Pick<
   OffchainApiSpace,
-  | 'terms'
   | 'private'
   | 'domain'
   | 'skin'
@@ -175,6 +171,7 @@ export type Space = {
   github: string;
   discord: string;
   coingecko?: string;
+  terms: string;
   voting_power_symbol: string;
   controller: string;
   voting_delay: number;
@@ -219,9 +216,8 @@ export type ProposalExecution = {
   strategyType: string;
   safeName: string;
   safeAddress: string;
-  networkId: NetworkID;
   transactions: Transaction[];
-  chainId?: number;
+  chainId: ChainId;
 };
 
 export type Proposal = {
@@ -237,6 +233,7 @@ export type Proposal = {
     name: string;
     snapshot_chain_id?: number;
     avatar: string;
+    terms: string;
     controller: string;
     admins?: string[];
     moderators?: string[];
@@ -286,6 +283,7 @@ export type Proposal = {
   cancelled: boolean;
   state: ProposalState;
   privacy: Privacy;
+  flagged: boolean;
 };
 
 export type UserProfile = {
