@@ -3,7 +3,7 @@ import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { offchainNetworks } from '@/networks';
-import { Choice, Proposal } from '@/types';
+import { Choice, Proposal, Space } from '@/types';
 
 const REASON_DEFINITION = {
   title: 'Reason',
@@ -56,7 +56,7 @@ const formValidator = getValidator({
 });
 
 const votingPower = computed(() =>
-  getVotingPower(props.proposal.space, props.proposal)
+  getVotingPower(props.proposal.space as Space, props.proposal)
 );
 
 const formattedVotingPower = computed(() =>
@@ -128,7 +128,7 @@ async function handleConfirmed(tx?: string | null) {
 }
 
 function handleFetchVotingPower() {
-  fetchVotingPower(props.proposal.space, props.proposal);
+  fetchVotingPower(props.proposal.space as Space, props.proposal);
 }
 
 watch(
