@@ -58,6 +58,10 @@ const currentVote = computed(
     votes.value[`${proposal.value.network}:${proposal.value.id}`]
 );
 
+const withoutBottomPadding = computed(
+  () => 'space-proposal-votes' === String(route.name)
+);
+
 async function handleVoteClick(choice: Choice) {
   if (!web3.value.account) {
     modalAccountOpen.value = true;
@@ -126,7 +130,12 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
+  <div
+    :class="[
+      'flex items-stretch md:flex-row flex-col w-full md:h-full',
+      { '!pb-0': withoutBottomPadding }
+    ]"
+  >
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 grow min-w-0">
@@ -202,8 +211,11 @@ watchEffect(() => {
       </div>
       <Affix
         :class="[
-          'shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6',
-          { 'hidden md:block': route.name === 'space-proposal-votes' }
+          'shrink-0 md:w-[340px] border-l-0 md:border-l',
+          {
+            'hidden md:block': route.name === 'space-proposal-votes',
+            '-mb-6': !withoutBottomPadding
+          }
         ]"
         :top="72"
         :bottom="64"
