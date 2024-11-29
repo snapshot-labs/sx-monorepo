@@ -1,5 +1,6 @@
 import { utils } from '@snapshot-labs/sx';
 import { defineStore } from 'pinia';
+import { compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { Proposal, Space } from '@/types';
@@ -32,6 +33,13 @@ export function getIndex(space: SpaceDetails, block: number | null): string {
 
 function isSpace(item: SpaceDetails | Proposal): item is Space {
   return 'proposal_threshold' in item;
+}
+
+function isSpaceMember(space: Space, account: string): boolean {
+  return [
+    ...(space.additionalRawData?.admins || []),
+    ...(space.additionalRawData?.moderators || [])
+  ].some(member => compareAddresses(member, account));
 }
 
 export const useVotingPowersStore = defineStore('votingPowers', () => {
@@ -103,7 +111,9 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       if (isSpace(item) && proposeVp) {
         const totalProposeVp = proposeVp.reduce((acc, b) => acc + b.value, 0n);
 
-        vpItem.canPropose = totalProposeVp >= BigInt(item.proposal_threshold);
+        vpItem.canPropose =
+          totalProposeVp >= BigInt(item.proposal_threshold) ||
+          isSpaceMember(space as Space, account);
       } else {
         vpItem.canVote = vpItem.totalVotingPower > 0n;
       }
