@@ -27,8 +27,8 @@ const emit = defineEmits<{
 const { vote } = useActions();
 const { web3 } = useWeb3();
 const {
-  getProposalVp,
-  fetchProposalVp,
+  get: getVotingPower,
+  fetch: fetchVotingPower,
   reset: resetVotingPower
 } = useVotingPower();
 const proposalsStore = useProposalsStore();
@@ -55,7 +55,9 @@ const formValidator = getValidator({
   }
 });
 
-const votingPower = computed(() => getProposalVp(props.proposal));
+const votingPower = computed(() =>
+  getVotingPower(props.proposal.space, props.proposal)
+);
 
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
@@ -126,7 +128,7 @@ async function handleConfirmed(tx?: string | null) {
 }
 
 function handleFetchVotingPower() {
-  fetchProposalVp(props.proposal);
+  fetchVotingPower(props.proposal.space, props.proposal);
 }
 
 watch(

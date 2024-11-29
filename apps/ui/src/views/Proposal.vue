@@ -11,8 +11,8 @@ const props = defineProps<{
 const route = useRoute();
 const proposalsStore = useProposalsStore();
 const {
-  getProposalVp,
-  fetchProposalVp,
+  get: getVotingPower,
+  fetch: fetchVotingPower,
   reset: resetVotingPower
 } = useVotingPower();
 const { setTitle } = useTitle();
@@ -45,7 +45,7 @@ const discussion = computed(() => {
 const votingPower = computed(() => {
   if (!proposal.value) return;
 
-  return getProposalVp(proposal.value);
+  return getVotingPower(props.space, proposal.value);
 });
 
 const votingPowerDecimals = computed(() => {
@@ -93,7 +93,7 @@ async function handleVoteSubmitted() {
 function handleFetchVotingPower() {
   if (!proposal.value) return;
 
-  fetchProposalVp(proposal.value);
+  fetchVotingPower(props.space, proposal.value);
 }
 
 watch(

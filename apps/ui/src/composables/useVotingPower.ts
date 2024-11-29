@@ -18,35 +18,22 @@ export function useVotingPower() {
     );
   }
 
-  function fetchProposalVp(proposal: Proposal) {
+  function fetch(space: Space, proposal?: Proposal) {
     if (!web3.value.account) return;
 
     votingPowersStore.fetch(
-      proposal,
+      proposal || space,
       web3.value.account,
-      proposalSnapshot(proposal)
+      proposal ? proposalSnapshot(proposal) : latestBlock(space.network)
     );
   }
 
-  function fetchSpaceVp(space: Space) {
-    if (!web3.value.account) return;
-
-    votingPowersStore.fetch(
-      space,
-      web3.value.account,
-      latestBlock(space.network)
-    );
-  }
-
-  function getProposalVp(proposal: Proposal) {
+  function get(space: Space, proposal?: Proposal) {
     return votingPowersStore.votingPowers.get(
-      getIndex(proposal.space, proposalSnapshot(proposal))
-    );
-  }
-
-  function getSpaceVp(space: Space) {
-    return votingPowersStore.votingPowers.get(
-      getIndex(space, latestBlock(space.network))
+      getIndex(
+        proposal ? proposal.space : space,
+        proposal ? proposalSnapshot(proposal) : latestBlock(space.network)
+      )
     );
   }
 
@@ -61,5 +48,5 @@ export function useVotingPower() {
     }
   );
 
-  return { getProposalVp, getSpaceVp, fetchProposalVp, fetchSpaceVp, reset };
+  return { get, fetch, reset };
 }
