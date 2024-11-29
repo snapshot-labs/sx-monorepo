@@ -119,7 +119,7 @@ export const starknetNetworks = {
       OZVotesStorageProof:
         '0x7ee3cf64f1072fe21570356eb57d4e9f78169ea9235ba610f60a8b33c36cc6e',
       OZVotesTrace208StorageProof:
-        '0x06e7bf6fc2ac80d216076b3340625d3d054d2f4a1d7dc4a22853c06e015907b3'
+        '0x50bceb018e677f281b30587406b8210a0d8fbf37e58299bb7c6ec0e8dd212a3'
     },
     ProposalValidations: {
       VotingPower:

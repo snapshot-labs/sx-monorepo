@@ -143,6 +143,7 @@ const PROPOSAL_FRAGMENT = gql`
     votes
     privacy
     plugins
+    flagged
   }
 `;
 
