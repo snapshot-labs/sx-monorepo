@@ -201,6 +201,11 @@ onBeforeUnmount(() => destroyAudio());
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
     <div>
+      <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
+        This proposal might contain scams, offensive material, or be malicious
+        in nature. Please proceed with caution.
+      </UiAlert>
+
       <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>

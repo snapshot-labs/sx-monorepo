@@ -284,6 +284,7 @@ export type Proposal = {
   cancelled: boolean;
   state: ProposalState;
   privacy: Privacy;
+  flagged: boolean;
 };
 
 export type UserProfile = {
