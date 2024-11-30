@@ -37,7 +37,6 @@ function isSpace(item: SpaceDetails | Proposal): item is Space {
 
 function isSpaceTeamMember(space: Space, account: string): boolean {
   return [
-    space.controller,
     ...(space.additionalRawData?.admins || []),
     ...(space.additionalRawData?.moderators || [])
   ]
