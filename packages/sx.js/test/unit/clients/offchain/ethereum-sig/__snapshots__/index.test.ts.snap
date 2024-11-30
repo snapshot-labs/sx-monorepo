@@ -59,6 +59,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
       "1234e",
     ],
     "plugins": "{}",
+    "privacy": "shutter",
     "snapshot": 19283932,
     "space": "wan-test.eth",
     "start": 1705795200,
@@ -86,6 +87,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
         "1234e",
       ],
       "plugins": "{}",
+      "privacy": "shutter",
       "snapshot": 19283932,
       "space": "wan-test.eth",
       "start": 1705795200,
@@ -93,7 +95,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
       "title": "Creation test",
       "type": "basic",
     },
-    "signature": "0x33482a4ebefdcc7c5dc006a8766e1b0dc5c653360b894d49a0c7819d97f16b6b67f4b78a9c4cd46f551fef61e4de97be9140bb32d5a43f7b0e52b4936a08c5f41c",
+    "signature": "0x810f135b210282a6933fd86850f7b36c031aaaf9cc580d339f9fba94efbf9ea564c9d612e9de87397dbf45ce97697bfa00b35d327beb78b77d042e13fec5806d1b",
     "types": {
       "Proposal": [
         {
@@ -146,6 +148,10 @@ exports[`EthereumSig > should create propose envelope 1`] = `
         },
         {
           "name": "plugins",
+          "type": "string",
+        },
+        {
+          "name": "privacy",
           "type": "string",
         },
         {

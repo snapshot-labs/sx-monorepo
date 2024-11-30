@@ -50,6 +50,7 @@ describe('EthereumSig', () => {
       discussion: 'https://snapshot.org',
       choices: ['For', 'Against', 'Abstain'],
       labels: ['1234e'],
+      privacy: 'shutter',
       start: Math.floor(Date.now() / 1000),
       end: Math.floor(Date.now() / 1000) + 60 * 60,
       snapshot: 19283932,
