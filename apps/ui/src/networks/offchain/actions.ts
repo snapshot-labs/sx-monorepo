@@ -157,7 +157,6 @@ export function createActions(
         timestamp: currentTime
       };
 
-      console.log(data);
       return client.propose({ signer: web3.getSigner(), data });
     },
     async updateProposal(

@@ -161,7 +161,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       | 'weighted'
       | 'basic'
   );
-  const privacy = ref('' as '' | 'shutter' | 'any');
+  const privacy = ref<'' | 'shutter' | 'any'>('');
   const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
   const snapshotChainId: Ref<number> = ref(1);
@@ -581,7 +581,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         type: voteType.value === 'any' ? '' : voteType.value,
         quorum: Number(quorum.value),
         quorumType: quorumType.value,
-        privacy: privacy.value === '' ? '' : privacy.value,
+        privacy: privacy.value,
         hideAbstain: ignoreAbstainVotes.value
       },
       validation:
