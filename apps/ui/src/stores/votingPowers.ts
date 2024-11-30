@@ -35,11 +35,14 @@ function isSpace(item: SpaceDetails | Proposal): item is Space {
   return 'proposal_threshold' in item;
 }
 
-function isSpaceMember(space: Space, account: string): boolean {
+function isSpaceTeamMember(space: Space, account: string): boolean {
   return [
+    space.controller,
     ...(space.additionalRawData?.admins || []),
     ...(space.additionalRawData?.moderators || [])
-  ].some(member => compareAddresses(member, account));
+  ]
+    .filter(Boolean)
+    .some(member => compareAddresses(member, account));
 }
 
 export const useVotingPowersStore = defineStore('votingPowers', () => {
@@ -113,7 +116,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
 
         vpItem.canPropose =
           totalProposeVp >= BigInt(item.proposal_threshold) ||
-          isSpaceMember(space as Space, account);
+          isSpaceTeamMember(space as Space, account);
       } else {
         vpItem.canVote = vpItem.totalVotingPower > 0n;
       }
