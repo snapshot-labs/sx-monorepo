@@ -2510,10 +2510,10 @@
     "@snapshot-labs/pineapple" "^0.2.0"
     cross-fetch "^3.1.5"
 
-"@snapshot-labs/lock@^0.2.8":
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.8.tgz#4eb81af37e57c6eac6135e7db3acfbb511e9ab1c"
-  integrity sha512-5Izr4uAIU1lf2CHa155SW4oqZhyndFQf7AQNpyazk0AtffgDmEa6T5KxU7ktRXL9SwuRyAlo7MJrnjxMDmqZWA==
+"@snapshot-labs/lock@^0.2.10":
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.10.tgz#82f86eaa04a7579fa15030ceba36aaa537e442fd"
+  integrity sha512-nSSlP6M/KVj+ZEX1OtyM1xsXOsY8e8dX5US9ZWIJGAaqrwPhvl0y/jm1p6gtIuVAcQGo4gCfiBrjLrP8qKA8PQ==
   dependencies:
     "@coinbase/wallet-sdk" "^4.0.4"
     "@portis/web3" "^4.0.6"
