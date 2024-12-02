@@ -3,7 +3,7 @@ import { PRIVACY_TYPES_INFO } from '@/helpers/constants';
 
 type Privacy = '' | 'shutter' | 'any';
 
-const votingTypes = ['', 'shutter', 'any'] as const;
+const votingTypes = ['any', 'shutter', ''] as const;
 
 defineProps<{
   open: boolean;
