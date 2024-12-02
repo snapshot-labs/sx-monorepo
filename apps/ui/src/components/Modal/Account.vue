@@ -83,6 +83,7 @@ watch(open, () => (step.value = null));
               :src="getConnectorIconUrl(connector.icon)"
               height="28"
               width="28"
+              class="rounded-lg"
               :alt="connector.name"
             />
             {{ connector.name }}

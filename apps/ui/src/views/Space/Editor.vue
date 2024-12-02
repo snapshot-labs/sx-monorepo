@@ -48,8 +48,11 @@ const {
   reset
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
-const { get: getPropositionPower, fetch: fetchPropositionPower } =
-  usePropositionPower();
+const {
+  get: getPropositionPower,
+  fetch: fetchPropositionPower,
+  reset: resetPropositionPower
+} = usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 
@@ -299,9 +302,13 @@ function handleFetchPropositionPower() {
 }
 
 watch(
-  () => web3.value.account,
-  toAccount => {
-    if (!toAccount) return;
+  [() => web3.value.account, () => web3.value.authLoading],
+  ([toAccount, toAuthLoading], [fromAccount]) => {
+    if (fromAccount && toAccount && fromAccount !== toAccount) {
+      resetPropositionPower();
+    }
+
+    if (toAuthLoading || !toAccount) return;
 
     handleFetchPropositionPower();
   },
@@ -388,182 +395,193 @@ watchEffect(() => {
         <IH-paper-airplane class="rotate-90 relative left-[2px]" />
       </UiButton>
     </UiTopnav>
-    <div class="md:mr-[340px]">
-      <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
-        <MessageVotingPower
-          v-if="propositionPower"
-          class="mb-4"
-          :voting-power="propositionPower"
-          action="propose"
-          @fetch-voting-power="handleFetchPropositionPower"
-        />
-        <UiAlert
-          v-if="
-            propositionPower && spaceType === 'default' && proposalLimitReached
-          "
-          type="error"
-          class="mb-4"
-        >
-          <span
-            >Please verify your space to publish more proposals.
-            <a
-              :href="VERIFIED_URL"
-              target="_blank"
-              class="text-rose-500 dark:text-neutral-100 font-semibold"
-              >Verify space</a
-            >.</span
-          >
-        </UiAlert>
-        <UiAlert
-          v-else-if="
-            propositionPower && spaceType !== 'turbo' && proposalLimitReached
-          "
-          type="error"
-          class="mb-4"
-        >
-          <span
-            >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals per
-            day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
-            <a
-              :href="TURBO_URL"
-              target="_blank"
-              class="text-rose-500 dark:text-neutral-100 font-semibold"
-              >Increase limit</a
-            >.</span
-          >
-        </UiAlert>
-        <UiInputString
-          :key="proposalKey || ''"
-          v-model="proposal.title"
-          :definition="TITLE_DEFINITION"
-          :error="formErrors.title"
-        />
-        <div class="flex space-x-3">
-          <button type="button" @click="previewEnabled = false">
-            <UiLink
-              :is-active="!previewEnabled"
-              text="Write"
-              class="border-transparent"
-            />
-          </button>
-          <button type="button" @click="previewEnabled = true">
-            <UiLink
-              :is-active="previewEnabled"
-              text="Preview"
-              class="border-transparent"
-            />
-          </button>
-        </div>
-        <UiMarkdown
-          v-if="previewEnabled"
-          class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
-          :body="proposal.body"
-        />
-        <UiComposer
-          v-else
-          v-model="proposal.body"
-          :definition="bodyDefinition"
-          :error="formErrors.body"
-        >
-          <template
+    <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
+      <div class="flex-1 grow min-w-0">
+        <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
+          <MessageVotingPower
+            v-if="propositionPower"
+            class="mb-4"
+            :voting-power="propositionPower"
+            action="propose"
+            @fetch-voting-power="handleFetchPropositionPower"
+          />
+          <UiAlert
             v-if="
-              !space?.turbo &&
-              isOffchainSpace &&
-              formErrors.body?.startsWith('Must not have more than')
+              propositionPower &&
+              spaceType === 'default' &&
+              proposalLimitReached
             "
-            #error-suffix
+            type="error"
+            class="mb-4"
           >
-            <a
-              :href="TURBO_URL"
-              target="_blank"
-              class="ml-1 text-skin-danger font-semibold"
-              >Increase limit</a
-            >.
-          </template>
-        </UiComposer>
-        <div class="s-base mb-5">
+            <span
+              >Please verify your space to publish more proposals.
+              <a
+                :href="VERIFIED_URL"
+                target="_blank"
+                class="text-rose-500 dark:text-neutral-100 font-semibold"
+                >Verify space</a
+              >.</span
+            >
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              propositionPower && spaceType !== 'turbo' && proposalLimitReached
+            "
+            type="error"
+            class="mb-4"
+          >
+            <span
+              >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals
+              per day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
+              <a
+                :href="TURBO_URL"
+                target="_blank"
+                class="text-rose-500 dark:text-neutral-100 font-semibold"
+                >Increase limit</a
+              >.</span
+            >
+          </UiAlert>
           <UiInputString
             :key="proposalKey || ''"
-            v-model="proposal.discussion"
-            :definition="DISCUSSION_DEFINITION"
-            :error="formErrors.discussion"
+            v-model="proposal.title"
+            :definition="TITLE_DEFINITION"
+            :error="formErrors.title"
           />
-          <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
-        </div>
-        <div
-          v-if="
-            network &&
-            strategiesWithTreasuries &&
-            strategiesWithTreasuries.length > 0
-          "
-        >
-          <h4 class="eyebrow mb-2">Execution</h4>
-          <EditorExecution
-            v-for="execution in editorExecutions"
-            :key="execution.address"
-            :model-value="execution.transactions"
-            :disabled="
-              !supportsMultipleTreasuries &&
-              hasExecution &&
-              execution.transactions.length === 0
-            "
-            :space="space"
-            :strategy="execution"
-            :extra-contacts="extraContacts"
-            class="mb-3"
-            @update:model-value="
-              value => handleExecutionUpdated(execution.address, value)
-            "
+          <div class="flex space-x-3">
+            <button type="button" @click="previewEnabled = false">
+              <UiLink
+                :is-active="!previewEnabled"
+                text="Write"
+                class="border-transparent"
+              />
+            </button>
+            <button type="button" @click="previewEnabled = true">
+              <UiLink
+                :is-active="previewEnabled"
+                text="Preview"
+                class="border-transparent"
+              />
+            </button>
+          </div>
+          <UiMarkdown
+            v-if="previewEnabled"
+            class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
+            :body="proposal.body"
           />
-        </div>
-      </UiContainer>
-    </div>
-
-    <div
-      class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
-    >
-      <EditorVotingType
-        v-model="proposal"
-        :voting-types="
-          enforcedVoteType ? [enforcedVoteType] : space.voting_types
-        "
-      />
-      <EditorChoices
-        v-model="proposal"
-        :minimum-basic-choices="
-          offchainNetworks.includes(space.network) ? 2 : 3
-        "
-        :definition="choicesDefinition"
-        :error="
-          proposal.choices.length > choicesDefinition.maxItems
-            ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
-            : ''
-        "
-      >
-        <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
-          <a
-            :href="TURBO_URL"
-            target="_blank"
-            class="ml-1 text-skin-danger font-semibold"
-            >Increase limit</a
-          >.
-        </template>
-      </EditorChoices>
-      <UiSwitch
-        v-if="isOffchainSpace && space.privacy === 'any'"
-        v-model="privacy"
-        title="Shielded voting"
-        tooltip="Choices will be encrypted and only visible once the voting period is over."
-      />
-      <EditorLabels
-        v-if="space.labels?.length"
-        v-model="proposal.labels"
-        :space="space"
-      />
-      <div>
-        <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-        <ProposalTimeline :data="space" />
+          <UiComposer
+            v-else
+            v-model="proposal.body"
+            :definition="bodyDefinition"
+            :error="formErrors.body"
+          >
+            <template
+              v-if="
+                !space?.turbo &&
+                isOffchainSpace &&
+                formErrors.body?.startsWith('Must not have more than')
+              "
+              #error-suffix
+            >
+              <a
+                :href="TURBO_URL"
+                target="_blank"
+                class="ml-1 text-skin-danger font-semibold"
+                >Increase limit</a
+              >.
+            </template>
+          </UiComposer>
+          <div class="s-base mb-5">
+            <UiInputString
+              :key="proposalKey || ''"
+              v-model="proposal.discussion"
+              :definition="DISCUSSION_DEFINITION"
+              :error="formErrors.discussion"
+            />
+            <UiLinkPreview
+              :key="proposalKey || ''"
+              :url="proposal.discussion"
+            />
+          </div>
+          <div
+            v-if="
+              network &&
+              strategiesWithTreasuries &&
+              strategiesWithTreasuries.length > 0
+            "
+          >
+            <h4 class="eyebrow mb-2">Execution</h4>
+            <EditorExecution
+              v-for="execution in editorExecutions"
+              :key="execution.address"
+              :model-value="execution.transactions"
+              :disabled="
+                !supportsMultipleTreasuries &&
+                hasExecution &&
+                execution.transactions.length === 0
+              "
+              :space="space"
+              :strategy="execution"
+              :extra-contacts="extraContacts"
+              class="mb-3"
+              @update:model-value="
+                value => handleExecutionUpdated(execution.address, value)
+              "
+            />
+          </div>
+        </UiContainer>
       </div>
+
+      <Affix
+        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6']"
+        :top="72"
+        :bottom="64"
+      >
+        <div class="flex flex-col p-4 space-y-4">
+          <EditorVotingType
+            v-model="proposal"
+            :voting-types="
+              enforcedVoteType ? [enforcedVoteType] : space.voting_types
+            "
+          />
+          <EditorChoices
+            v-model="proposal"
+            :minimum-basic-choices="
+              offchainNetworks.includes(space.network) ? 2 : 3
+            "
+            :definition="choicesDefinition"
+            :error="
+              proposal.choices.length > choicesDefinition.maxItems
+                ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
+                : ''
+            "
+          >
+            <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
+              <a
+                :href="TURBO_URL"
+                target="_blank"
+                class="ml-1 text-skin-danger font-semibold"
+                >Increase limit</a
+              >.
+            </template>
+          </EditorChoices>
+          <UiSwitch
+            v-if="isOffchainSpace && space.privacy === 'any'"
+            v-model="privacy"
+            title="Shielded voting"
+            tooltip="Choices will be encrypted and only visible once the voting period is over."
+          />
+          <EditorLabels
+            v-if="space.labels?.length"
+            v-model="proposal.labels"
+            :space="space"
+          />
+          <div>
+            <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
+            <ProposalTimeline :data="space" />
+          </div>
+        </div>
+      </Affix>
     </div>
     <teleport to="#modal">
       <ModalTerms
