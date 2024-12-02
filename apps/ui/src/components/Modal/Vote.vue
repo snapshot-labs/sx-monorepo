@@ -27,10 +27,10 @@ const emit = defineEmits<{
 const { vote } = useActions();
 const { web3 } = useWeb3();
 const {
-  votingPower,
-  fetch: fetchVotingPower,
+  getProposalVp,
+  fetchProposalVp,
   reset: resetVotingPower
-} = useVotingPower();
+} = useVoteVotingPower();
 const proposalsStore = useProposalsStore();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
@@ -54,6 +54,8 @@ const formValidator = getValidator({
     reason: REASON_DEFINITION
   }
 });
+
+const votingPower = computed(() => getProposalVp(props.proposal));
 
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
@@ -124,7 +126,7 @@ async function handleConfirmed(tx?: string | null) {
 }
 
 function handleFetchVotingPower() {
-  fetchVotingPower(props.proposal);
+  fetchProposalVp(props.proposal);
 }
 
 watch(

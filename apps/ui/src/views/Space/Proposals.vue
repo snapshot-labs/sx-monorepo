@@ -8,10 +8,10 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const {
-  votingPower,
-  fetch: fetchVotingPower,
+  getSpaceVp,
+  fetchSpaceVp,
   reset: resetVotingPower
-} = useVotingPower();
+} = useVoteVotingPower();
 const { web3 } = useWeb3();
 const router = useRouter();
 const route = useRoute();
@@ -27,6 +27,8 @@ const selectIconBaseProps = {
 const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
+
+const votingPower = computed(() => getSpaceVp(props.space));
 
 const spaceLabels = computed(() => {
   if (!props.space.labels) return {};
@@ -46,7 +48,7 @@ async function handleEndReached() {
 }
 
 function handleFetchVotingPower() {
-  fetchVotingPower(props.space);
+  fetchSpaceVp(props.space);
 }
 
 watchThrottled(
